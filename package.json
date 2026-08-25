@@ -1,0 +1,13 @@
+{
+  "name": "stillwater",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @stillwater/web --filter @stillwater/api dev",
+    "test": "pnpm --filter @stillwater/shared test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild"]
+  }
+}

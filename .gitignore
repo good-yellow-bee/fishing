@@ -1,0 +1,8 @@
+node_modules
+dist
+.vite
+*.sqlite
+*.sqlite-*
+.DS_Store
+.env
+apps/api/data/*.sqlite
