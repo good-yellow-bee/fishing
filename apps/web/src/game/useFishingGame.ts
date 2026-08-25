@@ -34,7 +34,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
   const [power, setPower] = useState(0);
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
-  const [hint, setHint] = useState("Hold Space or mouse to charge a cast. Release in the pale band.");
+  const [hint, setHint] = useState("Click the water to aim. Hold to charge, release in the pale band.");
 
   const setPhaseBoth = (next: ScenePhase) => {
     phaseRef.current = next;
@@ -132,7 +132,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     powerRef.current = 0;
     setPower(0);
     setPhaseBoth("casting");
-    setHint("Release in the moss band.");
+    setHint("Keep the ring on the water. Release in the moss band.");
   }, [profile]);
 
   const strikeOrCast = useCallback(() => {
@@ -163,7 +163,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
       }
     };
     const cancelCast = () => {
-      if (phaseRef.current === "casting") resetToIdle("Cast cancelled. Hold Space or mouse to try again.");
+      if (phaseRef.current === "casting") resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -196,7 +196,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     };
     const cancel = (event: PointerEvent) => {
       if (event.pointerId !== castPointerRef.current) return;
-      resetToIdle("Cast cancelled. Hold Space or mouse to try again.");
+      resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
     };
     surface.addEventListener("pointerdown", down);
     window.addEventListener("pointerup", up);
@@ -243,7 +243,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
 
   const dismissResult = () => {
     setOutcome(null);
-    resetToIdle("Hold Space or mouse to cast.");
+    resetToIdle("Click the water to aim, then hold to cast.");
   };
 
   return {

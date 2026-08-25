@@ -73,6 +73,7 @@ export function DockPage() {
         <p className="hint">{game.hint}</p>
         <aside className="camera-help" data-camera-control>
           <span>Explore the lake</span>
+          <kbd>Click water</kbd> aim
           <kbd>Right drag</kbd> orbit
           <kbd>Wheel</kbd> zoom
           <kbd>WASD</kbd> move

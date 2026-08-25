@@ -9,9 +9,9 @@ import { toonRamp } from "./toon";
 
 type Vec3 = [number, number, number];
 
-const LAKE_CENTER_Z = -2;
-const LAKE_RX = 22.5;
-const LAKE_RZ = 14.5;
+export const LAKE_CENTER_Z = -2;
+export const LAKE_RX = 22.5;
+export const LAKE_RZ = 14.5;
 
 const MODELS = {
   pine: "/models/tree_detailed.glb",
@@ -144,8 +144,14 @@ const FISH: FishProps[] = [
 
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
-function lakeEdge(angle: number) {
+export function lakeEdge(angle: number) {
   return 1 + Math.sin(angle * 3) * 0.025 + Math.sin(angle * 7 + 0.7) * 0.018;
+}
+
+export function inLake(x: number, z: number) {
+  const nx = x / LAKE_RX;
+  const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
+  return Math.hypot(nx, nz) <= lakeEdge(Math.atan2(nz, nx)) * 0.96;
 }
 
 function makeLakeGeometry(radiusX: number, radiusZ: number) {

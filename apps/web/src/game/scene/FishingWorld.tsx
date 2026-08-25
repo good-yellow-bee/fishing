@@ -5,7 +5,7 @@ import * as THREE from "three";
 import type { SpotId } from "@stillwater/shared";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
-import { LakeWorld } from "./LakeWorld";
+import { inLake, LakeWorld } from "./LakeWorld";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 
@@ -26,11 +26,20 @@ function isFighting(phase: ScenePhase) {
   return phase === "fight" || phase === "hookset";
 }
 
-function placeBobber(out: THREE.Vector3, spot: SpotId, power: number, dipped: boolean, t: number) {
-  const reach = 5.2 + power * 9.5;
-  out.x = BOBBER_X[spot];
-  out.z = 4.2 - reach * (spot === "dropoff" ? 1.15 : 1);
+function placeBobber(out: THREE.Vector3, spot: SpotId, power: number, dipped: boolean, t: number, aim: THREE.Vector3 | null) {
+  if (aim) {
+    out.x = aim.x;
+    out.z = aim.z;
+  } else {
+    const reach = 5.2 + power * 9.5;
+    out.x = BOBBER_X[spot];
+    out.z = 4.2 - reach * (spot === "dropoff" ? 1.15 : 1);
+  }
   out.y = dipped ? -0.14 : 0.07 + Math.sin(t * 2.4) * 0.04;
+}
+
+function isAiming(phase: ScenePhase) {
+  return phase === "idle" || phase === "casting";
 }
 
 function CameraRig({ phase }: { phase: ScenePhase }) {
@@ -111,7 +120,65 @@ function CameraRig({ phase }: { phase: ScenePhase }) {
   );
 }
 
-type LineAndBobberProps = Props & { rodTip: THREE.Vector3 };
+type AimState = {
+  live: THREE.Vector3;
+  overWater: boolean;
+};
+
+function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
+  const marker = useRef<THREE.Group>(null);
+  const { camera, gl } = useThree();
+  const raycaster = useMemo(() => new THREE.Raycaster(), []);
+  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
+  const hit = useMemo(() => new THREE.Vector3(), []);
+  const pointer = useRef(new THREE.Vector2());
+
+  useEffect(() => {
+    const onMove = (event: PointerEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      pointer.current.set(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
+  }, [gl]);
+
+  useFrame(() => {
+    if (!isAiming(phase)) {
+      if (marker.current) marker.current.visible = false;
+      return;
+    }
+    raycaster.setFromCamera(pointer.current, camera);
+    const point = raycaster.ray.intersectPlane(plane, hit);
+    const overWater = point != null && inLake(point.x, point.z);
+    aim.overWater = overWater;
+    if (overWater) aim.live.copy(hit);
+    if (marker.current) {
+      marker.current.visible = overWater;
+      if (overWater) marker.current.position.set(hit.x, 0.04, hit.z);
+    }
+    const wrap = gl.domElement.closest(".scene-wrap");
+    if (wrap instanceof HTMLElement) wrap.dataset.aim = overWater ? `${hit.x.toFixed(1)},${hit.z.toFixed(1)}` : "none";
+  });
+
+  return (
+    <group ref={marker} visible={false}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.38, 0.48, 28]} />
+        <meshBasicMaterial color="#e7f2ea" transparent opacity={0.55} depthWrite={false} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.08, 12]} />
+        <meshBasicMaterial color="#f4fff6" transparent opacity={0.7} depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
+type LineAndBobberProps = Props & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active }: { active: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -149,9 +216,12 @@ function HookedFish() {
   );
 }
 
-function LineAndBobber({ phase, power, spot, rodTip }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, spot, rodTip, aim, lookAt }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
+  const { gl } = useThree();
   const target = useMemo(() => new THREE.Vector3(), []);
+  const castAim = useMemo(() => new THREE.Vector3(), []);
+  const usingAim = useRef(false);
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
@@ -176,11 +246,27 @@ function LineAndBobber({ phase, power, spot, rodTip }: LineAndBobberProps) {
   }, [line]);
 
   useFrame((state) => {
+    const aiming = isAiming(phase);
+    if (aiming) {
+      if (aim.overWater) {
+        castAim.copy(aim.live);
+        usingAim.current = true;
+      } else if (phase === "idle") {
+        usingAim.current = false;
+      }
+    }
     line.visible = inWater;
     if (bobber.current) bobber.current.visible = inWater;
-    if (!inWater) return;
-    placeBobber(target, spot, Math.max(0.35, power), dipped, state.clock.elapsedTime);
+    if (!inWater) {
+      if (aiming && aim.overWater) lookAt.copy(aim.live);
+      else if (!aiming && usingAim.current) lookAt.copy(castAim);
+      return;
+    }
+    placeBobber(target, spot, Math.max(0.35, power), dipped, state.clock.elapsedTime, usingAim.current ? castAim : null);
     bobber.current?.position.copy(target);
+    lookAt.copy(target);
+    const wrap = gl.domElement.closest(".scene-wrap");
+    if (wrap instanceof HTMLElement) wrap.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
     const attr = line.geometry.getAttribute("position");
     const positions = attr.array as Float32Array;
     rodTip.toArray(positions, 0);
@@ -202,12 +288,15 @@ function LineAndBobber({ phase, power, spot, rodTip }: LineAndBobberProps) {
 
 function Scene({ phase, power, spot }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(0.4, 2.1, 6.2), []);
+  const lookAt = useMemo(() => new THREE.Vector3(0.55, 0, -2), []);
+  const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
   return (
     <>
       <CameraRig phase={phase} />
       <LakeWorld spot={spot} />
-      <Angler phase={phase} power={power} rodTip={rodTip} />
-      <LineAndBobber phase={phase} power={power} spot={spot} rodTip={rodTip} />
+      <WaterAim phase={phase} aim={aim} />
+      <LineAndBobber phase={phase} power={power} spot={spot} rodTip={rodTip} aim={aim} lookAt={lookAt} />
+      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
     </>
   );
 }
@@ -219,6 +308,7 @@ export function FishingWorld(props: Props) {
       dpr={[1, 1.75]}
       camera={{ position: CAM_START, fov: 42, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
+      style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
         gl.toneMappingExposure = 1.05;

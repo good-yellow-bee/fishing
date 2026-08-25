@@ -10,6 +10,7 @@ type Props = {
   phase: ScenePhase;
   power: number;
   rodTip: THREE.Vector3;
+  lookAt: THREE.Vector3;
 };
 
 useGLTF.preload("/models/character-male-c.glb");
@@ -32,9 +33,24 @@ function swing(phase: ScenePhase, power: number, t: number) {
   }
 }
 
-export function Angler({ phase, power, rodTip }: Props) {
+const STAND: [number, number, number] = [0.15, 0, 7.42];
+const INITIAL_YAW = Math.PI - 0.7;
+const YAW_MIN = Math.PI - 1.15;
+const YAW_MAX = Math.PI + 0.95;
+const ROD_BIAS = 0.18;
+
+function shortest(from: number, to: number) {
+  let diff = to - from;
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return diff;
+}
+
+export function Angler({ phase, power, rodTip, lookAt }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
+  const root = useRef<THREE.Group>(null);
+  const yaw = useRef(INITIAL_YAW);
   const grip = useRef<THREE.Group>(null);
   const tip = useRef<THREE.Object3D>(null);
 
@@ -67,13 +83,22 @@ export function Angler({ phase, power, rodTip }: Props) {
     };
   }, [actions]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
+    const target = THREE.MathUtils.clamp(
+      Math.atan2(lookAt.x - STAND[0], lookAt.z - STAND[2]) - ROD_BIAS,
+      YAW_MIN,
+      YAW_MAX,
+    );
+    yaw.current += shortest(yaw.current, target) * (1 - Math.exp(-7 * delta));
+    if (root.current) root.current.rotation.y = yaw.current;
+    const wrap = document.querySelector(".scene-wrap");
+    if (wrap instanceof HTMLElement) wrap.dataset.yaw = yaw.current.toFixed(2);
     if (grip.current) grip.current.rotation.x = swing(phase, power, state.clock.elapsedTime);
     tip.current?.getWorldPosition(rodTip);
   });
 
   return (
-    <group position={[0.15, 0, 7.42]} rotation={[0, Math.PI - 0.7, 0]} scale={1.7}>
+    <group ref={root} position={STAND} rotation={[0, INITIAL_YAW, 0]} scale={1.7}>
       <primitive object={character} />
       <group ref={grip} position={[0.2, 0.62, 0.22]} rotation={[1.05, 0.05, -0.28]}>
         <primitive object={rod} scale={0.19} />
