@@ -35,8 +35,9 @@ function swing(phase: ScenePhase, power: number, t: number) {
 
 const STAND: [number, number, number] = [0.15, 0, 7.42];
 const INITIAL_YAW = Math.PI - 0.7;
-const YAW_MIN = Math.PI - 1.15;
-const YAW_MAX = Math.PI + 0.95;
+const LAKE_YAW = Math.PI;
+const YAW_MIN = Math.PI - 1.2;
+const YAW_MAX = Math.PI + 1.25;
 const ROD_BIAS = 0.18;
 
 function shortest(from: number, to: number) {
@@ -44,6 +45,18 @@ function shortest(from: number, to: number) {
   while (diff > Math.PI) diff -= Math.PI * 2;
   while (diff < -Math.PI) diff += Math.PI * 2;
   return diff;
+}
+
+// atan2 is (-π, π]; clamp as an offset from lake-facing π so left-of-dock
+// looks stay left instead of snapping onto the right clamp.
+function yawToward(x: number, z: number) {
+  const dx = x - STAND[0];
+  const dz = z - STAND[2];
+  // Water behind the dock sits on atan2's ±π seam; pick a side instead of flipping.
+  if (dz >= 0) return dx < 0 ? YAW_MAX : YAW_MIN;
+  const raw = Math.atan2(dx, dz) - ROD_BIAS;
+  const offset = THREE.MathUtils.clamp(shortest(LAKE_YAW, raw), YAW_MIN - LAKE_YAW, YAW_MAX - LAKE_YAW);
+  return LAKE_YAW + offset;
 }
 
 export function Angler({ phase, power, rodTip, lookAt }: Props) {
@@ -84,11 +97,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
   }, [actions]);
 
   useFrame((state, delta) => {
-    const target = THREE.MathUtils.clamp(
-      Math.atan2(lookAt.x - STAND[0], lookAt.z - STAND[2]) - ROD_BIAS,
-      YAW_MIN,
-      YAW_MAX,
-    );
+    const target = yawToward(lookAt.x, lookAt.z);
     yaw.current += shortest(yaw.current, target) * (1 - Math.exp(-7 * delta));
     if (root.current) root.current.rotation.y = yaw.current;
     const wrap = document.querySelector(".scene-wrap");
