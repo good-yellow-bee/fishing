@@ -111,6 +111,12 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     powerRef.current = castPower;
     setPower(castPower);
     fx.cast();
+    const aim = surfaceRef.current?.dataset.aim;
+    if (!aim || aim === "none") {
+      setOutcome({ kind: "miss", message: "Missed the lake." });
+      resetToIdle("Bait landed on shore. Aim at the water.");
+      return;
+    }
     if (castPower < 0.22) {
       setOutcome({ kind: "miss", message: "The lure slapped the dock." });
       resetToIdle("Too little power. Hold longer.");

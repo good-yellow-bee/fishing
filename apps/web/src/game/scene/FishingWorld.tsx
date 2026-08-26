@@ -132,22 +132,11 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   const hit = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2());
-
-  useEffect(() => {
-    const onMove = (event: PointerEvent) => {
-      const rect = gl.domElement.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      pointer.current.set(
-        ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        -((event.clientY - rect.top) / rect.height) * 2 + 1,
-      );
-    };
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [gl]);
-
-  useFrame(() => {
-    if (!isAiming(phase)) {
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const syncAim = useRef(() => {});
+  syncAim.current = () => {
+    if (!isAiming(phaseRef.current)) {
       if (marker.current) marker.current.visible = false;
       return;
     }
@@ -162,7 +151,29 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
     }
     const wrap = gl.domElement.closest(".scene-wrap");
     if (wrap instanceof HTMLElement) wrap.dataset.aim = overWater ? `${hit.x.toFixed(1)},${hit.z.toFixed(1)}` : "none";
-  });
+  };
+
+  useEffect(() => {
+    const onPoint = (event: PointerEvent) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      pointer.current.set(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      syncAim.current();
+    };
+    window.addEventListener("pointermove", onPoint);
+    window.addEventListener("pointerdown", onPoint);
+    window.addEventListener("pointerup", onPoint, true);
+    return () => {
+      window.removeEventListener("pointermove", onPoint);
+      window.removeEventListener("pointerdown", onPoint);
+      window.removeEventListener("pointerup", onPoint, true);
+    };
+  }, [gl]);
+
+  useFrame(() => syncAim.current());
 
   return (
     <group ref={marker} visible={false}>
@@ -248,12 +259,8 @@ function LineAndBobber({ phase, power, spot, rodTip, aim, lookAt }: LineAndBobbe
   useFrame((state) => {
     const aiming = isAiming(phase);
     if (aiming) {
-      if (aim.overWater) {
-        castAim.copy(aim.live);
-        usingAim.current = true;
-      } else if (phase === "idle") {
-        usingAim.current = false;
-      }
+      usingAim.current = aim.overWater;
+      if (aim.overWater) castAim.copy(aim.live);
     }
     line.visible = inWater;
     if (bobber.current) bobber.current.visible = inWater;
