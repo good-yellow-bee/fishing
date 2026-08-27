@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { canLand, type FishSpecies, type Profile, type SpotId } from "@stillwater/shared";
+import { makeFight, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import type { ScenePhase } from "./scene/types";
@@ -29,12 +30,18 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
   const holdStartRef = useRef(0);
   const castPointerRef = useRef<number | null>(null);
   const fightRef = useRef<Fight | null>(null);
+  const runtimeRef = useRef<FightRuntime | null>(null);
+  const simRef = useRef<FightSim | null>(null);
+  const reelKeyRef = useRef(false);
+  const reelPointerRef = useRef<number | null>(null);
+  const spotRef = useRef(spot);
   const timers = useRef<Timers>({});
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [hint, setHint] = useState("Click the water to aim. Hold to charge, release in the pale band.");
+  spotRef.current = spot;
 
   const setPhaseBoth = (next: ScenePhase) => {
     phaseRef.current = next;
@@ -48,13 +55,27 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     timers.current = {};
   };
 
+  const clearFight = () => {
+    fightRef.current = null;
+    runtimeRef.current = null;
+    simRef.current = null;
+    reelKeyRef.current = false;
+    reelPointerRef.current = null;
+    const surface = surfaceRef.current;
+    if (surface) {
+      delete surface.dataset.tension;
+      delete surface.dataset.line;
+      delete surface.dataset.surge;
+    }
+    setFight(null);
+  };
+
   const resetToIdle = useCallback((message: string) => {
     clearTimers();
     holdingRef.current = false;
     castPointerRef.current = null;
     powerRef.current = 0;
-    fightRef.current = null;
-    setFight(null);
+    clearFight();
     setPower(0);
     setPhaseBoth("idle");
     setHint(message);
@@ -74,7 +95,10 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
         resetToIdle("Line parted. Spend points on Strength.");
       }, 1400);
     } else {
-      setHint(`Keep the ${species.name} on. ${species.challenge} fight.`);
+      const runtime = makeFight(species, weight, current.strength);
+      runtimeRef.current = runtime;
+      simRef.current = runtime.sim;
+      setHint("Hold to reel. Ease off when it runs.");
     }
   }, [resetToIdle]);
 
@@ -156,28 +180,32 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     const down = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
       if (event.code !== "Space" || event.repeat) return;
-      if (phaseRef.current === "fight") return;
       event.preventDefault();
-      strikeOrCast();
+      if (phaseRef.current !== "fight") strikeOrCast();
+      // The same press may have just set the hook — count it as reeling.
+      if (phaseRef.current === "fight") reelKeyRef.current = true;
     };
     const up = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
       if (event.code !== "Space") return;
+      reelKeyRef.current = false;
       if (phaseRef.current === "casting") {
         event.preventDefault();
         releaseCast();
       }
     };
-    const cancelCast = () => {
+    const onBlur = () => {
+      reelKeyRef.current = false;
+      reelPointerRef.current = null;
       if (phaseRef.current === "casting") resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
-    window.addEventListener("blur", cancelCast);
+    window.addEventListener("blur", onBlur);
     return () => {
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
-      window.removeEventListener("blur", cancelCast);
+      window.removeEventListener("blur", onBlur);
     };
   }, [releaseCast, resetToIdle, strikeOrCast]);
 
@@ -190,17 +218,24 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;
-      if (phaseRef.current === "fight") return;
       if ((event.target as HTMLElement).closest("button, a, input, [data-camera-control]")) return;
-      castPointerRef.current = event.pointerId;
-      strikeOrCast();
+      if (phaseRef.current !== "fight") {
+        castPointerRef.current = event.pointerId;
+        strikeOrCast();
+      }
+      // The same press may have just set the hook — count it as reeling.
+      if (phaseRef.current === "fight") reelPointerRef.current = event.pointerId;
     };
     const up = (event: PointerEvent) => {
+      if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
+      if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
       castPointerRef.current = null;
       if (phaseRef.current === "casting") releaseCast();
     };
     const cancel = (event: PointerEvent) => {
+      if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
+      if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
       resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
     };
@@ -216,36 +251,57 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
 
   useEffect(() => {
     let frame = 0;
+    let last = 0;
+    let lastReelFx = 0;
+    let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
       if (holdingRef.current && phaseRef.current === "casting") {
         powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
         setPower(powerRef.current);
+      }
+      const runtime = runtimeRef.current;
+      const current = fightRef.current;
+      if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
+        const reeling = reelKeyRef.current || reelPointerRef.current !== null;
+        const result = runtime.step(now, dt, reeling);
+        const sim = runtime.sim;
+        const surface = surfaceRef.current;
+        if (surface) {
+          surface.dataset.tension = sim.tension.toFixed(2);
+          surface.dataset.line = sim.line.toFixed(2);
+          surface.dataset.surge = String(sim.surge);
+        }
+        if (sim.surge === 2 && prevSurge !== 2) fx.surge();
+        prevSurge = sim.surge;
+        if (reeling && now - lastReelFx > 90) {
+          fx.reel();
+          lastReelFx = now;
+        }
+        if (result === "landed") {
+          fx.land();
+          setOutcome({ kind: "landed", species: current.species, weight: current.weight, spot: spotRef.current });
+          clearFight();
+          setPhaseBoth("result");
+          setHint("Landed. Cast again when ready.");
+        } else if (result === "snapped") {
+          fx.snap();
+          setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
+          resetToIdle("Broke off. Try again.");
+        } else if (result === "escaped") {
+          fx.snap();
+          setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
+          resetToIdle("Broke off. Try again.");
+        }
       }
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [resetToIdle]);
 
   useEffect(() => clearTimers, []);
-
-  const onFightSuccess = () => {
-    const current = fightRef.current;
-    if (!current || current.underpowered) return;
-    fx.land();
-    setOutcome({ kind: "landed", species: current.species, weight: current.weight, spot });
-    setFight(null);
-    fightRef.current = null;
-    setPhaseBoth("result");
-    setHint("Landed. Cast again when ready.");
-  };
-
-  const onFightFail = (reason: string) => {
-    const current = fightRef.current;
-    fx.snap();
-    setOutcome({ kind: "broke", message: reason || `${current?.species.name ?? "Fish"} threw the hook.` });
-    resetToIdle("Broke off. Try again.");
-  };
 
   const dismissResult = () => {
     setOutcome(null);
@@ -259,8 +315,7 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     fight,
     outcome,
     hint,
-    onFightSuccess,
-    onFightFail,
+    sim: simRef,
     dismissResult,
   };
 }

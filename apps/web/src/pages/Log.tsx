@@ -16,6 +16,13 @@ export function LogPage() {
   if (error) return <div className="log-page">{error}</div>;
   if (!me) return <div className="log-page">Loading the log…</div>;
 
+  const catches = me.catches;
+  const totalWeight = catches.reduce((sum, row) => sum + row.weight, 0);
+  const heaviest = catches.reduce<(typeof catches)[number] | null>(
+    (best, row) => (!best || row.weight > best.weight ? row : best),
+    null,
+  );
+
   return (
     <div className="log-page">
       <p>
@@ -23,8 +30,25 @@ export function LogPage() {
       </p>
       <h1>{me.profile.displayName}&rsquo;s catch log</h1>
       <p>
-        {me.profile.lifetimePoints} lifetime points · {me.catches.length} recent fish
+        {me.profile.lifetimePoints} lifetime points · {catches.length} recent fish
       </p>
+      {heaviest && (
+        <div className="log-summary">
+          <div>
+            <span className="eyebrow">Catches</span>
+            <strong>{catches.length}</strong>
+          </div>
+          <div>
+            <span className="eyebrow">Total weight</span>
+            <strong>{totalWeight.toFixed(1)} lb</strong>
+          </div>
+          <div>
+            <span className="eyebrow">Heaviest</span>
+            <strong>{heaviest.weight.toFixed(1)} lb</strong>
+            <small>{fishById(heaviest.speciesId)?.name ?? heaviest.speciesId}</small>
+          </div>
+        </div>
+      )}
       <table>
         <thead>
           <tr>
@@ -36,18 +60,21 @@ export function LogPage() {
           </tr>
         </thead>
         <tbody>
-          {me.catches.map((row) => (
-            <tr key={row.id}>
-              <td>{fishById(row.speciesId)?.name ?? row.speciesId}</td>
-              <td>{row.weight.toFixed(1)} lb</td>
-              <td>{row.spot}</td>
-              <td>{row.points}</td>
-              <td>{new Date(row.createdAt).toLocaleString()}</td>
-            </tr>
-          ))}
+          {catches.map((row) => {
+            const species = fishById(row.speciesId);
+            return (
+              <tr key={row.id} className={row.id === heaviest?.id ? "heaviest" : ""}>
+                <td className={species ? `rarity-${species.rarity}` : ""}>{species?.name ?? row.speciesId}</td>
+                <td>{row.weight.toFixed(1)} lb</td>
+                <td>{row.spot}</td>
+                <td>{row.points}</td>
+                <td>{new Date(row.createdAt).toLocaleString()}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
-      {me.catches.length === 0 && <p>Nothing landed yet.</p>}
+      {catches.length === 0 && <p>Nothing landed yet.</p>}
     </div>
   );
 }

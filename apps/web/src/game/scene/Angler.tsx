@@ -3,20 +3,24 @@ import { useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
+import type { SimRef } from "./FishingWorld";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
+import { useSceneWrap } from "./useSceneWrap";
 
 type Props = {
   phase: ScenePhase;
   power: number;
+  sim: SimRef;
   rodTip: THREE.Vector3;
+  hand: THREE.Vector3;
   lookAt: THREE.Vector3;
 };
 
 useGLTF.preload("/models/character-male-c.glb");
 useGLTF.preload("/models/fishing-rod.glb");
 
-function swing(phase: ScenePhase, power: number, t: number) {
+function swing(phase: ScenePhase, power: number, t: number, sim: SimRef) {
   switch (phase) {
     case "casting":
       return 0.35 - power * 1.15;
@@ -24,10 +28,13 @@ function swing(phase: ScenePhase, power: number, t: number) {
       return 1.05;
     case "hookset":
       return 1.45;
-    case "fight":
-      return 1.15 + Math.sin(t * 9) * 0.18;
+    case "fight": {
+      const fight = sim.current;
+      if (!fight) return 1.15 + Math.sin(t * 9) * 0.18;
+      return 1.05 + fight.tension * 0.5 + Math.sin(t * 10) * 0.06 * (1 + fight.surge);
+    }
     case "result":
-      return 0.85;
+      return 0.3;
     default:
       return 0.95 + Math.sin(t * 1.6) * 0.04;
   }
@@ -59,10 +66,11 @@ function yawToward(x: number, z: number) {
   return LAKE_YAW + offset;
 }
 
-export function Angler({ phase, power, rodTip, lookAt }: Props) {
+export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
+  const wrap = useSceneWrap();
   const yaw = useRef(INITIAL_YAW);
   const grip = useRef<THREE.Group>(null);
   const tip = useRef<THREE.Object3D>(null);
@@ -100,9 +108,11 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     const target = yawToward(lookAt.x, lookAt.z);
     yaw.current += shortest(yaw.current, target) * (1 - Math.exp(-7 * delta));
     if (root.current) root.current.rotation.y = yaw.current;
-    const wrap = document.querySelector(".scene-wrap");
-    if (wrap instanceof HTMLElement) wrap.dataset.yaw = yaw.current.toFixed(2);
-    if (grip.current) grip.current.rotation.x = swing(phase, power, state.clock.elapsedTime);
+    if (wrap.current) wrap.current.dataset.yaw = yaw.current.toFixed(2);
+    if (grip.current) {
+      grip.current.rotation.x = swing(phase, power, state.clock.elapsedTime, sim);
+      grip.current.getWorldPosition(hand);
+    }
     tip.current?.getWorldPosition(rodTip);
   });
 

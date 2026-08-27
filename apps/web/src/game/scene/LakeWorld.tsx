@@ -142,6 +142,58 @@ const FISH: FishProps[] = [
   },
 ];
 
+// Streak of sparkle quads on the water toward the sun disc at [38, 34, -62].
+const GLITTER_DIR = new THREE.Vector2(38, -60).normalize();
+const GLITTER_ANGLE = Math.atan2(60, 38);
+const GLITTER_QUADS = Array.from({ length: 16 }, (_, i) => {
+  const dist = 2.5 + (i / 15) * 12;
+  const side = (jitter(i + 7) - 0.5) * (1 + dist * 0.16);
+  return {
+    x: GLITTER_DIR.x * dist - GLITTER_DIR.y * side,
+    z: LAKE_CENTER_Z + GLITTER_DIR.y * dist + GLITTER_DIR.x * side,
+    scale: 0.3 + jitter(i + 31) * 0.45,
+    mat: i % 3,
+  };
+});
+
+const WING_GEOMETRY = new THREE.BufferGeometry();
+WING_GEOMETRY.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, 0.09, 0.7, 0.04, 0, 0, 0, -0.11], 3));
+WING_GEOMETRY.computeVertexNormals();
+const BIRD_MATERIAL = new THREE.MeshBasicMaterial({ color: "#2b3138", fog: false, side: THREE.DoubleSide });
+
+type FlockProps = { y: number; z: number; speed: number; offset: number; dir: 1 | -1; birds: Vec3[] };
+
+const FLOCKS: FlockProps[] = [
+  { y: 18, z: -32, speed: 1.1, offset: 20, dir: 1, birds: [[0, 0, 0], [-1.3, 0.4, 0.9], [1.2, 0.25, -0.8], [-2.4, -0.1, -0.6]] },
+  { y: 15.5, z: -18, speed: 0.85, offset: 68, dir: -1, birds: [[0, 0, 0], [1.4, 0.35, 0.7], [-1.2, 0.2, -0.9]] },
+];
+
+type DuckProps = { points: Vec3[]; speed: number; phase: number; body: string; head: string };
+
+const DUCKS: DuckProps[] = [
+  {
+    points: [[-9, 0, 4], [-6.5, 0, 5], [-4.8, 0, 3.2], [-6.8, 0, 2], [-9.5, 0, 2.6]],
+    speed: 0.02,
+    phase: 0,
+    body: "#8a6842",
+    head: "#3f7d6d",
+  },
+  {
+    points: [[7, 0, -6.5], [9.5, 0, -7], [9.6, 0, -8.4], [8, 0, -10], [6.2, 0, -8.5]],
+    speed: 0.016,
+    phase: 0.45,
+    body: "#9c7a4f",
+    head: "#45607a",
+  },
+];
+
+type DragonflyProps = { center: Vec3; size: number; speed: number; phase: number };
+
+const DRAGONFLIES: DragonflyProps[] = [
+  { center: [-4.2, 0.85, 9.1], size: 1.1, speed: 0.7, phase: 0 },
+  { center: [-7.6, 0.7, 4.6], size: 0.9, speed: 0.55, phase: 2.4 },
+];
+
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
 export function lakeEdge(angle: number) {
@@ -217,6 +269,28 @@ function makeWaterTexture() {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 3);
+  return texture;
+}
+
+// Faint dappled layer scrolled opposite the wave streaks for extra surface life.
+function makeWaterDetailTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d")!;
+  for (let i = 0; i < 30; i += 1) {
+    const x = jitter(i + 400) * 128;
+    const y = jitter(i + 440) * 128;
+    const r = 6 + jitter(i + 480) * 14;
+    ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.16)" : "rgba(150,190,205,0.14)";
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, r * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(5, 4);
   return texture;
 }
 
@@ -296,6 +370,7 @@ function LakeSurface({ spot }: { spot: SpotId }) {
   const bedGeometry = useMemo(() => makeLakeGeometry(LAKE_RX + 0.4, LAKE_RZ + 0.4), []);
   const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
+  const detailMap = useMemo(() => makeWaterDetailTexture(), []);
 
   useEffect(() => {
     return () => {
@@ -303,13 +378,16 @@ function LakeSurface({ spot }: { spot: SpotId }) {
       bedGeometry.dispose();
       foamGeometry.dispose();
       waterMap.dispose();
+      detailMap.dispose();
     };
-  }, [geometry, bedGeometry, foamGeometry, waterMap]);
+  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     waterMap.offset.x += delta * 0.014;
     waterMap.offset.y += delta * 0.008;
+    detailMap.offset.x -= delta * 0.006;
+    detailMap.offset.y += delta * 0.004;
     if (material.current) material.current.opacity = 0.8 + Math.sin(t * 0.45) * 0.02;
     if (glintA.current) glintA.current.opacity = 0.14 + Math.sin(t * 0.65) * 0.05;
     if (glintB.current) glintB.current.opacity = 0.1 + Math.sin(t * 0.52 + 2) * 0.04;
@@ -330,6 +408,9 @@ function LakeSurface({ spot }: { spot: SpotId }) {
           opacity={0.82}
           depthWrite={false}
         />
+      </mesh>
+      <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
       <mesh geometry={foamGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
         <meshBasicMaterial color="#e9f3ef" transparent opacity={0.3} depthWrite={false} />
@@ -395,7 +476,8 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
     if (!fish) return;
     const t = (state.clock.elapsedTime * speed + phase) % 1;
     curve.getPointAt(t, position);
-    curve.getTangentAt(t, tangent);
+    // Heading from a small look-ahead; getTangentAt allocates internally.
+    curve.getPointAt((t + 0.01) % 1, tangent).sub(position);
     // Keep the whole fish body between the surface and the bed.
     const half = 0.34 * size;
     position.y = THREE.MathUtils.clamp(
@@ -431,6 +513,182 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
           <meshBasicMaterial ref={rippleMaterial} color="#dcebe7" transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>
+    </group>
+  );
+}
+
+function SunGlitter() {
+  const geometry = useMemo(() => new THREE.PlaneGeometry(1, 0.28), []);
+  const materials = useMemo(
+    () =>
+      [0, 1, 2].map(
+        () =>
+          new THREE.MeshBasicMaterial({
+            color: "#fdf3d3",
+            transparent: true,
+            opacity: 0.1,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+          }),
+      ),
+    [],
+  );
+  // One instanced mesh per pulsing material group instead of 16 separate quads.
+  const groups = useMemo(() => {
+    const helper = new THREE.Object3D();
+    helper.rotation.set(-Math.PI / 2, 0, GLITTER_ANGLE);
+    return [0, 1, 2].map((mat) =>
+      GLITTER_QUADS.filter((quad) => quad.mat === mat).map((quad) => {
+        helper.position.set(quad.x, 0.05, quad.z);
+        helper.scale.setScalar(quad.scale);
+        helper.updateMatrix();
+        return helper.matrix.clone();
+      }),
+    );
+  }, []);
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+      materials.forEach((material) => material.dispose());
+    };
+  }, [geometry, materials]);
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    for (let i = 0; i < materials.length; i += 1) {
+      materials[i]!.opacity = 0.04 + (Math.sin(t * (0.9 + i * 0.33) + i * 2.1) * 0.5 + 0.5) * 0.09;
+    }
+  });
+  return groups.map((matrices, i) => (
+    <instancedMesh
+      key={i}
+      args={[geometry, materials[i], matrices.length]}
+      frustumCulled={false}
+      ref={(mesh) => {
+        if (!mesh) return;
+        matrices.forEach((matrix, j) => mesh.setMatrixAt(j, matrix));
+        mesh.instanceMatrix.needsUpdate = true;
+      }}
+    />
+  ));
+}
+
+function Bird({ position, phase, flap }: { position: Vec3; phase: number; flap: number }) {
+  const left = useRef<THREE.Group>(null);
+  const right = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    const f = Math.sin(state.clock.elapsedTime * flap + phase) * 0.55 + 0.15;
+    if (left.current) left.current.rotation.z = f;
+    if (right.current) right.current.rotation.z = -f;
+  });
+  return (
+    <group position={position}>
+      <group ref={left}>
+        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
+      </group>
+      <group ref={right} scale={[-1, 1, 1]}>
+        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
+      </group>
+    </group>
+  );
+}
+
+function BirdFlock({ y, z, speed, offset, dir, birds }: FlockProps) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (!ref.current) return;
+    ref.current.position.x = dir * (((state.clock.elapsedTime * speed + offset) % 110) - 55);
+  });
+  return (
+    <group ref={ref} position={[0, y, z]} rotation={[0, Math.PI / 2, 0]}>
+      {birds.map((position, i) => (
+        <Bird key={i} position={position} phase={i * 1.9} flap={6.5 + (i % 3) * 0.7} />
+      ))}
+    </group>
+  );
+}
+
+function Duck({ points, speed, phase, body, head }: DuckProps) {
+  const ref = useRef<THREE.Group>(null);
+  const ripple = useRef<THREE.Group>(null);
+  const rippleMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const curve = useMemo(() => new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)), true, "catmullrom", 0.4), [points]);
+  const position = useMemo(() => new THREE.Vector3(), []);
+  const tangent = useMemo(() => new THREE.Vector3(), []);
+
+  useFrame((state, delta) => {
+    const duck = ref.current;
+    if (!duck) return;
+    const t = (state.clock.elapsedTime * speed + phase) % 1;
+    curve.getPointAt(t, position);
+    // Heading from a small look-ahead; getTangentAt allocates internally.
+    curve.getPointAt((t + 0.01) % 1, tangent).sub(position);
+    position.y = 0.05 + Math.sin(state.clock.elapsedTime * 1.3 + phase * 9) * 0.02;
+    duck.position.copy(position);
+    const target = Math.atan2(tangent.x, tangent.z);
+    const turn = Math.atan2(Math.sin(target - duck.rotation.y), Math.cos(target - duck.rotation.y));
+    duck.rotation.y += turn * (1 - Math.exp(-4 * delta));
+    if (ripple.current && rippleMaterial.current) {
+      const pulse = (state.clock.elapsedTime * 0.5 + phase) % 1;
+      ripple.current.scale.setScalar(0.7 + pulse * 1.6);
+      rippleMaterial.current.opacity = (1 - pulse) * 0.14;
+    }
+  });
+
+  return (
+    <group ref={ref}>
+      <mesh position={[0, 0.09, 0]} scale={[0.19, 0.15, 0.3]} castShadow={false}>
+        <sphereGeometry args={[1, 12, 9]} />
+        <meshToonMaterial color={body} gradientMap={toonRamp()} />
+      </mesh>
+      <mesh position={[0, 0.26, 0.2]} scale={0.1} castShadow={false}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshToonMaterial color={head} gradientMap={toonRamp()} />
+      </mesh>
+      <mesh position={[0, 0.25, 0.32]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
+        <coneGeometry args={[0.035, 0.09, 6]} />
+        <meshToonMaterial color="#d8a13c" gradientMap={toonRamp()} />
+      </mesh>
+      <group ref={ripple} position={[0, -0.02, -0.18]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.32, 0.38, 24]} />
+          <meshBasicMaterial ref={rippleMaterial} color="#dcebe7" transparent opacity={0} depthWrite={false} />
+        </mesh>
+      </group>
+    </group>
+  );
+}
+
+function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
+  const ref = useRef<THREE.Group>(null);
+  const wingMaterial = useMemo(
+    () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
+    [],
+  );
+  useEffect(() => () => wingMaterial.dispose(), [wingMaterial]);
+  useFrame((state) => {
+    const fly = ref.current;
+    if (!fly) return;
+    const t = state.clock.elapsedTime * speed + phase;
+    fly.position.set(
+      center[0] + Math.sin(t) * size,
+      center[1] + Math.sin(t * 2.7) * 0.14,
+      center[2] + Math.sin(t * 2) * size * 0.55,
+    );
+    fly.rotation.y = Math.atan2(Math.cos(t), Math.cos(t * 2) * 1.1);
+    wingMaterial.opacity = 0.18 + (Math.sin(state.clock.elapsedTime * 34 + phase) * 0.5 + 0.5) * 0.16;
+  });
+  return (
+    <group ref={ref}>
+      <mesh rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
+        <capsuleGeometry args={[0.02, 0.3, 3, 6]} />
+        <meshToonMaterial color="#3d6f78" gradientMap={toonRamp()} />
+      </mesh>
+      <mesh material={wingMaterial} position={[0, 0.03, 0.06]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.42, 0.09]} />
+      </mesh>
+      <mesh material={wingMaterial} position={[0, 0.03, -0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.34, 0.08]} />
+      </mesh>
     </group>
   );
 }
@@ -545,6 +803,16 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
       ))}
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
+      ))}
+      <SunGlitter />
+      {FLOCKS.map((flock, i) => (
+        <BirdFlock key={i} {...flock} />
+      ))}
+      {DUCKS.map((duck, i) => (
+        <Duck key={i} {...duck} />
+      ))}
+      {DRAGONFLIES.map((fly, i) => (
+        <Dragonfly key={i} {...fly} />
       ))}
     </>
   );

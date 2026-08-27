@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { canUseSpot, type SkillId, type SpotId } from "@stillwater/shared";
+import { canUseSpot, catchPoints, type SkillId, type SpotId } from "@stillwater/shared";
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
+import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { UpgradePanel } from "../components/UpgradePanel";
-import { FightOverlay } from "../game/challenges/FightOverlay";
+import { fx } from "../game/fx";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
@@ -30,6 +31,8 @@ export function DockPage() {
   useEffect(() => {
     refresh().catch((err: Error) => setError(err.message));
   }, [refresh]);
+
+  useEffect(() => () => fx.ambient.stop(), []);
 
   useEffect(() => {
     if (game.outcome?.kind !== "landed") {
@@ -68,7 +71,7 @@ export function DockPage() {
     <div className="dock-page">
       <Hud profile={me.profile} email={me.user.email} />
       <div className="scene-wrap" ref={game.surfaceRef} data-phase={scenePhase} data-points={me.profile.points} data-power={game.power.toFixed(2)}>
-        <FishingWorld phase={scenePhase} power={game.power} spot={spot} />
+        <FishingWorld phase={scenePhase} power={game.power} spot={spot} sim={game.sim} />
         <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         <p className="hint">{game.hint}</p>
         <aside className="camera-help" data-camera-control>
@@ -78,19 +81,13 @@ export function DockPage() {
           <kbd>Wheel</kbd> zoom
           <kbd>WASD</kbd> move
         </aside>
-        {game.fight && (
-          <FightOverlay
-            fight={game.fight}
-            accuracy={me.profile.accuracy}
-            strength={me.profile.strength}
-            onSuccess={game.onFightSuccess}
-            onFail={game.onFightFail}
-          />
-        )}
+        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
         {game.outcome?.kind === "landed" && (
-          <div className="catch-card">
+          <div className={`catch-card rarity-${game.outcome.species.rarity}`}>
+            <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
             <p>{game.outcome.weight.toFixed(1)} lb</p>
+            <p>+{catchPoints(game.outcome.species, game.outcome.weight)} pts</p>
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Keep fishing
             </button>

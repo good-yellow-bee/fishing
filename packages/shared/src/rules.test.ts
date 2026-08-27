@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
-import { anglerLevel, canUseSpot, skillCost } from "./progression.ts";
-import { canLand, catchPoints, validateCatch, validateUpgrade } from "./rules.ts";
+import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
+import { canLand, catchPoints, legendaryCanBite, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 
 const starter: Profile = {
@@ -78,6 +78,45 @@ describe("catch rules", () => {
       expect(fish.spots.length).toBeGreaterThan(0);
       expect(fish.basePoints).toBeGreaterThan(0);
     }
+  });
+
+  it("keeps species ids unique", () => {
+    expect(new Set(FISH.map((fish) => fish.id)).size).toBe(FISH.length);
+  });
+
+  it("keeps every species at valid spots", () => {
+    for (const fish of FISH) {
+      for (const spot of fish.spots) expect(SPOT_IDS).toContain(spot);
+    }
+  });
+
+  it("bounds weight for the new species", () => {
+    for (const id of ["golden-shiner", "smallmouth-bass", "burbot", "tiger-muskie"]) {
+      const fish = fishById(id)!;
+      expect(weightInRange(fish, fish.minWeight)).toBe(true);
+      expect(weightInRange(fish, fish.maxWeight)).toBe(true);
+      expect(weightInRange(fish, fish.minWeight - 0.01)).toBe(false);
+      expect(weightInRange(fish, fish.maxWeight + 0.01)).toBe(false);
+    }
+  });
+
+  it("scales points with weight around the species midpoint", () => {
+    for (const fish of FISH) {
+      expect(catchPoints(fish, fish.maxWeight)).toBeGreaterThanOrEqual(fish.basePoints);
+      expect(catchPoints(fish, fish.minWeight)).toBeLessThan(catchPoints(fish, fish.maxWeight));
+    }
+  });
+
+  it("keeps a common species at every spot", () => {
+    for (const spot of SPOT_IDS) {
+      expect(FISH.some((fish) => fish.rarity === "common" && fish.spots.includes(spot))).toBe(true);
+    }
+  });
+
+  it("gates tiger muskie bites on angler skill", () => {
+    const muskie = fishById("tiger-muskie")!;
+    expect(legendaryCanBite(starter, muskie, "reeds")).toBe(false);
+    expect(legendaryCanBite({ strength: 5, accuracy: 2 }, muskie, "reeds")).toBe(true);
   });
 });
 
