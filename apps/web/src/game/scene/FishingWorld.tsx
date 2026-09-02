@@ -224,7 +224,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
       if (overWater) marker.current.position.set(hit.x, 0.04, hit.z);
     }
     if (wrap.current) {
-      wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(1)},${hit.z.toFixed(1)}` : "none";
+      wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(3)},${hit.z.toFixed(3)}` : "none";
       wrap.current.dataset.spot = overWater ? (spotAt(hit.x, hit.z) ?? "shore") : "shore";
     }
   };

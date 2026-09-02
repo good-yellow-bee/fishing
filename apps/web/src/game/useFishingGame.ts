@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   anglerLevel,
   canLand,
-  parseAim,
-  resolveLanding,
+  canUseSpot,
   type FishSpecies,
   type Profile,
   type SpotId,
@@ -152,23 +151,22 @@ export function useFishingGame(profile: Profile | null) {
     powerRef.current = castPower;
     setPower(castPower);
     fx.cast();
-    const aim = parseAim(surfaceRef.current?.dataset.aim);
+    const aimed = hintFromDataset(surfaceRef.current?.dataset.spot);
     const level = anglerLevel(profile.lifetimePoints);
-    const landing = resolveLanding(aim?.x ?? Number.NaN, aim?.z ?? Number.NaN, level);
-    if (!landing.ok) {
-      if (landing.reason === "locked") {
-        setOutcome({ kind: "miss", message: "Drop-off is too deep until level 3." });
-        resetToIdle("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
-        return;
-      }
+    if (!aimed || aimed === "shore") {
       setOutcome({ kind: "miss", message: "Missed the lake." });
       resetToIdle("Bait landed on shore. Aim at the water.");
       return;
     }
-    spotRef.current = landing.spot;
-    setSpot(landing.spot);
-    setAimHint(landing.spot);
-    aimHintRef.current = landing.spot;
+    if (!canUseSpot(aimed, level)) {
+      setOutcome({ kind: "miss", message: "Drop-off is too deep until level 3." });
+      resetToIdle("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
+      return;
+    }
+    spotRef.current = aimed;
+    setSpot(aimed);
+    setAimHint(aimed);
+    aimHintRef.current = aimed;
     if (castPower < 0.22) {
       setOutcome({ kind: "miss", message: "The lure slapped the dock." });
       resetToIdle("Too little power. Hold longer.");
