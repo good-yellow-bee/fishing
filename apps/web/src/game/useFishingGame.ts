@@ -7,7 +7,7 @@ import {
   type Profile,
   type SpotId,
 } from "@stillwater/shared";
-import { makeFight, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import type { ScenePhase } from "./scene/types";
@@ -34,6 +34,8 @@ type Timers = {
   wait?: number;
   hook?: number;
   snap?: number;
+  nibble?: number;
+  nibbleOff?: number;
 };
 
 export function useFishingGame(profile: Profile | null) {
@@ -57,6 +59,7 @@ export function useFishingGame(profile: Profile | null) {
   const [aimHint, setAimHint] = useState<AimHint>("dock");
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  const [nibble, setNibble] = useState(false);
   const [hint, setHint] = useState("Click the water to aim. Hold to charge, release in the pale band.");
 
   const setPhaseBoth = (next: ScenePhase) => {
@@ -68,6 +71,8 @@ export function useFishingGame(profile: Profile | null) {
     window.clearTimeout(timers.current.wait);
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
+    window.clearTimeout(timers.current.nibble);
+    window.clearTimeout(timers.current.nibbleOff);
     timers.current = {};
   };
 
@@ -82,7 +87,9 @@ export function useFishingGame(profile: Profile | null) {
       delete surface.dataset.tension;
       delete surface.dataset.line;
       delete surface.dataset.surge;
+      delete surface.dataset.nibble;
     }
+    setNibble(false);
     setFight(null);
   };
 
@@ -114,7 +121,7 @@ export function useFishingGame(profile: Profile | null) {
       const runtime = makeFight(species, weight, current.strength);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
-      setHint("Hold to reel. Ease off when it runs.");
+      setHint(`${FIGHT_LINES[species.challenge][0]}. Ease off when it runs.`);
     }
   }, [resetToIdle]);
 
@@ -130,9 +137,26 @@ export function useFishingGame(profile: Profile | null) {
 
   const startWait = useCallback((current: Profile) => {
     setPhaseBoth("waiting");
-    setHint("Watch the bobber. Strike on the dip — Space or click.");
+    setNibble(false);
+    setHint("Watch the bobber. A nibble first — strike on the real dip.");
+    const wait = waitMs(current.patience);
+    const nibbleAt = Math.min(wait - 500, wait * 0.5);
+    if (nibbleAt >= 480) {
+      timers.current.nibble = window.setTimeout(() => {
+        if (phaseRef.current !== "waiting") return;
+        setNibble(true);
+        const surface = surfaceRef.current;
+        if (surface) surface.dataset.nibble = "1";
+        fx.nibble();
+        timers.current.nibbleOff = window.setTimeout(() => {
+          setNibble(false);
+          if (surface) delete surface.dataset.nibble;
+        }, 280);
+      }, nibbleAt);
+    }
     timers.current.wait = window.setTimeout(() => {
       if (phaseRef.current !== "waiting") return;
+      setNibble(false);
       fx.bite();
       setPhaseBoth("hookset");
       setHint("NOW — strike!");
@@ -141,7 +165,7 @@ export function useFishingGame(profile: Profile | null) {
         setOutcome({ kind: "miss", message: "The fish dropped the bait." });
         resetToIdle("Missed the strike. Cast again.");
       }, hookWindowMs(current.accuracy));
-    }, waitMs(current.patience));
+    }, wait);
   }, [resetToIdle]);
 
   const releaseCast = useCallback(() => {
@@ -354,6 +378,7 @@ export function useFishingGame(profile: Profile | null) {
     fight,
     outcome,
     hint,
+    nibble,
     sim: simRef,
     dismissResult,
   };

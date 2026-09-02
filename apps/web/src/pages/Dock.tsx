@@ -73,8 +73,19 @@ export function DockPage() {
         data-points={me.profile.points}
         data-power={game.power.toFixed(2)}
         data-aim-hint={game.aimHint}
+        data-nibble={game.nibble ? "1" : "0"}
       >
-        <FishingWorld phase={scenePhase} power={game.power} spot={game.spot} sim={game.sim} />
+        <FishingWorld
+          phase={scenePhase}
+          power={game.power}
+          spot={game.spot}
+          sim={game.sim}
+          nibble={game.nibble}
+          species={
+            game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? null)
+          }
+          weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? 0)}
+        />
         <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         <p className="hint">{game.hint}</p>
         <aside className="camera-help" data-camera-control>

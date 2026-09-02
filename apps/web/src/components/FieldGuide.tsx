@@ -1,4 +1,4 @@
-import { fieldGuide, guideProgress, type CatchStat, type GuideEntry, type Rarity } from "@stillwater/shared";
+import { fieldGuide, guideProgress, type CatchStat, type GuideEntry } from "@stillwater/shared";
 
 type Props = {
   stats: CatchStat[];
@@ -6,10 +6,10 @@ type Props = {
 
 const SILHOUETTE = "M6 18C16 7 36 4 52 12L74 5L65 18L74 31L52 24C36 32 16 29 6 18Z";
 
-function FishMark({ known, rarity }: { known: boolean; rarity: Rarity }) {
+function FishMark({ known, color }: { known: boolean; color: string }) {
   return (
     <svg className="guide-fish" viewBox="0 0 80 36" aria-hidden>
-      <path d={SILHOUETTE} data-rarity={known ? rarity : "unknown"} />
+      <path d={SILHOUETTE} fill={known ? color : "#161310"} stroke={known ? "none" : "#6d675c"} strokeWidth={known ? 0 : 1.2} />
     </svg>
   );
 }
@@ -18,7 +18,7 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
   const known = entry.caught > 0;
   return (
     <article className={`guide-card ${known ? `rarity-${entry.species.rarity}` : "unknown"}`}>
-      <FishMark known={known} rarity={entry.species.rarity} />
+      <FishMark known={known} color={entry.species.color} />
       {known ? <span className="rarity-tag">{entry.species.rarity}</span> : <span className="rarity-tag">unlogged</span>}
       <h3>{known ? entry.species.name : "Unknown"}</h3>
       {known ? (

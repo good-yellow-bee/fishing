@@ -805,32 +805,6 @@ kbd {
   margin-bottom: 8px;
 }
 
-.guide-fish path {
-  fill: #8a8f85;
-}
-
-.guide-card.unknown .guide-fish path,
-.guide-fish path[data-rarity="unknown"] {
-  fill: #161310;
-  stroke: #6d675c;
-  stroke-width: 1.2;
-}
-
-.guide-card.rarity-uncommon .guide-fish path,
-.guide-fish path[data-rarity="uncommon"] {
-  fill: var(--rarity-uncommon);
-}
-
-.guide-card.rarity-rare .guide-fish path,
-.guide-fish path[data-rarity="rare"] {
-  fill: #7aa8c4;
-}
-
-.guide-card.rarity-legendary .guide-fish path,
-.guide-fish path[data-rarity="legendary"] {
-  fill: var(--rarity-legendary);
-}
-
 .guide-card.rarity-common {
   border-left: 3px solid var(--rarity-common);
 }

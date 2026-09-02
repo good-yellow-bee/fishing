@@ -12,6 +12,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock", "reeds"],
     basePoints: 7,
     rarity: "common",
+    color: "#d4a84b",
+    accent: "#f0d78a",
   },
   {
     id: "bluegill",
@@ -24,6 +26,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock"],
     basePoints: 8,
     rarity: "common",
+    color: "#3d6b4f",
+    accent: "#e8c45c",
   },
   {
     id: "perch",
@@ -36,6 +40,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock", "reeds", "dropoff"],
     basePoints: 12,
     rarity: "common",
+    color: "#c9a13a",
+    accent: "#5a3d1c",
   },
   {
     id: "brook-trout",
@@ -48,6 +54,8 @@ export const FISH: FishSpecies[] = [
     spots: ["reeds"],
     basePoints: 22,
     rarity: "uncommon",
+    color: "#8b3a2a",
+    accent: "#e8c9a0",
   },
   {
     id: "smallmouth-bass",
@@ -60,6 +68,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock", "dropoff"],
     basePoints: 26,
     rarity: "uncommon",
+    color: "#5c4a38",
+    accent: "#c4a574",
   },
   {
     id: "rainbow-trout",
@@ -72,6 +82,8 @@ export const FISH: FishSpecies[] = [
     spots: ["reeds", "dropoff"],
     basePoints: 28,
     rarity: "uncommon",
+    color: "#c47a6a",
+    accent: "#7eb8a8",
   },
   {
     id: "carp",
@@ -84,6 +96,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock", "reeds"],
     basePoints: 36,
     rarity: "uncommon",
+    color: "#b57a4a",
+    accent: "#e8c9a0",
   },
   {
     id: "pike",
@@ -96,6 +110,8 @@ export const FISH: FishSpecies[] = [
     spots: ["reeds", "dropoff"],
     basePoints: 48,
     rarity: "rare",
+    color: "#4a6b48",
+    accent: "#c9d4a8",
   },
   {
     id: "catfish",
@@ -108,6 +124,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dock", "dropoff"],
     basePoints: 40,
     rarity: "uncommon",
+    color: "#4a453c",
+    accent: "#c4b89a",
   },
   {
     id: "burbot",
@@ -120,6 +138,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dropoff"],
     basePoints: 52,
     rarity: "rare",
+    color: "#3d4a52",
+    accent: "#8aa0a8",
   },
   {
     id: "salmon",
@@ -132,6 +152,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dropoff"],
     basePoints: 55,
     rarity: "rare",
+    color: "#c45c4a",
+    accent: "#e8c4b0",
   },
   {
     id: "tiger-muskie",
@@ -144,6 +166,8 @@ export const FISH: FishSpecies[] = [
     spots: ["reeds"],
     basePoints: 100,
     rarity: "legendary",
+    color: "#6b8f3a",
+    accent: "#2a2e24",
   },
   {
     id: "sturgeon",
@@ -156,6 +180,8 @@ export const FISH: FishSpecies[] = [
     spots: ["dropoff"],
     basePoints: 120,
     rarity: "legendary",
+    color: "#6a7a78",
+    accent: "#c5b89a",
   },
 ];
 

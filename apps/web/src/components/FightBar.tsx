@@ -1,13 +1,11 @@
 import { useEffect, useRef } from "react";
-import type { FightSim } from "../game/fight";
+import { FIGHT_LINES, type FightSim } from "../game/fight";
 import type { Fight } from "../game/useFishingGame";
 
 type Props = {
   fight: Fight;
   sim: { current: FightSim | null };
 };
-
-const STATUS = ["Hold to reel it in", "It tenses up…", "IT RUNS — ease off!"];
 
 function tensionColor(tension: number) {
   if (tension < 0.55) return "#6a8f5a";
@@ -20,6 +18,7 @@ export function FightBar({ fight, sim }: Props) {
   const tensionFill = useRef<HTMLDivElement>(null);
   const lineFill = useRef<HTMLDivElement>(null);
   const status = useRef<HTMLParagraphElement>(null);
+  const lines = FIGHT_LINES[fight.species.challenge];
 
   useEffect(() => {
     let frame = 0;
@@ -33,9 +32,10 @@ export function FightBar({ fight, sim }: Props) {
         if (lineFill.current) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
-        if (status.current) status.current.textContent = STATUS[state.surge]!;
+        if (status.current) status.current.textContent = lines[state.surge]!;
         if (card.current) {
           card.current.dataset.surge = String(state.surge);
+          card.current.dataset.challenge = fight.species.challenge;
           card.current.classList.toggle("surging", state.surge === 2);
         }
       }
@@ -43,7 +43,7 @@ export function FightBar({ fight, sim }: Props) {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [sim]);
+  }, [fight.species.challenge, lines, sim]);
 
   return (
     <div ref={card} className="fight-bar">
@@ -66,7 +66,7 @@ export function FightBar({ fight, sim }: Props) {
             <div ref={lineFill} className="fill" />
           </div>
           <p ref={status} className="fight-status">
-            {STATUS[0]}
+            {lines[0]}
           </p>
         </>
       )}

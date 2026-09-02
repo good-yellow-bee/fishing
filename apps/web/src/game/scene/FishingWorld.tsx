@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, Suspense, type ComponentRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { inLake, spotAt, type SpotId } from "@stillwater/shared";
+import { inLake, spotAt, type FishSpecies, type SpotId } from "@stillwater/shared";
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
@@ -22,6 +22,9 @@ type Props = {
   power: number;
   spot: SpotId;
   sim: SimRef;
+  nibble: boolean;
+  species: FishSpecies | null;
+  weight: number;
 };
 
 const CAM_START: [number, number, number] = [8.8, 6.2, 15.8];
@@ -46,7 +49,15 @@ function isFighting(phase: ScenePhase) {
   return phase === "fight" || phase === "hookset";
 }
 
-function placeBobber(out: THREE.Vector3, spot: SpotId, power: number, dipped: boolean, t: number, aim: THREE.Vector3 | null) {
+function placeBobber(
+  out: THREE.Vector3,
+  spot: SpotId,
+  power: number,
+  dipped: boolean,
+  t: number,
+  aim: THREE.Vector3 | null,
+  nibble: boolean,
+) {
   if (aim) {
     out.x = aim.x;
     out.z = aim.z;
@@ -55,7 +66,9 @@ function placeBobber(out: THREE.Vector3, spot: SpotId, power: number, dipped: bo
     out.x = BOBBER_X[spot];
     out.z = 4.2 - reach * (spot === "dropoff" ? 1.15 : 1);
   }
-  out.y = dipped ? -0.14 : 0.07 + Math.sin(t * 2.4) * 0.04;
+  if (dipped) out.y = -0.14;
+  else if (nibble) out.y = -0.08 + Math.sin(t * 26) * 0.05;
+  else out.y = 0.07 + Math.sin(t * 2.4) * 0.04;
 }
 
 function isAiming(phase: ScenePhase) {
@@ -356,7 +369,19 @@ function SurgeSpray({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
 const LEAP_SEC = 0.7;
 const LEAP_GAP = 1.2;
 
-function HookedFish({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
+function HookedFish({
+  sim,
+  burstRef,
+  color,
+  accent,
+  scale,
+}: {
+  sim: SimRef;
+  burstRef: BurstRef;
+  color: string;
+  accent: string;
+  scale: number;
+}) {
   const fish = useRef<THREE.Group>(null);
   const leapStart = useRef(-1);
   const nextLeapAt = useRef(0);
@@ -392,8 +417,8 @@ function HookedFish({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
     fish.current.rotation.y = Math.sin(t * 6 * speed) * 0.55 * twist;
   });
   return (
-    <group ref={fish} position={[0, -0.14, 0.38]} scale={0.72}>
-      <ArticulatedFish color="#b96f43" accent="#e7bd72" speed={1.8} intensity={1.65} />
+    <group ref={fish} position={[0, -0.14, 0.38]} scale={scale}>
+      <ArticulatedFish color={color} accent={accent} speed={1.8} intensity={1.65} />
     </group>
   );
 }
@@ -402,8 +427,34 @@ const DOCK_POINT = new THREE.Vector3(0.3, 0, 5.9);
 const FLIGHT_SEC = 0.55;
 const SPLASH_SEC = 0.7;
 const LINE_POINTS = 11;
+const FALLBACK_COLOR = "#b96f43";
+const FALLBACK_ACCENT = "#e7bd72";
 
-function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt }: LineAndBobberProps) {
+function bodyScale(weight: number) {
+  return 0.5 + Math.min(0.45, weight / 28);
+}
+
+function StalkingFish({ active }: { active: boolean }) {
+  const fish = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    const g = fish.current;
+    if (!g) return;
+    const show = active && bobberWorld.y < 0.18;
+    g.visible = show;
+    if (!show) return;
+    const t = state.clock.elapsedTime;
+    const r = 0.62;
+    g.position.set(Math.cos(t * 1.7) * r, -0.22, Math.sin(t * 1.7) * r);
+    g.rotation.y = t * 1.7 + Math.PI / 2;
+  });
+  return (
+    <group ref={fish} visible={false} scale={0.42}>
+      <ArticulatedFish color="#24343c" accent="#3d4a52" speed={2.2} intensity={1.4} />
+    </group>
+  );
+}
+
+function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
   const splashMaterial = useRef<THREE.MeshBasicMaterial>(null);
@@ -459,7 +510,7 @@ function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt }: LineAnd
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
-    placeBobber(target, spot, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null);
+    placeBobber(target, spot, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null, nibble);
     if (castStarted) {
       flightFrom.copy(rodTip);
       flightTo.set(target.x, 0.07, target.z);
@@ -532,8 +583,17 @@ function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt }: LineAnd
       <group ref={bobber} visible={false}>
         <ToonModel url={BUOY_URL} scale={0.32} />
         <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} />
+        {phase === "waiting" && <StalkingFish active />}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
-        {phase === "fight" && <HookedFish sim={sim} burstRef={burstRef} />}
+        {phase === "fight" && (
+          <HookedFish
+            sim={sim}
+            burstRef={burstRef}
+            color={species?.color ?? FALLBACK_COLOR}
+            accent={species?.accent ?? FALLBACK_ACCENT}
+            scale={bodyScale(weight)}
+          />
+        )}
       </group>
     </>
   );
@@ -541,7 +601,19 @@ function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt }: LineAnd
 
 const CATCH_FLIGHT_SEC = 0.5;
 
-function CaughtFish({ phase, hand }: { phase: ScenePhase; hand: THREE.Vector3 }) {
+function CaughtFish({
+  phase,
+  hand,
+  color,
+  accent,
+  scale,
+}: {
+  phase: ScenePhase;
+  hand: THREE.Vector3;
+  color: string;
+  accent: string;
+  scale: number;
+}) {
   const group = useRef<THREE.Group>(null);
   const from = useMemo(() => new THREE.Vector3(), []);
   const prevPhase = useRef(phase);
@@ -576,13 +648,13 @@ function CaughtFish({ phase, hand }: { phase: ScenePhase; hand: THREE.Vector3 })
     }
   });
   return (
-    <group ref={group} visible={false} scale={0.72}>
-      <ArticulatedFish color="#b96f43" accent="#e7bd72" speed={0.6} intensity={0.5} />
+    <group ref={group} visible={false} scale={scale}>
+      <ArticulatedFish color={color} accent={accent} speed={0.6} intensity={0.5} />
     </group>
   );
 }
 
-function Scene({ phase, power, spot, sim }: Props) {
+function Scene({ phase, power, spot, sim, nibble, species, weight }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(0.4, 2.1, 6.2), []);
   const hand = useMemo(() => new THREE.Vector3(0.15, 1.1, 7.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(0.55, 0, -2), []);
@@ -592,8 +664,25 @@ function Scene({ phase, power, spot, sim }: Props) {
       <CameraRig phase={phase} sim={sim} />
       <LakeWorld spot={spot} />
       <WaterAim phase={phase} aim={aim} />
-      <LineAndBobber phase={phase} power={power} spot={spot} sim={sim} rodTip={rodTip} aim={aim} lookAt={lookAt} />
-      <CaughtFish phase={phase} hand={hand} />
+      <LineAndBobber
+        phase={phase}
+        power={power}
+        spot={spot}
+        sim={sim}
+        nibble={nibble}
+        species={species}
+        weight={weight}
+        rodTip={rodTip}
+        aim={aim}
+        lookAt={lookAt}
+      />
+      <CaughtFish
+        phase={phase}
+        hand={hand}
+        color={species?.color ?? FALLBACK_COLOR}
+        accent={species?.accent ?? FALLBACK_ACCENT}
+        scale={bodyScale(weight)}
+      />
       <Angler phase={phase} power={power} sim={sim} rodTip={rodTip} hand={hand} lookAt={lookAt} />
     </>
   );

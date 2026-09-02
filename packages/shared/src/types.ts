@@ -14,6 +14,8 @@ export type FishSpecies = {
   spots: SpotId[];
   basePoints: number;
   rarity: Rarity;
+  color: string;
+  accent: string;
 };
 
 export type Profile = {

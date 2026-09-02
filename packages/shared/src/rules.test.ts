@@ -79,6 +79,8 @@ describe("catch rules", () => {
       expect(fish.minAccuracy).toBeGreaterThanOrEqual(1);
       expect(fish.spots.length).toBeGreaterThan(0);
       expect(fish.basePoints).toBeGreaterThan(0);
+      expect(fish.color).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(fish.accent).toMatch(/^#[0-9a-f]{6}$/i);
     }
   });
 

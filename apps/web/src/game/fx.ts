@@ -150,6 +150,11 @@ export const fx = {
   plop() {
     if (this.enabled) waterPlop(1);
   },
+  nibble() {
+    if (!this.enabled) return;
+    tone("sine", 640, 580, 0.05, 0.02);
+    waterPlop(0.45);
+  },
   bite() {
     if (!this.enabled) return;
     tone("sine", 880, 900, 0.07, 0.035);
