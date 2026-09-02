@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "./auth.ts";
+import { boardRoutes } from "./routes/board.ts";
 import { catchRoutes } from "./routes/catches.ts";
 import { meRoutes } from "./routes/me.ts";
 import { upgradeRoutes } from "./routes/upgrades.ts";
@@ -24,10 +25,12 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 app.use("/api/me", requireSession);
 app.use("/api/catches", requireSession);
 app.use("/api/upgrades", requireSession);
+app.use("/api/board", requireSession);
 
 app.route("/api", meRoutes);
 app.route("/api", catchRoutes);
 app.route("/api", upgradeRoutes);
+app.route("/api", boardRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
+import { BOARD_LIMIT, boardView, rankBoard, type BoardStat } from "./board.ts";
 import { fieldGuide, guideProgress } from "./guide.ts";
 import { inLake, parseAim, resolveLanding, spotAt } from "./lake.ts";
 import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
@@ -171,6 +172,68 @@ describe("field guide", () => {
     expect(perch.heaviest).toBe(1.1);
     expect(shiner.caught).toBe(0);
     expect(guideProgress(entries).found).toBe(1);
+  });
+});
+
+describe("lodge board", () => {
+  const ash: BoardStat = {
+    userId: "a",
+    displayName: "Ash",
+    lifetimePoints: 50,
+    heaviest: 2,
+    species: 3,
+    catches: 4,
+  };
+  const bo: BoardStat = {
+    userId: "b",
+    displayName: "Bo",
+    lifetimePoints: 350,
+    heaviest: 8,
+    species: 6,
+    catches: 12,
+  };
+  const cy: BoardStat = {
+    userId: "c",
+    displayName: "Cy",
+    lifetimePoints: 50,
+    heaviest: 4,
+    species: 2,
+    catches: 3,
+  };
+
+  it("ranks lifetime points first, then heaviest", () => {
+    const ranked = rankBoard([ash, bo, cy]);
+    expect(ranked.map((row) => row.userId)).toEqual(["b", "c", "a"]);
+    expect(ranked[0]?.rank).toBe(1);
+    expect(ranked[0]?.level).toBe(4);
+  });
+
+  it("breaks leftover ties by display name", () => {
+    const ranked = rankBoard([
+      { ...ash, userId: "z", displayName: "Zed", heaviest: 4 },
+      { ...cy, userId: "c", displayName: "Cy", heaviest: 4 },
+    ]);
+    expect(ranked.map((row) => row.userId)).toEqual(["c", "z"]);
+  });
+
+  it("keeps the top 100 and still returns you when you sit below it", () => {
+    const crowd = Array.from({ length: 105 }, (_, i) => ({
+      userId: `u${i}`,
+      displayName: `Angler ${String(i).padStart(3, "0")}`,
+      lifetimePoints: 105 - i,
+      heaviest: 1,
+      species: 1,
+      catches: 1,
+    }));
+    const view = boardView(crowd, "u104");
+    expect(view.entries).toHaveLength(BOARD_LIMIT);
+    expect(view.entries.at(-1)?.userId).toBe("u99");
+    expect(view.you?.rank).toBe(105);
+    expect(view.you?.userId).toBe("u104");
+  });
+
+  it("returns a null standing when the viewer is not on the roster", () => {
+    expect(boardView([ash], "missing").you).toBeNull();
   });
 });
 

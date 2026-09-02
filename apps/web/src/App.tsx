@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
+import { BoardPage } from "./pages/Board";
 import { DockPage } from "./pages/Dock";
 import { LogPage } from "./pages/Log";
 import { LoginPage } from "./pages/Login";
@@ -40,6 +41,14 @@ export function App() {
         element={
           <Gate>
             <LogPage />
+          </Gate>
+        }
+      />
+      <Route
+        path="/board"
+        element={
+          <Gate>
+            <BoardPage />
           </Gate>
         }
       />

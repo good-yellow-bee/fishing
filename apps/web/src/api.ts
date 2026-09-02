@@ -1,4 +1,4 @@
-import type { CatchRecord, CatchStat, Profile, SkillId, SpotId } from "@stillwater/shared";
+import type { BoardView, CatchRecord, CatchStat, Profile, SkillId, SpotId } from "@stillwater/shared";
 
 export type Me = {
   user: { id: string; email: string; name: string };
@@ -31,6 +31,10 @@ export function recordCatch(body: { speciesId: string; weight: number; spot: Spo
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function getBoard() {
+  return request<BoardView>("/api/board");
 }
 
 export function buyUpgrade(skill: SkillId) {

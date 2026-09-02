@@ -139,6 +139,35 @@ export function listSpeciesStats(userId: string) {
   }));
 }
 
+export function listBoardStats() {
+  const rows = db
+    .prepare(
+      `SELECT p.user_id, p.display_name, p.lifetime_points,
+              COALESCE(MAX(c.weight), 0) as heaviest,
+              COUNT(c.id) as catches,
+              COUNT(DISTINCT CASE WHEN c.species_id IS NOT NULL THEN c.species_id END) as species
+       FROM profile p
+       LEFT JOIN catch c ON c.user_id = p.user_id
+       GROUP BY p.user_id, p.display_name, p.lifetime_points`,
+    )
+    .all() as {
+      user_id: string;
+      display_name: string;
+      lifetime_points: number;
+      heaviest: number;
+      catches: number;
+      species: number;
+    }[];
+  return rows.map((row) => ({
+    userId: row.user_id,
+    displayName: row.display_name,
+    lifetimePoints: row.lifetime_points,
+    heaviest: row.heaviest,
+    catches: Number(row.catches),
+    species: Number(row.species),
+  }));
+}
+
 export function insertCatch(row: CatchRow) {
   const tx = db.transaction(() => {
     db.prepare(

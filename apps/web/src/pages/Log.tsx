@@ -28,6 +28,8 @@ export function LogPage() {
     <div className="log-page">
       <p>
         <Link to="/">Back to the dock</Link>
+        {" · "}
+        <Link to="/board">Lodge board</Link>
       </p>
       <h1>{me.profile.displayName}&rsquo;s catch log</h1>
       <p>
