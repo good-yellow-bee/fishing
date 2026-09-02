@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { BOARD_LIMIT, boardView, rankBoard, type BoardStat } from "./board.ts";
-import { fieldGuide, guideProgress } from "./guide.ts";
+import { fieldGuide, guideProgress, catchStamp } from "./guide.ts";
+import { biteHourMul, lakeHour, lakeHourFromSearch, lakeHourWaitMul } from "./hour.ts";
 import { inLake, parseAim, resolveLanding, spotAt } from "./lake.ts";
 import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
 import { canLand, catchPoints, legendaryCanBite, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
@@ -172,6 +173,45 @@ describe("field guide", () => {
     expect(perch.heaviest).toBe(1.1);
     expect(shiner.caught).toBe(0);
     expect(guideProgress(entries).found).toBe(1);
+  });
+
+  it("stamps a first, a personal best, or a repeat", () => {
+    expect(catchStamp([], "perch", 0.8)).toEqual({ kind: "first" });
+    expect(catchStamp([{ speciesId: "perch", caught: 2, heaviest: 0.9, lastAt: "x" }], "perch", 1.1)).toEqual({
+      kind: "pb",
+      previous: 0.9,
+    });
+    expect(catchStamp([{ speciesId: "perch", caught: 2, heaviest: 1.1, lastAt: "x" }], "perch", 0.8)).toEqual({
+      kind: "repeat",
+      heaviest: 1.1,
+    });
+  });
+});
+
+describe("lake hour", () => {
+  const at = (hour: number) => new Date(2026, 8, 2, hour, 0, 0);
+
+  it("splits the clock into dawn, day, dusk, and night", () => {
+    expect(lakeHour(at(4))).toBe("night");
+    expect(lakeHour(at(6))).toBe("dawn");
+    expect(lakeHour(at(12))).toBe("day");
+    expect(lakeHour(at(19))).toBe("dusk");
+    expect(lakeHour(at(22))).toBe("night");
+  });
+
+  it("reads a forced hour from the query string", () => {
+    expect(lakeHourFromSearch("?hour=night")).toBe("night");
+    expect(lakeHourFromSearch("hour=dawn")).toBe("dawn");
+    expect(lakeHourFromSearch("?hour=noon")).toBeNull();
+  });
+
+  it("favors night hunters after dark and trout at dawn", () => {
+    const catfish = fishById("catfish")!;
+    const bluegill = fishById("bluegill")!;
+    const trout = fishById("brook-trout")!;
+    expect(biteHourMul(catfish, "night")).toBeGreaterThan(biteHourMul(bluegill, "night"));
+    expect(biteHourMul(trout, "dawn")).toBeGreaterThan(biteHourMul(trout, "day"));
+    expect(lakeHourWaitMul("night")).toBeGreaterThan(lakeHourWaitMul("dawn"));
   });
 });
 

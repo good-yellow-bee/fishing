@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, Suspense, type ComponentRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { inLake, spotAt, type FishSpecies, type SpotId } from "@stillwater/shared";
+import { inLake, spotAt, type FishSpecies, type LakeHour, type SpotId } from "@stillwater/shared";
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
-import { LakeWorld } from "./LakeWorld";
+import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -23,6 +23,7 @@ type Props = {
   spot: SpotId;
   sim: SimRef;
   nibble: boolean;
+  hour: LakeHour;
   species: FishSpecies | null;
   weight: number;
 };
@@ -278,7 +279,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   );
 }
 
-type LineAndBobberProps = Props & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "hour"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim }: { active: boolean; sim: SimRef }) {
   const group = useRef<THREE.Group>(null);
@@ -654,7 +655,15 @@ function CaughtFish({
   );
 }
 
-function Scene({ phase, power, spot, sim, nibble, species, weight }: Props) {
+function Tone({ hour }: { hour: LakeHour }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.toneMappingExposure = hour === "night" ? 0.72 : hour === "dusk" ? 0.92 : 1.05;
+  }, [gl, hour]);
+  return null;
+}
+
+function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(0.4, 2.1, 6.2), []);
   const hand = useMemo(() => new THREE.Vector3(0.15, 1.1, 7.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(0.55, 0, -2), []);
@@ -662,7 +671,8 @@ function Scene({ phase, power, spot, sim, nibble, species, weight }: Props) {
   return (
     <>
       <CameraRig phase={phase} sim={sim} />
-      <LakeWorld spot={spot} />
+      <Tone hour={hour} />
+      <LakeWorld spot={spot} hour={hour} />
       <WaterAim phase={phase} aim={aim} />
       <LineAndBobber
         phase={phase}
@@ -698,10 +708,10 @@ export function FishingWorld(props: Props) {
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.05;
+        gl.toneMappingExposure = props.hour === "night" ? 0.72 : props.hour === "dusk" ? 0.92 : 1.05;
       }}
     >
-      <color attach="background" args={["#b6cbd2"]} />
+      <color attach="background" args={[LAKE_HOUR_LOOK[props.hour].fog]} />
       <Suspense fallback={null}>
         <Scene {...props} />
       </Suspense>

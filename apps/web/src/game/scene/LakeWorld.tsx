@@ -2,12 +2,112 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type SpotId } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
 
 type Vec3 = [number, number, number];
+
+export const LAKE_HOUR_LOOK: Record<
+  LakeHour,
+  {
+    fog: string;
+    hemiSky: string;
+    hemiGround: string;
+    hemi: number;
+    sun: string;
+    sunInt: number;
+    sunPos: Vec3;
+    sky: [string, string, string];
+    disc: string;
+    glow: string;
+    discPos: Vec3;
+    clouds: string;
+    water: string;
+    waterDrop: string;
+    glint: number;
+    glitter: boolean;
+    birds: boolean;
+  }
+> = {
+  dawn: {
+    fog: "#e0c4a8",
+    hemiSky: "#f0c8b0",
+    hemiGround: "#5a4a38",
+    hemi: 0.95,
+    sun: "#ffb078",
+    sunInt: 1.7,
+    sunPos: [20, 12, 14],
+    sky: ["#f2d2b0", "#e8a888", "#7a9ab8"],
+    disc: "#ffd4a0",
+    glow: "#f4c9a0",
+    discPos: [32, 14, -58],
+    clouds: "#f6e4d0",
+    water: "#3d7a88",
+    waterDrop: "#2c5a6a",
+    glint: 0.85,
+    glitter: true,
+    birds: true,
+  },
+  day: {
+    fog: "#b6cbd2",
+    hemiSky: "#d3e6ef",
+    hemiGround: "#41564a",
+    hemi: 1.05,
+    sun: "#ffdf9e",
+    sunInt: 2.5,
+    sunPos: [16, 22, 10],
+    sky: ["#e6ead8", "#b7d2dc", "#79a8c6"],
+    disc: "#fff3cf",
+    glow: "#f4e9c5",
+    discPos: [38, 34, -62],
+    clouds: "#f4f8f6",
+    water: "#357795",
+    waterDrop: "#2c6784",
+    glint: 1,
+    glitter: true,
+    birds: true,
+  },
+  dusk: {
+    fog: "#c49070",
+    hemiSky: "#e8a070",
+    hemiGround: "#3a2820",
+    hemi: 0.85,
+    sun: "#ff8a50",
+    sunInt: 1.55,
+    sunPos: [-14, 10, 10],
+    sky: ["#e8a070", "#c45c48", "#4a3a68"],
+    disc: "#ffb070",
+    glow: "#e89060",
+    discPos: [-32, 12, -52],
+    clouds: "#f0c4a8",
+    water: "#2a5a6a",
+    waterDrop: "#1c4860",
+    glint: 0.7,
+    glitter: true,
+    birds: true,
+  },
+  night: {
+    fog: "#1c2a38",
+    hemiSky: "#6a82a0",
+    hemiGround: "#1e2a22",
+    hemi: 0.5,
+    sun: "#c5d0e0",
+    sunInt: 0.85,
+    sunPos: [-18, 24, 8],
+    sky: ["#1a2838", "#24344a", "#0e1620"],
+    disc: "#e8eef6",
+    glow: "#c5d0e0",
+    discPos: [-28, 30, -50],
+    clouds: "#3d4a58",
+    water: "#1a3a48",
+    waterDrop: "#143040",
+    glint: 0.18,
+    glitter: false,
+    birds: false,
+  },
+};
 
 const MODELS = {
   pine: "/models/tree_detailed.glb",
@@ -280,15 +380,15 @@ function makeWaterDetailTexture() {
   return texture;
 }
 
-function makeSkyTexture() {
+function makeSkyTexture(bottom: string, mid: string, top: string) {
   const canvas = document.createElement("canvas");
   canvas.width = 1;
   canvas.height = 256;
   const ctx = canvas.getContext("2d")!;
   const gradient = ctx.createLinearGradient(0, 256, 0, 0);
-  gradient.addColorStop(0, "#e6ead8");
-  gradient.addColorStop(0.42, "#b7d2dc");
-  gradient.addColorStop(1, "#79a8c6");
+  gradient.addColorStop(0, bottom);
+  gradient.addColorStop(0.42, mid);
+  gradient.addColorStop(1, top);
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 1, 256);
   const texture = new THREE.CanvasTexture(canvas);
@@ -296,8 +396,9 @@ function makeSkyTexture() {
   return texture;
 }
 
-function Sky() {
-  const texture = useMemo(() => makeSkyTexture(), []);
+function Sky({ hour }: { hour: LakeHour }) {
+  const look = LAKE_HOUR_LOOK[hour];
+  const texture = useMemo(() => makeSkyTexture(...look.sky), [look.sky]);
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <>
@@ -305,13 +406,13 @@ function Sky() {
         <sphereGeometry args={[1, 24, 16]} />
         <meshBasicMaterial map={texture} side={THREE.BackSide} fog={false} />
       </mesh>
-      <mesh position={[38, 34, -62]}>
-        <circleGeometry args={[5.5, 24]} />
-        <meshBasicMaterial color="#fff3cf" fog={false} />
+      <mesh position={look.discPos}>
+        <circleGeometry args={[hour === "night" ? 4.2 : 5.5, 24]} />
+        <meshBasicMaterial color={look.disc} fog={false} />
       </mesh>
-      <mesh position={[38, 34, -61.8]}>
-        <circleGeometry args={[9, 24]} />
-        <meshBasicMaterial color="#f4e9c5" transparent opacity={0.35} fog={false} />
+      <mesh position={[look.discPos[0], look.discPos[1], look.discPos[2] + 0.2]}>
+        <circleGeometry args={[hour === "night" ? 7 : 9, 24]} />
+        <meshBasicMaterial color={look.glow} transparent opacity={hour === "night" ? 0.22 : 0.35} fog={false} />
       </mesh>
     </>
   );
@@ -324,7 +425,7 @@ const CLOUDS: { y: number; z: number; scale: number; speed: number; offset: numb
   { y: 19, z: -34, scale: 1.2, offset: 72, speed: 0.28 },
 ];
 
-function Cloud({ y, z, scale, speed, offset }: (typeof CLOUDS)[number]) {
+function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & { color: string }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -334,21 +435,22 @@ function Cloud({ y, z, scale, speed, offset }: (typeof CLOUDS)[number]) {
     <group ref={ref} position={[0, y, z]} scale={scale}>
       <mesh position={[0, 0, 0]} scale={[2.6, 1.1, 1.6]}>
         <sphereGeometry args={[1, 10, 7]} />
-        <meshBasicMaterial color="#f4f8f6" fog={false} />
+        <meshBasicMaterial color={color} fog={false} />
       </mesh>
       <mesh position={[1.9, 0.35, 0.2]} scale={[1.5, 0.85, 1.2]}>
         <sphereGeometry args={[1, 9, 6]} />
-        <meshBasicMaterial color="#eef4f2" fog={false} />
+        <meshBasicMaterial color={color} fog={false} />
       </mesh>
       <mesh position={[-1.8, 0.2, -0.3]} scale={[1.3, 0.7, 1]}>
         <sphereGeometry args={[1, 9, 6]} />
-        <meshBasicMaterial color="#eef4f2" fog={false} />
+        <meshBasicMaterial color={color} fog={false} />
       </mesh>
     </group>
   );
 }
 
-function LakeSurface({ spot }: { spot: SpotId }) {
+function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
+  const look = LAKE_HOUR_LOOK[hour];
   const material = useRef<THREE.MeshToonMaterial>(null);
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
@@ -375,8 +477,8 @@ function LakeSurface({ spot }: { spot: SpotId }) {
     detailMap.offset.x -= delta * 0.006;
     detailMap.offset.y += delta * 0.004;
     if (material.current) material.current.opacity = 0.8 + Math.sin(t * 0.45) * 0.02;
-    if (glintA.current) glintA.current.opacity = 0.14 + Math.sin(t * 0.65) * 0.05;
-    if (glintB.current) glintB.current.opacity = 0.1 + Math.sin(t * 0.52 + 2) * 0.04;
+    if (glintA.current) glintA.current.opacity = look.glint * (0.14 + Math.sin(t * 0.65) * 0.05);
+    if (glintB.current) glintB.current.opacity = look.glint * (0.1 + Math.sin(t * 0.52 + 2) * 0.04);
   });
 
   return (
@@ -387,7 +489,7 @@ function LakeSurface({ spot }: { spot: SpotId }) {
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <meshToonMaterial
           ref={material}
-          color={spot === "dropoff" ? "#2c6784" : "#357795"}
+          color={spot === "dropoff" ? look.waterDrop : look.water}
           map={waterMap}
           gradientMap={toonRamp()}
           transparent
@@ -399,7 +501,7 @@ function LakeSurface({ spot }: { spot: SpotId }) {
         <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
       <mesh geometry={foamGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
-        <meshBasicMaterial color="#e9f3ef" transparent opacity={0.3} depthWrite={false} />
+        <meshBasicMaterial color="#e9f3ef" transparent opacity={hour === "night" ? 0.08 : 0.3} depthWrite={false} />
       </mesh>
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>
         <ringGeometry args={[2.4, 2.48, 64]} />
@@ -720,7 +822,8 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot }: { spot: SpotId }) {
+export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
+  const look = LAKE_HOUR_LOOK[hour];
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
   const ground = useMemo(() => makeGroundGeometry(), []);
   useEffect(() => {
@@ -731,13 +834,13 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
   }, [shore, ground]);
   return (
     <>
-      <fog attach="fog" args={["#b6cbd2", 40, 110]} />
-      <hemisphereLight args={["#d3e6ef", "#41564a", 1.05]} />
+      <fog attach="fog" args={[look.fog, hour === "night" ? 28 : 40, hour === "night" ? 90 : 110]} />
+      <hemisphereLight args={[look.hemiSky, look.hemiGround, look.hemi]} />
       <directionalLight
         castShadow
-        position={[16, 22, 10]}
-        intensity={2.5}
-        color="#ffdf9e"
+        position={look.sunPos}
+        intensity={look.sunInt}
+        color={look.sun}
         shadow-mapSize-width={1536}
         shadow-mapSize-height={1536}
         shadow-camera-near={1}
@@ -747,25 +850,25 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
         shadow-camera-top={22}
         shadow-camera-bottom={-20}
       />
-      <Sky />
+      <Sky hour={hour} />
       {CLOUDS.map((cloud, i) => (
-        <Cloud key={i} {...cloud} />
+        <Cloud key={i} {...cloud} color={look.clouds} />
       ))}
       <mesh geometry={ground} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, LAKE_CENTER_Z]} receiveShadow>
-        <meshToonMaterial color="#4d6c48" gradientMap={toonRamp()} />
+        <meshToonMaterial color={hour === "night" ? "#3a5240" : "#4d6c48"} gradientMap={toonRamp()} />
       </mesh>
       <mesh geometry={shore} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.035, LAKE_CENTER_Z]} receiveShadow>
-        <meshToonMaterial color="#9a815b" gradientMap={toonRamp()} />
+        <meshToonMaterial color={hour === "night" ? "#6a5a42" : "#9a815b"} gradientMap={toonRamp()} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4, -0.02, -5]} scale={[1.7, 1, 1]}>
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
-      <LakeSurface spot={spot} />
+      <LakeSurface spot={spot} hour={hour} />
 
-      <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color="#587a5f" />
-      <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color="#628468" />
-      <Hill position={[20, 4.6, -27]} scale={[18, 7, 11]} color="#547459" />
+      <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color={hour === "night" ? "#3d5a44" : "#587a5f"} />
+      <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color={hour === "night" ? "#456348" : "#628468"} />
+      <Hill position={[20, 4.6, -27]} scale={[18, 7, 11]} color={hour === "night" ? "#385640" : "#547459"} />
       <ScatterModels items={BACK_TREES} />
       <ScatterModels items={TREES} />
       <ScatterModels items={BUSHES} />
@@ -788,16 +891,18 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
       ))}
-      <SunGlitter />
-      {FLOCKS.map((flock, i) => (
-        <BirdFlock key={i} {...flock} />
-      ))}
+      {look.glitter && <SunGlitter />}
+      {look.birds &&
+        FLOCKS.map((flock, i) => (
+          <BirdFlock key={i} {...flock} />
+        ))}
       {DUCKS.map((duck, i) => (
         <Duck key={i} {...duck} />
       ))}
-      {DRAGONFLIES.map((fly, i) => (
-        <Dragonfly key={i} {...fly} />
-      ))}
+      {look.birds &&
+        DRAGONFLIES.map((fly, i) => (
+          <Dragonfly key={i} {...fly} />
+        ))}
     </>
   );
 }

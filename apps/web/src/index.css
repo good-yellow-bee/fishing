@@ -208,10 +208,18 @@ a {
 
 .level-chip,
 .points-chip,
-.skill-chip {
+.skill-chip,
+.hour-chip {
   border: 1px solid rgba(220, 196, 150, 0.22);
   background: rgba(238, 218, 181, 0.08);
   padding: 6px 8px;
+}
+
+.hour-chip {
+  color: #edc477;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 10px;
 }
 
 .points-chip {
@@ -602,6 +610,22 @@ kbd {
 
 .catch-card h2 {
   font-size: 28px;
+}
+
+.catch-stamp {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 4px 10px;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.catch-stamp.quiet {
+  border-color: rgba(215, 190, 142, 0.35);
+  color: #aa9d86;
 }
 
 .catch-card .rarity-tag {

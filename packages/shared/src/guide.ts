@@ -34,3 +34,15 @@ export function guideProgress(entries: GuideEntry[]) {
     total: entries.length,
   };
 }
+
+export type CatchStamp =
+  | { kind: "first" }
+  | { kind: "pb"; previous: number }
+  | { kind: "repeat"; heaviest: number };
+
+export function catchStamp(stats: CatchStat[], speciesId: string, weight: number): CatchStamp {
+  const row = stats.find((entry) => entry.speciesId === speciesId);
+  if (!row || row.caught === 0) return { kind: "first" };
+  if (weight > row.heaviest) return { kind: "pb", previous: row.heaviest };
+  return { kind: "repeat", heaviest: row.heaviest };
+}

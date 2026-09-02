@@ -1,5 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { canUseSpot, catchPoints, SPOT_IDS, SPOT_LABELS, type SkillId } from "@stillwater/shared";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import {
+  canUseSpot,
+  catchPoints,
+  catchStamp,
+  lakeHour,
+  lakeHourFromSearch,
+  LAKE_HOUR_BLURB,
+  SPOT_IDS,
+  SPOT_LABELS,
+  type SkillId,
+} from "@stillwater/shared";
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
@@ -10,12 +21,21 @@ import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 
 export function DockPage() {
+  const [params] = useSearchParams();
+  const [clockHour] = useState(() => lakeHour());
+  const hour = lakeHourFromSearch(params.toString()) ?? clockHour;
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const game = useFishingGame(me?.profile ?? null);
+  const game = useFishingGame(me?.profile ?? null, hour);
   const scenePhase = game.outcome ? "result" : game.phase;
   const posted = useRef<string | null>(null);
+  const statsRef = useRef(me?.speciesStats ?? []);
+  statsRef.current = me?.speciesStats ?? [];
+  const stamp = useMemo(() => {
+    if (game.outcome?.kind !== "landed") return null;
+    return catchStamp(statsRef.current, game.outcome.species.id, game.outcome.weight);
+  }, [game.outcome]);
 
   const refresh = useCallback(() => {
     return getMe().then(setMe);
@@ -65,7 +85,7 @@ export function DockPage() {
 
   return (
     <div className="dock-page">
-      <Hud profile={me.profile} email={me.user.email} />
+      <Hud profile={me.profile} email={me.user.email} hour={hour} />
       <div
         className="scene-wrap"
         ref={game.surfaceRef}
@@ -74,6 +94,7 @@ export function DockPage() {
         data-power={game.power.toFixed(2)}
         data-aim-hint={game.aimHint}
         data-nibble={game.nibble ? "1" : "0"}
+        data-hour={hour}
       >
         <FishingWorld
           phase={scenePhase}
@@ -81,6 +102,7 @@ export function DockPage() {
           spot={game.spot}
           sim={game.sim}
           nibble={game.nibble}
+          hour={hour}
           species={
             game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? null)
           }
@@ -102,6 +124,13 @@ export function DockPage() {
             <h2>{game.outcome.species.name}</h2>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
             <p>+{catchPoints(game.outcome.species, game.outcome.weight)} pts</p>
+            {stamp?.kind === "first" && <p className="catch-stamp">New in the field guide</p>}
+            {stamp?.kind === "pb" && (
+              <p className="catch-stamp">Personal best · was {stamp.previous.toFixed(1)} lb</p>
+            )}
+            {stamp?.kind === "repeat" && (
+              <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
+            )}
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Keep fishing
             </button>
@@ -137,6 +166,7 @@ export function DockPage() {
               );
             })}
           </div>
+          <p className="spot-legend">{LAKE_HOUR_BLURB[hour]}</p>
           <p className="spot-legend">Left bank reeds · close water dock · far dark basin drop-off</p>
           {error && <p className="warn">{error}</p>}
         </section>

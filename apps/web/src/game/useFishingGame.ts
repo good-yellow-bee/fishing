@@ -3,7 +3,9 @@ import {
   anglerLevel,
   canLand,
   canUseSpot,
+  lakeHour,
   type FishSpecies,
+  type LakeHour,
   type Profile,
   type SpotId,
 } from "@stillwater/shared";
@@ -38,7 +40,7 @@ type Timers = {
   nibbleOff?: number;
 };
 
-export function useFishingGame(profile: Profile | null) {
+export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHour()) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
@@ -130,16 +132,16 @@ export function useFishingGame(profile: Profile | null) {
     window.clearTimeout(timers.current.hook);
     fx.splash();
     const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spotRef.current, profile, short);
+    const species = pickBite(spotRef.current, profile, short, Math.random, hour);
     const { weight } = makeCatch(species, profile.patience);
     beginFight(species, weight, profile);
-  }, [beginFight, profile]);
+  }, [beginFight, hour, profile]);
 
   const startWait = useCallback((current: Profile) => {
     setPhaseBoth("waiting");
     setNibble(false);
     setHint("Watch the bobber. A nibble first — strike on the real dip.");
-    const wait = waitMs(current.patience);
+    const wait = waitMs(current.patience, hour);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
       timers.current.nibble = window.setTimeout(() => {
@@ -166,7 +168,7 @@ export function useFishingGame(profile: Profile | null) {
         resetToIdle("Missed the strike. Cast again.");
       }, hookWindowMs(current.accuracy));
     }, wait);
-  }, [resetToIdle]);
+  }, [hour, resetToIdle]);
 
   const releaseCast = useCallback(() => {
     if (phaseRef.current !== "casting" || !profile) return;

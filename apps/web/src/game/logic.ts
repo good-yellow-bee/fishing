@@ -2,7 +2,11 @@ import {
   FISH,
   legendaryCanBite,
   rollWeight,
+  biteHourMul,
+  lakeHour,
+  lakeHourWaitMul,
   type FishSpecies,
+  type LakeHour,
   type Profile,
   type SpotId,
 } from "@stillwater/shared";
@@ -27,9 +31,9 @@ export function hookWindowMs(accuracy: number) {
   return 720 + accuracy * 90;
 }
 
-export function waitMs(patience: number) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour()) {
   const base = 2200 + Math.random() * 3800;
-  return Math.max(1100, base * (1 - patience * 0.07));
+  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour));
 }
 
 export function pickBite(
@@ -37,6 +41,7 @@ export function pickBite(
   profile: Profile,
   shortCast: boolean,
   random = Math.random,
+  hour: LakeHour = lakeHour(),
 ): FishSpecies {
   let pool = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) pool = pool.filter((fish) => fish.rarity === "common");
@@ -44,7 +49,7 @@ export function pickBite(
   if (pool.length === 0) {
     pool = FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity === "common");
   }
-  const weights = pool.map((fish) => rarityWeight[fish.rarity]);
+  const weights = pool.map((fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour));
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= weights[i]!;

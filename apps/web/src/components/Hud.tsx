@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { anglerLevel, SKILL_LABELS, type Profile } from "@stillwater/shared";
+import { anglerLevel, LAKE_HOUR_LABELS, SKILL_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
 import { authClient } from "../auth-client";
 import { fx } from "../game/fx";
 
 type Props = {
   profile: Profile;
   email: string;
+  hour: LakeHour;
 };
 
-export function Hud({ profile, email }: Props) {
+export function Hud({ profile, email, hour }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const [muted, setMuted] = useState(!fx.enabled);
   return (
-    <header className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience}>
+    <header className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour}>
       <div className="hud-brand">
         <span className="eyebrow">Northern lake</span>
         <strong>Stillwater</strong>
@@ -23,6 +24,7 @@ export function Hud({ profile, email }: Props) {
         </div>
       </div>
       <div className="hud-stats">
+        <span className="hour-chip">{LAKE_HOUR_LABELS[hour]}</span>
         <span className="level-chip">Level {level}</span>
         <span className="points-chip">{profile.points} points</span>
         <span className="skill-chip">

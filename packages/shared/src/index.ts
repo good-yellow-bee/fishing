@@ -5,3 +5,4 @@ export * from "./rules.ts";
 export * from "./lake.ts";
 export * from "./guide.ts";
 export * from "./board.ts";
+export * from "./hour.ts";
