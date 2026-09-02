@@ -4,7 +4,6 @@ import {
   canLand,
   parseAim,
   resolveLanding,
-  spotAt,
   type FishSpecies,
   type Profile,
   type SpotId,
@@ -15,6 +14,11 @@ import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import type { ScenePhase } from "./scene/types";
 
 export type AimHint = SpotId | "shore";
+
+function hintFromDataset(raw: string | undefined): AimHint | null {
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "shore") return raw;
+  return null;
+}
 
 export type Fight = {
   species: FishSpecies;
@@ -287,13 +291,12 @@ export function useFishingGame(profile: Profile | null) {
       }
       const surface = surfaceRef.current;
       if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
-        const aimed = parseAim(surface.dataset.aim);
-        const nextHint: AimHint = aimed ? (spotAt(aimed.x, aimed.z) ?? "shore") : "shore";
-        if (nextHint !== aimHintRef.current) {
+        const nextHint = hintFromDataset(surface.dataset.spot);
+        if (nextHint && nextHint !== aimHintRef.current) {
           aimHintRef.current = nextHint;
           setAimHint(nextHint);
         }
-        if (nextHint !== "shore" && nextHint !== spotRef.current) {
+        if (nextHint && nextHint !== "shore" && nextHint !== spotRef.current) {
           spotRef.current = nextHint;
           setSpot(nextHint);
         }
@@ -304,7 +307,6 @@ export function useFishingGame(profile: Profile | null) {
         const reeling = reelKeyRef.current || reelPointerRef.current !== null;
         const result = runtime.step(now, dt, reeling);
         const sim = runtime.sim;
-        const surface = surfaceRef.current;
         if (surface) {
           surface.dataset.tension = sim.tension.toFixed(2);
           surface.dataset.line = sim.line.toFixed(2);

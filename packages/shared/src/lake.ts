@@ -5,7 +5,6 @@ export const LAKE_CENTER_Z = -2;
 export const LAKE_RX = 22.5;
 export const LAKE_RZ = 14.5;
 
-/** Left bank, including the reed bed around x = -13. */
 export const REEDS_MAX_X = -7;
 
 export type Landing =

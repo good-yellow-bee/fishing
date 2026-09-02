@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fishById } from "@stillwater/shared";
+import { fishById, SPOT_LABELS } from "@stillwater/shared";
 import { getMe, type Me } from "../api";
-import { FieldGuide, spotLabel } from "../components/FieldGuide";
+import { FieldGuide } from "../components/FieldGuide";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
@@ -68,7 +68,7 @@ export function LogPage() {
               <tr key={row.id} className={row.id === heaviest?.id ? "heaviest" : ""}>
                 <td className={species ? `rarity-${species.rarity}` : ""}>{species?.name ?? row.speciesId}</td>
                 <td>{row.weight.toFixed(1)} lb</td>
-                <td>{spotLabel(row.spot)}</td>
+                <td>{SPOT_LABELS[row.spot]}</td>
                 <td>{row.points}</td>
                 <td>{new Date(row.createdAt).toLocaleString()}</td>
               </tr>
