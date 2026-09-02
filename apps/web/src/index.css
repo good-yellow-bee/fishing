@@ -744,6 +744,10 @@ kbd {
   border-left: 2px solid var(--amber);
 }
 
+.board-page {
+  overflow-x: auto;
+}
+
 .board-page table {
   width: min(920px, 100%);
 }
