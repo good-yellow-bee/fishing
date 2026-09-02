@@ -32,3 +32,9 @@ export const SKILL_LABELS: Record<SkillId, string> = {
   accuracy: "Accuracy",
   patience: "Patience",
 };
+
+export const SPOT_LABELS: Record<SpotId, string> = {
+  dock: "Dock",
+  reeds: "Reeds",
+  dropoff: "Drop-off",
+};

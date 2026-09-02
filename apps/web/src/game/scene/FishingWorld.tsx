@@ -2,12 +2,12 @@ import { useEffect, useMemo, useRef, Suspense, type ComponentRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import type { SpotId } from "@stillwater/shared";
+import { inLake, spotAt, type SpotId } from "@stillwater/shared";
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
-import { inLake, LakeWorld } from "./LakeWorld";
+import { LakeWorld } from "./LakeWorld";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -223,7 +223,10 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
       marker.current.visible = overWater;
       if (overWater) marker.current.position.set(hit.x, 0.04, hit.z);
     }
-    if (wrap.current) wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(1)},${hit.z.toFixed(1)}` : "none";
+    if (wrap.current) {
+      wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(1)},${hit.z.toFixed(1)}` : "none";
+      wrap.current.dataset.spot = overWater ? (spotAt(hit.x, hit.z) ?? "shore") : "shore";
+    }
   };
 
   useEffect(() => {

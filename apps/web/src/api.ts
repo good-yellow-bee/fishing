@@ -1,4 +1,4 @@
-import type { CatchRecord, Profile, SkillId, SpotId } from "@stillwater/shared";
+import type { CatchRecord, CatchStat, Profile, SkillId, SpotId } from "@stillwater/shared";
 
 export type Me = {
   user: { id: string; email: string; name: string };
@@ -6,6 +6,7 @@ export type Me = {
   level: number;
   spots: Record<SpotId, boolean>;
   catches: CatchRecord[];
+  speciesStats: CatchStat[];
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

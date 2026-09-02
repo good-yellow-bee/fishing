@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { canUseSpot, catchPoints, type SkillId, type SpotId } from "@stillwater/shared";
+import { canUseSpot, catchPoints, SPOT_IDS, SPOT_LABELS, type SkillId } from "@stillwater/shared";
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
@@ -9,18 +9,11 @@ import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 
-const spots: { id: SpotId; label: string }[] = [
-  { id: "dock", label: "Dock" },
-  { id: "reeds", label: "Reeds" },
-  { id: "dropoff", label: "Drop-off" },
-];
-
 export function DockPage() {
   const [me, setMe] = useState<Me | null>(null);
-  const [spot, setSpot] = useState<SpotId>("dock");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const game = useFishingGame(me?.profile ?? null, spot);
+  const game = useFishingGame(me?.profile ?? null);
   const scenePhase = game.outcome ? "result" : game.phase;
   const posted = useRef<string | null>(null);
 
@@ -67,11 +60,21 @@ export function DockPage() {
     return <div className="dock-page">{error || "Walking the planks…"}</div>;
   }
 
+  const dropoffOpen = canUseSpot("dropoff", me.level);
+  const aiming = game.aimHint === "shore" ? "Shore" : SPOT_LABELS[game.aimHint];
+
   return (
     <div className="dock-page">
       <Hud profile={me.profile} email={me.user.email} />
-      <div className="scene-wrap" ref={game.surfaceRef} data-phase={scenePhase} data-points={me.profile.points} data-power={game.power.toFixed(2)}>
-        <FishingWorld phase={scenePhase} power={game.power} spot={spot} sim={game.sim} />
+      <div
+        className="scene-wrap"
+        ref={game.surfaceRef}
+        data-phase={scenePhase}
+        data-points={me.profile.points}
+        data-power={game.power.toFixed(2)}
+        data-aim-hint={game.aimHint}
+      >
+        <FishingWorld phase={scenePhase} power={game.power} spot={game.spot} sim={game.sim} />
         <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         <p className="hint">{game.hint}</p>
         <aside className="camera-help" data-camera-control>
@@ -86,7 +89,7 @@ export function DockPage() {
           <div className={`catch-card rarity-${game.outcome.species.rarity}`}>
             <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
-            <p>{game.outcome.weight.toFixed(1)} lb</p>
+            <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
             <p>+{catchPoints(game.outcome.species, game.outcome.weight)} pts</p>
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Keep fishing
@@ -105,26 +108,25 @@ export function DockPage() {
       <footer className="dock-footer">
         <section className="spot-panel">
           <div className="panel-heading">
-            <span className="eyebrow">Cast toward</span>
-            <h3>Fishing spot</h3>
+            <span className="eyebrow">Aiming at</span>
+            <h3 data-aiming={game.aimHint}>{aiming}</h3>
           </div>
           <div className="spot-row">
-            {spots.map((item) => {
-              const available = canUseSpot(item.id, me.level);
+            {SPOT_IDS.map((id) => {
+              const locked = id === "dropoff" && !dropoffOpen;
               return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={spot === item.id ? "active" : ""}
-                  disabled={!available || scenePhase !== "idle"}
-                  onClick={() => setSpot(item.id)}
+                <span
+                  key={id}
+                  className={game.aimHint === id ? "active" : ""}
+                  data-locked={locked ? "true" : "false"}
                 >
-                  {item.label}
-                  {!available ? " (lv 3)" : ""}
-                </button>
+                  {SPOT_LABELS[id]}
+                  {locked ? " (lv 3)" : ""}
+                </span>
               );
             })}
           </div>
+          <p className="spot-legend">Left bank reeds · close water dock · far dark basin drop-off</p>
           {error && <p className="warn">{error}</p>}
         </section>
         <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />

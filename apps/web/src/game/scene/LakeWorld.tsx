@@ -2,16 +2,12 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import type { SpotId } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
 
 type Vec3 = [number, number, number];
-
-export const LAKE_CENTER_Z = -2;
-export const LAKE_RX = 22.5;
-export const LAKE_RZ = 14.5;
 
 const MODELS = {
   pine: "/models/tree_detailed.glb",
@@ -195,16 +191,6 @@ const DRAGONFLIES: DragonflyProps[] = [
 ];
 
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
-
-export function lakeEdge(angle: number) {
-  return 1 + Math.sin(angle * 3) * 0.025 + Math.sin(angle * 7 + 0.7) * 0.018;
-}
-
-export function inLake(x: number, z: number) {
-  const nx = x / LAKE_RX;
-  const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
-  return Math.hypot(nx, nz) <= lakeEdge(Math.atan2(nz, nx)) * 0.96;
-}
 
 function makeLakeGeometry(radiusX: number, radiusZ: number) {
   const geometry = new THREE.CircleGeometry(1, 96);
@@ -771,12 +757,10 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
       <mesh geometry={shore} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.035, LAKE_CENTER_Z]} receiveShadow>
         <meshToonMaterial color="#9a815b" gradientMap={toonRamp()} />
       </mesh>
-      {spot === "dropoff" && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4, -0.02, -5]} scale={[1.7, 1, 1]}>
-          <circleGeometry args={[4.2, 48]} />
-          <meshBasicMaterial color="#1c3d4c" transparent opacity={0.55} />
-        </mesh>
-      )}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4, -0.02, -5]} scale={[1.7, 1, 1]}>
+        <circleGeometry args={[4.2, 48]} />
+        <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
+      </mesh>
       <LakeSurface spot={spot} />
 
       <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color="#587a5f" />
@@ -793,7 +777,7 @@ export function LakeWorld({ spot }: { spot: SpotId }) {
       <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
       <Rock position={[19.6, 0.28, -6.4]} scale={[0.9, 0.5, 0.7]} rotation={2.6} />
       <Dock />
-      <Reeds count={spot === "reeds" ? 14 : 7} origin={[-13.2, 0.03, 1.8]} />
+      <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (
         <ToonModel key={`${lily.url}-${i}`} url={lily.url} position={lily.position} scale={lily.scale} shadows={false} />

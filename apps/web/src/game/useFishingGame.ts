@@ -1,9 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { canLand, type FishSpecies, type Profile, type SpotId } from "@stillwater/shared";
+import {
+  anglerLevel,
+  canLand,
+  parseAim,
+  resolveLanding,
+  spotAt,
+  type FishSpecies,
+  type Profile,
+  type SpotId,
+} from "@stillwater/shared";
 import { makeFight, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import type { ScenePhase } from "./scene/types";
+
+export type AimHint = SpotId | "shore";
 
 export type Fight = {
   species: FishSpecies;
@@ -22,7 +33,7 @@ type Timers = {
   snap?: number;
 };
 
-export function useFishingGame(profile: Profile | null, spot: SpotId) {
+export function useFishingGame(profile: Profile | null) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
@@ -34,14 +45,16 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
   const simRef = useRef<FightSim | null>(null);
   const reelKeyRef = useRef(false);
   const reelPointerRef = useRef<number | null>(null);
-  const spotRef = useRef(spot);
+  const spotRef = useRef<SpotId>("dock");
+  const aimHintRef = useRef<AimHint>("dock");
   const timers = useRef<Timers>({});
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
+  const [spot, setSpot] = useState<SpotId>("dock");
+  const [aimHint, setAimHint] = useState<AimHint>("dock");
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [hint, setHint] = useState("Click the water to aim. Hold to charge, release in the pale band.");
-  spotRef.current = spot;
 
   const setPhaseBoth = (next: ScenePhase) => {
     phaseRef.current = next;
@@ -107,10 +120,10 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     window.clearTimeout(timers.current.hook);
     fx.splash();
     const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spot, profile, short);
+    const species = pickBite(spotRef.current, profile, short);
     const { weight } = makeCatch(species, profile.patience);
     beginFight(species, weight, profile);
-  }, [beginFight, profile, spot]);
+  }, [beginFight, profile]);
 
   const startWait = useCallback((current: Profile) => {
     setPhaseBoth("waiting");
@@ -135,12 +148,23 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     powerRef.current = castPower;
     setPower(castPower);
     fx.cast();
-    const aim = surfaceRef.current?.dataset.aim;
-    if (!aim || aim === "none") {
+    const aim = parseAim(surfaceRef.current?.dataset.aim);
+    const level = anglerLevel(profile.lifetimePoints);
+    const landing = resolveLanding(aim?.x ?? Number.NaN, aim?.z ?? Number.NaN, level);
+    if (!landing.ok) {
+      if (landing.reason === "locked") {
+        setOutcome({ kind: "miss", message: "Drop-off is too deep until level 3." });
+        resetToIdle("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
+        return;
+      }
       setOutcome({ kind: "miss", message: "Missed the lake." });
       resetToIdle("Bait landed on shore. Aim at the water.");
       return;
     }
+    spotRef.current = landing.spot;
+    setSpot(landing.spot);
+    setAimHint(landing.spot);
+    aimHintRef.current = landing.spot;
     if (castPower < 0.22) {
       setOutcome({ kind: "miss", message: "The lure slapped the dock." });
       resetToIdle("Too little power. Hold longer.");
@@ -261,6 +285,19 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
         powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
         setPower(powerRef.current);
       }
+      const surface = surfaceRef.current;
+      if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
+        const aimed = parseAim(surface.dataset.aim);
+        const nextHint: AimHint = aimed ? (spotAt(aimed.x, aimed.z) ?? "shore") : "shore";
+        if (nextHint !== aimHintRef.current) {
+          aimHintRef.current = nextHint;
+          setAimHint(nextHint);
+        }
+        if (nextHint !== "shore" && nextHint !== spotRef.current) {
+          spotRef.current = nextHint;
+          setSpot(nextHint);
+        }
+      }
       const runtime = runtimeRef.current;
       const current = fightRef.current;
       if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
@@ -312,6 +349,8 @@ export function useFishingGame(profile: Profile | null, spot: SpotId) {
     surfaceRef,
     phase,
     power,
+    spot,
+    aimHint,
     fight,
     outcome,
     hint,

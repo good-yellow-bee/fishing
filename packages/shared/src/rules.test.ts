@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
+import { fieldGuide, guideProgress } from "./guide.ts";
+import { inLake, parseAim, resolveLanding, spotAt } from "./lake.ts";
 import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
 import { canLand, catchPoints, legendaryCanBite, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
@@ -117,6 +119,56 @@ describe("catch rules", () => {
     const muskie = fishById("tiger-muskie")!;
     expect(legendaryCanBite(starter, muskie, "reeds")).toBe(false);
     expect(legendaryCanBite({ strength: 5, accuracy: 2 }, muskie, "reeds")).toBe(true);
+  });
+});
+
+describe("lake spots", () => {
+  it("keeps the basin in the lake and the dock deck out", () => {
+    expect(inLake(0, -2)).toBe(true);
+    expect(inLake(-12, 1)).toBe(true);
+    expect(inLake(4, -5)).toBe(true);
+    expect(inLake(0, 20)).toBe(false);
+  });
+
+  it("maps landing coordinates to spots", () => {
+    expect(spotAt(-12, 1)).toBe("reeds");
+    expect(spotAt(0.5, 3)).toBe("dock");
+    expect(spotAt(4, -5)).toBe("dropoff");
+    expect(spotAt(0, 20)).toBe(null);
+  });
+
+  it("parses the aim dataset", () => {
+    expect(parseAim("4.0,-5.2")).toEqual({ x: 4, z: -5.2 });
+    expect(parseAim("none")).toBe(null);
+    expect(parseAim(undefined)).toBe(null);
+  });
+
+  it("locks drop-off landings before level 3", () => {
+    expect(resolveLanding(4, -5, 1)).toEqual({ ok: false, reason: "locked" });
+    expect(resolveLanding(4, -5, 3)).toEqual({ ok: true, spot: "dropoff" });
+    expect(resolveLanding(-12, 1, 1)).toEqual({ ok: true, spot: "reeds" });
+    expect(resolveLanding(0, 20, 3)).toEqual({ ok: false, reason: "shore" });
+  });
+});
+
+describe("field guide", () => {
+  it("keeps unknown species empty", () => {
+    const entries = fieldGuide([]);
+    expect(guideProgress(entries)).toEqual({ found: 0, total: FISH.length });
+    expect(entries.every((entry) => entry.caught === 0 && entry.heaviest === null)).toBe(true);
+  });
+
+  it("fills personal bests for logged species", () => {
+    const entries = fieldGuide([
+      { speciesId: "perch", caught: 2, heaviest: 1.1, lastAt: "2026-09-01T12:00:00.000Z" },
+      { speciesId: "unknown-fish", caught: 1, heaviest: 9, lastAt: "2026-09-01T12:00:00.000Z" },
+    ]);
+    const perch = entries.find((entry) => entry.species.id === "perch")!;
+    const shiner = entries.find((entry) => entry.species.id === "golden-shiner")!;
+    expect(perch.caught).toBe(2);
+    expect(perch.heaviest).toBe(1.1);
+    expect(shiner.caught).toBe(0);
+    expect(guideProgress(entries).found).toBe(1);
   });
 });
 

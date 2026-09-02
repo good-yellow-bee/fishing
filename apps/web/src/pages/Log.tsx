@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fishById } from "@stillwater/shared";
 import { getMe, type Me } from "../api";
+import { FieldGuide, spotLabel } from "../components/FieldGuide";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
@@ -32,10 +33,11 @@ export function LogPage() {
       <p>
         {me.profile.lifetimePoints} lifetime points · {catches.length} recent fish
       </p>
+      <FieldGuide stats={me.speciesStats} />
       {heaviest && (
         <div className="log-summary">
           <div>
-            <span className="eyebrow">Catches</span>
+            <span className="eyebrow">Recent</span>
             <strong>{catches.length}</strong>
           </div>
           <div>
@@ -66,7 +68,7 @@ export function LogPage() {
               <tr key={row.id} className={row.id === heaviest?.id ? "heaviest" : ""}>
                 <td className={species ? `rarity-${species.rarity}` : ""}>{species?.name ?? row.speciesId}</td>
                 <td>{row.weight.toFixed(1)} lb</td>
-                <td>{row.spot}</td>
+                <td>{spotLabel(row.spot)}</td>
                 <td>{row.points}</td>
                 <td>{new Date(row.createdAt).toLocaleString()}</td>
               </tr>

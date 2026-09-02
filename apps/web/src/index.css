@@ -297,6 +297,7 @@ a {
 }
 
 .spot-row button,
+.spot-row span,
 .upgrade-row button,
 .panel-btn {
   background: rgba(232, 210, 170, 0.06);
@@ -308,6 +309,16 @@ a {
     background 140ms ease,
     border-color 140ms ease,
     transform 140ms ease;
+}
+
+.spot-row span {
+  cursor: default;
+}
+
+.spot-legend {
+  margin: 8px 0 0;
+  color: #aa9d86;
+  font-size: 11px;
 }
 
 .spot-row button:hover:not(:disabled),
@@ -332,9 +343,14 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
-.spot-row button.active {
+.spot-row button.active,
+.spot-row span.active {
   background: #a65d38;
   border-color: #e3ae7e;
+}
+
+.spot-row span[data-locked="true"] {
+  opacity: 0.45;
 }
 
 .spot-row button:disabled,
@@ -726,6 +742,109 @@ kbd {
 
 .log-page tr.heaviest td:first-child {
   border-left: 2px solid var(--amber);
+}
+
+.field-guide {
+  width: min(980px, 100%);
+  margin-top: 28px;
+}
+
+.field-guide .panel-heading {
+  margin-bottom: 14px;
+}
+
+.field-guide h2 {
+  font-size: 28px;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.guide-card {
+  padding: 12px 12px 14px;
+  border: 1px solid rgba(215, 190, 142, 0.28);
+  background: rgba(238, 218, 181, 0.06);
+  min-height: 148px;
+}
+
+.guide-card h3 {
+  font-size: 16px;
+  margin: 6px 0 4px;
+}
+
+.guide-card p {
+  margin: 0;
+  color: #aa9d86;
+  font-size: 11px;
+}
+
+.guide-card .rarity-tag {
+  display: inline-block;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  padding: 2px 7px;
+}
+
+.guide-card.unknown {
+  background: rgba(10, 12, 11, 0.35);
+}
+
+.guide-card.unknown h3 {
+  color: #6d675c;
+}
+
+.guide-fish {
+  display: block;
+  width: 78px;
+  height: 34px;
+  margin-bottom: 8px;
+}
+
+.guide-fish path {
+  fill: #8a8f85;
+}
+
+.guide-card.unknown .guide-fish path,
+.guide-fish path[data-rarity="unknown"] {
+  fill: #161310;
+  stroke: #6d675c;
+  stroke-width: 1.2;
+}
+
+.guide-card.rarity-uncommon .guide-fish path,
+.guide-fish path[data-rarity="uncommon"] {
+  fill: var(--rarity-uncommon);
+}
+
+.guide-card.rarity-rare .guide-fish path,
+.guide-fish path[data-rarity="rare"] {
+  fill: #7aa8c4;
+}
+
+.guide-card.rarity-legendary .guide-fish path,
+.guide-fish path[data-rarity="legendary"] {
+  fill: var(--rarity-legendary);
+}
+
+.guide-card.rarity-common {
+  border-left: 3px solid var(--rarity-common);
+}
+
+.guide-card.rarity-uncommon {
+  border-left: 3px solid var(--rarity-uncommon);
+}
+
+.guide-card.rarity-rare {
+  border-left: 3px solid var(--rarity-rare);
+}
+
+.guide-card.rarity-legendary {
+  border-left: 3px solid var(--rarity-legendary);
 }
 
 @media (max-width: 800px) {

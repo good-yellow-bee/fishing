@@ -124,6 +124,21 @@ export function listCatches(userId: string, limit = 20): CatchRow[] {
     .all(userId, limit) as CatchRow[];
 }
 
+export function listSpeciesStats(userId: string) {
+  const rows = db
+    .prepare(
+      `SELECT species_id, COUNT(*) as caught, MAX(weight) as heaviest, MAX(created_at) as last_at
+       FROM catch WHERE user_id = ? GROUP BY species_id`,
+    )
+    .all(userId) as { species_id: string; caught: number; heaviest: number; last_at: string }[];
+  return rows.map((row) => ({
+    speciesId: row.species_id,
+    caught: Number(row.caught),
+    heaviest: row.heaviest,
+    lastAt: row.last_at,
+  }));
+}
+
 export function insertCatch(row: CatchRow) {
   const tx = db.transaction(() => {
     db.prepare(
