@@ -4,10 +4,10 @@ import {
   canUseSpot,
   catchPoints,
   catchStamp,
+  isFishingStance,
   lakeHour,
   lakeHourFromSearch,
-  LAKE_HOUR_BLURB,
-  SPOT_IDS,
+  STANCE_LABELS,
   SPOT_LABELS,
   type SkillId,
 } from "@stillwater/shared";
@@ -27,6 +27,7 @@ export function DockPage() {
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [shopOpen, setShopOpen] = useState(false);
   const game = useFishingGame(me?.profile ?? null, hour);
   const scenePhase = game.outcome ? "result" : game.phase;
   const posted = useRef<string | null>(null);
@@ -63,6 +64,30 @@ export function DockPage() {
       .finally(() => setBusy(false));
   }, [game.outcome, refresh]);
 
+  useEffect(() => {
+    if (game.stance !== "shop") setShopOpen(false);
+  }, [game.stance]);
+
+  useEffect(() => {
+    if (game.shopTap) setShopOpen(true);
+  }, [game.shopTap]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
+      if (event.code === "Escape") {
+        setShopOpen(false);
+        return;
+      }
+      if (event.code !== "KeyE" || event.repeat) return;
+      if (game.stance !== "shop") return;
+      event.preventDefault();
+      setShopOpen((open) => !open);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [game.stance]);
+
   const onBuy = async (skill: SkillId) => {
     setBusy(true);
     setError("");
@@ -81,7 +106,9 @@ export function DockPage() {
   }
 
   const dropoffOpen = canUseSpot("dropoff", me.level);
-  const aiming = game.aimHint === "shore" ? "Shore" : SPOT_LABELS[game.aimHint];
+  const fishing = isFishingStance(game.stance);
+  const stanceLabel =
+    game.stance === "dropoff" && !dropoffOpen ? `${STANCE_LABELS.dropoff} (lv 3)` : STANCE_LABELS[game.stance];
 
   return (
     <div className="dock-page">
@@ -99,7 +126,7 @@ export function DockPage() {
         <FishingWorld
           phase={scenePhase}
           power={game.power}
-          spot={game.spot}
+          spot={isFishingStance(game.stance) ? game.stance : game.spot}
           sim={game.sim}
           nibble={game.nibble}
           hour={hour}
@@ -108,14 +135,19 @@ export function DockPage() {
           }
           weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? 0)}
         />
-        <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
+        {fishing && !shopOpen && (
+          <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
+        )}
         <p className="hint">{game.hint}</p>
+        <aside className="stance-chip" data-stance={game.stance}>
+          {stanceLabel}
+        </aside>
         <aside className="camera-help" data-camera-control>
-          <span>Explore the lake</span>
+          <span>Shore</span>
+          <kbd>WASD</kbd> walk
           <kbd>Click water</kbd> aim
-          <kbd>Right drag</kbd> orbit
-          <kbd>Wheel</kbd> zoom
-          <kbd>WASD</kbd> move
+          <kbd>E</kbd> shop
+          <kbd>Right drag</kbd> look
         </aside>
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
         {game.outcome?.kind === "landed" && (
@@ -144,34 +176,16 @@ export function DockPage() {
             </button>
           </div>
         )}
+        {shopOpen && (
+          <div className="shop-overlay">
+            <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
+            <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
+              Back to the path
+            </button>
+            {error && <p className="warn">{error}</p>}
+          </div>
+        )}
       </div>
-      <footer className="dock-footer">
-        <section className="spot-panel">
-          <div className="panel-heading">
-            <span className="eyebrow">Aiming at</span>
-            <h3 data-aiming={game.aimHint}>{aiming}</h3>
-          </div>
-          <div className="spot-row">
-            {SPOT_IDS.map((id) => {
-              const locked = id === "dropoff" && !dropoffOpen;
-              return (
-                <span
-                  key={id}
-                  className={game.aimHint === id ? "active" : ""}
-                  data-locked={locked ? "true" : "false"}
-                >
-                  {SPOT_LABELS[id]}
-                  {locked ? " (lv 3)" : ""}
-                </span>
-              );
-            })}
-          </div>
-          <p className="spot-legend">{LAKE_HOUR_BLURB[hour]}</p>
-          <p className="spot-legend">Left bank reeds · close water dock · far dark basin drop-off</p>
-          {error && <p className="warn">{error}</p>}
-        </section>
-        <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-      </footer>
     </div>
   );
 }

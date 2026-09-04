@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -129,6 +129,7 @@ const MODELS = {
   lilyLarge: "/models/lily_large.glb",
   lilySmall: "/models/lily_small.glb",
   reed: "/models/grass_leafsLarge.glb",
+  grassPlat: "/models/platform_grass.glb",
 } as const;
 
 type Scatter = { url: string; position: Vec3; scale: number; rot: number };
@@ -179,6 +180,10 @@ const NEAR_GRASS: Scatter[] = [
   { url: MODELS.grass, position: [5, -0.02, 9.3], scale: 1.4, rot: 1.2 },
   { url: MODELS.bushDetailed, position: [-6.4, -0.02, 9], scale: 1.4, rot: 0.9 },
   { url: MODELS.bushLarge, position: [7.1, -0.02, 9.8], scale: 1.3, rot: 2.8 },
+  { url: MODELS.grassLarge, position: [3.8, -0.02, 14.2], scale: 1.8, rot: 0.4 },
+  { url: MODELS.grass, position: [6.6, -0.02, 16.1], scale: 1.5, rot: 2.1 },
+  { url: MODELS.bushDetailed, position: [8.2, -0.02, 14.8], scale: 1.5, rot: 1.4 },
+  { url: MODELS.bushLarge, position: [2.1, -0.02, 16.6], scale: 1.35, rot: 3.2 },
 ];
 
 const LILIES: Lily[] = [
@@ -794,6 +799,39 @@ function Dock() {
   );
 }
 
+function Shack() {
+  return (
+    <group position={[SHOP_X, 0, SHOP_Z]}>
+      <ToonModel url={MODELS.grassPlat} position={[0, 0, 0]} scale={2.2} />
+      <ToonModel url={MODELS.platform} position={[0, 0.02, -0.2]} scale={1.7} />
+      <ToonModel url={MODELS.log} position={[-0.85, 0.22, 0.55]} rotation={[0, 1.2, 0]} scale={1.15} />
+      <ToonModel url={MODELS.log} position={[0.9, 0.22, 0.45]} rotation={[0, -0.4, 0]} scale={1.05} />
+      <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
+      <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
+      <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
+      <ToonModel url={MODELS.fat} position={[3.4, 0, 1.2]} scale={3.8} sitOnGround />
+      <ToonModel url={MODELS.oak} position={[-3.2, 0, 1.6]} scale={3.2} sitOnGround />
+    </group>
+  );
+}
+
+function ShorePath() {
+  return (
+    <group>
+      <ToonModel url={MODELS.path} position={[3.4, 0.02, 13.6]} rotation={[0, 0.4, 0]} scale={1.7} />
+      <ToonModel url={MODELS.path} position={[1.6, 0.02, 11.8]} rotation={[0, 0.55, 0]} scale={1.7} />
+      <ToonModel url={MODELS.path} position={[0.4, 0.02, 10.4]} rotation={[0, 0.2, 0]} scale={1.65} />
+      <ToonModel url={MODELS.path} position={[-6.2, 0.02, 11.2]} rotation={[0, 1.2, 0]} scale={1.55} />
+      <ToonModel url={MODELS.path} position={[-9.8, 0.02, 10.4]} rotation={[0, 0.9, 0]} scale={1.5} />
+      <ToonModel url={MODELS.path} position={[8.4, 0.02, 11]} rotation={[0, -1.05, 0]} scale={1.5} />
+      <ToonModel url={MODELS.path} position={[12.2, 0.02, 9.6]} rotation={[0, -0.85, 0]} scale={1.45} />
+      <ToonModel url={MODELS.log} position={[REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4]} rotation={[0, 0.8, 0]} scale={1.05} />
+      <Rock position={[DROPOFF_PAD.x - 0.8, 0.4, DROPOFF_PAD.z + 0.6]} scale={[1.3, 0.7, 1]} rotation={0.4} />
+      <Rock position={[DROPOFF_PAD.x + 0.9, 0.32, DROPOFF_PAD.z - 0.3]} scale={[0.9, 0.5, 0.75]} rotation={1.6} />
+    </group>
+  );
+}
+
 function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
   const keyPrefix = origin.join("-");
   return Array.from({ length: count }, (_, i) => (
@@ -880,6 +918,8 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
       <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
       <Rock position={[19.6, 0.28, -6.4]} scale={[0.9, 0.5, 0.7]} rotation={2.6} />
       <Dock />
+      <Shack />
+      <ShorePath />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (

@@ -3,7 +3,24 @@ import { FISH, fishById } from "./fish.ts";
 import { BOARD_LIMIT, boardView, rankBoard, type BoardStat } from "./board.ts";
 import { fieldGuide, guideProgress, catchStamp } from "./guide.ts";
 import { biteHourMul, lakeHour, lakeHourFromSearch, lakeHourWaitMul } from "./hour.ts";
-import { inLake, parseAim, resolveLanding, spotAt } from "./lake.ts";
+import {
+  DOCK_PAD,
+  DROPOFF_PAD,
+  REEDS_PAD,
+  SHOP_X,
+  SHOP_Z,
+  SPAWN_X,
+  SPAWN_Z,
+  inCastRange,
+  inLake,
+  parseAim,
+  parseStance,
+  resolveCast,
+  resolveLanding,
+  spotAt,
+  stanceAt,
+  walkableAt,
+} from "./lake.ts";
 import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
 import { canLand, catchPoints, legendaryCanBite, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
@@ -152,6 +169,38 @@ describe("lake spots", () => {
     expect(resolveLanding(4, -5, 3)).toEqual({ ok: true, spot: "dropoff" });
     expect(resolveLanding(-12, 1, 1)).toEqual({ ok: true, spot: "reeds" });
     expect(resolveLanding(0, 20, 3)).toEqual({ ok: false, reason: "shore" });
+  });
+
+  it("lets the dock sit on water and keeps the basin unwadeable", () => {
+    expect(inLake(DOCK_PAD.x, DOCK_PAD.z)).toBe(true);
+    expect(walkableAt(DOCK_PAD.x, DOCK_PAD.z)).toBe(true);
+    expect(walkableAt(SPAWN_X, SPAWN_Z)).toBe(true);
+    expect(inLake(SPAWN_X, SPAWN_Z)).toBe(false);
+    expect(walkableAt(0, -2)).toBe(false);
+  });
+
+  it("maps pads to shop, dock, reeds, and drop-off", () => {
+    expect(stanceAt(SPAWN_X, SPAWN_Z)).toBe("shop");
+    expect(stanceAt(SHOP_X, SHOP_Z)).toBe("shop");
+    expect(stanceAt(DOCK_PAD.x, DOCK_PAD.z)).toBe("dock");
+    expect(stanceAt(REEDS_PAD.x, REEDS_PAD.z)).toBe("reeds");
+    expect(stanceAt(DROPOFF_PAD.x, DROPOFF_PAD.z)).toBe("dropoff");
+    expect(stanceAt(5, 12)).toBe("trail");
+    expect(parseStance("shop")).toBe("shop");
+    expect(parseStance("none")).toBe(null);
+  });
+
+  it("needs a matching bank and range to cast", () => {
+    expect(inCastRange(DOCK_PAD.x, DOCK_PAD.z, 0.5, 3)).toBe(true);
+    expect(inCastRange(DOCK_PAD.x, DOCK_PAD.z, -12, 1)).toBe(false);
+    expect(resolveCast(0.5, 3, "dock", 1, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: true, spot: "dock" });
+    expect(resolveCast(-12, 1, "dock", 1, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: false, reason: "range" });
+    expect(resolveCast(-10, 4, "dock", 1, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: false, reason: "basin" });
+    expect(resolveCast(-12, 1, "reeds", 1, REEDS_PAD.x, REEDS_PAD.z)).toEqual({ ok: true, spot: "reeds" });
+    expect(resolveCast(15, -2, "dropoff", 1, DROPOFF_PAD.x, DROPOFF_PAD.z)).toEqual({ ok: false, reason: "locked" });
+    expect(resolveCast(15, -2, "dropoff", 3, DROPOFF_PAD.x, DROPOFF_PAD.z)).toEqual({ ok: true, spot: "dropoff" });
+    expect(resolveCast(0.5, 3, "shop", 3, SPAWN_X, SPAWN_Z)).toEqual({ ok: false, reason: "stance" });
+    expect(resolveCast(0, 20, "dock", 3, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: false, reason: "shore" });
   });
 });
 

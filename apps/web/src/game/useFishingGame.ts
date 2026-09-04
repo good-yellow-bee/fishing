@@ -2,12 +2,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   anglerLevel,
   canLand,
-  canUseSpot,
+  isFishingStance,
   lakeHour,
+  parseAim,
+  parseStance,
+  resolveCast,
+  type CastFail,
   type FishSpecies,
   type LakeHour,
   type Profile,
   type SpotId,
+  type StanceId,
 } from "@stillwater/shared";
 import { makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fx } from "./fx";
@@ -16,9 +21,35 @@ import type { ScenePhase } from "./scene/types";
 
 export type AimHint = SpotId | "shore";
 
+const CAST_FAIL_HINT: Record<CastFail, string> = {
+  stance: "Walk to the water to fish.",
+  range: "Too far for this bank. Walk closer.",
+  basin: "Wrong water from here. Walk to that bank.",
+  locked: "Drop-off unlocks at level 3. Cast closer in, or toward the reeds.",
+  shore: "Bait landed on shore. Aim at the water.",
+};
+
+const CAST_MISS: Record<CastFail, string> = {
+  locked: "Drop-off is too deep until level 3.",
+  basin: "Wrong water from here.",
+  range: "The lure fell short.",
+  stance: "Walk to a bank first.",
+  shore: "Missed the lake.",
+};
+
 function hintFromDataset(raw: string | undefined): AimHint | null {
   if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "shore") return raw;
   return null;
+}
+
+function castFailHint(reason: CastFail): string {
+  return CAST_FAIL_HINT[reason] ?? CAST_FAIL_HINT.shore;
+}
+
+function idleHint(stance: StanceId | null) {
+  if (stance === "shop") return "E: open the tackle shack. Walk down to the water to fish.";
+  if (stance && isFishingStance(stance)) return "Click the water to aim. Hold to charge, release in the pale band.";
+  return "Walk to the water.";
 }
 
 export type Fight = {
@@ -54,6 +85,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
   const reelPointerRef = useRef<number | null>(null);
   const spotRef = useRef<SpotId>("dock");
   const aimHintRef = useRef<AimHint>("dock");
+  const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
@@ -62,7 +94,9 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [nibble, setNibble] = useState(false);
-  const [hint, setHint] = useState("Click the water to aim. Hold to charge, release in the pale band.");
+  const [hint, setHint] = useState("Walk to the water.");
+  const [stance, setStance] = useState<StanceId>("shop");
+  const [shopTap, setShopTap] = useState(0);
 
   const setPhaseBoth = (next: ScenePhase) => {
     phaseRef.current = next;
@@ -177,22 +211,28 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     powerRef.current = castPower;
     setPower(castPower);
     fx.cast();
-    const aimed = hintFromDataset(surfaceRef.current?.dataset.spot);
+    const surface = surfaceRef.current;
+    const aimed = parseAim(surface?.dataset.aim);
+    const stanceNow = parseStance(surface?.dataset.stance) ?? "trail";
+    const angler = parseAim(surface?.dataset.angler);
     const level = anglerLevel(profile.lifetimePoints);
-    if (!aimed || aimed === "shore") {
-      setOutcome({ kind: "miss", message: "Missed the lake." });
-      resetToIdle("Bait landed on shore. Aim at the water.");
+    const landing = resolveCast(
+      aimed?.x ?? Number.NaN,
+      aimed?.z ?? Number.NaN,
+      stanceNow,
+      level,
+      angler?.x ?? Number.NaN,
+      angler?.z ?? Number.NaN,
+    );
+    if (!landing.ok) {
+      setOutcome({ kind: "miss", message: CAST_MISS[landing.reason] });
+      resetToIdle(castFailHint(landing.reason));
       return;
     }
-    if (!canUseSpot(aimed, level)) {
-      setOutcome({ kind: "miss", message: "Drop-off is too deep until level 3." });
-      resetToIdle("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
-      return;
-    }
-    spotRef.current = aimed;
-    setSpot(aimed);
-    setAimHint(aimed);
-    aimHintRef.current = aimed;
+    spotRef.current = landing.spot;
+    setSpot(landing.spot);
+    setAimHint(landing.spot);
+    aimHintRef.current = landing.spot;
     if (castPower < 0.22) {
       setOutcome({ kind: "miss", message: "The lure slapped the dock." });
       resetToIdle("Too little power. Hold longer.");
@@ -206,8 +246,29 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     startWait(profile);
   }, [profile, resetToIdle, startWait]);
 
-  const startCast = useCallback(() => {
+  const startCast = useCallback((via: "pointer" | "key") => {
     if (!profile || phaseRef.current !== "idle") return;
+    const surface = surfaceRef.current;
+    const stanceNow = parseStance(surface?.dataset.stance) ?? "trail";
+    if (stanceNow === "shop") {
+      if (via === "pointer") setShopTap((n) => n + 1);
+      else setHint(idleHint("shop"));
+      return;
+    }
+    const aimed = parseAim(surface?.dataset.aim);
+    const angler = parseAim(surface?.dataset.angler);
+    const preview = resolveCast(
+      aimed?.x ?? Number.NaN,
+      aimed?.z ?? Number.NaN,
+      stanceNow,
+      anglerLevel(profile.lifetimePoints),
+      angler?.x ?? Number.NaN,
+      angler?.z ?? Number.NaN,
+    );
+    if (!preview.ok) {
+      setHint(castFailHint(preview.reason));
+      return;
+    }
     setOutcome(null);
     holdingRef.current = true;
     holdStartRef.current = performance.now();
@@ -217,10 +278,10 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     setHint("Keep the ring on the water. Release in the moss band.");
   }, [profile]);
 
-  const strikeOrCast = useCallback(() => {
+  const strikeOrCast = useCallback((via: "pointer" | "key") => {
     switch (phaseRef.current) {
       case "idle":
-        startCast();
+        startCast(via);
         break;
       case "hookset":
         setTheHook();
@@ -233,7 +294,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
       if (event.code !== "Space" || event.repeat) return;
       event.preventDefault();
-      if (phaseRef.current !== "fight") strikeOrCast();
+      if (phaseRef.current !== "fight") strikeOrCast("key");
       // The same press may have just set the hook — count it as reeling.
       if (phaseRef.current === "fight") reelKeyRef.current = true;
     };
@@ -273,7 +334,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
       if ((event.target as HTMLElement).closest("button, a, input, [data-camera-control]")) return;
       if (phaseRef.current !== "fight") {
         castPointerRef.current = event.pointerId;
-        strikeOrCast();
+        strikeOrCast("pointer");
       }
       // The same press may have just set the hook — count it as reeling.
       if (phaseRef.current === "fight") reelPointerRef.current = event.pointerId;
@@ -316,13 +377,15 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
       const surface = surfaceRef.current;
       if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
         const nextHint = hintFromDataset(surface.dataset.spot);
+        const nextStance = parseStance(surface.dataset.stance);
+        if (nextStance && nextStance !== stanceRef.current) {
+          stanceRef.current = nextStance;
+          setStance(nextStance);
+          if (phaseRef.current === "idle") setHint(idleHint(nextStance));
+        }
         if (nextHint && nextHint !== aimHintRef.current) {
           aimHintRef.current = nextHint;
           setAimHint(nextHint);
-        }
-        if (nextHint && nextHint !== "shore" && nextHint !== spotRef.current) {
-          spotRef.current = nextHint;
-          setSpot(nextHint);
         }
       }
       const runtime = runtimeRef.current;
@@ -368,7 +431,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
 
   const dismissResult = () => {
     setOutcome(null);
-    resetToIdle("Click the water to aim, then hold to cast.");
+    resetToIdle(idleHint(stanceRef.current));
   };
 
   return {
@@ -377,6 +440,8 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     power,
     spot,
     aimHint,
+    stance,
+    shopTap,
     fight,
     outcome,
     hint,

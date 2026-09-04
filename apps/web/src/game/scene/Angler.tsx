@@ -3,7 +3,9 @@ import { useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
+import { isFishingStance, stanceAt } from "@stillwater/shared";
 import type { SimRef } from "./FishingWorld";
+import { anglerPose } from "./pose";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -40,11 +42,6 @@ function swing(phase: ScenePhase, power: number, t: number, sim: SimRef) {
   }
 }
 
-const STAND: [number, number, number] = [0.15, 0, 7.42];
-const INITIAL_YAW = Math.PI - 0.7;
-const LAKE_YAW = Math.PI;
-const YAW_MIN = Math.PI - 1.2;
-const YAW_MAX = Math.PI + 1.25;
 const ROD_BIAS = 0.18;
 
 function shortest(from: number, to: number) {
@@ -54,16 +51,17 @@ function shortest(from: number, to: number) {
   return diff;
 }
 
-// atan2 is (-π, π]; clamp as an offset from lake-facing π so left-of-dock
-// looks stay left instead of snapping onto the right clamp.
 function yawToward(x: number, z: number) {
-  const dx = x - STAND[0];
-  const dz = z - STAND[2];
-  // Water behind the dock sits on atan2's ±π seam; pick a side instead of flipping.
-  if (dz >= 0) return dx < 0 ? YAW_MAX : YAW_MIN;
-  const raw = Math.atan2(dx, dz) - ROD_BIAS;
-  const offset = THREE.MathUtils.clamp(shortest(LAKE_YAW, raw), YAW_MIN - LAKE_YAW, YAW_MAX - LAKE_YAW);
-  return LAKE_YAW + offset;
+  const dx = x - anglerPose.x;
+  const dz = z - anglerPose.z;
+  if (dx * dx + dz * dz < 0.04) return anglerPose.yaw;
+  return Math.atan2(dx, dz) - ROD_BIAS;
+}
+
+function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
+  if (moving) return "walk";
+  if (phase !== "idle" || fishing) return "holding-right";
+  return "idle";
 }
 
 export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
@@ -71,9 +69,9 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
   const wrap = useSceneWrap();
-  const yaw = useRef(INITIAL_YAW);
   const grip = useRef<THREE.Group>(null);
   const tip = useRef<THREE.Object3D>(null);
+  const playing = useRef("");
 
   const character = useMemo(() => {
     const next = cloneSkinned(gltf.scene);
@@ -96,28 +94,42 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
 
   const { actions } = useAnimations(gltf.animations, character);
 
-  useEffect(() => {
-    const clip = actions["holding-right"] ?? actions.idle;
-    clip?.reset().fadeIn(0.12).play();
-    return () => {
-      clip?.fadeOut(0.08);
-    };
-  }, [actions]);
-
   useFrame((state, delta) => {
-    const target = yawToward(lookAt.x, lookAt.z);
-    yaw.current += shortest(yaw.current, target) * (1 - Math.exp(-7 * delta));
-    if (root.current) root.current.rotation.y = yaw.current;
-    if (wrap.current) wrap.current.dataset.yaw = yaw.current.toFixed(2);
+    const fishing = isFishingStance(stanceAt(anglerPose.x, anglerPose.z));
+    const next = clipName(phase, anglerPose.moving, fishing);
+    if (next === "holding-right") {
+      const target = yawToward(lookAt.x, lookAt.z);
+      anglerPose.yaw += shortest(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
+    }
+    if (root.current) {
+      root.current.position.set(anglerPose.x, 0, anglerPose.z);
+      root.current.rotation.y = anglerPose.yaw;
+    }
+    if (wrap.current) wrap.current.dataset.yaw = anglerPose.yaw.toFixed(2);
     if (grip.current) {
       grip.current.rotation.x = swing(phase, power, state.clock.elapsedTime, sim);
       grip.current.getWorldPosition(hand);
     }
     tip.current?.getWorldPosition(rodTip);
+
+    if (playing.current !== next) {
+      const hold = actions["holding-right"] ?? actions.idle;
+      const clips = {
+        walk: actions.walk ?? actions.idle,
+        "holding-right": hold,
+        idle: actions.idle ?? hold,
+      };
+      const clip = clips[next];
+      if (clip) {
+        actions[playing.current]?.fadeOut(0.12);
+        clip.reset().setLoop(THREE.LoopRepeat, Infinity).fadeIn(0.12).play();
+        playing.current = next;
+      }
+    }
   });
 
   return (
-    <group ref={root} position={STAND} rotation={[0, INITIAL_YAW, 0]} scale={1.7}>
+    <group ref={root} position={[anglerPose.x, 0, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
       <primitive object={character} />
       <group ref={grip} position={[0.2, 0.62, 0.22]} rotation={[1.05, 0.05, -0.28]}>
         <primitive object={rod} scale={0.19} />

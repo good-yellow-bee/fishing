@@ -370,7 +370,7 @@ a:focus-visible {
 .hint {
   position: absolute;
   left: 24px;
-  bottom: 150px;
+  bottom: 24px;
   margin: 0;
   padding: 10px 13px;
   border-left: 2px solid #e1b86e;
@@ -390,7 +390,7 @@ a:focus-visible {
 .power-meter {
   position: absolute;
   right: 24px;
-  bottom: 150px;
+  bottom: 24px;
   width: min(280px, 42vw);
   z-index: 2;
   pointer-events: none;
@@ -410,6 +410,47 @@ a:focus-visible {
   height: 16px;
   border-color: rgba(230, 210, 175, 0.45);
   background: rgba(17, 24, 22, 0.82);
+}
+
+.stance-chip {
+  position: absolute;
+  left: 24px;
+  top: 102px;
+  z-index: 3;
+  padding: 8px 12px;
+  border: 1px solid rgba(220, 196, 150, 0.38);
+  background: rgba(20, 28, 25, 0.72);
+  color: #f0dfbf;
+  font-family: Fraunces, serif;
+  font-size: 16px;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.shop-overlay {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  z-index: 8;
+  width: min(420px, 92vw);
+  padding: 16px 16px 14px;
+  border: 1px solid rgba(215, 190, 142, 0.38);
+  background: rgba(24, 29, 25, 0.94);
+  box-shadow: 0 14px 34px rgba(9, 14, 13, 0.3);
+  backdrop-filter: blur(12px);
+  color: var(--paper);
+}
+
+.shop-overlay .upgrade-panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.shop-overlay .panel-btn {
+  margin-top: 12px;
+  width: 100%;
 }
 
 .camera-help {
@@ -445,7 +486,7 @@ kbd {
 .fight-bar {
   position: absolute;
   left: 50%;
-  bottom: 150px;
+  bottom: 24px;
   transform: translateX(-50%);
   width: min(360px, 88vw);
   z-index: 7;

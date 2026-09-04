@@ -2,12 +2,27 @@ import { useEffect, useMemo, useRef, Suspense, type ComponentRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { inLake, spotAt, type FishSpecies, type LakeHour, type SpotId } from "@stillwater/shared";
+import {
+  CAST_RANGE,
+  inCastRange,
+  inLake,
+  isFishingStance,
+  SPAWN_X,
+  SPAWN_Z,
+  spotAt,
+  stanceAt,
+  type FishSpecies,
+  type LakeHour,
+  type SpotId,
+  type StanceId,
+} from "@stillwater/shared";
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
+import { PlayerMove } from "./Player";
+import { anglerPose } from "./pose";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -28,10 +43,13 @@ type Props = {
   weight: number;
 };
 
-const CAM_START: [number, number, number] = [8.8, 6.2, 15.8];
-const BOBBER_X: Record<SpotId, number> = { reeds: -2.8, dropoff: 1.6, dock: 0.55 };
-const CAMERA_KEYS = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
-const ANGLER_POINT = new THREE.Vector3(0.15, 1, 7.4);
+const CAM_START: [number, number, number] = [SPAWN_X + 4.2, 6.2, SPAWN_Z + 8];
+const CHEST_Y = 1.05;
+const REEL_POINT = new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 1.4);
+
+function facingDelta(distance: number): [number, number] {
+  return [Math.sin(anglerPose.yaw) * distance, Math.cos(anglerPose.yaw) * distance];
+}
 
 // Live bobber world position, written by LineAndBobber each frame so
 // CameraRig and CaughtFish can read it without prop drilling.
@@ -52,7 +70,6 @@ function isFighting(phase: ScenePhase) {
 
 function placeBobber(
   out: THREE.Vector3,
-  spot: SpotId,
   power: number,
   dipped: boolean,
   t: number,
@@ -63,9 +80,10 @@ function placeBobber(
     out.x = aim.x;
     out.z = aim.z;
   } else {
-    const reach = 5.2 + power * 9.5;
-    out.x = BOBBER_X[spot];
-    out.z = 4.2 - reach * (spot === "dropoff" ? 1.15 : 1);
+    const reach = Math.min(CAST_RANGE * 0.85, 5.2 + power * 9.5);
+    const [dx, dz] = facingDelta(reach);
+    out.x = anglerPose.x + dx;
+    out.z = anglerPose.z + dz;
   }
   if (dipped) out.y = -0.14;
   else if (nibble) out.y = -0.08 + Math.sin(t * 26) * 0.05;
@@ -78,12 +96,9 @@ function isAiming(phase: ScenePhase) {
 
 function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
-  const keys = useRef(new Set<string>());
   const { camera, gl } = useThree();
-  const forward = useMemo(() => new THREE.Vector3(), []);
-  const right = useMemo(() => new THREE.Vector3(), []);
-  const movement = useMemo(() => new THREE.Vector3(), []);
-  const previousTarget = useMemo(() => new THREE.Vector3(), []);
+  const chest = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
+  const lastChest = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
   const restTarget = useMemo(() => new THREE.Vector3(), []);
   const focusPoint = useMemo(() => new THREE.Vector3(), []);
   const shakeOffset = useMemo(() => new THREE.Vector3(), []);
@@ -92,41 +107,24 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const returning = useRef(false);
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
-  const locked = phase === "fight" || phase === "result";
+  const fighting = phase === "fight";
 
   useEffect(() => {
     const canvas = gl.domElement;
     const preventMenu = (event: MouseEvent) => event.preventDefault();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
-      const key = event.key.toLowerCase();
-      if (!CAMERA_KEYS.has(key)) return;
-      event.preventDefault();
-      if (event.type === "keydown") keys.current.add(key);
-      else keys.current.delete(key);
-    };
-    const clearKeys = () => keys.current.clear();
-
     canvas.addEventListener("contextmenu", preventMenu);
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("keyup", onKey);
-    window.addEventListener("blur", clearKeys);
-    return () => {
-      canvas.removeEventListener("contextmenu", preventMenu);
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("keyup", onKey);
-      window.removeEventListener("blur", clearKeys);
-    };
+    return () => canvas.removeEventListener("contextmenu", preventMenu);
   }, [gl]);
 
   useFrame((state, delta) => {
     const orbit = controls.current;
     if (!orbit) return;
-    orbit.enabled = !locked;
+    orbit.enabled = !fighting;
     const t = state.clock.elapsedTime;
-    const fighting = phase === "fight";
+    chest.set(anglerPose.x, CHEST_Y, anglerPose.z);
+    const [dx, dz] = facingDelta(1.4);
+    REEL_POINT.set(anglerPose.x + dx, 0, anglerPose.z + dz);
 
-    // Shake impulses: big on snap/escape (fight ends without a landing), tiny on surge start.
     if (prevPhase.current === "fight" && phase !== "fight" && !fightEndedLanded()) shakeAmp.current = 0.12;
     prevPhase.current = phase;
     const surge = sim.current?.surge ?? 0;
@@ -137,42 +135,31 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (fighting) {
       if (!wasFight.current) {
         wasFight.current = true;
-        // Keep the original rest point if a new fight starts mid-return.
         if (!returning.current) restTarget.copy(orbit.target);
         returning.current = false;
       }
-      focusPoint.copy(ANGLER_POINT).add(bobberWorld).multiplyScalar(0.5);
+      focusPoint.copy(chest).add(bobberWorld).multiplyScalar(0.5);
       focusPoint.lerpVectors(restTarget, focusPoint, 0.35);
       orbit.target.lerp(focusPoint, 1 - Math.exp(-4.5 * delta));
       orbit.update();
-    } else if (wasFight.current) {
-      wasFight.current = false;
-      returning.current = true;
-    }
-    if (!fighting && returning.current) {
-      orbit.target.lerp(restTarget, 1 - Math.exp(-4.5 * delta));
-      orbit.update();
-      if (orbit.target.distanceToSquared(restTarget) < 0.0004 || (!locked && keys.current.size > 0)) returning.current = false;
-    }
-
-    if (!locked && keys.current.size > 0) {
-      forward.subVectors(orbit.target, camera.position).setY(0).normalize();
-      right.crossVectors(forward, camera.up).normalize();
-      movement.set(0, 0, 0);
-      if (keys.current.has("w") || keys.current.has("arrowup")) movement.add(forward);
-      if (keys.current.has("s") || keys.current.has("arrowdown")) movement.sub(forward);
-      if (keys.current.has("d") || keys.current.has("arrowright")) movement.add(right);
-      if (keys.current.has("a") || keys.current.has("arrowleft")) movement.sub(right);
-      if (movement.lengthSq() > 0) {
-        movement.normalize().multiplyScalar(Math.min(delta, 0.05) * 7);
-        previousTarget.copy(orbit.target);
-        orbit.target.add(movement);
-        orbit.target.x = THREE.MathUtils.clamp(orbit.target.x, -10, 10);
-        orbit.target.z = THREE.MathUtils.clamp(orbit.target.z, -9, 7);
-        camera.position.add(orbit.target).sub(previousTarget);
-        orbit.update();
+    } else {
+      if (wasFight.current) {
+        wasFight.current = false;
+        returning.current = true;
+        restTarget.copy(chest);
       }
+      camera.position.x += chest.x - lastChest.x;
+      camera.position.z += chest.z - lastChest.z;
+      if (returning.current) {
+        orbit.target.lerp(chest, 1 - Math.exp(-4.5 * delta));
+        if (orbit.target.distanceToSquared(chest) < 0.0004) returning.current = false;
+      } else {
+        orbit.target.x += chest.x - lastChest.x;
+        orbit.target.z += chest.z - lastChest.z;
+      }
+      orbit.update();
     }
+    lastChest.copy(chest);
 
     if (shakeAmp.current > 0.001) {
       shakeAmp.current *= Math.exp(-delta / 0.13);
@@ -191,16 +178,14 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return (
     <OrbitControls
       ref={controls}
-      target={[0, 0.8, 0.5]}
+      target={[SPAWN_X, CHEST_Y, SPAWN_Z]}
       enableDamping
       dampingFactor={0.08}
       enablePan={false}
-      minDistance={7}
-      maxDistance={24}
-      minPolarAngle={0.28}
-      maxPolarAngle={1.34}
-      minAzimuthAngle={-1.25}
-      maxAzimuthAngle={1.25}
+      minDistance={4}
+      maxDistance={18}
+      minPolarAngle={0.32}
+      maxPolarAngle={1.32}
       mouseButtons={{ LEFT: -1 as THREE.MOUSE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE }}
       touches={{ ONE: -1 as THREE.TOUCH, TWO: THREE.TOUCH.DOLLY_ROTATE }}
     />
@@ -211,6 +196,22 @@ type AimState = {
   live: THREE.Vector3;
   overWater: boolean;
 };
+
+type CastAimState = "ok" | "stance" | "shore" | "range" | "basin";
+
+function castAimState(
+  fishing: boolean,
+  overWater: boolean,
+  inRange: boolean,
+  waterSpot: SpotId | null,
+  stance: StanceId,
+): CastAimState {
+  if (!fishing) return "stance";
+  if (!overWater) return "shore";
+  if (!inRange) return "range";
+  if (waterSpot !== stance) return "basin";
+  return "ok";
+}
 
 function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   const marker = useRef<THREE.Group>(null);
@@ -231,15 +232,22 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
     raycaster.setFromCamera(pointer.current, camera);
     const point = raycaster.ray.intersectPlane(plane, hit);
     const overWater = point != null && inLake(point.x, point.z);
-    aim.overWater = overWater;
+    const stance = stanceAt(anglerPose.x, anglerPose.z);
+    const fishing = isFishingStance(stance);
+    const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z);
+    const waterSpot = overWater ? spotAt(hit.x, hit.z) : null;
+    const cast = castAimState(fishing, overWater, inRange, waterSpot, stance);
+    const canCast = cast === "ok";
+    aim.overWater = canCast;
     if (overWater) aim.live.copy(hit);
     if (marker.current) {
-      marker.current.visible = overWater;
-      if (overWater) marker.current.position.set(hit.x, 0.04, hit.z);
+      marker.current.visible = canCast;
+      if (canCast) marker.current.position.set(hit.x, 0.04, hit.z);
     }
     if (wrap.current) {
       wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(3)},${hit.z.toFixed(3)}` : "none";
-      wrap.current.dataset.spot = overWater ? (spotAt(hit.x, hit.z) ?? "shore") : "shore";
+      wrap.current.dataset.spot = waterSpot ?? "shore";
+      wrap.current.dataset.cast = cast;
     }
   };
 
@@ -279,7 +287,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   );
 }
 
-type LineAndBobberProps = Omit<Props, "hour"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "hour" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim }: { active: boolean; sim: SimRef }) {
   const group = useRef<THREE.Group>(null);
@@ -424,7 +432,6 @@ function HookedFish({
   );
 }
 
-const DOCK_POINT = new THREE.Vector3(0.3, 0, 5.9);
 const FLIGHT_SEC = 0.55;
 const SPLASH_SEC = 0.7;
 const LINE_POINTS = 11;
@@ -455,7 +462,7 @@ function StalkingFish({ active }: { active: boolean }) {
   );
 }
 
-function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
   const splashMaterial = useRef<THREE.MeshBasicMaterial>(null);
@@ -511,7 +518,7 @@ function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt, nibble, s
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
-    placeBobber(target, spot, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null, nibble);
+    placeBobber(target, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null, nibble);
     if (castStarted) {
       flightFrom.copy(rodTip);
       flightTo.set(target.x, 0.07, target.z);
@@ -536,8 +543,8 @@ function LineAndBobber({ phase, power, spot, sim, rodTip, aim, lookAt, nibble, s
       // fight (sim stays null) can't inherit the previous fight's landing.
       if (fightStarted || fightSim) lastFightSim = fightSim;
       if (fightSim) lastLine.current = fightSim.line;
-      target.x = THREE.MathUtils.lerp(DOCK_POINT.x, target.x, lastLine.current);
-      target.z = THREE.MathUtils.lerp(DOCK_POINT.z, target.z, lastLine.current);
+      target.x = THREE.MathUtils.lerp(REEL_POINT.x, target.x, lastLine.current);
+      target.z = THREE.MathUtils.lerp(REEL_POINT.z, target.z, lastLine.current);
       if (fightSim) target.y += Math.sin(t * 14) * 0.05 * (fightSim.surge === 2 ? 2 : 1);
     } else {
       lastLine.current = 1;
@@ -664,12 +671,13 @@ function Tone({ hour }: { hour: LakeHour }) {
 }
 
 function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
-  const rodTip = useMemo(() => new THREE.Vector3(0.4, 2.1, 6.2), []);
-  const hand = useMemo(() => new THREE.Vector3(0.15, 1.1, 7.2), []);
-  const lookAt = useMemo(() => new THREE.Vector3(0.55, 0, -2), []);
+  const rodTip = useMemo(() => new THREE.Vector3(SPAWN_X + 0.4, 2.1, SPAWN_Z - 1.2), []);
+  const hand = useMemo(() => new THREE.Vector3(SPAWN_X, 1.1, SPAWN_Z), []);
+  const lookAt = useMemo(() => new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
   return (
     <>
+      <PlayerMove phase={phase} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <LakeWorld spot={spot} hour={hour} />
@@ -677,7 +685,6 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
       <LineAndBobber
         phase={phase}
         power={power}
-        spot={spot}
         sim={sim}
         nibble={nibble}
         species={species}
