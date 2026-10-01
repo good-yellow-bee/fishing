@@ -1,3 +1,4 @@
+import { keepLureInWater } from "./fightMotion";
 import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
 
@@ -136,12 +137,15 @@ export function applyWaitShift(
   age: number,
 ) {
   const drift = waitDrift(x, z, time);
-  const nextX = x + drift.x;
-  const nextZ = z + drift.z;
+  let nextX = x + drift.x;
+  let nextZ = z + drift.z;
   const pull = waitTwitchPull(age);
-  if (pull <= 0) return { x: nextX, z: nextZ };
-  const dx = anglerX - nextX;
-  const dz = anglerZ - nextZ;
-  const reach = Math.hypot(dx, dz) || 1;
-  return { x: nextX + (dx / reach) * pull, z: nextZ + (dz / reach) * pull };
+  if (pull > 0) {
+    const dx = anglerX - nextX;
+    const dz = anglerZ - nextZ;
+    const reach = Math.hypot(dx, dz) || 1;
+    nextX += (dx / reach) * pull;
+    nextZ += (dz / reach) * pull;
+  }
+  return keepLureInWater(x, z, nextX, nextZ);
 }

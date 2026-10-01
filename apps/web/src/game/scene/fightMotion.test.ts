@@ -22,6 +22,7 @@ import {
   applyRetrieve,
   clearFightLine,
   dockLineLips,
+  liftDockSample,
   fishDepthMeters,
   fishLeadMeters,
   fishLeapHeight,
@@ -181,6 +182,9 @@ describe("fight motion", () => {
     expect(side[0]!.y).toBeGreaterThanOrEqual(0.72);
     expect(dockLineLips(3, 0.4, 2, 6, 0.2, -2)).toEqual([]);
     expect(dockLineLips(0, 1.6, 6.2, 0, 1.4, 4.2)).toEqual([]);
+    expect(liftDockSample(0.2, 0, 6.5)).toBeGreaterThanOrEqual(0.72);
+    expect(liftDockSample(1.4, 0, 6.5)).toBe(1.4);
+    expect(liftDockSample(0.1, 0, 2)).toBe(0.1);
   });
 
   it("leans back into the set and gets dragged forward on a run", () => {

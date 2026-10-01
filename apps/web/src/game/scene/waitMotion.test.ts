@@ -1,3 +1,4 @@
+import { inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   WAIT_EASE_SEC,
@@ -83,6 +84,33 @@ describe("waiting lure", () => {
     const restReach = Math.hypot(resting.x - 5, resting.z - 8);
     expect(Math.hypot(eased.x - resting.x, eased.z - resting.z)).toBeCloseTo(0);
     expect(Math.hypot(tight.x - 5, tight.z - 8)).toBeLessThan(restReach - 0.08);
+  });
+
+  it("keeps the twitch in the lake and off the dock", () => {
+    const x = 0;
+    const z = 5.18;
+    const age = WAIT_TWITCH_AT + WAIT_EASE_SEC + WAIT_TIGHT_SEC;
+    let rawOnDeck = false;
+    for (let i = 0; i < 48; i += 1) {
+      const time = i * 0.37;
+      const shifted = applyWaitShift(x, z, 0, 8, time, age);
+      const onDeck = shifted.x >= -1.05 && shifted.x <= 1.05 && shifted.z >= 5.2 && shifted.z <= 8.5;
+      expect(onDeck).toBe(false);
+      expect(inLake(shifted.x, shifted.z)).toBe(true);
+      const drift = waitDrift(x, z, time);
+      const pull = waitTwitchPull(age);
+      let rawX = x + drift.x;
+      let rawZ = z + drift.z;
+      const dx = 0 - rawX;
+      const dz = 8 - rawZ;
+      const reach = Math.hypot(dx, dz) || 1;
+      rawX += (dx / reach) * pull;
+      rawZ += (dz / reach) * pull;
+      if (rawX >= -1.05 && rawX <= 1.05 && rawZ >= 5.2 && rawZ <= 8.5) rawOnDeck = true;
+      const edge = applyWaitShift(0, -16.35, 0, 0, time, 0);
+      expect(inLake(edge.x, edge.z)).toBe(true);
+    }
+    expect(rawOnDeck).toBe(true);
   });
 
   it("stays off through the cast flight, the bite, the miss, the fight, and the landing", () => {

@@ -31,6 +31,7 @@ import {
   fightInput,
   clearFightLine,
   dockLineLips,
+  liftDockSample,
   fightLineSag,
   fightView,
   fishDepthMeters,
@@ -1253,7 +1254,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
       const holdLine = dipped || missing;
       if (holdLine) y = clearFightLine(y, x, z);
-      if (holdLine && i > 0) {
+      else if (sitting) y = liftDockSample(y, x, z);
+      if ((holdLine || sitting) && i > 0) {
         for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
           if (count >= LINE_CAP - (LINE_POINTS - i)) break;
           put(lip.x, lip.y, lip.z);
