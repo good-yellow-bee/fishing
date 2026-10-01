@@ -1,4 +1,4 @@
-import { catchesNewestFirst, spotById, type Logbook } from "./logbook.ts";
+import { catchesNewestFirst, spotById, type CatchEntry, type Logbook } from "./logbook.ts";
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
