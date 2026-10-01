@@ -23,6 +23,7 @@ import { ArticulatedFish } from "./ArticulatedFish";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose } from "./pose";
+import { waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -43,7 +44,7 @@ type Props = {
   weight: number;
 };
 
-const CAM_START: [number, number, number] = [SPAWN_X + 4.2, 6.2, SPAWN_Z + 8];
+const CAM_START: [number, number, number] = [SPAWN_X + 0.45, 3.42, SPAWN_Z + 6.9];
 const CHEST_Y = 1.05;
 const REEL_POINT = new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 1.4);
 
@@ -98,16 +99,21 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, gl } = useThree();
   const chest = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
-  const lastChest = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
+  const follow = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
+  const lastFollow = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
+  const desired = useMemo(() => new THREE.Vector3(), []);
   const restTarget = useMemo(() => new THREE.Vector3(), []);
   const focusPoint = useMemo(() => new THREE.Vector3(), []);
   const shakeOffset = useMemo(() => new THREE.Vector3(), []);
   const shakeAmp = useRef(0);
+  const heave = useRef(0);
+  const glide = useMemo(() => new THREE.Vector2(), []);
   const wasFight = useRef(false);
   const returning = useRef(false);
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const fighting = phase === "fight";
+  const rest = useMemo(() => [SPAWN_X, CHEST_Y, SPAWN_Z] as [number, number, number], []);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -131,6 +137,16 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (fighting && surge === 2 && prevSurge.current !== 2) shakeAmp.current = Math.max(shakeAmp.current, 0.05);
     prevSurge.current = surge;
     camera.position.sub(shakeOffset);
+    camera.position.y -= heave.current;
+
+    const glideK = 1 - Math.exp(-1.5 * delta);
+    glide.x += (anglerPose.vx - glide.x) * glideK;
+    glide.y += (anglerPose.vz - glide.y) * glideK;
+    const speed = Math.hypot(glide.x, glide.y);
+    if (!fighting && speed > 0.15) {
+      const lead = Math.min(2.6, speed * 0.58);
+      desired.set(chest.x + (glide.x / speed) * lead, chest.y, chest.z + (glide.y / speed) * lead);
+    } else desired.copy(chest);
 
     if (fighting) {
       if (!wasFight.current) {
@@ -146,20 +162,28 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       if (wasFight.current) {
         wasFight.current = false;
         returning.current = true;
-        restTarget.copy(chest);
+        follow.copy(orbit.target);
+        lastFollow.copy(orbit.target);
       }
-      camera.position.x += chest.x - lastChest.x;
-      camera.position.z += chest.z - lastChest.z;
       if (returning.current) {
-        orbit.target.lerp(chest, 1 - Math.exp(-4.5 * delta));
-        if (orbit.target.distanceToSquared(chest) < 0.0004) returning.current = false;
+        const blend = 1 - Math.exp(-4.5 * delta);
+        follow.lerp(desired, blend);
+        orbit.target.lerp(follow, blend);
+        if (orbit.target.distanceToSquared(desired) < 0.0008) returning.current = false;
+        lastFollow.copy(follow);
+        orbit.update();
       } else {
-        orbit.target.x += chest.x - lastChest.x;
-        orbit.target.z += chest.z - lastChest.z;
+        follow.lerp(desired, 1 - Math.exp(-2.35 * delta));
+        camera.position.x += follow.x - lastFollow.x;
+        camera.position.y += follow.y - lastFollow.y;
+        camera.position.z += follow.z - lastFollow.z;
+        orbit.target.x += follow.x - lastFollow.x;
+        orbit.target.y += follow.y - lastFollow.y;
+        orbit.target.z += follow.z - lastFollow.z;
+        lastFollow.copy(follow);
+        orbit.update();
       }
-      orbit.update();
     }
-    lastChest.copy(chest);
 
     if (shakeAmp.current > 0.001) {
       shakeAmp.current *= Math.exp(-delta / 0.13);
@@ -172,20 +196,23 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       shakeAmp.current = 0;
       shakeOffset.set(0, 0, 0);
     }
+    const heaveTarget = !fighting && anglerPose.moving ? Math.sin(anglerPose.gait * 2) * 0.055 : 0;
+    heave.current += (heaveTarget - heave.current) * (1 - Math.exp(-10 * delta));
+    camera.position.y += heave.current;
     camera.position.add(shakeOffset);
   });
 
   return (
     <OrbitControls
       ref={controls}
-      target={[SPAWN_X, CHEST_Y, SPAWN_Z]}
+      target={rest}
       enableDamping
-      dampingFactor={0.08}
+      dampingFactor={0.14}
       enablePan={false}
-      minDistance={4}
-      maxDistance={18}
-      minPolarAngle={0.32}
-      maxPolarAngle={1.32}
+      minDistance={3.4}
+      maxDistance={15}
+      minPolarAngle={0.48}
+      maxPolarAngle={1.38}
       mouseButtons={{ LEFT: -1 as THREE.MOUSE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE }}
       touches={{ ONE: -1 as THREE.TOUCH, TWO: THREE.TOUCH.DOLLY_ROTATE }}
     />
@@ -217,20 +244,20 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   const marker = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   const hit = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2());
   const wrap = useSceneWrap();
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
-  const syncAim = useRef(() => {});
-  syncAim.current = () => {
+  const now = useRef(0);
+  const syncAim = useRef((_time: number) => {});
+  syncAim.current = (time: number) => {
     if (!isAiming(phaseRef.current)) {
       if (marker.current) marker.current.visible = false;
       return;
     }
     raycaster.setFromCamera(pointer.current, camera);
-    const point = raycaster.ray.intersectPlane(plane, hit);
+    const point = waterRayHit(raycaster.ray.origin, raycaster.ray.direction, time, hit);
     const overWater = point != null && inLake(point.x, point.z);
     const stance = stanceAt(anglerPose.x, anglerPose.z);
     const fishing = isFishingStance(stance);
@@ -242,7 +269,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
     if (overWater) aim.live.copy(hit);
     if (marker.current) {
       marker.current.visible = canCast;
-      if (canCast) marker.current.position.set(hit.x, 0.04, hit.z);
+      if (canCast) marker.current.position.set(hit.x, waterHeight(hit.x, hit.z, time) + 0.06, hit.z);
     }
     if (wrap.current) {
       wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(3)},${hit.z.toFixed(3)}` : "none";
@@ -259,7 +286,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
         ((event.clientX - rect.left) / rect.width) * 2 - 1,
         -((event.clientY - rect.top) / rect.height) * 2 + 1,
       );
-      syncAim.current();
+      syncAim.current(now.current);
     };
     window.addEventListener("pointermove", onPoint);
     window.addEventListener("pointerdown", onPoint);
@@ -271,7 +298,10 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
     };
   }, [gl]);
 
-  useFrame(() => syncAim.current());
+  useFrame((state) => {
+    now.current = state.clock.elapsedTime;
+    syncAim.current(now.current);
+  });
 
   return (
     <group ref={marker} visible={false}>
@@ -527,9 +557,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     const flying = phase === "waiting" && flightStart.current >= 0 && t - flightStart.current < FLIGHT_SEC;
     if (flying) {
       const p = (t - flightStart.current) / FLIGHT_SEC;
-      const e = p * (2 - p);
+      const e = 1 - (1 - p) ** 1.4;
       target.lerpVectors(flightFrom, flightTo, e);
-      target.y += 2.2 * 4 * p * (1 - p);
+      target.y += 2.15 * Math.sin(Math.PI * p ** 0.7);
     } else if (flightStart.current >= 0) {
       flightStart.current = -1;
       splashStart.current = t;
@@ -549,6 +579,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     } else {
       lastLine.current = 1;
     }
+    if (!flying) target.y += waterHeight(target.x, target.z, t);
     if (splash.current && splashMaterial.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -556,7 +587,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         splashStart.current = -1;
       } else {
         splash.current.visible = true;
-        splash.current.position.set(flightTo.x, 0.03, flightTo.z);
+        splash.current.position.set(flightTo.x, waterHeight(flightTo.x, flightTo.z, t) + 0.04, flightTo.z);
         splash.current.scale.setScalar(0.4 + k * 1.4);
         splashMaterial.current.opacity = (1 - k) * 0.5;
       }
@@ -568,13 +599,20 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     // Quadratic sag: taut under tension during the fight, a relaxed drape otherwise.
     let sag = 0.22;
     if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
+    const lineX = target.x - rodTip.x;
+    const lineZ = target.z - rodTip.z;
+    const span = Math.hypot(lineX, lineZ) || 1;
+    const sway = (flying ? Math.sin(t * 9) * 0.14 : Math.sin(t * 1.6) * 0.07) * Math.min(1, span / 6);
+    const sideX = -lineZ / span;
+    const sideZ = lineX / span;
     const attr = line.geometry.getAttribute("position");
     const positions = attr.array as Float32Array;
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
-      positions[i * 3] = rodTip.x + (target.x - rodTip.x) * s;
-      positions[i * 3 + 1] = rodTip.y + (target.y - rodTip.y) * s - sag * 4 * s * (1 - s);
-      positions[i * 3 + 2] = rodTip.z + (target.z - rodTip.z) * s;
+      const belly = 4 * s * (1 - s);
+      positions[i * 3] = rodTip.x + lineX * s + sideX * sway * belly;
+      positions[i * 3 + 1] = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
+      positions[i * 3 + 2] = rodTip.z + lineZ * s + sideZ * sway * belly;
     }
     attr.needsUpdate = true;
   });
@@ -710,7 +748,7 @@ export function FishingWorld(props: Props) {
     <Canvas
       shadows
       dpr={[1, 1.75]}
-      camera={{ position: CAM_START, fov: 42, near: 0.1, far: 160 }}
+      camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
