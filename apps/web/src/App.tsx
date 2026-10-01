@@ -3,6 +3,8 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
 import { CatchFormPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
+import { GearPage } from "./field/gear/GearPage";
+import { TackleProvider } from "./field/gear/TackleState";
 import { HomePage } from "./field/HomePage";
 import { LogbookProvider } from "./field/LogbookState";
 import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
@@ -32,9 +34,11 @@ function Gate({ children }: { children: ReactNode }) {
 function FieldLayout() {
   return (
     <LogbookProvider>
-      <FieldShell>
-        <Outlet />
-      </FieldShell>
+      <TackleProvider>
+        <FieldShell>
+          <Outlet />
+        </FieldShell>
+      </TackleProvider>
     </LogbookProvider>
   );
 }
@@ -52,6 +56,8 @@ export function App() {
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/trips/new" element={<TripFormPage />} />
         <Route path="/trips/:tripId" element={<TripPage />} />
+        <Route path="/gear" element={<GearPage />} />
+        <Route path="/gear/:tripId" element={<GearPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

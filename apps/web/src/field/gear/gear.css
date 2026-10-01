@@ -1,0 +1,101 @@
+.tackle-trip + .tackle-trip {
+  margin-top: 8px;
+}
+
+.tackle-count {
+  color: var(--field-muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tackle-block > .tackle-count {
+  margin: 0 0 8px;
+}
+
+.tackle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--field-card);
+  border: 1px solid var(--field-line);
+}
+
+.tackle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--field-line);
+  cursor: pointer;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--field-ink);
+}
+
+.tackle-list li:last-child .tackle-row {
+  border-bottom: 0;
+}
+
+.tackle-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #9a3f2c;
+  cursor: pointer;
+}
+
+.tackle-row .is-packed {
+  color: var(--field-muted);
+  text-decoration: line-through;
+}
+
+.tackle-add {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 10px;
+  align-items: end;
+  margin-top: 10px;
+}
+
+.tackle-add label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--field-muted);
+}
+
+.tackle-add input {
+  width: 100%;
+  border: 1px solid #6b5233;
+  background: #fffaf2;
+  color: var(--field-ink);
+  padding: 10px 12px;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.tackle-add button {
+  background: transparent;
+  border: 1px solid #6b5233;
+  color: var(--field-ink);
+  padding: 10px 14px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.tackle-add button:hover {
+  background: var(--field-ink);
+  color: var(--field-paper);
+}
+
+.tackle-add .field-error {
+  grid-column: 1 / -1;
+}
