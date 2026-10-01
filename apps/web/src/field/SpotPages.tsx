@@ -139,6 +139,11 @@ export function SpotPage() {
 }
 
 export function SpotFormPage() {
+  const { spotId } = useParams();
+  return <SpotForm key={spotId ?? ""} />;
+}
+
+function SpotForm() {
   const { book, addSpot, updateSpot } = useLogbook();
   const navigate = useNavigate();
   const { spotId } = useParams();

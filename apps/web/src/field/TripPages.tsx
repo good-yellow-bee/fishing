@@ -150,6 +150,12 @@ export function TripPage() {
 }
 
 export function TripFormPage() {
+  const { tripId } = useParams();
+  const [params] = useSearchParams();
+  return <TripForm key={`${tripId ?? ""}:${params.toString()}`} />;
+}
+
+function TripForm() {
   const { book, addTrip, updateTrip } = useLogbook();
   const navigate = useNavigate();
   const { tripId } = useParams();

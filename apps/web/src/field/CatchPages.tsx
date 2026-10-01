@@ -74,6 +74,12 @@ export function CatchesPage() {
 }
 
 export function CatchFormPage() {
+  const { catchId } = useParams();
+  const [params] = useSearchParams();
+  return <CatchForm key={`${catchId ?? ""}:${params.toString()}`} />;
+}
+
+function CatchForm() {
   const { book, addCatch, updateCatch } = useLogbook();
   const navigate = useNavigate();
   const { catchId } = useParams();
