@@ -63,6 +63,7 @@ import {
   placeLandedFish,
 } from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
+import { missBobberLift, missLineSag, missView } from "./missMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose, shortestYaw } from "./pose";
@@ -111,6 +112,25 @@ function fightEndedLanded() {
 const landedFrom = new THREE.Vector3();
 const landedFish = new THREE.Vector3();
 const holdScratch = { x: 0, y: 0, z: 0 };
+
+function updateMiss(phase: ScenePhase, prevPhase: ScenePhase, delta: number) {
+  if (prevPhase === "hookset" && phase === "result") {
+    missView.active = true;
+    missView.age = 0;
+    missView.fromSag = biteLineSag(fightView.biteAge);
+    missView.fromPlunge = fightView.plunge;
+    missView.x = bobberWorld.x;
+    missView.z = bobberWorld.z;
+  }
+  if (phase === "result" && missView.active) {
+    missView.age += Math.min(delta, 0.05);
+    return;
+  }
+  if (phase !== "result") {
+    missView.active = false;
+    missView.age = -1;
+  }
+}
 
 function updateLanding(phase: ScenePhase, prevPhase: ScenePhase, delta: number, time: number) {
   if (prevPhase === "fight" && phase === "result" && fightEndedLanded()) {
@@ -413,6 +433,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 0.05);
+    updateMiss(phase, prevPhase.current, dt);
     updateLanding(phase, prevPhase.current, dt, t);
     const surge = (sim.current?.surge ?? 0) as FightSurge;
     const tension = sim.current?.tension ?? 0.2;
@@ -916,6 +937,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   const flightDur = useRef(0.6);
   const flightPower = useRef(0.5);
   const splashStart = useRef(-1);
+  const missRing = useRef(false);
   const lastLine = useRef(1);
   const burstRef = useRef<() => void>(() => {});
   const entryBurst = useRef<() => void>(() => {});
@@ -960,7 +982,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       usingAim.current = aim.overWater;
       if (aim.overWater) castAim.copy(aim.live);
     }
-    const showLure = (phase === "waiting" && released) || dipped;
+    const missing = phase === "result" && missView.active;
+    const showLure = (phase === "waiting" && released) || dipped || missing;
     if (phase === "result" && landView.active) {
       const opacity = landLineOpacity(landView.swing);
       (line.material as THREE.LineBasicMaterial).opacity = opacity;
@@ -1093,6 +1116,11 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     } else {
       lastLine.current = 1;
     }
+    if (missing) {
+      target.x = missView.x;
+      target.z = missView.z;
+      target.y = 0.07 + missBobberLift(missView.age, missView.fromPlunge);
+    }
     if (!flying) target.y += waterHeight(target.x, target.z, t);
     if (!flying && phase === "waiting" && splashStart.current >= 0) {
       const hop = (t - splashStart.current) / 0.36;
@@ -1117,6 +1145,12 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
       }
     }
+    if (missing && !missRing.current) {
+      missRing.current = true;
+      splashStart.current = t;
+      flightTo.set(missView.x, 0, missView.z);
+    }
+    if (!missing) missRing.current = false;
     if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -1143,6 +1177,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     if (flying) sag = castTrailSag(flightP, rawSpan);
     else if (phase === "fight" && sim.current) sag = fightView.sag;
     else if (phase === "hookset") sag = biteLineSag(fightView.biteAge);
+    else if (missing) sag = missLineSag(missView.age, missView.fromSag);
     let swayHz = 1.6;
     let swayAmp = 0.07;
     if (flying) {
@@ -1151,6 +1186,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     } else if (phase === "hookset") {
       swayHz = 8;
       swayAmp = 0.03 + biteLineSag(fightView.biteAge) * 0.1;
+    } else if (missing) {
+      swayHz = 3.2;
+      swayAmp = 0.18;
     } else if (phase === "fight" && sim.current) {
       if (fightView.surge === 2) {
         swayHz = 11;
@@ -1188,8 +1226,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const x = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
       const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
       let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
-      if (dipped) y = clearFightLine(y, x, z);
-      if (dipped && i > 0) {
+      const holdLine = dipped || missing;
+      if (holdLine) y = clearFightLine(y, x, z);
+      if (holdLine && i > 0) {
         for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
           if (count >= LINE_CAP - (LINE_POINTS - i)) break;
           put(lip.x, lip.y, lip.z);

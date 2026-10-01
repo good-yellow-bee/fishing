@@ -637,13 +637,19 @@ kbd {
   animation: card-pop 180ms ease-out;
 }
 
-/* Leave the angler and the fish in frame. The toast for a miss stays centered. */
+/* Leave the angler, the line, and the bobber in frame. */
 .catch-card {
   left: 28px;
   top: auto;
   bottom: 28px;
   transform: none;
   animation: card-settle 180ms ease-out;
+}
+
+.toast {
+  top: 112px;
+  transform: translate(-50%, 0);
+  animation: toast-drop 180ms ease-out;
 }
 
 @keyframes card-settle {
@@ -654,6 +660,18 @@ kbd {
 
   to {
     transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes toast-drop {
+  from {
+    transform: translate(-50%, -12px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
     opacity: 1;
   }
 }
@@ -1017,6 +1035,11 @@ kbd {
     left: 8px;
     max-width: none;
     font-size: 10px;
+  }
+
+  .toast {
+    top: auto;
+    bottom: 16px;
   }
 
   .fight-bar {

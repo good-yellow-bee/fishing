@@ -13,6 +13,7 @@ import {
 } from "./castMotion";
 import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } from "./fightMotion";
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
+import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
 import { anglerPose, shortestYaw } from "./pose";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
@@ -73,6 +74,10 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
   const strikeFrom = useRef(1.4);
   const landFrom = useRef(1.05);
   const holdingCatch = useRef(false);
+  const missFromPitch = useRef(1.05);
+  const missFromRoll = useRef(0);
+  const missFromLean = useRef(0);
+  const sprung = useRef(false);
   const prevPhase = useRef(phase);
 
   const character = useMemo(() => {
@@ -115,6 +120,14 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       landFrom.current = rodPitch.current;
     }
     if (!landing) holdingCatch.current = false;
+    const missing = phase === "result" && missView.active;
+    if (missing && !sprung.current) {
+      sprung.current = true;
+      missFromPitch.current = rodPitch.current;
+      missFromRoll.current = rodRoll.current;
+      missFromLean.current = bodyLean.current;
+    }
+    if (!missing) sprung.current = false;
     if (fighting) {
       const pitchTarget = fightRodPitch({
         tension: fightView.tension,
@@ -132,6 +145,8 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-16 * delta));
     } else if (landing) {
       rodPitch.current = landRodPitch(landView.age, landFrom.current);
+    } else if (missing) {
+      rodPitch.current = missRodPitch(missView.age, missFromPitch.current);
     } else {
       const rodTarget =
         phase === "casting" ? loadedRodPitch(power, t) : whipping ? thrownRodPitch(power, throwAge, whipFrom.current) : swing(phase, power, t);
@@ -154,9 +169,11 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge, fightView.biteAge)
       : landing
         ? landBodyLean(landView.age)
-        : 0;
+        : missing
+          ? missBodyLean(missView.age, missFromLean.current)
+          : 0;
     const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
-    if (striking || taking || landing) bodyLean.current = leanTarget;
+    if (striking || taking || landing || missing) bodyLean.current = leanTarget;
     else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
@@ -180,6 +197,8 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
         grip.current.rotation.z = ROD_REST_Z + rodRoll.current;
       } else if (landing) {
         grip.current.rotation.z = ROD_REST_Z;
+      } else if (missing) {
+        grip.current.rotation.z = ROD_REST_Z + missRodRoll(missView.age, missFromRoll.current);
       } else {
         const whipZ = throwAge >= 0 && throwAge < CAST_RELEASE_SEC ? Math.sin((throwAge / CAST_RELEASE_SEC) * Math.PI) * 0.12 : 0;
         const zTarget = ROD_REST_Z + whipZ;
