@@ -40,6 +40,8 @@ type LogbookApi = {
   deleteSpot: (id: string) => void;
   deleteTrip: (id: string) => void;
   restoreSample: () => void;
+  photos: CatchPhotoMap;
+  replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
@@ -174,6 +176,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       deleteSpot: (id) => commit(withoutSpot(book, id)),
       deleteTrip: (id) => commit(withoutTrip(book, id)),
       restoreSample: () => commit(sampleLogbook(new Date())),
+      photos,
+      replaceBook: (nextBook, nextPhotos) => {
+        setBook(nextBook);
+        setPhotos(photosForBook(nextBook, nextPhotos));
+      },
     };
   }, [book, photos]);
 

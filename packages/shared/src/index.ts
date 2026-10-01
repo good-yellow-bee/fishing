@@ -11,3 +11,4 @@ export * from "./bests.ts";
 export * from "./tackle.ts";
 export * from "./weather.ts";
 export * from "./photo.ts";
+export * from "./archive.ts";
