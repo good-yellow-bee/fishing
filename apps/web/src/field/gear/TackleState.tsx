@@ -12,6 +12,7 @@ type TackleApi = {
   items: TackleItem[];
   toggle: (id: string, packed: boolean) => void;
   add: (tripId: string, label: string) => string | null;
+  replaceTackle: (items: TackleItem[]) => void;
 };
 
 const TackleContext = createContext<TackleApi | null>(null);
@@ -51,6 +52,7 @@ export function TackleProvider({ children }: { children: ReactNode }) {
         });
         return null;
       },
+      replaceTackle: (next) => setItems(next),
     };
   }, [items]);
 

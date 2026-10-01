@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, catchesForTrip } from "@stillwater/shared";
+import { BookFile } from "./BookFile";
 import { CatchCard, TripCard } from "./cards";
 import { formatLongDay } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -12,7 +13,7 @@ function deskLine(now: Date): string {
 }
 
 export function HomePage() {
-  const { book, restoreSample } = useLogbook();
+  const { book } = useLogbook();
   const now = new Date();
   const today = localDate(now);
   const tomorrow = shiftDate(now, 1);
@@ -114,18 +115,7 @@ export function HomePage() {
         </section>
       </div>
 
-      <footer className="sheet-foot">
-        <p>Sample waters are invented. This book stays in this browser.</p>
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => {
-            if (window.confirm("Replace this book with the sample week?")) restoreSample();
-          }}
-        >
-          Restore sample book
-        </button>
-      </footer>
+      <BookFile />
     </div>
   );
 }
