@@ -26,9 +26,10 @@ export function commitFieldArchive(archive: FieldArchive): { ok: true } | { ok: 
     savePhotos(archive.photos);
     return { ok: true };
   } catch {
-    restore(LOGBOOK_STORAGE_KEY, previous.book);
+    // Last write first, so a value that filled the quota moves before the book grows back.
     restore(PHOTO_STORAGE_KEY, previous.photos);
     restore(TACKLE_STORAGE_KEY, previous.tackle);
+    restore(LOGBOOK_STORAGE_KEY, previous.book);
     return { ok: false, message: FIT_REFUSAL };
   }
 }
