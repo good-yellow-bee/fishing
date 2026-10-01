@@ -1,3 +1,5 @@
+import { inLake } from "@stillwater/shared";
+
 /** How long the strike whip takes before the rod settles into the fight. */
 export const HOOKSET_SEC = 1.55;
 
@@ -45,7 +47,7 @@ export const fightView = {
   runSide: 0,
   lead: 0.32,
   side: 0,
-  depth: 0.16,
+  depth: 0.42,
   leapAge: -1,
   tug: 0,
   plunge: 0,
@@ -70,7 +72,10 @@ export function biteRodPitch(biteAge: number, time: number) {
   return load + Math.sin(time * 23) * 0.055;
 }
 
-/** Tension and a run bend the tip down. A pump lifts it. */
+/**
+ * Tension and a run bend the tip down. A pump lifts it.
+ * Full tension plus a run stays near 1.5 rad so the tip clears the dock deck.
+ */
 export function loadedFightPitch(
   tension: number,
   surge: FightSurge,
@@ -79,7 +84,7 @@ export function loadedFightPitch(
   time: number,
 ) {
   const t = Math.min(1, Math.max(0, tension));
-  const base = 1.04 + t * 0.56;
+  const base = 0.94 + t * 0.16;
   const run = surge === 2 ? 0.36 : surge === 1 ? 0.09 : 0;
   const shiver = surge === 2 ? Math.sin(time * 27) * 0.04 : surge === 1 ? Math.sin(time * 19) * 0.028 : 0;
   const lift = reeling ? reelPumpLift(pump) * (surge === 2 ? 0.12 : 0.4) : 0;
@@ -151,11 +156,14 @@ export function fishSideMeters(surge: FightSurge, runSide: number) {
   return runSide * reach;
 }
 
-/** Meters under the surface. A run lifts the back out of the water. */
+/**
+ * Meters under the surface. The calm depth covers the body (about 0.31m
+ * at fight scale). A run lifts the back out of the water.
+ */
 export function fishDepthMeters(surge: FightSurge) {
   if (surge === 2) return 0.04;
-  if (surge === 1) return 0.1;
-  return 0.16;
+  if (surge === 1) return 0.22;
+  return 0.42;
 }
 
 /** 0..1 arc. Zero outside the leap. */
@@ -192,4 +200,17 @@ export function fightLineSag(tension: number, surge: FightSurge, reeling: boolea
   if (!reeling) return slack;
   const lift = reelPumpLift(pump);
   return slack * (0.85 - lift * 0.45);
+}
+
+/** bridge_wood.glb scaled 1.8. The deck top sits near y = 0.63. */
+const DOCK_DECK = { minX: -1.05, maxX: 1.05, minZ: 5.2, maxZ: 8.5, top: 0.72 };
+
+/** Lift a fight-line sample off the dock deck and the ground. Lake water can stay under the surface. */
+export function clearFightLine(y: number, x: number, z: number) {
+  let next = y;
+  if (x >= DOCK_DECK.minX && x <= DOCK_DECK.maxX && z >= DOCK_DECK.minZ && z <= DOCK_DECK.maxZ) {
+    next = Math.max(next, DOCK_DECK.top);
+  }
+  if (!inLake(x, z)) next = Math.max(next, 0.12);
+  return next;
 }

@@ -10,6 +10,8 @@ import {
   fightLineSag,
   fightRodPitch,
   fightRodRoll,
+  clearFightLine,
+  fishDepthMeters,
   fishLeadMeters,
   fishLeapHeight,
   fishSideMeters,
@@ -83,6 +85,18 @@ describe("fight motion", () => {
     expect(fishLeapHeight(-1)).toBe(0);
     expect(fishLeapHeight(FISH_LEAP_SEC / 2)).toBeGreaterThan(1);
     expect(fishLeapHeight(FISH_LEAP_SEC)).toBe(0);
+    expect(fishDepthMeters(0)).toBeGreaterThan(0.34);
+    expect(fishDepthMeters(2)).toBeLessThan(0.08);
+    const buried = loadedFightPitch(1, 2, false, 0, Math.PI / 54);
+    expect(buried).toBeLessThan(1.56);
+    expect(buried).toBeGreaterThan(loadedFightPitch(1, 0, false, 0, Math.PI / 54) + 0.3);
+  });
+
+  it("keeps the fight line off the dock deck and the ground", () => {
+    expect(clearFightLine(0.1, 0, 6.5)).toBeGreaterThan(0.7);
+    expect(clearFightLine(1.4, 0, 6.5)).toBe(1.4);
+    expect(clearFightLine(-0.4, 0, 16)).toBeGreaterThan(0.1);
+    expect(clearFightLine(-0.25, 0, 0)).toBe(-0.25);
   });
 
   it("leans back into the set and gets dragged forward on a run", () => {

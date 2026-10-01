@@ -25,6 +25,7 @@ import {
   bobberPlunge,
   bobberPull,
   fightInput,
+  clearFightLine,
   fightLineSag,
   fightView,
   fishDepthMeters,
@@ -401,7 +402,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     } else {
       fightView.lead = 0.32;
       fightView.side = 0;
-      fightView.depth = 0.16;
+      fightView.depth = 0.42;
       fightView.pull = 0;
       fightView.sag = 0.22;
       fightView.tug = 0;
@@ -820,6 +821,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       if (hop >= 0 && hop < 1) target.y += Math.sin(hop * Math.PI) * 0.16 * (1 - hop);
     }
     if (dipped && fightView.plunge > 0) target.y -= fightView.plunge;
+    if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
     if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -878,9 +880,13 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
-      positions[i * 3] = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
-      positions[i * 3 + 1] = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
-      positions[i * 3 + 2] = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
+      const x = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
+      const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
+      let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
+      if (dipped) y = clearFightLine(y, x, z);
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
     }
     attr.needsUpdate = true;
   });
