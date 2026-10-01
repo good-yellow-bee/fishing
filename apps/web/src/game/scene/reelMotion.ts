@@ -1,27 +1,32 @@
-import { retrieveHang, type FightSurge } from "./fightMotion";
+import { reelPumpLift, retrieveHang, type FightSurge } from "./fightMotion";
 
 /** Spool turns this many times for each turn of the handle. */
 export const SPOOL_GEAR = 3;
 
 const SAMPLE = 0.02;
 
+/** Finished hauls plus the inbound part of the current one. The drop does not unwind it. */
+function inbound(pump: number) {
+  if (pump <= 0) return 0;
+  const base = Math.floor(pump);
+  const u = pump - base;
+  const steps = Math.max(1, Math.ceil(u / SAMPLE));
+  let peak = 0;
+  for (let i = 0; i <= steps; i += 1) {
+    peak = Math.max(peak, reelPumpLift(base + (u * i) / steps));
+  }
+  return base + peak;
+}
+
 /**
  * Meters of line coming in between two retrieve samples.
- * Follows the haul: hang shrinking counts, the drop back out does not.
- * A pause, a backward sample, or a run adds nothing.
+ * Scales with the haul for this surge. The drop, a pause, and a run add nothing.
  */
 export function haulStep(prevPump: number, nextPump: number, reeling: boolean, surge: FightSurge) {
   if (!reeling || surge === 2 || !(nextPump > prevPump)) return 0;
-  const steps = Math.max(1, Math.ceil((nextPump - prevPump) / SAMPLE));
-  let taken = 0;
-  let prevHang = retrieveHang(prevPump, true, surge);
-  for (let i = 1; i <= steps; i += 1) {
-    const pump = prevPump + ((nextPump - prevPump) * i) / steps;
-    const hang = retrieveHang(pump, true, surge);
-    if (hang < prevHang) taken += prevHang - hang;
-    prevHang = hang;
-  }
-  return taken;
+  const gained = inbound(nextPump) - inbound(prevPump);
+  if (gained <= 0) return 0;
+  return gained * retrieveHang(0, true, surge);
 }
 
 /** Handle angle for line already on the spool. One calm haul is one full turn. */

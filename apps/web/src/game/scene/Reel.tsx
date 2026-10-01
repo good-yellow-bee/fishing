@@ -26,7 +26,7 @@ export function Reel() {
   });
 
   return (
-    <group position={[0.09, 0.14, 0]}>
+    <group position={[0.12, 0.16, 0.02]} scale={1.85}>
       <mesh position={[-0.045, 0, 0]}>
         <boxGeometry args={[0.028, 0.07, 0.04]} />
         <meshToonMaterial color="#3a322c" gradientMap={ramp} />
