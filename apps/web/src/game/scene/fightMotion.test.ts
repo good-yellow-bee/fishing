@@ -1,3 +1,4 @@
+import { inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   FISH_LEAP_SEC,
@@ -10,6 +11,7 @@ import {
   fightLineSag,
   fightRodPitch,
   fightRodRoll,
+  applyRetrieve,
   clearFightLine,
   fishDepthMeters,
   fishLeadMeters,
@@ -18,6 +20,10 @@ import {
   hooksetTug,
   loadedFightPitch,
   reelPumpLift,
+  retrieveHang,
+  retrieveHop,
+  retrieveWake,
+  retrieveWeave,
   type RodInput,
 } from "./fightMotion.ts";
 
@@ -97,6 +103,42 @@ describe("fight motion", () => {
     expect(clearFightLine(1.4, 0, 6.5)).toBe(1.4);
     expect(clearFightLine(-0.4, 0, 16)).toBeGreaterThan(0.1);
     expect(clearFightLine(-0.25, 0, 0)).toBe(-0.25);
+  });
+
+  it("hauls the lure in on each pump and keeps that dart off the bank", () => {
+    expect(retrieveHang(0, true, 0)).toBeGreaterThan(0.4);
+    expect(retrieveHang(0.62, true, 0)).toBeCloseTo(0);
+    expect(retrieveHang(0, false, 0)).toBe(0);
+    expect(retrieveHang(0.3, true, 2)).toBe(0);
+    expect(retrieveWeave(0.62, true, 0)).toBeGreaterThan(0.2);
+    expect(retrieveWeave(1.62, true, 0)).toBeLessThan(-0.2);
+    expect(retrieveWeave(0, true, 0)).toBeCloseTo(0);
+    expect(retrieveHop(0.62, true, 0)).toBeGreaterThan(retrieveHop(0, true, 0));
+    expect(retrieveWake(0.62, true, 0)).toBeGreaterThan(0.9);
+    expect(retrieveWake(0.62, true, 2)).toBe(0);
+
+    const reelX = 0;
+    const reelZ = 8;
+    const hung = applyRetrieve(0, -4, reelX, reelZ, 0, true, 0);
+    const hauled = applyRetrieve(0, -4, reelX, reelZ, 0.62, true, 0);
+    const hungReach = Math.hypot(hung.x - reelX, hung.z - reelZ);
+    const hauledReach = Math.hypot(hauled.x - reelX, hauled.z - reelZ);
+    expect(hungReach).toBeGreaterThan(12.3);
+    expect(hauledReach).toBeLessThan(hungReach - 0.3);
+    expect(Math.abs(hauled.x)).toBeGreaterThan(0.2);
+    const still = applyRetrieve(0, -4, reelX, reelZ, 0.62, false, 0);
+    expect(still).toEqual({ x: 0, z: -4 });
+    const running = applyRetrieve(0, -4, reelX, reelZ, 0, true, 2);
+    expect(running).toEqual({ x: 0, z: -4 });
+
+    const edgeZ = -16.35;
+    expect(inLake(0, edgeZ)).toBe(true);
+    const shore = applyRetrieve(0, edgeZ, 0, -8, 0, true, 0);
+    expect(inLake(shore.x, shore.z)).toBe(true);
+    expect(shore.z).toBeGreaterThan(edgeZ - 0.48);
+    const beside = applyRetrieve(1.2, 6.5, 0, 8, 1.62, true, 0);
+    const onDeck = beside.x >= -1.05 && beside.x <= 1.05 && beside.z >= 5.2 && beside.z <= 8.5;
+    expect(onDeck).toBe(false);
   });
 
   it("leans back into the set and gets dragged forward on a run", () => {

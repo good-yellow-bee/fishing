@@ -22,6 +22,7 @@ import { Angler } from "./Angler";
 import {
   FISH_LEAP_SEC,
   HOOKSET_SEC,
+  applyRetrieve,
   bobberPlunge,
   bobberPull,
   fightInput,
@@ -33,13 +34,16 @@ import {
   fishLeapHeight,
   fishSideMeters,
   hooksetTug,
+  retrieveHop,
+  retrieveWake,
+  retrieveWeave,
   type FightSurge,
 } from "./fightMotion";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { anglerPose } from "./pose";
+import { anglerPose, shortestYaw } from "./pose";
 import { waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
@@ -642,6 +646,63 @@ function HookedFish({
   );
 }
 
+const WAKE_RINGS = 3;
+
+function RetrieveWake() {
+  const rings = useMemo(() => {
+    const geometry = new THREE.RingGeometry(0.2, 0.32, 22);
+    return Array.from({ length: WAKE_RINGS }, () => {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xe7f3ee,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.visible = false;
+      return mesh;
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      rings[0]?.geometry.dispose();
+      rings.forEach((ring) => (ring.material as THREE.Material).dispose());
+    };
+  }, [rings]);
+
+  useFrame((state) => {
+    const wake = retrieveWake(fightView.pump, fightView.active && fightView.reeling, fightView.surge);
+    const dx = bobberWorld.x - anglerPose.x;
+    const dz = bobberWorld.z - anglerPose.z;
+    const reach = Math.hypot(dx, dz) || 1;
+    const outX = dx / reach;
+    const outZ = dz / reach;
+    const kick = retrieveWeave(fightView.pump, fightView.reeling, fightView.surge);
+    const time = state.clock.elapsedTime;
+    rings.forEach((ring, i) => {
+      ring.visible = wake > 0.08;
+      if (!ring.visible) return;
+      const back = 0.34 + i * 0.46;
+      const side = (i - 1) * kick * 0.35;
+      const x = bobberWorld.x + outX * back - outZ * side;
+      const z = bobberWorld.z + outZ * back + outX * side;
+      ring.position.set(x, waterHeight(x, z, time) + 0.04, z);
+      ring.scale.setScalar((0.85 + i * 0.55) * (0.55 + wake));
+      (ring.material as THREE.MeshBasicMaterial).opacity = wake * (0.42 - i * 0.11);
+    });
+  });
+
+  return (
+    <group>
+      {rings.map((ring, i) => (
+        <primitive key={i} object={ring} />
+      ))}
+    </group>
+  );
+}
+
 const SPLASH_SEC = 0.55;
 const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
@@ -775,15 +836,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       entryBurst.current();
       fx.plop();
     }
-    if (lure.current) {
-      if (flying) {
-        lure.current.rotation.x = flightP * Math.PI * 2 * (1.05 + flightPower.current * 0.65);
-        lure.current.rotation.z = Math.sin(flightP * Math.PI) * 0.5;
-      } else {
-        const settle = 1 - Math.exp(-8 * delta);
-        lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
-        lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
-      }
+    if (lure.current && flying) {
+      lure.current.rotation.x = flightP * Math.PI * 2 * (1.05 + flightPower.current * 0.65);
+      lure.current.rotation.z = Math.sin(flightP * Math.PI) * 0.5;
     }
     if (phase === "fight") {
       // Hold the last simulated line fraction so a fight ending mid-frame
@@ -808,6 +863,19 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         target.x += outX * fightView.pull + -outZ * fightView.runSide * fightView.pull;
         target.z += outZ * fightView.pull + outX * fightView.runSide * fightView.pull;
       }
+      if (fightSim && fightView.reeling) {
+        const hauled = applyRetrieve(
+          target.x,
+          target.z,
+          REEL_POINT.x,
+          REEL_POINT.z,
+          fightView.pump,
+          true,
+          fightView.surge,
+        );
+        target.x = hauled.x;
+        target.z = hauled.z;
+      }
       if (fightSim) {
         const bob = fightView.surge === 2 ? 0.02 : fightView.reeling ? 0.035 : 0.045;
         target.y += Math.sin(t * (fightView.reeling ? 8 : 14)) * bob;
@@ -820,8 +888,25 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const hop = (t - splashStart.current) / 0.36;
       if (hop >= 0 && hop < 1) target.y += Math.sin(hop * Math.PI) * 0.16 * (1 - hop);
     }
+    if (phase === "fight" && fightView.reeling) target.y += retrieveHop(fightView.pump, true, fightView.surge);
     if (dipped && fightView.plunge > 0) target.y -= fightView.plunge;
     if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
+    if (lure.current && !flying) {
+      const hauling = phase === "fight" && fightView.reeling && fightView.surge !== 2;
+      const settle = 1 - Math.exp((hauling ? -10 : -8) * delta);
+      if (hauling) {
+        const wake = retrieveWake(fightView.pump, true, fightView.surge);
+        const weave = retrieveWeave(fightView.pump, true, fightView.surge);
+        const inbound = Math.atan2(REEL_POINT.x - target.x, REEL_POINT.z - target.z);
+        lure.current.rotation.x += (wake * 0.9 - lure.current.rotation.x) * settle;
+        lure.current.rotation.y += shortestYaw(lure.current.rotation.y, inbound) * settle;
+        lure.current.rotation.z += (weave * 1.6 - lure.current.rotation.z) * settle;
+      } else {
+        lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
+        lure.current.rotation.y += shortestYaw(lure.current.rotation.y, 0) * settle;
+        lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
+      }
+    }
     if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -907,6 +992,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       <group ref={entryAnchor}>
         <EntrySpray burstRef={entryBurst} />
       </group>
+      {phase === "fight" && <RetrieveWake />}
       <group ref={bobber} visible={false}>
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
