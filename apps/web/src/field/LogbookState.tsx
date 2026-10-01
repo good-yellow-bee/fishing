@@ -3,6 +3,8 @@ import {
   parseCatchDraft,
   parseSpotDraft,
   parseTripDraft,
+  photosForBook,
+  putCatchPhoto,
   replaceCatch,
   replaceSpot,
   replaceTrip,
@@ -11,23 +13,27 @@ import {
   withSpot,
   withTrip,
   withoutCatch,
+  withoutCatchPhoto,
   withoutSpot,
   withoutTrip,
   type CatchDraft,
+  type CatchPhotoMap,
   type Logbook,
   type SpotDraft,
   type TripDraft,
 } from "@stillwater/shared";
+import { readStoredPhotos, savePhotos } from "./photoStore";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string };
 
 type LogbookApi = {
   book: Logbook;
-  addCatch: (draft: CatchDraft) => SaveResult;
+  photoFor: (id: string) => string | null;
+  addCatch: (draft: CatchDraft, photo: string | null) => SaveResult;
   addSpot: (draft: SpotDraft) => SaveResult;
   addTrip: (draft: TripDraft) => SaveResult;
-  updateCatch: (id: string, draft: CatchDraft) => SaveResult;
+  updateCatch: (id: string, draft: CatchDraft, photo: string | null) => SaveResult;
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
   deleteCatch: (id: string) => void;
@@ -50,20 +56,65 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     saveLogbook(seeded);
     return seeded;
   });
+  const [photos, setPhotos] = useState<CatchPhotoMap>(() => {
+    const storedBook = readStoredLogbook() ?? { catches: [] };
+    const storedPhotos = readStoredPhotos();
+    const pruned = photosForBook(storedBook, storedPhotos);
+    if (pruned !== storedPhotos) {
+      try {
+        savePhotos(pruned);
+      } catch {
+        return pruned;
+      }
+    }
+    return pruned;
+  });
 
   const api = useMemo<LogbookApi>(() => {
+    const persist = (nextBook: Logbook, nextPhotos: CatchPhotoMap): { ok: true } | { ok: false; message: string } => {
+      try {
+        saveLogbook(nextBook);
+      } catch {
+        return { ok: false, message: "The book could not be saved in this browser." };
+      }
+      if (nextPhotos !== photos) {
+        try {
+          savePhotos(nextPhotos);
+        } catch {
+          try {
+            saveLogbook(book);
+          } catch {
+            setBook(nextBook);
+            return { ok: false, message: "The catch was saved, but the photo did not fit in this browser." };
+          }
+          return { ok: false, message: "That photo does not fit alongside the book, so the change was not saved." };
+        }
+      }
+      setBook(nextBook);
+      setPhotos(nextPhotos);
+      return { ok: true };
+    };
+
     const commit = (next: Logbook) => {
-      saveLogbook(next);
-      setBook(next);
+      const result = persist(next, photosForBook(next, photos));
+      if (!result.ok) throw new Error(result.message);
     };
 
     return {
       book,
-      addCatch: (draft) => {
+      photoFor: (id) => photos[id] ?? null,
+      addCatch: (draft, photo) => {
         const parsed = parseCatchDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message };
         const id = newId();
-        commit(withCatch(book, { ...parsed.value, id }));
+        let nextPhotos = photos;
+        if (photo) {
+          const put = putCatchPhoto(photos, id, photo);
+          if (!put.ok) return put;
+          nextPhotos = put.photos;
+        }
+        const saved = persist(withCatch(book, { ...parsed.value, id }), nextPhotos);
+        if (!saved.ok) return saved;
         return { ok: true, id };
       },
       addSpot: (draft) => {
@@ -80,13 +131,25 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         commit(withTrip(book, { ...parsed.value, id }));
         return { ok: true, id };
       },
-      updateCatch: (id, draft) => {
+      updateCatch: (id, draft, photo) => {
         if (!book.catches.some((entry) => entry.id === id)) {
           return { ok: false, message: "That catch is not in this book." };
         }
         const parsed = parseCatchDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message };
-        commit(replaceCatch(book, { ...parsed.value, id }));
+        const current = photos[id] ?? null;
+        let nextPhotos = photos;
+        if (photo !== current) {
+          if (photo) {
+            const put = putCatchPhoto(photos, id, photo);
+            if (!put.ok) return put;
+            nextPhotos = put.photos;
+          } else {
+            nextPhotos = withoutCatchPhoto(photos, id);
+          }
+        }
+        const saved = persist(replaceCatch(book, { ...parsed.value, id }), nextPhotos);
+        if (!saved.ok) return saved;
         return { ok: true, id };
       },
       updateSpot: (id, draft) => {
@@ -112,7 +175,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       deleteTrip: (id) => commit(withoutTrip(book, id)),
       restoreSample: () => commit(sampleLogbook(new Date())),
     };
-  }, [book]);
+  }, [book, photos]);
 
   return <LogbookContext.Provider value={api}>{children}</LogbookContext.Provider>;
 }

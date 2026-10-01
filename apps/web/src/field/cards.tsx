@@ -8,6 +8,7 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { fishCountLabel, formatClock, tripWhen } from "./format";
+import { useLogbook } from "./LogbookState";
 import { WeatherLine } from "./Weather";
 
 export function CatchCard({
@@ -19,8 +20,11 @@ export function CatchCard({
   spotName: string;
   tripTitle: string | null;
 }) {
+  const { photoFor } = useLogbook();
+  const photo = photoFor(entry.id);
   return (
-    <article className="catch-card">
+    <article className={photo ? "catch-card has-photo" : "catch-card"}>
+      {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
       <p className={`measure measure-${entry.measure.kind}`}>{formatMeasure(entry.measure)}</p>
       <div>
         <h2>
