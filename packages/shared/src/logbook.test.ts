@@ -26,6 +26,9 @@ function draft(bookSpot: string, overrides: Partial<CatchDraft> = {}): CatchDraf
     tripId: "",
     caughtAt: "2026-09-28T07:15",
     note: "Short fight.",
+    sky: "overcast",
+    wind: "light-west",
+    waterTemp: "58",
     ...overrides,
   };
 }

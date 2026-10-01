@@ -13,6 +13,7 @@ import {
 import { CatchCard, TripCard } from "./cards";
 import { formatDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
+import { TripWeather } from "./Weather";
 
 export function TripsPage() {
   const { book } = useLogbook();
@@ -120,6 +121,7 @@ export function TripPage() {
         </Link>
       </header>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
+      <TripWeather catches={catches} />
       <div className="section-head">
         <h2>Fish on this outing</h2>
       </div>
