@@ -20,7 +20,7 @@ import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
-import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft } from "./castMotion";
+import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose } from "./pose";
@@ -648,7 +648,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       target.z = THREE.MathUtils.lerp(flightFrom.z, flightTo.z, along);
       target.y =
         THREE.MathUtils.lerp(flightFrom.y, landY, along) + castLoft(flightP, flightDist.current, flightPower.current);
-    } else if (phase === "waiting" && flightStart.current >= 0) {
+    } else if (flightStart.current >= 0) {
+      // A bite can win the same frame a long cast would have landed. Still
+      // finish the entry so the lure is not left in the air with the flight armed.
       flightDone.current = true;
       flightStart.current = -1;
       splashStart.current = t;
@@ -703,12 +705,13 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     lookAt.copy(target);
     if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
     // Quadratic sag: taut under tension during the fight, a loose trail while the lure is in the air.
-    let sag = 0.22;
-    if (flying) sag = 0.1 + (1 - flightP) * 0.75;
-    else if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
     const lineX = target.x - rodTip.x;
     const lineZ = target.z - rodTip.z;
-    const span = Math.hypot(lineX, lineZ) || 1;
+    const rawSpan = Math.hypot(lineX, lineZ);
+    const span = rawSpan || 1;
+    let sag = 0.22;
+    if (flying) sag = castTrailSag(flightP, rawSpan);
+    else if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
     const sway = (flying ? Math.sin(t * 7) * 0.05 * (1 - flightP) : Math.sin(t * 1.6) * 0.07) * Math.min(1, span / 6);
     const sideX = -lineZ / span;
     const sideZ = lineX / span;

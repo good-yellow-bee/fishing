@@ -23,6 +23,13 @@ export function castLoft(progress: number, distance: number, power: number) {
   return Math.sin(Math.PI * p ** 0.68) * height;
 }
 
+/** Line droop while the lure is in the air. Flat until the cast has left the tip. */
+export function castTrailSag(progress: number, span: number) {
+  const p = Math.min(1, Math.max(0, progress));
+  const trail = 0.1 + (1 - p) * 0.75;
+  return trail * Math.min(1, Math.max(0, span) / 4);
+}
+
 export function loadedRodPitch(power: number, time: number) {
   return 0.35 - power * 1.15 + Math.sin(time * 18) * 0.012 * power;
 }

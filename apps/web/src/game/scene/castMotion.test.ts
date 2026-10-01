@@ -5,6 +5,7 @@ import {
   castBodyLean,
   castFlightSeconds,
   castLoft,
+  castTrailSag,
   thrownRodPitch,
 } from "./castMotion.ts";
 
@@ -18,6 +19,9 @@ describe("cast arc", () => {
     expect(castAlong(0)).toBe(0);
     expect(castAlong(1)).toBe(1);
     expect(castAlong(0.4)).toBeGreaterThan(0.4);
+    expect(castTrailSag(0, 0)).toBeCloseTo(0);
+    expect(castTrailSag(0, 8)).toBeCloseTo(0.85);
+    expect(castTrailSag(0, 1)).toBeLessThan(0.25);
   });
 
   it("whips the rod from the load through a follow-through", () => {
