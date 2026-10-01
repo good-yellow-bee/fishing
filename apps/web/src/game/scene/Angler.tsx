@@ -119,8 +119,9 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
         fromPitch: strikeFrom.current,
       });
       const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
+      const follow = phase === "hookset" ? 26 : 16;
       if (striking) rodPitch.current = pitchTarget;
-      else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-16 * delta));
+      else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
     } else {
       const rodTarget =
         phase === "casting" ? loadedRodPitch(power, t) : whipping ? thrownRodPitch(power, throwAge, whipFrom.current) : swing(phase, power, t);

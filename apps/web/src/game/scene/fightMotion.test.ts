@@ -39,6 +39,7 @@ describe("fight motion", () => {
     expect(bite).toBeGreaterThan(biteRodPitch(0, 0));
     const strike = fightRodPitch(rod({ strikeAge: STRIKE_SNAP_SEC, fromPitch: bite }));
     expect(strike).toBeLessThan(bite - 0.6);
+    expect(fightRodPitch(rod({ strikeAge: STRIKE_SNAP_SEC + 0.1, fromPitch: bite }))).toBeLessThan(0.5);
     const running = loadedFightPitch(0.75, 2, false, 0, 0);
     const calm = loadedFightPitch(0.75, 0, false, 0, 0);
     expect(running).toBeGreaterThan(calm + 0.3);

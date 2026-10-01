@@ -1,8 +1,11 @@
 /** How long the strike whip takes before the rod settles into the fight. */
-export const HOOKSET_SEC = 0.42;
+export const HOOKSET_SEC = 0.74;
 
 /** The upward snap inside the hookset. */
-export const STRIKE_SNAP_SEC = 0.15;
+export const STRIKE_SNAP_SEC = 0.28;
+
+/** Pause at the top of the set so the strike reads. */
+export const STRIKE_HOLD_SEC = 0.16;
 
 /** Bobber yank toward the angler on the strike. */
 export const TUG_SEC = 0.32;
@@ -79,16 +82,21 @@ export function loadedFightPitch(
   return base + run + shiver - lift;
 }
 
-/** Snap from the loaded bite up through the hookset, then settle. */
+const SET_UP = 0.4;
+
+/** Snap from the loaded bite up through the hookset, hold, then settle. */
 export function strikeRodPitch(age: number, from: number, loaded: number) {
   if (age <= STRIKE_SNAP_SEC) {
     const u = Math.max(0, age) / STRIKE_SNAP_SEC;
-    return from + (0.58 - from) * u * u;
+    const e = 1 - (1 - u) ** 2;
+    return from + (SET_UP - from) * e;
   }
-  const u = (age - STRIKE_SNAP_SEC) / (HOOKSET_SEC - STRIKE_SNAP_SEC);
-  const damp = Math.exp(-3.1 * Math.max(0, u));
-  const settle = 0.58 + (loaded - 0.58) * (1 - Math.exp(-4.4 * Math.max(0, u)));
-  return settle + Math.sin(u * Math.PI * 2.4) * 0.07 * damp;
+  const held = STRIKE_SNAP_SEC + STRIKE_HOLD_SEC;
+  if (age <= held) return SET_UP;
+  const u = (age - held) / (HOOKSET_SEC - held);
+  const damp = Math.exp(-2.6 * Math.max(0, u));
+  const settle = SET_UP + (loaded - SET_UP) * (1 - Math.exp(-3.4 * Math.max(0, u)));
+  return settle + Math.sin(u * Math.PI * 2.2) * 0.06 * damp;
 }
 
 export function fightRodPitch(input: RodInput) {
@@ -112,10 +120,13 @@ export function fightRodRoll(surge: FightSurge, runSide: number, time: number, s
 /** Negative leans back (the set, a pump). Positive is the fish dragging you forward. */
 export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: number) {
   let lean = 0;
-  if (strikeAge < 0) lean += 0.07;
-  else if (strikeAge < HOOKSET_SEC) {
-    const u = strikeAge / HOOKSET_SEC;
-    lean -= 0.22 * Math.sin(Math.min(1, u / 0.28) * Math.PI);
+  if (strikeAge < 0) lean += 0.1;
+  else if (strikeAge < STRIKE_SNAP_SEC + STRIKE_HOLD_SEC) {
+    const u = Math.min(1, Math.max(0, strikeAge) / STRIKE_SNAP_SEC);
+    lean -= 0.28 * (1 - (1 - u) ** 2);
+  } else if (strikeAge < HOOKSET_SEC) {
+    const u = (strikeAge - STRIKE_SNAP_SEC - STRIKE_HOLD_SEC) / (HOOKSET_SEC - STRIKE_SNAP_SEC - STRIKE_HOLD_SEC);
+    lean -= 0.28 * (1 - Math.min(1, Math.max(0, u)));
   }
   if (reeling && surge !== 2) lean -= 0.11;
   if (surge === 2) lean += 0.16;
