@@ -225,7 +225,7 @@ export function retrieveWeave(pump: number, reeling: boolean, surge: FightSurge)
 /** Skip above the surface on the haul, meters. */
 export function retrieveHop(pump: number, reeling: boolean, surge: FightSurge) {
   if (!reeling || surge === 2) return 0;
-  return reelPumpLift(pump) * (surge === 1 ? 0.06 : 0.36);
+  return reelPumpLift(pump) * (surge === 1 ? 0.06 : 0.52);
 }
 
 /** 0..1 wake while the lure is moving in. A run keeps the water quiet. */

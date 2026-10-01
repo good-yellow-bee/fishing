@@ -713,6 +713,81 @@ function RetrieveWake() {
   );
 }
 
+const RETRIEVE_DROPS = 8;
+
+function RetrieveSplash() {
+  const velocities = useMemo(() => new Float32Array(RETRIEVE_DROPS * 3), []);
+  const life = useMemo(() => new Float32Array(RETRIEVE_DROPS), []);
+  const lastStroke = useRef(-1);
+  const pool = useMemo(() => {
+    const geometry = new THREE.SphereGeometry(0.07, 6, 5);
+    const holder = new THREE.Group();
+    for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xf7fffb,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      holder.add(mesh);
+    }
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      (pool.children[0] as THREE.Mesh).geometry.dispose();
+      pool.children.forEach((child) => ((child as THREE.Mesh).material as THREE.Material).dispose());
+    };
+  }, [pool]);
+
+  useFrame((_, delta) => {
+    const pumping = fightView.active && fightView.reeling;
+    const wake = retrieveWake(fightView.pump, pumping, fightView.surge);
+    const stroke = Math.floor(Math.max(0, fightView.pump));
+    if (wake > 0.82 && lastStroke.current !== stroke) {
+      lastStroke.current = stroke;
+      const dx = bobberWorld.x - anglerPose.x;
+      const dz = bobberWorld.z - anglerPose.z;
+      const reach = Math.hypot(dx, dz) || 1;
+      const outX = dx / reach;
+      const outZ = dz / reach;
+      const side = Math.sign(retrieveWeave(fightView.pump, true, fightView.surge) || 1);
+      for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+        const along = -0.35 - Math.random() * 1.1;
+        const kick = (Math.random() - 0.5) * 1.3 + side * 0.55;
+        velocities[i * 3] = outX * along - outZ * kick;
+        velocities[i * 3 + 1] = 2.2 + Math.random() * 1.5;
+        velocities[i * 3 + 2] = outZ * along + outX * kick;
+        life[i] = 0.4 + Math.random() * 0.18;
+        const mesh = pool.children[i] as THREE.Mesh;
+        mesh.position.set(bobberWorld.x, bobberWorld.y + 0.14, bobberWorld.z);
+        mesh.visible = true;
+        (mesh.material as THREE.MeshBasicMaterial).opacity = 0.9;
+      }
+    }
+    for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+      if (life[i]! <= 0) continue;
+      life[i] -= delta;
+      const mesh = pool.children[i] as THREE.Mesh;
+      if (life[i]! <= 0 || mesh.position.y < 0.02) {
+        life[i] = 0;
+        mesh.visible = false;
+        continue;
+      }
+      velocities[i * 3 + 1] -= 7.2 * delta;
+      mesh.position.x += velocities[i * 3]! * delta;
+      mesh.position.y += velocities[i * 3 + 1]! * delta;
+      mesh.position.z += velocities[i * 3 + 2]! * delta;
+      (mesh.material as THREE.MeshBasicMaterial).opacity = Math.min(0.92, life[i]! * 2.8);
+    }
+  });
+
+  return <primitive object={pool} />;
+}
+
 const SPLASH_SEC = 0.55;
 const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
@@ -1003,6 +1078,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         <EntrySpray burstRef={entryBurst} />
       </group>
       {phase === "fight" && <RetrieveWake />}
+      {phase === "fight" && <RetrieveSplash />}
       <group ref={bobber} visible={false}>
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
