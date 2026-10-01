@@ -111,15 +111,16 @@ export function biteRodPitch(biteAge: number, time: number) {
   return loaded + biteThrob(age) * 0.12 + tick;
 }
 
-/** Meters the bobber is pulled under. A tap ticks it; the yank dunks it. */
+/** Meters the bobber is pulled under. A tap ticks it; the yank dunks it; the throb lets it rise. */
 export function bitePlunge(biteAge: number) {
   const age = biteAgeOf(biteAge);
   if (age < BITE_TAP_SEC) return Math.sin((age / BITE_TAP_SEC) * Math.PI) * 0.045;
   if (age < BITE_SLACK_END) return 0.008;
   const u = Math.min(1, (age - BITE_SLACK_END) / 0.1);
   const dunk = (1 - (1 - u) ** 2) * 0.36;
-  const pump = Math.max(0, biteThrob(age)) * 0.07;
-  return dunk + pump;
+  const throb = biteThrob(age);
+  if (throb >= 0) return dunk + throb * 0.07;
+  return dunk + throb * (dunk - 0.02);
 }
 
 /** Belly of the line. Slack on the tap, tight on the yank, a little belly between pumps. */

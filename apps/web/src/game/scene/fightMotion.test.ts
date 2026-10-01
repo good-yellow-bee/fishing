@@ -63,6 +63,8 @@ describe("fight motion", () => {
     const up = biteRodPitch(BITE_YANK_END + BITE_THROB_SEC * 0.75, 0);
     expect(down).toBeGreaterThan(up + 0.15);
     expect(bitePlunge(BITE_YANK_END)).toBeGreaterThan(bitePlunge(BITE_TAP_SEC / 2) + 0.2);
+    expect(bitePlunge(BITE_YANK_END + BITE_THROB_SEC * 0.25)).toBeGreaterThan(bitePlunge(BITE_YANK_END));
+    expect(bitePlunge(BITE_YANK_END + BITE_THROB_SEC * 0.75)).toBeLessThan(0.08);
     expect(biteLineSag(0.05)).toBeGreaterThan(biteLineSag(BITE_YANK_END) + 0.15);
     expect(biteDart(BITE_SLACK_END)).toBe(0);
     expect(biteDart((BITE_SLACK_END + BITE_YANK_END) / 2)).toBeGreaterThan(0.2);
