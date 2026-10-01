@@ -40,7 +40,25 @@ import {
   retrieveWeave,
   type FightSurge,
 } from "./fightMotion";
-import { ArticulatedFish } from "./ArticulatedFish";
+import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
+import {
+  LAND_DRIPS,
+  landDrip,
+  landDripFall,
+  landExitSplash,
+  landFishPitch,
+  landFishRoll,
+  landFishYaw,
+  landFlop,
+  landHoldPoint,
+  landHoldShake,
+  landLineOpacity,
+  landLineSag,
+  landPresentYaw,
+  landSwing,
+  landView,
+  placeLandedFish,
+} from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
@@ -85,6 +103,40 @@ let lastFightSim: FightSim | null = null;
 
 function fightEndedLanded() {
   return lastFightSim !== null && lastFightSim.line <= 0;
+}
+
+const landedFrom = new THREE.Vector3();
+const landedFish = new THREE.Vector3();
+const holdScratch = { x: 0, y: 0, z: 0 };
+
+function updateLanding(phase: ScenePhase, prevPhase: ScenePhase, delta: number, time: number) {
+  if (prevPhase === "fight" && phase === "result" && fightEndedLanded()) {
+    landedFrom.set(
+      bobberWorld.x + fightView.localX,
+      bobberWorld.y + fightView.localY,
+      bobberWorld.z + fightView.localZ,
+    );
+    const dx = anglerPose.x - landedFrom.x;
+    const dz = anglerPose.z - landedFrom.z;
+    landView.haulYaw = dx * dx + dz * dz > 0.04 ? Math.atan2(dx, dz) : anglerPose.yaw;
+    landView.active = true;
+    landView.age = 0;
+  }
+  if (phase === "result" && landView.active) {
+    landView.presentYaw = landPresentYaw(anglerPose.yaw);
+    landView.swing = landSwing(landView.age);
+    landHoldPoint(holdScratch, anglerPose.x, anglerPose.bob, anglerPose.z, anglerPose.yaw, landView.age);
+    placeLandedFish(landedFish, landedFrom, holdScratch, landView.swing);
+    landedFish.y += landHoldShake(landView.age, time);
+    landedFish.y = clearFightLine(landedFish.y, landedFish.x, landedFish.z);
+    landView.age += Math.min(delta, 0.05);
+    return;
+  }
+  if (phase !== "result") {
+    landView.active = false;
+    landView.age = -1;
+    landView.swing = 0;
+  }
 }
 
 function isFighting(phase: ScenePhase) {
@@ -351,6 +403,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 0.05);
+    updateLanding(phase, prevPhase.current, dt, t);
     const surge = (sim.current?.surge ?? 0) as FightSurge;
     const tension = sim.current?.tension ?? 0.2;
     const live = phase === "fight" && sim.current != null;
@@ -886,6 +939,48 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       if (aim.overWater) castAim.copy(aim.live);
     }
     const showLure = (phase === "waiting" && released) || dipped;
+    if (phase === "result" && landView.active) {
+      const opacity = landLineOpacity(landView.swing);
+      (line.material as THREE.LineBasicMaterial).opacity = opacity;
+      line.visible = opacity > 0.03;
+      if (bobber.current) bobber.current.visible = false;
+      if (!line.visible) return;
+      const sag = landLineSag(landView.swing);
+      const lineX = landedFish.x - rodTip.x;
+      const lineZ = landedFish.z - rodTip.z;
+      const attr = line.geometry.getAttribute("position");
+      const positions = attr.array as Float32Array;
+      let count = 0;
+      let prevX = 0;
+      let prevY = 0;
+      let prevZ = 0;
+      const put = (x: number, y: number, z: number) => {
+        positions[count * 3] = x;
+        positions[count * 3 + 1] = y;
+        positions[count * 3 + 2] = z;
+        count += 1;
+      };
+      for (let i = 0; i < LINE_POINTS; i += 1) {
+        const s = i / (LINE_POINTS - 1);
+        const belly = 4 * s * (1 - s);
+        const x = rodTip.x + lineX * s;
+        const z = rodTip.z + lineZ * s;
+        const y = clearFightLine(rodTip.y + (landedFish.y - rodTip.y) * s - sag * belly, x, z);
+        if (i > 0) {
+          for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
+            if (count >= LINE_CAP - (LINE_POINTS - i)) break;
+            put(lip.x, lip.y, lip.z);
+          }
+        }
+        put(x, y, z);
+        prevX = x;
+        prevY = y;
+        prevZ = z;
+      }
+      line.geometry.setDrawRange(0, count);
+      attr.needsUpdate = true;
+      return;
+    }
     line.visible = showLure;
     if (bobber.current) bobber.current.visible = showLure;
     if (!showLure) {
@@ -1120,58 +1215,99 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   );
 }
 
-const CATCH_FLIGHT_SEC = 0.5;
-
 function CaughtFish({
   phase,
-  hand,
   color,
   accent,
   scale,
 }: {
   phase: ScenePhase;
-  hand: THREE.Vector3;
   color: string;
   accent: string;
   scale: number;
 }) {
   const group = useRef<THREE.Group>(null);
-  const from = useMemo(() => new THREE.Vector3(), []);
-  const prevPhase = useRef(phase);
-  const flightStart = useRef(-1);
-  // Misses and breaks also land on "result"; only celebrate an actual landing.
-  const caught = useRef(false);
+  const exit = useRef<THREE.Group>(null);
+  const exitMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const drive = useRef<FishDrive>({ intensity: 1.2, speed: 2.2 });
+  const drips = useMemo(() => {
+    const holder = new THREE.Group();
+    const geometry = new THREE.SphereGeometry(0.03, 5, 4);
+    for (let i = 0; i < LAND_DRIPS; i += 1) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xd7eee6,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      holder.add(mesh);
+    }
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const first = drips.children[0] as THREE.Mesh;
+      first.geometry.dispose();
+      drips.children.forEach((child) => ((child as THREE.Mesh).material as THREE.Material).dispose());
+    };
+  }, [drips]);
+
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    if (prevPhase.current === "fight" && phase === "result" && fightEndedLanded()) {
-      caught.current = true;
-      from.copy(bobberWorld);
-      flightStart.current = t;
-    }
-    prevPhase.current = phase;
-    if (phase !== "result") caught.current = false;
     const g = group.current;
-    if (!g) return;
-    const active = phase === "result" && caught.current;
-    g.visible = active;
-    if (!active) return;
-    const p = flightStart.current >= 0 ? Math.min(1, (t - flightStart.current) / CATCH_FLIGHT_SEC) : 1;
-    g.position.lerpVectors(from, hand, p);
-    g.position.y += 1.2 * 4 * p * (1 - p) + 0.35;
-    if (p < 1) {
-      // Spin through the arc, settling head-up in the angler's grip.
-      g.rotation.x = -p * Math.PI * 2.5;
-      g.rotation.z = 0;
-    } else {
-      g.rotation.x = -Math.PI / 2;
-      g.rotation.z = Math.sin(t * 2.6) * 0.1;
-      g.position.y += Math.sin(t * 2.2) * 0.03;
+    const active = phase === "result" && landView.active;
+    if (g) g.visible = active;
+    const splash = landExitSplash(active ? landView.age : -1);
+    if (exit.current && exitMaterial.current) {
+      exit.current.visible = splash >= 0;
+      if (splash >= 0) {
+        const y = waterHeight(landedFrom.x, landedFrom.z, t);
+        exit.current.position.set(landedFrom.x, y + 0.03, landedFrom.z);
+        exit.current.scale.setScalar(0.35 + splash * 1.6);
+        exitMaterial.current.opacity = (1 - splash) * 0.6;
+      }
+    }
+    if (g && active) {
+      const flop = landFlop(landView.age);
+      drive.current.intensity = 0.35 + flop;
+      drive.current.speed = 0.7 + flop * 1.5;
+      g.position.copy(landedFish);
+      g.rotation.order = "YXZ";
+      g.rotation.y = landFishYaw(landView.swing, landView.haulYaw, landView.presentYaw);
+      g.rotation.x = landFishPitch(landView.swing);
+      g.rotation.z = landFishRoll(landView.swing, landView.age, t);
+    }
+    for (let i = 0; i < LAND_DRIPS; i += 1) {
+      const mesh = drips.children[i] as THREE.Mesh;
+      const fall = active ? landDrip(landView.age, i) : -1;
+      mesh.visible = fall >= 0 && g != null;
+      if (fall < 0 || !g) continue;
+      const side = (i - (LAND_DRIPS - 1) / 2) * 0.07;
+      mesh.position.set(
+        g.position.x + side,
+        g.position.y + 0.08 - landDripFall(fall),
+        g.position.z + (i % 2 === 0 ? 0.05 : -0.06),
+      );
+      (mesh.material as THREE.MeshBasicMaterial).opacity = (1 - fall) * 0.8;
     }
   });
+
   return (
-    <group ref={group} visible={false} scale={scale}>
-      <ArticulatedFish color={color} accent={accent} speed={0.6} intensity={0.5} />
-    </group>
+    <>
+      <group ref={exit} visible={false}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.22, 0.4, 24]} />
+          <meshBasicMaterial ref={exitMaterial} color="#e7f4ee" transparent depthWrite={false} />
+        </mesh>
+      </group>
+      <primitive object={drips} />
+      <group ref={group} visible={false} scale={scale}>
+        <ArticulatedFish color={color} accent={accent} drive={drive} />
+      </group>
+    </>
   );
 }
 
@@ -1185,7 +1321,6 @@ function Tone({ hour }: { hour: LakeHour }) {
 
 function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(SPAWN_X + 0.4, 2.1, SPAWN_Z - 1.2), []);
-  const hand = useMemo(() => new THREE.Vector3(SPAWN_X, 1.1, SPAWN_Z), []);
   const lookAt = useMemo(() => new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
   return (
@@ -1209,12 +1344,11 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
       />
       <CaughtFish
         phase={phase}
-        hand={hand}
         color={species?.color ?? FALLBACK_COLOR}
         accent={species?.accent ?? FALLBACK_ACCENT}
-        scale={bodyScale(weight)}
+        scale={Math.max(0.95, bodyScale(weight))}
       />
-      <Angler phase={phase} power={power} rodTip={rodTip} hand={hand} lookAt={lookAt} />
+      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
     </>
   );
 }

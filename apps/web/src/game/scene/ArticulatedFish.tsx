@@ -3,12 +3,15 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { toonRamp } from "./toon";
 
+export type FishDrive = { intensity: number; speed: number };
+
 type Props = {
   color?: string;
   accent?: string;
   phase?: number;
   speed?: number;
   intensity?: number;
+  drive?: { readonly current: FishDrive };
 };
 
 function FishMaterial({ color }: { color: string }) {
@@ -21,14 +24,17 @@ export function ArticulatedFish({
   phase = 0,
   speed = 1,
   intensity = 1,
+  drive,
 }: Props) {
   const middle = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
 
   useFrame((state) => {
-    const wave = state.clock.elapsedTime * speed * 7 + phase;
-    if (middle.current) middle.current.rotation.y = Math.sin(wave) * 0.2 * intensity;
-    if (tail.current) tail.current.rotation.y = Math.sin(wave - 0.8) * 0.46 * intensity;
+    const rate = drive?.current.speed ?? speed;
+    const amp = drive?.current.intensity ?? intensity;
+    const wave = state.clock.elapsedTime * rate * 7 + phase;
+    if (middle.current) middle.current.rotation.y = Math.sin(wave) * 0.2 * amp;
+    if (tail.current) tail.current.rotation.y = Math.sin(wave - 0.8) * 0.46 * amp;
   });
 
   return (

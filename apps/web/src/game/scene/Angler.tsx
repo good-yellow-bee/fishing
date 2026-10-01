@@ -12,6 +12,7 @@ import {
   thrownRodPitch,
 } from "./castMotion";
 import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } from "./fightMotion";
+import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { anglerPose, shortestYaw } from "./pose";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
@@ -21,7 +22,6 @@ type Props = {
   phase: ScenePhase;
   power: number;
   rodTip: THREE.Vector3;
-  hand: THREE.Vector3;
   lookAt: THREE.Vector3;
 };
 
@@ -57,7 +57,7 @@ function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
   return "idle";
 }
 
-export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
+export function Angler({ phase, power, rodTip, lookAt }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -71,6 +71,8 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
   const whipFrom = useRef(0.95);
   const throwStart = useRef(-1);
   const strikeFrom = useRef(1.4);
+  const landFrom = useRef(1.05);
+  const holdingCatch = useRef(false);
   const prevPhase = useRef(phase);
 
   const character = useMemo(() => {
@@ -107,6 +109,12 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
     prevPhase.current = phase;
     const whipping = phase === "waiting" && throwAge >= 0 && throwAge < CAST_ROD_SETTLE_SEC + 0.15;
 
+    const landing = phase === "result" && landView.active;
+    if (landing && !holdingCatch.current) {
+      holdingCatch.current = true;
+      landFrom.current = rodPitch.current;
+    }
+    if (!landing) holdingCatch.current = false;
     if (fighting) {
       const pitchTarget = fightRodPitch({
         tension: fightView.tension,
@@ -122,6 +130,8 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
       const follow = phase === "hookset" ? 26 : 16;
       if (striking) rodPitch.current = pitchTarget;
       else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
+    } else if (landing) {
+      rodPitch.current = landRodPitch(landView.age, landFrom.current);
     } else {
       const rodTarget =
         phase === "casting" ? loadedRodPitch(power, t) : whipping ? thrownRodPitch(power, throwAge, whipFrom.current) : swing(phase, power, t);
@@ -139,9 +149,13 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
       anglerPose.yaw += shortestYaw(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
     }
     const castLean = castBodyLean(power, phase === "casting", phase === "waiting" ? throwAge : -1);
-    const leanTarget = fighting ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge) : 0;
+    const leanTarget = fighting
+      ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge)
+      : landing
+        ? landBodyLean(landView.age)
+        : 0;
     const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
-    if (striking) bodyLean.current = leanTarget;
+    if (striking || landing) bodyLean.current = leanTarget;
     else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
@@ -162,12 +176,13 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
         const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge);
         rodRoll.current += (rollTarget - rodRoll.current) * (1 - Math.exp(-14 * delta));
         grip.current.rotation.z = ROD_REST_Z + rodRoll.current;
+      } else if (landing) {
+        grip.current.rotation.z = ROD_REST_Z;
       } else {
         const whipZ = throwAge >= 0 && throwAge < CAST_RELEASE_SEC ? Math.sin((throwAge / CAST_RELEASE_SEC) * Math.PI) * 0.12 : 0;
         const zTarget = ROD_REST_Z + whipZ;
         grip.current.rotation.z += (zTarget - grip.current.rotation.z) * (whipping ? 1 : 1 - Math.exp(-8 * delta));
       }
-      grip.current.getWorldPosition(hand);
     }
     tip.current?.getWorldPosition(rodTip);
 
