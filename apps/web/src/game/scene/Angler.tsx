@@ -15,6 +15,7 @@ import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } fr
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
 import { anglerPose, shortestYaw } from "./pose";
+import { Reel } from "./Reel";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -228,6 +229,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       <primitive object={character} />
       <group ref={grip} position={[0.2, 0.62, 0.22]} rotation={[1.05, 0.05, -0.28]}>
         <primitive object={rod} scale={0.19} />
+        <Reel />
         <object3D ref={tip} position={[0, 0.94, 0]} />
       </group>
     </group>
