@@ -1,10 +1,10 @@
 import { catchPhotoWriteBlocked, catchPhotosFromUnknown, type CatchPhotoMap } from "@stillwater/shared";
 
-const KEY = "stillwater.field-log.photos.v1";
+export const PHOTO_STORAGE_KEY = "stillwater.field-log.photos.v1";
 
 export function readStoredPhotos(): CatchPhotoMap {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(PHOTO_STORAGE_KEY);
     if (!raw) return {};
     return catchPhotosFromUnknown(JSON.parse(raw) as unknown);
   } catch {
@@ -23,18 +23,18 @@ function storageChars(): number {
 
 export function savePhotos(photos: CatchPhotoMap) {
   const json = JSON.stringify(photos);
-  const previous = localStorage.getItem(KEY);
-  const previousChars = previous === null ? 0 : KEY.length + previous.length;
-  const nextChars = KEY.length + json.length;
+  const previous = localStorage.getItem(PHOTO_STORAGE_KEY);
+  const previousChars = previous === null ? 0 : PHOTO_STORAGE_KEY.length + previous.length;
+  const nextChars = PHOTO_STORAGE_KEY.length + json.length;
   if (nextChars > previousChars && catchPhotoWriteBlocked(storageChars(), previousChars, nextChars)) {
     throw new Error("That photo does not fit alongside the book, so the change was not saved.");
   }
   try {
-    localStorage.setItem(KEY, json);
+    localStorage.setItem(PHOTO_STORAGE_KEY, json);
   } catch (error) {
     if (previous !== null) {
       try {
-        localStorage.setItem(KEY, previous);
+        localStorage.setItem(PHOTO_STORAGE_KEY, previous);
       } catch {
         throw error;
       }
