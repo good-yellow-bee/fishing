@@ -7,3 +7,5 @@ export * from "./guide.ts";
 export * from "./board.ts";
 export * from "./hour.ts";
 export * from "./logbook.ts";
+export * from "./tackle.ts";
+export * from "./weather.ts";

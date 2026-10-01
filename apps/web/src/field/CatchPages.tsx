@@ -1,15 +1,21 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   FISH,
+  SKIES,
+  SKY_LABELS,
+  WINDS,
+  WIND_LABELS,
   catchesNewestFirst,
+  formatMeasure,
+  formatWeather,
   spotById,
   tripById,
   tripsForSpot,
   type CatchDraft,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
-import { formatDay, toLocalInput } from "./format";
+import { formatClock, formatDay, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 
 const SPECIES = [...FISH].map((fish) => fish.name).sort((a, b) => a.localeCompare(b));
@@ -37,7 +43,7 @@ export function CatchesPage() {
         <div>
           <p className="eyebrow">Catch log</p>
           <h1>Fish</h1>
-          <p className="lede">Species, what was on the hook, the water, and the hour.</p>
+          <p className="lede">Species, what was on the hook, the water, the hour, and the weather.</p>
         </div>
         <Link to="/catches/new" className="field-primary inline">
           Log a catch
@@ -76,6 +82,9 @@ export function CatchFormPage() {
   const [tripId, setTripId] = useState(presetTrip?.id ?? "");
   const [caughtAt, setCaughtAt] = useState(() => toLocalInput(new Date()));
   const [note, setNote] = useState("");
+  const [sky, setSky] = useState("");
+  const [wind, setWind] = useState("");
+  const [waterTemp, setWaterTemp] = useState("");
   const [error, setError] = useState("");
 
   const spotTrips = tripsForSpot(book, spotId);
@@ -88,7 +97,19 @@ export function CatchFormPage() {
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const result = addCatch({ species, measureKind, amount, lure, spotId, tripId, caughtAt, note });
+    const result = addCatch({
+      species,
+      measureKind,
+      amount,
+      lure,
+      spotId,
+      tripId,
+      caughtAt,
+      note,
+      sky,
+      wind,
+      waterTemp,
+    });
     if (!result.ok) {
       setError(result.message);
       return;
@@ -222,6 +243,43 @@ export function CatchFormPage() {
             </select>
           </label>
 
+          <label>
+            Sky
+            <select name="sky" value={sky} onChange={(event) => setSky(event.target.value)} required>
+              <option value="">Choose</option>
+              {SKIES.map((option) => (
+                <option key={option} value={option}>
+                  {SKY_LABELS[option]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Wind
+            <select name="wind" value={wind} onChange={(event) => setWind(event.target.value)} required>
+              <option value="">Choose</option>
+              {WINDS.map((option) => (
+                <option key={option} value={option}>
+                  {WIND_LABELS[option]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Water °F
+            <input
+              name="waterTemp"
+              inputMode="decimal"
+              value={waterTemp}
+              onChange={(event) => setWaterTemp(event.target.value)}
+              placeholder="58"
+              aria-label="Water temperature in Fahrenheit"
+              required
+            />
+          </label>
+
           <label className="wide">
             Note
             <textarea
@@ -243,6 +301,63 @@ export function CatchFormPage() {
           Save to the book
         </button>
       </form>
+    </div>
+  );
+}
+
+export function CatchPage() {
+  const { book } = useLogbook();
+  const { catchId = "" } = useParams();
+  const entry = book.catches.find((row) => row.id === catchId);
+
+  if (!entry) {
+    return (
+      <div className="sheet">
+        <h1>Missing fish</h1>
+        <p className="lede">That catch is not in this book.</p>
+        <Link to="/catches">Back to catches</Link>
+      </div>
+    );
+  }
+
+  const spot = spotById(book, entry.spotId);
+  const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
+
+  return (
+    <div className="sheet">
+      <header className="sheet-head">
+        <div>
+          <p className="eyebrow">
+            <Link to="/catches">Catches</Link>
+          </p>
+          <h1>{entry.species}</h1>
+          <p className="meta stand">
+            <span>{formatMeasure(entry.measure)}</span>
+            {" · "}
+            <span>{entry.lure}</span>
+            {spot ? (
+              <>
+                {" · "}
+                <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              </>
+            ) : null}
+            {" · "}
+            <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+          </p>
+        </div>
+      </header>
+      {entry.weather ? (
+        <aside className="conditions" aria-label="Weather">
+          <span className="eyebrow">Weather</span>
+          <p>{formatWeather(entry.weather)}</p>
+        </aside>
+      ) : null}
+      {entry.note ? <p className="prose">{entry.note}</p> : null}
+      {trip ? (
+        <p className="trip-link">
+          <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+        </p>
+      ) : null}
     </div>
   );
 }

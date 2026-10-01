@@ -8,6 +8,7 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { fishCountLabel, formatClock, tripWhen } from "./format";
+import { WeatherLine } from "./Weather";
 
 export function CatchCard({
   entry,
@@ -22,7 +23,9 @@ export function CatchCard({
     <article className="catch-card">
       <p className={`measure measure-${entry.measure.kind}`}>{formatMeasure(entry.measure)}</p>
       <div>
-        <h2>{entry.species}</h2>
+        <h2>
+          <Link to={`/catches/${entry.id}`}>{entry.species}</Link>
+        </h2>
         <p className="meta">
           <span>{entry.lure}</span>
           <span aria-hidden="true">·</span>
@@ -30,6 +33,7 @@ export function CatchCard({
           <span aria-hidden="true">·</span>
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
         </p>
+        <WeatherLine weather={entry.weather} />
         {entry.note ? <p className="note">{entry.note}</p> : null}
         {entry.tripId && tripTitle ? (
           <p className="trip-link">

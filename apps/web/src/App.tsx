@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
-import { CatchFormPage, CatchesPage } from "./field/CatchPages";
+import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
+import { GearPage } from "./field/gear/GearPage";
+import { TackleProvider } from "./field/gear/TackleState";
 import { HomePage } from "./field/HomePage";
 import { LogbookProvider } from "./field/LogbookState";
+import { SpotMapPage } from "./field/map/SpotMapPage";
 import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
 import { TripFormPage, TripPage, TripsPage } from "./field/TripPages";
 import { BoardPage } from "./pages/Board";
@@ -32,9 +35,11 @@ function Gate({ children }: { children: ReactNode }) {
 function FieldLayout() {
   return (
     <LogbookProvider>
-      <FieldShell>
-        <Outlet />
-      </FieldShell>
+      <TackleProvider>
+        <FieldShell>
+          <Outlet />
+        </FieldShell>
+      </TackleProvider>
     </LogbookProvider>
   );
 }
@@ -46,12 +51,16 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/catches" element={<CatchesPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />
+        <Route path="/catches/:catchId" element={<CatchPage />} />
         <Route path="/spots" element={<SpotsPage />} />
+        <Route path="/map" element={<SpotMapPage />} />
         <Route path="/spots/new" element={<SpotFormPage />} />
         <Route path="/spots/:spotId" element={<SpotPage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/trips/new" element={<TripFormPage />} />
         <Route path="/trips/:tripId" element={<TripPage />} />
+        <Route path="/gear" element={<GearPage />} />
+        <Route path="/gear/:tripId" element={<GearPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
