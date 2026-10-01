@@ -5,7 +5,7 @@ import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 import { isFishingStance, stanceAt } from "@stillwater/shared";
 import type { SimRef } from "./FishingWorld";
-import { anglerPose } from "./pose";
+import { anglerPose, shortestYaw } from "./pose";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -43,13 +43,6 @@ function swing(phase: ScenePhase, power: number, t: number, sim: SimRef) {
 }
 
 const ROD_BIAS = 0.18;
-
-function shortest(from: number, to: number) {
-  let diff = to - from;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  return diff;
-}
 
 function yawToward(x: number, z: number) {
   const dx = x - anglerPose.x;
@@ -99,11 +92,19 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
     const next = clipName(phase, anglerPose.moving, fishing);
     if (next === "holding-right") {
       const target = yawToward(lookAt.x, lookAt.z);
-      anglerPose.yaw += shortest(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
+      anglerPose.yaw += shortestYaw(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
     }
     if (root.current) {
-      root.current.position.set(anglerPose.x, 0, anglerPose.z);
+      root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
+      root.current.rotation.order = "YXZ";
       root.current.rotation.y = anglerPose.yaw;
+      root.current.rotation.x = anglerPose.pitch;
+      root.current.rotation.z = anglerPose.lean;
+    }
+    const walk = actions.walk;
+    if (walk) {
+      const speed = Math.hypot(anglerPose.vx, anglerPose.vz);
+      walk.timeScale = anglerPose.moving ? 0.72 + Math.min(0.62, speed / 6.2) : 1;
     }
     if (wrap.current) wrap.current.dataset.yaw = anglerPose.yaw.toFixed(2);
     if (grip.current) {
