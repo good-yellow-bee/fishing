@@ -126,10 +126,10 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
         pump: fightView.pump,
         fromPitch: strikeFrom.current,
       });
+      const taking = phase === "hookset";
       const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
-      const follow = phase === "hookset" ? 26 : 16;
-      if (striking) rodPitch.current = pitchTarget;
-      else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
+      if (striking || taking) rodPitch.current = pitchTarget;
+      else rodPitch.current += (pitchTarget - rodPitch.current) * (1 - Math.exp(-16 * delta));
     } else if (landing) {
       rodPitch.current = landRodPitch(landView.age, landFrom.current);
     } else {
@@ -149,13 +149,14 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       anglerPose.yaw += shortestYaw(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
     }
     const castLean = castBodyLean(power, phase === "casting", phase === "waiting" ? throwAge : -1);
+    const taking = phase === "hookset";
     const leanTarget = fighting
-      ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge)
+      ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge, fightView.biteAge)
       : landing
         ? landBodyLean(landView.age)
         : 0;
     const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
-    if (striking || landing) bodyLean.current = leanTarget;
+    if (striking || taking || landing) bodyLean.current = leanTarget;
     else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
@@ -174,7 +175,8 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       grip.current.rotation.x = rodPitch.current;
       if (fighting) {
         const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge);
-        rodRoll.current += (rollTarget - rodRoll.current) * (1 - Math.exp(-14 * delta));
+        if (phase === "hookset") rodRoll.current = rollTarget;
+        else rodRoll.current += (rollTarget - rodRoll.current) * (1 - Math.exp(-14 * delta));
         grip.current.rotation.z = ROD_REST_Z + rodRoll.current;
       } else if (landing) {
         grip.current.rotation.z = ROD_REST_Z;
