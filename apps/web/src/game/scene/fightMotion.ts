@@ -211,7 +211,7 @@ const DOCK_DECK = { minX: -1.05, maxX: 1.05, minZ: 5.2, maxZ: 8.5, top: 0.72 };
  */
 export function retrieveHang(pump: number, reeling: boolean, surge: FightSurge) {
   if (!reeling || surge === 2) return 0;
-  return (1 - reelPumpLift(pump)) * (surge === 1 ? 0.2 : 0.92);
+  return (1 - reelPumpLift(pump)) * (surge === 1 ? 0.22 : 1.45);
 }
 
 /** Sideways kick, meters. Alternates each pump and peaks as the lure comes in. */
@@ -219,13 +219,13 @@ export function retrieveWeave(pump: number, reeling: boolean, surge: FightSurge)
   if (!reeling || surge === 2) return 0;
   const stroke = Math.floor(Math.max(0, pump));
   const sign = stroke % 2 === 0 ? 1 : -1;
-  return sign * reelPumpLift(pump) * (surge === 1 ? 0.14 : 0.64);
+  return sign * reelPumpLift(pump) * (surge === 1 ? 0.16 : 1.05);
 }
 
 /** Skip above the surface on the haul, meters. */
 export function retrieveHop(pump: number, reeling: boolean, surge: FightSurge) {
   if (!reeling || surge === 2) return 0;
-  return reelPumpLift(pump) * (surge === 1 ? 0.05 : 0.24);
+  return reelPumpLift(pump) * (surge === 1 ? 0.06 : 0.36);
 }
 
 /** 0..1 wake while the lure is moving in. A run keeps the water quiet. */

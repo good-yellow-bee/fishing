@@ -385,7 +385,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (!active) runSide.current = 0.75;
     fightView.runSide = runSide.current;
 
-    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 1.15 : 2.35);
+    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15);
 
     if (live) {
       const leadTarget = fishLeadMeters(surge, fightView.reeling);
@@ -646,14 +646,15 @@ function HookedFish({
   );
 }
 
-const WAKE_RINGS = 3;
+const WAKE_RINGS = 10;
+const WAKE_LIFE = 1.15;
 
 function RetrieveWake() {
   const rings = useMemo(() => {
-    const geometry = new THREE.RingGeometry(0.28, 0.46, 22);
+    const geometry = new THREE.RingGeometry(0.34, 0.58, 24);
     return Array.from({ length: WAKE_RINGS }, () => {
       const material = new THREE.MeshBasicMaterial({
-        color: 0xe7f3ee,
+        color: 0xf4fff8,
         transparent: true,
         opacity: 0,
         depthWrite: false,
@@ -661,9 +662,12 @@ function RetrieveWake() {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -Math.PI / 2;
       mesh.visible = false;
+      mesh.userData.born = -1;
       return mesh;
     });
   }, []);
+  const cursor = useRef(0);
+  const lastDrop = useRef(-1);
 
   useEffect(() => {
     return () => {
@@ -673,24 +677,30 @@ function RetrieveWake() {
   }, [rings]);
 
   useFrame((state) => {
-    const wake = retrieveWake(fightView.pump, fightView.active && fightView.reeling, fightView.surge);
-    const dx = bobberWorld.x - anglerPose.x;
-    const dz = bobberWorld.z - anglerPose.z;
-    const reach = Math.hypot(dx, dz) || 1;
-    const outX = dx / reach;
-    const outZ = dz / reach;
-    const kick = retrieveWeave(fightView.pump, fightView.reeling, fightView.surge);
     const time = state.clock.elapsedTime;
-    rings.forEach((ring, i) => {
-      ring.visible = wake > 0.08;
-      if (!ring.visible) return;
-      const back = 0.45 + i * 0.7;
-      const side = (i - 1) * kick * 0.45;
-      const x = bobberWorld.x + outX * back - outZ * side;
-      const z = bobberWorld.z + outZ * back + outX * side;
-      ring.position.set(x, waterHeight(x, z, time) + 0.04, z);
-      ring.scale.setScalar((1.15 + i * 0.7) * (0.7 + wake));
-      (ring.material as THREE.MeshBasicMaterial).opacity = wake * (0.62 - i * 0.14);
+    const wake = retrieveWake(fightView.pump, fightView.active && fightView.reeling, fightView.surge);
+    if (wake > 0.42 && time - lastDrop.current > 0.09) {
+      lastDrop.current = time;
+      const ring = rings[cursor.current % rings.length];
+      cursor.current += 1;
+      ring.userData.born = time;
+      ring.userData.x = bobberWorld.x;
+      ring.userData.z = bobberWorld.z;
+    }
+    rings.forEach((ring) => {
+      const born = ring.userData.born as number;
+      const age = time - born;
+      if (born < 0 || age > WAKE_LIFE) {
+        ring.visible = false;
+        return;
+      }
+      const x = ring.userData.x as number;
+      const z = ring.userData.z as number;
+      const u = age / WAKE_LIFE;
+      ring.visible = true;
+      ring.position.set(x, waterHeight(x, z, time) + 0.045, z);
+      ring.scale.setScalar(0.85 + u * 2.8);
+      (ring.material as THREE.MeshBasicMaterial).opacity = (1 - u) * (1 - u) * 0.78;
     });
   });
 
