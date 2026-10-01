@@ -20,6 +20,7 @@ import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import { ArticulatedFish } from "./ArticulatedFish";
+import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose } from "./pose";
@@ -405,6 +406,68 @@ function SurgeSpray({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
   return <primitive object={pool} />;
 }
 
+function EntrySpray({ burstRef }: { burstRef: BurstRef }) {
+  const velocities = useMemo(() => new Float32Array(ENTRY_DROPS * 3), []);
+  const life = useMemo(() => new Float32Array(ENTRY_DROPS), []);
+  const pool = useMemo(() => {
+    const geometry = new THREE.SphereGeometry(0.035, 6, 5);
+    const holder = new THREE.Group();
+    for (let i = 0; i < ENTRY_DROPS; i += 1) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xe7f3ee,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      holder.add(mesh);
+    }
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    burstRef.current = () => {
+      for (let i = 0; i < ENTRY_DROPS; i += 1) {
+        const angle = (i / ENTRY_DROPS) * Math.PI * 2 + Math.random() * 0.35;
+        const spread = 0.75 + Math.random() * 1.15;
+        velocities[i * 3] = Math.cos(angle) * spread;
+        velocities[i * 3 + 1] = 1.9 + Math.random() * 1.5;
+        velocities[i * 3 + 2] = Math.sin(angle) * spread;
+        life[i] = 0.34 + Math.random() * 0.16;
+        const mesh = pool.children[i] as THREE.Mesh;
+        mesh.position.set((Math.random() - 0.5) * 0.08, 0.06, (Math.random() - 0.5) * 0.08);
+        mesh.visible = true;
+      }
+    };
+    return () => {
+      burstRef.current = () => {};
+      (pool.children[0] as THREE.Mesh).geometry.dispose();
+      pool.children.forEach((child) => ((child as THREE.Mesh).material as THREE.Material).dispose());
+    };
+  }, [burstRef, life, pool, velocities]);
+
+  useFrame((_, delta) => {
+    for (let i = 0; i < ENTRY_DROPS; i += 1) {
+      if (life[i]! <= 0) continue;
+      life[i] -= delta;
+      const mesh = pool.children[i] as THREE.Mesh;
+      if (life[i]! <= 0 || mesh.position.y < -0.02) {
+        life[i] = 0;
+        mesh.visible = false;
+        continue;
+      }
+      velocities[i * 3 + 1] -= 9.5 * delta;
+      mesh.position.x += velocities[i * 3]! * delta;
+      mesh.position.y += velocities[i * 3 + 1]! * delta;
+      mesh.position.z += velocities[i * 3 + 2]! * delta;
+      (mesh.material as THREE.MeshBasicMaterial).opacity = Math.min(0.9, life[i]! * 3);
+    }
+  });
+
+  return <primitive object={pool} />;
+}
+
 const LEAP_SEC = 0.7;
 const LEAP_GAP = 1.2;
 
@@ -462,8 +525,8 @@ function HookedFish({
   );
 }
 
-const FLIGHT_SEC = 0.55;
-const SPLASH_SEC = 0.7;
+const SPLASH_SEC = 0.55;
+const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
@@ -494,8 +557,11 @@ function StalkingFish({ active }: { active: boolean }) {
 
 function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
+  const lure = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
+  const entryAnchor = useRef<THREE.Group>(null);
   const splashMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const splashCore = useRef<THREE.MeshBasicMaterial>(null);
   const wrap = useSceneWrap();
   const target = useMemo(() => new THREE.Vector3(), []);
   const castAim = useMemo(() => new THREE.Vector3(), []);
@@ -503,10 +569,16 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   const flightTo = useMemo(() => new THREE.Vector3(), []);
   const usingAim = useRef(false);
   const prevPhase = useRef(phase);
+  const throwStart = useRef(-1);
   const flightStart = useRef(-1);
+  const flightDone = useRef(false);
+  const flightDist = useRef(0);
+  const flightDur = useRef(0.6);
+  const flightPower = useRef(0.5);
   const splashStart = useRef(-1);
   const lastLine = useRef(1);
   const burstRef = useRef<() => void>(() => {});
+  const entryBurst = useRef<() => void>(() => {});
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_POINTS * 3), 3));
@@ -521,7 +593,6 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     return mesh;
   }, []);
   const dipped = isFighting(phase);
-  const inWater = phase === "waiting" || dipped;
 
   useEffect(() => {
     return () => {
@@ -530,40 +601,72 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     };
   }, [line]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";
     prevPhase.current = phase;
+    if (castStarted) {
+      throwStart.current = t;
+      flightStart.current = -1;
+      flightDone.current = false;
+    }
+    if (phase !== "waiting") throwStart.current = -1;
+    const throwAge = throwStart.current >= 0 ? t - throwStart.current : -1;
+    const released = throwAge >= CAST_RELEASE_SEC;
     if (aiming) {
       usingAim.current = aim.overWater;
       if (aim.overWater) castAim.copy(aim.live);
     }
-    line.visible = inWater;
-    if (bobber.current) bobber.current.visible = inWater;
-    if (!inWater) {
-      flightStart.current = -1;
-      if (aiming && aim.overWater) lookAt.copy(aim.live);
+    const showLure = (phase === "waiting" && released) || dipped;
+    line.visible = showLure;
+    if (bobber.current) bobber.current.visible = showLure;
+    if (!showLure) {
+      if (phase === "waiting" && usingAim.current) lookAt.copy(castAim);
+      else if (aiming && aim.overWater) lookAt.copy(aim.live);
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
     placeBobber(target, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null, nibble);
-    if (castStarted) {
+    if (phase === "waiting" && released && !flightDone.current && flightStart.current < 0) {
       flightFrom.copy(rodTip);
       flightTo.set(target.x, 0.07, target.z);
+      flightDist.current = Math.hypot(flightTo.x - flightFrom.x, flightTo.z - flightFrom.z);
+      flightDur.current = castFlightSeconds(flightDist.current);
+      flightPower.current = Math.min(1, Math.max(0, power));
       flightStart.current = t;
     }
-    const flying = phase === "waiting" && flightStart.current >= 0 && t - flightStart.current < FLIGHT_SEC;
+    const flightAge = flightStart.current >= 0 ? t - flightStart.current : -1;
+    const flying = phase === "waiting" && flightAge >= 0 && flightAge < flightDur.current;
+    let flightP = -1;
     if (flying) {
-      const p = (t - flightStart.current) / FLIGHT_SEC;
-      const e = 1 - (1 - p) ** 1.4;
-      target.lerpVectors(flightFrom, flightTo, e);
-      target.y += 2.15 * Math.sin(Math.PI * p ** 0.7);
+      flightP = flightAge / flightDur.current;
+      const along = castAlong(flightP);
+      const landY = waterHeight(flightTo.x, flightTo.z, t) + 0.07;
+      target.x = THREE.MathUtils.lerp(flightFrom.x, flightTo.x, along);
+      target.z = THREE.MathUtils.lerp(flightFrom.z, flightTo.z, along);
+      target.y =
+        THREE.MathUtils.lerp(flightFrom.y, landY, along) + castLoft(flightP, flightDist.current, flightPower.current);
     } else if (flightStart.current >= 0) {
+      // A bite can win the same frame a long cast would have landed. Still
+      // finish the entry so the lure is not left in the air with the flight armed.
+      flightDone.current = true;
       flightStart.current = -1;
       splashStart.current = t;
+      entryAnchor.current?.position.set(flightTo.x, waterHeight(flightTo.x, flightTo.z, t) + 0.02, flightTo.z);
+      entryBurst.current();
       fx.plop();
+    }
+    if (lure.current) {
+      if (flying) {
+        lure.current.rotation.x = flightP * Math.PI * 2 * (1.05 + flightPower.current * 0.65);
+        lure.current.rotation.z = Math.sin(flightP * Math.PI) * 0.5;
+      } else {
+        const settle = 1 - Math.exp(-8 * delta);
+        lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
+        lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
+      }
     }
     if (phase === "fight") {
       // Hold the last simulated line fraction so a fight ending mid-frame
@@ -580,7 +683,11 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       lastLine.current = 1;
     }
     if (!flying) target.y += waterHeight(target.x, target.z, t);
-    if (splash.current && splashMaterial.current) {
+    if (!flying && phase === "waiting" && splashStart.current >= 0) {
+      const hop = (t - splashStart.current) / 0.36;
+      if (hop >= 0 && hop < 1) target.y += Math.sin(hop * Math.PI) * 0.16 * (1 - hop);
+    }
+    if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
         splash.current.visible = false;
@@ -588,31 +695,37 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       } else {
         splash.current.visible = true;
         splash.current.position.set(flightTo.x, waterHeight(flightTo.x, flightTo.z, t) + 0.04, flightTo.z);
-        splash.current.scale.setScalar(0.4 + k * 1.4);
-        splashMaterial.current.opacity = (1 - k) * 0.5;
+        splash.current.scale.setScalar(0.35 + k * 1.7);
+        splashMaterial.current.opacity = (1 - k) * 0.55;
+        splashCore.current.opacity = (1 - k) * (1 - k) * 0.7;
       }
     }
     bobber.current?.position.copy(target);
     bobberWorld.copy(target);
     lookAt.copy(target);
     if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
-    // Quadratic sag: taut under tension during the fight, a relaxed drape otherwise.
-    let sag = 0.22;
-    if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
+    // Quadratic sag: taut under tension during the fight, a loose trail while the lure is in the air.
     const lineX = target.x - rodTip.x;
     const lineZ = target.z - rodTip.z;
-    const span = Math.hypot(lineX, lineZ) || 1;
-    const sway = (flying ? Math.sin(t * 9) * 0.14 : Math.sin(t * 1.6) * 0.07) * Math.min(1, span / 6);
+    const rawSpan = Math.hypot(lineX, lineZ);
+    const span = rawSpan || 1;
+    let sag = 0.22;
+    if (flying) sag = castTrailSag(flightP, rawSpan);
+    else if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
+    const sway = (flying ? Math.sin(t * 7) * 0.05 * (1 - flightP) : Math.sin(t * 1.6) * 0.07) * Math.min(1, span / 6);
     const sideX = -lineZ / span;
     const sideZ = lineX / span;
+    const lag = flying ? (1 - castAlong(flightP)) * Math.min(1.35, span * 0.2) : 0;
+    const dirX = lineX / span;
+    const dirZ = lineZ / span;
     const attr = line.geometry.getAttribute("position");
     const positions = attr.array as Float32Array;
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
-      positions[i * 3] = rodTip.x + lineX * s + sideX * sway * belly;
+      positions[i * 3] = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
       positions[i * 3 + 1] = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
-      positions[i * 3 + 2] = rodTip.z + lineZ * s + sideZ * sway * belly;
+      positions[i * 3 + 2] = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
     }
     attr.needsUpdate = true;
   });
@@ -622,12 +735,21 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       <primitive object={line} />
       <group ref={splash} visible={false}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.3, 0.4, 28]} />
+          <ringGeometry args={[0.28, 0.4, 28]} />
           <meshBasicMaterial ref={splashMaterial} color="#e7f2ea" transparent depthWrite={false} />
         </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.08, 0.16, 20]} />
+          <meshBasicMaterial ref={splashCore} color="#f4fff8" transparent depthWrite={false} />
+        </mesh>
+      </group>
+      <group ref={entryAnchor}>
+        <EntrySpray burstRef={entryBurst} />
       </group>
       <group ref={bobber} visible={false}>
-        <ToonModel url={BUOY_URL} scale={0.32} />
+        <group ref={lure}>
+          <ToonModel url={BUOY_URL} scale={0.32} />
+        </group>
         <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} />
         {phase === "waiting" && <StalkingFish active />}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
