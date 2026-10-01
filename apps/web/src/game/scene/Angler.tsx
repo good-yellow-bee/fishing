@@ -140,7 +140,9 @@ export function Angler({ phase, power, rodTip, hand, lookAt }: Props) {
     }
     const castLean = castBodyLean(power, phase === "casting", phase === "waiting" ? throwAge : -1);
     const leanTarget = fighting ? fightBodyLean(fightView.surge, fightView.reeling, fightView.strikeAge) : 0;
-    bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
+    const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
+    if (striking) bodyLean.current = leanTarget;
+    else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
       root.current.rotation.order = "YXZ";

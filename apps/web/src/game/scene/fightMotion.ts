@@ -1,11 +1,11 @@
 /** How long the strike whip takes before the rod settles into the fight. */
-export const HOOKSET_SEC = 1.15;
+export const HOOKSET_SEC = 1.55;
 
 /** The upward snap inside the hookset. */
-export const STRIKE_SNAP_SEC = 0.28;
+export const STRIKE_SNAP_SEC = 0.22;
 
 /** Pause at the top of the set so the strike reads. */
-export const STRIKE_HOLD_SEC = 0.48;
+export const STRIKE_HOLD_SEC = 0.9;
 
 /** Bobber yank toward the angler on the strike. */
 export const TUG_SEC = 0.32;
@@ -51,6 +51,10 @@ export const fightView = {
   plunge: 0,
   pull: 0,
   sag: 0.22,
+  /** Fish offset in the bobber's local space, so spray can follow the run. */
+  localX: 0,
+  localY: 0,
+  localZ: 0,
 };
 
 /** 0 at the start of a pump, 1 at the top, 0 after the drop. */
@@ -82,7 +86,8 @@ export function loadedFightPitch(
   return base + run + shiver - lift;
 }
 
-const SET_UP = 0.4;
+/** Same family as a loaded cast: the tip comes back over the shoulder. */
+const SET_UP = -0.45;
 
 /** Snap from the loaded bite up through the hookset, hold, then settle. */
 export function strikeRodPitch(age: number, from: number, loaded: number) {
@@ -123,10 +128,10 @@ export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: nu
   if (strikeAge < 0) lean += 0.1;
   else if (strikeAge < STRIKE_SNAP_SEC + STRIKE_HOLD_SEC) {
     const u = Math.min(1, Math.max(0, strikeAge) / STRIKE_SNAP_SEC);
-    lean -= 0.28 * (1 - (1 - u) ** 2);
+    lean -= 0.42 * (1 - (1 - u) ** 2);
   } else if (strikeAge < HOOKSET_SEC) {
     const u = (strikeAge - STRIKE_SNAP_SEC - STRIKE_HOLD_SEC) / (HOOKSET_SEC - STRIKE_SNAP_SEC - STRIKE_HOLD_SEC);
-    lean -= 0.28 * (1 - Math.min(1, Math.max(0, u)));
+    lean -= 0.42 * (1 - Math.min(1, Math.max(0, u)));
   }
   if (reeling && surge !== 2) lean -= 0.11;
   if (surge === 2) lean += 0.16;
@@ -135,20 +140,21 @@ export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: nu
 
 /** How far the fish leads the lure, meters, along the cast. */
 export function fishLeadMeters(surge: FightSurge, reeling: boolean) {
-  if (surge === 2) return reeling ? 0.78 : 1.28;
-  if (surge === 1) return 0.5;
-  return reeling ? 0.14 : 0.38;
+  if (surge === 2) return reeling ? 0.95 : 1.55;
+  if (surge === 1) return 0.72;
+  return reeling ? 0.18 : 0.48;
 }
 
 /** Lateral lead. runSide is about -1..1. */
 export function fishSideMeters(surge: FightSurge, runSide: number) {
-  const reach = surge === 2 ? 0.95 : surge === 1 ? 0.32 : 0.06;
+  const reach = surge === 2 ? 1.85 : surge === 1 ? 0.62 : 0.12;
   return runSide * reach;
 }
 
+/** Meters under the surface. A run lifts the back out of the water. */
 export function fishDepthMeters(surge: FightSurge) {
-  if (surge === 2) return 0.34;
-  if (surge === 1) return 0.24;
+  if (surge === 2) return 0.04;
+  if (surge === 1) return 0.1;
   return 0.16;
 }
 
@@ -171,8 +177,8 @@ export function bobberPlunge(biteAge: number, strikeAge: number, surge: FightSur
 
 /** How far the lure is dragged along the run, meters. */
 export function bobberPull(surge: FightSurge, reeling: boolean) {
-  if (surge === 2) return reeling ? 0.22 : 0.5;
-  if (surge === 1) return 0.12;
+  if (surge === 2) return reeling ? 0.45 : 1.35;
+  if (surge === 1) return 0.32;
   return 0;
 }
 

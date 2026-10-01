@@ -21,6 +21,7 @@ import { fx } from "../fx";
 import { Angler } from "./Angler";
 import {
   FISH_LEAP_SEC,
+  HOOKSET_SEC,
   bobberPlunge,
   bobberPull,
   fightInput,
@@ -352,7 +353,11 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       if (biteAt.current < 0) biteAt.current = t;
       strikeAt.current = -1;
     } else if (phase === "fight") {
-      if (prevPhase.current !== "fight") strikeAt.current = t;
+      if (prevPhase.current !== "fight") {
+        strikeAt.current = t;
+        fightView.leapAge = 0;
+        nextLeap.current = t + 1.25;
+      }
       biteAt.current = -1;
     } else {
       biteAt.current = -1;
@@ -382,26 +387,17 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       const sideTarget = fishSideMeters(surge, runSide.current);
       const depthTarget = fishDepthMeters(surge);
       const pullTarget = bobberPull(surge, fightView.reeling);
-      const leadRate = surge === 2 && !fightView.reeling ? 2.05 : fightView.reeling ? 6.2 : 3.6;
+      const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;
+      const pullRate = surge === 2 && !fightView.reeling ? 5.4 : 3.4;
       fightView.lead += (leadTarget - fightView.lead) * (1 - Math.exp(-leadRate * dt));
-      fightView.side += (sideTarget - fightView.side) * (1 - Math.exp(-3.1 * dt));
+      fightView.side += (sideTarget - fightView.side) * (1 - Math.exp(-4.4 * dt));
       fightView.depth += (depthTarget - fightView.depth) * (1 - Math.exp(-4.2 * dt));
-      fightView.pull += (pullTarget - fightView.pull) * (1 - Math.exp(-2.8 * dt));
+      fightView.pull += (pullTarget - fightView.pull) * (1 - Math.exp(-pullRate * dt));
       fightView.sag = fightLineSag(tension, surge, fightView.reeling, fightView.pump);
       fightView.tug = hooksetTug(fightView.strikeAge);
+      if (fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC) fightView.sag = Math.min(fightView.sag, 0.1);
       fightView.plunge = bobberPlunge(0, fightView.strikeAge, surge);
-      if (surge === 2 && prevSurge.current !== 2) {
-        fightView.leapAge = -1;
-        nextLeap.current = t + 0.28;
-      }
-      if (surge === 2 && fightView.leapAge >= 0) {
-        fightView.leapAge += dt;
-        if (fightView.leapAge >= FISH_LEAP_SEC) {
-          fightView.leapAge = -1;
-          nextLeap.current = t + 1.15;
-        }
-      } else if (surge === 2 && t >= nextLeap.current) fightView.leapAge = 0;
-      else if (surge !== 2) fightView.leapAge = -1;
+      if (surge === 2 && prevSurge.current !== 2 && fightView.leapAge < 0) nextLeap.current = t + 0.22;
     } else {
       fightView.lead = 0.32;
       fightView.side = 0;
@@ -410,9 +406,19 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       fightView.sag = 0.22;
       fightView.tug = 0;
       fightView.pump = 0;
-      fightView.leapAge = -1;
+      if (phase !== "fight") fightView.leapAge = -1;
       fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) : 0;
     }
+
+    if (phase === "fight" && fightView.leapAge >= 0) {
+      fightView.leapAge += dt;
+      if (fightView.leapAge >= FISH_LEAP_SEC) {
+        fightView.leapAge = -1;
+        nextLeap.current = t + 0.95;
+      }
+    } else if (live && surge === 2 && fightView.leapAge < 0 && t >= nextLeap.current) {
+      fightView.leapAge = 0;
+    } else if (phase !== "fight") fightView.leapAge = -1;
 
     prevSurge.current = surge;
     prevPhase.current = phase;
@@ -486,10 +492,15 @@ function SurgeSpray({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
     };
   }, [burstRef, life, pool, velocities]);
 
+  const prevStrike = useRef(-1);
   useFrame((_, delta) => {
     const surge = sim.current?.surge ?? 0;
+    const age = fightView.strikeAge;
     if (surge === 2 && prevSurge.current !== 2) burstRef.current();
+    if (age >= 0 && age < 0.06 && prevStrike.current < 0) burstRef.current();
     prevSurge.current = surge;
+    prevStrike.current = age >= 0 ? age : -1;
+    pool.position.set(fightView.localX, fightView.localY, fightView.localZ);
     for (let i = 0; i < SPRAY_COUNT; i += 1) {
       if (life[i]! <= 0) continue;
       life[i] -= delta;
@@ -606,7 +617,14 @@ function HookedFish({
     const lead = fightView.lead + throb;
     const side = fightView.side + shake;
     const leap = fishLeapHeight(fightView.leapAge);
-    g.position.set(ax * lead + sx * side, -fightView.depth + leap, az * lead + sz * side);
+    const lx = ax * lead + sx * side;
+    const lz = az * lead + sz * side;
+    const surface = waterHeight(bx + lx, bz + lz, fightView.time);
+    const ly = surface - (parent?.position.y ?? bobberWorld.y) - fightView.depth + leap;
+    g.position.set(lx, ly, lz);
+    fightView.localX = lx;
+    fightView.localY = ly;
+    fightView.localZ = lz;
     const faceX = ax * Math.max(0.2, lead) + sx * side;
     const faceZ = az * Math.max(0.2, lead) + sz * side;
     if (faceX * faceX + faceZ * faceZ > 0.002) g.rotation.y = Math.atan2(faceX, faceZ);
@@ -777,8 +795,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       target.x = THREE.MathUtils.lerp(REEL_POINT.x, target.x, lastLine.current);
       target.z = THREE.MathUtils.lerp(REEL_POINT.z, target.z, lastLine.current);
       if (fightSim && fightView.tug > 0) {
-        target.x = THREE.MathUtils.lerp(target.x, REEL_POINT.x, fightView.tug * 0.2);
-        target.z = THREE.MathUtils.lerp(target.z, REEL_POINT.z, fightView.tug * 0.2);
+        target.x = THREE.MathUtils.lerp(target.x, REEL_POINT.x, fightView.tug * 0.32);
+        target.z = THREE.MathUtils.lerp(target.z, REEL_POINT.z, fightView.tug * 0.32);
       }
       if (fightSim && fightView.pull > 0.001) {
         const dx = target.x - REEL_POINT.x;
@@ -895,7 +913,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
             burstRef={burstRef}
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
-            scale={bodyScale(weight)}
+            scale={Math.max(0.95, bodyScale(weight))}
           />
         )}
       </group>
