@@ -23,7 +23,7 @@ import { ArticulatedFish } from "./ArticulatedFish";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose } from "./pose";
-import { waterHeight } from "./water";
+import { waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -244,7 +244,6 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   const marker = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
-  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), []);
   const hit = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2());
   const wrap = useSceneWrap();
@@ -258,7 +257,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
       return;
     }
     raycaster.setFromCamera(pointer.current, camera);
-    const point = raycaster.ray.intersectPlane(plane, hit);
+    const point = waterRayHit(raycaster.ray.origin, raycaster.ray.direction, time, hit);
     const overWater = point != null && inLake(point.x, point.z);
     const stance = stanceAt(anglerPose.x, anglerPose.z);
     const fishing = isFishingStance(stance);

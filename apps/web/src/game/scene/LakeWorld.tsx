@@ -670,16 +670,18 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
   useFrame((state, delta) => {
     const fish = ref.current;
     if (!fish) return;
-    const t = (state.clock.elapsedTime * speed + phase) % 1;
+    const time = state.clock.elapsedTime;
+    const t = (time * speed + phase) % 1;
     curve.getPointAt(t, position);
     // Heading from a small look-ahead; getTangentAt allocates internally.
     curve.getPointAt((t + 0.01) % 1, tangent).sub(position);
     // Keep the whole fish body between the surface and the bed.
     const half = 0.34 * size;
+    const surface = waterHeight(position.x, position.z, time);
     position.y = THREE.MathUtils.clamp(
-      position.y + Math.sin(state.clock.elapsedTime * 0.9 + phase * 20) * 0.05,
+      position.y + Math.sin(time * 0.9 + phase * 20) * 0.05,
       -1 + half,
-      -0.07 - half,
+      surface - 0.07 - half,
     );
     fish.position.copy(position);
     const target = Math.atan2(tangent.x, tangent.z);
@@ -691,8 +693,8 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
     }
     if (ripple.current && rippleMaterial.current) {
       // Ripple stays on the water surface above the fish; child y compensates group y and scale.
-      ripple.current.position.y = (0.03 - position.y) / size;
-      const pulse = (state.clock.elapsedTime * 0.55 + phase) % 1;
+      ripple.current.position.y = (surface + 0.03 - position.y) / size;
+      const pulse = (time * 0.55 + phase) % 1;
       ripple.current.scale.setScalar((0.7 + pulse * 1.9) / size);
       rippleMaterial.current.opacity = (1 - pulse) * 0.16;
     }
