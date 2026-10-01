@@ -125,15 +125,22 @@ function CatchForm() {
     photoPick.current = ticket;
     setReducing(true);
     setPhotoError("");
-    void compressCatchPhoto(file).then((result) => {
-      if (photoPick.current !== ticket) return;
-      setReducing(false);
-      if (!result.ok) {
-        setPhotoError(result.message);
-        return;
-      }
-      setPhoto(result.dataUrl);
-    });
+    void compressCatchPhoto(file).then(
+      (result) => {
+        if (photoPick.current !== ticket) return;
+        setReducing(false);
+        if (!result.ok) {
+          setPhotoError(result.message);
+          return;
+        }
+        setPhoto(result.dataUrl);
+      },
+      () => {
+        if (photoPick.current !== ticket) return;
+        setReducing(false);
+        setPhotoError("That photo could not be read. Choose a JPEG, PNG, or WebP.");
+      },
+    );
   };
 
   const clearPhoto = () => {

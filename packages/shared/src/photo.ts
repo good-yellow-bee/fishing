@@ -2,6 +2,10 @@ export const CATCH_PHOTO_MAX_BYTES = 130 * 1024;
 
 export const CATCH_PHOTO_STORE_MAX_CHARS = 3_000_000;
 
+export const CATCH_PHOTO_QUOTA_CHARS = 5_000_000;
+
+export const CATCH_PHOTO_BOOK_HEADROOM_CHARS = 1_000_000;
+
 export type CatchPhotoMap = Record<string, string>;
 
 const PHOTO_URL = /^data:image\/(jpeg|png|webp);base64,[a-z0-9+/]+={0,2}$/i;
@@ -74,4 +78,9 @@ export function withoutCatchPhoto(photos: CatchPhotoMap, id: string): CatchPhoto
   const next = { ...photos };
   delete next[id];
   return next;
+}
+
+export function catchPhotoWriteBlocked(usedChars: number, previousChars: number, nextChars: number): boolean {
+  if (nextChars <= previousChars) return false;
+  return usedChars - previousChars + nextChars + CATCH_PHOTO_BOOK_HEADROOM_CHARS > CATCH_PHOTO_QUOTA_CHARS;
 }

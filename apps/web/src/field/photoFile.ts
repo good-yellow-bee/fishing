@@ -22,9 +22,10 @@ export async function compressCatchPhoto(file: File): Promise<CompressedPhoto> {
     return { ok: false, message: "Choose a JPEG, PNG, or WebP photo." };
   }
   if (file.size > FILE_CEILING) {
+    const megabytes = FILE_CEILING / (1024 * 1024);
     return {
       ok: false,
-      message: `That file is too large to reduce here. Photos over ${CATCH_PHOTO_MAX_BYTES / 1024} KB are turned away.`,
+      message: `That file is too large to reduce here. Photos over ${megabytes} MB are turned away before they are reduced.`,
     };
   }
 
@@ -39,14 +40,20 @@ export async function compressCatchPhoto(file: File): Promise<CompressedPhoto> {
     for (const edge of EDGES) {
       for (const quality of QUALITIES) {
         const dataUrl = jpegDataUrl(bitmap, bitmap.width, bitmap.height, edge, quality);
-        if (!catchPhotoRejection(dataUrl)) return { ok: true, dataUrl };
+        if (dataUrl && !catchPhotoRejection(dataUrl)) return { ok: true, dataUrl };
       }
     }
     return {
       ok: false,
       message: `That photo is still over ${CATCH_PHOTO_MAX_BYTES / 1024} KB after it is reduced, so it was not saved.`,
     };
+  } catch {
+    return { ok: false, message: "That photo could not be read. Choose a JPEG, PNG, or WebP." };
   } finally {
-    bitmap.close();
+    try {
+      bitmap.close();
+    } catch {
+      // The data URL already holds the pixels when close fails.
+    }
   }
 }

@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { replaceCatch, sampleLogbook, withoutCatch, withoutSpot } from "./logbook.ts";
+import { isLogbook, replaceCatch, sampleLogbook, withoutCatch, withoutSpot } from "./logbook.ts";
 import {
+  CATCH_PHOTO_BOOK_HEADROOM_CHARS,
   CATCH_PHOTO_MAX_BYTES,
+  CATCH_PHOTO_QUOTA_CHARS,
   CATCH_PHOTO_STORE_MAX_CHARS,
   catchPhotoRejection,
+  catchPhotoWriteBlocked,
   catchPhotosFromUnknown,
   photosForBook,
   putCatchPhoto,
@@ -81,5 +84,29 @@ describe("catch photos", () => {
       photos = put.photos;
     }
     expect(refused).toBe(true);
+  });
+
+  it("still loads a book saved before photos existed", () => {
+    const book = sampleLogbook(now);
+    const stored: unknown = JSON.parse(JSON.stringify(book));
+    expect(isLogbook(stored)).toBe(true);
+    if (!isLogbook(stored)) return;
+    expect(stored.catches).toHaveLength(book.catches.length);
+    expect(photosForBook(stored, catchPhotosFromUnknown(undefined))).toEqual({});
+    expect(stored.catches.map((entry) => entry.id)).toEqual(book.catches.map((entry) => entry.id));
+  });
+
+  it("allows a smaller photo store when headroom would block a shrink", () => {
+    const used = 4_500_000;
+    const previous = 3_000_000;
+    const next = 2_700_000;
+    expect(used - previous + next + CATCH_PHOTO_BOOK_HEADROOM_CHARS).toBeGreaterThan(CATCH_PHOTO_QUOTA_CHARS);
+    expect(catchPhotoWriteBlocked(used, previous, next)).toBe(false);
+    expect(catchPhotoWriteBlocked(4_900_000, 200_000, 200_000)).toBe(false);
+  });
+
+  it("still turns away a larger photo that would crowd out the book", () => {
+    expect(catchPhotoWriteBlocked(4_500_000, 100_000, 500_000)).toBe(true);
+    expect(catchPhotoWriteBlocked(1_000_000, 100_000, 200_000)).toBe(false);
   });
 });
