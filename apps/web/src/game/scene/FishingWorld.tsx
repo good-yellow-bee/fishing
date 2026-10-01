@@ -512,7 +512,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
 
     prevSurge.current = surge;
     prevPhase.current = phase;
-  }, 1);
+  });
 
   return null;
 }
