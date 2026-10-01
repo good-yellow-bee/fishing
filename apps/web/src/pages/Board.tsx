@@ -43,7 +43,7 @@ export function BoardPage() {
   return (
     <div className="log-page board-page">
       <p>
-        <Link to="/">Back to the dock</Link>
+        <Link to="/play">Back to the dock</Link>
         {" · "}
         <Link to="/log">Catch log</Link>
       </p>

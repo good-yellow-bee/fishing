@@ -27,7 +27,7 @@ export function LogPage() {
   return (
     <div className="log-page">
       <p>
-        <Link to="/">Back to the dock</Link>
+        <Link to="/play">Back to the dock</Link>
         {" · "}
         <Link to="/board">Lodge board</Link>
       </p>
