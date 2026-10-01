@@ -341,6 +341,33 @@ function onDockDeck(x: number, z: number, pad = 0) {
 }
 
 /**
+ * Shrink a lure shift until it stays in the lake and off the dock.
+ * Prefers the 0.18 m pad. The unshifted point is the fallback.
+ */
+export function keepLureInWater(fromX: number, fromZ: number, x: number, z: number) {
+  const ox = x - fromX;
+  const oz = z - fromZ;
+  let scale = 1;
+  let offDeck: { x: number; z: number } | null = null;
+  for (let i = 0; i < 6; i += 1) {
+    const nextX = fromX + ox * scale;
+    const nextZ = fromZ + oz * scale;
+    if (inLake(nextX, nextZ) && !onDockDeck(nextX, nextZ)) {
+      if (!onDockDeck(nextX, nextZ, LURE_DOCK_PAD)) return { x: nextX, z: nextZ };
+      if (!offDeck) offDeck = { x: nextX, z: nextZ };
+    }
+    scale *= 0.5;
+  }
+  return offDeck ?? { x: fromX, z: fromZ };
+}
+
+/** Raise a sample that lies on the dock deck. Water and air samples stay put. */
+export function liftDockSample(y: number, x: number, z: number) {
+  if (!onDockDeck(x, z)) return y;
+  return Math.max(y, DOCK_DECK.top);
+}
+
+/**
  * Sideways dart of a bobber already on the water.
  * Shrinks the offset so the take stays in the lake and off the dock.
  */
