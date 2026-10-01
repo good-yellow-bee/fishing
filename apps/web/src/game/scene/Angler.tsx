@@ -4,6 +4,13 @@ import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
 import { isFishingStance, stanceAt } from "@stillwater/shared";
+import {
+  CAST_RELEASE_SEC,
+  CAST_ROD_SETTLE_SEC,
+  castBodyLean,
+  loadedRodPitch,
+  thrownRodPitch,
+} from "./castMotion";
 import type { SimRef } from "./FishingWorld";
 import { anglerPose, shortestYaw } from "./pose";
 import { applyToon, disposeMaterials } from "./toon";
@@ -43,6 +50,7 @@ function swing(phase: ScenePhase, power: number, t: number, sim: SimRef) {
 }
 
 const ROD_BIAS = 0.18;
+const ROD_REST_Z = -0.28;
 
 function yawToward(x: number, z: number) {
   const dx = x - anglerPose.x;
@@ -65,6 +73,10 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
   const grip = useRef<THREE.Group>(null);
   const tip = useRef<THREE.Object3D>(null);
   const playing = useRef("");
+  const rodPitch = useRef(0.95);
+  const whipFrom = useRef(0.95);
+  const throwStart = useRef(-1);
+  const prevPhase = useRef(phase);
 
   const character = useMemo(() => {
     const next = cloneSkinned(gltf.scene);
@@ -88,17 +100,39 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
   const { actions } = useAnimations(gltf.animations, character);
 
   useFrame((state, delta) => {
+    const t = state.clock.elapsedTime;
+    if (prevPhase.current === "casting" && phase === "waiting") {
+      throwStart.current = t;
+      whipFrom.current = rodPitch.current;
+    }
+    if (phase !== "waiting") throwStart.current = -1;
+    const throwAge = throwStart.current >= 0 ? t - throwStart.current : -1;
+    prevPhase.current = phase;
+    const whipping = phase === "waiting" && throwAge >= 0 && throwAge < CAST_ROD_SETTLE_SEC + 0.15;
+    const rodTarget =
+      phase === "casting"
+        ? loadedRodPitch(power, t)
+        : whipping
+          ? thrownRodPitch(power, throwAge, whipFrom.current)
+          : swing(phase, power, t, sim);
+    if (whipping) rodPitch.current = rodTarget;
+    else {
+      const follow = phase === "casting" ? 7 : 16;
+      rodPitch.current += (rodTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
+    }
+
     const fishing = isFishingStance(stanceAt(anglerPose.x, anglerPose.z));
     const next = clipName(phase, anglerPose.moving, fishing);
     if (next === "holding-right") {
       const target = yawToward(lookAt.x, lookAt.z);
       anglerPose.yaw += shortestYaw(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
     }
+    const lean = castBodyLean(power, phase === "casting", phase === "waiting" ? throwAge : -1);
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
       root.current.rotation.order = "YXZ";
       root.current.rotation.y = anglerPose.yaw;
-      root.current.rotation.x = anglerPose.pitch;
+      root.current.rotation.x = anglerPose.pitch + lean;
       root.current.rotation.z = anglerPose.lean;
     }
     const walk = actions.walk;
@@ -108,7 +142,11 @@ export function Angler({ phase, power, sim, rodTip, hand, lookAt }: Props) {
     }
     if (wrap.current) wrap.current.dataset.yaw = anglerPose.yaw.toFixed(2);
     if (grip.current) {
-      grip.current.rotation.x = swing(phase, power, state.clock.elapsedTime, sim);
+      grip.current.rotation.x = rodPitch.current;
+      const whipZ =
+        throwAge >= 0 && throwAge < CAST_RELEASE_SEC ? Math.sin((throwAge / CAST_RELEASE_SEC) * Math.PI) * 0.12 : 0;
+      const zTarget = ROD_REST_Z + whipZ;
+      grip.current.rotation.z += (zTarget - grip.current.rotation.z) * (whipping ? 1 : 1 - Math.exp(-8 * delta));
       grip.current.getWorldPosition(hand);
     }
     tip.current?.getWorldPosition(rodTip);
