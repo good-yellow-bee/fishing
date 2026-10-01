@@ -11,6 +11,7 @@ import {
   recentTrips,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
+import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { formatDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -76,7 +77,8 @@ export function TripsPage() {
 }
 
 export function TripPage() {
-  const { book } = useLogbook();
+  const { book, deleteTrip } = useLogbook();
+  const navigate = useNavigate();
   const { tripId = "" } = useParams();
   const trip = tripById(book, tripId);
 
@@ -97,30 +99,37 @@ export function TripPage() {
 
   return (
     <div className="sheet">
-      <header className="sheet-head">
-        <div>
-          <p className="eyebrow">
-            <Link to="/trips">Trips</Link>
-            {" · "}
-            {tripWhen(trip.date, today, tomorrow)}
-          </p>
-          <h1>{trip.title}</h1>
-          <p className="meta stand">
-            <time dateTime={trip.date}>{formatDay(trip.date)}</time>
-            {spot ? (
-              <>
-                {" · "}
-                <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-                {" · "}
-                {WATER_LABELS[spot.waterType]}
-              </>
-            ) : null}
-          </p>
-        </div>
-        <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
-          Add a catch
-        </Link>
-      </header>
+      <EditDelete
+        editTo={`/trips/${trip.id}/edit`}
+        ask="Delete this outing? Its fish stay in the book."
+        onDelete={() => {
+          deleteTrip(trip.id);
+          navigate("/trips");
+        }}
+        aside={
+          <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
+            Add a catch
+          </Link>
+        }
+      >
+        <p className="eyebrow">
+          <Link to="/trips">Trips</Link>
+          {" · "}
+          {tripWhen(trip.date, today, tomorrow)}
+        </p>
+        <h1>{trip.title}</h1>
+        <p className="meta stand">
+          <time dateTime={trip.date}>{formatDay(trip.date)}</time>
+          {spot ? (
+            <>
+              {" · "}
+              <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              {" · "}
+              {WATER_LABELS[spot.waterType]}
+            </>
+          ) : null}
+        </p>
+      </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
       <TripWeather catches={catches} />
       <TackleList tripId={trip.id} heading="Tackle" />
@@ -141,19 +150,22 @@ export function TripPage() {
 }
 
 export function TripFormPage() {
-  const { book, addTrip } = useLogbook();
+  const { book, addTrip, updateTrip } = useLogbook();
   const navigate = useNavigate();
+  const { tripId } = useParams();
   const [params] = useSearchParams();
+  const existing = tripId ? tripById(book, tripId) : undefined;
   const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : (book.spots[0]?.id ?? "");
-  const [date, setDate] = useState(() => localDate(new Date()));
-  const [spotId, setSpotId] = useState(preset);
-  const [title, setTitle] = useState("");
-  const [note, setNote] = useState("");
+  const [date, setDate] = useState(existing?.date ?? localDate(new Date()));
+  const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
+  const [title, setTitle] = useState(existing?.title ?? "");
+  const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const result = addTrip({ date, spotId, title, note });
+    const draft = { date, spotId, title, note };
+    const result = existing ? updateTrip(existing.id, draft) : addTrip(draft);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -161,7 +173,17 @@ export function TripFormPage() {
     navigate(`/trips/${result.id}`);
   };
 
-  if (book.spots.length === 0) {
+  if (tripId && !existing) {
+    return (
+      <div className="sheet">
+        <h1>Missing outing</h1>
+        <p className="lede">That trip is not in this book.</p>
+        <Link to="/trips">Back to trips</Link>
+      </div>
+    );
+  }
+
+  if (!existing && book.spots.length === 0) {
     return (
       <div className="sheet">
         <h1>Add a trip</h1>
@@ -177,10 +199,10 @@ export function TripFormPage() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">New outing</p>
-          <h1>Add a trip</h1>
+          <p className="eyebrow">{existing ? "Edit outing" : "New outing"}</p>
+          <h1>{existing ? existing.title : "Add a trip"}</h1>
         </div>
-        <Link to="/trips">Cancel</Link>
+        <Link to={existing ? `/trips/${existing.id}` : "/trips"}>Cancel</Link>
       </header>
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
@@ -224,7 +246,7 @@ export function TripFormPage() {
           </p>
         ) : null}
         <button type="submit" className="field-primary inline">
-          Save trip
+          {existing ? "Save changes" : "Save trip"}
         </button>
       </form>
     </div>

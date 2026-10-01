@@ -11,6 +11,7 @@ import {
   tripsForSpot,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
+import { EditDelete } from "./EditDelete";
 import { useLogbook } from "./LogbookState";
 
 export function SpotsPage() {
@@ -47,7 +48,8 @@ export function SpotsPage() {
 }
 
 export function SpotPage() {
-  const { book } = useLogbook();
+  const { book, deleteSpot } = useLogbook();
+  const navigate = useNavigate();
   const { spotId = "" } = useParams();
   const spot = spotById(book, spotId);
   const today = localDate(new Date());
@@ -68,18 +70,25 @@ export function SpotPage() {
 
   return (
     <div className="sheet">
-      <header className="sheet-head">
-        <div>
-          <p className="eyebrow">
-            <Link to="/spots">Spots</Link>
-          </p>
-          <h1>{spot.name}</h1>
-          <span className={`stamp stamp-${spot.waterType}`}>{WATER_LABELS[spot.waterType]}</span>
-        </div>
-        <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">
-          Log a catch here
-        </Link>
-      </header>
+      <EditDelete
+        editTo={`/spots/${spot.id}/edit`}
+        ask="Delete this water? Its outings and fish leave the book too."
+        onDelete={() => {
+          deleteSpot(spot.id);
+          navigate("/spots");
+        }}
+        aside={
+          <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">
+            Log a catch here
+          </Link>
+        }
+      >
+        <p className="eyebrow">
+          <Link to="/spots">Spots</Link>
+        </p>
+        <h1>{spot.name}</h1>
+        <span className={`stamp stamp-${spot.waterType}`}>{WATER_LABELS[spot.waterType]}</span>
+      </EditDelete>
       {spot.notes ? <p className="prose">{spot.notes}</p> : null}
       <aside className="conditions">
         <span className="eyebrow">Best conditions</span>
@@ -130,17 +139,20 @@ export function SpotPage() {
 }
 
 export function SpotFormPage() {
-  const { addSpot } = useLogbook();
+  const { book, addSpot, updateSpot } = useLogbook();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [waterType, setWaterType] = useState<string>("lake");
-  const [notes, setNotes] = useState("");
-  const [bestConditions, setBestConditions] = useState("");
+  const { spotId } = useParams();
+  const existing = spotId ? spotById(book, spotId) : undefined;
+  const [name, setName] = useState(existing?.name ?? "");
+  const [waterType, setWaterType] = useState<string>(existing?.waterType ?? "lake");
+  const [notes, setNotes] = useState(existing?.notes ?? "");
+  const [bestConditions, setBestConditions] = useState(existing?.bestConditions ?? "");
   const [error, setError] = useState("");
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const result = addSpot({ name, waterType, notes, bestConditions });
+    const draft = { name, waterType, notes, bestConditions };
+    const result = existing ? updateSpot(existing.id, draft) : addSpot(draft);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -148,14 +160,24 @@ export function SpotFormPage() {
     navigate(`/spots/${result.id}`);
   };
 
+  if (spotId && !existing) {
+    return (
+      <div className="sheet">
+        <h1>Missing water</h1>
+        <p className="lede">That spot is not in this book.</p>
+        <Link to="/spots">Back to spots</Link>
+      </div>
+    );
+  }
+
   return (
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">New water</p>
-          <h1>Add a spot</h1>
+          <p className="eyebrow">{existing ? "Edit water" : "New water"}</p>
+          <h1>{existing ? existing.name : "Add a spot"}</h1>
         </div>
-        <Link to="/spots">Cancel</Link>
+        <Link to={existing ? `/spots/${existing.id}` : "/spots"}>Cancel</Link>
       </header>
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
@@ -206,7 +228,7 @@ export function SpotFormPage() {
           </p>
         ) : null}
         <button type="submit" className="field-primary inline">
-          Save spot
+          {existing ? "Save changes" : "Save spot"}
         </button>
       </form>
     </div>

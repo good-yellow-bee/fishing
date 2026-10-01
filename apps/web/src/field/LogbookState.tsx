@@ -3,10 +3,16 @@ import {
   parseCatchDraft,
   parseSpotDraft,
   parseTripDraft,
+  replaceCatch,
+  replaceSpot,
+  replaceTrip,
   sampleLogbook,
   withCatch,
   withSpot,
   withTrip,
+  withoutCatch,
+  withoutSpot,
+  withoutTrip,
   type CatchDraft,
   type Logbook,
   type SpotDraft,
@@ -21,6 +27,12 @@ type LogbookApi = {
   addCatch: (draft: CatchDraft) => SaveResult;
   addSpot: (draft: SpotDraft) => SaveResult;
   addTrip: (draft: TripDraft) => SaveResult;
+  updateCatch: (id: string, draft: CatchDraft) => SaveResult;
+  updateSpot: (id: string, draft: SpotDraft) => SaveResult;
+  updateTrip: (id: string, draft: TripDraft) => SaveResult;
+  deleteCatch: (id: string) => void;
+  deleteSpot: (id: string) => void;
+  deleteTrip: (id: string) => void;
   restoreSample: () => void;
 };
 
@@ -68,6 +80,36 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         commit(withTrip(book, { ...parsed.value, id }));
         return { ok: true, id };
       },
+      updateCatch: (id, draft) => {
+        if (!book.catches.some((entry) => entry.id === id)) {
+          return { ok: false, message: "That catch is not in this book." };
+        }
+        const parsed = parseCatchDraft(draft, book);
+        if (!parsed.ok) return { ok: false, message: parsed.message };
+        commit(replaceCatch(book, { ...parsed.value, id }));
+        return { ok: true, id };
+      },
+      updateSpot: (id, draft) => {
+        if (!book.spots.some((spot) => spot.id === id)) {
+          return { ok: false, message: "That spot is not in this book." };
+        }
+        const parsed = parseSpotDraft(draft);
+        if (!parsed.ok) return { ok: false, message: parsed.message };
+        commit(replaceSpot(book, { ...parsed.value, id }));
+        return { ok: true, id };
+      },
+      updateTrip: (id, draft) => {
+        if (!book.trips.some((trip) => trip.id === id)) {
+          return { ok: false, message: "That outing is not in this book." };
+        }
+        const parsed = parseTripDraft(draft, book);
+        if (!parsed.ok) return { ok: false, message: parsed.message };
+        commit(replaceTrip(book, { ...parsed.value, id }));
+        return { ok: true, id };
+      },
+      deleteCatch: (id) => commit(withoutCatch(book, id)),
+      deleteSpot: (id) => commit(withoutSpot(book, id)),
+      deleteTrip: (id) => commit(withoutTrip(book, id)),
       restoreSample: () => commit(sampleLogbook(new Date())),
     };
   }, [book]);

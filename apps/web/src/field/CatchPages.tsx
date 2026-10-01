@@ -13,10 +13,16 @@ import {
   tripById,
   tripsForSpot,
   type CatchDraft,
+  type CatchEntry,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
+import { EditDelete } from "./EditDelete";
 import { formatClock, formatDay, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
+
+function amountText(entry: CatchEntry): string {
+  return String(entry.measure.kind === "length" ? entry.measure.inches : entry.measure.pounds);
+}
 
 const SPECIES = [...FISH].map((fish) => fish.name).sort((a, b) => a.localeCompare(b));
 
@@ -68,27 +74,31 @@ export function CatchesPage() {
 }
 
 export function CatchFormPage() {
-  const { book, addCatch } = useLogbook();
+  const { book, addCatch, updateCatch } = useLogbook();
   const navigate = useNavigate();
+  const { catchId } = useParams();
   const [params] = useSearchParams();
-  const presetTrip = tripById(book, params.get("trip") ?? "");
-  const presetSpot = presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
+  const existing = catchId ? book.catches.find((row) => row.id === catchId) : undefined;
+  const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
+  const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
 
-  const [species, setSpecies] = useState("");
-  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>("length");
-  const [amount, setAmount] = useState("");
-  const [lure, setLure] = useState("");
+  const [species, setSpecies] = useState(existing?.species ?? "");
+  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? "length");
+  const [amount, setAmount] = useState(existing ? amountText(existing) : "");
+  const [lure, setLure] = useState(existing?.lure ?? "");
   const [spotId, setSpotId] = useState(presetSpot);
-  const [tripId, setTripId] = useState(presetTrip?.id ?? "");
-  const [caughtAt, setCaughtAt] = useState(() => toLocalInput(new Date()));
-  const [note, setNote] = useState("");
-  const [sky, setSky] = useState("");
-  const [wind, setWind] = useState("");
-  const [waterTemp, setWaterTemp] = useState("");
+  const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
+  const [caughtAt, setCaughtAt] = useState(() =>
+    existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(new Date()),
+  );
+  const [note, setNote] = useState(existing?.note ?? "");
+  const [sky, setSky] = useState(existing?.weather?.sky ?? "");
+  const [wind, setWind] = useState(existing?.weather?.wind ?? "");
+  const [waterTemp, setWaterTemp] = useState(existing?.weather ? String(existing.weather.waterTempF) : "");
   const [error, setError] = useState("");
 
   const spotTrips = tripsForSpot(book, spotId);
-  const heading = presetTrip ? presetTrip.title : "Log a catch";
+  const heading = existing ? existing.species : presetTrip ? presetTrip.title : "Log a catch";
 
   const onSpot = (nextSpot: string) => {
     setSpotId(nextSpot);
@@ -97,7 +107,7 @@ export function CatchFormPage() {
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const result = addCatch({
+    const draft: CatchDraft = {
       species,
       measureKind,
       amount,
@@ -109,15 +119,27 @@ export function CatchFormPage() {
       sky,
       wind,
       waterTemp,
-    });
+    };
+    const result = existing ? updateCatch(existing.id, draft) : addCatch(draft);
     if (!result.ok) {
       setError(result.message);
       return;
     }
-    navigate(tripId ? `/trips/${tripId}` : "/catches");
+    if (existing) navigate(`/catches/${existing.id}`);
+    else navigate(tripId ? `/trips/${tripId}` : "/catches");
   };
 
-  if (book.spots.length === 0) {
+  if (catchId && !existing) {
+    return (
+      <div className="sheet">
+        <h1>Missing fish</h1>
+        <p className="lede">That catch is not in this book.</p>
+        <Link to="/catches">Back to catches</Link>
+      </div>
+    );
+  }
+
+  if (!existing && book.spots.length === 0) {
     return (
       <div className="sheet">
         <h1>Log a catch</h1>
@@ -133,10 +155,10 @@ export function CatchFormPage() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">New entry</p>
+          <p className="eyebrow">{existing ? "Edit entry" : "New entry"}</p>
           <h1>{heading}</h1>
         </div>
-        <Link to={tripId ? `/trips/${tripId}` : "/catches"}>Cancel</Link>
+        <Link to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}>Cancel</Link>
       </header>
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
@@ -298,7 +320,7 @@ export function CatchFormPage() {
           </p>
         ) : null}
         <button type="submit" className="field-primary inline">
-          Save to the book
+          {existing ? "Save changes" : "Save to the book"}
         </button>
       </form>
     </div>
@@ -306,7 +328,8 @@ export function CatchFormPage() {
 }
 
 export function CatchPage() {
-  const { book } = useLogbook();
+  const { book, deleteCatch } = useLogbook();
+  const navigate = useNavigate();
   const { catchId = "" } = useParams();
   const entry = book.catches.find((row) => row.id === catchId);
 
@@ -325,27 +348,32 @@ export function CatchPage() {
 
   return (
     <div className="sheet">
-      <header className="sheet-head">
-        <div>
-          <p className="eyebrow">
-            <Link to="/catches">Catches</Link>
-          </p>
-          <h1>{entry.species}</h1>
-          <p className="meta stand">
-            <span>{formatMeasure(entry.measure)}</span>
-            {" · "}
-            <span>{entry.lure}</span>
-            {spot ? (
-              <>
-                {" · "}
-                <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-              </>
-            ) : null}
-            {" · "}
-            <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
-          </p>
-        </div>
-      </header>
+      <EditDelete
+        editTo={`/catches/${entry.id}/edit`}
+        ask="Delete this fish from the book?"
+        onDelete={() => {
+          deleteCatch(entry.id);
+          navigate("/catches");
+        }}
+      >
+        <p className="eyebrow">
+          <Link to="/catches">Catches</Link>
+        </p>
+        <h1>{entry.species}</h1>
+        <p className="meta stand">
+          <span>{formatMeasure(entry.measure)}</span>
+          {" · "}
+          <span>{entry.lure}</span>
+          {spot ? (
+            <>
+              {" · "}
+              <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+            </>
+          ) : null}
+          {" · "}
+          <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+        </p>
+      </EditDelete>
       {entry.weather ? (
         <aside className="conditions" aria-label="Weather">
           <span className="eyebrow">Weather</span>

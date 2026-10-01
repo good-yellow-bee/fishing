@@ -9,8 +9,14 @@ import {
   parseTripDraft,
   recentCatches,
   recentTrips,
+  replaceCatch,
+  replaceSpot,
+  replaceTrip,
   sampleLogbook,
   upcomingTrips,
+  withoutCatch,
+  withoutSpot,
+  withoutTrip,
   type CatchDraft,
 } from "./logbook.ts";
 
@@ -131,5 +137,74 @@ describe("field log", () => {
     expect(isLogbook(null)).toBe(false);
     expect(isLogbook({ spots: [], trips: [], catches: [] })).toBe(true);
     expect(isLogbook({ spots: [{}], trips: [], catches: [] })).toBe(false);
+  });
+
+  it("rewrites one catch and keeps the rest", () => {
+    const parsed = parseCatchDraft(draft("spot-cedar", { species: "Tiger muskie", amount: "34", lure: "Spoon" }), book);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const next = replaceCatch(book, { ...parsed.value, id: "catch-pike-mepps" });
+    expect(next.catches).toHaveLength(book.catches.length);
+    expect(next.catches.find((entry) => entry.id === "catch-pike-mepps")).toMatchObject({
+      species: "Tiger muskie",
+      lure: "Spoon",
+      spotId: "spot-cedar",
+    });
+  });
+
+  it("renames a spot without moving its outings", () => {
+    const parsed = parseSpotDraft({
+      name: "Cedar Point",
+      waterType: "lake",
+      notes: "Same shelf.",
+      bestConditions: "Overcast",
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const next = replaceSpot(book, { ...parsed.value, id: "spot-cedar" });
+    expect(next.spots).toHaveLength(book.spots.length);
+    expect(next.spots.find((spot) => spot.id === "spot-cedar")?.name).toBe("Cedar Point");
+    expect(next.trips.filter((trip) => trip.spotId === "spot-cedar")).toHaveLength(2);
+  });
+
+  it("moves fish with an outing when that outing changes water", () => {
+    const parsed = parseTripDraft(
+      { date: "2026-09-25", spotId: "spot-cedar", title: "Moved", note: "Same fish." },
+      book,
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const next = replaceTrip(book, { ...parsed.value, id: "trip-mill" });
+    const fish = next.catches.filter((entry) => entry.tripId === "trip-mill");
+    expect(fish).toHaveLength(2);
+    expect(fish.every((entry) => entry.spotId === "spot-cedar")).toBe(true);
+    expect(next.trips.find((trip) => trip.id === "trip-mill")?.title).toBe("Moved");
+  });
+
+  it("drops one fish", () => {
+    const next = withoutCatch(book, "catch-gill");
+    expect(next.catches.some((entry) => entry.id === "catch-gill")).toBe(false);
+    expect(next.catches).toHaveLength(book.catches.length - 1);
+    expect(isLogbook(next)).toBe(true);
+  });
+
+  it("clears a deleted outing from its fish", () => {
+    const next = withoutTrip(book, "trip-mill");
+    expect(next.trips.some((trip) => trip.id === "trip-mill")).toBe(false);
+    const fish = next.catches.filter((entry) => entry.id === "catch-brook-bugger" || entry.id === "catch-brook-nymph");
+    expect(fish).toHaveLength(2);
+    expect(fish.every((entry) => entry.tripId === null && entry.spotId === "spot-mill" && entry.weather)).toBe(true);
+    expect(next.catches).toHaveLength(book.catches.length);
+    expect(isLogbook(next)).toBe(true);
+  });
+
+  it("removes a spot along with the outings and fish that need it", () => {
+    const next = withoutSpot(book, "spot-duck");
+    expect(next.spots.some((spot) => spot.id === "spot-duck")).toBe(false);
+    expect(next.trips.some((trip) => trip.id === "trip-duck" || trip.spotId === "spot-duck")).toBe(false);
+    expect(next.catches.some((entry) => entry.spotId === "spot-duck" || entry.tripId === "trip-duck")).toBe(false);
+    expect(next.catches).toHaveLength(book.catches.length - 2);
+    expect(next.trips).toHaveLength(book.trips.length - 1);
+    expect(isLogbook(next)).toBe(true);
   });
 });

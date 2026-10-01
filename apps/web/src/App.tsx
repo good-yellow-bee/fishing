@@ -51,13 +51,16 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/catches" element={<CatchesPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />
+        <Route path="/catches/:catchId/edit" element={<CatchFormPage />} />
         <Route path="/catches/:catchId" element={<CatchPage />} />
         <Route path="/spots" element={<SpotsPage />} />
         <Route path="/map" element={<SpotMapPage />} />
         <Route path="/spots/new" element={<SpotFormPage />} />
+        <Route path="/spots/:spotId/edit" element={<SpotFormPage />} />
         <Route path="/spots/:spotId" element={<SpotPage />} />
         <Route path="/trips" element={<TripsPage />} />
         <Route path="/trips/new" element={<TripFormPage />} />
+        <Route path="/trips/:tripId/edit" element={<TripFormPage />} />
         <Route path="/trips/:tripId" element={<TripPage />} />
         <Route path="/gear" element={<GearPage />} />
         <Route path="/gear/:tripId" element={<GearPage />} />
