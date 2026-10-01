@@ -20,7 +20,16 @@ describe("catch search", () => {
       "catch-brook-nymph",
       "catch-brook-bugger",
     ]);
+    expect(searchCatches(book, "mill  race").map((entry) => entry.id)).toEqual([
+      "catch-brook-nymph",
+      "catch-brook-bugger",
+    ]);
     expect(searchCatches(book, "mepps").map((entry) => entry.id)).toEqual(["catch-pike-mepps"]);
+  });
+
+  it("does not match a phrase split across species and water", () => {
+    expect(searchCatches(book, "pike\ncedar")).toEqual([]);
+    expect(searchCatches(book, "trout\nmill")).toEqual([]);
   });
 
   it("returns nothing for a blank query or a miss", () => {

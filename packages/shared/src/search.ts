@@ -1,12 +1,18 @@
-import { catchesNewestFirst, spotById, type CatchEntry, type Logbook } from "./logbook.ts";
+import { catchesNewestFirst, spotById, type Logbook } from "./logbook.ts";
 
-function haystack(book: Logbook, entry: CatchEntry): string {
-  const water = spotById(book, entry.spotId)?.name ?? "";
-  return `${entry.species}\n${water}\n${entry.lure}`.toLowerCase();
+function normalize(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function fieldHas(field: string, needle: string): boolean {
+  return normalize(field).includes(needle);
 }
 
 export function searchCatches(book: Logbook, query: string): CatchEntry[] {
-  const needle = query.trim().toLowerCase();
+  const needle = normalize(query);
   if (!needle) return [];
-  return catchesNewestFirst(book).filter((entry) => haystack(book, entry).includes(needle));
+  return catchesNewestFirst(book).filter((entry) => {
+    const water = spotById(book, entry.spotId)?.name ?? "";
+    return fieldHas(entry.species, needle) || fieldHas(water, needle) || fieldHas(entry.lure, needle);
+  });
 }
