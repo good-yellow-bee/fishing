@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
-import { CatchFormPage, CatchesPage } from "./field/CatchPages";
+import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
 import { HomePage } from "./field/HomePage";
 import { LogbookProvider } from "./field/LogbookState";
@@ -46,6 +46,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/catches" element={<CatchesPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />
+        <Route path="/catches/:catchId" element={<CatchPage />} />
         <Route path="/spots" element={<SpotsPage />} />
         <Route path="/spots/new" element={<SpotFormPage />} />
         <Route path="/spots/:spotId" element={<SpotPage />} />
