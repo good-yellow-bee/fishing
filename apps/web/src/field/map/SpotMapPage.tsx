@@ -124,7 +124,7 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
   return (
     <Link
       to={`/spots/${spot.id}`}
-      className={`map-pin map-pin-${place.labelSide}`}
+      className={`map-pin map-pin-${spot.id}`}
       style={{
         left: `${(point.x / MAP_WIDTH) * 100}%`,
         top: `${(point.y / MAP_HEIGHT) * 100}%`,

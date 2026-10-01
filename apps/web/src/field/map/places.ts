@@ -3,7 +3,6 @@ export type LngLat = { lat: number; lng: number };
 export const MAP_WIDTH = 1000;
 export const MAP_HEIGHT = 720;
 
-/** North-woods sheet. Ground scale is nearly even in both axes. */
 export const MAP_FRAME = {
   north: 46.882,
   south: 46.772,
@@ -15,16 +14,14 @@ export type SamplePlace = {
   spotId: string;
   lat: number;
   lng: number;
-  labelSide: "north" | "east" | "south" | "west";
 };
 
-/** Plausible coordinates for the seeded spots. Ids match sampleLogbook. */
 export const SAMPLE_PLACES: SamplePlace[] = [
-  { spotId: "spot-oxbow", lat: 46.8551, lng: -94.2438, labelSide: "east" },
-  { spotId: "spot-mill", lat: 46.832, lng: -94.205, labelSide: "east" },
-  { spotId: "spot-cedar", lat: 46.848, lng: -94.14, labelSide: "north" },
-  { spotId: "spot-duck", lat: 46.804, lng: -94.175, labelSide: "east" },
-  { spotId: "spot-quarry", lat: 46.792, lng: -94.095, labelSide: "west" },
+  { spotId: "spot-oxbow", lat: 46.8551, lng: -94.2438 },
+  { spotId: "spot-mill", lat: 46.832, lng: -94.205 },
+  { spotId: "spot-cedar", lat: 46.848, lng: -94.14 },
+  { spotId: "spot-duck", lat: 46.804, lng: -94.175 },
+  { spotId: "spot-quarry", lat: 46.792, lng: -94.095 },
 ];
 
 export const GRID_LATS = [46.87, 46.85, 46.83, 46.81, 46.79];
@@ -63,7 +60,6 @@ export const MILL_RACE: LngLat[] = [
   { lat: 46.826, lng: -94.186 },
 ];
 
-/** Short tick across the race, just upstream of the pocket. */
 export const MILL_DAM: LngLat[] = [
   { lat: 46.8376, lng: -94.2092 },
   { lat: 46.8344, lng: -94.2028 },
