@@ -11,6 +11,7 @@ import {
   recentTrips,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
+import { TackleList } from "./gear/TackleList";
 import { formatDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 
@@ -120,6 +121,7 @@ export function TripPage() {
         </Link>
       </header>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
+      <TackleList tripId={trip.id} heading="Tackle" />
       <div className="section-head">
         <h2>Fish on this outing</h2>
       </div>
