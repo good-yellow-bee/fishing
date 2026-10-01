@@ -637,6 +637,27 @@ kbd {
   animation: card-pop 180ms ease-out;
 }
 
+/* Leave the angler and the fish in frame. The toast for a miss stays centered. */
+.catch-card {
+  left: 28px;
+  top: auto;
+  bottom: 28px;
+  transform: none;
+  animation: card-settle 180ms ease-out;
+}
+
+@keyframes card-settle {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
 @keyframes card-pop {
   from {
     transform: translate(-50%, -50%) scale(0.92);
@@ -706,7 +727,7 @@ kbd {
 .catch-card.rarity-legendary {
   border-left: 4px solid var(--rarity-legendary);
   animation:
-    card-pop 180ms ease-out,
+    card-settle 180ms ease-out,
     legendary-glow 1.8s ease-in-out 180ms infinite;
 }
 

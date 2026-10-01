@@ -9,8 +9,12 @@ export const LAND_EXIT_SEC = 0.48;
 
 export const LAND_DRIPS = 4;
 
-/** Off-hand hold, meters in angler space: x right, y up, z forward. */
-const HAND = { x: -0.22, y: 1.18, z: 0.78 };
+/**
+ * Off-hand hold, meters in angler space: x right, y up, z forward.
+ * The follow camera sits behind the angler, so the fish rests on his right,
+ * which reads on screen-left, clear of his back.
+ */
+const HAND = { x: 0.78, y: 1.32, z: 0.28 };
 
 const HOIST_SEC = 0.36;
 const HOIST_PITCH = -0.22;
@@ -64,9 +68,9 @@ export function landFishPitch(swing: number) {
   return leave + (held - leave) * p + climb;
 }
 
-/** Head (+Z) across the angler's off hand, so the flank faces the camera. */
+/** Head (+Z) to the angler's right, screen-left of the follow camera, so the flank shows. */
 export function landPresentYaw(anglerYaw: number) {
-  return Math.atan2(-Math.cos(anglerYaw), Math.sin(anglerYaw));
+  return Math.atan2(Math.cos(anglerYaw), -Math.sin(anglerYaw));
 }
 
 /** Haul in head-first, then yaw into the hold. One turn, along the short arc. */

@@ -64,7 +64,7 @@ describe("landing", () => {
     }
     const haul = 0;
     const present = landPresentYaw(Math.PI);
-    expect(present).toBeCloseTo(Math.PI / 2);
+    expect(present).toBeCloseTo(-Math.PI / 2);
     expect(landFishYaw(0, haul, present)).toBeCloseTo(haul);
     expect(landFishYaw(1, haul, present)).toBeCloseTo(present);
     expect(Math.abs(landFishYaw(1, haul, present) - landFishYaw(0, haul, present))).toBeLessThan(Math.PI);
@@ -87,6 +87,7 @@ describe("landing", () => {
     landHoldPoint(atWater, 0, 0, 0, Math.PI, 0);
     landHoldPoint(shown, 0, 0, 0, Math.PI, LAND_SWING_SEC + LAND_PRESENT_SEC);
     expect(atWater.y).toBeGreaterThan(1);
+    expect(atWater.x).toBeLessThan(-0.5);
     expect(atWater.z).toBeLessThan(0);
     expect(shown.y).toBeGreaterThan(atWater.y);
   });
