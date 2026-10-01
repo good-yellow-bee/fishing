@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  CATCH_PHOTO_MAX_BYTES,
   FISH,
   SKIES,
   SKY_LABELS,
@@ -19,6 +20,7 @@ import { CatchCard } from "./cards";
 import { EditDelete } from "./EditDelete";
 import { formatClock, formatDay, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
+import { compressCatchPhoto } from "./photoFile";
 
 function amountText(entry: CatchEntry): string {
   return String(entry.measure.kind === "length" ? entry.measure.inches : entry.measure.pounds);
@@ -49,7 +51,7 @@ export function CatchesPage() {
         <div>
           <p className="eyebrow">Catch log</p>
           <h1>Fish</h1>
-          <p className="lede">Species, what was on the hook, the water, the hour, and the weather.</p>
+          <p className="lede">Species, what was on the hook, the water, the hour, the weather, and a photo if you kept one.</p>
         </div>
         <Link to="/catches/new" className="field-primary inline">
           Log a catch
@@ -80,7 +82,7 @@ export function CatchFormPage() {
 }
 
 function CatchForm() {
-  const { book, addCatch, updateCatch } = useLogbook();
+  const { book, addCatch, updateCatch, photoFor } = useLogbook();
   const navigate = useNavigate();
   const { catchId } = useParams();
   const [params] = useSearchParams();
@@ -101,7 +103,11 @@ function CatchForm() {
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [waterTemp, setWaterTemp] = useState(existing?.weather ? String(existing.weather.waterTempF) : "");
+  const [photo, setPhoto] = useState<string | null>(existing ? photoFor(existing.id) : null);
+  const [photoError, setPhotoError] = useState("");
+  const [reducing, setReducing] = useState(false);
   const [error, setError] = useState("");
+  const photoPick = useRef(0);
 
   const spotTrips = tripsForSpot(book, spotId);
   const heading = existing ? existing.species : presetTrip ? presetTrip.title : "Log a catch";
@@ -111,8 +117,45 @@ function CatchForm() {
     if (tripId && !tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) setTripId("");
   };
 
+  const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    const ticket = photoPick.current + 1;
+    photoPick.current = ticket;
+    setReducing(true);
+    setPhotoError("");
+    void compressCatchPhoto(file).then(
+      (result) => {
+        if (photoPick.current !== ticket) return;
+        setReducing(false);
+        if (!result.ok) {
+          setPhotoError(result.message);
+          return;
+        }
+        setPhoto(result.dataUrl);
+      },
+      () => {
+        if (photoPick.current !== ticket) return;
+        setReducing(false);
+        setPhotoError("That photo could not be read. Choose a JPEG, PNG, or WebP.");
+      },
+    );
+  };
+
+  const clearPhoto = () => {
+    photoPick.current += 1;
+    setReducing(false);
+    setPhoto(null);
+    setPhotoError("");
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    if (reducing) {
+      setError("Wait for the photo to finish reducing.");
+      return;
+    }
     const draft: CatchDraft = {
       species,
       measureKind,
@@ -126,7 +169,7 @@ function CatchForm() {
       wind,
       waterTemp,
     };
-    const result = existing ? updateCatch(existing.id, draft) : addCatch(draft);
+    const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -319,13 +362,42 @@ function CatchForm() {
               placeholder="Where it hit, and what you would repeat."
             />
           </label>
+
+          <div className="wide photo-field">
+            <label>
+              Photo
+              <input
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-describedby="photo-limit"
+                onChange={onPhoto}
+              />
+              <small className="field-hint" id="photo-limit">
+                One photo, kept in this browser with the catch. Large files are reduced. Anything still over{" "}
+                {CATCH_PHOTO_MAX_BYTES / 1024} KB is turned away so it cannot crowd out the book.
+              </small>
+            </label>
+            {photo ? <img className="catch-photo-preview" src={photo} alt="Selected catch photo" /> : null}
+            {photo ? (
+              <button type="button" className="text-button" onClick={clearPhoto}>
+                Remove photo
+              </button>
+            ) : null}
+            {reducing ? <p className="field-hint">Reducing the photo…</p> : null}
+            {photoError ? (
+              <p className="field-error" role="alert">
+                {photoError}
+              </p>
+            ) : null}
+          </div>
         </div>
         {error ? (
           <p className="field-error" role="alert">
             {error}
           </p>
         ) : null}
-        <button type="submit" className="field-primary inline">
+        <button type="submit" className="field-primary inline" disabled={reducing}>
           {existing ? "Save changes" : "Save to the book"}
         </button>
       </form>
@@ -334,7 +406,7 @@ function CatchForm() {
 }
 
 export function CatchPage() {
-  const { book, deleteCatch } = useLogbook();
+  const { book, deleteCatch, photoFor } = useLogbook();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
   const entry = book.catches.find((row) => row.id === catchId);
@@ -351,6 +423,7 @@ export function CatchPage() {
 
   const spot = spotById(book, entry.spotId);
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
+  const photo = photoFor(entry.id);
 
   return (
     <div className="sheet">
@@ -380,6 +453,11 @@ export function CatchPage() {
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
         </p>
       </EditDelete>
+      {photo ? (
+        <figure className="catch-photo">
+          <img src={photo} alt={`Photo of ${entry.species}`} />
+        </figure>
+      ) : null}
       {entry.weather ? (
         <aside className="conditions" aria-label="Weather">
           <span className="eyebrow">Weather</span>

@@ -15,5 +15,18 @@ export function readStoredLogbook(): Logbook | null {
 }
 
 export function saveLogbook(book: Logbook) {
-  localStorage.setItem(KEY, JSON.stringify(book));
+  const json = JSON.stringify(book);
+  const previous = localStorage.getItem(KEY);
+  try {
+    localStorage.setItem(KEY, json);
+  } catch (error) {
+    if (previous !== null) {
+      try {
+        localStorage.setItem(KEY, previous);
+      } catch {
+        throw error;
+      }
+    }
+    throw error;
+  }
 }
