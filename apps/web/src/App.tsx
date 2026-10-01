@@ -7,6 +7,7 @@ import { GearPage } from "./field/gear/GearPage";
 import { TackleProvider } from "./field/gear/TackleState";
 import { HomePage } from "./field/HomePage";
 import { LogbookProvider } from "./field/LogbookState";
+import { SpotMapPage } from "./field/map/SpotMapPage";
 import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
 import { TripFormPage, TripPage, TripsPage } from "./field/TripPages";
 import { BoardPage } from "./pages/Board";
@@ -51,6 +52,7 @@ export function App() {
         <Route path="/catches" element={<CatchesPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />
         <Route path="/spots" element={<SpotsPage />} />
+        <Route path="/map" element={<SpotMapPage />} />
         <Route path="/spots/new" element={<SpotFormPage />} />
         <Route path="/spots/:spotId" element={<SpotPage />} />
         <Route path="/trips" element={<TripsPage />} />
