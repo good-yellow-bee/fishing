@@ -1,11 +1,11 @@
 /** How long the strike whip takes before the rod settles into the fight. */
-export const HOOKSET_SEC = 0.74;
+export const HOOKSET_SEC = 1.15;
 
 /** The upward snap inside the hookset. */
 export const STRIKE_SNAP_SEC = 0.28;
 
 /** Pause at the top of the set so the strike reads. */
-export const STRIKE_HOLD_SEC = 0.16;
+export const STRIKE_HOLD_SEC = 0.48;
 
 /** Bobber yank toward the angler on the strike. */
 export const TUG_SEC = 0.32;
