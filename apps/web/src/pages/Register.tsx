@@ -19,7 +19,7 @@ export function RegisterPage() {
         return;
       }
       await authClient.getSession();
-      navigate("/");
+      navigate("/play");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not register");
     }

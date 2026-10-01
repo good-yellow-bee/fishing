@@ -1,8 +1,10 @@
 # Stillwater
 
-Browser fishing game on a northern lake. Walk the shore, pick a stance, cast, fight whatever takes the hook, then spend points at the shack.
+A local field log for after the trip, and a browser fishing game on a northern lake.
 
-The playable app lives in this repo (`fishing`). Register locally, then fish at [http://localhost:5173](http://localhost:5173).
+Open [http://localhost:5173](http://localhost:5173). The book stays in this browser: spots, trips, and catches, with a sample week already written in. Nothing in the log is sent to a server.
+
+The lake game is at [http://localhost:5173/play](http://localhost:5173/play). Register locally, then walk the shore, cast, and fight whatever takes the hook.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=000)
@@ -48,7 +50,7 @@ That starts:
 - web — [http://localhost:5173](http://localhost:5173)
 - api — [http://127.0.0.1:3001](http://127.0.0.1:3001)
 
-Register an account, then you are on the lake. Sessions are cookies; SQLite lives at `apps/api/data/stillwater.sqlite` (gitignored).
+The field log needs only the web app. For the lake, register an account at `/play`. Sessions are cookies; SQLite lives at `apps/api/data/stillwater.sqlite` (gitignored).
 
 ```bash
 pnpm test        # shared lake / catch / board rules
