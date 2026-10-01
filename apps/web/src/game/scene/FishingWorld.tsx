@@ -27,6 +27,7 @@ import {
   bobberPull,
   fightInput,
   clearFightLine,
+  dockLineLips,
   fightLineSag,
   fightView,
   fishDepthMeters,
@@ -791,6 +792,7 @@ function RetrieveSplash() {
 const SPLASH_SEC = 0.55;
 const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
+const LINE_CAP = LINE_POINTS + 4;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
@@ -844,7 +846,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   const entryBurst = useRef<() => void>(() => {});
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_POINTS * 3), 3));
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_CAP * 3), 3));
+    geometry.setDrawRange(0, LINE_POINTS);
     const material = new THREE.LineBasicMaterial({
       color: 0x1a1410,
       transparent: true,
@@ -1047,6 +1050,16 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     const dirZ = lineZ / span;
     const attr = line.geometry.getAttribute("position");
     const positions = attr.array as Float32Array;
+    let count = 0;
+    let prevX = 0;
+    let prevY = 0;
+    let prevZ = 0;
+    const put = (x: number, y: number, z: number) => {
+      positions[count * 3] = x;
+      positions[count * 3 + 1] = y;
+      positions[count * 3 + 2] = z;
+      count += 1;
+    };
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
@@ -1054,10 +1067,18 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
       let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
       if (dipped) y = clearFightLine(y, x, z);
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      if (dipped && i > 0) {
+        for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
+          if (count >= LINE_CAP - (LINE_POINTS - i)) break;
+          put(lip.x, lip.y, lip.z);
+        }
+      }
+      put(x, y, z);
+      prevX = x;
+      prevY = y;
+      prevZ = z;
     }
+    line.geometry.setDrawRange(0, count);
     attr.needsUpdate = true;
   });
 

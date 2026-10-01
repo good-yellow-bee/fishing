@@ -13,6 +13,7 @@ import {
   fightRodRoll,
   applyRetrieve,
   clearFightLine,
+  dockLineLips,
   fishDepthMeters,
   fishLeadMeters,
   fishLeapHeight,
@@ -139,6 +140,18 @@ describe("fight motion", () => {
     const beside = applyRetrieve(1.2, 6.5, 0, 8, 1.62, true, 0);
     const onDeck = beside.x >= -1.05 && beside.x <= 1.05 && beside.z >= 5.2 && beside.z <= 8.5;
     expect(onDeck).toBe(false);
+    const shaved = applyRetrieve(1.6, 6.5, 0, 8, 1.62, true, 0);
+    expect(shaved.x).toBeGreaterThan(1.05 + 0.18);
+
+    const end = dockLineLips(0, 0.72, 5.5, 0, 0.15, 4.4);
+    expect(end).toHaveLength(1);
+    expect(end[0]!.y).toBeGreaterThanOrEqual(0.72);
+    expect(end[0]!.z).toBeCloseTo(5.2, 2);
+    const side = dockLineLips(0, 0.8, 6.5, -2.2, 0.1, 6.5);
+    expect(side[0]!.x).toBeCloseTo(-1.05, 2);
+    expect(side[0]!.y).toBeGreaterThanOrEqual(0.72);
+    expect(dockLineLips(3, 0.4, 2, 6, 0.2, -2)).toEqual([]);
+    expect(dockLineLips(0, 1.6, 6.2, 0, 1.4, 4.2)).toEqual([]);
   });
 
   it("leans back into the set and gets dragged forward on a run", () => {

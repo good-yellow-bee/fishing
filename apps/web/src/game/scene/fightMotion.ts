@@ -234,8 +234,16 @@ export function retrieveWake(pump: number, reeling: boolean, surge: FightSurge) 
   return reelPumpLift(pump);
 }
 
-function onDockDeck(x: number, z: number) {
-  return x >= DOCK_DECK.minX && x <= DOCK_DECK.maxX && z >= DOCK_DECK.minZ && z <= DOCK_DECK.maxZ;
+/** Buoy half-width at the fight scale, plus a little air. */
+const LURE_DOCK_PAD = 0.18;
+
+function onDockDeck(x: number, z: number, pad = 0) {
+  return (
+    x >= DOCK_DECK.minX - pad &&
+    x <= DOCK_DECK.maxX + pad &&
+    z >= DOCK_DECK.minZ - pad &&
+    z <= DOCK_DECK.maxZ + pad
+  );
 }
 
 /**
@@ -261,23 +269,60 @@ export function applyRetrieve(
   const outZ = dz / reach;
   const capped = Math.min(hang, reach * 0.55);
   let scale = 1;
-  let nextX = x;
-  let nextZ = z;
+  let offDeck: { x: number; z: number } | null = null;
   for (let i = 0; i < 6; i += 1) {
-    nextX = x + outX * capped * scale - outZ * weave * scale;
-    nextZ = z + outZ * capped * scale + outX * weave * scale;
-    if (inLake(nextX, nextZ) && !onDockDeck(nextX, nextZ)) return { x: nextX, z: nextZ };
+    const nextX = x + outX * capped * scale - outZ * weave * scale;
+    const nextZ = z + outZ * capped * scale + outX * weave * scale;
+    if (inLake(nextX, nextZ) && !onDockDeck(nextX, nextZ)) {
+      if (!onDockDeck(nextX, nextZ, LURE_DOCK_PAD)) return { x: nextX, z: nextZ };
+      if (!offDeck) offDeck = { x: nextX, z: nextZ };
+    }
     scale *= 0.5;
   }
-  return { x, z };
+  return offDeck ?? { x, z };
+}
+
+/**
+ * Points to insert so a straight fight-line span does not cut the dock.
+ * Each one sits on the lip. Empty when the span already clears the deck.
+ */
+export function dockLineLips(
+  x0: number,
+  y0: number,
+  z0: number,
+  x1: number,
+  y1: number,
+  z1: number,
+) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const dz = z1 - z0;
+  const hits: { t: number; x: number; y: number; z: number }[] = [];
+  const planes: Array<[number, number, number]> = [
+    [DOCK_DECK.minX, x0, dx],
+    [DOCK_DECK.maxX, x0, dx],
+    [DOCK_DECK.minZ, z0, dz],
+    [DOCK_DECK.maxZ, z0, dz],
+  ];
+  for (const [plane, origin, delta] of planes) {
+    if (Math.abs(delta) < 1e-8) continue;
+    const t = (plane - origin) / delta;
+    if (t <= 1e-3 || t >= 1 - 1e-3) continue;
+    const x = x0 + dx * t;
+    const z = z0 + dz * t;
+    if (!onDockDeck(x, z, 1e-3)) continue;
+    if (hits.some((hit) => Math.abs(hit.t - t) < 1e-3)) continue;
+    hits.push({ t, x, y: y0 + dy * t, z });
+  }
+  hits.sort((a, b) => a.t - b.t);
+  if (!hits.some((hit) => hit.y < DOCK_DECK.top - 1e-3)) return [];
+  return hits.map((hit) => ({ x: hit.x, y: Math.max(hit.y, DOCK_DECK.top), z: hit.z }));
 }
 
 /** Lift a fight-line sample off the dock deck and the ground. Lake water can stay under the surface. */
 export function clearFightLine(y: number, x: number, z: number) {
   let next = y;
-  if (x >= DOCK_DECK.minX && x <= DOCK_DECK.maxX && z >= DOCK_DECK.minZ && z <= DOCK_DECK.maxZ) {
-    next = Math.max(next, DOCK_DECK.top);
-  }
+  if (onDockDeck(x, z)) next = Math.max(next, DOCK_DECK.top);
   if (!inLake(x, z)) next = Math.max(next, 0.12);
   return next;
 }
