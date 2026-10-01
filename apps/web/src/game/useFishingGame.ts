@@ -15,6 +15,7 @@ import {
   type StanceId,
 } from "@stillwater/shared";
 import { makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { fightInput } from "./scene/fightMotion";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import type { ScenePhase } from "./scene/types";
@@ -118,6 +119,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     simRef.current = null;
     reelKeyRef.current = false;
     reelPointerRef.current = null;
+    fightInput.reeling = false;
     const surface = surfaceRef.current;
     if (surface) {
       delete surface.dataset.tension;
@@ -390,8 +392,10 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
       }
       const runtime = runtimeRef.current;
       const current = fightRef.current;
+      fightInput.reeling = false;
       if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
         const reeling = reelKeyRef.current || reelPointerRef.current !== null;
+        fightInput.reeling = reeling;
         const result = runtime.step(now, dt, reeling);
         const sim = runtime.sim;
         if (surface) {

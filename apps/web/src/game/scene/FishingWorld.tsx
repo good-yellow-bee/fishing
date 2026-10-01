@@ -19,6 +19,22 @@ import {
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
+import {
+  FISH_LEAP_SEC,
+  HOOKSET_SEC,
+  bobberPlunge,
+  bobberPull,
+  fightInput,
+  clearFightLine,
+  fightLineSag,
+  fightView,
+  fishDepthMeters,
+  fishLeadMeters,
+  fishLeapHeight,
+  fishSideMeters,
+  hooksetTug,
+  type FightSurge,
+} from "./fightMotion";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
@@ -132,10 +148,11 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     const [dx, dz] = facingDelta(1.4);
     REEL_POINT.set(anglerPose.x + dx, 0, anglerPose.z + dz);
 
+    if (prevPhase.current !== "fight" && phase === "fight") shakeAmp.current = Math.max(shakeAmp.current, 0.09);
     if (prevPhase.current === "fight" && phase !== "fight" && !fightEndedLanded()) shakeAmp.current = 0.12;
     prevPhase.current = phase;
     const surge = sim.current?.surge ?? 0;
-    if (fighting && surge === 2 && prevSurge.current !== 2) shakeAmp.current = Math.max(shakeAmp.current, 0.05);
+    if (fighting && surge === 2 && prevSurge.current !== 2) shakeAmp.current = Math.max(shakeAmp.current, 0.09);
     prevSurge.current = surge;
     camera.position.sub(shakeOffset);
     camera.position.y -= heave.current;
@@ -318,6 +335,99 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
   );
 }
 
+function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
+  const prevPhase = useRef(phase);
+  const prevSurge = useRef(0);
+  const biteAt = useRef(-1);
+  const strikeAt = useRef(-1);
+  const nextLeap = useRef(0);
+  const runSide = useRef(0.75);
+
+  useFrame((state, delta) => {
+    const t = state.clock.elapsedTime;
+    const dt = Math.min(delta, 0.05);
+    const surge = (sim.current?.surge ?? 0) as FightSurge;
+    const tension = sim.current?.tension ?? 0.2;
+    const live = phase === "fight" && sim.current != null;
+
+    if (phase === "hookset") {
+      if (biteAt.current < 0) biteAt.current = t;
+      strikeAt.current = -1;
+    } else if (phase === "fight") {
+      if (prevPhase.current !== "fight") {
+        strikeAt.current = t;
+        fightView.leapAge = 0;
+        nextLeap.current = t + 1.25;
+      }
+      biteAt.current = -1;
+    } else {
+      biteAt.current = -1;
+      strikeAt.current = -1;
+    }
+
+    const active = phase === "hookset" || phase === "fight";
+    fightView.active = active;
+    fightView.time = t;
+    fightView.surge = live ? surge : 0;
+    fightView.tension = tension;
+    fightView.reeling = live && fightInput.reeling;
+    fightView.strikeAge = strikeAt.current >= 0 ? t - strikeAt.current : -1;
+    fightView.biteAge = biteAt.current >= 0 ? t - biteAt.current : 0;
+
+    if (live && surge === 1 && prevSurge.current === 0) {
+      const sign = Math.random() < 0.5 ? -1 : 1;
+      runSide.current = sign * (0.65 + Math.random() * 0.35);
+    }
+    if (!active) runSide.current = 0.75;
+    fightView.runSide = runSide.current;
+
+    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 1.15 : 2.35);
+
+    if (live) {
+      const leadTarget = fishLeadMeters(surge, fightView.reeling);
+      const sideTarget = fishSideMeters(surge, runSide.current);
+      const depthTarget = fishDepthMeters(surge);
+      const pullTarget = bobberPull(surge, fightView.reeling);
+      const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;
+      const pullRate = surge === 2 && !fightView.reeling ? 5.4 : 3.4;
+      fightView.lead += (leadTarget - fightView.lead) * (1 - Math.exp(-leadRate * dt));
+      fightView.side += (sideTarget - fightView.side) * (1 - Math.exp(-4.4 * dt));
+      fightView.depth += (depthTarget - fightView.depth) * (1 - Math.exp(-4.2 * dt));
+      fightView.pull += (pullTarget - fightView.pull) * (1 - Math.exp(-pullRate * dt));
+      fightView.sag = fightLineSag(tension, surge, fightView.reeling, fightView.pump);
+      fightView.tug = hooksetTug(fightView.strikeAge);
+      if (fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC) fightView.sag = Math.min(fightView.sag, 0.1);
+      fightView.plunge = bobberPlunge(0, fightView.strikeAge, surge);
+      if (surge === 2 && prevSurge.current !== 2 && fightView.leapAge < 0) nextLeap.current = t + 0.22;
+    } else {
+      fightView.lead = 0.32;
+      fightView.side = 0;
+      fightView.depth = 0.42;
+      fightView.pull = 0;
+      fightView.sag = 0.22;
+      fightView.tug = 0;
+      fightView.pump = 0;
+      if (phase !== "fight") fightView.leapAge = -1;
+      fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) : 0;
+    }
+
+    if (phase === "fight" && fightView.leapAge >= 0) {
+      fightView.leapAge += dt;
+      if (fightView.leapAge >= FISH_LEAP_SEC) {
+        fightView.leapAge = -1;
+        nextLeap.current = t + 0.95;
+      }
+    } else if (live && surge === 2 && fightView.leapAge < 0 && t >= nextLeap.current) {
+      fightView.leapAge = 0;
+    } else if (phase !== "fight") fightView.leapAge = -1;
+
+    prevSurge.current = surge;
+    prevPhase.current = phase;
+  });
+
+  return null;
+}
+
 type LineAndBobberProps = Omit<Props, "hour" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim }: { active: boolean; sim: SimRef }) {
@@ -327,6 +437,7 @@ function SurfaceRipple({ active, sim }: { active: boolean; sim: SimRef }) {
     if (!active || !group.current || !material.current) return;
     const speed = sim.current?.surge === 2 ? 1.8 : 1;
     const pulse = (state.clock.elapsedTime * 0.72 * speed) % 1;
+    group.current.position.y = 0.165 + fightView.plunge;
     group.current.scale.setScalar(0.55 + pulse * 2.3);
     material.current.opacity = (1 - pulse) * 0.4;
   });
@@ -382,10 +493,15 @@ function SurgeSpray({ sim, burstRef }: { sim: SimRef; burstRef: BurstRef }) {
     };
   }, [burstRef, life, pool, velocities]);
 
+  const prevStrike = useRef(-1);
   useFrame((_, delta) => {
     const surge = sim.current?.surge ?? 0;
+    const age = fightView.strikeAge;
     if (surge === 2 && prevSurge.current !== 2) burstRef.current();
+    if (age >= 0 && age < 0.06 && prevStrike.current < 0) burstRef.current();
     prevSurge.current = surge;
+    prevStrike.current = age >= 0 ? age : -1;
+    pool.position.set(fightView.localX, fightView.localY, fightView.localZ);
     for (let i = 0; i < SPRAY_COUNT; i += 1) {
       if (life[i]! <= 0) continue;
       life[i] -= delta;
@@ -468,59 +584,60 @@ function EntrySpray({ burstRef }: { burstRef: BurstRef }) {
   return <primitive object={pool} />;
 }
 
-const LEAP_SEC = 0.7;
-const LEAP_GAP = 1.2;
-
 function HookedFish({
-  sim,
   burstRef,
   color,
   accent,
   scale,
 }: {
-  sim: SimRef;
   burstRef: BurstRef;
   color: string;
   accent: string;
   scale: number;
 }) {
   const fish = useRef<THREE.Group>(null);
-  const leapStart = useRef(-1);
-  const nextLeapAt = useRef(0);
-  const prevSurge = useRef(0);
-  useFrame((state) => {
-    if (!fish.current) return;
-    const t = state.clock.elapsedTime;
-    const surge = sim.current?.surge ?? 0;
-    if (surge === 2 && prevSurge.current !== 2) nextLeapAt.current = t + 0.45;
-    prevSurge.current = surge;
-    if (leapStart.current >= 0) {
-      const p = (t - leapStart.current) / LEAP_SEC;
-      if (p < 1) {
-        fish.current.position.y = -0.14 + Math.sin(p * Math.PI) * 0.55;
-        fish.current.rotation.x = -p * Math.PI * 2;
-        fish.current.rotation.z = 0;
-        fish.current.rotation.y = 0;
-        return;
-      }
-      leapStart.current = -1;
-      nextLeapAt.current = t + LEAP_GAP;
-      fish.current.rotation.x = 0;
-      burstRef.current();
-    } else if (surge === 2 && t >= nextLeapAt.current) {
-      leapStart.current = t;
-      return;
-    }
-    const speed = surge === 2 ? 1.45 : 1;
-    const twist = surge === 2 ? 1.8 : surge === 1 ? 1.15 : 1;
-    const bounce = surge === 2 ? 1.6 : 1;
-    fish.current.position.y = -0.14 + Math.abs(Math.sin(t * 8 * speed)) * 0.2 * bounce;
-    fish.current.rotation.z = Math.sin(t * 10 * speed) * 0.28 * twist;
-    fish.current.rotation.y = Math.sin(t * 6 * speed) * 0.55 * twist;
+  const prevLeap = useRef(-1);
+  useFrame(() => {
+    const g = fish.current;
+    if (!g) return;
+    if (prevLeap.current >= 0 && fightView.leapAge < 0) burstRef.current();
+    prevLeap.current = fightView.leapAge;
+    const parent = g.parent;
+    const bx = parent?.position.x ?? bobberWorld.x;
+    const bz = parent?.position.z ?? bobberWorld.z;
+    let ax = bx - REEL_POINT.x;
+    let az = bz - REEL_POINT.z;
+    const reach = Math.hypot(ax, az) || 1;
+    ax /= reach;
+    az /= reach;
+    const sx = -az;
+    const sz = ax;
+    const surge = fightView.surge;
+    const throb = surge === 2 ? Math.sin(fightView.time * 8.5) * 0.16 : 0;
+    const shake = surge === 1 ? Math.sin(fightView.time * 22) * 0.07 : 0;
+    const lead = fightView.lead + throb;
+    const side = fightView.side + shake;
+    const leap = fishLeapHeight(fightView.leapAge);
+    const lx = ax * lead + sx * side;
+    const lz = az * lead + sz * side;
+    const surface = waterHeight(bx + lx, bz + lz, fightView.time);
+    const ly = surface - (parent?.position.y ?? bobberWorld.y) - fightView.depth + leap;
+    g.position.set(lx, ly, lz);
+    fightView.localX = lx;
+    fightView.localY = ly;
+    fightView.localZ = lz;
+    const faceX = ax * Math.max(0.2, lead) + sx * side;
+    const faceZ = az * Math.max(0.2, lead) + sz * side;
+    if (faceX * faceX + faceZ * faceZ > 0.002) g.rotation.y = Math.atan2(faceX, faceZ);
+    const leapP = leap > 0 ? fightView.leapAge / FISH_LEAP_SEC : 0;
+    g.rotation.x = leapP > 0 ? -Math.sin(leapP * Math.PI) * 0.95 : surge === 2 ? Math.sin(fightView.time * 9) * 0.16 : 0;
+    const bank = THREE.MathUtils.clamp(-fightView.runSide * (surge === 2 ? 0.42 : 0.12), -0.55, 0.55);
+    const thrash = surge === 1 ? Math.sin(fightView.time * 20) * 0.45 : surge === 2 ? Math.sin(fightView.time * 11) * 0.1 : 0;
+    g.rotation.z = bank + thrash;
   });
   return (
-    <group ref={fish} position={[0, -0.14, 0.38]} scale={scale}>
-      <ArticulatedFish color={color} accent={accent} speed={1.8} intensity={1.65} />
+    <group ref={fish} scale={scale}>
+      <ArticulatedFish color={color} accent={accent} speed={2.4} intensity={1.7} />
     </group>
   );
 }
@@ -678,7 +795,23 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       if (fightSim) lastLine.current = fightSim.line;
       target.x = THREE.MathUtils.lerp(REEL_POINT.x, target.x, lastLine.current);
       target.z = THREE.MathUtils.lerp(REEL_POINT.z, target.z, lastLine.current);
-      if (fightSim) target.y += Math.sin(t * 14) * 0.05 * (fightSim.surge === 2 ? 2 : 1);
+      if (fightSim && fightView.tug > 0) {
+        target.x = THREE.MathUtils.lerp(target.x, REEL_POINT.x, fightView.tug * 0.32);
+        target.z = THREE.MathUtils.lerp(target.z, REEL_POINT.z, fightView.tug * 0.32);
+      }
+      if (fightSim && fightView.pull > 0.001) {
+        const dx = target.x - REEL_POINT.x;
+        const dz = target.z - REEL_POINT.z;
+        const reach = Math.hypot(dx, dz) || 1;
+        const outX = dx / reach;
+        const outZ = dz / reach;
+        target.x += outX * fightView.pull + -outZ * fightView.runSide * fightView.pull;
+        target.z += outZ * fightView.pull + outX * fightView.runSide * fightView.pull;
+      }
+      if (fightSim) {
+        const bob = fightView.surge === 2 ? 0.02 : fightView.reeling ? 0.035 : 0.045;
+        target.y += Math.sin(t * (fightView.reeling ? 8 : 14)) * bob;
+      }
     } else {
       lastLine.current = 1;
     }
@@ -687,6 +820,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const hop = (t - splashStart.current) / 0.36;
       if (hop >= 0 && hop < 1) target.y += Math.sin(hop * Math.PI) * 0.16 * (1 - hop);
     }
+    if (dipped && fightView.plunge > 0) target.y -= fightView.plunge;
+    if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
     if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -704,15 +839,37 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     bobberWorld.copy(target);
     lookAt.copy(target);
     if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
-    // Quadratic sag: taut under tension during the fight, a loose trail while the lure is in the air.
+    // Cast trail keeps its own sag. A fight run or pump only lifts the belly.
     const lineX = target.x - rodTip.x;
     const lineZ = target.z - rodTip.z;
     const rawSpan = Math.hypot(lineX, lineZ);
     const span = rawSpan || 1;
     let sag = 0.22;
     if (flying) sag = castTrailSag(flightP, rawSpan);
-    else if (phase === "fight" && sim.current) sag = 0.04 + Math.max(0, 1 - sim.current.tension) * 0.5;
-    const sway = (flying ? Math.sin(t * 7) * 0.05 * (1 - flightP) : Math.sin(t * 1.6) * 0.07) * Math.min(1, span / 6);
+    else if (phase === "fight" && sim.current) sag = fightView.sag;
+    else if (phase === "hookset") sag = 0.1;
+    let swayHz = 1.6;
+    let swayAmp = 0.07;
+    if (flying) {
+      swayHz = 7;
+      swayAmp = 0.05 * (1 - flightP);
+    } else if (phase === "hookset") {
+      swayHz = 16;
+      swayAmp = 0.09;
+    } else if (phase === "fight" && sim.current) {
+      if (fightView.surge === 2) {
+        swayHz = 11;
+        swayAmp = 0.035;
+      } else if (fightView.surge === 1) {
+        swayHz = 15;
+        swayAmp = 0.1;
+      } else if (fightView.reeling) {
+        swayHz = 2.2;
+        swayAmp = 0.045;
+      }
+    }
+    const sway = Math.sin(t * swayHz) * swayAmp * Math.min(1, span / 6);
+    (line.material as THREE.LineBasicMaterial).opacity = phase === "fight" && fightView.surge === 2 ? 0.9 : 0.55;
     const sideX = -lineZ / span;
     const sideZ = lineX / span;
     const lag = flying ? (1 - castAlong(flightP)) * Math.min(1.35, span * 0.2) : 0;
@@ -723,9 +880,13 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
-      positions[i * 3] = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
-      positions[i * 3 + 1] = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
-      positions[i * 3 + 2] = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
+      const x = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
+      const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
+      let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
+      if (dipped) y = clearFightLine(y, x, z);
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
     }
     attr.needsUpdate = true;
   });
@@ -755,11 +916,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
         {phase === "fight" && (
           <HookedFish
-            sim={sim}
             burstRef={burstRef}
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
-            scale={bodyScale(weight)}
+            scale={Math.max(0.95, bodyScale(weight))}
           />
         )}
       </group>
@@ -838,6 +998,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
   return (
     <>
       <PlayerMove phase={phase} />
+      <FightMotion phase={phase} sim={sim} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <LakeWorld spot={spot} hour={hour} />
@@ -860,7 +1021,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
         accent={species?.accent ?? FALLBACK_ACCENT}
         scale={bodyScale(weight)}
       />
-      <Angler phase={phase} power={power} sim={sim} rodTip={rodTip} hand={hand} lookAt={lookAt} />
+      <Angler phase={phase} power={power} rodTip={rodTip} hand={hand} lookAt={lookAt} />
     </>
   );
 }
