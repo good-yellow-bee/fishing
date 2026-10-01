@@ -532,7 +532,7 @@ button.field-primary {
 
   .field-tab {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     position: fixed;
     left: 0;
     right: 0;
