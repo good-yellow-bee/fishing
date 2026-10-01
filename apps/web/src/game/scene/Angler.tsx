@@ -15,6 +15,7 @@ import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } fr
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
 import { anglerPose, shortestYaw } from "./pose";
+import { waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
@@ -114,6 +115,8 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     const throwAge = throwStart.current >= 0 ? t - throwStart.current : -1;
     prevPhase.current = phase;
     const whipping = phase === "waiting" && throwAge >= 0 && throwAge < CAST_ROD_SETTLE_SEC + 0.15;
+    const sitting = phase === "waiting" && !whipping && waitView.age >= 0;
+    const twitching = sitting && waitTwitchActive(waitView.age);
 
     const landing = phase === "result" && landView.active;
     if (landing && !holdingCatch.current) {
@@ -149,9 +152,14 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     } else if (missing) {
       rodPitch.current = missRodPitch(missView.age, missFromPitch.current);
     } else {
-      const rodTarget =
-        phase === "casting" ? loadedRodPitch(power, t) : whipping ? thrownRodPitch(power, throwAge, whipFrom.current) : swing(phase, power, t);
-      if (whipping) rodPitch.current = rodTarget;
+      const rodTarget = phase === "casting"
+        ? loadedRodPitch(power, t)
+        : whipping
+          ? thrownRodPitch(power, throwAge, whipFrom.current)
+          : sitting
+            ? waitRodPitch(waitView.age)
+            : swing(phase, power, t);
+      if (whipping || twitching) rodPitch.current = rodTarget;
       else {
         const follow = phase === "casting" ? 7 : 16;
         rodPitch.current += (rodTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
@@ -172,9 +180,11 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
         ? landBodyLean(landView.age)
         : missing
           ? missBodyLean(missView.age, missFromLean.current)
-          : 0;
+          : sitting
+            ? waitBodyLean(waitView.age)
+            : 0;
     const striking = phase === "fight" && fightView.strikeAge >= 0 && fightView.strikeAge < HOOKSET_SEC;
-    if (striking || taking || landing || missing) bodyLean.current = leanTarget;
+    if (striking || taking || landing || missing || twitching) bodyLean.current = leanTarget;
     else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
       root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);

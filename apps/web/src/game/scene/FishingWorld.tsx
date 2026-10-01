@@ -64,6 +64,7 @@ import {
 } from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { missBobberLift, missLineSag, missView } from "./missMotion";
+import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose, shortestYaw } from "./pose";
@@ -937,6 +938,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   const flightDur = useRef(0.6);
   const flightPower = useRef(0.5);
   const splashStart = useRef(-1);
+  const settleAt = useRef(-1);
   const missRing = useRef(false);
   const lastLine = useRef(1);
   const burstRef = useRef<() => void>(() => {});
@@ -984,6 +986,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     }
     const missing = phase === "result" && missView.active;
     const showLure = (phase === "waiting" && released) || dipped || missing;
+    if (!showLure) {
+      waitView.age = -1;
+      settleAt.current = -1;
+    }
     if (phase === "result" && landView.active) {
       const opacity = landLineOpacity(landView.swing);
       (line.material as THREE.LineBasicMaterial).opacity = opacity;
@@ -1121,6 +1127,17 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       target.z = missView.z;
       target.y = 0.07 + missBobberLift(missView.age, missView.fromPlunge);
     }
+    const sitting = lureIsWaiting(phase, flying) && flightDone.current;
+    if (sitting) {
+      if (settleAt.current < 0) settleAt.current = t;
+      waitView.age = t - settleAt.current;
+      const shifted = applyWaitShift(target.x, target.z, anglerPose.x, anglerPose.z, t, waitView.age);
+      target.x = shifted.x;
+      target.z = shifted.z;
+    } else {
+      settleAt.current = -1;
+      waitView.age = -1;
+    }
     if (!flying) target.y += waterHeight(target.x, target.z, t);
     if (!flying && phase === "waiting" && splashStart.current >= 0) {
       const hop = (t - splashStart.current) / 0.36;
@@ -1139,6 +1156,11 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         lure.current.rotation.x += (wake * 0.9 - lure.current.rotation.x) * settle;
         lure.current.rotation.y += shortestYaw(lure.current.rotation.y, inbound) * settle;
         lure.current.rotation.z += (weave * 1.6 - lure.current.rotation.z) * settle;
+      } else if (sitting) {
+        const nod = waitNod(target.x, target.z, t);
+        lure.current.rotation.x += (nod.x - lure.current.rotation.x) * settle;
+        lure.current.rotation.y += shortestYaw(lure.current.rotation.y, 0) * settle;
+        lure.current.rotation.z += (nod.z - lure.current.rotation.z) * settle;
       } else {
         lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
         lure.current.rotation.y += shortestYaw(lure.current.rotation.y, 0) * settle;
@@ -1175,6 +1197,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     const span = rawSpan || 1;
     let sag = 0.22;
     if (flying) sag = castTrailSag(flightP, rawSpan);
+    else if (sitting) sag = waitLineSag(waitView.age);
     else if (phase === "fight" && sim.current) sag = fightView.sag;
     else if (phase === "hookset") sag = biteLineSag(fightView.biteAge);
     else if (missing) sag = missLineSag(missView.age, missView.fromSag);
@@ -1183,6 +1206,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     if (flying) {
       swayHz = 7;
       swayAmp = 0.05 * (1 - flightP);
+    } else if (sitting) {
+      swayAmp = sag > WAIT_REST_SAG + 0.05 ? 0.12 : sag < WAIT_REST_SAG - 0.05 ? 0.02 : 0.07;
     } else if (phase === "hookset") {
       swayHz = 8;
       swayAmp = 0.03 + biteLineSag(fightView.biteAge) * 0.1;
