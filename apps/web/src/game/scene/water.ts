@@ -1,15 +1,77 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge } from "@stillwater/shared";
 
-// Chop dies out at the shoreline so the bank seam stays put.
-function shoreWeight(x: number, z: number) {
+/** 0 on the bank, 1 at the middle of the basin. */
+function shoreInland(x: number, z: number) {
   const nx = x / LAKE_RX;
   const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
   const radius = Math.hypot(nx, nz);
   const edge = lakeEdge(Math.atan2(nz, nx)) * 0.96;
   if (edge < 1e-4) return 0;
-  const inland = 1 - radius / edge;
-  const fade = Math.min(1, Math.max(0, inland / 0.2));
+  return Math.min(1, Math.max(0, 1 - radius / edge));
+}
+
+// Chop dies out at the shoreline so the bank seam stays put.
+function shoreWeight(x: number, z: number) {
+  const fade = Math.min(1, shoreInland(x, z) / 0.2);
   return fade * fade;
+}
+
+function smoothstep(edge0: number, edge1: number, value: number) {
+  const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+// The dock sits inside the basin, so the radial shelf alone would paint it deep.
+function dockShelf(x: number, z: number) {
+  const ahead = 6.9 - z;
+  if (ahead < -1.6) return 0;
+  const d = Math.hypot(x / 6, Math.max(0, ahead) / 7.2);
+  if (d >= 1) return 0;
+  return smoothstep(0, 1, 1 - d);
+}
+
+/** 0 in the shallows by the bank and the dock, 1 offshore. */
+export function waterDepth(x: number, z: number) {
+  return smoothstep(0.05, 0.58, shoreInland(x, z)) * (1 - dockShelf(x, z));
+}
+
+export type WaterRgb = { r: number; g: number; b: number };
+
+const SHALLOW_TINT: WaterRgb = { r: 1.85, g: 1.92, b: 1.42 };
+const DEEP_TINT: WaterRgb = { r: 0.22, g: 0.28, b: 0.36 };
+
+function mixTint(shallow: WaterRgb, deep: WaterRgb, t: number): WaterRgb {
+  return {
+    r: shallow.r + (deep.r - shallow.r) * t,
+    g: shallow.g + (deep.g - shallow.g) * t,
+    b: shallow.b + (deep.b - shallow.b) * t,
+  };
+}
+
+/** Vertex-color multiplier. Pale on the shelf, dark in open water. */
+export function waterDepthColor(x: number, z: number) {
+  return mixTint(SHALLOW_TINT, DEEP_TINT, waterDepth(x, z));
+}
+
+const BED_SHALLOW: WaterRgb = { r: 0.74, g: 0.67, b: 0.42 };
+const BED_DEEP: WaterRgb = { r: 0.04, g: 0.09, b: 0.12 };
+
+/** Lakebed color. Sand on the shelf, mud offshore. */
+export function bedColor(x: number, z: number) {
+  return mixTint(BED_SHALLOW, BED_DEEP, waterDepth(x, z));
+}
+
+/** World y of the bed. High beside the bank, deep in the middle. */
+export function bedHeight(x: number, z: number) {
+  return -0.55 - waterDepth(x, z) * 1.9;
+}
+
+/** Meters the sitting-bobber ring rides above the chop. */
+export const BOBBER_RING_LIFT = 0.03;
+
+/** World y of the ring around a sitting bobber. It follows the chop. */
+export function bobberRingHeight(x: number, z: number, time: number) {
+  return waterHeight(x, z, time) + BOBBER_RING_LIFT;
 }
 
 /** World-space water height. The mean surface stays at y = 0. */
