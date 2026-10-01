@@ -27,6 +27,7 @@ function FieldLinks() {
       <NavLink to="/map">Map</NavLink>
       <NavLink to="/trips">Trips</NavLink>
       <NavLink to="/gear">Gear</NavLink>
+      <NavLink to="/bests">Bests</NavLink>
     </>
   );
 }
