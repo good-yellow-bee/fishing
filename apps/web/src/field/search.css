@@ -1,0 +1,32 @@
+.catch-search {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 28px;
+}
+
+.catch-search label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--field-rust);
+}
+
+.catch-search input {
+  width: 100%;
+  max-width: 28rem;
+  border: 1px solid #6b5233;
+  background: #fffaf2;
+  color: var(--field-ink);
+  padding: 12px;
+  font: inherit;
+  font-size: 16px;
+}
+
+.catch-search input:focus-visible {
+  outline: 2px solid var(--field-water);
+  outline-offset: 2px;
+}
+
+.catch-search .stack {
+  margin-top: 8px;
+}
