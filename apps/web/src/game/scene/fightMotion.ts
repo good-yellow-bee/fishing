@@ -66,10 +66,104 @@ export function reelPumpLift(phase: number) {
   return Math.cos(((u - 0.62) / 0.38) * (Math.PI / 2));
 }
 
-/** Bite loads the rod down toward the water. */
+/** Waiting-rod pitch. The take starts here so the tip does not jump. */
+const BITE_REST = 1.05;
+
+/** Mouth tap before the fish commits. */
+export const BITE_TAP_SEC = 0.08;
+
+/** End of the slack pause, when the yank starts. */
+export const BITE_SLACK_END = 0.15;
+
+/** End of the hard yank. The tip throbs after this. */
+export const BITE_YANK_END = 0.29;
+
+/** One pump of the loaded tip after the yank. */
+export const BITE_THROB_SEC = 0.22;
+
+function biteAgeOf(biteAge: number) {
+  return Math.max(0, biteAge);
+}
+
+/** 1 at the bottom of a throb, -1 when the tip springs back. Zero before the yank ends. */
+function biteThrob(age: number) {
+  if (age < BITE_YANK_END) return 0;
+  return Math.sin(((age - BITE_YANK_END) / BITE_THROB_SEC) * Math.PI * 2);
+}
+
+/**
+ * Tap, almost recover, then a yank that loads the rod.
+ * After the yank the tip pumps instead of sitting in one bend.
+ */
 export function biteRodPitch(biteAge: number, time: number) {
-  const load = 1.14 + Math.min(0.4, Math.max(0, biteAge) * 2.1);
-  return load + Math.sin(time * 23) * 0.055;
+  const age = biteAgeOf(biteAge);
+  const tick = Math.sin(time * 23) * 0.035;
+  if (age < BITE_TAP_SEC) {
+    const u = age / BITE_TAP_SEC;
+    return BITE_REST + Math.sin(u * Math.PI) * 0.32 + tick * u;
+  }
+  if (age < BITE_SLACK_END) {
+    const u = (age - BITE_TAP_SEC) / (BITE_SLACK_END - BITE_TAP_SEC);
+    return BITE_REST + 0.05 * (1 - u) + tick;
+  }
+  const u = Math.min(1, (age - BITE_SLACK_END) / (BITE_YANK_END - BITE_SLACK_END));
+  const loaded = BITE_REST + 0.05 + (1 - (1 - u) ** 3) * 0.5;
+  return loaded + biteThrob(age) * 0.12 + tick;
+}
+
+/** Meters the bobber is pulled under. A tap ticks it; the yank dunks it; the throb lets it rise. */
+export function bitePlunge(biteAge: number) {
+  const age = biteAgeOf(biteAge);
+  if (age < BITE_TAP_SEC) return Math.sin((age / BITE_TAP_SEC) * Math.PI) * 0.045;
+  if (age < BITE_SLACK_END) return 0.008;
+  const u = Math.min(1, (age - BITE_SLACK_END) / 0.1);
+  const dunk = (1 - (1 - u) ** 2) * 0.36;
+  const throb = biteThrob(age);
+  if (throb >= 0) return dunk + throb * 0.07;
+  return dunk + throb * (dunk - 0.02);
+}
+
+/** Belly of the line. Slack on the tap, tight on the yank, a little belly between pumps. */
+export function biteLineSag(biteAge: number) {
+  const age = biteAgeOf(biteAge);
+  if (age < BITE_SLACK_END) return 0.3;
+  const u = Math.min(1, (age - BITE_SLACK_END) / 0.1);
+  const tight = 0.3 + (0.045 - 0.3) * (1 - (1 - u) ** 2);
+  const belly = Math.max(0, -biteThrob(age)) * 0.07;
+  return tight + belly;
+}
+
+/** Forward lean. The yank drags the angler; the pumps tug again. */
+export function biteBodyLean(biteAge: number) {
+  const age = biteAgeOf(biteAge);
+  const base = 0.045;
+  if (age < BITE_TAP_SEC) return base + Math.sin((age / BITE_TAP_SEC) * Math.PI) * 0.04;
+  if (age < BITE_SLACK_END) return base;
+  const u = Math.min(1, (age - BITE_SLACK_END) / 0.12);
+  return base + (1 - (1 - u) ** 2) * 0.16 + Math.max(0, biteThrob(age)) * 0.05;
+}
+
+/** Sideways kick of the tip, radians. */
+export function biteRodRoll(biteAge: number, time: number) {
+  const age = biteAgeOf(biteAge);
+  const tick = Math.sin(time * 17) * 0.025;
+  if (age < BITE_SLACK_END) return Math.sin(Math.min(1, age / BITE_TAP_SEC) * Math.PI) * 0.04 + tick;
+  if (age < BITE_YANK_END) {
+    const u = (age - BITE_SLACK_END) / (BITE_YANK_END - BITE_SLACK_END);
+    return Math.sin(u * Math.PI) * 0.16 + tick;
+  }
+  return Math.sin(((age - BITE_YANK_END) / (BITE_THROB_SEC * 2)) * Math.PI * 2) * 0.1 + tick;
+}
+
+/** Sideways dart of the bobber, meters. Positive through the yank, then it swaps sides. */
+export function biteDart(biteAge: number) {
+  const age = biteAgeOf(biteAge);
+  if (age < BITE_SLACK_END) return 0;
+  if (age < BITE_YANK_END) {
+    const u = (age - BITE_SLACK_END) / (BITE_YANK_END - BITE_SLACK_END);
+    return Math.sin(u * Math.PI) * 0.28;
+  }
+  return Math.sin(((age - BITE_YANK_END) / (BITE_THROB_SEC * 2)) * Math.PI * 2) * 0.2;
 }
 
 /**
@@ -120,7 +214,7 @@ export function fightRodPitch(input: RodInput) {
 export function fightRodRoll(surge: FightSurge, runSide: number, time: number, strikeAge: number, biteAge: number) {
   const pull = runSide * (surge === 2 ? 0.26 : surge === 1 ? 0.1 : 0.03);
   let shake = 0;
-  if (strikeAge < 0) shake = Math.sin(biteAge * 26) * 0.08;
+  if (strikeAge < 0) shake = biteRodRoll(biteAge, time);
   else if (surge === 1) shake = Math.sin(time * 22) * 0.07;
   else if (surge === 2) shake = Math.sin(time * 16) * 0.035;
   const snap = strikeAge >= 0 && strikeAge < STRIKE_SNAP_SEC ? Math.sin((strikeAge / STRIKE_SNAP_SEC) * Math.PI) * 0.1 : 0;
@@ -128,9 +222,9 @@ export function fightRodRoll(surge: FightSurge, runSide: number, time: number, s
 }
 
 /** Negative leans back (the set, a pump). Positive is the fish dragging you forward. */
-export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: number) {
+export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: number, biteAge = 0) {
   let lean = 0;
-  if (strikeAge < 0) lean += 0.1;
+  if (strikeAge < 0) lean += biteBodyLean(biteAge);
   else if (strikeAge < STRIKE_SNAP_SEC + STRIKE_HOLD_SEC) {
     const u = Math.min(1, Math.max(0, strikeAge) / STRIKE_SNAP_SEC);
     lean -= 0.42 * (1 - (1 - u) ** 2);
@@ -179,7 +273,7 @@ export function hooksetTug(strikeAge: number) {
 }
 
 export function bobberPlunge(biteAge: number, strikeAge: number, surge: FightSurge) {
-  if (strikeAge < 0) return 0.08 + Math.abs(Math.sin(Math.max(0, biteAge) * 17)) * 0.07;
+  if (strikeAge < 0) return bitePlunge(biteAge);
   return hooksetTug(strikeAge) * 0.18 + (surge === 2 ? 0.11 : 0);
 }
 
@@ -244,6 +338,28 @@ function onDockDeck(x: number, z: number, pad = 0) {
     z >= DOCK_DECK.minZ - pad &&
     z <= DOCK_DECK.maxZ + pad
   );
+}
+
+/**
+ * Sideways dart of a bobber already on the water.
+ * Shrinks the offset so the take stays in the lake and off the dock.
+ */
+export function applyBiteDart(x: number, z: number, anglerX: number, anglerZ: number, biteAge: number) {
+  const dart = biteDart(biteAge);
+  if (dart === 0) return { x, z };
+  const dx = x - anglerX;
+  const dz = z - anglerZ;
+  const reach = Math.hypot(dx, dz) || 1;
+  const sideX = -dz / reach;
+  const sideZ = dx / reach;
+  let scale = 1;
+  for (let i = 0; i < 4; i += 1) {
+    const nextX = x + sideX * dart * scale;
+    const nextZ = z + sideZ * dart * scale;
+    if (inLake(nextX, nextZ) && !onDockDeck(nextX, nextZ, LURE_DOCK_PAD)) return { x: nextX, z: nextZ };
+    scale *= 0.5;
+  }
+  return { x, z };
 }
 
 /**

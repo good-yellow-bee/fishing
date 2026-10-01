@@ -20,9 +20,12 @@ import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import {
+  BITE_SLACK_END,
   FISH_LEAP_SEC,
   HOOKSET_SEC,
+  applyBiteDart,
   applyRetrieve,
+  biteLineSag,
   bobberPlunge,
   bobberPull,
   fightInput,
@@ -146,7 +149,7 @@ function isFighting(phase: ScenePhase) {
 function placeBobber(
   out: THREE.Vector3,
   power: number,
-  dipped: boolean,
+  phase: ScenePhase,
   t: number,
   aim: THREE.Vector3 | null,
   nibble: boolean,
@@ -160,7 +163,8 @@ function placeBobber(
     out.x = anglerPose.x + dx;
     out.z = anglerPose.z + dz;
   }
-  if (dipped) out.y = -0.14;
+  if (phase === "fight") out.y = -0.14;
+  else if (phase === "hookset") out.y = 0.07;
   else if (nibble) out.y = -0.08 + Math.sin(t * 26) * 0.05;
   else out.y = 0.07 + Math.sin(t * 2.4) * 0.04;
 }
@@ -186,6 +190,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const returning = useRef(false);
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
+  const biteYanked = useRef(false);
   const fighting = phase === "fight";
   const rest = useMemo(() => [SPAWN_X, CHEST_Y, SPAWN_Z] as [number, number, number], []);
 
@@ -206,6 +211,11 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     REEL_POINT.set(anglerPose.x + dx, 0, anglerPose.z + dz);
 
     if (prevPhase.current !== "fight" && phase === "fight") shakeAmp.current = Math.max(shakeAmp.current, 0.09);
+    if (phase === "hookset" && !biteYanked.current && fightView.plunge > 0.25) {
+      biteYanked.current = true;
+      shakeAmp.current = Math.max(shakeAmp.current, 0.05);
+    }
+    if (phase !== "hookset") biteYanked.current = false;
     if (prevPhase.current === "fight" && phase !== "fight" && !fightEndedLanded()) shakeAmp.current = 0.12;
     prevPhase.current = phase;
     const surge = sim.current?.surge ?? 0;
@@ -488,18 +498,19 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
 
 type LineAndBobberProps = Omit<Props, "hour" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
-function SurfaceRipple({ active, sim }: { active: boolean; sim: SimRef }) {
+function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
   const material = useRef<THREE.MeshBasicMaterial>(null);
   useFrame((state) => {
     if (!active || !group.current || !material.current) return;
-    const speed = sim.current?.surge === 2 ? 1.8 : 1;
+    const speed = sunk ? (sim.current?.surge === 2 ? 1.8 : 1) : 2.2;
     const pulse = (state.clock.elapsedTime * 0.72 * speed) % 1;
-    group.current.position.y = 0.165 + fightView.plunge;
-    group.current.scale.setScalar(0.55 + pulse * 2.3);
+    // Fight sinks the bobber to y=-0.14. A bite leaves it on the surface and plunge pulls it under.
+    group.current.position.y = sunk ? 0.165 + fightView.plunge : fightView.plunge - 0.05;
+    const take = !sunk && fightView.plunge > 0.2 ? 1.35 : 1;
+    group.current.scale.setScalar((0.55 + pulse * 2.3) * take);
     material.current.opacity = (1 - pulse) * 0.4;
   });
-  // The bobber group sits at y=-0.14 while fighting; lift the ring back to the water surface.
   return (
     <group ref={group} visible={active} position={[0, 0.165, 0]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]}>
@@ -853,18 +864,29 @@ function bodyScale(weight: number) {
   return 0.5 + Math.min(0.45, weight / 28);
 }
 
-function StalkingFish({ active }: { active: boolean }) {
+function StalkingFish({ active, taking }: { active: boolean; taking: boolean }) {
   const fish = useRef<THREE.Group>(null);
   useFrame((state) => {
     const g = fish.current;
     if (!g) return;
-    const show = active && bobberWorld.y < 0.18;
+    const show = taking || (active && bobberWorld.y < 0.18);
     g.visible = show;
     if (!show) return;
     const t = state.clock.elapsedTime;
+    if (taking) {
+      const age = Math.max(0, fightView.biteAge);
+      const u = Math.min(1, age / BITE_SLACK_END);
+      const e = 1 - (1 - u) ** 2;
+      const orbit = 0.62 * (1 - e);
+      g.position.set(Math.cos(t * 1.7) * orbit, fightView.plunge - 0.34, Math.sin(t * 1.7) * orbit * 0.4);
+      g.rotation.y = Math.atan2(-g.position.x, Math.max(0.05, -g.position.z));
+      g.rotation.x = age >= BITE_SLACK_END ? 0.35 : 0.1;
+      g.rotation.z = age >= BITE_SLACK_END ? Math.sin(age * 18) * 0.4 : 0;
+      return;
+    }
     const r = 0.62;
     g.position.set(Math.cos(t * 1.7) * r, -0.22, Math.sin(t * 1.7) * r);
-    g.rotation.y = t * 1.7 + Math.PI / 2;
+    g.rotation.set(0, t * 1.7 + Math.PI / 2, 0);
   });
   return (
     <group ref={fish} visible={false} scale={0.42}>
@@ -989,7 +1011,12 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
-    placeBobber(target, Math.max(0.35, power), dipped, t, usingAim.current ? castAim : null, nibble);
+    placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble);
+    if (phase === "hookset") {
+      const darted = applyBiteDart(target.x, target.z, anglerPose.x, anglerPose.z, fightView.biteAge);
+      target.x = darted.x;
+      target.z = darted.z;
+    }
     if (phase === "waiting" && released && !flightDone.current && flightStart.current < 0) {
       flightFrom.copy(rodTip);
       flightTo.set(target.x, 0.07, target.z);
@@ -1115,15 +1142,15 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     let sag = 0.22;
     if (flying) sag = castTrailSag(flightP, rawSpan);
     else if (phase === "fight" && sim.current) sag = fightView.sag;
-    else if (phase === "hookset") sag = 0.1;
+    else if (phase === "hookset") sag = biteLineSag(fightView.biteAge);
     let swayHz = 1.6;
     let swayAmp = 0.07;
     if (flying) {
       swayHz = 7;
       swayAmp = 0.05 * (1 - flightP);
     } else if (phase === "hookset") {
-      swayHz = 16;
-      swayAmp = 0.09;
+      swayHz = 8;
+      swayAmp = 0.03 + biteLineSag(fightView.biteAge) * 0.1;
     } else if (phase === "fight" && sim.current) {
       if (fightView.surge === 2) {
         swayHz = 11;
@@ -1199,8 +1226,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
         </group>
-        <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} />
-        {phase === "waiting" && <StalkingFish active />}
+        <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} sunk={phase === "fight"} />
+        {(phase === "waiting" || phase === "hookset") && <StalkingFish active={phase === "waiting"} taking={phase === "hookset"} />}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
         {phase === "fight" && (
           <HookedFish

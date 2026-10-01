@@ -1,10 +1,18 @@
 import { inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
+  BITE_SLACK_END,
+  BITE_TAP_SEC,
+  BITE_THROB_SEC,
+  BITE_YANK_END,
   FISH_LEAP_SEC,
   HOOKSET_SEC,
   STRIKE_SNAP_SEC,
   TUG_SEC,
+  applyBiteDart,
+  biteDart,
+  biteLineSag,
+  bitePlunge,
   biteRodPitch,
   bobberPull,
   fightBodyLean,
@@ -44,6 +52,27 @@ function rod(over: Partial<RodInput> = {}): RodInput {
 
 describe("fight motion", () => {
   it("loads the rod on the bite, snaps it up to set the hook, then bends on a run", () => {
+    const rest = biteRodPitch(0, 0);
+    const tap = biteRodPitch(BITE_TAP_SEC / 2, 0);
+    const slack = biteRodPitch((BITE_TAP_SEC + BITE_SLACK_END) / 2, 0);
+    const yanked = biteRodPitch(BITE_YANK_END, 0);
+    expect(tap).toBeGreaterThan(rest + 0.2);
+    expect(slack).toBeLessThan(tap - 0.15);
+    expect(yanked).toBeGreaterThan(tap);
+    const down = biteRodPitch(BITE_YANK_END + BITE_THROB_SEC * 0.25, 0);
+    const up = biteRodPitch(BITE_YANK_END + BITE_THROB_SEC * 0.75, 0);
+    expect(down).toBeGreaterThan(up + 0.15);
+    expect(bitePlunge(BITE_YANK_END)).toBeGreaterThan(bitePlunge(BITE_TAP_SEC / 2) + 0.2);
+    expect(bitePlunge(BITE_YANK_END + BITE_THROB_SEC * 0.25)).toBeGreaterThan(bitePlunge(BITE_YANK_END));
+    expect(bitePlunge(BITE_YANK_END + BITE_THROB_SEC * 0.75)).toBeLessThan(0.08);
+    expect(biteLineSag(0.05)).toBeGreaterThan(biteLineSag(BITE_YANK_END) + 0.15);
+    expect(biteDart(BITE_SLACK_END)).toBe(0);
+    expect(biteDart((BITE_SLACK_END + BITE_YANK_END) / 2)).toBeGreaterThan(0.2);
+    const darted = applyBiteDart(0, -4, 0, 2, (BITE_SLACK_END + BITE_YANK_END) / 2);
+    expect(inLake(darted.x, darted.z)).toBe(true);
+    expect(Math.abs(darted.x)).toBeGreaterThan(0.15);
+    expect(applyBiteDart(0, -4, 0, 2, 0)).toEqual({ x: 0, z: -4 });
+    expect(Math.abs(fightRodRoll(0, 0, 0, -1, (BITE_SLACK_END + BITE_YANK_END) / 2))).toBeGreaterThan(0.1);
     const bite = biteRodPitch(0.3, 0);
     expect(bite).toBeGreaterThan(biteRodPitch(0, 0));
     const strike = fightRodPitch(rod({ strikeAge: STRIKE_SNAP_SEC, fromPitch: bite }));
@@ -156,6 +185,7 @@ describe("fight motion", () => {
 
   it("leans back into the set and gets dragged forward on a run", () => {
     expect(fightBodyLean(0, false, -1)).toBeGreaterThan(0);
+    expect(fightBodyLean(0, false, -1, BITE_YANK_END)).toBeGreaterThan(fightBodyLean(0, false, -1, 0) + 0.1);
     expect(fightBodyLean(0, false, 0.08)).toBeLessThan(0);
     expect(fightBodyLean(0, true, 2)).toBeLessThan(0);
     expect(fightBodyLean(2, false, 2)).toBeGreaterThan(0);
