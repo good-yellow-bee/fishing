@@ -205,12 +205,124 @@ export function fightLineSag(tension: number, surge: FightSurge, reeling: boolea
 /** bridge_wood.glb scaled 1.8. The deck top sits near y = 0.63. */
 const DOCK_DECK = { minX: -1.05, maxX: 1.05, minZ: 5.2, maxZ: 8.5, top: 0.72 };
 
+/**
+ * Meters the lure still sits beyond the reeled point at the bottom of a pump.
+ * It arrives on the lift, so the haul reads as a dart instead of a slide.
+ */
+export function retrieveHang(pump: number, reeling: boolean, surge: FightSurge) {
+  if (!reeling || surge === 2) return 0;
+  return (1 - reelPumpLift(pump)) * (surge === 1 ? 0.22 : 1.45);
+}
+
+/** Sideways kick, meters. Alternates each pump and peaks as the lure comes in. */
+export function retrieveWeave(pump: number, reeling: boolean, surge: FightSurge) {
+  if (!reeling || surge === 2) return 0;
+  const stroke = Math.floor(Math.max(0, pump));
+  const sign = stroke % 2 === 0 ? 1 : -1;
+  return sign * reelPumpLift(pump) * (surge === 1 ? 0.16 : 1.05);
+}
+
+/** Skip above the surface on the haul, meters. */
+export function retrieveHop(pump: number, reeling: boolean, surge: FightSurge) {
+  if (!reeling || surge === 2) return 0;
+  return reelPumpLift(pump) * (surge === 1 ? 0.06 : 0.52);
+}
+
+/** 0..1 wake while the lure is moving in. A run keeps the water quiet. */
+export function retrieveWake(pump: number, reeling: boolean, surge: FightSurge) {
+  if (!reeling || surge === 2) return 0;
+  return reelPumpLift(pump);
+}
+
+/** Buoy half-width at the fight scale, plus a little air. */
+const LURE_DOCK_PAD = 0.18;
+
+function onDockDeck(x: number, z: number, pad = 0) {
+  return (
+    x >= DOCK_DECK.minX - pad &&
+    x <= DOCK_DECK.maxX + pad &&
+    z >= DOCK_DECK.minZ - pad &&
+    z <= DOCK_DECK.maxZ + pad
+  );
+}
+
+/**
+ * Hang and weave applied to a lure already placed by the line fraction.
+ * Shrinks the offset so a haul stays in the water, off the dock and the bank.
+ */
+export function applyRetrieve(
+  x: number,
+  z: number,
+  reelX: number,
+  reelZ: number,
+  pump: number,
+  reeling: boolean,
+  surge: FightSurge,
+) {
+  const hang = retrieveHang(pump, reeling, surge);
+  const weave = retrieveWeave(pump, reeling, surge);
+  if (hang === 0 && weave === 0) return { x, z };
+  const dx = x - reelX;
+  const dz = z - reelZ;
+  const reach = Math.hypot(dx, dz) || 1;
+  const outX = dx / reach;
+  const outZ = dz / reach;
+  const capped = Math.min(hang, reach * 0.55);
+  let scale = 1;
+  let offDeck: { x: number; z: number } | null = null;
+  for (let i = 0; i < 6; i += 1) {
+    const nextX = x + outX * capped * scale - outZ * weave * scale;
+    const nextZ = z + outZ * capped * scale + outX * weave * scale;
+    if (inLake(nextX, nextZ) && !onDockDeck(nextX, nextZ)) {
+      if (!onDockDeck(nextX, nextZ, LURE_DOCK_PAD)) return { x: nextX, z: nextZ };
+      if (!offDeck) offDeck = { x: nextX, z: nextZ };
+    }
+    scale *= 0.5;
+  }
+  return offDeck ?? { x, z };
+}
+
+/**
+ * Points to insert so a straight fight-line span does not cut the dock.
+ * Each one sits on the lip. Empty when the span already clears the deck.
+ */
+export function dockLineLips(
+  x0: number,
+  y0: number,
+  z0: number,
+  x1: number,
+  y1: number,
+  z1: number,
+) {
+  const dx = x1 - x0;
+  const dy = y1 - y0;
+  const dz = z1 - z0;
+  const hits: { t: number; x: number; y: number; z: number }[] = [];
+  const planes: Array<[number, number, number]> = [
+    [DOCK_DECK.minX, x0, dx],
+    [DOCK_DECK.maxX, x0, dx],
+    [DOCK_DECK.minZ, z0, dz],
+    [DOCK_DECK.maxZ, z0, dz],
+  ];
+  for (const [plane, origin, delta] of planes) {
+    if (Math.abs(delta) < 1e-8) continue;
+    const t = (plane - origin) / delta;
+    if (t <= 1e-3 || t >= 1 - 1e-3) continue;
+    const x = x0 + dx * t;
+    const z = z0 + dz * t;
+    if (!onDockDeck(x, z, 1e-3)) continue;
+    if (hits.some((hit) => Math.abs(hit.t - t) < 1e-3)) continue;
+    hits.push({ t, x, y: y0 + dy * t, z });
+  }
+  hits.sort((a, b) => a.t - b.t);
+  if (!hits.some((hit) => hit.y < DOCK_DECK.top - 1e-3)) return [];
+  return hits.map((hit) => ({ x: hit.x, y: Math.max(hit.y, DOCK_DECK.top), z: hit.z }));
+}
+
 /** Lift a fight-line sample off the dock deck and the ground. Lake water can stay under the surface. */
 export function clearFightLine(y: number, x: number, z: number) {
   let next = y;
-  if (x >= DOCK_DECK.minX && x <= DOCK_DECK.maxX && z >= DOCK_DECK.minZ && z <= DOCK_DECK.maxZ) {
-    next = Math.max(next, DOCK_DECK.top);
-  }
+  if (onDockDeck(x, z)) next = Math.max(next, DOCK_DECK.top);
   if (!inLake(x, z)) next = Math.max(next, 0.12);
   return next;
 }

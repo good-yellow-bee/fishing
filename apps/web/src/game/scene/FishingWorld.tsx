@@ -22,10 +22,12 @@ import { Angler } from "./Angler";
 import {
   FISH_LEAP_SEC,
   HOOKSET_SEC,
+  applyRetrieve,
   bobberPlunge,
   bobberPull,
   fightInput,
   clearFightLine,
+  dockLineLips,
   fightLineSag,
   fightView,
   fishDepthMeters,
@@ -33,13 +35,16 @@ import {
   fishLeapHeight,
   fishSideMeters,
   hooksetTug,
+  retrieveHop,
+  retrieveWake,
+  retrieveWeave,
   type FightSurge,
 } from "./fightMotion";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { anglerPose } from "./pose";
+import { anglerPose, shortestYaw } from "./pose";
 import { waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
@@ -381,7 +386,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (!active) runSide.current = 0.75;
     fightView.runSide = runSide.current;
 
-    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 1.15 : 2.35);
+    if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15);
 
     if (live) {
       const leadTarget = fishLeadMeters(surge, fightView.reeling);
@@ -642,9 +647,152 @@ function HookedFish({
   );
 }
 
+const WAKE_RINGS = 10;
+const WAKE_LIFE = 1.15;
+
+function RetrieveWake() {
+  const rings = useMemo(() => {
+    const geometry = new THREE.RingGeometry(0.34, 0.58, 24);
+    return Array.from({ length: WAKE_RINGS }, () => {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xf4fff8,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.visible = false;
+      mesh.userData.born = -1;
+      return mesh;
+    });
+  }, []);
+  const cursor = useRef(0);
+  const lastDrop = useRef(-1);
+
+  useEffect(() => {
+    return () => {
+      rings[0]?.geometry.dispose();
+      rings.forEach((ring) => (ring.material as THREE.Material).dispose());
+    };
+  }, [rings]);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    const wake = retrieveWake(fightView.pump, fightView.active && fightView.reeling, fightView.surge);
+    if (wake > 0.42 && time - lastDrop.current > 0.09) {
+      lastDrop.current = time;
+      const ring = rings[cursor.current % rings.length];
+      cursor.current += 1;
+      ring.userData.born = time;
+      ring.userData.x = bobberWorld.x;
+      ring.userData.z = bobberWorld.z;
+    }
+    rings.forEach((ring) => {
+      const born = ring.userData.born as number;
+      const age = time - born;
+      if (born < 0 || age > WAKE_LIFE) {
+        ring.visible = false;
+        return;
+      }
+      const x = ring.userData.x as number;
+      const z = ring.userData.z as number;
+      const u = age / WAKE_LIFE;
+      ring.visible = true;
+      ring.position.set(x, waterHeight(x, z, time) + 0.045, z);
+      ring.scale.setScalar(0.85 + u * 2.8);
+      (ring.material as THREE.MeshBasicMaterial).opacity = (1 - u) * (1 - u) * 0.78;
+    });
+  });
+
+  return (
+    <group>
+      {rings.map((ring, i) => (
+        <primitive key={i} object={ring} />
+      ))}
+    </group>
+  );
+}
+
+const RETRIEVE_DROPS = 8;
+
+function RetrieveSplash() {
+  const velocities = useMemo(() => new Float32Array(RETRIEVE_DROPS * 3), []);
+  const life = useMemo(() => new Float32Array(RETRIEVE_DROPS), []);
+  const lastStroke = useRef(-1);
+  const pool = useMemo(() => {
+    const geometry = new THREE.SphereGeometry(0.07, 6, 5);
+    const holder = new THREE.Group();
+    for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xf7fffb,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      holder.add(mesh);
+    }
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      (pool.children[0] as THREE.Mesh).geometry.dispose();
+      pool.children.forEach((child) => ((child as THREE.Mesh).material as THREE.Material).dispose());
+    };
+  }, [pool]);
+
+  useFrame((_, delta) => {
+    const pumping = fightView.active && fightView.reeling;
+    const wake = retrieveWake(fightView.pump, pumping, fightView.surge);
+    const stroke = Math.floor(Math.max(0, fightView.pump));
+    if (wake > 0.82 && lastStroke.current !== stroke) {
+      lastStroke.current = stroke;
+      const dx = bobberWorld.x - anglerPose.x;
+      const dz = bobberWorld.z - anglerPose.z;
+      const reach = Math.hypot(dx, dz) || 1;
+      const outX = dx / reach;
+      const outZ = dz / reach;
+      const side = Math.sign(retrieveWeave(fightView.pump, true, fightView.surge) || 1);
+      for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+        const along = -0.35 - Math.random() * 1.1;
+        const kick = (Math.random() - 0.5) * 1.3 + side * 0.55;
+        velocities[i * 3] = outX * along - outZ * kick;
+        velocities[i * 3 + 1] = 2.2 + Math.random() * 1.5;
+        velocities[i * 3 + 2] = outZ * along + outX * kick;
+        life[i] = 0.4 + Math.random() * 0.18;
+        const mesh = pool.children[i] as THREE.Mesh;
+        mesh.position.set(bobberWorld.x, bobberWorld.y + 0.14, bobberWorld.z);
+        mesh.visible = true;
+        (mesh.material as THREE.MeshBasicMaterial).opacity = 0.9;
+      }
+    }
+    for (let i = 0; i < RETRIEVE_DROPS; i += 1) {
+      if (life[i]! <= 0) continue;
+      life[i] -= delta;
+      const mesh = pool.children[i] as THREE.Mesh;
+      if (life[i]! <= 0 || mesh.position.y < 0.02) {
+        life[i] = 0;
+        mesh.visible = false;
+        continue;
+      }
+      velocities[i * 3 + 1] -= 7.2 * delta;
+      mesh.position.x += velocities[i * 3]! * delta;
+      mesh.position.y += velocities[i * 3 + 1]! * delta;
+      mesh.position.z += velocities[i * 3 + 2]! * delta;
+      (mesh.material as THREE.MeshBasicMaterial).opacity = Math.min(0.92, life[i]! * 2.8);
+    }
+  });
+
+  return <primitive object={pool} />;
+}
+
 const SPLASH_SEC = 0.55;
 const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
+const LINE_CAP = LINE_POINTS + 4;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
@@ -698,7 +846,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   const entryBurst = useRef<() => void>(() => {});
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_POINTS * 3), 3));
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(LINE_CAP * 3), 3));
+    geometry.setDrawRange(0, LINE_POINTS);
     const material = new THREE.LineBasicMaterial({
       color: 0x1a1410,
       transparent: true,
@@ -775,15 +924,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       entryBurst.current();
       fx.plop();
     }
-    if (lure.current) {
-      if (flying) {
-        lure.current.rotation.x = flightP * Math.PI * 2 * (1.05 + flightPower.current * 0.65);
-        lure.current.rotation.z = Math.sin(flightP * Math.PI) * 0.5;
-      } else {
-        const settle = 1 - Math.exp(-8 * delta);
-        lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
-        lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
-      }
+    if (lure.current && flying) {
+      lure.current.rotation.x = flightP * Math.PI * 2 * (1.05 + flightPower.current * 0.65);
+      lure.current.rotation.z = Math.sin(flightP * Math.PI) * 0.5;
     }
     if (phase === "fight") {
       // Hold the last simulated line fraction so a fight ending mid-frame
@@ -808,6 +951,19 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         target.x += outX * fightView.pull + -outZ * fightView.runSide * fightView.pull;
         target.z += outZ * fightView.pull + outX * fightView.runSide * fightView.pull;
       }
+      if (fightSim && fightView.reeling) {
+        const hauled = applyRetrieve(
+          target.x,
+          target.z,
+          REEL_POINT.x,
+          REEL_POINT.z,
+          fightView.pump,
+          true,
+          fightView.surge,
+        );
+        target.x = hauled.x;
+        target.z = hauled.z;
+      }
       if (fightSim) {
         const bob = fightView.surge === 2 ? 0.02 : fightView.reeling ? 0.035 : 0.045;
         target.y += Math.sin(t * (fightView.reeling ? 8 : 14)) * bob;
@@ -820,8 +976,25 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const hop = (t - splashStart.current) / 0.36;
       if (hop >= 0 && hop < 1) target.y += Math.sin(hop * Math.PI) * 0.16 * (1 - hop);
     }
+    if (phase === "fight" && fightView.reeling) target.y += retrieveHop(fightView.pump, true, fightView.surge);
     if (dipped && fightView.plunge > 0) target.y -= fightView.plunge;
     if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
+    if (lure.current && !flying) {
+      const hauling = phase === "fight" && fightView.reeling && fightView.surge !== 2;
+      const settle = 1 - Math.exp((hauling ? -10 : -8) * delta);
+      if (hauling) {
+        const wake = retrieveWake(fightView.pump, true, fightView.surge);
+        const weave = retrieveWeave(fightView.pump, true, fightView.surge);
+        const inbound = Math.atan2(REEL_POINT.x - target.x, REEL_POINT.z - target.z);
+        lure.current.rotation.x += (wake * 0.9 - lure.current.rotation.x) * settle;
+        lure.current.rotation.y += shortestYaw(lure.current.rotation.y, inbound) * settle;
+        lure.current.rotation.z += (weave * 1.6 - lure.current.rotation.z) * settle;
+      } else {
+        lure.current.rotation.x += (0 - lure.current.rotation.x) * settle;
+        lure.current.rotation.y += shortestYaw(lure.current.rotation.y, 0) * settle;
+        lure.current.rotation.z += (0 - lure.current.rotation.z) * settle;
+      }
+    }
     if (splash.current && splashMaterial.current && splashCore.current) {
       const k = splashStart.current >= 0 ? (t - splashStart.current) / SPLASH_SEC : 1;
       if (k >= 1) {
@@ -877,6 +1050,16 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     const dirZ = lineZ / span;
     const attr = line.geometry.getAttribute("position");
     const positions = attr.array as Float32Array;
+    let count = 0;
+    let prevX = 0;
+    let prevY = 0;
+    let prevZ = 0;
+    const put = (x: number, y: number, z: number) => {
+      positions[count * 3] = x;
+      positions[count * 3 + 1] = y;
+      positions[count * 3 + 2] = z;
+      count += 1;
+    };
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
@@ -884,10 +1067,18 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
       let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
       if (dipped) y = clearFightLine(y, x, z);
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
+      if (dipped && i > 0) {
+        for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
+          if (count >= LINE_CAP - (LINE_POINTS - i)) break;
+          put(lip.x, lip.y, lip.z);
+        }
+      }
+      put(x, y, z);
+      prevX = x;
+      prevY = y;
+      prevZ = z;
     }
+    line.geometry.setDrawRange(0, count);
     attr.needsUpdate = true;
   });
 
@@ -907,6 +1098,8 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       <group ref={entryAnchor}>
         <EntrySpray burstRef={entryBurst} />
       </group>
+      {phase === "fight" && <RetrieveWake />}
+      {phase === "fight" && <RetrieveSplash />}
       <group ref={bobber} visible={false}>
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
