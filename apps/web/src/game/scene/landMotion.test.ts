@@ -88,7 +88,8 @@ describe("landing", () => {
     landHoldPoint(shown, 0, 0, 0, Math.PI, LAND_SWING_SEC + LAND_PRESENT_SEC);
     expect(atWater.y).toBeGreaterThan(1);
     expect(atWater.x).toBeLessThan(-0.5);
-    expect(atWater.z).toBeLessThan(0);
+    expect(atWater.z).toBeLessThan(-0.75);
+    expect(shown.z).toBeLessThan(-0.75);
     expect(shown.y).toBeGreaterThan(atWater.y);
   });
 

@@ -11,10 +11,11 @@ export const LAND_DRIPS = 4;
 
 /**
  * Off-hand hold, meters in angler space: x right, y up, z forward.
- * The follow camera sits behind the angler, so the fish rests on his right,
- * which reads on screen-left, clear of his back.
+ * The fish lies across the front of the hands. It stays forward of the chest
+ * (the body is about 0.4 m thick) and biased to his right, which reads on
+ * screen-left of the follow camera, clear of his back.
  */
-const HAND = { x: 0.78, y: 1.32, z: 0.28 };
+const HAND = { x: 0.64, y: 1.32, z: 0.84 };
 
 const HOIST_SEC = 0.36;
 const HOIST_PITCH = -0.22;
