@@ -512,3 +512,47 @@ export function withSpot(book: Logbook, spot: Spot): Logbook {
 export function withTrip(book: Logbook, trip: Trip): Logbook {
   return { ...book, trips: [...book.trips, trip] };
 }
+
+export function replaceCatch(book: Logbook, entry: CatchEntry): Logbook {
+  if (!book.catches.some((row) => row.id === entry.id)) return book;
+  return { ...book, catches: book.catches.map((row) => (row.id === entry.id ? entry : row)) };
+}
+
+export function replaceSpot(book: Logbook, spot: Spot): Logbook {
+  if (!book.spots.some((row) => row.id === spot.id)) return book;
+  return { ...book, spots: book.spots.map((row) => (row.id === spot.id ? spot : row)) };
+}
+
+export function replaceTrip(book: Logbook, trip: Trip): Logbook {
+  if (!book.trips.some((row) => row.id === trip.id)) return book;
+  return {
+    ...book,
+    trips: book.trips.map((row) => (row.id === trip.id ? trip : row)),
+    catches: book.catches.map((entry) =>
+      entry.tripId === trip.id && entry.spotId !== trip.spotId ? { ...entry, spotId: trip.spotId } : entry,
+    ),
+  };
+}
+
+export function withoutCatch(book: Logbook, id: string): Logbook {
+  return { ...book, catches: book.catches.filter((entry) => entry.id !== id) };
+}
+
+export function withoutTrip(book: Logbook, id: string): Logbook {
+  return {
+    ...book,
+    trips: book.trips.filter((trip) => trip.id !== id),
+    catches: book.catches.map((entry) => (entry.tripId === id ? { ...entry, tripId: null } : entry)),
+  };
+}
+
+export function withoutSpot(book: Logbook, id: string): Logbook {
+  const droppedTrips = new Set(book.trips.filter((trip) => trip.spotId === id).map((trip) => trip.id));
+  return {
+    spots: book.spots.filter((spot) => spot.id !== id),
+    trips: book.trips.filter((trip) => trip.spotId !== id),
+    catches: book.catches
+      .filter((entry) => entry.spotId !== id)
+      .map((entry) => (entry.tripId && droppedTrips.has(entry.tripId) ? { ...entry, tripId: null } : entry)),
+  };
+}
