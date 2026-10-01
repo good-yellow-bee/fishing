@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, catchesForTrip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
+import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { formatLongDay } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -48,6 +49,8 @@ export function HomePage() {
           <small>{nextSpot ? nextSpot.name : "Add an outing when you know the day"}</small>
         </div>
       </section>
+
+      <CatchSearch />
 
       <div className="home-grid">
         <section>
