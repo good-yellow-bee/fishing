@@ -106,11 +106,11 @@ describe("fight motion", () => {
   });
 
   it("hauls the lure in on each pump and keeps that dart off the bank", () => {
-    expect(retrieveHang(0, true, 0)).toBeGreaterThan(0.4);
+    expect(retrieveHang(0, true, 0)).toBeGreaterThan(0.8);
     expect(retrieveHang(0.62, true, 0)).toBeCloseTo(0);
     expect(retrieveHang(0, false, 0)).toBe(0);
     expect(retrieveHang(0.3, true, 2)).toBe(0);
-    expect(retrieveWeave(0.62, true, 0)).toBeGreaterThan(0.2);
+    expect(retrieveWeave(0.62, true, 0)).toBeGreaterThan(0.5);
     expect(retrieveWeave(1.62, true, 0)).toBeLessThan(-0.2);
     expect(retrieveWeave(0, true, 0)).toBeCloseTo(0);
     expect(retrieveHop(0.62, true, 0)).toBeGreaterThan(retrieveHop(0, true, 0));
@@ -123,7 +123,7 @@ describe("fight motion", () => {
     const hauled = applyRetrieve(0, -4, reelX, reelZ, 0.62, true, 0);
     const hungReach = Math.hypot(hung.x - reelX, hung.z - reelZ);
     const hauledReach = Math.hypot(hauled.x - reelX, hauled.z - reelZ);
-    expect(hungReach).toBeGreaterThan(12.3);
+    expect(hungReach).toBeGreaterThan(12.7);
     expect(hauledReach).toBeLessThan(hungReach - 0.3);
     expect(Math.abs(hauled.x)).toBeGreaterThan(0.2);
     const still = applyRetrieve(0, -4, reelX, reelZ, 0.62, false, 0);

@@ -650,7 +650,7 @@ const WAKE_RINGS = 3;
 
 function RetrieveWake() {
   const rings = useMemo(() => {
-    const geometry = new THREE.RingGeometry(0.2, 0.32, 22);
+    const geometry = new THREE.RingGeometry(0.28, 0.46, 22);
     return Array.from({ length: WAKE_RINGS }, () => {
       const material = new THREE.MeshBasicMaterial({
         color: 0xe7f3ee,
@@ -684,13 +684,13 @@ function RetrieveWake() {
     rings.forEach((ring, i) => {
       ring.visible = wake > 0.08;
       if (!ring.visible) return;
-      const back = 0.34 + i * 0.46;
-      const side = (i - 1) * kick * 0.35;
+      const back = 0.45 + i * 0.7;
+      const side = (i - 1) * kick * 0.45;
       const x = bobberWorld.x + outX * back - outZ * side;
       const z = bobberWorld.z + outZ * back + outX * side;
       ring.position.set(x, waterHeight(x, z, time) + 0.04, z);
-      ring.scale.setScalar((0.85 + i * 0.55) * (0.55 + wake));
-      (ring.material as THREE.MeshBasicMaterial).opacity = wake * (0.42 - i * 0.11);
+      ring.scale.setScalar((1.15 + i * 0.7) * (0.7 + wake));
+      (ring.material as THREE.MeshBasicMaterial).opacity = wake * (0.62 - i * 0.14);
     });
   });
 
