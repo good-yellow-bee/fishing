@@ -1,3 +1,5 @@
+import { isWeather, parseWeatherDraft, sampleCatchWeather, type CatchWeather } from "./weather.ts";
+
 export const WATER_TYPES = ["lake", "river", "pond", "creek", "reservoir"] as const;
 
 export type WaterType = (typeof WATER_TYPES)[number];
@@ -39,6 +41,7 @@ export type CatchEntry = {
   tripId: string | null;
   caughtAt: string;
   note: string;
+  weather: CatchWeather | null;
 };
 
 export type Logbook = {
@@ -59,6 +62,9 @@ export type CatchDraft = {
   tripId: string;
   caughtAt: string;
   note: string;
+  sky: string;
+  wind: string;
+  waterTemp: string;
 };
 
 export type SpotDraft = {
@@ -181,7 +187,7 @@ export function sampleLogbook(now = new Date()): Logbook {
     },
   ];
 
-  const catches: CatchEntry[] = [
+  const catches: Array<Omit<CatchEntry, "weather">> = [
     {
       id: "catch-brook-bugger",
       species: "Brook trout",
@@ -284,7 +290,11 @@ export function sampleLogbook(now = new Date()): Logbook {
     },
   ];
 
-  return { spots, trips, catches };
+  return {
+    spots,
+    trips,
+    catches: catches.map((entry) => ({ ...entry, weather: sampleCatchWeather(entry.id) })),
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -337,7 +347,8 @@ function isCatch(value: unknown): value is CatchEntry {
     typeof value.spotId === "string" &&
     (value.tripId === null || typeof value.tripId === "string") &&
     typeof value.caughtAt === "string" &&
-    typeof value.note === "string"
+    typeof value.note === "string" &&
+    (value.weather === null || isWeather(value.weather))
   );
 }
 
@@ -457,9 +468,12 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
   const note = draft.note.trim();
   if (note.length > 280) return fail("note", "Keep the note to a few lines.");
 
+  const weather = parseWeatherDraft(draft);
+  if (!weather.ok) return weather;
+
   return {
     ok: true,
-    value: { species, measure, lure, spotId: spot.id, tripId, caughtAt: when.toISOString(), note },
+    value: { species, measure, lure, spotId: spot.id, tripId, caughtAt: when.toISOString(), note, weather: weather.value },
   };
 }
 

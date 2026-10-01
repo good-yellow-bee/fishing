@@ -292,6 +292,7 @@ button.field-primary {
   background: var(--field-rust);
 }
 
+.weather-line,
 .meta,
 .note,
 .trip-link,
@@ -310,6 +311,10 @@ button.field-primary {
 
 .meta.stand {
   display: block;
+}
+
+.weather-line {
+  color: var(--field-water);
 }
 
 .catch-card a,
@@ -532,7 +537,7 @@ button.field-primary {
 
   .field-tab {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     position: fixed;
     left: 0;
     right: 0;
