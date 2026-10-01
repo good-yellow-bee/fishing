@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
+import { BestsPage } from "./field/bests/BestsPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
 import { GearPage } from "./field/gear/GearPage";
@@ -61,6 +62,7 @@ export function App() {
         <Route path="/trips/:tripId" element={<TripPage />} />
         <Route path="/gear" element={<GearPage />} />
         <Route path="/gear/:tripId" element={<GearPage />} />
+        <Route path="/bests" element={<BestsPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
