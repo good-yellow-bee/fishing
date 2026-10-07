@@ -6,6 +6,7 @@ import { DROPOFF_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
+import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
 import { bedColor, bedHeight, waterDepthColor, waterHeight } from "./water";
 
 type Vec3 = [number, number, number];
@@ -919,12 +920,28 @@ function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
   );
 }
 
+function PierDeck() {
+  return PIER_BOARDS.map((board, i) => (
+    <mesh
+      key={i}
+      position={[board.x, PIER_TOP - PIER_THICK / 2 + (i % 2) * 0.001, board.z]}
+      rotation={[0, board.yaw, 0]}
+      castShadow
+      receiveShadow
+    >
+      <boxGeometry args={[board.halfX * 2, PIER_THICK, board.halfZ * 2]} />
+      <meshToonMaterial color={PIER_PLANK[i % 2]} gradientMap={toonRamp()} />
+    </mesh>
+  ));
+}
+
 function Dock() {
   return (
     <group>
-      <ToonModel url={MODELS.bridge} position={[0, 0, 7.4]} rotation={[0, Math.PI / 2, 0]} scale={1.8} />
-      <ToonModel url={MODELS.bridge} position={[0, 0, 6.25]} rotation={[0, Math.PI / 2, 0]} scale={1.8} />
-      <ToonModel url={MODELS.path} position={[0, 0.02, 9]} rotation={[0, Math.PI / 2, 0]} scale={1.75} />
+      {BRIDGE_SPANS.map((z) => (
+        <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} />
+      ))}
+      <PierDeck />
       <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} />
       <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} />
       <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} />
@@ -951,9 +968,6 @@ function Shack() {
 function ShorePath() {
   return (
     <group>
-      <ToonModel url={MODELS.path} position={[3.4, 0.02, 13.6]} rotation={[0, 0.4, 0]} scale={1.7} />
-      <ToonModel url={MODELS.path} position={[1.6, 0.02, 11.8]} rotation={[0, 0.55, 0]} scale={1.7} />
-      <ToonModel url={MODELS.path} position={[0.4, 0.02, 10.4]} rotation={[0, 0.2, 0]} scale={1.65} />
       <ToonModel url={MODELS.path} position={[-6.2, 0.02, 11.2]} rotation={[0, 1.2, 0]} scale={1.55} />
       <ToonModel url={MODELS.path} position={[-9.8, 0.02, 10.4]} rotation={[0, 0.9, 0]} scale={1.5} />
       <ToonModel url={MODELS.path} position={[8.4, 0.02, 11]} rotation={[0, -1.05, 0]} scale={1.5} />
