@@ -8,6 +8,7 @@ import {
   isFishingStance,
   lakeHour,
   lakeHourFromSearch,
+  luresPacked,
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
@@ -16,10 +17,13 @@ import {
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
+import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { saveLandedCatch } from "../field/keepCatch";
+import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
+import { lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
@@ -34,6 +38,12 @@ export function DockPage() {
   const [shopOpen, setShopOpen] = useState(false);
   const game = useFishingGame(me?.profile ?? null, hour);
   const scenePhase = game.outcome ? "result" : game.phase;
+  const [lureChoices] = useState(() => luresPacked(readTackle()));
+  const [chosenLure, setChosenLure] = useState(() => lureChoices[0] ?? "Bobber");
+  const tiedLure = useRef(chosenLure);
+  if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
+  const lure = tiedLure.current;
+  const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
@@ -69,6 +79,7 @@ export function DockPage() {
         pounds: weight,
         bank: SPOT_LABELS[catchSpot],
         caughtAt: new Date().toISOString(),
+        lure: tiedLure.current,
       });
       setFieldSaved(true);
       setFieldLogError("");
@@ -154,6 +165,8 @@ export function DockPage() {
         data-aim-hint={game.aimHint}
         data-nibble={game.nibble ? "1" : "0"}
         data-hour={hour}
+        data-lure={lure}
+        data-lure-locked={lureLocked ? "1" : "0"}
       >
         <FishingWorld
           phase={scenePhase}
@@ -174,6 +187,15 @@ export function DockPage() {
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
         </aside>
+        <LureChoice
+          choices={lureChoices}
+          value={lure}
+          locked={lureLocked}
+          onChange={(next) => {
+            if (lureLocked || !lureChoices.includes(next)) return;
+            setChosenLure(next);
+          }}
+        />
         <aside className="camera-help" data-camera-control>
           <span>Shore</span>
           <kbd>WASD</kbd> walk
@@ -192,6 +214,7 @@ export function DockPage() {
             )}
             <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
+            <p className="catch-lure">{lure}</p>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
             <p>+{catchPoints(game.outcome.species, game.outcome.weight)} pts</p>
             {stamp?.kind === "first" && <p className="catch-stamp">New in the field guide</p>}

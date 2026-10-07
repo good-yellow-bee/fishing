@@ -87,4 +87,11 @@ describe("save a landed fish", () => {
     expect(book?.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(seeded.catches);
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
   });
+
+  it("stores the lure that was tied on", () => {
+    saveLandedCatch({ ...landed, lure: "#5 Mepps" });
+    const kept = readStoredLogbook()?.catches.find((entry) => entry.id === landed.id);
+    expect(kept?.lure).toBe("#5 Mepps");
+    expect(localStorage.getItem(LOGBOOK_STORAGE_KEY)).toContain("#5 Mepps");
+  });
 });

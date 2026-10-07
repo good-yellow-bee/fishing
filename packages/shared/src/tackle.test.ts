@@ -3,6 +3,7 @@ import { sampleLogbook } from "./logbook.ts";
 import {
   isTackleBox,
   itemsForTrip,
+  luresPacked,
   packedCount,
   parseTackleLabel,
   sampleTackle,
@@ -56,6 +57,22 @@ describe("tackle", () => {
     });
     expect(itemsForTrip(added, "trip-dawn").at(-1)?.label).toBe("Rag");
     expect(itemsForTrip(added, "trip-mill")).toHaveLength(itemsForTrip(items, "trip-mill").length);
+  });
+
+  it("offers packed tackle, or the sample list when nothing is packed", () => {
+    const sample = sampleTackle();
+    expect(luresPacked(null)).toEqual(luresPacked(sample));
+    expect(luresPacked([])).toEqual(luresPacked(sample));
+    expect(luresPacked(sample)[0]).toBe("Spinnerbait");
+    expect(luresPacked(sample)).toContain("#5 Mepps");
+    expect(luresPacked(sample)).toContain("Nightcrawlers");
+    expect(new Set(luresPacked(sample)).size).toBe(luresPacked(sample).length);
+
+    const packed = withPacked(withPacked(sample, "gear-dawn-mepps", true), "gear-duck-crawlers", true);
+    expect(luresPacked(packed)).toEqual(["#5 Mepps", "Nightcrawlers"]);
+
+    const bothSpinners = withPacked(withPacked(sample, "gear-dawn-spinner", true), "gear-cedar-eve-spinner", true);
+    expect(luresPacked(bothSpinners)).toEqual(["Spinnerbait"]);
   });
 
   it("asks for a short name", () => {

@@ -566,6 +566,7 @@ export type LandedFish = {
   pounds: number;
   bank: string;
   caughtAt: string;
+  lure?: string;
 };
 
 /** Fight results carry species and weight, not length. One weight catch on this lake. */
@@ -573,11 +574,12 @@ export function keepLandedCatch(book: Logbook, landed: LandedFish): Logbook {
   if (book.catches.some((entry) => entry.id === landed.id)) return book;
   const placed = withPlayLake(book);
   const bank = landed.bank.trim().toLowerCase();
+  const tied = (landed.lure ?? "").trim().replace(/\s+/g, " ");
   const entry: CatchEntry = {
     id: landed.id,
     species: landed.species,
     measure: { kind: "weight", pounds: landed.pounds },
-    lure: "Bobber",
+    lure: tied || "Bobber",
     spotId: placed.spotId,
     tripId: null,
     caughtAt: landed.caughtAt,

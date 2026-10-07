@@ -242,6 +242,28 @@ describe("field log", () => {
     })).toBe(next);
   });
 
+  it("records the lure that was tied on", () => {
+    const next = keepLandedCatch(book, {
+      id: "catch-play-mepps",
+      species: "Yellow perch",
+      pounds: 0.8,
+      bank: "dock",
+      caughtAt: "2026-10-07T18:20:00.000Z",
+      lure: "  #5 Mepps  ",
+    });
+    const kept = next.catches.find((entry) => entry.id === "catch-play-mepps");
+    expect(kept?.lure).toBe("#5 Mepps");
+    expect(keepLandedCatch(next, {
+      id: "catch-play-mepps",
+      species: "Yellow perch",
+      pounds: 0.8,
+      bank: "dock",
+      caughtAt: "2026-10-07T18:20:00.000Z",
+      lure: "Nightcrawlers",
+    })).toBe(next);
+    expect(kept?.lure).toBe("#5 Mepps");
+  });
+
   it("adds this lake when the book has no lake spot", () => {
     const river: Logbook = {
       spots: [

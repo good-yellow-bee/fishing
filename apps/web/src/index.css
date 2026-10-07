@@ -427,6 +427,50 @@ a:focus-visible {
   pointer-events: none;
 }
 
+.lure-choice {
+  position: absolute;
+  left: 24px;
+  top: 154px;
+  z-index: 4;
+  display: grid;
+  gap: 5px;
+  width: min(220px, 46vw);
+  margin: 0;
+  padding: 8px 10px 10px;
+  border: 1px solid rgba(220, 196, 150, 0.38);
+  background: rgba(20, 28, 25, 0.78);
+  color: #f0dfbf;
+  backdrop-filter: blur(8px);
+}
+
+/* Author `display: grid` would override the UA `[hidden]` rule and leave a dead click spot. */
+.lure-choice[hidden] {
+  display: none;
+}
+
+.lure-choice span {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.lure-choice select {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: #f3e6cc;
+  border: 1px solid #8a6a3c;
+  padding: 6px 8px;
+}
+
+.lure-choice select:disabled {
+  color: #f0dfbf;
+  background: rgba(17, 24, 22, 0.45);
+  border-color: rgba(220, 196, 150, 0.28);
+  opacity: 1;
+}
+
 .shop-overlay {
   position: absolute;
   right: 24px;
@@ -690,6 +734,12 @@ kbd {
 
 .catch-card h2 {
   font-size: 28px;
+}
+
+.catch-card .catch-lure {
+  grid-column: 1 / -1;
+  margin: 2px 0 8px;
+  font-size: 15px;
 }
 
 /* Field-log styles lay .catch-card out as a two-column grid. */
