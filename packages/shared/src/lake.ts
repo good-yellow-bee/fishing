@@ -29,8 +29,8 @@ export const DOCK_STAND_Z = 6.8;
 export const REEDS_PAD: Pad = { x: -12.3, z: 9.5, r: 3.2 };
 export const DROPOFF_PAD: Pad = { x: 15.4, z: 7.8, r: 3.2 };
 
-/** Open bank between the reeds and the dock. Feet stay on shore. */
-export const POINT_PAD: Pad = { x: -5.6, z: 12.2, r: 1.85 };
+/** Open bank between the reeds and the dock. Feet stay on shore, east of the reeds. */
+export const POINT_PAD: Pad = { x: -5.6, z: 12.2, r: 1.35 };
 /** Near-shore water in front of that bank. East of this stays dock water. */
 export const POINT_MAX_X = -3.5;
 export const POINT_MIN_Z = 0;
