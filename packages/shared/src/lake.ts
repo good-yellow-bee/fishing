@@ -19,6 +19,13 @@ export type StanceId = SpotId | "shop" | "trail";
 export type Pad = { x: number; z: number; r: number };
 
 export const DOCK_PAD: Pad = { x: 0.15, z: 7.42, r: 3.4 };
+
+/** bridge_wood.glb ×1.8, rot Y π/2, two spans. Plank top is model y 0.15. Post caps at 0.63 are not the deck. */
+export const DOCK_PLANKS = { minX: -0.72, maxX: 0.72, minZ: 5.49, maxZ: 8.16, top: 0.27 };
+
+/** Centered on the planks, facing the lake. */
+export const DOCK_STAND_X = 0;
+export const DOCK_STAND_Z = 6.8;
 export const REEDS_PAD: Pad = { x: -12.3, z: 9.5, r: 3.2 };
 export const DROPOFF_PAD: Pad = { x: 15.4, z: 7.8, r: 3.2 };
 
@@ -45,7 +52,12 @@ type Aabb = { minX: number; maxX: number; minZ: number; maxZ: number; water?: bo
 
 const WALK: Aabb[] = [
   { minX: 1.5, maxX: 9, minZ: 12.2, maxZ: 18.2 },
-  { minX: -2.6, maxX: 2.6, minZ: 5.6, maxZ: 13.2, water: true },
+  // Planks, then the path boards. The two narrow joins only bridge the gaps between meshes.
+  { minX: -0.55, maxX: 0.55, minZ: 5.65, maxZ: 8.15, water: true },
+  { minX: -0.28, maxX: 0.28, minZ: 8.0, maxZ: 9.85, water: true },
+  { minX: -0.15, maxX: 0.28, minZ: 9.7, maxZ: 10.55, water: true },
+  { minX: 0.05, maxX: 1.18, minZ: 10.18, maxZ: 10.58, water: true },
+  { minX: 0.98, maxX: 1.32, minZ: 10.4, maxZ: 11.48, water: true },
   { minX: -14.8, maxX: 16.8, minZ: 11.4, maxZ: 16.5 },
   { minX: -15.2, maxX: -8.5, minZ: 8.2, maxZ: 12.4 },
   { minX: 11.5, maxX: 17.6, minZ: 6.4, maxZ: 12.4 },
@@ -89,6 +101,20 @@ export function isFishingStance(stance: StanceId): stance is SpotId {
 
 export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number) {
   return inRadius(fromX, fromZ, toX, toZ, CAST_RANGE);
+}
+
+export function onDockPlanks(x: number, z: number) {
+  return (
+    x >= DOCK_PLANKS.minX &&
+    x <= DOCK_PLANKS.maxX &&
+    z >= DOCK_PLANKS.minZ &&
+    z <= DOCK_PLANKS.maxZ
+  );
+}
+
+/** Deck height on the planks. Ground level everywhere else. */
+export function footHeight(x: number, z: number) {
+  return onDockPlanks(x, z) ? DOCK_PLANKS.top : 0;
 }
 
 export function walkableAt(x: number, z: number) {

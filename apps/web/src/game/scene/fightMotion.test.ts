@@ -1,4 +1,4 @@
-import { inLake } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, footHeight, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   BITE_SLACK_END,
@@ -185,6 +185,21 @@ describe("fight motion", () => {
     expect(liftDockSample(0.2, 0, 6.5)).toBeGreaterThanOrEqual(0.72);
     expect(liftDockSample(1.4, 0, 6.5)).toBe(1.4);
     expect(liftDockSample(0.1, 0, 2)).toBe(0.1);
+  });
+
+  it("clears the dock from the stand on the planks", () => {
+    const feet = footHeight(DOCK_STAND_X, DOCK_STAND_Z);
+    const tipY = feet + 1.7;
+    const waterZ = 3.5;
+    const lips = dockLineLips(DOCK_STAND_X, tipY, DOCK_STAND_Z, DOCK_STAND_X, 0.1, waterZ);
+    for (const lip of lips) expect(lip.y).toBeGreaterThanOrEqual(0.72);
+    for (let i = 0; i <= 8; i += 1) {
+      const t = i / 8;
+      const y = tipY + (0.1 - tipY) * t;
+      const z = DOCK_STAND_Z + (waterZ - DOCK_STAND_Z) * t;
+      const cleared = clearFightLine(y, DOCK_STAND_X, z);
+      if (z >= 5.2 && z <= 8.5) expect(cleared).toBeGreaterThanOrEqual(0.72);
+    }
   });
 
   it("leans back into the set and gets dragged forward on a run", () => {

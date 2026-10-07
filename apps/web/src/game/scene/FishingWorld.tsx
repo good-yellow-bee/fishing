@@ -4,11 +4,12 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import {
   CAST_RANGE,
+  DOCK_PLANKS,
+  DOCK_STAND_X,
+  DOCK_STAND_Z,
   inCastRange,
   inLake,
   isFishingStance,
-  SPAWN_X,
-  SPAWN_Z,
   spotAt,
   stanceAt,
   type FishSpecies,
@@ -90,9 +91,9 @@ type Props = {
   weight: number;
 };
 
-const CAM_START: [number, number, number] = [SPAWN_X + 0.45, 3.42, SPAWN_Z + 6.9];
+const CAM_START: [number, number, number] = [DOCK_STAND_X + 0.45, 3.42 + DOCK_PLANKS.top, DOCK_STAND_Z + 6.9];
 const CHEST_Y = 1.05;
-const REEL_POINT = new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 1.4);
+const REEL_POINT = new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 1.4);
 
 function facingDelta(distance: number): [number, number] {
   return [Math.sin(anglerPose.yaw) * distance, Math.cos(anglerPose.yaw) * distance];
@@ -150,7 +151,7 @@ function updateLanding(phase: ScenePhase, prevPhase: ScenePhase, delta: number, 
   if (phase === "result" && landView.active) {
     landView.presentYaw = landPresentYaw(anglerPose.yaw);
     landView.swing = landSwing(landView.age);
-    landHoldPoint(holdScratch, anglerPose.x, anglerPose.bob, anglerPose.z, anglerPose.yaw, landView.age);
+    landHoldPoint(holdScratch, anglerPose.x, anglerPose.y + anglerPose.bob, anglerPose.z, anglerPose.yaw, landView.age);
     placeLandedFish(landedFish, landedFrom, holdScratch, landView.swing);
     landedFish.y += landHoldShake(landView.age, time);
     landedFish.y = clearFightLine(landedFish.y, landedFish.x, landedFish.z);
@@ -198,9 +199,9 @@ function isAiming(phase: ScenePhase) {
 function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, gl } = useThree();
-  const chest = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
-  const follow = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
-  const lastFollow = useMemo(() => new THREE.Vector3(SPAWN_X, CHEST_Y, SPAWN_Z), []);
+  const chest = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
+  const follow = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
+  const lastFollow = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
   const desired = useMemo(() => new THREE.Vector3(), []);
   const restTarget = useMemo(() => new THREE.Vector3(), []);
   const focusPoint = useMemo(() => new THREE.Vector3(), []);
@@ -214,7 +215,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const prevSurge = useRef(0);
   const biteYanked = useRef(false);
   const fighting = phase === "fight";
-  const rest = useMemo(() => [SPAWN_X, CHEST_Y, SPAWN_Z] as [number, number, number], []);
+  const rest = useMemo(() => [DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z] as [number, number, number], []);
 
   useEffect(() => {
     const canvas = gl.domElement;
@@ -228,7 +229,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (!orbit) return;
     orbit.enabled = !fighting;
     const t = state.clock.elapsedTime;
-    chest.set(anglerPose.x, CHEST_Y, anglerPose.z);
+    chest.set(anglerPose.x, CHEST_Y + anglerPose.y, anglerPose.z);
     const [dx, dz] = facingDelta(1.4);
     REEL_POINT.set(anglerPose.x + dx, 0, anglerPose.z + dz);
 
@@ -1424,8 +1425,8 @@ function Tone({ hour }: { hour: LakeHour }) {
 }
 
 function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
-  const rodTip = useMemo(() => new THREE.Vector3(SPAWN_X + 0.4, 2.1, SPAWN_Z - 1.2), []);
-  const lookAt = useMemo(() => new THREE.Vector3(SPAWN_X, 0, SPAWN_Z - 8), []);
+  const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
+  const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
   return (
     <>

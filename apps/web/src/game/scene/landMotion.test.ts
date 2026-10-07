@@ -1,3 +1,4 @@
+import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, footHeight } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   LAND_PRESENT_SEC,
@@ -91,6 +92,18 @@ describe("landing", () => {
     expect(atWater.z).toBeLessThan(-0.75);
     expect(shown.z).toBeLessThan(-0.75);
     expect(shown.y).toBeGreaterThan(atWater.y);
+  });
+
+  it("holds the fish clear of the dock and the chest from the stand", () => {
+    const feet = footHeight(DOCK_STAND_X, DOCK_STAND_Z);
+    const hold = { x: 0, y: 0, z: 0 };
+    landHoldPoint(hold, DOCK_STAND_X, feet, DOCK_STAND_Z, Math.PI, LAND_SWING_SEC + LAND_PRESENT_SEC);
+    const dx = hold.x - DOCK_STAND_X;
+    const dz = hold.z - DOCK_STAND_Z;
+    expect(hold.y).toBeGreaterThan(DOCK_PLANKS.top + 0.9);
+    expect(dz).toBeLessThan(-0.7);
+    expect(dx).toBeLessThan(-0.5);
+    expect(Math.hypot(dx, dz)).toBeGreaterThan(0.7);
   });
 
   it("keeps a short line on the fish until the hand closes", () => {
