@@ -131,14 +131,14 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     setFight(null);
   };
 
-  const resetToIdle = useCallback((message: string) => {
+  const resetToIdle = useCallback((message: string, phase: "idle" | "result" = "idle") => {
     clearTimers();
     holdingRef.current = false;
     castPointerRef.current = null;
     powerRef.current = 0;
     clearFight();
     setPower(0);
-    setPhaseBoth("idle");
+    setPhaseBoth(phase);
     setHint(message);
   }, []);
 
@@ -201,7 +201,8 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
       timers.current.hook = window.setTimeout(() => {
         if (phaseRef.current !== "hookset") return;
         setOutcome({ kind: "miss", message: "The fish dropped the bait." });
-        resetToIdle("Missed the strike. Cast again.");
+        // Hold result so the miss spring and the turn play out.
+        resetToIdle("Missed the strike. Cast again.", "result");
       }, hookWindowMs(current.accuracy));
     }, wait);
   }, [hour, resetToIdle]);
