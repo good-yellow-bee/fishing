@@ -692,7 +692,9 @@ kbd {
   font-size: 28px;
 }
 
+/* Field-log styles lay .catch-card out as a two-column grid. */
 .catch-best {
+  grid-column: 1 / -1;
   margin: 0 auto 14px;
   padding: 12px 14px 10px;
   max-width: 280px;
