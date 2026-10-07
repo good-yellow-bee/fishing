@@ -93,8 +93,14 @@ function beatLine(scope: FieldLogBestBeat["scope"], pounds: number, species: str
   return `Beats your ${size} ${species} already in the field log`;
 }
 
-export function fieldLogBestBeat(book: Logbook, species: string, pounds: number): FieldLogBestBeat | null {
-  const bests = personalBests(book);
+export function fieldLogBestBeat(
+  book: Logbook,
+  species: string,
+  pounds: number,
+  ignoreId?: string,
+): FieldLogBestBeat | null {
+  const prior = ignoreId ? { ...book, catches: book.catches.filter((entry) => entry.id !== ignoreId) } : book;
+  const bests = personalBests(prior);
   const bookBest = weightBest(bests.heaviest);
   if (bookBest && pounds > bookBest.pounds) {
     return {

@@ -11,7 +11,6 @@ import {
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
-  type FieldLogBestBeat,
   type SkillId,
 } from "@stillwater/shared";
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
@@ -38,7 +37,11 @@ export function DockPage() {
   const posted = useRef<string | null>(null);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
-  const [fieldBeat, setFieldBeat] = useState<FieldLogBestBeat | null>(null);
+  const fieldBeat = useMemo(() => {
+    if (game.outcome?.kind !== "landed") return null;
+    const book = readStoredLogbook() ?? sampleLogbook(new Date());
+    return fieldLogBestBeat(book, game.outcome.species.name, game.outcome.weight, game.outcome.id);
+  }, [game.outcome]);
   const statsRef = useRef(me?.speciesStats ?? []);
   statsRef.current = me?.speciesStats ?? [];
   const stamp = useMemo(() => {
@@ -80,14 +83,11 @@ export function DockPage() {
       posted.current = null;
       setFieldSaved(false);
       setFieldLogError("");
-      setFieldBeat(null);
       return;
     }
     const { id, species, weight, spot: catchSpot } = game.outcome;
     if (posted.current === id) return;
     posted.current = id;
-    const book = readStoredLogbook() ?? sampleLogbook(new Date());
-    setFieldBeat(fieldLogBestBeat(book, species.name, weight));
     saveFieldLog();
     setBusy(true);
     recordCatch({ speciesId: species.id, weight, spot: catchSpot })

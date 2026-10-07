@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fieldLogBestBeat, personalBests } from "./bests.ts";
-import { sampleLogbook } from "./logbook.ts";
+import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
 
@@ -93,6 +93,20 @@ describe("personal bests", () => {
       scope: "book",
       previousSpecies: "Northern pike",
       line: "Beats the 6.4 lb Northern pike already in the field log",
+    });
+
+    const saved = keepLandedCatch(book, {
+      id: "catch-play-perch",
+      species: "Yellow perch",
+      pounds: 0.8,
+      bank: "dock",
+      caughtAt: "2026-10-07T18:00:00.000Z",
+    });
+    expect(fieldLogBestBeat(saved, "Yellow perch", 0.8)).toBeNull();
+    expect(fieldLogBestBeat(saved, "Yellow perch", 0.8, "catch-play-perch")).toMatchObject({
+      scope: "species",
+      previousPounds: 0.6,
+      line: "Beats your 0.6 lb Yellow perch already in the field log",
     });
   });
 });
