@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
   catchPoints,
@@ -15,6 +15,7 @@ import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { UpgradePanel } from "../components/UpgradePanel";
+import { saveLandedCatch } from "../field/keepCatch";
 import { fx } from "../game/fx";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
@@ -57,6 +58,17 @@ export function DockPage() {
     const key = `${species.id}:${weight}:${catchSpot}`;
     if (posted.current === key) return;
     posted.current = key;
+    try {
+      saveLandedCatch({
+        id: crypto.randomUUID(),
+        species: species.name,
+        pounds: weight,
+        bank: SPOT_LABELS[catchSpot],
+        caughtAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The field log could not be saved.");
+    }
     setBusy(true);
     recordCatch({ speciesId: species.id, weight, spot: catchSpot })
       .then(() => refresh())
@@ -163,9 +175,13 @@ export function DockPage() {
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
             )}
+            <p className="catch-stamp quiet">Saved in the field log</p>
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Keep fishing
             </button>
+            <Link className="panel-btn" to="/catches">
+              Field log
+            </Link>
           </div>
         )}
         {game.outcome && game.outcome.kind !== "landed" && (
