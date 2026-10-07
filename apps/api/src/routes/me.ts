@@ -21,6 +21,7 @@ meRoutes.get("/me", (c) => {
       dock: canUseSpot("dock", level),
       reeds: canUseSpot("reeds", level),
       dropoff: canUseSpot("dropoff", level),
+      point: canUseSpot("point", level),
     },
     catches,
     speciesStats,

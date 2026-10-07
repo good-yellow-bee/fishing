@@ -61,4 +61,30 @@ describe("save a landed fish", () => {
     expect(book?.spots).toEqual(seeded.spots);
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
   });
+
+  it("saves a point catch in the field log and leaves the rest of the book", () => {
+    const seeded = sampleLogbook(new Date(2026, 9, 1));
+    saveLogbook(seeded);
+    saveLandedCatch({
+      id: "catch-play-point",
+      species: "Bluegill",
+      pounds: 0.4,
+      bank: "Point",
+      caughtAt: "2026-10-07T19:00:00.000Z",
+    });
+    const book = readStoredLogbook();
+    const kept = book?.catches.find((entry) => entry.id === "catch-play-point");
+    expect(localStorage.getItem(LOGBOOK_STORAGE_KEY)).toContain("Landed at the point.");
+    expect(kept).toMatchObject({
+      species: "Bluegill",
+      measure: { kind: "weight", pounds: 0.4 },
+      spotId: "spot-cedar",
+      note: "Landed at the point.",
+    });
+    expect(book?.catches).toHaveLength(seeded.catches.length + 1);
+    expect(book?.spots).toEqual(seeded.spots);
+    expect(book?.trips).toEqual(seeded.trips);
+    expect(book?.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(seeded.catches);
+    expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
+  });
 });

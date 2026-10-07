@@ -2,7 +2,7 @@ import type { SkillId, SpotId } from "./types.ts";
 
 export const MAX_SKILL = 8;
 export const DROPOFF_LEVEL = 3;
-export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff"];
+export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point"];
 
 export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200];
 
@@ -37,4 +37,5 @@ export const SPOT_LABELS: Record<SpotId, string> = {
   dock: "Dock",
   reeds: "Reeds",
   dropoff: "Drop-off",
+  point: "Point",
 };

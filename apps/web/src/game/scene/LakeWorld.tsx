@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -973,6 +973,7 @@ function ShorePath() {
       <ToonModel url={MODELS.path} position={[8.4, 0.02, 11]} rotation={[0, -1.05, 0]} scale={1.5} />
       <ToonModel url={MODELS.path} position={[12.2, 0.02, 9.6]} rotation={[0, -0.85, 0]} scale={1.45} />
       <ToonModel url={MODELS.log} position={[REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4]} rotation={[0, 0.8, 0]} scale={1.05} />
+      <ToonModel url={MODELS.log} position={[POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35]} rotation={[0, -0.4, 0]} scale={1.05} />
       <Rock position={[DROPOFF_PAD.x - 0.8, 0.4, DROPOFF_PAD.z + 0.6]} scale={[1.3, 0.7, 1]} rotation={0.4} />
       <Rock position={[DROPOFF_PAD.x + 0.9, 0.32, DROPOFF_PAD.z - 0.3]} scale={[0.9, 0.5, 0.75]} rotation={1.6} />
     </group>
