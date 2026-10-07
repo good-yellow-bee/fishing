@@ -7,7 +7,13 @@ type Props = {
 
 export function LureChoice({ choices, value, locked, onChange }: Props) {
   return (
-    <label className="lure-choice" data-lure-choice data-lure={value} data-lure-locked={locked ? "1" : "0"}>
+    <label
+      className="lure-choice"
+      hidden={locked}
+      data-lure-choice
+      data-lure={value}
+      data-lure-locked={locked ? "1" : "0"}
+    >
       <span>Lure</span>
       <select
         aria-label="Lure"

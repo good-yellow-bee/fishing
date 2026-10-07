@@ -443,6 +443,11 @@ a:focus-visible {
   backdrop-filter: blur(8px);
 }
 
+/* Author `display: grid` would override the UA `[hidden]` rule and leave a dead click spot. */
+.lure-choice[hidden] {
+  display: none;
+}
+
 .lure-choice span {
   font-size: 10px;
   letter-spacing: 0.14em;
