@@ -144,6 +144,22 @@ describe("catch rules", () => {
     }
   });
 
+  it("stocks a different mix at the point than the dock", () => {
+    const idsAt = (spot: "dock" | "point") =>
+      FISH.filter((fish) => fish.spots.includes(spot))
+        .map((fish) => fish.id)
+        .sort();
+    const point = idsAt("point");
+    const dock = idsAt("dock");
+    expect(point).toEqual(["bluegill", "brook-trout", "pike"]);
+    expect(dock).toEqual(["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"]);
+    expect(point.some((id) => dock.includes(id))).toBe(false);
+    expect(validateCatch(starter, { speciesId: "bluegill", weight: 0.3, spot: "point" }).ok).toBe(true);
+    expect(validateCatch(starter, { speciesId: "bluegill", weight: 0.3, spot: "dock" }).ok).toBe(false);
+    expect(validateCatch(starter, { speciesId: "perch", weight: 0.8, spot: "point" }).ok).toBe(false);
+    expect(validateCatch(starter, { speciesId: "perch", weight: 0.8, spot: "dock" }).ok).toBe(true);
+  });
+
   it("gates tiger muskie bites on angler skill", () => {
     const muskie = fishById("tiger-muskie")!;
     expect(legendaryCanBite(starter, muskie, "reeds")).toBe(false);
