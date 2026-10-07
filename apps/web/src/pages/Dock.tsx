@@ -36,11 +36,11 @@ export function DockPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
-  const game = useFishingGame(me?.profile ?? null, hour);
-  const scenePhase = game.outcome ? "result" : game.phase;
   const [lureChoices] = useState(() => luresPacked(readTackle()));
   const [chosenLure, setChosenLure] = useState(() => lureChoices[0] ?? "Bobber");
   const tiedLure = useRef(chosenLure);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure);
+  const scenePhase = game.outcome ? "result" : game.phase;
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);

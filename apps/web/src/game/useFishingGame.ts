@@ -72,7 +72,11 @@ type Timers = {
   nibbleOff?: number;
 };
 
-export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHour()) {
+export function useFishingGame(
+  profile: Profile | null,
+  hour: LakeHour = lakeHour(),
+  lureRef?: { readonly current: string },
+) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
@@ -168,7 +172,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
     window.clearTimeout(timers.current.hook);
     fx.splash();
     const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spotRef.current, profile, short, Math.random, hour);
+    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current);
     const { weight } = makeCatch(species, profile.patience);
     beginFight(species, weight, profile);
   }, [beginFight, hour, profile]);
