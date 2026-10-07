@@ -334,7 +334,7 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;
-      if ((event.target as HTMLElement).closest("button, a, input, [data-camera-control]")) return;
+      if ((event.target as HTMLElement).closest("button, a, input, select, label, [data-camera-control], [data-lure-choice]")) return;
       if (phaseRef.current !== "fight") {
         castPointerRef.current = event.pointerId;
         strikeOrCast("pointer");

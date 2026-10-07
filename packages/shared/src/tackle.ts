@@ -95,6 +95,23 @@ export function packedCount(items: TackleItem[]): number {
   return items.reduce((count, item) => count + (item.packed ? 1 : 0), 0);
 }
 
+/** Packed tackle labels, or the sample list when nothing is packed. */
+export function luresPacked(items: readonly TackleItem[] | null | undefined): string[] {
+  const packed: string[] = [];
+  for (const item of items ?? []) {
+    if (item.packed) packed.push(item.label);
+  }
+  const labels = packed.length > 0 ? packed : sampleTackle().map((item) => item.label);
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const label of labels) {
+    if (seen.has(label)) continue;
+    seen.add(label);
+    unique.push(label);
+  }
+  return unique;
+}
+
 export function withPacked(items: TackleItem[], id: string, packed: boolean): TackleItem[] {
   return items.map((item) => (item.id === id ? { ...item, packed } : item));
 }
