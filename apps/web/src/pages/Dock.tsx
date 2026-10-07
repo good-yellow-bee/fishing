@@ -4,9 +4,11 @@ import {
   canUseSpot,
   catchPoints,
   catchStamp,
+  fieldLogBestBeat,
   isFishingStance,
   lakeHour,
   lakeHourFromSearch,
+  sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
   type SkillId,
@@ -16,6 +18,7 @@ import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { saveLandedCatch } from "../field/keepCatch";
+import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
@@ -34,6 +37,11 @@ export function DockPage() {
   const posted = useRef<string | null>(null);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
+  const fieldBeat = useMemo(() => {
+    if (game.outcome?.kind !== "landed") return null;
+    const book = readStoredLogbook() ?? sampleLogbook(new Date());
+    return fieldLogBestBeat(book, game.outcome.species.name, game.outcome.weight, game.outcome.id);
+  }, [game.outcome]);
   const statsRef = useRef(me?.speciesStats ?? []);
   statsRef.current = me?.speciesStats ?? [];
   const stamp = useMemo(() => {
@@ -176,6 +184,12 @@ export function DockPage() {
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
         {game.outcome?.kind === "landed" && (
           <div className={`catch-card rarity-${game.outcome.species.rarity}`}>
+            {fieldBeat && (
+              <p className="catch-best" role="status">
+                <strong>Personal best</strong>
+                <span>{fieldBeat.line}</span>
+              </p>
+            )}
             <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>

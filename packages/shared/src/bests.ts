@@ -1,4 +1,4 @@
-import { spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
+import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
   species: string;
@@ -73,4 +73,51 @@ export function personalBests(book: Logbook): PersonalBests {
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 
   return { longest, heaviest, species, watersWithFish: waters.length, waters };
+}
+
+export type FieldLogBestBeat = {
+  scope: "book" | "species";
+  previousPounds: number;
+  previousSpecies: string;
+  line: string;
+};
+
+function weightBest(entry: CatchEntry | null): { pounds: number; species: string } | null {
+  if (!entry || entry.measure.kind !== "weight") return null;
+  return { pounds: entry.measure.pounds, species: entry.species };
+}
+
+function beatLine(scope: FieldLogBestBeat["scope"], pounds: number, species: string): string {
+  const size = formatMeasure({ kind: "weight", pounds });
+  if (scope === "book") return `Beats the ${size} ${species} already in the field log`;
+  return `Beats your ${size} ${species} already in the field log`;
+}
+
+export function fieldLogBestBeat(
+  book: Logbook,
+  species: string,
+  pounds: number,
+  ignoreId?: string,
+): FieldLogBestBeat | null {
+  const prior = ignoreId ? { ...book, catches: book.catches.filter((entry) => entry.id !== ignoreId) } : book;
+  const bests = personalBests(prior);
+  const bookBest = weightBest(bests.heaviest);
+  if (bookBest && pounds > bookBest.pounds) {
+    return {
+      scope: "book",
+      previousPounds: bookBest.pounds,
+      previousSpecies: bookBest.species,
+      line: beatLine("book", bookBest.pounds, bookBest.species),
+    };
+  }
+  const speciesBest = weightBest(bests.species.find((row) => row.species === species)?.heaviest ?? null);
+  if (speciesBest && pounds > speciesBest.pounds) {
+    return {
+      scope: "species",
+      previousPounds: speciesBest.pounds,
+      previousSpecies: speciesBest.species,
+      line: beatLine("species", speciesBest.pounds, speciesBest.species),
+    };
+  }
+  return null;
 }
