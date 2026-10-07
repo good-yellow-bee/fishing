@@ -21,7 +21,6 @@ import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import { Angler } from "./Angler";
 import {
-  BITE_SLACK_END,
   FISH_LEAP_SEC,
   HOOKSET_SEC,
   applyBiteDart,
@@ -66,6 +65,7 @@ import {
 } from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { missBobberLift, missLineSag, missView } from "./missMotion";
+import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
@@ -888,33 +888,39 @@ function bodyScale(weight: number) {
   return 0.5 + Math.min(0.45, weight / 28);
 }
 
-function StalkingFish({ active, taking }: { active: boolean; taking: boolean }) {
+function RisingFish({ phase }: { phase: ScenePhase }) {
   const fish = useRef<THREE.Group>(null);
+  const held = useRef(0);
   useFrame((state) => {
     const g = fish.current;
     if (!g) return;
-    const show = taking || (active && bobberWorld.y < 0.18);
-    g.visible = show;
-    if (!show) return;
-    const t = state.clock.elapsedTime;
-    if (taking) {
-      const age = Math.max(0, fightView.biteAge);
-      const u = Math.min(1, age / BITE_SLACK_END);
-      const e = 1 - (1 - u) ** 2;
-      const orbit = 0.62 * (1 - e);
-      g.position.set(Math.cos(t * 1.7) * orbit, fightView.plunge - 0.34, Math.sin(t * 1.7) * orbit * 0.4);
-      g.rotation.y = Math.atan2(-g.position.x, Math.max(0.05, -g.position.z));
-      g.rotation.x = age >= BITE_SLACK_END ? 0.35 : 0.1;
-      g.rotation.z = age >= BITE_SLACK_END ? Math.sin(age * 18) * 0.4 : 0;
+    const missing = phase === "result" && missView.active;
+    const landing = phase === "result" && landView.active;
+    const flying = phase === "waiting" && waitView.age < 0;
+    const mode = riseMode(phase, flying, missing, landing);
+    if (mode === "rise") held.current = Math.max(0, waitView.age);
+    if (mode === "off") {
+      g.visible = false;
       return;
     }
-    const r = 0.62;
-    g.position.set(Math.cos(t * 1.7) * r, -0.22, Math.sin(t * 1.7) * r);
-    g.rotation.set(0, t * 1.7 + Math.PI / 2, 0);
+    const parent = g.parent;
+    const bx = parent?.position.x ?? bobberWorld.x;
+    const bz = parent?.position.z ?? bobberWorld.z;
+    const time = state.clock.elapsedTime;
+    const pose =
+      mode === "take"
+        ? takePose(fightView.biteAge, held.current, bx, bz, anglerPose.x, anglerPose.z, time)
+        : mode === "turn"
+          ? turnPose(missView.age, bx, bz, anglerPose.x, anglerPose.z, time)
+          : risePose(waitView.age, bx, bz, anglerPose.x, anglerPose.z, time);
+    g.visible = pose.show;
+    if (!pose.show || !parent) return;
+    g.position.set(pose.x - parent.position.x, pose.y - parent.position.y, pose.z - parent.position.z);
+    g.rotation.set(pose.pitch, pose.yaw, 0);
   });
   return (
-    <group ref={fish} visible={false} scale={0.42}>
-      <ArticulatedFish color="#24343c" accent="#3d4a52" speed={2.2} intensity={1.4} />
+    <group ref={fish} visible={false} scale={RISE_SCALE}>
+      <ArticulatedFish color="#c4552a" accent="#f2d48a" speed={2.6} intensity={1.25} />
     </group>
   );
 }
@@ -1305,7 +1311,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
           <ToonModel url={BUOY_URL} scale={0.32} />
         </group>
         <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} sunk={phase === "fight"} />
-        {(phase === "waiting" || phase === "hookset") && <StalkingFish active={phase === "waiting"} taking={phase === "hookset"} />}
+        {(phase === "waiting" || phase === "hookset" || phase === "result") && <RisingFish phase={phase} />}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
         {phase === "fight" && (
           <HookedFish
