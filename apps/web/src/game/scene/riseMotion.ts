@@ -18,13 +18,13 @@ export const RISE_SCALE = 0.64;
 export const RISE_HALF_H = 0.22;
 
 /** Meters from the origin to the nose, along local +z. */
-export const RISE_NOSE = 0.7;
+export const RISE_NOSE = 0.71;
 
-/** Meters from the origin to the tail, along local -z. */
-export const RISE_TAIL = 0.8;
+/** Meters from the origin to the tail, along local -z, including the wag. */
+export const RISE_TAIL = 0.98;
 
-/** Meters from the origin to each flank. */
-export const RISE_HALF_W = 0.36;
+/** Meters from the origin to each flank, including the wag. */
+export const RISE_HALF_W = 0.5;
 
 const SURFACE_GAP = 0.03;
 const BED_GAP = 0.03;
@@ -96,19 +96,19 @@ function turned(lx: number, ly: number, lz: number, yaw: number, pitch: number):
   };
 }
 
+/** Corners of the scaled body. Axis tips miss the pitched back and the wagged tail. */
 function offsets(yaw: number, pitch: number) {
-  return [
-    turned(0, RISE_HALF_H, 0, yaw, pitch),
-    turned(0, -RISE_HALF_H, 0, yaw, pitch),
-    turned(0, 0, RISE_NOSE, yaw, pitch),
-    turned(0, 0, -RISE_TAIL, yaw, pitch),
-    turned(RISE_HALF_W, 0, 0, yaw, pitch),
-    turned(-RISE_HALF_W, 0, 0, yaw, pitch),
-  ];
+  const tips: Offset[] = [];
+  for (const x of [RISE_HALF_W, -RISE_HALF_W]) {
+    for (const y of [RISE_HALF_H, -RISE_HALF_H]) {
+      for (const z of [RISE_NOSE, -RISE_TAIL]) tips.push(turned(x, y, z, yaw, pitch));
+    }
+  }
+  return tips;
 }
 
-function bodyFits(x: number, z: number, yaw: number) {
-  return offsets(yaw, 0).every((tip) => {
+function bodyFits(x: number, z: number, yaw: number, pitch: number) {
+  return offsets(yaw, pitch).every((tip) => {
     const px = x + tip.dx;
     const pz = z + tip.dz;
     return inLake(px, pz) && !onDock(px, pz);
@@ -143,32 +143,46 @@ function lakeward(bobberX: number, bobberZ: number, anglerX: number, anglerZ: nu
 
 type Flat = { x: number; z: number; yaw: number };
 
-function lays(dist: number, side: number, basis: Basis, bobberX: number, bobberZ: number): Flat | null {
+function lays(
+  dist: number,
+  side: number,
+  basis: Basis,
+  bobberX: number,
+  bobberZ: number,
+  pitch: number,
+): Flat | null {
   for (let i = 0; i <= 5; i += 1) {
     const s = side * (1 - i / 5);
     const x = bobberX + basis.ox * dist + basis.sx * s;
     const z = bobberZ + basis.oz * dist + basis.sz * s;
     const yaw = Math.atan2(bobberX - x, bobberZ - z);
     if (!Number.isFinite(yaw)) continue;
-    if (bodyFits(x, z, yaw)) return { x, z, yaw };
+    if (bodyFits(x, z, yaw, pitch)) return { x, z, yaw };
   }
   return null;
 }
 
-function settle(dist: number, side: number, basis: Basis, bobberX: number, bobberZ: number): Flat | null {
+function settle(
+  dist: number,
+  side: number,
+  basis: Basis,
+  bobberX: number,
+  bobberZ: number,
+  pitch: number,
+): Flat | null {
   const step = 0.05;
   let min: number | null = null;
   let max: number | null = null;
   for (let i = 1; i <= 44; i += 1) {
     const d = i * step;
-    if (lays(d, 0, basis, bobberX, bobberZ)) {
+    if (lays(d, 0, basis, bobberX, bobberZ, pitch)) {
       if (min == null) min = d;
       max = d;
     }
   }
   if (min == null || max == null) return null;
   const used = Math.min(max, Math.max(min, dist));
-  return lays(used, side, basis, bobberX, bobberZ) ?? lays(min, 0, basis, bobberX, bobberZ);
+  return lays(used, side, basis, bobberX, bobberZ, pitch) ?? lays(min, 0, basis, bobberX, bobberZ, pitch);
 }
 
 function hidden(): RisePose {
@@ -189,7 +203,7 @@ function build(
   const basis = lakeward(bobberX, bobberZ, anglerX, anglerZ);
   let nextPitch = pitch;
   for (let i = 0; i < 5; i += 1) {
-    const flat = settle(dist, side, basis, bobberX, bobberZ);
+    const flat = settle(dist, side, basis, bobberX, bobberZ, nextPitch);
     if (flat) {
       const band = yBand(flat.x, flat.z, flat.yaw, nextPitch, time);
       if (band) {
@@ -277,7 +291,7 @@ export function turnPose(
     const swim = 1.15 * u * fade;
     const x = from.x + Math.sin(yaw) * swim + basis.ox * swim * 0.35;
     const z = from.z + Math.cos(yaw) * swim + basis.oz * swim * 0.35;
-    if (!bodyFits(x, z, yaw)) continue;
+    if (!bodyFits(x, z, yaw, pitch)) continue;
     const band = yBand(x, z, yaw, pitch, time);
     if (!band) continue;
     const y = Math.min(band.hi, Math.max(band.lo, from.y - 0.2 * u));

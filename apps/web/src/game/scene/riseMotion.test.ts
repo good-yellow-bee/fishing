@@ -1,10 +1,12 @@
 import { LAKE_CENTER_Z, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
+import * as THREE from "three";
 import { bedHeight, waterHeight } from "./water.ts";
 import {
   RISE_HALF_H,
   RISE_HALF_W,
   RISE_NOSE,
+  RISE_SCALE,
   RISE_SEC,
   RISE_TAIL,
   TAKE_SEC,
@@ -34,14 +36,13 @@ function turned(lx: number, ly: number, lz: number, pose: RisePose) {
 }
 
 function tips(pose: RisePose) {
-  return [
-    turned(0, RISE_HALF_H, 0, pose),
-    turned(0, -RISE_HALF_H, 0, pose),
-    turned(0, 0, RISE_NOSE, pose),
-    turned(0, 0, -RISE_TAIL, pose),
-    turned(RISE_HALF_W, 0, 0, pose),
-    turned(-RISE_HALF_W, 0, 0, pose),
-  ];
+  const corners = [];
+  for (const x of [RISE_HALF_W, -RISE_HALF_W]) {
+    for (const y of [RISE_HALF_H, -RISE_HALF_H]) {
+      for (const z of [RISE_NOSE, -RISE_TAIL]) corners.push(turned(x, y, z, pose));
+    }
+  }
+  return corners;
 }
 
 function expectClear(pose: RisePose, time: number) {
@@ -143,7 +144,72 @@ describe("rising fish", () => {
       expect(riseMode(phase, false, false, false)).toBe("off");
     }
   });
+
+  it("keeps the wagging mesh inside the clearance box", () => {
+    const amp = 1.25;
+    let minX = 0;
+    let maxX = 0;
+    let minY = 0;
+    let maxY = 0;
+    let minZ = 0;
+    let maxZ = 0;
+    for (let i = 0; i <= 12; i += 1) {
+      const phase = (i / 12) * Math.PI * 2;
+      const root = waggedFish(Math.sin(phase) * 0.2 * amp, Math.sin(phase - 0.8) * 0.46 * amp);
+      root.updateMatrixWorld(true);
+      const box = new THREE.Box3().setFromObject(root);
+      minX = Math.min(minX, box.min.x);
+      maxX = Math.max(maxX, box.max.x);
+      minY = Math.min(minY, box.min.y);
+      maxY = Math.max(maxY, box.max.y);
+      minZ = Math.min(minZ, box.min.z);
+      maxZ = Math.max(maxZ, box.max.z);
+    }
+    expect(minX).toBeGreaterThanOrEqual(-RISE_HALF_W);
+    expect(maxX).toBeLessThanOrEqual(RISE_HALF_W);
+    expect(minY).toBeGreaterThanOrEqual(-RISE_HALF_H);
+    expect(maxY).toBeLessThanOrEqual(RISE_HALF_H);
+    expect(maxZ).toBeLessThanOrEqual(RISE_NOSE);
+    expect(minZ).toBeGreaterThanOrEqual(-RISE_TAIL);
+  });
 });
+
+function waggedFish(midY: number, tailY: number) {
+  const mesh = (
+    geo: THREE.BufferGeometry,
+    pos?: [number, number, number],
+    rot?: [number, number, number],
+    scale?: [number, number, number],
+  ) => {
+    const child = new THREE.Mesh(geo);
+    if (pos) child.position.set(...pos);
+    if (rot) child.rotation.set(...rot);
+    if (scale) child.scale.set(...scale);
+    return child;
+  };
+  const root = new THREE.Group();
+  root.scale.setScalar(RISE_SCALE);
+  root.add(mesh(new THREE.SphereGeometry(0.42, 12, 8), [0, 0, 0.1], undefined, [1, 0.78, 1.65]));
+  root.add(mesh(new THREE.SphereGeometry(0.36, 12, 8), [0, 0.02, 0.72], undefined, [0.9, 0.8, 1]));
+  root.add(mesh(new THREE.SphereGeometry(0.045, 7, 5), [0.17, 0.17, 0.93]));
+  root.add(mesh(new THREE.SphereGeometry(0.045, 7, 5), [-0.17, 0.17, 0.93]));
+  root.add(mesh(new THREE.SphereGeometry(0.32, 7, 4), [0, 0.27, -0.02], [0.2, 0, 0], [0.5, 0.08, 0.48]));
+  const middle = new THREE.Group();
+  middle.position.set(0, 0, -0.45);
+  middle.rotation.y = midY;
+  middle.add(mesh(new THREE.SphereGeometry(0.34, 10, 7), [0, 0, -0.15], undefined, [0.85, 0.75, 1]));
+  const tail = new THREE.Group();
+  tail.position.set(0, 0, -0.4);
+  tail.rotation.y = tailY;
+  tail.add(mesh(new THREE.ConeGeometry(0.2, 0.5, 7), [0, 0, -0.14], [Math.PI / 2, 0, 0]));
+  tail.add(mesh(new THREE.SphereGeometry(0.5, 7, 4), [0.23, 0, -0.34], [0, -0.55, 0], [0.5, 0.08, 0.42]));
+  tail.add(mesh(new THREE.SphereGeometry(0.5, 7, 4), [-0.23, 0, -0.34], [0, 0.55, 0], [0.5, 0.08, 0.42]));
+  middle.add(tail);
+  root.add(middle);
+  root.add(mesh(new THREE.SphereGeometry(0.5, 7, 4), [0.38, -0.02, 0.03], [0, -0.35, 0], [0.34, 0.06, 0.25]));
+  root.add(mesh(new THREE.SphereGeometry(0.5, 7, 4), [-0.38, -0.02, 0.03], [0, 0.35, 0], [0.34, 0.06, 0.25]));
+  return root;
+}
 
 function shortestYaw(from: number, to: number) {
   let diff = to - from;
