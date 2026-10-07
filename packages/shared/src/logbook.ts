@@ -546,6 +546,47 @@ export function withoutTrip(book: Logbook, id: string): Logbook {
   };
 }
 
+const PLAY_LAKE: Spot = {
+  id: "spot-stillwater",
+  name: "Stillwater",
+  waterType: "lake",
+  notes: "",
+  bestConditions: "",
+};
+
+function withPlayLake(book: Logbook): { book: Logbook; spotId: string } {
+  const lake = book.spots.find((spot) => spot.waterType === "lake");
+  if (lake) return { book, spotId: lake.id };
+  return { book: withSpot(book, PLAY_LAKE), spotId: PLAY_LAKE.id };
+}
+
+export type LandedFish = {
+  id: string;
+  species: string;
+  pounds: number;
+  bank: string;
+  caughtAt: string;
+};
+
+/** Fight results carry species and weight, not length. One weight catch on this lake. */
+export function keepLandedCatch(book: Logbook, landed: LandedFish): Logbook {
+  if (book.catches.some((entry) => entry.id === landed.id)) return book;
+  const placed = withPlayLake(book);
+  const bank = landed.bank.trim().toLowerCase();
+  const entry: CatchEntry = {
+    id: landed.id,
+    species: landed.species,
+    measure: { kind: "weight", pounds: landed.pounds },
+    lure: "Bobber",
+    spotId: placed.spotId,
+    tripId: null,
+    caughtAt: landed.caughtAt,
+    note: bank ? `Landed at the ${bank}.` : "Landed on the lake.",
+    weather: null,
+  };
+  return withCatch(placed.book, entry);
+}
+
 export function withoutSpot(book: Logbook, id: string): Logbook {
   const droppedTrips = new Set(book.trips.filter((trip) => trip.spotId === id).map((trip) => trip.id));
   return {

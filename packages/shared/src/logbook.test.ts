@@ -3,6 +3,7 @@ import {
   catchesForTrip,
   formatMeasure,
   isLogbook,
+  keepLandedCatch,
   localDate,
   parseCatchDraft,
   parseSpotDraft,
@@ -18,6 +19,7 @@ import {
   withoutSpot,
   withoutTrip,
   type CatchDraft,
+  type Logbook,
 } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -205,6 +207,71 @@ describe("field log", () => {
     expect(next.catches.some((entry) => entry.spotId === "spot-duck" || entry.tripId === "trip-duck")).toBe(false);
     expect(next.catches).toHaveLength(book.catches.length - 2);
     expect(next.trips).toHaveLength(book.trips.length - 1);
+    expect(isLogbook(next)).toBe(true);
+  });
+
+  it("keeps a landed fish on the lake already in the book", () => {
+    const next = keepLandedCatch(book, {
+      id: "catch-play-gill",
+      species: "Bluegill",
+      pounds: 0.4,
+      bank: "dock",
+      caughtAt: "2026-10-07T18:04:00.000Z",
+    });
+    const kept = next.catches.find((entry) => entry.id === "catch-play-gill");
+    expect(next.spots).toEqual(book.spots);
+    expect(next.catches).toHaveLength(book.catches.length + 1);
+    expect(kept).toEqual({
+      id: "catch-play-gill",
+      species: "Bluegill",
+      measure: { kind: "weight", pounds: 0.4 },
+      lure: "Bobber",
+      spotId: "spot-cedar",
+      tripId: null,
+      caughtAt: "2026-10-07T18:04:00.000Z",
+      note: "Landed at the dock.",
+      weather: null,
+    });
+    expect(isLogbook(next)).toBe(true);
+    expect(keepLandedCatch(next, {
+      id: "catch-play-gill",
+      species: "Bluegill",
+      pounds: 0.4,
+      bank: "dock",
+      caughtAt: "2026-10-07T18:04:00.000Z",
+    })).toBe(next);
+  });
+
+  it("adds this lake when the book has no lake spot", () => {
+    const river: Logbook = {
+      spots: [
+        {
+          id: "spot-mill",
+          name: "Mill Race",
+          waterType: "river",
+          notes: "",
+          bestConditions: "",
+        },
+      ],
+      trips: [],
+      catches: [],
+    };
+    const next = keepLandedCatch(river, {
+      id: "catch-play-perch",
+      species: "Yellow perch",
+      pounds: 0.8,
+      bank: "Drop-off",
+      caughtAt: "2026-10-07T18:10:00.000Z",
+    });
+    expect(next.spots.map((spot) => spot.id)).toEqual(["spot-mill", "spot-stillwater"]);
+    expect(next.spots[1]).toMatchObject({ name: "Stillwater", waterType: "lake" });
+    expect(next.catches[0]).toMatchObject({
+      species: "Yellow perch",
+      measure: { kind: "weight", pounds: 0.8 },
+      spotId: "spot-stillwater",
+      note: "Landed at the drop-off.",
+      weather: null,
+    });
     expect(isLogbook(next)).toBe(true);
   });
 });

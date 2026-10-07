@@ -36,6 +36,7 @@ export function Hud({ profile, email, hour }: Props) {
         <span className="skill-chip">
           <small>{SKILL_LABELS.patience}</small> {profile.patience}
         </span>
+        <Link className="hud-link" to="/catches">Field log</Link>
         <Link className="hud-link" to="/log">Catch log</Link>
         <Link className="hud-link" to="/board">Board</Link>
         <button

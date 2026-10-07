@@ -774,6 +774,26 @@ kbd {
   background: #28362f;
 }
 
+.catch-card .catch-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.catch-card .catch-actions .catch-stamp,
+.catch-card .catch-actions .warn {
+  flex-basis: 100%;
+  margin: 8px 0 0;
+}
+
+.catch-card a.panel-btn {
+  color: var(--paper);
+  text-decoration: none;
+  display: inline-block;
+}
+
 .log-page {
   min-height: 100vh;
   background:
