@@ -60,7 +60,7 @@ export type Fight = {
 };
 
 export type Outcome =
-  | { kind: "landed"; species: FishSpecies; weight: number; spot: SpotId }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string };
 
@@ -412,7 +412,13 @@ export function useFishingGame(profile: Profile | null, hour: LakeHour = lakeHou
         }
         if (result === "landed") {
           fx.land();
-          setOutcome({ kind: "landed", species: current.species, weight: current.weight, spot: spotRef.current });
+          setOutcome({
+            kind: "landed",
+            id: crypto.randomUUID(),
+            species: current.species,
+            weight: current.weight,
+            spot: spotRef.current,
+          });
           clearFight();
           setPhaseBoth("result");
           setHint("Landed. Cast again when ready.");

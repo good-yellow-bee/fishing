@@ -32,6 +32,8 @@ export function DockPage() {
   const game = useFishingGame(me?.profile ?? null, hour);
   const scenePhase = game.outcome ? "result" : game.phase;
   const posted = useRef<string | null>(null);
+  const [fieldSaved, setFieldSaved] = useState(false);
+  const [fieldLogError, setFieldLogError] = useState("");
   const statsRef = useRef(me?.speciesStats ?? []);
   statsRef.current = me?.speciesStats ?? [];
   const stamp = useMemo(() => {
@@ -49,32 +51,42 @@ export function DockPage() {
 
   useEffect(() => () => fx.ambient.stop(), []);
 
-  useEffect(() => {
-    if (game.outcome?.kind !== "landed") {
-      posted.current = null;
-      return;
-    }
-    const { species, weight, spot: catchSpot } = game.outcome;
-    const key = `${species.id}:${weight}:${catchSpot}`;
-    if (posted.current === key) return;
-    posted.current = key;
+  const saveFieldLog = useCallback(() => {
+    if (game.outcome?.kind !== "landed") return;
+    const { id, species, weight, spot: catchSpot } = game.outcome;
     try {
       saveLandedCatch({
-        id: crypto.randomUUID(),
+        id,
         species: species.name,
         pounds: weight,
         bank: SPOT_LABELS[catchSpot],
         caughtAt: new Date().toISOString(),
       });
+      setFieldSaved(true);
+      setFieldLogError("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "The field log could not be saved.");
+      setFieldSaved(false);
+      setFieldLogError(err instanceof Error ? err.message : "The field log could not be saved.");
     }
+  }, [game.outcome]);
+
+  useEffect(() => {
+    if (game.outcome?.kind !== "landed") {
+      posted.current = null;
+      setFieldSaved(false);
+      setFieldLogError("");
+      return;
+    }
+    const { id, species, weight, spot: catchSpot } = game.outcome;
+    if (posted.current === id) return;
+    posted.current = id;
+    saveFieldLog();
     setBusy(true);
     recordCatch({ speciesId: species.id, weight, spot: catchSpot })
       .then(() => refresh())
       .catch((err: Error) => setError(err.message))
       .finally(() => setBusy(false));
-  }, [game.outcome, refresh]);
+  }, [game.outcome, refresh, saveFieldLog]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);
@@ -175,13 +187,25 @@ export function DockPage() {
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
             )}
-            <p className="catch-stamp quiet">Saved in the field log</p>
-            <button className="panel-btn" type="button" onClick={game.dismissResult}>
-              Keep fishing
-            </button>
-            <Link className="panel-btn" to="/catches">
-              Field log
-            </Link>
+            <div className="catch-actions">
+              {fieldSaved && <p className="catch-stamp quiet">Saved in the field log</p>}
+              {fieldLogError && (
+                <p className="warn" role="alert">
+                  {fieldLogError}
+                </p>
+              )}
+              <button className="panel-btn" type="button" onClick={game.dismissResult}>
+                Keep fishing
+              </button>
+              {fieldLogError && (
+                <button className="panel-btn" type="button" onClick={saveFieldLog}>
+                  Try saving again
+                </button>
+              )}
+              <Link className="panel-btn" to="/catches">
+                Field log
+              </Link>
+            </div>
           </div>
         )}
         {game.outcome && game.outcome.kind !== "landed" && (
