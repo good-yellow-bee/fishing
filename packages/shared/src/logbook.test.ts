@@ -274,4 +274,26 @@ describe("field log", () => {
     });
     expect(isLogbook(next)).toBe(true);
   });
+
+  it("keeps a point landing on this lake and leaves the other fish", () => {
+    const next = keepLandedCatch(book, {
+      id: "catch-play-point",
+      species: "Bluegill",
+      pounds: 0.4,
+      bank: "Point",
+      caughtAt: "2026-10-07T19:00:00.000Z",
+    });
+    const kept = next.catches.find((entry) => entry.id === "catch-play-point");
+    expect(kept).toMatchObject({
+      species: "Bluegill",
+      measure: { kind: "weight", pounds: 0.4 },
+      spotId: "spot-cedar",
+      note: "Landed at the point.",
+      weather: null,
+    });
+    expect(next.catches).toHaveLength(book.catches.length + 1);
+    expect(next.spots).toEqual(book.spots);
+    expect(next.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(book.catches);
+    expect(isLogbook(next)).toBe(true);
+  });
 });

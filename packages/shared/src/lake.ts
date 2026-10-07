@@ -29,6 +29,12 @@ export const DOCK_STAND_Z = 6.8;
 export const REEDS_PAD: Pad = { x: -12.3, z: 9.5, r: 3.2 };
 export const DROPOFF_PAD: Pad = { x: 15.4, z: 7.8, r: 3.2 };
 
+/** Open bank between the reeds and the dock. Feet stay on shore, east of the reeds. */
+export const POINT_PAD: Pad = { x: -5.6, z: 12.2, r: 1.35 };
+/** Near-shore water in front of that bank. East of this stays dock water. */
+export const POINT_MAX_X = -3.5;
+export const POINT_MIN_Z = 0;
+
 export const STANCE_LABELS: Record<StanceId, string> = {
   shop: "Shop",
   trail: "Path",
@@ -39,6 +45,7 @@ const FISHING_PADS: readonly [SpotId, Pad][] = [
   ["dock", DOCK_PAD],
   ["reeds", REEDS_PAD],
   ["dropoff", DROPOFF_PAD],
+  ["point", POINT_PAD],
 ];
 
 export type Landing =
@@ -92,11 +99,12 @@ export function spotAt(x: number, z: number): SpotId | null {
   if (!inLake(x, z)) return null;
   if (x <= REEDS_MAX_X) return "reeds";
   if (z <= LAKE_CENTER_Z) return "dropoff";
+  if (x <= POINT_MAX_X && z >= POINT_MIN_Z) return "point";
   return "dock";
 }
 
 export function isFishingStance(stance: StanceId): stance is SpotId {
-  return stance === "dock" || stance === "reeds" || stance === "dropoff";
+  return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point";
 }
 
 export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number) {
@@ -144,7 +152,7 @@ export function parseAim(raw: string | undefined): { x: number; z: number } | nu
 }
 
 export function parseStance(raw: string | undefined): StanceId | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "shop" || raw === "trail") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "shop" || raw === "trail") return raw;
   return null;
 }
 

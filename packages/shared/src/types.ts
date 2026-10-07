@@ -1,5 +1,5 @@
 export type ChallengeId = "mash" | "timing" | "tension" | "sequence" | "surge";
-export type SpotId = "dock" | "reeds" | "dropoff";
+export type SpotId = "dock" | "reeds" | "dropoff" | "point";
 export type SkillId = "strength" | "accuracy" | "patience";
 export type Rarity = "common" | "uncommon" | "rare" | "legendary";
 

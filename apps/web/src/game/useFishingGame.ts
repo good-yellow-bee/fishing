@@ -39,7 +39,7 @@ const CAST_MISS: Record<CastFail, string> = {
 };
 
 function hintFromDataset(raw: string | undefined): AimHint | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "shore") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "shore") return raw;
   return null;
 }
 

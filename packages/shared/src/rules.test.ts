@@ -9,6 +9,9 @@ import {
   DOCK_STAND_X,
   DOCK_STAND_Z,
   DROPOFF_PAD,
+  POINT_MAX_X,
+  POINT_PAD,
+  REEDS_MAX_X,
   REEDS_PAD,
   SHOP_X,
   SHOP_Z,
@@ -243,6 +246,34 @@ describe("lake spots", () => {
     expect(resolveCast(15, -2, "dropoff", 3, DROPOFF_PAD.x, DROPOFF_PAD.z)).toEqual({ ok: true, spot: "dropoff" });
     expect(resolveCast(0.5, 3, "shop", 3, SPAWN_X, SPAWN_Z)).toEqual({ ok: false, reason: "stance" });
     expect(resolveCast(0, 20, "dock", 3, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: false, reason: "shore" });
+  });
+
+  it("stands on the point and casts that shore", () => {
+    expect(walkableAt(POINT_PAD.x, POINT_PAD.z)).toBe(true);
+    expect(inLake(POINT_PAD.x, POINT_PAD.z)).toBe(false);
+    expect(footHeight(POINT_PAD.x, POINT_PAD.z)).toBe(0);
+    expect(stanceAt(POINT_PAD.x, POINT_PAD.z)).toBe("point");
+    expect(stanceAt(5, 12)).toBe("trail");
+    expect(spotAt(POINT_PAD.x, 6)).toBe("point");
+    expect(spotAt(0.5, 3)).toBe("dock");
+    expect(POINT_PAD.x - POINT_PAD.r).toBeGreaterThan(REEDS_MAX_X);
+    expect(POINT_PAD.x + POINT_PAD.r).toBeLessThanOrEqual(POINT_MAX_X);
+    const west = POINT_PAD.x - POINT_PAD.r + 0.05;
+    const east = POINT_PAD.x + POINT_PAD.r - 0.05;
+    expect(walkableAt(west, POINT_PAD.z)).toBe(true);
+    expect(walkableAt(east, POINT_PAD.z)).toBe(true);
+    expect(stanceAt(west, POINT_PAD.z)).toBe("point");
+    expect(stanceAt(east, POINT_PAD.z)).toBe("point");
+    expect(spotAt(west, 6)).toBe("point");
+    expect(spotAt(east, 6)).toBe("point");
+    expect(resolveCast(west, 6, "point", 1, west, POINT_PAD.z)).toEqual({ ok: true, spot: "point" });
+    expect(resolveCast(east, 6, "point", 1, east, POINT_PAD.z)).toEqual({ ok: true, spot: "point" });
+    expect(resolveCast(POINT_PAD.x, 6, "point", 1, POINT_PAD.x, POINT_PAD.z)).toEqual({ ok: true, spot: "point" });
+    expect(resolveCast(POINT_MAX_X + 0.2, 6, "point", 1, POINT_PAD.x, POINT_PAD.z)).toEqual({ ok: false, reason: "basin" });
+    expect(resolveCast(0, DOCK_STAND_Z, "point", 1, POINT_PAD.x, POINT_PAD.z)).toEqual({ ok: false, reason: "basin" });
+    expect(resolveCast(4, -5, "point", 1, POINT_PAD.x, POINT_PAD.z)).toEqual({ ok: false, reason: "range" });
+    expect(resolveCast(POINT_PAD.x, 6, "dock", 1, DOCK_PAD.x, DOCK_PAD.z)).toEqual({ ok: false, reason: "basin" });
+    expect(parseStance("point")).toBe("point");
   });
 });
 
