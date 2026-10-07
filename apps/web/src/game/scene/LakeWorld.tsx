@@ -6,7 +6,7 @@ import { DROPOFF_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
-import { waterHeight } from "./water";
+import { bedColor, bedHeight, waterDepthColor, waterHeight } from "./water";
 
 type Vec3 = [number, number, number];
 
@@ -298,17 +298,59 @@ const DRAGONFLIES: DragonflyProps[] = [
 
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
-function makeLakeGeometry(radiusX: number, radiusZ: number) {
-  const geometry = new THREE.CircleGeometry(1, 96);
-  const positions = geometry.getAttribute("position");
-  for (let i = 0; i < positions.count; i += 1) {
-    const x = positions.getX(i);
-    const z = positions.getY(i);
-    if (x === 0 && z === 0) continue;
-    const edge = lakeEdge(Math.atan2(z, x));
-    positions.setXY(i, x * radiusX * edge, z * radiusZ * edge);
+function pushDiscIndices(rings: number, segments: number, indices: number[]) {
+  for (let s = 0; s < segments; s += 1) {
+    indices.push(0, 1 + s, 1 + ((s + 1) % segments));
   }
+  for (let r = 0; r < rings - 1; r += 1) {
+    const inner = 1 + r * segments;
+    const outer = inner + segments;
+    for (let s = 0; s < segments; s += 1) {
+      const next = (s + 1) % segments;
+      const a = inner + s;
+      const b = inner + next;
+      const c = outer + s;
+      const d = outer + next;
+      indices.push(a, c, d);
+      indices.push(a, d, b);
+    }
+  }
+}
+
+// Shelf near the bank, basin in the middle. Local +Z is world up after the mesh pitch.
+function makeBedSurface(radiusX: number, radiusZ: number) {
+  const rings = 18;
+  const segments = 72;
+  const count = 1 + rings * segments;
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const indices: number[] = [];
+  const setVert = (i: number, x: number, y: number) => {
+    const worldZ = -y + LAKE_CENTER_Z;
+    const tint = bedColor(x, worldZ);
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = bedHeight(x, worldZ);
+    colors[i * 3] = tint.r;
+    colors[i * 3 + 1] = tint.g;
+    colors[i * 3 + 2] = tint.b;
+  };
+  setVert(0, 0, 0);
+  for (let r = 1; r <= rings; r += 1) {
+    const f = r / rings;
+    for (let s = 0; s < segments; s += 1) {
+      const angle = (s / segments) * Math.PI * 2;
+      const edge = lakeEdge(angle);
+      setVert(1 + (r - 1) * segments + s, Math.cos(angle) * radiusX * edge * f, Math.sin(angle) * radiusZ * edge * f);
+    }
+  }
+  pushDiscIndices(rings, segments, indices);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  geometry.setIndex(indices);
   geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
   return geometry;
 }
 
@@ -340,22 +382,7 @@ function makeWaveSurface(radiusX: number, radiusZ: number) {
       setVert(1 + (r - 1) * segments + s, Math.cos(angle) * radiusX * edge * f, Math.sin(angle) * radiusZ * edge * f);
     }
   }
-  for (let s = 0; s < segments; s += 1) {
-    indices.push(0, 1 + s, 1 + ((s + 1) % segments));
-  }
-  for (let r = 0; r < rings - 1; r += 1) {
-    const inner = 1 + r * segments;
-    const outer = inner + segments;
-    for (let s = 0; s < segments; s += 1) {
-      const next = (s + 1) % segments;
-      const a = inner + s;
-      const b = inner + next;
-      const c = outer + s;
-      const d = outer + next;
-      indices.push(a, c, d);
-      indices.push(a, d, b);
-    }
-  }
+  pushDiscIndices(rings, segments, indices);
   const geometry = new THREE.BufferGeometry();
   const position = new THREE.BufferAttribute(positions, 3);
   position.setUsage(THREE.DynamicDrawUsage);
@@ -371,19 +398,20 @@ function makeWaveSurface(radiusX: number, radiusZ: number) {
 function displaceWater(geometry: THREE.BufferGeometry, time: number) {
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   const base = geometry.userData.base as Float32Array;
-  for (let i = 0; i < position.count; i += 1) {
-    const x = base[i * 2] ?? 0;
-    const y = base[i * 2 + 1] ?? 0;
-    position.setZ(i, waterHeight(x, -y + LAKE_CENTER_Z, time));
-  }
   let colors = geometry.getAttribute("color") as THREE.BufferAttribute | undefined;
   if (!colors) {
     colors = new THREE.BufferAttribute(new Float32Array(position.count * 3), 3);
     geometry.setAttribute("color", colors);
   }
   for (let i = 0; i < position.count; i += 1) {
-    const shade = THREE.MathUtils.clamp(1 + position.getZ(i) * 2.5, 0.38, 1.45);
-    colors.setXYZ(i, shade, shade, shade * 1.04);
+    const x = base[i * 2] ?? 0;
+    const y = base[i * 2 + 1] ?? 0;
+    const worldZ = -y + LAKE_CENTER_Z;
+    const height = waterHeight(x, worldZ, time);
+    position.setZ(i, height);
+    const tint = waterDepthColor(x, worldZ);
+    const crest = 1 + height * 0.55;
+    colors.setXYZ(i, tint.r * crest, tint.g * crest, tint.b * crest);
   }
   colors.needsUpdate = true;
   position.needsUpdate = true;
@@ -539,7 +567,7 @@ function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
   const geometry = useMemo(() => makeWaveSurface(LAKE_RX, LAKE_RZ), []);
-  const bedGeometry = useMemo(() => makeLakeGeometry(LAKE_RX + 0.4, LAKE_RZ + 0.4), []);
+  const bedGeometry = useMemo(() => makeBedSurface(LAKE_RX + 0.35, LAKE_RZ + 0.35), []);
   const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
@@ -568,8 +596,8 @@ function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
 
   return (
     <group position={[0, 0, LAKE_CENTER_Z]}>
-      <mesh geometry={bedGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.1, 0]}>
-        <meshToonMaterial color="#23444f" gradientMap={toonRamp()} />
+      <mesh geometry={bedGeometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <meshToonMaterial color="#ffffff" vertexColors gradientMap={toonRamp()} />
       </mesh>
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <meshToonMaterial

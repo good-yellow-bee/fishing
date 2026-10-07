@@ -69,7 +69,7 @@ import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, wai
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose, shortestYaw } from "./pose";
-import { waterHeight, waterRayHit } from "./water";
+import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -920,6 +920,7 @@ function StalkingFish({ active, taking }: { active: boolean; taking: boolean }) 
 
 function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
+  const sitRing = useRef<THREE.Mesh>(null);
   const lure = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
   const entryAnchor = useRef<THREE.Group>(null);
@@ -996,6 +997,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       (line.material as THREE.LineBasicMaterial).opacity = opacity;
       line.visible = opacity > 0.03;
       if (bobber.current) bobber.current.visible = false;
+      if (sitRing.current) sitRing.current.visible = false;
       if (!line.visible) return;
       const sag = landLineSag(landView.swing);
       const lineX = landedFish.x - rodTip.x;
@@ -1036,6 +1038,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     line.visible = showLure;
     if (bobber.current) bobber.current.visible = showLure;
     if (!showLure) {
+      if (sitRing.current) sitRing.current.visible = false;
       if (phase === "waiting" && usingAim.current) lookAt.copy(castAim);
       else if (aiming && aim.overWater) lookAt.copy(aim.live);
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
@@ -1138,6 +1141,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     } else {
       settleAt.current = -1;
       waitView.age = -1;
+    }
+    if (sitRing.current) {
+      sitRing.current.visible = sitting;
+      if (sitting) sitRing.current.position.set(target.x, bobberRingHeight(target.x, target.z, t), target.z);
     }
     if (!flying) target.y += waterHeight(target.x, target.z, t);
     if (!flying && phase === "waiting" && splashStart.current >= 0) {
@@ -1288,6 +1295,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       </group>
       {phase === "fight" && <RetrieveWake />}
       {phase === "fight" && <RetrieveSplash />}
+      <mesh ref={sitRing} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
+        <ringGeometry args={[0.4, 0.55, 32]} />
+        <meshBasicMaterial color="#e7f4ee" transparent opacity={0.78} depthWrite={false} />
+      </mesh>
       <group ref={bobber} visible={false}>
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
