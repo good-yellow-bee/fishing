@@ -198,6 +198,12 @@ describe("lake spots", () => {
     expect(walkableAt(1.6, 7)).toBe(false);
     expect(walkableAt(-1.5, 6.8)).toBe(false);
     expect(walkableAt(0, 5.2)).toBe(false);
+    expect(inLake(0.8, 9.2)).toBe(true);
+    expect(walkableAt(0.8, 9.2)).toBe(false);
+    expect(inLake(1.8, 10.4)).toBe(true);
+    expect(walkableAt(1.8, 10.4)).toBe(false);
+    expect(inLake(1.4, 11.2)).toBe(true);
+    expect(walkableAt(1.4, 11.2)).toBe(false);
     expect(footHeight(1.6, 7)).toBe(0);
     expect(footHeight(SPAWN_X, SPAWN_Z)).toBe(0);
     for (const [x, z] of [
@@ -205,8 +211,8 @@ describe("lake spots", () => {
       [0, 8.1],
       [0, 9.4],
       [0.2, 10.3],
-      [0.9, 10.6],
-      [1.4, 11.2],
+      [0.9, 10.4],
+      [1.15, 11.4],
       [1.6, 11.5],
       [3.4, 13.2],
       [SPAWN_X, SPAWN_Z],

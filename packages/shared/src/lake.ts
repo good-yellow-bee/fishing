@@ -52,10 +52,12 @@ type Aabb = { minX: number; maxX: number; minZ: number; maxZ: number; water?: bo
 
 const WALK: Aabb[] = [
   { minX: 1.5, maxX: 9, minZ: 12.2, maxZ: 18.2 },
+  // Planks, then the path boards. The two narrow joins only bridge the gaps between meshes.
   { minX: -0.55, maxX: 0.55, minZ: 5.65, maxZ: 8.15, water: true },
-  { minX: -0.28, maxX: 0.28, minZ: 8.0, maxZ: 10.15, water: true },
-  { minX: -0.05, maxX: 1.2, minZ: 9.95, maxZ: 11.1, water: true },
-  { minX: 0.5, maxX: 2.1, minZ: 10.85, maxZ: 11.55, water: true },
+  { minX: -0.28, maxX: 0.28, minZ: 8.0, maxZ: 9.85, water: true },
+  { minX: -0.15, maxX: 0.28, minZ: 9.7, maxZ: 10.55, water: true },
+  { minX: 0.05, maxX: 1.18, minZ: 10.18, maxZ: 10.58, water: true },
+  { minX: 0.98, maxX: 1.32, minZ: 10.4, maxZ: 11.48, water: true },
   { minX: -14.8, maxX: 16.8, minZ: 11.4, maxZ: 16.5 },
   { minX: -15.2, maxX: -8.5, minZ: 8.2, maxZ: 12.4 },
   { minX: 11.5, maxX: 17.6, minZ: 6.4, maxZ: 12.4 },
