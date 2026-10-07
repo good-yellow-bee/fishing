@@ -4,11 +4,14 @@ import {
   canUseSpot,
   catchPoints,
   catchStamp,
+  fieldLogBestBeat,
   isFishingStance,
   lakeHour,
   lakeHourFromSearch,
+  sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
+  type FieldLogBestBeat,
   type SkillId,
 } from "@stillwater/shared";
 import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
@@ -16,6 +19,7 @@ import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { saveLandedCatch } from "../field/keepCatch";
+import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
@@ -34,6 +38,7 @@ export function DockPage() {
   const posted = useRef<string | null>(null);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
+  const [fieldBeat, setFieldBeat] = useState<FieldLogBestBeat | null>(null);
   const statsRef = useRef(me?.speciesStats ?? []);
   statsRef.current = me?.speciesStats ?? [];
   const stamp = useMemo(() => {
@@ -75,11 +80,14 @@ export function DockPage() {
       posted.current = null;
       setFieldSaved(false);
       setFieldLogError("");
+      setFieldBeat(null);
       return;
     }
     const { id, species, weight, spot: catchSpot } = game.outcome;
     if (posted.current === id) return;
     posted.current = id;
+    const book = readStoredLogbook() ?? sampleLogbook(new Date());
+    setFieldBeat(fieldLogBestBeat(book, species.name, weight));
     saveFieldLog();
     setBusy(true);
     recordCatch({ speciesId: species.id, weight, spot: catchSpot })
@@ -176,6 +184,12 @@ export function DockPage() {
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
         {game.outcome?.kind === "landed" && (
           <div className={`catch-card rarity-${game.outcome.species.rarity}`}>
+            {fieldBeat && (
+              <p className="catch-best" role="status">
+                <strong>Personal best</strong>
+                <span>{fieldBeat.line}</span>
+              </p>
+            )}
             <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>

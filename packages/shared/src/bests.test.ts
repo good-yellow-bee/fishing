@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { personalBests } from "./bests.ts";
+import { fieldLogBestBeat, personalBests } from "./bests.ts";
 import { sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -62,6 +62,37 @@ describe("personal bests", () => {
       species: [],
       watersWithFish: 0,
       waters: [],
+    });
+  });
+
+  it("names a landed fish that beats a personal best already in the book", () => {
+    const empty = { spots: book.spots, trips: book.trips, catches: [] };
+    expect(fieldLogBestBeat(empty, "Brook trout", 2)).toBeNull();
+    expect(fieldLogBestBeat(book, "Bluegill", 0.5)).toBeNull();
+    expect(fieldLogBestBeat(book, "Brook trout", 0.4)).toBeNull();
+    expect(fieldLogBestBeat(book, "Northern pike", 6.4)).toBeNull();
+
+    expect(fieldLogBestBeat(book, "Brook trout", 1.2)).toEqual({
+      scope: "species",
+      previousPounds: 0.4,
+      previousSpecies: "Brook trout",
+      line: "Beats your 0.4 lb Brook trout already in the field log",
+    });
+    expect(fieldLogBestBeat(book, "Yellow perch", 0.8)).toMatchObject({
+      scope: "species",
+      previousPounds: 0.6,
+      line: "Beats your 0.6 lb Yellow perch already in the field log",
+    });
+    expect(fieldLogBestBeat(book, "Northern pike", 7)).toEqual({
+      scope: "book",
+      previousPounds: 6.4,
+      previousSpecies: "Northern pike",
+      line: "Beats the 6.4 lb Northern pike already in the field log",
+    });
+    expect(fieldLogBestBeat(book, "Common carp", 8)).toMatchObject({
+      scope: "book",
+      previousSpecies: "Northern pike",
+      line: "Beats the 6.4 lb Northern pike already in the field log",
     });
   });
 });
