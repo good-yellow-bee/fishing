@@ -187,7 +187,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     if (striking || taking || landing || missing || twitching) bodyLean.current = leanTarget;
     else bodyLean.current += (leanTarget - bodyLean.current) * (1 - Math.exp(-8 * delta));
     if (root.current) {
-      root.current.position.set(anglerPose.x, anglerPose.bob, anglerPose.z);
+      root.current.position.set(anglerPose.x, anglerPose.y + anglerPose.bob, anglerPose.z);
       root.current.rotation.order = "YXZ";
       root.current.rotation.y = anglerPose.yaw;
       root.current.rotation.x = anglerPose.pitch + castLean + bodyLean.current;
@@ -235,7 +235,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
   });
 
   return (
-    <group ref={root} position={[anglerPose.x, 0, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
+    <group ref={root} position={[anglerPose.x, anglerPose.y, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
       <primitive object={character} />
       <group ref={grip} position={[0.2, 0.62, 0.22]} rotation={[1.05, 0.05, -0.28]}>
         <primitive object={rod} scale={0.19} />

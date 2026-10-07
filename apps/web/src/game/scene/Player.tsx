@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { stanceAt, walkableAt } from "@stillwater/shared";
+import { footHeight, stanceAt, walkableAt } from "@stillwater/shared";
 import { anglerPose, shortestYaw } from "./pose";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -119,6 +119,8 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
     if (anglerPose.moving) anglerPose.gait += dt * (5.4 + speed * 1.15);
     const targetBob = anglerPose.moving ? Math.abs(Math.sin(anglerPose.gait)) * 0.11 * Math.min(1, speed / 2.2) : 0;
     anglerPose.bob += (targetBob - anglerPose.bob) * (1 - Math.exp(-12 * dt));
+    const ground = footHeight(anglerPose.x, anglerPose.z);
+    anglerPose.y += (ground - anglerPose.y) * (1 - Math.exp(-14 * dt));
 
     if (wrap.current) {
       wrap.current.dataset.stance = stanceAt(anglerPose.x, anglerPose.z);

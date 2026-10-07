@@ -5,14 +5,19 @@ import { fieldGuide, guideProgress, catchStamp } from "./guide.ts";
 import { biteHourMul, lakeHour, lakeHourFromSearch, lakeHourWaitMul } from "./hour.ts";
 import {
   DOCK_PAD,
+  DOCK_PLANKS,
+  DOCK_STAND_X,
+  DOCK_STAND_Z,
   DROPOFF_PAD,
   REEDS_PAD,
   SHOP_X,
   SHOP_Z,
   SPAWN_X,
   SPAWN_Z,
+  footHeight,
   inCastRange,
   inLake,
+  onDockPlanks,
   parseAim,
   parseStance,
   resolveCast,
@@ -177,6 +182,35 @@ describe("lake spots", () => {
     expect(walkableAt(SPAWN_X, SPAWN_Z)).toBe(true);
     expect(inLake(SPAWN_X, SPAWN_Z)).toBe(false);
     expect(walkableAt(0, -2)).toBe(false);
+  });
+
+  it("stands the angler on the dock planks with dry feet", () => {
+    expect(onDockPlanks(DOCK_STAND_X, DOCK_STAND_Z)).toBe(true);
+    expect(walkableAt(DOCK_STAND_X, DOCK_STAND_Z)).toBe(true);
+    expect(stanceAt(DOCK_STAND_X, DOCK_STAND_Z)).toBe("dock");
+    expect(footHeight(DOCK_STAND_X, DOCK_STAND_Z)).toBe(DOCK_PLANKS.top);
+    expect(DOCK_PLANKS.top).toBeGreaterThan(0.5);
+    expect(walkableAt(0.4, 7.2)).toBe(true);
+    expect(walkableAt(-0.4, 6.2)).toBe(true);
+    expect(inLake(1.6, 7)).toBe(true);
+    expect(walkableAt(1.6, 7)).toBe(false);
+    expect(walkableAt(-1.5, 6.8)).toBe(false);
+    expect(walkableAt(0, 5.2)).toBe(false);
+    expect(footHeight(1.6, 7)).toBe(0);
+    expect(footHeight(SPAWN_X, SPAWN_Z)).toBe(0);
+    for (const [x, z] of [
+      [0, 6.8],
+      [0, 8.1],
+      [0, 9.4],
+      [0.2, 10.3],
+      [0.9, 10.6],
+      [1.4, 11.2],
+      [1.6, 11.5],
+      [3.4, 13.2],
+      [SPAWN_X, SPAWN_Z],
+    ] as const) {
+      expect(walkableAt(x, z)).toBe(true);
+    }
   });
 
   it("maps pads to shop, dock, reeds, and drop-off", () => {

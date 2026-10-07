@@ -1,8 +1,9 @@
-import { SPAWN_X, SPAWN_Z } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, footHeight } from "@stillwater/shared";
 
 export const anglerPose = {
-  x: SPAWN_X,
-  z: SPAWN_Z,
+  x: DOCK_STAND_X,
+  z: DOCK_STAND_Z,
+  y: footHeight(DOCK_STAND_X, DOCK_STAND_Z),
   yaw: Math.PI,
   moving: false,
   vx: 0,
