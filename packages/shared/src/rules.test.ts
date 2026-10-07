@@ -189,7 +189,9 @@ describe("lake spots", () => {
     expect(walkableAt(DOCK_STAND_X, DOCK_STAND_Z)).toBe(true);
     expect(stanceAt(DOCK_STAND_X, DOCK_STAND_Z)).toBe("dock");
     expect(footHeight(DOCK_STAND_X, DOCK_STAND_Z)).toBe(DOCK_PLANKS.top);
-    expect(DOCK_PLANKS.top).toBeGreaterThan(0.5);
+    expect(DOCK_PLANKS.top).toBeCloseTo(0.27);
+    expect(DOCK_PLANKS.top).toBeGreaterThan(0.2);
+    expect(DOCK_PLANKS.top).toBeLessThan(0.5);
     expect(walkableAt(0.4, 7.2)).toBe(true);
     expect(walkableAt(-0.4, 6.2)).toBe(true);
     expect(inLake(1.6, 7)).toBe(true);

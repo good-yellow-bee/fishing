@@ -20,8 +20,8 @@ export type Pad = { x: number; z: number; r: number };
 
 export const DOCK_PAD: Pad = { x: 0.15, z: 7.42, r: 3.4 };
 
-/** bridge_wood.glb scaled 1.8, two spans. The deck top is y = 0.63. */
-export const DOCK_PLANKS = { minX: -0.94, maxX: 0.94, minZ: 5.32, maxZ: 8.34, top: 0.63 };
+/** bridge_wood.glb ×1.8, rot Y π/2, two spans. Plank top is model y 0.15. Post caps at 0.63 are not the deck. */
+export const DOCK_PLANKS = { minX: -0.72, maxX: 0.72, minZ: 5.49, maxZ: 8.16, top: 0.27 };
 
 /** Centered on the planks, facing the lake. */
 export const DOCK_STAND_X = 0;
