@@ -39,6 +39,18 @@ export function clearRejectedCatches(userId: string) {
   localStorage.removeItem(`${key(userId)}.rejected`);
 }
 
+/** A 400 or 409 means the server will never take this catch, so retrying it would block every later one. */
+export function isPermanentRejection(error: unknown) {
+  return error instanceof ApiError && (error.status === 400 || error.status === 409);
+}
+
+export function rejectCatch(userId: string, row: CatchSubmission) {
+  const rejected = rejectedCatches(userId);
+  if (!rejected.some((item) => item.requestId === row.requestId)) {
+    localStorage.setItem(`${key(userId)}.rejected`, JSON.stringify([...rejected, row]));
+  }
+}
+
 export async function syncCatches(userId: string, post: (row: CatchSubmission) => Promise<unknown>) {
   for (;;) {
     const row = pendingCatches(userId)[0];
@@ -46,11 +58,8 @@ export async function syncCatches(userId: string, post: (row: CatchSubmission) =
     try {
       await post(row);
     } catch (error) {
-      if (!(error instanceof ApiError) || (error.status !== 400 && error.status !== 409)) throw error;
-      const rejected = rejectedCatches(userId);
-      if (!rejected.some((item) => item.requestId === row.requestId)) {
-        localStorage.setItem(`${key(userId)}.rejected`, JSON.stringify([...rejected, row]));
-      }
+      if (!isPermanentRejection(error)) throw error;
+      rejectCatch(userId, row);
     }
     const remaining = pendingCatches(userId).filter((item) => item.requestId !== row.requestId);
     localStorage.setItem(key(userId), JSON.stringify(remaining));

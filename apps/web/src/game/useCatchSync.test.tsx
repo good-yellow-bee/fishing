@@ -205,4 +205,143 @@ describe("useCatchSync", () => {
     expect(recordMock).toHaveBeenCalledTimes(2);
     expect(pendingCatches("angler")).toEqual([]);
   });
+
+  function refuseQueueWrites(times = Infinity) {
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let left = times;
+    const real = browser.window.Storage.prototype.setItem;
+    vi.spyOn(browser.window.Storage.prototype, "setItem").mockImplementation(function (this: Storage, name: string, value: string) {
+      if (name === "stillwater.pending-catches.angler" && left > 0) {
+        left -= 1;
+        throw new DOMException("full", "QuotaExceededError");
+      }
+      return real.call(this, name, value);
+    });
+  }
+
+  it("holds every refused catch until each one posts", async () => {
+    await mount();
+    refuseQueueWrites();
+    recordMock.mockRejectedValue(new Error("offline"));
+    await act(async () => { await sync.saveCatch(first); });
+    await act(async () => { await sync.saveCatch(second); });
+    expect(sync.pendingCount).toBe(2);
+    recordMock.mockResolvedValue(saved);
+    await act(async () => { await sync.sync(); });
+    const sent = new Set(recordMock.mock.calls.slice(-2).map(([row]) => row.requestId));
+    expect(sent).toEqual(new Set([first.requestId, second.requestId]));
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("keeps a catch refused while another direct post is in flight", async () => {
+    await mount();
+    refuseQueueWrites();
+    let release!: () => void;
+    recordMock.mockImplementationOnce(() => new Promise((resolve) => { release = () => resolve(saved); }));
+    let firstSave!: Promise<boolean>;
+    await act(async () => { firstSave = sync.saveCatch(first); });
+    await act(async () => { await sync.saveCatch(second); });
+    await act(async () => {
+      release();
+      await firstSave;
+    });
+    expect(recordMock.mock.calls.map(([row]) => row.requestId)).toEqual([first.requestId, second.requestId]);
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("files a refused catch the server rejects and keeps the queue moving", async () => {
+    queueCatch("angler", second);
+    recordMock.mockRejectedValue(new Error("offline"));
+    await mount();
+    refuseQueueWrites(1);
+    await act(async () => { await sync.saveCatch(first); });
+    recordMock.mockReset();
+    recordMock.mockImplementation(async (row) => {
+      if (row.requestId === first.requestId) throw new ApiError("line too light for this fish", 409);
+      return saved;
+    });
+    await act(async () => { await sync.sync(); });
+    expect(recordMock.mock.calls.map(([row]) => row.requestId)).toEqual([first.requestId, second.requestId]);
+    expect(rejectedCatches("angler").map((row) => row.requestId)).toEqual([first.requestId]);
+    expect(pendingCatches("angler")).toEqual([]);
+    expect(sync.pendingCount).toBe(0);
+    expect(sync.rejectedCount).toBe(1);
+    expect(sync.error).toBe("");
+  });
+
+  it("never posts a held catch or switches profile for another signed-in angler", async () => {
+    await mount();
+    refuseQueueWrites();
+    getMeMock.mockResolvedValue(me("someone-else"));
+    await act(async () => { await sync.saveCatch(first); });
+    await act(async () => { await sync.sync(); });
+    expect(recordMock).not.toHaveBeenCalled();
+    expect(onMe).not.toHaveBeenCalledWith(expect.objectContaining({ profile: expect.objectContaining({ userId: "someone-else" }) }));
+    expect(sync.error).toMatch(/another angler/i);
+    expect(sync.pendingCount).toBe(1);
+  });
+
+  it("reports a failed save rather than a pending points refresh", async () => {
+    await mount();
+    getMeMock.mockResolvedValueOnce(me("angler")).mockRejectedValueOnce(new Error("timeout"));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(sync.error).toMatch(/Catch saved/);
+    refuseQueueWrites();
+    recordMock.mockRejectedValueOnce(new Error("offline"));
+    await act(async () => { await sync.saveCatch(second); });
+    expect(sync.error).toBe("offline");
+  });
+
+  it("still posts a held catch when the queue cannot be read", async () => {
+    localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
+    await mount();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    await act(async () => { await sync.saveCatch(first); });
+    expect(recordMock).toHaveBeenCalledWith(first);
+    expect(sync.error).toMatch(/could not be read/);
+  });
+
+  it("counts a held catch once when a retry also queues it", async () => {
+    await mount();
+    refuseQueueWrites(1);
+    recordMock.mockRejectedValue(new Error("offline"));
+    await act(async () => { await sync.saveCatch(first); });
+    await act(async () => { await sync.saveCatch(first); });
+    expect(pendingCatches("angler")).toEqual([first]);
+    expect(sync.pendingCount).toBe(1);
+  });
+
+  it("shows the catch as waiting while its first save is in flight", async () => {
+    await mount();
+    let release!: () => void;
+    getMeMock.mockImplementationOnce(() => new Promise((resolve) => { release = () => resolve(me("angler")); }));
+    let pending!: Promise<boolean>;
+    await act(async () => { pending = sync.saveCatch(first); });
+    expect(sync.pendingCount).toBe(1);
+    await act(async () => {
+      release();
+      await pending;
+    });
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("checks the account again before showing refreshed points", async () => {
+    await mount();
+    getMeMock.mockResolvedValueOnce(me("angler")).mockResolvedValueOnce(me("someone-else"));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(recordMock).toHaveBeenCalledWith(first);
+    expect(onMe).not.toHaveBeenCalledWith(expect.objectContaining({ profile: expect.objectContaining({ userId: "someone-else" }) }));
+    expect(sync.error).toMatch(/another angler/i);
+  });
+
+  it("refreshes points after a partial sync and still reports what failed", async () => {
+    queueCatch("angler", first);
+    queueCatch("angler", second);
+    getMeMock.mockResolvedValueOnce(me("angler")).mockRejectedValueOnce(new Error("timeout"));
+    recordMock.mockResolvedValueOnce(saved).mockRejectedValueOnce(new Error("offline"));
+    await mount();
+    expect(getMeMock).toHaveBeenCalledTimes(2);
+    expect(pendingCatches("angler")).toEqual([second]);
+    expect(sync.error).toBe("offline");
+  });
 });
