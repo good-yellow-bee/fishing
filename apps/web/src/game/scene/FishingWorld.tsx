@@ -70,6 +70,14 @@ import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, wai
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose, shortestYaw } from "./pose";
+import {
+  STRIKE_DROPS,
+  strikeAnchor,
+  strikeDrop,
+  strikeDunk,
+  strikeRing,
+  strikeSpray,
+} from "./strikeSplash";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
@@ -1054,8 +1062,9 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble);
     if (phase === "hookset") {
       const darted = applyBiteDart(target.x, target.z, anglerPose.x, anglerPose.z, fightView.biteAge);
-      target.x = darted.x;
-      target.z = darted.z;
+      const anchored = strikeAnchor(darted.x, darted.z);
+      target.x = anchored.x;
+      target.z = anchored.z;
     }
     if (phase === "waiting" && released && !flightDone.current && flightStart.current < 0) {
       flightFrom.copy(rodTip);
@@ -1161,6 +1170,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     if (phase === "fight" && fightView.reeling) target.y += retrieveHop(fightView.pump, true, fightView.surge);
     if (dipped && fightView.plunge > 0) target.y -= fightView.plunge;
     if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
+    if (phase === "hookset") target.y -= strikeDunk(phase, fightView.biteAge);
     if (lure.current && !flying) {
       const hauling = phase === "fight" && fightView.reeling && fightView.surge !== 2;
       const settle = 1 - Math.exp((hauling ? -10 : -8) * delta);
@@ -1422,6 +1432,127 @@ function CaughtFish({
   );
 }
 
+function StrikeSplash({ phase }: { phase: ScenePhase }) {
+  const ring = useRef<THREE.Mesh>(null);
+  const ringMat = useRef<THREE.MeshBasicMaterial>(null);
+  const rim = useRef<THREE.Mesh>(null);
+  const rimMat = useRef<THREE.MeshBasicMaterial>(null);
+  const flash = useRef<THREE.Mesh>(null);
+  const flashMat = useRef<THREE.MeshBasicMaterial>(null);
+  const sprayPool = useMemo(() => {
+    const holder = new THREE.Group();
+    const geometry = new THREE.SphereGeometry(0.28, 8, 6);
+    for (let i = 0; i < STRIKE_DROPS; i += 1) {
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xf7fffb,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        toneMapped: false,
+        fog: false,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      mesh.scale.setScalar(0.85 + (i % 3) * 0.4);
+      holder.add(mesh);
+    }
+    holder.frustumCulled = false;
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const mesh = sprayPool.children[0] as THREE.Mesh;
+      mesh.geometry.dispose();
+      sprayPool.children.forEach((child) => ((child as THREE.Mesh).material as THREE.Material).dispose());
+    };
+  }, [sprayPool]);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    const age = phase === "hookset" ? fightView.biteAge : -1;
+    const ripple = strikeRing(phase, age, bobberWorld.x, bobberWorld.z, time);
+    if (ring.current && ringMat.current && rim.current && rimMat.current) {
+      ring.current.visible = ripple != null;
+      rim.current.visible = ripple != null;
+      if (ripple) {
+        ring.current.position.set(ripple.x, ripple.y, ripple.z);
+        rim.current.position.set(ripple.x, ripple.y + 0.004, ripple.z);
+        ring.current.scale.setScalar(ripple.radius);
+        rim.current.scale.setScalar(ripple.radius);
+        const fade = (1 - ripple.open) * 0.94;
+        ringMat.current.opacity = fade;
+        rimMat.current.opacity = fade;
+      }
+    }
+    const spray = strikeSpray(phase, age, bobberWorld.x, bobberWorld.z, time);
+    if (flash.current && flashMat.current) {
+      flash.current.visible = spray != null;
+      if (spray) {
+        flash.current.position.set(spray.x, spray.y + 0.01, spray.z);
+        flash.current.scale.setScalar(0.45 + spray.strength * 1.15);
+        flashMat.current.opacity = spray.strength * 0.82;
+      }
+    }
+    sprayPool.visible = spray != null;
+    if (!spray) return;
+    sprayPool.position.set(spray.x, spray.y, spray.z);
+    for (let i = 0; i < STRIKE_DROPS; i += 1) {
+      const drop = strikeDrop(phase, i, age);
+      const mesh = sprayPool.children[i] as THREE.Mesh;
+      if (!drop) {
+        mesh.visible = false;
+        continue;
+      }
+      mesh.visible = true;
+      mesh.position.set(drop.x, drop.y, drop.z);
+      (mesh.material as THREE.MeshBasicMaterial).opacity = drop.opacity;
+    }
+  });
+
+  return (
+    <>
+      <mesh ref={ring} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={4} frustumCulled={false}>
+        <ringGeometry args={[0.72, 1, 40]} />
+        <meshBasicMaterial
+          ref={ringMat}
+          color="#06202c"
+          transparent
+          depthWrite={false}
+          toneMapped={false}
+          fog={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <mesh ref={rim} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5} frustumCulled={false}>
+        <ringGeometry args={[0.42, 0.7, 32]} />
+        <meshBasicMaterial
+          ref={rimMat}
+          color="#f4fff8"
+          transparent
+          depthWrite={false}
+          toneMapped={false}
+          fog={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <mesh ref={flash} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={6} frustumCulled={false}>
+        <circleGeometry args={[1, 24]} />
+        <meshBasicMaterial
+          ref={flashMat}
+          color="#ffffff"
+          transparent
+          depthWrite={false}
+          toneMapped={false}
+          fog={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      <primitive object={sprayPool} />
+    </>
+  );
+}
+
 function Tone({ hour }: { hour: LakeHour }) {
   const { gl } = useThree();
   useEffect(() => {
@@ -1453,6 +1584,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
         aim={aim}
         lookAt={lookAt}
       />
+      <StrikeSplash phase={phase} />
       <CaughtFish
         phase={phase}
         color={species?.color ?? FALLBACK_COLOR}
