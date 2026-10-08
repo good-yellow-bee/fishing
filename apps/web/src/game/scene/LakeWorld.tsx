@@ -6,6 +6,14 @@ import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
+import {
+  BANK_BOARDS,
+  BANK_STAND_LIFT,
+  BANK_STAND_PLANK,
+  BANK_THICK,
+  BANK_TOP,
+  BANK_WALK_PLANK,
+} from "./bankWalk";
 import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
 import { LakeRain } from "./LakeRain";
 import { bedColor, bedHeight, waterDepthColor, waterHeight } from "./water";
@@ -921,6 +929,20 @@ function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
   );
 }
 
+function BankWalks() {
+  return BANK_BOARDS.map((board, i) => {
+    const stand = board.kind === "stand";
+    const plank = stand ? BANK_STAND_PLANK : BANK_WALK_PLANK;
+    const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (i % 2) * 0.001;
+    return (
+      <mesh key={i} position={[board.x, y, board.z]} rotation={[0, board.yaw, 0]} castShadow receiveShadow>
+        <boxGeometry args={[board.halfX * 2, BANK_THICK, board.halfZ * 2]} />
+        <meshToonMaterial color={plank[i % 2]} gradientMap={toonRamp()} />
+      </mesh>
+    );
+  });
+}
+
 function PierDeck() {
   return PIER_BOARDS.map((board, i) => (
     <mesh
@@ -1069,6 +1091,7 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
       <Dock />
       <Shack />
       <ShorePath />
+      <BankWalks />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (
