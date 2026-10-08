@@ -69,6 +69,12 @@ describe("catch rules", () => {
     expect(catchPoints(perch, mid)).toBe(perch.basePoints);
   });
 
+  it("awards a rounded 1.5x clean-fight bonus", () => {
+    const perch = fishById("perch")!;
+    const mid = (perch.minWeight + perch.maxWeight) / 2;
+    expect(catchPoints(perch, mid, true)).toBe(Math.round(perch.basePoints * 1.5));
+  });
+
   it("rejects a sturgeon on a starter line", () => {
     const result = validateCatch(starter, {
       speciesId: "sturgeon",
