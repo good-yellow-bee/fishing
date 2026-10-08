@@ -18,16 +18,16 @@ const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
 const HOURS = ["dawn", "day", "dusk", "night"] as const;
 const BANKS = ["dock", "reeds", "dropoff", "point"] as const;
 
-function bites(spot: SpotId, profile: Profile, hour: LakeHour, lure: string | undefined, sky: Sky | undefined) {
-  return Array.from({ length: 480 }, (_, i) => pickBite(spot, profile, false, () => i / 480, hour, lure, sky));
+function bites(spot: SpotId, profile: Profile, hour: LakeHour, lure: string | undefined, sky: Sky | undefined, samples = 480) {
+  return Array.from({ length: samples }, (_, i) => pickBite(spot, profile, false, () => i / samples, hour, lure, sky));
 }
 
 function count(spot: SpotId, id: string, sky: Sky, lure?: string) {
   return bites(spot, strong, "day", lure, sky).filter((fish) => fish.id === id).length;
 }
 
-function landableShare(spot: SpotId, profile: Profile, hour: LakeHour, lure: string, sky: Sky) {
-  return bites(spot, profile, hour, lure, sky).filter((fish) => canLand(profile, fish)).length / 480;
+function landableShare(spot: SpotId, profile: Profile, hour: LakeHour, lure: string, sky: Sky, samples = 480) {
+  return bites(spot, profile, hour, lure, sky, samples).filter((fish) => canLand(profile, fish)).length / samples;
 }
 
 describe("bite weather", () => {
@@ -64,22 +64,17 @@ describe("bite weather", () => {
       for (const spot of BANKS) {
         for (const hour of HOURS) {
           for (const lure of ["Spinnerbait", "Nightcrawlers"]) {
-            for (const accuracy of [1, 2, 3]) {
-              let previous = 0;
-              for (let strength = 1; strength <= 5; strength++) {
-                const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure, sky);
-                expect(share, `${sky} ${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
-                previous = share;
-              }
-            }
-            for (const strength of [1, 3, 5]) {
-              let previous = 0;
-              for (let accuracy = 1; accuracy <= 3; accuracy++) {
-                const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure, sky);
-                expect(share, `${sky} ${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
-                previous = share;
-              }
-            }
+            // Every Strength x Accuracy pair once, sampled coarser than biteMix so four skies stay fast on CI.
+            const shares = [1, 2, 3].map((accuracy) =>
+              [1, 2, 3, 4, 5].map((strength) => landableShare(spot, { ...starter, strength, accuracy }, hour, lure, sky, 240)),
+            );
+            shares.forEach((row, a) => {
+              row.forEach((share, s) => {
+                const where = `${sky} ${spot} ${hour} ${lure} str ${s + 1} acc ${a + 1}`;
+                if (s > 0) expect(share, where).toBeGreaterThanOrEqual(row[s - 1]! - 1e-9);
+                if (a > 0) expect(share, where).toBeGreaterThanOrEqual(shares[a - 1]![s]! - 1e-9);
+              });
+            });
           }
         }
       }
