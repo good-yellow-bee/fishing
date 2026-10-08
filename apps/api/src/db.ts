@@ -91,6 +91,8 @@ db.exec(`
     user_id TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
     day TEXT NOT NULL,
     daily_request_id TEXT NOT NULL,
+    window_from TEXT NOT NULL,
+    window_to TEXT NOT NULL,
     claimed_at TEXT NOT NULL,
     PRIMARY KEY (user_id, day, daily_request_id)
   );
@@ -227,6 +229,9 @@ export function listCatchesBetween(userId: string, from: string, to: string): Ca
     .all(userId, from, to) as CatchRow[];
 }
 
+/** An angler's local day and the UTC window of catches it counts. */
+export type DayWindow = { day: string; from: string; to: string };
+
 export function listDailyClaims(userId: string, day: string): string[] {
   const rows = db
     .prepare(`SELECT daily_request_id FROM daily_request_claim WHERE user_id = ? AND day = ?`)
@@ -234,14 +239,26 @@ export function listDailyClaims(userId: string, day: string): string[] {
   return rows.map((row) => row.daily_request_id);
 }
 
+/** The client picks the offsets, so a window overlapping another claimed day's would count the same catches twice. */
+export function overlapsOtherClaimedDay(userId: string, local: DayWindow): boolean {
+  return (
+    db
+      .prepare(
+        `SELECT 1 FROM daily_request_claim WHERE user_id = ? AND day != ? AND window_from < ? AND window_to > ? LIMIT 1`,
+      )
+      .get(userId, local.day, local.to, local.from) !== undefined
+  );
+}
+
 /** False when that day's request was already claimed; the primary key rules out paying twice. */
-export function claimDailyRequest(userId: string, day: string, dailyRequestId: string, reward: number): boolean {
+export function claimDailyRequest(userId: string, local: DayWindow, dailyRequestId: string, reward: number): boolean {
   return db.transaction(() => {
     const claim = db
       .prepare(
-        `INSERT OR IGNORE INTO daily_request_claim (user_id, day, daily_request_id, claimed_at) VALUES (?, ?, ?, ?)`,
+        `INSERT OR IGNORE INTO daily_request_claim (user_id, day, daily_request_id, window_from, window_to, claimed_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
       )
-      .run(userId, day, dailyRequestId, new Date().toISOString());
+      .run(userId, local.day, dailyRequestId, local.from, local.to, new Date().toISOString());
     if (claim.changes !== 1) return false;
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,

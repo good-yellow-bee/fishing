@@ -68,10 +68,11 @@ export function buyUpgrade(skill: SkillId) {
   });
 }
 
-/** The server counts catches by this local day, so it also needs the UTC offset at that day's midnight. */
+/** The server counts catches by this local day, so it also needs the UTC offsets at its midnight and the next. */
 function dayQuery(day: string) {
   const [year, month, date] = day.split("-").map(Number);
-  return `day=${day}&offset=${new Date(year!, month! - 1, date).getTimezoneOffset()}`;
+  const offsetAt = (midnight: number) => new Date(year!, month! - 1, midnight).getTimezoneOffset();
+  return `day=${day}&offset=${offsetAt(date!)}&nextOffset=${offsetAt(date! + 1)}`;
 }
 
 export function getDailyRequests(day = localDate(new Date())) {

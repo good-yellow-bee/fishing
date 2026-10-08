@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { dailyRequestLabel } from "@stillwater/shared";
-import { claimDailyRequest, getDailyRequests, type DailyBoard } from "../api";
+import { ApiError, claimDailyRequest, getDailyRequests, type DailyBoard } from "../api";
 
 type Props = {
   /** Changes once a catch reaches the server, so progress reloads. */
@@ -12,12 +12,15 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
   const [board, setBoard] = useState<DailyBoard | null>(null);
   const [claiming, setClaiming] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let live = true;
     getDailyRequests()
       .then((next) => {
-        if (live) setBoard(next);
+        if (!live) return;
+        setBoard(next);
+        setError("");
       })
       .catch((err: Error) => {
         if (live) setError(err.message);
@@ -25,22 +28,30 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
     return () => {
       live = false;
     };
-  }, [catchKey]);
+  }, [catchKey, reload]);
 
   const claim = async (day: string, id: string) => {
     setClaiming(id);
     setError("");
     try {
       await claimDailyRequest(id, day);
-      setBoard((current) =>
-        current && { ...current, requests: current.requests.map((row) => (row.id === id ? { ...row, claimed: true } : row)) },
-      );
-      await onClaimed();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "The request could not be claimed.");
-    } finally {
-      setClaiming(null);
+      // Already paid, from another tab or a claim whose response was lost: settle the row instead.
+      if (!(err instanceof ApiError && err.message === "request already claimed")) {
+        setError(err instanceof Error ? err.message : "The request could not be claimed.");
+        setClaiming(null);
+        return;
+      }
     }
+    setBoard((current) =>
+      current && { ...current, requests: current.requests.map((row) => (row.id === id ? { ...row, claimed: true } : row)) },
+    );
+    try {
+      await onClaimed();
+    } catch {
+      setError("Claimed, but your points could not be refreshed.");
+    }
+    setClaiming(null);
   };
 
   return (
@@ -52,7 +63,8 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
       {board ? (
         <ul>
           {board.requests.map((row) => (
-            <li key={row.id} data-claimed={row.claimed ? "1" : "0"}>
+            // A live row reads out "Claimed" once its button is replaced.
+            <li key={row.id} data-claimed={row.claimed ? "1" : "0"} aria-live="polite">
               <span className="daily-request-label">{dailyRequestLabel(row)}</span>
               <span className="daily-request-progress" data-done={row.progress >= row.count ? "1" : "0"}>
                 {row.progress}/{row.count}
@@ -63,6 +75,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
               ) : (
                 <button
                   type="button"
+                  aria-label={`Claim ${dailyRequestLabel(row)}`}
                   disabled={row.progress < row.count || claiming !== null}
                   onClick={() => void claim(board.day, row.id)}
                 >
@@ -75,7 +88,23 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
       ) : (
         !error && <p className="daily-requests-note">Reading the board…</p>
       )}
-      {error && <p className="warn">{error}</p>}
+      {error && (
+        <p className="warn" role="alert">
+          {error}
+        </p>
+      )}
+      {!board && error && (
+        <button
+          className="panel-btn"
+          type="button"
+          onClick={() => {
+            setError("");
+            setReload((count) => count + 1);
+          }}
+        >
+          Read the board again
+        </button>
+      )}
     </section>
   );
 }

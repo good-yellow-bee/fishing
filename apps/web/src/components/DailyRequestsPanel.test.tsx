@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from "node:fs";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,6 +34,14 @@ async function mount(catchKey?: string) {
     root = createRoot(container);
   }
   await act(async () => root!.render(<DailyRequestsPanel catchKey={catchKey} onClaimed={onClaimed} />));
+}
+
+function warning() {
+  return container!.querySelector(".warn");
+}
+
+function button(text: string) {
+  return [...container!.querySelectorAll("button")].find((candidate) => candidate.textContent === text);
 }
 
 function rows() {
@@ -87,9 +96,39 @@ describe("DailyRequestsPanel", () => {
 
     await act(async () => rows()[0]!.button!.click());
 
-    expect(container!.querySelector(".warn")?.textContent).toBe("request incomplete");
+    expect(warning()?.textContent).toBe("request incomplete");
+    expect(warning()?.getAttribute("role")).toBe("alert");
     expect(rows()[0]!.button?.disabled).toBe(false);
     expect(onClaimed).not.toHaveBeenCalled();
+  });
+
+  it("settles a row already claimed in another tab and refreshes points", async () => {
+    claimMock.mockRejectedValue(new ApiError("request already claimed", 409));
+    await mount("catch-1");
+
+    await act(async () => rows()[0]!.button!.click());
+
+    expect(rows()[0]!.text).toContain("Claimed");
+    expect(rows()[0]!.button).toBeNull();
+    expect(warning()).toBeNull();
+    expect(onClaimed).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a paid claim marked claimed when only the points refresh fails", async () => {
+    onClaimed.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await mount("catch-1");
+
+    await act(async () => rows()[0]!.button!.click());
+
+    expect(rows()[0]!.text).toContain("Claimed");
+    expect(warning()?.textContent).toBe("Claimed, but your points could not be refreshed.");
+  });
+
+  it("names each Claim button for its request and announces a row once it is claimed", async () => {
+    await mount("catch-1");
+
+    expect(rows()[0]!.button?.getAttribute("aria-label")).toBe("Claim 3 × golden shiner at the Dock");
+    expect([...container!.querySelectorAll("li")].map((row) => row.getAttribute("aria-live"))).toEqual(["polite", "polite", "polite"]);
   });
 
   it("reloads the board after a catch is saved", async () => {
@@ -99,5 +138,38 @@ describe("DailyRequestsPanel", () => {
 
     await mount("catch-2");
     expect(getMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("drops a load error once a later load succeeds", async () => {
+    getMock.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await mount("catch-1");
+    expect(warning()?.textContent).toBe("Failed to fetch");
+
+    await mount("catch-2");
+
+    expect(rows()).toHaveLength(3);
+    expect(warning()).toBeNull();
+    expect(button("Read the board again")).toBeUndefined();
+  });
+
+  it("reads the board again on request after a failed load", async () => {
+    getMock.mockRejectedValueOnce(new Error("Failed to fetch"));
+    await mount("catch-1");
+    expect(rows()).toHaveLength(0);
+
+    await act(async () => button("Read the board again")!.click());
+
+    expect(getMock).toHaveBeenCalledTimes(2);
+    expect(rows()).toHaveLength(3);
+    expect(warning()).toBeNull();
+  });
+});
+
+describe("shop overlay", () => {
+  it("caps its height to the viewport and scrolls, so the board never lifts the upgrades off a short screen", () => {
+    const css = readFileSync(`${import.meta.dirname}/../index.css`, "utf8");
+    const block = /^\.shop-overlay \{([^}]*)\}/m.exec(css)?.[1];
+    expect(block).toContain("max-height: calc(100dvh - 48px);");
+    expect(block).toContain("overflow-y: auto;");
   });
 });

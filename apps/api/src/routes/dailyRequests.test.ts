@@ -30,6 +30,12 @@ const day = days.find((candidate) => {
 const board = dailyRequestsForDay(day);
 const bankRequest = board.find(isBankRequest)!;
 const weightRequest = board.find((request) => request.minWeight !== undefined)!;
+const sharedOn = (first: string, second: string) =>
+  dailyRequestsForDay(first).find((request) => dailyRequestsForDay(second).some((row) => row.id === request.id));
+// Consecutive days whose boards share a request, so it can be claimed under both day keys.
+const firstDay = days.find((candidate, index) => index + 1 < days.length && sharedOn(candidate, days[index + 1]!))!;
+const secondDay = days[days.indexOf(firstDay) + 1]!;
+const sharedRequest = sharedOn(firstDay, secondDay)!;
 // UTC-5: the local day runs from 05:00Z to 05:00Z the next morning.
 const offset = 300;
 const localStart = Date.parse(`${day}T05:00:00.000Z`);
@@ -75,7 +81,8 @@ function complete(request: DailyRequest, createdAt = at(localStart + 3_600_000))
   }
 }
 
-const query = (dayParam = day, offsetParam: number | string = offset) => `day=${dayParam}&offset=${offsetParam}`;
+const query = (dayParam = day, offsetParam: number | string = offset, nextOffsetParam: number | string = offsetParam) =>
+  `day=${dayParam}&offset=${offsetParam}&nextOffset=${nextOffsetParam}`;
 
 async function getBoard(search = query()) {
   const response = await app.request(`http://test/api/daily-requests?${search}`);
@@ -141,7 +148,16 @@ describe("GET /api/daily-requests", () => {
   it("rejects a malformed day, a day far from the server's, and an impossible offset", async () => {
     const twoDaysOn = new Date(Date.parse(`${day}T00:00:00.000Z`) + 2 * 86_400_000).toISOString().slice(0, 10);
     const tomorrow = new Date(Date.parse(`${day}T00:00:00.000Z`) + 86_400_000).toISOString().slice(0, 10);
-    for (const search of [query("2026-13-01"), query(day.replaceAll("-", "/")), query(twoDaysOn), query(day, 900), query(day, "1.5"), `day=${day}`]) {
+    for (const search of [
+      query("2026-13-01"),
+      query(day.replaceAll("-", "/")),
+      query(twoDaysOn),
+      query(day, 900),
+      query(day, "1.5"),
+      query(day, offset, -900),
+      `day=${day}&offset=${offset}`,
+      `day=${day}`,
+    ]) {
       expect((await getBoard(search)).status).toBe(400);
     }
     expect((await getBoard(query(tomorrow, -600))).status).toBe(200);
@@ -161,6 +177,31 @@ describe("POST /api/daily-requests/:id/claim", () => {
     expect(second.status).toBe(409);
     await expect(second.json()).resolves.toEqual({ error: "request already claimed" });
     expect(profile()).toEqual({ points: 10 + bankRequest.reward, lifetime_points: 60 + bankRequest.reward });
+  });
+
+  it("refuses another day key whose window covers catches a claimed day already counted", async () => {
+    vi.setSystemTime(new Date(`${firstDay}T20:00:00.000Z`));
+    complete(sharedRequest, `${firstDay}T20:00:00.000Z`);
+
+    // UTC-5 on the first day and UTC+10 on the second both cover 20:00Z.
+    const first = await claim(sharedRequest.id, query(firstDay, 300));
+    const second = await claim(sharedRequest.id, query(secondDay, -600));
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(409);
+    await expect(second.json()).resolves.toEqual({ error: "those hours already count for another day" });
+    expect(profile()).toEqual({ points: 10 + sharedRequest.reward, lifetime_points: 60 + sharedRequest.reward });
+  });
+
+  it("pays the same request on consecutive days across a DST change", async () => {
+    vi.setSystemTime(new Date(`${firstDay}T12:00:00.000Z`));
+    // Spring forward: UTC-5 at the first midnight and UTC-4 from the next, so the first day ends at 04:00Z.
+    complete(sharedRequest, `${firstDay}T12:00:00.000Z`);
+    complete(sharedRequest, `${secondDay}T04:30:00.000Z`);
+
+    expect((await claim(sharedRequest.id, query(firstDay, 300, 240))).status).toBe(200);
+    expect((await claim(sharedRequest.id, query(secondDay, 240))).status).toBe(200);
+    expect(profile()).toEqual({ points: 10 + 2 * sharedRequest.reward, lifetime_points: 60 + 2 * sharedRequest.reward });
   });
 
   it("refuses an incomplete request", async () => {
