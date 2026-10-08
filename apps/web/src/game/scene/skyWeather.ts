@@ -5,9 +5,9 @@ export const RAIN_COUNT = 128;
 export const RAIN_SKY_TOP = 9.2;
 export const RAIN_FALL_SEC = 0.95;
 export const RAIN_RIPPLE_SEC = 0.62;
-export const RAIN_STREAK_LENGTH = 3.1;
+export const RAIN_STREAK_LENGTH = 1.3;
 /** Meters a splash ring rides above the chop. */
-export const RAIN_RIPPLE_LIFT = 0.14;
+export const RAIN_RIPPLE_LIFT = 0.06;
 
 const PLACES = 64;
 const CYCLE = RAIN_FALL_SEC + RAIN_RIPPLE_SEC;
@@ -62,7 +62,7 @@ export function rainRipple(index: number, time: number): RainRipple | null {
     x: column.x,
     y: waterHeight(column.x, column.z, time) + RAIN_RIPPLE_LIFT,
     z: column.z,
-    radius: 0.55 + open * 2.6,
+    radius: 0.14 + open * 0.75,
     open,
   };
 }

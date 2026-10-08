@@ -48,7 +48,7 @@ describe("lake rain", () => {
       if (ripple) {
         water += 1;
         expect(ripple.y).toBeCloseTo(waterHeight(ripple.x, ripple.z, time) + RAIN_RIPPLE_LIFT, 5);
-        expect(ripple.radius).toBeGreaterThan(0.3);
+        expect(ripple.radius).toBeGreaterThan(0.1);
         expect(ripple.open).toBeGreaterThanOrEqual(0);
         expect(ripple.open).toBeLessThan(1);
       }
@@ -78,7 +78,7 @@ describe("lake rain", () => {
     expect(later).not.toBeNull();
     expect(ripple!.x).toBe(column.x);
     expect(ripple!.z).toBe(column.z);
-    expect(later!.radius).toBeGreaterThan(ripple!.radius + 0.3);
+    expect(later!.radius).toBeGreaterThan(ripple!.radius + 0.25);
     expect(later!.open).toBeGreaterThan(ripple!.open);
   });
 });

@@ -1057,7 +1057,7 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
+export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: LakeHour; rain?: boolean }) {
   const look = LAKE_HOUR_LOOK[hour];
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
   const ground = useMemo(() => makeGroundGeometry(), []);
@@ -1141,7 +1141,7 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
         DRAGONFLIES.map((fly, i) => (
           <Dragonfly key={i} {...fly} />
         ))}
-      <LakeRain />
+      {rain && <LakeRain />}
     </>
   );
 }
