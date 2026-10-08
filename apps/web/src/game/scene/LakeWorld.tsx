@@ -945,20 +945,54 @@ function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
   );
 }
 
+type BankPlank = { board: (typeof BANK_BOARDS)[number]; index: number };
+
+function bankPlankBatches() {
+  const batches = new Map<string, BankPlank[]>();
+  BANK_BOARDS.forEach((board, index) => {
+    const colors = board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK;
+    const color = colors[index % 2];
+    const batch = batches.get(color);
+    const plank = { board, index };
+    if (batch) batch.push(plank);
+    else batches.set(color, [plank]);
+  });
+  return [...batches].map(([color, planks]) => ({ color, planks }));
+}
+
+const BANK_PLANK_BATCHES = bankPlankBatches();
+
+/** Matrix for one board; unit geometry keeps all planks in four draw calls. */
+export function bankPlankMatrix(board: (typeof BANK_BOARDS)[number], index: number) {
+  const stand = board.kind === "stand";
+  const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (index % 2) * 0.001;
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(board.x, y, board.z),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(0, board.yaw, 0)),
+    new THREE.Vector3(board.halfX * 2, BANK_THICK, board.halfZ * 2),
+  );
+}
+
+function BankPlanks({ color, planks }: { color: string; planks: readonly BankPlank[] }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const geometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
+  const material = useMemo(() => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp() }), [color]);
+
+  useEffect(() => {
+    if (!mesh.current) return;
+    planks.forEach(({ board, index }, instance) => mesh.current!.setMatrixAt(instance, bankPlankMatrix(board, index)));
+    mesh.current.instanceMatrix.needsUpdate = true;
+  }, [planks]);
+
+  return <instancedMesh ref={mesh} args={[geometry, material, planks.length]} castShadow receiveShadow />;
+}
+
 function BankWalks() {
   return (
     <group>
-      {BANK_BOARDS.map((board, i) => {
-        const stand = board.kind === "stand";
-        const plank = stand ? BANK_STAND_PLANK : BANK_WALK_PLANK;
-        const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (i % 2) * 0.001;
-        return (
-          <mesh key={i} position={[board.x, y, board.z]} rotation={[0, board.yaw, 0]} castShadow receiveShadow>
-            <boxGeometry args={[board.halfX * 2, BANK_THICK, board.halfZ * 2]} />
-            <meshToonMaterial color={plank[i % 2]} gradientMap={toonRamp()} />
-          </mesh>
-        );
-      })}
+      {BANK_PLANK_BATCHES.map(({ color, planks }) => (
+        <BankPlanks key={color} color={color} planks={planks} />
+      ))}
       {BANK_POSTS.map((post) => (
         <mesh key={`${post.spot}-post`} position={[post.x, 0.52, post.z]} castShadow>
           <boxGeometry args={[0.16, 1.04, 0.16]} />
