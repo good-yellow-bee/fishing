@@ -1480,9 +1480,8 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
         rim.current.position.set(ripple.x, ripple.y + 0.004, ripple.z);
         ring.current.scale.setScalar(ripple.radius);
         rim.current.scale.setScalar(ripple.radius);
-        const fade = (1 - ripple.open) * 0.94;
-        ringMat.current.opacity = fade;
-        rimMat.current.opacity = fade;
+        ringMat.current.opacity = ripple.opacity * 0.55;
+        rimMat.current.opacity = ripple.opacity;
       }
     }
     const spray = strikeSpray(phase, age, bobberWorld.x, bobberWorld.z, time);
@@ -1490,8 +1489,8 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       flash.current.visible = spray != null;
       if (spray) {
         flash.current.position.set(spray.x, spray.y + 0.01, spray.z);
-        flash.current.scale.setScalar(1.15 + spray.strength * 2.1);
-        flashMat.current.opacity = spray.strength * 0.82;
+        flash.current.scale.setScalar(0.48 + spray.strength * 0.72);
+        flashMat.current.opacity = 0.34 + spray.strength * 0.4;
       }
     }
     sprayPool.visible = spray != null;
@@ -1525,7 +1524,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
         />
       </mesh>
       <mesh ref={rim} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5} frustumCulled={false}>
-        <ringGeometry args={[0.42, 0.7, 32]} />
+        <ringGeometry args={[0.5, 0.94, 40]} />
         <meshBasicMaterial
           ref={rimMat}
           color="#f4fff8"
