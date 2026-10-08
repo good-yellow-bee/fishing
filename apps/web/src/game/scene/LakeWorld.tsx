@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -978,10 +978,17 @@ function BankPlanks({ color, planks }: { color: string; planks: readonly BankPla
   const geometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp() }), [color]);
 
-  useEffect(() => {
+  useEffect(() => () => {
+    geometry.dispose();
+    material.dispose();
+  }, [geometry, material]);
+
+  useLayoutEffect(() => {
     if (!mesh.current) return;
     planks.forEach(({ board, index }, instance) => mesh.current!.setMatrixAt(instance, bankPlankMatrix(board, index)));
     mesh.current.instanceMatrix.needsUpdate = true;
+    mesh.current.computeBoundingBox();
+    mesh.current.computeBoundingSphere();
   }, [planks]);
 
   return <instancedMesh ref={mesh} args={[geometry, material, planks.length]} castShadow receiveShadow />;
