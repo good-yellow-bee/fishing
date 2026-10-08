@@ -144,10 +144,46 @@ describe("DailyRequestsPanel", () => {
   });
 
   it("reads the new day's board when the tab comes back after midnight", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date(2026, 2, 14, 23, 50) });
     await mount("catch-1");
+    expect(getMock).toHaveBeenLastCalledWith("2026-03-14");
+    await act(async () => document.dispatchEvent(new Event("visibilitychange")));
     expect(getMock).toHaveBeenCalledTimes(1);
+    vi.setSystemTime(new Date(2026, 2, 15, 0, 5));
     await act(async () => document.dispatchEvent(new Event("visibilitychange")));
     expect(getMock).toHaveBeenCalledTimes(2);
+    expect(getMock).toHaveBeenLastCalledWith("2026-03-15");
+    vi.useRealTimers();
+  });
+
+  it("reloads at once when a board asked for before midnight arrives after it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date(2026, 2, 14, 23, 59, 59) });
+    let answer!: () => void;
+    getMock.mockImplementationOnce(() => new Promise((resolve) => { answer = () => resolve(board); }));
+    await mount("catch-1");
+    vi.setSystemTime(new Date(2026, 2, 15, 0, 0, 1));
+    await act(async () => answer());
+    expect(getMock).toHaveBeenCalledTimes(2);
+    expect(getMock).toHaveBeenLastCalledWith("2026-03-15");
+    vi.useRealTimers();
+  });
+
+  it("offers to read the board again when a refresh fails over a board already shown", async () => {
+    await mount("catch-1");
+    getMock.mockRejectedValueOnce(new Error("offline"));
+    await mount("catch-2");
+    expect(button("Read the board again")).toBeDefined();
+    expect(rows().length).toBeGreaterThan(0);
+  });
+
+  it("keeps a paid claim claimed when a board read before the claim arrives after it", async () => {
+    await mount("catch-1");
+    let answer!: () => void;
+    getMock.mockImplementationOnce(() => new Promise((resolve) => { answer = () => resolve(board); }));
+    await mount("catch-2");
+    await act(async () => rows()[0]!.button!.click());
+    await act(async () => answer());
+    expect(rows()[0]!.text).toContain("Claimed");
   });
 
   it("reloads the board after a catch is saved", async () => {

@@ -69,10 +69,12 @@ export function buyUpgrade(skill: SkillId) {
 }
 
 /** The server counts catches by this local day, so it also needs the UTC offsets at its midnight and the next. */
-function dayQuery(day: string) {
+/** The local day as the instants it starts and ends, which stay right where clocks jump at midnight. */
+export function dayQuery(day: string) {
   const [year, month, date] = day.split("-").map(Number);
-  const offsetAt = (midnight: number) => new Date(year!, month! - 1, midnight).getTimezoneOffset();
-  return `day=${day}&offset=${offsetAt(date!)}&nextOffset=${offsetAt(date! + 1)}`;
+  const from = new Date(year!, month! - 1, date!).toISOString();
+  const to = new Date(year!, month! - 1, date! + 1).toISOString();
+  return `day=${day}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
 }
 
 export function getDailyRequests(day = localDate(new Date())) {

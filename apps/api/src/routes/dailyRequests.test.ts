@@ -81,8 +81,13 @@ function complete(request: DailyRequest, createdAt = at(localStart + 3_600_000))
   }
 }
 
-const query = (dayParam = day, offsetParam: number | string = offset, nextOffsetParam: number | string = offsetParam) =>
-  `day=${dayParam}&offset=${offsetParam}&nextOffset=${nextOffsetParam}`;
+/** The client's day window, built from Date#getTimezoneOffset minutes at its midnight and the next. */
+const query = (dayParam = day, offsetParam: number | string = offset, nextOffsetParam: number | string = offsetParam) => {
+  const midnight = Date.parse(`${dayParam.replaceAll("/", "-")}T00:00:00.000Z`);
+  const at = (base: number, minutes: number | string) =>
+    typeof minutes !== "number" ? minutes : Number.isNaN(base) ? "not-a-time" : new Date(base + minutes * 60_000).toISOString();
+  return `day=${dayParam}&from=${encodeURIComponent(at(midnight, offsetParam))}&to=${encodeURIComponent(at(midnight + 86_400_000, nextOffsetParam))}`;
+};
 
 async function getBoard(search = query()) {
   const response = await app.request(`http://test/api/daily-requests?${search}`);
@@ -156,13 +161,15 @@ describe("GET /api/daily-requests", () => {
       query(day, "1.5"),
       query(day, offset, -900),
       query(day, -840, 720),
-      query(day, 300, 420),
+      query(day, 300, 480),
       `day=${day}&offset=${offset}`,
       `day=${day}`,
     ]) {
       expect((await getBoard(search)).status).toBe(400);
     }
     expect((await getBoard(query(tomorrow, -600))).status).toBe(200);
+    // Two-hour DST shifts are real (Antarctica/Troll).
+    expect((await getBoard(query(day, 0, -120))).status).toBe(200);
   });
 });
 

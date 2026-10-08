@@ -6,37 +6,26 @@ import type { SessionUser } from "../session.ts";
 export const dailyRequestRoutes = new Hono();
 
 const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
 const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
-const offsetPattern = /^-?\d{1,3}$/;
-const MAX_DAY_SHIFT_MINUTES = 60;
-
-/** Minutes from Date#getTimezoneOffset; real zones run from UTC+14 to UTC-12. */
-function zoneOffset(value: string | undefined) {
-  if (!value || !offsetPattern.test(value)) return null;
-  const minutes = Number(value);
-  return minutes < -840 || minutes > 720 ? null : minutes;
-}
 
 /**
- * The angler's calendar day as a UTC window, from Date#getTimezoneOffset at its midnight and at the next,
- * so one angler's days abut exactly even across a DST change.
+ * The angler's calendar day as the UTC instants of its first moment and the next day's, measured by the client
+ * so zones that jump at midnight still start the day at the right instant. Real zones run UTC-12..+14 and a day
+ * lasts 22-26 hours (up to two-hour DST shifts).
  */
-function localDay({ day, offset, nextOffset }: Record<string, string | undefined>) {
-  const start = zoneOffset(offset);
-  const end = zoneOffset(nextOffset);
-  if (!day || !dayPattern.test(day) || start === null || end === null) return null;
-  // One zone's offsets differ by at most a DST shift across a day; anything else is not a real local day.
-  if (Math.abs(start - end) > MAX_DAY_SHIFT_MINUTES) return null;
+function localDay({ day, from, to }: Record<string, string | undefined>) {
+  if (!day || !dayPattern.test(day) || !from || !to) return null;
   const midnight = Date.parse(`${day}T00:00:00.000Z`);
-  if (Number.isNaN(midnight) || new Date(midnight).toISOString().slice(0, 10) !== day) return null;
-  // Given the offset bounds, a real local date is never more than a day from the server's.
+  const start = Date.parse(from);
+  const end = Date.parse(to);
+  if ([midnight, start, end].some(Number.isNaN) || new Date(midnight).toISOString().slice(0, 10) !== day) return null;
+  if (start < midnight - 12 * HOUR_MS - HOUR_MS || start > midnight + 14 * HOUR_MS + HOUR_MS) return null;
+  if (end - start < 22 * HOUR_MS || end - start > 26 * HOUR_MS) return null;
+  // Given those bounds, a real local date is never more than a day from the server's.
   const today = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
   if (Math.abs(midnight - today) > DAY_MS) return null;
-  return {
-    day,
-    from: new Date(midnight + start * 60_000).toISOString(),
-    to: new Date(midnight + DAY_MS + end * 60_000).toISOString(),
-  };
+  return { day, from: new Date(start).toISOString(), to: new Date(end).toISOString() };
 }
 
 dailyRequestRoutes.get("/daily-requests", (c) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dailyRequestLabel, localDate } from "@stillwater/shared";
 import { ApiError, claimDailyRequest, getDailyRequests, type DailyBoard } from "../api";
 
@@ -13,17 +13,29 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
   const [claiming, setClaiming] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
+  const [loadFailed, setLoadFailed] = useState(false);
+  // Claims paid this session, by day: a board read before the claim landed must not offer them again.
+  const settled = useRef(new Set<string>());
+  // The local day last asked for; the board is stale once the clock passes it.
+  const asked = useRef("");
 
   useEffect(() => {
     let live = true;
-    getDailyRequests()
+    asked.current = localDate(new Date());
+    getDailyRequests(asked.current)
       .then((next) => {
         if (!live) return;
-        setBoard(next);
+        setBoard({
+          ...next,
+          requests: next.requests.map((row) => (settled.current.has(`${next.day}:${row.id}`) ? { ...row, claimed: true } : row)),
+        });
         setError("");
+        setLoadFailed(false);
       })
       .catch((err: Error) => {
-        if (live) setError(err.message);
+        if (!live) return;
+        setError(err.message);
+        setLoadFailed(true);
       });
     return () => {
       live = false;
@@ -33,10 +45,15 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
   // A shop left open past midnight, or a tab resumed the next day, reads the new day's board.
   useEffect(() => {
     if (!board) return;
-    const stale = () => localDate(new Date()) !== board.day;
+    const stale = () => localDate(new Date()) !== asked.current;
     const recheck = () => {
       if (stale()) setReload((n) => n + 1);
     };
+    // A board read just before midnight can arrive already out of date.
+    if (stale()) {
+      recheck();
+      return;
+    }
     const midnight = new Date();
     midnight.setHours(24, 0, 1, 0);
     const timer = window.setTimeout(recheck, midnight.getTime() - Date.now());
@@ -60,6 +77,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
         return;
       }
     }
+    settled.current.add(`${day}:${id}`);
     // Ids repeat across days, so a claim only settles the board it was made on.
     setBoard((current) =>
       current && current.day === day
@@ -113,12 +131,13 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
           {error}
         </p>
       )}
-      {!board && error && (
+      {loadFailed && (
         <button
           className="panel-btn"
           type="button"
           onClick={() => {
             setError("");
+            setLoadFailed(false);
             setReload((count) => count + 1);
           }}
         >
