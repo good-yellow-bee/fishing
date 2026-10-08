@@ -18,6 +18,15 @@ import { makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeSta
 import { fightInput } from "./scene/fightMotion";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
+<<<<<<< HEAD
+||||||| parent of eb3b7c5 (refactor: bridge typed scene state)
+import { hotspotAt, isHotspotCast } from "./hotspot";
+import { localId } from "./localId";
+=======
+import { hotspotAt, isHotspotCast } from "./hotspot";
+import { initialSceneState, type SceneStateRef } from "./sceneState";
+import { localId } from "./localId";
+>>>>>>> eb3b7c5 (refactor: bridge typed scene state)
 import type { ScenePhase } from "./scene/types";
 
 export type AimHint = SpotId | "shore";
@@ -78,6 +87,7 @@ export function useFishingGame(
   lureRef?: { readonly current: string },
 ) {
   const surfaceRef = useRef<HTMLDivElement>(null);
+  const sceneStateRef = useRef(initialSceneState());
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
   const holdingRef = useRef(false);
@@ -219,9 +229,9 @@ export function useFishingGame(
     setPower(castPower);
     fx.cast();
     const surface = surfaceRef.current;
-    const aimed = parseAim(surface?.dataset.aim);
-    const stanceNow = parseStance(surface?.dataset.stance) ?? "trail";
-    const angler = parseAim(surface?.dataset.angler);
+    const aimed = sceneStateRef.current.aim ?? parseAim(surface?.dataset.aim);
+    const stanceNow = sceneStateRef.current.stance ?? parseStance(surface?.dataset.stance) ?? "trail";
+    const angler = sceneStateRef.current.angler ?? parseAim(surface?.dataset.angler);
     const level = anglerLevel(profile.lifetimePoints);
     const landing = resolveCast(
       aimed?.x ?? Number.NaN,
@@ -256,14 +266,14 @@ export function useFishingGame(
   const startCast = useCallback((via: "pointer" | "key") => {
     if (!profile || phaseRef.current !== "idle") return;
     const surface = surfaceRef.current;
-    const stanceNow = parseStance(surface?.dataset.stance) ?? "trail";
+    const stanceNow = sceneStateRef.current.stance ?? parseStance(surface?.dataset.stance) ?? "trail";
     if (stanceNow === "shop") {
       if (via === "pointer") setShopTap((n) => n + 1);
       else setHint(idleHint("shop"));
       return;
     }
-    const aimed = parseAim(surface?.dataset.aim);
-    const angler = parseAim(surface?.dataset.angler);
+    const aimed = sceneStateRef.current.aim ?? parseAim(surface?.dataset.aim);
+    const angler = sceneStateRef.current.angler ?? parseAim(surface?.dataset.angler);
     const preview = resolveCast(
       aimed?.x ?? Number.NaN,
       aimed?.z ?? Number.NaN,
@@ -375,11 +385,167 @@ export function useFishingGame(
     let lastReelFx = 0;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
+<<<<<<< HEAD
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
       last = now;
       if (holdingRef.current && phaseRef.current === "casting") {
         powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
         setPower(powerRef.current);
+||||||| parent of eb3b7c5 (refactor: bridge typed scene state)
+      frame = requestAnimationFrame(loop);
+      try {
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+        last = now;
+        if (holdingRef.current && phaseRef.current === "casting") {
+          powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
+          setPower(powerRef.current);
+        }
+        const surface = surfaceRef.current;
+        if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
+          const nextHint = hintFromDataset(surface.dataset.spot);
+          const nextStance = parseStance(surface.dataset.stance);
+          if (nextStance && nextStance !== stanceRef.current) {
+            stanceRef.current = nextStance;
+            setStance(nextStance);
+            if (phaseRef.current === "idle") setHint(idleHint(nextStance));
+          }
+          if (nextHint && nextHint !== aimHintRef.current) {
+            aimHintRef.current = nextHint;
+            setAimHint(nextHint);
+          }
+        }
+        const runtime = runtimeRef.current;
+        const current = fightRef.current;
+        fightInput.reeling = false;
+        if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
+          const reeling = reelKeyRef.current || reelPointerRef.current !== null;
+          fightInput.reeling = reeling;
+          const result = runtime.step(now, dt, reeling, { steering: steeringRef.current, pumping: pumpRef.current });
+          pumpRef.current = false;
+          setFightMove((previous) => previous?.kind === runtime.move?.kind && previous?.direction === runtime.move?.direction && previous?.windowOpen === runtime.move?.windowOpen ? previous : runtime.move);
+          const sim = runtime.sim;
+          if (surface) {
+            surface.dataset.tension = sim.tension.toFixed(2);
+            surface.dataset.line = sim.line.toFixed(2);
+            surface.dataset.surge = String(sim.surge);
+          }
+          if (sim.surge === 2 && prevSurge !== 2) fx.surge();
+          prevSurge = sim.surge;
+          if (reeling && now - lastReelFx > 90) {
+            fx.reel();
+            lastReelFx = now;
+          }
+          if (result === "landed") {
+            fx.land();
+            setOutcome({
+              kind: "landed",
+              id: localId(),
+              species: current.species,
+              weight: current.weight,
+              spot: spotRef.current,
+              clean: isCleanFight(runtime.performance),
+            });
+            clearFight();
+            setPhaseBoth("result");
+            setHint("Landed. Cast again when ready.");
+          } else if (result === "snapped") {
+            fx.snap();
+            setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
+            resetToIdle("Broke off. Try again.");
+          } else if (result === "escaped") {
+            fx.snap();
+            setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
+            resetToIdle("Broke off. Try again.");
+          }
+        }
+      } catch (error) {
+        clearTimers();
+        holdingRef.current = false;
+        castPointerRef.current = null;
+        powerRef.current = 0;
+        clearFight();
+        setPower(0);
+        setPhaseBoth("result");
+        setOutcome({ kind: "error", message: "The fishing loop hit a problem. You can cast again." });
+        setHint(error instanceof Error ? error.message : "The fishing loop hit a problem.");
+=======
+      frame = requestAnimationFrame(loop);
+      try {
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+        last = now;
+        if (holdingRef.current && phaseRef.current === "casting") {
+          powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
+          setPower(powerRef.current);
+        }
+        const surface = surfaceRef.current;
+        if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
+        const nextHint = sceneStateRef.current.aimHint ?? hintFromDataset(surface.dataset.spot);
+        const nextStance = sceneStateRef.current.stance ?? parseStance(surface.dataset.stance);
+          if (nextStance && nextStance !== stanceRef.current) {
+            stanceRef.current = nextStance;
+            setStance(nextStance);
+            if (phaseRef.current === "idle") setHint(idleHint(nextStance));
+          }
+          if (nextHint && nextHint !== aimHintRef.current) {
+            aimHintRef.current = nextHint;
+            setAimHint(nextHint);
+          }
+        }
+        const runtime = runtimeRef.current;
+        const current = fightRef.current;
+        fightInput.reeling = false;
+        if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
+          const reeling = reelKeyRef.current || reelPointerRef.current !== null;
+          fightInput.reeling = reeling;
+          const result = runtime.step(now, dt, reeling, { steering: steeringRef.current, pumping: pumpRef.current });
+          pumpRef.current = false;
+          setFightMove((previous) => previous?.kind === runtime.move?.kind && previous?.direction === runtime.move?.direction && previous?.windowOpen === runtime.move?.windowOpen ? previous : runtime.move);
+          const sim = runtime.sim;
+          if (surface) {
+            surface.dataset.tension = sim.tension.toFixed(2);
+            surface.dataset.line = sim.line.toFixed(2);
+            surface.dataset.surge = String(sim.surge);
+          }
+          if (sim.surge === 2 && prevSurge !== 2) fx.surge();
+          prevSurge = sim.surge;
+          if (reeling && now - lastReelFx > 90) {
+            fx.reel();
+            lastReelFx = now;
+          }
+          if (result === "landed") {
+            fx.land();
+            setOutcome({
+              kind: "landed",
+              id: localId(),
+              species: current.species,
+              weight: current.weight,
+              spot: spotRef.current,
+              clean: isCleanFight(runtime.performance),
+            });
+            clearFight();
+            setPhaseBoth("result");
+            setHint("Landed. Cast again when ready.");
+          } else if (result === "snapped") {
+            fx.snap();
+            setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
+            resetToIdle("Broke off. Try again.");
+          } else if (result === "escaped") {
+            fx.snap();
+            setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
+            resetToIdle("Broke off. Try again.");
+          }
+        }
+      } catch (error) {
+        clearTimers();
+        holdingRef.current = false;
+        castPointerRef.current = null;
+        powerRef.current = 0;
+        clearFight();
+        setPower(0);
+        setPhaseBoth("result");
+        setOutcome({ kind: "error", message: "The fishing loop hit a problem. You can cast again." });
+        setHint(error instanceof Error ? error.message : "The fishing loop hit a problem.");
+>>>>>>> eb3b7c5 (refactor: bridge typed scene state)
       }
       const surface = surfaceRef.current;
       if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
@@ -451,6 +617,7 @@ export function useFishingGame(
 
   return {
     surfaceRef,
+    sceneStateRef: sceneStateRef as SceneStateRef,
     phase,
     power,
     spot,
