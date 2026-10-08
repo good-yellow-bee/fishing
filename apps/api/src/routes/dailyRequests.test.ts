@@ -155,6 +155,8 @@ describe("GET /api/daily-requests", () => {
       query(day, 900),
       query(day, "1.5"),
       query(day, offset, -900),
+      query(day, -840, 720),
+      query(day, 300, 420),
       `day=${day}&offset=${offset}`,
       `day=${day}`,
     ]) {

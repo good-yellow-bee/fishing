@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { dailyRequestLabel } from "@stillwater/shared";
+import { dailyRequestLabel, localDate } from "@stillwater/shared";
 import { ApiError, claimDailyRequest, getDailyRequests, type DailyBoard } from "../api";
 
 type Props = {
@@ -30,6 +30,23 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
     };
   }, [catchKey, reload]);
 
+  // A shop left open past midnight, or a tab resumed the next day, reads the new day's board.
+  useEffect(() => {
+    if (!board) return;
+    const stale = () => localDate(new Date()) !== board.day;
+    const recheck = () => {
+      if (stale()) setReload((n) => n + 1);
+    };
+    const midnight = new Date();
+    midnight.setHours(24, 0, 1, 0);
+    const timer = window.setTimeout(recheck, midnight.getTime() - Date.now());
+    document.addEventListener("visibilitychange", recheck);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", recheck);
+    };
+  }, [board]);
+
   const claim = async (day: string, id: string) => {
     setClaiming(id);
     setError("");
@@ -43,8 +60,11 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
         return;
       }
     }
+    // Ids repeat across days, so a claim only settles the board it was made on.
     setBoard((current) =>
-      current && { ...current, requests: current.requests.map((row) => (row.id === id ? { ...row, claimed: true } : row)) },
+      current && current.day === day
+        ? { ...current, requests: current.requests.map((row) => (row.id === id ? { ...row, claimed: true } : row)) }
+        : current,
     );
     try {
       await onClaimed();

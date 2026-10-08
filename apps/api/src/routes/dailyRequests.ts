@@ -8,6 +8,7 @@ export const dailyRequestRoutes = new Hono();
 const DAY_MS = 86_400_000;
 const dayPattern = /^\d{4}-\d{2}-\d{2}$/;
 const offsetPattern = /^-?\d{1,3}$/;
+const MAX_DAY_SHIFT_MINUTES = 60;
 
 /** Minutes from Date#getTimezoneOffset; real zones run from UTC+14 to UTC-12. */
 function zoneOffset(value: string | undefined) {
@@ -24,6 +25,8 @@ function localDay({ day, offset, nextOffset }: Record<string, string | undefined
   const start = zoneOffset(offset);
   const end = zoneOffset(nextOffset);
   if (!day || !dayPattern.test(day) || start === null || end === null) return null;
+  // One zone's offsets differ by at most a DST shift across a day; anything else is not a real local day.
+  if (Math.abs(start - end) > MAX_DAY_SHIFT_MINUTES) return null;
   const midnight = Date.parse(`${day}T00:00:00.000Z`);
   if (Number.isNaN(midnight) || new Date(midnight).toISOString().slice(0, 10) !== day) return null;
   // Given the offset bounds, a real local date is never more than a day from the server's.

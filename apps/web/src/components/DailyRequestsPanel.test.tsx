@@ -131,6 +131,25 @@ describe("DailyRequestsPanel", () => {
     expect([...container!.querySelectorAll("li")].map((row) => row.getAttribute("aria-live"))).toEqual(["polite", "polite", "polite"]);
   });
 
+  it("leaves the next day's board alone when an earlier day's claim lands late", async () => {
+    await mount("catch-1");
+    let finish!: () => void;
+    claimMock.mockImplementationOnce(() => new Promise((resolve) => { finish = () => resolve({ reward: 15 }); }));
+    await act(async () => rows()[0]!.button!.click());
+    getMock.mockResolvedValue({ ...board, day: "2026-03-15" });
+    await mount("catch-2");
+    await act(async () => finish());
+    expect(rows()[0]!.text).not.toContain("Claimed");
+    expect(rows()[0]!.button).not.toBeNull();
+  });
+
+  it("reads the new day's board when the tab comes back after midnight", async () => {
+    await mount("catch-1");
+    expect(getMock).toHaveBeenCalledTimes(1);
+    await act(async () => document.dispatchEvent(new Event("visibilitychange")));
+    expect(getMock).toHaveBeenCalledTimes(2);
+  });
+
   it("reloads the board after a catch is saved", async () => {
     await mount("catch-1");
     await mount("catch-1");
