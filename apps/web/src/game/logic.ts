@@ -19,7 +19,7 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
   legendary: 0.05,
 };
 
-/** Fish the angler cannot land yet still bite now and then, as a glimpse of what Strength unlocks. */
+/** Fish the angler cannot land yet still bite now and then, as a glimpse of what upgrades unlock. */
 const OUT_OF_REACH_BITE = 0.35;
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
@@ -79,9 +79,9 @@ export function pickBite(
   const appeal = (fish: FishSpecies) => rarityWeight[fish.rarity] * biteHourMul(fish, hour);
   const drawn = pool.reduce((sum, fish) => sum + appeal(fish), 0);
   const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish), 0);
-  // A big lure must not lock a weak angler out: the bank's other landable fish fill in for the share of the
-  // lure's draw still out of reach, so every Strength rank lands at least as often as the one before.
-  const fillIn = drawn > 0 ? 1 - inReach / drawn : 0;
+  // A big lure must not lock a weak angler out: the bank's lighter landable fish fill in for the share of its
+  // draw still out of reach. A small lure already draws the light half, so it never pulls in big fish.
+  const fillIn = lure && favorsLargeFish(lure) && drawn > 0 ? 1 - inReach / drawn : 0;
   const fillers = fillIn > 0
     ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
     : [];

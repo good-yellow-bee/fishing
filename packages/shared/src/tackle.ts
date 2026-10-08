@@ -95,14 +95,14 @@ export function packedCount(items: TackleItem[]): number {
   return items.reduce((count, item) => count + (item.packed ? 1 : 0), 0);
 }
 
-/** Gear that is never tied on, and line that is unless it names a lure ("In-line spinner"). */
-const TACKLE_TOOL = /\b(pliers|net|glasses|spreaders|forceps|hemostats?|nippers|floatant|headlamp|rod|reel)\b/i;
-const LINE = /\b(line|leader|tippet)\b/i;
-const LURE = /spinner|spoon|jig|crank|plug|minnow|worm|crawler|bobber|popper|bugger|nymph|caddis|tail|tube|grub|shad|frog|lure|bait|hook|streamer|mepps/i;
+/** Gear that is never tied on, singular or plural. */
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?)\b/i;
+/** Line names end with the line word ("Steel leader"); "In-line spinner" does not. */
+const LINE = /\b(lines?|leaders?|tippets?)\s*$/i;
 
 /** Anything not recognised as a tool or line counts as a lure, so lures the angler typed stay on the list. */
 export function isLureLabel(label: string): boolean {
-  return !TACKLE_TOOL.test(label) && (LURE.test(label) || !LINE.test(label));
+  return !TACKLE_TOOL.test(label) && !LINE.test(label);
 }
 
 /** Packed lures, or the sample's lures when none are packed. */

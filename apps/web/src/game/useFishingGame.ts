@@ -159,7 +159,7 @@ export function useFishingGame(
       timers.current.snap = window.setTimeout(() => {
         fx.snap();
         setOutcome({ kind: "broke", message: `${species.name} snapped the line.` });
-        resetToIdle("Line parted. Spend points on Strength.");
+        resetToIdle(`Line parted. Spend points on ${current.strength < species.minStrength ? "Strength" : "Accuracy"}.`);
       }, 1400);
     } else {
       const runtime = makeFight(species, weight, current.strength);

@@ -118,15 +118,46 @@ describe("bite mix", () => {
     }
   });
 
-  it("lands at least as often after every Strength upgrade", () => {
+  it("lands at least as often after every Strength or Accuracy upgrade", () => {
     for (const spot of BANKS) {
       for (const hour of HOURS) {
         for (const lure of ["Spinnerbait", "Nightcrawlers"]) {
-          let previous = 0;
-          for (let strength = 1; strength <= 5; strength++) {
-            const share = landableShare(spot, { ...starter, strength, accuracy: strength >= 4 ? 3 : 1 }, hour, lure);
-            expect(share, `${spot} ${hour} ${lure} strength ${strength}`).toBeGreaterThanOrEqual(previous - 1e-9);
-            previous = share;
+          for (const accuracy of [1, 2, 3]) {
+            let previous = 0;
+            for (let strength = 1; strength <= 5; strength++) {
+              const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure);
+              expect(share, `${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
+              previous = share;
+            }
+          }
+          for (const strength of [1, 3, 5]) {
+            let previous = 0;
+            for (let accuracy = 1; accuracy <= 3; accuracy++) {
+              const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure);
+              expect(share, `${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
+              previous = share;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it("keeps the first Strength upgrade worth it with a big lure", () => {
+    expect(landableShare("dock", { ...starter, strength: 2 }, "day", "Spinnerbait")).toBeGreaterThan(0.75);
+  });
+
+  it("never lets a small lure draw big-lure fish, whatever the angler can land", () => {
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        const reach = new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, "Nightcrawlers").id));
+        for (let strength = 1; strength <= 5; strength++) {
+          for (let accuracy = 1; accuracy <= 3; accuracy++) {
+            for (let i = 0; i < 480; i++) {
+              const fish = pickBite(spot, { ...starter, strength, accuracy }, false, () => i / 480, hour, "Nightcrawlers");
+              expect(reach.has(fish.id), `${spot} ${hour} str ${strength} acc ${accuracy}: ${fish.id}`).toBe(true);
+            }
           }
         }
       }
