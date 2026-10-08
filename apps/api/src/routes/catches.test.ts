@@ -16,6 +16,7 @@ let createProfile: typeof import("../db.ts").createProfile;
 
 beforeAll(async () => {
   const routes = await import("./catches.ts");
+  const upgrades = await import("./upgrades.ts");
   const database = await import("../db.ts");
   db = database.db;
   createProfile = database.createProfile;
@@ -25,6 +26,7 @@ beforeAll(async () => {
     await next();
   });
   app.route("/", routes.catchRoutes);
+  app.route("/", upgrades.upgradeRoutes);
 });
 
 beforeEach(() => {
@@ -75,6 +77,23 @@ describe("POST /catches", () => {
     });
   });
 
+  it("rejects a request ID reused for a different catch", async () => {
+    const first = await app.request("http://test/catches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock" }),
+    });
+    const conflict = await app.request("http://test/catches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId, speciesId: "golden-shiner", weight: 0.2, spot: "dock" }),
+    });
+
+    expect(first.status).toBe(200);
+    expect(conflict.status).toBe(409);
+    await expect(conflict.json()).resolves.toEqual({ error: "request ID conflicts with an existing catch" });
+  });
+
   it("limits successful catch submissions per minute", async () => {
     const results = await Promise.all(
       Array.from({ length: 13 }, (_, index) =>
@@ -93,5 +112,16 @@ describe("POST /catches", () => {
 
     expect(results.filter((response) => response.status === 200)).toHaveLength(12);
     expect(results.filter((response) => response.status === 429)).toHaveLength(1);
+  });
+
+  it("returns 400 for malformed upgrade JSON", async () => {
+    const response = await app.request("http://test/upgrades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{",
+    });
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "invalid JSON" });
   });
 });

@@ -27,6 +27,9 @@ catchRoutes.post("/catches", async (c) => {
   }
   const previous = findCatchByRequestId(user.id, body.requestId);
   if (previous) {
+    if (previous.species_id !== body.speciesId || previous.weight !== body.weight || previous.spot !== body.spot) {
+      return c.json({ error: "request ID conflicts with an existing catch" }, 409);
+    }
     return c.json({ id: previous.id, points: previous.points, speciesId: previous.species_id, weight: previous.weight });
   }
   const row = getProfile(user.id);
@@ -45,6 +48,9 @@ catchRoutes.post("/catches", async (c) => {
   };
   const saved = recordCatch(record);
   if (saved.kind === "existing") {
+    if (saved.catch.species_id !== body.speciesId || saved.catch.weight !== body.weight || saved.catch.spot !== body.spot) {
+      return c.json({ error: "request ID conflicts with an existing catch" }, 409);
+    }
     return c.json({
       id: saved.catch.id,
       points: saved.catch.points,
