@@ -24,7 +24,7 @@ describe("strike splash", () => {
   it("opens with the bite and stays readable for the whole hookset", () => {
     expect(STRIKE_SPRAY_SEC).toBeLessThan(STRIKE_RING_OPEN_SEC);
     expect(STRIKE_DUNK_SEC).toBeLessThan(WINDOW_SEC);
-    expect(STRIKE_RING_OPACITY).toBeGreaterThan(0.8);
+    expect(STRIKE_RING_OPACITY).toBeGreaterThan(0.6);
 
     expect(strikeRing("hookset", -0.01, OPEN.x, OPEN.z, 1)).toBeNull();
     expect(strikeSpray("hookset", -0.01, OPEN.x, OPEN.z, 1)).toBeNull();
@@ -39,13 +39,16 @@ describe("strike splash", () => {
     expect(mid).not.toBeNull();
     expect(held).not.toBeNull();
     expect(late).not.toBeNull();
-    expect(mid!.radius).toBeGreaterThan(born!.radius + 0.6);
+    expect(mid!.radius).toBeGreaterThan(born!.radius + 0.4);
     expect(mid!.open).toBeGreaterThan(born!.open);
     expect(held!.open).toBe(1);
     expect(late!.radius).toBeCloseTo(held!.radius, 5);
     expect(born!.opacity).toBe(STRIKE_RING_OPACITY);
     expect(held!.opacity).toBe(STRIKE_RING_OPACITY);
-    expect(late!.opacity).toBeGreaterThan(0.8);
+    expect(late!.opacity).toBeGreaterThan(0.6);
+    for (const age of [0, 0.2, STRIKE_RING_OPEN_SEC, WINDOW_SEC, 2]) {
+      expect(strikeRing("hookset", age, OPEN.x, OPEN.z, 1)!.radius).toBeLessThanOrEqual(1.5);
+    }
 
     const spray = strikeSpray("hookset", 0.04, OPEN.x, OPEN.z, 1);
     const fading = strikeSpray("hookset", STRIKE_SPRAY_SEC * 0.75, OPEN.x, OPEN.z, 1);
@@ -65,9 +68,13 @@ describe("strike splash", () => {
     expect(falling).not.toBeNull();
     expect(falling!.y).toBeLessThan(burst!.y);
     expect(falling!.opacity).toBeGreaterThan(0.5);
-    expect(dropLate).not.toBeNull();
-    expect(dropLate!.y).toBeGreaterThan(0.25);
-    expect(dropLate!.opacity).toBeGreaterThan(0.6);
+    expect(dropLate).toBeNull();
+    expect(strikeDrop("hookset", 0, STRIKE_SPRAY_SEC)).toBeNull();
+    for (let i = 0; i < STRIKE_DROPS; i += 1) {
+      const drop = strikeDrop("hookset", i, STRIKE_SPRAY_SEC * 0.5)!;
+      expect(Math.hypot(drop.x, drop.z)).toBeLessThan(0.8);
+      expect(drop.y).toBeLessThan(1);
+    }
     for (let i = 0; i < STRIKE_DROPS; i += 1) expect(strikeDrop("hookset", i, 0.08)).not.toBeNull();
 
     const sunk = strikeDunk("hookset", 0.3);
