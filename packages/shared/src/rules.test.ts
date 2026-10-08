@@ -30,7 +30,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, legendaryCanBite, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 
 const starter: Profile = {
@@ -441,5 +441,22 @@ describe("upgrades", () => {
   it("rejects a broke upgrade", () => {
     const result = validateUpgrade({ ...starter, points: 0 }, "accuracy");
     expect(result.ok).toBe(false);
+  });
+
+  it("names the species the next useful rank lets this angler land", () => {
+    expect(skillUnlock(starter, "strength")).toBe("Strength 2: Brook trout, Smallmouth bass, Rainbow trout");
+    // Burbot also needs Accuracy 2, so Strength 3 alone does not open it.
+    expect(skillUnlock({ ...starter, strength: 2 }, "strength")).toBe("Strength 3: Common carp, Channel catfish");
+    expect(skillUnlock({ ...starter, strength: 2, accuracy: 2 }, "strength")).toBe(
+      "Strength 3: Common carp, Channel catfish, Burbot",
+    );
+    expect(skillUnlock({ ...starter, strength: 3 }, "accuracy")).toBe("Accuracy 2: Burbot");
+  });
+
+  it("has no unlock line when no rank of that skill opens a fish on its own", () => {
+    expect(skillUnlock(starter, "accuracy")).toBeNull();
+    expect(skillUnlock({ ...starter, strength: 5 }, "strength")).toBeNull();
+    expect(skillUnlock({ ...starter, strength: 8, accuracy: 8 }, "strength")).toBeNull();
+    expect(skillUnlock(starter, "patience")).toBeNull();
   });
 });
