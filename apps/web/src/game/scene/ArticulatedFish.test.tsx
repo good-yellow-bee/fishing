@@ -5,8 +5,13 @@ import * as THREE from "three";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ArticulatedFish } from "./ArticulatedFish";
 
-const { Group, Mesh, SphereGeometry, ConeGeometry, MeshBasicMaterial, MeshDepthMaterial, MeshToonMaterial } = THREE;
-extend({ Group, Mesh, SphereGeometry, ConeGeometry, MeshBasicMaterial, MeshDepthMaterial, MeshToonMaterial });
+const { Group, Mesh, SphereGeometry, ConeGeometry, MeshBasicMaterial, MeshToonMaterial } = THREE;
+extend({ Group, Mesh, SphereGeometry, ConeGeometry, MeshBasicMaterial, MeshToonMaterial });
+
+// Fields WebGLPrograms keys a shader program on; equal values mean the prepass and coat share one.
+const PROGRAM_KEYS = ["type", "transparent", "toneMapped", "fog", "side", "premultipliedAlpha", "alphaTest", "vertexColors", "dithering", "blending"] as const;
+
+const shape = (mesh: THREE.Mesh) => [mesh.geometry.type, (mesh.geometry as THREE.SphereGeometry).parameters];
 
 // Builds the scene graph without WebGL; nothing is ever drawn.
 const gl = { render() {}, setPixelRatio() {}, setSize() {} };
@@ -36,20 +41,23 @@ afterEach(() => {
 });
 
 describe("ArticulatedFish", () => {
-  it("draws each hooked part as a depth prepass then one coat over the nearest surface", async () => {
+  it("draws each hooked part as a depth prepass on the coat's shader program, then one coat over the nearest surface", async () => {
     const meshes = await fishMeshes(true);
     expect(meshes).toHaveLength(22);
     for (let i = 0; i < meshes.length; i += 2) {
       const [prepass, coat] = [meshes[i], meshes[i + 1]];
-      const depth = prepass.material as THREE.MeshDepthMaterial;
+      const depth = prepass.material as THREE.MeshBasicMaterial;
       const paint = coat.material as THREE.MeshBasicMaterial;
       expect(prepass.parent).toBe(coat.parent);
       expect(prepass.position.equals(coat.position)).toBe(true);
+      expect(prepass.quaternion.equals(coat.quaternion)).toBe(true);
+      expect(prepass.scale.equals(coat.scale)).toBe(true);
+      expect(shape(prepass)).toEqual(shape(coat));
       expect(prepass.renderOrder).toBe(1);
-      expect(depth.isMeshDepthMaterial).toBe(true);
-      expect(depth).toMatchObject({ colorWrite: false, depthWrite: true, transparent: true });
+      expect(depth).toMatchObject({ colorWrite: false, depthWrite: true, depthTest: true, depthFunc: THREE.LessEqualDepth });
+      for (const key of PROGRAM_KEYS) expect(depth[key], key).toBe(paint[key]);
       expect(coat.renderOrder).toBe(2);
-      expect(paint).toMatchObject({ transparent: true, depthWrite: false, depthFunc: THREE.LessEqualDepth, stencilWrite: false });
+      expect(paint).toMatchObject({ isMeshBasicMaterial: true, transparent: true, toneMapped: false, depthWrite: false, depthTest: true, depthFunc: THREE.LessEqualDepth, stencilWrite: false });
       expect(prepass.castShadow || coat.castShadow).toBe(false);
     }
   });

@@ -18,17 +18,11 @@ type Props = {
 
 /** One coat. A second fish part on the same pixel would hide the water. */
 const FIGHT_OPACITY = 0.66;
+/** Prepass and coat compile to one shader program, so the coat's depth matches the prepass bit for bit. */
+const FIGHT_PROGRAM = { transparent: true, toneMapped: false } as const;
 
 function fightCoat(color: string) {
-  return {
-    color,
-    transparent: true,
-    opacity: FIGHT_OPACITY,
-    depthWrite: false,
-    // Only the surface the prepass kept passes; Equal can speckle across shader programs.
-    depthFunc: THREE.LessEqualDepth,
-    toneMapped: false,
-  } as const;
+  return { ...FIGHT_PROGRAM, color, opacity: FIGHT_OPACITY, depthWrite: false } as const;
 }
 
 function FishMaterial({ color, unlit }: { color: string; unlit?: boolean }) {
@@ -57,7 +51,7 @@ function FishMesh({ shape, material, unlit, castShadow = false, ...props }: Fish
     <>
       <mesh {...props} renderOrder={1} castShadow={false}>
         {shape}
-        <meshDepthMaterial transparent colorWrite={false} depthWrite />
+        <meshBasicMaterial {...FIGHT_PROGRAM} colorWrite={false} depthWrite />
       </mesh>
       <mesh {...props} renderOrder={2} castShadow={false}>
         {shape}
