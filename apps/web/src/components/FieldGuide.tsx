@@ -1,16 +1,17 @@
 import {
   fieldGuide,
-  guideClue,
   guideProgress,
   isTrophyWeight,
   LAKE_HOUR_LABELS,
+  shadowSize,
   SPOT_LABELS,
   trophyWeight,
   type CatchStat,
   type GuideEntry,
   type ShadowSize,
+  type SpotId,
 } from "@stillwater/shared";
-import { lureSizeFor, type LureSize } from "../game/logic";
+import { bestHourFor, lureSizeFor, type LureSize } from "../game/logic";
 
 type Props = {
   stats: CatchStat[];
@@ -42,7 +43,7 @@ function FishMark({ known, color }: { known: boolean; color: string }) {
 function GuideCard({ entry }: { entry: GuideEntry }) {
   const { species } = entry;
   const known = entry.caught > 0;
-  const clue = guideClue(species);
+  const hourAt = (spot: SpotId) => LAKE_HOUR_LABELS[bestHourFor(species, spot)].toLowerCase();
   const trophyLanded = entry.heaviest !== null && isTrophyWeight(species, entry.heaviest);
   return (
     <article className={`guide-card ${known ? `rarity-${species.rarity}` : "unknown"}`}>
@@ -58,17 +59,15 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
           <p>Trophy ≥ {trophyWeight(species).toFixed(1)} lb</p>
         </>
       )}
-      <p>
-        {SHADOW_LABELS[clue.shadow]} · best at {LAKE_HOUR_LABELS[clue.bestHour].toLowerCase()}
-      </p>
+      <p>{SHADOW_LABELS[shadowSize(species)]}</p>
       {known ? (
-        clue.spots.map((spot) => (
+        species.spots.map((spot) => (
           <p key={spot}>
-            {SPOT_LABELS[spot]}: {LURE_LABELS[lureSizeFor(species, spot)]}
+            {SPOT_LABELS[spot]}: {LURE_LABELS[lureSizeFor(species, spot)]} at {hourAt(spot)}
           </p>
         ))
       ) : (
-        <p>{clue.spots.map((spot) => SPOT_LABELS[spot]).join(" · ")}</p>
+        <p>{species.spots.map((spot) => `${SPOT_LABELS[spot]} at ${hourAt(spot)}`).join(" · ")}</p>
       )}
     </article>
   );
@@ -85,6 +84,7 @@ export function FieldGuide({ stats }: Props) {
           {found} / {total} species
         </h2>
       </div>
+      <p className="guide-note">Lure and time clues assume a cast released in the band.</p>
       <div className="guide-grid">
         {entries.map((entry) => (
           <GuideCard key={entry.species.id} entry={entry} />

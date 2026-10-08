@@ -1,5 +1,4 @@
 import { FISH, fishById } from "./fish.ts";
-import { LAKE_HOURS, biteHourMul, type LakeHour } from "./hour.ts";
 import type { FishSpecies } from "./types.ts";
 
 export type CatchStat = {
@@ -70,18 +69,4 @@ export function shadowSize(species: FishSpecies): ShadowSize {
   if (species.maxWeight <= 5) return "medium";
   if (species.maxWeight <= 20) return "large";
   return "huge";
-}
-
-export type GuideClue = {
-  spots: FishSpecies["spots"];
-  bestHour: LakeHour;
-  shadow: ShadowSize;
-};
-
-export function guideClue(species: FishSpecies): GuideClue {
-  let bestHour: LakeHour = LAKE_HOURS[0];
-  for (const hour of LAKE_HOURS.slice(1)) {
-    if (biteHourMul(species, hour) > biteHourMul(species, bestHour)) bestHour = hour;
-  }
-  return { spots: species.spots, bestHour, shadow: shadowSize(species) };
 }

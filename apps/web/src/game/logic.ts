@@ -4,6 +4,7 @@ import {
   legendaryCanBite,
   rollWeight,
   biteHourMul,
+  LAKE_HOURS,
   lakeHour,
   lakeHourWaitMul,
   type FishSpecies,
@@ -21,6 +22,10 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
 
 /** Fish the angler cannot land yet still bite now and then, as a glimpse of what upgrades unlock. */
 const OUT_OF_REACH_BITE = 0.35;
+
+function appeal(fish: FishSpecies, hour: LakeHour): number {
+  return rarityWeight[fish.rarity] * biteHourMul(fish, hour);
+}
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
 function favorsLargeFish(lure: string): boolean {
@@ -45,13 +50,28 @@ function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies
 
 export type LureSize = "small" | "large" | "either";
 
-/** The field guide's lure answer, read from the same per-bank split pickBite draws from. */
+/** The field guide's lure answer, read from the same per-bank split pickBite draws from on a full cast. */
 export function lureSizeFor(species: FishSpecies, spot: SpotId): LureSize {
   const home = FISH.filter((fish) => fish.spots.includes(spot));
   const small = sizedPool(home, false).some((fish) => fish.id === species.id);
   const large = sizedPool(home, true).some((fish) => fish.id === species.id);
   if (!small && !large) throw new Error(`${species.id} does not live at ${spot}`);
   return small && large ? "either" : small ? "small" : "large";
+}
+
+/** The field guide's hour for a bank: when a full cast with the right lure most often draws this fish, for an angler who can land the whole bank. */
+export function bestHourFor(species: FishSpecies, spot: SpotId): LakeHour {
+  const home = FISH.filter((fish) => fish.spots.includes(spot));
+  const pools = [sizedPool(home, false), sizedPool(home, true)].filter((pool) => pool.some((fish) => fish.id === species.id));
+  if (pools.length === 0) throw new Error(`${species.id} does not live at ${spot}`);
+  // Rivals in the pool get their own hour boosts, so only the per-cast share says when this fish bites most.
+  const share = (hour: LakeHour) =>
+    pools.reduce((sum, pool) => sum + appeal(species, hour) / pool.reduce((all, fish) => all + appeal(fish, hour), 0), 0);
+  // Exact ties (carp at the dock is a third of the big-lure pool at dawn, day, and night) go to the fish's own boost.
+  return LAKE_HOURS.reduce((best, hour) => {
+    const gap = share(hour) - share(best);
+    return gap > 1e-9 || (gap > -1e-9 && biteHourMul(species, hour) > biteHourMul(species, best)) ? hour : best;
+  });
 }
 
 export function sweetBand(accuracy: number) {
@@ -91,9 +111,8 @@ export function pickBite(
       lure,
     );
   }
-  const appeal = (fish: FishSpecies) => rarityWeight[fish.rarity] * biteHourMul(fish, hour);
-  const drawn = pool.reduce((sum, fish) => sum + appeal(fish), 0);
-  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish), 0);
+  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour), 0);
   // A big lure must not lock a weak angler out: the bank's lighter landable fish fill in for the share of its
   // draw still out of reach. A small lure already draws the light half, so it never pulls in big fish.
   const fillIn = lure && favorsLargeFish(lure) && drawn > 0 ? 1 - inReach / drawn : 0;
@@ -101,8 +120,8 @@ export function pickBite(
     ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
     : [];
   const weights = [
-    ...pool.map((fish) => appeal(fish) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
-    ...fillers.map((fish) => appeal(fish) * fillIn),
+    ...pool.map((fish) => appeal(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
+    ...fillers.map((fish) => appeal(fish, hour) * fillIn),
   ];
   pool = [...pool, ...fillers];
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);

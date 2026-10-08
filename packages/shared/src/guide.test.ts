@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
-import { catchStamp, guideClue, isTrophyWeight, shadowSize, trophyWeight } from "./guide.ts";
+import { catchStamp, isTrophyWeight, shadowSize, trophyWeight } from "./guide.ts";
 import { rollWeight } from "./rules.ts";
 
 const species = (id: string) => fishById(id)!;
@@ -53,12 +53,5 @@ describe("field guide clues", () => {
       "tiger-muskie": "huge",
       sturgeon: "huge",
     });
-  });
-
-  it("gives unknown fish their banks, best time, and shadow", () => {
-    expect(guideClue(species("catfish"))).toEqual({ spots: ["dock", "dropoff"], bestHour: "night", shadow: "large" });
-    expect(guideClue(species("brook-trout")).bestHour).toBe("dawn");
-    expect(guideClue(species("smallmouth-bass")).bestHour).toBe("dusk");
-    expect(guideClue(species("golden-shiner")).bestHour).toBe("day");
   });
 });

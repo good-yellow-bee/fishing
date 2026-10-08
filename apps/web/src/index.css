@@ -1055,6 +1055,12 @@ kbd {
   font-size: 28px;
 }
 
+.field-guide .guide-note {
+  margin: -6px 0 12px;
+  color: #aa9d86;
+  font-size: 12px;
+}
+
 .guide-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
