@@ -209,9 +209,9 @@ export function useFishingGame(
       setHint("NOW — strike!");
       timers.current.hook = window.setTimeout(() => {
         if (phaseRef.current !== "hookset") return;
-        setOutcome({ kind: "miss", message: "The fish dropped the bait." });
+        setOutcome({ kind: "miss", message: "Too slow. The fish dropped the bait." });
         // Hold result so the miss spring and the turn play out.
-        resetToIdle("Missed the strike. Cast again.", "result");
+        resetToIdle("Strike the moment the bobber goes under.", "result");
       }, hookWindowMs(current.accuracy));
     }, wait);
   }, [hour, resetToIdle]);
@@ -297,6 +297,9 @@ export function useFishingGame(
         break;
       case "hookset":
         setTheHook();
+        break;
+      case "waiting":
+        setHint("Too early. Wait for the bobber to go under, then strike.");
         break;
     }
   }, [setTheHook, startCast]);

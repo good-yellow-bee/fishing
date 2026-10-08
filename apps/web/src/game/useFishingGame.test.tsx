@@ -46,6 +46,7 @@ function Harness() {
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
+      <p data-testid="hint">{game.hint}</p>
     </>
   );
 }
@@ -135,3 +136,39 @@ describe("useFishingGame landed outcome", () => {
     expect(container!.querySelector("span")?.textContent).toBe("false");
   });
 });
+
+describe("useFishingGame strike timing", () => {
+  const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+  const phase = () => container!.querySelector("output")?.textContent;
+
+  function cast(surface: HTMLDivElement) {
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    now += 500;
+    act(() => window.dispatchEvent(pointer("pointerup")));
+  }
+
+  it("says an early strike is too early and still lets the real bite be hooked", () => {
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(600));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/too early/i);
+    expect(phase()).toBe("waiting:none");
+    act(() => window.dispatchEvent(pointer("pointerup", 2)));
+    act(() => vi.advanceTimersByTime(1_601));
+    expect(phase()).toBe("hookset:none");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
+    expect(phase()).toBe("fight:none");
+  });
+
+  it("gives a human reaction time to hook the real bite", () => {
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    expect(phase()).toBe("hookset:none");
+    act(() => vi.advanceTimersByTime(1_000));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("fight:none");
+  });
+});
+
