@@ -238,7 +238,7 @@ export function DockPage() {
         </aside>
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
         {game.outcome?.kind === "landed" && (
-          <div className={`catch-card rarity-${game.outcome.species.rarity}`}>
+          <div className={`landed-card rarity-${game.outcome.species.rarity}`}>
             {fieldBeat && (
               <p className="catch-best" role="status">
                 <strong>Personal best</strong>
