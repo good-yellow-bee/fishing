@@ -42,6 +42,7 @@ import {
   retrieveWake,
   retrieveWeave,
   type FightSurge,
+  resetFightView,
 } from "./fightMotion";
 import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
 import {
@@ -61,15 +62,16 @@ import {
   landSwing,
   landView,
   placeLandedFish,
+  resetLandView,
 } from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
-import { missBobberLift, missLineSag, missView } from "./missMotion";
+import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
-import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
+import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { anglerPose, shortestYaw } from "./pose";
+import { anglerPose, resetAnglerPose, shortestYaw } from "./pose";
 import {
   STRIKE_DROPS,
   strikeAnchor,
@@ -125,6 +127,19 @@ function fightEndedLanded() {
 const landedFrom = new THREE.Vector3();
 const landedFish = new THREE.Vector3();
 const holdScratch = { x: 0, y: 0, z: 0 };
+
+function resetFishingScene() {
+  resetAnglerPose();
+  resetFightView();
+  resetLandView();
+  resetMissView();
+  resetWaitView();
+  lastFightSim = null;
+  bobberWorld.set(0.55, 0, -2);
+  landedFrom.set(0, 0, 0);
+  landedFish.set(0, 0, 0);
+  Object.assign(holdScratch, { x: 0, y: 0, z: 0 });
+}
 
 function updateMiss(phase: ScenePhase, prevPhase: ScenePhase, delta: number) {
   if (prevPhase === "hookset" && phase === "result") {
@@ -1593,6 +1608,10 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight, preview
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
+  useEffect(() => {
+    resetFishingScene();
+    return resetFishingScene;
+  }, []);
   return (
     <>
       <PlayerMove phase={phase} />

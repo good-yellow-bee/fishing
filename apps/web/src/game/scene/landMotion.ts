@@ -29,6 +29,10 @@ export const landView = {
   presentYaw: 0,
 };
 
+export function resetLandView() {
+  Object.assign(landView, { active: false, age: -1, swing: 0, haulYaw: 0, presentYaw: 0 });
+}
+
 function clamp01(value: number) {
   return Math.min(1, Math.max(0, value));
 }

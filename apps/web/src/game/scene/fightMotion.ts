@@ -59,6 +59,32 @@ export const fightView = {
   localZ: 0,
 };
 
+export function resetFightView() {
+  fightInput.reeling = false;
+  Object.assign(fightView, {
+    active: false,
+    surge: 0,
+    tension: 0.2,
+    reeling: false,
+    strikeAge: -1,
+    biteAge: 0,
+    pump: 0,
+    time: 0,
+    runSide: 0,
+    lead: 0.32,
+    side: 0,
+    depth: 0.42,
+    leapAge: -1,
+    tug: 0,
+    plunge: 0,
+    pull: 0,
+    sag: 0.22,
+    localX: 0,
+    localY: 0,
+    localZ: 0,
+  });
+}
+
 /** 0 at the start of a pump, 1 at the top, 0 after the drop. */
 export function reelPumpLift(phase: number) {
   const u = phase - Math.floor(phase);
