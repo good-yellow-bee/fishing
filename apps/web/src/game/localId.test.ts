@@ -11,8 +11,10 @@ describe("localId", () => {
 
   it("uses getRandomValues on local HTTP, where randomUUID is missing", () => {
     const real = globalThis.crypto;
-    vi.stubGlobal("crypto", { getRandomValues: real.getRandomValues.bind(real) });
+    const getRandomValues = vi.fn(real.getRandomValues.bind(real));
+    vi.stubGlobal("crypto", { getRandomValues });
     const ids = new Set(Array.from({ length: 20 }, () => localId()));
+    expect(getRandomValues).toHaveBeenCalledTimes(20);
     expect(ids.size).toBe(20);
     for (const id of ids) {
       expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
