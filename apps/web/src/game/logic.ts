@@ -73,6 +73,12 @@ export function lureSizeFor(species: FishSpecies, spot: SpotId): LureSize {
   return small && large ? "either" : small ? "small" : "large";
 }
 
+/** The top Strength among fish this lure draws at a bank. Legendaries only bite once landable, so they never count. */
+export function lureStrengthAt(spot: SpotId, lure: string): number {
+  const home = FISH.filter((fish) => fish.spots.includes(spot));
+  return Math.max(...poolForLure(home, lure).filter((fish) => fish.rarity !== "legendary").map((fish) => fish.minStrength));
+}
+
 /** The field guide's hour for a bank: when a full cast with the right lure most often draws this fish, for an angler who can land the whole bank. */
 export function bestHourFor(species: FishSpecies, spot: SpotId): LakeHour {
   const home = FISH.filter((fish) => fish.spots.includes(spot));

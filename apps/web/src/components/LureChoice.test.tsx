@@ -20,7 +20,7 @@ function mount(value: string, onChange: (value: string) => void) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<LureChoice choices={["Spinnerbait", "Popper", "#5 Mepps"]} value={value} locked={false} onChange={onChange} />));
+  act(() => root!.render(<LureChoice choices={["Spinnerbait", "Popper", "#5 Mepps"]} value={value} spot="dock" locked={false} onChange={onChange} />));
   return container.querySelector("select")!;
 }
 
@@ -31,14 +31,28 @@ describe("LureChoice", () => {
     expect(container!.querySelector("small")?.textContent).toBe("Big lure — heavier fish (Strength 3+ to land most)");
   });
 
-  it("lets go of focus after a pick so Space casts instead of reopening the list", () => {
+  it("lets go of focus after a pointer pick so Space casts instead of reopening the list", () => {
     const onChange = vi.fn();
     const select = mount("Spinnerbait", onChange);
     select.focus();
     expect(document.activeElement).toBe(select);
+    act(() => select.dispatchEvent(new Event("pointerdown", { bubbles: true })));
     select.value = "Popper";
     act(() => select.dispatchEvent(new Event("change", { bubbles: true })));
     expect(onChange).toHaveBeenCalledWith("Popper");
     expect(document.activeElement).not.toBe(select);
+  });
+
+  it("keeps focus while the keyboard steps through lures", () => {
+    const onChange = vi.fn();
+    const select = mount("Spinnerbait", onChange);
+    // A click earlier, then arrow keys: the keys win.
+    act(() => select.dispatchEvent(new Event("pointerdown", { bubbles: true })));
+    select.focus();
+    act(() => select.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })));
+    select.value = "#5 Mepps";
+    act(() => select.dispatchEvent(new Event("change", { bubbles: true })));
+    expect(onChange).toHaveBeenCalledWith("#5 Mepps");
+    expect(document.activeElement).toBe(select);
   });
 });

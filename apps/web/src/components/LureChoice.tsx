@@ -1,13 +1,18 @@
+import { useRef } from "react";
+import type { SpotId } from "@stillwater/shared";
 import { lureBlurb, smallLuresFirst } from "../game/lureChoice";
 
 type Props = {
   choices: string[];
   value: string;
+  spot: SpotId;
   locked: boolean;
   onChange: (value: string) => void;
 };
 
-export function LureChoice({ choices, value, locked, onChange }: Props) {
+export function LureChoice({ choices, value, spot, locked, onChange }: Props) {
+  // Arrow keys and type-ahead change a closed select, so only a pointer pick hands focus back.
+  const pointerPick = useRef(false);
   return (
     <label
       className="lure-choice"
@@ -21,11 +26,17 @@ export function LureChoice({ choices, value, locked, onChange }: Props) {
         aria-label="Lure"
         value={value}
         disabled={locked}
-        onPointerDown={(event) => event.stopPropagation()}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          pointerPick.current = true;
+        }}
+        onKeyDown={() => {
+          pointerPick.current = false;
+        }}
         onChange={(event) => {
           onChange(event.target.value);
           // A focused select swallows Space, so hand it back to the cast.
-          event.currentTarget.blur();
+          if (pointerPick.current) event.currentTarget.blur();
         }}
       >
         {smallLuresFirst(choices).map((label) => (
@@ -34,7 +45,7 @@ export function LureChoice({ choices, value, locked, onChange }: Props) {
           </option>
         ))}
       </select>
-      <small>{lureBlurb(value)}</small>
+      <small>{lureBlurb(value, spot)}</small>
     </label>
   );
 }

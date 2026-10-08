@@ -28,14 +28,25 @@ export function UpgradePanel({ profile, busy, onBuy }: Props) {
           const cost = next ? skillCost(rank) : null;
           const disabled = busy || !cost || profile.points < cost;
           const unlock = skillUnlock(profile, skill);
+          const noteId = `upgrade-${skill}-note`;
+          const unlockId = `upgrade-${skill}-unlock`;
           return (
             <div key={skill} className="upgrade-skill">
-              <button type="button" disabled={disabled} onClick={() => onBuy(skill)}>
+              <button
+                type="button"
+                disabled={disabled}
+                aria-describedby={unlock ? `${noteId} ${unlockId}` : noteId}
+                onClick={() => onBuy(skill)}
+              >
                 {SKILL_LABELS[skill]} {rank}
                 {cost ? ` → ${next} (${cost} pts)` : " max"}
               </button>
-              <p>{SKILL_NOTES[skill]}</p>
-              {unlock && <p className="upgrade-unlock">{unlock}</p>}
+              <p id={noteId}>{SKILL_NOTES[skill]}</p>
+              {unlock && (
+                <p id={unlockId} className="upgrade-unlock">
+                  {unlock}
+                </p>
+              )}
             </div>
           );
         })}

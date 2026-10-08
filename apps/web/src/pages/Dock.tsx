@@ -108,16 +108,18 @@ export function DockPage() {
     if (level === undefined) return;
     const rise = levelUp(seenLevel.current, level);
     seenLevel.current = level;
-    if (!rise) return;
-    fx.land();
-    setLevelToast(rise);
+    if (rise) setLevelToast(rise);
   }, [level]);
 
+  // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
+  const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
+  const shownLevel = bankClear ? levelToast : null;
   useEffect(() => {
-    if (!levelToast) return;
+    if (!shownLevel) return;
+    fx.land();
     const timer = window.setTimeout(() => setLevelToast(null), 4000);
     return () => window.clearTimeout(timer);
-  }, [levelToast]);
+  }, [shownLevel]);
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -197,6 +199,7 @@ export function DockPage() {
 
   const dropoffOpen = canUseSpot("dropoff", me.level);
   const fishing = isFishingStance(game.stance);
+  const bank = isFishingStance(game.stance) ? game.stance : game.spot;
   const stanceLabel =
     game.stance === "dropoff" && !dropoffOpen ? `${STANCE_LABELS.dropoff} (lv 3)` : STANCE_LABELS[game.stance];
 
@@ -219,7 +222,7 @@ export function DockPage() {
         <FishingWorld
           phase={scenePhase}
           power={game.power}
-          spot={isFishingStance(game.stance) ? game.stance : game.spot}
+          spot={bank}
           sim={game.sim}
           nibble={game.nibble}
           hour={hour}
@@ -262,6 +265,7 @@ export function DockPage() {
         <LureChoice
           choices={lureChoices}
           value={lure}
+          spot={bank}
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
@@ -327,12 +331,15 @@ export function DockPage() {
             </button>
           </div>
         )}
-        {levelToast && (
-          <div className="toast level-toast" role="status">
-            <h2>Level {levelToast.level}</h2>
-            {levelToast.opened && <p>{levelToast.opened}</p>}
-          </div>
-        )}
+        {/* Mounted empty so screen readers announce the toast when it fills in. */}
+        <div className="level-status" role="status">
+          {shownLevel && (
+            <div className="toast level-toast">
+              <h2>Level {shownLevel.level}</h2>
+              {shownLevel.opened && <p>{shownLevel.opened}</p>}
+            </div>
+          )}
+        </div>
         {shopOpen && (
           <div className="shop-overlay">
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
