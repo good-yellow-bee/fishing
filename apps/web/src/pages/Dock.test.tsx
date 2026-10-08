@@ -133,7 +133,7 @@ describe("dock weather", () => {
 
 describe("level-up toast", () => {
   it("waits out the catch card, then fills a status region that was already mounted", async () => {
-    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
     const perch = fishById("perch")!;
     const levelThree: Me = {
       ...me,
@@ -170,7 +170,31 @@ describe("level-up toast", () => {
     expect(status?.querySelector(".level-toast p")?.textContent).toBe("The drop-off is open — walk east along the shore.");
     expect(fx.land).toHaveBeenCalledTimes(1);
 
-    act(() => vi.advanceTimersByTime(4000));
+    // A quick recast hides it; coming back resumes the remaining time without a second chime.
+    act(() => vi.advanceTimersByTime(2500));
+    landed.outcome = { kind: "miss", message: "Too slow. The fish dropped the bait." };
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".level-toast")).toBeNull();
+    act(() => vi.advanceTimersByTime(10_000));
+    landed.outcome = null;
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".level-toast")).not.toBeNull();
+    expect(fx.land).toHaveBeenCalledTimes(1);
+    act(() => vi.advanceTimersByTime(1400));
+    expect(page.querySelector(".level-toast")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(200));
     expect(page.querySelector(".level-toast")).toBeNull();
     expect(page.querySelector(".level-status")).toBe(status);
   });

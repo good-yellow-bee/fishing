@@ -35,6 +35,8 @@ import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 
+const LEVEL_TOAST_MS = 4000;
+
 export function DockPage() {
   const [params] = useSearchParams();
   // One clock for the hour and the day's weather, so both turn over together.
@@ -47,6 +49,9 @@ export function DockPage() {
   const [shopOpen, setShopOpen] = useState(false);
   const seenLevel = useRef<number | null>(null);
   const [levelToast, setLevelToast] = useState<LevelUp | null>(null);
+  // Visible time left for the current toast and the level already chimed, so hiding it never restarts either.
+  const toastLeft = useRef(0);
+  const chimedLevel = useRef<number | null>(null);
   const [lureChoices] = useState(() => luresPacked(readTackle()));
   // Null until the angler picks a lure this session, so the default follows their Strength.
   const [pickedLure, setPickedLure] = useState<string | null>(null);
@@ -108,7 +113,10 @@ export function DockPage() {
     if (level === undefined) return;
     const rise = levelUp(seenLevel.current, level);
     seenLevel.current = level;
-    if (rise) setLevelToast(rise);
+    if (rise) {
+      toastLeft.current = LEVEL_TOAST_MS;
+      setLevelToast(rise);
+    }
   }, [level]);
 
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
@@ -116,9 +124,16 @@ export function DockPage() {
   const shownLevel = bankClear ? levelToast : null;
   useEffect(() => {
     if (!shownLevel) return;
-    fx.land();
-    const timer = window.setTimeout(() => setLevelToast(null), 4000);
-    return () => window.clearTimeout(timer);
+    if (chimedLevel.current !== shownLevel.level) {
+      chimedLevel.current = shownLevel.level;
+      fx.land();
+    }
+    const shownAt = performance.now();
+    const timer = window.setTimeout(() => setLevelToast(null), toastLeft.current);
+    return () => {
+      window.clearTimeout(timer);
+      toastLeft.current = Math.max(0, toastLeft.current - (performance.now() - shownAt));
+    };
   }, [shownLevel]);
 
   const saveFieldLog = useCallback(() => {
