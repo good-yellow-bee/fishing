@@ -12,9 +12,10 @@ import {
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
+  type CatchSubmission,
   type SkillId,
 } from "@stillwater/shared";
-import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
+import { buyUpgrade, getMe, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { LureChoice } from "../components/LureChoice";
@@ -27,7 +28,7 @@ import { lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
-import { pendingCatches, queueCatch, rejectedCatches, syncCatches } from "../game/pendingCatches";
+import { useCatchSync } from "../game/useCatchSync";
 
 export function DockPage() {
   const [params] = useSearchParams();
@@ -46,11 +47,8 @@ export function DockPage() {
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
-  const syncing = useRef(false);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [rejectedCount, setRejectedCount] = useState(0);
-  const [catchSaveError, setCatchSaveError] = useState("");
   const userId = me?.profile.userId;
+  const catchSync = useCatchSync(userId, setMe, setError);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
   const fieldBeat = useMemo(() => {
@@ -69,55 +67,22 @@ export function DockPage() {
     return getMe().then(setMe);
   }, []);
 
-  const syncPending = useCallback(async () => {
-    if (!userId || syncing.current) return;
-    syncing.current = true;
-    setCatchSaveError("");
-    try {
-      await syncCatches(userId, recordCatch);
-      setPendingCount(0);
-      setRejectedCount(rejectedCatches(userId).length);
-      await refresh();
-    } catch (err) {
-      setCatchSaveError(err instanceof Error ? err.message : "The catch could not be saved to the server.");
-    } finally {
-      syncing.current = false;
-    }
-  }, [refresh, userId]);
+  const saveOutcome = useCallback(
+    async (id: string, row: CatchSubmission) => {
+      posted.current = id;
+      if (!(await catchSync.saveCatch(row)) && posted.current === id) posted.current = null;
+    },
+    [catchSync.saveCatch],
+  );
 
   const retryServerSave = () => {
-    if (userId && game.outcome?.kind === "landed" && posted.current !== game.outcome.id) {
-      try {
-        queueCatch(userId, {
-          requestId: game.outcome.id,
-          speciesId: game.outcome.species.id,
-          weight: game.outcome.weight,
-          spot: game.outcome.spot,
-        });
-        posted.current = game.outcome.id;
-        setPendingCount(pendingCatches(userId).length);
-      } catch (err) {
-        setCatchSaveError(err instanceof Error ? err.message : "The catch could not be queued for saving.");
-        return;
-      }
-    }
-    void syncPending();
-  };
-
-  useEffect(() => {
-    if (!userId) return;
-    try {
-      setPendingCount(pendingCatches(userId).length);
-      setRejectedCount(rejectedCatches(userId).length);
-    } catch (err) {
-      setCatchSaveError(err instanceof Error ? err.message : "Pending catches could not be read.");
+    const outcome = game.outcome;
+    if (outcome?.kind === "landed" && posted.current !== outcome.id) {
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot });
       return;
     }
-    void syncPending();
-    const onOnline = () => { void syncPending(); };
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-  }, [syncPending, userId]);
+    void catchSync.sync();
+  };
 
   useEffect(() => {
     refresh().catch((err: Error) => setError(err.message));
@@ -156,15 +121,8 @@ export function DockPage() {
     if (posted.current === id) return;
     saveFieldLog();
     if (!userId) return;
-    try {
-      queueCatch(userId, { requestId: id, speciesId: species.id, weight, spot: catchSpot });
-      posted.current = id;
-      setPendingCount(pendingCatches(userId).length);
-      void syncPending();
-    } catch (err) {
-      setCatchSaveError(err instanceof Error ? err.message : "The catch could not be queued for saving.");
-    }
-  }, [game.outcome, saveFieldLog, syncPending, userId]);
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot });
+  }, [game.outcome, saveFieldLog, saveOutcome, userId]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);
@@ -243,18 +201,18 @@ export function DockPage() {
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         )}
         <p className="hint">{game.hint}</p>
-        {(pendingCount > 0 || catchSaveError || rejectedCount > 0) && (
+        {(catchSync.pendingCount > 0 || catchSync.error || catchSync.rejectedCount > 0) && (
           <aside className="catch-sync" data-camera-control role="status">
-            {(pendingCount > 0 || catchSaveError) && (
+            {(catchSync.pendingCount > 0 || catchSync.error) && (
               <>
-                <p>{catchSaveError || `${pendingCount} catch${pendingCount === 1 ? "" : "es"} waiting to sync.`}</p>
+                <p>{catchSync.error || `${catchSync.pendingCount} catch${catchSync.pendingCount === 1 ? "" : "es"} waiting to sync.`}</p>
                 <button className="panel-btn" type="button" onClick={retryServerSave}>Retry server save</button>
               </>
             )}
-            {rejectedCount > 0 && (
+            {catchSync.rejectedCount > 0 && (
               <>
-                <p>{rejectedCount} catch{rejectedCount === 1 ? "" : "es"} could not be verified. Your field-log entries are kept.</p>
-                <button className="panel-btn" type="button" onClick={() => setRejectedCount(0)}>Dismiss</button>
+                <p>{catchSync.rejectedCount} catch{catchSync.rejectedCount === 1 ? "" : "es"} could not be verified. Your field-log entries are kept.</p>
+                <button className="panel-btn" type="button" onClick={catchSync.dismissRejected}>Dismiss</button>
               </>
             )}
           </aside>

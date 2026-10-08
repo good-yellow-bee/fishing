@@ -35,6 +35,10 @@ export function rejectedCatches(userId: string): CatchSubmission[] {
   return rows;
 }
 
+export function clearRejectedCatches(userId: string) {
+  localStorage.removeItem(`${key(userId)}.rejected`);
+}
+
 export async function syncCatches(userId: string, post: (row: CatchSubmission) => Promise<unknown>) {
   for (;;) {
     const row = pendingCatches(userId)[0];
