@@ -3,37 +3,20 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { RAIN_COUNT, rainRipple, rainStreak } from "./skyWeather";
 
+/** Thin, see-through streaks and rings, so a shower never hides the line or the fish. */
 export function LakeRain() {
-  const cores = useRef<THREE.InstancedMesh>(null);
-  const shells = useRef<THREE.InstancedMesh>(null);
+  const streaks = useRef<THREE.InstancedMesh>(null);
   const rings = useRef<THREE.InstancedMesh>(null);
-  const hits = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => new THREE.Object3D(), []);
-  const coreGeo = useMemo(() => new THREE.PlaneGeometry(0.28, 1), []);
-  const shellGeo = useMemo(() => new THREE.PlaneGeometry(0.96, 1), []);
-  const ringGeo = useMemo(() => new THREE.RingGeometry(0.42, 1, 28), []);
-  const hitGeo = useMemo(() => new THREE.CircleGeometry(1, 20), []);
-  const coreMat = useMemo(
+  const streakGeo = useMemo(() => new THREE.PlaneGeometry(0.035, 1), []);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.86, 1, 24), []);
+  const streakMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#e7f8ff",
+        color: "#d4e3ea",
         transparent: true,
-        opacity: 0.98,
+        opacity: 0.38,
         depthWrite: false,
-        fog: false,
-        toneMapped: false,
-        side: THREE.DoubleSide,
-      }),
-    [],
-  );
-  const shellMat = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: "#041018",
-        transparent: true,
-        opacity: 0.96,
-        depthWrite: false,
-        fog: false,
         toneMapped: false,
         side: THREE.DoubleSide,
       }),
@@ -42,24 +25,10 @@ export function LakeRain() {
   const ringMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#06202c",
+        color: "#e2eff3",
         transparent: true,
-        opacity: 0.9,
+        opacity: 0.32,
         depthWrite: false,
-        fog: false,
-        toneMapped: false,
-        side: THREE.DoubleSide,
-      }),
-    [],
-  );
-  const hitMat = useMemo(
-    () =>
-      new THREE.MeshBasicMaterial({
-        color: "#ffffff",
-        transparent: true,
-        opacity: 0.88,
-        depthWrite: false,
-        fog: false,
         toneMapped: false,
         side: THREE.DoubleSide,
       }),
@@ -68,25 +37,19 @@ export function LakeRain() {
 
   useEffect(
     () => () => {
-      coreGeo.dispose();
-      shellGeo.dispose();
+      streakGeo.dispose();
       ringGeo.dispose();
-      hitGeo.dispose();
-      coreMat.dispose();
-      shellMat.dispose();
+      streakMat.dispose();
       ringMat.dispose();
-      hitMat.dispose();
     },
-    [coreGeo, shellGeo, ringGeo, hitGeo, coreMat, shellMat, ringMat, hitMat],
+    [streakGeo, ringGeo, streakMat, ringMat],
   );
 
   useFrame(({ clock, camera }) => {
     const time = clock.elapsedTime;
-    const core = cores.current;
-    const shell = shells.current;
+    const streak = streaks.current;
     const ring = rings.current;
-    const hit = hits.current;
-    if (!core || !shell || !ring || !hit) return;
+    if (!streak || !ring) return;
     for (let i = 0; i < RAIN_COUNT; i += 1) {
       const drop = rainStreak(i, time);
       if (drop) {
@@ -100,39 +63,27 @@ export function LakeRain() {
         scratch.scale.set(0, 0, 0);
       }
       scratch.updateMatrix();
-      core.setMatrixAt(i, scratch.matrix);
-      shell.setMatrixAt(i, scratch.matrix);
+      streak.setMatrixAt(i, scratch.matrix);
 
       const splash = rainRipple(i, time);
       if (splash) {
         scratch.position.set(splash.x, splash.y, splash.z);
         scratch.rotation.set(-Math.PI / 2, 0, 0);
         scratch.scale.set(splash.radius, splash.radius, 1);
-        scratch.updateMatrix();
-        ring.setMatrixAt(i, scratch.matrix);
-        const burst = splash.open < 0.5 ? 0.42 + (1 - splash.open) * 0.55 : 0;
-        scratch.scale.set(burst, burst, 1);
-        scratch.updateMatrix();
-        hit.setMatrixAt(i, scratch.matrix);
       } else {
         scratch.scale.set(0, 0, 0);
-        scratch.updateMatrix();
-        ring.setMatrixAt(i, scratch.matrix);
-        hit.setMatrixAt(i, scratch.matrix);
       }
+      scratch.updateMatrix();
+      ring.setMatrixAt(i, scratch.matrix);
     }
-    core.instanceMatrix.needsUpdate = true;
-    shell.instanceMatrix.needsUpdate = true;
+    streak.instanceMatrix.needsUpdate = true;
     ring.instanceMatrix.needsUpdate = true;
-    hit.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <group name="lake-rain">
-      <instancedMesh ref={shells} args={[shellGeo, shellMat, RAIN_COUNT]} frustumCulled={false} renderOrder={4} />
-      <instancedMesh ref={cores} args={[coreGeo, coreMat, RAIN_COUNT]} frustumCulled={false} renderOrder={5} />
+      <instancedMesh ref={streaks} args={[streakGeo, streakMat, RAIN_COUNT]} frustumCulled={false} renderOrder={5} />
       <instancedMesh ref={rings} args={[ringGeo, ringMat, RAIN_COUNT]} frustumCulled={false} renderOrder={4} />
-      <instancedMesh ref={hits} args={[hitGeo, hitMat, RAIN_COUNT]} frustumCulled={false} renderOrder={5} />
     </group>
   );
 }
