@@ -6,6 +6,7 @@ import {
   withTackleItem,
   type TackleItem,
 } from "@stillwater/shared";
+import { localId } from "../../game/localId";
 import { readTackle, saveTackle } from "./storage";
 
 type TackleApi = {
@@ -40,7 +41,7 @@ export function TackleProvider({ children }: { children: ReactNode }) {
         const parsed = parseTackleLabel(label);
         if (!parsed.ok) return parsed.message;
         const item: TackleItem = {
-          id: crypto.randomUUID(),
+          id: localId(),
           tripId,
           label: parsed.value,
           packed: false,

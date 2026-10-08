@@ -441,6 +441,7 @@ export function useFishingGame(
           }
         }
       } catch (error) {
+        console.error(error);
         clearTimers();
         holdingRef.current = false;
         castPointerRef.current = null;

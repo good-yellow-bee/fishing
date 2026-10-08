@@ -53,9 +53,9 @@ afterEach(() => {
   root = null;
   container = null;
   frames = [];
+  vi.unstubAllGlobals();
   vi.useRealTimers();
   vi.restoreAllMocks();
-  vi.unstubAllGlobals();
 });
 
 describe("useFishingGame animation recovery", () => {
@@ -68,6 +68,7 @@ describe("useFishingGame animation recovery", () => {
     });
     vi.stubGlobal("cancelAnimationFrame", () => undefined);
     vi.spyOn(Math, "random").mockReturnValue(0);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     container = document.createElement("div");
     document.body.append(container);
@@ -81,10 +82,15 @@ describe("useFishingGame animation recovery", () => {
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown")));
     const frame = frames.at(-1)!;
+    const scheduled = frames.length;
     act(() => frame(1_000));
 
     expect(step).toHaveBeenCalledTimes(1);
+    expect(logged).toHaveBeenCalledWith(expect.objectContaining({ message: "simulated fight failure" }));
     expect(container.querySelector("output")?.textContent).toBe("result:error");
+    expect(frames.length).toBe(scheduled + 1);
+    act(() => frames.at(-1)!(1_016));
+    expect(frames.length).toBe(scheduled + 2);
     act(() => (container!.querySelector("button") as HTMLButtonElement).click());
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(container.querySelector("output")?.textContent).toBe("casting:none");
