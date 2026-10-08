@@ -7,6 +7,7 @@ import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
 import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
+import { LakeRain } from "./LakeRain";
 import { bedColor, bedHeight, waterDepthColor, waterHeight } from "./water";
 
 type Vec3 = [number, number, number];
@@ -1091,6 +1092,7 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
         DRAGONFLIES.map((fly, i) => (
           <Dragonfly key={i} {...fly} />
         ))}
+      <LakeRain />
     </>
   );
 }
