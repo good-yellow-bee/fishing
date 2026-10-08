@@ -367,7 +367,7 @@ function makeBedSurface(radiusX: number, radiusZ: number) {
 }
 
 // Concentric rings so the surface can chop. Local +Z is world up after the mesh pitch.
-export function makeWaveSurface(radiusX: number, radiusZ: number) {
+function makeWaveSurface(radiusX: number, radiusZ: number) {
   const rings = 24;
   const segments = 84;
   const count = 1 + rings * segments;
@@ -407,8 +407,8 @@ export function makeWaveSurface(radiusX: number, radiusZ: number) {
   const shoreWeights = new Float32Array(position.count);
   const tints = new Float32Array(position.count * 3);
   for (let i = 0; i < position.count; i += 1) {
-    const x = base[i * 2] ?? 0;
-    const worldZ = -(base[i * 2 + 1] ?? 0) + LAKE_CENTER_Z;
+    const x = base[i * 2]!;
+    const worldZ = -base[i * 2 + 1]! + LAKE_CENTER_Z;
     shoreWeights[i] = waterShoreWeight(x, worldZ);
     const tint = waterDepthColor(x, worldZ);
     tints[i * 3] = tint.r;
@@ -420,7 +420,7 @@ export function makeWaveSurface(radiusX: number, radiusZ: number) {
   return geometry;
 }
 
-export function displaceWater(geometry: THREE.BufferGeometry, time: number) {
+function displaceWater(geometry: THREE.BufferGeometry, time: number) {
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   const base = geometry.userData.base as Float32Array;
   const shoreWeights = geometry.userData.shoreWeights as Float32Array;
@@ -431,13 +431,13 @@ export function displaceWater(geometry: THREE.BufferGeometry, time: number) {
     geometry.setAttribute("color", colors);
   }
   for (let i = 0; i < position.count; i += 1) {
-    const x = base[i * 2] ?? 0;
-    const y = base[i * 2 + 1] ?? 0;
+    const x = base[i * 2]!;
+    const y = base[i * 2 + 1]!;
     const worldZ = -y + LAKE_CENTER_Z;
-    const height = waterHeightWithShoreWeight(x, worldZ, time, shoreWeights[i] ?? 0);
+    const height = waterHeightWithShoreWeight(x, worldZ, time, shoreWeights[i]!);
     position.setZ(i, height);
     const crest = 1 + height * 0.55;
-    colors.setXYZ(i, (tints[i * 3] ?? 0) * crest, (tints[i * 3 + 1] ?? 0) * crest, (tints[i * 3 + 2] ?? 0) * crest);
+    colors.setXYZ(i, tints[i * 3]! * crest, tints[i * 3 + 1]! * crest, tints[i * 3 + 2]! * crest);
   }
   colors.needsUpdate = true;
   position.needsUpdate = true;

@@ -11,7 +11,8 @@ function shoreInland(x: number, z: number) {
 }
 
 // Chop dies out at the shoreline so the bank seam stays put.
-function shoreWeight(x: number, z: number) {
+/** Static shoreline fade used by the water surface mesh. */
+export function waterShoreWeight(x: number, z: number) {
   const fade = Math.min(1, shoreInland(x, z) / 0.2);
   return fade * fade;
 }
@@ -24,11 +25,6 @@ export function waterHeightWithShoreWeight(x: number, z: number, time: number, w
     Math.sin(x * 0.22 + z * 0.31 + time * 1.15) * 0.08 +
     Math.sin(x * 0.9 - z * 0.62 + time * 1.6) * 0.035;
   return chop * weight;
-}
-
-/** Static shoreline fade used by the water surface mesh. */
-export function waterShoreWeight(x: number, z: number) {
-  return shoreWeight(x, z);
 }
 
 function smoothstep(edge0: number, edge1: number, value: number) {
@@ -91,7 +87,7 @@ export function bobberRingHeight(x: number, z: number, time: number) {
 
 /** World-space water height. The mean surface stays at y = 0. */
 export function waterHeight(x: number, z: number, time: number) {
-  return waterHeightWithShoreWeight(x, z, time, shoreWeight(x, z));
+  return waterHeightWithShoreWeight(x, z, time, waterShoreWeight(x, z));
 }
 
 const RAY_STEP = 0.2;
