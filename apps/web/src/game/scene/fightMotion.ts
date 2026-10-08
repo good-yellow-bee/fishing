@@ -361,6 +361,11 @@ export function keepLureInWater(fromX: number, fromZ: number, x: number, z: numb
   return offDeck ?? { x: fromX, z: fromZ };
 }
 
+/** In the lake and outside the lip pad the waiting bobber keeps. */
+export function lureClearsDock(x: number, z: number) {
+  return inLake(x, z) && !onDockDeck(x, z, LURE_DOCK_PAD);
+}
+
 /** Raise a sample that lies on the dock deck. Water and air samples stay put. */
 export function liftDockSample(y: number, x: number, z: number) {
   if (!onDockDeck(x, z)) return y;
