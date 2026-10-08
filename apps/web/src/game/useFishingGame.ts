@@ -14,7 +14,7 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import { isCleanFight, makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { isCleanFight, makeFight, FIGHT_LINES, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
@@ -88,6 +88,7 @@ export function useFishingGame(
   const fightRef = useRef<Fight | null>(null);
   const runtimeRef = useRef<FightRuntime | null>(null);
   const simRef = useRef<FightSim | null>(null);
+  const performanceRef = useRef<FightPerformance | null>(null);
   const reelKeyRef = useRef(false);
   const reelPointerRef = useRef<number | null>(null);
   const spotRef = useRef<SpotId>("dock");
@@ -123,6 +124,7 @@ export function useFishingGame(
     fightRef.current = null;
     runtimeRef.current = null;
     simRef.current = null;
+    performanceRef.current = null;
     reelKeyRef.current = false;
     reelPointerRef.current = null;
     fightInput.reeling = false;
@@ -165,6 +167,7 @@ export function useFishingGame(
       const runtime = makeFight(species, weight, current.strength);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
+      performanceRef.current = runtime.performance;
       setHint(`${FIGHT_LINES[species.challenge][0]}. Ease off when it runs.`);
     }
   }, [resetToIdle]);
@@ -478,6 +481,7 @@ export function useFishingGame(
     hint,
     nibble,
     sim: simRef,
+    performance: performanceRef,
     powerRef,
     dismissResult,
   };

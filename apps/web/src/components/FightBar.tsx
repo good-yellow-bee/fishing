@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
-import { FIGHT_LINES, RED_TENSION, type FightSim } from "../game/fight";
+import { FIGHT_LINES, isCleanFight, RED_TENSION, type FightPerformance, type FightSim } from "../game/fight";
 import type { Fight } from "../game/useFishingGame";
 
 type Props = {
   fight: Fight;
   sim: { current: FightSim | null };
+  performance: { current: FightPerformance | null };
 };
 
 function tensionColor(tension: number) {
@@ -13,11 +14,12 @@ function tensionColor(tension: number) {
   return "#b85c38";
 }
 
-export function FightBar({ fight, sim }: Props) {
+export function FightBar({ fight, sim, performance }: Props) {
   const card = useRef<HTMLDivElement>(null);
   const tensionFill = useRef<HTMLDivElement>(null);
   const lineFill = useRef<HTMLDivElement>(null);
   const status = useRef<HTMLParagraphElement>(null);
+  const clean = useRef<HTMLParagraphElement>(null);
   const lines = FIGHT_LINES[fight.species.challenge];
 
   useEffect(() => {
@@ -33,6 +35,12 @@ export function FightBar({ fight, sim }: Props) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
         if (status.current) status.current.textContent = lines[state.surge]!;
+        const record = performance.current;
+        if (clean.current && record) {
+          const stillClean = isCleanFight(record);
+          clean.current.textContent = stillClean ? "Clean fight · 1.5× points" : "Clean bonus lost";
+          clean.current.classList.toggle("lost", !stillClean);
+        }
         if (card.current) {
           card.current.dataset.surge = String(state.surge);
           card.current.dataset.challenge = fight.species.challenge;
@@ -43,7 +51,7 @@ export function FightBar({ fight, sim }: Props) {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [fight.species.challenge, lines, sim]);
+  }, [fight.species.challenge, lines, performance, sim]);
 
   return (
     <div ref={card} className="fight-bar">
@@ -68,6 +76,7 @@ export function FightBar({ fight, sim }: Props) {
           <p ref={status} className="fight-status">
             {lines[0]}
           </p>
+          <p ref={clean} className="fight-clean">Clean fight · 1.5× points</p>
         </>
       )}
     </div>
