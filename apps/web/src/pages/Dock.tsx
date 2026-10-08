@@ -236,7 +236,7 @@ export function DockPage() {
           <kbd>E</kbd> shop
           <kbd>Right drag</kbd> look
         </aside>
-        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} />}
+        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}`}>
             {fieldBeat && (

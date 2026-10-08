@@ -583,6 +583,25 @@ kbd {
   color: var(--rust);
 }
 
+.fight-bar .fight-clean {
+  margin: 8px auto 0;
+  width: fit-content;
+  padding: 2px 8px;
+  border: 1px solid #a8771f;
+  color: #7a5212;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.fight-bar .fight-clean.lost {
+  border-color: rgba(102, 81, 57, 0.35);
+  color: #8a7d68;
+  font-weight: 400;
+  text-decoration: line-through;
+}
+
 .fight-bar .tick {
   position: absolute;
   top: 0;
