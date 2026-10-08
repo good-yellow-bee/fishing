@@ -146,7 +146,12 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       missFromLean.current = bodyLean.current;
     }
     if (!missing) sprung.current = false;
-    if (fighting) {
+    const fishing = isFishingStance(stanceAt(anglerPose.x, anglerPose.z));
+    const next = clipName(phase, anglerPose.moving, fishing);
+    if (next !== "holding-right") {
+      // The arm hangs in this clip, so carry the rod near level whatever the phase was doing with it.
+      rodPitch.current += (ROD_CARRY_PITCH - rodPitch.current) * (1 - Math.exp(-10 * delta));
+    } else if (fighting) {
       const pitchTarget = fightRodPitch({
         tension: fightView.tension,
         surge: fightView.surge,
@@ -172,9 +177,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
           ? thrownRodPitch(power, throwAge, whipFrom.current)
           : sitting
             ? waitRodPitch(waitView.age)
-            : clipName(phase, anglerPose.moving, isFishingStance(stanceAt(anglerPose.x, anglerPose.z))) !== "holding-right"
-              ? ROD_CARRY_PITCH
-              : swing(phase, power, t);
+            : swing(phase, power, t);
       if (whipping || twitching) rodPitch.current = rodTarget;
       else {
         const follow = phase === "casting" ? 7 : 16;
@@ -182,8 +185,6 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
       }
     }
 
-    const fishing = isFishingStance(stanceAt(anglerPose.x, anglerPose.z));
-    const next = clipName(phase, anglerPose.moving, fishing);
     if (next === "holding-right") {
       const target = yawToward(lookAt.x, lookAt.z);
       anglerPose.yaw += shortestYaw(anglerPose.yaw, target) * (1 - Math.exp(-7 * delta));
