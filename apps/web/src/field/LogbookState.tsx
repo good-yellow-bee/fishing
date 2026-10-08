@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { localId as newId } from "../game/localId";
 import {
   parseCatchDraft,
   parseSpotDraft,
@@ -45,10 +46,6 @@ type LogbookApi = {
 };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
-
-function newId(): string {
-  return crypto.randomUUID();
-}
 
 export function LogbookProvider({ children }: { children: ReactNode }) {
   const [book, setBook] = useState<Logbook>(() => {
