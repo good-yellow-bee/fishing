@@ -1593,7 +1593,7 @@ export function FishingWorld(props: Props) {
       shadows
       dpr={[1, 1.75]}
       camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
-      gl={{ antialias: true, stencil: true }}
+      gl={{ antialias: true }}
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
