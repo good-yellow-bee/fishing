@@ -95,13 +95,20 @@ export function packedCount(items: TackleItem[]): number {
   return items.reduce((count, item) => count + (item.packed ? 1 : 0), 0);
 }
 
-/** Packed tackle labels, or the sample list when nothing is packed. */
+/** Tools and line that pack with tackle but cannot be tied on. Anything else, including a lure the angler typed, counts. */
+const NOT_A_LURE = /plier|leader|tippet|\bnet\b|glasses|spreader|lamp|nipper|forceps|hemostat|floatant|\brod\b|\breel\b|\bline\b|knife|scale|cooler|wader/i;
+
+export function isLureLabel(label: string): boolean {
+  return !NOT_A_LURE.test(label);
+}
+
+/** Packed lures, or the sample's lures when none are packed. */
 export function luresPacked(items: readonly TackleItem[] | null | undefined): string[] {
   const packed: string[] = [];
   for (const item of items ?? []) {
-    if (item.packed) packed.push(item.label);
+    if (item.packed && isLureLabel(item.label)) packed.push(item.label);
   }
-  const labels = packed.length > 0 ? packed : sampleTackle().map((item) => item.label);
+  const labels = packed.length > 0 ? packed : sampleTackle().map((item) => item.label).filter(isLureLabel);
   const seen = new Set<string>();
   const unique: string[] = [];
   for (const label of labels) {

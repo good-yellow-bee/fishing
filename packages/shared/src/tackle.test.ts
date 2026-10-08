@@ -67,12 +67,23 @@ describe("tackle", () => {
     expect(luresPacked(sample)).toContain("#5 Mepps");
     expect(luresPacked(sample)).toContain("Nightcrawlers");
     expect(new Set(luresPacked(sample)).size).toBe(luresPacked(sample).length);
+    for (const tool of ["Landing net", "Headlamp", "Long-nose pliers", "Steel leader", "5x tippet", "Forceps", "Floatant", "5-weight fly rod"]) {
+      expect(luresPacked(sample)).not.toContain(tool);
+    }
 
     const packed = withPacked(withPacked(sample, "gear-dawn-mepps", true), "gear-duck-crawlers", true);
     expect(luresPacked(packed)).toEqual(["#5 Mepps", "Nightcrawlers"]);
 
     const bothSpinners = withPacked(withPacked(sample, "gear-dawn-spinner", true), "gear-cedar-eve-spinner", true);
     expect(luresPacked(bothSpinners)).toEqual(["Spinnerbait"]);
+  });
+
+  it("keeps a lure the angler typed and drops packed tools", () => {
+    const sample = sampleTackle();
+    const typed = { id: "mine", tripId: "trip-dawn", label: "Rapala minnow", packed: true };
+    const pliers = withPacked(sample, "gear-dawn-pliers", true);
+    expect(luresPacked([...pliers, typed])).toEqual(["Rapala minnow"]);
+    expect(luresPacked(pliers)).toEqual(luresPacked(sample));
   });
 
   it("asks for a short name", () => {

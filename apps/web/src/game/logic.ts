@@ -1,5 +1,6 @@
 import {
   FISH,
+  canLand,
   legendaryCanBite,
   rollWeight,
   biteHourMul,
@@ -17,6 +18,9 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
   rare: 0.16,
   legendary: 0.05,
 };
+
+/** Fish the angler cannot land yet still bite now and then, as a glimpse of what Strength unlocks. */
+const OUT_OF_REACH_BITE = 0.5;
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
 function favorsLargeFish(lure: string): boolean {
@@ -61,10 +65,10 @@ export function pickBite(
   hour: LakeHour = lakeHour(),
   lure?: string,
 ): FishSpecies {
-  let pool = FISH.filter((fish) => fish.spots.includes(spot));
-  if (shortCast) pool = pool.filter((fish) => fish.rarity === "common");
+  let home = FISH.filter((fish) => fish.spots.includes(spot));
+  if (shortCast) home = home.filter((fish) => fish.rarity === "common");
   // Split before the legendary check so a fish that becomes legal does not move the cut.
-  pool = poolForLure(pool, lure);
+  let pool = poolForLure(home, lure);
   pool = pool.filter((fish) => fish.rarity !== "legendary" || legendaryCanBite(profile, fish, spot));
   if (pool.length === 0) {
     pool = poolForLure(
@@ -72,7 +76,14 @@ export function pickBite(
       lure,
     );
   }
-  const weights = pool.map((fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour));
+  // A big lure must not lock a weak angler out: when nothing it draws is landable, the small fish still bite.
+  if (!pool.some((fish) => canLand(profile, fish))) {
+    const drawn = pool;
+    pool = [...drawn, ...home.filter((fish) => !drawn.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))];
+  }
+  const weights = pool.map(
+    (fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE),
+  );
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= weights[i]!;

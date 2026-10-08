@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FISH, type Profile, type SpotId } from "@stillwater/shared";
+import { canLand, FISH, type Profile, type SpotId } from "@stillwater/shared";
 import { pickBite } from "./logic";
 
 const starter: Profile = {
@@ -11,6 +11,9 @@ const starter: Profile = {
   accuracy: 1,
   patience: 1,
 };
+
+/** Strong enough for every ordinary fish, too weak for legendaries. */
+const seasoned: Profile = { ...starter, strength: 4, accuracy: 2 };
 
 const POINT = ["bluegill", "brook-trout", "pike"];
 const DOCK = ["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"];
@@ -56,12 +59,12 @@ describe("bite mix", () => {
       "Woolly buggers",
     ];
     for (const lure of smallLures) {
-      expect(drawn("point", lure)).toEqual(smallPoint);
-      expect(drawn("dock", lure)).toEqual(smallDock);
+      expect(drawn("point", lure, seasoned)).toEqual(smallPoint);
+      expect(drawn("dock", lure, seasoned)).toEqual(smallDock);
     }
     for (const lure of largeLures) {
-      expect(drawn("point", lure)).toEqual(largePoint);
-      expect(drawn("dock", lure)).toEqual(largeDock);
+      expect(drawn("point", lure, seasoned)).toEqual(largePoint);
+      expect(drawn("dock", lure, seasoned)).toEqual(largeDock);
     }
     expect(smallPoint).not.toEqual(largePoint);
     expect(smallDock).not.toEqual(largeDock);
@@ -93,8 +96,25 @@ describe("bite mix", () => {
     const ordinary = (id: string) => FISH.find((fish) => fish.id === id)?.rarity !== "legendary";
     for (const spot of ["reeds", "dropoff"] as const) {
       for (const lure of ["Bobber", "Spoon"]) {
-        expect(drawn(spot, lure, strong).filter(ordinary)).toEqual(drawn(spot, lure));
+        expect(drawn(spot, lure, strong).filter(ordinary)).toEqual(drawn(spot, lure, seasoned));
       }
     }
+  });
+
+  it("never locks a starter out with a big lure", () => {
+    for (const spot of ["dock", "reeds", "dropoff", "point"] as const) {
+      for (const lure of ["Spinnerbait", "#5 Mepps", "Spoon", "Crayfish crankbait"]) {
+        const fish = Array.from({ length: 48 }, (_, i) => pickBite(spot, starter, false, () => i / 48, "day", lure));
+        const landable = fish.filter((one) => canLand(starter, one)).length;
+        expect(landable / fish.length, `${spot} ${lure}`).toBeGreaterThan(0.6);
+      }
+    }
+  });
+
+  it("lets fish out of reach bite less often than for an angler who can land them", () => {
+    const carps = (profile: Profile) =>
+      Array.from({ length: 480 }, (_, i) => pickBite("dock", profile, false, () => i / 480, "day")).filter((fish) => fish.id === "carp").length;
+    expect(carps(starter)).toBeGreaterThan(0);
+    expect(carps(starter)).toBeLessThan(carps(seasoned));
   });
 });
