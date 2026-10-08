@@ -14,8 +14,8 @@ export type BankBoard = {
   kind: "walk" | "stand";
 };
 
-export const REEDS_STAND = { x: -13.5, z: 10.1 };
-export const DROPOFF_STAND = { x: 17.08, z: 7.75 };
+export const REEDS_STAND = { x: -13.6, z: 10.7 };
+export const DROPOFF_STAND = { x: 17.24, z: 8.36 };
 
 /** Same plank colors as the pier. The pale pad is where you stand. */
 export const BANK_WALK_PLANK = ["#e28357", "#b56845"] as const;
@@ -43,7 +43,8 @@ export const DROPOFF_WALK: readonly { x: number; z: number }[] = [
 ];
 
 const REEDS_HALF = { x: 0.62, z: 0.48 };
-const DROPOFF_HALF = { x: 0.36, z: 0.4 };
+/** Shorter toward the water so the whole pad stays on the shore and a cast still reaches deep water. */
+const DROPOFF_HALF = { x: 0.36, z: 0.28 };
 
 function boardsAlong(
   points: readonly { x: number; z: number }[],
@@ -101,7 +102,7 @@ export const BANK_WALK_BOARDS: readonly BankBoard[] = [
 /** Inland edge of each pad, so the post is on the stand and out of the cast. */
 export const BANK_POSTS: readonly { x: number; z: number; spot: "reeds" | "dropoff" }[] = [
   { x: REEDS_STAND.x, z: REEDS_STAND.z + 0.36, spot: "reeds" },
-  { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z + 0.28, spot: "dropoff" },
+  { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z + 0.2, spot: "dropoff" },
 ];
 
 export const BANK_STAND_BOARDS: readonly BankBoard[] = [

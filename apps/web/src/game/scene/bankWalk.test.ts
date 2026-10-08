@@ -2,7 +2,11 @@ import {
   CAST_RANGE,
   DOCK_STAND_X,
   DOCK_STAND_Z,
+  LAKE_CENTER_Z,
+  LAKE_RX,
+  LAKE_RZ,
   inLake,
+  lakeEdge,
   resolveCast,
   spotAt,
   stanceAt,
@@ -33,6 +37,30 @@ function samples(route: readonly { x: number; z: number }[], step: number) {
     for (let s = 0; s <= n; s += 1) {
       const t = s / n;
       points.push({ x: a.x + (b.x - a.x) * t, z: a.z + (b.z - a.z) * t });
+    }
+  }
+  return points;
+}
+
+/** Meters past the rendered shoreline. The ground is cut 0.15m outside that edge. */
+function shoreClearance(x: number, z: number) {
+  const nx = x / LAKE_RX;
+  const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
+  const radius = Math.hypot(nx, nz);
+  const edge = lakeEdge(Math.atan2(nz, nx));
+  const scale = Math.hypot((LAKE_RX * nx) / (radius || 1), (LAKE_RZ * nz) / (radius || 1));
+  return (radius - edge) * scale;
+}
+
+function boardPoints(board: { x: number; z: number; halfX: number; halfZ: number; yaw: number }) {
+  const c = Math.cos(board.yaw);
+  const s = Math.sin(board.yaw);
+  const points: { x: number; z: number }[] = [];
+  for (const u of [-1, 0, 1]) {
+    for (const v of [-1, 0, 1]) {
+      const lx = u * board.halfX;
+      const lz = v * board.halfZ;
+      points.push({ x: board.x + lx * c + lz * s, z: board.z - lx * s + lz * c });
     }
   }
   return points;
@@ -91,7 +119,12 @@ describe("bank walks", () => {
         expect(inLake(point.x, point.z), `${point.x},${point.z}`).toBe(false);
       }
     }
-    for (const board of BANK_BOARDS) expect(bankBoardOnWalk(board), `${board.x},${board.z}`).toBe(true);
+    for (const board of BANK_BOARDS) {
+      expect(bankBoardOnWalk(board), `${board.x},${board.z}`).toBe(true);
+      for (const point of boardPoints(board)) {
+        expect(shoreClearance(point.x, point.z), `${board.kind} ${point.x},${point.z}`).toBeGreaterThanOrEqual(0.15);
+      }
+    }
     expect(walkableAt(DOCK_STAND_X, DOCK_STAND_Z)).toBe(true);
     expect(walkableAt(1.15, 11.4)).toBe(true);
     expect(reached(1.15, 11.4, REEDS_STAND.x, REEDS_STAND.z)).toBe(true);
@@ -121,9 +154,18 @@ describe("bank walks", () => {
       ok: false,
       reason: "locked",
     });
+    expect(resolveCast(DROPOFF_STAND.x, -2, "dropoff", 2, DROPOFF_STAND.x, DROPOFF_STAND.z)).toEqual({
+      ok: false,
+      reason: "locked",
+    });
+    const dropoffInland = nearestWater(DROPOFF_STAND.x, DROPOFF_STAND.z + 0.2, "dropoff");
+    expect(dropoffInland).not.toBeNull();
+    expect(
+      resolveCast(dropoffInland!.x, dropoffInland!.z, "dropoff", 3, DROPOFF_STAND.x, DROPOFF_STAND.z + 0.2),
+    ).toEqual({ ok: true, spot: "dropoff" });
     expect(BANK_STAND_BOARDS.every((board) => board.kind === "stand")).toBe(true);
     expect(onBankStand(REEDS_STAND.x, REEDS_STAND.z + 0.4)).toBe(true);
-    expect(onBankStand(DROPOFF_STAND.x, DROPOFF_STAND.z + 0.3)).toBe(true);
+    expect(onBankStand(DROPOFF_STAND.x, DROPOFF_STAND.z + 0.2)).toBe(true);
     for (const post of BANK_POSTS) {
       expect(onBankStand(post.x, post.z), post.spot).toBe(true);
       expect(walkableAt(post.x, post.z), post.spot).toBe(true);
