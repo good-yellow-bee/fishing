@@ -3,8 +3,18 @@ import { describe, expect, it } from "vitest";
 import { CAST_RANGE, DAILY_SKIES, LAKE_HOURS } from "@stillwater/shared";
 import { LAKE_HOUR_LOOK, weatherLook } from "./LakeWorld.tsx";
 
-/** The farthest bobber seen from the dock camera, which sits about 7 m behind the angler. */
-const BOBBER_FAR = CAST_RANGE + 7;
+// FishingWorld's OrbitControls: zoomed fully out and orbited lowest, looking at the angler's chest on the dock.
+const CAMERA_MAX_DISTANCE = 15;
+const CAMERA_MAX_POLAR = 1.38;
+const CHEST_HEIGHT = 1.32;
+/** View depth of a full cast's bobber from that camera, which is what three.js fog reads. */
+const BOBBER_FAR = CAMERA_MAX_DISTANCE + CAST_RANGE * Math.sin(CAMERA_MAX_POLAR) + CHEST_HEIGHT * Math.cos(CAMERA_MAX_POLAR);
+
+/** three.js linear fog blends by smoothstep between near and far. */
+function fogged(depth: number, near: number, far: number) {
+  const t = Math.min(1, Math.max(0, (depth - near) / (far - near)));
+  return t * t * (3 - 2 * t);
+}
 
 function luminance(color: string) {
   const c = new THREE.Color(color);
@@ -64,13 +74,57 @@ describe("weather look", () => {
   });
 
   it("pulls the fog in close on a foggy day but leaves the farthest bobber more than half clear", () => {
+    expect(BOBBER_FAR).toBeGreaterThan(26);
     for (const hour of LAKE_HOURS) {
+      for (const sky of DAILY_SKIES) {
+        const look = weatherLook(hour, sky);
+        expect(fogged(BOBBER_FAR, look.fogNear, look.fogFar), `${hour} ${sky}`).toBeLessThan(0.5);
+      }
       const fog = weatherLook(hour, "fog");
       const clear = weatherLook(hour, "clear");
       expect(fog.fogFar, hour).toBeLessThan(clear.fogFar / 2);
       expect(fog.fogNear, hour).toBeLessThan(clear.fogNear / 2);
-      const hidden = (BOBBER_FAR - fog.fogNear) / (fog.fogFar - fog.fogNear);
-      expect(hidden, hour).toBeLessThan(0.5);
     }
+  });
+
+  it("dulls the water, its glints, and the shadows under cloud, rain, and fog", () => {
+    for (const hour of LAKE_HOURS) {
+      const clear = weatherLook(hour, "clear");
+      expect([clear.water, clear.waterDrop, clear.glint, clear.shadow]).toEqual([
+        LAKE_HOUR_LOOK[hour].water,
+        LAKE_HOUR_LOOK[hour].waterDrop,
+        LAKE_HOUR_LOOK[hour].glint,
+        1,
+      ]);
+      for (const sky of ["overcast", "rain", "fog"] as const) {
+        const look = weatherLook(hour, sky);
+        expect(saturation(look.water), `${hour} ${sky}`).toBeLessThan(saturation(clear.water) * 0.8);
+        expect(saturation(look.waterDrop), `${hour} ${sky}`).toBeLessThan(saturation(clear.waterDrop) * 0.8);
+        expect(look.glint, `${hour} ${sky}`).toBeLessThan(clear.glint / 2);
+        expect(look.shadow, `${hour} ${sky}`).toBeLessThan(0.5);
+      }
+    }
+  });
+
+  it("sinks the clouds into a fog bank instead of brightening them", () => {
+    const clear = weatherLook("day", "clear");
+    const fog = weatherLook("day", "fog");
+    expect(luminance(fog.clouds)).toBeLessThan(luminance(clear.clouds));
+    // Clouds skip the fog, so their color alone has to blend them into it.
+    for (const hour of LAKE_HOURS) {
+      const own = weatherLook(hour, "clear");
+      const foggy = weatherLook(hour, "fog");
+      const gap = (look: typeof own) => Math.abs(luminance(look.clouds) - luminance(look.fog));
+      expect(gap(foggy), hour).toBeLessThan(gap(own) * 0.3);
+    }
+  });
+
+  it("dims the unlit rain with the hour's light so night rain does not glow", () => {
+    for (const sky of DAILY_SKIES) expect(weatherLook("day", sky).rainLight, sky).toBe(1);
+    const light = (hour: (typeof LAKE_HOURS)[number]) => weatherLook(hour, "rain").rainLight;
+    expect(light("night")).toBeLessThan(0.2);
+    expect(light("night")).toBeLessThan(light("dusk"));
+    expect(light("dusk")).toBeLessThan(light("day"));
+    expect(light("dawn")).toBeLessThan(light("day"));
   });
 });

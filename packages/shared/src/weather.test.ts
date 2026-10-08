@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { catchesForTrip, isLogbook, parseCatchDraft, sampleLogbook, type CatchDraft } from "./logbook.ts";
 import { fishById } from "./fish.ts";
 import { lakeHour } from "./hour.ts";
@@ -17,6 +17,19 @@ import {
 } from "./weather.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
+
+/** CI runs in UTC, where a UTC day and a local day agree; New York tells them apart. */
+function inNewYork() {
+  let zone: string | undefined;
+  beforeAll(() => {
+    zone = process.env.TZ;
+    process.env.TZ = "America/New_York";
+  });
+  afterAll(() => {
+    if (zone === undefined) delete process.env.TZ;
+    else process.env.TZ = zone;
+  });
+}
 
 function draft(overrides: Partial<CatchDraft> = {}): CatchDraft {
   return {
@@ -88,6 +101,7 @@ describe("catch weather", () => {
 });
 
 describe("daily lake weather", () => {
+  inNewYork();
   const days = Array.from({ length: 365 }, (_, day) => new Date(2026, 0, 1 + day, 12));
   const year = days.map((day) => weatherForDay(day));
   const share = (hits: number, total: number) => hits / total;
@@ -138,6 +152,7 @@ describe("daily lake weather", () => {
 });
 
 describe("daily catch conditions", () => {
+  inNewYork();
   const days = Array.from({ length: 365 }, (_, day) => new Date(2026, 0, 1 + day, 12));
 
   it("keeps the same wind and water all day and records the sky it was given", () => {

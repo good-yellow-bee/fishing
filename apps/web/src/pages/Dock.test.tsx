@@ -4,13 +4,31 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { lakeHour, SKY_BLURB, weatherForDay, type LakeHour, type Sky } from "@stillwater/shared";
-import { getMe, type Me } from "../api";
+import { dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type LakeHour, type Sky } from "@stillwater/shared";
+import { getMe, recordCatch, type Me } from "../api";
+import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
+import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky }) => void>();
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
 
-vi.mock("../api", async (importOriginal) => ({ ...(await importOriginal<typeof import("../api")>()), getMe: vi.fn() }));
+vi.mock("../api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../api")>()),
+  getMe: vi.fn(),
+  recordCatch: vi.fn(),
+}));
+// The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
+vi.mock("../game/useFishingGame", async (importOriginal) => {
+  const real = await importOriginal<typeof import("../game/useFishingGame")>();
+  return {
+    ...real,
+    useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
+      const game = real.useFishingGame(...args);
+      return landed.outcome ? { ...game, outcome: landed.outcome } : game;
+    },
+  };
+});
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock("../game/fx", () => ({ fx: { enabled: true, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
@@ -51,6 +69,8 @@ afterEach(() => {
   container?.remove();
   root = null;
   container = null;
+  landed.outcome = null;
+  browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
   vi.useRealTimers();
@@ -81,7 +101,8 @@ describe("dock weather", () => {
     expect(lastScene()).toMatchObject({ hour: "night", sky: "fog" });
     expect(page.querySelector(".scene-wrap")?.getAttribute("data-sky")).toBe("fog");
     const chip = page.querySelector(".sky-chip");
-    expect(chip?.textContent).toContain("Fog");
+    // Only the label sits in the HUD row; the blurb rides in the tooltip.
+    expect(chip?.textContent).toBe("Fog");
     expect(chip?.getAttribute("title")).toBe(SKY_BLURB.fog);
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog");
   });
@@ -94,5 +115,16 @@ describe("dock weather", () => {
     expect(lastScene()).toMatchObject({ hour: lakeHour(now), sky });
     expect(page.querySelector(".hud")?.getAttribute("data-sky")).toBe(sky);
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith(lakeHour(now), sky);
+  });
+
+  it("writes the day's conditions into the field log with a landed fish", async () => {
+    const now = new Date(2026, 9, 8, 14, 0);
+    vi.useFakeTimers({ toFake: ["Date"], now });
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-dock-fog", points: 1, speciesId: perch.id, weight: 0.6 });
+    landed.outcome = { kind: "landed", id: "catch-dock-fog", species: perch, weight: 0.6, spot: "dock", clean: false };
+    await openDock("/?sky=fog");
+    const kept = readStoredLogbook()?.catches.find((entry) => entry.id === "catch-dock-fog");
+    expect(kept?.weather).toEqual(dailyConditions(now, "fog"));
   });
 });

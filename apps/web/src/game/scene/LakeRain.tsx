@@ -3,8 +3,11 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { RAIN_COUNT, rainRipple, rainStreak } from "./skyWeather";
 
+const STREAK_COLOR = "#d4e3ea";
+const RING_COLOR = "#e2eff3";
+
 /** Thin, see-through streaks and rings, so a shower never hides the line or the fish. */
-export function LakeRain() {
+export function LakeRain({ light }: { light: number }) {
   const streaks = useRef<THREE.InstancedMesh>(null);
   const rings = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => new THREE.Object3D(), []);
@@ -13,7 +16,7 @@ export function LakeRain() {
   const streakMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#d4e3ea",
+        color: STREAK_COLOR,
         transparent: true,
         opacity: 0.38,
         depthWrite: false,
@@ -25,7 +28,7 @@ export function LakeRain() {
   const ringMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#e2eff3",
+        color: RING_COLOR,
         transparent: true,
         opacity: 0.32,
         depthWrite: false,
@@ -34,6 +37,12 @@ export function LakeRain() {
       }),
     [],
   );
+
+  // Unlit and untoned to keep the day look, so the hour's light dims it here.
+  useEffect(() => {
+    streakMat.color.set(STREAK_COLOR).multiplyScalar(light);
+    ringMat.color.set(RING_COLOR).multiplyScalar(light);
+  }, [light, streakMat, ringMat]);
 
   useEffect(
     () => () => {

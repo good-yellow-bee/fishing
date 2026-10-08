@@ -35,9 +35,9 @@ export function Hud({ profile, email, hour, sky }: Props) {
       </div>
       <div className="hud-stats">
         <span className="hour-chip">{LAKE_HOUR_LABELS[hour]}</span>
+        {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
         <span className="sky-chip" title={SKY_BLURB[sky]}>
           {SKY_LABELS[sky]}
-          <small>{SKY_BLURB[sky]}</small>
         </span>
         <span className="level-chip">Level {level}</span>
         <span className="points-chip">{profile.points} points</span>

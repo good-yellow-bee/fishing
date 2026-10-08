@@ -224,15 +224,6 @@ a {
   font-size: 10px;
 }
 
-.sky-chip small {
-  display: block;
-  margin-top: 2px;
-  color: #a99d87;
-  font-size: 9px;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 .points-chip {
   color: #edc477;
 }
@@ -1155,8 +1146,7 @@ kbd {
   }
 
   .hud-user small,
-  .skill-chip small,
-  .sky-chip small {
+  .skill-chip small {
     display: none;
   }
 

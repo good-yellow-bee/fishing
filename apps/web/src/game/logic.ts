@@ -25,8 +25,20 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
 /** Fish the angler cannot land yet still bite now and then, as a glimpse of what upgrades unlock. */
 const OUT_OF_REACH_BITE = 0.35;
 
-function appeal(fish: FishSpecies, hour: LakeHour, sky?: Sky): number {
-  return rarityWeight[fish.rarity] * biteHourMul(fish, hour) * (sky ? biteWeatherMul(fish, sky) : 1);
+function appeal(fish: FishSpecies, hour: LakeHour): number {
+  return rarityWeight[fish.rarity] * biteHourMul(fish, hour);
+}
+
+/** Weather reshuffles fish within what the angler can land and within what they cannot, so it never moves the landable share. */
+function weatherWeights(pool: FishSpecies[], weights: number[], profile: Profile, sky: Sky): number[] {
+  const landable = pool.map((fish) => canLand(profile, fish));
+  const shifted = weights.map((weight, i) => weight * biteWeatherMul(pool[i]!, sky));
+  const total = (list: number[], group: boolean) => list.reduce((sum, weight, i) => (landable[i] === group ? sum + weight : sum), 0);
+  const scale = [false, true].map((group) => {
+    const after = total(shifted, group);
+    return after > 0 ? total(weights, group) / after : 1;
+  });
+  return shifted.map((weight, i) => weight * scale[Number(landable[i])]!);
 }
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
@@ -115,8 +127,8 @@ export function pickBite(
       lure,
     );
   }
-  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour, sky), 0);
-  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour, sky), 0);
+  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour), 0);
   // A big lure must not lock a weak angler out: the bank's lighter landable fish fill in for the share of its
   // draw still out of reach. A small lure already draws the light half, so it never pulls in big fish.
   const fillIn = lure && favorsLargeFish(lure) && drawn > 0 ? 1 - inReach / drawn : 0;
@@ -124,13 +136,14 @@ export function pickBite(
     ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
     : [];
   const weights = [
-    ...pool.map((fish) => appeal(fish, hour, sky) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
-    ...fillers.map((fish) => appeal(fish, hour, sky) * fillIn),
+    ...pool.map((fish) => appeal(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
+    ...fillers.map((fish) => appeal(fish, hour) * fillIn),
   ];
   pool = [...pool, ...fillers];
-  let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
+  const drawWeights = sky ? weatherWeights(pool, weights, profile, sky) : weights;
+  let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
-    roll -= weights[i]!;
+    roll -= drawWeights[i]!;
     if (roll <= 0) return pool[i]!;
   }
   return pool[0]!;

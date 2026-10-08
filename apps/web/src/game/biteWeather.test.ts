@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canLand, canUseSpot, DAILY_SKIES, type LakeHour, type Profile, type Sky, type SpotId } from "@stillwater/shared";
+import { canLand, DAILY_SKIES, type LakeHour, type Profile, type Sky, type SpotId } from "@stillwater/shared";
 import { pickBite } from "./logic";
 
 const starter: Profile = {
@@ -17,6 +17,7 @@ const seasoned: Profile = { ...starter, strength: 4, accuracy: 2 };
 const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
 const HOURS = ["dawn", "day", "dusk", "night"] as const;
 const BANKS = ["dock", "reeds", "dropoff", "point"] as const;
+const LURES = ["Spinnerbait", "#5 Mepps", "Spoon", "Crayfish crankbait", "Nightcrawlers"] as const;
 
 function bites(spot: SpotId, profile: Profile, hour: LakeHour, lure: string | undefined, sky: Sky | undefined, samples = 480) {
   return Array.from({ length: samples }, (_, i) => pickBite(spot, profile, false, () => i / samples, hour, lure, sky));
@@ -26,7 +27,7 @@ function count(spot: SpotId, id: string, sky: Sky, lure?: string) {
   return bites(spot, strong, "day", lure, sky).filter((fish) => fish.id === id).length;
 }
 
-function landableShare(spot: SpotId, profile: Profile, hour: LakeHour, lure: string, sky: Sky, samples = 480) {
+function landableShare(spot: SpotId, profile: Profile, hour: LakeHour, lure: string, sky: Sky | undefined, samples = 480) {
   return bites(spot, profile, hour, lure, sky, samples).filter((fish) => canLand(profile, fish)).length / samples;
 }
 
@@ -47,12 +48,29 @@ describe("bite weather", () => {
     }
   });
 
-  it("never locks a starter out of the banks open at level 1, in any weather", () => {
+  // The drop-off opens at level 3 with Strength still optional, so a Strength 1 angler fishes it too.
+  it("never locks a starter out, whatever the bank, lure, hour, or weather", () => {
     for (const sky of DAILY_SKIES) {
-      for (const spot of BANKS.filter((bank) => canUseSpot(bank, 1))) {
+      for (const spot of BANKS) {
         for (const hour of HOURS) {
-          for (const lure of ["Spinnerbait", "Spoon", "Nightcrawlers"]) {
+          for (const lure of LURES) {
             expect(landableShare(spot, starter, hour, lure, sky), `${sky} ${spot} ${hour} ${lure}`).toBeGreaterThan(0.55);
+          }
+        }
+      }
+    }
+  });
+
+  it("changes which fish bite but not how many of them the angler can land", () => {
+    for (const profile of [starter, { ...starter, strength: 2 }, { ...starter, strength: 3, accuracy: 2 }]) {
+      for (const spot of BANKS) {
+        for (const hour of HOURS) {
+          for (const lure of ["Spinnerbait", "Nightcrawlers"]) {
+            const calm = landableShare(spot, profile, hour, lure, undefined);
+            for (const sky of DAILY_SKIES) {
+              const where = `${sky} ${spot} ${hour} ${lure} str ${profile.strength} acc ${profile.accuracy}`;
+              expect(Math.abs(landableShare(spot, profile, hour, lure, sky) - calm), where).toBeLessThanOrEqual(2 / 480);
+            }
           }
         }
       }

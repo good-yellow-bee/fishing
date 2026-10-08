@@ -1,4 +1,4 @@
-import { inLake, onDockPlanks } from "@stillwater/shared";
+import { DOCK_PAD, DROPOFF_PAD, inLake, LAKE_RX, onDockPlanks, POINT_PAD, REEDS_PAD, resolveCast, walkableAt } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { waterHeight } from "./water.ts";
 import {
@@ -26,9 +26,26 @@ describe("lake rain", () => {
       const drop = rainColumn(i);
       expect(inLake(drop.x, drop.z)).toBe(true);
       expect(onDockPlanks(drop.x, drop.z)).toBe(false);
+      expect(walkableAt(drop.x, drop.z)).toBe(false);
       places.add(`${drop.x.toFixed(2)},${drop.z.toFixed(2)}`);
     }
     expect(places.size).toBe(RAIN_COUNT);
+  });
+
+  it("rains around the bobber at every bank, not only in front of the dock", () => {
+    const drops = Array.from({ length: RAIN_COUNT }, (_, i) => rainColumn(i));
+    for (const [bank, pad] of [["dock", DOCK_PAD], ["reeds", REEDS_PAD], ["dropoff", DROPOFF_PAD], ["point", POINT_PAD]] as const) {
+      let landings = 0;
+      for (let x = -LAKE_RX; x <= LAKE_RX; x += 0.5) {
+        for (let z = -18; z <= 14; z += 0.5) {
+          if (!resolveCast(x, z, bank, 99, pad.x, pad.z).ok) continue;
+          landings += 1;
+          const nearest = Math.min(...drops.map((drop) => Math.hypot(drop.x - x, drop.z - z)));
+          expect(nearest, `${bank} ${x},${z}`).toBeLessThan(2.5);
+        }
+      }
+      expect(landings, bank).toBeGreaterThan(20);
+    }
   });
 
   it("fills the sky and the water at the same time", () => {

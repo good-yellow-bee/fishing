@@ -123,13 +123,16 @@ export const LAKE_HOUR_LOOK: Record<
   },
 };
 
-/** How far each sky grays the hour's palette, dims the sun, and pulls the fog in. */
-const WEATHER_TINT: Record<WeatherSky, { mute: number; shade: number; clouds: number; sun: number; near: number; far: number }> = {
-  clear: { mute: 0, shade: 1, clouds: 1, sun: 1, near: 1, far: 1 },
-  "partly-cloudy": { mute: 0.2, shade: 0.97, clouds: 0.95, sun: 0.85, near: 0.95, far: 0.95 },
-  overcast: { mute: 0.6, shade: 0.86, clouds: 0.74, sun: 0.55, near: 0.85, far: 0.85 },
-  rain: { mute: 0.72, shade: 0.5, clouds: 0.38, sun: 0.4, near: 0.6, far: 0.7 },
-  fog: { mute: 0.8, shade: 1.1, clouds: 1.1, sun: 0.5, near: 0.3, far: 0.45 },
+/** How far each sky grays the hour's palette, dims the sun, and pulls the fog in. Haze sinks the unfogged clouds into the fog bank. */
+const WEATHER_TINT: Record<
+  WeatherSky,
+  { mute: number; shade: number; clouds: number; haze: number; sun: number; near: number; far: number }
+> = {
+  clear: { mute: 0, shade: 1, clouds: 1, haze: 0, sun: 1, near: 1, far: 1 },
+  "partly-cloudy": { mute: 0.2, shade: 0.97, clouds: 0.95, haze: 0, sun: 0.85, near: 0.95, far: 0.95 },
+  overcast: { mute: 0.6, shade: 0.86, clouds: 0.74, haze: 0, sun: 0.55, near: 0.85, far: 0.85 },
+  rain: { mute: 0.72, shade: 0.5, clouds: 0.38, haze: 0, sun: 0.4, near: 0.6, far: 0.7 },
+  fog: { mute: 0.8, shade: 1.1, clouds: 1, haze: 0.8, sun: 0.5, near: 0.42, far: 0.47 },
 };
 
 export type WeatherLook = {
@@ -140,31 +143,57 @@ export type WeatherLook = {
   hemiSky: string;
   sunInt: number;
   sunOut: boolean;
+  /** Shadow strength: soft under cloud, where only the sun disc used to change. */
+  shadow: number;
   clouds: string;
+  water: string;
+  waterDrop: string;
+  glint: number;
   rain: boolean;
+  /** Sky light on the unlit rain, relative to day, so night rain does not glow. */
+  rainLight: number;
 };
+
+function luminance(color: THREE.Color) {
+  return color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;
+}
 
 /** Grays a color toward its own brightness rather than a fixed gray, so a rainy night stays a night. */
 function mute(color: string, amount: number, shade: number) {
   const tinted = new THREE.Color(color);
-  const gray = Math.min(1, (tinted.r * 0.2126 + tinted.g * 0.7152 + tinted.b * 0.0722) * shade);
+  const gray = Math.min(1, luminance(tinted) * shade);
   return `#${tinted.lerp(new THREE.Color(gray, gray, gray), amount).getHexString()}`;
+}
+
+/** Sky light at this hour; muting keeps its brightness, so the weather does not change it. */
+function ambient(hour: LakeHour) {
+  const look = LAKE_HOUR_LOOK[hour];
+  return look.hemi * luminance(new THREE.Color(look.hemiSky));
 }
 
 export function weatherLook(hour: LakeHour, sky: WeatherSky): WeatherLook {
   const look = LAKE_HOUR_LOOK[hour];
   const tint = WEATHER_TINT[sky];
   const night = hour === "night";
+  const fog = mute(look.fog, tint.mute, tint.shade);
+  const sunOut = tint.sun > 0.8;
+  const clouds = new THREE.Color(mute(look.clouds, tint.mute, tint.clouds)).lerp(new THREE.Color(fog), tint.haze);
   return {
     sky: [mute(look.sky[0], tint.mute, tint.shade), mute(look.sky[1], tint.mute, tint.shade), mute(look.sky[2], tint.mute, tint.shade)],
-    fog: mute(look.fog, tint.mute, tint.shade),
+    fog,
     fogNear: (night ? 28 : 40) * tint.near,
     fogFar: (night ? 90 : 110) * tint.far,
     hemiSky: mute(look.hemiSky, tint.mute, 1),
     sunInt: look.sunInt * tint.sun,
-    sunOut: tint.sun > 0.8,
-    clouds: mute(look.clouds, tint.mute, tint.clouds),
+    sunOut,
+    shadow: sunOut ? 1 : 0.3,
+    clouds: `#${clouds.getHexString()}`,
+    // Water keeps more of its color than the sky so the lake still reads as water under cloud.
+    water: mute(look.water, tint.mute * 0.6, 1),
+    waterDrop: mute(look.waterDrop, tint.mute * 0.6, 1),
+    glint: look.glint * (sunOut ? 1 : 0.3),
     rain: sky === "rain",
+    rainLight: ambient(hour) / ambient("day"),
   };
 }
 
@@ -640,8 +669,7 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
-function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
-  const look = LAKE_HOUR_LOOK[hour];
+function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; weather: WeatherLook }) {
   const material = useRef<THREE.MeshToonMaterial>(null);
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
@@ -669,8 +697,8 @@ function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
     detailMap.offset.x -= delta * 0.006;
     detailMap.offset.y += delta * 0.004;
     if (material.current) material.current.opacity = 0.8 + Math.sin(t * 0.45) * 0.02;
-    if (glintA.current) glintA.current.opacity = look.glint * (0.14 + Math.sin(t * 0.65) * 0.05);
-    if (glintB.current) glintB.current.opacity = look.glint * (0.1 + Math.sin(t * 0.52 + 2) * 0.04);
+    if (glintA.current) glintA.current.opacity = weather.glint * (0.14 + Math.sin(t * 0.65) * 0.05);
+    if (glintB.current) glintB.current.opacity = weather.glint * (0.1 + Math.sin(t * 0.52 + 2) * 0.04);
   });
 
   return (
@@ -681,7 +709,7 @@ function LakeSurface({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <meshToonMaterial
           ref={material}
-          color={spot === "dropoff" ? look.waterDrop : look.water}
+          color={spot === "dropoff" ? weather.waterDrop : weather.water}
           map={waterMap}
           vertexColors
           gradientMap={toonRamp()}
@@ -1174,6 +1202,7 @@ export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; s
         position={look.sunPos}
         intensity={weather.sunInt}
         color={look.sun}
+        shadow-intensity={weather.shadow}
         shadow-mapSize-width={1536}
         shadow-mapSize-height={1536}
         shadow-camera-near={1}
@@ -1197,7 +1226,7 @@ export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; s
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
-      <LakeSurface spot={spot} hour={hour} />
+      <LakeSurface spot={spot} hour={hour} weather={weather} />
 
       <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color={hour === "night" ? "#3d5a44" : "#587a5f"} />
       <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color={hour === "night" ? "#456348" : "#628468"} />
@@ -1239,7 +1268,7 @@ export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; s
         DRAGONFLIES.map((fly, i) => (
           <Dragonfly key={i} {...fly} />
         ))}
-      {weather.rain && <LakeRain />}
+      {weather.rain && <LakeRain light={weather.rainLight} />}
     </>
   );
 }
