@@ -20,6 +20,7 @@ import {
 } from "@stillwater/shared";
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
+import type { Hotspot } from "../hotspot";
 import { Angler } from "./Angler";
 import {
   FISH_LEAP_SEC,
@@ -100,6 +101,7 @@ type Props = {
   sky: Sky;
   species: FishSpecies | null;
   weight: number;
+  hotspot: Hotspot | null;
 };
 
 const CAM_START: [number, number, number] = [DOCK_STAND_X + 0.45, 3.42 + DOCK_PLANKS.top, DOCK_STAND_Z + 6.9];
@@ -524,7 +526,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "hour" | "sky" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "hour" | "sky" | "spot" | "hotspot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -1554,7 +1556,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight }: Props) {
+function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1564,7 +1566,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight }: 
       <FightMotion phase={phase} sim={sim} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
-      <LakeWorld spot={spot} hour={hour} sky={sky} />
+      <LakeWorld spot={spot} hour={hour} sky={sky} hotspot={hotspot} />
       <WaterAim phase={phase} aim={aim} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />

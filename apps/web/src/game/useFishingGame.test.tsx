@@ -2,8 +2,10 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { Profile } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, type Profile } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
+import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
+import { waitMs } from "./logic";
 
 const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
@@ -26,6 +28,17 @@ import { useFishingGame } from "./useFishingGame";
 const profile: Profile = {
   userId: "test", displayName: "Test", points: 0, lifetimePoints: 0, strength: 5, accuracy: 3, patience: 1,
 };
+
+/** Mid-period with the bubbles on the dock, clear of the harness's default aim at 0.5,3. */
+function dockBubbles() {
+  for (let period = Math.floor(Date.UTC(2026, 9, 8, 12) / HOTSPOT_PERIOD_MS); ; period += 1) {
+    const at = (period + 0.5) * HOTSPOT_PERIOD_MS;
+    const bubbles = hotspotAt(at, 1);
+    if (bubbles.spot === "dock" && Math.hypot(bubbles.x - 0.5, bubbles.z - 3) > HOTSPOT_RADIUS * 2) return { at, bubbles };
+  }
+}
+
+const DOCK_BUBBLES = dockBubbles();
 
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
@@ -65,8 +78,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function mount() {
+/** Pins the clock so a bubble move never lands inside a test by accident. */
+function mount(at = DOCK_BUBBLES.at) {
   vi.useFakeTimers();
+  vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
     frames.push(callback);
@@ -90,6 +105,15 @@ function castAndFight(surface: HTMLDivElement, pointerId: number) {
   act(() => vi.advanceTimersByTime(2_201));
   act(() => surface.dispatchEvent(pointer("pointerdown", pointerId)));
   act(() => frames.at(-1)!(now));
+}
+
+const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+const phase = () => container!.querySelector("output")?.textContent;
+
+function cast(surface: HTMLDivElement) {
+  act(() => surface.dispatchEvent(pointer("pointerdown")));
+  now += 500;
+  act(() => window.dispatchEvent(pointer("pointerup")));
 }
 
 describe("useFishingGame animation recovery", () => {
@@ -138,15 +162,6 @@ describe("useFishingGame landed outcome", () => {
 });
 
 describe("useFishingGame strike timing", () => {
-  const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
-  const phase = () => container!.querySelector("output")?.textContent;
-
-  function cast(surface: HTMLDivElement) {
-    act(() => surface.dispatchEvent(pointer("pointerdown")));
-    now += 500;
-    act(() => window.dispatchEvent(pointer("pointerup")));
-  }
-
   it("says an early strike is too early and still lets the real bite be hooked", () => {
     const surface = mount();
     cast(surface);
@@ -182,6 +197,57 @@ describe("useFishingGame strike timing", () => {
     act(() => surface.dispatchEvent(second));
     expect(hint()).toMatch(/watch the bobber/i);
     expect(phase()).toBe("waiting:none");
+  });
+});
+
+describe("useFishingGame bubbling hotspot", () => {
+  const sooner = () => Math.ceil(waitMs(profile.patience, "day", true));
+
+  it("tells the angler the lure is in the bubbles and brings the bite sooner", () => {
+    const surface = mount();
+    surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
+    surface.dataset.aim = `${DOCK_BUBBLES.bubbles.x},${DOCK_BUBBLES.bubbles.z}`;
+    cast(surface);
+    expect(hint()).toMatch(/your lure is in the bubbles/i);
+    // A camera pinch takes back the early strike's hint, not the bubbles line.
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/too early/i);
+    const pinch = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
+    Object.defineProperties(pinch, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
+    act(() => surface.dispatchEvent(pinch));
+    expect(hint()).toMatch(/your lure is in the bubbles/i);
+    act(() => window.dispatchEvent(pointer("pointerup", 2)));
+
+    expect(sooner()).toBeLessThan(waitMs(profile.patience, "day"));
+    act(() => vi.advanceTimersByTime(sooner()));
+    expect(phase()).toBe("hookset:none");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 4)));
+    expect(phase()).toBe("fight:none");
+  });
+
+  it("waits the usual time for a cast outside the bubbles", () => {
+    const surface = mount();
+    surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
+    cast(surface);
+    expect(hint()).toMatch(/watch the bobber/i);
+    expect(hint()).not.toMatch(/bubbles/i);
+    act(() => vi.advanceTimersByTime(sooner()));
+    expect(phase()).toBe("waiting:none");
+  });
+
+  it("tells an idle angler where the bubbles went, but leaves a waiting angler's hint alone", () => {
+    const boundary = DOCK_BUBBLES.bubbles.startsAt + HOTSPOT_PERIOD_MS;
+    mount(boundary - 1_000);
+    act(() => vi.advanceTimersByTime(1_001));
+    expect(hint()).toBe("The bubbles moved to the Reeds.");
+    act(() => root?.unmount());
+    container?.remove();
+
+    const surface = mount(boundary - 1_000);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1_001));
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/watch the bobber/i);
   });
 });
 
