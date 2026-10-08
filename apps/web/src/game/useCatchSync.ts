@@ -1,32 +1,61 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatchSubmission } from "@stillwater/shared";
 import { ApiError, getMe, recordCatch, type Me } from "../api";
-import { clearRejectedCatches, pendingCatches, queueCatch, rejectedCatches, syncCatches } from "./pendingCatches";
+import {
+  clearRejectedCatches,
+  isPermanentRejection,
+  pendingCatches,
+  queueCatch,
+  rejectCatch,
+  rejectedCatches,
+  syncCatches,
+} from "./pendingCatches";
 
 /** Matches the server's per-minute catch limit. */
 export const RATE_LIMIT_RETRY_MS = 60_000;
 
 const SAVE_FAILED = "The catch could not be saved to the server.";
+const OTHER_ANGLER = "Another angler is signed in here. Sign back in as yourself to sync these catches.";
+const SAVED_OTHER_ANGLER = "Catch saved, but another angler is now signed in here.";
 
 function message(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
 }
 
-/** Saves landed catches through the local retry queue, posting only for the account that owns the queue. */
-export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void, onRefreshError: (message: string) => void) {
+type Held = { owner: string; row: CatchSubmission };
+
+function heldFor(owner: string, from: Map<string, Held>) {
+  return [...from.values()].filter((item) => item.owner === owner);
+}
+
+/** Saves landed catches through the local retry queue, posting only for the account that owns them. */
+export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void) {
   const [pendingCount, setPendingCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [error, setError] = useState("");
   const syncing = useRef(false);
   const syncAgain = useRef(false);
   const retryTimer = useRef<number | undefined>(undefined);
+  // Catches storage refused, by requestId; they live here until a direct post settles them.
+  const held = useRef(new Map<string, Held>());
+  // Rejections storage could not record either.
+  const heldRejections = useRef(new Map<string, Held>());
+  const staleProfile = useRef(false);
 
   const countQueue = useCallback((owner: string) => {
-    setPendingCount(pendingCatches(owner).length);
-    setRejectedCount(rejectedCatches(owner).length);
+    const queued = pendingCatches(owner);
+    const ids = new Set(queued.map((row) => row.requestId));
+    setPendingCount(queued.length + heldFor(owner, held.current).filter((item) => !ids.has(item.row.requestId)).length);
+    const filed = new Set(rejectedCatches(owner).map((row) => row.requestId));
+    setRejectedCount(filed.size + heldFor(owner, heldRejections.current).filter((item) => !filed.has(item.row.requestId)).length);
   }, []);
 
-  const refresh = useCallback(() => getMe().then(onMe, (err: unknown) => onRefreshError(message(err, "Profile refresh failed."))), [onMe, onRefreshError]);
+  /** Reads the session and refuses to act for anyone but the owner of these catches. */
+  const signedInOwner = useCallback(async (owner: string) => {
+    const me = await getMe();
+    if (me.profile.userId !== owner) throw new Error(OTHER_ANGLER);
+    onMe(me);
+  }, [onMe]);
 
   const sync = useCallback(async () => {
     if (!userId) return;
@@ -39,66 +68,99 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
     try {
       do {
         syncAgain.current = false;
-        let queued = 0;
+        // Each pass reports only its own failures, so an error never outlives the work it was about.
+        let failure = "";
+        // Only catches the server took change the points; rejections do not.
+        let saved = false;
         try {
-          queued = pendingCatches(userId).length;
-          if (queued > 0) {
-            setError("");
-            const me = await getMe();
-            if (me.profile.userId !== userId) {
-              throw new Error("Another angler is signed in here. These catches will sync when their owner signs back in.");
-            }
-            onMe(me);
-            await syncCatches(userId, recordCatch);
+          const mine = heldFor(userId, held.current);
+          let unreadable: unknown = null;
+          let queued = 0;
+          try {
+            queued = pendingCatches(userId).length;
+          } catch (err) {
+            unreadable = err;
           }
+          if (queued > 0 || mine.length > 0) {
+            await signedInOwner(userId);
+            for (const item of mine) {
+              try {
+                await recordCatch(item.row);
+                saved = true;
+              } catch (err) {
+                if (!isPermanentRejection(err)) throw err;
+                try {
+                  rejectCatch(userId, item.row);
+                } catch {
+                  heldRejections.current.set(item.row.requestId, item);
+                }
+              }
+              held.current.delete(item.row.requestId);
+            }
+            if (queued > 0) {
+              await syncCatches(userId, async (row) => {
+                await recordCatch(row);
+                saved = true;
+              });
+            }
+          }
+          if (unreadable) throw unreadable;
         } catch (err) {
-          setError(message(err, SAVE_FAILED));
+          failure = message(err, SAVE_FAILED);
           if (err instanceof ApiError && err.status === 429) {
             retryTimer.current = window.setTimeout(() => void sync(), RATE_LIMIT_RETRY_MS);
           }
         }
-        let remaining = queued;
         try {
-          remaining = pendingCatches(userId).length;
           countQueue(userId);
         } catch (err) {
-          setError(message(err, "Pending catches could not be read."));
+          failure ||= message(err, "Pending catches could not be read.");
+          setPendingCount(heldFor(userId, held.current).length);
+          setRejectedCount(heldFor(userId, heldRejections.current).length);
         }
-        if (remaining < queued) await refresh();
+        if (saved || (staleProfile.current && !failure)) {
+          try {
+            await signedInOwner(userId);
+            staleProfile.current = false;
+          } catch (err) {
+            staleProfile.current = true;
+            failure ||= err instanceof Error && err.message === OTHER_ANGLER
+              ? saved ? SAVED_OTHER_ANGLER : OTHER_ANGLER
+              : `Catch saved. Points will update once the server answers (${message(err, "no response")}).`;
+          }
+        }
+        setError(failure);
       } while (syncAgain.current);
     } finally {
       syncing.current = false;
     }
-  }, [countQueue, onMe, refresh, userId]);
+  }, [countQueue, signedInOwner, userId]);
 
-  /** Resolves false when the catch is neither queued nor saved, so the caller can offer a retry. */
+  /** Resolves false while the catch is neither queued nor saved; sync() keeps retrying it. */
   const saveCatch = useCallback(
     async (row: CatchSubmission) => {
       if (!userId) return false;
       try {
         queueCatch(userId, row);
       } catch (queueError) {
-        // Full or blocked storage must not cost the catch: post it directly, the server dedupes by requestId.
+        // Full or blocked storage must not cost the catch: hold it in memory and post it directly.
         console.warn("Catch queue unavailable; saving directly.", queueError);
-        try {
-          await recordCatch(row);
-        } catch (err) {
-          setError(message(err, SAVE_FAILED));
-          return false;
-        }
-        setError("");
-        await refresh();
-        return true;
+        held.current.set(row.requestId, { owner: userId, row });
       }
-      setPendingCount(pendingCatches(userId).length);
+      try {
+        countQueue(userId);
+      } catch {
+        setPendingCount(heldFor(userId, held.current).length);
+      }
       await sync();
-      return true;
+      return !held.current.has(row.requestId);
     },
-    [refresh, sync, userId],
+    [countQueue, sync, userId],
   );
 
   const dismissRejected = useCallback(() => {
     if (!userId) return;
+    for (const item of heldFor(userId, heldRejections.current)) heldRejections.current.delete(item.row.requestId);
     try {
       clearRejectedCatches(userId);
       setRejectedCount(0);
@@ -113,7 +175,6 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
       countQueue(userId);
     } catch (err) {
       setError(message(err, "Pending catches could not be read."));
-      return;
     }
     void sync();
     const onOnline = () => void sync();
