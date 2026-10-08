@@ -5,9 +5,9 @@ import Database from "better-sqlite3";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
-export const dbPath = join(dataDir, "stillwater.sqlite");
+export const dbPath = process.env.STILLWATER_DB_PATH ?? join(dataDir, "stillwater.sqlite");
 
-mkdirSync(dataDir, { recursive: true });
+mkdirSync(dirname(dbPath), { recursive: true });
 
 export const db = new Database(dbPath);
 db.pragma("journal_mode = WAL");
@@ -80,11 +80,18 @@ db.exec(`
     weight REAL NOT NULL,
     points INTEGER NOT NULL,
     spot TEXT NOT NULL,
+    request_id TEXT,
     created_at TEXT NOT NULL
   );
 
   CREATE INDEX IF NOT EXISTS catch_user_created ON catch (user_id, created_at DESC);
 `);
+
+const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
+if (!catchColumns.some((column) => column.name === "request_id")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN request_id TEXT`);
+}
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
 export type ProfileRow = {
   user_id: string;
@@ -103,6 +110,7 @@ export type CatchRow = {
   weight: number;
   points: number;
   spot: string;
+  request_id: string | null;
   created_at: string;
 };
 
@@ -122,6 +130,12 @@ export function listCatches(userId: string, limit = 20): CatchRow[] {
   return db
     .prepare(`SELECT * FROM catch WHERE user_id = ? ORDER BY created_at DESC LIMIT ?`)
     .all(userId, limit) as CatchRow[];
+}
+
+export function findCatchByRequestId(userId: string, requestId: string): CatchRow | undefined {
+  return db
+    .prepare(`SELECT * FROM catch WHERE user_id = ? AND request_id = ?`)
+    .get(userId, requestId) as CatchRow | undefined;
 }
 
 export function listSpeciesStats(userId: string) {
@@ -168,17 +182,29 @@ export function listBoardStats() {
   }));
 }
 
-export function insertCatch(row: CatchRow) {
-  const tx = db.transaction(() => {
+export type RecordCatchResult =
+  | { kind: "created" }
+  | { kind: "existing"; catch: CatchRow }
+  | { kind: "rate_limited" };
+
+export function recordCatch(row: CatchRow): RecordCatchResult {
+  return db.transaction(() => {
+    const existing = findCatchByRequestId(row.user_id, row.request_id ?? "");
+    if (existing) return { kind: "existing", catch: existing } as const;
+    const cutoff = new Date(new Date(row.created_at).getTime() - 60_000).toISOString();
+    const count = db
+      .prepare(`SELECT COUNT(*) as count FROM catch WHERE user_id = ? AND created_at > ?`)
+      .get(row.user_id, cutoff) as { count: number };
+    if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @created_at)`,
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @created_at)`,
     ).run(row);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
     ).run(row.points, row.points, row.user_id);
-  });
-  tx();
+    return { kind: "created" } as const;
+  })();
 }
 
 export function applyUpgrade(userId: string, skill: "strength" | "accuracy" | "patience", cost: number) {

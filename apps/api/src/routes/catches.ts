@@ -1,16 +1,33 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { validateCatch, SPOT_IDS, type CatchRequest } from "@stillwater/shared";
-import { getProfile, insertCatch, toProfile } from "../db.ts";
+import { validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { findCatchByRequestId, getProfile, recordCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
 
+const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 catchRoutes.post("/catches", async (c) => {
   const user = c.get("user") as SessionUser;
-  const body = (await c.req.json()) as CatchRequest;
-  if (!body?.speciesId || typeof body.weight !== "number" || !SPOT_IDS.includes(body.spot)) {
+  let body: CatchSubmission;
+  try {
+    body = (await c.req.json()) as CatchSubmission;
+  } catch {
+    return c.json({ error: "invalid JSON" }, 400);
+  }
+  if (
+    !body?.speciesId ||
+    typeof body.weight !== "number" ||
+    !SPOT_IDS.includes(body.spot) ||
+    typeof body.requestId !== "string" ||
+    !requestIdPattern.test(body.requestId)
+  ) {
     return c.json({ error: "invalid catch" }, 400);
+  }
+  const previous = findCatchByRequestId(user.id, body.requestId);
+  if (previous) {
+    return c.json({ id: previous.id, points: previous.points, speciesId: previous.species_id, weight: previous.weight });
   }
   const row = getProfile(user.id);
   if (!row) return c.json({ error: "profile missing" }, 404);
@@ -23,9 +40,19 @@ catchRoutes.post("/catches", async (c) => {
     weight: body.weight,
     points: result.points,
     spot: body.spot,
+    request_id: body.requestId,
     created_at: new Date().toISOString(),
   };
-  insertCatch(record);
+  const saved = recordCatch(record);
+  if (saved.kind === "existing") {
+    return c.json({
+      id: saved.catch.id,
+      points: saved.catch.points,
+      speciesId: saved.catch.species_id,
+      weight: saved.catch.weight,
+    });
+  }
+  if (saved.kind === "rate_limited") return c.json({ error: "catch rate limit exceeded" }, 429);
   return c.json({
     id: record.id,
     points: result.points,

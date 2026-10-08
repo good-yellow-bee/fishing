@@ -44,6 +44,10 @@ export type CatchRequest = {
   spot: SpotId;
 };
 
+export type CatchSubmission = CatchRequest & {
+  requestId: string;
+};
+
 export type UpgradeRequest = {
   skill: SkillId;
 };
