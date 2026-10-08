@@ -48,12 +48,14 @@ const ROD_BIAS = 0.18;
 /** Center of the right fist in the `arm-right` bone frame; the bind pose holds the arm out along -x. */
 const RIGHT_FIST = new THREE.Vector3(-0.24, 0, 0.02);
 const ROD_REST_Z = 0.12;
+/** Rod held near level at the hip while the arm hangs, so the butt clears the ground. */
+const ROD_CARRY_PITCH = 1.35;
 
 function yawToward(x: number, z: number) {
   const dx = x - anglerPose.x;
   const dz = z - anglerPose.z;
   if (dx * dx + dz * dz < 0.04) return anglerPose.yaw;
-  return Math.atan2(dx, dz) - ROD_BIAS;
+  return Math.atan2(dx, dz) + ROD_BIAS;
 }
 
 function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
@@ -170,7 +172,9 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
           ? thrownRodPitch(power, throwAge, whipFrom.current)
           : sitting
             ? waitRodPitch(waitView.age)
-            : swing(phase, power, t);
+            : clipName(phase, anglerPose.moving, isFishingStance(stanceAt(anglerPose.x, anglerPose.z))) !== "holding-right"
+              ? ROD_CARRY_PITCH
+              : swing(phase, power, t);
       if (whipping || twitching) rodPitch.current = rodTarget;
       else {
         const follow = phase === "casting" ? 7 : 16;
@@ -225,7 +229,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
         grip.current.rotation.z = ROD_REST_Z + missRodRoll(missView.age, missFromRoll.current);
       } else {
         const whipZ = throwAge >= 0 && throwAge < CAST_RELEASE_SEC ? Math.sin((throwAge / CAST_RELEASE_SEC) * Math.PI) * 0.12 : 0;
-        const zTarget = ROD_REST_Z + whipZ;
+        const zTarget = ROD_REST_Z - whipZ;
         grip.current.rotation.z += (zTarget - grip.current.rotation.z) * (whipping ? 1 : 1 - Math.exp(-8 * delta));
       }
     }
