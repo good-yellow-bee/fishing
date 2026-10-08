@@ -19,6 +19,7 @@ import {
 import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
 import { LakeRain } from "./LakeRain";
 import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
+import { hotspotAt } from "../hotspot";
 
 type Vec3 = [number, number, number];
 
@@ -918,6 +919,50 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
   );
 }
 
+const HOTSPOT_BUBBLES = 12;
+
+function BubblingHotspot() {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  const group = useRef<THREE.Group>(null);
+  const geometry = useMemo(() => new THREE.SphereGeometry(0.06, 7, 5), []);
+  const material = useMemo(
+    () => new THREE.MeshBasicMaterial({ color: "#dff5f0", transparent: true, opacity: 0.58, depthWrite: false }),
+    [],
+  );
+  const matrix = useMemo(() => new THREE.Matrix4(), []);
+  const position = useMemo(() => new THREE.Vector3(), []);
+  const scale = useMemo(() => new THREE.Vector3(), []);
+  const rotation = useMemo(() => new THREE.Quaternion(), []);
+
+  useEffect(() => () => {
+    geometry.dispose();
+    material.dispose();
+  }, [geometry, material]);
+
+  useFrame((state) => {
+    const hotspot = hotspotAt(Date.now());
+    const time = state.clock.elapsedTime;
+    if (group.current) group.current.position.set(hotspot.x, waterHeight(hotspot.x, hotspot.z, time) + 0.015, hotspot.z);
+    if (!mesh.current) return;
+    for (let i = 0; i < HOTSPOT_BUBBLES; i += 1) {
+      const cycle = (time * (0.55 + (i % 3) * 0.08) + i * 0.19) % 1;
+      const angle = i * 2.4 + Math.floor(time * 0.3) * 0.7;
+      const radius = 0.16 + (i % 4) * 0.1 + cycle * 0.2;
+      position.set(Math.cos(angle) * radius, cycle * 0.22, Math.sin(angle) * radius);
+      scale.setScalar(0.35 + cycle * 0.8);
+      matrix.compose(position, rotation, scale);
+      mesh.current.setMatrixAt(i, matrix);
+    }
+    mesh.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <group ref={group}>
+      <instancedMesh ref={mesh} args={[geometry, material, HOTSPOT_BUBBLES]} frustumCulled={false} renderOrder={3} />
+    </group>
+  );
+}
+
 function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
   const ref = useRef<THREE.Group>(null);
   const wingMaterial = useMemo(
@@ -1195,6 +1240,7 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky = weatherForD
           <Dragonfly key={i} {...fly} />
         ))}
       {sky === "rain" && <LakeRain />}
+      <BubblingHotspot />
     </>
   );
 });
