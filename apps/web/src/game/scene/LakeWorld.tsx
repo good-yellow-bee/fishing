@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, weatherForDay, type LakeHour, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -534,9 +534,17 @@ function makeSkyTexture(bottom: string, mid: string, top: string) {
   return texture;
 }
 
-function Sky({ hour }: { hour: LakeHour }) {
+function skyColors(hour: LakeHour, sky: WeatherSky): [string, string, string] {
+  const colors = LAKE_HOUR_LOOK[hour].sky;
+  if (sky === "overcast") return ["#9aa5a3", "#7e9299", "#617581"];
+  if (sky === "rain") return ["#65737a", "#536976", "#405764"];
+  if (sky === "fog") return ["#c5cbc3", "#abb7b2", "#94a8a3"];
+  return colors;
+}
+
+function Sky({ hour, sky }: { hour: LakeHour; sky: WeatherSky }) {
   const look = LAKE_HOUR_LOOK[hour];
-  const texture = useMemo(() => makeSkyTexture(...look.sky), [look.sky]);
+  const texture = useMemo(() => makeSkyTexture(...skyColors(hour, sky)), [hour, sky]);
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <>
@@ -1098,8 +1106,12 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
+export function LakeWorld({ spot, hour, sky = weatherForDay() }: { spot: SpotId; hour: LakeHour; sky?: WeatherSky }) {
   const look = LAKE_HOUR_LOOK[hour];
+  const weatherLight = sky === "rain" ? 0.46 : sky === "fog" ? 0.55 : sky === "overcast" ? 0.68 : 1;
+  const fogColor = sky === "fog" ? "#b9c4bd" : sky === "rain" ? "#667b83" : look.fog;
+  const fogNear = sky === "fog" ? 12 : hour === "night" ? 28 : 40;
+  const fogFar = sky === "fog" ? 52 : hour === "night" ? 90 : 110;
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
   const ground = useMemo(() => makeGroundGeometry(), []);
   useEffect(() => {
@@ -1110,12 +1122,12 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
   }, [shore, ground]);
   return (
     <>
-      <fog attach="fog" args={[look.fog, hour === "night" ? 28 : 40, hour === "night" ? 90 : 110]} />
+      <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
       <hemisphereLight args={[look.hemiSky, look.hemiGround, look.hemi]} />
       <directionalLight
         castShadow
         position={look.sunPos}
-        intensity={look.sunInt}
+        intensity={look.sunInt * weatherLight}
         color={look.sun}
         shadow-mapSize-width={1536}
         shadow-mapSize-height={1536}
@@ -1126,7 +1138,7 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
         shadow-camera-top={22}
         shadow-camera-bottom={-20}
       />
-      <Sky hour={hour} />
+      <Sky hour={hour} sky={sky} />
       {CLOUDS.map((cloud, i) => (
         <Cloud key={i} {...cloud} color={look.clouds} />
       ))}
@@ -1182,7 +1194,7 @@ export function LakeWorld({ spot, hour }: { spot: SpotId; hour: LakeHour }) {
         DRAGONFLIES.map((fly, i) => (
           <Dragonfly key={i} {...fly} />
         ))}
-      <LakeRain />
+      {sky === "rain" && <LakeRain />}
     </>
   );
 }
