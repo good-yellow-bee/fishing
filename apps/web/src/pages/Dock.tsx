@@ -12,9 +12,10 @@ import {
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
+  type CatchSubmission,
   type SkillId,
 } from "@stillwater/shared";
-import { buyUpgrade, getMe, recordCatch, type Me } from "../api";
+import { buyUpgrade, getMe, type Me } from "../api";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { LureChoice } from "../components/LureChoice";
@@ -27,6 +28,7 @@ import { lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
+import { useCatchSync } from "../game/useCatchSync";
 
 export function DockPage() {
   const [params] = useSearchParams();
@@ -45,6 +47,8 @@ export function DockPage() {
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
+  const userId = me?.profile.userId;
+  const catchSync = useCatchSync(userId, setMe, setError);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
   const fieldBeat = useMemo(() => {
@@ -62,6 +66,23 @@ export function DockPage() {
   const refresh = useCallback(() => {
     return getMe().then(setMe);
   }, []);
+
+  const saveOutcome = useCallback(
+    async (id: string, row: CatchSubmission) => {
+      posted.current = id;
+      if (!(await catchSync.saveCatch(row)) && posted.current === id) posted.current = null;
+    },
+    [catchSync.saveCatch],
+  );
+
+  const retryServerSave = () => {
+    const outcome = game.outcome;
+    if (outcome?.kind === "landed" && posted.current !== outcome.id) {
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot });
+      return;
+    }
+    void catchSync.sync();
+  };
 
   useEffect(() => {
     refresh().catch((err: Error) => setError(err.message));
@@ -98,14 +119,10 @@ export function DockPage() {
     }
     const { id, species, weight, spot: catchSpot } = game.outcome;
     if (posted.current === id) return;
-    posted.current = id;
     saveFieldLog();
-    setBusy(true);
-    recordCatch({ speciesId: species.id, weight, spot: catchSpot })
-      .then(() => refresh())
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setBusy(false));
-  }, [game.outcome, refresh, saveFieldLog]);
+    if (!userId) return;
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot });
+  }, [game.outcome, saveFieldLog, saveOutcome, userId]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);
@@ -184,6 +201,22 @@ export function DockPage() {
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         )}
         <p className="hint">{game.hint}</p>
+        {(catchSync.pendingCount > 0 || catchSync.error || catchSync.rejectedCount > 0) && (
+          <aside className="catch-sync" data-camera-control role="status">
+            {(catchSync.pendingCount > 0 || catchSync.error) && (
+              <>
+                <p>{catchSync.error || `${catchSync.pendingCount} catch${catchSync.pendingCount === 1 ? "" : "es"} waiting to sync.`}</p>
+                <button className="panel-btn" type="button" onClick={retryServerSave}>Retry server save</button>
+              </>
+            )}
+            {catchSync.rejectedCount > 0 && (
+              <>
+                <p>{catchSync.rejectedCount} catch{catchSync.rejectedCount === 1 ? "" : "es"} could not be verified. Your field-log entries are kept.</p>
+                <button className="panel-btn" type="button" onClick={catchSync.dismissRejected}>Dismiss</button>
+              </>
+            )}
+          </aside>
+        )}
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
         </aside>

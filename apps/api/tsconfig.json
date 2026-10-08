@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "verbatimModuleSyntax": true,
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     "allowImportingTsExtensions": true
   },
   "include": ["src"]

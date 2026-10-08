@@ -9,7 +9,12 @@ export const upgradeRoutes = new Hono();
 
 upgradeRoutes.post("/upgrades", async (c) => {
   const user = c.get("user") as SessionUser;
-  const body = (await c.req.json()) as { skill?: SkillId };
+  let body: { skill?: SkillId };
+  try {
+    body = (await c.req.json()) as { skill?: SkillId };
+  } catch {
+    return c.json({ error: "invalid JSON" }, 400);
+  }
   if (!body?.skill || !skills.includes(body.skill)) {
     return c.json({ error: "invalid skill" }, 400);
   }
