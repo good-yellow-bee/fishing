@@ -1564,6 +1564,8 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
       <Tone hour={hour} />
       <LakeWorld spot={spot} hour={hour} />
       <WaterAim phase={phase} aim={aim} />
+      {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
+      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
       <LineAndBobber
         phase={phase}
         power={power}
@@ -1582,7 +1584,6 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
         accent={species?.accent ?? FALLBACK_ACCENT}
         scale={Math.max(0.95, bodyScale(weight))}
       />
-      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
     </>
   );
 }
