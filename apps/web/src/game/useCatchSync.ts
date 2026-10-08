@@ -15,7 +15,8 @@ import {
 export const RATE_LIMIT_RETRY_MS = 60_000;
 
 const SAVE_FAILED = "The catch could not be saved to the server.";
-const OTHER_ANGLER = "Another angler is signed in here. These catches will sync when their owner signs back in.";
+const OTHER_ANGLER = "Another angler is signed in here. Sign back in as yourself to sync these catches.";
+const SAVED_OTHER_ANGLER = "Catch saved, but another angler is now signed in here.";
 
 function message(err: unknown, fallback: string) {
   return err instanceof Error ? err.message : fallback;
@@ -45,7 +46,8 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
     const queued = pendingCatches(owner);
     const ids = new Set(queued.map((row) => row.requestId));
     setPendingCount(queued.length + heldFor(owner, held.current).filter((item) => !ids.has(item.row.requestId)).length);
-    setRejectedCount(rejectedCatches(owner).length + heldFor(owner, heldRejections.current).length);
+    const filed = new Set(rejectedCatches(owner).map((row) => row.requestId));
+    setRejectedCount(filed.size + heldFor(owner, heldRejections.current).filter((item) => !filed.has(item.row.requestId)).length);
   }, []);
 
   /** Reads the session and refuses to act for anyone but the owner of these catches. */
@@ -68,11 +70,12 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
         syncAgain.current = false;
         // Each pass reports only its own failures, so an error never outlives the work it was about.
         let failure = "";
+        // Only catches the server took change the points; rejections do not.
         let saved = false;
-        let queued = 0;
         try {
           const mine = heldFor(userId, held.current);
           let unreadable: unknown = null;
+          let queued = 0;
           try {
             queued = pendingCatches(userId).length;
           } catch (err) {
@@ -83,6 +86,7 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
             for (const item of mine) {
               try {
                 await recordCatch(item.row);
+                saved = true;
               } catch (err) {
                 if (!isPermanentRejection(err)) throw err;
                 try {
@@ -92,9 +96,13 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
                 }
               }
               held.current.delete(item.row.requestId);
-              saved = true;
             }
-            if (queued > 0) await syncCatches(userId, recordCatch);
+            if (queued > 0) {
+              await syncCatches(userId, async (row) => {
+                await recordCatch(row);
+                saved = true;
+              });
+            }
           }
           if (unreadable) throw unreadable;
         } catch (err) {
@@ -104,10 +112,11 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
           }
         }
         try {
-          if (pendingCatches(userId).length < queued) saved = true;
           countQueue(userId);
         } catch (err) {
           failure ||= message(err, "Pending catches could not be read.");
+          setPendingCount(heldFor(userId, held.current).length);
+          setRejectedCount(heldFor(userId, heldRejections.current).length);
         }
         if (saved || (staleProfile.current && !failure)) {
           try {
@@ -116,7 +125,7 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
           } catch (err) {
             staleProfile.current = true;
             failure ||= err instanceof Error && err.message === OTHER_ANGLER
-              ? OTHER_ANGLER
+              ? saved ? SAVED_OTHER_ANGLER : OTHER_ANGLER
               : `Catch saved. Points will update once the server answers (${message(err, "no response")}).`;
           }
         }

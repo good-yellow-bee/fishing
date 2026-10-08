@@ -344,4 +344,88 @@ describe("useCatchSync", () => {
     expect(pendingCatches("angler")).toEqual([second]);
     expect(sync.error).toBe("offline");
   });
+
+  it("keeps a rejection visible when storage cannot record it either", async () => {
+    await mount();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(browser.window.Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("full", "QuotaExceededError");
+    });
+    recordMock.mockRejectedValueOnce(new ApiError("line too light for this fish", 409));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(sync.pendingCount).toBe(0);
+    expect(sync.rejectedCount).toBe(1);
+    act(() => sync.dismissRejected());
+    await act(async () => { await sync.sync(); });
+    expect(sync.rejectedCount).toBe(0);
+  });
+
+  it("refreshes points after a held catch posts", async () => {
+    await mount();
+    refuseQueueWrites(1);
+    onMe.mockClear();
+    await act(async () => { await sync.saveCatch(first); });
+    expect(recordMock).toHaveBeenCalledWith(first);
+    expect(onMe).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not claim a rejected catch was saved", async () => {
+    queueCatch("angler", first);
+    recordMock.mockRejectedValueOnce(new ApiError("invalid catch", 400));
+    getMeMock.mockResolvedValueOnce(me("angler")).mockRejectedValue(new Error("timeout"));
+    await mount();
+    expect(sync.rejectedCount).toBe(1);
+    expect(getMeMock).toHaveBeenCalledTimes(1);
+    expect(sync.error).toBe("");
+  });
+
+  it("reports a failed save before an unreadable queue", async () => {
+    localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
+    await mount();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    recordMock.mockRejectedValueOnce(new Error("offline"));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(sync.error).toBe("offline");
+    expect(sync.pendingCount).toBe(1);
+  });
+
+  it("shows a held catch as waiting before its direct post settles", async () => {
+    await mount();
+    refuseQueueWrites();
+    let release!: () => void;
+    getMeMock.mockImplementationOnce(() => new Promise((resolve) => { release = () => resolve(me("angler")); }));
+    let pending!: Promise<boolean>;
+    await act(async () => { pending = sync.saveCatch(first); });
+    expect(sync.pendingCount).toBe(1);
+    await act(async () => {
+      release();
+      await pending;
+    });
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("does not claim a held catch the server rejected was saved", async () => {
+    await mount();
+    refuseQueueWrites(1);
+    recordMock.mockRejectedValueOnce(new ApiError("invalid catch", 400));
+    getMeMock.mockResolvedValueOnce(me("angler")).mockRejectedValue(new Error("timeout"));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(sync.rejectedCount).toBe(1);
+    expect(sync.error).toBe("");
+  });
+
+  it("shows a held catch as waiting even when the queue cannot be read", async () => {
+    localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
+    await mount();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    let release!: () => void;
+    getMeMock.mockImplementationOnce(() => new Promise((resolve) => { release = () => resolve(me("angler")); }));
+    let pending!: Promise<boolean>;
+    await act(async () => { pending = sync.saveCatch(first); });
+    expect(sync.pendingCount).toBe(1);
+    await act(async () => {
+      release();
+      await pending;
+    });
+  });
 });
