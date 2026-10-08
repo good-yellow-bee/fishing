@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FISH, type Profile, type SpotId } from "@stillwater/shared";
+import { canLand, FISH, type Profile, type SpotId } from "@stillwater/shared";
 import { pickBite } from "./logic";
 
 const starter: Profile = {
@@ -11,6 +11,9 @@ const starter: Profile = {
   accuracy: 1,
   patience: 1,
 };
+
+/** Strong enough for every ordinary fish, too weak for legendaries. */
+const seasoned: Profile = { ...starter, strength: 4, accuracy: 2 };
 
 const POINT = ["bluegill", "brook-trout", "pike"];
 const DOCK = ["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"];
@@ -56,12 +59,12 @@ describe("bite mix", () => {
       "Woolly buggers",
     ];
     for (const lure of smallLures) {
-      expect(drawn("point", lure)).toEqual(smallPoint);
-      expect(drawn("dock", lure)).toEqual(smallDock);
+      expect(drawn("point", lure, seasoned)).toEqual(smallPoint);
+      expect(drawn("dock", lure, seasoned)).toEqual(smallDock);
     }
     for (const lure of largeLures) {
-      expect(drawn("point", lure)).toEqual(largePoint);
-      expect(drawn("dock", lure)).toEqual(largeDock);
+      expect(drawn("point", lure, seasoned)).toEqual(largePoint);
+      expect(drawn("dock", lure, seasoned)).toEqual(largeDock);
     }
     expect(smallPoint).not.toEqual(largePoint);
     expect(smallDock).not.toEqual(largeDock);
@@ -93,8 +96,78 @@ describe("bite mix", () => {
     const ordinary = (id: string) => FISH.find((fish) => fish.id === id)?.rarity !== "legendary";
     for (const spot of ["reeds", "dropoff"] as const) {
       for (const lure of ["Bobber", "Spoon"]) {
-        expect(drawn(spot, lure, strong).filter(ordinary)).toEqual(drawn(spot, lure));
+        expect(drawn(spot, lure, strong).filter(ordinary)).toEqual(drawn(spot, lure, seasoned));
       }
     }
+  });
+
+  const HOURS = ["dawn", "day", "dusk", "night"] as const;
+  const BANKS = ["dock", "reeds", "dropoff", "point"] as const;
+  function landableShare(spot: SpotId, profile: Profile, hour: (typeof HOURS)[number], lure: string) {
+    const fish = Array.from({ length: 480 }, (_, i) => pickBite(spot, profile, false, () => i / 480, hour, lure));
+    return fish.filter((one) => canLand(profile, one)).length / fish.length;
+  }
+
+  it("never locks a starter out, whatever the lure or the hour", () => {
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        for (const lure of ["Spinnerbait", "#5 Mepps", "Spoon", "Crayfish crankbait", "Nightcrawlers"]) {
+          expect(landableShare(spot, starter, hour, lure), `${spot} ${hour} ${lure}`).toBeGreaterThan(0.55);
+        }
+      }
+    }
+  });
+
+  it("lands at least as often after every Strength or Accuracy upgrade", () => {
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        for (const lure of ["Spinnerbait", "Nightcrawlers"]) {
+          for (const accuracy of [1, 2, 3]) {
+            let previous = 0;
+            for (let strength = 1; strength <= 5; strength++) {
+              const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure);
+              expect(share, `${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
+              previous = share;
+            }
+          }
+          for (const strength of [1, 3, 5]) {
+            let previous = 0;
+            for (let accuracy = 1; accuracy <= 3; accuracy++) {
+              const share = landableShare(spot, { ...starter, strength, accuracy }, hour, lure);
+              expect(share, `${spot} ${hour} ${lure} str ${strength} acc ${accuracy}`).toBeGreaterThanOrEqual(previous - 1e-9);
+              previous = share;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it("keeps the first Strength upgrade worth it with a big lure", () => {
+    expect(landableShare("dock", { ...starter, strength: 2 }, "day", "Spinnerbait")).toBeGreaterThan(0.75);
+  });
+
+  it("never lets a small lure draw big-lure fish, whatever the angler can land", () => {
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        const reach = new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, "Nightcrawlers").id));
+        for (let strength = 1; strength <= 5; strength++) {
+          for (let accuracy = 1; accuracy <= 3; accuracy++) {
+            for (let i = 0; i < 480; i++) {
+              const fish = pickBite(spot, { ...starter, strength, accuracy }, false, () => i / 480, hour, "Nightcrawlers");
+              expect(reach.has(fish.id), `${spot} ${hour} str ${strength} acc ${accuracy}: ${fish.id}`).toBe(true);
+            }
+          }
+        }
+      }
+    }
+  });
+
+  it("lets fish out of reach bite less often than for an angler who can land them", () => {
+    const carps = (profile: Profile) =>
+      Array.from({ length: 480 }, (_, i) => pickBite("dock", profile, false, () => i / 480, "day")).filter((fish) => fish.id === "carp").length;
+    expect(carps(starter)).toBeGreaterThan(0);
+    expect(carps(starter)).toBeLessThan(carps(seasoned));
   });
 });
