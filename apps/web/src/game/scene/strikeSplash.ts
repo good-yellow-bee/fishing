@@ -20,16 +20,17 @@ export const STRIKE_DUNK_M = 0.48;
 /** Meters the ring and the spray ride above the chop. Same placement as the rain rings. */
 export const STRIKE_RING_LIFT = 0.14;
 
-/** White rim stays this bright for the whole hookset, so a still can catch it. */
-export const STRIKE_RING_OPACITY = 0.92;
+/** White rim brightness for the whole hookset; the Strike card and the bite sound carry the rest. */
+export const STRIKE_RING_OPACITY = 0.72;
 
 export const STRIKE_DROPS = 8;
 
 /** Open water just lakeward of the dock lip. The shrink starts here. */
 const LAKEWARD_Z = 4.6;
 
-const RING_RADIUS_START = 1.2;
-const RING_RADIUS_END = 3.35;
+/** A bobber-sized splash, not a lake-wide one. */
+const RING_RADIUS_START = 0.45;
+const RING_RADIUS_END = 1.5;
 
 export type StrikeRing = {
   x: number;
@@ -95,22 +96,20 @@ export function strikeSpray(phase: ScenePhase, age: number, x: number, z: number
   };
 }
 
-/** One droplet of the burst, in meters around the splash point. Null when the hookset is over. */
+/** One droplet of the burst, in meters around the splash point. Null once it has fallen back. */
 export function strikeDrop(phase: ScenePhase, index: number, age: number): StrikeDrop | null {
   if (!duringHookset(phase, age)) return null;
   const u = Math.min(1, age / STRIKE_SPRAY_SEC);
   const i = ((index % STRIKE_DROPS) + STRIKE_DROPS) % STRIKE_DROPS;
   const angle = (i / STRIKE_DROPS) * Math.PI * 2 + 0.35;
-  const spread = 0.16 + u * 1.25;
+  if (age >= STRIKE_SPRAY_SEC) return null;
+  const spread = 0.1 + u * 0.6;
   const rise = u < 0.24 ? 0.55 + (u / 0.24) * 0.45 : (1 - u) / 0.76;
-  const arc = Math.max(0, rise) * (1.15 + (i % 3) * 0.45);
-  const settled = 0.42 + (i % 3) * 0.2;
-  const held = age >= STRIKE_SPRAY_SEC;
   return {
     x: Math.cos(angle) * spread,
-    y: held ? settled + Math.sin(age * 5 + i) * 0.08 : arc,
+    y: Math.max(0, rise) * (0.55 + (i % 3) * 0.2),
     z: Math.sin(angle) * spread,
-    opacity: held ? 0.74 : Math.max(0.64, (1 - u) * 0.95),
+    opacity: Math.max(0.55, (1 - u) * 0.9),
   };
 }
 

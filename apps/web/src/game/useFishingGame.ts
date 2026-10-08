@@ -74,6 +74,8 @@ type Timers = {
   nibbleOff?: number;
 };
 
+const WAIT_HINT = "Watch the bobber. A nibble first — strike on the real dip.";
+
 export function useFishingGame(
   profile: Profile | null,
   hour: LakeHour = lakeHour(),
@@ -185,7 +187,7 @@ export function useFishingGame(
   const startWait = useCallback((current: Profile) => {
     setPhaseBoth("waiting");
     setNibble(false);
-    setHint("Watch the bobber. A nibble first — strike on the real dip.");
+    setHint(WAIT_HINT);
     const wait = waitMs(current.patience, hour);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
@@ -209,9 +211,9 @@ export function useFishingGame(
       setHint("NOW — strike!");
       timers.current.hook = window.setTimeout(() => {
         if (phaseRef.current !== "hookset") return;
-        setOutcome({ kind: "miss", message: "The fish dropped the bait." });
+        setOutcome({ kind: "miss", message: "Too slow. The fish dropped the bait." });
         // Hold result so the miss spring and the turn play out.
-        resetToIdle("Missed the strike. Cast again.", "result");
+        resetToIdle("Strike the moment the bobber goes under.", "result");
       }, hookWindowMs(current.accuracy));
     }, wait);
   }, [hour, resetToIdle]);
@@ -298,6 +300,9 @@ export function useFishingGame(
       case "hookset":
         setTheHook();
         break;
+      case "waiting":
+        setHint("Too early. Wait for the bobber to go under, then strike.");
+        break;
     }
   }, [setTheHook, startCast]);
 
@@ -340,6 +345,8 @@ export function useFishingGame(
     const down = (event: PointerEvent) => {
       if (event.pointerType === "touch" && !event.isPrimary) {
         if (phaseRef.current === "casting") resetToIdle("Camera moved. Hold one finger or Space to cast.");
+        // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
+        if (phaseRef.current === "waiting") setHint(WAIT_HINT);
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;

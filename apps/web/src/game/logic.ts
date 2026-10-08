@@ -83,8 +83,9 @@ export function sweetBand(accuracy: number) {
   };
 }
 
+/** Long enough to react to the real dip rather than guess it; Accuracy still widens it. */
 export function hookWindowMs(accuracy: number) {
-  return 720 + accuracy * 90;
+  return 1000 + accuracy * 100;
 }
 
 export function waitMs(patience: number, hour: LakeHour = lakeHour()) {

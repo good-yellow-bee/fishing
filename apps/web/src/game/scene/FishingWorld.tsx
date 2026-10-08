@@ -1433,7 +1433,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
   const flashMat = useRef<THREE.MeshBasicMaterial>(null);
   const sprayPool = useMemo(() => {
     const holder = new THREE.Group();
-    const geometry = new THREE.SphereGeometry(0.42, 8, 6);
+    const geometry = new THREE.SphereGeometry(0.16, 8, 6);
     for (let i = 0; i < STRIKE_DROPS; i += 1) {
       const material = new THREE.MeshBasicMaterial({
         color: 0xf7fffb,
@@ -1445,7 +1445,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.visible = false;
-      mesh.scale.setScalar(0.85 + (i % 3) * 0.4);
+      mesh.scale.setScalar(0.8 + (i % 3) * 0.3);
       holder.add(mesh);
     }
     holder.frustumCulled = false;
@@ -1481,8 +1481,8 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       flash.current.visible = spray != null;
       if (spray) {
         flash.current.position.set(spray.x, spray.y + 0.01, spray.z);
-        flash.current.scale.setScalar(0.48 + spray.strength * 0.72);
-        flashMat.current.opacity = 0.34 + spray.strength * 0.4;
+        flash.current.scale.setScalar(0.22 + spray.strength * 0.3);
+        flashMat.current.opacity = 0.2 + spray.strength * 0.3;
       }
     }
     sprayPool.visible = spray != null;
@@ -1516,7 +1516,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
         />
       </mesh>
       <mesh ref={rim} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5} frustumCulled={false}>
-        <ringGeometry args={[0.5, 0.94, 40]} />
+        <ringGeometry args={[0.8, 0.95, 40]} />
         <meshBasicMaterial
           ref={rimMat}
           color="#f4fff8"

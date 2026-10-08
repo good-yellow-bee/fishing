@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
@@ -24,6 +24,7 @@ import { saveLandedCatch } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
+import { hookWindowMs } from "../game/logic";
 import { lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
@@ -197,6 +198,13 @@ export function DockPage() {
           }
           weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? 0)}
         />
+        {game.phase === "hookset" && (
+          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy)}ms` } as CSSProperties}>
+            <strong>Strike!</strong>
+            <span>Click or Space</span>
+            <i />
+          </div>
+        )}
         {fishing && !shopOpen && (
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         )}
