@@ -1204,3 +1204,19 @@ kbd {
     top: 96px;
   }
 }
+.catch-sync {
+  position: absolute;
+  z-index: 5;
+  top: 76px;
+  right: 16px;
+  max-width: min(300px, calc(100% - 32px));
+  padding: 12px;
+  border: 1px solid #b58c58;
+  border-radius: 10px;
+  color: #f6e2b8;
+  background: #242c27;
+}
+
+.catch-sync p {
+  margin: 0 0 8px;
+}

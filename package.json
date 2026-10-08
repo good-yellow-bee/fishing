@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.14.0",
   "scripts": {
     "dev": "pnpm --parallel --filter @stillwater/web --filter @stillwater/api dev",
-    "test": "pnpm --filter @stillwater/shared --filter @stillwater/web test",
+    "test": "pnpm --filter @stillwater/shared --filter @stillwater/web --filter @stillwater/api test",
     "typecheck": "pnpm -r typecheck"
   },
   "pnpm": {

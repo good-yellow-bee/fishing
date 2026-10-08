@@ -27,6 +27,7 @@ import { lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
+import { pendingCatches, queueCatch, rejectedCatches, syncCatches } from "../game/pendingCatches";
 
 export function DockPage() {
   const [params] = useSearchParams();
@@ -45,6 +46,11 @@ export function DockPage() {
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
+  const syncing = useRef(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+  const [catchSaveError, setCatchSaveError] = useState("");
+  const userId = me?.profile.userId;
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
   const fieldBeat = useMemo(() => {
@@ -62,6 +68,56 @@ export function DockPage() {
   const refresh = useCallback(() => {
     return getMe().then(setMe);
   }, []);
+
+  const syncPending = useCallback(async () => {
+    if (!userId || syncing.current) return;
+    syncing.current = true;
+    setCatchSaveError("");
+    try {
+      await syncCatches(userId, recordCatch);
+      setPendingCount(0);
+      setRejectedCount(rejectedCatches(userId).length);
+      await refresh();
+    } catch (err) {
+      setCatchSaveError(err instanceof Error ? err.message : "The catch could not be saved to the server.");
+    } finally {
+      syncing.current = false;
+    }
+  }, [refresh, userId]);
+
+  const retryServerSave = () => {
+    if (userId && game.outcome?.kind === "landed" && posted.current !== game.outcome.id) {
+      try {
+        queueCatch(userId, {
+          requestId: game.outcome.id,
+          speciesId: game.outcome.species.id,
+          weight: game.outcome.weight,
+          spot: game.outcome.spot,
+        });
+        posted.current = game.outcome.id;
+        setPendingCount(pendingCatches(userId).length);
+      } catch (err) {
+        setCatchSaveError(err instanceof Error ? err.message : "The catch could not be queued for saving.");
+        return;
+      }
+    }
+    void syncPending();
+  };
+
+  useEffect(() => {
+    if (!userId) return;
+    try {
+      setPendingCount(pendingCatches(userId).length);
+      setRejectedCount(rejectedCatches(userId).length);
+    } catch (err) {
+      setCatchSaveError(err instanceof Error ? err.message : "Pending catches could not be read.");
+      return;
+    }
+    void syncPending();
+    const onOnline = () => { void syncPending(); };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [syncPending, userId]);
 
   useEffect(() => {
     refresh().catch((err: Error) => setError(err.message));
@@ -98,14 +154,17 @@ export function DockPage() {
     }
     const { id, species, weight, spot: catchSpot } = game.outcome;
     if (posted.current === id) return;
-    posted.current = id;
     saveFieldLog();
-    setBusy(true);
-    recordCatch({ speciesId: species.id, weight, spot: catchSpot })
-      .then(() => refresh())
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setBusy(false));
-  }, [game.outcome, refresh, saveFieldLog]);
+    if (!userId) return;
+    try {
+      queueCatch(userId, { requestId: id, speciesId: species.id, weight, spot: catchSpot });
+      posted.current = id;
+      setPendingCount(pendingCatches(userId).length);
+      void syncPending();
+    } catch (err) {
+      setCatchSaveError(err instanceof Error ? err.message : "The catch could not be queued for saving.");
+    }
+  }, [game.outcome, saveFieldLog, syncPending, userId]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);
@@ -184,6 +243,22 @@ export function DockPage() {
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         )}
         <p className="hint">{game.hint}</p>
+        {(pendingCount > 0 || catchSaveError || rejectedCount > 0) && (
+          <aside className="catch-sync" data-camera-control role="status">
+            {(pendingCount > 0 || catchSaveError) && (
+              <>
+                <p>{catchSaveError || `${pendingCount} catch${pendingCount === 1 ? "" : "es"} waiting to sync.`}</p>
+                <button className="panel-btn" type="button" onClick={retryServerSave}>Retry server save</button>
+              </>
+            )}
+            {rejectedCount > 0 && (
+              <>
+                <p>{rejectedCount} catch{rejectedCount === 1 ? "" : "es"} could not be verified. Your field-log entries are kept.</p>
+                <button className="panel-btn" type="button" onClick={() => setRejectedCount(0)}>Dismiss</button>
+              </>
+            )}
+          </aside>
+        )}
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
         </aside>
