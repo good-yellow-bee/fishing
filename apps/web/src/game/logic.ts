@@ -63,11 +63,15 @@ export function pickBite(
 ): FishSpecies {
   let pool = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) pool = pool.filter((fish) => fish.rarity === "common");
+  // Split before the legendary check so a fish that becomes legal does not move the cut.
+  pool = poolForLure(pool, lure);
   pool = pool.filter((fish) => fish.rarity !== "legendary" || legendaryCanBite(profile, fish, spot));
   if (pool.length === 0) {
-    pool = FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity === "common");
+    pool = poolForLure(
+      FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity === "common"),
+      lure,
+    );
   }
-  pool = poolForLure(pool, lure);
   const weights = pool.map((fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour));
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {

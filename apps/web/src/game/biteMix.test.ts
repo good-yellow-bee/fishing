@@ -15,9 +15,9 @@ const starter: Profile = {
 const POINT = ["bluegill", "brook-trout", "pike"];
 const DOCK = ["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"];
 
-function drawn(spot: SpotId, lure?: string) {
+function drawn(spot: SpotId, lure?: string, profile: Profile = starter) {
   const ids = new Set<string>();
-  for (let i = 0; i < 48; i++) ids.add(pickBite(spot, starter, false, () => i / 48, "day", lure).id);
+  for (let i = 0; i < 48; i++) ids.add(pickBite(spot, profile, false, () => i / 48, "day", lure).id);
   return [...ids].sort();
 }
 
@@ -85,6 +85,16 @@ describe("bite mix", () => {
     for (const id of [...drawn("dock", "Bobber"), ...drawn("dock", "Spinnerbait")]) {
       expect(DOCK).toContain(id);
       expect(POINT).not.toContain(id);
+    }
+  });
+
+  it("does not move a fish between lures when a heavier one becomes legal", () => {
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    const ordinary = (id: string) => FISH.find((fish) => fish.id === id)?.rarity !== "legendary";
+    for (const spot of ["reeds", "dropoff"] as const) {
+      for (const lure of ["Bobber", "Spoon"]) {
+        expect(drawn(spot, lure, strong).filter(ordinary)).toEqual(drawn(spot, lure));
+      }
     }
   });
 });
