@@ -9,39 +9,45 @@ export function LakeRain() {
   const rings = useRef<THREE.InstancedMesh>(null);
   const hits = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => new THREE.Object3D(), []);
-  const coreGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
-  const shellGeo = useMemo(() => new THREE.BoxGeometry(0.14, 1, 0.14), []);
-  const ringGeo = useMemo(() => new THREE.RingGeometry(0.58, 1, 22), []);
-  const hitGeo = useMemo(() => new THREE.CircleGeometry(1, 16), []);
+  const coreGeo = useMemo(() => new THREE.PlaneGeometry(0.28, 1), []);
+  const shellGeo = useMemo(() => new THREE.PlaneGeometry(0.96, 1), []);
+  const ringGeo = useMemo(() => new THREE.RingGeometry(0.42, 1, 28), []);
+  const hitGeo = useMemo(() => new THREE.CircleGeometry(1, 20), []);
   const coreMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#f5fcff",
+        color: "#e7f8ff",
         transparent: true,
-        opacity: 0.96,
+        opacity: 0.98,
         depthWrite: false,
         fog: false,
+        toneMapped: false,
+        side: THREE.DoubleSide,
       }),
     [],
   );
   const shellMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#1b3648",
+        color: "#041018",
         transparent: true,
-        opacity: 0.84,
+        opacity: 0.96,
         depthWrite: false,
         fog: false,
+        toneMapped: false,
+        side: THREE.DoubleSide,
       }),
     [],
   );
   const ringMat = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: "#f7fdff",
+        color: "#06202c",
         transparent: true,
-        opacity: 0.82,
+        opacity: 0.9,
         depthWrite: false,
+        fog: false,
+        toneMapped: false,
         side: THREE.DoubleSide,
       }),
     [],
@@ -51,8 +57,10 @@ export function LakeRain() {
       new THREE.MeshBasicMaterial({
         color: "#ffffff",
         transparent: true,
-        opacity: 0.72,
+        opacity: 0.88,
         depthWrite: false,
+        fog: false,
+        toneMapped: false,
         side: THREE.DoubleSide,
       }),
     [],
@@ -72,7 +80,7 @@ export function LakeRain() {
     [coreGeo, shellGeo, ringGeo, hitGeo, coreMat, shellMat, ringMat, hitMat],
   );
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock, camera }) => {
     const time = clock.elapsedTime;
     const core = cores.current;
     const shell = shells.current;
@@ -82,8 +90,9 @@ export function LakeRain() {
     for (let i = 0; i < RAIN_COUNT; i += 1) {
       const drop = rainStreak(i, time);
       if (drop) {
+        const yaw = Math.atan2(camera.position.x - drop.x, camera.position.z - drop.z);
         scratch.position.set(drop.x, drop.y, drop.z);
-        scratch.rotation.set(0, 0, 0);
+        scratch.rotation.set(0, yaw, 0);
         scratch.scale.set(1, drop.length, 1);
       } else {
         scratch.position.set(0, -40, 0);
@@ -101,7 +110,7 @@ export function LakeRain() {
         scratch.scale.set(splash.radius, splash.radius, 1);
         scratch.updateMatrix();
         ring.setMatrixAt(i, scratch.matrix);
-        const burst = splash.open < 0.42 ? 0.2 + (1 - splash.open) * 0.18 : 0;
+        const burst = splash.open < 0.5 ? 0.42 + (1 - splash.open) * 0.55 : 0;
         scratch.scale.set(burst, burst, 1);
         scratch.updateMatrix();
         hit.setMatrixAt(i, scratch.matrix);
@@ -120,10 +129,10 @@ export function LakeRain() {
 
   return (
     <group name="lake-rain">
-      <instancedMesh ref={shells} args={[shellGeo, shellMat, RAIN_COUNT]} frustumCulled={false} renderOrder={2} />
-      <instancedMesh ref={cores} args={[coreGeo, coreMat, RAIN_COUNT]} frustumCulled={false} renderOrder={3} />
-      <instancedMesh ref={rings} args={[ringGeo, ringMat, RAIN_COUNT]} frustumCulled={false} renderOrder={2} />
-      <instancedMesh ref={hits} args={[hitGeo, hitMat, RAIN_COUNT]} frustumCulled={false} renderOrder={3} />
+      <instancedMesh ref={shells} args={[shellGeo, shellMat, RAIN_COUNT]} frustumCulled={false} renderOrder={4} />
+      <instancedMesh ref={cores} args={[coreGeo, coreMat, RAIN_COUNT]} frustumCulled={false} renderOrder={5} />
+      <instancedMesh ref={rings} args={[ringGeo, ringMat, RAIN_COUNT]} frustumCulled={false} renderOrder={4} />
+      <instancedMesh ref={hits} args={[hitGeo, hitMat, RAIN_COUNT]} frustumCulled={false} renderOrder={5} />
     </group>
   );
 }
