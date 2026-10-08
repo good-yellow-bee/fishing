@@ -17,9 +17,10 @@ export type BankBoard = {
 export const REEDS_STAND = { x: -13.5, z: 10.1 };
 export const DROPOFF_STAND = { x: 17.08, z: 7.75 };
 
-/** Dark planks mark the walk. The pale pad is where you stand. */
-export const BANK_WALK_PLANK = ["#6e4630", "#8b5a3c"] as const;
-export const BANK_STAND_PLANK = ["#f3e0bc", "#e2c48a"] as const;
+/** Same plank colors as the pier. The pale pad is where you stand. */
+export const BANK_WALK_PLANK = ["#e28357", "#b56845"] as const;
+export const BANK_STAND_PLANK = ["#f6e2b8", "#e7c98a"] as const;
+export const BANK_POST = "#4a2c1c";
 export const BANK_TOP = 0.035;
 export const BANK_THICK = 0.05;
 export const BANK_STAND_LIFT = 0.012;
@@ -95,6 +96,12 @@ function coverRect(cx: number, cz: number, halfX: number, halfZ: number, kind: B
 export const BANK_WALK_BOARDS: readonly BankBoard[] = [
   ...boardsAlong(REEDS_WALK, 0.3, "walk"),
   ...boardsAlong(DROPOFF_WALK, 0.2, "walk"),
+];
+
+/** Inland edge of each pad, so the post is on the stand and out of the cast. */
+export const BANK_POSTS: readonly { x: number; z: number; spot: "reeds" | "dropoff" }[] = [
+  { x: REEDS_STAND.x, z: REEDS_STAND.z + 0.36, spot: "reeds" },
+  { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z + 0.28, spot: "dropoff" },
 ];
 
 export const BANK_STAND_BOARDS: readonly BankBoard[] = [

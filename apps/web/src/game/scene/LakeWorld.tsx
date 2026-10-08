@@ -8,6 +8,8 @@ import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
 import {
   BANK_BOARDS,
+  BANK_POST,
+  BANK_POSTS,
   BANK_STAND_LIFT,
   BANK_STAND_PLANK,
   BANK_THICK,
@@ -930,17 +932,27 @@ function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
 }
 
 function BankWalks() {
-  return BANK_BOARDS.map((board, i) => {
-    const stand = board.kind === "stand";
-    const plank = stand ? BANK_STAND_PLANK : BANK_WALK_PLANK;
-    const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (i % 2) * 0.001;
-    return (
-      <mesh key={i} position={[board.x, y, board.z]} rotation={[0, board.yaw, 0]} castShadow receiveShadow>
-        <boxGeometry args={[board.halfX * 2, BANK_THICK, board.halfZ * 2]} />
-        <meshToonMaterial color={plank[i % 2]} gradientMap={toonRamp()} />
-      </mesh>
-    );
-  });
+  return (
+    <group>
+      {BANK_BOARDS.map((board, i) => {
+        const stand = board.kind === "stand";
+        const plank = stand ? BANK_STAND_PLANK : BANK_WALK_PLANK;
+        const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (i % 2) * 0.001;
+        return (
+          <mesh key={i} position={[board.x, y, board.z]} rotation={[0, board.yaw, 0]} castShadow receiveShadow>
+            <boxGeometry args={[board.halfX * 2, BANK_THICK, board.halfZ * 2]} />
+            <meshToonMaterial color={plank[i % 2]} gradientMap={toonRamp()} />
+          </mesh>
+        );
+      })}
+      {BANK_POSTS.map((post) => (
+        <mesh key={`${post.spot}-post`} position={[post.x, 0.52, post.z]} castShadow>
+          <boxGeometry args={[0.16, 1.04, 0.16]} />
+          <meshToonMaterial color={BANK_POST} gradientMap={toonRamp()} />
+        </mesh>
+      ))}
+    </group>
+  );
 }
 
 function PierDeck() {

@@ -12,6 +12,7 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   BANK_BOARDS,
+  BANK_POSTS,
   BANK_STAND_BOARDS,
   DROPOFF_STAND,
   DROPOFF_WALK,
@@ -123,5 +124,11 @@ describe("bank walks", () => {
     expect(BANK_STAND_BOARDS.every((board) => board.kind === "stand")).toBe(true);
     expect(onBankStand(REEDS_STAND.x, REEDS_STAND.z + 0.4)).toBe(true);
     expect(onBankStand(DROPOFF_STAND.x, DROPOFF_STAND.z + 0.3)).toBe(true);
+    for (const post of BANK_POSTS) {
+      expect(onBankStand(post.x, post.z), post.spot).toBe(true);
+      expect(walkableAt(post.x, post.z), post.spot).toBe(true);
+      expect(inLake(post.x, post.z), post.spot).toBe(false);
+      expect(stanceAt(post.x, post.z), post.spot).toBe(post.spot);
+    }
   });
 });
