@@ -45,7 +45,9 @@ function swing(phase: ScenePhase, power: number, t: number) {
 }
 
 const ROD_BIAS = 0.18;
-const ROD_REST_Z = -0.28;
+/** Center of the right fist in the `arm-right` bone frame; the bind pose holds the arm out along -x. */
+const RIGHT_FIST = new THREE.Vector3(-0.24, 0, 0.02);
+const ROD_REST_Z = 0.12;
 
 function yawToward(x: number, z: number) {
   const dx = x - anglerPose.x;
@@ -87,6 +89,16 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     applyToon(next);
     return next;
   }, [gltf.scene]);
+
+  const fist = useMemo(() => {
+    const arm = character.getObjectByName("arm-right");
+    if (!arm) throw new Error("The angler model has no arm-right bone to hold the rod.");
+    const anchor = new THREE.Object3D();
+    anchor.position.copy(RIGHT_FIST);
+    arm.add(anchor);
+    return anchor;
+  }, [character]);
+  const fistAt = useMemo(() => new THREE.Vector3(), []);
 
   const rod = useMemo(() => {
     const next = rodFile.scene.clone(true);
@@ -200,6 +212,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
     }
     if (wrap.current) wrap.current.dataset.yaw = anglerPose.yaw.toFixed(2);
     if (grip.current) {
+      if (root.current) grip.current.position.copy(root.current.worldToLocal(fist.getWorldPosition(fistAt)));
       grip.current.rotation.x = rodPitch.current;
       if (fighting) {
         const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge);
@@ -237,7 +250,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
   return (
     <group ref={root} position={[anglerPose.x, anglerPose.y, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
       <primitive object={character} />
-      <group ref={grip} position={[0.2, 0.62, 0.22]} rotation={[1.05, 0.05, -0.28]}>
+      <group ref={grip} rotation={[1.05, 0.05, ROD_REST_Z]}>
         <primitive object={rod} scale={0.19} />
         <Reel />
         <object3D ref={tip} position={[0, 0.94, 0]} />
