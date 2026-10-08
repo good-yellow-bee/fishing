@@ -16,6 +16,21 @@ function shoreWeight(x: number, z: number) {
   return fade * fade;
 }
 
+/** Applies the dynamic wave pattern with a previously sampled shoreline fade. */
+export function waterHeightWithShoreWeight(x: number, z: number, time: number, weight: number) {
+  const chop =
+    Math.sin(x * 0.33 + time * 0.85) * 0.16 +
+    Math.sin(z * 0.47 - time * 0.7) * 0.12 +
+    Math.sin(x * 0.22 + z * 0.31 + time * 1.15) * 0.08 +
+    Math.sin(x * 0.9 - z * 0.62 + time * 1.6) * 0.035;
+  return chop * weight;
+}
+
+/** Static shoreline fade used by the water surface mesh. */
+export function waterShoreWeight(x: number, z: number) {
+  return shoreWeight(x, z);
+}
+
 function smoothstep(edge0: number, edge1: number, value: number) {
   const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
@@ -76,12 +91,7 @@ export function bobberRingHeight(x: number, z: number, time: number) {
 
 /** World-space water height. The mean surface stays at y = 0. */
 export function waterHeight(x: number, z: number, time: number) {
-  const chop =
-    Math.sin(x * 0.33 + time * 0.85) * 0.16 +
-    Math.sin(z * 0.47 - time * 0.7) * 0.12 +
-    Math.sin(x * 0.22 + z * 0.31 + time * 1.15) * 0.08 +
-    Math.sin(x * 0.9 - z * 0.62 + time * 1.6) * 0.035;
-  return chop * shoreWeight(x, z);
+  return waterHeightWithShoreWeight(x, z, time, shoreWeight(x, z));
 }
 
 const RAY_STEP = 0.2;

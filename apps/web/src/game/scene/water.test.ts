@@ -8,6 +8,8 @@ import {
   waterDepth,
   waterDepthColor,
   waterHeight,
+  waterHeightWithShoreWeight,
+  waterShoreWeight,
   type WaterRgb,
 } from "./water.ts";
 
@@ -50,5 +52,18 @@ describe("lake depth", () => {
     expect(Math.abs(early - later)).toBeGreaterThan(0.02);
     expect(early).not.toBe(0);
     expect(bobberRingHeight(0, 40, 1.2)).toBeCloseTo(BOBBER_RING_LIFT);
+  });
+});
+
+describe("precomputed water values", () => {
+  it("keeps the public water height identical when the shoreline fade is cached", () => {
+    for (const [x, z, time] of [
+      [0, LAKE_CENTER_Z, 0],
+      [-12.4, -4.7, 1.8],
+      [20.1, LAKE_CENTER_Z + 1.2, 5.4],
+      [0, 40, 3.1],
+    ] as const) {
+      expect(waterHeightWithShoreWeight(x, z, time, waterShoreWeight(x, z))).toBeCloseTo(waterHeight(x, z, time), 12);
+    }
   });
 });
