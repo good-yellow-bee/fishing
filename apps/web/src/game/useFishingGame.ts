@@ -76,6 +76,7 @@ type Timers = {
 };
 
 const WAIT_HINT = "Watch the bobber. A nibble first — strike on the real dip.";
+const SHORT_CAST_HINT = "Short cast — only small fish will look.";
 
 export function useFishingGame(
   profile: Profile | null,
@@ -99,6 +100,7 @@ export function useFishingGame(
   const aimHintRef = useRef<AimHint>("dock");
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
+  const waitHintRef = useRef(WAIT_HINT);
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
   const [spot, setSpot] = useState<SpotId>("dock");
@@ -186,10 +188,12 @@ export function useFishingGame(
     beginFight(species, weight, profile);
   }, [beginFight, hour, profile, sky]);
 
-  const startWait = useCallback((current: Profile) => {
+  const startWait = useCallback((current: Profile, short: boolean) => {
     setPhaseBoth("waiting");
     setNibble(false);
-    setHint(WAIT_HINT);
+    // A short cast only draws commons; past the band changes nothing until the backlash, so it gets no hint.
+    waitHintRef.current = short ? SHORT_CAST_HINT : WAIT_HINT;
+    setHint(waitHintRef.current);
     const wait = waitMs(current.patience, hour);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
@@ -259,7 +263,7 @@ export function useFishingGame(
       resetToIdle("Overpowered. Release in the band.");
       return;
     }
-    startWait(profile);
+    startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
   const startCast = useCallback((via: "pointer" | "key") => {
@@ -348,7 +352,7 @@ export function useFishingGame(
       if (event.pointerType === "touch" && !event.isPrimary) {
         if (phaseRef.current === "casting") resetToIdle("Camera moved. Hold one finger or Space to cast.");
         // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
-        if (phaseRef.current === "waiting") setHint(WAIT_HINT);
+        if (phaseRef.current === "waiting") setHint(waitHintRef.current);
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;

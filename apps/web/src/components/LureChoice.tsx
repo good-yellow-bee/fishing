@@ -1,3 +1,5 @@
+import { lureBlurb, smallLuresFirst } from "../game/lureChoice";
+
 type Props = {
   choices: string[];
   value: string;
@@ -20,14 +22,19 @@ export function LureChoice({ choices, value, locked, onChange }: Props) {
         value={value}
         disabled={locked}
         onPointerDown={(event) => event.stopPropagation()}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+          // A focused select swallows Space, so hand it back to the cast.
+          event.currentTarget.blur();
+        }}
       >
-        {choices.map((label) => (
+        {smallLuresFirst(choices).map((label) => (
           <option key={label} value={label}>
             {label}
           </option>
         ))}
       </select>
+      <small>{lureBlurb(value)}</small>
     </label>
   );
 }

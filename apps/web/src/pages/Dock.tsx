@@ -28,7 +28,8 @@ import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs } from "../game/logic";
-import { lureCanChange } from "../game/lureChoice";
+import { levelUp, type LevelUp } from "../game/levelUp";
+import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
@@ -44,8 +45,12 @@ export function DockPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
+  const seenLevel = useRef<number | null>(null);
+  const [levelToast, setLevelToast] = useState<LevelUp | null>(null);
   const [lureChoices] = useState(() => luresPacked(readTackle()));
-  const [chosenLure, setChosenLure] = useState(() => lureChoices[0] ?? "Bobber");
+  // Null until the angler picks a lure this session, so the default follows their Strength.
+  const [pickedLure, setPickedLure] = useState<string | null>(null);
+  const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky);
   const scenePhase = game.outcome ? "result" : game.phase;
@@ -97,6 +102,22 @@ export function DockPage() {
   useEffect(() => () => fx.ambient.stop(), []);
 
   useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
+
+  const level = me?.level;
+  useEffect(() => {
+    if (level === undefined) return;
+    const rise = levelUp(seenLevel.current, level);
+    seenLevel.current = level;
+    if (!rise) return;
+    fx.land();
+    setLevelToast(rise);
+  }, [level]);
+
+  useEffect(() => {
+    if (!levelToast) return;
+    const timer = window.setTimeout(() => setLevelToast(null), 4000);
+    return () => window.clearTimeout(timer);
+  }, [levelToast]);
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -244,7 +265,7 @@ export function DockPage() {
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
-            setChosenLure(next);
+            setPickedLure(next);
           }}
         />
         <aside className="camera-help" data-camera-control>
@@ -304,6 +325,12 @@ export function DockPage() {
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Cast again
             </button>
+          </div>
+        )}
+        {levelToast && (
+          <div className="toast level-toast" role="status">
+            <h2>Level {levelToast.level}</h2>
+            {levelToast.opened && <p>{levelToast.opened}</p>}
           </div>
         )}
         {shopOpen && (

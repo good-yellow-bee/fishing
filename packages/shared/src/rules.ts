@@ -1,5 +1,5 @@
-import { fishById } from "./fish.ts";
-import { anglerLevel, canUseSpot, MAX_SKILL, skillCost } from "./progression.ts";
+import { FISH, fishById } from "./fish.ts";
+import { anglerLevel, canUseSpot, MAX_SKILL, SKILL_LABELS, skillCost } from "./progression.ts";
 import type { CatchRequest, FishSpecies, Profile, SkillId, SpotId } from "./types.ts";
 
 export function catchPoints(species: FishSpecies, weight: number, clean = false): number {
@@ -14,6 +14,16 @@ export function weightInRange(species: FishSpecies, weight: number): boolean {
 
 export function canLand(profile: Pick<Profile, "strength" | "accuracy">, species: FishSpecies): boolean {
   return profile.strength >= species.minStrength && profile.accuracy >= species.minAccuracy;
+}
+
+/** The nearest rank of a skill that lets this angler land new species, e.g. "Strength 3: Common carp, Channel catfish". */
+export function skillUnlock(profile: Pick<Profile, SkillId>, skill: SkillId): string | null {
+  for (let rank = profile[skill] + 1; rank <= MAX_SKILL; rank++) {
+    const raised = { ...profile, [skill]: rank };
+    const opened = FISH.filter((fish) => !canLand(profile, fish) && canLand(raised, fish));
+    if (opened.length > 0) return `${SKILL_LABELS[skill]} ${rank}: ${opened.map((fish) => fish.name).join(", ")}`;
+  }
+  return null;
 }
 
 export function legendaryCanBite(

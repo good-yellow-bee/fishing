@@ -42,7 +42,7 @@ function weatherWeights(pool: FishSpecies[], weights: number[], profile: Profile
 }
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
-function favorsLargeFish(lure: string): boolean {
+export function favorsLargeFish(lure: string): boolean {
   const text = lure.toLowerCase();
   if (/bobber|worm|crawler|popper|pheasant|caddis|size\s*8/.test(text)) return false;
   return /spinner|spoon|mepps|crank|tube|bugger/.test(text);
