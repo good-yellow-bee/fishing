@@ -43,17 +43,17 @@ const FRAME_SEC = 1 / 60;
 const REACTION_FRAMES = 12;
 const SLOW_REACTION_FRAMES = 15;
 
-/** Plays a fight at 60 Hz where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
-function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES) {
+/** Plays a fight at 60 Hz (by default) where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC) {
   const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
   const hand: boolean[] = Array(reactionFrames).fill(false);
   let intent = false;
-  for (let frame = 0; frame < 120 / FRAME_SEC; frame++) {
+  for (let frame = 0; frame < 120 / frameSec; frame++) {
     intent = policy(runtime.sim, intent);
     hand.push(intent);
-    const outcome = runtime.step(frame * FRAME_SEC * 1000, FRAME_SEC, hand.shift()!);
+    const outcome = runtime.step(frame * frameSec * 1000, frameSec, hand.shift()!);
     if (outcome !== "fighting") {
-      return { outcome, seconds: frame * FRAME_SEC, clean: outcome === "landed" && isCleanFight(runtime.performance) };
+      return { outcome, seconds: frame * frameSec, clean: outcome === "landed" && isCleanFight(runtime.performance) };
     }
   }
   return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false };
@@ -218,4 +218,17 @@ describe("surges", () => {
       }
     }
   });
+
+  it("still saves the line on a prompt LET GO at 30 and 20 frames per second", () => {
+    for (const fps of [30, 20]) {
+      const frameSec = 1 / fps;
+      for (const species of FISH) {
+        for (const weight of weights(species)) {
+          const fights = SEEDS.map((seed) => play(species, weight, seed, lateOnRuns, Math.round(0.25 / frameSec), frameSec));
+          expect(fights.map((fight) => fight.outcome), `${fps} fps ${species.id} ${weight} lb`).toEqual(SEEDS.map(() => "landed"));
+        }
+      }
+    }
+  });
 });
+

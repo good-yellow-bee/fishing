@@ -47,6 +47,10 @@ const PATTERNS: Record<ChallengeId, Pattern> = {
 /** Reeling as a run starts turns the bar red and costs the clean bonus; the run then pulls gently enough that red lasts ~0.3 s, so a 0.25 s reaction to red or LET GO still saves the line. */
 const SURGE_PULL = 0.6;
 
+/** A run cannot snap the line in its first moments, so a prompt LET GO is saved at any frame rate. */
+const RUN_GRACE_MS = 300;
+const GRACE_TENSION = 0.95;
+
 export const FIGHT_LINES: Record<ChallengeId, [string, string, string]> = {
   mash: ["Reel in quick pumps", "Let go now — it's shaking", "LET GO — head shake!"],
   timing: ["Reel a steady retrieve", "Let go now — it's lining up", "LET GO — it's running!"],
@@ -78,6 +82,7 @@ export function makeFight(
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
   let completedSurges = 0;
   let nextAt: number | null = null;
+  let graceUntil = -Infinity;
 
   const step = (nowMs: number, dtSec: number, reeling: boolean): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -90,6 +95,7 @@ export function makeFight(
         nextAt = nowMs + range(pattern.surgeMin, pattern.surgeMax);
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
+        graceUntil = nowMs + RUN_GRACE_MS;
       } else {
         sim.surge = 0;
         completedSurges += 1;
@@ -107,6 +113,7 @@ export function makeFight(
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
+    if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
