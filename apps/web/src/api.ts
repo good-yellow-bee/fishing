@@ -1,4 +1,14 @@
-import type { BoardView, CatchRecord, CatchStat, CatchSubmission, Profile, SkillId, SpotId } from "@stillwater/shared";
+import {
+  localDate,
+  type BoardView,
+  type CatchRecord,
+  type CatchStat,
+  type CatchSubmission,
+  type DailyRequest,
+  type Profile,
+  type SkillId,
+  type SpotId,
+} from "@stillwater/shared";
 
 export type Me = {
   user: { id: string; email: string; name: string };
@@ -8,6 +18,10 @@ export type Me = {
   catches: CatchRecord[];
   speciesStats: CatchStat[];
 };
+
+export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };
+
+export type DailyBoard = { day: string; requests: DailyRequestRow[] };
 
 export class ApiError extends Error {
   readonly status: number;
@@ -51,5 +65,22 @@ export function buyUpgrade(skill: SkillId) {
   return request<{ profile: Profile }>("/api/upgrades", {
     method: "POST",
     body: JSON.stringify({ skill }),
+  });
+}
+
+/** The server counts catches by this local day, so it also needs the UTC offset at that day's midnight. */
+function dayQuery(day: string) {
+  const [year, month, date] = day.split("-").map(Number);
+  return `day=${day}&offset=${new Date(year!, month! - 1, date).getTimezoneOffset()}`;
+}
+
+export function getDailyRequests(day = localDate(new Date())) {
+  return request<DailyBoard>(`/api/daily-requests?${dayQuery(day)}`);
+}
+
+/** Takes the day the board was read for, so a claim just after midnight still finds its request. */
+export function claimDailyRequest(id: string, day: string) {
+  return request<{ reward: number }>(`/api/daily-requests/${encodeURIComponent(id)}/claim?${dayQuery(day)}`, {
+    method: "POST",
   });
 }
