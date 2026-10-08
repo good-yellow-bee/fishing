@@ -1,3 +1,5 @@
+import type { LakeHour, Sky } from "@stillwater/shared";
+
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
@@ -87,13 +89,77 @@ function waterPlop(size: number) {
 let lapSrc: AudioBufferSourceNode | null = null;
 let lapLfo: OscillatorNode | null = null;
 let lapGain: GainNode | null = null;
-let birdTimer = 0;
+let rainSrc: AudioBufferSourceNode | null = null;
+let rainGain: GainNode | null = null;
+let wildlifeTimer = 0;
+let melodyTimer = 0;
+let ambientHour: LakeHour = "day";
+let ambientSky: Sky = "clear";
+
+export function ambientProfile(hour: LakeHour, sky: Sky) {
+  return {
+    rain: sky === "rain",
+    wildlife: hour === "night" ? "crickets" : "birds",
+    melody: hour === "night" ? [220, 261.63, 293.66] : [329.63, 392, 493.88],
+  } as const;
+}
 
 function chirp() {
+  if (!lapSrc) return;
+  if (ambientProfile(ambientHour, ambientSky).wildlife === "crickets") {
+    const base = 3600 + Math.random() * 700;
+    tone("square", base, base * 0.96, 0.035, 0.003);
+    tone("square", base * 1.06, base, 0.025, 0.002, 0.07);
+    wildlifeTimer = window.setTimeout(chirp, 180 + Math.random() * 420);
+    return;
+  }
   const base = 2000 + Math.random() * 1400;
   tone("sine", base, base * 1.5, 0.09, 0.012);
   tone("sine", base * 1.2, base * 1.9, 0.08, 0.01, 0.13);
-  birdTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+  wildlifeTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+}
+
+function playMelody() {
+  if (!lapSrc) return;
+  const notes = ambientProfile(ambientHour, ambientSky).melody;
+  const start = Math.floor(Math.random() * notes.length);
+  for (let i = 0; i < notes.length; i += 1) {
+    const note = notes[(start + i) % notes.length]!;
+    tone("sine", note, note, 0.7, 0.006, i * 0.62);
+  }
+  melodyTimer = window.setTimeout(playMelody, 9200 + Math.random() * 4200);
+}
+
+function startRain() {
+  if (rainSrc || ambientSky !== "rain") return;
+  const ac = audio();
+  rainSrc = ac.createBufferSource();
+  rainSrc.buffer = noise();
+  rainSrc.loop = true;
+  const filter = ac.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = 1200;
+  rainGain = ac.createGain();
+  rainGain.gain.value = 0.0035;
+  rainSrc.connect(filter).connect(rainGain).connect(bus());
+  rainSrc.start();
+}
+
+function stopRain() {
+  if (!rainSrc) return;
+  rainSrc.stop();
+  rainGain?.disconnect();
+  rainSrc = null;
+  rainGain = null;
+}
+
+function restartAmbientTimers() {
+  window.clearTimeout(wildlifeTimer);
+  window.clearTimeout(melodyTimer);
+  if (lapSrc) {
+    wildlifeTimer = window.setTimeout(chirp, ambientHour === "night" ? 300 : 2000 + Math.random() * 2000);
+    melodyTimer = window.setTimeout(playMelody, 4000 + Math.random() * 3000);
+  }
 }
 
 const ambient = {
@@ -116,14 +182,26 @@ const ambient = {
     lapSrc.connect(f).connect(lapGain).connect(bus());
     lapSrc.start();
     lapLfo.start();
-    birdTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+    startRain();
+    restartAmbientTimers();
+  },
+  setConditions(hour: LakeHour, sky: Sky) {
+    const changed = ambientHour !== hour || ambientSky !== sky;
+    ambientHour = hour;
+    ambientSky = sky;
+    if (!changed || !lapSrc) return;
+    stopRain();
+    startRain();
+    restartAmbientTimers();
   },
   stop() {
     if (!lapSrc) return;
-    window.clearTimeout(birdTimer);
+    window.clearTimeout(wildlifeTimer);
+    window.clearTimeout(melodyTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();
+    stopRain();
     lapSrc = null;
     lapLfo = null;
     lapGain = null;
