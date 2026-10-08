@@ -170,5 +170,18 @@ describe("useFishingGame strike timing", () => {
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(phase()).toBe("fight:none");
   });
+
+  it("takes back the early-strike hint when a second finger shows it was a camera pinch", () => {
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(600));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/too early/i);
+    const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
+    Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
+    act(() => surface.dispatchEvent(second));
+    expect(hint()).toMatch(/watch the bobber/i);
+    expect(phase()).toBe("waiting:none");
+  });
 });
 
