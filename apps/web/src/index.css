@@ -660,7 +660,7 @@ kbd {
   background: #6a8f5a99;
 }
 
-.catch-card,
+.landed-card,
 .toast {
   position: absolute;
   left: 50%;
@@ -676,13 +676,13 @@ kbd {
   backdrop-filter: blur(10px);
 }
 
-.catch-card,
+.landed-card,
 .toast {
   animation: card-pop 180ms ease-out;
 }
 
 /* Leave the angler, the line, and the bobber in frame. */
-.catch-card {
+.landed-card {
   left: 28px;
   top: auto;
   bottom: 28px;
@@ -732,19 +732,16 @@ kbd {
   }
 }
 
-.catch-card h2 {
+.landed-card h2 {
   font-size: 28px;
 }
 
-.catch-card .catch-lure {
-  grid-column: 1 / -1;
+.landed-card .catch-lure {
   margin: 2px 0 8px;
   font-size: 15px;
 }
 
-/* Field-log styles lay .catch-card out as a two-column grid. */
 .catch-best {
-  grid-column: 1 / -1;
   margin: 0 auto 14px;
   padding: 12px 14px 10px;
   max-width: 280px;
@@ -797,7 +794,23 @@ kbd {
   color: #aa9d86;
 }
 
-.catch-card .rarity-tag {
+/* Amber on the parchment card reads too faint; ink it darker there. */
+.landed-card .catch-stamp {
+  border-color: #a8771f;
+  background: rgba(217, 169, 78, 0.16);
+  color: #7a5212;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.landed-card .catch-stamp.quiet {
+  border-color: rgba(102, 81, 57, 0.35);
+  background: none;
+  color: #6f6352;
+  font-weight: 400;
+}
+
+.landed-card .rarity-tag {
   display: inline-block;
   font-size: 10px;
   letter-spacing: 0.14em;
@@ -807,38 +820,38 @@ kbd {
   margin-bottom: 8px;
 }
 
-.catch-card.rarity-common {
+.landed-card.rarity-common {
   border-left: 4px solid var(--rarity-common);
 }
 
-.catch-card.rarity-common .rarity-tag {
+.landed-card.rarity-common .rarity-tag {
   color: var(--rarity-common);
 }
 
-.catch-card.rarity-uncommon {
+.landed-card.rarity-uncommon {
   border-left: 4px solid var(--rarity-uncommon);
 }
 
-.catch-card.rarity-uncommon .rarity-tag {
+.landed-card.rarity-uncommon .rarity-tag {
   color: var(--rarity-uncommon);
 }
 
-.catch-card.rarity-rare {
+.landed-card.rarity-rare {
   border-left: 4px solid var(--rarity-rare);
 }
 
-.catch-card.rarity-rare .rarity-tag {
+.landed-card.rarity-rare .rarity-tag {
   color: var(--rarity-rare);
 }
 
-.catch-card.rarity-legendary {
+.landed-card.rarity-legendary {
   border-left: 4px solid var(--rarity-legendary);
   animation:
     card-settle 180ms ease-out,
     legendary-glow 1.8s ease-in-out 180ms infinite;
 }
 
-.catch-card.rarity-legendary .rarity-tag {
+.landed-card.rarity-legendary .rarity-tag {
   color: #a3752c;
 }
 
@@ -857,27 +870,26 @@ kbd {
   }
 }
 
-.catch-card .panel-btn,
+.landed-card .panel-btn,
 .toast .panel-btn {
   margin-top: 8px;
   background: #28362f;
 }
 
-.catch-card .catch-actions {
-  grid-column: 1 / -1;
+.landed-card .catch-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
 }
 
-.catch-card .catch-actions .catch-stamp,
-.catch-card .catch-actions .warn {
+.landed-card .catch-actions .catch-stamp,
+.landed-card .catch-actions .warn {
   flex-basis: 100%;
   margin: 8px 0 0;
 }
 
-.catch-card a.panel-btn {
+.landed-card a.panel-btn {
   color: var(--paper);
   text-decoration: none;
   display: inline-block;
