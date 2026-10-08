@@ -23,7 +23,7 @@ import { useSceneWrap } from "./useSceneWrap";
 
 type Props = {
   phase: ScenePhase;
-  power: number;
+  powerRef: Readonly<{ current: number }>;
   rodTip: THREE.Vector3;
   lookAt: THREE.Vector3;
 };
@@ -60,7 +60,7 @@ function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
   return "idle";
 }
 
-export function Angler({ phase, power, rodTip, lookAt }: Props) {
+export function Angler({ phase, powerRef, rodTip, lookAt }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -105,6 +105,7 @@ export function Angler({ phase, power, rodTip, lookAt }: Props) {
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
+    const power = powerRef.current;
     const fighting = phase === "hookset" || phase === "fight";
     if (prevPhase.current === "casting" && phase === "waiting") {
       throwStart.current = t;

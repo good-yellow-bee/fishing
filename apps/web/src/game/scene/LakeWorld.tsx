@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -1106,7 +1106,7 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour, sky = weatherForDay() }: { spot: SpotId; hour: LakeHour; sky?: WeatherSky }) {
+export const LakeWorld = memo(function LakeWorld({ spot, hour, sky = weatherForDay() }: { spot: SpotId; hour: LakeHour; sky?: WeatherSky }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weatherLight = sky === "rain" ? 0.46 : sky === "fog" ? 0.55 : sky === "overcast" ? 0.68 : 1;
   const fogColor = sky === "fog" ? "#b9c4bd" : sky === "rain" ? "#667b83" : look.fog;
@@ -1197,4 +1197,4 @@ export function LakeWorld({ spot, hour, sky = weatherForDay() }: { spot: SpotId;
       {sky === "rain" && <LakeRain />}
     </>
   );
-}
+});

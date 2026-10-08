@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -92,7 +92,7 @@ export type SimRef = { current: FightSim | null };
 
 type Props = {
   phase: ScenePhase;
-  power: number;
+  powerRef: Readonly<{ current: number }>;
   spot: SpotId;
   sim: SimRef;
   nibble: boolean;
@@ -916,7 +916,7 @@ function RisingFish({ phase }: { phase: ScenePhase }) {
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species }: LineAndBobberProps) {
+function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const sitRing = useRef<THREE.Mesh>(null);
@@ -969,6 +969,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
+    const power = powerRef.current;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";
@@ -1604,7 +1605,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ phase, power, spot, sim, nibble, hour, species, weight, previewFish = false }: Props) {
+function Scene({ phase, powerRef, spot, sim, nibble, hour, species, weight, previewFish = false }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1622,7 +1623,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight, preview
       <WaterAim phase={phase} aim={aim} />
       <LineAndBobber
         phase={phase}
-        power={power}
+        powerRef={powerRef}
         sim={sim}
         nibble={nibble}
         species={species}
@@ -1639,12 +1640,12 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight, preview
         accent={species?.accent ?? FALLBACK_ACCENT}
         scale={Math.max(0.95, bodyScale(weight))}
       />
-      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
+      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} />
     </>
   );
 }
 
-export function FishingWorld(props: Props) {
+export const FishingWorld = memo(function FishingWorld(props: Props) {
   return (
     <Canvas
       shadows
@@ -1663,4 +1664,4 @@ export function FishingWorld(props: Props) {
       </Suspense>
     </Canvas>
   );
-}
+});
