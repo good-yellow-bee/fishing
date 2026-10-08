@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { makeFight } from "./fight";
+import { isCleanFight, makeFight } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -59,5 +59,21 @@ describe("makeFight", () => {
     expect(runtime.sim.surge).toBe(0);
     runtime.step(2320, 0, false);
     expect(runtime.sim.surge).toBe(1);
+  });
+
+  it("records a clean fight until red tension or the escape limit is reached", () => {
+    const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+
+    expect(isCleanFight(runtime.performance)).toBe(true);
+    runtime.sim.tension = 0.81;
+    runtime.step(0, 0, false);
+    expect(runtime.performance.peakTension).toBe(0.81);
+    expect(isCleanFight(runtime.performance)).toBe(false);
+
+    const lineRun = makeFight(fish("perch"), 0.8, 2, () => 0);
+    lineRun.sim.line = 1.25;
+    lineRun.step(0, 0, false);
+    expect(lineRun.performance.reachedEscapeLine).toBe(true);
+    expect(isCleanFight(lineRun.performance)).toBe(false);
   });
 });

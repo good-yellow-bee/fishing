@@ -6,8 +6,18 @@ export type FightSim = { line: number; tension: number; surge: SurgeState };
 export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 export type FightRuntime = {
   sim: FightSim;
+  performance: FightPerformance;
   step(nowMs: number, dtSec: number, reeling: boolean): FightOutcome;
 };
+
+export type FightPerformance = {
+  peakTension: number;
+  reachedEscapeLine: boolean;
+};
+
+export function isCleanFight(performance: FightPerformance) {
+  return performance.peakTension <= 0.8 && !performance.reachedEscapeLine;
+}
 
 type Pattern = {
   calmMin: number;
@@ -55,6 +65,7 @@ export function makeFight(
   const range = (min: number, max: number) => min + random() * (max - min);
 
   const sim: FightSim = { line: 1, tension: 0.2, surge: 0 };
+  const performance: FightPerformance = { peakTension: sim.tension, reachedEscapeLine: false };
   let completedSurges = 0;
   let nextAt: number | null = null;
 
@@ -85,6 +96,8 @@ export function makeFight(
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
     sim.line = Math.min(1.3, Math.max(0, sim.line));
+    performance.peakTension = Math.max(performance.peakTension, sim.tension);
+    performance.reachedEscapeLine ||= sim.line >= 1.25;
 
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";
@@ -92,5 +105,5 @@ export function makeFight(
     return "fighting";
   };
 
-  return { sim, step };
+  return { sim, performance, step };
 }

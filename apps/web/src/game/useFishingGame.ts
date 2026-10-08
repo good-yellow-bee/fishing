@@ -14,7 +14,7 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import { makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { isCleanFight, makeFight, FIGHT_LINES, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { fx } from "./fx";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
@@ -61,7 +61,7 @@ export type Fight = {
 };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string }
   | { kind: "error"; message: string };
@@ -426,6 +426,7 @@ export function useFishingGame(
               species: current.species,
               weight: current.weight,
               spot: spotRef.current,
+              clean: isCleanFight(runtime.performance),
             });
             clearFight();
             setPhaseBoth("result");
