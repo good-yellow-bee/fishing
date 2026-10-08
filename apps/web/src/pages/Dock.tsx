@@ -258,6 +258,7 @@ export function DockPage() {
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
             )}
+            {stamp?.trophy && <p className="catch-stamp">Trophy</p>}
             <div className="catch-actions">
               {fieldSaved && <p className="catch-stamp quiet">Saved in the field log</p>}
               {fieldLogError && (

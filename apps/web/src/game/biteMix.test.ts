@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { canLand, FISH, type Profile, type SpotId } from "@stillwater/shared";
-import { pickBite } from "./logic";
+import { bestHourFor, lureSizeFor, pickBite } from "./logic";
 
 const starter: Profile = {
   userId: "u1",
@@ -169,5 +169,67 @@ describe("bite mix", () => {
       Array.from({ length: 480 }, (_, i) => pickBite("dock", profile, false, () => i / 480, "day")).filter((fish) => fish.id === "carp").length;
     expect(carps(starter)).toBeGreaterThan(0);
     expect(carps(starter)).toBeLessThan(carps(seasoned));
+  });
+
+  it("gives the field guide the lure size that actually draws each fish on each bank on a full cast", () => {
+    // Strong enough for legendaries, so no lighter fish fill in for a big lure.
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    for (const hour of HOURS) {
+      for (const spot of BANKS) {
+        const reach = (lure: string) =>
+          new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, lure).id));
+        const small = reach("Nightcrawlers");
+        const large = reach("Spoon");
+        for (const fish of FISH.filter((one) => one.spots.includes(spot))) {
+          const size = lureSizeFor(fish, spot);
+          expect(small.has(fish.id), `${hour} ${spot} ${fish.id} ${size}`).toBe(size !== "large");
+          expect(large.has(fish.id), `${hour} ${spot} ${fish.id} ${size}`).toBe(size !== "small");
+        }
+      }
+    }
+    const fish = (id: string) => FISH.find((one) => one.id === id)!;
+    expect(lureSizeFor(fish("smallmouth-bass"), "dock")).toBe("either");
+    expect(lureSizeFor(fish("smallmouth-bass"), "dropoff")).toBe("small");
+    expect(lureSizeFor(fish("carp"), "dock")).toBe("large");
+    expect(() => lureSizeFor(fish("bluegill"), "dock")).toThrow();
+  });
+
+  it("gives the field guide the hour each bank draws each fish most often with its lure", () => {
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    const lures = { small: ["Nightcrawlers"], large: ["Spoon"], either: ["Nightcrawlers", "Spoon"] };
+    for (const spot of BANKS) {
+      for (const fish of FISH.filter((one) => one.spots.includes(spot))) {
+        const count = (hour: (typeof HOURS)[number]) =>
+          lures[lureSizeFor(fish, spot)].reduce(
+            (sum, lure) =>
+              sum + Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, lure)).filter((one) => one.id === fish.id).length,
+            0,
+          );
+        const counts = HOURS.map(count);
+        const best = bestHourFor(fish, spot);
+        // Two draws of slack for exact ties such as carp at the dock.
+        expect(counts[HOURS.indexOf(best)], `${spot} ${fish.id} ${best} ${counts}`).toBeGreaterThanOrEqual(Math.max(...counts) - 2);
+      }
+    }
+    const fish = (id: string) => FISH.find((one) => one.id === id)!;
+    expect(bestHourFor(fish("sturgeon"), "dropoff")).toBe("day");
+    expect(bestHourFor(fish("perch"), "dock")).toBe("dawn");
+    expect(bestHourFor(fish("perch"), "reeds")).toBe("day");
+    expect(bestHourFor(fish("perch"), "dropoff")).toBe("day");
+    expect(bestHourFor(fish("carp"), "dock")).toBe("night");
+    expect(() => bestHourFor(fish("bluegill"), "dock")).toThrow();
+  });
+
+  it("splits a short cast's commons on their own, which is why the guide speaks for full casts", () => {
+    const perch = FISH.find((one) => one.id === "perch")!;
+    for (const spot of ["dock", "reeds"] as const) {
+      expect(lureSizeFor(perch, spot)).toBe("small");
+      for (const hour of HOURS) {
+        const reach = (lure: string) =>
+          [...new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, starter, true, () => i / 480, hour, lure).id))];
+        expect(reach("Nightcrawlers"), `${spot} ${hour}`).toEqual(["golden-shiner"]);
+        expect(reach("Spoon"), `${spot} ${hour}`).toEqual(["perch"]);
+      }
+    }
   });
 });

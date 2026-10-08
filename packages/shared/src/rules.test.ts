@@ -329,14 +329,16 @@ describe("field guide", () => {
   });
 
   it("stamps a first, a personal best, or a repeat", () => {
-    expect(catchStamp([], "perch", 0.8)).toEqual({ kind: "first" });
+    expect(catchStamp([], "perch", 0.8)).toEqual({ kind: "first", trophy: false });
     expect(catchStamp([{ speciesId: "perch", caught: 2, heaviest: 0.9, lastAt: "x" }], "perch", 1.1)).toEqual({
       kind: "pb",
       previous: 0.9,
+      trophy: true,
     });
     expect(catchStamp([{ speciesId: "perch", caught: 2, heaviest: 1.1, lastAt: "x" }], "perch", 0.8)).toEqual({
       kind: "repeat",
       heaviest: 1.1,
+      trophy: false,
     });
   });
 });
