@@ -217,7 +217,8 @@ export function fightRodRoll(surge: FightSurge, runSide: number, time: number, s
   if (strikeAge < 0) shake = biteRodRoll(biteAge, time);
   else if (surge === 1) shake = Math.sin(time * 22) * 0.07;
   else if (surge === 2) shake = Math.sin(time * 16) * 0.035;
-  const snap = strikeAge >= 0 && strikeAge < STRIKE_SNAP_SEC ? Math.sin((strikeAge / STRIKE_SNAP_SEC) * Math.PI) * 0.1 : 0;
+  // The rod rests leaning out from the right hand, so the upright snap rolls it back the negative way.
+  const snap = strikeAge >= 0 && strikeAge < STRIKE_SNAP_SEC ? -Math.sin((strikeAge / STRIKE_SNAP_SEC) * Math.PI) * 0.1 : 0;
   return pull + shake + snap;
 }
 
