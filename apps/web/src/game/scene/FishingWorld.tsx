@@ -702,8 +702,8 @@ function HookedFish({
     prevLeap.current = fightView.leapAge;
   });
   return (
-    <group ref={fishRef} visible={false} scale={FIGHT_FISH_SCALE}>
-      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} />
+    <group ref={fishRef} scale={FIGHT_FISH_SCALE} visible={false}>
+      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} throughWater />
     </group>
   );
 }
@@ -1181,7 +1181,6 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     bobber.current?.position.copy(target);
     bobberWorld.copy(target);
     lookAt.copy(target);
-    if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
     const hookedPose =
       fightFishMode(phase) === "on"
         ? fightFishPose(
@@ -1194,6 +1193,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
             t,
           )
         : null;
+    if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
     if (hooked.current) {
       const g = hooked.current;
       g.visible = hookedPose?.show ?? false;
