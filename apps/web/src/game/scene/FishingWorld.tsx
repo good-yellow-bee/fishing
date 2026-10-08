@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, Suspense, type ComponentRef } from "react";
+import { useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -36,7 +36,6 @@ import {
   fightView,
   fishDepthMeters,
   fishLeadMeters,
-  fishLeapHeight,
   fishSideMeters,
   hooksetTug,
   retrieveHop,
@@ -66,6 +65,7 @@ import {
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { missBobberLift, missLineSag, missView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
+import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
 import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
 import { PlayerMove } from "./Player";
@@ -686,59 +686,24 @@ function EntrySpray({ burstRef }: { burstRef: BurstRef }) {
 }
 
 function HookedFish({
+  fishRef,
   burstRef,
   color,
   accent,
-  scale,
 }: {
+  fishRef: RefObject<THREE.Group | null>;
   burstRef: BurstRef;
   color: string;
   accent: string;
-  scale: number;
 }) {
-  const fish = useRef<THREE.Group>(null);
   const prevLeap = useRef(-1);
   useFrame(() => {
-    const g = fish.current;
-    if (!g) return;
     if (prevLeap.current >= 0 && fightView.leapAge < 0) burstRef.current();
     prevLeap.current = fightView.leapAge;
-    const parent = g.parent;
-    const bx = parent?.position.x ?? bobberWorld.x;
-    const bz = parent?.position.z ?? bobberWorld.z;
-    let ax = bx - REEL_POINT.x;
-    let az = bz - REEL_POINT.z;
-    const reach = Math.hypot(ax, az) || 1;
-    ax /= reach;
-    az /= reach;
-    const sx = -az;
-    const sz = ax;
-    const surge = fightView.surge;
-    const throb = surge === 2 ? Math.sin(fightView.time * 8.5) * 0.16 : 0;
-    const shake = surge === 1 ? Math.sin(fightView.time * 22) * 0.07 : 0;
-    const lead = fightView.lead + throb;
-    const side = fightView.side + shake;
-    const leap = fishLeapHeight(fightView.leapAge);
-    const lx = ax * lead + sx * side;
-    const lz = az * lead + sz * side;
-    const surface = waterHeight(bx + lx, bz + lz, fightView.time);
-    const ly = surface - (parent?.position.y ?? bobberWorld.y) - fightView.depth + leap;
-    g.position.set(lx, ly, lz);
-    fightView.localX = lx;
-    fightView.localY = ly;
-    fightView.localZ = lz;
-    const faceX = ax * Math.max(0.2, lead) + sx * side;
-    const faceZ = az * Math.max(0.2, lead) + sz * side;
-    if (faceX * faceX + faceZ * faceZ > 0.002) g.rotation.y = Math.atan2(faceX, faceZ);
-    const leapP = leap > 0 ? fightView.leapAge / FISH_LEAP_SEC : 0;
-    g.rotation.x = leapP > 0 ? -Math.sin(leapP * Math.PI) * 0.95 : surge === 2 ? Math.sin(fightView.time * 9) * 0.16 : 0;
-    const bank = THREE.MathUtils.clamp(-fightView.runSide * (surge === 2 ? 0.42 : 0.12), -0.55, 0.55);
-    const thrash = surge === 1 ? Math.sin(fightView.time * 20) * 0.45 : surge === 2 ? Math.sin(fightView.time * 11) * 0.1 : 0;
-    g.rotation.z = bank + thrash;
   });
   return (
-    <group ref={fish} scale={scale}>
-      <ArticulatedFish color={color} accent={accent} speed={2.4} intensity={1.7} />
+    <group ref={fishRef} visible={false} scale={FIGHT_FISH_SCALE}>
+      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} />
     </group>
   );
 }
@@ -888,7 +853,8 @@ function RetrieveSplash() {
 const SPLASH_SEC = 0.55;
 const ENTRY_DROPS = 9;
 const LINE_POINTS = 11;
-const LINE_CAP = LINE_POINTS + 4;
+const LINE_TAIL = 1;
+const LINE_CAP = LINE_POINTS + 4 + LINE_TAIL;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
@@ -933,8 +899,9 @@ function RisingFish({ phase }: { phase: ScenePhase }) {
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
+  const hooked = useRef<THREE.Group>(null);
   const sitRing = useRef<THREE.Mesh>(null);
   const lure = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
@@ -1215,6 +1182,30 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
     bobberWorld.copy(target);
     lookAt.copy(target);
     if (wrap.current) wrap.current.dataset.bobber = `${target.x.toFixed(2)},${target.z.toFixed(2)}`;
+    const hookedPose =
+      fightFishMode(phase) === "on"
+        ? fightFishPose(
+            target.x,
+            target.z,
+            anglerPose.x,
+            anglerPose.z,
+            fightView.lead + (fightView.surge === 2 ? Math.sin(t * 8.5) * 0.12 : 0),
+            fightView.side + (fightView.surge === 1 ? Math.sin(t * 22) * 0.06 : 0),
+            t,
+          )
+        : null;
+    if (hooked.current) {
+      const g = hooked.current;
+      g.visible = hookedPose?.show ?? false;
+      if (hookedPose?.show) {
+        g.position.set(hookedPose.x - target.x, hookedPose.y - target.y, hookedPose.z - target.z);
+        g.rotation.set(hookedPose.pitch, hookedPose.yaw, 0);
+        fightView.localX = g.position.x;
+        fightView.localY = g.position.y;
+        fightView.localZ = g.position.z;
+      }
+    }
+    const meet = hookedPose?.show ? fightLineEnd(phase, hookedPose, target) : null;
     // Cast trail keeps its own sag. A fight run or pump only lifts the belly.
     const lineX = target.x - rodTip.x;
     const lineZ = target.z - rodTip.z;
@@ -1281,7 +1272,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       else if (sitting) y = liftDockSample(y, x, z);
       if ((holdLine || sitting) && i > 0) {
         for (const lip of dockLineLips(prevX, prevY, prevZ, x, y, z)) {
-          if (count >= LINE_CAP - (LINE_POINTS - i)) break;
+          if (count >= LINE_CAP - LINE_TAIL - (LINE_POINTS - i)) break;
           put(lip.x, lip.y, lip.z);
         }
       }
@@ -1289,6 +1280,13 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       prevX = x;
       prevY = y;
       prevZ = z;
+    }
+    if (meet) {
+      for (const lip of dockLineLips(prevX, prevY, prevZ, meet.x, meet.y, meet.z)) {
+        if (count >= LINE_CAP - 1) break;
+        put(lip.x, lip.y, lip.z);
+      }
+      if (count < LINE_CAP) put(meet.x, meet.y, meet.z);
     }
     line.geometry.setDrawRange(0, count);
     attr.needsUpdate = true;
@@ -1325,10 +1323,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
         {phase === "fight" && (
           <HookedFish
+            fishRef={hooked}
             burstRef={burstRef}
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
-            scale={Math.max(0.95, bodyScale(weight))}
           />
         )}
       </group>
