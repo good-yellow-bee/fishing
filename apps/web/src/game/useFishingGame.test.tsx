@@ -55,6 +55,7 @@ afterEach(() => {
   frames = [];
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
 describe("useFishingGame animation recovery", () => {
@@ -77,7 +78,7 @@ describe("useFishingGame animation recovery", () => {
     act(() => surface.dispatchEvent(pointer("pointerdown")));
     now = 500;
     act(() => window.dispatchEvent(pointer("pointerup")));
-    act(() => vi.advanceTimersByTime(2_100));
+    act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown")));
     const frame = frames.at(-1)!;
     act(() => frame(1_000));

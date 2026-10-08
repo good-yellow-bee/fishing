@@ -441,7 +441,12 @@ export function useFishingGame(
           }
         }
       } catch (error) {
+        clearTimers();
+        holdingRef.current = false;
+        castPointerRef.current = null;
+        powerRef.current = 0;
         clearFight();
+        setPower(0);
         setPhaseBoth("result");
         setOutcome({ kind: "error", message: "The fishing loop hit a problem. You can cast again." });
         setHint(error instanceof Error ? error.message : "The fishing loop hit a problem.");
