@@ -20,8 +20,12 @@ export const FIGHT_WAG = 1.25;
 export const FIGHT_MOUTH_Y = -0.1;
 export const FIGHT_MOUTH_Z = 0.95;
 
-const SURFACE_GAP = 0.03;
+const SURFACE_GAP = 0.14;
 const BED_GAP = 0.03;
+/** Extra sink below the surface ceiling so the back stays under the chop. */
+const SINK = 0.42;
+/** Nose stays on the line. The body angles so the flank reads from the dock. */
+const YAW_SHOW = 0.9;
 const PITCH = -0.05;
 const DOCK = { minX: -1.05, maxX: 1.05, minZ: 5.2, maxZ: 8.5 };
 
@@ -112,8 +116,7 @@ function hidden(): FightFishPose {
   return { show: false, x: 0, y: 0, z: 0, yaw: 0, pitch: 0, mouthX: 0, mouthY: 0, mouthZ: 0 };
 }
 
-function tryPlace(mouthX: number, mouthZ: number, anglerX: number, anglerZ: number, pitch: number, time: number) {
-  const yaw = Math.atan2(anglerX - mouthX, anglerZ - mouthZ);
+function tryYaw(mouthX: number, mouthZ: number, yaw: number, pitch: number, time: number) {
   if (!Number.isFinite(yaw)) return null;
   const mouth = mouthOffset(yaw, pitch);
   const x = mouthX - mouth.dx;
@@ -121,7 +124,7 @@ function tryPlace(mouthX: number, mouthZ: number, anglerX: number, anglerZ: numb
   if (!bodyFits(x, z, yaw, pitch)) return null;
   const band = yBand(x, z, yaw, pitch, time);
   if (!band) return null;
-  let y = band.hi + Math.sin(time * 2.2) * 0.012;
+  let y = band.hi - SINK + Math.sin(time * 2.2) * 0.012;
   y = Math.min(band.hi, Math.max(band.lo, y));
   return {
     show: true,
@@ -134,6 +137,16 @@ function tryPlace(mouthX: number, mouthZ: number, anglerX: number, anglerZ: numb
     mouthY: y + mouth.dy,
     mouthZ,
   } satisfies FightFishPose;
+}
+
+function tryPlace(mouthX: number, mouthZ: number, anglerX: number, anglerZ: number, pitch: number, time: number) {
+  const facing = Math.atan2(anglerX - mouthX, anglerZ - mouthZ);
+  if (!Number.isFinite(facing)) return null;
+  for (const bias of [YAW_SHOW, -YAW_SHOW, 0]) {
+    const pose = tryYaw(mouthX, mouthZ, facing + bias, pitch, time);
+    if (pose) return pose;
+  }
+  return null;
 }
 
 /**

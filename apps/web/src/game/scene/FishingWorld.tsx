@@ -703,7 +703,7 @@ function HookedFish({
   });
   return (
     <group ref={fishRef} scale={FIGHT_FISH_SCALE} visible={false}>
-      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} throughWater />
+      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} flat />
     </group>
   );
 }

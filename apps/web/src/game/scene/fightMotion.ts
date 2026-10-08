@@ -237,16 +237,16 @@ export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: nu
   return lean;
 }
 
-/** How far the fish leads the lure, meters, along the cast. */
+/** How far the fish leads the lure, meters, along the cast. A run clears the rod tip. */
 export function fishLeadMeters(surge: FightSurge, reeling: boolean) {
-  if (surge === 2) return reeling ? 0.95 : 1.55;
-  if (surge === 1) return 0.72;
-  return reeling ? 0.18 : 0.48;
+  if (surge === 2) return reeling ? 2.6 : 5.2;
+  if (surge === 1) return 2.1;
+  return reeling ? 0.35 : 1.2;
 }
 
 /** Lateral lead. runSide is about -1..1. */
 export function fishSideMeters(surge: FightSurge, runSide: number) {
-  const reach = surge === 2 ? 1.85 : surge === 1 ? 0.62 : 0.12;
+  const reach = surge === 2 ? 3.2 : surge === 1 ? 1.15 : 0.2;
   return runSide * reach;
 }
 

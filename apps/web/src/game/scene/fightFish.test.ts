@@ -87,7 +87,7 @@ describe("fighting fish", () => {
         expectClear(hauling, time);
         expectClear(horsing, time);
         expectClear(wide, time);
-        expect(reach(running)).toBeGreaterThan(reach(hauling) + 0.8);
+        expect(reach(running)).toBeGreaterThan(reach(hauling) + 2);
         expect(reach(running)).toBeGreaterThan(reach(horsing) + 0.25);
       }
     }
@@ -120,7 +120,7 @@ describe("fighting fish", () => {
     expectClear(running, TIME);
     expect(Math.hypot(running.mouthX - ANGLER.x, running.mouthZ - ANGLER.z)).toBeLessThan(reach(running) - 0.4);
     expect(Math.hypot(running.mouthX - bobber.x, running.mouthZ - bobber.z)).toBeGreaterThan(
-      Math.hypot(hauling.mouthX - bobber.x, hauling.mouthZ - bobber.z) + 0.8,
+      Math.hypot(hauling.mouthX - bobber.x, hauling.mouthZ - bobber.z) + 2.5,
     );
     expect(fightLineEnd("fight", running, bobber)).toEqual({
       x: running.mouthX,
@@ -139,6 +139,32 @@ describe("fighting fish", () => {
     expect(fightFishMode("fight")).toBe("on");
     for (const phase of ["idle", "casting", "waiting", "hookset", "result"] as const) {
       expect(fightFishMode(phase)).toBe("off");
+    }
+  });
+
+  it("keeps every wagged vertex under the chop", () => {
+    const bobber = { x: 0, z: 1.5 };
+    for (const lead of [RUN_LEAD, HAUL_LEAD]) {
+      const pose = fightFishPose(bobber.x, bobber.z, ANGLER.x, ANGLER.z, lead, 0, TIME);
+      expectClear(pose, TIME);
+      for (let i = 0; i <= 8; i += 1) {
+        const phase = (i / 8) * Math.PI * 2;
+        const root = waggedFish(Math.sin(phase) * 0.2 * FIGHT_WAG, Math.sin(phase - 0.8) * 0.46 * FIGHT_WAG);
+        root.position.set(pose.x, pose.y, pose.z);
+        root.rotation.set(pose.pitch, pose.yaw, 0);
+        root.updateMatrixWorld(true);
+        root.traverse((obj) => {
+          const mesh = obj as THREE.Mesh;
+          if (!mesh.isMesh) return;
+          const pos = mesh.geometry.attributes.position as THREE.BufferAttribute;
+          const vertex = new THREE.Vector3();
+          for (let k = 0; k < pos.count; k += 1) {
+            vertex.fromBufferAttribute(pos, k).applyMatrix4(mesh.matrixWorld);
+            expect(vertex.y).toBeLessThan(waterHeight(vertex.x, vertex.z, TIME));
+            expect(vertex.y).toBeGreaterThan(bedHeight(vertex.x, vertex.z));
+          }
+        });
+      }
     }
   });
 
