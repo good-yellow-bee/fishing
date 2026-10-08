@@ -101,6 +101,10 @@ describe("useCatchSync", () => {
     recordMock.mockRejectedValueOnce(new Error("offline"));
     await act(async () => expect(await sync.saveCatch(first)).toBe(false));
     expect(sync.error).toBe("offline");
+    await act(async () => { await sync.sync(); });
+    expect(sync.error).toBe("offline");
+    await act(async () => expect(await sync.saveCatch(first)).toBe(true));
+    expect(sync.error).toBe("");
   });
 
   it("keeps a backlog queued when another account is signed in", async () => {
@@ -111,6 +115,7 @@ describe("useCatchSync", () => {
     expect(pendingCatches("angler")).toEqual([first]);
     expect(sync.pendingCount).toBe(1);
     expect(sync.error).toMatch(/another angler/i);
+    expect(onMe).not.toHaveBeenCalled();
   });
 
   it("syncs a catch queued while the previous sync is still refreshing points", async () => {
@@ -149,7 +154,9 @@ describe("useCatchSync", () => {
     recordMock.mockRejectedValueOnce(new ApiError("catch rate limit exceeded", 429));
     await act(async () => { await sync.saveCatch(first); });
     expect(pendingCatches("angler")).toEqual([first]);
-    await act(async () => { await vi.advanceTimersByTimeAsync(RATE_LIMIT_RETRY_MS); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(RATE_LIMIT_RETRY_MS - 1); });
+    expect(recordMock).toHaveBeenCalledTimes(1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1); });
     expect(recordMock).toHaveBeenCalledTimes(2);
     expect(pendingCatches("angler")).toEqual([]);
   });

@@ -39,16 +39,16 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
     try {
       do {
         syncAgain.current = false;
-        setError("");
         let queued = 0;
         try {
           queued = pendingCatches(userId).length;
           if (queued > 0) {
+            setError("");
             const me = await getMe();
-            onMe(me);
             if (me.profile.userId !== userId) {
               throw new Error("Another angler is signed in here. These catches will sync when their owner signs back in.");
             }
+            onMe(me);
             await syncCatches(userId, recordCatch);
           }
         } catch (err) {
@@ -86,6 +86,7 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
           setError(message(err, SAVE_FAILED));
           return false;
         }
+        setError("");
         await refresh();
         return true;
       }
