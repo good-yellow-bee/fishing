@@ -97,6 +97,8 @@ type Props = {
   hour: LakeHour;
   species: FishSpecies | null;
   weight: number;
+  /** Level-four perk: hint at a bite without revealing its species. */
+  previewFish?: boolean;
 };
 
 const CAM_START: [number, number, number] = [DOCK_STAND_X + 0.45, 3.42 + DOCK_PLANKS.top, DOCK_STAND_Z + 6.9];
@@ -1430,6 +1432,35 @@ function CaughtFish({
   );
 }
 
+function FishShadow({ visible }: { visible: boolean }) {
+  const group = useRef<THREE.Group>(null);
+  const material = useRef<THREE.MeshBasicMaterial>(null);
+
+  useFrame((state) => {
+    const shadow = group.current;
+    if (!shadow) return;
+    shadow.visible = visible;
+    if (!visible) return;
+    const time = state.clock.elapsedTime;
+    const orbit = time * 2.4;
+    const x = bobberWorld.x + Math.sin(orbit) * 0.24;
+    const z = bobberWorld.z + Math.cos(orbit * 0.8) * 0.18;
+    shadow.position.set(x, waterHeight(x, z, time) - 0.12, z);
+    shadow.rotation.y = orbit + Math.PI / 2;
+    shadow.scale.set(0.72 + Math.sin(orbit * 1.3) * 0.08, 1, 1);
+    if (material.current) material.current.opacity = 0.24 + Math.sin(orbit * 1.6) * 0.04;
+  });
+
+  return (
+    <group ref={group} visible={false}>
+      <mesh scale={[0.55, 0.025, 1.1]}>
+        <sphereGeometry args={[1, 12, 8]} />
+        <meshBasicMaterial ref={material} color="#172c34" transparent depthWrite={false} />
+      </mesh>
+    </group>
+  );
+}
+
 function StrikeSplash({ phase }: { phase: ScenePhase }) {
   const ring = useRef<THREE.Mesh>(null);
   const ringMat = useRef<THREE.MeshBasicMaterial>(null);
@@ -1558,7 +1589,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
+function Scene({ phase, power, spot, sim, nibble, hour, species, weight, previewFish = false }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1581,6 +1612,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
         aim={aim}
         lookAt={lookAt}
       />
+      <FishShadow visible={previewFish && phase === "waiting" && nibble} />
       <StrikeSplash phase={phase} />
       <CaughtFish
         phase={phase}
