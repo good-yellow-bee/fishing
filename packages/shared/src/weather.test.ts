@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { catchesForTrip, isLogbook, parseCatchDraft, sampleLogbook, type CatchDraft } from "./logbook.ts";
+import { fishById } from "./fish.ts";
+import { biteWeatherMul, weatherForDay, weatherFromSearch } from "./weather.ts";
 import { formatWeather, parseWeatherDraft, prepareStoredLogbook, sampleCatchWeather } from "./weather.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -70,5 +72,27 @@ describe("catch weather", () => {
     expect(isLogbook(stored)).toBe(true);
     expect(catches[0]?.weather).toEqual(sampleCatchWeather("catch-pike-mepps"));
     expect(catches[1]?.weather).toEqual({ sky: "rain", wind: "strong", waterTempF: 49 });
+  });
+});
+
+describe("daily lake weather", () => {
+  it("is stable by UTC day and only chooses the daily weather set", () => {
+    const first = weatherForDay(new Date("2026-10-08T00:01:00.000Z"));
+    const later = weatherForDay(new Date("2026-10-08T23:59:00.000Z"));
+
+    expect(first).toBe(later);
+    expect(["clear", "overcast", "rain", "fog"]).toContain(first);
+  });
+
+  it("accepts only explicit visual weather overrides", () => {
+    expect(weatherFromSearch("?weather=rain")).toBe("rain");
+    expect(weatherFromSearch("?sky=partly-cloudy")).toBe("partly-cloudy");
+    expect(weatherFromSearch("?weather=storm")).toBeNull();
+  });
+
+  it("makes pike more likely in rain", () => {
+    const pike = fishById("pike");
+    expect(pike).toBeDefined();
+    expect(biteWeatherMul(pike!, "rain")).toBeGreaterThan(biteWeatherMul(pike!, "clear"));
   });
 });

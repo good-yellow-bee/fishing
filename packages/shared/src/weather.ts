@@ -2,6 +2,8 @@ export const SKIES = ["clear", "partly-cloudy", "overcast", "rain", "fog"] as co
 
 export type Sky = (typeof SKIES)[number];
 
+const DAILY_SKIES = ["clear", "overcast", "rain", "fog"] as const satisfies readonly Sky[];
+
 export const SKY_LABELS: Record<Sky, string> = {
   clear: "Clear",
   "partly-cloudy": "Partly cloudy",
@@ -62,6 +64,42 @@ const SAMPLE_CATCH_WEATHER: Record<string, CatchWeather> = {
 
 function isSky(value: unknown): value is Sky {
   return typeof value === "string" && (SKIES as readonly string[]).includes(value);
+}
+
+/** The same UTC calendar day always has the same lake weather for every player. */
+export function weatherForDay(date: Date = new Date()): Sky {
+  const key = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}-${date.getUTCDate()}`;
+  let hash = 2166136261;
+  for (const char of key) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return DAILY_SKIES[(hash >>> 0) % DAILY_SKIES.length]!;
+}
+
+/** A local visual preview override. Server rewards must use issued daily weather. */
+export function weatherFromSearch(search: string): Sky | null {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const value = params.get("weather") ?? params.get("sky");
+  return value && isSky(value) ? value : null;
+}
+
+const WEATHER_RARITY: Record<Sky, Record<import("./types.ts").Rarity, number>> = {
+  clear: { common: 1.1, uncommon: 1, rare: 0.9, legendary: 0.9 },
+  "partly-cloudy": { common: 1, uncommon: 1, rare: 1, legendary: 1 },
+  overcast: { common: 0.95, uncommon: 1.1, rare: 1.1, legendary: 1.1 },
+  rain: { common: 0.9, uncommon: 1.15, rare: 1.2, legendary: 1.2 },
+  fog: { common: 0.9, uncommon: 1.05, rare: 1.25, legendary: 1.3 },
+};
+
+const WEATHER_SPECIES: Partial<Record<Sky, Record<string, number>>> = {
+  overcast: { "brook-trout": 1.35, "rainbow-trout": 1.35 },
+  rain: { pike: 1.7, "tiger-muskie": 1.35 },
+  fog: { catfish: 1.45, burbot: 1.45 },
+};
+
+export function biteWeatherMul(species: import("./types.ts").FishSpecies, sky: Sky): number {
+  return WEATHER_RARITY[sky][species.rarity] * (WEATHER_SPECIES[sky]?.[species.id] ?? 1);
 }
 
 function isWind(value: unknown): value is Wind {
