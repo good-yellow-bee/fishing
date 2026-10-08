@@ -446,11 +446,11 @@ export function useFishingGame(
           } else if (result === "snapped") {
             fx.snap();
             setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
-            resetToIdle("Broke off. Try again.");
+            resetToIdle("Too much tension — let go when the bar turns red.");
           } else if (result === "escaped") {
             fx.snap();
             setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
-            resetToIdle("Broke off. Try again.");
+            resetToIdle("Ran out of line — hold to reel whenever the fish is calm.");
           }
         }
       } catch (error) {

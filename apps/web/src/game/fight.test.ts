@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FISH } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime } from "./fight";
+import { FISH, type FishSpecies } from "@stillwater/shared";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -8,13 +8,54 @@ function fish(id: string) {
   return found;
 }
 
-/** Reels in calm water below 0.6 tension and eases off otherwise, like a careful angler. */
+/** Reels in calm water below 0.6 tension and lets go from the telegraph on, like a careful angler. */
 function land(runtime: FightRuntime, fromMs = 0): FightOutcome {
   let outcome: FightOutcome = "fighting";
   for (let now = fromMs; outcome === "fighting" && now < fromMs + 60_000; now += 50) {
-    outcome = runtime.step(now, 0.05, runtime.sim.surge !== 2 && runtime.sim.tension < 0.6);
+    outcome = runtime.step(now, 0.05, runtime.sim.surge === 0 && runtime.sim.tension < 0.6);
   }
   return outcome;
+}
+
+/** Deterministic random source (mulberry32) so each seed replays the same fish. */
+function seeded(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Policy = (sim: FightSim, reeling: boolean) => boolean;
+
+const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && sim.tension < 0.7;
+/** Ignores surges; 0.6 leaves room for the reaction delay, so calm water alone never turns the bar red. */
+const barOnly: Policy = (sim, reeling) => sim.tension < (reeling ? 0.6 : 0.45);
+
+const SEEDS = Array.from({ length: 12 }, (_, index) => index + 1);
+const FRAME_SEC = 1 / 60;
+const REACTION_FRAMES = 12;
+
+/** Plays a fight at 60 Hz where the angler's hand acts on what they saw 0.2 s earlier. */
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy) {
+  const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
+  const hand: boolean[] = Array(REACTION_FRAMES).fill(false);
+  let intent = false;
+  for (let frame = 0; frame < 120 / FRAME_SEC; frame++) {
+    intent = policy(runtime.sim, intent);
+    hand.push(intent);
+    const outcome = runtime.step(frame * FRAME_SEC * 1000, FRAME_SEC, hand.shift()!);
+    if (outcome !== "fighting") {
+      return { outcome, seconds: frame * FRAME_SEC, clean: outcome === "landed" && isCleanFight(runtime.performance) };
+    }
+  }
+  return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false };
+}
+
+function weights(species: FishSpecies) {
+  return [species.minWeight, (species.minWeight + species.maxWeight) / 2, species.maxWeight];
 }
 
 describe("makeFight", () => {
@@ -110,5 +151,50 @@ describe("makeFight", () => {
     expect(runtime.step(1, 0, false)).toBe("landed");
     expect(runtime.performance.peakTension).toBe(RED_TENSION);
     expect(isCleanFight(runtime.performance)).toBe(false);
+  });
+});
+
+describe("surges", () => {
+  it("lands every species, mostly clean, for an angler who lets go on the telegraph", () => {
+    for (const species of FISH) {
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, releaseOnTelegraph));
+
+        const label = `${species.id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(SEEDS.length * 0.8);
+      }
+    }
+  });
+
+  it("lands a mid-size sturgeon in about 25 seconds when played by the telegraph", () => {
+    const sturgeon = fish("sturgeon");
+    const fights = SEEDS.map((seed) => play(sturgeon, 50, seed, releaseOnTelegraph));
+    const average = fights.reduce((sum, fight) => sum + fight.seconds, 0) / fights.length;
+
+    expect(average).toBeGreaterThan(18);
+    expect(average).toBeLessThan(32);
+  });
+
+  it("costs pike and sturgeon the clean bonus when the angler only watches the tension bar", () => {
+    for (const id of ["pike", "sturgeon"]) {
+      const species = fish(id);
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
+
+        expect(fights.filter((fight) => !fight.clean).length, `${id} ${weight} lb`).toBeGreaterThan(SEEDS.length / 2);
+      }
+    }
+  });
+
+  it("never snaps a starter fish for an angler who only watches the tension bar", () => {
+    for (const id of ["golden-shiner", "perch", "bluegill"]) {
+      const species = fish(id);
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
+
+        expect(fights.map((fight) => fight.outcome), `${id} ${weight} lb`).toEqual(SEEDS.map(() => "landed"));
+      }
+    }
   });
 });

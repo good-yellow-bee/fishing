@@ -604,6 +604,30 @@ kbd {
   text-decoration: line-through;
 }
 
+.fight-bar .fight-controls {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(102, 81, 57, 0.25);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  color: #4a3b2a;
+}
+
+.fight-bar .on-touch {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .fight-bar .on-pointer {
+    display: none;
+  }
+
+  .fight-bar .on-touch {
+    display: inline;
+  }
+}
+
 .fight-bar .tick {
   position: absolute;
   top: 0;

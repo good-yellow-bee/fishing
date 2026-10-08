@@ -37,19 +37,23 @@ type Pattern = {
 };
 
 const PATTERNS: Record<ChallengeId, Pattern> = {
-  mash: { calmMin: 700, calmMax: 1200, surgeMin: 400, surgeMax: 700, warnMs: 220, strength: 0.35, reelSurge: 0.75 },
+  mash: { calmMin: 700, calmMax: 1200, surgeMin: 400, surgeMax: 700, warnMs: 220, strength: 0.25, reelSurge: 0.75 },
   timing: { calmMin: 1500, calmMax: 2400, surgeMin: 700, surgeMax: 1000, warnMs: 480, strength: 0.62, reelSurge: 0.18 },
   tension: { calmMin: 1100, calmMax: 1800, surgeMin: 1600, surgeMax: 2400, warnMs: 380, strength: 0.48, reelSurge: 0.4 },
   sequence: { calmMin: 800, calmMax: 1300, surgeMin: 700, surgeMax: 1100, warnMs: 260, strength: 0.5, reelSurge: 0.32 },
-  surge: { calmMin: 900, calmMax: 1400, surgeMin: 2000, surgeMax: 3200, warnMs: 350, strength: 0.52, reelSurge: 0.28 },
+  surge: { calmMin: 900, calmMax: 1400, surgeMin: 1200, surgeMax: 1900, warnMs: 350, strength: 0.52, reelSurge: 0.28 },
 };
 
+/** Reeling into a run jolts the line and keeps pulling, so watching only the tension bar is not enough; mash shakes stay gentle so starters never snap. */
+const SURGE_PULL = 2.5;
+const SURGE_JOLT = 0.15;
+
 export const FIGHT_LINES: Record<ChallengeId, [string, string, string]> = {
-  mash: ["Keep pumping", "It's shaking…", "SHAKE — ease a hair"],
-  timing: ["Steady retrieve", "It's lining up…", "RUN — let it go"],
-  tension: ["Grind it in", "The rod loads…", "BULLDOG — ease off"],
-  sequence: ["Short pumps", "Another burst…", "DOUBLE RUN — ease"],
-  surge: ["Don't horse it", "It's gathering…", "LONG RUN — ease off"],
+  mash: ["Reel in quick pumps", "Get ready to let go — it's shaking", "LET GO — head shake!"],
+  timing: ["Reel a steady retrieve", "Get ready to let go — it's lining up", "LET GO — it's running!"],
+  tension: ["Reel and grind it in", "Get ready to let go — the rod loads", "LET GO — bulldog run!"],
+  sequence: ["Reel in short pumps", "Get ready to let go — another burst", "LET GO — double run!"],
+  surge: ["Reel easy — don't horse it", "Get ready to let go — it's gathering", "LET GO — long run!"],
 };
 
 export function makeFight(
@@ -85,6 +89,7 @@ export function makeFight(
       } else if (sim.surge === 1) {
         sim.surge = 2;
         nextAt = nowMs + range(pattern.surgeMin, pattern.surgeMax);
+        if (reeling) sim.tension += SURGE_JOLT;
       } else {
         sim.surge = 0;
         completedSurges += 1;
@@ -94,7 +99,7 @@ export function makeFight(
     }
 
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
-    const eff = pattern.strength * surgeScale + escalation;
+    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
       sim.line -= reelRate * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
