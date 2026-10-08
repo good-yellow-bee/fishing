@@ -703,7 +703,7 @@ function HookedFish({
   });
   return (
     <group ref={fishRef} scale={FIGHT_FISH_SCALE} visible={false}>
-      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} flat />
+      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} unlit />
     </group>
   );
 }
@@ -1599,7 +1599,7 @@ export function FishingWorld(props: Props) {
       shadows
       dpr={[1, 1.75]}
       camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
-      gl={{ antialias: true }}
+      gl={{ antialias: true, stencil: true }}
       style={{ cursor: "crosshair" }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
