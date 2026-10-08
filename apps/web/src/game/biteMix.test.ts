@@ -101,12 +101,34 @@ describe("bite mix", () => {
     }
   });
 
-  it("never locks a starter out with a big lure", () => {
-    for (const spot of ["dock", "reeds", "dropoff", "point"] as const) {
-      for (const lure of ["Spinnerbait", "#5 Mepps", "Spoon", "Crayfish crankbait"]) {
-        const fish = Array.from({ length: 48 }, (_, i) => pickBite(spot, starter, false, () => i / 48, "day", lure));
-        const landable = fish.filter((one) => canLand(starter, one)).length;
-        expect(landable / fish.length, `${spot} ${lure}`).toBeGreaterThan(0.6);
+  const HOURS = ["dawn", "day", "dusk", "night"] as const;
+  const BANKS = ["dock", "reeds", "dropoff", "point"] as const;
+  function landableShare(spot: SpotId, profile: Profile, hour: (typeof HOURS)[number], lure: string) {
+    const fish = Array.from({ length: 480 }, (_, i) => pickBite(spot, profile, false, () => i / 480, hour, lure));
+    return fish.filter((one) => canLand(profile, one)).length / fish.length;
+  }
+
+  it("never locks a starter out, whatever the lure or the hour", () => {
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        for (const lure of ["Spinnerbait", "#5 Mepps", "Spoon", "Crayfish crankbait", "Nightcrawlers"]) {
+          expect(landableShare(spot, starter, hour, lure), `${spot} ${hour} ${lure}`).toBeGreaterThan(0.55);
+        }
+      }
+    }
+  });
+
+  it("lands at least as often after every Strength upgrade", () => {
+    for (const spot of BANKS) {
+      for (const hour of HOURS) {
+        for (const lure of ["Spinnerbait", "Nightcrawlers"]) {
+          let previous = 0;
+          for (let strength = 1; strength <= 5; strength++) {
+            const share = landableShare(spot, { ...starter, strength, accuracy: strength >= 4 ? 3 : 1 }, hour, lure);
+            expect(share, `${spot} ${hour} ${lure} strength ${strength}`).toBeGreaterThanOrEqual(previous - 1e-9);
+            previous = share;
+          }
+        }
       }
     }
   });

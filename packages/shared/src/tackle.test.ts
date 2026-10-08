@@ -7,6 +7,7 @@ import {
   packedCount,
   parseTackleLabel,
   sampleTackle,
+  isLureLabel,
   withPacked,
   withTackleItem,
 } from "./tackle.ts";
@@ -84,6 +85,15 @@ describe("tackle", () => {
     const pliers = withPacked(sample, "gear-dawn-pliers", true);
     expect(luresPacked([...pliers, typed])).toEqual(["Rapala minnow"]);
     expect(luresPacked(pliers)).toEqual(luresPacked(sample));
+  });
+
+  it("tells typed lures from tools and line", () => {
+    for (const lure of ["In-line spinner", "Lamprey", "Live scale shad", "Knife jig", "Spreader bar", "Rapala minnow", "Mister Twister", "Size 8 hooks", "Woolly buggers"]) {
+      expect(isLureLabel(lure), lure).toBe(true);
+    }
+    for (const tool of ["Steel leader", "6x tippet", "Braided line", "Landing net", "Jaw spreaders", "Headlamp", "5-weight fly rod", "Spinning reel", "Hemostats"]) {
+      expect(isLureLabel(tool), tool).toBe(false);
+    }
   });
 
   it("asks for a short name", () => {

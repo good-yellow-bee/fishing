@@ -20,7 +20,7 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
 };
 
 /** Fish the angler cannot land yet still bite now and then, as a glimpse of what Strength unlocks. */
-const OUT_OF_REACH_BITE = 0.5;
+const OUT_OF_REACH_BITE = 0.35;
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
 function favorsLargeFish(lure: string): boolean {
@@ -76,14 +76,20 @@ export function pickBite(
       lure,
     );
   }
-  // A big lure must not lock a weak angler out: when nothing it draws is landable, the small fish still bite.
-  if (!pool.some((fish) => canLand(profile, fish))) {
-    const drawn = pool;
-    pool = [...drawn, ...home.filter((fish) => !drawn.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))];
-  }
-  const weights = pool.map(
-    (fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE),
-  );
+  const appeal = (fish: FishSpecies) => rarityWeight[fish.rarity] * biteHourMul(fish, hour);
+  const drawn = pool.reduce((sum, fish) => sum + appeal(fish), 0);
+  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish), 0);
+  // A big lure must not lock a weak angler out: the bank's other landable fish fill in for the share of the
+  // lure's draw still out of reach, so every Strength rank lands at least as often as the one before.
+  const fillIn = drawn > 0 ? 1 - inReach / drawn : 0;
+  const fillers = fillIn > 0
+    ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
+    : [];
+  const weights = [
+    ...pool.map((fish) => appeal(fish) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
+    ...fillers.map((fish) => appeal(fish) * fillIn),
+  ];
+  pool = [...pool, ...fillers];
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= weights[i]!;
