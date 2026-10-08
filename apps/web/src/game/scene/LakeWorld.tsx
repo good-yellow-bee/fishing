@@ -18,7 +18,7 @@ import {
 } from "./bankWalk";
 import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
 import { LakeRain } from "./LakeRain";
-import { bedColor, bedHeight, waterDepthColor, waterHeight } from "./water";
+import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
 
 type Vec3 = [number, number, number];
 
@@ -367,7 +367,7 @@ function makeBedSurface(radiusX: number, radiusZ: number) {
 }
 
 // Concentric rings so the surface can chop. Local +Z is world up after the mesh pitch.
-function makeWaveSurface(radiusX: number, radiusZ: number) {
+export function makeWaveSurface(radiusX: number, radiusZ: number) {
   const rings = 24;
   const segments = 84;
   const count = 1 + rings * segments;
@@ -404,12 +404,27 @@ function makeWaveSurface(radiusX: number, radiusZ: number) {
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
   geometry.userData.base = base;
+  const shoreWeights = new Float32Array(position.count);
+  const tints = new Float32Array(position.count * 3);
+  for (let i = 0; i < position.count; i += 1) {
+    const x = base[i * 2] ?? 0;
+    const worldZ = -(base[i * 2 + 1] ?? 0) + LAKE_CENTER_Z;
+    shoreWeights[i] = waterShoreWeight(x, worldZ);
+    const tint = waterDepthColor(x, worldZ);
+    tints[i * 3] = tint.r;
+    tints[i * 3 + 1] = tint.g;
+    tints[i * 3 + 2] = tint.b;
+  }
+  geometry.userData.shoreWeights = shoreWeights;
+  geometry.userData.tints = tints;
   return geometry;
 }
 
-function displaceWater(geometry: THREE.BufferGeometry, time: number) {
+export function displaceWater(geometry: THREE.BufferGeometry, time: number) {
   const position = geometry.getAttribute("position") as THREE.BufferAttribute;
   const base = geometry.userData.base as Float32Array;
+  const shoreWeights = geometry.userData.shoreWeights as Float32Array;
+  const tints = geometry.userData.tints as Float32Array;
   let colors = geometry.getAttribute("color") as THREE.BufferAttribute | undefined;
   if (!colors) {
     colors = new THREE.BufferAttribute(new Float32Array(position.count * 3), 3);
@@ -419,11 +434,10 @@ function displaceWater(geometry: THREE.BufferGeometry, time: number) {
     const x = base[i * 2] ?? 0;
     const y = base[i * 2 + 1] ?? 0;
     const worldZ = -y + LAKE_CENTER_Z;
-    const height = waterHeight(x, worldZ, time);
+    const height = waterHeightWithShoreWeight(x, worldZ, time, shoreWeights[i] ?? 0);
     position.setZ(i, height);
-    const tint = waterDepthColor(x, worldZ);
     const crest = 1 + height * 0.55;
-    colors.setXYZ(i, tint.r * crest, tint.g * crest, tint.b * crest);
+    colors.setXYZ(i, (tints[i * 3] ?? 0) * crest, (tints[i * 3 + 1] ?? 0) * crest, (tints[i * 3 + 2] ?? 0) * crest);
   }
   colors.needsUpdate = true;
   position.needsUpdate = true;
