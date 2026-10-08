@@ -80,7 +80,7 @@ export function FightBar({ fight, sim, performance }: Props) {
           <p className="fight-controls">
             <span className="on-pointer">HOLD click / Space to reel</span>
             <span className="on-touch">HOLD the screen to reel</span>
-            {" · "}LET GO when tension goes red or the fish runs
+            {" · "}LET GO when the fish is about to run or tension goes red
           </p>
         </>
       )}

@@ -8,11 +8,11 @@ function fish(id: string) {
   return found;
 }
 
-/** Reels in calm water below 0.6 tension and lets go from the telegraph on, like a careful angler. */
+/** Reels in calm water below 0.6 tension and eases off otherwise, like a careful angler. */
 function land(runtime: FightRuntime, fromMs = 0): FightOutcome {
   let outcome: FightOutcome = "fighting";
   for (let now = fromMs; outcome === "fighting" && now < fromMs + 60_000; now += 50) {
-    outcome = runtime.step(now, 0.05, runtime.sim.surge === 0 && runtime.sim.tension < 0.6);
+    outcome = runtime.step(now, 0.05, runtime.sim.surge !== 2 && runtime.sim.tension < 0.6);
   }
   return outcome;
 }
@@ -33,15 +33,20 @@ type Policy = (sim: FightSim, reeling: boolean) => boolean;
 const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && sim.tension < 0.7;
 /** Ignores surges; 0.6 leaves room for the reaction delay, so calm water alone never turns the bar red. */
 const barOnly: Policy = (sim, reeling) => sim.tension < (reeling ? 0.6 : 0.45);
+/** Misses the warning and lets go only on LET GO or red, resuming once calm and back in the green. */
+const lateOnRuns: Policy = (sim, reeling) => sim.surge !== 2 && sim.tension < (reeling ? RED_TENSION : 0.55);
+/** Ignores runs entirely and reels whenever the bar is out of the red. */
+const redOnly: Policy = (sim) => sim.tension < RED_TENSION;
 
 const SEEDS = Array.from({ length: 12 }, (_, index) => index + 1);
 const FRAME_SEC = 1 / 60;
 const REACTION_FRAMES = 12;
+const SLOW_REACTION_FRAMES = 15;
 
-/** Plays a fight at 60 Hz where the angler's hand acts on what they saw 0.2 s earlier. */
-function play(species: FishSpecies, weight: number, seed: number, policy: Policy) {
+/** Plays a fight at 60 Hz where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES) {
   const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
-  const hand: boolean[] = Array(REACTION_FRAMES).fill(false);
+  const hand: boolean[] = Array(reactionFrames).fill(false);
   let intent = false;
   for (let frame = 0; frame < 120 / FRAME_SEC; frame++) {
     intent = policy(runtime.sim, intent);
@@ -176,24 +181,40 @@ describe("surges", () => {
     expect(average).toBeLessThan(32);
   });
 
-  it("costs pike and sturgeon the clean bonus when the angler only watches the tension bar", () => {
-    for (const id of ["pike", "sturgeon"]) {
-      const species = fish(id);
+  it("lands every non-starter fish but costs the clean bonus when the angler only watches the tension bar", () => {
+    for (const species of FISH.filter((candidate) => candidate.challenge !== "mash")) {
       for (const weight of weights(species)) {
         const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
 
-        expect(fights.filter((fight) => !fight.clean).length, `${id} ${weight} lb`).toBeGreaterThan(SEEDS.length / 2);
+        const label = `${species.id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => !fight.clean).length, label).toBeGreaterThan(SEEDS.length / 2);
       }
     }
   });
 
-  it("never snaps a starter fish for an angler who only watches the tension bar", () => {
+  it("lands starter fish, mostly clean, for an angler who only watches the tension bar", () => {
     for (const id of ["golden-shiner", "perch", "bluegill"]) {
       const species = fish(id);
       for (const weight of weights(species)) {
         const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
 
-        expect(fights.map((fight) => fight.outcome), `${id} ${weight} lb`).toEqual(SEEDS.map(() => "landed"));
+        const label = `${id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(SEEDS.length * 0.8);
+      }
+    }
+  });
+
+  it("never snaps a fish for a slow angler who lets go only on LET GO or a red bar", () => {
+    for (const [name, policy] of Object.entries({ lateOnRuns, redOnly })) {
+      for (const species of FISH) {
+        for (const weight of weights(species)) {
+          const fights = SEEDS.map((seed) => play(species, weight, seed, policy, SLOW_REACTION_FRAMES));
+
+          const label = `${name} ${species.id} ${weight} lb`;
+          expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        }
       }
     }
   });

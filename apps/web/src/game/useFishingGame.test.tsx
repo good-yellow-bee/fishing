@@ -146,7 +146,7 @@ describe("useFishingGame lost fight", () => {
     step.mockReturnValueOnce("snapped");
     castAndFight(surface, 1);
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
-    expect(hint()).toMatch(/too much tension.*let go when the bar turns red/i);
+    expect(hint()).toMatch(/too much tension.*let go when the bar turns red or the fish is about to run/i);
 
     act(() => (container!.querySelector("button") as HTMLButtonElement).click());
     step.mockReturnValueOnce("escaped");

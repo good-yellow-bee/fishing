@@ -48,7 +48,11 @@ describe("FightBar controls", () => {
     const controls = container!.querySelector(".fight-controls")!.textContent;
     expect(controls).toMatch(/hold click \/ space to reel/i);
     expect(controls).toMatch(/hold the screen to reel/i);
-    expect(controls).toMatch(/let go when tension goes red or the fish runs/i);
+    expect(controls).toMatch(/let go when the fish is about to run or tension goes red/i);
+
+    sim.current.surge = 1;
+    frame();
+    expect(container!.querySelector(".fight-status")!.textContent).toMatch(/^let go now/i);
 
     sim.current.surge = 2;
     frame();

@@ -1220,7 +1220,7 @@ kbd {
   }
 
   .fight-bar {
-    bottom: clamp(16px, calc(100dvh - 230px), 244px);
+    bottom: clamp(16px, calc(100dvh - 280px), 244px);
     width: min(340px, 92vw);
   }
 
