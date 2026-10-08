@@ -1,6 +1,10 @@
+import type { FishSpecies, Rarity } from "./types.ts";
+
 export const SKIES = ["clear", "partly-cloudy", "overcast", "rain", "fog"] as const;
 
 export type Sky = (typeof SKIES)[number];
+
+export const DAILY_SKIES = ["clear", "overcast", "rain", "fog"] as const satisfies readonly Sky[];
 
 export const SKY_LABELS: Record<Sky, string> = {
   clear: "Clear",
@@ -8,6 +12,14 @@ export const SKY_LABELS: Record<Sky, string> = {
   overcast: "Overcast",
   rain: "Rain",
   fog: "Fog",
+};
+
+export const SKY_BLURB: Record<Sky, string> = {
+  clear: "Bright water. Commons feed, rare fish hang back.",
+  "partly-cloudy": "Mixed light. No fish favored.",
+  overcast: "Gray light. Trout and bass roam.",
+  rain: "Rain on the water. Pike and muskie hunt.",
+  fog: "Fog on the lake. Catfish and burbot stir.",
 };
 
 export const WINDS = [
@@ -62,6 +74,80 @@ const SAMPLE_CATCH_WEATHER: Record<string, CatchWeather> = {
 
 function isSky(value: unknown): value is Sky {
   return typeof value === "string" && (SKIES as readonly string[]).includes(value);
+}
+
+/** FNV-1a over the local calendar day, then a murmur3 finalizer: raw FNV low bits nearly rotate from one day to the next. */
+function dayHash(date: Date, salt: string): number {
+  const key = `${salt}:${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  let hash = 2166136261;
+  for (const char of key) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  hash ^= hash >>> 16;
+  hash = Math.imul(hash, 0x85ebca6b);
+  hash ^= hash >>> 13;
+  hash = Math.imul(hash, 0xc2b2ae35);
+  hash ^= hash >>> 16;
+  return hash >>> 0;
+}
+
+/** Local calendar day, the same clock as lakeHour, so the weather turns over with the hour at local midnight. */
+export function weatherForDay(date: Date = new Date()): Sky {
+  return DAILY_SKIES[dayHash(date, "sky") % DAILY_SKIES.length]!;
+}
+
+export function weatherFromSearch(search: string): Sky | null {
+  const raw = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search).get("sky");
+  return DAILY_SKIES.find((sky) => sky === raw) ?? null;
+}
+
+const WIND_MPH: Record<Sky, [number, number]> = {
+  clear: [0, 12],
+  "partly-cloudy": [2, 14],
+  overcast: [4, 16],
+  rain: [8, 24],
+  fog: [0, 4],
+};
+
+const LIGHT_WINDS = ["light-north", "light-east", "light-south", "light-west"] as const satisfies readonly Wind[];
+
+function windFor(mph: number, heading: number): Wind {
+  if (mph < 3) return "calm";
+  if (mph < 11) return LIGHT_WINDS[heading % LIGHT_WINDS.length]!;
+  return mph < 19 ? "breezy" : "strong";
+}
+
+/** Field-log conditions for a catch on this lake: wind and water temperature hold for the whole local day. */
+export function dailyConditions(date: Date, sky: Sky): CatchWeather {
+  const seed = dayHash(date, "conditions");
+  const [calmest, windiest] = WIND_MPH[sky];
+  const mph = calmest + ((seed % 1000) / 1000) * (windiest - calmest);
+  const dayOfYear = Math.round(
+    (new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / 86_400_000,
+  );
+  // A northern lake: coldest water in early February, warmest in early August.
+  const season = Math.cos(((dayOfYear - 218) / 365) * 2 * Math.PI);
+  const drift = ((seed >>> 10) % 5) - 2;
+  return { sky, wind: windFor(mph, seed >>> 20), waterTempF: Math.round(56 + 19 * season + drift) };
+}
+
+const WEATHER_RARITY: Record<Sky, Record<Rarity, number>> = {
+  clear: { common: 1.1, uncommon: 1, rare: 0.9, legendary: 0.9 },
+  "partly-cloudy": { common: 1, uncommon: 1, rare: 1, legendary: 1 },
+  overcast: { common: 0.95, uncommon: 1.1, rare: 1.1, legendary: 1.1 },
+  rain: { common: 0.9, uncommon: 1.15, rare: 1.2, legendary: 1.2 },
+  fog: { common: 0.9, uncommon: 1.05, rare: 1.25, legendary: 1.3 },
+};
+
+const WEATHER_SPECIES: Partial<Record<Sky, Record<string, number>>> = {
+  overcast: { "brook-trout": 1.35, "rainbow-trout": 1.35, "smallmouth-bass": 1.7 },
+  rain: { pike: 1.7, "tiger-muskie": 1.35 },
+  fog: { catfish: 1.45, burbot: 1.45 },
+};
+
+export function biteWeatherMul(species: FishSpecies, sky: Sky): number {
+  return WEATHER_RARITY[sky][species.rarity] * (WEATHER_SPECIES[sky]?.[species.id] ?? 1);
 }
 
 function isWind(value: unknown): value is Wind {

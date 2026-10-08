@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { anglerLevel, LAKE_HOUR_LABELS, SKILL_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
+import {
+  anglerLevel,
+  LAKE_HOUR_LABELS,
+  SKILL_LABELS,
+  SKY_BLURB,
+  SKY_LABELS,
+  type LakeHour,
+  type Profile,
+  type Sky,
+} from "@stillwater/shared";
 import { authClient } from "../auth-client";
 import { fx } from "../game/fx";
 
@@ -8,13 +17,14 @@ type Props = {
   profile: Profile;
   email: string;
   hour: LakeHour;
+  sky: Sky;
 };
 
-export function Hud({ profile, email, hour }: Props) {
+export function Hud({ profile, email, hour, sky }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const [muted, setMuted] = useState(!fx.enabled);
   return (
-    <header className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour}>
+    <header className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
       <div className="hud-brand">
         <span className="eyebrow">Northern lake</span>
         <strong>Stillwater</strong>
@@ -25,6 +35,10 @@ export function Hud({ profile, email, hour }: Props) {
       </div>
       <div className="hud-stats">
         <span className="hour-chip">{LAKE_HOUR_LABELS[hour]}</span>
+        {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
+        <span className="sky-chip" title={SKY_BLURB[sky]}>
+          {SKY_LABELS[sky]}
+        </span>
         <span className="level-chip">Level {level}</span>
         <span className="points-chip">{profile.points} points</span>
         <span className="skill-chip">

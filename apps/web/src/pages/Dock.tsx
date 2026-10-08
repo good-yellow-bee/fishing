@@ -4,6 +4,7 @@ import {
   canUseSpot,
   catchPoints,
   catchStamp,
+  dailyConditions,
   fieldLogBestBeat,
   isFishingStance,
   lakeHour,
@@ -12,6 +13,8 @@ import {
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
+  weatherForDay,
+  weatherFromSearch,
   type CatchSubmission,
   type SkillId,
 } from "@stillwater/shared";
@@ -33,8 +36,10 @@ import { useCatchSync } from "../game/useCatchSync";
 
 export function DockPage() {
   const [params] = useSearchParams();
-  const [clockHour] = useState(() => lakeHour());
-  const hour = lakeHourFromSearch(params.toString()) ?? clockHour;
+  // One clock for the hour and the day's weather, so both turn over together.
+  const [openedAt] = useState(() => new Date());
+  const hour = lakeHourFromSearch(params.toString()) ?? lakeHour(openedAt);
+  const sky = weatherFromSearch(params.toString()) ?? weatherForDay(openedAt);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +47,7 @@ export function DockPage() {
   const [lureChoices] = useState(() => luresPacked(readTackle()));
   const [chosenLure, setChosenLure] = useState(() => lureChoices[0] ?? "Bobber");
   const tiedLure = useRef(chosenLure);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky);
   const scenePhase = game.outcome ? "result" : game.phase;
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
@@ -91,6 +96,8 @@ export function DockPage() {
 
   useEffect(() => () => fx.ambient.stop(), []);
 
+  useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
+
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
     const { id, species, weight, spot: catchSpot } = game.outcome;
@@ -102,6 +109,7 @@ export function DockPage() {
         bank: SPOT_LABELS[catchSpot],
         caughtAt: new Date().toISOString(),
         lure: tiedLure.current,
+        weather: dailyConditions(openedAt, sky),
       });
       setFieldSaved(true);
       setFieldLogError("");
@@ -109,7 +117,7 @@ export function DockPage() {
       setFieldSaved(false);
       setFieldLogError(err instanceof Error ? err.message : "The field log could not be saved.");
     }
-  }, [game.outcome]);
+  }, [game.outcome, openedAt, sky]);
 
   useEffect(() => {
     if (game.outcome?.kind !== "landed") {
@@ -173,7 +181,7 @@ export function DockPage() {
 
   return (
     <div className="dock-page">
-      <Hud profile={me.profile} email={me.user.email} hour={hour} />
+      <Hud profile={me.profile} email={me.user.email} hour={hour} sky={sky} />
       <div
         className="scene-wrap"
         ref={game.surfaceRef}
@@ -183,6 +191,7 @@ export function DockPage() {
         data-aim-hint={game.aimHint}
         data-nibble={game.nibble ? "1" : "0"}
         data-hour={hour}
+        data-sky={sky}
         data-lure={lure}
         data-lure-locked={lureLocked ? "1" : "0"}
       >
@@ -193,6 +202,7 @@ export function DockPage() {
           sim={game.sim}
           nibble={game.nibble}
           hour={hour}
+          sky={sky}
           species={
             game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? null)
           }

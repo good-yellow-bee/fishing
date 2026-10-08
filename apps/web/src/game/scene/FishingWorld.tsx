@@ -14,6 +14,7 @@ import {
   stanceAt,
   type FishSpecies,
   type LakeHour,
+  type Sky,
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
@@ -67,7 +68,7 @@ import { missBobberLift, missLineSag, missView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
-import { LakeWorld, LAKE_HOUR_LOOK } from "./LakeWorld";
+import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
 import { anglerPose, shortestYaw } from "./pose";
 import {
@@ -96,6 +97,7 @@ type Props = {
   sim: SimRef;
   nibble: boolean;
   hour: LakeHour;
+  sky: Sky;
   species: FishSpecies | null;
   weight: number;
 };
@@ -522,7 +524,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "hour" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "hour" | "sky" | "spot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -1552,7 +1554,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props) {
+function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1562,7 +1564,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, species, weight }: Props
       <FightMotion phase={phase} sim={sim} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
-      <LakeWorld spot={spot} hour={hour} />
+      <LakeWorld spot={spot} hour={hour} sky={sky} />
       <WaterAim phase={phase} aim={aim} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
@@ -1601,7 +1603,7 @@ export function FishingWorld(props: Props) {
         gl.toneMappingExposure = props.hour === "night" ? 0.72 : props.hour === "dusk" ? 0.92 : 1.05;
       }}
     >
-      <color attach="background" args={[LAKE_HOUR_LOOK[props.hour].fog]} />
+      <color attach="background" args={[weatherLook(props.hour, props.sky).fog]} />
       <Suspense fallback={null}>
         <Scene {...props} />
       </Suspense>

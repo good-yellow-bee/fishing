@@ -1,7 +1,6 @@
+import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, onDockPlanks, walkableAt } from "@stillwater/shared";
 import { waterHeight } from "./water";
 
-/** Drops in the air at once. Two sheets share the basin so the shower stays thick. */
-export const RAIN_COUNT = 128;
 export const RAIN_SKY_TOP = 9.2;
 export const RAIN_FALL_SEC = 0.95;
 export const RAIN_RIPPLE_SEC = 0.62;
@@ -9,26 +8,32 @@ export const RAIN_STREAK_LENGTH = 1.3;
 /** Meters a splash ring rides above the chop. */
 export const RAIN_RIPPLE_LIFT = 0.06;
 
-const PLACES = 64;
 const CYCLE = RAIN_FALL_SEC + RAIN_RIPPLE_SEC;
-const XS = [-10.4, -7.5, -4.8, -2.2, 2.2, 4.8, 7.5, 10.4] as const;
-const ZS = [-12.6, -9.8, -7.1, -4.5, -1.9, 0.5, 2.7, 4.6] as const;
+const STEP_X = 2.7;
+const STEP_Z = 2.6;
 
 export type RainColumn = { x: number; z: number; phase: number };
 export type RainStreak = { x: number; y: number; z: number; length: number };
 export type RainRipple = { x: number; y: number; z: number; radius: number; open: number };
 
-/** Fixed landing for one drop. The second sheet is shifted so rings do not stack. */
+/** Every bank's water gets the same shower, so rain falls around the bobber wherever the angler casts. */
+const COLUMNS: RainColumn[] = [0, 1].flatMap((layer) => {
+  const sheet: { x: number; z: number }[] = [];
+  // The second sheet is shifted half a step so rings do not stack.
+  for (let x = -LAKE_RX + layer * STEP_X * 0.5; x <= LAKE_RX; x += STEP_X) {
+    for (let z = LAKE_CENTER_Z - LAKE_RZ + layer * STEP_Z * 0.5; z <= LAKE_CENTER_Z + LAKE_RZ; z += STEP_Z) {
+      if (inLake(x, z) && !onDockPlanks(x, z) && !walkableAt(x, z)) sheet.push({ x, z });
+    }
+  }
+  return sheet.map((place, slot) => ({ ...place, phase: (slot * 0.381 + layer * 0.5) % 1 }));
+});
+
+/** Drops in the air at once. Two sheets share the basin so the shower stays thick. */
+export const RAIN_COUNT = COLUMNS.length;
+
+/** Fixed landing for one drop. */
 export function rainColumn(index: number): RainColumn {
-  const slot = ((index % PLACES) + PLACES) % PLACES;
-  const layer = Math.floor(index / PLACES) % 2;
-  const col = slot % XS.length;
-  const row = Math.floor(slot / XS.length);
-  return {
-    x: XS[col]! + layer * 1.35,
-    z: ZS[row]! + layer * 1.1,
-    phase: (slot * 0.381 + layer * 0.5) % 1,
-  };
+  return COLUMNS[((index % RAIN_COUNT) + RAIN_COUNT) % RAIN_COUNT]!;
 }
 
 function cycleU(index: number, time: number) {

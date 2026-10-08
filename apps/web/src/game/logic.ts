@@ -4,12 +4,14 @@ import {
   legendaryCanBite,
   rollWeight,
   biteHourMul,
+  biteWeatherMul,
   LAKE_HOURS,
   lakeHour,
   lakeHourWaitMul,
   type FishSpecies,
   type LakeHour,
   type Profile,
+  type Sky,
   type SpotId,
 } from "@stillwater/shared";
 
@@ -25,6 +27,18 @@ const OUT_OF_REACH_BITE = 0.35;
 
 function appeal(fish: FishSpecies, hour: LakeHour): number {
   return rarityWeight[fish.rarity] * biteHourMul(fish, hour);
+}
+
+/** Weather reshuffles fish within what the angler can land and within what they cannot, so it never moves the landable share. */
+function weatherWeights(pool: FishSpecies[], weights: number[], profile: Profile, sky: Sky): number[] {
+  const landable = pool.map((fish) => canLand(profile, fish));
+  const shifted = weights.map((weight, i) => weight * biteWeatherMul(pool[i]!, sky));
+  const total = (list: number[], group: boolean) => list.reduce((sum, weight, i) => (landable[i] === group ? sum + weight : sum), 0);
+  const scale = [false, true].map((group) => {
+    const after = total(shifted, group);
+    return after > 0 ? total(weights, group) / after : 1;
+  });
+  return shifted.map((weight, i) => weight * scale[Number(landable[i])]!);
 }
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
@@ -100,6 +114,7 @@ export function pickBite(
   random = Math.random,
   hour: LakeHour = lakeHour(),
   lure?: string,
+  sky?: Sky,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) home = home.filter((fish) => fish.rarity === "common");
@@ -125,9 +140,10 @@ export function pickBite(
     ...fillers.map((fish) => appeal(fish, hour) * fillIn),
   ];
   pool = [...pool, ...fillers];
-  let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
+  const drawWeights = sky ? weatherWeights(pool, weights, profile, sky) : weights;
+  let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
-    roll -= weights[i]!;
+    roll -= drawWeights[i]!;
     if (roll <= 0) return pool[i]!;
   }
   return pool[0]!;
