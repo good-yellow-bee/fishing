@@ -1441,7 +1441,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
   const flashMat = useRef<THREE.MeshBasicMaterial>(null);
   const sprayPool = useMemo(() => {
     const holder = new THREE.Group();
-    const geometry = new THREE.SphereGeometry(0.28, 8, 6);
+    const geometry = new THREE.SphereGeometry(0.42, 8, 6);
     for (let i = 0; i < STRIKE_DROPS; i += 1) {
       const material = new THREE.MeshBasicMaterial({
         color: 0xf7fffb,
@@ -1490,7 +1490,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       flash.current.visible = spray != null;
       if (spray) {
         flash.current.position.set(spray.x, spray.y + 0.01, spray.z);
-        flash.current.scale.setScalar(0.45 + spray.strength * 1.15);
+        flash.current.scale.setScalar(1.15 + spray.strength * 2.1);
         flashMat.current.opacity = spray.strength * 0.82;
       }
     }

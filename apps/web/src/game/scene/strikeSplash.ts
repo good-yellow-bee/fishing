@@ -66,7 +66,7 @@ export function strikeRing(phase: ScenePhase, age: number, x: number, z: number,
     x: spot.x,
     y: waterHeight(spot.x, spot.z, time) + STRIKE_RING_LIFT,
     z: spot.z,
-    radius: 0.55 + open * 2.5,
+    radius: 1.15 + open * 3.2,
     open,
   };
 }
@@ -93,7 +93,7 @@ export function strikeDrop(phase: ScenePhase, index: number, age: number): Strik
   const rise = u < 0.24 ? 0.55 + (u / 0.24) * 0.45 : (1 - u) / 0.76;
   return {
     x: Math.cos(angle) * spread,
-    y: Math.max(0, rise) * (0.62 + (i % 3) * 0.28),
+    y: Math.max(0, rise) * (1.15 + (i % 3) * 0.45),
     z: Math.sin(angle) * spread,
     opacity: (1 - u) * 0.95,
   };
