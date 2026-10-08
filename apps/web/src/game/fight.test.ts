@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, type FightOutcome, type FightRuntime } from "./fight";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -79,14 +79,25 @@ describe("makeFight", () => {
     expect(isCleanFight(runtime.performance)).toBe(true);
   });
 
-  it("lands an unclean fight after the fish takes line past the hookset", () => {
+  it("stays clean when a hookset tap leaves the line idle before reeling", () => {
     const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
-    runtime.step(0, 0, false);
-    runtime.step(1000, 1, false);
+    let now = 0;
+    for (; now <= 720; now += 16) runtime.step(now, 0.016, false);
 
-    expect(runtime.sim.line).toBeGreaterThan(1);
-    expect(land(runtime, 1000)).toBe("landed");
+    expect(runtime.performance.maxLine).toBeGreaterThan(1);
+    expect(land(runtime, now)).toBe("landed");
     expect(runtime.performance.peakTension).toBeLessThan(RED_TENSION);
+    expect(isCleanFight(runtime.performance)).toBe(true);
+  });
+
+  it("lands an unclean fight after the fish nearly runs out the line", () => {
+    const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+    let now = 0;
+    for (; runtime.sim.line < RUN_OUT_LINE; now += 50) expect(runtime.step(now, 0.05, false)).toBe("fighting");
+
+    expect(land(runtime, now)).toBe("landed");
+    expect(runtime.performance.peakTension).toBeLessThan(RED_TENSION);
+    expect(runtime.performance.maxLine).toBeGreaterThanOrEqual(RUN_OUT_LINE);
     expect(isCleanFight(runtime.performance)).toBe(false);
   });
 

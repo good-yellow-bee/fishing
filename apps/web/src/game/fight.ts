@@ -18,9 +18,12 @@ export type FightPerformance = {
 /** Where FightBar turns the tension bar red. */
 export const RED_TENSION = 0.8;
 
-/** Clean = tension never went red and the fish never took line past the hookset, where FightBar's line bar is empty. */
+/** 80% of the way from hookset (1) to escape (1.25), like RED_TENSION; a hookset tap's idle frames stay far below it. */
+export const RUN_OUT_LINE = 1.2;
+
+/** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension < RED_TENSION && performance.maxLine <= 1;
+  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE;
 }
 
 type Pattern = {
