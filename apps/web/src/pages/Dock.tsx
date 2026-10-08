@@ -48,7 +48,7 @@ export function DockPage() {
   const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
   const userId = me?.profile.userId;
-  const catchSync = useCatchSync(userId, setMe, setError);
+  const catchSync = useCatchSync(userId, setMe);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
   const fieldBeat = useMemo(() => {

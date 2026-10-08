@@ -13,20 +13,21 @@ function message(err: unknown, fallback: string) {
 }
 
 /** Saves landed catches through the local retry queue, posting only for the account that owns the queue. */
-export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void, onRefreshError: (message: string) => void) {
+export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void) {
   const [pendingCount, setPendingCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [error, setError] = useState("");
   const syncing = useRef(false);
   const syncAgain = useRef(false);
   const retryTimer = useRef<number | undefined>(undefined);
+  // A catch storage refused to queue; it lives here until a direct post succeeds.
+  const unsaved = useRef<CatchSubmission | null>(null);
+  const staleProfile = useRef(false);
 
   const countQueue = useCallback((owner: string) => {
-    setPendingCount(pendingCatches(owner).length);
+    setPendingCount(pendingCatches(owner).length + (unsaved.current ? 1 : 0));
     setRejectedCount(rejectedCatches(owner).length);
   }, []);
-
-  const refresh = useCallback(() => getMe().then(onMe, (err: unknown) => onRefreshError(message(err, "Profile refresh failed."))), [onMe, onRefreshError]);
 
   const sync = useCallback(async () => {
     if (!userId) return;
@@ -39,17 +40,27 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
     try {
       do {
         syncAgain.current = false;
-        let queued = 0;
+        // Each pass reports only its own failures, so an error never outlives the work it was about.
+        setError("");
+        let saved = false;
         try {
-          queued = pendingCatches(userId).length;
-          if (queued > 0) {
-            setError("");
+          const queued = pendingCatches(userId).length;
+          const direct = unsaved.current;
+          if (queued > 0 || direct) {
             const me = await getMe();
             if (me.profile.userId !== userId) {
               throw new Error("Another angler is signed in here. These catches will sync when their owner signs back in.");
             }
             onMe(me);
-            await syncCatches(userId, recordCatch);
+            if (direct) {
+              await recordCatch(direct);
+              unsaved.current = null;
+              saved = true;
+            }
+            if (queued > 0) {
+              await syncCatches(userId, recordCatch);
+              saved = true;
+            }
           }
         } catch (err) {
           setError(message(err, SAVE_FAILED));
@@ -57,44 +68,41 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void,
             retryTimer.current = window.setTimeout(() => void sync(), RATE_LIMIT_RETRY_MS);
           }
         }
-        let remaining = queued;
         try {
-          remaining = pendingCatches(userId).length;
           countQueue(userId);
         } catch (err) {
           setError(message(err, "Pending catches could not be read."));
         }
-        if (remaining < queued) await refresh();
+        if (saved || staleProfile.current) {
+          try {
+            onMe(await getMe());
+            staleProfile.current = false;
+          } catch (err) {
+            staleProfile.current = true;
+            setError(`Catch saved. Points will update once the server answers (${message(err, "no response")}).`);
+          }
+        }
       } while (syncAgain.current);
     } finally {
       syncing.current = false;
     }
-  }, [countQueue, onMe, refresh, userId]);
+  }, [countQueue, onMe, userId]);
 
-  /** Resolves false when the catch is neither queued nor saved, so the caller can offer a retry. */
+  /** Resolves false when the catch is neither queued nor saved yet; sync() keeps retrying it. */
   const saveCatch = useCallback(
     async (row: CatchSubmission) => {
       if (!userId) return false;
       try {
         queueCatch(userId, row);
       } catch (queueError) {
-        // Full or blocked storage must not cost the catch: post it directly, the server dedupes by requestId.
+        // Full or blocked storage must not cost the catch: hold it in memory and post it directly.
         console.warn("Catch queue unavailable; saving directly.", queueError);
-        try {
-          await recordCatch(row);
-        } catch (err) {
-          setError(message(err, SAVE_FAILED));
-          return false;
-        }
-        setError("");
-        await refresh();
-        return true;
+        unsaved.current = row;
       }
-      setPendingCount(pendingCatches(userId).length);
       await sync();
-      return true;
+      return unsaved.current?.requestId !== row.requestId;
     },
-    [refresh, sync, userId],
+    [sync, userId],
   );
 
   const dismissRejected = useCallback(() => {

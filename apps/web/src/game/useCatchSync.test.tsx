@@ -38,10 +38,9 @@ let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let sync: ReturnType<typeof useCatchSync>;
 const onMe = vi.fn();
-const onRefreshError = vi.fn();
 
 function Harness({ userId }: { userId: string }) {
-  sync = useCatchSync(userId, onMe, onRefreshError);
+  sync = useCatchSync(userId, onMe);
   return null;
 }
 
@@ -92,18 +91,64 @@ describe("useCatchSync", () => {
     expect(sync.error).toBe("");
   });
 
-  it("reports a failed direct save so the caller can retry", async () => {
+  it("keeps retrying a catch storage refused until a direct save succeeds", async () => {
     await mount();
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    vi.spyOn(browser.window.Storage.prototype, "setItem").mockImplementation(() => {
+    vi.spyOn(browser.window.Storage.prototype, "setItem").mockImplementationOnce(() => {
       throw new DOMException("full", "QuotaExceededError");
     });
-    recordMock.mockRejectedValueOnce(new Error("offline"));
+    recordMock.mockRejectedValueOnce(new Error("offline")).mockRejectedValueOnce(new Error("offline"));
     await act(async () => expect(await sync.saveCatch(first)).toBe(false));
     expect(sync.error).toBe("offline");
+    expect(sync.pendingCount).toBe(1);
     await act(async () => { await sync.sync(); });
     expect(sync.error).toBe("offline");
-    await act(async () => expect(await sync.saveCatch(first)).toBe(true));
+    expect(sync.pendingCount).toBe(1);
+    await act(async () => { await sync.sync(); });
+    expect(recordMock.mock.calls.map(([row]) => row.requestId)).toEqual([first.requestId, first.requestId, first.requestId]);
+    expect(sync.error).toBe("");
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("sends a refused catch along with the queued backlog when the connection returns", async () => {
+    queueCatch("angler", first);
+    recordMock.mockRejectedValue(new Error("offline"));
+    await mount();
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(browser.window.Storage.prototype, "setItem").mockImplementationOnce(() => {
+      throw new DOMException("full", "QuotaExceededError");
+    });
+    await act(async () => expect(await sync.saveCatch(second)).toBe(false));
+    expect(sync.pendingCount).toBe(2);
+    recordMock.mockResolvedValue(saved);
+    await act(async () => { window.dispatchEvent(new Event("online")); });
+    await act(async () => { await Promise.resolve(); });
+    const sent = recordMock.mock.calls.map(([row]) => row.requestId);
+    expect(sent.slice(-2).sort()).toEqual([first.requestId, second.requestId].sort());
+    expect(pendingCatches("angler")).toEqual([]);
+    expect(sync.pendingCount).toBe(0);
+    expect(sync.error).toBe("");
+  });
+
+  it("clears a stale error once another tab drained the queue", async () => {
+    queueCatch("angler", first);
+    recordMock.mockRejectedValueOnce(new Error("offline"));
+    await mount();
+    expect(sync.error).toBe("offline");
+    localStorage.removeItem("stillwater.pending-catches.angler");
+    await act(async () => { await sync.sync(); });
+    expect(sync.error).toBe("");
+    expect(sync.pendingCount).toBe(0);
+  });
+
+  it("shows a failed points refresh next to Retry and refreshes on retry", async () => {
+    await mount();
+    getMeMock.mockResolvedValueOnce(me("angler")).mockRejectedValueOnce(new Error("timeout"));
+    await act(async () => { await sync.saveCatch(first); });
+    expect(sync.error).toMatch(/Catch saved.*timeout/);
+    onMe.mockClear();
+    await act(async () => { await sync.sync(); });
+    expect(onMe).toHaveBeenCalledTimes(1);
     expect(sync.error).toBe("");
   });
 
