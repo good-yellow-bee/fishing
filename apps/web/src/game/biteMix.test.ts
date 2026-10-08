@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { canLand, FISH, type Profile, type SpotId } from "@stillwater/shared";
-import { pickBite } from "./logic";
+import { lureSizeFor, pickBite } from "./logic";
 
 const starter: Profile = {
   userId: "u1",
@@ -169,5 +169,28 @@ describe("bite mix", () => {
       Array.from({ length: 480 }, (_, i) => pickBite("dock", profile, false, () => i / 480, "day")).filter((fish) => fish.id === "carp").length;
     expect(carps(starter)).toBeGreaterThan(0);
     expect(carps(starter)).toBeLessThan(carps(seasoned));
+  });
+
+  it("gives the field guide the lure size that actually draws each fish on each bank", () => {
+    // Strong enough for legendaries, so no lighter fish fill in for a big lure.
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    for (const hour of HOURS) {
+      for (const spot of BANKS) {
+        const reach = (lure: string) =>
+          new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, lure).id));
+        const small = reach("Nightcrawlers");
+        const large = reach("Spoon");
+        for (const fish of FISH.filter((one) => one.spots.includes(spot))) {
+          const size = lureSizeFor(fish, spot);
+          expect(small.has(fish.id), `${hour} ${spot} ${fish.id} ${size}`).toBe(size !== "large");
+          expect(large.has(fish.id), `${hour} ${spot} ${fish.id} ${size}`).toBe(size !== "small");
+        }
+      }
+    }
+    const fish = (id: string) => FISH.find((one) => one.id === id)!;
+    expect(lureSizeFor(fish("smallmouth-bass"), "dock")).toBe("either");
+    expect(lureSizeFor(fish("smallmouth-bass"), "dropoff")).toBe("small");
+    expect(lureSizeFor(fish("carp"), "dock")).toBe("large");
+    expect(() => lureSizeFor(fish("bluegill"), "dock")).toThrow();
   });
 });

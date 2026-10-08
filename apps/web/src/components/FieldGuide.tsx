@@ -1,10 +1,35 @@
-import { fieldGuide, guideProgress, type CatchStat, type GuideEntry } from "@stillwater/shared";
+import {
+  fieldGuide,
+  guideClue,
+  guideProgress,
+  isTrophyWeight,
+  LAKE_HOUR_LABELS,
+  SPOT_LABELS,
+  trophyWeight,
+  type CatchStat,
+  type GuideEntry,
+  type ShadowSize,
+} from "@stillwater/shared";
+import { lureSizeFor, type LureSize } from "../game/logic";
 
 type Props = {
   stats: CatchStat[];
 };
 
 const SILHOUETTE = "M6 18C16 7 36 4 52 12L74 5L65 18L74 31L52 24C36 32 16 29 6 18Z";
+
+const SHADOW_LABELS: Record<ShadowSize, string> = {
+  small: "Small shadow",
+  medium: "Medium shadow",
+  large: "Large shadow",
+  huge: "Huge shadow",
+};
+
+const LURE_LABELS: Record<LureSize, string> = {
+  small: "small lure",
+  large: "big lure",
+  either: "any lure",
+};
 
 function FishMark({ known, color }: { known: boolean; color: string }) {
   return (
@@ -15,18 +40,35 @@ function FishMark({ known, color }: { known: boolean; color: string }) {
 }
 
 function GuideCard({ entry }: { entry: GuideEntry }) {
+  const { species } = entry;
   const known = entry.caught > 0;
+  const clue = guideClue(species);
+  const trophyLanded = entry.heaviest !== null && isTrophyWeight(species, entry.heaviest);
   return (
-    <article className={`guide-card ${known ? `rarity-${entry.species.rarity}` : "unknown"}`}>
-      <FishMark known={known} color={entry.species.color} />
-      {known ? <span className="rarity-tag">{entry.species.rarity}</span> : <span className="rarity-tag">unlogged</span>}
-      <h3>{known ? entry.species.name : "Unknown"}</h3>
+    <article className={`guide-card ${known ? `rarity-${species.rarity}` : "unknown"}`}>
+      <FishMark known={known} color={species.color} />
+      {known ? <span className="rarity-tag">{species.rarity}</span> : <span className="rarity-tag">unlogged</span>}
+      {trophyLanded && <span className="rarity-tag guide-trophy">Trophy</span>}
+      <h3>{known ? species.name : "Unknown"}</h3>
+      {known && (
+        <>
+          <p>
+            {entry.caught} landed · PB {entry.heaviest?.toFixed(1)} lb
+          </p>
+          <p>Trophy ≥ {trophyWeight(species).toFixed(1)} lb</p>
+        </>
+      )}
+      <p>
+        {SHADOW_LABELS[clue.shadow]} · best at {LAKE_HOUR_LABELS[clue.bestHour].toLowerCase()}
+      </p>
       {known ? (
-        <p>
-          {entry.caught} landed · PB {entry.heaviest?.toFixed(1)} lb
-        </p>
+        clue.spots.map((spot) => (
+          <p key={spot}>
+            {SPOT_LABELS[spot]}: {LURE_LABELS[lureSizeFor(species, spot)]}
+          </p>
+        ))
       ) : (
-        <p>Not yet in the book</p>
+        <p>{clue.spots.map((spot) => SPOT_LABELS[spot]).join(" · ")}</p>
       )}
     </article>
   );

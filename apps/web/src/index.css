@@ -1088,6 +1088,11 @@ kbd {
   padding: 2px 7px;
 }
 
+.guide-card .guide-trophy {
+  margin-left: 6px;
+  color: var(--amber);
+}
+
 .guide-card.unknown {
   background: rgba(10, 12, 11, 0.35);
 }

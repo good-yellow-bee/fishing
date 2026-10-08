@@ -29,14 +29,29 @@ function favorsLargeFish(lure: string): boolean {
   return /spinner|spoon|mepps|crank|tube|bugger/.test(text);
 }
 
-function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies[] {
-  const tied = lure?.trim();
-  if (!tied || pool.length < 2) return pool;
+function sizedPool(pool: FishSpecies[], large: boolean): FishSpecies[] {
+  if (pool.length < 2) return pool;
   const ordered = [...pool].sort(
     (a, b) => a.minWeight - b.minWeight || a.maxWeight - b.maxWeight || a.id.localeCompare(b.id),
   );
   const count = Math.ceil(ordered.length / 2);
-  return favorsLargeFish(tied) ? ordered.slice(ordered.length - count) : ordered.slice(0, count);
+  return large ? ordered.slice(ordered.length - count) : ordered.slice(0, count);
+}
+
+function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies[] {
+  const tied = lure?.trim();
+  return tied ? sizedPool(pool, favorsLargeFish(tied)) : pool;
+}
+
+export type LureSize = "small" | "large" | "either";
+
+/** The field guide's lure answer, read from the same per-bank split pickBite draws from. */
+export function lureSizeFor(species: FishSpecies, spot: SpotId): LureSize {
+  const home = FISH.filter((fish) => fish.spots.includes(spot));
+  const small = sizedPool(home, false).some((fish) => fish.id === species.id);
+  const large = sizedPool(home, true).some((fish) => fish.id === species.id);
+  if (!small && !large) throw new Error(`${species.id} does not live at ${spot}`);
+  return small && large ? "either" : small ? "small" : "large";
 }
 
 export function sweetBand(accuracy: number) {
