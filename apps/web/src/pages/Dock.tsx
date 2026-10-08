@@ -28,14 +28,12 @@ import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs } from "../game/logic";
-import { levelUp, type LevelUp } from "../game/levelUp";
+import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
-
-const LEVEL_TOAST_MS = 4000;
 
 export function DockPage() {
   const [params] = useSearchParams();
@@ -47,11 +45,6 @@ export function DockPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
-  const seenLevel = useRef<number | null>(null);
-  const [levelToast, setLevelToast] = useState<LevelUp | null>(null);
-  // Visible time left for the current toast and the level already chimed, so hiding it never restarts either.
-  const toastLeft = useRef(0);
-  const chimedLevel = useRef<number | null>(null);
   const [lureChoices] = useState(() => luresPacked(readTackle()));
   // Null until the angler picks a lure this session, so the default follows their Strength.
   const [pickedLure, setPickedLure] = useState<string | null>(null);
@@ -108,33 +101,9 @@ export function DockPage() {
 
   useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
 
-  const level = me?.level;
-  useEffect(() => {
-    if (level === undefined) return;
-    const rise = levelUp(seenLevel.current, level);
-    seenLevel.current = level;
-    if (rise) {
-      toastLeft.current = LEVEL_TOAST_MS;
-      setLevelToast(rise);
-    }
-  }, [level]);
-
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
-  const shownLevel = bankClear ? levelToast : null;
-  useEffect(() => {
-    if (!shownLevel) return;
-    if (chimedLevel.current !== shownLevel.level) {
-      chimedLevel.current = shownLevel.level;
-      fx.land();
-    }
-    const shownAt = performance.now();
-    const timer = window.setTimeout(() => setLevelToast(null), toastLeft.current);
-    return () => {
-      window.clearTimeout(timer);
-      toastLeft.current = Math.max(0, toastLeft.current - (performance.now() - shownAt));
-    };
-  }, [shownLevel]);
+  const shownLevel = useLevelToast(me?.level, bankClear);
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;

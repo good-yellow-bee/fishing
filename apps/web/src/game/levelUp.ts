@@ -8,3 +8,8 @@ export function levelUp(seen: number | null, level: number): LevelUp | null {
   const dropoff = seen < DROPOFF_LEVEL && level >= DROPOFF_LEVEL;
   return { level, opened: dropoff ? "The drop-off is open — walk east along the shore." : null };
 }
+
+/** A newer rise replaces the pending toast but keeps an unlock it had not shown yet. */
+export function mergeLevelUp(pending: LevelUp | null, rise: LevelUp): LevelUp {
+  return { level: rise.level, opened: rise.opened ?? pending?.opened ?? null };
+}
