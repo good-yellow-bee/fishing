@@ -18,6 +18,23 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
   legendary: 0.05,
 };
 
+/** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
+function favorsLargeFish(lure: string): boolean {
+  const text = lure.toLowerCase();
+  if (/bobber|worm|crawler|popper|pheasant|caddis|size\s*8/.test(text)) return false;
+  return /spinner|spoon|mepps|crank|tube|bugger/.test(text);
+}
+
+function poolForLure(pool: FishSpecies[], lure: string | undefined): FishSpecies[] {
+  const tied = lure?.trim();
+  if (!tied || pool.length < 2) return pool;
+  const ordered = [...pool].sort(
+    (a, b) => a.minWeight - b.minWeight || a.maxWeight - b.maxWeight || a.id.localeCompare(b.id),
+  );
+  const count = Math.ceil(ordered.length / 2);
+  return favorsLargeFish(tied) ? ordered.slice(ordered.length - count) : ordered.slice(0, count);
+}
+
 export function sweetBand(accuracy: number) {
   const width = 0.16 + accuracy * 0.03;
   const center = 0.62;
@@ -42,12 +59,18 @@ export function pickBite(
   shortCast: boolean,
   random = Math.random,
   hour: LakeHour = lakeHour(),
+  lure?: string,
 ): FishSpecies {
   let pool = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) pool = pool.filter((fish) => fish.rarity === "common");
+  // Split before the legendary check so a fish that becomes legal does not move the cut.
+  pool = poolForLure(pool, lure);
   pool = pool.filter((fish) => fish.rarity !== "legendary" || legendaryCanBite(profile, fish, spot));
   if (pool.length === 0) {
-    pool = FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity === "common");
+    pool = poolForLure(
+      FISH.filter((fish) => fish.spots.includes(spot) && fish.rarity === "common"),
+      lure,
+    );
   }
   const weights = pool.map((fish) => rarityWeight[fish.rarity] * biteHourMul(fish, hour));
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);
