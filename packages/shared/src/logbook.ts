@@ -567,6 +567,7 @@ export type LandedFish = {
   bank: string;
   caughtAt: string;
   lure?: string;
+  weather?: CatchWeather;
 };
 
 /** Fight results carry species and weight, not length. One weight catch on this lake. */
@@ -584,7 +585,7 @@ export function keepLandedCatch(book: Logbook, landed: LandedFish): Logbook {
     tripId: null,
     caughtAt: landed.caughtAt,
     note: bank ? `Landed at the ${bank}.` : "Landed on the lake.",
-    weather: null,
+    weather: landed.weather ?? null,
   };
   return withCatch(placed.book, entry);
 }

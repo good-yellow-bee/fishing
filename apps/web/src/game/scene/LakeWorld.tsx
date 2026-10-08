@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -122,6 +122,51 @@ export const LAKE_HOUR_LOOK: Record<
     birds: false,
   },
 };
+
+/** How far each sky grays the hour's palette, dims the sun, and pulls the fog in. */
+const WEATHER_TINT: Record<WeatherSky, { mute: number; shade: number; clouds: number; sun: number; near: number; far: number }> = {
+  clear: { mute: 0, shade: 1, clouds: 1, sun: 1, near: 1, far: 1 },
+  "partly-cloudy": { mute: 0.2, shade: 0.97, clouds: 0.95, sun: 0.85, near: 0.95, far: 0.95 },
+  overcast: { mute: 0.6, shade: 0.86, clouds: 0.74, sun: 0.55, near: 0.85, far: 0.85 },
+  rain: { mute: 0.72, shade: 0.5, clouds: 0.38, sun: 0.4, near: 0.6, far: 0.7 },
+  fog: { mute: 0.8, shade: 1.1, clouds: 1.1, sun: 0.5, near: 0.3, far: 0.45 },
+};
+
+export type WeatherLook = {
+  sky: [string, string, string];
+  fog: string;
+  fogNear: number;
+  fogFar: number;
+  hemiSky: string;
+  sunInt: number;
+  sunOut: boolean;
+  clouds: string;
+  rain: boolean;
+};
+
+/** Grays a color toward its own brightness rather than a fixed gray, so a rainy night stays a night. */
+function mute(color: string, amount: number, shade: number) {
+  const tinted = new THREE.Color(color);
+  const gray = Math.min(1, (tinted.r * 0.2126 + tinted.g * 0.7152 + tinted.b * 0.0722) * shade);
+  return `#${tinted.lerp(new THREE.Color(gray, gray, gray), amount).getHexString()}`;
+}
+
+export function weatherLook(hour: LakeHour, sky: WeatherSky): WeatherLook {
+  const look = LAKE_HOUR_LOOK[hour];
+  const tint = WEATHER_TINT[sky];
+  const night = hour === "night";
+  return {
+    sky: [mute(look.sky[0], tint.mute, tint.shade), mute(look.sky[1], tint.mute, tint.shade), mute(look.sky[2], tint.mute, tint.shade)],
+    fog: mute(look.fog, tint.mute, tint.shade),
+    fogNear: (night ? 28 : 40) * tint.near,
+    fogFar: (night ? 90 : 110) * tint.far,
+    hemiSky: mute(look.hemiSky, tint.mute, 1),
+    sunInt: look.sunInt * tint.sun,
+    sunOut: tint.sun > 0.8,
+    clouds: mute(look.clouds, tint.mute, tint.clouds),
+    rain: sky === "rain",
+  };
+}
 
 const MODELS = {
   pine: "/models/tree_detailed.glb",
@@ -535,9 +580,9 @@ function makeSkyTexture(bottom: string, mid: string, top: string) {
   return texture;
 }
 
-function Sky({ hour }: { hour: LakeHour }) {
+function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
   const look = LAKE_HOUR_LOOK[hour];
-  const texture = useMemo(() => makeSkyTexture(...look.sky), [look.sky]);
+  const texture = useMemo(() => makeSkyTexture(...weather.sky), [weather.sky]);
   useEffect(() => () => texture.dispose(), [texture]);
   return (
     <>
@@ -545,13 +590,20 @@ function Sky({ hour }: { hour: LakeHour }) {
         <sphereGeometry args={[1, 24, 16]} />
         <meshBasicMaterial map={texture} side={THREE.BackSide} fog={false} />
       </mesh>
-      <mesh position={look.discPos}>
-        <circleGeometry args={[hour === "night" ? 4.2 : 5.5, 24]} />
-        <meshBasicMaterial color={look.disc} fog={false} />
-      </mesh>
+      {weather.sunOut && (
+        <mesh position={look.discPos}>
+          <circleGeometry args={[hour === "night" ? 4.2 : 5.5, 24]} />
+          <meshBasicMaterial color={look.disc} fog={false} />
+        </mesh>
+      )}
       <mesh position={[look.discPos[0], look.discPos[1], look.discPos[2] + 0.2]}>
         <circleGeometry args={[hour === "night" ? 7 : 9, 24]} />
-        <meshBasicMaterial color={look.glow} transparent opacity={hour === "night" ? 0.22 : 0.35} fog={false} />
+        <meshBasicMaterial
+          color={look.glow}
+          transparent
+          opacity={(hour === "night" ? 0.22 : 0.35) * (weather.sunOut ? 1 : 0.5)}
+          fog={false}
+        />
       </mesh>
     </>
   );
@@ -1102,8 +1154,9 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: LakeHour; rain?: boolean }) {
+export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; sky: WeatherSky }) {
   const look = LAKE_HOUR_LOOK[hour];
+  const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
   const ground = useMemo(() => makeGroundGeometry(), []);
   useEffect(() => {
@@ -1114,12 +1167,12 @@ export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: La
   }, [shore, ground]);
   return (
     <>
-      <fog attach="fog" args={[look.fog, hour === "night" ? 28 : 40, hour === "night" ? 90 : 110]} />
-      <hemisphereLight args={[look.hemiSky, look.hemiGround, look.hemi]} />
+      <fog attach="fog" args={[weather.fog, weather.fogNear, weather.fogFar]} />
+      <hemisphereLight args={[weather.hemiSky, look.hemiGround, look.hemi]} />
       <directionalLight
         castShadow
         position={look.sunPos}
-        intensity={look.sunInt}
+        intensity={weather.sunInt}
         color={look.sun}
         shadow-mapSize-width={1536}
         shadow-mapSize-height={1536}
@@ -1130,9 +1183,9 @@ export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: La
         shadow-camera-top={22}
         shadow-camera-bottom={-20}
       />
-      <Sky hour={hour} />
+      <Sky hour={hour} weather={weather} />
       {CLOUDS.map((cloud, i) => (
-        <Cloud key={i} {...cloud} color={look.clouds} />
+        <Cloud key={i} {...cloud} color={weather.clouds} />
       ))}
       <mesh geometry={ground} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, LAKE_CENTER_Z]} receiveShadow>
         <meshToonMaterial color={hour === "night" ? "#3a5240" : "#4d6c48"} gradientMap={toonRamp()} />
@@ -1174,7 +1227,7 @@ export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: La
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
       ))}
-      {look.glitter && <SunGlitter />}
+      {look.glitter && weather.sunOut && <SunGlitter />}
       {look.birds &&
         FLOCKS.map((flock, i) => (
           <BirdFlock key={i} {...flock} />
@@ -1186,7 +1239,7 @@ export function LakeWorld({ spot, hour, rain = false }: { spot: SpotId; hour: La
         DRAGONFLIES.map((fly, i) => (
           <Dragonfly key={i} {...fly} />
         ))}
-      {rain && <LakeRain />}
+      {weather.rain && <LakeRain />}
     </>
   );
 }

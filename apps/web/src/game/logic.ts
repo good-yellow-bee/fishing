@@ -4,12 +4,14 @@ import {
   legendaryCanBite,
   rollWeight,
   biteHourMul,
+  biteWeatherMul,
   LAKE_HOURS,
   lakeHour,
   lakeHourWaitMul,
   type FishSpecies,
   type LakeHour,
   type Profile,
+  type Sky,
   type SpotId,
 } from "@stillwater/shared";
 
@@ -23,8 +25,8 @@ const rarityWeight: Record<FishSpecies["rarity"], number> = {
 /** Fish the angler cannot land yet still bite now and then, as a glimpse of what upgrades unlock. */
 const OUT_OF_REACH_BITE = 0.35;
 
-function appeal(fish: FishSpecies, hour: LakeHour): number {
-  return rarityWeight[fish.rarity] * biteHourMul(fish, hour);
+function appeal(fish: FishSpecies, hour: LakeHour, sky?: Sky): number {
+  return rarityWeight[fish.rarity] * biteHourMul(fish, hour) * (sky ? biteWeatherMul(fish, sky) : 1);
 }
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
@@ -100,6 +102,7 @@ export function pickBite(
   random = Math.random,
   hour: LakeHour = lakeHour(),
   lure?: string,
+  sky?: Sky,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) home = home.filter((fish) => fish.rarity === "common");
@@ -112,8 +115,8 @@ export function pickBite(
       lure,
     );
   }
-  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
-  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour, sky), 0);
+  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour, sky), 0);
   // A big lure must not lock a weak angler out: the bank's lighter landable fish fill in for the share of its
   // draw still out of reach. A small lure already draws the light half, so it never pulls in big fish.
   const fillIn = lure && favorsLargeFish(lure) && drawn > 0 ? 1 - inReach / drawn : 0;
@@ -121,8 +124,8 @@ export function pickBite(
     ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
     : [];
   const weights = [
-    ...pool.map((fish) => appeal(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
-    ...fillers.map((fish) => appeal(fish, hour) * fillIn),
+    ...pool.map((fish) => appeal(fish, hour, sky) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
+    ...fillers.map((fish) => appeal(fish, hour, sky) * fillIn),
   ];
   pool = [...pool, ...fillers];
   let roll = random() * weights.reduce((sum, weight) => sum + weight, 0);

@@ -1,3 +1,5 @@
+import type { LakeHour, Sky } from "@stillwater/shared";
+
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
@@ -87,13 +89,73 @@ function waterPlop(size: number) {
 let lapSrc: AudioBufferSourceNode | null = null;
 let lapLfo: OscillatorNode | null = null;
 let lapGain: GainNode | null = null;
-let birdTimer = 0;
+let rainSrc: AudioBufferSourceNode | null = null;
+let rainGain: GainNode | null = null;
+let wildlifeTimer = 0;
+let loonTimer = 0;
+let ambientHour: LakeHour = "day";
+let ambientSky: Sky = "clear";
+
+export function ambientProfile(hour: LakeHour, sky: Sky) {
+  const night = hour === "night";
+  return { wildlife: night ? "crickets" : "birds", loons: night, rain: sky === "rain" } as const;
+}
 
 function chirp() {
+  if (!lapSrc) return;
+  if (ambientProfile(ambientHour, ambientSky).wildlife === "crickets") {
+    const base = 3600 + Math.random() * 700;
+    tone("square", base, base * 0.96, 0.035, 0.003);
+    tone("square", base * 1.06, base, 0.025, 0.002, 0.07);
+    wildlifeTimer = window.setTimeout(chirp, 180 + Math.random() * 420);
+    return;
+  }
   const base = 2000 + Math.random() * 1400;
   tone("sine", base, base * 1.5, 0.09, 0.012);
   tone("sine", base * 1.2, base * 1.9, 0.08, 0.01, 0.13);
-  birdTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+  wildlifeTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+}
+
+/** A loon's wail across the water: a slow rise, a held note, then a fall. */
+function loonCall() {
+  if (!lapSrc || !ambientProfile(ambientHour, ambientSky).loons) return;
+  const base = 520 + Math.random() * 80;
+  tone("sine", base, base * 1.5, 0.9, 0.012);
+  tone("sine", base * 1.5, base * 1.45, 1.1, 0.01, 0.85);
+  tone("sine", base * 1.45, base * 1.1, 0.8, 0.008, 1.9);
+  loonTimer = window.setTimeout(loonCall, 14000 + Math.random() * 12000);
+}
+
+function startRain() {
+  if (rainSrc || !ambientProfile(ambientHour, ambientSky).rain) return;
+  const ac = audio();
+  rainSrc = ac.createBufferSource();
+  rainSrc.buffer = noise();
+  rainSrc.loop = true;
+  const filter = ac.createBiquadFilter();
+  filter.type = "highpass";
+  filter.frequency.value = 1200;
+  rainGain = ac.createGain();
+  rainGain.gain.value = 0.0035;
+  rainSrc.connect(filter).connect(rainGain).connect(bus());
+  rainSrc.start();
+}
+
+function stopRain() {
+  if (!rainSrc) return;
+  rainSrc.stop();
+  rainGain?.disconnect();
+  rainSrc = null;
+  rainGain = null;
+}
+
+function restartWildlife() {
+  window.clearTimeout(wildlifeTimer);
+  window.clearTimeout(loonTimer);
+  if (!lapSrc) return;
+  const { wildlife, loons } = ambientProfile(ambientHour, ambientSky);
+  wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" ? 300 : 2000 + Math.random() * 2000);
+  if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
 }
 
 const ambient = {
@@ -116,14 +178,27 @@ const ambient = {
     lapSrc.connect(f).connect(lapGain).connect(bus());
     lapSrc.start();
     lapLfo.start();
-    birdTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+    startRain();
+    restartWildlife();
+  },
+  /** Safe before the first cast: the sounds start on the first cast, with the latest conditions. */
+  setConditions(hour: LakeHour, sky: Sky) {
+    if (ambientHour === hour && ambientSky === sky) return;
+    ambientHour = hour;
+    ambientSky = sky;
+    if (!lapSrc) return;
+    stopRain();
+    startRain();
+    restartWildlife();
   },
   stop() {
     if (!lapSrc) return;
-    window.clearTimeout(birdTimer);
+    window.clearTimeout(wildlifeTimer);
+    window.clearTimeout(loonTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();
+    stopRain();
     lapSrc = null;
     lapLfo = null;
     lapGain = null;

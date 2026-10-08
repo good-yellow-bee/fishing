@@ -11,6 +11,7 @@ import {
   type FishSpecies,
   type LakeHour,
   type Profile,
+  type Sky,
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
@@ -80,6 +81,7 @@ export function useFishingGame(
   profile: Profile | null,
   hour: LakeHour = lakeHour(),
   lureRef?: { readonly current: string },
+  sky?: Sky,
 ) {
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
@@ -179,10 +181,10 @@ export function useFishingGame(
     window.clearTimeout(timers.current.hook);
     fx.splash();
     const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current);
+    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current, sky);
     const { weight } = makeCatch(species, profile.patience);
     beginFight(species, weight, profile);
-  }, [beginFight, hour, profile]);
+  }, [beginFight, hour, profile, sky]);
 
   const startWait = useCallback((current: Profile) => {
     setPhaseBoth("waiting");

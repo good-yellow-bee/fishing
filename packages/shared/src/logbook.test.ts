@@ -21,6 +21,7 @@ import {
   type CatchDraft,
   type Logbook,
 } from "./logbook.ts";
+import { dailyConditions, formatWeather } from "./weather.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
 
@@ -262,6 +263,23 @@ describe("field log", () => {
       lure: "Nightcrawlers",
     })).toBe(next);
     expect(kept?.lure).toBe("#5 Mepps");
+  });
+
+  it("records the day's conditions with a landed fish", () => {
+    const weather = dailyConditions(new Date(2026, 9, 7, 18, 30), "fog");
+    const next = keepLandedCatch(book, {
+      id: "catch-play-fog",
+      species: "Burbot",
+      pounds: 3.1,
+      bank: "Drop-off",
+      caughtAt: "2026-10-07T18:30:00.000Z",
+      weather,
+    });
+    const kept = next.catches.find((entry) => entry.id === "catch-play-fog");
+    expect(kept?.weather).toEqual(weather);
+    expect(kept?.weather?.sky).toBe("fog");
+    expect(formatWeather(kept!.weather!)).toMatch(/^Fog · /);
+    expect(isLogbook(next)).toBe(true);
   });
 
   it("adds this lake when the book has no lake spot", () => {

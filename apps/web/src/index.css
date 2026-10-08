@@ -209,17 +209,28 @@ a {
 .level-chip,
 .points-chip,
 .skill-chip,
-.hour-chip {
+.hour-chip,
+.sky-chip {
   border: 1px solid rgba(220, 196, 150, 0.22);
   background: rgba(238, 218, 181, 0.08);
   padding: 6px 8px;
 }
 
-.hour-chip {
+.hour-chip,
+.sky-chip {
   color: #edc477;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 10px;
+}
+
+.sky-chip small {
+  display: block;
+  margin-top: 2px;
+  color: #a99d87;
+  font-size: 9px;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .points-chip {
@@ -1144,7 +1155,8 @@ kbd {
   }
 
   .hud-user small,
-  .skill-chip small {
+  .skill-chip small,
+  .sky-chip small {
     display: none;
   }
 
