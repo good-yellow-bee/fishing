@@ -44,7 +44,7 @@ export function validateCatch(profile: Profile, request: CatchRequest): CatchRes
   if (!canLand(profile, species)) {
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
-  return { ok: true, points: catchPoints(species, request.weight), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
+import { catchPoints, fishById } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -41,6 +42,14 @@ afterAll(() => {
   db.close();
   rmSync(testDir, { recursive: true, force: true });
 });
+
+function post(body: unknown) {
+  return app.request("http://test/catches", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
 describe("POST /catches", () => {
   it("returns 400 for malformed JSON", async () => {
@@ -92,6 +101,33 @@ describe("POST /catches", () => {
     expect(first.status).toBe(200);
     expect(conflict.status).toBe(409);
     await expect(conflict.json()).resolves.toEqual({ error: "request ID conflicts with an existing catch" });
+  });
+
+  it("stores a clean fight and returns its bonused points", async () => {
+    const points = catchPoints(fishById("golden-shiner")!, 0.3, true);
+    const response = await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", clean: true });
+
+    expect(response.status).toBe(200);
+    expect(points).toBeGreaterThan(catchPoints(fishById("golden-shiner")!, 0.3));
+    await expect(response.json()).resolves.toMatchObject({ points });
+    expect(db.prepare(`SELECT clean, points FROM catch`).get()).toEqual({ clean: 1, points });
+    expect(db.prepare(`SELECT points FROM profile WHERE user_id = ?`).get(user.id)).toEqual({ points });
+  });
+
+  it("rejects a retry that changes the clean flag", async () => {
+    const payload = { requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock" };
+    expect((await post(payload)).status).toBe(200);
+    const conflict = await post({ ...payload, clean: true });
+
+    expect(conflict.status).toBe(409);
+    expect((await post({ ...payload, clean: false })).status).toBe(200);
+  });
+
+  it("rejects a clean flag that is not a boolean", async () => {
+    const response = await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", clean: "yes" });
+
+    expect(response.status).toBe(400);
+    expect(db.prepare(`SELECT COUNT(*) as count FROM catch`).get()).toEqual({ count: 0 });
   });
 
   it("limits successful catch submissions per minute", async () => {

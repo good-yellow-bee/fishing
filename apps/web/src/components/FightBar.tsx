@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { FIGHT_LINES, type FightSim } from "../game/fight";
+import { FIGHT_LINES, RED_TENSION, type FightSim } from "../game/fight";
 import type { Fight } from "../game/useFishingGame";
 
 type Props = {
@@ -9,7 +9,7 @@ type Props = {
 
 function tensionColor(tension: number) {
   if (tension < 0.55) return "#6a8f5a";
-  if (tension < 0.8) return "#d9a94e";
+  if (tension < RED_TENSION) return "#d9a94e";
   return "#b85c38";
 }
 

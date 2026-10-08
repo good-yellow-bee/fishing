@@ -12,11 +12,15 @@ export type FightRuntime = {
 
 export type FightPerformance = {
   peakTension: number;
-  reachedEscapeLine: boolean;
+  maxLine: number;
 };
 
+/** Where FightBar turns the tension bar red. */
+export const RED_TENSION = 0.8;
+
+/** Clean = tension never went red and the fish never took line past the hookset, where FightBar's line bar is empty. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension <= 0.8 && !performance.reachedEscapeLine;
+  return performance.peakTension < RED_TENSION && performance.maxLine <= 1;
 }
 
 type Pattern = {
@@ -65,7 +69,7 @@ export function makeFight(
   const range = (min: number, max: number) => min + random() * (max - min);
 
   const sim: FightSim = { line: 1, tension: 0.2, surge: 0 };
-  const performance: FightPerformance = { peakTension: sim.tension, reachedEscapeLine: false };
+  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
   let completedSurges = 0;
   let nextAt: number | null = null;
 
@@ -97,7 +101,7 @@ export function makeFight(
     }
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
-    performance.reachedEscapeLine ||= sim.line >= 1.25;
+    performance.maxLine = Math.max(performance.maxLine, sim.line);
 
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";

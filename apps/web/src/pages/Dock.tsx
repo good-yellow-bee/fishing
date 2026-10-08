@@ -78,7 +78,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean });
       return;
     }
     void catchSync.sync();
@@ -117,11 +117,11 @@ export function DockPage() {
       setFieldLogError("");
       return;
     }
-    const { id, species, weight, spot: catchSpot } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean } = game.outcome;
     if (posted.current === id) return;
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean });
   }, [game.outcome, saveFieldLog, saveOutcome, userId]);
 
   useEffect(() => {
@@ -249,7 +249,8 @@ export function DockPage() {
             <h2>{game.outcome.species.name}</h2>
             <p className="catch-lure">{lure}</p>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
-            <p>+{catchPoints(game.outcome.species, game.outcome.weight)} pts</p>
+            <p>+{catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean)} pts</p>
+            {game.outcome.clean && <p className="catch-stamp">Clean fight</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">New in the field guide</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">Personal best · was {stamp.previous.toFixed(1)} lb</p>

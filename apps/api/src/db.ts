@@ -81,6 +81,7 @@ db.exec(`
     points INTEGER NOT NULL,
     spot TEXT NOT NULL,
     request_id TEXT,
+    clean INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
 
@@ -90,6 +91,9 @@ db.exec(`
 const catchColumns = db.prepare(`PRAGMA table_info(catch)`).all() as { name: string }[];
 if (!catchColumns.some((column) => column.name === "request_id")) {
   db.exec(`ALTER TABLE catch ADD COLUMN request_id TEXT`);
+}
+if (!catchColumns.some((column) => column.name === "clean")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN clean INTEGER NOT NULL DEFAULT 0`);
 }
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
@@ -111,6 +115,7 @@ export type CatchRow = {
   points: number;
   spot: string;
   request_id: string | null;
+  clean: 0 | 1;
   created_at: string;
 };
 
@@ -197,8 +202,8 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @created_at)`,
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @created_at)`,
     ).run(row);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,

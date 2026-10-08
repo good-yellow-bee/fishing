@@ -94,6 +94,15 @@ describe("catch rules", () => {
     if (result.ok) expect(result.points).toBeGreaterThan(0);
   });
 
+  it("applies the clean-fight bonus only to catches marked clean", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
+    expect(validateCatch(starter, request)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: false })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: true })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8, true) });
+    expect(catchPoints(perch, 0.8, true)).toBeGreaterThan(catchPoints(perch, 0.8));
+  });
+
   it("blocks landing when strength is short", () => {
     const pike = fishById("pike")!;
     expect(canLand(starter, pike)).toBe(false);

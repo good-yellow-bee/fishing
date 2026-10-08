@@ -10,7 +10,7 @@ function isSubmission(value: unknown): value is CatchSubmission {
   const row = value as Record<string, unknown>;
   return typeof row.requestId === "string" && row.requestId.length <= 80 &&
     typeof row.speciesId === "string" && typeof row.weight === "number" && Number.isFinite(row.weight) &&
-    SPOT_IDS.some((spot) => spot === row.spot);
+    SPOT_IDS.some((spot) => spot === row.spot) && (row.clean === undefined || typeof row.clean === "boolean");
 }
 
 export function pendingCatches(userId: string): CatchSubmission[] {
