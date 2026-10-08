@@ -60,7 +60,7 @@ function FishMesh({ shape, material, unlit, castShadow = false, ...props }: Fish
     <>
       <mesh {...props} renderOrder={1} castShadow={false}>
         {cloneElement(shape)}
-        <meshDepthMaterial colorWrite={false} depthWrite />
+        <meshDepthMaterial transparent opacity={1} colorWrite={false} depthWrite />
       </mesh>
       <mesh {...props} renderOrder={2} castShadow={false}>
         {cloneElement(shape)}
