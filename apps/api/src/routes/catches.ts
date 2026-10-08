@@ -1,12 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
-import { findCatchByRequestId, getProfile, recordCatch, toProfile } from "../db.ts";
+import { findCatchByRequestId, getProfile, recordCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
 
 const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function sameCatch(row: CatchRow, body: CatchSubmission) {
+  return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
+    row.clean === (body.clean ? 1 : 0);
+}
 
 catchRoutes.post("/catches", async (c) => {
   const user = c.get("user") as SessionUser;
@@ -21,13 +26,14 @@ catchRoutes.post("/catches", async (c) => {
     typeof body.weight !== "number" ||
     !SPOT_IDS.includes(body.spot) ||
     typeof body.requestId !== "string" ||
-    !requestIdPattern.test(body.requestId)
+    !requestIdPattern.test(body.requestId) ||
+    (body.clean !== undefined && typeof body.clean !== "boolean")
   ) {
     return c.json({ error: "invalid catch" }, 400);
   }
   const previous = findCatchByRequestId(user.id, body.requestId);
   if (previous) {
-    if (previous.species_id !== body.speciesId || previous.weight !== body.weight || previous.spot !== body.spot) {
+    if (!sameCatch(previous, body)) {
       return c.json({ error: "request ID conflicts with an existing catch" }, 409);
     }
     return c.json({ id: previous.id, points: previous.points, speciesId: previous.species_id, weight: previous.weight });
@@ -36,7 +42,7 @@ catchRoutes.post("/catches", async (c) => {
   if (!row) return c.json({ error: "profile missing" }, 404);
   const result = validateCatch(toProfile(row), body);
   if (!result.ok) return c.json({ error: result.error }, result.status);
-  const record = {
+  const record: CatchRow = {
     id: randomUUID(),
     user_id: user.id,
     species_id: body.speciesId,
@@ -44,11 +50,12 @@ catchRoutes.post("/catches", async (c) => {
     points: result.points,
     spot: body.spot,
     request_id: body.requestId,
+    clean: body.clean ? 1 : 0,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);
   if (saved.kind === "existing") {
-    if (saved.catch.species_id !== body.speciesId || saved.catch.weight !== body.weight || saved.catch.spot !== body.spot) {
+    if (!sameCatch(saved.catch, body)) {
       return c.json({ error: "request ID conflicts with an existing catch" }, 409);
     }
     return c.json({

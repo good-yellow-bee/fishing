@@ -42,6 +42,21 @@ describe("pending catch submissions", () => {
     expect(pendingCatches("angler")).toEqual([]);
   });
 
+  it("keeps the clean flag and still syncs rows queued before it existed", async () => {
+    const clean = { ...caught, requestId: "1e0a0c08-7e6d-4ee2-8718-4a938773b7e2", clean: true };
+    localStorage.setItem("stillwater.pending-catches.angler", JSON.stringify([caught]));
+    queueCatch("angler", clean);
+    const sent: unknown[] = [];
+    await syncCatches("angler", async (row) => { sent.push(row); });
+    expect(sent).toEqual([caught, clean]);
+    expect(sent[0]).not.toHaveProperty("clean");
+  });
+
+  it("refuses a stored clean flag that is not a boolean", () => {
+    localStorage.setItem("stillwater.pending-catches.angler", JSON.stringify([{ ...caught, clean: "yes" }]));
+    expect(() => pendingCatches("angler")).toThrow("could not be read");
+  });
+
   it("surfaces corrupt storage without replacing it", () => {
     localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
     expect(() => pendingCatches("angler")).toThrow("could not be read");

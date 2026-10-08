@@ -42,6 +42,7 @@ export type CatchRequest = {
   speciesId: string;
   weight: number;
   spot: SpotId;
+  clean?: boolean;
 };
 
 export type CatchSubmission = CatchRequest & {

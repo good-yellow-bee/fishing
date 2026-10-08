@@ -2,9 +2,10 @@ import { fishById } from "./fish.ts";
 import { anglerLevel, canUseSpot, MAX_SKILL, skillCost } from "./progression.ts";
 import type { CatchRequest, FishSpecies, Profile, SkillId, SpotId } from "./types.ts";
 
-export function catchPoints(species: FishSpecies, weight: number): number {
+export function catchPoints(species: FishSpecies, weight: number, clean = false): number {
   const mid = (species.minWeight + species.maxWeight) / 2;
-  return Math.max(1, Math.round(species.basePoints * (weight / mid)));
+  const points = species.basePoints * (weight / mid) * (clean ? 1.5 : 1);
+  return Math.max(1, Math.round(points));
 }
 
 export function weightInRange(species: FishSpecies, weight: number): boolean {
@@ -43,7 +44,7 @@ export function validateCatch(profile: Profile, request: CatchRequest): CatchRes
   if (!canLand(profile, species)) {
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
-  return { ok: true, points: catchPoints(species, request.weight), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

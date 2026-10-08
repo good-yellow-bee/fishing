@@ -69,6 +69,12 @@ describe("catch rules", () => {
     expect(catchPoints(perch, mid)).toBe(perch.basePoints);
   });
 
+  it("awards a rounded 1.5x clean-fight bonus", () => {
+    const perch = fishById("perch")!;
+    const mid = (perch.minWeight + perch.maxWeight) / 2;
+    expect(catchPoints(perch, mid, true)).toBe(Math.round(perch.basePoints * 1.5));
+  });
+
   it("rejects a sturgeon on a starter line", () => {
     const result = validateCatch(starter, {
       speciesId: "sturgeon",
@@ -86,6 +92,15 @@ describe("catch rules", () => {
     });
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.points).toBeGreaterThan(0);
+  });
+
+  it("applies the clean-fight bonus only to catches marked clean", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
+    expect(validateCatch(starter, request)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: false })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: true })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8, true) });
+    expect(catchPoints(perch, 0.8, true)).toBeGreaterThan(catchPoints(perch, 0.8));
   });
 
   it("blocks landing when strength is short", () => {
