@@ -137,6 +137,25 @@ describe("useFishingGame landed outcome", () => {
   });
 });
 
+describe("useFishingGame lost fight", () => {
+  const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+
+  it("says why the line broke and what to do next time", () => {
+    const surface = mount();
+
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
+    expect(hint()).toMatch(/too much tension.*let go when the bar turns red or the fish is about to run/i);
+
+    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 2);
+    expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
+    expect(hint()).toMatch(/ran out of line.*reel whenever the fish is calm/i);
+  });
+});
+
 describe("useFishingGame strike timing", () => {
   const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
   const phase = () => container!.querySelector("output")?.textContent;

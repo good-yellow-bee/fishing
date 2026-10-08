@@ -41,15 +41,22 @@ const PATTERNS: Record<ChallengeId, Pattern> = {
   timing: { calmMin: 1500, calmMax: 2400, surgeMin: 700, surgeMax: 1000, warnMs: 480, strength: 0.62, reelSurge: 0.18 },
   tension: { calmMin: 1100, calmMax: 1800, surgeMin: 1600, surgeMax: 2400, warnMs: 380, strength: 0.48, reelSurge: 0.4 },
   sequence: { calmMin: 800, calmMax: 1300, surgeMin: 700, surgeMax: 1100, warnMs: 260, strength: 0.5, reelSurge: 0.32 },
-  surge: { calmMin: 900, calmMax: 1400, surgeMin: 2000, surgeMax: 3200, warnMs: 350, strength: 0.52, reelSurge: 0.28 },
+  surge: { calmMin: 900, calmMax: 1400, surgeMin: 1200, surgeMax: 1900, warnMs: 350, strength: 0.52, reelSurge: 0.28 },
 };
 
+/** Reeling as a run starts turns the bar red and costs the clean bonus; the run then pulls gently enough that red lasts ~0.3 s, so a 0.25 s reaction to red or LET GO still saves the line. */
+const SURGE_PULL = 0.6;
+
+/** A run cannot snap the line in its first moments, so a prompt LET GO is saved at any frame rate. */
+const RUN_GRACE_MS = 300;
+const GRACE_TENSION = 0.95;
+
 export const FIGHT_LINES: Record<ChallengeId, [string, string, string]> = {
-  mash: ["Keep pumping", "It's shaking…", "SHAKE — ease a hair"],
-  timing: ["Steady retrieve", "It's lining up…", "RUN — let it go"],
-  tension: ["Grind it in", "The rod loads…", "BULLDOG — ease off"],
-  sequence: ["Short pumps", "Another burst…", "DOUBLE RUN — ease"],
-  surge: ["Don't horse it", "It's gathering…", "LONG RUN — ease off"],
+  mash: ["Reel in quick pumps", "Let go now — it's shaking", "LET GO — head shake!"],
+  timing: ["Reel a steady retrieve", "Let go now — it's lining up", "LET GO — it's running!"],
+  tension: ["Reel and grind it in", "Let go now — the rod loads", "LET GO — bulldog run!"],
+  sequence: ["Reel in short pumps", "Let go now — another burst", "LET GO — double run!"],
+  surge: ["Reel easy — don't horse it", "Let go now — it's gathering", "LET GO — long run!"],
 };
 
 export function makeFight(
@@ -75,6 +82,7 @@ export function makeFight(
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
   let completedSurges = 0;
   let nextAt: number | null = null;
+  let graceUntil = -Infinity;
 
   const step = (nowMs: number, dtSec: number, reeling: boolean): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -85,6 +93,9 @@ export function makeFight(
       } else if (sim.surge === 1) {
         sim.surge = 2;
         nextAt = nowMs + range(pattern.surgeMin, pattern.surgeMax);
+        // Starter head shakes skip this: their 220 ms warning is about one reaction time.
+        if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
+        graceUntil = nowMs + RUN_GRACE_MS;
       } else {
         sim.surge = 0;
         completedSurges += 1;
@@ -94,7 +105,7 @@ export function makeFight(
     }
 
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
-    const eff = pattern.strength * surgeScale + escalation;
+    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
       sim.line -= reelRate * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
@@ -102,6 +113,7 @@ export function makeFight(
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
+    if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);

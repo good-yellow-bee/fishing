@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FISH } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime } from "./fight";
+import { FISH, type FishSpecies } from "@stillwater/shared";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -15,6 +15,52 @@ function land(runtime: FightRuntime, fromMs = 0): FightOutcome {
     outcome = runtime.step(now, 0.05, runtime.sim.surge !== 2 && runtime.sim.tension < 0.6);
   }
   return outcome;
+}
+
+/** Deterministic random source (mulberry32) so each seed replays the same fish. */
+function seeded(seed: number) {
+  let state = seed;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+type Policy = (sim: FightSim, reeling: boolean) => boolean;
+
+const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && sim.tension < 0.7;
+/** Ignores surges; 0.6 leaves room for the reaction delay, so calm water alone never turns the bar red. */
+const barOnly: Policy = (sim, reeling) => sim.tension < (reeling ? 0.6 : 0.45);
+/** Misses the warning and lets go only on LET GO or red, resuming once calm and back in the green. */
+const lateOnRuns: Policy = (sim, reeling) => sim.surge !== 2 && sim.tension < (reeling ? RED_TENSION : 0.55);
+/** Ignores runs entirely and reels whenever the bar is out of the red. */
+const redOnly: Policy = (sim) => sim.tension < RED_TENSION;
+
+const SEEDS = Array.from({ length: 12 }, (_, index) => index + 1);
+const FRAME_SEC = 1 / 60;
+const REACTION_FRAMES = 12;
+const SLOW_REACTION_FRAMES = 15;
+
+/** Plays a fight at 60 Hz (by default) where the angler's hand acts on what they saw 0.2 s (by default) earlier. */
+function play(species: FishSpecies, weight: number, seed: number, policy: Policy, reactionFrames = REACTION_FRAMES, frameSec = FRAME_SEC) {
+  const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
+  const hand: boolean[] = Array(reactionFrames).fill(false);
+  let intent = false;
+  for (let frame = 0; frame < 120 / frameSec; frame++) {
+    intent = policy(runtime.sim, intent);
+    hand.push(intent);
+    const outcome = runtime.step(frame * frameSec * 1000, frameSec, hand.shift()!);
+    if (outcome !== "fighting") {
+      return { outcome, seconds: frame * frameSec, clean: outcome === "landed" && isCleanFight(runtime.performance) };
+    }
+  }
+  return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false };
+}
+
+function weights(species: FishSpecies) {
+  return [species.minWeight, (species.minWeight + species.maxWeight) / 2, species.maxWeight];
 }
 
 describe("makeFight", () => {
@@ -112,3 +158,77 @@ describe("makeFight", () => {
     expect(isCleanFight(runtime.performance)).toBe(false);
   });
 });
+
+describe("surges", () => {
+  it("lands every species, mostly clean, for an angler who lets go on the telegraph", () => {
+    for (const species of FISH) {
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, releaseOnTelegraph));
+
+        const label = `${species.id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(SEEDS.length * 0.8);
+      }
+    }
+  });
+
+  it("lands a mid-size sturgeon in about 25 seconds when played by the telegraph", () => {
+    const sturgeon = fish("sturgeon");
+    const fights = SEEDS.map((seed) => play(sturgeon, 50, seed, releaseOnTelegraph));
+    const average = fights.reduce((sum, fight) => sum + fight.seconds, 0) / fights.length;
+
+    expect(average).toBeGreaterThan(18);
+    expect(average).toBeLessThan(32);
+  });
+
+  it("lands every non-starter fish but costs the clean bonus when the angler only watches the tension bar", () => {
+    for (const species of FISH.filter((candidate) => candidate.challenge !== "mash")) {
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
+
+        const label = `${species.id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => !fight.clean).length, label).toBeGreaterThan(SEEDS.length / 2);
+      }
+    }
+  });
+
+  it("lands starter fish, mostly clean, for an angler who only watches the tension bar", () => {
+    for (const id of ["golden-shiner", "perch", "bluegill"]) {
+      const species = fish(id);
+      for (const weight of weights(species)) {
+        const fights = SEEDS.map((seed) => play(species, weight, seed, barOnly));
+
+        const label = `${id} ${weight} lb`;
+        expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        expect(fights.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(SEEDS.length * 0.8);
+      }
+    }
+  });
+
+  it("never snaps a fish for a slow angler who lets go only on LET GO or a red bar", () => {
+    for (const [name, policy] of Object.entries({ lateOnRuns, redOnly })) {
+      for (const species of FISH) {
+        for (const weight of weights(species)) {
+          const fights = SEEDS.map((seed) => play(species, weight, seed, policy, SLOW_REACTION_FRAMES));
+
+          const label = `${name} ${species.id} ${weight} lb`;
+          expect(fights.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+        }
+      }
+    }
+  });
+
+  it("still saves the line on a prompt LET GO at 30 and 20 frames per second", () => {
+    for (const fps of [30, 20]) {
+      const frameSec = 1 / fps;
+      for (const species of FISH) {
+        for (const weight of weights(species)) {
+          const fights = SEEDS.map((seed) => play(species, weight, seed, lateOnRuns, Math.round(0.25 / frameSec), frameSec));
+          expect(fights.map((fight) => fight.outcome), `${fps} fps ${species.id} ${weight} lb`).toEqual(SEEDS.map(() => "landed"));
+        }
+      }
+    }
+  });
+});
+
