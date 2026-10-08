@@ -82,6 +82,7 @@ import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
+import { listenForWaterAim } from "./pointerAim";
 
 const BUOY_URL = "/models/buoy.glb";
 useGLTF.preload(BUOY_URL);
@@ -404,14 +405,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
       );
       syncAim.current(now.current);
     };
-    window.addEventListener("pointermove", onPoint);
-    window.addEventListener("pointerdown", onPoint);
-    window.addEventListener("pointerup", onPoint, true);
-    return () => {
-      window.removeEventListener("pointermove", onPoint);
-      window.removeEventListener("pointerdown", onPoint);
-      window.removeEventListener("pointerup", onPoint, true);
-    };
+    return listenForWaterAim(window, onPoint);
   }, [gl]);
 
   useFrame((state) => {
