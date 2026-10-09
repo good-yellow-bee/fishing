@@ -79,10 +79,7 @@ type Timers = {
 
 const WAIT_HINT = "Watch the bobber. A nibble first — strike on the real dip.";
 const HOTSPOT_WAIT_HINT = "Your lure is in the bubbles. Watch the bobber — strike on the real dip.";
-
-function waitHint(inBubbles: boolean) {
-  return inBubbles ? HOTSPOT_WAIT_HINT : WAIT_HINT;
-}
+const SHORT_CAST_HINT = "Short cast — only small fish will look.";
 
 function movedHint(spot: SpotId) {
   return `The bubbles moved to the ${SPOT_LABELS[spot]}.`;
@@ -113,6 +110,7 @@ export function useFishingGame(
   const aimHintRef = useRef<AimHint>("dock");
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
+  const waitHintRef = useRef(WAIT_HINT);
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
   const [spot, setSpot] = useState<SpotId>("dock");
@@ -205,10 +203,12 @@ export function useFishingGame(
     beginFight(species, weight, profile);
   }, [beginFight, hour, profile, sky]);
 
-  const startWait = useCallback((current: Profile) => {
+  const startWait = useCallback((current: Profile, short: boolean) => {
     setPhaseBoth("waiting");
     setNibble(false);
-    setHint(waitHint(castHotspotRef.current));
+    // A short cast only draws commons, even in the bubbles.
+    waitHintRef.current = short ? SHORT_CAST_HINT : castHotspotRef.current ? HOTSPOT_WAIT_HINT : WAIT_HINT;
+    setHint(waitHintRef.current);
     const wait = waitMs(current.patience, hour, castHotspotRef.current);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
@@ -279,7 +279,7 @@ export function useFishingGame(
       return;
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
-    startWait(profile);
+    startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
   const startCast = useCallback((via: "pointer" | "key") => {
@@ -368,7 +368,7 @@ export function useFishingGame(
       if (event.pointerType === "touch" && !event.isPrimary) {
         if (phaseRef.current === "casting") resetToIdle("Camera moved. Hold one finger or Space to cast.");
         // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
-        if (phaseRef.current === "waiting") setHint(waitHint(castHotspotRef.current));
+        if (phaseRef.current === "waiting") setHint(waitHintRef.current);
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;
@@ -466,11 +466,11 @@ export function useFishingGame(
           } else if (result === "snapped") {
             fx.snap();
             setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
-            resetToIdle("Broke off. Try again.");
+            resetToIdle("Too much tension — let go when the bar turns red or the fish is about to run.");
           } else if (result === "escaped") {
             fx.snap();
             setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
-            resetToIdle("Broke off. Try again.");
+            resetToIdle("Ran out of line — hold to reel whenever the fish is calm.");
           }
         }
       } catch (error) {

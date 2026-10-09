@@ -64,6 +64,7 @@ function Harness() {
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
+      <i data-testid="rarity">{game.fight?.species.rarity ?? ""}</i>
     </>
   );
 }
@@ -162,6 +163,25 @@ describe("useFishingGame landed outcome", () => {
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("result:landed");
     expect(container!.querySelector("span")?.textContent).toBe("false");
+  });
+});
+
+describe("useFishingGame lost fight", () => {
+  const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+
+  it("says why the line broke and what to do next time", () => {
+    const surface = mount();
+
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
+    expect(hint()).toMatch(/too much tension.*let go when the bar turns red or the fish is about to run/i);
+
+    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 2);
+    expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
+    expect(hint()).toMatch(/ran out of line.*reel whenever the fish is calm/i);
   });
 });
 
@@ -284,3 +304,62 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(hint()).not.toBe(movedLine);
   });
 });
+
+describe("useFishingGame cast feedback", () => {
+  const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
+  const phase = () => container!.querySelector("output")?.textContent;
+  const rarity = () => container!.querySelector("[data-testid=rarity]")?.textContent;
+
+  /** Full power takes 900ms; Accuracy 3 puts the band at about 0.50–0.75. */
+  function castFor(surface: HTMLDivElement, holdMs: number) {
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    now += holdMs;
+    act(() => window.dispatchEvent(pointer("pointerup")));
+  }
+
+  /** A late roll draws the last fish in the pool, so a full dock pool hooks a catfish. */
+  function hookOnLateRoll(surface: HTMLDivElement) {
+    act(() => vi.advanceTimersByTime(2_201));
+    vi.mocked(Math.random).mockReturnValue(0.99);
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+  }
+
+  it("says a short cast only draws small fish, and only a common bites", () => {
+    const surface = mount();
+    castFor(surface, 300);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toBe("Short cast — only small fish will look.");
+    hookOnLateRoll(surface);
+    expect(phase()).toBe("fight:none");
+    expect(rarity()).toBe("common");
+  });
+
+  it("keeps the plain wait hint for a cast in the band, which draws past the commons", () => {
+    const surface = mount();
+    castFor(surface, 500);
+    expect(hint()).toMatch(/watch the bobber/i);
+    hookOnLateRoll(surface);
+    expect(phase()).toBe("fight:none");
+    expect(rarity()).toBe("uncommon");
+  });
+
+  it("does not call out a release past the band, since only a backlash changes anything", () => {
+    const surface = mount();
+    castFor(surface, 800);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/watch the bobber/i);
+  });
+
+  it("puts the short-cast hint back when an early strike turns out to be a camera pinch", () => {
+    const surface = mount();
+    castFor(surface, 300);
+    act(() => vi.advanceTimersByTime(600));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/too early/i);
+    const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
+    Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
+    act(() => surface.dispatchEvent(second));
+    expect(hint()).toMatch(/short cast/i);
+  });
+});
+

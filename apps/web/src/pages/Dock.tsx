@@ -28,7 +28,8 @@ import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs } from "../game/logic";
-import { lureCanChange } from "../game/lureChoice";
+import { useLevelToast } from "../game/useLevelToast";
+import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
@@ -45,7 +46,9 @@ export function DockPage() {
   const [error, setError] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
   const [lureChoices] = useState(() => luresPacked(readTackle()));
-  const [chosenLure, setChosenLure] = useState(() => lureChoices[0] ?? "Bobber");
+  // Null until the angler picks a lure this session, so the default follows their Strength.
+  const [pickedLure, setPickedLure] = useState<string | null>(null);
+  const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky);
   const scenePhase = game.outcome ? "result" : game.phase;
@@ -97,6 +100,10 @@ export function DockPage() {
   useEffect(() => () => fx.ambient.stop(), []);
 
   useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
+
+  // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
+  const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
+  const shownLevel = useLevelToast(me?.level, bankClear);
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -176,6 +183,7 @@ export function DockPage() {
 
   const dropoffOpen = canUseSpot("dropoff", me.level);
   const fishing = isFishingStance(game.stance);
+  const bank = isFishingStance(game.stance) ? game.stance : game.spot;
   const stanceLabel =
     game.stance === "dropoff" && !dropoffOpen ? `${STANCE_LABELS.dropoff} (lv 3)` : STANCE_LABELS[game.stance];
 
@@ -198,7 +206,7 @@ export function DockPage() {
         <FishingWorld
           phase={scenePhase}
           power={game.power}
-          spot={isFishingStance(game.stance) ? game.stance : game.spot}
+          spot={bank}
           sim={game.sim}
           nibble={game.nibble}
           hour={hour}
@@ -242,10 +250,11 @@ export function DockPage() {
         <LureChoice
           choices={lureChoices}
           value={lure}
+          spot={bank}
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
-            setChosenLure(next);
+            setPickedLure(next);
           }}
         />
         <aside className="camera-help" data-camera-control>
@@ -307,6 +316,15 @@ export function DockPage() {
             </button>
           </div>
         )}
+        {/* Mounted empty so screen readers announce the toast when it fills in. */}
+        <div className="level-status" role="status">
+          {shownLevel && (
+            <div className="toast level-toast">
+              <h2>Level {shownLevel.level}</h2>
+              {shownLevel.opened && <p>{shownLevel.opened}</p>}
+            </div>
+          )}
+        </div>
         {shopOpen && (
           <div className="shop-overlay">
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />

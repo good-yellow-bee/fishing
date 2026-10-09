@@ -11,11 +11,13 @@ let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let frames: FrameRequestCallback[] = [];
 
+let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0 } };
+
 function mount(performance: FightPerformance | null, underpowered = false) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
-  const sim = { current: { line: 1, tension: 0.3, surge: 0 } as FightSim };
+  sim = { current: { line: 1, tension: 0.3, surge: 0 } };
   const record = { current: performance };
   container = document.createElement("div");
   document.body.append(container);
@@ -37,6 +39,26 @@ afterEach(() => {
   container = null;
   frames = [];
   vi.unstubAllGlobals();
+});
+
+describe("FightBar controls", () => {
+  it("keeps the reel and let-go controls on the card while the fish runs", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    frame();
+    const controls = container!.querySelector(".fight-controls")!.textContent;
+    expect(controls).toMatch(/hold click \/ space to reel/i);
+    expect(controls).toMatch(/hold the screen to reel/i);
+    expect(controls).toMatch(/let go when the fish is about to run or tension goes red/i);
+
+    sim.current.surge = 1;
+    frame();
+    expect(container!.querySelector(".fight-status")!.textContent).toMatch(/^let go now/i);
+
+    sim.current.surge = 2;
+    frame();
+    expect(container!.querySelector(".fight-status")!.textContent).toMatch(/^let go/i);
+    expect(container!.querySelector(".fight-controls")!.textContent).toBe(controls);
+  });
 });
 
 describe("FightBar clean-fight chip", () => {

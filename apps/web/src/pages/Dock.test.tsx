@@ -30,7 +30,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
   };
 });
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
-vi.mock("../game/fx", () => ({ fx: { enabled: true, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
+vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
   FishingWorld: (props: { hour: LakeHour; sky: Sky }) => {
     scene(props);
@@ -73,6 +73,8 @@ afterEach(() => {
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
+  vi.mocked(fx.land).mockClear();
+  vi.mocked(getMe).mockReset();
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -126,5 +128,74 @@ describe("dock weather", () => {
     await openDock("/?sky=fog");
     const kept = readStoredLogbook()?.catches.find((entry) => entry.id === "catch-dock-fog");
     expect(kept?.weather).toEqual(dailyConditions(now, "fog"));
+  });
+});
+
+describe("level-up toast", () => {
+  it("waits out the catch card, then fills a status region that was already mounted", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
+    const perch = fishById("perch")!;
+    const levelThree: Me = {
+      ...me,
+      profile: { ...me.profile, points: 150, lifetimePoints: 150 },
+      level: 3,
+      spots: { ...me.spots, dropoff: true },
+    };
+    // The page load and the owner check before the save read level 1; the read after the save sees level 3.
+    vi.mocked(getMe).mockResolvedValueOnce(me).mockResolvedValueOnce(me).mockResolvedValue(levelThree);
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-level", points: 150, speciesId: perch.id, weight: 0.6 });
+    landed.outcome = { kind: "landed", id: "catch-level", species: perch, weight: 0.6, spot: "dock", clean: false };
+    const page = await openDock("/");
+    await act(async () => undefined);
+    expect(page.querySelector(".level-chip")?.textContent).toBe("Level 3");
+    expect(page.querySelector(".landed-card")).not.toBeNull();
+    const status = page.querySelector(".level-status");
+    expect(status?.getAttribute("role")).toBe("status");
+    // A long look at the card must not use up the toast's time.
+    act(() => vi.advanceTimersByTime(5000));
+    expect(status?.textContent).toBe("");
+    expect(fx.land).not.toHaveBeenCalled();
+
+    landed.outcome = null;
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".landed-card")).toBeNull();
+    expect(page.querySelector(".level-status")).toBe(status);
+    expect(status?.querySelector(".level-toast h2")?.textContent).toBe("Level 3");
+    expect(status?.querySelector(".level-toast p")?.textContent).toBe("The drop-off is open — walk east along the shore.");
+    expect(fx.land).toHaveBeenCalledTimes(1);
+
+    // A quick recast hides it; coming back resumes the remaining time without a second chime.
+    act(() => vi.advanceTimersByTime(2500));
+    landed.outcome = { kind: "miss", message: "Too slow. The fish dropped the bait." };
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".level-toast")).toBeNull();
+    act(() => vi.advanceTimersByTime(10_000));
+    landed.outcome = null;
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".level-toast")).not.toBeNull();
+    expect(fx.land).toHaveBeenCalledTimes(1);
+    act(() => vi.advanceTimersByTime(1400));
+    expect(page.querySelector(".level-toast")).not.toBeNull();
+    act(() => vi.advanceTimersByTime(200));
+    expect(page.querySelector(".level-toast")).toBeNull();
+    expect(page.querySelector(".level-status")).toBe(status);
   });
 });
