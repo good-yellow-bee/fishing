@@ -2,10 +2,10 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, type Profile } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, SPOT_LABELS, type Profile } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { waitMs } from "./logic";
+import { pickBite, waitMs } from "./logic";
 
 const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
@@ -15,6 +15,10 @@ let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 vi.mock("./fx", () => ({
   fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn() },
 }));
+vi.mock("./logic", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./logic")>();
+  return { ...actual, pickBite: vi.fn(actual.pickBite) };
+});
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
   return {
@@ -202,8 +206,12 @@ describe("useFishingGame strike timing", () => {
 
 describe("useFishingGame bubbling hotspot", () => {
   const sooner = () => Math.ceil(waitMs(profile.patience, "day", true));
+  const usual = () => Math.ceil(waitMs(profile.patience, "day"));
+  const inBubbles = () => vi.mocked(pickBite).mock.lastCall?.[7];
+  const boundary = DOCK_BUBBLES.bubbles.startsAt + HOTSPOT_PERIOD_MS;
+  const movedLine = `The bubbles moved to the ${SPOT_LABELS[hotspotAt(boundary, 1).spot]}.`;
 
-  it("tells the angler the lure is in the bubbles and brings the bite sooner", () => {
+  it("tells the angler the lure is in the bubbles, brings the bite sooner and draws from the bubbles' odds", () => {
     const surface = mount();
     surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
     surface.dataset.aim = `${DOCK_BUBBLES.bubbles.x},${DOCK_BUBBLES.bubbles.z}`;
@@ -223,9 +231,10 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(phase()).toBe("hookset:none");
     act(() => surface.dispatchEvent(pointer("pointerdown", 4)));
     expect(phase()).toBe("fight:none");
+    expect(inBubbles()).toBe(true);
   });
 
-  it("waits the usual time for a cast outside the bubbles", () => {
+  it("waits the usual time and draws the usual odds for a cast outside the bubbles", () => {
     const surface = mount();
     surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
     cast(surface);
@@ -233,13 +242,17 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(hint()).not.toMatch(/bubbles/i);
     act(() => vi.advanceTimersByTime(sooner()));
     expect(phase()).toBe("waiting:none");
+    act(() => vi.advanceTimersByTime(usual() - sooner()));
+    expect(phase()).toBe("hookset:none");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("fight:none");
+    expect(inBubbles()).toBe(false);
   });
 
   it("tells an idle angler where the bubbles went, but leaves a waiting angler's hint alone", () => {
-    const boundary = DOCK_BUBBLES.bubbles.startsAt + HOTSPOT_PERIOD_MS;
     mount(boundary - 1_000);
     act(() => vi.advanceTimersByTime(1_001));
-    expect(hint()).toBe("The bubbles moved to the Reeds.");
+    expect(hint()).toBe(movedLine);
     act(() => root?.unmount());
     container?.remove();
 
@@ -249,5 +262,25 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/watch the bobber/i);
   });
-});
 
+  it("tells a move that came mid-cast once the angler is back to idle, and only once", () => {
+    const surface = mount(boundary - 1_000);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1_001));
+    expect(phase()).toBe("waiting:none");
+    act(() => vi.advanceTimersByTime(usual()));
+    expect(phase()).toBe("hookset:none");
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).not.toBe(movedLine);
+    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    expect(phase()).toBe("idle:none");
+    expect(hint()).toBe(movedLine);
+
+    cast(surface);
+    act(() => vi.advanceTimersByTime(usual()));
+    act(() => vi.advanceTimersByTime(5_000));
+    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    expect(hint()).not.toBe(movedLine);
+  });
+});
