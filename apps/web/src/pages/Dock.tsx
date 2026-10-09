@@ -19,6 +19,7 @@ import {
   type SkillId,
 } from "@stillwater/shared";
 import { buyUpgrade, getMe, type Me } from "../api";
+import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { LureChoice } from "../components/LureChoice";
@@ -327,6 +328,7 @@ export function DockPage() {
         {shopOpen && (
           <div className="shop-overlay">
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
+            <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
               Back to the path
             </button>
