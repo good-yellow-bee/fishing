@@ -20,7 +20,8 @@ function localDay({ day, from, to }: Record<string, string | undefined>) {
   const start = Date.parse(from);
   const end = Date.parse(to);
   if ([midnight, start, end].some(Number.isNaN) || new Date(midnight).toISOString().slice(0, 10) !== day) return null;
-  if (start < midnight - 12 * HOUR_MS - HOUR_MS || start > midnight + 14 * HOUR_MS + HOUR_MS) return null;
+  // UTC+14 starts before UTC midnight; UTC-12 starts after it. Keep the one-hour midnight-transition margin.
+  if (start < midnight - 15 * HOUR_MS || start > midnight + 13 * HOUR_MS) return null;
   if (end - start < 22 * HOUR_MS || end - start > 26 * HOUR_MS) return null;
   // Given those bounds, a real local date is never more than a day from the server's.
   const today = Date.parse(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);

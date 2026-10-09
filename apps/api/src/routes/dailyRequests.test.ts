@@ -158,6 +158,8 @@ describe("GET /api/daily-requests", () => {
       query(day.replaceAll("-", "/")),
       query(twoDaysOn),
       query(day, 900),
+      query(day, -901),
+      query(day, 781),
       query(day, "1.5"),
       query(day, offset, -900),
       query(day, -840, 720),
@@ -165,11 +167,17 @@ describe("GET /api/daily-requests", () => {
       `day=${day}&offset=${offset}`,
       `day=${day}`,
     ]) {
-      expect((await getBoard(search)).status).toBe(400);
+      expect((await getBoard(search)).status, search).toBe(400);
     }
     expect((await getBoard(query(tomorrow, -600))).status).toBe(200);
+  });
+
+  it("accepts both timezone extremes and both directions of two-hour DST shifts", async () => {
+    expect((await getBoard(query(day, -840))).status).toBe(200);
+    expect((await getBoard(query(day, 720))).status).toBe(200);
     // Two-hour DST shifts are real (Antarctica/Troll).
     expect((await getBoard(query(day, 0, -120))).status).toBe(200);
+    expect((await getBoard(query(day, -120, 0))).status).toBe(200);
   });
 });
 

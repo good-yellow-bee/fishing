@@ -68,7 +68,6 @@ export function buyUpgrade(skill: SkillId) {
   });
 }
 
-/** The server counts catches by this local day, so it also needs the UTC offsets at its midnight and the next. */
 /** The local day as the instants it starts and ends, which stay right where clocks jump at midnight. */
 export function dayQuery(day: string) {
   const [year, month, date] = day.split("-").map(Number);
