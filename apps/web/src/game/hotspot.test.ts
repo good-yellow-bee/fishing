@@ -1,4 +1,4 @@
-import { inLake, resolveCast, SPOT_IDS, spotAt, stanceAt, walkableAt, type SpotId } from "@stillwater/shared";
+import { CAST_RANGE, inLake, resolveCast, SPOT_IDS, spotAt, stanceAt, walkableAt } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { BANK_STANDS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, isHotspotCast } from "./hotspot";
 
@@ -22,6 +22,7 @@ describe("bubbling hotspot", () => {
       const patches = new Map(series(level).map((hotspot) => [`${hotspot.spot} ${hotspot.x},${hotspot.z}`, hotspot]));
       for (const [where, hotspot] of patches) {
         const stand = BANK_STANDS[hotspot.spot];
+        expect(Math.hypot(hotspot.x - stand.x, hotspot.z - stand.z) + HOTSPOT_RADIUS, where).toBeLessThanOrEqual(CAST_RANGE);
         expect(inLake(hotspot.x, hotspot.z), where).toBe(true);
         expect(walkableAt(hotspot.x, hotspot.z), where).toBe(false);
         expect(spotAt(hotspot.x, hotspot.z), where).toBe(hotspot.spot);
@@ -39,8 +40,7 @@ describe("bubbling hotspot", () => {
           }
         }
         expect(unreachable, where).toEqual([]);
-        // Finer than the placement grid, so a seam patch can measure a hair under half.
-        expect(open / disc, where).toBeGreaterThanOrEqual(0.45);
+        expect(open / disc, where).toBeGreaterThanOrEqual(0.5);
       }
       for (const spot of new Set([...patches.values()].map((hotspot) => hotspot.spot))) {
         expect([...patches.values()].filter((hotspot) => hotspot.spot === spot).length, `level ${level} ${spot}`).toBeGreaterThanOrEqual(5);
@@ -74,6 +74,14 @@ describe("bubbling hotspot", () => {
     for (let i = 0; i < PERIODS; i += 1) {
       if (after[i]!.spot !== "dropoff") expect(after[i], `period ${i}`).toEqual(before[i]);
       if (i + 1 < PERIODS) expect(after[i + 1]!.spot, `period ${i}`).not.toBe(before[i]!.spot);
+    }
+  });
+
+  it("never repeats at period 11 to 0, including when the drop-off opens", () => {
+    for (const [beforeLevel, afterLevel] of [[2, 2], [3, 3], [2, 3]] as const) {
+      const before = hotspotAt(11 * HOTSPOT_PERIOD_MS, beforeLevel);
+      const after = hotspotAt(12 * HOTSPOT_PERIOD_MS, afterLevel);
+      expect(after.spot).not.toBe(before.spot);
     }
   });
 

@@ -34,14 +34,16 @@ const STEP = 0.5;
 function mostlyOpen(spot: SpotId, x: number, z: number) {
   let disc = 0;
   let open = 0;
-  for (let dx = -HOTSPOT_RADIUS; dx <= HOTSPOT_RADIUS; dx += STEP) {
-    for (let dz = -HOTSPOT_RADIUS; dz <= HOTSPOT_RADIUS; dz += STEP) {
+  const sample = STEP / 2;
+  for (let dx = -HOTSPOT_RADIUS + sample / 2; dx < HOTSPOT_RADIUS; dx += sample) {
+    for (let dz = -HOTSPOT_RADIUS + sample / 2; dz < HOTSPOT_RADIUS; dz += sample) {
       if (Math.hypot(dx, dz) > HOTSPOT_RADIUS) continue;
       disc += 1;
       if (spotAt(x + dx, z + dz) === spot && !walkableAt(x + dx, z + dz)) open += 1;
     }
   }
-  return open * 2 >= disc;
+  // Sample cell centers with a margin so seam points cannot inflate the open-water share.
+  return open / disc >= 0.55;
 }
 
 /** Centers on that bank's open water, clear of the pier and the path boards, with the whole patch in reach of the stand. */

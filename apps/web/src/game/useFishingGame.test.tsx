@@ -254,6 +254,34 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(inBubbles()).toBe(true);
   });
 
+  it("keeps the short-cast warning in the bubbles and still draws only common fish", () => {
+    const surface = mount();
+    surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
+    surface.dataset.aim = `${DOCK_BUBBLES.bubbles.x},${DOCK_BUBBLES.bubbles.z}`;
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    now += 300;
+    act(() => window.dispatchEvent(pointer("pointerup")));
+    expect(hint()).toMatch(/short cast/i);
+    expect(hint()).toMatch(/your lure is in the bubbles/i);
+    act(() => vi.advanceTimersByTime(sooner()));
+    vi.mocked(Math.random).mockReturnValue(0.99);
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(inBubbles()).toBe(true);
+    expect(vi.mocked(pickBite).mock.lastCall?.[2]).toBe(true);
+    expect(container!.querySelector("[data-testid=rarity]")?.textContent).toBe("common");
+  });
+
+  it("keeps a cast's bonus when the bubbles move before the bite", () => {
+    const surface = mount(boundary - 1_000);
+    surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;
+    surface.dataset.aim = `${DOCK_BUBBLES.bubbles.x},${DOCK_BUBBLES.bubbles.z}`;
+    cast(surface);
+    act(() => vi.advanceTimersByTime(sooner()));
+    expect(phase()).toBe("hookset:none");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(inBubbles()).toBe(true);
+  });
+
   it("waits the usual time and draws the usual odds for a cast outside the bubbles", () => {
     const surface = mount();
     surface.dataset.angler = `${DOCK_STAND_X},${DOCK_STAND_Z}`;

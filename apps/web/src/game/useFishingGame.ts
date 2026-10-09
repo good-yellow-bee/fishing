@@ -207,7 +207,8 @@ export function useFishingGame(
     setPhaseBoth("waiting");
     setNibble(false);
     // A short cast only draws commons, even in the bubbles.
-    waitHintRef.current = short ? SHORT_CAST_HINT : castHotspotRef.current ? HOTSPOT_WAIT_HINT : WAIT_HINT;
+    waitHintRef.current = short ? SHORT_CAST_HINT : WAIT_HINT;
+    if (castHotspotRef.current) waitHintRef.current = short ? `${SHORT_CAST_HINT} ${HOTSPOT_WAIT_HINT}` : HOTSPOT_WAIT_HINT;
     setHint(waitHintRef.current);
     const wait = waitMs(current.patience, hour, castHotspotRef.current);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
