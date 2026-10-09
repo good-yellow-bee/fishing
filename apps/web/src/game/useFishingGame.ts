@@ -84,6 +84,10 @@ function waitHint(inBubbles: boolean) {
   return inBubbles ? HOTSPOT_WAIT_HINT : WAIT_HINT;
 }
 
+function movedHint(spot: SpotId) {
+  return `The bubbles moved to the ${SPOT_LABELS[spot]}.`;
+}
+
 export function useFishingGame(
   profile: Profile | null,
   hour: LakeHour = lakeHour(),
@@ -105,6 +109,7 @@ export function useFishingGame(
   const spotRef = useRef<SpotId>("dock");
   const hotspotRef = useRef<Hotspot | null>(null);
   const castHotspotRef = useRef(false);
+  const movedUnheardRef = useRef(false);
   const aimHintRef = useRef<AimHint>("dock");
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
@@ -163,7 +168,9 @@ export function useFishingGame(
     clearFight();
     setPower(0);
     setPhaseBoth(phase);
-    setHint(message);
+    const moved = phase === "idle" && movedUnheardRef.current ? hotspotRef.current : null;
+    if (moved) movedUnheardRef.current = false;
+    setHint(moved ? movedHint(moved.spot) : message);
   }, []);
 
   const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile) => {
@@ -495,8 +502,9 @@ export function useFishingGame(
       const moved = hotspotRef.current !== null && hotspotRef.current.spot !== next.spot;
       hotspotRef.current = next;
       setHotspot(next);
-      // Mid-cast the hint is busy with the bobber or the fight, so only an idle angler hears it.
-      if (moved && phaseRef.current === "idle") setHint(`The bubbles moved to the ${SPOT_LABELS[next.spot]}.`);
+      // Mid-cast the hint is busy with the bobber or the fight, so the move is told on the angler's return to idle.
+      if (moved && phaseRef.current === "idle") setHint(movedHint(next.spot));
+      else if (moved) movedUnheardRef.current = true;
       timer = window.setTimeout(place, next.startsAt + HOTSPOT_PERIOD_MS - now);
     };
     place();
