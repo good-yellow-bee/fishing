@@ -1,4 +1,4 @@
-import { canUseSpot, SPOT_LABELS } from "./progression.ts";
+import { canUseSpot, castRangeMultiplier, SPOT_LABELS } from "./progression.ts";
 import type { SpotId } from "./types.ts";
 
 export const LAKE_CENTER_Z = -2;
@@ -107,8 +107,8 @@ export function isFishingStance(stance: StanceId): stance is SpotId {
   return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point";
 }
 
-export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number) {
-  return inRadius(fromX, fromZ, toX, toZ, CAST_RANGE);
+export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number, level = 1) {
+  return inRadius(fromX, fromZ, toX, toZ, CAST_RANGE * castRangeMultiplier(level));
 }
 
 export function onDockPlanks(x: number, z: number) {
@@ -176,7 +176,7 @@ export function resolveCast(
   if (!Number.isFinite(aimX) || !Number.isFinite(aimZ)) return { ok: false, reason: "shore" };
   const water = spotAt(aimX, aimZ);
   if (!water) return { ok: false, reason: "shore" };
-  if (!inCastRange(fromX, fromZ, aimX, aimZ)) return { ok: false, reason: "range" };
+  if (!inCastRange(fromX, fromZ, aimX, aimZ, level)) return { ok: false, reason: "range" };
   if (water !== stance) return { ok: false, reason: "basin" };
   if (!canUseSpot(stance, level)) return { ok: false, reason: "locked" };
   return { ok: true, spot: stance };

@@ -55,8 +55,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness() {
-  const game = useFishingGame(profile, "day");
+function Harness({ current = profile }: { current?: Profile }) {
+  const game = useFishingGame(current, "day");
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42" />
@@ -64,6 +64,8 @@ function Harness() {
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
+      <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
+      <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
       <i data-testid="rarity">{game.fight?.species.rarity ?? ""}</i>
     </>
   );
@@ -78,13 +80,14 @@ afterEach(() => {
   now = 0;
   fightPerformance = { peakTension: 0.2, maxLine: 1 };
   step.mockClear();
+  vi.mocked(pickBite).mockClear();
   vi.unstubAllGlobals();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at) {
+function mount(at = DOCK_BUBBLES.at, current = profile) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -98,7 +101,7 @@ function mount(at = DOCK_BUBBLES.at) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness />));
+  act(() => root!.render(<Harness current={current} />));
   return container.querySelector("div")!;
 }
 
@@ -347,8 +350,8 @@ describe("useFishingGame cast feedback", () => {
 
   /** A late roll draws the last fish in the pool, so a full dock pool hooks a catfish. */
   function hookOnLateRoll(surface: HTMLDivElement) {
-    act(() => vi.advanceTimersByTime(2_201));
     vi.mocked(Math.random).mockReturnValue(0.99);
+    act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
   }
 
@@ -391,3 +394,44 @@ describe("useFishingGame cast feedback", () => {
   });
 });
 
+describe("level unlock integration", () => {
+  it("rolls the actual fish on the bite and keeps it through the strike", () => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 350 });
+    cast(surface);
+    expect(pickBite).not.toHaveBeenCalled();
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toBe("");
+    act(() => vi.advanceTimersByTime(2201));
+    expect(phase()).toBe("hookset:none");
+    expect(pickBite).toHaveBeenCalledTimes(1);
+    const bitten = container!.querySelector("[data-testid=bite]")!.textContent;
+    expect(bitten).toMatch(/.+\|[0-9.]+/);
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(pickBite).toHaveBeenCalledTimes(1);
+    expect(container!.querySelector("[data-testid=fight]")!.textContent).toBe(bitten);
+  });
+
+  it("clears the rolled bite after a missed strike", () => {
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).not.toBe("");
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("result:miss");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toBe("");
+  });
+
+  it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: points });
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    expect(phase()).toBe(expected);
+    if (points === 700) {
+      now += 500;
+      act(() => window.dispatchEvent(pointer("pointerup")));
+      expect(phase()).toBe("waiting:none");
+    }
+  });
+});

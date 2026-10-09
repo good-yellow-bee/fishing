@@ -22,6 +22,31 @@ export function canUseSpot(spot: SpotId, level: number): boolean {
   return spot !== "dropoff" || level >= DROPOFF_LEVEL;
 }
 
+const LEVEL_UNLOCKS: Record<number, string> = {
+  3: "The drop-off is open — walk east along the shore.",
+  4: "See a fish shadow before you strike.",
+  5: "Cast 25% farther.",
+  6: "Legendary fish bite more often at night or in rain.",
+  7: "Fish bite 15% faster.",
+  8: "Better odds of trophy-size fish.",
+};
+
+export function levelUnlock(level: number): string | null {
+  return LEVEL_UNLOCKS[level] ?? null;
+}
+
+export function canPreviewFish(level: number): boolean {
+  return level >= 4;
+}
+
+export function castRangeMultiplier(level: number): number {
+  return level >= 5 ? 1.25 : 1;
+}
+
+export function biteWaitMulForLevel(level: number): number {
+  return level >= 7 ? 0.85 : 1;
+}
+
 export function nextSkillRank(current: number): number | null {
   if (current >= MAX_SKILL) return null;
   return current + 1;

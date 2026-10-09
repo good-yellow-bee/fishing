@@ -97,6 +97,7 @@ export function useFishingGame(
   const holdingRef = useRef(false);
   const holdStartRef = useRef(0);
   const castPointerRef = useRef<number | null>(null);
+  const biteRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
   const fightRef = useRef<Fight | null>(null);
   const runtimeRef = useRef<FightRuntime | null>(null);
   const simRef = useRef<FightSim | null>(null);
@@ -115,6 +116,7 @@ export function useFishingGame(
   const [power, setPower] = useState(0);
   const [spot, setSpot] = useState<SpotId>("dock");
   const [aimHint, setAimHint] = useState<AimHint>("dock");
+  const [bite, setBite] = useState<{ species: FishSpecies; weight: number } | null>(null);
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [nibble, setNibble] = useState(false);
@@ -139,6 +141,8 @@ export function useFishingGame(
   };
 
   const clearFight = () => {
+    biteRef.current = null;
+    setBite(null);
     fightRef.current = null;
     runtimeRef.current = null;
     simRef.current = null;
@@ -195,13 +199,12 @@ export function useFishingGame(
 
   const setTheHook = useCallback(() => {
     if (phaseRef.current !== "hookset" || !profile) return;
+    const bitten = biteRef.current;
+    if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     fx.splash();
-    const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current);
-    const { weight } = makeCatch(species, profile.patience);
-    beginFight(species, weight, profile);
-  }, [beginFight, hour, profile, sky]);
+    beginFight(bitten.species, bitten.weight, profile);
+  }, [beginFight, profile]);
 
   const startWait = useCallback((current: Profile, short: boolean) => {
     setPhaseBoth("waiting");
@@ -210,7 +213,7 @@ export function useFishingGame(
     waitHintRef.current = short ? SHORT_CAST_HINT : WAIT_HINT;
     if (castHotspotRef.current) waitHintRef.current = short ? `${SHORT_CAST_HINT} ${HOTSPOT_WAIT_HINT}` : HOTSPOT_WAIT_HINT;
     setHint(waitHintRef.current);
-    const wait = waitMs(current.patience, hour, castHotspotRef.current);
+    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints));
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
       timers.current.nibble = window.setTimeout(() => {
@@ -228,6 +231,10 @@ export function useFishingGame(
     timers.current.wait = window.setTimeout(() => {
       if (phaseRef.current !== "waiting") return;
       setNibble(false);
+      const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current);
+      const bitten = makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
+      biteRef.current = bitten;
+      setBite(bitten);
       fx.bite();
       setPhaseBoth("hookset");
       setHint("NOW — strike!");
@@ -238,7 +245,7 @@ export function useFishingGame(
         resetToIdle("Strike the moment the bobber goes under.", "result");
       }, hookWindowMs(current.accuracy));
     }, wait);
-  }, [hour, resetToIdle]);
+  }, [hour, lureRef, resetToIdle, sky]);
 
   const releaseCast = useCallback(() => {
     if (phaseRef.current !== "casting" || !profile) return;
@@ -526,6 +533,7 @@ export function useFishingGame(
     stance,
     shopTap,
     fight,
+    bite,
     outcome,
     hint,
     nibble,

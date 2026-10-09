@@ -4,6 +4,7 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import {
   CAST_RANGE,
+  castRangeMultiplier,
   DOCK_PLANKS,
   DOCK_STAND_X,
   DOCK_STAND_Z,
@@ -46,6 +47,7 @@ import {
   type FightSurge,
 } from "./fightMotion";
 import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
+import { bodyScale, FishShadow } from "./FishShadow";
 import {
   LAND_DRIPS,
   landDrip,
@@ -92,6 +94,7 @@ useGLTF.preload(BUOY_URL);
 export type SimRef = { current: FightSim | null };
 
 type Props = {
+  level: number;
   phase: ScenePhase;
   power: number;
   spot: SpotId;
@@ -189,12 +192,13 @@ function placeBobber(
   t: number,
   aim: THREE.Vector3 | null,
   nibble: boolean,
+  level: number,
 ) {
   if (aim) {
     out.x = aim.x;
     out.z = aim.z;
   } else {
-    const reach = Math.min(CAST_RANGE * 0.85, 5.2 + power * 9.5);
+    const reach = Math.min(CAST_RANGE * 0.85, 5.2 + power * 9.5) * castRangeMultiplier(level);
     const [dx, dz] = facingDelta(reach);
     out.x = anglerPose.x + dx;
     out.z = anglerPose.z + dz;
@@ -361,7 +365,7 @@ function castAimState(
   return "ok";
 }
 
-function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
+function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; level: number }) {
   const marker = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -382,7 +386,7 @@ function WaterAim({ phase, aim }: { phase: ScenePhase; aim: AimState }) {
     const overWater = point != null && inLake(point.x, point.z);
     const stance = stanceAt(anglerPose.x, anglerPose.z);
     const fishing = isFishingStance(stance);
-    const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z);
+    const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z, level);
     const waterSpot = overWater ? spotAt(hit.x, hit.z) : null;
     const cast = castAimState(fishing, overWater, inRange, waterSpot, stance);
     const canCast = cast === "ok";
@@ -856,10 +860,6 @@ const LINE_CAP = LINE_POINTS + 4 + LINE_TAIL;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
-function bodyScale(weight: number) {
-  return 0.5 + Math.min(0.45, weight / 28);
-}
-
 function RisingFish({ phase }: { phase: ScenePhase }) {
   const fish = useRef<THREE.Group>(null);
   const held = useRef(0);
@@ -897,7 +897,7 @@ function RisingFish({ phase }: { phase: ScenePhase }) {
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, level }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const sitRing = useRef<THREE.Mesh>(null);
@@ -1024,7 +1024,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
-    placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble);
+    placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble, level);
     if (phase === "hookset") {
       const darted = applyBiteDart(target.x, target.z, anglerPose.x, anglerPose.z, fightView.biteAge);
       const anchored = strikeAnchor(darted.x, darted.z);
@@ -1556,7 +1556,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot }: Props) {
+function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1567,10 +1567,11 @@ function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight, ho
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <LakeWorld spot={spot} hour={hour} sky={sky} hotspot={hotspot} />
-      <WaterAim phase={phase} aim={aim} />
+      <WaterAim phase={phase} aim={aim} level={level} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
       <LineAndBobber
+        level={level}
         phase={phase}
         power={power}
         sim={sim}
@@ -1581,6 +1582,7 @@ function Scene({ phase, power, spot, sim, nibble, hour, sky, species, weight, ho
         aim={aim}
         lookAt={lookAt}
       />
+      {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} />}
       <StrikeSplash phase={phase} />
       <CaughtFish
         phase={phase}
