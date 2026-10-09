@@ -29,10 +29,21 @@ function appeal(fish: FishSpecies, hour: LakeHour): number {
   return rarityWeight[fish.rarity] * biteHourMul(fish, hour);
 }
 
-/** Weather reshuffles fish within what the angler can land and within what they cannot, so it never moves the landable share. */
-function weatherWeights(pool: FishSpecies[], weights: number[], profile: Profile, sky: Sky): number[] {
+/** The bubbles stir the bank's rarer fish; a legendary is never drawn less than a rare. */
+const HOTSPOT_BITE: Record<FishSpecies["rarity"], number> = {
+  common: 1,
+  uncommon: 1.5,
+  rare: 2.5,
+  legendary: 3,
+};
+
+/** Casting into the bubbles cuts the wait. The floor still leaves room for the nibble. */
+const HOTSPOT_WAIT = 0.6;
+
+/** Weather and the bubbles reshuffle fish within what the angler can land and within what they cannot, so neither moves the landable share. */
+function reshuffle(pool: FishSpecies[], weights: number[], profile: Profile, lift: (fish: FishSpecies) => number): number[] {
   const landable = pool.map((fish) => canLand(profile, fish));
-  const shifted = weights.map((weight, i) => weight * biteWeatherMul(pool[i]!, sky));
+  const shifted = weights.map((weight, i) => weight * lift(pool[i]!));
   const total = (list: number[], group: boolean) => list.reduce((sum, weight, i) => (landable[i] === group ? sum + weight : sum), 0);
   const scale = [false, true].map((group) => {
     const after = total(shifted, group);
@@ -108,9 +119,9 @@ export function hookWindowMs(accuracy: number) {
   return 1000 + accuracy * 100;
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour()) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false) {
   const base = 2200 + Math.random() * 3800;
-  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour));
+  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1));
 }
 
 export function pickBite(
@@ -121,6 +132,7 @@ export function pickBite(
   hour: LakeHour = lakeHour(),
   lure?: string,
   sky?: Sky,
+  hotspot = false,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (shortCast) home = home.filter((fish) => fish.rarity === "common");
@@ -146,7 +158,8 @@ export function pickBite(
     ...fillers.map((fish) => appeal(fish, hour) * fillIn),
   ];
   pool = [...pool, ...fillers];
-  const drawWeights = sky ? weatherWeights(pool, weights, profile, sky) : weights;
+  const lift = (fish: FishSpecies) => (sky ? biteWeatherMul(fish, sky) : 1) * (hotspot ? HOTSPOT_BITE[fish.rarity] : 1);
+  const drawWeights = sky || hotspot ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;

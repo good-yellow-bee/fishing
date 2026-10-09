@@ -18,6 +18,8 @@ import {
   type BankBoard,
 } from "./bankWalk";
 import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_TOP } from "./pierDeck";
+import type { Hotspot } from "../hotspot";
+import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
 
@@ -1182,7 +1184,7 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; sky: WeatherSky }) {
+export function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; hotspot: Hotspot | null }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -1269,6 +1271,7 @@ export function LakeWorld({ spot, hour, sky }: { spot: SpotId; hour: LakeHour; s
           <Dragonfly key={i} {...fly} />
         ))}
       {weather.rain && <LakeRain light={weather.rainLight} />}
+      {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </>
   );
 }

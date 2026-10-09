@@ -7,6 +7,7 @@ import {
   parseAim,
   parseStance,
   resolveCast,
+  SPOT_LABELS,
   type CastFail,
   type FishSpecies,
   type LakeHour,
@@ -18,6 +19,7 @@ import {
 import { isCleanFight, makeFight, FIGHT_LINES, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { fx } from "./fx";
+import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import type { ScenePhase } from "./scene/types";
@@ -76,7 +78,12 @@ type Timers = {
 };
 
 const WAIT_HINT = "Watch the bobber. A nibble first — strike on the real dip.";
+const HOTSPOT_WAIT_HINT = "Your lure is in the bubbles. Watch the bobber — strike on the real dip.";
 const SHORT_CAST_HINT = "Short cast — only small fish will look.";
+
+function movedHint(spot: SpotId) {
+  return `The bubbles moved to the ${SPOT_LABELS[spot]}.`;
+}
 
 export function useFishingGame(
   profile: Profile | null,
@@ -97,6 +104,9 @@ export function useFishingGame(
   const reelKeyRef = useRef(false);
   const reelPointerRef = useRef<number | null>(null);
   const spotRef = useRef<SpotId>("dock");
+  const hotspotRef = useRef<Hotspot | null>(null);
+  const castHotspotRef = useRef(false);
+  const movedUnheardRef = useRef(false);
   const aimHintRef = useRef<AimHint>("dock");
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
@@ -111,6 +121,8 @@ export function useFishingGame(
   const [hint, setHint] = useState("Walk to the water.");
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
+  const [hotspot, setHotspot] = useState<Hotspot | null>(null);
+  const level = profile ? anglerLevel(profile.lifetimePoints) : null;
 
   const setPhaseBoth = (next: ScenePhase) => {
     phaseRef.current = next;
@@ -149,11 +161,14 @@ export function useFishingGame(
     clearTimers();
     holdingRef.current = false;
     castPointerRef.current = null;
+    castHotspotRef.current = false;
     powerRef.current = 0;
     clearFight();
     setPower(0);
     setPhaseBoth(phase);
-    setHint(message);
+    const moved = phase === "idle" && movedUnheardRef.current ? hotspotRef.current : null;
+    if (moved) movedUnheardRef.current = false;
+    setHint(moved ? movedHint(moved.spot) : message);
   }, []);
 
   const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile) => {
@@ -183,7 +198,7 @@ export function useFishingGame(
     window.clearTimeout(timers.current.hook);
     fx.splash();
     const short = powerRef.current < sweetBand(profile.accuracy).min;
-    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current, sky);
+    const species = pickBite(spotRef.current, profile, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current);
     const { weight } = makeCatch(species, profile.patience);
     beginFight(species, weight, profile);
   }, [beginFight, hour, profile, sky]);
@@ -191,10 +206,11 @@ export function useFishingGame(
   const startWait = useCallback((current: Profile, short: boolean) => {
     setPhaseBoth("waiting");
     setNibble(false);
-    // A short cast only draws commons; past the band changes nothing until the backlash, so it gets no hint.
+    // A short cast only draws commons, even in the bubbles.
     waitHintRef.current = short ? SHORT_CAST_HINT : WAIT_HINT;
+    if (castHotspotRef.current) waitHintRef.current = short ? `${SHORT_CAST_HINT} ${HOTSPOT_WAIT_HINT}` : HOTSPOT_WAIT_HINT;
     setHint(waitHintRef.current);
-    const wait = waitMs(current.patience, hour);
+    const wait = waitMs(current.patience, hour, castHotspotRef.current);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
       timers.current.nibble = window.setTimeout(() => {
@@ -263,6 +279,7 @@ export function useFishingGame(
       resetToIdle("Overpowered. Release in the band.");
       return;
     }
+    castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
@@ -476,6 +493,25 @@ export function useFishingGame(
 
   useEffect(() => clearTimers, []);
 
+  // Wall-clock periods, so the bubbles sit in the same place for everyone on the lake.
+  useEffect(() => {
+    if (level === null) return;
+    let timer = 0;
+    const place = () => {
+      const now = Date.now();
+      const next = hotspotAt(now, level);
+      const moved = hotspotRef.current !== null && hotspotRef.current.spot !== next.spot;
+      hotspotRef.current = next;
+      setHotspot(next);
+      // Mid-cast the hint is busy with the bobber or the fight, so the move is told on the angler's return to idle.
+      if (moved && phaseRef.current === "idle") setHint(movedHint(next.spot));
+      else if (moved) movedUnheardRef.current = true;
+      timer = window.setTimeout(place, next.startsAt + HOTSPOT_PERIOD_MS - now);
+    };
+    place();
+    return () => window.clearTimeout(timer);
+  }, [level]);
+
   const dismissResult = () => {
     setOutcome(null);
     resetToIdle(idleHint(stanceRef.current));
@@ -493,6 +529,7 @@ export function useFishingGame(
     outcome,
     hint,
     nibble,
+    hotspot,
     sim: simRef,
     performance: performanceRef,
     powerRef,
