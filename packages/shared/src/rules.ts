@@ -69,8 +69,9 @@ export function validateUpgrade(profile: Profile, skill: SkillId): UpgradeResult
   return { ok: true, cost, nextRank: current + 1 };
 }
 
-export function rollWeight(species: FishSpecies, patience: number, random = Math.random): number {
-  const t = Math.min(1, Math.max(0, random() + patience * 0.015));
+export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
+  const trophyBoost = level >= 8 ? 0.1 : 0;
+  const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));
   const weight = species.minWeight + (species.maxWeight - species.minWeight) * t;
   return Math.round(weight * 10) / 10;
 }

@@ -1,5 +1,7 @@
 import {
   FISH,
+  anglerLevel,
+  biteWaitMulForLevel,
   canLand,
   legendaryCanBite,
   rollWeight,
@@ -119,9 +121,9 @@ export function hookWindowMs(accuracy: number) {
   return 1000 + accuracy * 100;
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1) {
   const base = 2200 + Math.random() * 3800;
-  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1));
+  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level));
 }
 
 export function pickBite(
@@ -158,8 +160,12 @@ export function pickBite(
     ...fillers.map((fish) => appeal(fish, hour) * fillIn),
   ];
   pool = [...pool, ...fillers];
-  const lift = (fish: FishSpecies) => (sky ? biteWeatherMul(fish, sky) : 1) * (hotspot ? HOTSPOT_BITE[fish.rarity] : 1);
-  const drawWeights = sky || hotspot ? reshuffle(pool, weights, profile, lift) : weights;
+  const legendaryBonus = anglerLevel(profile.lifetimePoints) >= 6 && (hour === "night" || sky === "rain");
+  const lift = (fish: FishSpecies) =>
+    (sky ? biteWeatherMul(fish, sky) : 1) *
+    (hotspot ? HOTSPOT_BITE[fish.rarity] : 1) *
+    (legendaryBonus && fish.rarity === "legendary" ? 2 : 1);
+  const drawWeights = sky || hotspot || legendaryBonus ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;
@@ -168,8 +174,8 @@ export function pickBite(
   return pool[0]!;
 }
 
-export function makeCatch(species: FishSpecies, patience: number) {
-  return { species, weight: rollWeight(species, patience) };
+export function makeCatch(species: FishSpecies, patience: number, level = 1) {
+  return { species, weight: rollWeight(species, patience, Math.random, level) };
 }
 
 export function difficulty01(species: FishSpecies, weight: number) {

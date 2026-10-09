@@ -54,7 +54,7 @@ describe("useLevelToast", () => {
     show(2, false);
     show(3, false);
     show(4, false);
-    expect(show(4, true)).toBe("4|The drop-off is open — walk east along the shore.");
+    expect(show(4, true)).toBe("4|The drop-off is open — walk east along the shore. See a fish shadow before you strike.");
     expect(fx.land).toHaveBeenCalledTimes(1);
   });
 
@@ -62,4 +62,22 @@ describe("useLevelToast", () => {
     expect(mergeLevelUp({ level: 3, opened: "open" }, { level: 4, opened: null })).toEqual({ level: 4, opened: "open" });
     expect(mergeLevelUp(null, { level: 3, opened: "x" })).toEqual({ level: 3, opened: "x" });
   });
+});
+
+it.each([
+  [4, "See a fish shadow before you strike."],
+  [5, "Cast 25% farther."],
+  [6, "Legendary fish bite more often at night or in rain."],
+  [7, "Fish bite 15% faster."],
+  [8, "Better odds of trophy-size fish."],
+] as const)("shows the level %i opened line", (level, line) => {
+  show(level - 1, true);
+  expect(show(level, true)).toBe(`${level}|${line}`);
+});
+
+it("retains both new unlocks while a toast is pending", () => {
+  show(5, false);
+  show(6, false);
+  show(7, false);
+  expect(show(7, true)).toBe("7|Legendary fish bite more often at night or in rain. Fish bite 15% faster.");
 });

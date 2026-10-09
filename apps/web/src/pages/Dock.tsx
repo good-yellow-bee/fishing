@@ -205,6 +205,7 @@ export function DockPage() {
         data-lure-locked={lureLocked ? "1" : "0"}
       >
         <FishingWorld
+          level={me.level}
           phase={scenePhase}
           power={game.power}
           spot={bank}
@@ -213,9 +214,9 @@ export function DockPage() {
           hour={hour}
           sky={sky}
           species={
-            game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? null)
+            game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? game.bite?.species ?? null)
           }
-          weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? 0)}
+          weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? game.bite?.weight ?? 0)}
           hotspot={game.hotspot}
         />
         {game.phase === "hookset" && (
