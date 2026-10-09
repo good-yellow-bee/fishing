@@ -328,7 +328,7 @@ export function DockPage() {
         {shopOpen && (
           <div className="shop-overlay">
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <DailyRequestsPanel catchKey={me.catches[0]?.id} onClaimed={refresh} />
+            <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
               Back to the path
             </button>
