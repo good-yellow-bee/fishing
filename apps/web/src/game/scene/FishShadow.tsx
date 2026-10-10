@@ -5,10 +5,6 @@ import * as THREE from "three";
 import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
 
-export function bodyScale(weight: number) {
-  return 0.5 + Math.min(0.45, weight / 28);
-}
-
 type Props = { level: number; phase: ScenePhase; weight: number; bobber: { x: number; z: number } };
 
 export function FishShadow({ level, phase, weight, bobber }: Props) {

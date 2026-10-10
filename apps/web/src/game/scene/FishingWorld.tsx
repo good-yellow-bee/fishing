@@ -47,7 +47,8 @@ import {
   type FightSurge,
 } from "./fightMotion";
 import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
-import { bodyScale, FishShadow } from "./FishShadow";
+import { FishShadow } from "./FishShadow";
+import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
   landDrip,
@@ -860,7 +861,7 @@ const LINE_CAP = LINE_POINTS + 4 + LINE_TAIL;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
-function RisingFish({ phase }: { phase: ScenePhase }) {
+function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: string; accent: string; size: number }) {
   const fish = useRef<THREE.Group>(null);
   const held = useRef(0);
   useFrame((state) => {
@@ -881,23 +882,23 @@ function RisingFish({ phase }: { phase: ScenePhase }) {
     const time = state.clock.elapsedTime;
     const pose =
       mode === "take"
-        ? takePose(fightView.biteAge, held.current, bx, bz, anglerPose.x, anglerPose.z, time)
+        ? takePose(fightView.biteAge, held.current, bx, bz, anglerPose.x, anglerPose.z, time, size)
         : mode === "turn"
-          ? turnPose(missView.age, bx, bz, anglerPose.x, anglerPose.z, time)
-          : risePose(waitView.age, bx, bz, anglerPose.x, anglerPose.z, time);
+          ? turnPose(missView.age, bx, bz, anglerPose.x, anglerPose.z, time, size)
+          : risePose(waitView.age, bx, bz, anglerPose.x, anglerPose.z, time, size);
     g.visible = pose.show;
     if (!pose.show || !parent) return;
     g.position.set(pose.x - parent.position.x, pose.y - parent.position.y, pose.z - parent.position.z);
     g.rotation.set(pose.pitch, pose.yaw, 0);
   });
   return (
-    <group ref={fish} visible={false} scale={RISE_SCALE}>
-      <ArticulatedFish color="#c4552a" accent="#f2d48a" speed={2.6} intensity={1.25} />
+    <group ref={fish} visible={false} scale={RISE_SCALE * size}>
+      <ArticulatedFish color={color} accent={accent} speed={2.6} intensity={1.25} />
     </group>
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, level }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight, level }: LineAndBobberProps) {
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const sitRing = useRef<THREE.Mesh>(null);
@@ -1317,7 +1318,14 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
           <ToonModel url={BUOY_URL} scale={0.32} />
         </group>
         <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} sunk={phase === "fight"} />
-        {(phase === "waiting" || phase === "hookset" || phase === "result") && <RisingFish phase={phase} />}
+        {(phase === "waiting" || phase === "hookset" || phase === "result") && (
+          <RisingFish
+            phase={phase}
+            color={species?.color ?? FALLBACK_COLOR}
+            accent={species?.accent ?? FALLBACK_ACCENT}
+            size={fishSize(weight)}
+          />
+        )}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
         {phase === "fight" && (
           <HookedFish
@@ -1588,7 +1596,7 @@ function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, wei
         phase={phase}
         color={species?.color ?? FALLBACK_COLOR}
         accent={species?.accent ?? FALLBACK_ACCENT}
-        scale={Math.max(0.95, bodyScale(weight))}
+        scale={landedScale(weight)}
       />
     </>
   );
