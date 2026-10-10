@@ -4,13 +4,13 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type LakeHour, type Sky } from "@stillwater/shared";
+import { dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type Sky } from "@stillwater/shared";
 import { getMe, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import type { Outcome } from "../game/useFishingGame";
 
-const scene = vi.fn<(props: { hour: LakeHour; sky: Sky }) => void>();
+const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number }) => void>();
 const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
 
 vi.mock("../api", async (importOriginal) => ({
@@ -32,7 +32,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
-  FishingWorld: (props: { hour: LakeHour; sky: Sky }) => {
+  FishingWorld: (props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number }) => {
     scene(props);
     return null;
   },
@@ -128,6 +128,29 @@ describe("dock weather", () => {
     await openDock("/?sky=fog");
     const kept = readStoredLogbook()?.catches.find((entry) => entry.id === "catch-dock-fog");
     expect(kept?.weather).toEqual(dailyConditions(now, "fog"));
+  });
+});
+
+describe("dock scene fish", () => {
+  it("shows the landed fish at its weight, and the fish that turned away on a missed strike", async () => {
+    const perch = fishById("perch")!;
+    landed.outcome = { kind: "miss", message: "Too slow.", fish: { species: perch, weight: 0.9 } };
+    await openDock("/");
+    expect(lastScene()).toMatchObject({ species: perch, weight: 0.9 });
+    act(() => root?.unmount());
+    container?.remove();
+
+    const carp = fishById("carp")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-carp", points: 1, speciesId: carp.id, weight: 11 });
+    landed.outcome = { kind: "landed", id: "catch-carp", species: carp, weight: 11, spot: "dock", clean: false };
+    await openDock("/");
+    expect(lastScene()).toMatchObject({ species: carp, weight: 11 });
+  });
+
+  it("shows no fish after a cast that missed the water", async () => {
+    landed.outcome = { kind: "miss", message: "Missed the lake." };
+    await openDock("/");
+    expect(lastScene()).toMatchObject({ species: null, weight: 0 });
   });
 });
 

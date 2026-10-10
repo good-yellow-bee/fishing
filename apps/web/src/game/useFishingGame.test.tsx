@@ -66,6 +66,7 @@ function Harness({ current = profile }: { current?: Profile }) {
       <p data-testid="hint">{game.hint}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
+      <b data-testid="missed">{game.outcome?.kind === "miss" && game.outcome.fish ? `${game.outcome.fish.species.id}|${game.outcome.fish.weight}` : ""}</b>
       <i data-testid="rarity">{game.fight?.species.rarity ?? ""}</i>
     </>
   );
@@ -348,15 +349,19 @@ describe("useFishingGame cast feedback", () => {
     act(() => window.dispatchEvent(pointer("pointerup")));
   }
 
-  /** A late roll draws the last fish in the pool, so a full dock pool hooks a catfish. */
-  function hookOnLateRoll(surface: HTMLDivElement) {
+  /** A late roll draws the last fish in the pool, so a full dock pool hooks a catfish. The fish is rolled as the lure sits. */
+  function lateRoll() {
     vi.mocked(Math.random).mockReturnValue(0.99);
-    act(() => vi.advanceTimersByTime(2_201));
+  }
+
+  function hookOnLateRoll(surface: HTMLDivElement) {
+    act(() => vi.advanceTimersByTime(Math.ceil(waitMs(profile.patience, "day"))));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
   }
 
   it("says a short cast only draws small fish, and only a common bites", () => {
     const surface = mount();
+    lateRoll();
     castFor(surface, 300);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toBe("Short cast — only small fish will look.");
@@ -367,6 +372,7 @@ describe("useFishingGame cast feedback", () => {
 
   it("keeps the plain wait hint for a cast in the band, which draws past the commons", () => {
     const surface = mount();
+    lateRoll();
     castFor(surface, 500);
     expect(hint()).toMatch(/watch the bobber/i);
     hookOnLateRoll(surface);
@@ -395,30 +401,33 @@ describe("useFishingGame cast feedback", () => {
 });
 
 describe("level unlock integration", () => {
-  it("rolls the actual fish on the bite and keeps it through the strike", () => {
+  it("rolls the fish as the lure sits and hooks that same fish", () => {
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 350 });
     cast(surface);
-    expect(pickBite).not.toHaveBeenCalled();
-    expect(container!.querySelector("[data-testid=bite]")?.textContent).toBe("");
+    expect(phase()).toBe("waiting:none");
+    expect(pickBite).toHaveBeenCalledTimes(1);
+    const seen = container!.querySelector("[data-testid=bite]")!.textContent;
+    expect(seen).toMatch(/.+\|[0-9.]+/);
+    // A different roll by the time of the bite must not swap the fish under the bobber.
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
     act(() => vi.advanceTimersByTime(2201));
     expect(phase()).toBe("hookset:none");
-    expect(pickBite).toHaveBeenCalledTimes(1);
-    const bitten = container!.querySelector("[data-testid=bite]")!.textContent;
-    expect(bitten).toMatch(/.+\|[0-9.]+/);
-    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    expect(container!.querySelector("[data-testid=bite]")!.textContent).toBe(seen);
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(pickBite).toHaveBeenCalledTimes(1);
-    expect(container!.querySelector("[data-testid=fight]")!.textContent).toBe(bitten);
+    expect(container!.querySelector("[data-testid=fight]")!.textContent).toBe(seen);
   });
 
-  it("clears the rolled bite after a missed strike", () => {
+  it("clears the rolled bite after a missed strike, and the miss keeps the fish that turned away", () => {
     const surface = mount();
     cast(surface);
+    const seen = container!.querySelector("[data-testid=bite]")?.textContent;
+    expect(seen).not.toBe("");
     act(() => vi.advanceTimersByTime(2201));
-    expect(container!.querySelector("[data-testid=bite]")?.textContent).not.toBe("");
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toBe("");
+    expect(container!.querySelector("[data-testid=missed]")?.textContent).toBe(seen);
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {

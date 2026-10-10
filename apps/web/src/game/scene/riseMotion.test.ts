@@ -1,6 +1,8 @@
 import { LAKE_CENTER_Z, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
+import { FISH } from "@stillwater/shared";
+import { fishSize, landedScale } from "./fishSize.ts";
 import { bedHeight, waterHeight } from "./water.ts";
 import {
   RISE_HALF_H,
@@ -35,19 +37,19 @@ function turned(lx: number, ly: number, lz: number, pose: RisePose) {
   };
 }
 
-function tips(pose: RisePose) {
+function tips(pose: RisePose, size = 1) {
   const corners = [];
-  for (const x of [RISE_HALF_W, -RISE_HALF_W]) {
-    for (const y of [RISE_HALF_H, -RISE_HALF_H]) {
-      for (const z of [RISE_NOSE, -RISE_TAIL]) corners.push(turned(x, y, z, pose));
+  for (const x of [RISE_HALF_W * size, -RISE_HALF_W * size]) {
+    for (const y of [RISE_HALF_H * size, -RISE_HALF_H * size]) {
+      for (const z of [RISE_NOSE * size, -RISE_TAIL * size]) corners.push(turned(x, y, z, pose));
     }
   }
   return corners;
 }
 
-function expectClear(pose: RisePose, time: number) {
+function expectClear(pose: RisePose, time: number, size = 1) {
   expect(pose.show).toBe(true);
-  for (const tip of tips(pose)) {
+  for (const tip of tips(pose, size)) {
     expect(inLake(tip.x, tip.z)).toBe(true);
     expect(onDock(tip.x, tip.z)).toBe(false);
     expect(tip.y).toBeLessThan(waterHeight(tip.x, tip.z, time));
@@ -107,6 +109,30 @@ describe("rising fish", () => {
     const risen = risePose(RISE_SEC, 0, LAKE_CENTER_Z, ANGLER.x, ANGLER.z, TIME);
     expect(risen.y).toBeGreaterThan(offshore + RISE_HALF_H);
     expect(risen.y).toBeLessThan(0);
+  });
+
+  it("keeps the lightest and heaviest fish clear at their own size", () => {
+    const weights = FISH.flatMap((fish) => [fish.minWeight, fish.maxWeight]);
+    const sizes = [fishSize(Math.min(...weights)), fishSize(Math.max(...weights))];
+    const bobbers = [
+      [0, 5.05],
+      [0.8, 4.6],
+      [-1.2, 3.4],
+      [2.5, -1],
+      [14, -2],
+    ] as const;
+    for (const size of sizes) {
+      for (const [x, z] of bobbers) {
+        for (const time of [0.2, 3.1]) {
+          for (let i = 0; i <= 4; i += 1) {
+            const age = (RISE_SEC * i) / 4;
+            expectClear(risePose(age, x, z, ANGLER.x, ANGLER.z, time, size), time, size);
+            expectClear(takePose((TAKE_SEC * i) / 4, age, x, z, ANGLER.x, ANGLER.z, time, size), time, size);
+            expectClear(turnPose((TURN_SEC * i) / 4, x, z, ANGLER.x, ANGLER.z, time, size), time, size);
+          }
+        }
+      }
+    }
   });
 
   it("takes the lure on the bite and turns away on the miss", () => {
@@ -217,3 +243,20 @@ function shortestYaw(from: number, to: number) {
   while (diff < -Math.PI) diff += Math.PI * 2;
   return diff;
 }
+
+describe("fish size", () => {
+  it("grows with weight, so a sturgeon is plainly bigger than a shiner under the bobber and in the hand", () => {
+    const shiner = FISH.find((fish) => fish.id === "golden-shiner")!;
+    const sturgeon = FISH.find((fish) => fish.id === "sturgeon")!;
+    expect(fishSize(shiner.minWeight)).toBeGreaterThanOrEqual(0.7);
+    expect(fishSize(sturgeon.maxWeight)).toBeLessThanOrEqual(1.2);
+    expect(fishSize(sturgeon.minWeight) - fishSize(shiner.maxWeight)).toBeGreaterThan(0.3);
+    expect(landedScale(shiner.minWeight)).toBeGreaterThanOrEqual(0.95);
+    expect(landedScale(sturgeon.minWeight) - landedScale(shiner.maxWeight)).toBeGreaterThan(0.35);
+    let prev = 0;
+    for (let weight = 0; weight <= 80; weight += 0.5) {
+      expect(fishSize(weight)).toBeGreaterThanOrEqual(prev);
+      prev = fishSize(weight);
+    }
+  });
+});

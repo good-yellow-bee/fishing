@@ -53,6 +53,9 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky);
   const scenePhase = game.outcome ? "result" : game.phase;
+  // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
+  const shownFish =
+    game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
@@ -213,10 +216,8 @@ export function DockPage() {
           nibble={game.nibble}
           hour={hour}
           sky={sky}
-          species={
-            game.outcome?.kind === "landed" ? game.outcome.species : (game.fight?.species ?? game.bite?.species ?? null)
-          }
-          weight={game.outcome?.kind === "landed" ? game.outcome.weight : (game.fight?.weight ?? game.bite?.weight ?? 0)}
+          species={shownFish?.species ?? null}
+          weight={shownFish?.weight ?? 0}
           hotspot={game.hotspot}
         />
         {game.phase === "hookset" && (
