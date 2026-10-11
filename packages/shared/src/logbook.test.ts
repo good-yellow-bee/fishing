@@ -4,6 +4,7 @@ import {
   formatMeasure,
   isLogbook,
   keepLandedCatch,
+  keepPlayTrip,
   localDate,
   parseCatchDraft,
   parseSpotDraft,
@@ -241,6 +242,26 @@ describe("field log", () => {
       bank: "dock",
       caughtAt: "2026-10-07T18:04:00.000Z",
     })).toBe(next);
+  });
+
+  it("files a day on the lake as one trip, linking its catches, and does it only once", () => {
+    const landed = (id: string) => ({ id, species: "Bluegill", pounds: 0.4, bank: "dock", caughtAt: "2026-10-07T18:04:00.000Z" });
+    let next = keepLandedCatch(keepLandedCatch(book, landed("play-a")), landed("play-b"));
+    next = replaceCatch(next, { ...next.catches.find((entry) => entry.id === "play-b")!, tripId: "trip-elsewhere" });
+    const trip = { id: "trip-play-1", date: "2026-10-07", title: "Dusk at the dock · overcast", catchIds: ["play-a", "play-b", "gone"] };
+
+    const filed = keepPlayTrip(next, trip);
+    expect(filed.trips.find((entry) => entry.id === "trip-play-1")).toEqual({
+      id: "trip-play-1",
+      date: "2026-10-07",
+      spotId: "spot-cedar",
+      title: "Dusk at the dock · overcast",
+      note: "",
+    });
+    expect(catchesForTrip(filed, "trip-play-1").map((entry) => entry.id)).toEqual(["play-a"]);
+    expect(filed.catches.find((entry) => entry.id === "play-b")?.tripId).toBe("trip-elsewhere");
+    expect(isLogbook(filed)).toBe(true);
+    expect(keepPlayTrip(filed, trip)).toBe(filed);
   });
 
   it("records the lure that was tied on", () => {

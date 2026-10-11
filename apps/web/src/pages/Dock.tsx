@@ -14,6 +14,8 @@ import {
   lakeHour,
   lakeHourFromSearch,
   luresPacked,
+  keepPlayTrip,
+  localDate,
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
@@ -34,10 +36,12 @@ import { SettingsPanel } from "../components/SettingsPanel";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
-import { readStoredLogbook } from "../field/storage";
+import { readStoredLogbook, saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
+import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
+import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
 import { trackLabel } from "../game/scene/shoreTracks";
 import { useLevelToast } from "../game/useLevelToast";
@@ -138,6 +142,56 @@ export function DockPage() {
       live = false;
     };
   }, [userId, lastCatch]);
+  // The day on the water, kept per angler so a closed tab can be written up next visit.
+  const [session, setSession] = useState<SessionDraft | null>(null);
+  const [recap, setRecap] = useState<{ leftover: boolean } | null>(null);
+  const [filedTrip, setFiledTrip] = useState<{ id: string; title: string } | null>(null);
+  const sessionOwner = useRef<string | null>(null);
+  useEffect(() => {
+    if (!userId) return;
+    const stored = loadSession(userId);
+    sessionOwner.current = userId;
+    if (stored && stored.fish.length > 0 && stored.date !== localDate(new Date())) {
+      setSession(stored);
+      setRecap({ leftover: true });
+      return;
+    }
+    // A fish landed before the profile arrived joins today's stored outing rather than replacing it.
+    setSession((current) => (stored && current ? current.fish.reduce(withSessionFish, stored) : (current ?? stored)));
+  }, [userId]);
+  useEffect(() => {
+    if (userId && sessionOwner.current === userId) saveSession(userId, session);
+  }, [session, userId]);
+  useEffect(() => {
+    if (game.outcome?.kind !== "landed") return;
+    const { id, species, weight, spot: landedAt, clean } = game.outcome;
+    const first = stamp?.kind === "first";
+    setSession((current) => {
+      const now = new Date();
+      const base = current && current.date === localDate(now) ? current : startSession(now, sky);
+      return withSessionFish(base, { id, speciesId: species.id, speciesName: species.name, weight, spot: landedAt, hour, first, clean });
+    });
+    // Only a new landing adds a fish; hour and sky changes must not replay it.
+  }, [game.outcome]);
+  const fileTrip = () => {
+    if (!session) return;
+    const title = sessionTitle(session);
+    try {
+      const book = readStoredLogbook() ?? sampleLogbook(new Date());
+      saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title, catchIds: session.fish.map((fish) => fish.id) }));
+      setFiledTrip({ id: session.id, title });
+      setSession(null);
+    } catch {
+      setFieldLogError("The field log could not be saved in this browser.");
+    }
+  };
+  const closeRecap = () => {
+    // Letting an old trip go clears it; closing today's keeps fishing on the same outing.
+    if (recap?.leftover && !filedTrip) setSession(null);
+    setRecap(null);
+    setFiledTrip(null);
+  };
+
   const lodge = useMemo(() => {
     if (game.outcome?.kind !== "landed" || !recordsRef.current || !userId) return null;
     return lodgeStamp(recordsRef.current, game.outcome.species.id, game.outcome.weight, userId);
@@ -322,7 +376,13 @@ export function DockPage() {
 
   return (
     <div className="dock-page">
-      <Hud profile={me.profile} hour={hour} sky={sky} onSettings={() => setSettingsOpen(true)} />
+      <Hud
+        profile={me.profile}
+        hour={hour}
+        sky={sky}
+        onSettings={() => setSettingsOpen(true)}
+        onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
+      />
       <div
         className="scene-wrap"
         ref={game.surfaceRef}
@@ -543,6 +603,15 @@ export function DockPage() {
         )}
       </div>
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {recap && (session || filedTrip) && (
+        <TripRecap
+          draft={session ?? { id: filedTrip!.id, date: "", sky, fish: [] }}
+          leftover={recap.leftover}
+          filed={filedTrip}
+          onFile={fileTrip}
+          onClose={closeRecap}
+        />
+      )}
     </div>
   );
 }

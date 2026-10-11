@@ -8,6 +8,7 @@ import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherF
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
+import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[] }) => void>();
@@ -245,6 +246,56 @@ describe("lodge records", () => {
     });
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("Lodge record · was 12.3 lb (Mara)");
+  });
+});
+
+describe("packing up", () => {
+  it("recaps the outing from the HUD and files it in the field log as a trip", async () => {
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-trip", points: 3, speciesId: perch.id, weight: 0.7 });
+    landed.outcome = { kind: "landed", id: "catch-trip", species: perch, weight: 0.7, spot: "dock", clean: true };
+    const page = await openDock("/?hour=dusk&sky=fog");
+    await act(async () => undefined);
+    landed.outcome = null;
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/?hour=dusk&sky=fog"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    const packUp = [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Pack up");
+    expect(packUp).toBeDefined();
+    act(() => packUp!.click());
+    const recap = document.querySelector(".trip-recap");
+    expect(recap?.querySelector("h2")?.textContent).toBe("Dusk at the dock · fog");
+    expect(recap?.querySelector(".trip-recap-stats")?.textContent).toContain("0.7 lb");
+    act(() => [...recap!.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent === "Write it in the book")!.click());
+    const book = readStoredLogbook()!;
+    const trip = book.trips.find((entry) => entry.title === "Dusk at the dock · fog");
+    expect(trip).toBeDefined();
+    expect(book.catches.find((entry) => entry.id === "catch-trip")?.tripId).toBe(trip!.id);
+    expect(document.querySelector(".trip-recap-filed")?.textContent).toContain("Written in the book");
+    act(() => [...document.querySelectorAll<HTMLButtonElement>(".trip-recap button")].find((b) => b.textContent === "Back to the lake")!.click());
+    expect(document.querySelector(".trip-recap")).toBeNull();
+    expect([...page.querySelectorAll(".hud button")].some((b) => b.textContent === "Pack up")).toBe(false);
+  });
+
+  it("offers yesterday's unfiled outing when the dock opens, and lets it go", async () => {
+    const yesterday = new Date(Date.now() - 86_400_000);
+    const draft = {
+      ...startSession(yesterday, "rain"),
+      fish: [{ id: "old", speciesId: "pike", speciesName: "Northern pike", weight: 5, spot: "reeds" as const, hour: "night" as const, first: true, clean: false }],
+    };
+    localStorage.setItem(sessionKey("u1"), JSON.stringify(draft));
+    await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    const recap = document.querySelector(".trip-recap");
+    expect(recap?.querySelector(".eyebrow")?.textContent).toBe("Your last trip");
+    expect(recap?.querySelector(".trip-recap-firsts")?.textContent).toBe("New in the guide: Northern pike");
+    act(() => [...recap!.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent === "Let it go")!.click());
+    expect(document.querySelector(".trip-recap")).toBeNull();
+    expect(localStorage.getItem(sessionKey("u1"))).toBeNull();
   });
 });
 

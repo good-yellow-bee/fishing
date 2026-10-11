@@ -35,7 +35,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P12 | ~~Lodge badges~~ (shipped) | progression | M | C | P11 |
 | P13 | ~~Weekly board + species record wall~~ (shipped) | social | M | C | — |
 | P14 | ~~Tracks on the shore (async presence)~~ (shipped) | social | S/M | C | — |
-| P15 | Day-on-the-water recap → field-log trip | journal | M | C | #53 |
+| P15 | ~~Day-on-the-water recap → field-log trip~~ (shipped) | journal | M | C | #53 |
 | P16 | ~~Three-day forecast at the shack~~ (shipped) | retention | S | C | #53 |
 | P17 | Lure classes (keeps the field-log tie-in) | content | M | D | #50 |
 | P18 | Five new species + the Inlet bank | content | L | D | level unlocks |
@@ -200,7 +200,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S/M. **Deps:** none.
 - **Test:** `shoreTracks.test.ts` opacity curve and anchors inside `inLake`; `db.test.ts` recent query.
 
-### P15 · Day-on-the-water recap → field-log trip
+### ~~P15 · Day-on-the-water recap → field-log trip~~ (shipped: a HUD "Pack up" button and a "Your last trip" card on the next day's visit; no 20-minute idle trigger, and the card shows fish, heaviest, new species and clean fights rather than points)
 - **Pitch:** when you leave the dock, one card: fish, points, best, new entries — and "Write it in the book" files the session as a trip.
 - **Borrowed:** Stardew end-of-day shipping summary; Dredge day roll-over; A Short Hike's quiet closure.
 - **Why fun:** `keepLandedCatch` saves every fish with `tripId: null`, so the field log's Trips page never links game sessions; sessions end with no beat.
