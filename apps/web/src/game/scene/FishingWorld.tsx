@@ -161,6 +161,8 @@ export function resetFishingScene() {
   bobberWorld.set(0.55, 0, -2);
   landedFrom.set(0, 0, 0);
   landedFish.set(0, 0, 0);
+  Object.assign(holdScratch, { x: 0, y: 0, z: 0 });
+  REEL_POINT.set(DOCK_STAND_X, 0, DOCK_STAND_Z - 1.4);
 }
 const holdScratch = { x: 0, y: 0, z: 0 };
 

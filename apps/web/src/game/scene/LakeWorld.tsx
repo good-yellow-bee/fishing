@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -1184,7 +1184,7 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
-export function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; hotspot: Hotspot | null }) {
+export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; hotspot: Hotspot | null }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -1274,4 +1274,4 @@ export function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: La
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </>
   );
-}
+});
