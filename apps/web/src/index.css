@@ -1819,3 +1819,66 @@ html[data-reduce-motion="1"] .walkthrough li {
 .shop-overlay:focus {
   outline: none;
 }
+
+/* A new lake hour while you fish: the scene dims, the hour swaps underneath, and it lifts again. */
+.hour-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 16px;
+  background: rgb(8, 11, 12);
+  color: #f3e6cc;
+  text-align: center;
+  pointer-events: none;
+  animation: hour-veil 3.2s ease-in-out forwards;
+}
+
+.hour-veil strong {
+  font-family: Fraunces, serif;
+  font-size: 26px;
+  font-weight: 500;
+}
+
+.hour-veil span {
+  color: var(--paper-dim);
+  font-size: 13px;
+}
+
+@keyframes hour-veil {
+  0% {
+    background-color: rgba(8, 11, 12, 0);
+    color: rgba(243, 230, 204, 0);
+  }
+  34%,
+  52% {
+    background-color: rgba(8, 11, 12, 0.72);
+    color: rgba(243, 230, 204, 1);
+  }
+  100% {
+    background-color: rgba(8, 11, 12, 0);
+    color: rgba(243, 230, 204, 0);
+  }
+}
+
+/* Reduced motion: no fade, just the line over the lake for a moment. */
+@media (prefers-reduced-motion: reduce) {
+  .hour-veil {
+    animation: none;
+    background: none;
+    align-content: start;
+    padding-top: 30vh;
+    text-shadow: 0 1px 8px #000;
+  }
+}
+
+html[data-reduce-motion="1"] .hour-veil {
+  animation: none;
+  background: none;
+  align-content: start;
+  padding-top: 30vh;
+  text-shadow: 0 1px 8px #000;
+}

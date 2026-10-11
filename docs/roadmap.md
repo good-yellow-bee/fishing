@@ -30,7 +30,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P7 | ~~Tap-to-walk + thumb controls~~ (shipped) | mobile | M | B | — |
 | P8 | ~~Settings & quality panel~~ (shipped) | access/QoL | S/M | B | — |
 | P9 | ~~Screen reader & keyboard parity~~ (shipped) | access | S | B | — |
-| P10 | Live hour crossfade | visual/feel | M | B | #53 look table |
+| P10 | ~~Live hour crossfade~~ (shipped) | visual/feel | M | B | #53 look table |
 | P11 | Catch conditions on the server | data enabler | S | C | #53 |
 | P12 | Lodge badges | progression | M | C | P11 |
 | P13 | Weekly board + species record wall | social | M | C | — |
@@ -150,7 +150,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** none.
 - **Test:** `FightBar.test.tsx` aria attributes; `Dock.test.tsx` focus moves into the shop.
 
-### P10 · Live hour crossfade
+### ~~P10 · Live hour crossfade~~ (shipped: a 30 s clock check turns the hour at a calm moment under a short veil, with the new hour swapped in at its darkest; the per-colour look-table lerp was left out)
 - **Pitch:** fish through dusk and watch the lake go to night without reloading.
 - **Borrowed:** Animal Crossing (real-time clock, the world turns while you play).
 - **Why fun:** `Dock.tsx` captures `lakeHour()` once at mount; a session crossing 17:00 stays "day" in look and bites. Real time is the game's identity — honour it live.

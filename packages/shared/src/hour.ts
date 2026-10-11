@@ -29,6 +29,18 @@ export function lakeHour(at: Date = new Date()): LakeHour {
   return "night";
 }
 
+/** Clock hours where the lake hour turns over: dawn, day, dusk, night. */
+export const LAKE_HOUR_STARTS = [5, 8, 17, 21] as const;
+
+/** The next moment the lake hour changes after `at`, on the same local clock as lakeHour. */
+export function nextLakeHourChange(at: Date): Date {
+  for (const start of LAKE_HOUR_STARTS) {
+    const turn = new Date(at.getFullYear(), at.getMonth(), at.getDate(), start, 0, 0, 0);
+    if (turn > at) return turn;
+  }
+  return new Date(at.getFullYear(), at.getMonth(), at.getDate() + 1, LAKE_HOUR_STARTS[0], 0, 0, 0);
+}
+
 export function lakeHourFromSearch(search: string): LakeHour | null {
   const raw = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search).get("hour");
   return raw && isLakeHour(raw) ? raw : null;

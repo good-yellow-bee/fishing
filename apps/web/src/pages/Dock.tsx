@@ -7,6 +7,7 @@ import {
   dailyConditions,
   fieldLogBestBeat,
   isFishingStance,
+  LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
   luresPacked,
@@ -16,6 +17,7 @@ import {
   weatherForDay,
   weatherFromSearch,
   type CatchSubmission,
+  type LakeHour,
   type SkillId,
 } from "@stillwater/shared";
 import { buyUpgrade, getMe, type Me } from "../api";
@@ -37,9 +39,23 @@ import { FishingWorld } from "../game/scene/FishingWorld";
 import { walkAnglerTo } from "../game/scene/pose";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
+import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
+
+/** How often the page reads the clock for a new lake hour. */
+const HOUR_CHECK_MS = 30_000;
+/** The veil darkens, the hour swaps under it, then it lifts. */
+const HOUR_SWAP_MS = 1_100;
+const HOUR_VEIL_MS = 3_200;
+
+const HOUR_TURN_LINE: Record<LakeHour, string> = {
+  dawn: "Dawn breaks over the lake.",
+  day: "The sun is up.",
+  dusk: "Dusk settles on the water.",
+  night: "Night falls.",
+};
 
 const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "dock", label: STANCE_LABELS.dock },
@@ -53,7 +69,12 @@ export function DockPage() {
   const [params] = useSearchParams();
   // One clock for the hour and the day's weather, so both turn over together.
   const [openedAt] = useState(() => new Date());
-  const hour = lakeHourFromSearch(params.toString()) ?? lakeHour(openedAt);
+  const forcedHour = lakeHourFromSearch(params.toString());
+  // The real clock keeps running while you fish; ?hour= pins it for testing.
+  const [liveHour, setLiveHour] = useState(() => lakeHour(openedAt));
+  const [turningTo, setTurningTo] = useState<LakeHour | null>(null);
+  const [veil, setVeil] = useState<LakeHour | null>(null);
+  const hour = forcedHour ?? liveHour;
   const sky = weatherFromSearch(params.toString()) ?? weatherForDay(openedAt);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
@@ -143,6 +164,38 @@ export function DockPage() {
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
+
+  // Watch the clock; a new lake hour waits for a calm moment so it never lands mid-strike or mid-fight.
+  useEffect(() => {
+    if (forcedHour) return;
+    const check = () => {
+      const now = lakeHour(new Date());
+      setTurningTo(now === liveHour ? null : now);
+    };
+    const timer = window.setInterval(check, HOUR_CHECK_MS);
+    return () => window.clearInterval(timer);
+  }, [forcedHour, liveHour]);
+
+  const calmForTurn = scenePhase === "idle" || scenePhase === "waiting" || scenePhase === "result";
+  useEffect(() => {
+    if (!turningTo || !calmForTurn) return;
+    setVeil(turningTo);
+    // The swap lands under the darkest moment of the veil; with reduced motion there is no veil to wait for.
+    const swap = window.setTimeout(
+      () => {
+        setLiveHour(turningTo);
+        setTurningTo(null);
+      },
+      prefersReducedMotion() || savedSettings.reduceMotion ? 0 : HOUR_SWAP_MS,
+    );
+    return () => window.clearTimeout(swap);
+  }, [turningTo, calmForTurn]);
+
+  useEffect(() => {
+    if (!veil) return;
+    const lift = window.setTimeout(() => setVeil(null), HOUR_VEIL_MS);
+    return () => window.clearTimeout(lift);
+  }, [veil]);
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -409,6 +462,12 @@ export function DockPage() {
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
               Cast again
             </button>
+          </div>
+        )}
+        {veil && (
+          <div className="hour-veil" key={veil} role="status">
+            <strong>{HOUR_TURN_LINE[veil]}</strong>
+            <span>{LAKE_HOUR_BLURB[veil]}</span>
           </div>
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}

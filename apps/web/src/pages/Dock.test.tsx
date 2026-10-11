@@ -331,3 +331,35 @@ describe("settings", () => {
     reloadSettings();
   });
 });
+
+describe("dock lake hour", () => {
+  it("turns the hour while you fish, under a veil that lifts again", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval", "setTimeout", "clearTimeout"], now: new Date(2026, 9, 8, 16, 59, 50) });
+    const page = await openDock("/?sky=clear");
+    expect(lastScene().hour).toBe("day");
+    await act(async () => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(page.querySelector(".hour-veil")?.textContent).toContain("Dusk settles on the water.");
+    expect(lastScene().hour).toBe("day");
+    await act(async () => {
+      vi.advanceTimersByTime(1_200);
+    });
+    expect(lastScene().hour).toBe("dusk");
+    expect(page.querySelector(".scene-wrap")?.getAttribute("data-hour")).toBe("dusk");
+    await act(async () => {
+      vi.advanceTimersByTime(2_100);
+    });
+    expect(page.querySelector(".hour-veil")).toBeNull();
+  });
+
+  it("keeps a pinned ?hour= however long you stay", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setInterval", "clearInterval", "setTimeout", "clearTimeout"], now: new Date(2026, 9, 8, 16, 59, 50) });
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(page.querySelector(".hour-veil")).toBeNull();
+    expect(lastScene().hour).toBe("day");
+  });
+});
