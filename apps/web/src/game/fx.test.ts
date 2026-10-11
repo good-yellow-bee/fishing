@@ -100,3 +100,27 @@ describe("ambient conditions", () => {
     expect(tones).not.toContain(bird);
   });
 });
+
+describe("fx haptics", () => {
+  afterEach(() => {
+    fx.hapticsEnabled = true;
+    vi.unstubAllGlobals();
+  });
+
+  it("vibrates the beat's pattern where the phone can", () => {
+    const vibrate = vi.fn(() => true);
+    vi.stubGlobal("navigator", { ...navigator, vibrate });
+    fx.haptic("surge");
+    expect(vibrate).toHaveBeenCalledWith([30, 40, 30]);
+  });
+
+  it("stays quiet without vibrate, or when switched off", () => {
+    vi.stubGlobal("navigator", { ...navigator, vibrate: undefined });
+    expect(() => fx.haptic("bite")).not.toThrow();
+    const vibrate = vi.fn(() => true);
+    vi.stubGlobal("navigator", { ...navigator, vibrate });
+    fx.hapticsEnabled = false;
+    fx.haptic("bite");
+    expect(vibrate).not.toHaveBeenCalled();
+  });
+});

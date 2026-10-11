@@ -2,6 +2,8 @@ import { DOCK_STAND_X, DOCK_STAND_Z, footHeight, inLake } from "@stillwater/shar
 import { describe, expect, it } from "vitest";
 import {
   BITE_SLACK_END,
+  HIT_STOP_SEC,
+  isFrozen,
   BITE_TAP_SEC,
   BITE_THROB_SEC,
   BITE_YANK_END,
@@ -210,5 +212,18 @@ describe("fight motion", () => {
     expect(fightBodyLean(2, false, 2)).toBeGreaterThan(0);
     expect(fightRodRoll(2, 1, 0, 2, 0)).toBeGreaterThan(0.2);
     expect(fightRodRoll(2, -1, 0, 2, 0)).toBeLessThan(-0.2);
+  });
+});
+
+describe("strike hit-stop", () => {
+  it("holds for a few frames after the strike and no longer", () => {
+    const strikeAt = 10;
+    const until = strikeAt + HIT_STOP_SEC;
+    expect(HIT_STOP_SEC).toBeGreaterThanOrEqual(0.05);
+    expect(HIT_STOP_SEC).toBeLessThanOrEqual(0.12);
+    expect(isFrozen(strikeAt, until)).toBe(true);
+    expect(isFrozen(strikeAt + 0.05, until)).toBe(true);
+    expect(isFrozen(until, until)).toBe(false);
+    expect(isFrozen(strikeAt, -1)).toBe(false);
   });
 });

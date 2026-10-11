@@ -38,6 +38,8 @@ import {
   liftDockSample,
   fightLineSag,
   fightView,
+  HIT_STOP_SEC,
+  isFrozen,
   fishDepthMeters,
   fishLeadMeters,
   fishSideMeters,
@@ -252,6 +254,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   useFrame((state, delta) => {
     const orbit = controls.current;
     if (!orbit) return;
+    if (isFrozen(state.clock.elapsedTime, fightView.freezeUntil)) return;
     orbit.enabled = !fighting;
     const t = state.clock.elapsedTime;
     chest.set(anglerPose.x, CHEST_Y + anglerPose.y, anglerPose.z);
@@ -502,6 +505,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       strikeAt.current = -1;
     } else if (phase === "fight") {
       if (prevPhase.current !== "fight") {
+        fightView.freezeUntil = t + HIT_STOP_SEC;
         strikeAt.current = t;
         fightView.leapAge = 0;
         nextLeap.current = t + 1.25;
@@ -1002,6 +1006,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
+    if (isFrozen(t, fightView.freezeUntil)) return;
     const aiming = isAiming(phase);
     const castStarted = prevPhase.current === "casting" && phase === "waiting";
     const fightStarted = prevPhase.current !== "fight" && phase === "fight";

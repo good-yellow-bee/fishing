@@ -1518,9 +1518,28 @@ kbd {
   }
 }
 
+/* The strike lands: one quick pale flash over the lake as the fight starts. */
+.scene-wrap[data-phase="fight"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #fffbea;
+  opacity: 0;
+  animation: strike-flash 160ms ease-out;
+}
+
+@keyframes strike-flash {
+  from {
+    opacity: 0.32;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .strike-cue,
   .strike-cue i,
+  .scene-wrap[data-phase="fight"]::after,
   .landed-card,
   .landed-card.rarity-legendary,
   .toast,

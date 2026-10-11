@@ -57,7 +57,16 @@ export const fightView = {
   localX: 0,
   localY: 0,
   localZ: 0,
+  /** Scene clock time until which the strike's hit-stop holds the line and camera still. */
+  freezeUntil: -1,
 };
+
+/** The hit-stop on a set hook: a few frames of stillness so the strike lands. */
+export const HIT_STOP_SEC = 0.08;
+
+export function isFrozen(time: number, until: number) {
+  return time < until;
+}
 
 /** 0 at the start of a pump, 1 at the top, 0 after the drop. */
 export function reelPumpLift(phase: number) {

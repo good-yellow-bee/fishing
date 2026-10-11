@@ -205,6 +205,18 @@ const ambient = {
   },
 };
 
+/** Buzz patterns in ms for phones that can vibrate (Android Chrome; iOS Safari has no vibrate). */
+export const HAPTICS = {
+  nibble: [15],
+  bite: [40],
+  strike: [50],
+  surge: [30, 40, 30],
+  snap: [80],
+  land: [20, 30, 60],
+} as const;
+
+export type HapticBeat = keyof typeof HAPTICS;
+
 export const fx = {
   get enabled() {
     return enabledFlag;
@@ -214,6 +226,12 @@ export const fx = {
     if (ctx && master) master.gain.setTargetAtTime(v ? 1 : 0, ctx.currentTime, 0.01);
   },
   ambient,
+  /** Felt rather than heard, so it follows its own switch, not the sound. */
+  hapticsEnabled: true,
+  haptic(beat: HapticBeat) {
+    if (!this.hapticsEnabled || typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+    navigator.vibrate([...HAPTICS[beat]]);
+  },
   cast() {
     ambient.start();
     if (!this.enabled) return;
