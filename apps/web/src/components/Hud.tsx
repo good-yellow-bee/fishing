@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   anglerLevel,
@@ -15,22 +15,32 @@ import { fx } from "../game/fx";
 
 type Props = {
   profile: Profile;
-  email: string;
   hour: LakeHour;
   sky: Sky;
 };
 
-export function Hud({ profile, email, hour, sky }: Props) {
+export function Hud({ profile, hour, sky }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const [muted, setMuted] = useState(!fx.enabled);
+  const header = useRef<HTMLElement>(null);
+  // Phones stack the scene's chips under the HUD, whose height changes as it wraps.
+  useEffect(() => {
+    const el = header.current;
+    const page = el?.parentElement;
+    if (!el || !page || typeof ResizeObserver === "undefined") return;
+    const sync = () => page.style.setProperty("--hud-bottom", `${Math.ceil(el.offsetTop + el.offsetHeight)}px`);
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    sync();
+    return () => observer.disconnect();
+  }, []);
   return (
-    <header className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
+    <header ref={header} className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
       <div className="hud-brand">
         <span className="eyebrow">Northern lake</span>
         <strong>Stillwater</strong>
         <div className="hud-user">
           <span>{profile.displayName}</span>
-          <small>{email}</small>
         </div>
       </div>
       <div className="hud-stats">

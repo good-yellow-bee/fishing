@@ -1,4 +1,5 @@
 import { DOCK_STAND_X, DOCK_STAND_Z, footHeight } from "@stillwater/shared";
+import { MIN_WALK, walkPath, type WalkPoint } from "./walkPath";
 
 export const anglerPose = {
   x: DOCK_STAND_X,
@@ -12,6 +13,8 @@ export const anglerPose = {
   lean: 0,
   pitch: 0,
   gait: 0,
+  /** Tap-to-walk waypoints still ahead. Keys clear it. */
+  route: [] as WalkPoint[],
 };
 
 export function shortestYaw(from: number, to: number) {
@@ -19,4 +22,13 @@ export function shortestYaw(from: number, to: number) {
   while (diff > Math.PI) diff -= Math.PI * 2;
   while (diff < -Math.PI) diff += Math.PI * 2;
   return diff;
+}
+
+/** Sets the angler walking to a point on the shore. False when it is too close or out of reach. */
+export function walkAnglerTo(x: number, z: number) {
+  if (Math.hypot(x - anglerPose.x, z - anglerPose.z) < MIN_WALK) return false;
+  const path = walkPath(anglerPose.x, anglerPose.z, x, z);
+  if (!path) return false;
+  anglerPose.route = path;
+  return true;
 }
