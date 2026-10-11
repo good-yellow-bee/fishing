@@ -36,7 +36,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P13 | ~~Weekly board + species record wall~~ (shipped) | social | M | C | — |
 | P14 | ~~Tracks on the shore (async presence)~~ (shipped) | social | S/M | C | — |
 | P15 | Day-on-the-water recap → field-log trip | journal | M | C | #53 |
-| P16 | Three-day forecast at the shack | retention | S | C | #53 |
+| P16 | ~~Three-day forecast at the shack~~ (shipped) | retention | S | C | #53 |
 | P17 | Lure classes (keeps the field-log tie-in) | content | M | D | #50 |
 | P18 | Five new species + the Inlet bank | content | L | D | level unlocks |
 | P19 | Rowboat open-water stance | content | L | D | P18, landing lift |
@@ -208,7 +208,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** #53 for sky.
 - **Test:** `logbook.test.ts` `keepPlayTrip` links catches and is idempotent; `session.test.ts`.
 
-### P16 · Three-day forecast at the shack
+### ~~P16 · Three-day forecast at the shack~~ (shipped)
 - **Pitch:** a chalk board at the shack: today fog, tomorrow rain, Thursday clear — come back for pike.
 - **Borrowed:** Stardew TV forecast; Animal Crossing morning announcements.
 - **Why fun:** #53 seeds sky from the date (`weatherForDay`), so a forecast is free and it turns weather into a reason to return; `SKY_BLURB` already names the favoured fish.

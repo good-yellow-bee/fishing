@@ -97,6 +97,16 @@ export function weatherForDay(date: Date = new Date()): Sky {
   return DAILY_SKIES[dayHash(date, "sky") % DAILY_SKIES.length]!;
 }
 
+export type ForecastDay = { date: Date; sky: Sky };
+
+/** The next `days` local days from `date`, today first. Each is weatherForDay at local noon, so DST never skips a day. */
+export function forecast(date: Date = new Date(), days = 3): ForecastDay[] {
+  return Array.from({ length: days }, (_, n) => {
+    const day = new Date(date.getFullYear(), date.getMonth(), date.getDate() + n, 12);
+    return { date: day, sky: weatherForDay(day) };
+  });
+}
+
 export function weatherFromSearch(search: string): Sky | null {
   const raw = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search).get("sky");
   return DAILY_SKIES.find((sky) => sky === raw) ?? null;
