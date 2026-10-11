@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { itemsForTrip, packedCount } from "@stillwater/shared";
+import { isLureLabel, itemsForTrip, lureClass, packedCount } from "@stillwater/shared";
 import { useTackle } from "./TackleState";
 import "./gear.css";
 
@@ -47,6 +47,7 @@ export function TackleList({ tripId, heading }: { tripId: string; heading?: stri
                   onChange={(event) => toggle(item.id, event.target.checked)}
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{item.label}</span>
+                {isLureLabel(item.label) && <span className="lure-tag">{lureClass(item.label).label}</span>}
               </label>
             </li>
           ))}

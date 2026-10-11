@@ -3,6 +3,7 @@ import {
   guideProgress,
   isTrophyWeight,
   LAKE_HOUR_LABELS,
+  lureClassesFor,
   shadowSize,
   SPOT_LABELS,
   trophyWeight,
@@ -40,6 +41,15 @@ function FishMark({ known, color }: { known: boolean; color: string }) {
   );
 }
 
+/** The lure classes that pull a species harder, with the hours they work, e.g. "Live bait (night), Spoon". */
+function drawsOn(speciesId: string): string {
+  return lureClassesFor(speciesId)
+    .map(({ lure, hours }) =>
+      hours && hours.length < 4 ? `${lure.label} (${hours.map((hour) => LAKE_HOUR_LABELS[hour].toLowerCase()).join(", ")})` : lure.label,
+    )
+    .join(", ");
+}
+
 function GuideCard({ entry }: { entry: GuideEntry }) {
   const { species } = entry;
   const known = entry.caught > 0;
@@ -69,6 +79,7 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
       ) : (
         <p>{species.spots.map((spot) => `${SPOT_LABELS[spot]} at ${hourAt(spot)}`).join(" · ")}</p>
       )}
+      {known && drawsOn(species.id) && <p className="guide-draws">Draws on: {drawsOn(species.id)}</p>}
     </article>
   );
 }

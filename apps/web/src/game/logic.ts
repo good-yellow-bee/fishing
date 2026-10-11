@@ -10,6 +10,8 @@ import {
   LAKE_HOURS,
   lakeHour,
   lakeHourWaitMul,
+  lureClass,
+  lurePull,
   type FishSpecies,
   type LakeHour,
   type Profile,
@@ -56,9 +58,7 @@ function reshuffle(pool: FishSpecies[], weights: number[], profile: Profile, lif
 
 /** Bobber, worm, and the sample's small lures. Spinners, spoons, and larger lures take the other half. */
 export function favorsLargeFish(lure: string): boolean {
-  const text = lure.toLowerCase();
-  if (/bobber|worm|crawler|popper|pheasant|caddis|size\s*8/.test(text)) return false;
-  return /spinner|spoon|mepps|crank|tube|bugger/.test(text);
+  return lureClass(lure).size === "large";
 }
 
 function sizedPool(pool: FishSpecies[], large: boolean): FishSpecies[] {
@@ -89,7 +89,12 @@ export function lureSizeFor(species: FishSpecies, spot: SpotId): LureSize {
 /** The top Strength among fish this lure draws at a bank. Legendaries only bite once landable, so they never count. */
 export function lureStrengthAt(spot: SpotId, lure: string): number {
   const home = FISH.filter((fish) => fish.spots.includes(spot));
-  return Math.max(...poolForLure(home, lure).filter((fish) => fish.rarity !== "legendary").map((fish) => fish.minStrength));
+  const kind = lureClass(lure);
+  // Fish the lure's class reaches across the size line bite too, at some hour.
+  const reached = home.filter((fish) => LAKE_HOURS.some((hour) => lurePull(kind, fish.id, hour) > 0));
+  return Math.max(
+    ...[...poolForLure(home, lure), ...reached].filter((fish) => fish.rarity !== "legendary").map((fish) => fish.minStrength),
+  );
 }
 
 /** The field guide's hour for a bank: when a full cast with the right lure most often draws this fish, for an angler who can land the whole bank. */
@@ -177,19 +182,29 @@ export function pickBite(
       lure,
     );
   }
-  const drawn = pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
-  const inReach = pool.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  // The lure's class leans on the fish it suits: harder on its own half, and on a full cast a little across the size line.
+  const kind = lure?.trim() ? lureClass(lure) : null;
+  const pull = (fish: FishSpecies) => (kind ? lurePull(kind, fish.id, hour) : 0);
+  const crossers = shortCast
+    ? []
+    : home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && pull(fish) > 0);
+  const lean = (fish: FishSpecies) => appeal(fish, hour) * (pool.includes(fish) ? 1 + pull(fish) : pull(fish));
+  const drawing = [...pool, ...crossers];
+  const drawn = drawing.reduce((sum, fish) => sum + lean(fish), 0);
+  const plainDrawn = pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  const inReach = drawing.filter((fish) => canLand(profile, fish)).reduce((sum, fish) => sum + lean(fish), 0);
   // A big lure must not lock a weak angler out: the bank's lighter landable fish fill in for the share of its
   // draw still out of reach. A small lure already draws the light half, so it never pulls in big fish.
   const fillIn = lure && favorsLargeFish(lure) && drawn > 0 ? 1 - inReach / drawn : 0;
   const fillers = fillIn > 0
-    ? home.filter((fish) => !pool.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
+    ? home.filter((fish) => !drawing.includes(fish) && fish.rarity !== "legendary" && canLand(profile, fish))
     : [];
   const weights = [
-    ...pool.map((fish) => appeal(fish, hour) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
-    ...fillers.map((fish) => appeal(fish, hour) * fillIn),
+    ...drawing.map((fish) => lean(fish) * (canLand(profile, fish) ? 1 : OUT_OF_REACH_BITE)),
+    // Fillers keep their share when the class leans the draw harder.
+    ...fillers.map((fish) => appeal(fish, hour) * fillIn * (drawn / plainDrawn)),
   ];
-  pool = [...pool, ...fillers];
+  pool = [...drawing, ...fillers];
   const legendaryBonus = anglerLevel(profile.lifetimePoints) >= 6 && (hour === "night" || sky === "rain");
   const lift = (fish: FishSpecies) =>
     (sky ? biteWeatherMul(fish, sky) : 1) *

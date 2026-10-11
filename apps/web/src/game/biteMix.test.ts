@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { canLand, FISH, type Profile, type SpotId } from "@stillwater/shared";
-import { bestHourFor, lureSizeFor, pickBite } from "./logic";
+import { bestHourFor, favorsLargeFish, lureSizeFor, pickBite } from "./logic";
 
 const starter: Profile = {
   userId: "u1",
@@ -40,10 +40,9 @@ describe("bite mix", () => {
     const smallDock = ["golden-shiner", "perch", "smallmouth-bass"];
     const largeDock = ["carp", "catfish", "smallmouth-bass"];
 
+    // Live bait also reaches across the line at the dock; "reaches the fish its class names" covers that.
     const smallLures = [
       "Bobber",
-      "Worm",
-      "Nightcrawlers",
       "Pencil bobbers",
       "Popper",
       "Pheasant tails",
@@ -178,7 +177,8 @@ describe("bite mix", () => {
       for (const spot of BANKS) {
         const reach = (lure: string) =>
           new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, strong, false, () => i / 480, hour, lure).id));
-        const small = reach("Nightcrawlers");
+        // A plain small lure: live bait reaches bottom feeders across the line, which the guide names on its own.
+        const small = reach("Pencil bobbers");
         const large = reach("Spoon");
         for (const fish of FISH.filter((one) => one.spots.includes(spot))) {
           const size = lureSizeFor(fish, spot);
@@ -231,5 +231,43 @@ describe("bite mix", () => {
         expect(reach("Spoon"), `${spot} ${hour}`).toEqual(["perch"]);
       }
     }
+  });
+
+  describe("lure classes", () => {
+    const share = (spot: SpotId, hour: (typeof HOURS)[number], lure: string, id: string, profile: Profile = seasoned) =>
+      Array.from({ length: 960 }, (_, i) => pickBite(spot, profile, false, () => i / 960, hour, lure)).filter((fish) => fish.id === id)
+        .length / 960;
+    const draws = (spot: SpotId, hour: (typeof HOURS)[number], lure: string) =>
+      Array.from({ length: 480 }, (_, i) => pickBite(spot, seasoned, false, () => i / 480, hour, lure).id);
+
+    it("a popper at night adds nothing to a plain small lure", () => {
+      for (const spot of BANKS) expect(draws(spot, "night", "Popper"), spot).toEqual(draws(spot, "night", "Mystery lure"));
+    });
+
+    it("a popper at dusk turns bass at the drop-off", () => {
+      expect(share("dropoff", "dusk", "Popper", "smallmouth-bass")).toBeGreaterThan(share("dropoff", "dusk", "Mystery lure", "smallmouth-bass"));
+    });
+
+    it("nightcrawlers at night favour catfish, across the size line", () => {
+      expect(share("dock", "night", "Pencil bobbers", "catfish")).toBe(0);
+      const night = share("dock", "night", "Nightcrawlers", "catfish");
+      expect(night).toBeGreaterThan(share("dock", "day", "Nightcrawlers", "catfish"));
+      expect(night).toBeGreaterThan(0.1);
+    });
+
+    it("reaches across the line only on a full cast", () => {
+      for (const hour of HOURS) {
+        const ids = new Set(Array.from({ length: 480 }, (_, i) => pickBite("dock", seasoned, true, () => i / 480, hour, "Nightcrawlers").id));
+        expect([...ids], hour).toEqual(["golden-shiner"]);
+      }
+    });
+
+    it("an unknown label falls back to the size rule", () => {
+      expect(favorsLargeFish("Mystery lure")).toBe(false);
+      for (const spot of BANKS) {
+        const small = FISH.filter((fish) => fish.spots.includes(spot) && lureSizeFor(fish, spot) !== "large").map((fish) => fish.id);
+        for (const hour of HOURS) expect([...new Set(draws(spot, hour, "Mystery lure"))].sort(), `${spot} ${hour}`).toEqual(small.sort());
+      }
+    });
   });
 });

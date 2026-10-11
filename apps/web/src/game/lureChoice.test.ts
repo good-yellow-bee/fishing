@@ -34,9 +34,9 @@ describe("lure choice", () => {
 
   it("says what the tied lure draws, and what a small lure still needs on this bank", () => {
     expect(lureBlurb("Popper", "dock")).toBe("Small lure — lighter fish (some here need Strength 2)");
-    expect(lureBlurb("Popper", "reeds")).toBe("Small lure — lighter fish (some here need Strength 2)");
+    expect(lureBlurb("Popper", "reeds")).toBe("Small lure — lighter fish (some here need Strength 4)");
     expect(lureBlurb("Pheasant tails", "point")).toBe("Small lure — lighter fish (some here need Strength 2)");
-    expect(lureBlurb("Popper", "dropoff")).toBe("Small lure — lighter fish (some here need Strength 3)");
+    expect(lureBlurb("Popper", "dropoff")).toBe("Small lure — lighter fish (some here need Strength 4)");
     expect(lureBlurb("Spinnerbait", "reeds")).toBe("Big lure — heavier fish (Strength 3+ to land most)");
   });
 

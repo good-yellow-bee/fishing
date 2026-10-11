@@ -38,6 +38,7 @@ describe("field guide card", () => {
       "Medium shadow",
       "Dock: any lure at dusk",
       "Drop-off: small lure at dusk",
+      "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
     ]);
     expect(bass.trophy).toBeNull();
   });
@@ -47,6 +48,12 @@ describe("field guide card", () => {
     expect(guide("carp").trophy?.textContent).toBe("Trophy");
     expect(guide("carp").lines).toContain("Dock: big lure at night");
     expect(guide("perch").trophy).toBeNull();
+  });
+
+  it("names the lures that draw a logged fish, and keeps them hidden until then", () => {
+    expect(cards([stat("catfish", 4)])("catfish").lines).toContain("Draws on: Live bait (night)");
+    expect(cards([])("catfish").text).not.toContain("Draws on");
+    expect(cards([stat("sturgeon", 40)])("sturgeon").text).not.toContain("Draws on");
   });
 
   it("says the clues are for a cast released in the band", () => {
