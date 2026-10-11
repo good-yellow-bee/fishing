@@ -590,6 +590,29 @@ export function keepLandedCatch(book: Logbook, landed: LandedFish): Logbook {
   return withCatch(placed.book, entry);
 }
 
+export type PlayTrip = {
+  id: string;
+  /** Local calendar day, YYYY-MM-DD. */
+  date: string;
+  title: string;
+  catchIds: readonly string[];
+};
+
+/**
+ * Files a day on the lake as a trip on the play lake and links its catches to it. Filing the same trip again
+ * changes nothing; a catch already filed under another trip stays where it is.
+ */
+export function keepPlayTrip(book: Logbook, trip: PlayTrip): Logbook {
+  if (book.trips.some((entry) => entry.id === trip.id)) return book;
+  const placed = withPlayLake(book);
+  const ids = new Set(trip.catchIds);
+  const kept = withTrip(placed.book, { id: trip.id, date: trip.date, spotId: placed.spotId, title: trip.title, note: "" });
+  return {
+    ...kept,
+    catches: kept.catches.map((entry) => (ids.has(entry.id) && entry.tripId === null ? { ...entry, tripId: trip.id } : entry)),
+  };
+}
+
 export function withoutSpot(book: Logbook, id: string): Logbook {
   const droppedTrips = new Set(book.trips.filter((trip) => trip.spotId === id).map((trip) => trip.id));
   return {

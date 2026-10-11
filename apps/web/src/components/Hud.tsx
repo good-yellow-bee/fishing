@@ -18,9 +18,11 @@ type Props = {
   hour: LakeHour;
   sky: Sky;
   onSettings?: () => void;
+  /** Shown once the outing has a fish in it. */
+  onPackUp?: () => void;
 };
 
-export function Hud({ profile, hour, sky, onSettings }: Props) {
+export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
   const header = useRef<HTMLElement>(null);
@@ -71,6 +73,11 @@ export function Hud({ profile, hour, sky, onSettings }: Props) {
         >
           {muted ? "Sound" : "Mute"}
         </button>
+        {onPackUp && (
+          <button className="hud-link" type="button" onClick={onPackUp}>
+            Pack up
+          </button>
+        )}
         {onSettings && (
           <button className="hud-link" type="button" onClick={onSettings}>
             Settings
