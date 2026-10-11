@@ -14,3 +14,4 @@ export * from "./photo.ts";
 export * from "./archive.ts";
 export * from "./search.ts";
 export * from "./dailyRequests.ts";
+export * from "./badges.ts";

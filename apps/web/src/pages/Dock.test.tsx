@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type Sky } from "@stillwater/shared";
+import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type Sky } from "@stillwater/shared";
 import { getMe, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -47,6 +47,7 @@ const me: Me = {
   spots: { dock: true, reeds: true, point: true, dropoff: false },
   catches: [],
   speciesStats: [],
+  badges: [],
 };
 
 // Node ships its own empty `localStorage` global, so borrow a real one.
@@ -221,6 +222,34 @@ describe("level-up toast", () => {
     act(() => vi.advanceTimersByTime(200));
     expect(page.querySelector(".level-toast")).toBeNull();
     expect(page.querySelector(".level-status")).toBe(status);
+  });
+});
+
+describe("dock badges", () => {
+  it("names a badge the saved catch earned once the catch card is gone, then clears it", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
+    const pike = fishById("pike")!;
+    const none = badgeProgress([]);
+    const rainPike = badgeProgress([{ speciesId: "pike", spot: "reeds", hour: "dusk", sky: "rain", clean: false, count: 1, heaviest: 4 }]);
+    vi.mocked(getMe).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValue({ ...me, badges: rainPike });
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pike", points: 9, speciesId: pike.id, weight: 4 });
+    landed.outcome = { kind: "landed", id: "catch-pike", species: pike, weight: 4, spot: "reeds", clean: false };
+    const page = await openDock("/?hour=dusk&sky=rain");
+    await act(async () => undefined);
+    expect(page.querySelector(".badge-toast")).toBeNull();
+
+    landed.outcome = null;
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/?hour=dusk&sky=rain"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    expect(page.querySelector(".level-status .badge-toast h2")?.textContent).toBe("Rain pike");
+    expect(page.querySelector(".badge-toast p")?.textContent).toBe("Land a pike in the rain.");
+    act(() => vi.advanceTimersByTime(4300));
+    expect(page.querySelector(".badge-toast")).toBeNull();
   });
 });
 

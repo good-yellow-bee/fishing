@@ -1,6 +1,7 @@
 import {
   localDate,
   type BoardView,
+  type BadgeProgress,
   type CatchRecord,
   type CatchStat,
   type CatchSubmission,
@@ -17,6 +18,7 @@ export type Me = {
   spots: Record<SpotId, boolean>;
   catches: CatchRecord[];
   speciesStats: CatchStat[];
+  badges: BadgeProgress[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };

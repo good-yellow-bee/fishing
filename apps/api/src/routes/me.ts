@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { anglerLevel, canUseSpot } from "@stillwater/shared";
-import { getProfile, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
+import { anglerLevel, badgeProgress, canUseSpot } from "@stillwater/shared";
+import { getProfile, listBadgeFacts, listCatches, listSpeciesStats, toCatch, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const meRoutes = new Hono();
@@ -25,5 +25,6 @@ meRoutes.get("/me", (c) => {
     },
     catches,
     speciesStats,
+    badges: badgeProgress(listBadgeFacts(user.id)),
   });
 });

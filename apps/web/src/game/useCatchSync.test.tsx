@@ -27,6 +27,7 @@ function me(userId: string): Me {
     spots: { dock: true, reeds: false, point: false, dropoff: false },
     catches: [],
     speciesStats: [],
+    badges: [],
   } as Me;
 }
 
