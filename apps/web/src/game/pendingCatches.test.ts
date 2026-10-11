@@ -57,6 +57,15 @@ describe("pending catch submissions", () => {
     expect(() => pendingCatches("angler")).toThrow("could not be read");
   });
 
+  it("keeps the hour and sky, and refuses ones it does not know", () => {
+    queueCatch("angler", { ...caught, hour: "dusk", sky: "rain" });
+    expect(pendingCatches("angler")).toEqual([{ ...caught, hour: "dusk", sky: "rain" }]);
+    localStorage.setItem("stillwater.pending-catches.angler", JSON.stringify([{ ...caught, hour: "noon" }]));
+    expect(() => pendingCatches("angler")).toThrow("could not be read");
+    localStorage.setItem("stillwater.pending-catches.angler", JSON.stringify([{ ...caught, sky: "hail" }]));
+    expect(() => pendingCatches("angler")).toThrow("could not be read");
+  });
+
   it("surfaces corrupt storage without replacing it", () => {
     localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
     expect(() => pendingCatches("angler")).toThrow("could not be read");

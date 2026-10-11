@@ -1,4 +1,4 @@
-import { SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { isLakeHour, isSky, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { ApiError } from "../api";
 
 function key(userId: string) {
@@ -10,7 +10,8 @@ function isSubmission(value: unknown): value is CatchSubmission {
   const row = value as Record<string, unknown>;
   return typeof row.requestId === "string" && row.requestId.length <= 80 &&
     typeof row.speciesId === "string" && typeof row.weight === "number" && Number.isFinite(row.weight) &&
-    SPOT_IDS.some((spot) => spot === row.spot) && (row.clean === undefined || typeof row.clean === "boolean");
+    SPOT_IDS.some((spot) => spot === row.spot) && (row.clean === undefined || typeof row.clean === "boolean") &&
+    (row.hour === undefined || (typeof row.hour === "string" && isLakeHour(row.hour))) && (row.sky === undefined || isSky(row.sky));
 }
 
 export function pendingCatches(userId: string): CatchSubmission[] {

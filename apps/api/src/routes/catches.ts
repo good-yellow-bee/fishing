@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { isLakeHour, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { findCatchByRequestId, getProfile, recordCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -10,7 +10,7 @@ const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 
 function sameCatch(row: CatchRow, body: CatchSubmission) {
   return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
-    row.clean === (body.clean ? 1 : 0);
+    row.clean === (body.clean ? 1 : 0) && row.hour === (body.hour ?? null) && row.sky === (body.sky ?? null);
 }
 
 catchRoutes.post("/catches", async (c) => {
@@ -27,7 +27,9 @@ catchRoutes.post("/catches", async (c) => {
     !SPOT_IDS.includes(body.spot) ||
     typeof body.requestId !== "string" ||
     !requestIdPattern.test(body.requestId) ||
-    (body.clean !== undefined && typeof body.clean !== "boolean")
+    (body.clean !== undefined && typeof body.clean !== "boolean") ||
+    (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
+    (body.sky !== undefined && !isSky(body.sky))
   ) {
     return c.json({ error: "invalid catch" }, 400);
   }
@@ -51,6 +53,8 @@ catchRoutes.post("/catches", async (c) => {
     spot: body.spot,
     request_id: body.requestId,
     clean: body.clean ? 1 : 0,
+    hour: body.hour ?? null,
+    sky: body.sky ?? null,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);

@@ -1,3 +1,6 @@
+import type { LakeHour } from "./hour.ts";
+import type { Sky } from "./weather.ts";
+
 export type ChallengeId = "mash" | "timing" | "tension" | "sequence" | "surge";
 export type SpotId = "dock" | "reeds" | "dropoff" | "point";
 export type SkillId = "strength" | "accuracy" | "patience";
@@ -35,6 +38,9 @@ export type CatchRecord = {
   weight: number;
   points: number;
   spot: SpotId;
+  /** The lake hour and sky the angler fished under; null on catches saved before they were recorded. */
+  hour: LakeHour | null;
+  sky: Sky | null;
   createdAt: string;
 };
 
@@ -43,6 +49,9 @@ export type CatchRequest = {
   weight: number;
   spot: SpotId;
   clean?: boolean;
+  /** Optional so catches queued offline before these were sent still post. */
+  hour?: LakeHour;
+  sky?: Sky;
 };
 
 export type CatchSubmission = CatchRequest & {

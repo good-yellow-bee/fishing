@@ -10,7 +10,7 @@ const dbPath = join(testDir, "stillwater.sqlite");
 afterAll(() => rmSync(testDir, { recursive: true, force: true }));
 
 describe("catch table migration", () => {
-  it("adds the clean column to an existing database as not clean", async () => {
+  it("adds the clean column as not clean, and empty hour and sky columns, to an existing database", async () => {
     const legacy = new Database(dbPath);
     legacy.exec(`
       CREATE TABLE catch (
@@ -24,7 +24,7 @@ describe("catch table migration", () => {
 
     const { db } = await import("./db.ts");
 
-    expect(db.prepare(`SELECT clean FROM catch WHERE id = 'old'`).get()).toEqual({ clean: 0 });
+    expect(db.prepare(`SELECT clean, hour, sky FROM catch WHERE id = 'old'`).get()).toEqual({ clean: 0, hour: null, sky: null });
     db.close();
   });
 });

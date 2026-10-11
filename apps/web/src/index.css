@@ -1882,3 +1882,11 @@ html[data-reduce-motion="1"] .hour-veil {
   padding-top: 30vh;
   text-shadow: 0 1px 8px #000;
 }
+
+/* On a phone the catch table scrolls on its own instead of pushing the page sideways. */
+@media (max-width: 640px) {
+  .log-page table {
+    display: block;
+    overflow-x: auto;
+  }
+}

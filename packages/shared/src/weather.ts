@@ -72,7 +72,7 @@ const SAMPLE_CATCH_WEATHER: Record<string, CatchWeather> = {
   "catch-rainbow": { sky: "overcast", wind: "light-east", waterTempF: 48 },
 };
 
-function isSky(value: unknown): value is Sky {
+export function isSky(value: unknown): value is Sky {
   return typeof value === "string" && (SKIES as readonly string[]).includes(value);
 }
 

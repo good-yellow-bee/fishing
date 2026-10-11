@@ -82,6 +82,8 @@ db.exec(`
     spot TEXT NOT NULL,
     request_id TEXT,
     clean INTEGER NOT NULL DEFAULT 0,
+    hour TEXT,
+    sky TEXT,
     created_at TEXT NOT NULL
   );
 
@@ -105,6 +107,13 @@ if (!catchColumns.some((column) => column.name === "request_id")) {
 if (!catchColumns.some((column) => column.name === "clean")) {
   db.exec(`ALTER TABLE catch ADD COLUMN clean INTEGER NOT NULL DEFAULT 0`);
 }
+// Older rows keep null: their hour can't be recovered from created_at without the angler's time zone.
+if (!catchColumns.some((column) => column.name === "hour")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN hour TEXT`);
+}
+if (!catchColumns.some((column) => column.name === "sky")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN sky TEXT`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
 export type ProfileRow = {
@@ -126,6 +135,8 @@ export type CatchRow = {
   spot: string;
   request_id: string | null;
   clean: 0 | 1;
+  hour: string | null;
+  sky: string | null;
   created_at: string;
 };
 
@@ -212,8 +223,8 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @created_at)`,
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @created_at)`,
     ).run(row);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
@@ -297,6 +308,8 @@ export function toCatch(row: CatchRow) {
     weight: row.weight,
     points: row.points,
     spot: row.spot,
+    hour: row.hour,
+    sky: row.sky,
     createdAt: row.created_at,
   };
 }

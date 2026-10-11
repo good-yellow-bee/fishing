@@ -130,6 +130,33 @@ describe("POST /catches", () => {
     expect(db.prepare(`SELECT COUNT(*) as count FROM catch`).get()).toEqual({ count: 0 });
   });
 
+  it("stores the hour and sky the fish came in under", async () => {
+    const response = await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "dusk", sky: "rain" });
+
+    expect(response.status).toBe(200);
+    expect(db.prepare(`SELECT hour, sky FROM catch`).get()).toEqual({ hour: "dusk", sky: "rain" });
+  });
+
+  it("keeps posting a catch queued before conditions were sent, with none recorded", async () => {
+    expect((await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock" })).status).toBe(200);
+    expect(db.prepare(`SELECT hour, sky FROM catch`).get()).toEqual({ hour: null, sky: null });
+  });
+
+  it("rejects an unknown hour or sky", async () => {
+    const payload = { requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock" };
+    expect((await post({ ...payload, hour: "noon", sky: "rain" })).status).toBe(400);
+    expect((await post({ ...payload, hour: "dusk", sky: "hail" })).status).toBe(400);
+    expect((await post({ ...payload, hour: 3 })).status).toBe(400);
+    expect(db.prepare(`SELECT COUNT(*) as count FROM catch`).get()).toEqual({ count: 0 });
+  });
+
+  it("rejects a retry that changes the conditions", async () => {
+    const payload = { requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "night", sky: "fog" };
+    expect((await post(payload)).status).toBe(200);
+    expect((await post({ ...payload, sky: "clear" })).status).toBe(409);
+    expect((await post(payload)).status).toBe(200);
+  });
+
   it("limits successful catch submissions per minute", async () => {
     const results = await Promise.all(
       Array.from({ length: 13 }, (_, index) =>
