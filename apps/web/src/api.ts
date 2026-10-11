@@ -3,6 +3,7 @@ import {
   type BoardView,
   type BadgeProgress,
   type BoardPeriod,
+  type LodgeTrack,
   type SpeciesRecord,
   type CatchRecord,
   type CatchStat,
@@ -63,6 +64,10 @@ export function recordCatch(body: CatchSubmission) {
 
 export function getBoard(period: BoardPeriod = "all") {
   return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
+}
+
+export function getLodgeTracks() {
+  return request<{ tracks: LodgeTrack[] }>("/api/lodge/recent").then((body) => body.tracks);
 }
 
 export function getSpeciesRecords() {

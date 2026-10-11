@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { isLakeHour, isSky, type BadgeFactRow, type BoardStat, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { isLakeHour, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -250,6 +250,25 @@ export function listSpeciesRecords(): SpeciesRecord[] {
     userId: row.user_id,
     holder: row.display_name,
     at: row.created_at,
+  }));
+}
+
+/** Other anglers' catches since `since`, newest first, for the shore tracks. */
+export function listRecentLodgeCatches(since: string, limit: number): (LodgeTrack & { userId: string })[] {
+  const rows = db
+    .prepare(
+      `SELECT c.id, c.user_id, p.display_name, c.species_id, c.spot, c.created_at
+       FROM catch c JOIN profile p ON p.user_id = c.user_id
+       WHERE c.created_at >= ? ORDER BY c.created_at DESC LIMIT ?`,
+    )
+    .all(since, limit) as { id: string; user_id: string; display_name: string; species_id: string; spot: SpotId; created_at: string }[];
+  return rows.map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    displayName: row.display_name,
+    speciesId: row.species_id,
+    spot: row.spot,
+    createdAt: row.created_at,
   }));
 }
 

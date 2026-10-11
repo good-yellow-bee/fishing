@@ -4,6 +4,7 @@ import { auth } from "./auth.ts";
 import { boardRoutes } from "./routes/board.ts";
 import { catchRoutes } from "./routes/catches.ts";
 import { dailyRequestRoutes } from "./routes/dailyRequests.ts";
+import { lodgeRoutes } from "./routes/lodge.ts";
 import { meRoutes } from "./routes/me.ts";
 import { upgradeRoutes } from "./routes/upgrades.ts";
 import { requireSession } from "./session.ts";
@@ -29,11 +30,13 @@ app.use("/api/daily-requests/*", requireSession);
 app.use("/api/upgrades", requireSession);
 app.use("/api/board", requireSession);
 app.use("/api/board/*", requireSession);
+app.use("/api/lodge/*", requireSession);
 
 app.route("/api", meRoutes);
 app.route("/api", catchRoutes);
 app.route("/api", dailyRequestRoutes);
 app.route("/api", upgradeRoutes);
 app.route("/api", boardRoutes);
+app.route("/api", lodgeRoutes);
 
 app.get("/api/health", (c) => c.json({ ok: true }));

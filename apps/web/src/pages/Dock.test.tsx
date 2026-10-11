@@ -4,19 +4,20 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type Sky } from "@stillwater/shared";
-import { getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
+import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
+import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import type { Outcome } from "../game/useFishingGame";
 
-const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number }) => void>();
+const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[] }) => void>();
 const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
   getMe: vi.fn(),
   getSpeciesRecords: vi.fn(async () => []),
+  getLodgeTracks: vi.fn(async () => []),
   recordCatch: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
@@ -33,7 +34,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
 vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() }, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
-  FishingWorld: (props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number }) => {
+  FishingWorld: (props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[] }) => {
     scene(props);
     return null;
   },
@@ -78,6 +79,7 @@ afterEach(() => {
   vi.mocked(fx.land).mockClear();
   vi.mocked(getMe).mockReset();
   vi.mocked(getSpeciesRecords).mockResolvedValue([]);
+  vi.mocked(getLodgeTracks).mockResolvedValue([]);
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -243,6 +245,17 @@ describe("lodge records", () => {
     });
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("Lodge record · was 12.3 lb (Mara)");
+  });
+});
+
+describe("shore tracks", () => {
+  it("puts other anglers' recent catches on the water and names the latest on the bank", async () => {
+    const track: LodgeTrack = { id: "t1", displayName: "Mara", speciesId: "pike", spot: "reeds", createdAt: new Date(Date.now() - 12 * 60_000 - 5_000).toISOString() };
+    vi.mocked(getLodgeTracks).mockResolvedValue([track]);
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    expect(lastScene().tracks).toEqual([track]);
+    expect(page.querySelector(".lodge-tracks p")?.textContent).toBe("Mara · northern pike · Reeds · 12 min ago");
   });
 });
 

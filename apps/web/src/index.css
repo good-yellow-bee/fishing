@@ -2026,3 +2026,22 @@ html[data-reduce-motion="1"] .hour-veil {
 .record-wall li span {
   font-size: 12px;
 }
+
+/* Who else has been fishing: a quiet note above the hint, nothing to press. */
+.lodge-tracks {
+  position: absolute;
+  left: 24px;
+  bottom: 86px;
+  z-index: 2;
+  max-width: min(42ch, 70vw);
+  padding: 7px 11px;
+  background: rgba(17, 24, 22, 0.55);
+  color: var(--paper-dim);
+  pointer-events: none;
+}
+
+.lodge-tracks p {
+  margin: 3px 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+}
