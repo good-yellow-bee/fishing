@@ -29,7 +29,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
 | P7 | ~~Tap-to-walk + thumb controls~~ (shipped) | mobile | M | B | — |
 | P8 | ~~Settings & quality panel~~ (shipped) | access/QoL | S/M | B | — |
-| P9 | Screen reader & keyboard parity | access | S | B | — |
+| P9 | ~~Screen reader & keyboard parity~~ (shipped) | access | S | B | — |
 | P10 | Live hour crossfade | visual/feel | M | B | #53 look table |
 | P11 | Catch conditions on the server | data enabler | S | C | #53 |
 | P12 | Lodge badges | progression | M | C | P11 |
@@ -142,7 +142,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S/M. **Deps:** none; P7 and P23 consume it.
 - **Test:** `settings.test.ts` parse/defaults/corrupt storage; existing `Dock.test.tsx`.
 
-### P9 · Screen reader & keyboard parity
+### ~~P9 · Screen reader & keyboard parity~~ (shipped: the shack focuses its panel, not a buy button, so a stray Space buys nothing)
 - **Pitch:** every state change is spoken; every control reachable by Tab.
 - **Borrowed:** — (hygiene, no borrow; Stardew and Dredge both ship this as plain options).
 - **Why fun:** `.hint` has no `aria-live`; `FightBar` writes status via `textContent` on a ref so it is never announced; the shop overlay has no dialog role or focus trap; tension bar has no `role="meter"`. (Tension ticks at 55/80 % already exist — colour is not the only cue; keep them.)

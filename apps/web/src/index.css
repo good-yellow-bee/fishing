@@ -1814,3 +1814,8 @@ html[data-reduce-motion="1"] .walkthrough li {
   color: var(--paper-dim);
   font-size: 11px;
 }
+
+/* Focus lands on the shack panel itself so a keyboard player can Tab in; no ring on the box. */
+.shop-overlay:focus {
+  outline: none;
+}

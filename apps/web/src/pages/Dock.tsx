@@ -65,6 +65,7 @@ export function DockPage() {
     savedSettings.lastLure && lureChoices.includes(savedSettings.lastLure) ? savedSettings.lastLure : null,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const shopPanel = useRef<HTMLDivElement>(null);
   const prefs = useSettings();
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
@@ -186,6 +187,17 @@ export function DockPage() {
     if (game.shopTap) setShopOpen(true);
   }, [game.shopTap]);
 
+  // Keyboard players land inside the shack and go back where they were when it closes.
+  useEffect(() => {
+    if (!shopOpen) return;
+    const before = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    // The panel itself, not its first button: a stray Space must not buy an upgrade.
+    shopPanel.current?.focus();
+    return () => {
+      if (before?.isConnected) before.focus();
+    };
+  }, [shopOpen]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
@@ -273,7 +285,9 @@ export function DockPage() {
         {fishing && !shopOpen && (
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
         )}
-        <p className="hint">{game.hint}</p>
+        <p className="hint" aria-live="polite">
+          {game.hint}
+        </p>
         {(catchSync.pendingCount > 0 || catchSync.error || catchSync.rejectedCount > 0) && (
           <aside className="catch-sync" data-camera-control role="status">
             {(catchSync.pendingCount > 0 || catchSync.error) && (
@@ -407,7 +421,7 @@ export function DockPage() {
           )}
         </div>
         {shopOpen && (
-          <div className="shop-overlay">
+          <div className="shop-overlay" role="dialog" aria-modal="true" aria-label="The shack" ref={shopPanel} tabIndex={-1}>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
