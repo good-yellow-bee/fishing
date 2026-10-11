@@ -1,10 +1,20 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { JSDOM } from "jsdom";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, parseSettings, reloadSettings, settings, SETTINGS_KEY, updateSettings } from "./settings";
+
+// Newer Node ships its own empty `localStorage` global, so borrow a real one.
+const browser = new JSDOM("", { url: "http://localhost" });
+afterAll(() => browser.window.close());
+
+beforeEach(() => {
+  vi.stubGlobal("localStorage", browser.window.localStorage);
+});
 
 afterEach(() => {
   localStorage.clear();
   reloadSettings();
+  vi.unstubAllGlobals();
 });
 
 describe("settings", () => {
