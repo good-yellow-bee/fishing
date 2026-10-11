@@ -194,6 +194,7 @@ export function useFishingGame(
       setHint("This fish is too heavy for your line.");
       timers.current.snap = window.setTimeout(() => {
         fx.snap();
+        fx.haptic("snap");
         setOutcome({ kind: "broke", message: `${species.name} snapped the line.` });
         resetToIdle(`Line parted. Spend points on ${current.strength < species.minStrength ? "Strength" : "Accuracy"}.`);
       }, 1400);
@@ -212,6 +213,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     fx.splash();
+    fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile);
   }, [beginFight, profile]);
 
@@ -237,6 +239,7 @@ export function useFishingGame(
         const surface = surfaceRef.current;
         if (surface) surface.dataset.nibble = "1";
         fx.nibble();
+        fx.haptic("nibble");
         timers.current.nibbleOff = window.setTimeout(() => {
           setNibble(false);
           if (surface) delete surface.dataset.nibble;
@@ -247,6 +250,7 @@ export function useFishingGame(
       if (phaseRef.current !== "waiting") return;
       setNibble(false);
       fx.bite();
+      fx.haptic("bite");
       setPhaseBoth("hookset");
       setHint("NOW — strike!");
       timers.current.hook = window.setTimeout(() => {
@@ -478,7 +482,10 @@ export function useFishingGame(
             surface.dataset.line = sim.line.toFixed(2);
             surface.dataset.surge = String(sim.surge);
           }
-          if (sim.surge === 2 && prevSurge !== 2) fx.surge();
+          if (sim.surge === 2 && prevSurge !== 2) {
+            fx.surge();
+            fx.haptic("surge");
+          }
           prevSurge = sim.surge;
           if (reeling && now - lastReelFx > 90) {
             fx.reel();
@@ -486,6 +493,7 @@ export function useFishingGame(
           }
           if (result === "landed") {
             fx.land();
+            fx.haptic("land");
             setOutcome({
               kind: "landed",
               id: localId(),
@@ -499,10 +507,12 @@ export function useFishingGame(
             setHint("Landed. Click the water or hold Space to cast again.");
           } else if (result === "snapped") {
             fx.snap();
+            fx.haptic("snap");
             setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
             resetToIdle("Too much tension — let go when the bar turns red or the fish is about to run.");
           } else if (result === "escaped") {
             fx.snap();
+            fx.haptic("snap");
             setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
             resetToIdle("Ran out of line — hold to reel whenever the fish is calm.");
           }

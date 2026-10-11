@@ -22,7 +22,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | # | Title | Area | Size | Wave | Depends on |
 |---|---|---|---|---|---|
 | P1 | On-water cast band | feel | S | A | perf memo (power via ref) |
-| P2 | Hookset hit-stop + haptics | feel | S | A | — (#55 merged) |
+| P2 | ~~Hookset hit-stop + haptics~~ (shipped) | feel | S | A | — (#55 merged) |
 | P3 | Drag clicker (tension audio) | feel/audio | S | A | — |
 | P4 | First-cast walkthrough | onboarding | S/M | A | — |
 | P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
@@ -63,7 +63,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** queued perf memo (power through a ref).
 - **Test:** `castRing.test.ts` (radius monotonic, `inBand` matches `sweetBand`); manual `?hour=day`, hold at the dock, ring green inside band, release outside → existing miss toast.
 
-### P2 · Hookset hit-stop + haptics
+### ~~P2 · Hookset hit-stop + haptics~~ (shipped)
 - **Pitch:** the strike lands with an 80 ms freeze, a white blink, and a buzz in your hand.
 - **Borrowed:** Dredge (rumble on the bite); Stardew ("!" + rod jolt); fighting-game hit-stop.
 - **Why fun:** today the bite is two sine blips (`fx.bite`) plus a 0.05 shake on the plunge, and the strike itself (fight entry) is `fx.splash` plus a 0.09 shake in `CameraRig`. The strike is the moment the game is about; impact should be unmistakable — the hit-stop targets fight entry, the haptic targets both beats.

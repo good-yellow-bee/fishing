@@ -13,7 +13,7 @@ const step = vi.fn<() => FightOutcome>(() => {
 let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn() },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn() },
 }));
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
@@ -28,6 +28,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { RECAST_GUARD_MS, useFishingGame } from "./useFishingGame";
+import { fx } from "./fx";
 
 const profile: Profile = {
   userId: "test", displayName: "Test", points: 0, lifetimePoints: 0, strength: 5, accuracy: 3, patience: 1,
@@ -495,5 +496,18 @@ describe("useFishingGame fast recast", () => {
     now += RECAST_GUARD_MS - 100;
     act(() => surface.dispatchEvent(pointer("pointerdown", 5)));
     expect(phase()).toBe("result:miss");
+  });
+});
+
+describe("useFishingGame haptics", () => {
+  it("buzzes on the bite and again on the strike", () => {
+    const surface = mount();
+    vi.mocked(fx.haptic).mockClear();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(Math.ceil(waitMs(profile.patience, "day"))));
+    expect(phase()).toBe("hookset:none");
+    expect(vi.mocked(fx.haptic).mock.calls.map(([beat]) => beat)).toContain("bite");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(vi.mocked(fx.haptic)).toHaveBeenLastCalledWith("strike");
   });
 });
