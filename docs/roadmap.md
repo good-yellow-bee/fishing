@@ -25,7 +25,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P2 | Hookset hit-stop + haptics | feel | S | A | — (#55 merged) |
 | P3 | Drag clicker (tension audio) | feel/audio | S | A | — |
 | P4 | First-cast walkthrough | onboarding | S/M | A | — |
-| P5 | Mercy bites for the first three fish | onboarding | S | A | — |
+| P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
 | P7 | Tap-to-walk + thumb controls | mobile | M | B | — |
 | P8 | Settings & quality panel | access/QoL | S/M | B | — |
@@ -96,7 +96,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S/M. **Deps:** none.
 - **Test:** `walkthrough.test.ts` step machine; `Dock.test.tsx` (on #53) renders the first chip with zero stats.
 
-### P5 · Mercy bites for the first three fish
+### ~~P5 · Mercy bites for the first three fish~~ (shipped)
 - **Pitch:** your first three fish come fast, bite hard, and fight fair.
 - **Borrowed:** Stardew (training rod, easy early fish); A Short Hike (no-fail feel).
 - **Why fun:** at level 1 on the dock by day, `pickBite` can draw carp (`minStrength` 3) at `OUT_OF_REACH_BITE` 0.35 → "Line parted" on cast one; `waitMs` is 2.2–6 s. `d1700d0` already fills in landable fish for big lures — extend that for newcomers.

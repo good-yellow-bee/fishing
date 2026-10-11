@@ -116,14 +116,25 @@ export function sweetBand(accuracy: number) {
   };
 }
 
-/** Long enough to react to the real dip rather than guess it; Accuracy still widens it. */
-export function hookWindowMs(accuracy: number) {
-  return 1000 + accuracy * 100;
+/** A new angler's first fish come easy: this many landed fish keep the mercy on. */
+export const MERCY_CATCHES = 3;
+/** Mercy bites come quickly and give a little longer to strike. */
+export const MERCY_WAIT_MAX_MS = 2600;
+export const MERCY_HOOK_BONUS_MS = 400;
+
+export function isMercy(caughtTotal: number) {
+  return caughtTotal < MERCY_CATCHES;
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1) {
+/** Long enough to react to the real dip rather than guess it; Accuracy still widens it. */
+export function hookWindowMs(accuracy: number, mercy = false) {
+  return 1000 + accuracy * 100 + (mercy ? MERCY_HOOK_BONUS_MS : 0);
+}
+
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false) {
   const base = 2200 + Math.random() * 3800;
-  return Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level));
+  const wait = Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level));
+  return mercy ? Math.min(wait, MERCY_WAIT_MAX_MS) : wait;
 }
 
 export function pickBite(
@@ -135,8 +146,23 @@ export function pickBite(
   lure?: string,
   sky?: Sky,
   hotspot = false,
+  mercy = false,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
+  if (mercy) {
+    // Only commons the angler can land, so the first fish is never a lost fight.
+    const easy = home.filter((fish) => fish.rarity === "common" && canLand(profile, fish));
+    const byLure = poolForLure(easy, lure);
+    const pool = byLure.length > 0 ? byLure : easy;
+    if (pool.length > 0) {
+      let roll = random() * pool.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+      for (const fish of pool) {
+        roll -= appeal(fish, hour);
+        if (roll <= 0) return fish;
+      }
+      return pool[0]!;
+    }
+  }
   if (shortCast) home = home.filter((fish) => fish.rarity === "common");
   // Split before the legendary check so a fish that becomes legal does not move the cut.
   let pool = poolForLure(home, lure);

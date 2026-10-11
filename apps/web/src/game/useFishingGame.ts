@@ -93,7 +93,11 @@ export function useFishingGame(
   hour: LakeHour = lakeHour(),
   lureRef?: { readonly current: string },
   sky?: Sky,
+  /** A new angler's easy first fish (see `isMercy`). */
+  mercy = false,
 ) {
+  const mercyRef = useRef(mercy);
+  mercyRef.current = mercy;
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
@@ -219,11 +223,12 @@ export function useFishingGame(
     if (castHotspotRef.current) waitHintRef.current = short ? `${SHORT_CAST_HINT} ${HOTSPOT_WAIT_HINT}` : HOTSPOT_WAIT_HINT;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
-    const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current);
+    const mercyNow = mercyRef.current;
+    const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow);
     const bitten = makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
     setBite(bitten);
-    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints));
+    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
       timers.current.nibble = window.setTimeout(() => {
@@ -250,7 +255,7 @@ export function useFishingGame(
         setOutcome({ kind: "miss", message: "Too slow. The fish dropped the bait.", fish: bitten });
         // Hold result so the miss spring and the turn play out.
         resetToIdle("Strike the moment the bobber goes under.", "result");
-      }, hookWindowMs(current.accuracy));
+      }, hookWindowMs(current.accuracy, mercyNow));
     }, wait);
   }, [hour, lureRef, resetToIdle, sky]);
 
