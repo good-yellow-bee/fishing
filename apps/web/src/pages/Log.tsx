@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fishById, SPOT_LABELS } from "@stillwater/shared";
+import { fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
 import { getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 
@@ -59,6 +59,7 @@ export function LogPage() {
             <th>Fish</th>
             <th>Weight</th>
             <th>Spot</th>
+            <th>Conditions</th>
             <th>Points</th>
             <th>When</th>
           </tr>
@@ -71,6 +72,7 @@ export function LogPage() {
                 <td className={species ? `rarity-${species.rarity}` : ""}>{species?.name ?? row.speciesId}</td>
                 <td>{row.weight.toFixed(1)} lb</td>
                 <td>{SPOT_LABELS[row.spot]}</td>
+                <td>{row.hour && row.sky ? `${LAKE_HOUR_LABELS[row.hour]} · ${SKY_LABELS[row.sky]}` : "—"}</td>
                 <td>{row.points}</td>
                 <td>{new Date(row.createdAt).toLocaleString()}</td>
               </tr>

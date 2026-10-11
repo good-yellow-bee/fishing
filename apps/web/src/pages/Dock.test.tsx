@@ -128,6 +128,7 @@ describe("dock weather", () => {
     await openDock("/?sky=fog");
     const kept = readStoredLogbook()?.catches.find((entry) => entry.id === "catch-dock-fog");
     expect(kept?.weather).toEqual(dailyConditions(now, "fog"));
+    expect(recordCatch).toHaveBeenLastCalledWith(expect.objectContaining({ requestId: "catch-dock-fog", hour: "day", sky: "fog" }));
   });
 });
 

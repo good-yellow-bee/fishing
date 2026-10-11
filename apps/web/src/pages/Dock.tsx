@@ -132,7 +132,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky });
       return;
     }
     void catchSync.sync();
@@ -229,8 +229,8 @@ export function DockPage() {
     if (posted.current === id) return;
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean });
-  }, [game.outcome, saveFieldLog, saveOutcome, userId]);
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky });
+  }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);

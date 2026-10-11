@@ -31,7 +31,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P8 | ~~Settings & quality panel~~ (shipped) | access/QoL | S/M | B | — |
 | P9 | ~~Screen reader & keyboard parity~~ (shipped) | access | S | B | — |
 | P10 | ~~Live hour crossfade~~ (shipped) | visual/feel | M | B | #53 look table |
-| P11 | Catch conditions on the server | data enabler | S | C | #53 |
+| P11 | ~~Catch conditions on the server~~ (shipped) | data enabler | S | C | #53 |
 | P12 | Lodge badges | progression | M | C | P11 |
 | P13 | Weekly board + species record wall | social | M | C | — |
 | P14 | Tracks on the shore (async presence) | social | S/M | C | — |
@@ -163,7 +163,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave C — Reasons to come back
 
-### P11 · Catch conditions on the server (enabler)
+### ~~P11 · Catch conditions on the server (enabler)~~ (shipped: older rows keep an empty hour and sky; the catch log shows a Conditions column)
 - **Pitch:** the lodge remembers when and under what sky each fish came in.
 - **Borrowed:** Animal Crossing (every catch records time and weather for the Critterpedia).
 - **Why fun:** `catch` rows hold species, weight, points, spot, clean, created_at only. "Night owl" or "rain pike" badges are impossible; deriving hour from `created_at` on the server breaks across timezones (client `lakeHour` uses local `getHours`). The field log already records weather (#53).
