@@ -697,6 +697,53 @@ a:focus-visible {
   pointer-events: auto;
 }
 
+/* A thumb-sized strike and reel button; only on touch screens, where a mouse is not the tool. */
+.thumb-strike,
+.strike-cue .cue-touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .strike-cue .cue-keys {
+    display: none;
+  }
+
+  .strike-cue .cue-touch {
+    display: inline;
+  }
+
+  .thumb-strike {
+    position: absolute;
+    right: 16px;
+    bottom: 24px;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border: 2px solid rgba(239, 224, 194, 0.85);
+    border-radius: 50%;
+    background: rgba(20, 28, 25, 0.78);
+    color: #f0dfbf;
+    font-family: Fraunces, serif;
+    font-size: 18px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .thumb-strike[data-phase="hookset"] {
+    border-color: var(--amber);
+    background: rgba(217, 169, 78, 0.92);
+    color: var(--ink);
+  }
+
+  .thumb-strike:active {
+    transform: scale(0.94);
+  }
+}
+
 /* The walkthrough teaches the same controls. */
 .scene-wrap[data-walkthrough="1"] .camera-help {
   display: none;

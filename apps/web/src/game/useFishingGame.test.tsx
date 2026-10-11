@@ -60,7 +60,9 @@ function Harness({ current = profile }: { current?: Profile }) {
   const game = useFishingGame(current, "day");
   return (
     <>
-      <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42" />
+      <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
+        <button type="button" data-thumb-strike>Strike</button>
+      </div>
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
@@ -146,7 +148,7 @@ describe("useFishingGame animation recovery", () => {
     expect(frames.length).toBe(scheduled + 1);
     act(() => frames.at(-1)!(1_016));
     expect(frames.length).toBe(scheduled + 2);
-    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(container!.querySelector("output")?.textContent).toBe("casting:none");
   });
@@ -162,7 +164,7 @@ describe("useFishingGame landed outcome", () => {
     expect(container!.querySelector("output")?.textContent).toBe("result:landed");
     expect(container!.querySelector("span")?.textContent).toBe("true");
 
-    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
     fightPerformance = { peakTension: 0.9, maxLine: 1 };
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 2);
@@ -182,7 +184,7 @@ describe("useFishingGame lost fight", () => {
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
     expect(hint()).toMatch(/too much tension.*let go when the bar turns red or the fish is about to run/i);
 
-    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
     step.mockReturnValueOnce("escaped");
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
@@ -203,6 +205,22 @@ describe("useFishingGame strike timing", () => {
     expect(phase()).toBe("hookset:none");
     act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
     expect(phase()).toBe("fight:none");
+  });
+
+  it("strikes and reels from the thumb button, but never casts from it", () => {
+    const surface = mount();
+    const thumb = surface.querySelector<HTMLButtonElement>("[data-thumb-strike]")!;
+    act(() => thumb.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("idle:none");
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    expect(phase()).toBe("hookset:none");
+    act(() => thumb.dispatchEvent(pointer("pointerdown", 3)));
+    expect(phase()).toBe("fight:none");
+    step.mockReturnValueOnce("fighting");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true);
   });
 
   it("gives a human reaction time to hook the real bite", () => {
@@ -326,14 +344,14 @@ describe("useFishingGame bubbling hotspot", () => {
     act(() => vi.advanceTimersByTime(5_000));
     expect(phase()).toBe("result:miss");
     expect(hint()).not.toBe(movedLine);
-    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
     expect(phase()).toBe("idle:none");
     expect(hint()).toBe(movedLine);
 
     cast(surface);
     act(() => vi.advanceTimersByTime(usual()));
     act(() => vi.advanceTimersByTime(5_000));
-    act(() => (container!.querySelector("button") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
     expect(hint()).not.toBe(movedLine);
   });
 });

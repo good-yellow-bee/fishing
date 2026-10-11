@@ -238,9 +238,16 @@ export function DockPage() {
         {game.phase === "hookset" && (
           <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>
             <strong>Strike!</strong>
-            <span>Click or Space</span>
+            <span className="cue-keys">Click or Space</span>
+            <span className="cue-touch">Tap anywhere</span>
             <i />
           </div>
+        )}
+        {(scenePhase === "waiting" || scenePhase === "hookset" || scenePhase === "fight") && (
+          // Space and a tap on the water do the same; this is just where a thumb rests on a phone.
+          <button className="thumb-strike" type="button" data-thumb-strike data-phase={scenePhase} tabIndex={-1} aria-hidden>
+            {scenePhase === "fight" ? "Reel" : "Strike"}
+          </button>
         )}
         {fishing && !shopOpen && (
           <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
