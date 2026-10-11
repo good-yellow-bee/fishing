@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "./logbook.ts";
 import {
+  LURE_CLASSES,
+  lureClass,
+  lureClassesFor,
+  lurePull,
   isTackleBox,
   itemsForTrip,
   luresPacked,
@@ -104,5 +108,48 @@ describe("tackle", () => {
     expect(parseTackleLabel("  spare leader  ")).toEqual({ ok: true, value: "spare leader" });
     expect(parseTackleLabel(" ")).toMatchObject({ ok: false });
     expect(parseTackleLabel("a")).toMatchObject({ ok: false });
+  });
+});
+
+describe("lure classes", () => {
+  /** The size rule before lure classes, kept here to prove every label still lands on the same half. */
+  const oldLarge = (label: string) => {
+    const text = label.toLowerCase();
+    if (/bobber|worm|crawler|popper|pheasant|caddis|size\s*8/.test(text)) return false;
+    return /spinner|spoon|mepps|crank|tube|bugger/.test(text);
+  };
+
+  it("keeps every packed sample lure on the half the old size rule put it", () => {
+    const labels = [
+      ...sampleTackle().map((item) => item.label).filter(isLureLabel),
+      "Bobber", "Worm", "Spoon", "Elk hair caddis", "Mystery lure", "Spinner with a worm",
+    ];
+    for (const label of labels) expect(lureClass(label).size, label).toBe(oldLarge(label) ? "large" : "small");
+  });
+
+  it("names each sample lure's class", () => {
+    expect(lureClass("#5 Mepps").id).toBe("spinner");
+    expect(lureClass("Nightcrawlers").id).toBe("worm");
+    expect(lureClass("Pencil bobbers").id).toBe("bobber");
+    expect(lureClass("Pheasant tails").id).toBe("fly");
+    expect(lureClass("Woolly buggers").id).toBe("streamer");
+    expect(lureClass("Green pumpkin tubes").id).toBe("jig");
+    expect(lureClass("Crayfish crankbait").id).toBe("crank");
+    expect(lureClass("Mystery lure").id).toBe("plain");
+  });
+
+  it("pulls only at the hours a class works", () => {
+    const popper = lureClass("Popper");
+    expect(lurePull(popper, "smallmouth-bass", "dusk")).toBeCloseTo(0.8);
+    expect(lurePull(popper, "smallmouth-bass", "night")).toBe(0);
+    expect(lurePull(popper, "carp", "dusk")).toBe(0);
+    expect(lurePull(lureClass("Spoon"), "pike", "night")).toBeCloseTo(0.6);
+  });
+
+  it("lists the classes that draw a species, with their best hours", () => {
+    expect(lureClassesFor("catfish")).toEqual([{ lure: lureClass("Nightcrawlers"), hours: ["night"] }]);
+    expect(lureClassesFor("salmon").map((one) => one.lure.id)).toEqual(["streamer", "spoon"]);
+    expect(lureClassesFor("sturgeon")).toEqual([]);
+    expect(new Set(LURE_CLASSES.map((one) => one.id)).size).toBe(LURE_CLASSES.length);
   });
 });

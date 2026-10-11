@@ -218,7 +218,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave D — A bigger lake
 
-### P17 · Lure classes (keeps the field-log tie-in)
+### ~~P17 · Lure classes (keeps the field-log tie-in)~~ (shipped: nine classes; a class leans harder on the fish it names and, on a full cast, reaches a little across the size line, e.g. live bait pulls catfish at night; field-log gear stays the lure source)
 - **Pitch:** the lures you packed in the field log each have a character — a Mepps turns bass and pike at dusk, a nightcrawler under a bobber pulls perch and catfish, a popper only works dawn and dusk.
 - **Borrowed:** Stardew bait and tackle (spinner, trap bobber); Animal Crossing fish bait; real tackle lore.
 - **Why fun:** `favorsLargeFish` is a regex that halves the pool by weight — lure choice is a coarse size switch. Keep lures sourced from `luresPacked(readTackle())` (the distinctive field-log link, lure saved on the catch) but give them depth.
