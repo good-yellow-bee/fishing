@@ -248,8 +248,12 @@ describe("touch play", () => {
     const page = await openDock("/?hour=day&sky=clear");
     const open = page.querySelector<HTMLButtonElement>(".walk-shop")!;
     act(() => open.click());
-    expect(page.querySelector(".shop-overlay")).not.toBeNull();
+    const shop = page.querySelector(".shop-overlay")!;
+    expect(shop).not.toBeNull();
+    expect(shop.getAttribute("role")).toBe("dialog");
+    expect(document.activeElement).toBe(shop);
     expect(page.querySelector(".walk-signs")).toBeNull();
+    expect(page.querySelector(".hint")?.getAttribute("aria-live")).toBe("polite");
   });
 });
 

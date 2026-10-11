@@ -86,3 +86,25 @@ describe("FightBar clean-fight chip", () => {
     expect(container!.querySelector(".fight-clean")).toBeNull();
   });
 });
+
+describe("FightBar for screen readers", () => {
+  it("reports tension and line as meters and speaks each new call once", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    sim.current.tension = 0.62;
+    sim.current.line = 0.25;
+    frame();
+    const [tension, line] = [...container!.querySelectorAll('[role="meter"]')];
+    expect(tension!.getAttribute("aria-valuenow")).toBe("62");
+    expect(line!.getAttribute("aria-valuenow")).toBe("75");
+    const status = container!.querySelector('.fight-status[role="status"]')!;
+    const said = status.textContent;
+    let writes = 0;
+    new MutationObserver((records) => (writes += records.length)).observe(status, { childList: true, characterData: true, subtree: true });
+    frame();
+    frame();
+    return Promise.resolve().then(() => {
+      expect(writes).toBe(0);
+      expect(status.textContent).toBe(said);
+    });
+  });
+});

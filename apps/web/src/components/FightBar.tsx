@@ -23,10 +23,13 @@ export function FightBar({ fight, sim, performance }: Props) {
   const status = useRef<HTMLParagraphElement>(null);
   const clean = useRef<HTMLParagraphElement>(null);
   const lines = FIGHT_LINES[fight.species.challenge];
+  const tensionMeter = useRef<HTMLDivElement>(null);
+  const lineMeter = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let frame = 0;
-    const loop = () => {
+    let spokenAt = -Infinity;
+    const loop = (now: number) => {
       const state = sim.current;
       if (state) {
         if (tensionFill.current) {
@@ -36,7 +39,14 @@ export function FightBar({ fight, sim, performance }: Props) {
         if (lineFill.current) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
-        if (status.current) status.current.textContent = lines[state.surge]!;
+        // Written only on a change, so the live region speaks each new call once.
+        if (status.current && status.current.textContent !== lines[state.surge]) status.current.textContent = lines[state.surge]!;
+        // Screen readers get the bars as meters, refreshed four times a second rather than every frame.
+        if (now - spokenAt >= 250) {
+          spokenAt = now;
+          tensionMeter.current?.setAttribute("aria-valuenow", String(Math.round(Math.min(1, state.tension) * 100)));
+          lineMeter.current?.setAttribute("aria-valuenow", String(Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100)));
+        }
         const record = performance.current;
         if (clean.current && record) {
           const stillClean = isCleanFight(record);
@@ -65,17 +75,25 @@ export function FightBar({ fight, sim, performance }: Props) {
         <p className="warn">This fish is too heavy for your line.</p>
       ) : (
         <>
-          <span className="fight-label">Tension</span>
-          <div className="bar">
+          <span className="fight-label" id="fight-tension-label">Tension</span>
+          <div
+            ref={tensionMeter}
+            className="bar"
+            role="meter"
+            aria-labelledby="fight-tension-label"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={0}
+          >
             <div ref={tensionFill} className="fill" />
             <i className="tick" style={{ left: "55%" }} />
             <i className="tick" style={{ left: "80%" }} />
           </div>
-          <span className="fight-label">Line in</span>
-          <div className="bar">
+          <span className="fight-label" id="fight-line-label">Line in</span>
+          <div ref={lineMeter} className="bar" role="meter" aria-labelledby="fight-line-label" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
             <div ref={lineFill} className="fill" />
           </div>
-          <p ref={status} className="fight-status">
+          <p ref={status} className="fight-status" role="status" aria-live="assertive">
             {lines[0]}
           </p>
           <p ref={clean} className="fight-clean">Clean fight · 1.5× points</p>
