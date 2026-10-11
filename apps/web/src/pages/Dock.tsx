@@ -8,6 +8,8 @@ import {
   fieldLogBestBeat,
   isFishingStance,
   badgeById,
+  lodgeStamp,
+  type SpeciesRecord,
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
@@ -21,7 +23,7 @@ import {
   type LakeHour,
   type SkillId,
 } from "@stillwater/shared";
-import { buyUpgrade, getMe, type Me } from "../api";
+import { buyUpgrade, getMe, getSpeciesRecords, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
@@ -118,6 +120,25 @@ export function DockPage() {
     if (game.outcome?.kind !== "landed") return null;
     return catchStamp(statsRef.current, game.outcome.species.id, game.outcome.weight);
   }, [game.outcome]);
+  // Read before the catch is saved, so a new record can name the one it beat; read again after each save.
+  const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
+  const recordsRef = useRef(records);
+  recordsRef.current = records;
+  const lastCatch = me?.catches[0]?.id;
+  useEffect(() => {
+    if (!userId) return;
+    let live = true;
+    getSpeciesRecords()
+      .then((rows) => live && setRecords(rows))
+      .catch(() => live && setRecords(null));
+    return () => {
+      live = false;
+    };
+  }, [userId, lastCatch]);
+  const lodge = useMemo(() => {
+    if (game.outcome?.kind !== "landed" || !recordsRef.current || !userId) return null;
+    return lodgeStamp(recordsRef.current, game.outcome.species.id, game.outcome.weight, userId);
+  }, [game.outcome, userId]);
 
   const refresh = useCallback(() => {
     return getMe().then(setMe);
@@ -439,6 +460,12 @@ export function DockPage() {
               <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">Trophy</p>}
+            {lodge?.kind === "first" && <p className="catch-stamp">First on the lodge wall</p>}
+            {lodge?.kind === "record" && (
+              <p className="catch-stamp">
+                Lodge record · {lodge.yours ? `beat your ${lodge.previous.toFixed(1)} lb` : `was ${lodge.previous.toFixed(1)} lb (${lodge.holder})`}
+              </p>
+            )}
             <div className="catch-actions">
               {fieldSaved && <p className="catch-stamp quiet">Saved in the field log</p>}
               {fieldLogError && (

@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { isLakeHour, isSky, type BadgeFactRow, type SpotId } from "@stillwater/shared";
+import { isLakeHour, isSky, type BadgeFactRow, type BoardStat, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -199,21 +199,25 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
   }));
 }
 
-export function listBoardStats() {
+/** Every angler's standing. With `since`, only catches from then on count and only anglers who landed one appear. */
+export function listBoardStats(since?: string): BoardStat[] {
   const rows = db
     .prepare(
       `SELECT p.user_id, p.display_name, p.lifetime_points,
+              COALESCE(SUM(c.points), 0) as period_points,
               COALESCE(MAX(c.weight), 0) as heaviest,
               COUNT(c.id) as catches,
               COUNT(DISTINCT CASE WHEN c.species_id IS NOT NULL THEN c.species_id END) as species
        FROM profile p
-       LEFT JOIN catch c ON c.user_id = p.user_id
-       GROUP BY p.user_id, p.display_name, p.lifetime_points`,
+       LEFT JOIN catch c ON c.user_id = p.user_id AND (@since IS NULL OR c.created_at >= @since)
+       GROUP BY p.user_id, p.display_name, p.lifetime_points
+       HAVING @since IS NULL OR COUNT(c.id) > 0`,
     )
-    .all() as {
+    .all({ since: since ?? null }) as {
       user_id: string;
       display_name: string;
       lifetime_points: number;
+      period_points: number;
       heaviest: number;
       catches: number;
       species: number;
@@ -222,9 +226,30 @@ export function listBoardStats() {
     userId: row.user_id,
     displayName: row.display_name,
     lifetimePoints: row.lifetime_points,
+    score: since ? Number(row.period_points) : row.lifetime_points,
     heaviest: row.heaviest,
     catches: Number(row.catches),
     species: Number(row.species),
+  }));
+}
+
+/** The heaviest of each species anyone has landed, with who holds it; the earlier catch keeps a tie. */
+export function listSpeciesRecords(): SpeciesRecord[] {
+  const rows = db
+    .prepare(
+      `SELECT species_id, weight, user_id, display_name, created_at FROM (
+         SELECT c.species_id, c.weight, c.user_id, p.display_name, c.created_at,
+                ROW_NUMBER() OVER (PARTITION BY c.species_id ORDER BY c.weight DESC, c.created_at ASC, c.id ASC) as place
+         FROM catch c JOIN profile p ON p.user_id = c.user_id
+       ) WHERE place = 1`,
+    )
+    .all() as { species_id: string; weight: number; user_id: string; display_name: string; created_at: string }[];
+  return rows.map((row) => ({
+    speciesId: row.species_id,
+    weight: row.weight,
+    userId: row.user_id,
+    holder: row.display_name,
+    at: row.created_at,
   }));
 }
 

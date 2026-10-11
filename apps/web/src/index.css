@@ -1947,3 +1947,82 @@ html[data-reduce-motion="1"] .hour-veil {
     overflow-x: auto;
   }
 }
+
+.board-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.board-tabs button {
+  padding: 6px 14px;
+  border: 1px solid rgba(215, 190, 142, 0.32);
+  background: none;
+  color: #aa9d86;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.board-tabs button.active {
+  border-color: #b8914a;
+  background: rgba(201, 158, 82, 0.18);
+  color: #f0e2c4;
+}
+
+/* Record wall: one plaque per species, coloured by rarity once someone holds it. */
+.record-wall {
+  width: min(820px, 100%);
+  margin-top: 28px;
+}
+
+.record-wall h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.record-wall ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record-wall li {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(215, 190, 142, 0.32);
+  border-left: 3px solid var(--rarity-common);
+}
+
+.record-wall li.rarity-uncommon {
+  border-left-color: var(--rarity-uncommon);
+}
+
+.record-wall li.rarity-rare {
+  border-left-color: var(--rarity-rare);
+}
+
+.record-wall li.rarity-legendary {
+  border-left-color: var(--rarity-legendary);
+}
+
+.record-wall li.empty {
+  border-style: dashed;
+  border-left-width: 1px;
+  color: #776d5d;
+}
+
+.record-wall li strong {
+  font-family: Fraunces, serif;
+  font-size: 16px;
+}
+
+.record-wall li span {
+  font-size: 12px;
+}
