@@ -3,6 +3,7 @@ import { catchesForTrip, isLogbook, parseCatchDraft, sampleLogbook, type CatchDr
 import { fishById } from "./fish.ts";
 import { lakeHour } from "./hour.ts";
 import {
+  forecast,
   biteWeatherMul,
   DAILY_SKIES,
   dailyConditions,
@@ -182,5 +183,22 @@ describe("daily catch conditions", () => {
     expect(water(4)).toBeGreaterThan(water(1));
     expect(water(7)).toBeGreaterThan(68);
     expect(water(10)).toBeLessThan(water(7));
+  });
+});
+
+describe("three-day forecast", () => {
+  it("reads today, tomorrow and the day after from the same seed as the lake", () => {
+    const now = new Date(2026, 9, 11, 22, 40);
+    const days = forecast(now);
+    expect(days).toHaveLength(3);
+    expect(days.map((day) => day.date.getDate())).toEqual([11, 12, 13]);
+    expect(days[0]!.sky).toBe(weatherForDay(now));
+    expect(days[1]!.sky).toBe(weatherForDay(new Date(2026, 9, 12, 6)));
+    expect(forecast(now)).toEqual(days);
+  });
+
+  it("steps one local day at a time across a month end and a DST change", () => {
+    expect(forecast(new Date(2026, 9, 31, 1), 3).map((day) => `${day.date.getMonth() + 1}/${day.date.getDate()}`)).toEqual(["10/31", "11/1", "11/2"]);
+    expect(forecast(new Date(2026, 2, 28, 23), 3).map((day) => day.date.getDate())).toEqual([28, 29, 30]);
   });
 });

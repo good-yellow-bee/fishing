@@ -27,6 +27,7 @@ import { buyUpgrade, getMe, getSpeciesRecords, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
+import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
@@ -533,6 +534,7 @@ export function DockPage() {
           <div className="shop-overlay" role="dialog" aria-modal="true" aria-label="The shack" ref={shopPanel} tabIndex={-1}>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
+            <ForecastBoard />
             <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
               Back to the path
             </button>

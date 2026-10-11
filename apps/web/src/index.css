@@ -2045,3 +2045,47 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 11px;
   line-height: 1.35;
 }
+
+/* The shack's chalk board: three days of sky, written plain. */
+.forecast-board {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(215, 190, 142, 0.24);
+}
+
+.forecast-board ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.forecast-board li {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  padding: 8px 9px;
+  background: rgba(44, 52, 46, 0.7);
+  border: 1px solid rgba(232, 226, 210, 0.16);
+  color: #e8e2d2;
+}
+
+.forecast-board strong {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #aa9d86;
+}
+
+.forecast-sky {
+  font-family: Fraunces, serif;
+  font-size: 17px;
+}
+
+.forecast-board small {
+  color: #aa9d86;
+  font-size: 11px;
+  line-height: 1.3;
+}
