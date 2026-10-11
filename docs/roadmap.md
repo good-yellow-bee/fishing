@@ -23,7 +23,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 |---|---|---|---|---|---|
 | P1 | On-water cast band | feel | S | A | perf memo (power via ref) |
 | P2 | ~~Hookset hit-stop + haptics~~ (shipped) | feel | S | A | — (#55 merged) |
-| P3 | Drag clicker (tension audio) | feel/audio | S | A | — |
+| P3 | ~~Drag clicker (tension audio)~~ (shipped) | feel/audio | S | A | — |
 | P4 | First-cast walkthrough | onboarding | S/M | A | — |
 | P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
@@ -74,7 +74,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** none (#55 is merged; build on its `strikeSplash.ts` timings).
 - **Test:** `fx.test.ts` (on #53) with a mocked `navigator.vibrate`; `fightMotion.test.ts` `isFrozen(t, until)`.
 
-### P3 · Drag clicker (continuous tension audio)
+### ~~P3 · Drag clicker (continuous tension audio)~~ (shipped)
 - **Pitch:** the reel's drag sings — a tick that rises as tension climbs, a rasp when it goes red, a hiss when line pays out. Silence means slack.
 - **Borrowed:** Stardew fishing bar (the whine you learn to react to); Dredge creaking rod.
 - **Why fun:** the fight is tension management and the only continuous cue is `FightBar` colour. The clean-fight 1.5× depends on staying under `RED_TENSION` 0.8; an audible pre-red warning lets you watch the fish instead of the bar.

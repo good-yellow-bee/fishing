@@ -1,4 +1,5 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
+import type { DragTone } from "./dragTone";
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -205,6 +206,58 @@ const ambient = {
   },
 };
 
+let dragOsc: OscillatorNode | null = null;
+let dragGain: GainNode | null = null;
+let dragFilter: BiquadFilterNode | null = null;
+let lastRasp = 0;
+let lastHiss = 0;
+
+/** A continuous drag voice for the fight; `set` starts it, `stop` ends it with the fight. */
+const drag = {
+  set(next: DragTone) {
+    if (!enabledFlag) {
+      drag.stop();
+      return;
+    }
+    const ac = audio();
+    if (!dragOsc) {
+      dragOsc = ac.createOscillator();
+      dragOsc.type = "sawtooth";
+      dragFilter = ac.createBiquadFilter();
+      dragFilter.type = "bandpass";
+      dragFilter.Q.value = 6;
+      dragGain = ac.createGain();
+      dragGain.gain.value = 0;
+      dragOsc.connect(dragFilter).connect(dragGain).connect(bus());
+      dragOsc.start();
+    }
+    const t = ac.currentTime;
+    dragOsc.frequency.setTargetAtTime(next.hz, t, 0.05);
+    dragFilter!.frequency.setTargetAtTime(next.hz * 2, t, 0.05);
+    dragGain!.gain.setTargetAtTime(next.gain, t, 0.06);
+    if (next.rasp && t - lastRasp > 0.33) {
+      lastRasp = t;
+      noiseBurst("bandpass", 3200, 1800, 0.05, 0.03);
+    }
+    if (next.hiss && t - lastHiss > 0.16) {
+      lastHiss = t;
+      noiseBurst("highpass", 5200, 4200, 0.18, 0.02);
+    }
+  },
+  stop() {
+    if (!dragOsc) return;
+    dragOsc.stop();
+    dragOsc.disconnect();
+    dragGain!.disconnect();
+    dragOsc = null;
+    dragGain = null;
+    dragFilter = null;
+  },
+  get playing() {
+    return dragOsc !== null;
+  },
+};
+
 /** Buzz patterns in ms for phones that can vibrate (Android Chrome; iOS Safari has no vibrate). */
 export const HAPTICS = {
   nibble: [15],
@@ -226,6 +279,7 @@ export const fx = {
     if (ctx && master) master.gain.setTargetAtTime(v ? 1 : 0, ctx.currentTime, 0.01);
   },
   ambient,
+  drag,
   /** Felt rather than heard, so it follows its own switch, not the sound. */
   hapticsEnabled: true,
   haptic(beat: HapticBeat) {

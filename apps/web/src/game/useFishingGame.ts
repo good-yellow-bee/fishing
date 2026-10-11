@@ -18,6 +18,7 @@ import {
 } from "@stillwater/shared";
 import { isCleanFight, makeFight, FIGHT_LINES, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
+import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
@@ -159,6 +160,7 @@ export function useFishingGame(
     reelKeyRef.current = false;
     reelPointerRef.current = null;
     fightInput.reeling = false;
+    fx.drag.stop();
     const surface = surfaceRef.current;
     if (surface) {
       delete surface.dataset.tension;
@@ -487,6 +489,7 @@ export function useFishingGame(
             fx.haptic("surge");
           }
           prevSurge = sim.surge;
+          fx.drag.set(dragTone(sim.tension, sim.surge, reeling));
           if (reeling && now - lastReelFx > 90) {
             fx.reel();
             lastReelFx = now;
@@ -531,7 +534,10 @@ export function useFishingGame(
       }
     };
     frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      fx.drag.stop();
+    };
   }, [resetToIdle]);
 
   useEffect(() => clearTimers, []);

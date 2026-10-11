@@ -13,7 +13,7 @@ const step = vi.fn<() => FightOutcome>(() => {
 let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn() },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
@@ -509,5 +509,19 @@ describe("useFishingGame haptics", () => {
     expect(vi.mocked(fx.haptic).mock.calls.map(([beat]) => beat)).toContain("bite");
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(vi.mocked(fx.haptic)).toHaveBeenLastCalledWith("strike");
+  });
+});
+
+describe("useFishingGame drag tone", () => {
+  it("sings the drag through the fight and stops it when the fight ends", () => {
+    const surface = mount();
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    expect(phase()).toBe("fight:none");
+    expect(vi.mocked(fx.drag.set)).toHaveBeenCalled();
+    vi.mocked(fx.drag.stop).mockClear();
+    act(() => root!.unmount());
+    root = null;
+    expect(vi.mocked(fx.drag.stop)).toHaveBeenCalled();
   });
 });
