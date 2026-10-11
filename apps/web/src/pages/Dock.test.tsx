@@ -30,7 +30,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
   };
 });
 vi.mock("../auth-client", () => ({ authClient: { signOut: vi.fn() } }));
-vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
+vi.mock("../game/fx", () => ({ fx: { enabled: true, land: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() }, ambient: { start: vi.fn(), stop: vi.fn(), setConditions: vi.fn() } } }));
 vi.mock("../game/scene/FishingWorld", () => ({
   FishingWorld: (props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number }) => {
     scene(props);

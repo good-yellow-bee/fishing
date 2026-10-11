@@ -124,3 +124,21 @@ describe("fx haptics", () => {
     expect(vibrate).not.toHaveBeenCalled();
   });
 });
+
+describe("fx drag", () => {
+  it("starts on the first tone, keeps one voice, and stops", () => {
+    fx.drag.set({ gain: 0.01, hz: 200, rasp: true, hiss: true });
+    fx.drag.set({ gain: 0.02, hz: 300, rasp: false, hiss: false });
+    expect(fx.drag.playing).toBe(true);
+    fx.drag.stop();
+    expect(fx.drag.playing).toBe(false);
+  });
+
+  it("goes quiet when the sound is muted", () => {
+    fx.drag.set({ gain: 0.01, hz: 200, rasp: false, hiss: false });
+    fx.enabled = false;
+    fx.drag.set({ gain: 0.01, hz: 200, rasp: false, hiss: false });
+    expect(fx.drag.playing).toBe(false);
+    fx.enabled = true;
+  });
+});
