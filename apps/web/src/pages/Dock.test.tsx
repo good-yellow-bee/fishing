@@ -252,3 +252,44 @@ describe("touch play", () => {
     expect(page.querySelector(".walk-signs")).toBeNull();
   });
 });
+
+describe("first-cast walkthrough", () => {
+  it("greets a new angler with the aim chip lit, sending them to a bank first", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const chips = [...page.querySelectorAll(".walkthrough li")];
+    expect(chips.map((chip) => chip.textContent)).toEqual(["Aim", "Charge", "Wait", "Strike", "Ease"]);
+    expect(chips[0]!.getAttribute("data-state")).toBe("now");
+    expect(page.querySelector(".walkthrough p")?.textContent).toMatch(/Walk onto a bank/);
+    expect(page.querySelector(".scene-wrap")?.getAttribute("data-walkthrough")).toBe("1");
+  });
+
+  it("stays away once a fish is in the book or the angler skipped it", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, speciesStats: [{ speciesId: "perch", caught: 1, heaviest: 0.5, lastAt: "2026-10-10T12:00:00.000Z" }] });
+    let page = await openDock("/?hour=day&sky=clear");
+    expect(page.querySelector(".walkthrough")).toBeNull();
+    act(() => root?.unmount());
+    container?.remove();
+
+    vi.mocked(getMe).mockResolvedValue(me);
+    page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walkthrough-skip")!.click());
+    expect(page.querySelector(".walkthrough")).toBeNull();
+    expect(page.querySelector(".scene-wrap")?.hasAttribute("data-walkthrough")).toBe(false);
+    act(() => root?.unmount());
+    container?.remove();
+
+    page = await openDock("/?hour=day&sky=clear");
+    expect(page.querySelector(".walkthrough")).toBeNull();
+  });
+
+  it("sends off the first landed fish and never shows again", async () => {
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-first", points: 1, speciesId: perch.id, weight: 0.6 });
+    landed.outcome = { kind: "landed", id: "catch-first", species: perch, weight: 0.6, spot: "dock", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    expect(page.querySelector(".walkthrough")?.getAttribute("data-step")).toBe("landed");
+    expect(page.querySelector(".walkthrough p")?.textContent).toMatch(/first fish/);
+    expect([...page.querySelectorAll(".walkthrough li")].every((chip) => chip.getAttribute("data-state") === "done")).toBe(true);
+    expect(localStorage.getItem("stillwater.walkthrough.u1.v1")).toBe("done");
+  });
+});

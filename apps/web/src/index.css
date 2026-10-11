@@ -629,6 +629,79 @@ a:focus-visible {
   color: var(--amber);
 }
 
+.walkthrough {
+  position: absolute;
+  top: 102px;
+  left: 50%;
+  z-index: 4;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: min(420px, 60vw);
+  padding: 8px 12px 9px;
+  border: 1px solid rgba(220, 196, 150, 0.38);
+  background: rgba(20, 28, 25, 0.72);
+  color: #f0dfbf;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.walkthrough ol {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.walkthrough li {
+  padding: 3px 8px;
+  border: 1px solid rgba(220, 196, 150, 0.28);
+  color: #9d9483;
+  font-size: 11px;
+  text-transform: uppercase;
+  transition: color 200ms, border-color 200ms, background 200ms;
+}
+
+.walkthrough li[data-state="done"] {
+  border-color: var(--moss);
+  color: #b7d0a6;
+}
+
+.walkthrough li[data-state="now"] {
+  border-color: var(--amber);
+  background: rgba(217, 169, 78, 0.18);
+  color: var(--amber);
+}
+
+.walkthrough p {
+  margin: 0;
+  font-family: Fraunces, serif;
+  font-size: 15px;
+  text-align: center;
+}
+
+.walkthrough-skip {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: #9d9483;
+  font: inherit;
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* The walkthrough teaches the same controls. */
+.scene-wrap[data-walkthrough="1"] .camera-help {
+  display: none;
+}
+
 .camera-help {
   position: absolute;
   top: 102px;
@@ -1379,6 +1452,28 @@ kbd {
     display: none;
   }
 
+  .walkthrough {
+    top: calc(var(--hud-bottom, 140px) + 90px);
+    right: 8px;
+    left: 8px;
+    width: auto;
+    transform: none;
+  }
+
+  .walkthrough p {
+    font-size: 13px;
+  }
+
+  .walkthrough-skip {
+    top: 0;
+    right: 0;
+    padding: 10px 10px;
+  }
+
+  .scene-wrap[data-walkthrough="1"] .hint {
+    top: calc(var(--hud-bottom, 140px) + 168px);
+  }
+
   .hint {
     top: calc(var(--hud-bottom, 140px) + 90px);
     right: 8px;
@@ -1554,7 +1649,8 @@ kbd {
 
   .panel-btn,
   .upgrade-row button,
-  .spot-row span {
+  .spot-row span,
+  .walkthrough li {
     transition: none;
   }
 }

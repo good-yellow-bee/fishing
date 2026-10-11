@@ -24,7 +24,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P1 | On-water cast band | feel | S | A | perf memo (power via ref) |
 | P2 | ~~Hookset hit-stop + haptics~~ (shipped) | feel | S | A | — (#55 merged) |
 | P3 | ~~Drag clicker (tension audio)~~ (shipped) | feel/audio | S | A | — |
-| P4 | First-cast walkthrough | onboarding | S/M | A | — |
+| P4 | ~~First-cast walkthrough~~ (shipped) | onboarding | S/M | A | — |
 | P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
 | P7 | Tap-to-walk + thumb controls | mobile | M | B | — |
@@ -85,7 +85,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** none.
 - **Test:** `dragTone.test.ts` (monotonic gain, rasp threshold); `fx.test.ts` asserts `setTargetAtTime` calls with a mocked `AudioContext`.
 
-### P4 · First-cast walkthrough
+### ~~P4 · First-cast walkthrough~~ (shipped)
 - **Pitch:** a new angler gets five quiet chips that light up as they do the thing — aim, charge, wait for the real dip, strike, ease on the run — then they vanish forever.
 - **Borrowed:** A Short Hike (diegetic prompts, no modal); Stardew (Willy's rod moment); Animal Crossing (first-day nudges).
 - **Why fun:** onboarding today is the `hint` string plus the `camera-help` key list. The nibble-then-bite rule and the band are only explained after a failure.
