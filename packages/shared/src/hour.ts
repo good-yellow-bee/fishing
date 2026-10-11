@@ -13,7 +13,7 @@ export const LAKE_HOUR_LABELS: Record<LakeHour, string> = {
 export const LAKE_HOUR_BLURB: Record<LakeHour, string> = {
   dawn: "Trout work the shallows.",
   day: "Bright water. Commons cruise the dock.",
-  dusk: "Bass and pike hunt the edges.",
+  dusk: "Bass, pike and walleye hunt the edges.",
   night: "Cats and burbot move in.",
 };
 
@@ -54,10 +54,10 @@ const HOUR_RARITY: Record<LakeHour, Record<Rarity, number>> = {
 };
 
 const HOUR_SPECIES: Record<LakeHour, Record<string, number>> = {
-  dawn: { "brook-trout": 1.8, "rainbow-trout": 1.8, perch: 1.4, salmon: 1.5 },
-  day: {},
-  dusk: { "smallmouth-bass": 1.7, pike: 1.6, "tiger-muskie": 1.4 },
-  night: { catfish: 2.2, burbot: 2.2, carp: 1.6, pike: 1.3 },
+  dawn: { "brook-trout": 1.8, "rainbow-trout": 1.8, perch: 1.4, salmon: 1.5, crappie: 1.8 },
+  day: { "lake-whitefish": 1.4 },
+  dusk: { "smallmouth-bass": 1.7, pike: 1.6, "tiger-muskie": 1.4, walleye: 1.8, "largemouth-bass": 1.5 },
+  night: { catfish: 2.2, burbot: 2.2, carp: 1.6, pike: 1.3, walleye: 1.7, "ghost-pike": 1.8 },
 };
 
 export function biteHourMul(species: FishSpecies, hour: LakeHour): number {

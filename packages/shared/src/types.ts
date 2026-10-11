@@ -2,7 +2,7 @@ import type { LakeHour } from "./hour.ts";
 import type { Sky } from "./weather.ts";
 
 export type ChallengeId = "mash" | "timing" | "tension" | "sequence" | "surge";
-export type SpotId = "dock" | "reeds" | "dropoff" | "point";
+export type SpotId = "dock" | "reeds" | "dropoff" | "point" | "inlet";
 export type SkillId = "strength" | "accuracy" | "patience";
 export type Rarity = "common" | "uncommon" | "rare" | "legendary";
 

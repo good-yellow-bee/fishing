@@ -2,7 +2,8 @@ import type { SkillId, SpotId } from "./types.ts";
 
 export const MAX_SKILL = 8;
 export const DROPOFF_LEVEL = 3;
-export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point"];
+export const INLET_LEVEL = 6;
+export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet"];
 
 export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200];
 
@@ -19,14 +20,16 @@ export function skillCost(currentRank: number): number {
 }
 
 export function canUseSpot(spot: SpotId, level: number): boolean {
-  return spot !== "dropoff" || level >= DROPOFF_LEVEL;
+  if (spot === "dropoff") return level >= DROPOFF_LEVEL;
+  if (spot === "inlet") return level >= INLET_LEVEL;
+  return true;
 }
 
 const LEVEL_UNLOCKS: Record<number, string> = {
   3: "The drop-off is open — walk east along the shore.",
   4: "See a fish shadow before you strike.",
   5: "Cast 25% farther.",
-  6: "Legendary fish bite more often at night or in rain.",
+  6: "The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain.",
   7: "Fish bite 15% faster.",
   8: "Better odds of trophy-size fish.",
 };
@@ -63,4 +66,5 @@ export const SPOT_LABELS: Record<SpotId, string> = {
   reeds: "Reeds",
   dropoff: "Drop-off",
   point: "Point",
+  inlet: "Inlet",
 };

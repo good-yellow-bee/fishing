@@ -15,8 +15,8 @@ const starter: Profile = {
 /** Strong enough for every ordinary fish, too weak for legendaries. */
 const seasoned: Profile = { ...starter, strength: 4, accuracy: 2 };
 
-const POINT = ["bluegill", "brook-trout", "pike"];
-const DOCK = ["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"];
+const POINT = ["bluegill", "brook-trout", "largemouth-bass", "pike", "walleye"];
+const DOCK = ["carp", "catfish", "crappie", "golden-shiner", "perch", "smallmouth-bass"];
 
 function drawn(spot: SpotId, lure?: string, profile: Profile = starter) {
   const ids = new Set<string>();
@@ -35,9 +35,9 @@ describe("bite mix", () => {
   });
 
   it("a small lure and a large lure on the same bank do not draw the same pool", () => {
-    const smallPoint = ["bluegill", "brook-trout"];
-    const largePoint = ["brook-trout", "pike"];
-    const smallDock = ["golden-shiner", "perch", "smallmouth-bass"];
+    const smallPoint = ["bluegill", "brook-trout", "largemouth-bass"];
+    const largePoint = ["largemouth-bass", "pike", "walleye"];
+    const smallDock = ["crappie", "golden-shiner", "perch"];
     const largeDock = ["carp", "catfish", "smallmouth-bass"];
 
     // Live bait also reaches across the line at the dock; "reaches the fish its class names" covers that.
@@ -55,8 +55,8 @@ describe("bite mix", () => {
       "Spoon",
       "Crayfish crankbait",
       "Green pumpkin tubes",
-      "Woolly buggers",
     ];
+    // Woolly buggers reach brook trout across the line at the point, like live bait at the dock.
     for (const lure of smallLures) {
       expect(drawn("point", lure, seasoned)).toEqual(smallPoint);
       expect(drawn("dock", lure, seasoned)).toEqual(smallDock);
@@ -188,7 +188,8 @@ describe("bite mix", () => {
       }
     }
     const fish = (id: string) => FISH.find((one) => one.id === id)!;
-    expect(lureSizeFor(fish("smallmouth-bass"), "dock")).toBe("either");
+    expect(lureSizeFor(fish("smallmouth-bass"), "dock")).toBe("large");
+    expect(lureSizeFor(fish("largemouth-bass"), "point")).toBe("either");
     expect(lureSizeFor(fish("smallmouth-bass"), "dropoff")).toBe("small");
     expect(lureSizeFor(fish("carp"), "dock")).toBe("large");
     expect(() => lureSizeFor(fish("bluegill"), "dock")).toThrow();
@@ -222,13 +223,15 @@ describe("bite mix", () => {
 
   it("splits a short cast's commons on their own, which is why the guide speaks for full casts", () => {
     const perch = FISH.find((one) => one.id === "perch")!;
+    // The dock's three commons split shiner and crappie against crappie and perch; the reeds' two split one each.
+    const short = { dock: [["crappie", "golden-shiner"], ["crappie", "perch"]], reeds: [["golden-shiner"], ["perch"]] } as const;
     for (const spot of ["dock", "reeds"] as const) {
       expect(lureSizeFor(perch, spot)).toBe("small");
       for (const hour of HOURS) {
         const reach = (lure: string) =>
-          [...new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, starter, true, () => i / 480, hour, lure).id))];
-        expect(reach("Nightcrawlers"), `${spot} ${hour}`).toEqual(["golden-shiner"]);
-        expect(reach("Spoon"), `${spot} ${hour}`).toEqual(["perch"]);
+          [...new Set(Array.from({ length: 480 }, (_, i) => pickBite(spot, starter, true, () => i / 480, hour, lure).id))].sort();
+        expect(reach("Nightcrawlers"), `${spot} ${hour}`).toEqual(short[spot][0]);
+        expect(reach("Spoon"), `${spot} ${hour}`).toEqual(short[spot][1]);
       }
     }
   });
@@ -258,7 +261,7 @@ describe("bite mix", () => {
     it("reaches across the line only on a full cast", () => {
       for (const hour of HOURS) {
         const ids = new Set(Array.from({ length: 480 }, (_, i) => pickBite("dock", seasoned, true, () => i / 480, hour, "Nightcrawlers").id));
-        expect([...ids], hour).toEqual(["golden-shiner"]);
+        expect([...ids].sort(), hour).toEqual(["crappie", "golden-shiner"]);
       }
     });
 
@@ -270,4 +273,22 @@ describe("bite mix", () => {
       }
     });
   });
+
+  it("stocks the inlet with creek fish, and the ghost pike only for an angler who can land it", () => {
+    const strong: Profile = { ...starter, strength: 5, accuracy: 3 };
+    const inlet = FISH.filter((fish) => fish.spots.includes("inlet")).map((fish) => fish.id);
+    const ghosts = (profile: Profile, hour: (typeof HOURS)[number], sky?: "fog") =>
+      Array.from({ length: 960 }, (_, i) => pickBite("inlet", profile, false, () => i / 960, hour, "Spoon", sky)).filter(
+        (fish) => fish.id === "ghost-pike",
+      ).length;
+    for (const hour of HOURS) {
+      for (const lure of ["Pencil bobbers", "Spoon", "Nightcrawlers"]) {
+        for (let i = 0; i < 96; i++) expect(inlet).toContain(pickBite("inlet", strong, false, () => i / 96, hour, lure).id);
+      }
+      expect(ghosts(seasoned, hour)).toBe(0);
+    }
+    expect(ghosts(strong, "night")).toBeGreaterThan(ghosts(strong, "day"));
+    expect(ghosts(strong, "day", "fog")).toBeGreaterThan(ghosts(strong, "day"));
+  });
 });
+

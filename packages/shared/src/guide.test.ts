@@ -52,6 +52,11 @@ describe("field guide clues", () => {
       salmon: "large",
       "tiger-muskie": "huge",
       sturgeon: "huge",
+      crappie: "small",
+      "largemouth-bass": "large",
+      "lake-whitefish": "medium",
+      walleye: "large",
+      "ghost-pike": "huge",
     });
   });
 });

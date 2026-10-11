@@ -67,7 +67,7 @@ describe("useLevelToast", () => {
 it.each([
   [4, "See a fish shadow before you strike."],
   [5, "Cast 25% farther."],
-  [6, "Legendary fish bite more often at night or in rain."],
+  [6, "The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain."],
   [7, "Fish bite 15% faster."],
   [8, "Better odds of trophy-size fish."],
 ] as const)("shows the level %i opened line", (level, line) => {
@@ -79,5 +79,5 @@ it("retains both new unlocks while a toast is pending", () => {
   show(5, false);
   show(6, false);
   show(7, false);
-  expect(show(7, true)).toBe("7|Legendary fish bite more often at night or in rain. Fish bite 15% faster.");
+  expect(show(7, true)).toBe("7|The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain. Fish bite 15% faster.");
 });
