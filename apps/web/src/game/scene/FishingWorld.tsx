@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useMemo, useRef, useState, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -98,6 +98,7 @@ import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
+import { settings, SHAKE_SCALE } from "../settings";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -350,10 +351,11 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (calm) shakeAmp.current = 0;
     if (shakeAmp.current > 0.001) {
       shakeAmp.current *= Math.exp(-delta / 0.13);
+      const amp = shakeAmp.current * SHAKE_SCALE[settings.shake];
       shakeOffset.set(
-        Math.sin(t * 47) * shakeAmp.current,
-        Math.sin(t * 53 + 1.3) * shakeAmp.current,
-        Math.sin(t * 41 + 2.1) * shakeAmp.current,
+        Math.sin(t * 47) * amp,
+        Math.sin(t * 53 + 1.3) * amp,
+        Math.sin(t * 41 + 2.1) * amp,
       );
     } else {
       shakeAmp.current = 0;
@@ -1725,10 +1727,12 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, species, weight, ho
 
 /** Memoized: the cast charge reaches the scene through powerRef, so holding a cast re-renders nothing here. */
 export const FishingWorld = memo(function FishingWorld(props: Props) {
+  // Read once per visit: flipping shadows on a live renderer leaves materials compiled for the old setting.
+  const [quality] = useState(() => ({ shadows: settings.shadows, dpr: settings.sharpness === "sharp" ? ([1, 1.75] as [number, number]) : 1 }));
   return (
     <Canvas
-      shadows
-      dpr={[1, 1.75]}
+      shadows={quality.shadows}
+      dpr={quality.dpr}
       camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
       style={{ cursor: "crosshair" }}

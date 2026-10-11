@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSettings } from "../settings";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -6,8 +7,9 @@ export function prefersReducedMotion() {
   return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(QUERY).matches;
 }
 
-/** Follows the system "reduce motion" setting, live. */
+/** Follows the system "reduce motion" setting and the in-game one, live. */
 export function useReducedMotion() {
+  const { reduceMotion } = useSettings();
   const [reduced, setReduced] = useState(prefersReducedMotion);
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -17,5 +19,5 @@ export function useReducedMotion() {
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
   }, []);
-  return reduced;
+  return reduced || reduceMotion;
 }

@@ -28,7 +28,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
 | P7 | ~~Tap-to-walk + thumb controls~~ (shipped) | mobile | M | B | — |
-| P8 | Settings & quality panel | access/QoL | S/M | B | — |
+| P8 | ~~Settings & quality panel~~ (shipped) | access/QoL | S/M | B | — |
 | P9 | Screen reader & keyboard parity | access | S | B | — |
 | P10 | Live hour crossfade | visual/feel | M | B | #53 look table |
 | P11 | Catch conditions on the server | data enabler | S | C | #53 |
@@ -131,7 +131,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** none.
 - **Test:** `lake.test.ts` — `walkPath` from `DOCK_STAND` reaches `REEDS_STAND` and `DROPOFF_STAND`, every node `walkableAt`; `Player` stays key-driven in existing tests.
 
-### P8 · Settings & quality panel
+### ~~P8 · Settings & quality panel~~ (shipped: HUD Settings button; shadows and sharpness apply on the next visit; the corner cast meter stays)
 - **Pitch:** a small gear in the HUD: volume, shake, particles, shadows, sharpness, reel mode — remembered next visit.
 - **Borrowed:** Stardew options; Dredge accessibility toggles (motion).
 - **Why fun:** `fx.enabled` and `chosenLure` are in-memory (reset on reload); `Canvas` is fixed `shadows dpr=[1,1.75]`; shake amplitude fixed in `CameraRig`; `RAIN_COUNT` 128 whenever it rains. Low-end phones need a lever and the perf memo needs a place to land.
