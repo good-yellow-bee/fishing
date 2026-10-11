@@ -17,6 +17,13 @@ export const anglerPose = {
   route: [] as WalkPoint[],
 };
 
+const POSE_START = { ...anglerPose };
+
+/** Back on the dock, standing still, with nowhere to walk. */
+export function resetAnglerPose() {
+  Object.assign(anglerPose, POSE_START, { route: [] });
+}
+
 export function shortestYaw(from: number, to: number) {
   let diff = to - from;
   while (diff > Math.PI) diff -= Math.PI * 2;

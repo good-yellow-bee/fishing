@@ -61,6 +61,13 @@ export const fightView = {
   freezeUntil: -1,
 };
 
+const FIGHT_VIEW_START = { ...fightView };
+
+export function resetFightView() {
+  fightInput.reeling = false;
+  Object.assign(fightView, FIGHT_VIEW_START);
+}
+
 /** The hit-stop on a set hook: a few frames of stillness so the strike lands. */
 export const HIT_STOP_SEC = 0.08;
 

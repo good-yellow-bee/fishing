@@ -19,6 +19,12 @@ export const missView = {
   z: 0,
 };
 
+const MISS_VIEW_START = { ...missView };
+
+export function resetMissView() {
+  Object.assign(missView, MISS_VIEW_START);
+}
+
 /**
  * Loaded tip whips up past the rest pose, rings, then settles.
  * Age 0 is the pitch the bite left behind.
