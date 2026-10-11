@@ -232,6 +232,8 @@ export function DockPage() {
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
           hotspot={game.hotspot}
+          powerRef={game.powerRef}
+          accuracy={me.profile.accuracy}
         />
         {game.phase === "hookset" && (
           <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>

@@ -93,6 +93,8 @@ import { useSceneWrap } from "./useSceneWrap";
 import { listenForWaterAim } from "./pointerAim";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
+import { castRing, CAST_RING_COLORS } from "./castRing";
+import { sweetBand } from "../logic";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -113,6 +115,9 @@ type Props = {
   species: FishSpecies | null;
   weight: number;
   hotspot: Hotspot | null;
+  /** Live cast power, read each frame so the ring grows without a re-render. */
+  powerRef: { current: number };
+  accuracy: number;
 };
 
 const CAM_START: [number, number, number] = [DOCK_STAND_X + 0.45, 3.42 + DOCK_PLANKS.top, DOCK_STAND_Z + 6.9];
@@ -379,8 +384,13 @@ function castAimState(
 
 const GROUND = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
-function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; level: number }) {
+type WaterAimProps = { phase: ScenePhase; aim: AimState; level: number; powerRef: { current: number }; accuracy: number };
+
+function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   const marker = useRef<THREE.Group>(null);
+  const chargeRing = useRef<THREE.Mesh>(null);
+  const chargeMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const band = useMemo(() => sweetBand(accuracy), [accuracy]);
   const walkMarker = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -454,6 +464,17 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
   useFrame((state) => {
     now.current = state.clock.elapsedTime;
     syncAim.current(now.current);
+    if (chargeRing.current && chargeMaterial.current) {
+      const charging = phaseRef.current === "casting" && powerRef.current > 0;
+      chargeRing.current.visible = charging;
+      if (charging) {
+        const ring = castRing(powerRef.current, band);
+        chargeRing.current.scale.setScalar(ring.radius);
+        chargeMaterial.current.color.set(CAST_RING_COLORS[ring.tone]);
+        chargeMaterial.current.opacity = ring.opacity;
+      }
+      if (wrap.current) wrap.current.dataset.castRing = charging ? castRing(powerRef.current, band).tone : "none";
+    }
     const goal = anglerPose.route[anglerPose.route.length - 1];
     if (walkMarker.current) {
       walkMarker.current.visible = goal !== undefined;
@@ -471,6 +492,11 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.08, 12]} />
           <meshBasicMaterial color="#f4fff6" transparent opacity={0.7} depthWrite={false} />
+        </mesh>
+        {/* The cast meter: unit radius, scaled by power each frame. */}
+        <mesh ref={chargeRing} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+          <ringGeometry args={[0.9, 1, 48]} />
+          <meshBasicMaterial ref={chargeMaterial} color={CAST_RING_COLORS.short} transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>
       <group ref={walkMarker} visible={false}>
@@ -579,7 +605,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "sky" | "spot" | "hotspot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "sky" | "spot" | "hotspot" | "powerRef" | "accuracy"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -1632,7 +1658,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot }: Props) {
+function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
@@ -1643,7 +1669,7 @@ function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, wei
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <LakeWorld spot={spot} hour={hour} sky={sky} hotspot={hotspot} />
-      <WaterAim phase={phase} aim={aim} level={level} />
+      <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
       <LineAndBobber

@@ -21,7 +21,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 | # | Title | Area | Size | Wave | Depends on |
 |---|---|---|---|---|---|
-| P1 | On-water cast band | feel | S | A | perf memo (power via ref) |
+| P1 | ~~On-water cast band~~ (shipped) | feel | S | A | perf memo (power via ref) |
 | P2 | ~~Hookset hit-stop + haptics~~ (shipped) | feel | S | A | — (#55 merged) |
 | P3 | ~~Drag clicker (tension audio)~~ (shipped) | feel/audio | S | A | — |
 | P4 | ~~First-cast walkthrough~~ (shipped) | onboarding | S/M | A | — |
@@ -51,7 +51,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave A — Feel the bite
 
-### P1 · On-water cast band
+### ~~P1 · On-water cast band~~ (shipped: the ring reads `powerRef` each frame, rust past a backlash; the bottom-right meter stays until P8)
 - **Pitch:** while you hold, the aim ring on the water grows and turns moss-green inside the sweet band. Release there. Eyes never leave the lake.
 - **Borrowed:** Stardew (cast meter drawn on the character, not the HUD); Webfishing (in-world cast indicator); Cast n Chill (near-zero HUD).
 - **Why fun:** `PowerMeter` sits bottom-right while the aim marker sits on the water → split attention. New players eat "The lure slapped the dock" (<0.22) and "Backlash" (>0.94) because they are watching the wrong thing.

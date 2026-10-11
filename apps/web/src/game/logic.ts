@@ -107,6 +107,10 @@ export function bestHourFor(species: FishSpecies, spot: SpotId): LakeHour {
   });
 }
 
+/** Below this the lure slaps the dock; above the other, the reel backlashes. */
+export const SLAP_POWER = 0.22;
+export const BACKLASH_POWER = 0.94;
+
 export function sweetBand(accuracy: number) {
   const width = 0.16 + accuracy * 0.03;
   const center = 0.62;
