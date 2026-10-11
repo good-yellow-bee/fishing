@@ -94,6 +94,7 @@ import { listenForWaterAim } from "./pointerAim";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
+import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
 
 const BUOY_URL = "/models/buoy.glb";
@@ -175,14 +176,14 @@ function updateLanding(phase: ScenePhase, prevPhase: ScenePhase, delta: number, 
     const dz = anglerPose.z - landedFrom.z;
     landView.haulYaw = dx * dx + dz * dz > 0.04 ? Math.atan2(dx, dz) : anglerPose.yaw;
     landView.active = true;
-    landView.age = 0;
+    landView.age = LIFT_START_AGE;
   }
   if (phase === "result" && landView.active) {
     landView.presentYaw = landPresentYaw(anglerPose.yaw);
     landView.swing = landSwing(landView.age);
     landHoldPoint(holdScratch, anglerPose.x, anglerPose.y + anglerPose.bob, anglerPose.z, anglerPose.yaw, landView.age);
     placeLandedFish(landedFish, landedFrom, holdScratch, landView.swing);
-    landedFish.y += landHoldShake(landView.age, time);
+    landedFish.y += landHoldShake(landView.age, time) - liftDepth(landView.age);
     landedFish.y = clearFightLine(landedFish.y, landedFish.x, landedFish.z);
     landView.age += Math.min(delta, 0.05);
     return;
@@ -1490,7 +1491,7 @@ function CaughtFish({
       }
     }
     if (g && active) {
-      const flop = landFlop(landView.age);
+      const flop = Math.max(landFlop(landView.age), liftFlop(landView.age));
       drive.current.intensity = 0.35 + flop;
       drive.current.speed = 0.7 + flop * 1.5;
       g.position.copy(landedFish);
