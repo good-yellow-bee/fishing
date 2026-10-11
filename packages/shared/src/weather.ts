@@ -151,9 +151,9 @@ const WEATHER_RARITY: Record<Sky, Record<Rarity, number>> = {
 };
 
 const WEATHER_SPECIES: Partial<Record<Sky, Record<string, number>>> = {
-  overcast: { "brook-trout": 1.35, "rainbow-trout": 1.35, "smallmouth-bass": 1.7 },
-  rain: { pike: 1.7, "tiger-muskie": 1.35 },
-  fog: { catfish: 1.45, burbot: 1.45 },
+  overcast: { "brook-trout": 1.35, "rainbow-trout": 1.35, "smallmouth-bass": 1.7, walleye: 1.5 },
+  rain: { pike: 1.7, "tiger-muskie": 1.35, "largemouth-bass": 1.4 },
+  fog: { catfish: 1.45, burbot: 1.45, "ghost-pike": 2 },
 };
 
 export function biteWeatherMul(species: FishSpecies, sky: Sky): number {

@@ -162,7 +162,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Topwater",
     match: /popper|buzzbait|\bfrogs?\b|topwater/i,
     size: "small",
-    species: { "smallmouth-bass": 1.8, bluegill: 1.4, pike: 1.3 },
+    species: { "smallmouth-bass": 1.8, "largemouth-bass": 1.8, bluegill: 1.4, pike: 1.3 },
     hours: { dawn: 1, dusk: 1 },
   },
   {
@@ -170,7 +170,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Live bait",
     match: /worm|crawler|leech|minnow/i,
     size: "small",
-    species: { catfish: 1.9, carp: 1.4, perch: 1.4 },
+    species: { catfish: 1.9, carp: 1.4, perch: 1.4, walleye: 1.4 },
     hours: { night: 1, dusk: 0.6, dawn: 0.4, day: 0.25 },
   },
   {
@@ -178,14 +178,14 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Float rig",
     match: /bobber|\bfloats?\b|size\s*\d+/i,
     size: "small",
-    species: { perch: 1.5, bluegill: 1.5, "golden-shiner": 1.4 },
+    species: { perch: 1.5, bluegill: 1.5, "golden-shiner": 1.4, crappie: 1.5 },
   },
   {
     id: "fly",
     label: "Fly",
     match: /pheasant|caddis|nymph|midge|hare'?s ear|\bfly\b|\bflies\b/i,
     size: "small",
-    species: { "brook-trout": 1.8, "rainbow-trout": 1.8 },
+    species: { "brook-trout": 1.8, "rainbow-trout": 1.8, "lake-whitefish": 1.4 },
     hours: { dawn: 1, dusk: 0.8, day: 0.5 },
   },
   {
@@ -200,7 +200,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Spinner",
     match: /spinner|mepps|in-?line/i,
     size: "large",
-    species: { pike: 1.5, "smallmouth-bass": 1.6 },
+    species: { pike: 1.5, "smallmouth-bass": 1.6, "largemouth-bass": 1.5 },
     hours: { dusk: 1, dawn: 0.8, day: 0.6, night: 0.3 },
   },
   {
@@ -208,7 +208,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Spoon",
     match: /spoon|dardevle|daredevil|kastmaster/i,
     size: "large",
-    species: { pike: 1.6, salmon: 1.6, "tiger-muskie": 1.3 },
+    species: { pike: 1.6, salmon: 1.6, "tiger-muskie": 1.3, "ghost-pike": 1.3 },
   },
   {
     id: "crank",
@@ -222,7 +222,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
     label: "Jig",
     match: /tube|\bjigs?\b|\bgrubs?\b/i,
     size: "large",
-    species: { "smallmouth-bass": 1.8, burbot: 1.5 },
+    species: { "smallmouth-bass": 1.8, burbot: 1.5, walleye: 1.6 },
   },
 ];
 

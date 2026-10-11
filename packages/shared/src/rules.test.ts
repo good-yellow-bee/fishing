@@ -9,6 +9,7 @@ import {
   DOCK_STAND_X,
   DOCK_STAND_Z,
   DROPOFF_PAD,
+  INLET_PAD,
   POINT_MAX_X,
   POINT_PAD,
   REEDS_MAX_X,
@@ -29,7 +30,7 @@ import {
   stanceAt,
   walkableAt,
 } from "./lake.ts";
-import { anglerLevel, canUseSpot, skillCost, SPOT_IDS } from "./progression.ts";
+import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
 import { canLand, catchPoints, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 
@@ -166,8 +167,8 @@ describe("catch rules", () => {
         .sort();
     const point = idsAt("point");
     const dock = idsAt("dock");
-    expect(point).toEqual(["bluegill", "brook-trout", "pike"]);
-    expect(dock).toEqual(["carp", "catfish", "golden-shiner", "perch", "smallmouth-bass"]);
+    expect(point).toEqual(["bluegill", "brook-trout", "largemouth-bass", "pike", "walleye"]);
+    expect(dock).toEqual(["carp", "catfish", "crappie", "golden-shiner", "perch", "smallmouth-bass"]);
     expect(point.some((id) => dock.includes(id))).toBe(false);
     expect(validateCatch(starter, { speciesId: "bluegill", weight: 0.3, spot: "point" }).ok).toBe(true);
     expect(validateCatch(starter, { speciesId: "bluegill", weight: 0.3, spot: "dock" }).ok).toBe(false);
@@ -475,13 +476,13 @@ describe("upgrades", () => {
   });
 
   it("names the species the next useful rank lets this angler land", () => {
-    expect(skillUnlock(starter, "strength")).toBe("Strength 2: Brook trout, Smallmouth bass, Rainbow trout");
+    expect(skillUnlock(starter, "strength")).toBe("Strength 2: Brook trout, Smallmouth bass, Rainbow trout, Largemouth bass");
     // Burbot also needs Accuracy 2, so Strength 3 alone does not open it.
     expect(skillUnlock({ ...starter, strength: 2 }, "strength")).toBe("Strength 3: Common carp, Channel catfish");
     expect(skillUnlock({ ...starter, strength: 2, accuracy: 2 }, "strength")).toBe(
-      "Strength 3: Common carp, Channel catfish, Burbot",
+      "Strength 3: Common carp, Channel catfish, Walleye, Burbot",
     );
-    expect(skillUnlock({ ...starter, strength: 3 }, "accuracy")).toBe("Accuracy 2: Burbot");
+    expect(skillUnlock({ ...starter, strength: 3 }, "accuracy")).toBe("Accuracy 2: Walleye, Burbot");
   });
 
   it("has no unlock line when no rank of that skill opens a fish on its own", () => {
@@ -491,3 +492,36 @@ describe("upgrades", () => {
     expect(skillUnlock(starter, "patience")).toBeNull();
   });
 });
+
+describe("inlet bank", () => {
+  it("opens at level 6", () => {
+    expect(canUseSpot("inlet", INLET_LEVEL - 1)).toBe(false);
+    expect(canUseSpot("inlet", INLET_LEVEL)).toBe(true);
+  });
+
+  it("stands on the dry west shore and fishes the lake's north-west water", () => {
+    expect(walkableAt(INLET_PAD.x, INLET_PAD.z)).toBe(true);
+    expect(inLake(INLET_PAD.x, INLET_PAD.z)).toBe(false);
+    expect(stanceAt(INLET_PAD.x, INLET_PAD.z)).toBe("inlet");
+    expect(parseStance("inlet")).toBe("inlet");
+    expect(spotAt(-18, -6)).toBe("inlet");
+    // The reeds keep their water south of the line and east of it.
+    expect(spotAt(-18, -2)).toBe("reeds");
+    expect(spotAt(-12, -6)).toBe("reeds");
+  });
+
+  it("casts from the inlet once open, and the reeds stand cannot reach it", () => {
+    expect(resolveCast(-18, -6, "inlet", INLET_LEVEL, INLET_PAD.x, INLET_PAD.z)).toEqual({ ok: true, spot: "inlet" });
+    expect(resolveCast(-18, -6, "inlet", INLET_LEVEL - 1, INLET_PAD.x, INLET_PAD.z)).toEqual({ ok: false, reason: "locked" });
+    const reeds = resolveCast(-16, -5, "reeds", 8, REEDS_PAD.x, REEDS_PAD.z);
+    expect(reeds.ok).toBe(false);
+  });
+
+  it("keeps a common at the inlet and lands every inlet fish only there or on its other banks", () => {
+    const inlet = FISH.filter((fish) => fish.spots.includes("inlet"));
+    expect(inlet.some((fish) => fish.rarity === "common")).toBe(true);
+    expect(inlet.map((fish) => fish.id).sort()).toEqual(["brook-trout", "ghost-pike", "golden-shiner", "rainbow-trout", "salmon", "walleye"]);
+    expect(fishById("ghost-pike")?.spots).toEqual(["inlet"]);
+  });
+});
+

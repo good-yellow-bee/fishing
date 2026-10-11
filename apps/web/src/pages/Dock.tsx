@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
+  DROPOFF_LEVEL,
+  INLET_LEVEL,
   catchPoints,
   catchStamp,
   dailyConditions,
@@ -72,6 +74,7 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "dock", label: STANCE_LABELS.dock },
   { target: "point", label: STANCE_LABELS.point },
   { target: "reeds", label: STANCE_LABELS.reeds },
+  { target: "inlet", label: STANCE_LABELS.inlet },
   { target: "dropoff", label: STANCE_LABELS.dropoff },
   { target: "shop", label: "Shack" },
 ];
@@ -371,8 +374,13 @@ export function DockPage() {
   const dropoffOpen = canUseSpot("dropoff", me.level);
   const fishing = isFishingStance(game.stance);
   const bank = isFishingStance(game.stance) ? game.stance : game.spot;
+  const inletOpen = canUseSpot("inlet", me.level);
   const stanceLabel =
-    game.stance === "dropoff" && !dropoffOpen ? `${STANCE_LABELS.dropoff} (lv 3)` : STANCE_LABELS[game.stance];
+    game.stance === "dropoff" && !dropoffOpen
+      ? `${STANCE_LABELS.dropoff} (lv ${DROPOFF_LEVEL})`
+      : game.stance === "inlet" && !inletOpen
+        ? `${STANCE_LABELS.inlet} (lv ${INLET_LEVEL})`
+        : STANCE_LABELS[game.stance];
 
   return (
     <div className="dock-page">
@@ -477,7 +485,8 @@ export function DockPage() {
                 Open shop
               </button>
             )}
-            {SIGNPOSTS.map(({ target, label }) => (
+            {/* The inlet's signpost goes up with the level that opens it; until then the west shore is just a walk. */}
+            {SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
               <button
                 key={target}
                 className="panel-btn"

@@ -16,6 +16,7 @@ export type BankBoard = {
 
 export const REEDS_STAND = { x: -13.6, z: 10.7 };
 export const DROPOFF_STAND = { x: 17.24, z: 8.36 };
+export const INLET_STAND = { x: -22.7, z: -4.4 };
 
 /** Same plank colors as the pier. The pale pad is where you stand. */
 export const BANK_WALK_PLANK = ["#e28357", "#b56845"] as const;
@@ -42,9 +43,20 @@ export const DROPOFF_WALK: readonly { x: number; z: number }[] = [
   { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z },
 ];
 
+/** Up the west shore from the reeds boards to the inlet, keeping a step back from the waterline. */
+export const INLET_WALK: readonly { x: number; z: number }[] = [
+  { x: -14.2, z: 11.6 },
+  { x: -17.2, z: 9.6 },
+  { x: -20.6, z: 6.4 },
+  { x: -22.9, z: 2.4 },
+  { x: -23.3, z: -1.4 },
+  { x: INLET_STAND.x, z: INLET_STAND.z },
+];
+
 const REEDS_HALF = { x: 0.62, z: 0.48 };
 /** Shorter toward the water so the whole pad stays on the shore and a cast still reaches deep water. */
 const DROPOFF_HALF = { x: 0.36, z: 0.28 };
+const INLET_HALF = { x: 0.55, z: 0.45 };
 
 function boardsAlong(
   points: readonly { x: number; z: number }[],
@@ -97,17 +109,20 @@ function coverRect(cx: number, cz: number, halfX: number, halfZ: number, kind: B
 export const BANK_WALK_BOARDS: readonly BankBoard[] = [
   ...boardsAlong(REEDS_WALK, 0.3, "walk"),
   ...boardsAlong(DROPOFF_WALK, 0.2, "walk"),
+  ...boardsAlong(INLET_WALK, 0.24, "walk"),
 ];
 
 /** Inland edge of each pad, so the post is on the stand and out of the cast. */
-export const BANK_POSTS: readonly { x: number; z: number; spot: "reeds" | "dropoff" }[] = [
+export const BANK_POSTS: readonly { x: number; z: number; spot: "reeds" | "dropoff" | "inlet" }[] = [
   { x: REEDS_STAND.x, z: REEDS_STAND.z + 0.36, spot: "reeds" },
   { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z + 0.2, spot: "dropoff" },
+  { x: INLET_STAND.x - 0.4, z: INLET_STAND.z, spot: "inlet" },
 ];
 
 export const BANK_STAND_BOARDS: readonly BankBoard[] = [
   ...coverRect(REEDS_STAND.x, REEDS_STAND.z, REEDS_HALF.x, REEDS_HALF.z, "stand"),
   ...coverRect(DROPOFF_STAND.x, DROPOFF_STAND.z, DROPOFF_HALF.x, DROPOFF_HALF.z, "stand"),
+  ...coverRect(INLET_STAND.x, INLET_STAND.z, INLET_HALF.x, INLET_HALF.z, "stand"),
 ];
 
 export const BANK_BOARDS: readonly BankBoard[] = [...BANK_WALK_BOARDS, ...BANK_STAND_BOARDS];

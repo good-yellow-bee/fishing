@@ -35,6 +35,12 @@ export const POINT_PAD: Pad = { x: -5.6, z: 12.2, r: 1.35 };
 export const POINT_MAX_X = -3.5;
 export const POINT_MIN_Z = 0;
 
+/** Where the creek comes in, up the west shore past the reeds. Feet on the dry bank north of the creek mouth. */
+export const INLET_PAD: Pad = { x: -22.7, z: -4.4, r: 1.6 };
+/** The inlet's water: the lake's north-west corner. Out of a cast's reach from the reeds stand. */
+export const INLET_MAX_X = -14;
+export const INLET_MAX_Z = -4;
+
 export const STANCE_LABELS: Record<StanceId, string> = {
   shop: "Shop",
   trail: "Path",
@@ -46,6 +52,7 @@ const FISHING_PADS: readonly [SpotId, Pad][] = [
   ["reeds", REEDS_PAD],
   ["dropoff", DROPOFF_PAD],
   ["point", POINT_PAD],
+  ["inlet", INLET_PAD],
 ];
 
 export type Landing =
@@ -69,6 +76,8 @@ const WALK: Aabb[] = [
   { minX: -15.2, maxX: -8.5, minZ: 8.2, maxZ: 12.4 },
   { minX: 11.5, maxX: 17.6, minZ: 6.4, maxZ: 12.4 },
   { minX: -4, maxX: 8, minZ: 9.5, maxZ: 13.5 },
+  // The west shore from the reeds up to the inlet. Dry ground only, so the lake trims its inner edge.
+  { minX: -24, maxX: -13, minZ: -6.4, maxZ: 12.4 },
 ];
 
 function inAabb(x: number, z: number, box: Aabb) {
@@ -97,6 +106,8 @@ export function inLake(x: number, z: number) {
 
 export function spotAt(x: number, z: number): SpotId | null {
   if (!inLake(x, z)) return null;
+  // First, because the reeds claim the whole west and the drop-off the whole north.
+  if (x <= INLET_MAX_X && z <= INLET_MAX_Z) return "inlet";
   if (x <= REEDS_MAX_X) return "reeds";
   if (z <= LAKE_CENTER_Z) return "dropoff";
   if (x <= POINT_MAX_X && z >= POINT_MIN_Z) return "point";
@@ -104,7 +115,7 @@ export function spotAt(x: number, z: number): SpotId | null {
 }
 
 export function isFishingStance(stance: StanceId): stance is SpotId {
-  return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point";
+  return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point" || stance === "inlet";
 }
 
 export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number, level = 1) {
@@ -152,7 +163,7 @@ export function parseAim(raw: string | undefined): { x: number; z: number } | nu
 }
 
 export function parseStance(raw: string | undefined): StanceId | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "shop" || raw === "trail") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "shop" || raw === "trail") return raw;
   return null;
 }
 

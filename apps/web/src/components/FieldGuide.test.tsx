@@ -36,7 +36,7 @@ describe("field guide card", () => {
       "2 landed · PB 2.4 lb",
       "Trophy ≥ 3.6 lb",
       "Medium shadow",
-      "Dock: any lure at dusk",
+      "Dock: big lure at dusk",
       "Drop-off: small lure at dusk",
       "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
     ]);

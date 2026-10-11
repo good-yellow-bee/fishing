@@ -6,6 +6,7 @@ const TRACK_WATER: Record<SpotId, { x: number; z: number; spread: number }> = {
   reeds: { x: -12.5, z: 3, spread: 2.4 },
   point: { x: -5.2, z: 4, spread: 1.1 },
   dropoff: { x: 6, z: -7, spread: 4 },
+  inlet: { x: -17, z: -7, spread: 2 },
 };
 
 /** Seconds for one ring to open out and fade. */
