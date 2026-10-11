@@ -28,7 +28,7 @@ import { saveLandedCatch } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { hookWindowMs } from "../game/logic";
+import { hookWindowMs, isMercy } from "../game/logic";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
@@ -61,7 +61,9 @@ export function DockPage() {
   const [pickedLure, setPickedLure] = useState<string | null>(null);
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky);
+  const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
+  const mercy = isMercy(caughtTotal);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy);
   const scenePhase = game.outcome ? "result" : game.phase;
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
   const shownFish =
@@ -231,7 +233,7 @@ export function DockPage() {
           hotspot={game.hotspot}
         />
         {game.phase === "hookset" && (
-          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy)}ms` } as CSSProperties}>
+          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>
             <strong>Strike!</strong>
             <span>Click or Space</span>
             <i />
