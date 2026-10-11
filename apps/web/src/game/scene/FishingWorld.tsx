@@ -90,8 +90,11 @@ import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { listenForWaterAim } from "./pointerAim";
 import { useReducedMotion } from "./reducedMotion";
+import { GLOW_TIP, lineLook } from "./lineLook";
 
 const BUOY_URL = "/models/buoy.glb";
+/** Top of the buoy model at its 0.32 scale, where the night tip sits. */
+const GLOW_TIP_Y = 0.46;
 useGLTF.preload(BUOY_URL);
 
 export type SimRef = { current: FightSim | null };
@@ -572,7 +575,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "hour" | "sky" | "spot" | "hotspot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "sky" | "spot" | "hotspot"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -939,7 +942,10 @@ function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: 
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight, level }: LineAndBobberProps) {
+function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour }: LineAndBobberProps) {
+  const look = lineLook(hour);
+  const restOpacity = useRef(look.opacity);
+  restOpacity.current = look.opacity;
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const sitRing = useRef<THREE.Mesh>(null);
@@ -989,6 +995,10 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       line.material.dispose();
     };
   }, [line]);
+
+  useEffect(() => {
+    (line.material as THREE.LineBasicMaterial).color.set(look.line);
+  }, [line, look.line]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
@@ -1283,7 +1293,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       }
     }
     const sway = Math.sin(t * swayHz) * swayAmp * Math.min(1, span / 6);
-    (line.material as THREE.LineBasicMaterial).opacity = phase === "fight" && fightView.surge === 2 ? 0.9 : 0.55;
+    (line.material as THREE.LineBasicMaterial).opacity = phase === "fight" && fightView.surge === 2 ? 0.9 : restOpacity.current;
     const sideX = -lineZ / span;
     const sideZ = lineX / span;
     const lag = flying ? (1 - castAlong(flightP)) * Math.min(1.35, span * 0.2) : 0;
@@ -1357,6 +1367,18 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
       <group ref={bobber} visible={false}>
         <group ref={lure}>
           <ToonModel url={BUOY_URL} scale={0.32} />
+          {look.glowTip && (
+            <group position={[0, GLOW_TIP_Y, 0]}>
+              <mesh>
+                <sphereGeometry args={[0.045, 12, 8]} />
+                <meshBasicMaterial color={GLOW_TIP} toneMapped={false} fog={false} />
+              </mesh>
+              <mesh>
+                <sphereGeometry args={[0.13, 12, 8]} />
+                <meshBasicMaterial color={GLOW_TIP} transparent opacity={0.22} depthWrite={false} toneMapped={false} fog={false} />
+              </mesh>
+            </group>
+          )}
         </group>
         <SurfaceRipple active={phase === "hookset" || phase === "fight"} sim={sim} sunk={phase === "fight"} />
         {(phase === "waiting" || phase === "hookset" || phase === "result") && (
@@ -1630,6 +1652,7 @@ function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, wei
         rodTip={rodTip}
         aim={aim}
         lookAt={lookAt}
+        hour={hour}
       />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} />}
       <StrikeSplash phase={phase} />
