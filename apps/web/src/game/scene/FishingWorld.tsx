@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
+import { memo, useEffect, useMemo, useRef, Suspense, type ComponentRef, type RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -38,6 +38,7 @@ import {
   liftDockSample,
   fightLineSag,
   fightView,
+  resetFightView,
   HIT_STOP_SEC,
   isFrozen,
   fishDepthMeters,
@@ -68,16 +69,17 @@ import {
   landPresentYaw,
   landSwing,
   landView,
+  resetLandView,
   placeLandedFish,
 } from "./landMotion";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
-import { missBobberLift, missLineSag, missView } from "./missMotion";
+import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
-import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
+import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { anglerPose, shortestYaw, walkAnglerTo } from "./pose";
+import { anglerPose, resetAnglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
   STRIKE_DROPS,
   strikeAnchor,
@@ -107,7 +109,6 @@ export type SimRef = { current: FightSim | null };
 type Props = {
   level: number;
   phase: ScenePhase;
-  power: number;
   spot: SpotId;
   sim: SimRef;
   nibble: boolean;
@@ -144,6 +145,23 @@ function fightEndedLanded() {
 
 const landedFrom = new THREE.Vector3();
 const landedFish = new THREE.Vector3();
+
+/**
+ * The scene keeps its live pose in module state, which outlives the page.
+ * Leaving /play mid-fight and coming back must not resume a dead landing or
+ * put the angler where they stood last visit.
+ */
+export function resetFishingScene() {
+  resetAnglerPose();
+  resetFightView();
+  resetLandView();
+  resetMissView();
+  resetWaitView();
+  lastFightSim = null;
+  bobberWorld.set(0.55, 0, -2);
+  landedFrom.set(0, 0, 0);
+  landedFish.set(0, 0, 0);
+}
 const holdScratch = { x: 0, y: 0, z: 0 };
 
 function updateMiss(phase: ScenePhase, prevPhase: ScenePhase, delta: number) {
@@ -606,7 +624,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   return null;
 }
 
-type LineAndBobberProps = Omit<Props, "sky" | "spot" | "hotspot" | "powerRef" | "accuracy"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
+type LineAndBobberProps = Omit<Props, "sky" | "spot" | "hotspot" | "accuracy"> & { rodTip: THREE.Vector3; aim: AimState; lookAt: THREE.Vector3 };
 
 function SurfaceRipple({ active, sim, sunk }: { active: boolean; sim: SimRef; sunk: boolean }) {
   const group = useRef<THREE.Group>(null);
@@ -973,7 +991,7 @@ function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: 
   );
 }
 
-function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour }: LineAndBobberProps) {
+function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour }: LineAndBobberProps) {
   const look = lineLook(hour);
   const restOpacity = useRef(look.opacity);
   restOpacity.current = look.opacity;
@@ -1032,6 +1050,7 @@ function LineAndBobber({ phase, power, sim, rodTip, aim, lookAt, nibble, species
   }, [line, look.line]);
 
   useFrame((state, delta) => {
+    const power = powerRef.current;
     const t = state.clock.elapsedTime;
     if (isFrozen(t, fightView.freezeUntil)) return;
     const aiming = isAiming(phase);
@@ -1659,10 +1678,14 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, weight, hotspot, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, species, weight, hotspot, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
+  useEffect(() => {
+    resetFishingScene();
+    return resetFishingScene;
+  }, []);
   return (
     <>
       <PlayerMove phase={phase} />
@@ -1672,11 +1695,11 @@ function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, wei
       <LakeWorld spot={spot} hour={hour} sky={sky} hotspot={hotspot} />
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
-      <Angler phase={phase} power={power} rodTip={rodTip} lookAt={lookAt} />
+      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} />
       <LineAndBobber
         level={level}
         phase={phase}
-        power={power}
+        powerRef={powerRef}
         sim={sim}
         nibble={nibble}
         species={species}
@@ -1698,7 +1721,8 @@ function Scene({ level, phase, power, spot, sim, nibble, hour, sky, species, wei
   );
 }
 
-export function FishingWorld(props: Props) {
+/** Memoized: the cast charge reaches the scene through powerRef, so holding a cast re-renders nothing here. */
+export const FishingWorld = memo(function FishingWorld(props: Props) {
   return (
     <Canvas
       shadows
@@ -1717,4 +1741,4 @@ export function FishingWorld(props: Props) {
       </Suspense>
     </Canvas>
   );
-}
+});

@@ -38,6 +38,10 @@ export const waitView = {
   age: -1,
 };
 
+export function resetWaitView() {
+  waitView.age = -1;
+}
+
 export function waitTwitchEnd() {
   return WAIT_TWITCH_AT + WAIT_EASE_SEC + WAIT_TIGHT_SEC + WAIT_SETTLE_SEC;
 }

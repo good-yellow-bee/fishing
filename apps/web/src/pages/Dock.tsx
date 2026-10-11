@@ -223,7 +223,6 @@ export function DockPage() {
         <FishingWorld
           level={me.level}
           phase={scenePhase}
-          power={game.power}
           spot={bank}
           sim={game.sim}
           nibble={game.nibble}
