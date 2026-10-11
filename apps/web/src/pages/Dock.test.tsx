@@ -293,3 +293,37 @@ describe("first-cast walkthrough", () => {
     expect(localStorage.getItem("stillwater.walkthrough.u1.v1")).toBe("done");
   });
 });
+
+describe("settings", () => {
+  it("opens from the HUD, takes focus, mutes the sound, and closes on Escape", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const gear = [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Settings")!;
+    act(() => gear.click());
+    const dialog = page.querySelector('[role="dialog"]')!;
+    expect(dialog.textContent).toContain("Reeling");
+    expect(dialog.contains(document.activeElement)).toBe(true);
+    const mute = [...dialog.querySelectorAll<HTMLLabelElement>("label")].find((l) => l.textContent?.includes("Mute all"))!;
+    act(() => mute.querySelector("input")!.click());
+    expect(fx.enabled).toBe(false);
+    expect([...page.querySelectorAll(".hud button")].some((b) => b.textContent === "Sound")).toBe(true);
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Escape" })));
+    expect(page.querySelector('[role="dialog"]')).toBeNull();
+    act(() => [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Sound")!.click());
+    expect(fx.enabled).toBe(true);
+  });
+
+  it("ties on last visit's lure when it is still packed", async () => {
+    const { reloadSettings, updateSettings } = await import("../game/settings");
+    const page = await openDock("/?hour=day&sky=clear");
+    const options = [...page.querySelectorAll<HTMLOptionElement>(".lure-choice option")].map((o) => o.value);
+    const last = options.at(-1)!;
+    act(() => root?.unmount());
+    container?.remove();
+    updateSettings({ lastLure: last });
+    const again = await openDock("/?hour=day&sky=clear");
+    expect(again.querySelector<HTMLSelectElement>(".lure-choice select")?.value).toBe(last);
+    expect(again.querySelector(".scene-wrap")?.getAttribute("data-lure")).toBe(last);
+    localStorage.clear();
+    reloadSettings();
+  });
+});

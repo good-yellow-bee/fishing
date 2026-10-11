@@ -5,12 +5,13 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let enabledFlag = true;
+let volumeLevel = 1;
 
 function audio() {
   if (!ctx) {
     ctx = new AudioContext();
     master = ctx.createGain();
-    master.gain.value = enabledFlag ? 1 : 0;
+    master.gain.value = enabledFlag ? volumeLevel : 0;
     master.connect(ctx.destination);
   }
   // Recover from suspension (e.g. iOS Safari audio interruption).
@@ -276,7 +277,15 @@ export const fx = {
   },
   set enabled(v: boolean) {
     enabledFlag = v;
-    if (ctx && master) master.gain.setTargetAtTime(v ? 1 : 0, ctx.currentTime, 0.01);
+    if (ctx && master) master.gain.setTargetAtTime(v ? volumeLevel : 0, ctx.currentTime, 0.01);
+  },
+  /** Master volume, 0..1, under the mute switch. */
+  get volume() {
+    return volumeLevel;
+  },
+  set volume(v: number) {
+    volumeLevel = Math.min(1, Math.max(0, v));
+    if (ctx && master) master.gain.setTargetAtTime(enabledFlag ? volumeLevel : 0, ctx.currentTime, 0.01);
   },
   ambient,
   drag,

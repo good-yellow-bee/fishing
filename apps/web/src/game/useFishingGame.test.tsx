@@ -27,6 +27,7 @@ vi.mock("./fight", async (importOriginal) => {
   };
 });
 
+import { updateSettings } from "./settings";
 import { RECAST_GUARD_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 
@@ -221,6 +222,33 @@ describe("useFishingGame strike timing", () => {
     now += 16;
     act(() => frames.at(-1)!(now));
     expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true);
+  });
+
+  it("keeps reeling between taps in toggle mode", () => {
+    updateSettings({ reelMode: "toggle" });
+    try {
+      const surface = mount();
+      cast(surface);
+      act(() => vi.advanceTimersByTime(2_201));
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      act(() => window.dispatchEvent(pointer("pointerup", 2)));
+      expect(phase()).toBe("fight:none");
+      const frame = () => {
+        step.mockReturnValueOnce("fighting");
+        now += 16;
+        act(() => frames.at(-1)!(now));
+        return (step.mock.lastCall as unknown as [number, number, boolean])[2];
+      };
+      // The strike tap started the reel and letting go did not stop it.
+      expect(frame()).toBe(true);
+      act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
+      act(() => window.dispatchEvent(pointer("pointerup", 3)));
+      expect(frame()).toBe(false);
+      act(() => surface.dispatchEvent(pointer("pointerdown", 4)));
+      expect(frame()).toBe(true);
+    } finally {
+      updateSettings({ reelMode: "hold" });
+    }
   });
 
   it("gives a human reaction time to hook the real bite", () => {

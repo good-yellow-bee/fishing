@@ -18,6 +18,7 @@ import {
 } from "@stillwater/shared";
 import { isCleanFight, makeFight, FIGHT_LINES, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
+import { settings } from "./settings";
 import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
@@ -112,6 +113,12 @@ export function useFishingGame(
   const performanceRef = useRef<FightPerformance | null>(null);
   const reelKeyRef = useRef(false);
   const reelPointerRef = useRef<number | null>(null);
+  /** Toggle reel mode: on until the next press. */
+  const reelLatchRef = useRef(false);
+  /** In toggle mode a press flips reeling; the press that set the hook always starts it. */
+  const latchReel = (striking: boolean) => {
+    reelLatchRef.current = striking ? true : !reelLatchRef.current;
+  };
   const spotRef = useRef<SpotId>("dock");
   const hotspotRef = useRef<Hotspot | null>(null);
   const castHotspotRef = useRef(false);
@@ -159,6 +166,7 @@ export function useFishingGame(
     performanceRef.current = null;
     reelKeyRef.current = false;
     reelPointerRef.current = null;
+    reelLatchRef.current = false;
     fightInput.reeling = false;
     fx.drag.stop();
     const surface = surfaceRef.current;
@@ -373,9 +381,13 @@ export function useFishingGame(
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
       if (event.code !== "Space" || event.repeat) return;
       event.preventDefault();
-      if (phaseRef.current !== "fight") strikeOrCast("key");
+      const striking = phaseRef.current !== "fight";
+      if (striking) strikeOrCast("key");
       // The same press may have just set the hook — count it as reeling.
-      if (phaseRef.current === "fight") reelKeyRef.current = true;
+      if (phaseRef.current === "fight") {
+        reelKeyRef.current = true;
+        latchReel(striking);
+      }
     };
     const up = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
@@ -417,12 +429,16 @@ export function useFishingGame(
       const thumb = target.closest("[data-thumb-strike]") !== null;
       if (!thumb && target.closest("button, a, input, select, label, [data-camera-control], [data-lure-choice]")) return;
       if (thumb && phaseRef.current !== "waiting" && phaseRef.current !== "hookset" && phaseRef.current !== "fight") return;
-      if (phaseRef.current !== "fight") {
+      const striking = phaseRef.current !== "fight";
+      if (striking) {
         castPointerRef.current = event.pointerId;
         strikeOrCast("pointer");
       }
       // The same press may have just set the hook — count it as reeling.
-      if (phaseRef.current === "fight") reelPointerRef.current = event.pointerId;
+      if (phaseRef.current === "fight") {
+        reelPointerRef.current = event.pointerId;
+        latchReel(striking);
+      }
     };
     const up = (event: PointerEvent) => {
       if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
@@ -479,7 +495,8 @@ export function useFishingGame(
         const current = fightRef.current;
         fightInput.reeling = false;
         if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
-          const reeling = reelKeyRef.current || reelPointerRef.current !== null;
+          const reeling =
+            settings.reelMode === "toggle" ? reelLatchRef.current : reelKeyRef.current || reelPointerRef.current !== null;
           fightInput.reeling = reeling;
           const result = runtime.step(now, dt, reeling);
           const sim = runtime.sim;

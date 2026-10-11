@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { FIGHT_LINES, isCleanFight, RED_TENSION, type FightPerformance, type FightSim } from "../game/fight";
+import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 
 type Props = {
@@ -15,6 +16,7 @@ function tensionColor(tension: number) {
 }
 
 export function FightBar({ fight, sim, performance }: Props) {
+  const { reelMode } = useSettings();
   const card = useRef<HTMLDivElement>(null);
   const tensionFill = useRef<HTMLDivElement>(null);
   const lineFill = useRef<HTMLDivElement>(null);
@@ -77,11 +79,19 @@ export function FightBar({ fight, sim, performance }: Props) {
             {lines[0]}
           </p>
           <p ref={clean} className="fight-clean">Clean fight · 1.5× points</p>
-          <p className="fight-controls">
-            <span className="on-pointer">HOLD click / Space to reel</span>
-            <span className="on-touch">HOLD the screen to reel</span>
-            {" · "}LET GO when the fish is about to run or tension goes red
-          </p>
+          {reelMode === "toggle" ? (
+            <p className="fight-controls">
+              <span className="on-pointer">TAP click / Space to start reeling</span>
+              <span className="on-touch">TAP the screen to start reeling</span>
+              {" · "}TAP again when the fish is about to run or tension goes red
+            </p>
+          ) : (
+            <p className="fight-controls">
+              <span className="on-pointer">HOLD click / Space to reel</span>
+              <span className="on-touch">HOLD the screen to reel</span>
+              {" · "}LET GO when the fish is about to run or tension goes red
+            </p>
+          )}
         </>
       )}
     </div>

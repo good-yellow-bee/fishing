@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   anglerLevel,
@@ -11,17 +11,18 @@ import {
   type Sky,
 } from "@stillwater/shared";
 import { authClient } from "../auth-client";
-import { fx } from "../game/fx";
+import { updateSettings, useSettings } from "../game/settings";
 
 type Props = {
   profile: Profile;
   hour: LakeHour;
   sky: Sky;
+  onSettings?: () => void;
 };
 
-export function Hud({ profile, hour, sky }: Props) {
+export function Hud({ profile, hour, sky, onSettings }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
-  const [muted, setMuted] = useState(!fx.enabled);
+  const { muted } = useSettings();
   const header = useRef<HTMLElement>(null);
   // Phones stack the scene's chips under the HUD, whose height changes as it wraps.
   useEffect(() => {
@@ -66,13 +67,15 @@ export function Hud({ profile, hour, sky }: Props) {
         <button
           className="hud-link"
           type="button"
-          onClick={() => {
-            fx.enabled = !fx.enabled;
-            setMuted(!fx.enabled);
-          }}
+          onClick={() => updateSettings({ muted: !muted })}
         >
           {muted ? "Sound" : "Mute"}
         </button>
+        {onSettings && (
+          <button className="hud-link" type="button" onClick={onSettings}>
+            Settings
+          </button>
+        )}
         <button className="hud-link" type="button" onClick={() => authClient.signOut()}>
           Logout
         </button>

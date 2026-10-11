@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { settings } from "../settings";
 import { RAIN_COUNT, rainRipple, rainStreak } from "./skyWeather";
 
 const STREAK_COLOR = "#d4e3ea";
@@ -59,7 +60,10 @@ export function LakeRain({ light }: { light: number }) {
     const streak = streaks.current;
     const ring = rings.current;
     if (!streak || !ring) return;
-    for (let i = 0; i < RAIN_COUNT; i += 1) {
+    // Lite particles keep every other drop, so the shower thins evenly instead of leaving a gap.
+    const stride = settings.particles === "lite" ? 2 : 1;
+    let slot = 0;
+    for (let i = 0; i < RAIN_COUNT; i += stride, slot += 1) {
       const drop = rainStreak(i, time);
       if (drop) {
         const yaw = Math.atan2(camera.position.x - drop.x, camera.position.z - drop.z);
@@ -72,7 +76,7 @@ export function LakeRain({ light }: { light: number }) {
         scratch.scale.set(0, 0, 0);
       }
       scratch.updateMatrix();
-      streak.setMatrixAt(i, scratch.matrix);
+      streak.setMatrixAt(slot, scratch.matrix);
 
       const splash = rainRipple(i, time);
       if (splash) {
@@ -83,8 +87,10 @@ export function LakeRain({ light }: { light: number }) {
         scratch.scale.set(0, 0, 0);
       }
       scratch.updateMatrix();
-      ring.setMatrixAt(i, scratch.matrix);
+      ring.setMatrixAt(slot, scratch.matrix);
     }
+    streak.count = slot;
+    ring.count = slot;
     streak.instanceMatrix.needsUpdate = true;
     ring.instanceMatrix.needsUpdate = true;
   });

@@ -24,6 +24,7 @@ import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
+import { SettingsPanel } from "../components/SettingsPanel";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
@@ -38,6 +39,7 @@ import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
+import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 
 const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "dock", label: STANCE_LABELS.dock },
@@ -58,8 +60,12 @@ export function DockPage() {
   const [error, setError] = useState("");
   const [shopOpen, setShopOpen] = useState(false);
   const [lureChoices] = useState(() => luresPacked(readTackle()));
-  // Null until the angler picks a lure this session, so the default follows their Strength.
-  const [pickedLure, setPickedLure] = useState<string | null>(null);
+  // The lure from last visit if it is still packed; otherwise null, so the default follows their Strength.
+  const [pickedLure, setPickedLure] = useState<string | null>(() =>
+    savedSettings.lastLure && lureChoices.includes(savedSettings.lastLure) ? savedSettings.lastLure : null,
+  );
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const prefs = useSettings();
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
@@ -118,6 +124,21 @@ export function DockPage() {
 
   useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
 
+  useEffect(() => {
+    fx.enabled = !prefs.muted;
+    fx.volume = prefs.volume;
+  }, [prefs.muted, prefs.volume]);
+
+  // The page's CSS mirrors the system reduced-motion rules under this flag.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (prefs.reduceMotion) root.dataset.reduceMotion = "1";
+    else delete root.dataset.reduceMotion;
+    return () => {
+      delete root.dataset.reduceMotion;
+    };
+  }, [prefs.reduceMotion]);
+
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
@@ -170,6 +191,7 @@ export function DockPage() {
       if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
       if (event.code === "Escape") {
         setShopOpen(false);
+        setSettingsOpen(false);
         return;
       }
       if (event.code !== "KeyE" || event.repeat) return;
@@ -206,7 +228,7 @@ export function DockPage() {
 
   return (
     <div className="dock-page">
-      <Hud profile={me.profile} hour={hour} sky={sky} />
+      <Hud profile={me.profile} hour={hour} sky={sky} onSettings={() => setSettingsOpen(true)} />
       <div
         className="scene-wrap"
         ref={game.surfaceRef}
@@ -288,6 +310,7 @@ export function DockPage() {
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
             setPickedLure(next);
+            updateSettings({ lastLure: next });
           }}
         />
         {scenePhase === "idle" && !shopOpen && (
@@ -394,6 +417,7 @@ export function DockPage() {
           </div>
         )}
       </div>
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </div>
   );
 }
