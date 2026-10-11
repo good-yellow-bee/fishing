@@ -21,7 +21,7 @@ import { fightInput } from "./scene/fightMotion";
 import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
+import { BACKLASH_POWER, hookWindowMs, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import type { ScenePhase } from "./scene/types";
 
@@ -294,12 +294,12 @@ export function useFishingGame(
     setSpot(landing.spot);
     setAimHint(landing.spot);
     aimHintRef.current = landing.spot;
-    if (castPower < 0.22) {
+    if (castPower < SLAP_POWER) {
       setOutcome({ kind: "miss", message: "The lure slapped the dock." });
       resetToIdle("Too little power. Hold longer.");
       return;
     }
-    if (castPower > 0.94) {
+    if (castPower > BACKLASH_POWER) {
       setOutcome({ kind: "miss", message: "Backlash. Recast." });
       resetToIdle("Overpowered. Release in the band.");
       return;
