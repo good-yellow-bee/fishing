@@ -163,7 +163,7 @@ a {
 .eyebrow {
   display: block;
   color: #d0bb91;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -187,14 +187,6 @@ a {
   border-left: 1px solid rgba(215, 190, 142, 0.3);
   color: #f1e4ca;
   font-size: 11px;
-}
-
-.hud-user small {
-  max-width: 180px;
-  overflow: hidden;
-  color: #aa9d86;
-  font-size: 8px;
-  text-overflow: ellipsis;
 }
 
 .hud-stats {
@@ -221,7 +213,7 @@ a {
   color: #edc477;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .points-chip {
@@ -230,7 +222,7 @@ a {
 
 .skill-chip small {
   color: #a99d87;
-  font-size: 8px;
+  font-size: 11px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -241,7 +233,7 @@ a {
   border: 0;
   cursor: pointer;
   padding: 6px 4px;
-  font-size: 10px;
+  font-size: 11px;
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -470,7 +462,7 @@ a:focus-visible {
 }
 
 .lure-choice span {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -597,7 +589,7 @@ a:focus-visible {
 
 .daily-request-claimed {
   color: var(--moss);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-align: center;
   text-transform: uppercase;
@@ -607,6 +599,34 @@ a:focus-visible {
   margin: 0;
   color: #aa9d86;
   font-size: 12px;
+}
+
+.walk-signs {
+  position: absolute;
+  top: 146px;
+  right: 24px;
+  z-index: 3;
+  display: grid;
+  gap: 4px;
+  justify-items: stretch;
+}
+
+.walk-signs .panel-btn {
+  padding: 6px 12px;
+  background: rgba(20, 28, 25, 0.72);
+  font-size: 12px;
+  text-align: left;
+  backdrop-filter: blur(8px);
+}
+
+.walk-signs .panel-btn:disabled {
+  color: var(--amber);
+  cursor: default;
+}
+
+.walk-signs .walk-shop {
+  border-color: var(--amber);
+  color: var(--amber);
 }
 
 .camera-help {
@@ -620,7 +640,7 @@ a:focus-visible {
   border: 1px solid rgba(220, 196, 150, 0.28);
   background: rgba(20, 28, 25, 0.68);
   color: #c9bea9;
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
   backdrop-filter: blur(8px);
   z-index: 3;
@@ -666,7 +686,7 @@ kbd {
 
 .fight-bar .fight-label {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 8px 0 4px;
@@ -701,7 +721,7 @@ kbd {
   padding: 2px 8px;
   border: 1px solid #a8771f;
   color: #7a5212;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -950,7 +970,7 @@ kbd {
   color: var(--amber);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .catch-stamp.quiet {
@@ -976,7 +996,7 @@ kbd {
 
 .landed-card .rarity-tag {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
@@ -1232,7 +1252,7 @@ kbd {
 
 .guide-card .rarity-tag {
   display: inline-block;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border: 1px solid currentColor;
@@ -1288,13 +1308,28 @@ kbd {
     justify-content: flex-start;
   }
 
-  .hud-user small,
   .skill-chip small {
     display: none;
   }
 
   .camera-help {
     display: none;
+  }
+
+  /* One thumb row along the bottom; the hint moves to the top on phones. */
+  .walk-signs {
+    top: auto;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  .walk-signs .panel-btn {
+    min-height: 44px;
+    padding: 6px 4px;
+    text-align: center;
   }
 
   .dock-footer {
@@ -1321,16 +1356,36 @@ kbd {
   .upgrade-row button,
   .spot-row button {
     padding: 6px 8px;
-    font-size: 10px;
+    font-size: 11px;
+  }
+
+  /* Under the HUD, whatever height it wraps to: the bank on the left, the lure on the right, the hint under both. */
+  .stance-chip {
+    top: calc(var(--hud-bottom, 140px) + 8px);
+    left: 8px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .lure-choice {
+    top: calc(var(--hud-bottom, 140px) + 8px);
+    right: 8px;
+    left: auto;
+    width: min(210px, 56vw);
+    padding: 6px 8px 8px;
+  }
+
+  .lure-choice small {
+    display: none;
   }
 
   .hint {
-    top: 118px;
+    top: calc(var(--hud-bottom, 140px) + 90px);
     right: 8px;
     bottom: auto;
     left: 8px;
     max-width: none;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .toast {
@@ -1367,12 +1422,12 @@ kbd {
   .level-chip,
   .points-chip {
     padding: 4px 6px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .hud .hud-link {
     padding: 4px 2px;
-    font-size: 9px;
+    font-size: 11px;
   }
 
   .panel-heading .eyebrow {
@@ -1387,8 +1442,8 @@ kbd {
     bottom: 215px;
   }
 
-  .hint {
-    top: 96px;
+  .hud .eyebrow {
+    display: none;
   }
 }
 .catch-sync {
@@ -1465,7 +1520,22 @@ kbd {
 
 @media (prefers-reduced-motion: reduce) {
   .strike-cue,
-  .strike-cue i {
+  .strike-cue i,
+  .landed-card,
+  .landed-card.rarity-legendary,
+  .toast,
+  .level-toast {
     animation: none;
+  }
+
+  /* Keep the colour pulse that says "surge"; drop the shake. */
+  .fight-bar.surging {
+    animation: fight-pulse 0.45s ease-in-out infinite;
+  }
+
+  .panel-btn,
+  .upgrade-row button,
+  .spot-row span {
+    transition: none;
   }
 }

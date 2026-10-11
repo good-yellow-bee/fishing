@@ -8,6 +8,7 @@ import {
   DOCK_PLANKS,
   DOCK_STAND_X,
   DOCK_STAND_Z,
+  footHeight,
   inCastRange,
   inLake,
   isFishingStance,
@@ -74,7 +75,7 @@ import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView } from "./waitMotion";
 import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { anglerPose, shortestYaw } from "./pose";
+import { anglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
   STRIKE_DROPS,
   strikeAnchor,
@@ -88,6 +89,7 @@ import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { listenForWaterAim } from "./pointerAim";
+import { useReducedMotion } from "./reducedMotion";
 
 const BUOY_URL = "/models/buoy.glb";
 useGLTF.preload(BUOY_URL);
@@ -233,6 +235,8 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const prevSurge = useRef(0);
   const biteYanked = useRef(false);
   const fighting = phase === "fight";
+  // Reduced motion: no shake on the strike, surge or snap, and no walking heave.
+  const calm = useReducedMotion();
   const rest = useMemo(() => [DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z] as [number, number, number], []);
 
   useEffect(() => {
@@ -311,6 +315,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       }
     }
 
+    if (calm) shakeAmp.current = 0;
     if (shakeAmp.current > 0.001) {
       shakeAmp.current *= Math.exp(-delta / 0.13);
       shakeOffset.set(
@@ -322,7 +327,7 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       shakeAmp.current = 0;
       shakeOffset.set(0, 0, 0);
     }
-    const heaveTarget = !fighting && anglerPose.moving ? Math.sin(anglerPose.gait * 2) * 0.055 : 0;
+    const heaveTarget = !calm && !fighting && anglerPose.moving ? Math.sin(anglerPose.gait * 2) * 0.055 : 0;
     heave.current += (heaveTarget - heave.current) * (1 - Math.exp(-10 * delta));
     camera.position.y += heave.current;
     camera.position.add(shakeOffset);
@@ -366,16 +371,21 @@ function castAimState(
   return "ok";
 }
 
+const GROUND = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
 function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; level: number }) {
   const marker = useRef<THREE.Group>(null);
+  const walkMarker = useRef<THREE.Group>(null);
   const { camera, gl } = useThree();
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
   const hit = useMemo(() => new THREE.Vector3(), []);
+  const ground = useMemo(() => new THREE.Vector3(), []);
   const pointer = useRef(new THREE.Vector2());
   const wrap = useSceneWrap();
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const now = useRef(0);
+  const castState = useRef<CastAimState>("stance");
   const syncAim = useRef((_time: number) => {});
   syncAim.current = (time: number) => {
     if (!isAiming(phaseRef.current)) {
@@ -390,6 +400,7 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
     const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z, level);
     const waterSpot = overWater ? spotAt(hit.x, hit.z) : null;
     const cast = castAimState(fishing, overWater, inRange, waterSpot, stance);
+    castState.current = cast;
     const canCast = cast === "ok";
     aim.overWater = canCast;
     if (overWater) aim.live.copy(hit);
@@ -404,6 +415,22 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
     }
   };
 
+  /** A tap on open shore walks there instead of casting. Runs before the cast handler sees the press. */
+  const tryWalk = (event: PointerEvent) => {
+    if (!wrap.current) return;
+    wrap.current.dataset.walk = "0";
+    const phaseNow = phaseRef.current;
+    if (phaseNow !== "idle" && phaseNow !== "result") return;
+    if (event.target !== gl.domElement || !event.isPrimary || event.button !== 0) return;
+    if (castState.current === "ok") return;
+    raycaster.setFromCamera(pointer.current, camera);
+    if (!raycaster.ray.intersectPlane(GROUND, ground)) return;
+    if (!walkAnglerTo(ground.x, ground.z)) return;
+    wrap.current.dataset.walk = "1";
+  };
+  const tryWalkRef = useRef(tryWalk);
+  tryWalkRef.current = tryWalk;
+
   useEffect(() => {
     const onPoint = (event: PointerEvent) => {
       const rect = gl.domElement.getBoundingClientRect();
@@ -413,6 +440,7 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
         -((event.clientY - rect.top) / rect.height) * 2 + 1,
       );
       syncAim.current(now.current);
+      if (event.type === "pointerdown") tryWalkRef.current(event);
     };
     return listenForWaterAim(window, onPoint);
   }, [gl]);
@@ -420,19 +448,32 @@ function WaterAim({ phase, aim, level }: { phase: ScenePhase; aim: AimState; lev
   useFrame((state) => {
     now.current = state.clock.elapsedTime;
     syncAim.current(now.current);
+    const goal = anglerPose.route[anglerPose.route.length - 1];
+    if (walkMarker.current) {
+      walkMarker.current.visible = goal !== undefined;
+      if (goal) walkMarker.current.position.set(goal.x, footHeight(goal.x, goal.z) + 0.04, goal.z);
+    }
   });
 
   return (
-    <group ref={marker} visible={false}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[0.38, 0.48, 28]} />
-        <meshBasicMaterial color="#e7f2ea" transparent opacity={0.55} depthWrite={false} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.08, 12]} />
-        <meshBasicMaterial color="#f4fff6" transparent opacity={0.7} depthWrite={false} />
-      </mesh>
-    </group>
+    <>
+      <group ref={marker} visible={false}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.38, 0.48, 28]} />
+          <meshBasicMaterial color="#e7f2ea" transparent opacity={0.55} depthWrite={false} />
+        </mesh>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.08, 12]} />
+          <meshBasicMaterial color="#f4fff6" transparent opacity={0.7} depthWrite={false} />
+        </mesh>
+      </group>
+      <group ref={walkMarker} visible={false}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[0.22, 0.3, 24]} />
+          <meshBasicMaterial color="#f6e2b8" transparent opacity={0.7} depthWrite={false} />
+        </mesh>
+      </group>
+    </>
   );
 }
 

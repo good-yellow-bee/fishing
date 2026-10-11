@@ -32,9 +32,19 @@ import { hookWindowMs } from "../game/logic";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
+import { walkAnglerTo } from "../game/scene/pose";
+import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
+
+const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
+  { target: "dock", label: STANCE_LABELS.dock },
+  { target: "point", label: STANCE_LABELS.point },
+  { target: "reeds", label: STANCE_LABELS.reeds },
+  { target: "dropoff", label: STANCE_LABELS.dropoff },
+  { target: "shop", label: "Shack" },
+];
 
 export function DockPage() {
   const [params] = useSearchParams();
@@ -193,7 +203,7 @@ export function DockPage() {
 
   return (
     <div className="dock-page">
-      <Hud profile={me.profile} email={me.user.email} hour={hour} sky={sky} />
+      <Hud profile={me.profile} hour={hour} sky={sky} />
       <div
         className="scene-wrap"
         ref={game.surfaceRef}
@@ -260,9 +270,34 @@ export function DockPage() {
             setPickedLure(next);
           }}
         />
+        {scenePhase === "idle" && !shopOpen && (
+          <nav className="walk-signs" data-camera-control aria-label="Walk to">
+            {game.stance === "shop" && (
+              <button className="panel-btn walk-shop" type="button" onClick={() => setShopOpen(true)}>
+                Open shop
+              </button>
+            )}
+            {SIGNPOSTS.map(({ target, label }) => (
+              <button
+                key={target}
+                className="panel-btn"
+                type="button"
+                aria-current={game.stance === target ? "location" : undefined}
+                disabled={game.stance === target}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
         <aside className="camera-help" data-camera-control>
           <span>Shore</span>
-          <kbd>WASD</kbd> walk
+          <kbd>WASD</kbd> or <kbd>Click shore</kbd> walk
           <kbd>Click water</kbd> aim
           <kbd>E</kbd> shop
           <kbd>Right drag</kbd> look

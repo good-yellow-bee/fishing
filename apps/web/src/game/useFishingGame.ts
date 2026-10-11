@@ -52,7 +52,7 @@ function castFailHint(reason: CastFail): string {
 }
 
 function idleHint(stance: StanceId | null) {
-  if (stance === "shop") return "E: open the tackle shack. Walk down to the water to fish.";
+  if (stance === "shop") return "Open the tackle shack with E or the Open shop button. Walk down to the water to fish.";
   if (stance && isFishingStance(stance)) return "Click the water to aim. Hold to charge, release in the pale band.";
   return "Walk to the water.";
 }
@@ -295,6 +295,8 @@ export function useFishingGame(
   const startCast = useCallback((via: "pointer" | "key") => {
     if (!profile || phaseRef.current !== "idle") return;
     const surface = surfaceRef.current;
+    // The scene already sent the angler walking to this tap on the shore.
+    if (via === "pointer" && surface?.dataset.walk === "1") return;
     const stanceNow = parseStance(surface?.dataset.stance) ?? "trail";
     if (stanceNow === "shop") {
       if (via === "pointer") setShopTap((n) => n + 1);

@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { footHeight, stanceAt, walkableAt } from "@stillwater/shared";
 import { anglerPose, shortestYaw } from "./pose";
+import { routeWish } from "./walkPath";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 
@@ -11,6 +12,8 @@ const MAX_SPEED = 4.35;
 const ACCEL = 5.2;
 const BRAKE = 3.1;
 const STOP_BRAKE = 28;
+/** A tap-to-walk that makes no headway this long has hit something; give it up. */
+const STUCK_SECONDS = 1.2;
 
 function canWalk(phase: ScenePhase) {
   return phase === "idle" || phase === "result";
@@ -40,6 +43,8 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
   const forward = useMemo(() => new THREE.Vector3(), []);
   const right = useMemo(() => new THREE.Vector3(), []);
   const wish = useMemo(() => new THREE.Vector3(), []);
+  const routeStep = useMemo(() => ({ x: 0, z: 0 }), []);
+  const stuck = useRef(0);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -47,8 +52,10 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
       const key = event.key.toLowerCase();
       if (!MOVE_KEYS.has(key)) return;
       event.preventDefault();
-      if (event.type === "keydown") keys.current.add(key);
-      else keys.current.delete(key);
+      if (event.type === "keydown") {
+        keys.current.add(key);
+        anglerPose.route = [];
+      } else keys.current.delete(key);
     };
     const clear = () => keys.current.clear();
     window.addEventListener("keydown", onKey);
@@ -76,7 +83,11 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
       if (keys.current.has("a") || keys.current.has("arrowleft")) wish.sub(right);
       if (wish.lengthSq() > 1) wish.normalize();
       wish.multiplyScalar(MAX_SPEED);
+    } else if (walking && anglerPose.route.length > 0) {
+      routeWish(anglerPose.x, anglerPose.z, anglerPose.route, MAX_SPEED, routeStep);
+      wish.set(routeStep.x, 0, routeStep.z);
     }
+    if (!walking) anglerPose.route = [];
 
     const hasInput = wish.lengthSq() > 0;
     const rate = (walking ? (hasInput ? ACCEL : BRAKE) : STOP_BRAKE) * dt;
@@ -102,6 +113,10 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
     }
 
     const speed = Math.hypot(anglerPose.vx, anglerPose.vz);
+    if (anglerPose.route.length > 0 && speed < 0.15) {
+      stuck.current += dt;
+      if (stuck.current > STUCK_SECONDS) anglerPose.route = [];
+    } else stuck.current = 0;
     if (walking && (hasInput || speed > 0.4)) {
       const heading = Math.atan2(hasInput ? wish.x : anglerPose.vx, hasInput ? wish.z : anglerPose.vz);
       const err = shortestYaw(anglerPose.yaw, heading);

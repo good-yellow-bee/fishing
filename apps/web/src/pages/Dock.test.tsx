@@ -222,3 +222,33 @@ describe("level-up toast", () => {
     expect(page.querySelector(".level-status")).toBe(status);
   });
 });
+
+describe("touch play", () => {
+  it("keeps the email off the play HUD", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    expect(page.textContent).toContain("Ash");
+    expect(page.textContent).not.toContain("ash@stillwater.test");
+  });
+
+  it("walks the angler to a bank from its signpost", async () => {
+    const { anglerPose } = await import("../game/scene/pose");
+    const page = await openDock("/?hour=day&sky=clear");
+    const signs = [...page.querySelectorAll<HTMLButtonElement>(".walk-signs button")];
+    // The angler starts the session at the shack, so the shop button leads the row.
+    expect(signs.map((b) => b.textContent)).toEqual(["Open shop", "Dock", "Point", "Reeds", "Drop-off", "Shack"]);
+    const reeds = signs.find((b) => b.textContent === "Reeds")!;
+    act(() => reeds.click());
+    const goal = anglerPose.route.at(-1);
+    expect(goal).toBeDefined();
+    expect(goal!.x).toBeLessThan(-13);
+    anglerPose.route = [];
+  });
+
+  it("opens the shop from the HUD button at the shack", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const open = page.querySelector<HTMLButtonElement>(".walk-shop")!;
+    act(() => open.click());
+    expect(page.querySelector(".shop-overlay")).not.toBeNull();
+    expect(page.querySelector(".walk-signs")).toBeNull();
+  });
+});

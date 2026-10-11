@@ -444,3 +444,20 @@ describe("level unlock integration", () => {
     }
   });
 });
+
+describe("useFishingGame tap-to-walk", () => {
+  it("leaves a tap the scene turned into a walk alone, and casts on the next tap at the water", () => {
+    const surface = mount();
+    const before = hint();
+    surface.dataset.walk = "1";
+    surface.dataset.aim = "none";
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    expect(phase()).toBe("idle:none");
+    expect(hint()).toBe(before);
+    act(() => window.dispatchEvent(pointer("pointerup")));
+    surface.dataset.walk = "0";
+    surface.dataset.aim = "0.5,3";
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    expect(phase()).toBe("casting:none");
+  });
+});
