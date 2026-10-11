@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
-import { BOARD_LIMIT, boardView, rankBoard, type BoardStat } from "./board.ts";
+import { BOARD_LIMIT, boardView, lodgeStamp, rankBoard, weekStart, type BoardStat, type SpeciesRecord } from "./board.ts";
 import { fieldGuide, guideProgress, catchStamp } from "./guide.ts";
 import { biteHourMul, lakeHour, lakeHourFromSearch, lakeHourWaitMul } from "./hour.ts";
 import {
@@ -375,6 +375,7 @@ describe("lodge board", () => {
     userId: "a",
     displayName: "Ash",
     lifetimePoints: 50,
+    score: 50,
     heaviest: 2,
     species: 3,
     catches: 4,
@@ -383,6 +384,7 @@ describe("lodge board", () => {
     userId: "b",
     displayName: "Bo",
     lifetimePoints: 350,
+    score: 350,
     heaviest: 8,
     species: 6,
     catches: 12,
@@ -391,6 +393,7 @@ describe("lodge board", () => {
     userId: "c",
     displayName: "Cy",
     lifetimePoints: 50,
+    score: 50,
     heaviest: 4,
     species: 2,
     catches: 3,
@@ -416,6 +419,7 @@ describe("lodge board", () => {
       userId: `u${i}`,
       displayName: `Angler ${String(i).padStart(3, "0")}`,
       lifetimePoints: 105 - i,
+      score: 105 - i,
       heaviest: 1,
       species: 1,
       catches: 1,
@@ -429,6 +433,33 @@ describe("lodge board", () => {
 
   it("returns a null standing when the viewer is not on the roster", () => {
     expect(boardView([ash], "missing").you).toBeNull();
+  });
+
+  it("ranks the week on points landed since Monday, keeping the level from lifetime points", () => {
+    const ranked = rankBoard([{ ...bo, score: 12 }, { ...ash, score: 40 }]);
+    expect(ranked.map((row) => row.userId)).toEqual(["a", "b"]);
+    expect(ranked[1]?.level).toBe(4);
+    expect(boardView([ash], "a", BOARD_LIMIT, "week").period).toBe("week");
+  });
+
+  it("starts the week at Monday 00:00 UTC", () => {
+    expect(weekStart(new Date("2026-10-11T23:59:00Z")).toISOString()).toBe("2026-10-05T00:00:00.000Z");
+    expect(weekStart(new Date("2026-10-12T00:00:00Z")).toISOString()).toBe("2026-10-12T00:00:00.000Z");
+    expect(weekStart(new Date("2026-10-14T08:30:00Z")).toISOString()).toBe("2026-10-12T00:00:00.000Z");
+  });
+});
+
+describe("lodge record stamp", () => {
+  const records: SpeciesRecord[] = [{ speciesId: "pike", weight: 12.3, userId: "m", holder: "Mara", at: "2026-10-01T00:00:00Z" }];
+
+  it("calls a species nobody has landed first on the wall", () => {
+    expect(lodgeStamp(records, "carp", 3, "a")).toEqual({ kind: "first" });
+  });
+
+  it("names the old record and its holder when beaten, and stays quiet on a tie", () => {
+    expect(lodgeStamp(records, "pike", 12.4, "a")).toEqual({ kind: "record", previous: 12.3, holder: "Mara", yours: false });
+    expect(lodgeStamp(records, "pike", 12.4, "m")).toMatchObject({ yours: true });
+    expect(lodgeStamp(records, "pike", 12.3, "a")).toBeNull();
   });
 });
 

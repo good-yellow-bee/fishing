@@ -2,6 +2,8 @@ import {
   localDate,
   type BoardView,
   type BadgeProgress,
+  type BoardPeriod,
+  type SpeciesRecord,
   type CatchRecord,
   type CatchStat,
   type CatchSubmission,
@@ -59,8 +61,12 @@ export function recordCatch(body: CatchSubmission) {
   });
 }
 
-export function getBoard() {
-  return request<BoardView>("/api/board");
+export function getBoard(period: BoardPeriod = "all") {
+  return request<BoardView>(period === "all" ? "/api/board" : `/api/board?period=${period}`);
+}
+
+export function getSpeciesRecords() {
+  return request<{ records: SpeciesRecord[] }>("/api/board/records").then((body) => body.records);
 }
 
 export function buyUpgrade(skill: SkillId) {

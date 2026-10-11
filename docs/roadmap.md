@@ -33,7 +33,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P10 | ~~Live hour crossfade~~ (shipped) | visual/feel | M | B | #53 look table |
 | P11 | ~~Catch conditions on the server~~ (shipped) | data enabler | S | C | #53 |
 | P12 | ~~Lodge badges~~ (shipped) | progression | M | C | P11 |
-| P13 | Weekly board + species record wall | social | M | C | — |
+| P13 | ~~Weekly board + species record wall~~ (shipped) | social | M | C | — |
 | P14 | Tracks on the shore (async presence) | social | S/M | C | — |
 | P15 | Day-on-the-water recap → field-log trip | journal | M | C | #53 |
 | P16 | Three-day forecast at the shack | retention | S | C | #53 |
@@ -182,7 +182,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** P11.
 - **Test:** `badges.test.ts` table-driven; `db.test.ts` facts query on seeded rows.
 
-### P13 · Weekly board + species record wall
+### ~~P13 · Weekly board + species record wall~~ (shipped: the week restarts Monday 00:00 UTC for the whole lodge; empty record slots stay "Unknown" so the wall spoils no species)
 - **Pitch:** a fresh race every Monday, and a wall of who holds the heaviest of each species.
 - **Borrowed:** Animal Crossing fishing tourney; Stardew museum donor plaques; Dredge's "the one that got away" chase.
 - **Why fun:** `rankBoard` sorts lifetime points only — newcomers never catch leaders; weight is stored but nobody competes on it.

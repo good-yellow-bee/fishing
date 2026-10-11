@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type Sky } from "@stillwater/shared";
-import { getMe, recordCatch, type Me } from "../api";
+import { getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import type { Outcome } from "../game/useFishingGame";
@@ -16,6 +16,7 @@ const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
   getMe: vi.fn(),
+  getSpeciesRecords: vi.fn(async () => []),
   recordCatch: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
@@ -76,6 +77,7 @@ afterEach(() => {
   vi.mocked(fx.ambient.setConditions).mockClear();
   vi.mocked(fx.land).mockClear();
   vi.mocked(getMe).mockReset();
+  vi.mocked(getSpeciesRecords).mockResolvedValue([]);
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });
@@ -222,6 +224,25 @@ describe("level-up toast", () => {
     act(() => vi.advanceTimersByTime(200));
     expect(page.querySelector(".level-toast")).toBeNull();
     expect(page.querySelector(".level-status")).toBe(status);
+  });
+});
+
+describe("lodge records", () => {
+  it("stamps a catch that beats the lodge record with the weight and angler it beat", async () => {
+    vi.mocked(getSpeciesRecords).mockResolvedValue([{ speciesId: "pike", weight: 12.3, userId: "mara", holder: "Mara", at: "2026-10-01T00:00:00Z" }]);
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-big-pike", points: 40, speciesId: "pike", weight: 13.1 });
+    const page = await openDock("/?hour=dusk&sky=rain");
+    await act(async () => undefined);
+    landed.outcome = { kind: "landed", id: "catch-big-pike", species: fishById("pike")!, weight: 13.1, spot: "reeds", clean: false };
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/?hour=dusk&sky=rain"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
+    expect(stamps).toContain("Lodge record · was 12.3 lb (Mara)");
   });
 });
 
