@@ -2,6 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
+import { isLakeHour, isSky, type BadgeFactRow, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -176,6 +177,25 @@ export function listSpeciesStats(userId: string) {
     caught: Number(row.caught),
     heaviest: row.heaviest,
     lastAt: row.last_at,
+  }));
+}
+
+/** The whole history grouped into badge facts; `listCatches` stops at 20, so badges can't be read from it. */
+export function listBadgeFacts(userId: string): BadgeFactRow[] {
+  const rows = db
+    .prepare(
+      `SELECT species_id, spot, hour, sky, clean, COUNT(*) as count, MAX(weight) as heaviest
+       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, clean`,
+    )
+    .all(userId) as { species_id: string; spot: SpotId; hour: string | null; sky: string | null; clean: 0 | 1; count: number; heaviest: number }[];
+  return rows.map((row) => ({
+    speciesId: row.species_id,
+    spot: row.spot,
+    hour: row.hour !== null && isLakeHour(row.hour) ? row.hour : null,
+    sky: isSky(row.sky) ? row.sky : null,
+    clean: row.clean === 1,
+    count: Number(row.count),
+    heaviest: row.heaviest,
   }));
 }
 

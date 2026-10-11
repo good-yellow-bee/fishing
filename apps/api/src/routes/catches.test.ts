@@ -157,6 +157,21 @@ describe("POST /catches", () => {
     expect((await post(payload)).status).toBe(200);
   });
 
+  it("groups the whole history into badge facts, and the lodge reads badges from them", async () => {
+    const { listBadgeFacts } = await import("../db.ts");
+    const { badgeProgress } = await import("@stillwater/shared");
+    const ids = ["1e0a0c08-7e6d-4ee2-8718-4a938773b7e3", "1e0a0c08-7e6d-4ee2-8718-4a938773b7e4", "1e0a0c08-7e6d-4ee2-8718-4a938773b7e5"];
+    await post({ requestId: ids[0], speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "night", sky: "rain", clean: true });
+    await post({ requestId: ids[1], speciesId: "golden-shiner", weight: 0.4, spot: "dock", hour: "night", sky: "rain", clean: true });
+    await post({ requestId: ids[2], speciesId: "golden-shiner", weight: 0.2, spot: "dock" });
+
+    const facts = listBadgeFacts(user.id);
+    expect(facts).toHaveLength(2);
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", clean: true, count: 2, heaviest: 0.4 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, clean: false, count: 1, heaviest: 0.2 });
+    expect(badgeProgress(facts).find((badge) => badge.id === "night-owl")).toMatchObject({ have: 2, earned: false });
+  });
+
   it("limits successful catch submissions per minute", async () => {
     const results = await Promise.all(
       Array.from({ length: 13 }, (_, index) =>

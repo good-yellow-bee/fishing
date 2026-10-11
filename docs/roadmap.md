@@ -32,7 +32,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P9 | ~~Screen reader & keyboard parity~~ (shipped) | access | S | B | — |
 | P10 | ~~Live hour crossfade~~ (shipped) | visual/feel | M | B | #53 look table |
 | P11 | ~~Catch conditions on the server~~ (shipped) | data enabler | S | C | #53 |
-| P12 | Lodge badges | progression | M | C | P11 |
+| P12 | ~~Lodge badges~~ (shipped) | progression | M | C | P11 |
 | P13 | Weekly board + species record wall | social | M | C | — |
 | P14 | Tracks on the shore (async presence) | social | S/M | C | — |
 | P15 | Day-on-the-water recap → field-log trip | journal | M | C | #53 |
@@ -171,7 +171,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** #53 for `Sky`. Client-asserted until anti-cheat lands (deferred).
 - **Test:** `catches.test.ts` rejects a bad hour; `db.test.ts` migration adds columns on an old schema.
 
-### P12 · Lodge badges
+### ~~P12 · Lodge badges~~ (shipped: six badges on a wall in the catch log and a toast when one lands; "Lodge record" became Trophy, a trophy-weight fish, since lodge-wide records belong to P13; the board count was left out)
 - **Pitch:** brass badges on the lodge wall — Four banks, Night owl, Rain pike, Clean sweep, Full book, Lodge record.
 - **Borrowed:** Stardew achievements; Animal Crossing Nook Miles stamps; Webfishing journal milestones.
 - **Why fun:** after 13 species the guide is done and lifetime points is the only long goal. Badges give mid-term goals that push players to night, rain, and the other banks.

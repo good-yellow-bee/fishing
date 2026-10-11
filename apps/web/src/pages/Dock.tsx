@@ -7,6 +7,7 @@ import {
   dailyConditions,
   fieldLogBestBeat,
   isFishingStance,
+  badgeById,
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
@@ -33,6 +34,7 @@ import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
+import { useBadgeToast } from "../game/useBadgeToast";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
@@ -164,6 +166,8 @@ export function DockPage() {
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
+  // A level-up has the floor first; the badge waits its turn behind it.
+  const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
 
   // Watch the clock; a new lake hour waits for a calm moment so it never lands mid-strike or mid-fight.
   useEffect(() => {
@@ -476,6 +480,13 @@ export function DockPage() {
             <div className="toast level-toast">
               <h2>Level {shownLevel.level}</h2>
               {shownLevel.opened && <p>{shownLevel.opened}</p>}
+            </div>
+          )}
+          {shownBadges && (
+            <div className="toast level-toast badge-toast">
+              <span className="eyebrow">{shownBadges.length > 1 ? "Badges" : "Badge"}</span>
+              <h2>{shownBadges.map((id) => badgeById(id)?.label ?? id).join(" · ")}</h2>
+              {shownBadges.length === 1 && <p>{badgeById(shownBadges[0])?.blurb}</p>}
             </div>
           )}
         </div>

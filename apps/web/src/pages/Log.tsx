@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
+import { badgeById, fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
 import { getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 
@@ -35,6 +35,18 @@ export function LogPage() {
       <p>
         {me.profile.lifetimePoints} lifetime points · {catches.length} recent fish
       </p>
+      <section className="badge-wall" aria-label="Lodge badges">
+        <h2>Lodge badges</h2>
+        <ul>
+          {me.badges.map((badge) => (
+            <li key={badge.id} className={badge.earned ? "earned" : ""}>
+              <strong>{badgeById(badge.id)?.label ?? badge.id}</strong>
+              <span>{badgeById(badge.id)?.blurb}</span>
+              <small>{badge.earned ? "Earned" : `${badge.have} of ${badge.need}`}</small>
+            </li>
+          ))}
+        </ul>
+      </section>
       <FieldGuide stats={me.speciesStats} />
       {heaviest && (
         <div className="log-summary">
