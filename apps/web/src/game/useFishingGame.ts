@@ -412,7 +412,11 @@ export function useFishingGame(
         return;
       }
       if (!event.isPrimary || event.button !== 0) return;
-      if ((event.target as HTMLElement).closest("button, a, input, select, label, [data-camera-control], [data-lure-choice]")) return;
+      const target = event.target as HTMLElement;
+      // The thumb button is a press on the water that sits under a thumb.
+      const thumb = target.closest("[data-thumb-strike]") !== null;
+      if (!thumb && target.closest("button, a, input, select, label, [data-camera-control], [data-lure-choice]")) return;
+      if (thumb && phaseRef.current !== "waiting" && phaseRef.current !== "hookset" && phaseRef.current !== "fight") return;
       if (phaseRef.current !== "fight") {
         castPointerRef.current = event.pointerId;
         strikeOrCast("pointer");

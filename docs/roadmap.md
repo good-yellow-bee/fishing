@@ -27,7 +27,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P4 | ~~First-cast walkthrough~~ (shipped) | onboarding | S/M | A | — |
 | P5 | ~~Mercy bites for the first three fish~~ (shipped) | onboarding | S | A | — |
 | P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
-| P7 | Tap-to-walk + thumb controls | mobile | M | B | — |
+| P7 | ~~Tap-to-walk + thumb controls~~ (shipped) | mobile | M | B | — |
 | P8 | Settings & quality panel | access/QoL | S/M | B | — |
 | P9 | Screen reader & keyboard parity | access | S | B | — |
 | P10 | Live hour crossfade | visual/feel | M | B | #53 look table |
@@ -118,7 +118,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave B — Reach every player
 
-### P7 · Tap-to-walk + thumb controls
+### ~~P7 · Tap-to-walk + thumb controls~~ (shipped: tap-to-walk, signposts and the shop button in #63; the round thumb Strike/Reel button on touch screens after)
 - **Pitch:** on a phone, tap where you want to stand and the angler walks there; hold the big Strike/Reel button; signposts jump you to a bank.
 - **Borrowed:** A Short Hike (touch port); Animal Crossing Pocket Camp (tap-to-move).
 - **Why fun:** `Player.tsx` reads keys only (`MOVE_KEYS`). The angler spawns on the dock, so a phone can fish the dock but never reach the reeds, point, drop-off, or the shack (`E`). Touch casting works (#36); the rest of the shore does not exist on mobile.
