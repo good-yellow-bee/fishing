@@ -24,6 +24,7 @@ import { FightBar } from "../components/FightBar";
 import { Hud } from "../components/Hud";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
+import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook } from "../field/storage";
@@ -259,6 +260,15 @@ export function DockPage() {
             )}
           </aside>
         )}
+        <Walkthrough
+          userId={me.profile.userId}
+          caughtTotal={caughtTotal}
+          fishing={fishing}
+          phase={scenePhase}
+          nibble={game.nibble}
+          outcome={game.outcome?.kind ?? null}
+          surfaceRef={game.surfaceRef}
+        />
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
         </aside>
