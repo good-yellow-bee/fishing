@@ -37,6 +37,8 @@ import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
+import { useLodgeTracks } from "../game/useLodgeTracks";
+import { trackLabel } from "../game/scene/shoreTracks";
 import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
@@ -202,6 +204,7 @@ export function DockPage() {
   }, [forcedHour, liveHour]);
 
   const calmForTurn = scenePhase === "idle" || scenePhase === "waiting" || scenePhase === "result";
+  const tracks = useLodgeTracks(Boolean(userId), calmForTurn);
   useEffect(() => {
     if (!turningTo || !calmForTurn) return;
     setVeil(turningTo);
@@ -343,6 +346,7 @@ export function DockPage() {
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
           hotspot={game.hotspot}
+          tracks={tracks}
           powerRef={game.powerRef}
           accuracy={me.profile.accuracy}
         />
@@ -494,6 +498,14 @@ export function DockPage() {
               Cast again
             </button>
           </div>
+        )}
+        {bankClear && tracks.length > 0 && (
+          <aside className="lodge-tracks" aria-label="Lately on the lake">
+            <span className="eyebrow">Lately on the lake</span>
+            {tracks.slice(0, 2).map((track) => (
+              <p key={track.id}>{trackLabel(track, Date.now())}</p>
+            ))}
+          </aside>
         )}
         {veil && (
           <div className="hour-veil" key={veil} role="status">

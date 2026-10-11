@@ -34,7 +34,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P11 | ~~Catch conditions on the server~~ (shipped) | data enabler | S | C | #53 |
 | P12 | ~~Lodge badges~~ (shipped) | progression | M | C | P11 |
 | P13 | ~~Weekly board + species record wall~~ (shipped) | social | M | C | — |
-| P14 | Tracks on the shore (async presence) | social | S/M | C | — |
+| P14 | ~~Tracks on the shore (async presence)~~ (shipped) | social | S/M | C | — |
 | P15 | Day-on-the-water recap → field-log trip | journal | M | C | #53 |
 | P16 | Three-day forecast at the shack | retention | S | C | #53 |
 | P17 | Lure classes (keeps the field-log tie-in) | content | M | D | #50 |
@@ -192,7 +192,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** none.
 - **Test:** `board.test.ts` weekly rank from catch rows; `db.test.ts` records query.
 
-### P14 · Tracks on the shore (async presence)
+### ~~P14 · Tracks on the shore (async presence)~~ (shipped: the latest two show as a "Lately on the lake" note above the hint instead of a tap chip on each ring; your own catches are left out)
 - **Pitch:** faint rings on the water where someone landed a fish in the last hour — "Mara · pike · reeds · 12 min ago".
 - **Borrowed:** Webfishing (shared-lobby warmth); Journey / Dark Souls (asynchronous traces); Dredge (other sailors' logs).
 - **Why fun:** the lodge is a table on another page and the lake feels empty. Async presence gives social warmth with no netcode.
