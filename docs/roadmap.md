@@ -26,7 +26,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P3 | Drag clicker (tension audio) | feel/audio | S | A | — |
 | P4 | First-cast walkthrough | onboarding | S/M | A | — |
 | P5 | Mercy bites for the first three fish | onboarding | S | A | — |
-| P6 | Fast recast from any result | QoL | S | A | — |
+| P6 | ~~Fast recast from any result~~ (shipped) | QoL | S | A | — |
 | P7 | Tap-to-walk + thumb controls | mobile | M | B | — |
 | P8 | Settings & quality panel | access/QoL | S/M | B | — |
 | P9 | Screen reader & keyboard parity | access | S | B | — |
@@ -106,7 +106,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** S. **Deps:** none.
 - **Test:** extend `biteMix.test.ts` — 1000 mercy draws never yield `!canLand` or non-common.
 
-### P6 · Fast recast from any result
+### ~~P6 · Fast recast from any result~~ (shipped: click or Space casts past a miss or landed card after 450 ms; the 6 s card collapse was left out)
 - **Pitch:** a miss or a landed card never blocks the next cast — click the water or press Space and you are charging.
 - **Borrowed:** Cast n Chill / Webfishing zero-friction loop.
 - **Why fun:** `strikeOrCast` has no `result` case; after a miss you must click "Cast again", after a landing "Keep fishing". Every extra click is loop friction.

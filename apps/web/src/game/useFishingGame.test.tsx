@@ -27,7 +27,7 @@ vi.mock("./fight", async (importOriginal) => {
   };
 });
 
-import { useFishingGame } from "./useFishingGame";
+import { RECAST_GUARD_MS, useFishingGame } from "./useFishingGame";
 
 const profile: Profile = {
   userId: "test", displayName: "Test", points: 0, lifetimePoints: 0, strength: 5, accuracy: 3, patience: 1,
@@ -459,5 +459,41 @@ describe("useFishingGame tap-to-walk", () => {
     surface.dataset.aim = "0.5,3";
     act(() => surface.dispatchEvent(pointer("pointerdown")));
     expect(phase()).toBe("casting:none");
+  });
+});
+
+describe("useFishingGame fast recast", () => {
+  /** Casts and lets the bite go by, so the round ends on a missed strike. */
+  function missABite(surface: HTMLDivElement) {
+    cast(surface);
+    act(() => vi.advanceTimersByTime(20_000));
+    expect(phase()).toBe("result:miss");
+  }
+
+  it("casts straight from a missed strike with a click on the water", () => {
+    const surface = mount();
+    missABite(surface);
+    now += RECAST_GUARD_MS;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 5)));
+    expect(phase()).toBe("casting:none");
+    now += 500;
+    act(() => window.dispatchEvent(pointer("pointerup", 5)));
+    expect(phase()).toBe("waiting:none");
+  });
+
+  it("casts straight from a result with Space", () => {
+    const surface = mount();
+    missABite(surface);
+    now += RECAST_GUARD_MS;
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", bubbles: true })));
+    expect(phase()).toBe("casting:none");
+  });
+
+  it("keeps the result up through a click that lands as it appears", () => {
+    const surface = mount();
+    missABite(surface);
+    now += RECAST_GUARD_MS - 100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 5)));
+    expect(phase()).toBe("result:miss");
   });
 });

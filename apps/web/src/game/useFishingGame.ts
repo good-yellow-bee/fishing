@@ -24,6 +24,9 @@ import { hookWindowMs, makeCatch, pickBite, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import type { ScenePhase } from "./scene/types";
 
+/** How long a result stays up before a click or Space can cast straight past it. */
+export const RECAST_GUARD_MS = 450;
+
 export type AimHint = SpotId | "shore";
 
 const CAST_FAIL_HINT: Record<CastFail, string> = {
@@ -112,6 +115,7 @@ export function useFishingGame(
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
   const waitHintRef = useRef(WAIT_HINT);
+  const resultAtRef = useRef(0);
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
   const [spot, setSpot] = useState<SpotId>("dock");
@@ -127,6 +131,7 @@ export function useFishingGame(
   const level = profile ? anglerLevel(profile.lifetimePoints) : null;
 
   const setPhaseBoth = (next: ScenePhase) => {
+    if (next === "result" && phaseRef.current !== "result") resultAtRef.current = performance.now();
     phaseRef.current = next;
     setPhase(next);
   };
@@ -337,8 +342,20 @@ export function useFishingGame(
       case "waiting":
         setHint("Too early. Wait for the bobber to go under, then strike.");
         break;
+      case "result":
+        // A frantic last click of the fight should not throw away the catch card unread.
+        if (performance.now() - resultAtRef.current < RECAST_GUARD_MS) break;
+        setOutcome(null);
+        {
+          // The reset forgets the pointer, but this same press is the cast now.
+          const pointerId = castPointerRef.current;
+          resetToIdle(idleHint(stanceRef.current));
+          castPointerRef.current = pointerId;
+        }
+        startCast(via);
+        break;
     }
-  }, [setTheHook, startCast]);
+  }, [resetToIdle, setTheHook, startCast]);
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -474,7 +491,7 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            setHint("Landed. Cast again when ready.");
+            setHint("Landed. Click the water or hold Space to cast again.");
           } else if (result === "snapped") {
             fx.snap();
             setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
