@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { badgeProgress, newlyEarned, type BadgeFactRow, type BadgeId } from "./badges.ts";
+import { badgeProgress, FIRST_BOOK, newlyEarned, type BadgeFactRow, type BadgeId } from "./badges.ts";
 import { FISH, fishById } from "./fish.ts";
 import { trophyWeight } from "./guide.ts";
 
@@ -23,10 +23,16 @@ describe("lodge badges", () => {
     ["rain-pike", [row({ speciesId: "pike", sky: "rain" })], [row({ speciesId: "pike", sky: "fog" }), row({ sky: "rain" })]],
     ["clean-sweep", [row({ clean: true, count: 10 })], [row({ clean: true, count: 9 }), row({ count: 20 })]],
     ["trophy", [row({ heaviest: trophyWeight(fishById("perch")!) })], [row({ heaviest: trophyWeight(fishById("perch")!) - 0.1, count: 40 })]],
-    ["full-book", FISH.map((fish) => row({ speciesId: fish.id })), FISH.slice(1).map((fish) => row({ speciesId: fish.id }))],
+    ["full-book", FIRST_BOOK.map((id) => row({ speciesId: id })), FISH.filter((fish) => fish.id !== FIRST_BOOK[0]).map((fish) => row({ speciesId: fish.id }))],
   ])("%s: earned on the first history, not on the near miss", (id, hit, miss) => {
     expect(earned(hit)).toContain(id);
     expect(earned(miss)).not.toContain(id);
+  });
+
+  it("keeps Full book to the first thirteen species, so the inlet's fish don't take it away", () => {
+    expect(FIRST_BOOK.every((id) => fishById(id))).toBe(true);
+    const book = badgeProgress(FIRST_BOOK.map((id) => row({ speciesId: id }))).find((b) => b.id === "full-book")!;
+    expect(book).toEqual({ id: "full-book", have: 13, need: 13, earned: true });
   });
 
   it("caps progress at the goal and ignores rows with no hour or sky", () => {
