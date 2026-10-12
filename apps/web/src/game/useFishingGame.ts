@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   anglerLevel,
+  INLET_LEVEL,
   canLand,
   isFishingStance,
   lakeHour,
@@ -47,13 +48,24 @@ const CAST_MISS: Record<CastFail, string> = {
   shore: "Missed the lake.",
 };
 
+/** Only the inlet stance locks with its own words; the drop-off's are the defaults above. */
+const INLET_LOCKED = {
+  hint: `The inlet opens at level ${INLET_LEVEL}. Fish the other banks for now.`,
+  miss: `The inlet is closed until level ${INLET_LEVEL}.`,
+};
+
 function hintFromDataset(raw: string | undefined): AimHint | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "shore") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "shore") return raw;
   return null;
 }
 
-function castFailHint(reason: CastFail): string {
+function castFailHint(reason: CastFail, stance?: StanceId): string {
+  if (reason === "locked" && stance === "inlet") return INLET_LOCKED.hint;
   return CAST_FAIL_HINT[reason] ?? CAST_FAIL_HINT.shore;
+}
+
+function castMiss(reason: CastFail, stance: StanceId): string {
+  return reason === "locked" && stance === "inlet" ? INLET_LOCKED.miss : CAST_MISS[reason];
 }
 
 function idleHint(stance: StanceId | null) {
@@ -294,8 +306,8 @@ export function useFishingGame(
       angler?.z ?? Number.NaN,
     );
     if (!landing.ok) {
-      setOutcome({ kind: "miss", message: CAST_MISS[landing.reason] });
-      resetToIdle(castFailHint(landing.reason));
+      setOutcome({ kind: "miss", message: castMiss(landing.reason, stanceNow) });
+      resetToIdle(castFailHint(landing.reason, stanceNow));
       return;
     }
     spotRef.current = landing.spot;
@@ -338,7 +350,7 @@ export function useFishingGame(
       angler?.z ?? Number.NaN,
     );
     if (!preview.ok) {
-      setHint(castFailHint(preview.reason));
+      setHint(castFailHint(preview.reason, stanceNow));
       return;
     }
     setOutcome(null);

@@ -1,8 +1,7 @@
-import { FISH, fishById } from "./fish.ts";
+import { fishById } from "./fish.ts";
 import { isTrophyWeight } from "./guide.ts";
 import type { LakeHour } from "./hour.ts";
 import type { SpotId } from "./types.ts";
-import { SPOT_IDS } from "./progression.ts";
 import type { Sky } from "./weather.ts";
 
 /**
@@ -38,12 +37,30 @@ function distinct(facts: BadgeFactRow[], key: (row: BadgeFactRow) => string) {
   return new Set(facts.filter((row) => row.count > 0).map(key)).size;
 }
 
+/** The lake's species before the inlet opened. Full book keeps to these so nobody who earned it loses it. */
+export const FIRST_BOOK: readonly string[] = [
+  "golden-shiner",
+  "bluegill",
+  "perch",
+  "brook-trout",
+  "smallmouth-bass",
+  "rainbow-trout",
+  "carp",
+  "pike",
+  "catfish",
+  "burbot",
+  "salmon",
+  "tiger-muskie",
+  "sturgeon",
+];
+
 export const BADGES: readonly Badge[] = [
   {
     id: "four-banks",
     label: "Four banks",
-    blurb: "Land a fish from every bank.",
-    need: SPOT_IDS.length,
+    blurb: "Land a fish from four different banks.",
+    // Four, not every bank: the badge predates the inlet and nobody who earned it should lose it.
+    need: 4,
     have: (facts) => distinct(facts, (row) => row.spot),
   },
   {
@@ -83,9 +100,9 @@ export const BADGES: readonly Badge[] = [
   {
     id: "full-book",
     label: "Full book",
-    blurb: "Land every species in the lake.",
-    need: FISH.length,
-    have: (facts) => distinct(facts.filter((row) => fishById(row.speciesId)), (row) => row.speciesId),
+    blurb: "Land all thirteen species of the lake's first book.",
+    need: FIRST_BOOK.length,
+    have: (facts) => distinct(facts.filter((row) => FIRST_BOOK.includes(row.speciesId)), (row) => row.speciesId),
   },
 ];
 

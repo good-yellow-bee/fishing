@@ -56,7 +56,8 @@ describe("bubbling hotspot", () => {
   });
 
   it("moves to another bank every period, and only to banks the angler can fish", () => {
-    for (const [level, banks] of [[1, ["dock", "point", "reeds"]], [3, ["dock", "dropoff", "point", "reeds"]]] as const) {
+    // The inlet never gets bubbles, even once it opens.
+    for (const [level, banks] of [[1, ["dock", "point", "reeds"]], [3, ["dock", "dropoff", "point", "reeds"]], [8, ["dock", "dropoff", "point", "reeds"]]] as const) {
       const all = series(level);
       for (let i = 1; i < all.length; i += 1) {
         const [before, after] = [all[i - 1]!, all[i]!];

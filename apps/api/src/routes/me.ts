@@ -22,6 +22,7 @@ meRoutes.get("/me", (c) => {
       reeds: canUseSpot("reeds", level),
       dropoff: canUseSpot("dropoff", level),
       point: canUseSpot("point", level),
+      inlet: canUseSpot("inlet", level),
     },
     catches,
     speciesStats,

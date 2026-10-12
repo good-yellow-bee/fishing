@@ -1,3 +1,4 @@
+import { inletCurrent } from "./creek";
 import { keepLureInWater } from "./fightMotion";
 import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
@@ -131,7 +132,7 @@ export function waitNod(x: number, z: number, time: number) {
   };
 }
 
-/** Drift plus the tighten pull. The pull is toward the angler. */
+/** Drift, the creek's current at the inlet, plus the tighten pull. The pull is toward the angler. */
 export function applyWaitShift(
   x: number,
   z: number,
@@ -141,8 +142,9 @@ export function applyWaitShift(
   age: number,
 ) {
   const drift = waitDrift(x, z, time);
-  let nextX = x + drift.x;
-  let nextZ = z + drift.z;
+  const current = inletCurrent(x, z, time);
+  let nextX = x + drift.x + current.x;
+  let nextZ = z + drift.z + current.z;
   const pull = waitTwitchPull(age);
   if (pull > 0) {
     const dx = anglerX - nextX;

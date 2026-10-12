@@ -1,5 +1,5 @@
 import { DOCK_STAND_X, DOCK_STAND_Z, POINT_PAD, SPAWN_X, SPAWN_Z, walkableAt } from "@stillwater/shared";
-import { DROPOFF_STAND, REEDS_STAND } from "./bankWalk";
+import { DROPOFF_STAND, INLET_STAND, REEDS_STAND } from "./bankWalk";
 
 /**
  * Tap-to-walk. A grid over the walkable shore, a breadth-first search from
@@ -10,9 +10,9 @@ import { DROPOFF_STAND, REEDS_STAND } from "./bankWalk";
 export type WalkPoint = { x: number; z: number };
 
 const CELL = 0.25;
-const MIN_X = -15.5;
+const MIN_X = -24.5;
 const MAX_X = 18;
-const MIN_Z = 5.5;
+const MIN_Z = -7;
 const MAX_Z = 18.5;
 const COLS = Math.ceil((MAX_X - MIN_X) / CELL) + 1;
 const ROWS = Math.ceil((MAX_Z - MIN_Z) / CELL) + 1;
@@ -27,6 +27,7 @@ export const WALK_TARGETS = {
   point: { x: POINT_PAD.x, z: POINT_PAD.z },
   reeds: { x: REEDS_STAND.x, z: REEDS_STAND.z },
   dropoff: { x: DROPOFF_STAND.x, z: DROPOFF_STAND.z },
+  inlet: { x: INLET_STAND.x, z: INLET_STAND.z },
   shop: { x: SPAWN_X, z: SPAWN_Z },
 } as const satisfies Record<string, WalkPoint>;
 

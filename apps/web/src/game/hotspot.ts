@@ -12,7 +12,7 @@ import {
   walkableAt,
   type SpotId,
 } from "@stillwater/shared";
-import { DROPOFF_STAND, REEDS_STAND } from "./scene/bankWalk";
+import { DROPOFF_STAND, INLET_STAND, REEDS_STAND } from "./scene/bankWalk";
 
 export const HOTSPOT_PERIOD_MS = 3 * 60 * 1000;
 export const HOTSPOT_RADIUS = 1.5;
@@ -26,6 +26,7 @@ export const BANK_STANDS: Record<SpotId, { x: number; z: number }> = {
   // The pale drop-off board reaches only a 0.6 m band of deep water, too thin for a patch, so measure from the water's edge in front of it.
   dropoff: { x: DROPOFF_STAND.x, z: 6.7 },
   point: { x: POINT_PAD.x, z: POINT_PAD.z },
+  inlet: INLET_STAND,
 };
 
 const STEP = 0.5;
@@ -69,13 +70,13 @@ function mix(value: number) {
   return (n ^ (n >>> 16)) >>> 0;
 }
 
-/** Each bank three times in twelve periods, never twice running. */
+/** Each bank three times in twelve periods, never twice running. The inlet keeps its own pace and gets no bubbles. */
 const ROTATION: readonly SpotId[] = ["dock", "reeds", "dropoff", "point", "reeds", "point", "dropoff", "dock", "point", "dock", "dropoff", "reeds"];
 // Before the drop-off opens, its turn goes to the bank on neither side, so a level-up never repeats a bank and only moves the bubbles onto the drop-off.
 const ROTATION_WITHOUT_DROPOFF = ROTATION.map((spot, i) => {
   if (spot !== "dropoff") return spot;
   const [before, after] = [ROTATION.at(i - 1), ROTATION[(i + 1) % ROTATION.length]];
-  return SPOT_IDS.find((other) => other !== "dropoff" && other !== before && other !== after)!;
+  return SPOT_IDS.find((other) => other !== "dropoff" && other !== "inlet" && other !== before && other !== after)!;
 });
 
 /** One bubble patch per wall-clock period, on a bank this angler can fish, never the same bank two periods running. */
