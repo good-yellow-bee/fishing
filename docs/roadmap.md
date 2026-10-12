@@ -263,7 +263,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** P20 (portrait framing), landing lift.
 - **Test:** pure `photoFrameAt(age)` in `landMotion.test.ts`; `photo.test.ts` caps already covered.
 
-### P22 · Water: caustics, sun road, rim
+### ~~P22 · Water: caustics, sun road, rim~~ (shipped: the sun road follows the hour's disc; two drifting caustic nets on the shelf, scaled by glint; rim measured against the lake's up, not the chop normals, which washed near water out)
 - **Pitch:** light dances on the sand in the shallows, the sun road follows the real sun, the far water catches the sky.
 - **Borrowed:** A Short Hike (flat water with sparkle); Animal Crossing (shallow caustics); Dredge (sky on the water).
 - **Why fun:** `GLITTER_DIR` is fixed to the day sun `[38,-60]` even when `discPos` moves at dawn/dusk; the lakebed is flat vertex colour; the water is `MeshToonMaterial` + CPU `displaceWater` with no shader hook.
