@@ -202,3 +202,13 @@ export function landExitSplash(age: number) {
   if (age < 0 || age >= LAND_EXIT_SEC) return -1;
   return age / LAND_EXIT_SEC;
 }
+
+/** The snapshot for the field log, just after the hand takes the fish. */
+export const PHOTO_AGE = LAND_SWING_SEC + 0.2;
+/** Past this the moment has gone; a frame stalled this long doesn't get a late photo. */
+const PHOTO_LATE_SEC = 1;
+
+/** True while the landing is at the moment for the photo. Take one per landing. */
+export function photoFrameAt(age: number) {
+  return age >= PHOTO_AGE && age < PHOTO_AGE + PHOTO_LATE_SEC;
+}

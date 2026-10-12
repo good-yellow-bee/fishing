@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   LAND_PRESENT_SEC,
   LAND_SWING_SEC,
+  PHOTO_AGE,
   landBodyLean,
   landDrip,
   landDripFall,
@@ -17,6 +18,7 @@ import {
   landPresentYaw,
   landRodPitch,
   landSwing,
+  photoFrameAt,
   placeLandedFish,
 } from "./landMotion.ts";
 
@@ -118,5 +120,19 @@ describe("landing", () => {
     expect(landDrip(0, 0)).toBe(-1);
     expect(landDrip(0.3, 0)).toBeGreaterThan(0);
     expect(landDripFall(1)).toBeGreaterThan(landDripFall(0.5));
+  });
+});
+
+describe("catch photo moment", () => {
+  it("comes once the hand has the fish, not during the swing", () => {
+    expect(PHOTO_AGE).toBeGreaterThan(LAND_SWING_SEC);
+    expect(photoFrameAt(-0.2)).toBe(false);
+    expect(photoFrameAt(LAND_SWING_SEC)).toBe(false);
+    expect(photoFrameAt(PHOTO_AGE)).toBe(true);
+    expect(photoFrameAt(PHOTO_AGE + 0.3)).toBe(true);
+  });
+
+  it("is skipped after a long stall rather than taken late", () => {
+    expect(photoFrameAt(PHOTO_AGE + 2)).toBe(false);
   });
 });

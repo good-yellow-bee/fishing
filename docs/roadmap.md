@@ -255,7 +255,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** landing lift (same `updateLanding`/`landView` code), P8.
 - **Test:** `cameraBeats.test.ts`; manual `?hour=dusk` landing.
 
-### P21 · Catch photo → field log
+### ~~P21 · Catch photo → field log~~ (shipped: a 640 px JPEG snapped in the scene at `PHOTO_AGE` and pinned to the catch by the dock; a photo the player chose is never replaced)
 - **Pitch:** as the fish is held up, the game snaps a photo and pins it to the field-log entry.
 - **Borrowed:** Animal Crossing ("I caught a…!" pose); Webfishing screenshot culture.
 - **Why fun:** the field log already stores catch photos (`photoStore.ts`, `putCatchPhoto`, 130 KB cap) for real trips; game catches arrive without one.
