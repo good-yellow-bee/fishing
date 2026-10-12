@@ -81,6 +81,7 @@ import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
+import { aboard, ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
 import { anglerPose, resetAnglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
   STRIKE_DROPS,
@@ -158,6 +159,7 @@ const landedFish = new THREE.Vector3();
  */
 export function resetFishingScene() {
   resetAnglerPose();
+  resetBoat();
   resetFightView();
   resetLandView();
   resetMissView();
@@ -438,9 +440,10 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
     raycaster.setFromCamera(pointer.current, camera);
     const point = waterRayHit(raycaster.ray.origin, raycaster.ray.direction, time, hit);
     const overWater = point != null && inLake(point.x, point.z);
-    const stance = stanceAt(anglerPose.x, anglerPose.z);
+    // A boat under way is no stance to cast from, even over a pad.
+    const stance = aboard() && boat.mode !== "anchored" ? "trail" : stanceAt(anglerPose.x, anglerPose.z);
     const fishing = isFishingStance(stance);
-    const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z, level);
+    const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z, level, stance === "open");
     const waterSpot = overWater ? spotAt(hit.x, hit.z) : null;
     const cast = castAimState(fishing, overWater, inRange, waterSpot, stance);
     castState.current = cast;
@@ -1689,6 +1692,15 @@ function Tone({ hour }: { hour: LakeHour }) {
 function Scene({ level, phase, spot, sim, nibble, hour, sky, species, weight, hotspot, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
+  // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
+  useEffect(
+    () =>
+      subscribeBoat(() => {
+        if (boat.mode === "anchored") lookAt.set(ANCHOR.x + Math.sin(boat.yaw) * 8, 0, ANCHOR.z + Math.cos(boat.yaw) * 8);
+        else if (boat.mode === "moored") lookAt.set(DOCK_STAND_X, 0, DOCK_STAND_Z - 8);
+      }),
+    [lookAt],
+  );
   const aim = useMemo<AimState>(() => ({ live: new THREE.Vector3(), overWater: false }), []);
   useEffect(() => {
     resetFishingScene();

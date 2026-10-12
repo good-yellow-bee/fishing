@@ -26,8 +26,8 @@ describe("field guide card", () => {
     expect(catfish.text).not.toContain("Channel catfish");
     expect(catfish.text).not.toContain("Trophy");
     // Night swells the drop-off's big-lure pool with catfish and pike, so the sturgeon's share peaks by day.
-    expect(unknown("sturgeon").lines).toEqual(["Huge shadow", "Drop-off at high sun"]);
-    expect(unknown("perch").lines).toEqual(["Small shadow", "Dock at dawn · Reeds at high sun · Drop-off at high sun"]);
+    expect(unknown("sturgeon").lines).toEqual(["Huge shadow", "Drop-off at high sun · Open water at high sun"]);
+    expect(unknown("perch").lines).toEqual(["Small shadow", "Dock at dawn · Reeds at high sun · Drop-off at high sun · Open water at dawn"]);
   });
 
   it("adds the lure size per bank and the trophy weight once a fish is logged", () => {

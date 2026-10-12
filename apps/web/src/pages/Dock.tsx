@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
@@ -50,6 +50,7 @@ import { useLevelToast } from "../game/useLevelToast";
 import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { walkAnglerTo } from "../game/scene/pose";
+import { aboard, boatMode, rowBack, rowOut, subscribeBoat } from "../game/scene/boat";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
@@ -108,6 +109,7 @@ export function DockPage() {
   const mercy = isMercy(caughtTotal);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy);
   const scenePhase = game.outcome ? "result" : game.phase;
+  const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
   const shownFish =
     game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
@@ -375,8 +377,11 @@ export function DockPage() {
   const fishing = isFishingStance(game.stance);
   const bank = isFishingStance(game.stance) ? game.stance : game.spot;
   const inletOpen = canUseSpot("inlet", me.level);
-  const stanceLabel =
-    game.stance === "dropoff" && !dropoffOpen
+  const boatOpen = canUseSpot("open", me.level);
+  const rowing = boatState === "rowingOut" || boatState === "rowingBack";
+  const stanceLabel = rowing
+    ? "Rowing"
+    : game.stance === "dropoff" && !dropoffOpen
       ? `${STANCE_LABELS.dropoff} (lv ${DROPOFF_LEVEL})`
       : game.stance === "inlet" && !inletOpen
         ? `${STANCE_LABELS.inlet} (lv ${INLET_LEVEL})`
@@ -485,8 +490,25 @@ export function DockPage() {
                 Open shop
               </button>
             )}
+            {boatState === "anchored" && (
+              <button className="panel-btn" type="button" onClick={(event) => {
+                event.currentTarget.blur();
+                rowBack();
+              }}>
+                Row back
+              </button>
+            )}
+            {/* The rowboat is tied to the pier; it unties at the level that opens the deep water. */}
+            {boatState === "moored" && boatOpen && game.stance === "dock" && (
+              <button className="panel-btn walk-shop" type="button" onClick={(event) => {
+                event.currentTarget.blur();
+                rowOut();
+              }}>
+                Row out
+              </button>
+            )}
             {/* The inlet's signpost goes up with the level that opens it; until then the west shore is just a walk. */}
-            {SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
+            {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
               <button
                 key={target}
                 className="panel-btn"

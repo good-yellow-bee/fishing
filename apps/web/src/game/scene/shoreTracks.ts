@@ -5,8 +5,10 @@ const TRACK_WATER: Record<SpotId, { x: number; z: number; spread: number }> = {
   dock: { x: 3, z: 2, spread: 2.6 },
   reeds: { x: -12.5, z: 3, spread: 2.4 },
   point: { x: -5.2, z: 4, spread: 1.1 },
-  dropoff: { x: 6, z: -7, spread: 4 },
+  // East of the deep hole, which is open water now.
+  dropoff: { x: 11, z: -6, spread: 3 },
   inlet: { x: -17, z: -7, spread: 2 },
+  open: { x: 4, z: -6.2, spread: 3 },
 };
 
 /** Seconds for one ring to open out and fade. */

@@ -4,12 +4,17 @@ import { BOARD_LIMIT, boardView, lodgeStamp, rankBoard, weekStart, type BoardSta
 import { fieldGuide, guideProgress, catchStamp } from "./guide.ts";
 import { biteHourMul, lakeHour, lakeHourFromSearch, lakeHourWaitMul } from "./hour.ts";
 import {
+  BOAT_CAST_RANGE,
+  CAST_RANGE,
   DOCK_PAD,
   DOCK_PLANKS,
   DOCK_STAND_X,
   DOCK_STAND_Z,
   DROPOFF_PAD,
   INLET_PAD,
+  LAKE_CENTER_Z,
+  OPEN_PAD,
+  OPEN_WATER,
   POINT_MAX_X,
   POINT_PAD,
   REEDS_MAX_X,
@@ -194,8 +199,29 @@ describe("lake spots", () => {
   it("maps landing coordinates to spots", () => {
     expect(spotAt(-12, 1)).toBe("reeds");
     expect(spotAt(0.5, 3)).toBe("dock");
-    expect(spotAt(4, -5)).toBe("dropoff");
+    expect(spotAt(12, -6)).toBe("dropoff");
+    expect(spotAt(4, -5)).toBe("open");
     expect(spotAt(0, 20)).toBe(null);
+  });
+
+  it("opens the basin's deep hole to the rowboat at level 7, and only from the boat", () => {
+    expect(resolveLanding(OPEN_WATER.x, OPEN_WATER.z, 6)).toEqual({ ok: false, reason: "locked" });
+    expect(resolveLanding(OPEN_WATER.x, OPEN_WATER.z, 7)).toEqual({ ok: true, spot: "open" });
+    expect(stanceAt(OPEN_PAD.x, OPEN_PAD.z)).toBe("open");
+    expect(walkableAt(OPEN_PAD.x, OPEN_PAD.z)).toBe(false);
+    // Everything above the drop-off line stays dock water.
+    for (let x = -2; x <= 10; x += 0.25) expect(spotAt(x, LAKE_CENTER_Z + 0.05)).not.toBe("open");
+    // From a bank, open water is another bank's water.
+    expect(resolveCast(2, -3, "dock", 8, DOCK_STAND_X, DOCK_STAND_Z)).toEqual({ ok: false, reason: "basin" });
+    expect(resolveCast(6, -6, "open", 6, OPEN_PAD.x, OPEN_PAD.z)).toEqual({ ok: false, reason: "locked" });
+    expect(resolveCast(6, -6, "open", 7, OPEN_PAD.x, OPEN_PAD.z)).toEqual({ ok: true, spot: "open" });
+  });
+
+  it("lets a cast from the boat fly 30% farther", () => {
+    const far = CAST_RANGE * 1.25;
+    expect(inCastRange(0, 0, far, 0, 1)).toBe(false);
+    expect(inCastRange(0, 0, far, 0, 1, true)).toBe(true);
+    expect(inCastRange(0, 0, CAST_RANGE * BOAT_CAST_RANGE + 0.01, 0, 1, true)).toBe(false);
   });
 
   it("parses the aim dataset", () => {
@@ -205,8 +231,8 @@ describe("lake spots", () => {
   });
 
   it("locks drop-off landings before level 3", () => {
-    expect(resolveLanding(4, -5, 1)).toEqual({ ok: false, reason: "locked" });
-    expect(resolveLanding(4, -5, 3)).toEqual({ ok: true, spot: "dropoff" });
+    expect(resolveLanding(12, -6, 1)).toEqual({ ok: false, reason: "locked" });
+    expect(resolveLanding(12, -6, 3)).toEqual({ ok: true, spot: "dropoff" });
     expect(resolveLanding(-12, 1, 1)).toEqual({ ok: true, spot: "reeds" });
     expect(resolveLanding(0, 20, 3)).toEqual({ ok: false, reason: "shore" });
   });

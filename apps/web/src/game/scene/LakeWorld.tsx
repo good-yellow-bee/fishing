@@ -2,7 +2,7 @@ import { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -21,6 +21,7 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
 import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
 
@@ -217,6 +218,7 @@ const MODELS = {
   platform: "/models/platform_beach.glb",
   path: "/models/path_wood.glb",
   log: "/models/log.glb",
+  buoy: "/models/buoy.glb",
   lilyLarge: "/models/lily_large.glb",
   lilySmall: "/models/lily_small.glb",
   reed: "/models/grass_leafsLarge.glb",
@@ -1249,6 +1251,46 @@ function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
   );
 }
 
+/** The angler's own rowboat. Moored by the pier until level 7 unties it; follows the row out and back, rocking on the chop. */
+function PlayerBoat() {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    const hull = ref.current;
+    if (!hull) return;
+    const t = state.clock.elapsedTime;
+    const at = boatPathPoint(boat.u);
+    const y = waterHeight(at.x, at.z, t);
+    const sample = 0.75;
+    hull.position.set(at.x, y + BOAT_DECK - 0.14, at.z);
+    hull.rotation.order = "YXZ";
+    hull.rotation.y = boat.yaw;
+    hull.rotation.x = THREE.MathUtils.clamp((waterHeight(at.x, at.z + sample, t) - y) * 1.15, -0.2, 0.2);
+    hull.rotation.z = THREE.MathUtils.clamp((y - waterHeight(at.x + sample, at.z, t)) * 1.15, -0.2, 0.2);
+  });
+  return (
+    <group ref={ref}>
+      <ToonModel url={MODELS.rowboat} scale={0.66} shadows={false} />
+    </group>
+  );
+}
+
+/** Marks the deep hole the boat anchors over. Bobs a little off to one side so it never sits in the cast. */
+function AnchorBuoy() {
+  const ref = useRef<THREE.Group>(null);
+  const at = { x: OPEN_PAD.x + 1.6, z: OPEN_PAD.z - 1.1 };
+  useFrame((state) => {
+    if (!ref.current) return;
+    const t = state.clock.elapsedTime;
+    ref.current.position.y = waterHeight(at.x, at.z, t) - 0.05;
+    ref.current.rotation.z = Math.sin(t * 1.3) * 0.08;
+  });
+  return (
+    <group ref={ref} position={[at.x, 0, at.z]}>
+      <ToonModel url={MODELS.buoy} scale={0.28} shadows={false} />
+    </group>
+  );
+}
+
 function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
   const keyPrefix = origin.join("-");
   return Array.from({ length: count }, (_, i) => (
@@ -1342,6 +1384,8 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       <ShorePath />
       <BankWalks />
       <Creek hour={hour} weather={weather} />
+      <PlayerBoat />
+      <AnchorBuoy />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (
