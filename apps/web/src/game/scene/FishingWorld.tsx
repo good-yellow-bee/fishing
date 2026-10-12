@@ -71,9 +71,11 @@ import {
   landPresentYaw,
   landSwing,
   landView,
+  photoFrameAt,
   resetLandView,
   placeLandedFish,
 } from "./landMotion";
+import { clearCatchShot, postCatchShot, snapCanvas } from "./catchPhoto";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
@@ -163,6 +165,7 @@ export function resetFishingScene() {
   resetBoat();
   resetFightView();
   resetLandView();
+  clearCatchShot();
   resetMissView();
   resetWaitView();
   lastFightSim = null;
@@ -1767,8 +1770,32 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, species, weight, ho
         accent={species?.accent ?? FALLBACK_ACCENT}
         scale={landedScale(weight)}
       />
+      {/* Last in the tree, so the snapshot sees every pose written this frame. */}
+      <CatchCamera />
     </>
   );
+}
+
+/** Snaps the held-up fish for the field log, once per landing. */
+function CatchCamera() {
+  const taken = useRef(false);
+  useFrame(({ gl, scene, camera }) => {
+    if (!landView.active) {
+      taken.current = false;
+      return;
+    }
+    if (taken.current || !photoFrameAt(landView.age)) return;
+    taken.current = true;
+    // Render the frame now so the pixels are there to copy; the default render follows.
+    gl.render(scene, camera);
+    try {
+      const shot = snapCanvas(gl.domElement);
+      if (shot) postCatchShot(shot);
+    } catch {
+      // A tainted or lost context leaves this catch without a photo.
+    }
+  });
+  return null;
 }
 
 /** Memoized: the cast charge reaches the scene through powerRef, so holding a cast re-renders nothing here. */

@@ -36,7 +36,7 @@ import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { Walkthrough } from "../components/Walkthrough";
-import { saveLandedCatch } from "../field/keepCatch";
+import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { readStoredLogbook, saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -51,6 +51,7 @@ import { defaultLure, lureCanChange } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { walkAnglerTo } from "../game/scene/pose";
 import { aboard, boatMode, rowBack, rowOut, subscribeBoat } from "../game/scene/boat";
+import { latestCatchShot, subscribeCatchShot } from "../game/scene/catchPhoto";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
@@ -121,6 +122,11 @@ export function DockPage() {
   const catchSync = useCatchSync(userId, setMe);
   const [fieldSaved, setFieldSaved] = useState(false);
   const [fieldLogError, setFieldLogError] = useState("");
+  const [photoSaved, setPhotoSaved] = useState(false);
+  // The scene's snapshot of the fish held up, and the catch it belongs to.
+  const catchShot = useSyncExternalStore(subscribeCatchShot, latestCatchShot);
+  const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
+  const shotBase = useRef<{ id: string; seq: number } | null>(null);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
     const book = readStoredLogbook() ?? sampleLogbook(new Date());
@@ -285,6 +291,27 @@ export function DockPage() {
     return () => window.clearTimeout(lift);
   }, [veil]);
 
+  const pinPhoto = useCallback((id: string) => {
+    const shot = shotFor.current;
+    if (shot?.id !== id) return;
+    try {
+      if (saveLandedPhoto(id, shot.dataUrl)) setPhotoSaved(true);
+    } catch {
+      // The catch is kept; only the photo didn't fit in this browser.
+    }
+  }, []);
+
+  // The snapshot comes as the fish is held up, after the catch was written.
+  useEffect(() => {
+    if (game.outcome?.kind !== "landed") return;
+    // Only a shot taken after this fish landed; an earlier landing's late shot must not be pinned to it.
+    if (shotBase.current?.id !== game.outcome.id) shotBase.current = { id: game.outcome.id, seq: catchShot?.seq ?? 0 };
+    if (!catchShot || catchShot.seq <= shotBase.current.seq) return;
+    if (shotFor.current?.seq === catchShot.seq) return;
+    shotFor.current = { seq: catchShot.seq, id: game.outcome.id, dataUrl: catchShot.dataUrl };
+    pinPhoto(game.outcome.id);
+  }, [catchShot, game.outcome, pinPhoto]);
+
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
     const { id, species, weight, spot: catchSpot } = game.outcome;
@@ -304,13 +331,15 @@ export function DockPage() {
       setFieldSaved(false);
       setFieldLogError(err instanceof Error ? err.message : "The field log could not be saved.");
     }
-  }, [game.outcome, openedAt, sky]);
+    pinPhoto(id);
+  }, [game.outcome, openedAt, sky, pinPhoto]);
 
   useEffect(() => {
     if (game.outcome?.kind !== "landed") {
       posted.current = null;
       setFieldSaved(false);
       setFieldLogError("");
+      setPhotoSaved(false);
       return;
     }
     const { id, species, weight, spot: catchSpot, clean } = game.outcome;
@@ -563,7 +592,9 @@ export function DockPage() {
               </p>
             )}
             <div className="catch-actions">
-              {fieldSaved && <p className="catch-stamp quiet">Saved in the field log</p>}
+              {fieldSaved && (
+                <p className="catch-stamp quiet">{photoSaved ? "Saved in the field log, with a photo" : "Saved in the field log"}</p>
+              )}
               {fieldLogError && (
                 <p className="warn" role="alert">
                   {fieldLogError}

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PHOTO_STORAGE_KEY } from "./photoStore";
-import { saveLandedCatch } from "./keepCatch";
+import { PHOTO_STORAGE_KEY, readStoredPhotos } from "./photoStore";
+import { saveLandedCatch, saveLandedPhoto } from "./keepCatch";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook } from "./storage";
 import { sampleLogbook } from "@stillwater/shared";
 
@@ -93,5 +93,20 @@ describe("save a landed fish", () => {
     const kept = readStoredLogbook()?.catches.find((entry) => entry.id === landed.id);
     expect(kept?.lure).toBe("#5 Mepps");
     expect(localStorage.getItem(LOGBOOK_STORAGE_KEY)).toContain("#5 Mepps");
+  });
+
+  it("pins the scene's photo to the landed catch", () => {
+    saveLandedCatch(landed);
+    expect(saveLandedPhoto(landed.id, "data:image/jpeg;base64,AAAA")).toBe(true);
+    expect(readStoredPhotos()[landed.id]).toBe("data:image/jpeg;base64,AAAA");
+  });
+
+  it("leaves a photo the player chose and skips catches not in the book", () => {
+    saveLandedCatch(landed);
+    saveLandedPhoto(landed.id, "data:image/jpeg;base64,AAAA");
+    expect(saveLandedPhoto(landed.id, "data:image/jpeg;base64,BBBB")).toBe(false);
+    expect(readStoredPhotos()[landed.id]).toBe("data:image/jpeg;base64,AAAA");
+    expect(saveLandedPhoto("catch-missing", "data:image/jpeg;base64,CCCC")).toBe(false);
+    expect(readStoredPhotos()["catch-missing"]).toBeUndefined();
   });
 });
