@@ -40,7 +40,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P17 | ~~Lure classes (keeps the field-log tie-in)~~ (shipped) | content | M | D | #50 |
 | P18 | ~~Five new species + the Inlet bank~~ (shipped) | content | L | D | level unlocks |
 | P19 | ~~Rowboat open-water stance~~ (shipped) | content | L | D | P18, landing lift |
-| P20 | Fight & landing camera | camera | M | E | landing lift, P8 |
+| P20 | ~~Fight & landing camera~~ (shipped) | camera | M | E | landing lift, P8 |
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
 | P23 | Atmosphere pass (fireflies, mist, bloom) | visual | M | E | P8, #53 |
@@ -247,7 +247,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave E — Golden hour
 
-### P20 · Fight & landing camera
+### ~~P20 · Fight & landing camera~~ (shipped: the camera leans in on the hook, closer on a hard pull, eases back on a run, comes in close on the fish in your hands, then gives back the distance you had; it only ever comes closer, and reduced motion keeps it still. The polar drop was left out)
 - **Pitch:** the camera leans in when the hook sets, tracks the run, then drops to a low three-quarter portrait as the fish comes up into your hands.
 - **Borrowed:** Animal Crossing (catch pose + push-in); Stardew (zoom on the perfect catch); Dredge (catch reveal).
 - **Why fun:** `CameraRig` only blends the target toward the chest/bobber midpoint (0.35) and shakes; distance stays wherever the player left it. The queued landing lift deserves a framed beat.

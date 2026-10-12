@@ -81,6 +81,7 @@ import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
+import { beatDistance, dollyStep, fightDistance, landingDistance, landingFramed, landingWeight } from "./cameraBeats";
 import { aboard, ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
 import { anglerPose, resetAnglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
@@ -272,6 +273,9 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteYanked = useRef(false);
+  /** Where the player left the camera. Beats come in from here and hand back to it. */
+  const userDistance = useRef<number | null>(null);
+  const beating = useRef(false);
   const fighting = phase === "fight";
   // Reduced motion: no shake on the strike, surge or snap, and no walking heave.
   const calm = useReducedMotion();
@@ -316,6 +320,13 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       const lead = Math.min(2.6, speed * 0.58);
       desired.set(chest.x + (glide.x / speed) * lead, chest.y, chest.z + (glide.y / speed) * lead);
     } else desired.copy(chest);
+    // Landing portrait: frame between the chest and the fish held up in the hands.
+    const landing = !calm && phase === "result" && landView.active ? landingWeight(landView.age) * 0.5 : 0;
+    if (landing > 0) {
+      desired.x += (holdScratch.x - desired.x) * landing;
+      desired.y += (holdScratch.y - desired.y) * landing;
+      desired.z += (holdScratch.z - desired.z) * landing;
+    }
 
     if (fighting) {
       if (!wasFight.current) {
@@ -353,6 +364,24 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
         orbit.update();
       }
     }
+
+    // Camera beats: lean in on the fight, come close for the landing, then give the player's distance back.
+    const distance = camera.position.distanceTo(orbit.target);
+    if (userDistance.current === null) userDistance.current = distance;
+    let beatTarget: number | null = null;
+    if (!calm && fighting) beatTarget = beatDistance(userDistance.current, fightDistance(surge, fightView.tension));
+    else if (!calm && phase === "result" && landView.active && landingFramed(landView.age)) {
+      beatTarget = landingDistance(userDistance.current, landView.age);
+    }
+    if (beatTarget !== null) beating.current = true;
+    else if (beating.current) {
+      beatTarget = userDistance.current;
+      if (Math.abs(distance - userDistance.current) < 0.03) beating.current = false;
+    }
+    if (beating.current && beatTarget !== null && distance > 1e-3) {
+      const next = dollyStep(distance, beatTarget, delta);
+      camera.position.sub(orbit.target).multiplyScalar(next / distance).add(orbit.target);
+    } else userDistance.current = distance;
 
     if (calm) shakeAmp.current = 0;
     if (shakeAmp.current > 0.001) {
