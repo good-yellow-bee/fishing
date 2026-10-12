@@ -81,7 +81,7 @@ import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { LakeWorld, weatherLook } from "./LakeWorld";
 import { PlayerMove } from "./Player";
-import { ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
+import { aboard, ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
 import { anglerPose, resetAnglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
   STRIKE_DROPS,
@@ -440,7 +440,8 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
     raycaster.setFromCamera(pointer.current, camera);
     const point = waterRayHit(raycaster.ray.origin, raycaster.ray.direction, time, hit);
     const overWater = point != null && inLake(point.x, point.z);
-    const stance = stanceAt(anglerPose.x, anglerPose.z);
+    // A boat under way is no stance to cast from, even over a pad.
+    const stance = aboard() && boat.mode !== "anchored" ? "trail" : stanceAt(anglerPose.x, anglerPose.z);
     const fishing = isFishingStance(stance);
     const inRange = overWater && inCastRange(anglerPose.x, anglerPose.z, hit.x, hit.z, level, stance === "open");
     const waterSpot = overWater ? spotAt(hit.x, hit.z) : null;
