@@ -126,6 +126,7 @@ export function DockPage() {
   // The scene's snapshot of the fish held up, and the catch it belongs to.
   const catchShot = useSyncExternalStore(subscribeCatchShot, latestCatchShot);
   const shotFor = useRef<{ seq: number; id: string; dataUrl: string } | null>(null);
+  const shotBase = useRef<{ id: string; seq: number } | null>(null);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
     const book = readStoredLogbook() ?? sampleLogbook(new Date());
@@ -302,7 +303,10 @@ export function DockPage() {
 
   // The snapshot comes as the fish is held up, after the catch was written.
   useEffect(() => {
-    if (!catchShot || game.outcome?.kind !== "landed") return;
+    if (game.outcome?.kind !== "landed") return;
+    // Only a shot taken after this fish landed; an earlier landing's late shot must not be pinned to it.
+    if (shotBase.current?.id !== game.outcome.id) shotBase.current = { id: game.outcome.id, seq: catchShot?.seq ?? 0 };
+    if (!catchShot || catchShot.seq <= shotBase.current.seq) return;
     if (shotFor.current?.seq === catchShot.seq) return;
     shotFor.current = { seq: catchShot.seq, id: game.outcome.id, dataUrl: catchShot.dataUrl };
     pinPhoto(game.outcome.id);
