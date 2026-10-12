@@ -138,3 +138,22 @@ export function waterRayHit(
   }
   return null;
 }
+
+/** Flat direction from the middle of the lake toward the sun or moon disc, unit length. The sun road runs along it. */
+export function glitterDirection(discPos: readonly [number, number, number]) {
+  const x = discPos[0];
+  const z = discPos[2] - LAKE_CENTER_Z;
+  const len = Math.hypot(x, z);
+  if (len < 1e-6) return { x: 0, z: -1 };
+  return { x: x / len, z: z / len };
+}
+
+/** True where a glitter quad sits on open water, clear of the bank. */
+export function glitterOnWater(x: number, z: number) {
+  return waterShoreWeight(x, z) > 0.5;
+}
+
+/** 0..1, how strongly light dances on the bed here. Full on the sandy shelf, gone by depth 0.4. */
+export function causticStrength(x: number, z: number) {
+  return 1 - smoothstep(0.15, 0.4, waterDepth(x, z));
+}

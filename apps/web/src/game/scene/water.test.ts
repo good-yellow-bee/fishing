@@ -1,10 +1,13 @@
-import { LAKE_CENTER_Z } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   BOBBER_RING_LIFT,
   bedColor,
   bedHeight,
   bobberRingHeight,
+  causticStrength,
+  glitterDirection,
+  glitterOnWater,
   waterDepth,
   waterDepthColor,
   waterHeight,
@@ -65,5 +68,28 @@ describe("precomputed water values", () => {
     ] as const) {
       expect(waterHeightWithShoreWeight(x, z, time, waterShoreWeight(x, z))).toBeCloseTo(waterHeight(x, z, time), 12);
     }
+  });
+});
+
+describe("sun road and caustics", () => {
+  it("points the sun road at the disc, wherever the hour puts it", () => {
+    const day = glitterDirection([38, 34, -62]);
+    expect(Math.hypot(day.x, day.z)).toBeCloseTo(1);
+    expect(day.x).toBeGreaterThan(0);
+    expect(day.z).toBeLessThan(0);
+    const dusk = glitterDirection([-32, 12, -52]);
+    expect(dusk.x).toBeLessThan(0);
+    expect(dusk.z).toBeLessThan(0);
+  });
+
+  it("keeps glitter off the bank", () => {
+    expect(glitterOnWater(0, LAKE_CENTER_Z)).toBe(true);
+    expect(glitterOnWater(40, LAKE_CENTER_Z)).toBe(false);
+  });
+
+  it("lights the sandy shelf and leaves the deep bed dark", () => {
+    expect(causticStrength(0, LAKE_CENTER_Z)).toBe(0);
+    const shelf = { x: LAKE_RX * 0.9, z: LAKE_CENTER_Z };
+    expect(causticStrength(shelf.x, shelf.z)).toBeGreaterThan(0.9);
   });
 });

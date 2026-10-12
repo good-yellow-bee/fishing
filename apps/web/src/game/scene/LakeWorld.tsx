@@ -23,7 +23,7 @@ import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
-import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
+import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
 
 type Vec3 = [number, number, number];
 
@@ -359,19 +359,20 @@ const FISH: FishProps[] = [
   },
 ];
 
-// Streak of sparkle quads on the water toward the sun disc at [38, 34, -62].
-const GLITTER_DIR = new THREE.Vector2(38, -60).normalize();
-const GLITTER_ANGLE = Math.atan2(60, 38);
-const GLITTER_QUADS = Array.from({ length: 16 }, (_, i) => {
-  const dist = 2.5 + (i / 15) * 12;
-  const side = (jitter(i + 7) - 0.5) * (1 + dist * 0.16);
-  return {
-    x: GLITTER_DIR.x * dist - GLITTER_DIR.y * side,
-    z: LAKE_CENTER_Z + GLITTER_DIR.y * dist + GLITTER_DIR.x * side,
-    scale: 0.3 + jitter(i + 31) * 0.45,
-    mat: i % 3,
-  };
-});
+// Streak of sparkle quads on the water toward the sun disc, wherever the hour puts it.
+function glitterQuads(discPos: Vec3) {
+  const dir = glitterDirection(discPos);
+  return Array.from({ length: 16 }, (_, i) => {
+    const dist = 2.5 + (i / 15) * 12;
+    const side = (jitter(i + 7) - 0.5) * (1 + dist * 0.16);
+    return {
+      x: dir.x * dist - dir.z * side,
+      z: LAKE_CENTER_Z + dir.z * dist + dir.x * side,
+      scale: 0.3 + jitter(i + 31) * 0.45,
+      mat: i % 3,
+    };
+  }).filter((quad) => glitterOnWater(quad.x, quad.z));
+}
 
 const WING_GEOMETRY = new THREE.BufferGeometry();
 WING_GEOMETRY.setAttribute("position", new THREE.Float32BufferAttribute([0, 0, 0.09, 0.7, 0.04, 0, 0, 0, -0.11], 3));
@@ -467,6 +468,93 @@ function makeBedSurface(radiusX: number, radiusZ: number) {
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
   return geometry;
+}
+
+/**
+ * The bed again, a hair higher, carrying the caustic light. Vertex colour is
+ * the shelf mask, so with additive blending the deep bed gets nothing.
+ */
+function makeCausticGeometry(bed: THREE.BufferGeometry) {
+  const geometry = bed.clone();
+  const position = geometry.getAttribute("position") as THREE.BufferAttribute;
+  const mask = new Float32Array(position.count * 3);
+  const uvs = new Float32Array(position.count * 2);
+  for (let i = 0; i < position.count; i += 1) {
+    const x = position.getX(i);
+    const worldZ = -position.getY(i) + LAKE_CENTER_Z;
+    const k = causticStrength(x, worldZ);
+    mask[i * 3] = k;
+    mask[i * 3 + 1] = k;
+    mask[i * 3 + 2] = k;
+    uvs[i * 2] = x / 3.2;
+    uvs[i * 2 + 1] = worldZ / 3.2;
+  }
+  geometry.setAttribute("color", new THREE.BufferAttribute(mask, 3));
+  geometry.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+  return geometry;
+}
+
+// Bright cell walls, the net of light a rippled surface throws on sand. Tiles.
+function makeCausticTexture() {
+  const size = 128;
+  const cells = Array.from({ length: 12 }, (_, i) => ({ x: jitter(i + 700) * size, y: jitter(i + 740) * size }));
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const image = ctx.createImageData(size, size);
+  for (let py = 0; py < size; py += 1) {
+    for (let px = 0; px < size; px += 1) {
+      let f1 = Infinity;
+      let f2 = Infinity;
+      for (const cell of cells) {
+        let dx = Math.abs(px - cell.x);
+        let dy = Math.abs(py - cell.y);
+        dx = Math.min(dx, size - dx);
+        dy = Math.min(dy, size - dy);
+        const d = Math.hypot(dx, dy);
+        if (d < f1) {
+          f2 = f1;
+          f1 = d;
+        } else if (d < f2) {
+          f2 = d;
+        }
+      }
+      const wall = Math.max(0, 1 - (f2 - f1) / 5);
+      const v = Math.round(255 * wall * wall);
+      const at = (py * size + px) * 4;
+      image.data[at] = v;
+      image.data[at + 1] = v;
+      image.data[at + 2] = Math.round(v * 0.9);
+      image.data[at + 3] = 255;
+    }
+  }
+  ctx.putImageData(image, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  return texture;
+}
+
+/**
+ * Sky caught on the water at a glancing angle: far water goes pale, water underfoot stays clear.
+ * Measured against the lake's up rather than the chop's normals, which made near water glance too.
+ */
+const RIM_STRENGTH = 0.32;
+
+const rimCacheKey = () => "lake-water-rim";
+
+function addWaterRim(shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }, rimColor: THREE.IUniform<THREE.Color>) {
+  shader.uniforms.rimColor = rimColor;
+  shader.fragmentShader = shader.fragmentShader
+    .replace("void main() {", "uniform vec3 rimColor;\nvoid main() {")
+    .replace(
+      "#include <opaque_fragment>",
+      `vec3 lakeUp = normalize((viewMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+float rim = pow(1.0 - clamp(dot(lakeUp, normalize(vViewPosition)), 0.0, 1.0), 6.0);
+outgoingLight = mix(outgoingLight, rimColor, rim * ${RIM_STRENGTH.toFixed(2)});
+#include <opaque_fragment>`,
+    );
 }
 
 // Concentric rings so the surface can chop. Local +Z is world up after the mesh pitch.
@@ -706,6 +794,18 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
   const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
+  const causticGeometry = useMemo(() => makeCausticGeometry(bedGeometry), [bedGeometry]);
+  const causticA = useMemo(() => makeCausticTexture(), []);
+  const causticB = useMemo(() => {
+    const texture = causticA.clone();
+    texture.repeat.set(0.8, 0.8);
+    texture.needsUpdate = true;
+    return texture;
+  }, [causticA]);
+  const rimColor = useMemo(() => ({ value: new THREE.Color() }), []);
+  rimColor.value.set(weather.sky[1]);
+  const withRim = useMemo(() => (shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }) => addWaterRim(shader, rimColor), [rimColor]);
+  const causticLight = weather.glint * 0.22;
 
   useEffect(() => {
     return () => {
@@ -714,8 +814,11 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
       foamGeometry.dispose();
       waterMap.dispose();
       detailMap.dispose();
+      causticGeometry.dispose();
+      causticA.dispose();
+      causticB.dispose();
     };
-  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap]);
+  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap, causticGeometry, causticA, causticB]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
@@ -724,6 +827,11 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
     waterMap.offset.y += delta * 0.008;
     detailMap.offset.x -= delta * 0.006;
     detailMap.offset.y += delta * 0.004;
+    // Two nets drifting across each other, so the light shifts instead of sliding.
+    causticA.offset.x += delta * 0.045;
+    causticA.offset.y += delta * 0.02;
+    causticB.offset.x -= delta * 0.03;
+    causticB.offset.y += delta * 0.038;
     if (material.current) material.current.opacity = 0.8 + Math.sin(t * 0.45) * 0.02;
     if (glintA.current) glintA.current.opacity = weather.glint * (0.14 + Math.sin(t * 0.65) * 0.05);
     if (glintB.current) glintB.current.opacity = weather.glint * (0.1 + Math.sin(t * 0.52 + 2) * 0.04);
@@ -734,9 +842,25 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
       <mesh geometry={bedGeometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <meshToonMaterial color="#ffffff" vertexColors gradientMap={toonRamp()} />
       </mesh>
+      {/* Drawn after the water, so the shallows' light isn't dimmed by the surface over it. */}
+      {causticLight > 0.05 &&
+        [causticA, causticB].map((map, i) => (
+          <mesh key={i} geometry={causticGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} renderOrder={2}>
+            <meshBasicMaterial
+              map={map}
+              vertexColors
+              transparent
+              opacity={causticLight}
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+            />
+          </mesh>
+        ))}
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <meshToonMaterial
           ref={material}
+          onBeforeCompile={withRim}
+          customProgramCacheKey={rimCacheKey}
           color={spot === "dropoff" ? weather.waterDrop : weather.water}
           map={waterMap}
           vertexColors
@@ -878,7 +1002,7 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
   );
 }
 
-function SunGlitter() {
+function SunGlitter({ discPos }: { discPos: Vec3 }) {
   const geometry = useMemo(() => new THREE.PlaneGeometry(1, 0.28), []);
   const materials = useMemo(
     () =>
@@ -894,7 +1018,12 @@ function SunGlitter() {
       ),
     [],
   );
-  const bands = useMemo(() => [0, 1, 2].map((mat) => GLITTER_QUADS.filter((quad) => quad.mat === mat)), []);
+  const [dx, , dz] = discPos;
+  const bands = useMemo(() => {
+    const quads = glitterQuads([dx, 0, dz]);
+    return [0, 1, 2].map((mat) => quads.filter((quad) => quad.mat === mat));
+  }, [dx, dz]);
+  const angle = Math.atan2(-(dz - LAKE_CENTER_Z), dx);
   const helper = useMemo(() => new THREE.Object3D(), []);
   const meshes = useRef<Array<THREE.InstancedMesh | null>>([]);
   useEffect(() => {
@@ -905,7 +1034,7 @@ function SunGlitter() {
   }, [geometry, materials]);
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    helper.rotation.set(-Math.PI / 2, 0, GLITTER_ANGLE);
+    helper.rotation.set(-Math.PI / 2, 0, angle);
     for (let i = 0; i < materials.length; i += 1) {
       materials[i]!.opacity = 0.04 + (Math.sin(t * (0.9 + i * 0.33) + i * 2.1) * 0.5 + 0.5) * 0.09;
       const mesh = meshes.current[i];
@@ -922,7 +1051,7 @@ function SunGlitter() {
   });
   return bands.map((quads, i) => (
     <instancedMesh
-      key={i}
+      key={`${i}-${quads.length}-${dx}-${dz}`}
       args={[geometry, materials[i], quads.length]}
       frustumCulled={false}
       ref={(mesh) => {
@@ -1397,7 +1526,7 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
       ))}
-      {look.glitter && weather.sunOut && <SunGlitter />}
+      {look.glitter && weather.sunOut && <SunGlitter discPos={look.discPos} />}
       {look.birds &&
         FLOCKS.map((flock, i) => (
           <BirdFlock key={i} {...flock} />
