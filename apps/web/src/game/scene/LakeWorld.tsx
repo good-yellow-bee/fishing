@@ -851,6 +851,8 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
               vertexColors
               transparent
               opacity={causticLight}
+              // Fog would tint the masked-off deep bed, and additive blending would add that tint as light.
+              fog={false}
               depthWrite={false}
               blending={THREE.AdditiveBlending}
             />
