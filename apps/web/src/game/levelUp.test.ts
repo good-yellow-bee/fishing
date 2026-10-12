@@ -23,7 +23,7 @@ const unlocks = [
   [4, "See a fish shadow before you strike."],
   [5, "Cast 25% farther."],
   [6, "The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain."],
-  [7, "Fish bite 15% faster."],
+  [7, "Fish bite 15% faster. The rowboat is yours — untie it at the dock and row out to open water."],
   [8, "Better odds of trophy-size fish."],
 ] as const;
 

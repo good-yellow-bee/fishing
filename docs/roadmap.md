@@ -39,7 +39,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P16 | ~~Three-day forecast at the shack~~ (shipped) | retention | S | C | #53 |
 | P17 | ~~Lure classes (keeps the field-log tie-in)~~ (shipped) | content | M | D | #50 |
 | P18 | ~~Five new species + the Inlet bank~~ (shipped) | content | L | D | level unlocks |
-| P19 | Rowboat open-water stance | content | L | D | P18, landing lift |
+| P19 | ~~Rowboat open-water stance~~ (shipped) | content | L | D | P18, landing lift |
 | P20 | Fight & landing camera | camera | M | E | landing lift, P8 |
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
@@ -237,7 +237,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** L. **Deps:** level unlocks; P17 optional.
 - **Test:** `rules.test.ts` spot lock; `lake.test.ts` `spotAt`/`walkableAt` for the pad; `biteMix.test.ts` per-spot pools.
 
-### P19 · Rowboat open-water stance
+### ~~P19 · Rowboat open-water stance~~ (shipped: at level 7 "Row out" at the dock rows the rowboat to an anchor over the deep hole; open water is its own bank there with perch, whitefish, walleye, salmon and sturgeon, casts fly 30% farther, and "Row back" brings you home)
 - **Pitch:** at level 7 untie the canoe, row to the buoy over the deep hole, and cast anywhere in the basin while the boat rocks.
 - **Borrowed:** Dredge (the boat is the game); A Short Hike (boat as a reward); Stardew (pier vs. open water).
 - **Why fun:** the basin is scenery; sturgeon and salmon live at the drop-off only. A boat stance makes the middle a place, using the existing `MODELS.canoe` and `buoy.glb`.

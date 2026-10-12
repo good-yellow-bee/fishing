@@ -41,6 +41,13 @@ export const INLET_PAD: Pad = { x: -22.7, z: -4.4, r: 1.6 };
 export const INLET_MAX_X = -14;
 export const INLET_MAX_Z = -4;
 
+/** The deep hole in the middle of the basin. Only the rowboat reaches it. Its top edge stops at the drop-off line, so dock water stays the dock's. */
+export const OPEN_WATER = { x: 4, z: -6.2, r: 4.1 };
+/** Where the rowboat lies at anchor. The angler stands in it, so this pad is the only way onto open water. */
+export const OPEN_PAD: Pad = { x: 4, z: -6.2, r: 0.9 };
+/** A boat lets the cast fly farther than from the bank. */
+export const BOAT_CAST_RANGE = 1.3;
+
 export const STANCE_LABELS: Record<StanceId, string> = {
   shop: "Shop",
   trail: "Path",
@@ -53,6 +60,7 @@ const FISHING_PADS: readonly [SpotId, Pad][] = [
   ["dropoff", DROPOFF_PAD],
   ["point", POINT_PAD],
   ["inlet", INLET_PAD],
+  ["open", OPEN_PAD],
 ];
 
 export type Landing =
@@ -108,6 +116,7 @@ export function spotAt(x: number, z: number): SpotId | null {
   if (!inLake(x, z)) return null;
   // First, because the reeds claim the whole west and the drop-off the whole north.
   if (x <= INLET_MAX_X && z <= INLET_MAX_Z) return "inlet";
+  if (inRadius(x, z, OPEN_WATER.x, OPEN_WATER.z, OPEN_WATER.r)) return "open";
   if (x <= REEDS_MAX_X) return "reeds";
   if (z <= LAKE_CENTER_Z) return "dropoff";
   if (x <= POINT_MAX_X && z >= POINT_MIN_Z) return "point";
@@ -115,11 +124,11 @@ export function spotAt(x: number, z: number): SpotId | null {
 }
 
 export function isFishingStance(stance: StanceId): stance is SpotId {
-  return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point" || stance === "inlet";
+  return stance === "dock" || stance === "reeds" || stance === "dropoff" || stance === "point" || stance === "inlet" || stance === "open";
 }
 
-export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number, level = 1) {
-  return inRadius(fromX, fromZ, toX, toZ, CAST_RANGE * castRangeMultiplier(level));
+export function inCastRange(fromX: number, fromZ: number, toX: number, toZ: number, level = 1, boat = false) {
+  return inRadius(fromX, fromZ, toX, toZ, CAST_RANGE * castRangeMultiplier(level) * (boat ? BOAT_CAST_RANGE : 1));
 }
 
 export function onDockPlanks(x: number, z: number) {
@@ -163,7 +172,7 @@ export function parseAim(raw: string | undefined): { x: number; z: number } | nu
 }
 
 export function parseStance(raw: string | undefined): StanceId | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "shop" || raw === "trail") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "open" || raw === "shop" || raw === "trail") return raw;
   return null;
 }
 
@@ -187,7 +196,7 @@ export function resolveCast(
   if (!Number.isFinite(aimX) || !Number.isFinite(aimZ)) return { ok: false, reason: "shore" };
   const water = spotAt(aimX, aimZ);
   if (!water) return { ok: false, reason: "shore" };
-  if (!inCastRange(fromX, fromZ, aimX, aimZ, level)) return { ok: false, reason: "range" };
+  if (!inCastRange(fromX, fromZ, aimX, aimZ, level, stance === "open")) return { ok: false, reason: "range" };
   if (water !== stance) return { ok: false, reason: "basin" };
   if (!canUseSpot(stance, level)) return { ok: false, reason: "locked" };
   return { ok: true, spot: stance };

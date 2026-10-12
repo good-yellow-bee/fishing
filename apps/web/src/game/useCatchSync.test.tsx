@@ -24,7 +24,7 @@ function me(userId: string): Me {
     user: { id: userId, email: `${userId}@stillwater.test`, name: userId },
     profile: { userId, displayName: userId, points: 0, lifetimePoints: 0, strength: 1, accuracy: 1, patience: 1 },
     level: 1,
-    spots: { dock: true, reeds: false, point: false, dropoff: false, inlet: false },
+    spots: { dock: true, reeds: false, point: false, dropoff: false, inlet: false, open: false },
     catches: [],
     speciesStats: [],
     badges: [],

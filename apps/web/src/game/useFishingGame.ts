@@ -55,7 +55,7 @@ const INLET_LOCKED = {
 };
 
 function hintFromDataset(raw: string | undefined): AimHint | null {
-  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "shore") return raw;
+  if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "open" || raw === "shore") return raw;
   return null;
 }
 

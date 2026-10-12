@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { footHeight, stanceAt, walkableAt } from "@stillwater/shared";
+import { aboard, BOAT_DECK, boat, boatPathPoint, LANDING_STEP, stepBoat } from "./boat";
 import { anglerPose, shortestYaw } from "./pose";
 import { routeWish } from "./walkPath";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
+import { waterHeight } from "./water";
 
 const MOVE_KEYS = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
 const MAX_SPEED = 4.35;
@@ -33,6 +35,35 @@ function applyWalk(dx: number, dz: number) {
   }
   if (walkableAt(anglerPose.x, nz)) {
     anglerPose.z = nz;
+  }
+}
+
+/** In the boat: the angler goes where the hull goes, faces the bow while rowing, and rides the chop. */
+function rideBoat(dt: number, time: number) {
+  const rowing = boat.mode === "rowingOut" || boat.mode === "rowingBack";
+  const home = stepBoat(dt);
+  anglerPose.route = [];
+  anglerPose.vx = 0;
+  anglerPose.vz = 0;
+  anglerPose.moving = false;
+  anglerPose.bob = 0;
+  anglerPose.lean += (0 - anglerPose.lean) * (1 - Math.exp(-8 * dt));
+  anglerPose.pitch += (0 - anglerPose.pitch) * (1 - Math.exp(-4.5 * dt));
+  if (home) {
+    anglerPose.x = LANDING_STEP.x;
+    anglerPose.z = LANDING_STEP.z;
+    anglerPose.y = footHeight(LANDING_STEP.x, LANDING_STEP.z);
+    return;
+  }
+  const at = boatPathPoint(boat.u);
+  anglerPose.x = at.x;
+  anglerPose.z = at.z;
+  anglerPose.y = BOAT_DECK + waterHeight(at.x, at.z, time);
+  if (rowing) {
+    // The path's tangent points out to the anchor; coming home the bow swings round.
+    const heading = boat.mode === "rowingOut" ? at.yaw : at.yaw + Math.PI;
+    boat.yaw += shortestYaw(boat.yaw, heading) * (1 - Math.exp(-2.2 * dt));
+    anglerPose.yaw += shortestYaw(anglerPose.yaw, boat.yaw) * (1 - Math.exp(-3 * dt));
   }
 }
 
@@ -68,8 +99,17 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
     };
   }, []);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);
+    if (aboard()) {
+      rideBoat(dt, state.clock.elapsedTime);
+      if (wrap.current) {
+        // No casting from a boat still under way, even over the anchor.
+        wrap.current.dataset.stance = boat.mode === "anchored" ? stanceAt(anglerPose.x, anglerPose.z) : "trail";
+        wrap.current.dataset.angler = `${anglerPose.x.toFixed(3)},${anglerPose.z.toFixed(3)}`;
+      }
+      return;
+    }
     const walking = canWalk(phase);
     wish.set(0, 0, 0);
     if (walking && keys.current.size > 0) {
