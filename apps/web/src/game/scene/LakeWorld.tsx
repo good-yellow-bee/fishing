@@ -21,6 +21,7 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
 import { bedColor, bedHeight, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
 
 type Vec3 = [number, number, number];
@@ -255,13 +256,36 @@ function scatterRing(count: number, urls: readonly string[], seed: number, sprea
 }
 
 const TREE_URLS = [MODELS.pine, MODELS.pineDark, MODELS.pine, MODELS.oak, MODELS.fat, MODELS.pineDark, MODELS.oakDark] as const;
-const TREES = scatterRing(22, TREE_URLS, 3, 6, 3.4, 5.6);
-const BACK_TREES = scatterRing(14, [MODELS.pineDark, MODELS.oakDark, MODELS.pine], 57, 6, 4.6, 6.4).map((tree) => ({
-  ...tree,
-  position: [tree.position[0] * 1.18, tree.position[1], tree.position[2] * 1.24 - 1.5] as Vec3,
-}));
-const BUSHES = scatterRing(10, [MODELS.bushDetailed, MODELS.bushLarge], 11, 2.2, 1.1, 2.1);
-const GRASS = scatterRing(16, [MODELS.grass, MODELS.grassLarge], 23, 1.4, 1.2, 2.2);
+/** Nothing grows in the creek. Trees keep a wider berth since their crowns spread. */
+function offCreek(items: Scatter[], margin: number) {
+  return items.filter((item) => !nearCreek(item.position[0], item.position[2], margin));
+}
+
+const TREES = offCreek(scatterRing(22, TREE_URLS, 3, 6, 3.4, 5.6), 1.6);
+const BACK_TREES = offCreek(
+  scatterRing(14, [MODELS.pineDark, MODELS.oakDark, MODELS.pine], 57, 6, 4.6, 6.4).map((tree) => ({
+    ...tree,
+    position: [tree.position[0] * 1.18, tree.position[1], tree.position[2] * 1.24 - 1.5] as Vec3,
+  })),
+  1.6,
+);
+const BUSHES = offCreek(scatterRing(10, [MODELS.bushDetailed, MODELS.bushLarge], 11, 2.2, 1.1, 2.1), 0.4);
+const GRASS = offCreek(scatterRing(16, [MODELS.grass, MODELS.grassLarge], 23, 1.4, 1.2, 2.2), 0.2);
+
+/** Pines and oaks lining the creek, back from the water and off the inlet walk. */
+const CREEK_TREES: Scatter[] = [
+  { url: MODELS.oak, position: [-31.8, -0.08, -9.4], scale: 4.1, rot: 2.1 },
+  { url: MODELS.pine, position: [-24.6, -0.08, -13.6], scale: 4.8, rot: 1.4 },
+  { url: MODELS.oakDark, position: [-29.4, -0.08, -14.6], scale: 4.6, rot: 3.3 },
+  { url: MODELS.pineDark, position: [-35.2, -0.08, -16.8], scale: 5, rot: 0.3 },
+];
+
+const CREEK_GRASS: Scatter[] = [
+  { url: MODELS.grassLarge, position: [-23.1, -0.02, -7.6], scale: 1.6, rot: 0.9 },
+  { url: MODELS.grass, position: [-26.8, -0.02, -9.1], scale: 1.4, rot: 2.4 },
+  { url: MODELS.bushDetailed, position: [-25.4, -0.02, -12.1], scale: 1.2, rot: 1.1 },
+  { url: MODELS.grassLarge, position: [-30.6, -0.02, -11.0], scale: 1.5, rot: 3.6 },
+];
 
 const NEAR_GRASS: Scatter[] = [
   { url: MODELS.grassLarge, position: [-4.6, -0.02, 9.6], scale: 1.9, rot: 0.6 },
@@ -1156,6 +1180,75 @@ function ShorePath() {
   );
 }
 
+// Lengthwise streaks; V runs along the creek so scrolling it reads as flow.
+function makeCreekTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d")!;
+  ctx.fillStyle = "#f2f8f9";
+  ctx.fillRect(0, 0, 64, 128);
+  for (let i = 0; i < 14; i += 1) {
+    const x = 6 + jitter(i + 600) * 52;
+    const y = jitter(i + 640) * 128;
+    const len = 18 + jitter(i + 680) * 30;
+    ctx.strokeStyle = i % 3 === 0 ? "rgba(255,255,255,0.9)" : "rgba(180,210,214,0.75)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + (jitter(i + 720) - 0.5) * 4, y + len);
+    ctx.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  return texture;
+}
+
+function ribbonGeometry(halfWidth: number) {
+  const { positions, uvs, indices } = creekRibbon(halfWidth);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+/** The creek that feeds the inlet: a muddy bed, running water, rocks on the banks. */
+function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
+  const bank = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH + CREEK_BANK), []);
+  const water = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH), []);
+  const flow = useMemo(() => makeCreekTexture(), []);
+  useEffect(() => {
+    return () => {
+      bank.dispose();
+      water.dispose();
+      flow.dispose();
+    };
+  }, [bank, water, flow]);
+  useFrame((_, delta) => {
+    // Points run mouth first, so falling V carries the streaks down into the lake.
+    flow.offset.y += delta * 0.18;
+  });
+  return (
+    <group>
+      <mesh geometry={bank} position={[0, -0.03, 0]} receiveShadow>
+        <meshToonMaterial color={hour === "night" ? "#5a4c38" : "#86704f"} gradientMap={toonRamp()} />
+      </mesh>
+      <mesh geometry={water} position={[0, -0.012, 0]} receiveShadow>
+        <meshToonMaterial color={weather.water} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
+      </mesh>
+      {CREEK_ROCKS.map((rock, i) => (
+        <Rock key={i} position={[rock.x, rock.scale[1] * 0.45, rock.z]} scale={rock.scale} rotation={rock.rot} />
+      ))}
+      <Reeds count={6} origin={[-23.2, 0.03, -11.0]} />
+      <ScatterModels items={CREEK_TREES} />
+      <ScatterModels items={CREEK_GRASS} />
+    </group>
+  );
+}
+
 function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
   const keyPrefix = origin.join("-");
   return Array.from({ length: count }, (_, i) => (
@@ -1238,7 +1331,8 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       <ScatterModels items={BUSHES} />
       <ScatterModels items={GRASS} />
       <ScatterModels items={NEAR_GRASS} />
-      <Rock position={[-17.5, 0.45, 6.2]} scale={[1.7, 0.75, 1.15]} rotation={0.3} />
+      {/* In the shallows, off the shore line the inlet walk follows. */}
+      <Rock position={[-15.6, 0.3, 5.4]} scale={[1.2, 0.6, 0.9]} rotation={0.3} />
       <Rock position={[16.2, 0.5, 3.5]} scale={[1.4, 0.85, 1.1]} rotation={1.1} />
       <Rock position={[12.8, 0.3, -12.7]} scale={[1.1, 0.55, 0.8]} rotation={0.7} />
       <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
@@ -1247,6 +1341,7 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       <Shack />
       <ShorePath />
       <BankWalks />
+      <Creek hour={hour} weather={weather} />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (

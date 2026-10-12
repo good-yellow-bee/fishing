@@ -37,8 +37,8 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P14 | ~~Tracks on the shore (async presence)~~ (shipped) | social | S/M | C | — |
 | P15 | ~~Day-on-the-water recap → field-log trip~~ (shipped) | journal | M | C | #53 |
 | P16 | ~~Three-day forecast at the shack~~ (shipped) | retention | S | C | #53 |
-| P17 | Lure classes (keeps the field-log tie-in) | content | M | D | #50 |
-| P18 | Five new species + the Inlet bank | content | L | D | level unlocks |
+| P17 | ~~Lure classes (keeps the field-log tie-in)~~ (shipped) | content | M | D | #50 |
+| P18 | ~~Five new species + the Inlet bank~~ (shipped) | content | L | D | level unlocks |
 | P19 | Rowboat open-water stance | content | L | D | P18, landing lift |
 | P20 | Fight & landing camera | camera | M | E | landing lift, P8 |
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
@@ -226,7 +226,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** #50.
 - **Test:** `biteMix.test.ts` — popper at night adds nothing; nightcrawler at night favours catfish; unknown label falls back to the size rule.
 
-### P18 · Five new species + the Inlet bank
+### ~~P18 · Five new species + the Inlet bank~~ (shipped: crappie, largemouth, lake whitefish, walleye and a legendary ghost pike; the inlet opens at level 6 up the west shore, where a creek runs in and its current carries the float out from the mouth)
 - **Pitch:** walleye at dusk off the point, crappie under the dock at dawn, largemouth in the lilies, whitefish deep, a ghost pike in the fog — and a fifth bank where the creek comes in, level 6.
 - **Borrowed:** Stardew (location-specific fish lists); Animal Crossing (river-mouth species); Dredge (regions with their own catch).
 - **Why fun:** 13 species, the point holds three. Content runs out by level 5 and the queued level 6–8 unlocks need somewhere to point.
