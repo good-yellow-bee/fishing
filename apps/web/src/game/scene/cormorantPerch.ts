@@ -1,4 +1,5 @@
 import type { LakeHour, LakeSeason } from "@stillwater/shared";
+import type { Splash } from "./duckFlush";
 
 /**
  * A cormorant on a rock out in the far water: it stands with its wings
@@ -108,4 +109,23 @@ export function cormorantPose(time: number): CormorantPose {
     under: 0,
     swimming: climb < 0.5,
   };
+}
+
+/** A cast landing this close to the rock while it stands there sends it straight into the water. */
+export const CORMORANT_SCARE_RADIUS = 3.5;
+const SPLASH_FRESH_SEC = 0.6;
+
+/**
+ * The clock shift that makes it leave the rock now: `shift` is added to the
+ * frame time before `cormorantPose`. A fresh splash near the rock while it
+ * stands there (drying or folded) jumps the round to the hop; otherwise the
+ * shift stays as it was.
+ */
+export function cormorantStartle(time: number, shift: number, splash: Splash) {
+  const age = time - splash.at;
+  if (!(age >= 0 && age < SPLASH_FRESH_SEC)) return shift;
+  if (Math.hypot(splash.x - CORMORANT_ROCK.x, splash.z - CORMORANT_ROCK.z) >= CORMORANT_SCARE_RADIUS) return shift;
+  const t = (((time + shift) % CORMORANT_CYCLE) + CORMORANT_CYCLE) % CORMORANT_CYCLE;
+  if (t >= DRY_SEC + FOLD_SEC) return shift;
+  return shift + (DRY_SEC + FOLD_SEC - t);
 }

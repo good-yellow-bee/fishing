@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { grebePose } from "./grebeRush";
+import { lastSplash } from "./duckFlush";
+import { grebePose, grebesScared, grebeUnder } from "./grebeRush";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -26,8 +27,20 @@ export function Grebes() {
   const heads = useRef<(THREE.Group | null)[]>([]);
   const sprays = useRef<(THREE.Group | null)[]>([]);
   const yaws = useRef<(number | null)[]>([null, null]);
+  const dove = useRef({ at: Number.NEGATIVE_INFINITY, heard: Number.NEGATIVE_INFINITY });
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
+    // Each splash is looked at once; a close one sends the pair under together.
+    const d = dove.current;
+    if (lastSplash.at !== d.heard && time - lastSplash.at >= 0) {
+      if (grebesScared(lastSplash, time)) {
+        d.heard = lastSplash.at;
+        d.at = time;
+      } else if (time - lastSplash.at >= 0.6) {
+        d.heard = lastSplash.at;
+      }
+    }
+    const under = grebeUnder(time - d.at);
     for (const k of [0, 1] as const) {
       const bird = birds.current[k];
       if (!bird) continue;
@@ -38,8 +51,9 @@ export function Grebes() {
       const yaw = last + turn * Math.min(1, delta * (pose.rushing ? 12 : 2.5));
       yaws.current[k] = yaw;
       const surface = waterHeight(pose.x, pose.z, time);
-      bird.position.set(pose.x, surface - 0.05 + pose.upright * 0.12, pose.z);
-      bird.rotation.set(0, yaw, 0, "YXZ");
+      bird.visible = under < 1;
+      bird.position.set(pose.x, surface - 0.05 + pose.upright * 0.12 - under * 0.3, pose.z);
+      bird.rotation.set(under * 0.8, yaw, 0, "YXZ");
       const body = bodies.current[k];
       // Reared up, breast high, running on its feet.
       if (body) body.rotation.x = -pose.upright * 0.9;
@@ -51,7 +65,7 @@ export function Grebes() {
       }
       const spray = sprays.current[k];
       if (spray) {
-        spray.visible = pose.rushing;
+        spray.visible = pose.rushing && under === 0;
         spray.children.forEach((drop, i) => {
           const hop = (time * 6 + i * 0.27) % 1;
           drop.position.y = 0.03 + Math.sin(hop * Math.PI) * 0.12;

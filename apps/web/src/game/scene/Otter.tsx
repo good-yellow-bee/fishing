@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { pitchTurn } from "./bodyPitch";
 import { lastSplash } from "./duckFlush";
 import { otterPose, otterRoute, stepOtter, type OtterState } from "./otterMotion";
 import { toonRamp } from "./toon";
@@ -27,7 +28,7 @@ export function Otter() {
     otter.visible = pose.under < 1;
     // Rides low, only the head and a line of back above the water, with a little paddling bob.
     otter.position.set(pose.x, surface - 0.05 - pose.under * 0.3 + Math.sin(time * 5) * 0.012, pose.z);
-    otter.rotation.set(pose.pitch, pose.yaw, 0, "YXZ");
+    otter.rotation.set(pitchTurn(pose.pitch), pose.yaw, 0, "YXZ");
     if (ring.current && ringMaterial.current) {
       ring.current.visible = pose.ring >= 0;
       if (pose.ring >= 0) {

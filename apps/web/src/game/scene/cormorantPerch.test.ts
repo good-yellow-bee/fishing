@@ -10,6 +10,7 @@ import {
   HOP_SEC,
   ROCK_TOP,
   cormorantOut,
+  cormorantStartle,
   cormorantPose,
 } from "./cormorantPerch";
 import { SWAN_LOOP } from "./swanGlide";
@@ -59,5 +60,18 @@ describe("cormorant", () => {
     const nx = (CORMORANT_ROCK.x - SWAN_LOOP.x) / (SWAN_LOOP.rx + 3);
     const nz = (CORMORANT_ROCK.z - SWAN_LOOP.z) / (SWAN_LOOP.rz + 3);
     expect(Math.hypot(nx, nz)).toBeGreaterThan(1);
+  });
+
+  it("leaves the rock at once when a cast lands close, and only then", () => {
+    const time = 20;
+    const near = { x: CORMORANT_ROCK.x + 1, z: CORMORANT_ROCK.z, at: time - 0.1 };
+    const shift = cormorantStartle(time, 0, near);
+    expect(cormorantPose(time + shift).y).toBeCloseTo(ROCK_TOP, 5);
+    expect(cormorantPose(time + shift + HOP_SEC).swimming).toBe(true);
+    expect(cormorantStartle(time, 0, { ...near, at: time - 3 })).toBe(0);
+    expect(cormorantStartle(time, 0, { x: CORMORANT_ROCK.x + 8, z: CORMORANT_ROCK.z, at: time })).toBe(0);
+    // Already in the water: nothing changes.
+    const fishing = DRY_SEC + FOLD_SEC + HOP_SEC + 3;
+    expect(cormorantStartle(fishing, 0, { ...near, at: fishing })).toBe(0);
   });
 });

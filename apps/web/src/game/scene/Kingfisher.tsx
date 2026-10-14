@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { pitchTurn } from "./bodyPitch";
 import { lastSplash } from "./duckFlush";
 import { KINGFISHER_PERCH, kingfisherPose, stepKingfisher, type KingfisherState } from "./kingfisherFlight";
 import { useReducedMotion } from "./reducedMotion";
@@ -34,7 +35,7 @@ export function Kingfisher() {
     const pose = kingfisherPose(time, state.current, still);
     group.visible = !pose.hidden;
     group.position.set(pose.x, pose.y, pose.z);
-    group.rotation.set(pose.pitch, pose.yaw, 0, "YXZ");
+    group.rotation.set(pitchTurn(pose.pitch), pose.yaw, 0, "YXZ");
     // Folded along the body on the snag; out and beating fast in flight.
     const beat = still ? 0 : Math.sin(time * 40) * 0.7;
     const spread = pose.flying * (1.2 + beat);

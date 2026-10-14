@@ -24,6 +24,7 @@ export const PL_GAME: PlBook = {
   "Geese honk overhead": "Gęsi gęgają nad głową",
   "A beaver slaps its tail": "Bóbr klepie ogonem o wodę",
   "A swan hisses": "Łabędź syczy",
+  "Cast too close to the cormorant or the grebes and they slip under; the loon, otter and kingfisher now dive head first.": "Rzuć za blisko kormorana albo perkozów, a zanurkują; nur, wydra i zimorodek nurkują teraz głową w dół.",
   "A cormorant stands on a rock out in the lake drying its wings, and slips in now and then to fish.": "Kormoran stoi na kamieniu na jeziorze i suszy skrzydła, a co jakiś czas wślizguje się do wody na ryby.",
   "In spring, watch for a pair of grebes rearing up and rushing across the water side by side.": "Wiosną wypatruj pary perkozów, które stają dęba i pędzą ramię w ramię po wodzie.",
   "On spring and summer days, a pair of swans glides the far water, now and then tipping under to feed.": "Wiosną i latem za dnia para łabędzi sunie po dalekiej wodzie, co jakiś czas zanurzając głowę, by się pożywić.",
