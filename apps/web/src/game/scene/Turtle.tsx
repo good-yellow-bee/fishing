@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { lastSplash } from "./duckFlush";
+import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { BASKING_LOG, stepTurtle, turtleEntry, turtlePose, type TurtleState } from "./turtleMotion";
@@ -14,6 +15,23 @@ const LOG = "#6b5039";
 const LOG_END = "#a88a62";
 /** Drawn larger than life so it reads from the dock. */
 const TURTLE_SCALE = 2.6;
+
+const FEET = [
+  [0.08, 0.06],
+  [-0.08, 0.06],
+  [0.07, -0.07],
+  [-0.07, -0.07],
+] as const;
+
+/** The shell, its rim and the four feet never move apart, so they bake into one shape; the head stays apart to reach and tuck. */
+export function turtleShell() {
+  return mergePainted([
+    // A low domed shell over a pale rim, facing +z.
+    { geometry: new THREE.SphereGeometry(1, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), position: [0, 0.03, 0], scale: [0.09, 0.045, 0.11], color: SHELL },
+    { geometry: new THREE.SphereGeometry(1, 12, 6), position: [0, 0.03, 0], scale: [0.095, 0.012, 0.115], color: RIM },
+    ...FEET.map(([x, z]) => ({ geometry: new THREE.SphereGeometry(1, 6, 4), position: [x, 0.02, z] as const, scale: [0.028, 0.01, 0.02] as const, color: SKIN })),
+  ]);
+}
 
 /** The half-sunk log off the west bank: there all year, a turtle's seat on summer days. */
 export function BaskingLog() {
@@ -44,6 +62,15 @@ export function Turtle() {
   const head = useRef<THREE.Group>(null);
   const ring = useRef<THREE.Mesh>(null);
   const ringMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const shell = useMemo(turtleShell, []);
+  const painted = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  useEffect(
+    () => () => {
+      shell.dispose();
+      painted.dispose();
+    },
+    [shell, painted],
+  );
   const state = useRef<TurtleState>({ mode: "basking" });
   const still = useReducedMotion();
 
@@ -71,32 +98,13 @@ export function Turtle() {
   return (
     <>
       <group ref={body} name="turtle" scale={TURTLE_SCALE}>
-        {/* A low domed shell over a pale rim, facing +z. */}
-        <mesh position={[0, 0.03, 0]} scale={[0.09, 0.045, 0.11]}>
-          <sphereGeometry args={[1, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2]} />
-          <meshToonMaterial color={SHELL} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.03, 0]} scale={[0.095, 0.012, 0.115]}>
-          <sphereGeometry args={[1, 12, 6]} />
-          <meshToonMaterial color={RIM} gradientMap={toonRamp()} />
-        </mesh>
+        <mesh geometry={shell} material={painted} />
         <group ref={head} position={[0, 0.04, 0.11]}>
           <mesh scale={[0.026, 0.022, 0.034]}>
             <sphereGeometry args={[1, 8, 6]} />
             <meshToonMaterial color={SKIN} gradientMap={toonRamp()} />
           </mesh>
         </group>
-        {[
-          [0.08, 0.06],
-          [-0.08, 0.06],
-          [0.07, -0.07],
-          [-0.07, -0.07],
-        ].map(([x, z]) => (
-          <mesh key={`${x},${z}`} position={[x!, 0.02, z!]} scale={[0.028, 0.01, 0.02]}>
-            <sphereGeometry args={[1, 6, 4]} />
-            <meshToonMaterial color={SKIN} gradientMap={toonRamp()} />
-          </mesh>
-        ))}
       </group>
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
         <ringGeometry args={[0.32, 0.38, 24]} />

@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { pitchTurn } from "./bodyPitch";
 import { lastSplash } from "./duckFlush";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { KINGFISHER_PERCH, kingfisherPose, stepKingfisher, type KingfisherState } from "./kingfisherFlight";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -17,6 +18,29 @@ const WING = new THREE.BoxGeometry(0.005, 0.065, 0.04);
 /** Drawn about twice life size so the flash of blue reads from the dock. */
 const BIRD_SCALE = 2.2;
 
+/** The snag's trunk and branch, and the bird's body, belly, head, beak and tail, each bake into one shape. */
+export function kingfisherShapes() {
+  return {
+    // The snag: a bare stick leaning out of the water, the bird's perch at its tip.
+    snag: mergeParts([
+      {
+        geometry: new THREE.CylinderGeometry(0.025, 0.05, KINGFISHER_PERCH.y + 0.5, 6),
+        position: [KINGFISHER_PERCH.x + 0.12, KINGFISHER_PERCH.y / 2 - 0.25, KINGFISHER_PERCH.z],
+        rotation: [0, 0, 0.12],
+      },
+      { geometry: new THREE.CylinderGeometry(0.012, 0.02, 0.4, 5), position: [KINGFISHER_PERCH.x + 0.25, KINGFISHER_PERCH.y * 0.7, KINGFISHER_PERCH.z], rotation: [0, 0, -0.9] },
+    ]),
+    // Body along +z, the way the pose's yaw faces; it sits on the perch, so everything rides above y 0.
+    bird: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.045, 0], scale: [0.032, 0.036, 0.055], color: BACK },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.032, 0.008], scale: [0.028, 0.026, 0.045], color: BELLY },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.075, 0.04], scale: 0.028, color: BACK },
+      { geometry: new THREE.ConeGeometry(0.008, 0.055, 6), position: [0, 0.072, 0.09], rotation: [Math.PI / 2, 0, 0], color: BEAK },
+      { geometry: new THREE.ConeGeometry(0.012, 0.04, 5), position: [0, 0.045, -0.065], rotation: [-Math.PI / 2 - 0.3, 0, 0], color: BACK },
+    ]),
+  };
+}
+
 /** A bare snag off the east bank with a kingfisher on it; motion lives in kingfisherFlight.ts. */
 export function Kingfisher() {
   const bird = useRef<THREE.Group>(null);
@@ -25,6 +49,21 @@ export function Kingfisher() {
   const ring = useRef<THREE.Mesh>(null);
   const ringMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const state = useRef<KingfisherState>({ mode: "perched" });
+  const shapes = useMemo(kingfisherShapes, []);
+  const looks = useMemo(
+    () => ({
+      snag: new THREE.MeshToonMaterial({ color: SNAG, gradientMap: toonRamp() }),
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      wing: new THREE.MeshToonMaterial({ color: BACK, gradientMap: toonRamp() }),
+    }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      [shapes.snag, shapes.bird, looks.snag, looks.painted, looks.wing].forEach((thing) => thing.dispose());
+    },
+    [shapes, looks],
+  );
   const still = useReducedMotion();
 
   useFrame((frame) => {
@@ -53,47 +92,15 @@ export function Kingfisher() {
 
   return (
     <>
-      {/* The snag: a bare stick leaning out of the water, the bird's perch at its tip. */}
-      <mesh position={[KINGFISHER_PERCH.x + 0.12, KINGFISHER_PERCH.y / 2 - 0.25, KINGFISHER_PERCH.z]} rotation={[0, 0, 0.12]} castShadow>
-        <cylinderGeometry args={[0.025, 0.05, KINGFISHER_PERCH.y + 0.5, 6]} />
-        <meshToonMaterial color={SNAG} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[KINGFISHER_PERCH.x + 0.25, KINGFISHER_PERCH.y * 0.7, KINGFISHER_PERCH.z]} rotation={[0, 0, -0.9]}>
-        <cylinderGeometry args={[0.012, 0.02, 0.4, 5]} />
-        <meshToonMaterial color={SNAG} gradientMap={toonRamp()} />
-      </mesh>
+      <mesh geometry={shapes.snag} material={looks.snag} castShadow />
       <group ref={bird} name="kingfisher" scale={BIRD_SCALE}>
-        {/* Body along +z, the way the pose's yaw faces; it sits on the perch, so everything rides above y 0. */}
-        <mesh position={[0, 0.045, 0]} scale={[0.032, 0.036, 0.055]}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.032, 0.008]} scale={[0.028, 0.026, 0.045]}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={BELLY} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.075, 0.04]} scale={0.028}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.072, 0.09]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[0.008, 0.055, 6]} />
-          <meshBasicMaterial color={BEAK} />
-        </mesh>
-        <mesh position={[0, 0.045, -0.065]} rotation={[-Math.PI / 2 - 0.3, 0, 0]}>
-          <coneGeometry args={[0.012, 0.04, 5]} />
-          <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-        </mesh>
+        <mesh geometry={shapes.bird} material={looks.painted} />
         {/* Wings hinge at the shoulders; folded, they hang down the bird's sides, and swing out level to fly. */}
         <group ref={right} position={[0.028, 0.06, 0]}>
-          <mesh position={[0, -0.032, 0]} geometry={WING}>
-            <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-          </mesh>
+          <mesh position={[0, -0.032, 0]} geometry={WING} material={looks.wing} />
         </group>
         <group ref={left} position={[-0.028, 0.06, 0]}>
-          <mesh position={[0, -0.032, 0]} geometry={WING}>
-            <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-          </mesh>
+          <mesh position={[0, -0.032, 0]} geometry={WING} material={looks.wing} />
         </group>
       </group>
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
