@@ -1323,6 +1323,19 @@ kbd {
   border-left: 2px solid var(--amber);
 }
 
+/* The controller's aim cursor: a ring that sits over the water like the mouse would. */
+.pad-cursor {
+  position: fixed;
+  z-index: 30;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(18, 14, 10, 0.6);
+  pointer-events: none;
+}
+
 /* A golden fish: gold edge on the landed card and a gold word on the log row. */
 .landed-card.golden {
   border-left: 4px solid #c8961f;

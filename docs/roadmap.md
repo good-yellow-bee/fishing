@@ -358,13 +358,13 @@ Claude picked these after Wave H; the owner can reorder or drop any.
 | I2 | ~~Dragonflies over the reeds on warm days~~ (shipped) | wildlife | S/M |
 | I3 | ~~Ducks on the open water that scatter from a close cast~~ (shipped) | wildlife | M |
 | I4 | ~~Rare golden fish~~ (shipped) | collection | M/L |
-| I5 | Play with a gamepad | input | S/M |
+| I5 | ~~Play with a gamepad~~ (shipped) | input | S/M |
 
 - **I1 · Installable, opens offline.** A web manifest and icons so phones and desktops can install Stillwater, and a small service worker (production builds only) that keeps the app shell, built assets and models so the field log opens without a network. The lake itself needs the API, so offline it shows a card pointing to the field log instead of bouncing to sign-in. The API is never cached.
 - **I2 · Dragonflies.** The two figure-eight dragonflies by the dock become seven that hover and dart over the three reed beds, only on dry spring and summer days and evenings; pure position functions with tests, like the fireflies.
 - **I3 · Ducks.** The ducks already paddle their loops by day; a cast that lands close sends them flapping off, and they drift back later. Motion in pure functions with tests, like the heron.
 - **I4 · Golden fish.** About one fish in forty lands golden, rolled from a hash of the catch's request ID so the card, the server and offline retries agree. It pays double (stacking with the fish of the week), keeps a `golden` column, shows gold on the landed card, the held-up fish and the log, and earns the "Gold" badge. Older catches stay plain.
-- **I5 · Gamepad.** A connected controller aims with the left stick, casts and strikes with A, reels with the right trigger and walks banks with the shoulder buttons.
+- **I5 · Gamepad.** A connected controller walks with the left stick, aims with the right stick (an on-screen ring cursor), casts, strikes and reels with A or the right trigger, opens the shop with Y and closes panels with B. It replays as the same keys and pointer moves, so no game code forks.
 
 ## Risks / open questions for the owner
 
