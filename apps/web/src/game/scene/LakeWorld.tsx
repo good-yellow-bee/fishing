@@ -68,6 +68,8 @@ import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
+import { Osprey } from "./Osprey";
+import { ospreyOut } from "./ospreyFlight";
 import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
@@ -1908,6 +1910,7 @@ export const LakeWorld = memo(function LakeWorld({
       {otterOut(hour, season) && <Otter />}
       {beaverOut(hour, season) && <Beaver />}
       {butterfliesOut(hour, sky, season) && <Butterflies />}
+      {ospreyOut(hour, sky, season) && <Osprey />}
       {batsOut(hour, sky, season) && <Bats />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />

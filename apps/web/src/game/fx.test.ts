@@ -306,6 +306,17 @@ describe("beaver", () => {
   });
 });
 
+describe("osprey", () => {
+  it("splashes far off once the lake's sounds are going", () => {
+    fx.farSplash();
+    expect(tones).toHaveLength(0);
+    fx.ambient.start();
+    tones.length = 0;
+    fx.farSplash();
+    expect(tones.length).toBeGreaterThan(0);
+  });
+});
+
 describe("deer and ducklings", () => {
   it("snort and peep once the lake's sounds are going, and not before", () => {
     fx.snort();

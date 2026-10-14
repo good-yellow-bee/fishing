@@ -644,7 +644,7 @@ Claude picked these after Wave X; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~Y1~~ | ~~Icicles hang from the dock rails in winter~~ (#172) | weather | S |
 | ~~Y2~~ | ~~Butterflies flit along the shore on sunny summer days~~ (#173) | wildlife | S |
-| Y3 | An osprey circles high and now and then plunges for a fish | wildlife | M |
+| ~~Y3~~ | ~~An osprey circles high and now and then plunges for a fish~~ (#174) | wildlife | M |
 | Y4 | A thermos on the dock steams on cold mornings | props | S |
 | Y5 | Refresh the "New on the lake" card for Wave Y | onboarding | S |
 
