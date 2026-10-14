@@ -18,11 +18,31 @@ import { anglerPose, shortestYaw } from "./pose";
 import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
 import { capSnow } from "./capSnow";
+import { rodBowAmount, rodBowOffset, rodTipAt } from "./rodBow";
 import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 
 const CAP_SNOW_COLOR = "#eef3f6";
+/** The rod's tip, straight, in the grip's space. */
+const ROD_TIP_Y = 0.94;
+
+/** Bows every mesh of the rod by `amount` from its straight shape (see rodBow.ts). */
+function bendRod(rod: THREE.Object3D, amount: number) {
+  rod.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const straight = obj.userData.straight as Float32Array | undefined;
+    if (!straight) return;
+    const position = obj.geometry.getAttribute("position") as THREE.BufferAttribute;
+    let length = 0;
+    for (let i = 2; i < straight.length; i += 3) length = Math.max(length, straight[i]!);
+    for (let i = 0; i < position.count; i++) {
+      const z = straight[i * 3 + 2]!;
+      position.setXYZ(i, straight[i * 3]!, straight[i * 3 + 1]! - rodBowOffset(z, length, amount), z);
+    }
+    position.needsUpdate = true;
+  });
+}
 
 type Props = {
   phase: ScenePhase;
@@ -141,8 +161,17 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
   const rod = useMemo(() => {
     const next = rodFile.scene.clone(true);
     applyToon(next);
+    // Its own copy of the geometry, so the rod can bow under a fish without bending the cached model.
+    next.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry = obj.geometry.clone();
+        obj.userData.straight = (obj.geometry.getAttribute("position") as THREE.BufferAttribute).array.slice();
+      }
+    });
     return next;
   }, [rodFile.scene]);
+  const bow = useRef(0);
+  const shownBow = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -280,6 +309,17 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
         grip.current.rotation.z += (zTarget - grip.current.rotation.z) * (whipping ? 1 : 1 - Math.exp(-8 * delta));
       }
     }
+    // Under a fish the rod bows toward the line, more with tension and in a surge.
+    const bowTarget = fighting ? rodBowAmount(fightView.tension, fightView.surge) : 0;
+    bow.current += (bowTarget - bow.current) * (1 - Math.exp(-10 * delta));
+    if (Math.abs(bow.current - shownBow.current) > 0.002 || (bow.current < 0.002 && shownBow.current !== 0)) {
+      shownBow.current = bow.current < 0.002 ? 0 : bow.current;
+      bendRod(rod, shownBow.current);
+      if (tip.current) {
+        const at = rodTipAt(shownBow.current, ROD_TIP_Y);
+        tip.current.position.set(0, at.y, at.z);
+      }
+    }
     tip.current?.getWorldPosition(rodTip);
 
     if (playing.current !== next) {
@@ -304,7 +344,7 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
       <group ref={grip} rotation={[1.05, 0.05, ROD_REST_Z]}>
         <primitive object={rod} scale={0.19} />
         <Reel />
-        <object3D ref={tip} position={[0, 0.94, 0]} />
+        <object3D ref={tip} position={[0, ROD_TIP_Y, 0]} />
       </group>
     </group>
   );
