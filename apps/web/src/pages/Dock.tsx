@@ -17,6 +17,8 @@ import {
   lakeHourFromSearch,
   lakeSeason,
   seasonFromSearch,
+  LAKE_HOUR_LABELS,
+  SKY_LABELS,
   SEASON_LABELS,
   luresPacked,
   keepPlayTrip,
@@ -64,7 +66,8 @@ import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { oneDecimal, rarityLabel } from "../game/logic";
-import { t, tn, useT } from "../i18n";
+import { locale, t, tn, useT } from "../i18n";
+import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { bestBeatText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
@@ -339,6 +342,22 @@ export function DockPage() {
     shotFor.current = { seq: catchShot.seq, id: game.outcome.id, dataUrl: catchShot.dataUrl };
     pinPhoto(game.outcome.id);
   }, [catchShot, game.outcome, pinPhoto]);
+
+  const [shareError, setShareError] = useState(false);
+  useEffect(() => setShareError(false), [game.outcome]);
+  const savePicture = () => {
+    const outcome = game.outcome;
+    if (outcome?.kind !== "landed") return;
+    const now = new Date();
+    const photo = shotFor.current?.id === outcome.id ? shotFor.current.dataUrl : null;
+    const text = {
+      title: t(outcome.species.name),
+      detail: `${oneDecimal(outcome.weight)} lb · ${t(SPOT_LABELS[outcome.spot])}`,
+      conditions: [t(LAKE_HOUR_LABELS[hour]), t(SKY_LABELS[sky]), t(SEASON_LABELS[season])].join(" · "),
+      date: now.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
+    };
+    saveShareCard(text, photo, shareCardFileName(outcome.species.id, now)).catch(() => setShareError(true));
+  };
 
   const saveFieldLog = useCallback(() => {
     if (game.outcome?.kind !== "landed") return;
@@ -646,6 +665,14 @@ export function DockPage() {
               <Link className="panel-btn" to="/catches">
                 {t("Field log")}
               </Link>
+              <button className="panel-btn" type="button" onClick={savePicture}>
+                {t("Save picture")}
+              </button>
+              {shareError && (
+                <p className="warn" role="alert">
+                  {t("The picture could not be made in this browser.")}
+                </p>
+              )}
             </div>
           </div>
         )}

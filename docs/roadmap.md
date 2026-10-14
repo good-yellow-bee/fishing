@@ -338,7 +338,7 @@ Claude picked these after Wave G; the owner can reorder or drop any.
 |---|---|---|---|
 | H1 | ~~Load the 3D lake on demand~~ (shipped) | perf | S/M |
 | H2 | ~~A heron wades the reed shallows~~ (shipped) | wildlife | M |
-| H3 | Save the landed card as a picture | share | S/M |
+| H3 | ~~Save the landed card as a picture~~ (shipped) | share | S/M |
 | H4 | ~~Tension bar that reads without colour~~ (shipped) | a11y | S |
 | H5 | Species of the week on the weekly board | retention | M |
 

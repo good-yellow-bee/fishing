@@ -287,6 +287,8 @@ export const PL_GAME: PlBook = {
   Easy: "Luźno",
   Tight: "Napięta",
   "Too tight": "Za mocno",
+  "Save picture": "Zapisz obrazek",
+  "The picture could not be made in this browser.": "Ta przeglądarka nie zdołała zrobić obrazka.",
   "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
   "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
   "Settings|hud": "Opcje",
