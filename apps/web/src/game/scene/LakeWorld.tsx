@@ -27,7 +27,7 @@ import { DockRain } from "./DockRain";
 import { DockSnow } from "./DockSnow";
 import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
-import { DUCKLING_COUNT, ducklingAt, ducklingsOut } from "./ducklingTrail";
+import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
 import { ReedFluff } from "./ReedFluff";
 import { fluffOut } from "./cattailTufts";
@@ -73,6 +73,7 @@ import { starOpacity } from "./starField";
 import { Stars } from "./Stars";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
+import { fx } from "../fx";
 import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
@@ -1315,6 +1316,7 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
   const ducklings = useRef<Array<THREE.Group | null>>([]);
   const chick = useMemo(() => new THREE.Vector3(), []);
   const chickAhead = useMemo(() => new THREE.Vector3(), []);
+  const nextPeep = useRef(DUCKLING_PEEP_MIN);
   const ripple = useRef<THREE.Group>(null);
   const rippleMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const leftWing = useRef<THREE.Group>(null);
@@ -1340,7 +1342,11 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
       now.mode === "flushed" ? duckFlush(time - now.since, now.from, now.dir) : now.mode === "returning" ? duckReturn(time - now.since, position, now.dir) : null;
     duck.visible = now.mode !== "away";
     const flying = flight !== null;
-    // The ducklings paddle in her wake; when she is flushed they hide in the reeds until she is back.
+    // The ducklings paddle in her wake, peeping now and then; when she is flushed they hide in the reeds until she is back.
+    if (showBrood && now.mode === "paddling" && time >= nextPeep.current) {
+      fx.peep();
+      nextPeep.current = time + DUCKLING_PEEP_MIN + Math.random() * DUCKLING_PEEP_SPREAD;
+    }
     ducklings.current.forEach((duckling, k) => {
       if (!duckling) return;
       duckling.visible = now.mode === "paddling";

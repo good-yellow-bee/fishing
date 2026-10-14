@@ -4,6 +4,10 @@ import type { LakeSeason } from "@stillwater/shared";
 export const DUCKLING_COUNT = 4;
 export const DUCKLING_GAP = 0.026;
 
+/** Seconds between peeps: at least the first, plus up to the second. */
+export const DUCKLING_PEEP_MIN = 3;
+export const DUCKLING_PEEP_SPREAD = 5;
+
 /** Spring broods only. */
 export function ducklingsOut(season: LakeSeason) {
   return season === "spring";

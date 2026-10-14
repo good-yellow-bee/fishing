@@ -551,6 +551,21 @@ export const fx = {
       BELL_PARTIALS.forEach((partial, i) => tone("sine", pitch * partial, pitch * partial * 0.998, 0.5 / (i + 1), loud / (i + 1.5), when));
     });
   },
+  /** A spooked deer's snort from the far bank: two short, breathy blasts. Quiet until the lake's sounds have started. */
+  snort() {
+    if (!this.enabled || !lapSrc) return;
+    noiseBurst("bandpass", 1100, 380, 0.16, 0.03, 0, natureBus());
+    noiseBurst("bandpass", 950, 340, 0.12, 0.018, 0.24, natureBus());
+  },
+  /** A duckling or two peeping: thin, high, rising notes. Quiet until the lake's sounds have started. */
+  peep() {
+    if (!this.enabled || !lapSrc) return;
+    const notes = 1 + Math.floor(Math.random() * 3);
+    for (let n = 0; n < notes; n += 1) {
+      const base = 3000 + Math.random() * 500;
+      tone("sine", base, base * 1.15, 0.07, 0.0045, n * (0.14 + Math.random() * 0.08), 0, natureBus());
+    }
+  },
   /**
    * Thunder `when` seconds from now: low-passed noise that rolls and grumbles away. A near strike (1) opens on a
    * sharp crack and rolls louder; a far one (0) is only a low rumble. Quiet until the lake's sounds have started.

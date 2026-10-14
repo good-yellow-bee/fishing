@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
+import { fx } from "../fx";
 import { lastSplash } from "./duckFlush";
 import { deerPose, stepDeer, type DeerState } from "./deerMotion";
 import { useReducedMotion } from "./reducedMotion";
@@ -49,7 +50,9 @@ export function Deer() {
     const deer = body.current;
     if (!deer) return;
     const time = frame.clock.elapsedTime;
-    state.current = stepDeer(state.current, time, lastSplash, still);
+    const next = stepDeer(state.current, time, lastSplash, still);
+    if (next.mode === "fled" && state.current.mode !== "fled") fx.snort();
+    state.current = next;
     const pose = deerPose(time, state.current, still);
     deer.visible = !pose.hidden;
     deer.position.set(pose.x, 0, pose.z);

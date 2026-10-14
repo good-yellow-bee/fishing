@@ -288,3 +288,26 @@ describe("rod bell", () => {
     expect(tones).toHaveLength(0);
   });
 });
+
+describe("deer and ducklings", () => {
+  it("snort and peep once the lake's sounds are going, and not before", () => {
+    fx.snort();
+    fx.peep();
+    expect(tones).toHaveLength(0);
+    fx.ambient.start();
+    tones.length = 0;
+    fx.peep();
+    expect(tones.length).toBeGreaterThan(0);
+    expect(Math.min(...tones)).toBeGreaterThanOrEqual(3000);
+  });
+
+  it("stay quiet when sound is off", () => {
+    fx.ambient.start();
+    tones.length = 0;
+    fx.enabled = false;
+    fx.peep();
+    fx.snort();
+    fx.enabled = true;
+    expect(tones).toHaveLength(0);
+  });
+});
