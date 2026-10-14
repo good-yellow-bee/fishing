@@ -570,13 +570,13 @@ Claude picked these after Wave T; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| U1 | A deer comes down to drink on the far bank at dawn and dusk | wildlife | M |
+| ~~U1~~ | ~~A deer comes down to drink on the far bank at dawn and dusk~~ (#157) | wildlife | M |
 | U2 | Water striders skating in the calm shallows by the dock | wildlife | S |
 | U3 | Autumn mist curling off the water at dawn | weather | S/M |
 | U4 | Cattail fluff drifting on the breeze in late summer | weather | S |
 | U5 | Refresh the "New on the lake" card for Wave U | onboarding | S |
 
-- **U1 · Deer.** Now and then at dawn or dusk a deer steps out of the far treeline, walks down to the water, lowers its head to drink with small rings at its muzzle, and heads back. A cast landing near it sends it bounding off. Not in winter storms; still under Reduce motion.
+- **U1 · Deer.** Once every 75 seconds at dawn and dusk (not in rain) a deer walks out of the far treeline to the water's edge, turns side-on and drinks, looking up now and then, with small rings at its muzzle, then walks back. A cast landing within 7 m sends it bounding off until its next visit. Reduce motion keeps it standing with its head up.
 - **U2 · Water striders.** On calm days outside winter a few striders skate in short darts on the still water just off the dock, each foot dimpling the surface. Gone in rain or wind.
 - **U3 · Morning mist.** At dawn in fall, low wisps of mist drift slowly across the water and thin out as they go. Lite effects keep half; off with Reduce motion's drift (they hold still).
 - **U4 · Cattail fluff.** In late summer and fall, white tufts lift from the reeds and float downwind over the water with the day's wind.
