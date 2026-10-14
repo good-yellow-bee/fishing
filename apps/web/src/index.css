@@ -1894,6 +1894,37 @@ kbd {
     max-height: calc(100% - 140px);
     overflow-y: auto;
   }
+
+  .landed-card h2 {
+    font-size: 24px;
+  }
+
+  .landed-card .guide-fish {
+    width: 76px;
+    margin-bottom: 4px;
+  }
+
+  .landed-card .catch-best {
+    margin-bottom: 8px;
+    padding: 8px 10px 6px;
+  }
+
+  /* Two buttons a row, so long Polish labels do not stack the actions out of view. */
+  .landed-card .catch-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .landed-card .catch-actions .catch-stamp,
+  .landed-card .catch-actions .warn {
+    grid-column: 1 / -1;
+  }
+
+  .landed-card .catch-actions .panel-btn {
+    margin-top: 0;
+    padding-inline: 6px;
+    text-align: center;
+  }
 }
 .catch-sync {
   position: absolute;
