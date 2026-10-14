@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, fx, onLoonCall, onOwlHoot } from "./fx";
+import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, drumKnocks, fx, onLoonCall, onOwlHoot } from "./fx";
 
 const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} });
 const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
@@ -87,7 +87,19 @@ describe("ambient conditions", () => {
     expect(ambientProfile("dawn", "overcast", "fall")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
-    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true, owls: true });
+    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true, owls: true, woodpecker: false });
+  });
+
+  it("drums a woodpecker on dry mornings and days outside winter, in a quick roll that slows at the end", () => {
+    expect(ambientProfile("dawn", "clear", "summer").woodpecker).toBe(true);
+    expect(ambientProfile("day", "overcast", "fall").woodpecker).toBe(true);
+    expect(ambientProfile("day", "rain", "summer").woodpecker).toBe(false);
+    expect(ambientProfile("day", "clear", "winter").woodpecker).toBe(false);
+    expect(ambientProfile("dusk", "clear", "summer").woodpecker).toBe(false);
+    const knocks = drumKnocks(16);
+    expect(knocks).toHaveLength(16);
+    expect(knocks[1]! - knocks[0]!).toBeLessThan(knocks[15]! - knocks[14]!);
+    expect(knocks[15]!).toBeLessThan(1.5);
   });
 
   it("follows the season: geese over in fall, a chickadee and the wind in winter, quiet winter nights", () => {

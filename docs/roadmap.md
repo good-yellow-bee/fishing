@@ -714,8 +714,8 @@ Claude picked these after Wave AB; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~AC1~~ | ~~Northern lights on some clear winter and fall nights, low over the far shore and mirrored in the water~~ (#183) | scene | M |
 | ~~AC2~~ | ~~A skein of geese crosses high over the far shore in fall, mirrored in the lake~~ (#184) | scene | S/M |
-| AC3 | A woodpecker drums in the woods on mornings, with a caption | sound | S |
-| AC4 | Refresh the "New on the lake" card for Wave AC | onboarding | S |
+| ~~AC3~~ | ~~A woodpecker drums in the woods on mornings, with a caption~~ (#185) | sound | S |
+| ~~AC4~~ | ~~Refresh the "New on the lake" card for Wave AC~~ (#185) | onboarding | S |
 
 - **AC1 · Northern lights.** On a few seeded clear nights in fall and winter, green curtains shimmer low over the far treeline. The dock camera sees little sky, so the lake's mirror carries most of it.
 - **AC2 · Geese skein.** Swallows already fly on summer days (Swallows.tsx), so this slot went to fall geese instead. A V of geese crosses high over the far shore soon after you arrive, then again when the geese honk. The dock sees little sky, so their mirror image crossing the lake carries it.
@@ -723,6 +723,17 @@ Claude picked these after Wave AB; the owner can reorder or drop any.
 - **AC4 · What's new, again.** List whatever Wave AC lands on the card.
 
 Claude checks each against what already exists before building and swaps any that are already there.
+
+## Wave AD — Leftover fixes from the review (added 2026-10-14, after Wave AC shipped)
+
+Claude picked these after Wave AC from the review's "smaller fixes" list. Some may already be fixed, so each is checked first and dropped if so.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AD1 | The lake hour moves on while you play instead of freezing at page load | fix | S |
+| AD2 | Charging a cast stops re-rendering the whole page every frame | performance | S/M |
+| AD3 | The lure picker gives Space back to casting after you choose | fix | S |
+| AD4 | The first game save no longer seeds the sample logbook | fix | S |
 
 ## Risks / open questions for the owner
 
