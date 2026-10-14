@@ -484,13 +484,31 @@ Claude picked these after Wave O; the owner can reorder or drop any.
 | ~~P2~~ | ~~Autumn leaves drifting down onto the water~~ (#138) | seasons | M |
 | ~~P3~~ | ~~A mayfly hatch on spring and summer evenings~~ (#139) | wildlife | M |
 | ~~P4~~ | ~~Water lilies in flower through the summer~~ (#139) | seasons | S |
-| P5 | Refresh the "New on the lake" card for Waves O and P | onboarding | S |
+| ~~P5~~ | ~~Refresh the "New on the lake" card for Waves O and P~~ (#140) | onboarding | S |
 
 - **P1 · Keys card.** "?" (and a Settings button) opens a small card listing every key and pad button: Space, the mouse, W A S D, E, H, Escape. Escape or "?" closes it.
 - **P2 · Falling leaves.** In fall, now and then a leaf spins down from the shore trees and settles on the water, drifting with the day's wind before it sinks. Fewer with Effects set to Lite.
 - **P3 · Mayfly hatch.** Whenever the evening rise is on (calm or light-wind dry dusks in spring and summer), small pale flies dance over the water in reach of the bank, a quick climb and a slow parachute down, among the rising fish.
 - **P4 · Lilies in flower.** The lily pads by the reeds carry white and pink flowers in summer, a few buds in late spring, and none in fall or winter.
 - **P5 · What's new, again.** Bump the card's batch to list titles, photo mode, storms and the otter, plus whatever Wave P lands.
+
+## Wave Q — More life in the sky (added 2026-10-14, after Wave P shipped)
+
+Claude picked these after Wave P; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| Q1 | A rainbow when the sun breaks through the rain | sky | S/M |
+| Q2 | Bats hawking over the water on summer nights | wildlife | M |
+| Q3 | A kingfisher that perches on the reeds and dives | wildlife | M |
+| Q4 | Swallows skimming the lake on warm summer days | wildlife | M |
+| Q5 | Refresh the "New on the lake" card for Wave Q | onboarding | S |
+
+- **Q1 · Rainbow.** On rain days, in the morning and late afternoon when the sun sits low, a soft rainbow arc stands in the sky across from the sun. Hidden at night, in fog, and in winter.
+- **Q2 · Bats.** From dusk into the night in summer (and warm spring nights), a few small bats flicker low over the water in jinking loops. Fewer with Effects set to Lite, still with Reduce motion.
+- **Q3 · Kingfisher.** On calm days outside winter, a bright blue bird sits on a reed stem near the bank, now and then drops into the water with a tiny splash and flies back. It leaves for a while if a lure lands close.
+- **Q4 · Swallows.** On warm, dry summer days, a handful of swallows sweep low over the lake in long arcs, dipping to the surface now and then. They stay away in rain and wind.
+- **Q5 · What's new, again.** List whatever Wave Q lands on the card.
 
 ## Risks / open questions for the owner
 
