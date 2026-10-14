@@ -645,14 +645,32 @@ Claude picked these after Wave X; the owner can reorder or drop any.
 | ~~Y1~~ | ~~Icicles hang from the dock rails in winter~~ (#172) | weather | S |
 | ~~Y2~~ | ~~Butterflies flit along the shore on sunny summer days~~ (#173) | wildlife | S |
 | ~~Y3~~ | ~~An osprey circles high and now and then plunges for a fish~~ (#174) | wildlife | M |
-| Y4 | A thermos on the dock steams on cold mornings | props | S |
-| Y5 | Refresh the "New on the lake" card for Wave Y | onboarding | S |
+| ~~Y4~~ | ~~A thermos on the dock steams on cold mornings~~ (#175) | props | S |
+| ~~Y5~~ | ~~Refresh the "New on the lake" card for Wave Y~~ (#175) | onboarding | S |
 
 - **Y1 · Icicles.** In winter a row of short icicles hangs under the dock's edge and rails, catching the light.
 - **Y2 · Butterflies.** On clear summer days a few butterflies flutter low along the near banks and over the lily pads.
 - **Y3 · Osprey.** On clear days an osprey circles high over the lake; every few minutes it folds, plunges with a splash, and climbs away, sometimes with a fish.
 - **Y4 · Thermos.** A thermos stands on the dock beside the angler; on cold dawns and in winter a wisp of steam curls from its cup.
 - **Y5 · What's new, again.** List whatever Wave Y lands on the card.
+
+## Wave Z — Small comforts and night life (added 2026-10-14, after Wave Y shipped)
+
+Claude picked these after Wave Y; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| Z1 | Moths flutter round the dock lanterns after dark | wildlife | S |
+| Z2 | Puddles on the shore path shimmer after rain | weather | S |
+| Z3 | The angler sips from the thermos cup now and then while waiting | angler | S/M |
+| Z4 | A fox trots along the far bank at dusk and night | wildlife | M |
+| Z5 | Refresh the "New on the lake" card for Wave Z | onboarding | S |
+
+- **Z1 · Moths.** After dark, when the dock lanterns are lit, a few pale moths circle each lantern in jittery loops.
+- **Z2 · Puddles.** During and after rain, a few shallow puddles on the near shore path catch the sky and ripple as drops hit them.
+- **Z3 · A sip.** While the float sits and nothing is biting, the angler sometimes lifts the thermos cup for a sip and sets it back down.
+- **Z4 · Fox.** At dusk and at night a red fox now and then trots along the far bank, stops to look across the water, and slips away into the trees.
+- **Z5 · What's new, again.** List whatever Wave Z lands on the card.
 
 ## Risks / open questions for the owner
 
