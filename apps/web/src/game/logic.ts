@@ -20,6 +20,7 @@ import {
   type Profile,
   type Sky,
   type SpotId,
+  HOT_BANK_WAIT,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -163,9 +164,12 @@ export function hookWindowMs(accuracy: number, mercy = false) {
   return 1000 + accuracy * 100 + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false) {
   const base = 2200 + Math.random() * 3800;
-  const wait = Math.max(1100, base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level));
+  const wait = Math.max(
+    1100,
+    base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1),
+  );
   return mercy ? Math.min(wait, MERCY_WAIT_MAX_MS) : wait;
 }
 
