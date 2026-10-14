@@ -76,6 +76,7 @@ import { swansOut } from "./swanGlide";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
+import { duckShape, ducklingShape } from "./duckShapes";
 import { fastVertexNormals } from "./waterNormals";
 import { fishBuild } from "./fishBuild";
 import { swallowsOut } from "./swallowFlight";
@@ -532,10 +533,6 @@ const FLOCKS: FlockProps[] = [
   { y: 18, z: -32, speed: 1.1, offset: 20, dir: 1, birds: [[0, 0, 0], [-1.3, 0.4, 0.9], [1.2, 0.25, -0.8], [-2.4, -0.1, -0.6]] },
   { y: 15.5, z: -18, speed: 0.85, offset: 68, dir: -1, birds: [[0, 0, 0], [1.4, 0.35, 0.7], [-1.2, 0.2, -0.9]] },
 ];
-
-/** Downy yellow-brown ducklings with darker caps. */
-const DUCKLING_DOWN = "#d9b45a";
-const DUCKLING_HEAD = "#7a5a2e";
 
 type DuckProps = { points: Vec3[]; speed: number; phase: number; body: string; head: string; brood?: boolean };
 
@@ -1361,6 +1358,22 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
   const leftWing = useRef<THREE.Group>(null);
   const rightWing = useRef<THREE.Group>(null);
   const flush = useRef<DuckState>({ mode: "paddling" });
+  const shapes = useMemo(
+    () => ({
+      duck: duckShape(body, head),
+      duckling: ducklingShape(),
+      wing: new THREE.BoxGeometry(1, 1, 1),
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      feathers: new THREE.MeshToonMaterial({ color: body, gradientMap: toonRamp() }),
+    }),
+    [body, head],
+  );
+  useEffect(
+    () => () => {
+      Object.values(shapes).forEach((thing) => thing.dispose());
+    },
+    [shapes],
+  );
   const curve = useMemo(() => new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)), true, "catmullrom", 0.4), [points]);
   const position = useMemo(() => new THREE.Vector3(), []);
   const tangent = useMemo(() => new THREE.Vector3(), []);
@@ -1429,45 +1442,17 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
               ducklings.current[k] = duckling;
             }}
           >
-            <mesh position={[0, 0.05, 0]} scale={[0.08, 0.065, 0.11]} castShadow={false}>
-              <sphereGeometry args={[1, 8, 6]} />
-              <meshToonMaterial color={DUCKLING_DOWN} gradientMap={toonRamp()} />
-            </mesh>
-            <mesh position={[0, 0.12, 0.08]} scale={0.05} castShadow={false}>
-              <sphereGeometry args={[1, 8, 6]} />
-              <meshToonMaterial color={DUCKLING_HEAD} gradientMap={toonRamp()} />
-            </mesh>
-            <mesh position={[0, 0.115, 0.135]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
-              <coneGeometry args={[0.018, 0.04, 5]} />
-              <meshToonMaterial color="#c98f32" gradientMap={toonRamp()} />
-            </mesh>
+            <mesh geometry={shapes.duckling} material={shapes.painted} castShadow={false} />
           </group>
         ))}
-      <group ref={ref}>
-        <mesh position={[0, 0.09, 0]} scale={[0.19, 0.15, 0.3]} castShadow={false}>
-          <sphereGeometry args={[1, 12, 9]} />
-          <meshToonMaterial color={body} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.26, 0.2]} scale={0.1} castShadow={false}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={head} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.25, 0.32]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
-          <coneGeometry args={[0.035, 0.09, 6]} />
-          <meshToonMaterial color="#d8a13c" gradientMap={toonRamp()} />
-        </mesh>
+      <group ref={ref} name="duck">
+        <mesh geometry={shapes.duck} material={shapes.painted} castShadow={false} />
         {/* Wings only show in flight, hinged at the shoulders. */}
         <group ref={leftWing} position={[0.12, 0.14, 0.02]} visible={false}>
-          <mesh position={[0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshToonMaterial color={body} gradientMap={toonRamp()} />
-          </mesh>
+          <mesh geometry={shapes.wing} material={shapes.feathers} position={[0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false} />
         </group>
         <group ref={rightWing} position={[-0.12, 0.14, 0.02]} visible={false}>
-          <mesh position={[-0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshToonMaterial color={body} gradientMap={toonRamp()} />
-          </mesh>
+          <mesh geometry={shapes.wing} material={shapes.feathers} position={[-0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false} />
         </group>
         <group ref={ripple} position={[0, -0.02, -0.18]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
