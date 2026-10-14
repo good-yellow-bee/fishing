@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { turtleShell } from "./Turtle";
+import { baskingLogShape, turtleShell } from "./Turtle";
+import { BASKING_LOG } from "./turtleMotion";
 
 describe("turtleShell", () => {
   it("bakes the shell, rim and four feet into one shape in three colours", () => {
@@ -10,5 +11,14 @@ describe("turtleShell", () => {
     expect(tones.size).toBe(3);
     shell.computeBoundingBox();
     expect(shell.boundingBox!.max.x).toBeGreaterThan(0.1);
+  });
+});
+
+describe("basking log", () => {
+  it("bakes the log and its branch into one shape", () => {
+    const wood = baskingLogShape();
+    wood.computeBoundingBox();
+    expect(wood.boundingBox!.max.x).toBeCloseTo(BASKING_LOG.length / 2, 3);
+    expect(wood.boundingBox!.max.y).toBeGreaterThan(0.19);
   });
 });

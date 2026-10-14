@@ -1005,6 +1005,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BM1~~ | ~~The thermos and its cup bake into one painted shape each, and the reel's spool and crank bake into one each, so they cost 5 draws instead of 12~~ (#226) | perf | S |
 | ~~BM2~~ | ~~Winter dock footprints and post snow caps bake into one shape each, and the three bank-stand posts into one shadow caster (16 draws down to 3)~~ (#227) | perf | S |
+| ~~BM3~~ | ~~The windsock's three stripes bake into one painted shape and the basking log into one with its branch (3 casters down to 1, 3 draws down to 2 by the log)~~ (#228) | perf | S |
 
 ## Risks / open questions for the owner
 
