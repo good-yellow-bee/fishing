@@ -132,6 +132,25 @@ export function waitNod(x: number, z: number, time: number) {
   };
 }
 
+/** How heavy a fish nibbles, 0 a light tapper (half a pound and under) to 1 a heavy dipper (16 lb and up). */
+export function nibbleHeft(weight: number) {
+  if (!(weight > 0)) return 0;
+  return Math.min(1, Math.max(0, (Math.log2(weight) + 1) / 5));
+}
+
+/**
+ * The float's height while a fish nibbles, by its weight: small fish give it
+ * quick, shallow taps; big ones pull it down in a slow, heavy dip. Only how
+ * it looks; the bite comes when it always did.
+ */
+export function nibbleBob(time: number, weight: number) {
+  const heft = nibbleHeft(weight);
+  const depth = 0.06 + heft * 0.08;
+  const rate = 30 - heft * 18;
+  const swing = 0.04 - heft * 0.01;
+  return -depth + Math.sin(time * rate) * swing;
+}
+
 /** How far a nibble dips and shivers the rod tip, radians of pitch. */
 export const NIBBLE_DIP = 0.035;
 export const NIBBLE_SHIVER = 0.022;

@@ -89,7 +89,7 @@ import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag 
 import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd, leapLift } from "./fightFish";
-import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
+import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, nibbleBob, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld";
 import { clearDistance, easePull } from "./cameraClear";
 import { PlayerMove } from "./Player";
@@ -269,6 +269,7 @@ function placeBobber(
   aim: THREE.Vector3 | null,
   nibble: boolean,
   level: number,
+  weight = 0,
 ) {
   if (aim) {
     out.x = aim.x;
@@ -281,7 +282,7 @@ function placeBobber(
   }
   if (phase === "fight") out.y = -0.14;
   else if (phase === "hookset") out.y = 0.07;
-  else if (nibble) out.y = -0.08 + Math.sin(t * 26) * 0.05;
+  else if (nibble) out.y = nibbleBob(t, weight);
   else out.y = 0.07 + Math.sin(t * 2.4) * 0.04;
 }
 
@@ -1264,7 +1265,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       else if (!aiming && usingAim.current) lookAt.copy(castAim);
       return;
     }
-    placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble, level);
+    placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble, level, weight);
     if (phase === "hookset" || phase === "fight") {
       target.x += heldShift.current.x;
       target.z += heldShift.current.z;

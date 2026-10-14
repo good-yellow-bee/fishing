@@ -607,13 +607,13 @@ Claude picked these after Wave V, turning from scenery back to the fishing itsel
 | # | Title | Area | Size |
 |---|---|---|---|
 | W1 | Line spray: drops flick off the line when a fish surges | fight | S |
-| W2 | The float bobs and dips in a pattern by species before the bite | bite | S/M |
+| ~~W2~~ | ~~The float bobs and dips in a pattern by fish size before the bite~~ (#166) | bite | S/M |
 | W3 | A thrashing fish at the net sends up splashes and spray | landing | S |
 | ~~W4~~ | ~~Rod tip shivers on a nibble even when the float is out of view~~ (#165) | bite | S |
 | W5 | Refresh the "New on the lake" card for Wave W | onboarding | S |
 
 - **W1 · Line spray.** While a fish surges and the line is under high tension, a few bright drops flick off the line near the water. Off with Reduce motion; Lite effects keep half.
-- **W2 · Species nibbles.** Before the bite, small fish give quick, fidgety taps, while big ones give slow, heavy dips, so a watchful angler can guess what's coming. No change to bite timing or the catch odds.
+- **W2 · Nibbles by size.** Before the bite, small fish (half a pound and under) give the float quick, shallow taps, while big ones (up to 16 lb and over) pull it down in a slower, deeper dip, so a watchful angler can guess what's coming. Keyed to the rolled fish's weight rather than its species, since weight is what a float feels. No change to bite timing or the catch odds.
 - **W3 · Splashy landing.** As the fish comes to the net it thrashes, throwing small splashes and a ring or two.
 - **W4 · Rod tip shiver.** Each nibble also gives the rod tip a small, quick shiver, readable when the float is far away or hard to see.
 - **W5 · What's new, again.** List whatever Wave W lands on the card.
