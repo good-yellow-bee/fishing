@@ -101,6 +101,7 @@ let windLfo: OscillatorNode | null = null;
 let windGain: GainNode | null = null;
 let geeseTimer = 0;
 let frogTimer = 0;
+let owlTimer = 0;
 let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
 let ambientSeason: LakeSeason = "summer";
@@ -126,6 +127,8 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
     // Peepers and green frogs call from the reeds on warm evenings, rain or not.
     frogs: (hour === "dusk" || hour === "night") && (season === "spring" || season === "summer"),
     wind: winter,
+    // The owl on the far bank calls through the night, all but winter.
+    owls: night && !winter,
   };
 }
 
@@ -175,6 +178,44 @@ function chirp() {
   tone("sine", base, base * 1.5, 0.09, 0.012);
   tone("sine", base * 1.2, base * 1.9, 0.08, 0.01, 0.13);
   wildlifeTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
+}
+
+const owlListeners = new Set<() => void>();
+
+/** Runs `listener` each time the owl hoots; returns the unsubscribe. */
+export function onOwlHoot(listener: () => void) {
+  owlListeners.add(listener);
+  return () => {
+    owlListeners.delete(listener);
+  };
+}
+
+/** One soft, breathy note: swells in and dies away, unlike tone()'s plucked start. */
+function hootNote(freq: number, duration: number, gain: number, when: number) {
+  const ac = audio();
+  const t = ac.currentTime + when;
+  const osc = ac.createOscillator();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(freq, t);
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.94, t + duration);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(gain, t + duration * 0.25);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  osc.connect(g).connect(bus());
+  osc.start(t);
+  osc.stop(t + duration);
+}
+
+/** The owl's "hoo, hoo-hoo" from across the water, low and soft. */
+function owlCall() {
+  if (!lapSrc || !profile().owls) return;
+  const base = 360 + Math.random() * 40;
+  hootNote(base, 0.42, 0.03, 0);
+  hootNote(base * 0.95, 0.28, 0.024, 0.62);
+  hootNote(base * 0.95, 0.36, 0.026, 0.95);
+  for (const listener of owlListeners) listener();
+  owlTimer = window.setTimeout(owlCall, 16000 + Math.random() * 16000);
 }
 
 /** Where the visible loon is for the listener; the scene keeps it current. */
@@ -298,12 +339,14 @@ function restartWildlife() {
   window.clearTimeout(loonTimer);
   window.clearTimeout(geeseTimer);
   window.clearTimeout(frogTimer);
+  window.clearTimeout(owlTimer);
   if (!lapSrc) return;
-  const { wildlife, loons, geese, frogs } = profile();
+  const { wildlife, loons, geese, frogs, owls } = profile();
   if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" || wildlife === "chorus" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
   if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
   if (frogs) frogTimer = window.setTimeout(frogCall, 1500 + Math.random() * 2000);
+  if (owls) owlTimer = window.setTimeout(owlCall, 7000 + Math.random() * 8000);
 }
 
 const ambient = {
@@ -354,6 +397,7 @@ const ambient = {
     window.clearTimeout(loonTimer);
     window.clearTimeout(geeseTimer);
     window.clearTimeout(frogTimer);
+    window.clearTimeout(owlTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();

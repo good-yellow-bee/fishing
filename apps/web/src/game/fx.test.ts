@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, fx, onLoonCall } from "./fx";
+import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, fx, onLoonCall, onOwlHoot } from "./fx";
 
 const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} });
 const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
@@ -75,7 +75,7 @@ describe("ambient conditions", () => {
     expect(ambientProfile("dawn", "overcast", "fall")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
-    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true });
+    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true, owls: true });
   });
 
   it("follows the season: geese over in fall, a chickadee and the wind in winter, quiet winter nights", () => {
@@ -112,6 +112,21 @@ describe("ambient conditions", () => {
     stop();
     vi.advanceTimersByTime(30_000);
     expect(heard).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets the owl hoot through the night, but not in winter", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const heard = vi.fn();
+    const stop = onOwlHoot(heard);
+    fx.ambient.setConditions("night", "clear", "summer");
+    fx.ambient.start();
+    vi.advanceTimersByTime(12_000);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(tones).toContain(380);
+    fx.ambient.setConditions("night", "clear", "winter");
+    vi.advanceTimersByTime(60_000);
+    expect(heard).toHaveBeenCalledTimes(1);
+    stop();
   });
 
   it("sends geese over on a fall day", () => {
