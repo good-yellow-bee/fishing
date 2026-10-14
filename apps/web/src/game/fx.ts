@@ -557,6 +557,12 @@ export const fx = {
     noiseBurst("bandpass", 1100, 380, 0.16, 0.03, 0, natureBus());
     noiseBurst("bandpass", 950, 340, 0.12, 0.018, 0.24, natureBus());
   },
+  /** A beaver's tail slapping the water: a sharp crack of spray over a deep hollow thump. Quiet until the lake's sounds have started. */
+  tailSlap() {
+    if (!this.enabled || !lapSrc) return;
+    noiseBurst("bandpass", 2200, 600, 0.2, 0.05, 0, natureBus());
+    tone("sine", 130, 55, 0.22, 0.03, 0, 0, natureBus());
+  },
   /** A duckling or two peeping: thin, high, rising notes. Quiet until the lake's sounds have started. */
   peep() {
     if (!this.enabled || !lapSrc) return;
