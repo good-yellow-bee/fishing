@@ -12,6 +12,8 @@ import {
   NIBBLE_DIP,
   NIBBLE_SHIVER,
   lureIsWaiting,
+  nibbleBob,
+  nibbleHeft,
   nibbleShiver,
   waitBodyLean,
   waitDrift,
@@ -157,5 +159,34 @@ describe("nibble on the rod tip", () => {
     expect(low).toBeGreaterThanOrEqual(NIBBLE_DIP - NIBBLE_SHIVER - 1e-9);
     expect(high).toBeLessThanOrEqual(NIBBLE_DIP + NIBBLE_SHIVER + 1e-9);
     expect(high - low).toBeGreaterThan(NIBBLE_SHIVER);
+  });
+});
+
+describe("nibbles by size", () => {
+  it("rank fish from light tappers to heavy dippers", () => {
+    expect(nibbleHeft(0.3)).toBe(0);
+    expect(nibbleHeft(2)).toBeGreaterThan(nibbleHeft(1));
+    expect(nibbleHeft(40)).toBe(1);
+    expect(nibbleHeft(0)).toBe(0);
+  });
+
+  it("pull a big fish's float deeper and more slowly than a small one's", () => {
+    const sample = (weight: number) => {
+      let low = Infinity;
+      let crossings = 0;
+      let last = nibbleBob(0, weight);
+      for (let t = 0.005; t < 1; t += 0.005) {
+        const y = nibbleBob(t, weight);
+        low = Math.min(low, y);
+        const mid = -0.06 - nibbleHeft(weight) * 0.08;
+        if ((last - mid) * (y - mid) < 0) crossings++;
+        last = y;
+      }
+      return { low, crossings };
+    };
+    const small = sample(0.4);
+    const big = sample(20);
+    expect(big.low).toBeLessThan(small.low);
+    expect(big.crossings).toBeLessThan(small.crossings);
   });
 });
