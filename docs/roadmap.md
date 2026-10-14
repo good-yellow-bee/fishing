@@ -356,7 +356,7 @@ Claude picked these after Wave H; the owner can reorder or drop any.
 |---|---|---|---|
 | I1 | ~~Install the lake as an app, open offline~~ (shipped) | platform | M |
 | I2 | ~~Dragonflies over the reeds on warm days~~ (shipped) | wildlife | S/M |
-| I3 | Ducks on the open water that scatter from a close cast | wildlife | M |
+| I3 | ~~Ducks on the open water that scatter from a close cast~~ (shipped) | wildlife | M |
 | I4 | Rare golden fish | collection | M/L |
 | I5 | Play with a gamepad | input | S/M |
 

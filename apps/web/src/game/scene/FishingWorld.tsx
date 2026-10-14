@@ -96,6 +96,7 @@ import {
   strikeRing,
   strikeSpray,
 } from "./strikeSplash";
+import { markSplash } from "./duckFlush";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
@@ -1235,6 +1236,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       flightDone.current = true;
       flightStart.current = -1;
       splashStart.current = t;
+      markSplash(flightTo.x, flightTo.z, t);
       entryAnchor.current?.position.set(flightTo.x, waterHeight(flightTo.x, flightTo.z, t) + 0.02, flightTo.z);
       entryBurst.current();
       fx.plop();
