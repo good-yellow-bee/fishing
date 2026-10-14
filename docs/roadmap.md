@@ -833,6 +833,15 @@ The owner's open "tap-to-walk vs joystick" question: Claude keeps tap-to-walk an
 | ~~AN1~~ | ~~On touch screens a thumb stick walks the angler, analog like a gamepad stick, on the left (right when left-handed)~~ (#201) | controls | M |
 | ~~AN2~~ | ~~A Settings switch for it, and the news card mentions it~~ (#201) | settings | S |
 
+## Wave AO — Keep a picture from photo mode (added 2026-10-14, after Wave AN shipped)
+
+Claude picked this: photo mode (H) already hides the panels, but saving the view meant a system screenshot, which is awkward on a phone.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AO1~~ | ~~In photo mode, P, Space, the pad's A or a Save this view button saves the lake at full size as a PNG, without the panels~~ (#202) | photo mode | S |
+| ~~AO2~~ | ~~The keys card lists it, and the news card mentions it~~ (#202) | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

@@ -87,7 +87,8 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { oneDecimal, rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
-import { saveShareCard, shareCardFileName } from "../game/shareCard";
+import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
+import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
 import { bestBeatText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
@@ -339,6 +340,22 @@ export function DockPage() {
   useEffect(() => {
     if (!photoAllowed) setPhoto(false);
   }, [photoAllowed]);
+  // The shutter: the scene copies its next frame and the browser saves it as a PNG. The panels stay hidden.
+  const [pictureNote, setPictureNote] = useState<{ seq: number; saved: boolean } | null>(null);
+  const saveLakePicture = useCallback(() => {
+    void requestLakeShot()
+      .then((canvas) => {
+        if (!canvas) throw new Error("frame");
+        return savePng(canvas, lakePictureFileName(new Date()));
+      })
+      .then(
+        () => setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: true })),
+        () => setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: false })),
+      );
+  }, []);
+  useEffect(() => {
+    if (!photo) setPictureNote(null);
+  }, [photo]);
   useEffect(() => {
     // Capture runs ahead of the game's own keys, so nothing casts or walks off unseen while the panels are away.
     const onKey = (event: KeyboardEvent) => {
@@ -347,6 +364,7 @@ export function DockPage() {
         event.stopImmediatePropagation();
         event.preventDefault();
         if ((event.code === "KeyH" || event.code === "Escape") && !event.repeat) setPhoto(false);
+        if ((event.code === "Space" || event.code === "KeyP" || event.code === "Enter") && !event.repeat) saveLakePicture();
         return;
       }
       if (event.code !== "KeyH" || event.repeat || !photoAllowed || settingsOpen || keysOpen) return;
@@ -355,7 +373,7 @@ export function DockPage() {
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [photo, photoAllowed, settingsOpen, keysOpen]);
+  }, [photo, photoAllowed, settingsOpen, keysOpen, saveLakePicture]);
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
@@ -576,8 +594,18 @@ export function DockPage() {
     <div className="dock-page" data-photo={photo ? "1" : undefined}>
       {photo && (
         <button className="photo-exit" type="button" onClick={() => setPhoto(false)}>
-          <span>{t("Photo mode. Press H or tap to bring the panels back.")}</span>
+          <span>{t("Photo mode. Press P or Space to save a picture, H or tap to bring the panels back.")}</span>
         </button>
+      )}
+      {photo && (
+        <button className="photo-shutter" type="button" onClick={saveLakePicture} data-photo-shutter>
+          {t("Save this view")}
+        </button>
+      )}
+      {photo && pictureNote && (
+        <p key={pictureNote.seq} className="photo-note" role="status">
+          {pictureNote.saved ? t("Picture saved") : t("The picture could not be saved")}
+        </p>
       )}
       <Hud
         profile={me.profile}

@@ -135,7 +135,7 @@ a {
 }
 
 /* Photo mode: only the lake stays; a clear button over it brings the panels back. */
-.dock-page[data-photo] > :not(.scene-wrap, .photo-exit),
+.dock-page[data-photo] > :not(.scene-wrap, .photo-exit, .photo-shutter, .photo-note),
 .dock-page[data-photo] .scene-wrap > :not(div:has(canvas)) {
   display: none !important;
 }
@@ -161,6 +161,49 @@ a {
   font: inherit;
   font-size: 13px;
   animation: photo-hint 3s ease-in forwards;
+}
+
+.photo-shutter {
+  position: absolute;
+  right: 20px;
+  bottom: 72px;
+  z-index: 41;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 2px solid rgba(241, 228, 202, 0.85);
+  border-radius: 999px;
+  background: rgba(12, 18, 16, 0.55);
+  color: #f1e4ca;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.photo-shutter:focus-visible {
+  outline: 2px solid #f1e4ca;
+  outline-offset: 3px;
+}
+
+html[data-hand="left"] .photo-shutter {
+  right: auto;
+  left: 20px;
+}
+
+.photo-note {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  z-index: 41;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: rgba(12, 18, 16, 0.6);
+  color: #f1e4ca;
+  font-size: 13px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: photo-hint 2.4s ease-in forwards;
 }
 
 @keyframes photo-hint {

@@ -24,6 +24,8 @@ export const PL_GAME: PlBook = {
   "Geese honk overhead": "Gęsi gęgają nad głową",
   "A beaver slaps its tail": "Bóbr klepie ogonem o wodę",
   "A swan hisses": "Łabędź syczy",
+  "Photo mode (H) can now save the view: press P or Space, or tap Save this view, and the lake is saved as a picture.":
+    "Tryb zdjęcia (H) zapisuje teraz widok: naciśnij P albo spację, albo stuknij Zapisz ten widok, a jezioro zapisze się jako zdjęcie.",
   "On a touch screen, a thumb stick at the bottom corner walks the angler. Settings can hide it.": "Na ekranie dotykowym gałka w dolnym rogu prowadzi wędkarza. W Ustawieniach można ją ukryć.",
   "Walking stick (a thumb stick for walking on a touch screen)": "Drążek chodzenia (gałka pod kciuk do chodzenia na ekranie dotykowym)",
   "Terns call over the water": "Rybitwy krzyczą nad wodą",
@@ -377,7 +379,12 @@ export const PL_GAME: PlBook = {
   "Fish whisperer": "Zaklinacz ryb",
   "Lake master": "Mistrz jeziora",
   "Lake legend": "Legenda jeziora",
-  "Photo mode. Press H or tap to bring the panels back.": "Tryb zdjęcia. Naciśnij H albo stuknij, by przywrócić panele.",
+  "Photo mode. Press P or Space to save a picture, H or tap to bring the panels back.":
+    "Tryb zdjęcia. Naciśnij P albo spację, by zapisać zdjęcie, H albo stuknij, by przywrócić panele.",
+  "Save this view": "Zapisz ten widok",
+  "Picture saved": "Zdjęcie zapisane",
+  "The picture could not be saved": "Nie udało się zapisać zdjęcia",
+  "In photo mode: save a picture of the lake": "W trybie zdjęcia: zapisz zdjęcie jeziora",
   "Photo mode (H): hide the panels": "Tryb zdjęcia (H): ukryj panele",
   "Keys and buttons": "Klawisze i przyciski",
   "Keys and buttons (?)": "Klawisze i przyciski (?)",
