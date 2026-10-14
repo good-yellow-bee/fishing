@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
@@ -9,30 +9,35 @@ import { GearPage } from "./field/gear/GearPage";
 import { TackleProvider } from "./field/gear/TackleState";
 import { HomePage } from "./field/HomePage";
 import { LogbookProvider } from "./field/LogbookState";
-import { SpotMapPage } from "./field/map/SpotMapPage";
 import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
 import { TripFormPage, TripPage, TripsPage } from "./field/TripPages";
-import { BoardPage } from "./pages/Board";
-import { DockPage } from "./pages/Dock";
-import { LogPage } from "./pages/Log";
 import { LoginPage } from "./pages/Login";
 import { RegisterPage } from "./pages/Register";
 
+// The lake pulls in three.js and the models, so it and the pages around it load on demand:
+// sign-in and the field log open without waiting for the 3D bundle.
+const DockPage = lazy(() => import("./pages/Dock").then((module) => ({ default: module.DockPage })));
+const LogPage = lazy(() => import("./pages/Log").then((module) => ({ default: module.LogPage })));
+const BoardPage = lazy(() => import("./pages/Board").then((module) => ({ default: module.BoardPage })));
+const SpotMapPage = lazy(() => import("./field/map/SpotMapPage").then((module) => ({ default: module.SpotMapPage })));
+
+function FogLifting() {
+  const t = useT();
+  return (
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Stillwater</h1>
+        <p className="lede">{t("Fog lifting…")}</p>
+      </div>
+    </div>
+  );
+}
+
 function Gate({ children }: { children: ReactNode }) {
   const session = authClient.useSession();
-  const t = useT();
-  if (session.isPending) {
-    return (
-      <div className="auth-shell">
-        <div className="auth-card">
-          <h1>Stillwater</h1>
-          <p className="lede">{t("Fog lifting…")}</p>
-        </div>
-      </div>
-    );
-  }
+  if (session.isPending) return <FogLifting />;
   if (!session.data) return <Navigate to="/login" replace />;
-  return children;
+  return <Suspense fallback={<FogLifting />}>{children}</Suspense>;
 }
 
 function FieldLayout() {
@@ -57,7 +62,14 @@ export function App() {
         <Route path="/catches/:catchId/edit" element={<CatchFormPage />} />
         <Route path="/catches/:catchId" element={<CatchPage />} />
         <Route path="/spots" element={<SpotsPage />} />
-        <Route path="/map" element={<SpotMapPage />} />
+        <Route
+          path="/map"
+          element={
+            <Suspense fallback={null}>
+              <SpotMapPage />
+            </Suspense>
+          }
+        />
         <Route path="/spots/new" element={<SpotFormPage />} />
         <Route path="/spots/:spotId/edit" element={<SpotFormPage />} />
         <Route path="/spots/:spotId" element={<SpotPage />} />
