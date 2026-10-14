@@ -713,12 +713,12 @@ Claude picked these after Wave AB; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AC1~~ | ~~Northern lights on some clear winter and fall nights, low over the far shore and mirrored in the water~~ (#183) | scene | M |
-| AC2 | Swallows skim the water on summer dusks, dipping to drink and leaving tiny rings | scene | S/M |
+| ~~AC2~~ | ~~A skein of geese crosses high over the far shore in fall, mirrored in the lake~~ (#184) | scene | S/M |
 | AC3 | A woodpecker drums in the woods on mornings, with a caption | sound | S |
 | AC4 | Refresh the "New on the lake" card for Wave AC | onboarding | S |
 
 - **AC1 · Northern lights.** On a few seeded clear nights in fall and winter, green curtains shimmer low over the far treeline. The dock camera sees little sky, so the lake's mirror carries most of it.
-- **AC2 · Swallows.** Three or four swallows sweep fast, low loops over the water at summer dusk. Now and then one dips and leaves a ring.
+- **AC2 · Geese skein.** Swallows already fly on summer days (Swallows.tsx), so this slot went to fall geese instead. A V of geese crosses high over the far shore soon after you arrive, then again when the geese honk. The dock sees little sky, so their mirror image crossing the lake carries it.
 - **AC3 · Woodpecker.** A short drum roll comes from the woods now and then on mornings outside winter. The sound captions name it.
 - **AC4 · What's new, again.** List whatever Wave AC lands on the card.
 
