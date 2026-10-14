@@ -35,6 +35,8 @@ import { useReducedMotion } from "./reducedMotion";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
+import { starOpacity } from "./starField";
+import { Stars } from "./Stars";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { useSettings } from "../settings";
@@ -1601,6 +1603,7 @@ export const LakeWorld = memo(function LakeWorld({
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky, moonLight(moon)), [hour, sky, moon]);
   const mist = mistAmount(hour, sky);
+  const stars = starOpacity(hour === "night", weather.sunOut, moonLight(moon));
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -1635,6 +1638,7 @@ export const LakeWorld = memo(function LakeWorld({
         shadow-camera-bottom={-20}
       />
       <Sky hour={hour} weather={weather} moon={moon} />
+      {stars > 0 && <Stars opacity={stars} />}
       {CLOUDS.map((cloud, i) => (
         <Cloud key={i} {...cloud} color={weather.clouds} />
       ))}

@@ -409,13 +409,13 @@ Claude picked these after Wave K; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | L1 | ~~Ripples that run with the wind~~ (shipped) | weather/visual | S |
-| L2 | Stars and a rare shooting star on clear nights | sky | S/M |
+| L2 | ~~Stars and a rare shooting star on clear nights~~ (shipped) | sky | S/M |
 | L3 | Cloud shadows sliding over the water on fair days | weather/visual | S/M |
 | L4 | A rod bell that rings on a nibble after dark | gameplay/a11y | S/M |
 | L5 | Dawn chorus in spring and summer | audio | S |
 
 - **L1 · Wind on the water.** The surface streaks and dapple scroll downwind with the day's wind (the one that walks the float since K4), faster on breezy and strong days; a calm day keeps the old slow drift.
-- **L2 · Stars.** Clear nights show a field of stars that fades with the moon's light and hides under cloud, rain or fog; now and then a shooting star crosses it.
+- **L2 · Stars.** Clear nights show a field of stars that fades with the moon's light and hides under cloud, rain or fog, and the lake carries their shimmering reflection (the hills hide most of the sky from the dock, so the reflection is what you see first). About once every 40 seconds a shooting star crosses the northern sky, unless Reduce motion is on.
 - **L3 · Cloud shadows.** On clear and overcast days soft cloud shadows slide across the lake and shore, downwind.
 - **L4 · Rod bell.** After dark, when the float is hard to see, a small bell on the rod tip jingles on each nibble and rings hard on the bite, with a matching screen-reader line.
 - **L5 · Dawn chorus.** Dawn in spring and summer gets a fuller bird chorus that thins out as the morning goes on.
