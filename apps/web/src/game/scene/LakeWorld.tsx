@@ -27,6 +27,7 @@ import { DockRain } from "./DockRain";
 import { DockSnow } from "./DockSnow";
 import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
+import { DUCKLING_COUNT, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
 import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
@@ -485,7 +486,11 @@ const FLOCKS: FlockProps[] = [
   { y: 15.5, z: -18, speed: 0.85, offset: 68, dir: -1, birds: [[0, 0, 0], [1.4, 0.35, 0.7], [-1.2, 0.2, -0.9]] },
 ];
 
-type DuckProps = { points: Vec3[]; speed: number; phase: number; body: string; head: string };
+/** Downy yellow-brown ducklings with darker caps. */
+const DUCKLING_DOWN = "#d9b45a";
+const DUCKLING_HEAD = "#7a5a2e";
+
+type DuckProps = { points: Vec3[]; speed: number; phase: number; body: string; head: string; brood?: boolean };
 
 const DUCKS: DuckProps[] = [
   {
@@ -501,6 +506,8 @@ const DUCKS: DuckProps[] = [
     phase: 0.45,
     body: "#9c7a4f",
     head: "#45607a",
+    // Leads her ducklings round the east shallows in spring, in view of the dock.
+    brood: true,
   },
 ];
 
@@ -1299,8 +1306,13 @@ function BirdFlock({ y, z, speed, offset, dir, birds }: FlockProps) {
   );
 }
 
-function Duck({ points, speed, phase, body, head }: DuckProps) {
+function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
   const ref = useRef<THREE.Group>(null);
+  const season = useContext(SeasonContext);
+  const showBrood = brood && ducklingsOut(season);
+  const ducklings = useRef<Array<THREE.Group | null>>([]);
+  const chick = useMemo(() => new THREE.Vector3(), []);
+  const chickAhead = useMemo(() => new THREE.Vector3(), []);
   const ripple = useRef<THREE.Group>(null);
   const rippleMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const leftWing = useRef<THREE.Group>(null);
@@ -1326,6 +1338,18 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
       now.mode === "flushed" ? duckFlush(time - now.since, now.from, now.dir) : now.mode === "returning" ? duckReturn(time - now.since, position, now.dir) : null;
     duck.visible = now.mode !== "away";
     const flying = flight !== null;
+    // The ducklings paddle in her wake; when she is flushed they hide in the reeds until she is back.
+    ducklings.current.forEach((duckling, k) => {
+      if (!duckling) return;
+      duckling.visible = now.mode === "paddling";
+      if (!duckling.visible) return;
+      const { along, weave } = ducklingAt(t, k, time);
+      curve.getPointAt(along, chick);
+      curve.getPointAt((along + 0.01) % 1, chickAhead).sub(chick);
+      const yaw = Math.atan2(chickAhead.x, chickAhead.z);
+      duckling.position.set(chick.x + Math.cos(yaw) * weave, waterHeight(chick.x, chick.z, time) + 0.04 + Math.sin(time * 2.6 + k) * 0.01, chick.z - Math.sin(yaw) * weave);
+      duckling.rotation.y = yaw;
+    });
     if (leftWing.current) leftWing.current.visible = flying;
     if (rightWing.current) rightWing.current.visible = flying;
     if (ripple.current) ripple.current.visible = !flying;
@@ -1349,39 +1373,63 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
   });
 
   return (
-    <group ref={ref}>
-      <mesh position={[0, 0.09, 0]} scale={[0.19, 0.15, 0.3]} castShadow={false}>
-        <sphereGeometry args={[1, 12, 9]} />
-        <meshToonMaterial color={body} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[0, 0.26, 0.2]} scale={0.1} castShadow={false}>
-        <sphereGeometry args={[1, 10, 8]} />
-        <meshToonMaterial color={head} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[0, 0.25, 0.32]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
-        <coneGeometry args={[0.035, 0.09, 6]} />
-        <meshToonMaterial color="#d8a13c" gradientMap={toonRamp()} />
-      </mesh>
-      {/* Wings only show in flight, hinged at the shoulders. */}
-      <group ref={leftWing} position={[0.12, 0.14, 0.02]} visible={false}>
-        <mesh position={[0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
-          <boxGeometry args={[1, 1, 1]} />
+    <>
+      {showBrood &&
+        Array.from({ length: DUCKLING_COUNT }, (_, k) => (
+          <group
+            key={k}
+            ref={(duckling) => {
+              ducklings.current[k] = duckling;
+            }}
+          >
+            <mesh position={[0, 0.05, 0]} scale={[0.08, 0.065, 0.11]} castShadow={false}>
+              <sphereGeometry args={[1, 8, 6]} />
+              <meshToonMaterial color={DUCKLING_DOWN} gradientMap={toonRamp()} />
+            </mesh>
+            <mesh position={[0, 0.12, 0.08]} scale={0.05} castShadow={false}>
+              <sphereGeometry args={[1, 8, 6]} />
+              <meshToonMaterial color={DUCKLING_HEAD} gradientMap={toonRamp()} />
+            </mesh>
+            <mesh position={[0, 0.115, 0.135]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
+              <coneGeometry args={[0.018, 0.04, 5]} />
+              <meshToonMaterial color="#c98f32" gradientMap={toonRamp()} />
+            </mesh>
+          </group>
+        ))}
+      <group ref={ref}>
+        <mesh position={[0, 0.09, 0]} scale={[0.19, 0.15, 0.3]} castShadow={false}>
+          <sphereGeometry args={[1, 12, 9]} />
           <meshToonMaterial color={body} gradientMap={toonRamp()} />
         </mesh>
-      </group>
-      <group ref={rightWing} position={[-0.12, 0.14, 0.02]} visible={false}>
-        <mesh position={[-0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
-          <boxGeometry args={[1, 1, 1]} />
-          <meshToonMaterial color={body} gradientMap={toonRamp()} />
+        <mesh position={[0, 0.26, 0.2]} scale={0.1} castShadow={false}>
+          <sphereGeometry args={[1, 10, 8]} />
+          <meshToonMaterial color={head} gradientMap={toonRamp()} />
         </mesh>
-      </group>
-      <group ref={ripple} position={[0, -0.02, -0.18]}>
-        <mesh rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.32, 0.38, 24]} />
-          <meshBasicMaterial ref={rippleMaterial} color="#dcebe7" transparent opacity={0} depthWrite={false} />
+        <mesh position={[0, 0.25, 0.32]} rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
+          <coneGeometry args={[0.035, 0.09, 6]} />
+          <meshToonMaterial color="#d8a13c" gradientMap={toonRamp()} />
         </mesh>
+        {/* Wings only show in flight, hinged at the shoulders. */}
+        <group ref={leftWing} position={[0.12, 0.14, 0.02]} visible={false}>
+          <mesh position={[0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshToonMaterial color={body} gradientMap={toonRamp()} />
+          </mesh>
+        </group>
+        <group ref={rightWing} position={[-0.12, 0.14, 0.02]} visible={false}>
+          <mesh position={[-0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshToonMaterial color={body} gradientMap={toonRamp()} />
+          </mesh>
+        </group>
+        <group ref={ripple} position={[0, -0.02, -0.18]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.32, 0.38, 24]} />
+            <meshBasicMaterial ref={rippleMaterial} color="#dcebe7" transparent opacity={0} depthWrite={false} />
+          </mesh>
+        </group>
       </group>
-    </group>
+    </>
   );
 }
 
