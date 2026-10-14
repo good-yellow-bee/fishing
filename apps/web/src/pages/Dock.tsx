@@ -31,6 +31,10 @@ import {
   SPOT_LABELS,
   skyAt,
   isSnow,
+  moonFromSearch,
+  moonLight,
+  moonName,
+  moonPhase,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
@@ -138,6 +142,8 @@ export function DockPage() {
   const sky = forcedSky ?? liveSky;
   // Read once per visit like the day's weather; ?season= pins it for testing.
   const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
+  // The real moon, read once per visit; ?moon= pins the phase for testing.
+  const moon = moonFromSearch(params.toString()) ?? moonPhase(openedAt);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -162,7 +168,7 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon));
   const scenePhase = game.outcome ? "result" : game.phase;
   const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
@@ -531,6 +537,7 @@ export function DockPage() {
         season={season}
         onSettings={() => setSettingsOpen(true)}
         streak={streakDays(me.recentDays, localDate(new Date())).current}
+        moon={moonName(moon)}
         onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
       />
       <div
@@ -560,6 +567,7 @@ export function DockPage() {
           weight={shownFish?.weight ?? 0}
           golden={landedGolden}
           released={landedReleased}
+          moon={moon}
           hotspot={game.hotspot}
           tracks={tracks}
           powerRef={game.powerRef}

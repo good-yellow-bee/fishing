@@ -391,13 +391,13 @@ Claude picked these after Wave J; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | K1 | ~~Snow instead of rain in winter~~ (shipped) | weather | M |
-| K2 | Moon phases at night | sky | M |
+| K2 | ~~Moon phases at night~~ (shipped) | sky | M |
 | K3 | A loon you can see on the open water | wildlife | M |
 | K4 | Wind that pushes the float | weather/gameplay | M/L |
 | K5 | Larger text setting | accessibility | S |
 
 - **K1 · Snow.** A rainy winter day snows instead: slow flakes drifting over the lake and shore that melt on the water, no rain hiss, and "Snow" on the HUD, the chalk board, the veil line and the catch log. Fish read it as rain, so nothing about the odds changes.
-- **K2 · Moon phases.** The night moon follows the real lunar phase (new to full), its light on the water scales with it, and the chalk board and HUD eyebrow name a full or new moon. A full moon leans rare fish a little more toward night, like the hour does.
+- **K2 · Moon phases.** The night moon shows the real lunar phase (a lit crescent, quarter or gibbous with a faint earthshine side), the moonlight and its glow scale with how much is lit (a new moon keeps 55% of the light so night stays playable), and the HUD eyebrow and the chalk board name a full or new moon. Near full (over 75% lit), rare and legendary fish come up to 15% more at night, reshuffled within what the angler can land. `?moon=0..1` pins the phase.
 - **K3 · Loon.** The loon you hear at night gets a body: it swims slow loops on open water at dusk and night, dives near the float and comes up somewhere else, and its call plays from where it is.
 - **K4 · Wind.** The day's wind (already in the field log's conditions) sets a direction and strength: the chop and ripples lean with it, and on a breezy or strong day the float drifts slowly downwind while you wait.
 - **K5 · Text size.** A Settings choice for larger text (HUD, cards, panels), kept per browser like the other settings.

@@ -2247,6 +2247,12 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 17px;
 }
 
+.forecast-moon {
+  color: var(--paper-dim);
+  font-size: 12px;
+  font-style: italic;
+}
+
 .forecast-turn {
   color: var(--amber);
   font-size: 12px;

@@ -2,7 +2,7 @@ import { createContext, memo, useContext, useEffect, useLayoutEffect, useMemo, u
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -22,6 +22,7 @@ import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { LakeSnow } from "./LakeSnow";
+import { moonTexture } from "./moonDisc";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
@@ -155,6 +156,8 @@ const WEATHER_TINT: Record<
 
 export type WeatherLook = {
   sky: [string, string, string];
+  /** How bright the disc's glow is: the moon's light at night, full by day. */
+  discGlow: number;
   fog: string;
   fogNear: number;
   fogFar: number;
@@ -189,7 +192,8 @@ function ambient(hour: LakeHour) {
   return look.hemi * luminance(new THREE.Color(look.hemiSky));
 }
 
-export function weatherLook(hour: LakeHour, sky: WeatherSky): WeatherLook {
+/** `moon` is the lit share of the moon, 0 new to 1 full; at night it sets how much light the moon gives. */
+export function weatherLook(hour: LakeHour, sky: WeatherSky, moon = 1): WeatherLook {
   const look = LAKE_HOUR_LOOK[hour];
   const tint = WEATHER_TINT[sky];
   const night = hour === "night";
@@ -202,7 +206,8 @@ export function weatherLook(hour: LakeHour, sky: WeatherSky): WeatherLook {
     fogNear: (night ? 28 : 40) * tint.near,
     fogFar: (night ? 90 : 110) * tint.far,
     hemiSky: mute(look.hemiSky, tint.mute, 1),
-    sunInt: look.sunInt * tint.sun,
+    sunInt: look.sunInt * tint.sun * (night ? 0.55 + 0.45 * moon : 1),
+    discGlow: night ? 0.35 + 0.65 * moon : 1,
     sunOut,
     shadow: sunOut ? 1 : 0.3,
     clouds: `#${clouds.getHexString()}`,
@@ -779,7 +784,7 @@ function makeSkyTexture(bottom: string, mid: string, top: string) {
   return texture;
 }
 
-function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
+function Sky({ hour, weather, moon }: { hour: LakeHour; weather: WeatherLook; moon: number }) {
   const look = LAKE_HOUR_LOOK[hour];
   const texture = useMemo(() => makeSkyTexture(...weather.sky), [weather.sky]);
   useEffect(() => () => texture.dispose(), [texture]);
@@ -787,6 +792,10 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
   const full = useSettings().particles === "full";
   const halo = useMemo(() => makeSoftSpotTexture(0.12), []);
   useEffect(() => () => halo.dispose(), [halo]);
+  const night = hour === "night";
+  // The night disc shows the real moon's face; the phase barely moves in a visit, so it is drawn once.
+  const face = useMemo(() => (night ? moonTexture(moon) : null), [night, moon]);
+  useEffect(() => () => face?.dispose(), [face]);
   return (
     <>
       <mesh scale={90}>
@@ -795,8 +804,8 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
       </mesh>
       {weather.sunOut && (
         <mesh position={look.discPos}>
-          <circleGeometry args={[hour === "night" ? 4.2 : 5.5, 24]} />
-          <meshBasicMaterial color={look.disc} fog={false} />
+          {face ? <planeGeometry args={[8.4, 8.4]} /> : <circleGeometry args={[5.5, 24]} />}
+          <meshBasicMaterial color={look.disc} map={face} transparent={face !== null} depthWrite={face === null} fog={false} />
         </mesh>
       )}
       <mesh position={[look.discPos[0], look.discPos[1], look.discPos[2] + 0.2]}>
@@ -804,7 +813,7 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
         <meshBasicMaterial
           color={look.glow}
           transparent
-          opacity={(hour === "night" ? 0.22 : 0.35) * (weather.sunOut ? 1 : 0.5)}
+          opacity={(hour === "night" ? 0.22 : 0.35) * (weather.sunOut ? 1 : 0.5) * weather.discGlow}
           fog={false}
         />
       </mesh>
@@ -815,7 +824,7 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
             map={halo}
             color={look.glow}
             transparent
-            opacity={(hour === "night" ? 0.3 : 0.55) * (weather.sunOut ? 1 : 0.35)}
+            opacity={(hour === "night" ? 0.3 : 0.55) * (weather.sunOut ? 1 : 0.35) * weather.discGlow}
             blending={THREE.AdditiveBlending}
             depthWrite={false}
             toneMapped={false}
@@ -1570,15 +1579,18 @@ export const LakeWorld = memo(function LakeWorld({
   sky,
   season = "summer",
   hotspot,
+  moon = 0.5,
 }: {
   spot: SpotId;
   hour: LakeHour;
   sky: WeatherSky;
   season?: LakeSeason;
   hotspot: Hotspot | null;
+  /** The real moon's phase, 0 new to 0.5 full to 1 new again. */
+  moon?: number;
 }) {
   const look = LAKE_HOUR_LOOK[hour];
-  const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
+  const weather = useMemo(() => weatherLook(hour, sky, moonLight(moon)), [hour, sky, moon]);
   const mist = mistAmount(hour, sky);
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
@@ -1613,7 +1625,7 @@ export const LakeWorld = memo(function LakeWorld({
         shadow-camera-top={22}
         shadow-camera-bottom={-20}
       />
-      <Sky hour={hour} weather={weather} />
+      <Sky hour={hour} weather={weather} moon={moon} />
       {CLOUDS.map((cloud, i) => (
         <Cloud key={i} {...cloud} color={weather.clouds} />
       ))}

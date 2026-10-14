@@ -1,4 +1,4 @@
-import { forecast, lakeSeason, skyBlurb, skyLabel } from "@stillwater/shared";
+import { forecast, lakeSeason, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
 
 function dayName(date: Date, index: number) {
@@ -6,6 +6,12 @@ function dayName(date: Date, index: number) {
   if (index === 1) return t("Tomorrow");
   const name = date.toLocaleDateString(locale(), { weekday: "long" });
   return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+/** A full or new moon on that day's night (read at 22:00), worth chalking up; null otherwise. */
+function nightMoon(date: Date) {
+  const name = moonName(moonPhase(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 22)));
+  return name === "full" || name === "new" ? name : null;
 }
 
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
@@ -26,6 +32,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
               <span className="forecast-turn">{t("Turns {sky} around {hour}:00", { sky: t(skyLabel(day.turn.to, lakeSeason(day.date))).toLowerCase(), hour: day.turn.hour })}</span>
             )}
             <small>{t(skyBlurb(day.sky, lakeSeason(day.date)))}</small>
+            {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
           </li>
         ))}
       </ul>

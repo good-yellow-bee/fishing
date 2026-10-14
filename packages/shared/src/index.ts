@@ -21,3 +21,4 @@ export * from "./weeklyFish.ts";
 export * from "./golden.ts";
 export * from "./streak.ts";
 export * from "./snow.ts";
+export * from "./moon.ts";
