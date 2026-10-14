@@ -1,4 +1,5 @@
 import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
+import type { Splash } from "./duckFlush";
 
 /**
  * A pair of grebes in spring. Most of the time they float near each other,
@@ -73,4 +74,28 @@ export function grebePose(k: 0 | 1, time: number): GrebePose {
     rushing: run >= 0 && run < RUSH_SEC,
     shake,
   };
+}
+
+/** A cast landing this close to either grebe sends both under. */
+export const GREBE_SCARE_RADIUS = 3.5;
+/** Seconds they stay down, counting the dive and the bob back up. */
+export const GREBE_DIVE_SEC = 5;
+const DIVE_EASE = 0.35;
+
+/** Whether a fresh splash lands close enough to either grebe to send them under. */
+export function grebesScared(splash: Splash, time: number) {
+  const age = time - splash.at;
+  if (!(age >= 0 && age < 0.6)) return false;
+  return ([0, 1] as const).some((k) => {
+    const pose = grebePose(k, time);
+    return Math.hypot(pose.x - splash.x, pose.z - splash.z) < GREBE_SCARE_RADIUS;
+  });
+}
+
+/** How far under they are `since` seconds after diving: 0 on top, 1 out of sight. */
+export function grebeUnder(since: number) {
+  if (since < 0 || since >= GREBE_DIVE_SEC) return 0;
+  if (since < DIVE_EASE) return since / DIVE_EASE;
+  if (since > GREBE_DIVE_SEC - DIVE_EASE) return (GREBE_DIVE_SEC - since) / DIVE_EASE;
+  return 1;
 }

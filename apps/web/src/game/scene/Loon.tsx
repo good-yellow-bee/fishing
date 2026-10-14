@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { pitchTurn } from "./bodyPitch";
 import { fx, onLoonCall } from "../fx";
 import { loonCallLift, loonPose, soundPlace } from "./loonMotion";
 import { toonRamp } from "./toon";
@@ -33,7 +34,7 @@ export function Loon() {
     const surface = waterHeight(pose.x, pose.z, time);
     loon.visible = pose.under < 1;
     loon.position.set(pose.x, surface - pose.under * 0.35, pose.z);
-    loon.rotation.set(pose.pitch, pose.yaw, 0, "YXZ");
+    loon.rotation.set(pitchTurn(pose.pitch), pose.yaw, 0, "YXZ");
     if (neck.current) neck.current.rotation.x = -0.55 * loonCallLift(time - calledAt.current);
     if (ring.current && ringMaterial.current) {
       ring.current.visible = pose.ring >= 0;

@@ -52,7 +52,7 @@ export function Beaver() {
     const surface = waterHeight(pose.x, pose.z, time);
     // Swims low: only the head, a hump of back and the branch show, bobbing as it paddles.
     beaver.position.set(pose.x, surface - 0.06 - pose.under * 0.4 + Math.sin(time * 4) * 0.01, pose.z);
-    beaver.rotation.set(-pose.under * 0.6, pose.yaw, 0, "YXZ");
+    beaver.rotation.set(pose.under * 0.6, pose.yaw, 0, "YXZ");
     if (tail.current) tail.current.rotation.x = pose.tail * 1.3;
     if (wake.current) {
       wake.current.position.set(pose.x, surface + 0.05, pose.z);

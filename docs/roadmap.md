@@ -795,6 +795,17 @@ Claude picked these; neither bird was on the lake yet. The owner can reorder or 
 | ~~AJ2~~ | ~~In spring, a pair of grebes does its courtship rush across the water, side by side~~ (#196) | ambient life | M |
 | ~~AJ3~~ | ~~Refresh the "New on the lake" card for Wave AJ~~ (#196) | onboarding | S |
 
+## Wave AK — Divers that notice you (added 2026-10-14, after Wave AJ shipped)
+
+Claude picked these to give Wave AJ's birds the same reactions the ducks, beaver and swans have, and fixed a pitch sign found on the way.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AK1~~ | ~~A cast landing near the cormorant's rock sends it straight into the water~~ (#197) | ambient life | S |
+| ~~AK2~~ | ~~A cast landing near the grebes sends both under for a few seconds~~ (#197) | ambient life | S |
+| ~~AK3~~ | ~~The loon, otter, kingfisher and beaver tip nose first when they dive, not tail first~~ (#197: bodyPitch.ts) | fix | S |
+| ~~AK4~~ | ~~Refresh the "New on the lake" card for Wave AK~~ (#197) | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

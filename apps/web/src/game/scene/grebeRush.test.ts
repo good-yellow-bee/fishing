@@ -1,7 +1,7 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { CORMORANT_ROCK } from "./cormorantPerch";
-import { GREBE_A, GREBE_B, PAIR_GAP, RUSH_AT, RUSH_GAP, RUSH_SEC, grebePose, grebesOut } from "./grebeRush";
+import { GREBE_A, GREBE_B, GREBE_DIVE_SEC, PAIR_GAP, RUSH_AT, RUSH_GAP, RUSH_SEC, grebePose, grebeUnder, grebesOut, grebesScared } from "./grebeRush";
 
 describe("grebes", () => {
   it("are out on spring mornings and days, not in rain", () => {
@@ -51,5 +51,16 @@ describe("grebes", () => {
     const b = grebePose(1, 10);
     const toB = Math.atan2(b.x - a.x, b.z - a.z);
     expect(Math.abs(Math.atan2(Math.sin(toB - a.yaw), Math.cos(toB - a.yaw)))).toBeLessThan(0.05);
+  });
+
+  it("dive together when a cast lands close, and bob back up", () => {
+    const time = 12;
+    const one = grebePose(1, time);
+    expect(grebesScared({ x: one.x + 1, z: one.z, at: time - 0.1 }, time)).toBe(true);
+    expect(grebesScared({ x: one.x + 1, z: one.z, at: time - 2 }, time)).toBe(false);
+    expect(grebesScared({ x: one.x + 9, z: one.z + 9, at: time }, time)).toBe(false);
+    expect(grebeUnder(-1)).toBe(0);
+    expect(grebeUnder(GREBE_DIVE_SEC / 2)).toBe(1);
+    expect(grebeUnder(GREBE_DIVE_SEC)).toBe(0);
   });
 });

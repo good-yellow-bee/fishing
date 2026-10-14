@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { CORMORANT_ROCK, cormorantPose } from "./cormorantPerch";
+import { lastSplash } from "./duckFlush";
+import { CORMORANT_ROCK, cormorantPose, cormorantStartle } from "./cormorantPerch";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -33,22 +34,27 @@ export function Cormorant() {
   const bird = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const wings = useRef<(THREE.Group | null)[]>([null, null]);
-  useFrame(({ clock }) => {
+  const shift = useRef(0);
+  const spread = useRef(0);
+  useFrame(({ clock }, delta) => {
     const group = bird.current;
     if (!group) return;
     const time = clock.elapsedTime;
-    const pose = cormorantPose(time);
+    shift.current = cormorantStartle(time, shift.current, lastSplash);
+    const pose = cormorantPose(time + shift.current);
     const surface = pose.swimming ? waterHeight(pose.x, pose.z, time) : 0;
     group.visible = pose.under < 1;
     group.position.set(pose.x, pose.y + surface - (pose.swimming ? 0.18 : 0) - pose.under * 0.4, pose.z);
-    group.rotation.set(-pose.under * 0.7, pose.yaw, 0, "YXZ");
+    group.rotation.set(pose.under * 0.7, pose.yaw, 0, "YXZ");
     // Upright on the rock; on the water it lies forward, low, with the neck up.
     if (body.current) body.current.rotation.x = pose.swimming ? 0.5 : 0.1;
+    // Eased, so a startled bird snaps its wings shut quickly rather than in one frame.
+    spread.current += (pose.spread - spread.current) * Math.min(1, delta * 10);
     wings.current.forEach((wing, i) => {
       if (!wing) return;
       const side = i === 0 ? 1 : -1;
       // Folded: swung back along the flank. Open: out to the side and a little up.
-      wing.rotation.set(0, side * (1 - pose.spread) * 1.35, side * pose.spread * 0.35);
+      wing.rotation.set(0, side * (1 - spread.current) * 1.35, side * spread.current * 0.35);
     });
   });
   return (
