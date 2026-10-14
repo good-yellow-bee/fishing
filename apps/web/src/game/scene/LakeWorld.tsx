@@ -35,6 +35,7 @@ import { useReducedMotion } from "./reducedMotion";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
+import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
 import { Stars } from "./Stars";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
@@ -750,6 +751,41 @@ function makeWaterTexture() {
   return texture;
 }
 
+// Soft cloud shadows: white blobs on clear, tinted dark by the material; each blob is drawn wrapped so the tile repeats seamlessly.
+function makeCloudShadowTexture() {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  for (const blob of cloudBlobs()) {
+    for (const dx of [-1, 0, 1]) {
+      for (const dy of [-1, 0, 1]) {
+        const x = (blob.x + dx) * size;
+        const y = (blob.y + dy) * size;
+        const r = blob.r * size;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(1, blob.squash);
+        const fill = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+        fill.addColorStop(0, "rgba(255,255,255,1)");
+        fill.addColorStop(0.55, "rgba(255,255,255,0.7)");
+        fill.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1.3, 1);
+  return texture;
+}
+
 // Faint dappled layer scrolled opposite the wave streaks for extra surface life.
 function makeWaterDetailTexture() {
   const canvas = document.createElement("canvas");
@@ -871,7 +907,7 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
-function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHour; weather: WeatherLook; wind: { x: number; z: number } }) {
+function LakeSurface({ spot, hour, sky, weather, wind }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; weather: WeatherLook; wind: { x: number; z: number } }) {
   const material = useRef<THREE.MeshToonMaterial>(null);
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
@@ -880,6 +916,7 @@ function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHo
   const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
+  const cloudMap = useMemo(() => makeCloudShadowTexture(), []);
   const causticGeometry = useMemo(() => makeCausticGeometry(bedGeometry), [bedGeometry]);
   const causticA = useMemo(() => makeCausticTexture(), []);
   const causticB = useMemo(() => {
@@ -893,6 +930,8 @@ function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHo
   const withRim = useMemo(() => (shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }) => addWaterRim(shader, rimColor), [rimColor]);
   const causticLight = weather.glint * 0.22;
   const scroll = surfaceScroll(wind);
+  const clouds = cloudScroll(wind);
+  const cloudShade = cloudShadowStrength(hour, sky);
 
   useEffect(() => {
     return () => {
@@ -901,11 +940,12 @@ function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHo
       foamGeometry.dispose();
       waterMap.dispose();
       detailMap.dispose();
+      cloudMap.dispose();
       causticGeometry.dispose();
       causticA.dispose();
       causticB.dispose();
     };
-  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap, causticGeometry, causticA, causticB]);
+  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap, cloudMap, causticGeometry, causticA, causticB]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
@@ -915,6 +955,8 @@ function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHo
     waterMap.offset.y += delta * scroll.streak.y;
     detailMap.offset.x += delta * scroll.detail.x;
     detailMap.offset.y += delta * scroll.detail.y;
+    cloudMap.offset.x += delta * clouds.x;
+    cloudMap.offset.y += delta * clouds.y;
     // Two nets drifting across each other, so the light shifts instead of sliding.
     causticA.offset.x += delta * 0.045;
     causticA.offset.y += delta * 0.02;
@@ -963,6 +1005,11 @@ function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHo
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
+      {cloudShade > 0 && (
+        <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
+          <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
+        </mesh>
+      )}
       <mesh geometry={foamGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
         <meshBasicMaterial color="#e9f3ef" transparent opacity={hour === "night" ? 0.08 : 0.3} depthWrite={false} />
       </mesh>
@@ -1658,7 +1705,7 @@ export const LakeWorld = memo(function LakeWorld({
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
-      <LakeSurface spot={spot} hour={hour} weather={weather} wind={wind} />
+      <LakeSurface spot={spot} hour={hour} sky={sky} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
