@@ -69,8 +69,12 @@ packages/shared     Lake geometry, fish, hours, progression (source of truth)
 
 Vite proxies `/api` to the API. Catch validation and upgrades run on the server against the same shared rules as the client.
 
-Dev auth defaults (`BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`) are fine on localhost. Change the secret before exposing the API.
+Dev auth defaults (`BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`) are fine on localhost. Change the secret before exposing the API; with `NODE_ENV=production` the API won't start without one.
 
 ## Credits
 
 Nature kit, character, and rod models from [Kenney](https://kenney.nl).
+
+## License
+
+[MIT](LICENSE). Third-party models keep their own licenses.
