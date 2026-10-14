@@ -338,4 +338,11 @@ export const PL_GAME: PlBook = {
   "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
   "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
   "Settings|hud": "Opcje",
+  Greenhorn: "Żółtodziób",
+  Dabbler: "Amator",
+  "Keen angler": "Zapalony wędkarz",
+  "Old hand": "Stary wyga",
+  "Fish whisperer": "Zaklinacz ryb",
+  "Lake master": "Mistrz jeziora",
+  "Lake legend": "Legenda jeziora",
 };

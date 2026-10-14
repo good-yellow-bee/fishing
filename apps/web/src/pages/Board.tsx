@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BOARD_LIMIT, FISH, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
+import { anglerTitle, BOARD_LIMIT, FISH, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { FishMark } from "../components/FishMark";
 import { locale, t, tn, useT } from "../i18n";
@@ -27,7 +27,10 @@ function BoardRow({ row, you }: { row: BoardEntry; you: boolean }) {
       <td>
         <RankMark rank={row.rank} />
       </td>
-      <td>{row.displayName}</td>
+      <td>
+        {row.displayName}
+        <small className="board-title">{t(anglerTitle(row.level))}</small>
+      </td>
       <td>{row.level}</td>
       <td>{row.score}</td>
       <td>{row.heaviest > 0 ? `${lb(row.heaviest)} lb` : "—"}</td>

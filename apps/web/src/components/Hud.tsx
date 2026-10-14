@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   anglerLevel,
+  anglerTitle,
   LAKE_HOUR_LABELS,
   SKILL_LABELS,
   SEASON_BLURB,
@@ -64,6 +65,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
         <strong>Stillwater</strong>
         <div className="hud-user">
           <span>{profile.displayName}</span>
+          <span className="hud-title">{t(anglerTitle(level))}</span>
           {streak >= 2 && <span className="hud-streak">{tn(streak, "{n} day in a row", "{n} days in a row")}</span>}
         </div>
       </div>
@@ -73,7 +75,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
         <span className="sky-chip" title={wind ? `${t(skyBlurb(sky, season))} ${t("Wind: {wind}.", { wind: t(WIND_LABELS[wind]) })}` : t(skyBlurb(sky, season))}>
           {t(skyLabel(sky, season))}
         </span>
-        <span className="level-chip">{t("Level {level}", { level })}</span>
+        <span className="level-chip" title={t(anglerTitle(level))}>{t("Level {level}", { level })}</span>
         <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
         <span className="skill-chip">
           <small>{t(SKILL_LABELS.strength)}</small> {profile.strength}

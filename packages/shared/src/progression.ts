@@ -16,6 +16,23 @@ export function anglerLevel(lifetimePoints: number): number {
   return level;
 }
 
+/** What the lake calls an angler at each level, from the first cast to the top of the board. */
+export const ANGLER_TITLES = [
+  "Greenhorn",
+  "Dabbler",
+  "Angler",
+  "Keen angler",
+  "Old hand",
+  "Fish whisperer",
+  "Lake master",
+  "Lake legend",
+] as const;
+
+export function anglerTitle(level: number): string {
+  const i = Math.min(Math.max(Math.floor(level), 1), ANGLER_TITLES.length) - 1;
+  return ANGLER_TITLES[i]!;
+}
+
 export function skillCost(currentRank: number): number {
   return 20 * currentRank * currentRank;
 }

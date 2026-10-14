@@ -185,6 +185,18 @@ a {
   font-weight: 600;
 }
 
+.hud-title {
+  color: #c9b48c;
+  font-style: italic;
+}
+
+.board-title {
+  display: block;
+  color: #b7a37f;
+  font-size: 0.78em;
+  font-style: italic;
+}
+
 .hud-user {
   display: grid;
   gap: 1px;
