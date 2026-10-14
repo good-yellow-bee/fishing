@@ -63,11 +63,39 @@ afterEach(() => {
 
 describe("ambient conditions", () => {
   it("plays birds by day, crickets and loons at night, and rain only when it rains", () => {
-    expect(ambientProfile("day", "clear")).toEqual({ wildlife: "birds", loons: false, rain: false });
-    expect(ambientProfile("dawn", "overcast")).toEqual({ wildlife: "birds", loons: false, rain: false });
-    expect(ambientProfile("dusk", "rain")).toEqual({ wildlife: "birds", loons: false, rain: true });
-    expect(ambientProfile("night", "fog")).toEqual({ wildlife: "crickets", loons: true, rain: false });
-    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true });
+    expect(ambientProfile("day", "clear")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
+    expect(ambientProfile("dawn", "overcast")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
+    expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
+    expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
+    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false });
+  });
+
+  it("follows the season: geese over in fall, a chickadee and the wind in winter, quiet winter nights", () => {
+    expect(ambientProfile("day", "clear", "fall")).toMatchObject({ wildlife: "birds", geese: true, wind: false });
+    expect(ambientProfile("day", "rain", "fall").geese).toBe(false);
+    expect(ambientProfile("night", "clear", "fall")).toMatchObject({ wildlife: "crickets", loons: true, geese: false });
+    expect(ambientProfile("day", "clear", "winter")).toMatchObject({ wildlife: "chickadees", loons: false, wind: true });
+    expect(ambientProfile("night", "clear", "winter")).toMatchObject({ wildlife: "quiet", loons: false, wind: true });
+    expect(ambientProfile("dawn", "clear", "spring")).toMatchObject({ wildlife: "birds", geese: false, wind: false });
+  });
+
+  it("blows a wind loop in winter and drops it when the season turns", () => {
+    fx.ambient.setConditions("night", "clear", "winter");
+    fx.ambient.start();
+    expect(loops.size).toBe(2);
+    vi.advanceTimersByTime(60000);
+    // A winter night has no crickets and no loons.
+    expect(tones).toEqual([]);
+    fx.ambient.setConditions("night", "clear", "summer");
+    expect(loops.size).toBe(1);
+  });
+
+  it("sends geese over on a fall day", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    fx.ambient.setConditions("day", "clear", "fall");
+    fx.ambient.start();
+    vi.advanceTimersByTime(11000);
+    expect(tones).toContain(330);
   });
 
   it("starts the rain hiss with the lake on a rainy day and stops it when the sky clears", () => {

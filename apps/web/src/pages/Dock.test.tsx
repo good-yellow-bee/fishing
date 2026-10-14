@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, dailyConditions, fishById, lakeHour, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
+import { badgeProgress, dailyConditions, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -104,15 +104,16 @@ function lastScene() {
 }
 
 describe("dock weather", () => {
-  it("sends the ?sky= override to the scene, the HUD, and the ambience", async () => {
-    const page = await openDock("/?hour=night&sky=fog");
-    expect(lastScene()).toMatchObject({ hour: "night", sky: "fog" });
+  it("sends the ?sky= and ?season= overrides to the scene, the HUD, and the ambience", async () => {
+    const page = await openDock("/?hour=night&sky=fog&season=winter");
+    expect(lastScene()).toMatchObject({ hour: "night", sky: "fog", season: "winter" });
+    expect(page.querySelector(".hud .eyebrow")?.textContent).toBe("Northern lake · Winter");
     expect(page.querySelector(".scene-wrap")?.getAttribute("data-sky")).toBe("fog");
     const chip = page.querySelector(".sky-chip");
     // Only the label sits in the HUD row; the blurb rides in the tooltip.
     expect(chip?.textContent).toBe("Fog");
     expect(chip?.getAttribute("title")).toBe(SKY_BLURB.fog);
-    expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog");
+    expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog", "winter");
   });
 
   it("uses the day's weather on the same clock as the hour without an override", async () => {
@@ -122,7 +123,8 @@ describe("dock weather", () => {
     const sky = weatherForDay(now);
     expect(lastScene()).toMatchObject({ hour: lakeHour(now), sky });
     expect(page.querySelector(".hud")?.getAttribute("data-sky")).toBe(sky);
-    expect(fx.ambient.setConditions).toHaveBeenLastCalledWith(lakeHour(now), sky);
+    expect(lastScene()).toMatchObject({ season: lakeSeason(now) });
+    expect(fx.ambient.setConditions).toHaveBeenLastCalledWith(lakeHour(now), sky, lakeSeason(now));
   });
 
   it("writes the day's conditions into the field log with a landed fish", async () => {

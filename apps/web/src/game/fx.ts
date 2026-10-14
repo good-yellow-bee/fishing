@@ -1,4 +1,4 @@
-import type { LakeHour, Sky } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 import type { DragTone } from "./dragTone";
 
 let ctx: AudioContext | null = null;
@@ -95,17 +95,50 @@ let rainSrc: AudioBufferSourceNode | null = null;
 let rainGain: GainNode | null = null;
 let wildlifeTimer = 0;
 let loonTimer = 0;
+let windSrc: AudioBufferSourceNode | null = null;
+let windLfo: OscillatorNode | null = null;
+let windGain: GainNode | null = null;
+let geeseTimer = 0;
 let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
+let ambientSeason: LakeSeason = "summer";
 
-export function ambientProfile(hour: LakeHour, sky: Sky) {
+export type Wildlife = "birds" | "crickets" | "chickadees" | "quiet";
+
+/**
+ * What the shore sounds like. Crickets and loons go quiet in winter, when a
+ * chickadee calls by day and the wind moves over the ice; geese pass over in fall.
+ */
+export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "summer") {
   const night = hour === "night";
-  return { wildlife: night ? "crickets" : "birds", loons: night, rain: sky === "rain" } as const;
+  const winter = season === "winter";
+  const wildlife: Wildlife = winter ? (night ? "quiet" : "chickadees") : night ? "crickets" : "birds";
+  return {
+    wildlife,
+    loons: night && !winter,
+    rain: sky === "rain",
+    geese: season === "fall" && !night && sky !== "rain",
+    wind: winter,
+  };
+}
+
+function profile() {
+  return ambientProfile(ambientHour, ambientSky, ambientSeason);
 }
 
 function chirp() {
   if (!lapSrc) return;
-  if (ambientProfile(ambientHour, ambientSky).wildlife === "crickets") {
+  const { wildlife } = profile();
+  if (wildlife === "quiet") return;
+  if (wildlife === "chickadees") {
+    // "Fee-bee": a clean high whistle, then one a step lower.
+    const base = 3900 + Math.random() * 300;
+    tone("sine", base, base * 0.98, 0.32, 0.009);
+    tone("sine", base * 0.84, base * 0.82, 0.36, 0.008, 0.42);
+    wildlifeTimer = window.setTimeout(chirp, 4000 + Math.random() * 5000);
+    return;
+  }
+  if (wildlife === "crickets") {
     const base = 3600 + Math.random() * 700;
     tone("square", base, base * 0.96, 0.035, 0.003);
     tone("square", base * 1.06, base, 0.025, 0.002, 0.07);
@@ -120,7 +153,7 @@ function chirp() {
 
 /** A loon's wail across the water: a slow rise, a held note, then a fall. */
 function loonCall() {
-  if (!lapSrc || !ambientProfile(ambientHour, ambientSky).loons) return;
+  if (!lapSrc || !profile().loons) return;
   const base = 520 + Math.random() * 80;
   tone("sine", base, base * 1.5, 0.9, 0.012);
   tone("sine", base * 1.5, base * 1.45, 1.1, 0.01, 0.85);
@@ -129,7 +162,7 @@ function loonCall() {
 }
 
 function startRain() {
-  if (rainSrc || !ambientProfile(ambientHour, ambientSky).rain) return;
+  if (rainSrc || !profile().rain) return;
   const ac = audio();
   rainSrc = ac.createBufferSource();
   rainSrc.buffer = noise();
@@ -151,13 +184,58 @@ function stopRain() {
   rainGain = null;
 }
 
+/** A skein of geese going over: a few honks, each a short nasal drop, a little ragged. */
+function geeseCall() {
+  if (!lapSrc || !profile().geese) return;
+  const honks = 3 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < honks; i++) {
+    const base = 300 + Math.random() * 60;
+    tone("sawtooth", base, base * 0.86, 0.16, 0.0035, i * (0.28 + Math.random() * 0.2));
+  }
+  geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
+}
+
+/** Winter wind: band-passed noise that swells and drops on a slow wobble. */
+function startWind() {
+  if (windSrc || !profile().wind) return;
+  const ac = audio();
+  windSrc = ac.createBufferSource();
+  windSrc.buffer = noise();
+  windSrc.loop = true;
+  const filter = ac.createBiquadFilter();
+  filter.type = "bandpass";
+  filter.frequency.value = 520;
+  windGain = ac.createGain();
+  windGain.gain.value = 0.006;
+  windLfo = ac.createOscillator();
+  windLfo.frequency.value = 0.07;
+  const depth = ac.createGain();
+  depth.gain.value = 0.004;
+  windLfo.connect(depth).connect(windGain.gain);
+  windSrc.connect(filter).connect(windGain).connect(bus());
+  windSrc.start();
+  windLfo.start();
+}
+
+function stopWind() {
+  if (!windSrc) return;
+  windSrc.stop();
+  windLfo?.stop();
+  windGain?.disconnect();
+  windSrc = null;
+  windLfo = null;
+  windGain = null;
+}
+
 function restartWildlife() {
   window.clearTimeout(wildlifeTimer);
   window.clearTimeout(loonTimer);
+  window.clearTimeout(geeseTimer);
   if (!lapSrc) return;
-  const { wildlife, loons } = ambientProfile(ambientHour, ambientSky);
-  wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" ? 300 : 2000 + Math.random() * 2000);
+  const { wildlife, loons, geese } = profile();
+  if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
+  if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
 }
 
 const ambient = {
@@ -181,26 +259,32 @@ const ambient = {
     lapSrc.start();
     lapLfo.start();
     startRain();
+    startWind();
     restartWildlife();
   },
   /** Safe before the first cast: the sounds start on the first cast, with the latest conditions. */
-  setConditions(hour: LakeHour, sky: Sky) {
-    if (ambientHour === hour && ambientSky === sky) return;
+  setConditions(hour: LakeHour, sky: Sky, season: LakeSeason = "summer") {
+    if (ambientHour === hour && ambientSky === sky && ambientSeason === season) return;
     ambientHour = hour;
     ambientSky = sky;
+    ambientSeason = season;
     if (!lapSrc) return;
     stopRain();
     startRain();
+    stopWind();
+    startWind();
     restartWildlife();
   },
   stop() {
     if (!lapSrc) return;
     window.clearTimeout(wildlifeTimer);
     window.clearTimeout(loonTimer);
+    window.clearTimeout(geeseTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();
     stopRain();
+    stopWind();
     lapSrc = null;
     lapLfo = null;
     lapGain = null;
