@@ -1,6 +1,7 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { anglerPose } from "./pose";
 import { heronFlight, heronLanding, heronWade, stepHeron, type HeronPose, type HeronState } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
@@ -9,6 +10,34 @@ import { waterHeight } from "./water";
 
 /** Feet sit this far under the surface while wading. */
 const WADE_DEPTH = -0.12;
+
+const BODY = "#8d969c";
+const PALE = "#d4d9db";
+const CAP = "#2b2f33";
+const BEAK = "#d9a43a";
+
+/** Parts that never move apart bake into one shape each: body and breast, the neck with its head, cap and bill, the held fish, the legs. */
+export function heronShapes() {
+  return {
+    // Body, tilted a little nose-down, with a pale breast.
+    body: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.78, 0], rotation: [0.25, 0, 0], scale: [0.17, 0.19, 0.36], color: BODY },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.74, 0.16], scale: [0.12, 0.14, 0.16], color: PALE },
+    ]),
+    neck: mergePainted([
+      { geometry: new THREE.CylinderGeometry(0.03, 0.045, 0.42, 8), position: [0, 0.2, 0.05], rotation: [0.25, 0, 0], color: PALE },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.42, 0.1], scale: [0.065, 0.07, 0.09], color: PALE },
+      { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.46, 0.06], scale: [0.05, 0.03, 0.08], color: CAP },
+      { geometry: new THREE.ConeGeometry(0.025, 0.22, 6), position: [0, 0.41, 0.27], rotation: [Math.PI / 2, 0, 0], color: BEAK },
+    ]),
+    fish: mergeParts([
+      { geometry: new THREE.SphereGeometry(1, 8, 6), scale: [0.11, 0.032, 0.026] },
+      { geometry: new THREE.ConeGeometry(0.035, 0.05, 4), position: [-0.12, 0, 0], rotation: [0, 0, -Math.PI / 2], scale: [1, 1, 0.4] },
+    ]),
+    legs: mergeParts([-0.05, 0.05].map((x) => ({ geometry: new THREE.CylinderGeometry(0.014, 0.014, 0.66, 5), position: [x, -0.33, 0] as const }))),
+    wing: new THREE.BoxGeometry(1, 1, 1),
+  };
+}
 
 /** Made of a few primitives, like the ducks, so it costs no model download. About 1.1 m tall standing. */
 export function Heron() {
@@ -24,8 +53,20 @@ export function Heron() {
   const still = useReducedMotion();
   const mats = useMemo(() => {
     const toon = (color: string) => new THREE.MeshToonMaterial({ color, gradientMap: toonRamp() });
-    return { body: toon("#8d969c"), pale: toon("#d4d9db"), wing: toon("#6f7a82"), beak: toon("#d9a43a"), leg: toon("#6b5a3c"), cap: toon("#2b2f33"), fish: toon("#b9c4bd") };
+    return {
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      wing: toon("#6f7a82"),
+      leg: toon("#6b5a3c"),
+      fish: toon("#b9c4bd"),
+    };
   }, []);
+  const shapes = useMemo(heronShapes, []);
+  useEffect(
+    () => () => {
+      [...Object.values(mats), ...Object.values(shapes)].forEach((thing) => thing.dispose());
+    },
+    [mats, shapes],
+  );
 
   useFrame((frame) => {
     const group = root.current;
@@ -80,56 +121,26 @@ export function Heron() {
         <ringGeometry args={[0.3, 0.37, 24]} />
         <meshBasicMaterial ref={ringMaterial} color="#dcebe7" transparent opacity={0} depthWrite={false} />
       </mesh>
-      <group ref={root}>
-        {/* Body, tilted a little nose-down, with a pale breast. */}
-        <mesh material={mats.body} position={[0, 0.78, 0]} rotation={[0.25, 0, 0]} scale={[0.17, 0.19, 0.36]} castShadow>
-          <sphereGeometry args={[1, 12, 9]} />
-        </mesh>
-        <mesh material={mats.pale} position={[0, 0.74, 0.16]} scale={[0.12, 0.14, 0.16]}>
-          <sphereGeometry args={[1, 10, 8]} />
-        </mesh>
+      <group ref={root} name="heron">
+        <mesh geometry={shapes.body} material={mats.painted} castShadow />
         {/* Neck pivots at the shoulder: stand tall, stab forward, tuck back in flight. */}
         <group ref={neck} position={[0, 0.86, 0.24]}>
-          <mesh material={mats.pale} position={[0, 0.2, 0.05]} rotation={[0.25, 0, 0]}>
-            <cylinderGeometry args={[0.03, 0.045, 0.42, 8]} />
-          </mesh>
-          <mesh material={mats.pale} position={[0, 0.42, 0.1]} scale={[0.065, 0.07, 0.09]}>
-            <sphereGeometry args={[1, 10, 8]} />
-          </mesh>
-          <mesh material={mats.cap} position={[0, 0.46, 0.06]} scale={[0.05, 0.03, 0.08]}>
-            <sphereGeometry args={[1, 8, 6]} />
-          </mesh>
-          <mesh material={mats.beak} position={[0, 0.41, 0.27]} rotation={[Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[0.025, 0.22, 6]} />
-          </mesh>
+          <mesh geometry={shapes.neck} material={mats.painted} />
           {/* A small fish held crosswise near the bill's tip. */}
           <group ref={fish} position={[0, 0.41, 0.34]} visible={false}>
-            <mesh material={mats.fish} scale={[0.11, 0.032, 0.026]}>
-              <sphereGeometry args={[1, 8, 6]} />
-            </mesh>
-            <mesh material={mats.fish} position={[-0.12, 0, 0]} rotation={[0, 0, -Math.PI / 2]} scale={[1, 1, 0.4]}>
-              <coneGeometry args={[0.035, 0.05, 4]} />
-            </mesh>
+            <mesh geometry={shapes.fish} material={mats.fish} />
           </group>
         </group>
         {/* Legs hang from the hip and trail behind in flight. */}
         <group ref={legs} position={[0, 0.66, -0.04]}>
-          {[-0.05, 0.05].map((x) => (
-            <mesh key={x} material={mats.leg} position={[x, -0.33, 0]}>
-              <cylinderGeometry args={[0.014, 0.014, 0.66, 5]} />
-            </mesh>
-          ))}
+          <mesh geometry={shapes.legs} material={mats.leg} />
         </group>
         {/* Broad wings, shown only in flight. */}
         <group ref={leftWing} position={[0.12, 0.84, 0]} visible={false}>
-          <mesh material={mats.wing} position={[0.42, 0, 0]} scale={[0.84, 0.03, 0.34]}>
-            <boxGeometry args={[1, 1, 1]} />
-          </mesh>
+          <mesh geometry={shapes.wing} material={mats.wing} position={[0.42, 0, 0]} scale={[0.84, 0.03, 0.34]} />
         </group>
         <group ref={rightWing} position={[-0.12, 0.84, 0]} visible={false}>
-          <mesh material={mats.wing} position={[-0.42, 0, 0]} scale={[0.84, 0.03, 0.34]}>
-            <boxGeometry args={[1, 1, 1]} />
-          </mesh>
+          <mesh geometry={shapes.wing} material={mats.wing} position={[-0.42, 0, 0]} scale={[0.84, 0.03, 0.34]} />
         </group>
       </group>
     </>
