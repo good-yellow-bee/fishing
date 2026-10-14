@@ -23,6 +23,8 @@ import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
+import { Heron } from "./Heron";
+import { heronOut } from "./heronMotion";
 import { mistAmount } from "./mist";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
@@ -1643,6 +1645,7 @@ export const LakeWorld = memo(function LakeWorld({
       {weather.rain && <LakeRain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {firefliesOut(hour, sky) && <Fireflies />}
+      {heronOut(hour, sky) && <Heron />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </SeasonContext.Provider>
   );
