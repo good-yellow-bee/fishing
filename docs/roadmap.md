@@ -591,14 +591,32 @@ Claude picked these after Wave U; the owner can reorder or drop any.
 | ~~V1~~ | ~~Ducklings peep and a spooked deer snorts~~ (#161) | sound | S |
 | ~~V2~~ | ~~Cat's-paw gusts sweeping patches of water on breezy days~~ (#162) | weather | S/M |
 | ~~V3~~ | ~~Snow gathers on the angler's cap in winter snowfall~~ (#163) | weather | S |
-| V4 | Frogs on lily pads plop in when a cast lands close | wildlife | S/M |
-| V5 | Refresh the "New on the lake" card for Wave V | onboarding | S |
+| ~~V4~~ | ~~Frogs on lily pads plop in when a cast lands close~~ (#164) | wildlife | S/M |
+| ~~V5~~ | ~~Refresh the "New on the lake" card for Wave V~~ (#164) | onboarding | S |
 
 - **V1 · Peeps and snorts.** Soft high peeps now and then while the ducklings are out, and a sharp snort when a cast sends the deer off, both under the Nature sounds slider.
 - **V2 · Gusts.** On breezy and strong-wind days, rippled patches that catch the sky sweep across the water downwind every few seconds, faster in a strong wind, the way a gust roughens the surface. (Darker patches were tried first and vanished against the teal water.) Off with Reduce motion; Lite effects keep half.
 - **V3 · Snowy cap.** While snow falls, snow builds up on the angler's cap and shoulders over about 45 seconds, and melts away within about 12 once it stops.
-- **V4 · Frogs on pads.** On summer evenings a frog or two sits on the lily pads near the reeds; a cast landing close makes them plop into the water with a ring, and they climb back later.
+- **V4 · Frogs on pads.** In spring and summer, by day and at dusk, a frog sits on each of two lily pads (one by the west reeds, one in the east shallows), puffing its throat now and then. A cast landing within 4 m sends it leaping in with a plop and a ring; it hops back up about 30 seconds later. Reduce motion keeps its throat still.
 - **V5 · What's new, again.** List whatever Wave V lands on the card.
+
+## Wave W — Fishing feel (added 2026-10-14, after Wave V shipped)
+
+Claude picked these after Wave V, turning from scenery back to the fishing itself; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| W1 | Line spray: drops flick off the line when a fish surges | fight | S |
+| W2 | The float bobs and dips in a pattern by species before the bite | bite | S/M |
+| W3 | A thrashing fish at the net sends up splashes and spray | landing | S |
+| W4 | Rod tip shivers on a nibble even when the float is out of view | bite | S |
+| W5 | Refresh the "New on the lake" card for Wave W | onboarding | S |
+
+- **W1 · Line spray.** While a fish surges and the line is under high tension, a few bright drops flick off the line near the water. Off with Reduce motion; Lite effects keep half.
+- **W2 · Species nibbles.** Before the bite, small fish give quick, fidgety taps, while big ones give slow, heavy dips, so a watchful angler can guess what's coming. No change to bite timing or the catch odds.
+- **W3 · Splashy landing.** As the fish comes to the net it thrashes, throwing small splashes and a ring or two.
+- **W4 · Rod tip shiver.** Each nibble also gives the rod tip a small, quick shiver, readable when the float is far away or hard to see.
+- **W5 · What's new, again.** List whatever Wave W lands on the card.
 
 ## Risks / open questions for the owner
 

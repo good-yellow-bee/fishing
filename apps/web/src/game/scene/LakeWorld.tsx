@@ -31,6 +31,8 @@ import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, du
 import { Striders } from "./Striders";
 import { ReedFluff } from "./ReedFluff";
 import { Gusts } from "./Gusts";
+import { PadFrog } from "./PadFrog";
+import { FROG_PADS, frogsOnPads } from "./padFrogs";
 import { gustsOut } from "./gustPatch";
 import { fluffOut } from "./cattailTufts";
 import { stridersOut } from "./striderSkate";
@@ -1865,6 +1867,7 @@ export const LakeWorld = memo(function LakeWorld({
       {LILIES.map((lily, i) => (
         <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} />
       ))}
+      {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {BOATS.map((boat, i) => (
         <Boat key={`${boat.url}-${i}`} {...boat} />
       ))}
