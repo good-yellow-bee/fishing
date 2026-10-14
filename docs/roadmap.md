@@ -987,6 +987,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BJ1~~ | ~~axe scan of every page: the dock, catch log and lodge board now sit in a `main` landmark, and each trip's tackle list on the gear page has its own name ("Tackle for {trip}"); all twelve pages scan clean~~ (#223) | accessibility | S |
 
+## Wave BK — Rocks in one draw per cluster (added 2026-10-14, after Wave BJ shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BK1~~ | ~~The lake's grey rocks (drop-off pair, creek rocks, shallows and the cormorant's rock) drawn as three instanced clusters instead of one mesh each, saving a draw and a shadow draw per rock~~ (#224) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

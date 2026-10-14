@@ -1115,14 +1115,55 @@ function Hill({ position, scale, color }: { position: Vec3; scale: Vec3; color: 
   );
 }
 
-function Rock({ position, scale, rotation = 0 }: { position: Vec3; scale: Vec3; rotation?: number }) {
-  return (
-    <mesh position={position} scale={scale} rotation={[0.15, rotation, -0.08]} castShadow receiveShadow>
-      <dodecahedronGeometry args={[1, 0]} />
-      <meshToonMaterial color="#75796f" gradientMap={toonRamp()} />
-    </mesh>
+type RockSpec = { position: Vec3; scale: Vec3; rotation?: number };
+
+export function rockMatrix({ position, scale, rotation = 0 }: RockSpec) {
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(...position),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(0.15, rotation, -0.08)),
+    new THREE.Vector3(...scale),
   );
 }
+
+/** A cluster of grey rocks: all one shape, so the cluster is one instanced draw (and one shadow draw). */
+function Rocks({ items }: { items: readonly RockSpec[] }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+
+  useLayoutEffect(() => {
+    const rocks = mesh.current;
+    if (!rocks) return;
+    items.forEach((item, i) => rocks.setMatrixAt(i, rockMatrix(item)));
+    rocks.instanceMatrix.needsUpdate = true;
+    // Culling and shadow passes cache the first bounds three computes, which may predate these matrices.
+    rocks.computeBoundingBox();
+    rocks.computeBoundingSphere();
+  }, [items]);
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, items.length]} castShadow receiveShadow>
+      <dodecahedronGeometry args={[1, 0]} />
+      <meshToonMaterial color="#75796f" gradientMap={toonRamp()} />
+    </instancedMesh>
+  );
+}
+
+const DROPOFF_ROCKS: RockSpec[] = [
+  { position: [DROPOFF_PAD.x - 0.8, 0.4, DROPOFF_PAD.z + 0.6], scale: [1.3, 0.7, 1], rotation: 0.4 },
+  { position: [DROPOFF_PAD.x + 0.9, 0.32, DROPOFF_PAD.z - 0.3], scale: [0.9, 0.5, 0.75], rotation: 1.6 },
+];
+
+const LAKE_ROCKS: RockSpec[] = [
+  // In the shallows, off the shore line the inlet walk follows.
+  { position: [-15.6, 0.3, 5.4], scale: [1.2, 0.6, 0.9], rotation: 0.3 },
+  { position: [16.2, 0.5, 3.5], scale: [1.4, 0.85, 1.1], rotation: 1.1 },
+  { position: [12.8, 0.3, -12.7], scale: [1.1, 0.55, 0.8], rotation: 0.7 },
+  { position: [-14.8, 0.35, -10.9], scale: [1.2, 0.6, 0.9], rotation: 1.8 },
+  { position: [19.6, 0.28, -6.4], scale: [0.9, 0.5, 0.7], rotation: 2.6 },
+  // The cormorant's rock, just breaking the surface out in the far water.
+  { position: [CORMORANT_ROCK.x, 0.02, CORMORANT_ROCK.z], scale: [0.75, 0.38, 0.6], rotation: 0.9 },
+];
+
+const CREEK_ROCK_SPECS: RockSpec[] = CREEK_ROCKS.map((rock) => ({ position: [rock.x, rock.scale[1] * 0.45, rock.z], scale: rock.scale, rotation: rock.rot }));
 
 /** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
 function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: string }) {
@@ -1651,8 +1692,7 @@ function ShorePath() {
       <ToonModel url={MODELS.path} position={[12.2, 0.02, 9.6]} rotation={[0, -0.85, 0]} scale={1.45} />
       <ToonModel url={MODELS.log} position={[REEDS_PAD.x + 1.1, 0.12, REEDS_PAD.z + 0.4]} rotation={[0, 0.8, 0]} scale={1.05} />
       <ToonModel url={MODELS.log} position={[POINT_PAD.x + 1.15, 0.12, POINT_PAD.z + 0.35]} rotation={[0, -0.4, 0]} scale={1.05} />
-      <Rock position={[DROPOFF_PAD.x - 0.8, 0.4, DROPOFF_PAD.z + 0.6]} scale={[1.3, 0.7, 1]} rotation={0.4} />
-      <Rock position={[DROPOFF_PAD.x + 0.9, 0.32, DROPOFF_PAD.z - 0.3]} scale={[0.9, 0.5, 0.75]} rotation={1.6} />
+      <Rocks items={DROPOFF_ROCKS} />
     </group>
   );
 }
@@ -1716,9 +1756,7 @@ function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
       <mesh geometry={water} position={[0, -0.012, 0]} receiveShadow>
         <meshToonMaterial color={weather.water} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
-      {CREEK_ROCKS.map((rock, i) => (
-        <Rock key={i} position={[rock.x, rock.scale[1] * 0.45, rock.z]} scale={rock.scale} rotation={rock.rot} />
-      ))}
+      <Rocks items={CREEK_ROCK_SPECS} />
       <Reeds count={6} origin={[-23.2, 0.03, -11.0]} />
       <ScatterModels items={CREEK_TREES} />
       <ScatterModels items={CREEK_GRASS} />
@@ -1902,14 +1940,7 @@ export const LakeWorld = memo(function LakeWorld({
       <ScatterModels items={BUSHES} />
       <ScatterModels items={GRASS} />
       <ScatterModels items={NEAR_GRASS} />
-      {/* In the shallows, off the shore line the inlet walk follows. */}
-      <Rock position={[-15.6, 0.3, 5.4]} scale={[1.2, 0.6, 0.9]} rotation={0.3} />
-      <Rock position={[16.2, 0.5, 3.5]} scale={[1.4, 0.85, 1.1]} rotation={1.1} />
-      <Rock position={[12.8, 0.3, -12.7]} scale={[1.1, 0.55, 0.8]} rotation={0.7} />
-      <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
-      <Rock position={[19.6, 0.28, -6.4]} scale={[0.9, 0.5, 0.7]} rotation={2.6} />
-      {/* The cormorant's rock, just breaking the surface out in the far water. */}
-      <Rock position={[CORMORANT_ROCK.x, 0.02, CORMORANT_ROCK.z]} scale={[0.75, 0.38, 0.6]} rotation={0.9} />
+      <Rocks items={LAKE_ROCKS} />
       <Dock wet={dockWet(weather.rain, season)} />
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
       {dockSnowy(season) && <DockSnow />}
