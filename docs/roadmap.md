@@ -412,13 +412,13 @@ Claude picked these after Wave K; the owner can reorder or drop any.
 | L2 | ~~Stars and a rare shooting star on clear nights~~ (shipped) | sky | S/M |
 | L3 | ~~Cloud shadows sliding over the water on fair days~~ (shipped) | weather/visual | S/M |
 | L4 | ~~A rod bell that rings on a nibble after dark~~ (shipped) | gameplay/a11y | S/M |
-| L5 | Dawn chorus in spring and summer | audio | S |
+| L5 | ~~Dawn chorus in spring and summer~~ (shipped) | audio | S |
 
 - **L1 · Wind on the water.** The surface streaks and dapple scroll downwind with the day's wind (the one that walks the float since K4), faster on breezy and strong days; a calm day keeps the old slow drift.
 - **L2 · Stars.** Clear nights show a field of stars that fades with the moon's light and hides under cloud, rain or fog, and the lake carries their shimmering reflection (the hills hide most of the sky from the dock, so the reflection is what you see first). About once every 40 seconds a shooting star crosses the northern sky, unless Reduce motion is on.
 - **L3 · Cloud shadows.** On clear days (softer at dawn and dusk, none at night or under grey skies) soft cloud shadows slide across the water: east on a still day, downwind on a windy one. They stay on the water so they never clip into the banks.
 - **L4 · Rod bell.** At night, while a line is in the water, a small brass bell hangs under the rod tip. It jumps and jingles on a nibble (the hint line, which screen readers hear, says so) and swings and rings hard on the bite.
-- **L5 · Dawn chorus.** Dawn in spring and summer gets a fuller bird chorus that thins out as the morning goes on.
+- **L5 · Dawn chorus.** Spring and summer dawns (unless it rains) swap the daytime's occasional two-note call for a busy chorus of overlapping warbles, trills and calls at varied pitch and loudness. It gives way to the usual birds when the hour turns to day.
 
 ## Risks / open questions for the owner
 

@@ -104,7 +104,7 @@ let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
 let ambientSeason: LakeSeason = "summer";
 
-export type Wildlife = "birds" | "crickets" | "chickadees" | "quiet";
+export type Wildlife = "birds" | "chorus" | "crickets" | "chickadees" | "quiet";
 
 /**
  * What the shore sounds like. Crickets and loons go quiet in winter, when a
@@ -113,7 +113,9 @@ export type Wildlife = "birds" | "crickets" | "chickadees" | "quiet";
 export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "summer") {
   const night = hour === "night";
   const winter = season === "winter";
-  const wildlife: Wildlife = winter ? (night ? "quiet" : "chickadees") : night ? "crickets" : "birds";
+  // Spring and summer dawns, unless it rains, get the full chorus.
+  const chorus = hour === "dawn" && (season === "spring" || season === "summer") && sky !== "rain";
+  const wildlife: Wildlife = winter ? (night ? "quiet" : "chickadees") : night ? "crickets" : chorus ? "chorus" : "birds";
   return {
     wildlife,
     loons: night && !winter,
@@ -126,6 +128,20 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
 
 function profile() {
   return ambientProfile(ambientHour, ambientSky, ambientSeason);
+}
+
+/** One bird of the dawn chorus: a falling warble, a quick trill, or the day's two-note call, each panned nowhere in particular. */
+function chorusSong(kind: number) {
+  const base = 1900 + Math.random() * 1800;
+  const quiet = 0.005 + Math.random() * 0.006;
+  if (kind === 0) {
+    for (let n = 0; n < 4; n += 1) tone("sine", base * (1.25 - n * 0.08), base * (1.1 - n * 0.08), 0.11, quiet, n * 0.14);
+  } else if (kind === 1) {
+    for (let n = 0; n < 7; n += 1) tone("sine", base * 1.4, base * 1.3, 0.035, quiet * 0.8, n * 0.05);
+  } else {
+    tone("sine", base, base * 1.5, 0.09, quiet);
+    tone("sine", base * 1.2, base * 1.9, 0.08, quiet * 0.85, 0.13);
+  }
 }
 
 function chirp() {
@@ -145,6 +161,11 @@ function chirp() {
     tone("square", base, base * 0.96, 0.035, 0.003);
     tone("square", base * 1.06, base, 0.025, 0.002, 0.07);
     wildlifeTimer = window.setTimeout(chirp, 180 + Math.random() * 420);
+    return;
+  }
+  if (wildlife === "chorus") {
+    chorusSong(Math.floor(Math.random() * 3));
+    wildlifeTimer = window.setTimeout(chirp, 250 + Math.random() * 550);
     return;
   }
   const base = 2000 + Math.random() * 1400;
@@ -261,7 +282,7 @@ function restartWildlife() {
   window.clearTimeout(geeseTimer);
   if (!lapSrc) return;
   const { wildlife, loons, geese } = profile();
-  if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" ? 300 : 2000 + Math.random() * 2000);
+  if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" || wildlife === "chorus" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
   if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
 }

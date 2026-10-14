@@ -72,7 +72,7 @@ describe("ambient conditions", () => {
     expect(ambientProfile("day", "clear")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("day", "rain", "winter")).toMatchObject({ rain: false, wind: true });
     expect(ambientProfile("day", "rain", "fall")).toMatchObject({ rain: true });
-    expect(ambientProfile("dawn", "overcast")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
+    expect(ambientProfile("dawn", "overcast", "fall")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
     expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false });
@@ -84,7 +84,7 @@ describe("ambient conditions", () => {
     expect(ambientProfile("night", "clear", "fall")).toMatchObject({ wildlife: "crickets", loons: true, geese: false });
     expect(ambientProfile("day", "clear", "winter")).toMatchObject({ wildlife: "chickadees", loons: false, wind: true });
     expect(ambientProfile("night", "clear", "winter")).toMatchObject({ wildlife: "quiet", loons: false, wind: true });
-    expect(ambientProfile("dawn", "clear", "spring")).toMatchObject({ wildlife: "birds", geese: false, wind: false });
+    expect(ambientProfile("dawn", "clear", "spring")).toMatchObject({ wildlife: "chorus", geese: false, wind: false });
   });
 
   it("blows a wind loop in winter and drops it when the season turns", () => {
@@ -192,6 +192,29 @@ describe("fx drag", () => {
     fx.drag.set({ gain: 0.01, hz: 200, rasp: false, hiss: false });
     expect(fx.drag.playing).toBe(false);
     fx.enabled = true;
+  });
+});
+
+describe("dawn chorus", () => {
+  it("fills spring and summer dawns, but not a rainy one, a fall one, or later in the day", () => {
+    expect(ambientProfile("dawn", "clear", "spring").wildlife).toBe("chorus");
+    expect(ambientProfile("dawn", "overcast", "summer").wildlife).toBe("chorus");
+    expect(ambientProfile("dawn", "rain", "summer").wildlife).toBe("birds");
+    expect(ambientProfile("dawn", "clear", "fall").wildlife).toBe("birds");
+    expect(ambientProfile("day", "clear", "summer").wildlife).toBe("birds");
+  });
+
+  it("sings far more often than the daytime birds", () => {
+    fx.ambient.setConditions("dawn", "clear", "summer");
+    fx.ambient.start();
+    vi.advanceTimersByTime(10_000);
+    const dawn = tones.length;
+    fx.ambient.stop();
+    tones.length = 0;
+    fx.ambient.setConditions("day", "clear", "summer");
+    fx.ambient.start();
+    vi.advanceTimersByTime(10_000);
+    expect(dawn).toBeGreaterThan(tones.length * 3);
   });
 });
 
