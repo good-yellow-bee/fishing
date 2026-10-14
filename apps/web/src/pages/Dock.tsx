@@ -18,6 +18,8 @@ import {
   lakeSeason,
   seasonFromSearch,
   weeklyBonus,
+  GOLDEN_BONUS,
+  isGolden,
   LAKE_HOUR_LABELS,
   SKY_LABELS,
   SEASON_LABELS,
@@ -146,6 +148,8 @@ export function DockPage() {
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
   const shownFish =
     game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
+  // The landed fish's ID is its request ID, so this matches the roll the server makes.
+  const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
@@ -499,6 +503,7 @@ export function DockPage() {
           season={season}
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
+          golden={landedGolden}
           hotspot={game.hotspot}
           tracks={tracks}
           powerRef={game.powerRef}
@@ -615,14 +620,14 @@ export function DockPage() {
         </aside>
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} />}
         {game.outcome?.kind === "landed" && (
-          <div className={`landed-card rarity-${game.outcome.species.rarity}`}>
+          <div className={`landed-card rarity-${game.outcome.species.rarity}${landedGolden ? " golden" : ""}`}>
             {fieldBeat && (
               <p className="catch-best" role="status">
                 <strong>{t("Personal best")}</strong>
                 <span>{bestBeatText(fieldBeat)}</span>
               </p>
             )}
-            <FishMark species={game.outcome.species} />
+            <FishMark species={game.outcome.species} golden={landedGolden} />
             <span className="rarity-tag">{rarityLabel(game.outcome.species.rarity)}</span>
             <h2>{t(game.outcome.species.name)}</h2>
             <p className="catch-lore">{t(game.outcome.species.lore)}</p>
@@ -630,9 +635,15 @@ export function DockPage() {
             <p>{oneDecimal(game.outcome.weight)} lb · {t(SPOT_LABELS[game.outcome.spot])}</p>
             <p>
               {t("+{points} pts", {
-                points: catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean, weeklyBonus(game.outcome.species.id)),
+                points: catchPoints(
+                  game.outcome.species,
+                  game.outcome.weight,
+                  game.outcome.clean,
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1),
+                ),
               })}
             </p>
+            {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
             {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}

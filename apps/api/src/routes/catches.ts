@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { isLakeHour, isLakeSeason, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { isGolden, isLakeHour, isLakeSeason, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { findCatchByRequestId, getProfile, recordCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -58,6 +58,7 @@ catchRoutes.post("/catches", async (c) => {
     hour: body.hour ?? null,
     sky: body.sky ?? null,
     season: body.season ?? null,
+    golden: isGolden(body.requestId) ? 1 : 0,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);

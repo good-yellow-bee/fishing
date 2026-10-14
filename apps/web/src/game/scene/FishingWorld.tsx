@@ -109,6 +109,7 @@ import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings } from "../settings";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
+import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -129,6 +130,8 @@ type Props = {
   season?: LakeSeason;
   species: FishSpecies | null;
   weight: number;
+  /** The landed fish rolled golden; the held-up fish wears the gold coat. */
+  golden?: boolean;
   hotspot: Hotspot | null;
   /** Other anglers' recent catches, as faint rings on their bank's water. */
   tracks?: readonly LodgeTrack[];
@@ -1768,7 +1771,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, hotspot, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, hotspot, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -1814,8 +1817,8 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <StrikeSplash phase={phase} />
       <CaughtFish
         phase={phase}
-        color={species?.color ?? FALLBACK_COLOR}
-        accent={species?.accent ?? FALLBACK_ACCENT}
+        color={golden ? GOLDEN_COLOR : (species?.color ?? FALLBACK_COLOR)}
+        accent={golden ? GOLDEN_ACCENT : (species?.accent ?? FALLBACK_ACCENT)}
         scale={landedScale(weight)}
       />
       {/* Last in the tree, so the snapshot sees every pose written this frame. */}

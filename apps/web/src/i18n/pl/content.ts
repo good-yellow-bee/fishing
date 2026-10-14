@@ -148,6 +148,8 @@ export const PL_CONTENT: PlBook = {
   "Land all thirteen species of the lake's first book.": "Złów wszystkie trzynaście gatunków z pierwszego atlasu jeziora.",
   "Four seasons": "Cztery pory roku",
   "Land a fish in spring, summer, fall and winter.": "Złów rybę wiosną, latem, jesienią i zimą.",
+  "Gold": "Złoto",
+  "Land a golden fish.": "Złów złotą rybę.",
 
   // Lure classes (tackle.ts)
   Topwater: "Powierzchniowa",

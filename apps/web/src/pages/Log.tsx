@@ -95,8 +95,9 @@ export function LogPage() {
               <tr key={row.id} className={row.id === heaviest?.id ? "heaviest" : ""}>
                 <td className={species ? `rarity-${species.rarity}` : ""}>
                   <span className="log-fish">
-                    {species && <FishMark species={species} />}
+                    {species && <FishMark species={species} golden={row.golden} />}
                     {species ? t(species.name) : row.speciesId}
+                    {row.golden && <small className="log-golden">{t("Golden")}</small>}
                   </span>
                 </td>
                 <td>{lb(row.weight)} lb</td>

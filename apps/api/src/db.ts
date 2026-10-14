@@ -86,6 +86,7 @@ db.exec(`
     hour TEXT,
     sky TEXT,
     season TEXT,
+    golden INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
 
@@ -120,6 +121,10 @@ if (!catchColumns.some((column) => column.name === "sky")) {
 if (!catchColumns.some((column) => column.name === "season")) {
   db.exec(`ALTER TABLE catch ADD COLUMN season TEXT`);
 }
+// Older rows stay plain: they were paid as plain fish, so they don't turn golden after the fact.
+if (!catchColumns.some((column) => column.name === "golden")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN golden INTEGER NOT NULL DEFAULT 0`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
 export type ProfileRow = {
@@ -144,6 +149,7 @@ export type CatchRow = {
   hour: string | null;
   sky: string | null;
   season: string | null;
+  golden: 0 | 1;
   created_at: string;
 };
 
@@ -190,8 +196,8 @@ export function listSpeciesStats(userId: string) {
 export function listBadgeFacts(userId: string): BadgeFactRow[] {
   const rows = db
     .prepare(
-      `SELECT species_id, spot, hour, sky, season, clean, COUNT(*) as count, MAX(weight) as heaviest
-       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean`,
+      `SELECT species_id, spot, hour, sky, season, clean, golden, COUNT(*) as count, MAX(weight) as heaviest
+       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden`,
     )
     .all(userId) as {
     species_id: string;
@@ -200,6 +206,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     sky: string | null;
     season: string | null;
     clean: 0 | 1;
+    golden: 0 | 1;
     count: number;
     heaviest: number;
   }[];
@@ -210,6 +217,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     sky: isSky(row.sky) ? row.sky : null,
     season: isLakeSeason(row.season) ? row.season : null,
     clean: row.clean === 1,
+    golden: row.golden === 1,
     count: Number(row.count),
     heaviest: row.heaviest,
   }));
@@ -303,8 +311,8 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @created_at)`,
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @created_at)`,
     ).run(row);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
@@ -391,6 +399,7 @@ export function toCatch(row: CatchRow) {
     hour: row.hour,
     sky: row.sky,
     season: row.season,
+    golden: row.golden === 1,
     createdAt: row.created_at,
   };
 }
