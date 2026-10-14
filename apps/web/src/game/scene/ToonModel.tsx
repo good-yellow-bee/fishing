@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { applyToon, disposeMaterials, shadeColours } from "./toon";
+import { applyToon, releaseSharedMaterials, shadeColours, shareMaterials } from "./toon";
 import { tintPlant, type PlantKind } from "./seasonLook";
 
 type Props = {
@@ -38,10 +38,12 @@ export function ToonModel({
       const box = new THREE.Box3().setFromObject(next);
       next.position.y -= box.min.y;
     }
+    // Tinted and shaded first, so copies share only when they truly look alike.
+    shareMaterials(next);
     return next;
   }, [scene, shadows, sitOnGround, plant?.season, plant?.kind, plant?.variant, shade]);
 
-  useEffect(() => () => disposeMaterials(cloned), [cloned]);
+  useEffect(() => () => releaseSharedMaterials(cloned), [cloned]);
 
   return (
     <group position={position} rotation={rotation} scale={scale}>

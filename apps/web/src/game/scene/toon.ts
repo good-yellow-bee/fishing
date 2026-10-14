@@ -66,3 +66,65 @@ export function findBone(root: THREE.Object3D, pattern: RegExp) {
   });
   return hit;
 }
+
+/** Toon materials scenery copies share, by what they look like, with how many mesh slots use each. */
+const sharedMaterials = new Map<string, { material: THREE.Material; users: number }>();
+
+function lookKey(material: THREE.Material) {
+  const toon = material as THREE.MeshToonMaterial;
+  if (!(toon instanceof THREE.MeshToonMaterial)) return null;
+  return [toon.color.getHexString(), toon.map?.uuid ?? "-", toon.gradientMap?.uuid ?? "-", toon.transparent, toon.opacity, toon.side, toon.alphaTest].join("|");
+}
+
+/**
+ * Swaps each toon material under `root` for one shared by every copy that looks
+ * the same, so a forest of cloned trees draws from a handful of materials.
+ * The swapped-out copies are disposed. Release with releaseSharedMaterials.
+ */
+export function shareMaterials(root: THREE.Object3D) {
+  root.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const own = Array.isArray(obj.material) ? obj.material : [obj.material];
+    const next = own.map((material: THREE.Material) => {
+      const key = lookKey(material);
+      if (key === null) return material;
+      const entry = sharedMaterials.get(key);
+      if (entry) {
+        entry.users += 1;
+        if (entry.material !== material) material.dispose();
+        return entry.material;
+      }
+      material.userData.shareKey = key;
+      sharedMaterials.set(key, { material, users: 1 });
+      return material;
+    });
+    obj.material = next.length === 1 ? next[0]! : next;
+  });
+}
+
+/** Lets go of `root`'s shared materials; the last user disposes each. Materials that weren't shared are disposed as usual. */
+export function releaseSharedMaterials(root: THREE.Object3D) {
+  const loose = new Set<THREE.Material>();
+  root.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const current = Array.isArray(obj.material) ? obj.material : [obj.material];
+    current.forEach((material: THREE.Material) => {
+      const key = material.userData.shareKey as string | undefined;
+      const entry = key === undefined ? undefined : sharedMaterials.get(key);
+      if (!entry || entry.material !== material) {
+        loose.add(material);
+        return;
+      }
+      entry.users -= 1;
+      if (entry.users > 0) return;
+      sharedMaterials.delete(key!);
+      material.dispose();
+    });
+  });
+  loose.forEach((material) => material.dispose());
+}
+
+/** How many distinct shared materials are live; for tests. */
+export function sharedMaterialCount() {
+  return sharedMaterials.size;
+}

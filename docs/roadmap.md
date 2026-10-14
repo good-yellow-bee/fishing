@@ -741,7 +741,7 @@ Claude picked the review's remaining performance items. Each is checked first, a
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AE1 | Scenery copies share their toon materials instead of each building its own | performance | M |
+| ~~AE1~~ | ~~Scenery copies share their toon materials instead of each building its own~~ (#187) | performance | M |
 | AE2 | The aim raycasts run only when the pointer or the camera has moved | performance | S |
 | AE3 | The water stops recomputing its normals every frame where a cheaper path exists | performance | S/M |
 
