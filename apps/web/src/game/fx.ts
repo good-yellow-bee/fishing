@@ -294,6 +294,16 @@ function stopRain() {
   rainGain = null;
 }
 
+const geeseListeners = new Set<() => void>();
+
+/** Runs `listener` each time the geese honk going over; returns the unsubscribe. */
+export function onGeeseCall(listener: () => void) {
+  geeseListeners.add(listener);
+  return () => {
+    geeseListeners.delete(listener);
+  };
+}
+
 /** A skein of geese going over: a few honks, each a short nasal drop, a little ragged. */
 function geeseCall() {
   if (!lapSrc || !profile().geese) return;
@@ -302,6 +312,7 @@ function geeseCall() {
     const base = 300 + Math.random() * 60;
     tone("sawtooth", base, base * 0.86, 0.16, 0.0035, i * (0.28 + Math.random() * 0.2), 0, natureBus());
   }
+  for (const listener of geeseListeners) listener();
   captionSound("geese");
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
