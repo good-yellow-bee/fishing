@@ -519,14 +519,32 @@ Claude picked these after Wave Q; the owner can reorder or drop any.
 | ~~R1~~ | ~~Pick your float's colour in Settings~~ (#145) | personal | S |
 | ~~R2~~ | ~~A turtle sunning on a log on summer days~~ (#146) | wildlife | M |
 | ~~R3~~ | ~~An owl on a bare branch that hoots after dark~~ (#147) | wildlife | M |
-| R4 | Now and then a fish jumps clear out on the open water | lake | S/M |
-| R5 | Refresh the "New on the lake" card for Wave R | onboarding | S |
+| ~~R4~~ | ~~Now and then a fish jumps clear out on the open water~~ (#148) | lake | S/M |
+| ~~R5~~ | ~~Refresh the "New on the lake" card for Wave R~~ (#148) | onboarding | S |
 
 - **R1 · Float colour.** Settings gains a row of float colours (blue, red, orange, yellow, green, purple), remembered in this browser. The float's body takes the colour by sliding its UVs to another swatch of the shared palette; the white cap and the night glow tip stay.
 - **R2 · Turtle.** A half-sunk log lies off the west bank all year. On bright summer days a turtle basks on it, stretching its neck now and then; a cast landing within 4.5 m sends it sliding off with a splash ring, and it climbs back about 45 seconds later. Reduce motion holds its neck still.
 - **R3 · Owl.** A bare dead tree stands on the far bank all year. After dark outside winter an owl sits on its branch, eyes catching the light, turning its head now and then, and gives a soft "hoo, hoo-hoo" every 16 to 32 seconds, bowing with each call (muted with the rest of the sound). Reduce motion keeps its head and body still.
-- **R4 · Jumping fish.** Every minute or two, a fish flips clear of the water somewhere out on the open lake with a splash ring, more often at dawn and dusk. Off with Reduce motion. Purely for looks: it never marks a bite.
+- **R4 · Jumping fish.** Once in every 75 seconds by day (35 at dawn and dusk), a fish flips clear of the water somewhere out on the open lake, at least 7 m from the dock, with a ring where it leaves and one where it falls back. Not in winter, off with Reduce motion, and purely for looks: it never marks a bite.
 - **R5 · What's new, again.** List whatever Wave R lands on the card.
+
+## Wave S — Listening, and the lake after rain and moonrise (added 2026-10-14, after Wave R shipped)
+
+Claude picked these after Wave R; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| S1 | A separate volume for nature sounds | settings | S |
+| S2 | The heron sometimes catches a fish | wildlife | M |
+| S3 | A moon road on the water on clear nights | sky | S/M |
+| S4 | Dock planks that darken and shine in the rain | weather | S |
+| S5 | Refresh the "New on the lake" card for Wave S | onboarding | S |
+
+- **S1 · Nature volume.** Settings gains a second slider for the lake's own sounds (water, birds, frogs, loon, owl, rain, wind), apart from the game's effects (casts, reel, bites). Both sit under the main volume and Mute.
+- **S2 · Heron's catch.** Every so often the wading heron freezes, stabs into the water with a splash ring, and lifts its head with a small fish crosswise in its bill before swallowing it.
+- **S3 · Moon road.** On clear nights with a bright moon, a broken silver path of glints runs across the water toward the moon, like the sun's road by day. Fainter as the moon wanes; none under cloud.
+- **S4 · Wet dock.** When it rains, the dock and pier planks turn darker and pick up a faint sheen, and dry back as the sky clears.
+- **S5 · What's new, again.** List whatever Wave S lands on the card.
 
 ## Risks / open questions for the owner
 

@@ -1,13 +1,13 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14c";
+export const NEWS_ID = "2026-10-14d";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "Rainy dawns and dusks can bring a rainbow, mirrored in the lake.",
-  "Bats hunt low over the water on summer evenings.",
-  "A kingfisher sits on a snag off the east bank. Cast close and it flies off.",
-  "Swallows skim the lake on still summer days.",
+  "Pick your float's colour in Settings.",
+  "A turtle basks on a log on bright summer days. Cast close and it slides off.",
+  "Listen for the owl on the far bank after dark.",
+  "Now and then a fish leaps clear out on the open lake.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
