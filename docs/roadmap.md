@@ -536,7 +536,7 @@ Claude picked these after Wave R; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~S1~~ | ~~A separate volume for nature sounds~~ (#149) | settings | S |
 | ~~S2~~ | ~~The heron sometimes catches a fish~~ (#150) | wildlife | M |
-| S3 | A moon road on the water on clear nights | sky | S/M |
+| ~~S3~~ | ~~A moon road on the water on clear nights~~ (#151) | sky | S/M |
 | S4 | Dock planks that darken and shine in the rain | weather | S |
 | S5 | Refresh the "New on the lake" card for Wave S | onboarding | S |
 

@@ -22,7 +22,8 @@ import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { LakeSnow } from "./LakeSnow";
-import { moonTexture } from "./moonDisc";
+import { MoonRoad } from "./MoonRoad";
+import { moonRoad, moonTexture } from "./moonDisc";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
@@ -1704,6 +1705,7 @@ export const LakeWorld = memo(function LakeWorld({
   const weather = useMemo(() => weatherLook(hour, sky, moonLight(moon)), [hour, sky, moon]);
   const mist = mistAmount(hour, sky);
   const stars = starOpacity(hour === "night", weather.sunOut, moonLight(moon));
+  const road = moonRoad(hour === "night", weather.sunOut, moonLight(moon));
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -1793,6 +1795,7 @@ export const LakeWorld = memo(function LakeWorld({
         <SwimmingFish key={i} {...fish} />
       ))}
       {look.glitter && weather.sunOut && <SunGlitter discPos={look.discPos} />}
+      {road > 0 && <MoonRoad discPos={look.discPos} strength={road} />}
       {look.birds &&
         FLOCKS.map((flock, i) => (
           <BirdFlock key={i} {...flock} />
