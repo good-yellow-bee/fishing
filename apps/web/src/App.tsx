@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ReactNode } from "react";
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
 import { BestsPage } from "./field/bests/BestsPage";
@@ -33,9 +33,26 @@ function FogLifting() {
   );
 }
 
+function Offline() {
+  const t = useT();
+  return (
+    <div className="auth-shell">
+      <div className="auth-card">
+        <h1>Stillwater</h1>
+        <p className="lede">{t("You're offline. The lake needs a connection, but your field log works without one.")}</p>
+        <p>
+          <Link to="/">{t("Open the field log")}</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Gate({ children }: { children: ReactNode }) {
   const session = authClient.useSession();
   if (session.isPending) return <FogLifting />;
+  // Offline, the session check fails too; don't send a signed-in angler to the sign-in page.
+  if (!session.data && !navigator.onLine) return <Offline />;
   if (!session.data) return <Navigate to="/login" replace />;
   return <Suspense fallback={<FogLifting />}>{children}</Suspense>;
 }

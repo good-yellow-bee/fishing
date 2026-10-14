@@ -3,6 +3,9 @@ import type { PlBook } from ".";
 export const PL_PAGES: PlBook = {
   // App gate
   "Fog lifting…": "Mgła się podnosi…",
+  "You're offline. The lake needs a connection, but your field log works without one.":
+    "Jesteś offline. Jezioro potrzebuje połączenia, ale dziennik połowów działa bez niego.",
+  "Open the field log": "Otwórz dziennik połowów",
 
   // Login and register
   "Email": "E-mail",
