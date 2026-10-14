@@ -38,6 +38,7 @@ import {
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
 import { canLand, catchPoints, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
+import { weeklyFish } from "./weeklyFish.ts";
 
 const starter: Profile = {
   userId: "u1",
@@ -103,9 +104,12 @@ describe("catch rules", () => {
   it("applies the clean-fight bonus only to catches marked clean", () => {
     const perch = fishById("perch")!;
     const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
-    expect(validateCatch(starter, request)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
-    expect(validateCatch(starter, { ...request, clean: false })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
-    expect(validateCatch(starter, { ...request, clean: true })).toMatchObject({ ok: true, points: catchPoints(perch, 0.8, true) });
+    // A summer week, when perch can't be the fish of the week, so no weekly bonus muddies the sums.
+    const at = new Date("2026-07-15T12:00:00Z");
+    expect(weeklyFish(at).id).not.toBe("perch");
+    expect(validateCatch(starter, request, at)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: false }, at)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, clean: true }, at)).toMatchObject({ ok: true, points: catchPoints(perch, 0.8, true) });
     expect(catchPoints(perch, 0.8, true)).toBeGreaterThan(catchPoints(perch, 0.8));
   });
 

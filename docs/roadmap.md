@@ -340,7 +340,7 @@ Claude picked these after Wave G; the owner can reorder or drop any.
 | H2 | ~~A heron wades the reed shallows~~ (shipped) | wildlife | M |
 | H3 | ~~Save the landed card as a picture~~ (shipped) | share | S/M |
 | H4 | ~~Tension bar that reads without colour~~ (shipped) | a11y | S |
-| H5 | Species of the week on the weekly board | retention | M |
+| H5 | ~~Species of the week on the weekly board~~ (shipped) | retention | M |
 
 - **H1 · Split the bundle.** The whole game ships as one 1.6 MB script (466 kB gzipped), so the sign-in page waits for three.js. Lazy-load the play scene and the field log routes so sign-in, the board and the catch log open fast.
 - **H2 · Heron.** By day a grey heron stands in the reed shallows, stalks and stabs now and then, and lifts off when the angler walks close; gone at night and in rain. Pure position functions with tests, like the fireflies.

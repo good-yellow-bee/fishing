@@ -1330,6 +1330,28 @@ kbd {
   font-size: 0.85em;
 }
 
+/* The board's fish of the week: its mark beside the name and the bonus. */
+.weekly-fish {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid rgba(232, 214, 176, 0.35);
+  width: fit-content;
+}
+
+.weekly-fish .guide-fish {
+  flex-shrink: 0;
+  width: 56px;
+  margin: 0;
+}
+
+.weekly-fish span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .log-fish {
   display: flex;
   align-items: center;

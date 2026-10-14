@@ -17,6 +17,7 @@ import {
   lakeHourFromSearch,
   lakeSeason,
   seasonFromSearch,
+  weeklyBonus,
   LAKE_HOUR_LABELS,
   SKY_LABELS,
   SEASON_LABELS,
@@ -627,7 +628,12 @@ export function DockPage() {
             <p className="catch-lore">{t(game.outcome.species.lore)}</p>
             <p className="catch-lure">{t(lure)}</p>
             <p>{oneDecimal(game.outcome.weight)} lb · {t(SPOT_LABELS[game.outcome.spot])}</p>
-            <p>{t("+{points} pts", { points: catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean) })}</p>
+            <p>
+              {t("+{points} pts", {
+                points: catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean, weeklyBonus(game.outcome.species.id)),
+              })}
+            </p>
+            {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
