@@ -1,4 +1,4 @@
-import { forecast, lakeSeason, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
+import { forecast, hotBankForDay, lakeSeason, SPOT_LABELS, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
 
 function dayName(date: Date, index: number) {
@@ -32,6 +32,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
               <span className="forecast-turn">{t("Turns {sky} around {hour}:00", { sky: t(skyLabel(day.turn.to, lakeSeason(day.date))).toLowerCase(), hour: day.turn.hour })}</span>
             )}
             <small>{t(skyBlurb(day.sky, lakeSeason(day.date)))}</small>
+            <span className="forecast-bank">{t("Biting best at the {bank}", { bank: t(SPOT_LABELS[hotBankForDay(day.date)]) })}</span>
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
           </li>
         ))}

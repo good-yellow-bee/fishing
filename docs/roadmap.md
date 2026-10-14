@@ -420,6 +420,24 @@ Claude picked these after Wave K; the owner can reorder or drop any.
 - **L4 · Rod bell.** At night, while a line is in the water, a small brass bell hangs under the rod tip. It jumps and jingles on a nibble (the hint line, which screen readers hear, says so) and swings and rings hard on the bite.
 - **L5 · Dawn chorus.** Spring and summer dawns (unless it rains) swap the daytime's occasional two-note call for a busy chorus of overlapping warbles, trills and calls at varied pitch and loudness. It gives way to the usual birds when the hour turns to day.
 
+## Wave M — Reasons to try another bank (added 2026-10-14, after Wave L shipped)
+
+Claude picked these after Wave L; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| M1 | ~~Hot bank of the day~~ (shipped) | gameplay/retention | S/M |
+| M2 | Evening rise: fish dimpling the water at dusk | gameplay/visual | M |
+| M3 | Frogs in the reeds at dusk | audio | S |
+| M4 | Early bird badge | progression | S |
+| M5 | Snags in the reeds | gameplay | M |
+
+- **M1 · Hot bank.** Each local day one bank (dock, reeds, drop-off, point or inlet) runs hot: bites come a fifth sooner there. Every bank gets its day once in five, never two days running. The shack's chalk board names it for each of the three days, and the bank chip reads "biting today" while you stand on it.
+- **M2 · Evening rise.** On calm dusks in spring and summer, rings dimple the open water; a cast that lands near a fresh ring gets its bite sooner.
+- **M3 · Frogs.** Spring and summer dusks get green-frog plunks and a peeper chorus from the reed bank.
+- **M4 · Early bird.** A lodge badge for landing ten fish at dawn.
+- **M5 · Snags.** A cast that lands deep in the reeds can snag; a few gentle taps free it, a hard pull loses the lure's cast (no lure lost), so reed casting asks for care.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

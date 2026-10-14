@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { canLand, DAILY_SKIES, LAKE_HOURS, type FishSpecies, type LakeHour, type Profile, type Sky, type SpotId } from "@stillwater/shared";
+import { canLand, DAILY_SKIES, LAKE_HOURS, type FishSpecies, type LakeHour, type Profile, type Sky, type SpotId, HOT_BANK_WAIT } from "@stillwater/shared";
 import { pickBite, waitMs } from "./logic";
 
 const starter: Profile = {
@@ -91,5 +91,17 @@ describe("bubbling hotspot bite", () => {
     }
     vi.spyOn(Math, "random").mockReturnValue(0);
     expect(waitMs(1, "day", true)).toBeLessThan(waitMs(1, "day"));
+  });
+});
+
+describe("hot bank of the day", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("brings the bite a fifth sooner, never under the floor", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.9);
+    const usual = waitMs(0, "day");
+    expect(waitMs(0, "day", false, 1, false, true)).toBeCloseTo(usual * HOT_BANK_WAIT, 6);
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    expect(waitMs(8, "dawn", true, 20, false, true)).toBeGreaterThanOrEqual(1100);
   });
 });

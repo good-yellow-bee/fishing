@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Link, useSearchParams } from "react-router-dom";
 import {
   canUseSpot,
+  hotBankForDay,
   DROPOFF_LEVEL,
   INLET_LEVEL,
   catchPoints,
@@ -145,6 +146,7 @@ export function DockPage() {
   const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
   // The real moon, read once per visit; ?moon= pins the phase for testing.
   const moon = moonFromSearch(params.toString()) ?? moonPhase(openedAt);
+  const hotBank = useMemo(() => hotBankForDay(openedAt), [openedAt]);
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const [me, setMe] = useState<Me | null>(null);
@@ -626,6 +628,7 @@ export function DockPage() {
         />
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
+          {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}

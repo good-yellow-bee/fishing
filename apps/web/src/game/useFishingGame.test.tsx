@@ -15,6 +15,11 @@ let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 vi.mock("./fx", () => ({
   fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
+// The tests time bites to the usual wait; the day's hot bank is kept off the dock.
+vi.mock("@stillwater/shared", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@stillwater/shared")>();
+  return { ...actual, hotBankForDay: () => "inlet" };
+});
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   return { ...actual, pickBite: vi.fn(actual.pickBite) };

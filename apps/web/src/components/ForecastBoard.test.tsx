@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SKY_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
+import { hotBankForDay, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -17,6 +17,9 @@ describe("ForecastBoard", () => {
     const days = [...host.querySelectorAll("li")];
     expect(days.map((day) => day.querySelector("strong")?.textContent)).toEqual(["Today", "Tomorrow", "Tuesday"]);
     expect(days[2]?.querySelector(".forecast-sky")?.textContent).toBe(SKY_LABELS[weatherForDay(new Date(2026, 9, 13, 12))]);
+    expect(days.map((day) => day.querySelector(".forecast-bank")?.textContent)).toEqual(
+      [11, 12, 13].map((date) => `Biting best at the ${SPOT_LABELS[hotBankForDay(new Date(2026, 9, date))]}`),
+    );
     act(() => root.unmount());
   });
 

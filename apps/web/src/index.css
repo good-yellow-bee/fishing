@@ -2247,6 +2247,18 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 17px;
 }
 
+.forecast-bank {
+  color: #edc477;
+  font-size: 12px;
+}
+
+.stance-hot {
+  color: #edc477;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
 .forecast-moon {
   color: var(--paper-dim);
   font-size: 12px;
