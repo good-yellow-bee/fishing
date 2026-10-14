@@ -39,6 +39,8 @@ import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
 import { Owl, OwlTree } from "./Owl";
 import { owlOut } from "./owlMotion";
+import { JumpingFish } from "./JumpingFish";
+import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
 import { FallingLeaves } from "./FallingLeaves";
@@ -1813,6 +1815,7 @@ export const LakeWorld = memo(function LakeWorld({
       {turtleOut(hour, sky, season) && <Turtle />}
       <OwlTree />
       {owlOut(hour, season) && <Owl />}
+      {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
