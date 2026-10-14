@@ -327,6 +327,29 @@ export function DockPage() {
   }, [prefs.reduceMotion]);
 
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
+  // Photo mode hides every panel for a clean shot; a bite brings them straight back.
+  const [photo, setPhoto] = useState(false);
+  const photoAllowed = !shopOpen && scenePhase !== "hookset" && scenePhase !== "fight";
+  useEffect(() => {
+    if (!photoAllowed) setPhoto(false);
+  }, [photoAllowed]);
+  useEffect(() => {
+    // Capture runs ahead of the game's own keys, so nothing casts or walks off unseen while the panels are away.
+    const onKey = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
+      if (photo) {
+        event.stopImmediatePropagation();
+        event.preventDefault();
+        if ((event.code === "KeyH" || event.code === "Escape") && !event.repeat) setPhoto(false);
+        return;
+      }
+      if (event.code !== "KeyH" || event.repeat || !photoAllowed || settingsOpen) return;
+      event.preventDefault();
+      setPhoto(true);
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [photo, photoAllowed, settingsOpen]);
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
@@ -537,7 +560,12 @@ export function DockPage() {
         : t(STANCE_LABELS[game.stance]);
 
   return (
-    <div className="dock-page">
+    <div className="dock-page" data-photo={photo ? "1" : undefined}>
+      {photo && (
+        <button className="photo-exit" type="button" onClick={() => setPhoto(false)}>
+          <span>{t("Photo mode. Press H or tap to bring the panels back.")}</span>
+        </button>
+      )}
       <Hud
         profile={me.profile}
         hour={hour}
@@ -850,7 +878,19 @@ export function DockPage() {
           </div>
         )}
       </div>
-      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && (
+        <SettingsPanel
+          onClose={() => setSettingsOpen(false)}
+          onPhoto={
+            photoAllowed
+              ? () => {
+                  setSettingsOpen(false);
+                  setPhoto(true);
+                }
+              : undefined
+          }
+        />
+      )}
       {recap && (session || filedTrip) && (
         <TripRecap
           draft={session ?? { id: filedTrip!.id, date: "", sky, fish: [] }}

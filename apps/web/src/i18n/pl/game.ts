@@ -345,4 +345,6 @@ export const PL_GAME: PlBook = {
   "Fish whisperer": "Zaklinacz ryb",
   "Lake master": "Mistrz jeziora",
   "Lake legend": "Legenda jeziora",
+  "Photo mode. Press H or tap to bring the panels back.": "Tryb zdjęcia. Naciśnij H albo stuknij, by przywrócić panele.",
+  "Photo mode (H): hide the panels": "Tryb zdjęcia (H): ukryj panele",
 };

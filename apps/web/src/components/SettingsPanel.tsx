@@ -45,7 +45,8 @@ function LanguageChoice() {
 }
 
 /** Language, text size, sound, camera, effects and reel controls, remembered in this browser. */
-export function SettingsPanel({ onClose }: { onClose: () => void }) {
+/** `onPhoto`, when given, hides every panel for a clean screenshot (H does the same). */
+export function SettingsPanel({ onClose, onPhoto }: { onClose: () => void; onPhoto?: () => void }) {
   const current = useSettings();
   const t = useT();
   const panel = useRef<HTMLElement>(null);
@@ -141,6 +142,11 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           {t("Shadows")}
         </label>
         <p className="settings-note">{t("Picture and shadows change the next time you open the lake.")}</p>
+        {onPhoto && (
+          <button className="panel-btn" type="button" data-photo-mode onClick={onPhoto}>
+            {t("Photo mode (H): hide the panels")}
+          </button>
+        )}
         <button className="panel-btn" type="button" onClick={onClose}>
           {t("Back to the lake")}
         </button>

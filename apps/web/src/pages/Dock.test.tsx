@@ -507,6 +507,29 @@ describe("settings", () => {
     expect(fx.enabled).toBe(true);
   });
 
+  it("hides every panel in photo mode until H, Escape or a tap brings them back", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const root = page.querySelector(".dock-page")!;
+    const key = (code: string) => act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code, cancelable: true })));
+    key("KeyH");
+    expect(root.getAttribute("data-photo")).toBe("1");
+    // The game never sees keys while the panels are away, so Space casts nothing.
+    key("Space");
+    expect(page.querySelector(".scene-wrap")!.getAttribute("data-phase")).toBe("idle");
+    key("Escape");
+    expect(root.hasAttribute("data-photo")).toBe(false);
+    key("KeyH");
+    act(() => page.querySelector<HTMLButtonElement>(".photo-exit")!.click());
+    expect(root.hasAttribute("data-photo")).toBe(false);
+    const gear = [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Settings")!;
+    act(() => gear.click());
+    act(() => page.querySelector<HTMLButtonElement>("[data-photo-mode]")!.click());
+    expect(page.querySelector('[role="dialog"]')).toBeNull();
+    expect(root.getAttribute("data-photo")).toBe("1");
+    key("KeyH");
+    expect(root.hasAttribute("data-photo")).toBe(false);
+  });
+
   it("ties on last visit's lure when it is still packed", async () => {
     const { reloadSettings, updateSettings } = await import("../game/settings");
     const page = await openDock("/?hour=day&sky=clear");
