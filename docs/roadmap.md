@@ -480,7 +480,7 @@ Claude picked these after Wave O; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| P1 | A keys and buttons card on "?" | QoL | S |
+| ~~P1~~ | ~~A keys and buttons card on "?"~~ (#137) | QoL | S |
 | P2 | Autumn leaves drifting down onto the water | seasons | M |
 | P3 | A mayfly hatch on spring and summer evenings | wildlife | M |
 | P4 | Water lilies in flower through the summer | seasons | S |

@@ -56,6 +56,7 @@ import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { KeysCard } from "../components/KeysCard";
 import { stormOn } from "../game/scene/storm";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
@@ -164,6 +165,7 @@ export function DockPage() {
     savedSettings.lastLure && lureChoices.includes(savedSettings.lastLure) ? savedSettings.lastLure : null,
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [keysOpen, setKeysOpen] = useState(false);
   const shopPanel = useRef<HTMLDivElement>(null);
   const prefs = useSettings();
   const steppedDownAt = useEffectsSteppedDown();
@@ -345,13 +347,13 @@ export function DockPage() {
         if ((event.code === "KeyH" || event.code === "Escape") && !event.repeat) setPhoto(false);
         return;
       }
-      if (event.code !== "KeyH" || event.repeat || !photoAllowed || settingsOpen) return;
+      if (event.code !== "KeyH" || event.repeat || !photoAllowed || settingsOpen || keysOpen) return;
       event.preventDefault();
       setPhoto(true);
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [photo, photoAllowed, settingsOpen]);
+  }, [photo, photoAllowed, settingsOpen, keysOpen]);
   const bankClear = !shopOpen && (scenePhase === "idle" || scenePhase === "casting" || scenePhase === "waiting");
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
@@ -519,6 +521,13 @@ export function DockPage() {
       if (event.code === "Escape") {
         setShopOpen(false);
         setSettingsOpen(false);
+        setKeysOpen(false);
+        return;
+      }
+      if (event.key === "?") {
+        event.preventDefault();
+        setSettingsOpen(false);
+        setKeysOpen((open) => !open);
         return;
       }
       if (event.code !== "KeyE" || event.repeat) return;
@@ -885,6 +894,10 @@ export function DockPage() {
       {settingsOpen && (
         <SettingsPanel
           onClose={() => setSettingsOpen(false)}
+          onKeys={() => {
+            setSettingsOpen(false);
+            setKeysOpen(true);
+          }}
           onPhoto={
             photoAllowed
               ? () => {
@@ -895,6 +908,7 @@ export function DockPage() {
           }
         />
       )}
+      {keysOpen && <KeysCard onClose={() => setKeysOpen(false)} />}
       {recap && (session || filedTrip) && (
         <TripRecap
           draft={session ?? { id: filedTrip!.id, date: "", sky, fish: [] }}

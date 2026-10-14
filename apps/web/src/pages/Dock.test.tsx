@@ -530,6 +530,19 @@ describe("settings", () => {
     expect(root.hasAttribute("data-photo")).toBe(false);
   });
 
+  it("opens the keys card on ? or from settings, and closes it on Escape", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "?", code: "Slash", shiftKey: true })));
+    expect(page.querySelector(".keys-card")?.textContent).toContain("Photo mode");
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Escape" })));
+    expect(page.querySelector(".keys-card")).toBeNull();
+    const gear = [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Settings")!;
+    act(() => gear.click());
+    act(() => page.querySelector<HTMLButtonElement>("[data-keys-card]")!.click());
+    expect(page.querySelector(".settings-panel:not(.keys-card)")).toBeNull();
+    expect(page.querySelector(".keys-card")).not.toBeNull();
+  });
+
   it("ties on last visit's lure when it is still packed", async () => {
     const { reloadSettings, updateSettings } = await import("../game/settings");
     const page = await openDock("/?hour=day&sky=clear");
