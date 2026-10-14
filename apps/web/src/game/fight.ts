@@ -18,6 +18,16 @@ export type FightPerformance = {
 
 /** Where FightBar turns the tension bar red. */
 export const RED_TENSION = 0.8;
+/** Under this the line is easy; between it and RED_TENSION it is tight. */
+export const TIGHT_TENSION = 0.55;
+
+export type TensionZone = "easy" | "tight" | "red";
+
+/** The fight bar's zone for a tension, so it can be named in words and patterns as well as colour. */
+export function tensionZone(tension: number): TensionZone {
+  if (tension < TIGHT_TENSION) return "easy";
+  return tension < RED_TENSION ? "tight" : "red";
+}
 
 /** 80% of the way from hookset (1) to escape (1.25), like RED_TENSION; a hookset tap's idle frames stay far below it. */
 export const RUN_OUT_LINE = 1.2;

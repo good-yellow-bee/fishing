@@ -820,6 +820,27 @@ kbd {
   width: 0;
 }
 
+.fight-bar .fight-zone {
+  float: right;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* Drawn over the fill, so a fill that reaches it turns striped: "too tight" is a pattern as well as a colour. */
+.fight-bar .danger-zone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(-45deg, rgba(239, 224, 194, 0.3) 0 3px, transparent 3px 7px);
+}
+
+.fight-bar .tick-red {
+  width: 3px;
+  margin-left: -1px;
+  background: #f4efe4;
+}
+
 .fight-bar .fight-status {
   margin: 10px 0 0;
   font-size: 12px;

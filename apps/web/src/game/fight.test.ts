@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, TIGHT_TENSION, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -232,3 +232,14 @@ describe("surges", () => {
   });
 });
 
+
+describe("tension zones", () => {
+  it("names the bar's zone at its edges, matching the clean-fight line", () => {
+    expect(tensionZone(0)).toBe("easy");
+    expect(tensionZone(TIGHT_TENSION - 0.001)).toBe("easy");
+    expect(tensionZone(TIGHT_TENSION)).toBe("tight");
+    expect(tensionZone(RED_TENSION - 0.001)).toBe("tight");
+    expect(tensionZone(RED_TENSION)).toBe("red");
+    expect(tensionZone(1.2)).toBe("red");
+  });
+});
