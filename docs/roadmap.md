@@ -999,6 +999,13 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BL1~~ | ~~Short landscape touch screens get a one-row header and panels tucked into the corners, so the lure panel no longer covers the walking stick; the shore help on touch screens names the stick, tapping the shore, touching the water and two-finger looking instead of WASD, clicks and right-drag~~ (#225) | phone UX | S |
 
+## Wave BM — Fewer draws at the angler's feet (added 2026-10-14, after Wave BL shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BM1~~ | ~~The thermos and its cup bake into one painted shape each, and the reel's spool and crank bake into one each, so they cost 5 draws instead of 12~~ (#226) | perf | S |
+| BM2 | Static shadow casters that never move (logs, path stones, crates) stop casting where their shadow falls out of view or merge into one caster | perf | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
