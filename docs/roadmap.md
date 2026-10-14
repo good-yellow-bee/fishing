@@ -573,14 +573,32 @@ Claude picked these after Wave T; the owner can reorder or drop any.
 | ~~U1~~ | ~~A deer comes down to drink on the far bank at dawn and dusk~~ (#157) | wildlife | M |
 | ~~U2~~ | ~~Water striders skating in the calm shallows by the dock~~ (#158) | wildlife | S |
 | ~~U3~~ | ~~Ducklings trailing a duck in spring~~ (#159) | wildlife | S |
-| U4 | Cattail fluff drifting on the breeze in late summer | weather | S |
-| U5 | Refresh the "New on the lake" card for Wave U | onboarding | S |
+| ~~U4~~ | ~~Cattail fluff drifting on the breeze in late summer~~ (#160) | weather | S |
+| ~~U5~~ | ~~Refresh the "New on the lake" card for Wave U~~ (#160) | onboarding | S |
 
 - **U1 · Deer.** Once every 75 seconds at dawn and dusk (not in rain) a deer walks out of the far treeline to the water's edge, turns side-on and drinks, looking up now and then, with small rings at its muzzle, then walks back. A cast landing within 7 m sends it bounding off until its next visit. Reduce motion keeps it standing with its head up.
 - **U2 · Water striders.** On calm, dry days outside winter (dawn to dusk, wind at most a light breeze) six striders rest and dart in quick short dashes on the water just off the dock's left side, each long leg dimpling the surface. Lite effects keep three; Reduce motion holds them still.
 - **U3 · Ducklings.** Swapped in for the planned autumn mist, which the lake already has at dawn. In spring the duck in the east shallows leads four ducklings in a weaving line behind her; when a cast flushes her they hide in the reeds and paddle out again once she is back.
-- **U4 · Cattail fluff.** In late summer and fall, white tufts lift from the reeds and float downwind over the water with the day's wind.
+- **U4 · Cattail fluff.** In summer and fall (not in rain), soft white tufts lift from the three reed beds and float low over the water, downwind with the day's wind or out over the lake in still air, faster as the wind rises. Lite effects keep half; Reduce motion holds them in the air.
 - **U5 · What's new, again.** List whatever Wave U lands on the card.
+
+## Wave V — Sounds and gusts (added 2026-10-14, after Wave U shipped)
+
+Claude picked these after Wave U; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| V1 | Ducklings peep and a spooked deer snorts | sound | S |
+| V2 | Cat's-paw gusts darkening patches of water on breezy days | weather | S/M |
+| V3 | Snow gathers on the angler's cap in winter snowfall | weather | S |
+| V4 | Frogs on lily pads plop in when a cast lands close | wildlife | S/M |
+| V5 | Refresh the "New on the lake" card for Wave V | onboarding | S |
+
+- **V1 · Peeps and snorts.** Soft high peeps now and then while the ducklings are out, and a sharp snort when a cast sends the deer off, both under the Nature sounds slider.
+- **V2 · Gusts.** On breezy and strong-wind days, darker rippled patches sweep across the water downwind every few seconds, the way a gust roughens the surface. Off with Reduce motion; Lite effects keep half.
+- **V3 · Snowy cap.** While snow falls, a little snow builds up on the angler's cap and shoulders, and is gone when it stops.
+- **V4 · Frogs on pads.** On summer evenings a frog or two sits on the lily pads near the reeds; a cast landing close makes them plop into the water with a ring, and they climb back later.
+- **V5 · What's new, again.** List whatever Wave V lands on the card.
 
 ## Risks / open questions for the owner
 

@@ -29,6 +29,8 @@ import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
 import { DUCKLING_COUNT, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
+import { ReedFluff } from "./ReedFluff";
+import { fluffOut } from "./cattailTufts";
 import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
 import { dewWebOut } from "./orbWeb";
@@ -1889,6 +1891,7 @@ export const LakeWorld = memo(function LakeWorld({
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
+      {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </SeasonContext.Provider>
