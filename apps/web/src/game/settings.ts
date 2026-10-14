@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 
 /**
  * Player settings, remembered in this browser. Frame loops read the live
@@ -6,6 +6,8 @@ import { useSyncExternalStore } from "react";
  */
 
 export type ShakeLevel = "off" | "soft" | "full";
+
+export type TextSize = "normal" | "large" | "larger";
 
 export type Settings = {
   /** 0..1, on top of Mute. */
@@ -23,6 +25,8 @@ export type Settings = {
   reelMode: "hold" | "toggle";
   /** On top of the system setting: no shake, flashes or card animations. */
   reduceMotion: boolean;
+  /** Words, panels and buttons drawn at 1x, 1.15x or 1.3x; the lake itself keeps its size. */
+  textSize: TextSize;
   /** The lure tied on last, if it is still packed next visit. */
   lastLure: string | null;
 };
@@ -39,6 +43,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sharpness: "sharp",
   reelMode: "hold",
   reduceMotion: false,
+  textSize: "normal",
   lastLure: null,
 };
 
@@ -69,6 +74,7 @@ export function parseSettings(raw: string | null): Settings {
     sharpness: pick(data.sharpness, ["sharp", "fast"], d.sharpness),
     reelMode: pick(data.reelMode, ["hold", "toggle"], d.reelMode),
     reduceMotion: typeof data.reduceMotion === "boolean" ? data.reduceMotion : d.reduceMotion,
+    textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
 }
@@ -106,6 +112,16 @@ export function subscribeSettings(listener: () => void) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+/** Mirrors the text size onto <html>, where the stylesheet scales the words and panels. */
+export function useTextSize() {
+  const { textSize } = useSettings();
+  useEffect(() => {
+    const root = document.documentElement;
+    if (textSize === "normal") delete root.dataset.textSize;
+    else root.dataset.textSize = textSize;
+  }, [textSize]);
 }
 
 export function useSettings() {

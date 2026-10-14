@@ -409,7 +409,7 @@ a:focus-visible {
   position: absolute;
   right: 24px;
   bottom: 24px;
-  width: min(280px, 42vw);
+  width: min(280px, calc(42vw / var(--text-zoom, 1)));
   z-index: 2;
   pointer-events: none;
   color: #f3e6cc;
@@ -452,7 +452,7 @@ a:focus-visible {
   z-index: 4;
   display: grid;
   gap: 5px;
-  width: min(220px, 46vw);
+  width: min(220px, calc(46vw / var(--text-zoom, 1)));
   margin: 0;
   padding: 8px 10px 10px;
   border: 1px solid rgba(220, 196, 150, 0.38);
@@ -500,10 +500,10 @@ a:focus-visible {
   right: 24px;
   bottom: 24px;
   z-index: 8;
-  width: min(420px, 92vw);
+  width: min(420px, calc(92vw / var(--text-zoom, 1)));
   /* Anchored at the bottom, so on a short landscape screen it scrolls rather than lifting the upgrades off the top. */
-  max-height: calc(100vh - 48px);
-  max-height: calc(100dvh - 48px);
+  max-height: calc(100vh / var(--text-zoom, 1) - 48px);
+  max-height: calc(100dvh / var(--text-zoom, 1) - 48px);
   overflow-y: auto;
   padding: 16px 16px 14px;
   border: 1px solid rgba(215, 190, 142, 0.38);
@@ -643,7 +643,7 @@ a:focus-visible {
   display: grid;
   justify-items: center;
   gap: 6px;
-  width: min(420px, 60vw);
+  width: min(420px, calc(60vw / var(--text-zoom, 1)));
   padding: 8px 12px 9px;
   border: 1px solid rgba(220, 196, 150, 0.38);
   background: rgba(20, 28, 25, 0.72);
@@ -789,7 +789,7 @@ kbd {
   left: 50%;
   bottom: 24px;
   transform: translateX(-50%);
-  width: min(360px, 88vw);
+  width: min(360px, calc(88vw / var(--text-zoom, 1)));
   z-index: 7;
   pointer-events: none;
   background: rgba(239, 224, 194, 0.94);
@@ -992,7 +992,7 @@ kbd {
   border: 1px solid #665139;
   box-shadow: 0 24px 60px rgba(10, 16, 14, 0.4);
   padding: 24px 28px;
-  min-width: min(320px, 88vw);
+  min-width: min(320px, calc(88vw / var(--text-zoom, 1)));
   text-align: center;
   backdrop-filter: blur(10px);
 }
@@ -1029,7 +1029,7 @@ kbd {
   transform: translateX(-50%);
   padding: 10px 16px;
   min-width: 0;
-  max-width: min(420px, 88vw);
+  max-width: min(420px, calc(88vw / var(--text-zoom, 1)));
   font-size: 13px;
   pointer-events: none;
 }
@@ -1654,7 +1654,7 @@ kbd {
     top: calc(var(--hud-bottom, 140px) + 8px);
     right: 8px;
     left: auto;
-    width: min(210px, 56vw);
+    width: min(210px, calc(56vw / var(--text-zoom, 1)));
     padding: 6px 8px 8px;
   }
 
@@ -1699,8 +1699,8 @@ kbd {
   }
 
   .fight-bar {
-    bottom: clamp(16px, calc(100dvh - 280px), 244px);
-    width: min(340px, 92vw);
+    bottom: clamp(16px, calc(100dvh / var(--text-zoom, 1) - 280px), 244px);
+    width: min(340px, calc(92vw / var(--text-zoom, 1)));
   }
 
   .power-meter {
@@ -1901,7 +1901,7 @@ html[data-reduce-motion="1"] .walkthrough li {
   display: grid;
   gap: 12px;
   width: min(380px, 100%);
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh / var(--text-zoom, 1) - 32px);
   overflow-y: auto;
   padding: 18px 18px 16px;
   border: 1px solid rgba(215, 190, 142, 0.38);
@@ -2196,7 +2196,7 @@ html[data-reduce-motion="1"] .hour-veil {
   left: 24px;
   bottom: 86px;
   z-index: 2;
-  max-width: min(42ch, 70vw);
+  max-width: min(42ch, calc(70vw / var(--text-zoom, 1)));
   padding: 7px 11px;
   background: rgba(17, 24, 22, 0.55);
   color: var(--paper-dim);
@@ -2312,4 +2312,25 @@ html[data-reduce-motion="1"] .hour-veil {
 .trip-recap-actions {
   display: grid;
   gap: 8px;
+}
+
+/* Text size from Settings: the words and panels grow, the lake and its canvas keep their size.
+   Viewport units inside a zoomed panel grow with it, so their sizes divide by --text-zoom. */
+html[data-text-size="large"] {
+  --text-zoom: 1.15;
+}
+
+html[data-text-size="larger"] {
+  --text-zoom: 1.3;
+}
+
+html[data-text-size] :is(
+  .dock-page > :not(.scene-wrap),
+  .scene-wrap > :not(div, .pad-cursor),
+  .scene-wrap > div:not(:has(canvas)),
+  .field,
+  .auth-shell,
+  .log-page
+) {
+  zoom: var(--text-zoom);
 }
