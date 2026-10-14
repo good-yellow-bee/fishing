@@ -29,6 +29,8 @@ import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
 import { DockLeaves } from "./DockLeaves";
 import { DockSnow } from "./DockSnow";
+import { Icicles } from "./Icicles";
+import { iciclesOut } from "./icicleRow";
 import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
 import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, ducklingsOut } from "./ducklingTrail";
@@ -1859,6 +1861,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Dock wet={dockWet(weather.rain, season)} />
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
       {dockSnowy(season) && <DockSnow />}
+      {iciclesOut(season) && <Icicles />}
       {dockLeavesOut(season) && <DockLeaves wind={wind} />}
       {dewWebOut(hour, season) && <DewWeb />}
       {dewGlintsOut(hour, season) && <DewGrass />}
