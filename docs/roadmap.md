@@ -553,13 +553,13 @@ Claude picked these after Wave S; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~T1~~ | ~~The angler's breath shows on cold mornings~~ (#153) | weather | S |
-| T2 | Shooting stars mirrored in the lake on clear nights | sky | S |
+| ~~T2~~ | ~~Shooting stars mirrored in the lake on clear nights~~ (#154) | sky | S |
 | T3 | Snow settles on the dock in winter | weather | S |
 | T4 | A dewy spider web on the dock rail at dawn | wildlife | S |
 | T5 | Refresh the "New on the lake" card for Wave T | onboarding | S |
 
 - **T1 · Breath.** At dawn, and any time in winter, small pale puffs drift from the angler's face every few seconds and fade. Off with Reduce motion; Lite effects keep every other puff.
-- **T2 · Shooting stars.** On clear nights a meteor now and then streaks across the sky, seen in the lake's mirror like the stars and rainbow, since the dock camera sees little sky. Rare: about one a minute at most.
+- **T2 · Shooting stars.** The shooting stars that already crossed the sky now fly low over the far shore, and each one shows as a bright streak crossing the lake's mirror in front of the dock, since the dock camera sees little sky. Still one per 40 seconds at most, off with Reduce motion.
 - **T3 · Snowy dock.** In winter the dock and pier planks wear a thin white top, and the posts a cap of snow, like the snow on the banks.
 - **T4 · Spider web.** At dawn a small round web strung between two posts of the dock rail catches the low light, beaded with dew that glints. It fades by full day; not in winter.
 - **T5 · What's new, again.** List whatever Wave T lands on the card.
