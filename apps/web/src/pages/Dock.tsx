@@ -15,6 +15,8 @@ import {
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
+  lakeSeason,
+  seasonFromSearch,
   luresPacked,
   keepPlayTrip,
   localDate,
@@ -92,6 +94,8 @@ export function DockPage() {
   const [veil, setVeil] = useState<LakeHour | null>(null);
   const hour = forcedHour ?? liveHour;
   const sky = weatherFromSearch(params.toString()) ?? weatherForDay(openedAt);
+  // Read once per visit like the day's weather; ?season= pins it for testing.
+  const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -108,7 +112,7 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season);
   const scenePhase = game.outcome ? "result" : game.phase;
   const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
@@ -422,6 +426,7 @@ export function DockPage() {
         profile={me.profile}
         hour={hour}
         sky={sky}
+        season={season}
         onSettings={() => setSettingsOpen(true)}
         onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
       />
@@ -435,6 +440,7 @@ export function DockPage() {
         data-nibble={game.nibble ? "1" : "0"}
         data-hour={hour}
         data-sky={sky}
+        data-season={season}
         data-lure={lure}
         data-lure-locked={lureLocked ? "1" : "0"}
       >
@@ -446,6 +452,7 @@ export function DockPage() {
           nibble={game.nibble}
           hour={hour}
           sky={sky}
+          season={season}
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
           hotspot={game.hotspot}

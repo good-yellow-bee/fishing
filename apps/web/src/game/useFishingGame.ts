@@ -12,6 +12,7 @@ import {
   type CastFail,
   type FishSpecies,
   type LakeHour,
+  type LakeSeason,
   type Profile,
   type Sky,
   type SpotId,
@@ -109,6 +110,7 @@ export function useFishingGame(
   sky?: Sky,
   /** A new angler's easy first fish (see `isMercy`). */
   mercy = false,
+  season?: LakeSeason,
 ) {
   const mercyRef = useRef(mercy);
   mercyRef.current = mercy;
@@ -248,7 +250,7 @@ export function useFishingGame(
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
-    const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow);
+    const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season);
     const bitten = makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
     setBite(bitten);
@@ -283,7 +285,7 @@ export function useFishingGame(
         resetToIdle("Strike the moment the bobber goes under.", "result");
       }, hookWindowMs(current.accuracy, mercyNow));
     }, wait);
-  }, [hour, lureRef, resetToIdle, sky]);
+  }, [hour, lureRef, resetToIdle, season, sky]);
 
   const releaseCast = useCallback(() => {
     if (phaseRef.current !== "casting" || !profile) return;

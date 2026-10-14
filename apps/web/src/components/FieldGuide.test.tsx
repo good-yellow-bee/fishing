@@ -39,6 +39,7 @@ describe("field guide card", () => {
       "Dock: big lure at dusk",
       "Drop-off: small lure at dusk",
       "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
+      "Runs in summer",
     ]);
     expect(bass.trophy).toBeNull();
   });
@@ -54,6 +55,13 @@ describe("field guide card", () => {
     expect(cards([stat("catfish", 4)])("catfish").lines).toContain("Draws on: Live bait (night)");
     expect(cards([])("catfish").text).not.toContain("Draws on");
     expect(cards([stat("sturgeon", 40)])("sturgeon").text).not.toContain("Draws on");
+  });
+
+  it("names the season a logged fish runs in, and says nothing for a fish with no season", () => {
+    expect(cards([stat("salmon", 8)])("salmon").lines).toContain("Runs in fall");
+    expect(cards([stat("burbot", 3)])("burbot").lines).toContain("Runs in winter");
+    expect(cards([])("salmon").text).not.toContain("Runs in");
+    expect(cards([stat("golden-shiner", 0.2)])("golden-shiner").text).not.toContain("Runs in");
   });
 
   it("says the clues are for a cast released in the band", () => {
