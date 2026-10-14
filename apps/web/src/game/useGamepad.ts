@@ -3,10 +3,12 @@ import { aimLean, keyChanges, moveCursor, padKeys, type PadKeys } from "./gamepa
 
 /**
  * Polls the first connected controller each frame and replays it as keys on the window and pointer moves
- * from an on-screen cursor. Returns where to draw the cursor, or null while no controller has aimed.
+ * from an on-screen cursor. Returns whether a controller is connected, and where to draw the cursor
+ * (null while it has not aimed).
  */
 export function useGamepad(enabled = true) {
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const [connected, setConnected] = useState(false);
   const keys = useRef<PadKeys>(new Set());
   const at = useRef<{ x: number; y: number } | null>(null);
 
@@ -25,6 +27,7 @@ export function useGamepad(enabled = true) {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const pad = [...navigator.getGamepads()].find((one) => one?.connected);
+      setConnected(pad !== undefined && pad !== null);
       if (!pad) {
         releaseAll();
         return;
@@ -49,5 +52,5 @@ export function useGamepad(enabled = true) {
     };
   }, [enabled]);
 
-  return cursor;
+  return { cursor, connected };
 }
