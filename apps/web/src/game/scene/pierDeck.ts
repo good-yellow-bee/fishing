@@ -32,7 +32,7 @@ export const BRIDGE_SPANS = [7.4, 6.25] as const;
 type Box = DeckRect;
 
 /** Walk boxes along the pier, with the dock end extended onto the bridge deck. */
-const APPROACH: readonly Box[] = [
+export const APPROACH: readonly Box[] = [
   { minX: -0.28, maxX: 0.28, minZ: 7.9, maxZ: 9.85 },
   { minX: -0.15, maxX: 0.28, minZ: 9.7, maxZ: 10.55 },
   { minX: 0.05, maxX: 1.18, minZ: 10.18, maxZ: 10.58 },
