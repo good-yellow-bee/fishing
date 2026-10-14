@@ -14,6 +14,8 @@ import {
   FIGHT_WAG,
   fightFishMode,
   fightFishPose,
+  LEAP_HEIGHT,
+  leapLift,
   fightLineEnd,
   type FightFishPose,
 } from "./fightFish.ts";
@@ -232,3 +234,14 @@ function waggedFish(midY: number, tailY: number) {
   root.add(mesh(new THREE.SphereGeometry(0.5, 7, 4), [-0.38, -0.02, 0.03], [0, 0.35, 0], [0.34, 0.06, 0.25]));
   return root;
 }
+
+describe("leapLift", () => {
+  it("clears the water nose up, peaks halfway, and falls back nose down", () => {
+    expect(leapLift(0).y).toBeCloseTo(0);
+    expect(leapLift(0.5).y).toBeCloseTo(LEAP_HEIGHT);
+    expect(leapLift(1).y).toBeCloseTo(0);
+    expect(leapLift(0.1).pitch).toBeGreaterThan(0);
+    expect(leapLift(0.9).pitch).toBeLessThan(0);
+    expect(leapLift(2)).toEqual(leapLift(1));
+  });
+});

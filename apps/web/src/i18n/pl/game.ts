@@ -156,6 +156,9 @@ export const PL_GAME: PlBook = {
   "Reel easy — don't horse it": "Zwijaj spokojnie — nie szarp",
   "Let go now — it's gathering": "Puść teraz — zbiera siły",
   "LET GO — long run!": "PUŚĆ — długi odjazd!",
+  "Reel steady": "Zwijaj równo",
+  "Let go now — it's coming up!": "Puść teraz — idzie do góry!",
+  "BOW — it's jumping!": "PUŚĆ — skacze!",
 
   // Field guide
   "Small shadow": "Mały cień",

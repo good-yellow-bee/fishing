@@ -188,3 +188,12 @@ export function fightLineEnd(phase: ScenePhase, pose: FightFishPose, bobber: Poi
   if (fightFishMode(phase) !== "on" || !pose.show) return { x: bobber.x, y: bobber.y, z: bobber.z };
   return { x: pose.mouthX, y: pose.mouthY, z: pose.mouthZ };
 }
+
+/** Meters a leaping fish clears the water at the top of its jump. */
+export const LEAP_HEIGHT = 0.9;
+
+/** A leap `u` (0..1) of the way through: how high the fish is and how far its nose tips up (then over). */
+export function leapLift(u: number) {
+  const k = Math.min(1, Math.max(0, u));
+  return { y: Math.sin(Math.PI * k) * LEAP_HEIGHT, pitch: Math.cos(Math.PI * k) * 0.7 };
+}

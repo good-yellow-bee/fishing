@@ -3,8 +3,16 @@ import { t } from "../i18n";
 import { difficulty01 } from "./logic";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
-export type FightSim = { line: number; tension: number; surge: SurgeState };
+/** `jump`: the coming or current run is a leap clear of the water. */
+export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean };
 export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
+
+/** Trout, bass and salmon jump: every second run of theirs is a leap. */
+export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "smallmouth-bass", "largemouth-bass", "salmon"]);
+/** A leap is in the air this long. */
+export const JUMP_MS = 750;
+/** Seconds into a leap before a held line costs anything: a prompt bow is always in time. */
+export const JUMP_GRACE_SEC = 0.15;
 export type FightRuntime = {
   sim: FightSim;
   performance: FightPerformance;
@@ -62,6 +70,11 @@ const SURGE_PULL = 0.6;
 const RUN_GRACE_MS = 300;
 const GRACE_TENSION = 0.95;
 
+/** The fight card's calls when the coming run is a leap: calm, warning, in the air. */
+export function jumpLines(): [string, string, string] {
+  return [t("Reel steady"), t("Let go now — it's coming up!"), t("BOW — it's jumping!")];
+}
+
 /** The fight card's three calls for a challenge (calm, warning, run), in the player's language. */
 export function fightLines(challenge: ChallengeId): [string, string, string] {
   switch (challenge) {
@@ -102,21 +115,27 @@ export function makeFight(
   let completedSurges = 0;
   let nextAt: number | null = null;
   let graceUntil = -Infinity;
+  let jumpAge = 0;
+  const leaper = LEAPERS.has(species.id);
 
   const step = (nowMs: number, dtSec: number, reeling: boolean): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;
-        nextAt = nowMs + pattern.warnMs;
+        sim.jump = leaper && completedSurges % 2 === 1;
+        jumpAge = 0;
+        // A leap gets a longer warning: it is the one mistake that ends the fight outright.
+        nextAt = nowMs + (sim.jump ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
         sim.surge = 2;
-        nextAt = nowMs + range(pattern.surgeMin, pattern.surgeMax);
+        nextAt = nowMs + (sim.jump ? JUMP_MS : range(pattern.surgeMin, pattern.surgeMax));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
       } else {
         sim.surge = 0;
+        sim.jump = false;
         completedSurges += 1;
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax));
@@ -131,6 +150,11 @@ export function makeFight(
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
+    }
+    // A line held tight through a leap loads the rod into the red: the clean bonus goes, but never the fish.
+    if (sim.jump && sim.surge === 2) {
+      jumpAge += dtSec;
+      if (reeling && jumpAge > JUMP_GRACE_SEC) sim.tension = Math.max(sim.tension, RED_TENSION);
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     sim.line = Math.min(1.3, Math.max(0, sim.line));
