@@ -462,17 +462,35 @@ Claude picked these after Wave N; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| O1 | ~~"New on the lake" card for returning anglers~~ (shipped) | onboarding | S |
+| ~~O1~~ | ~~"New on the lake" card for returning anglers~~ (#132) | onboarding | S |
 | ~~O2~~ | ~~Angler titles by level~~ (#133) | progression | S |
 | ~~O3~~ | ~~Photo mode: hide the panels with H~~ (#134) | QoL | S |
 | ~~O4~~ | ~~Thunder and lightning on stormy rain days~~ (#135) | weather | M |
-| O5 | An otter along the far bank at dawn and dusk | wildlife | M |
+| ~~O5~~ | ~~An otter along the far bank at dawn and dusk~~ (#136) | wildlife | M |
 
 - **O1 · What's new.** An angler who has landed a fish before sees a one-time card listing the latest headline changes (leaps, hot bank, evening rise, snags, stars and the rod bell, the new settings), only while idle on the bank. "Got it" hides it until the next batch; brand-new anglers get the walkthrough instead.
 - **O2 · Titles.** A title from the angler's level ("Greenhorn" up to "Lake legend") next to their name on the HUD and the lodge board.
 - **O3 · Photo mode.** H (or a pad button) hides every panel for a clean screenshot; H again or Escape brings them back.
 - **O4 · Storms.** On rain days with a strong wind, now and then the sky flashes and thunder rolls a few seconds later (no flash with Reduce motion).
 - **O5 · Otter.** At dawn and dusk outside winter, an otter swims the far bank, porpoising and diving, and slips away from a close cast like the ducks do.
+
+## Wave P — Seasons on the water, and finding your way (added 2026-10-14, after Wave O shipped)
+
+Claude picked these after Wave O; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| P1 | A keys and buttons card on "?" | QoL | S |
+| P2 | Autumn leaves drifting down onto the water | seasons | M |
+| P3 | A mayfly hatch on spring and summer evenings | wildlife | M |
+| P4 | Water lilies in flower through the summer | seasons | S |
+| P5 | Refresh the "New on the lake" card for Waves O and P | onboarding | S |
+
+- **P1 · Keys card.** "?" (and a Settings button) opens a small card listing every key and pad button: Space, the mouse, W A S D, E, H, Escape. Escape or "?" closes it.
+- **P2 · Falling leaves.** In fall, now and then a leaf spins down from the shore trees and settles on the water, drifting with the day's wind before it sinks. Fewer with Effects set to Lite.
+- **P3 · Mayfly hatch.** On spring and summer dusks with little wind, small pale flies dance low over the water near the reeds; the evening rise already brings the fish up to meet them.
+- **P4 · Lilies in flower.** The lily pads by the reeds carry white and pink flowers in summer, a few buds in late spring, and none in fall or winter.
+- **P5 · What's new, again.** Bump the card's batch to list titles, photo mode, storms and the otter, plus whatever Wave P lands.
 
 ## Risks / open questions for the owner
 
