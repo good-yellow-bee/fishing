@@ -626,7 +626,7 @@ Claude picked these after Wave W; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~X1~~ | ~~Fallen leaves gather on the dock in fall~~ (#168) | weather | S |
 | ~~X2~~ | ~~Lightning flashes mirrored in the lake during storms~~ (#169) | sky | S |
-| X3 | Dew glints on the shore grass at dawn | weather | S |
+| ~~X3~~ | ~~Dew glints on the shore grass at dawn~~ (#170) | weather | S |
 | X4 | A beaver swims past at dusk with a branch, and slaps its tail at a close cast | wildlife | M |
 | X5 | Refresh the "New on the lake" card for Wave X | onboarding | S |
 
