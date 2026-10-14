@@ -2057,7 +2057,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         wind={wind}
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
-      {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} />}
+      {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} />
       <CaughtFish
         phase={phase}

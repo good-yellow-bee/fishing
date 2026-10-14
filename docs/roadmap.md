@@ -761,9 +761,9 @@ Claude picked these to carry Wave AF's species shapes to every fish on the lake;
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AG1 | The fish swimming around the lake wear their species' build and markings | fish | S/M |
-| AG2 | The shadow under the float stretches for long fish and rounds out for deep ones | fish | S |
-| AG3 | Refresh the "New on the lake" card for Wave AG | onboarding | S |
+| ~~AG1~~ | ~~The fish swimming around the lake wear their species' build and markings~~ (#190) | fish | S/M |
+| ~~AG2~~ | ~~The shadow under the float runs long for pike and short for panfish~~ (#190) | fish | S |
+| ~~AG3~~ | ~~Refresh the "New on the lake" card for Wave AG~~ (#190) | onboarding | S |
 
 ## Risks / open questions for the owner
 

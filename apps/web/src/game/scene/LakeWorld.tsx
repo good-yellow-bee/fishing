@@ -68,6 +68,7 @@ import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
 import { fastVertexNormals } from "./waterNormals";
+import { fishBuild } from "./fishBuild";
 import { swallowsOut } from "./swallowFlight";
 import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
@@ -342,6 +343,8 @@ type FishProps = {
   size: number;
   color: string;
   accent: string;
+  /** Which species it is, for its build and markings. */
+  species: string;
 };
 
 // Deterministic pseudo-random in [0, 1) so the layout is stable across renders.
@@ -452,6 +455,7 @@ const FISH: FishProps[] = [
     phase: 0,
     size: 1.05,
     color: "#b9673e",
+    species: "smallmouth-bass",
     accent: "#e7bd72",
   },
   {
@@ -460,6 +464,7 @@ const FISH: FishProps[] = [
     phase: 0.22,
     size: 0.85,
     color: "#779057",
+    species: "largemouth-bass",
     accent: "#c6ce85",
   },
   {
@@ -468,6 +473,7 @@ const FISH: FishProps[] = [
     phase: 0.48,
     size: 1.12,
     color: "#566f78",
+    species: "pike",
     accent: "#b7c7bd",
   },
   {
@@ -476,6 +482,7 @@ const FISH: FishProps[] = [
     phase: 0.67,
     size: 0.8,
     color: "#c5893d",
+    species: "perch",
     accent: "#f1cf77",
   },
   {
@@ -484,6 +491,7 @@ const FISH: FishProps[] = [
     phase: 0.84,
     size: 0.95,
     color: "#8b5c4b",
+    species: "catfish",
     accent: "#d4a071",
   },
 ];
@@ -1184,7 +1192,8 @@ function Boat({ url, position, heading, delay, scale }: BoatProps) {
   );
 }
 
-function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) {
+function SwimmingFish({ points, speed, phase, size, color, accent, species }: FishProps) {
+  const build = useMemo(() => fishBuild(species), [species]);
   const ref = useRef<THREE.Group>(null);
   const bank = useRef<THREE.Group>(null);
   const ripple = useRef<THREE.Group>(null);
@@ -1229,7 +1238,7 @@ function SwimmingFish({ points, speed, phase, size, color, accent }: FishProps) 
   return (
     <group ref={ref} scale={size}>
       <group ref={bank}>
-        <ArticulatedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} />
+        <ArticulatedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} build={build} />
       </group>
       <group ref={ripple}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>

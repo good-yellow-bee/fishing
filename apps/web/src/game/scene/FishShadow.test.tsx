@@ -14,10 +14,10 @@ const gl = { render() {}, setPixelRatio() {}, setSize() {} };
 let root: ReconcilerRoot<HTMLCanvasElement> | null = null;
 const bobber = { x: 4, z: -2 };
 
-async function shadowAt(level: number, phase: ScenePhase, weight: number) {
+async function shadowAt(level: number, phase: ScenePhase, weight: number, speciesId?: string) {
   root ??= createRoot(document.createElement("canvas"));
   await root.configure({ gl, frameloop: "never", size: { width: 1, height: 1, top: 0, left: 0 } });
-  const store = root.render(<FishShadow level={level} phase={phase} weight={weight} bobber={bobber} />);
+  const store = root.render(<FishShadow level={level} phase={phase} weight={weight} bobber={bobber} speciesId={speciesId} />);
   await act(async () => {});
   store.getState().advance(1);
   const group = store.getState().scene.children[0] as THREE.Group;
@@ -56,6 +56,13 @@ describe("bite shadow", () => {
     for (let i = 1; i < scales.length; i += 1) expect(scales[i]).toBeGreaterThan(scales[i - 1]!);
     expect(scales.at(-1)! / scales[0]!).toBeGreaterThan(2);
     expect((await shadowAt(4, "hookset", 800)).scale.x).toBeCloseTo(2.4);
+  });
+
+  it("runs long and narrow for a pike, short for a bluegill", async () => {
+    const pike = (await shadowAt(4, "hookset", 4, "pike")).scale.clone();
+    const bluegill = (await shadowAt(4, "hookset", 4, "bluegill")).scale.clone();
+    expect(pike.z / pike.x).toBeGreaterThan(1.5);
+    expect(bluegill.z).toBeLessThan(pike.z);
   });
 
   it("follows the bobber just below the water, with a dark silhouette over the transparent surface", async () => {

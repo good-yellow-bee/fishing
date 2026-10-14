@@ -30,6 +30,7 @@ export const PL_GAME: PlBook = {
   "A woodpecker drums in the woods on dry mornings and days.": "W suche poranki i dni w lesie bębni dzięcioł.",
   "Every species now has its own shape: long pike, deep bluegill, whiskered catfish.": "Każdy gatunek ma teraz własny kształt: długi szczupak, wysoki bass słoneczny, wąsaty sum.",
   "Perch and walleye wear bars, trout carry spots, and pike show pale flecks.": "Okonie i sandacze mają pręgi, pstrągi kropki, a szczupaki jasne plamki.",
+  "The fish cruising the lake wear their own shapes too, and from level 4 the shadow at the float hints at a long pike or a short panfish.": "Ryby krążące po jeziorze też mają własne kształty, a od poziomu 4 cień przy spławiku zdradza długiego szczupaka albo krótką rybkę.",
   "Fish nibble one to three times at varied moments, so the first nibble no longer tells you when the bite comes.": "Ryby skubią od jednego do trzech razy w różnych chwilach, więc pierwsze skubnięcie nie zdradza już, kiedy przyjdzie branie.",
   "Sound captions in Settings put the lake's sounds into words: thunder, loons, owls, geese and the beaver.": "Napisy do dźwięków w Ustawieniach opisują słowami odgłosy jeziora: grzmoty, nury, sowy, gęsi i bobra.",
   Full: "Pełne",
