@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14y";
+export const NEWS_ID = "2026-10-14z";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Settings has a battery saver: the lake draws 30 frames a second to spare a phone's battery.",
   "Change the lure without the menu: Q and R on a keyboard, or the bumpers on a controller.",
   "Photo mode (H) can now save the view: press P or Space, or tap Save this view, and the lake is saved as a picture.",
   "In photo mode, drag to look around and pinch, scroll or press + and − to zoom before you save.",

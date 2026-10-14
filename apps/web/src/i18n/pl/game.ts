@@ -387,6 +387,11 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "Settings has a battery saver: the lake draws 30 frames a second to spare a phone's battery.":
+    "Ustawienia mają oszczędzanie baterii: jezioro rysuje 30 klatek na sekundę, by oszczędzać baterię telefonu.",
+  "Frame rate": "Płynność",
+  Smooth: "Płynnie",
+  "Battery saver (30 a second)": "Oszczędzanie baterii (30 klatek na sekundę)",
   "Change the lure without the menu: Q and R on a keyboard, or the bumpers on a controller.":
     "Zmieniaj przynętę bez menu: Q i R na klawiaturze albo bumpery na kontrolerze.",
   "Picture saved": "Zdjęcie zapisane",
