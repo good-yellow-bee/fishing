@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
+import { mergePainted } from "./mergeParts";
 import { sipView } from "./sipMotion";
 import { CUP_HEIGHT, CUP_SPOT, STEAM_BLOBS, THERMOS_SPOT, steamBlob } from "./steamWisp";
 import { useReducedMotion } from "./reducedMotion";
@@ -10,6 +11,22 @@ import { toonRamp } from "./toon";
 const FLASK = "#3f6b4f";
 const STEEL = "#c9cfd2";
 const STEAM = "#f1f5f7";
+const COFFEE = "#5a3a24";
+
+/** The flask (body, cap, base ring) and the cup (with its coffee) each bake into one painted shape. */
+export function thermosShapes() {
+  return {
+    flask: mergePainted([
+      { geometry: new THREE.CylinderGeometry(0.055, 0.055, 0.26, 12), position: [0, 0.13, 0], color: FLASK },
+      { geometry: new THREE.CylinderGeometry(0.035, 0.045, 0.035, 10), position: [0, 0.275, 0], color: STEEL },
+      { geometry: new THREE.CylinderGeometry(0.057, 0.057, 0.02, 12), position: [0, 0.05, 0], color: STEEL },
+    ]),
+    cup: mergePainted([
+      { geometry: new THREE.CylinderGeometry(0.045, 0.038, CUP_HEIGHT, 12), position: [0, CUP_HEIGHT / 2, 0], color: STEEL },
+      { geometry: new THREE.CircleGeometry(0.04, 12), position: [0, CUP_HEIGHT - 0.008, 0], rotation: [-Math.PI / 2, 0, 0], color: COFFEE },
+    ]),
+  };
+}
 
 /** A thermos and its steel cup on the dock; on cold mornings and in winter a wisp of steam curls up from the cup. `light` dims the steam at night. */
 export function Thermos({ steaming, light }: { steaming: boolean; light: number }) {
@@ -19,6 +36,8 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
     () => new THREE.MeshBasicMaterial({ color: STEAM, transparent: true, opacity: 0.4, depthWrite: false, toneMapped: false }),
     [],
   );
+  const shapes = useMemo(thermosShapes, []);
+  const painted = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const blobs = useRef<Array<THREE.Mesh | null>>([]);
   const cup = useRef<THREE.Group>(null);
   useEffect(() => {
@@ -28,8 +47,11 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
     () => () => {
       geometry.dispose();
       material.dispose();
+      shapes.flask.dispose();
+      shapes.cup.dispose();
+      painted.dispose();
     },
-    [geometry, material],
+    [geometry, material, shapes, painted],
   );
   useFrame((state) => {
     const t = still ? 1.2 : state.clock.elapsedTime;
@@ -48,29 +70,9 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
   });
   return (
     <group name="thermos">
-      <group position={[THERMOS_SPOT.x, THERMOS_SPOT.y, THERMOS_SPOT.z]}>
-        <mesh position={[0, 0.13, 0]} castShadow>
-          <cylinderGeometry args={[0.055, 0.055, 0.26, 12]} />
-          <meshToonMaterial color={FLASK} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.275, 0]} castShadow>
-          <cylinderGeometry args={[0.035, 0.045, 0.035, 10]} />
-          <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.05, 0]}>
-          <cylinderGeometry args={[0.057, 0.057, 0.02, 12]} />
-          <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
-        </mesh>
-      </group>
+      <mesh position={[THERMOS_SPOT.x, THERMOS_SPOT.y, THERMOS_SPOT.z]} geometry={shapes.flask} material={painted} castShadow />
       <group ref={cup}>
-        <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT / 2, CUP_SPOT.z]} castShadow>
-          <cylinderGeometry args={[0.045, 0.038, CUP_HEIGHT, 12]} />
-          <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT - 0.008, CUP_SPOT.z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.04, 12]} />
-          <meshToonMaterial color="#5a3a24" gradientMap={toonRamp()} />
-        </mesh>
+        <mesh position={[CUP_SPOT.x, CUP_SPOT.y, CUP_SPOT.z]} geometry={shapes.cup} material={painted} castShadow />
       </group>
       {Array.from({ length: STEAM_BLOBS }, (_, i) => (
         <mesh

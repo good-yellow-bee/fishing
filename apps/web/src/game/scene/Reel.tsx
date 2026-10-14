@@ -1,9 +1,26 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fightView } from "./fightMotion";
+import { mergePainted } from "./mergeParts";
 import { handleRadians, haulStep, spoolRadians } from "./reelMotion";
 import { toonRamp } from "./toon";
+
+/** The spool (drum, rim, line guides) and the crank (arm, knob) each bake into one painted shape so they turn as one. */
+export function reelShapes() {
+  return {
+    drum: mergePainted([
+      { geometry: new THREE.CylinderGeometry(0.05, 0.05, 0.034, 14), rotation: [0, 0, Math.PI / 2], color: "#d7dee2" },
+      { geometry: new THREE.CylinderGeometry(0.072, 0.072, 0.01, 14), position: [0.022, 0, 0], rotation: [0, 0, Math.PI / 2], color: "#7f8b93" },
+      { geometry: new THREE.BoxGeometry(0.036, 0.016, 0.016), position: [0, 0.058, 0], color: "#243036" },
+      { geometry: new THREE.BoxGeometry(0.036, 0.016, 0.016), position: [0, -0.02, 0.05], color: "#243036" },
+    ]),
+    crank: mergePainted([
+      { geometry: new THREE.BoxGeometry(0.014, 0.16, 0.016), position: [0, 0.08, 0], color: "#1c2422" },
+      { geometry: new THREE.SphereGeometry(0.032, 12, 10), position: [0.02, 0.15, 0], color: "#d08a3a" },
+    ]),
+  };
+}
 
 export function Reel() {
   const crank = useRef<THREE.Group>(null);
@@ -11,6 +28,16 @@ export function Reel() {
   const hauled = useRef(0);
   const prevPump = useRef(0);
   const ramp = toonRamp();
+  const shapes = useMemo(reelShapes, []);
+  const painted = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: ramp }), [ramp]);
+  useEffect(
+    () => () => {
+      shapes.drum.dispose();
+      shapes.crank.dispose();
+      painted.dispose();
+    },
+    [shapes, painted],
+  );
 
   useFrame(() => {
     if (!fightView.active) {
@@ -32,32 +59,10 @@ export function Reel() {
         <meshToonMaterial color="#3a322c" gradientMap={ramp} />
       </mesh>
       <group ref={drum}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.05, 0.05, 0.034, 14]} />
-          <meshToonMaterial color="#d7dee2" gradientMap={ramp} />
-        </mesh>
-        <mesh position={[0.022, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.072, 0.072, 0.01, 14]} />
-          <meshToonMaterial color="#7f8b93" gradientMap={ramp} />
-        </mesh>
-        <mesh position={[0, 0.058, 0]}>
-          <boxGeometry args={[0.036, 0.016, 0.016]} />
-          <meshToonMaterial color="#243036" gradientMap={ramp} />
-        </mesh>
-        <mesh position={[0, -0.02, 0.05]}>
-          <boxGeometry args={[0.036, 0.016, 0.016]} />
-          <meshToonMaterial color="#243036" gradientMap={ramp} />
-        </mesh>
+        <mesh geometry={shapes.drum} material={painted} />
       </group>
       <group ref={crank} position={[0.038, 0, 0]}>
-        <mesh position={[0, 0.08, 0]}>
-          <boxGeometry args={[0.014, 0.16, 0.016]} />
-          <meshToonMaterial color="#1c2422" gradientMap={ramp} />
-        </mesh>
-        <mesh position={[0.02, 0.15, 0]}>
-          <sphereGeometry args={[0.032, 12, 10]} />
-          <meshToonMaterial color="#d08a3a" gradientMap={ramp} />
-        </mesh>
+        <mesh geometry={shapes.crank} material={painted} />
       </group>
     </group>
   );
