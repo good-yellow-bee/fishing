@@ -39,3 +39,47 @@ export function moonTexture(phase: number, size = 64): THREE.DataTexture {
   texture.needsUpdate = true;
   return texture;
 }
+
+/** The moon's road needs at least this much of the moon lit; a thin crescent lays none. */
+export const MOON_ROAD_MIN = 0.3;
+
+/**
+ * How bright the moon's road of glints on the water is: only on a clear night,
+ * brighter the fuller the moon (`light` is moonLight, 0..1). 0 for no road.
+ */
+export function moonRoad(night: boolean, clear: boolean, light: number): number {
+  if (!night || !clear || light < MOON_ROAD_MIN) return 0;
+  return Math.min(1, light);
+}
+
+export type RoadGlint = { x: number; z: number; scale: number; band: number };
+
+/** Glints in the moon's road, and how many shimmer bands they split into. */
+export const MOON_ROAD_GLINTS = 48;
+export const MOON_ROAD_BANDS = 3;
+
+function unit(i: number) {
+  const s = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/**
+ * The glints of the moon's road: a strip from just off the dock toward the
+ * moon disc, widening with distance, kept to open water (`onWater`).
+ */
+export function moonRoadGlints(
+  from: { x: number; z: number },
+  disc: readonly [number, number, number],
+  onWater: (x: number, z: number) => boolean,
+): RoadGlint[] {
+  const dx = disc[0] - from.x;
+  const dz = disc[2] - from.z;
+  const len = Math.hypot(dx, dz) || 1;
+  const ux = dx / len;
+  const uz = dz / len;
+  return Array.from({ length: MOON_ROAD_GLINTS }, (_, i) => {
+    const dist = 3 + (i / (MOON_ROAD_GLINTS - 1)) * 21;
+    const side = (unit(i + 3) - 0.5) * (0.6 + dist * 0.12);
+    return { x: from.x + ux * dist - uz * side, z: from.z + uz * dist + ux * side, scale: 0.4 + unit(i + 17) * 0.6, band: i % MOON_ROAD_BANDS };
+  }).filter((glint) => onWater(glint.x, glint.z));
+}
