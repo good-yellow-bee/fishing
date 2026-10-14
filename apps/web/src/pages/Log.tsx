@@ -22,8 +22,8 @@ export function LogPage() {
       .catch((err: Error) => setError(err.message));
   }, []);
 
-  if (error) return <div className="log-page">{errorText(error)}</div>;
-  if (!me) return <div className="log-page">{t("Loading the log…")}</div>;
+  if (error) return <main className="log-page">{errorText(error)}</main>;
+  if (!me) return <main className="log-page">{t("Loading the log…")}</main>;
 
   const catches = me.catches;
   const totalWeight = catches.reduce((sum, row) => sum + row.weight, 0);
@@ -33,7 +33,7 @@ export function LogPage() {
   );
 
   return (
-    <div className="log-page">
+    <main className="log-page">
       <p>
         <Link to="/play">{t("Back to the dock")}</Link>
         {" · "}
@@ -121,6 +121,6 @@ export function LogPage() {
         </tbody>
       </table>
       {catches.length === 0 && <p>{t("Nothing landed yet.")}</p>}
-    </div>
+    </main>
   );
 }

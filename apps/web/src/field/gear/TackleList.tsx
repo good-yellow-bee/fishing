@@ -5,7 +5,8 @@ import { messageText } from "../format";
 import { useTackle } from "./TackleState";
 import "./gear.css";
 
-export function TackleList({ tripId, heading }: { tripId: string; heading?: string }) {
+/** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
+export function TackleList({ tripId, heading, name }: { tripId: string; heading?: string; name?: string }) {
   const t = useT();
   const { items, toggle, add } = useTackle();
   const rows = itemsForTrip(items, tripId);
@@ -27,7 +28,7 @@ export function TackleList({ tripId, heading }: { tripId: string; heading?: stri
   const count = rows.length === 0 ? t("Nothing packed") : t("{packed} of {total} packed", { packed, total: rows.length });
 
   return (
-    <section className="tackle-block" aria-label={heading ?? t("Tackle")}>
+    <section className="tackle-block" aria-label={name ?? heading ?? t("Tackle")}>
       {heading ? (
         <div className="section-head">
           <h2>{heading}</h2>
