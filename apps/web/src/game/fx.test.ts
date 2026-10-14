@@ -87,7 +87,7 @@ describe("ambient conditions", () => {
     expect(ambientProfile("dawn", "overcast", "fall")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
-    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true, owls: true, woodpecker: false });
+    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true, owls: true, woodpecker: false, terns: false });
   });
 
   it("drums a woodpecker on dry mornings and days outside winter, in a quick roll that slows at the end", () => {
@@ -96,6 +96,8 @@ describe("ambient conditions", () => {
     expect(ambientProfile("day", "rain", "summer").woodpecker).toBe(false);
     expect(ambientProfile("day", "clear", "winter").woodpecker).toBe(false);
     expect(ambientProfile("dusk", "clear", "summer").woodpecker).toBe(false);
+    expect(ambientProfile("day", "clear", "summer").terns).toBe(true);
+    expect(ambientProfile("day", "clear", "fall").terns).toBe(false);
     const knocks = drumKnocks(16);
     expect(knocks).toHaveLength(16);
     expect(knocks[1]! - knocks[0]!).toBeLessThan(knocks[15]! - knocks[14]!);

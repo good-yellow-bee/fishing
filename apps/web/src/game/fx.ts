@@ -118,6 +118,7 @@ let geeseTimer = 0;
 let frogTimer = 0;
 let owlTimer = 0;
 let woodpeckerTimer = 0;
+let ternTimer = 0;
 let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
 let ambientSeason: LakeSeason = "summer";
@@ -147,6 +148,8 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
     owls: night && !winter,
     // A woodpecker drums in the woods on dry mornings and days, all but winter.
     woodpecker: (hour === "dawn" || hour === "day") && !winter && sky !== "rain",
+    // Terns work the fish patch on spring and summer days, calling as they go.
+    terns: (hour === "dawn" || hour === "day") && (season === "spring" || season === "summer") && sky !== "rain",
   };
 }
 
@@ -320,6 +323,18 @@ function geeseCall() {
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
 
+/** A tern over the fish patch: a harsh, falling "kee-arr", once or twice. */
+function ternCall() {
+  if (!lapSrc || !profile().terns) return;
+  const calls = 1 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < calls; i++) {
+    const base = 2500 + Math.random() * 400;
+    tone("square", base, base * 0.62, 0.3, 0.0016, i * (0.42 + Math.random() * 0.15), 0, natureBus());
+  }
+  captionSound("terns");
+  ternTimer = window.setTimeout(ternCall, 9000 + Math.random() * 12000);
+}
+
 /** Seconds into a drum roll that each knock lands: a quick burst that slows a touch toward its end. */
 export function drumKnocks(count: number) {
   const out: number[] = [];
@@ -397,14 +412,16 @@ function restartWildlife() {
   window.clearTimeout(frogTimer);
   window.clearTimeout(owlTimer);
   window.clearTimeout(woodpeckerTimer);
+  window.clearTimeout(ternTimer);
   if (!lapSrc) return;
-  const { wildlife, loons, geese, frogs, owls, woodpecker } = profile();
+  const { wildlife, loons, geese, frogs, owls, woodpecker, terns } = profile();
   if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" || wildlife === "chorus" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
   if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
   if (frogs) frogTimer = window.setTimeout(frogCall, 1500 + Math.random() * 2000);
   if (owls) owlTimer = window.setTimeout(owlCall, 7000 + Math.random() * 8000);
   if (woodpecker) woodpeckerTimer = window.setTimeout(woodpeckerCall, 9000 + Math.random() * 10000);
+  if (terns) ternTimer = window.setTimeout(ternCall, 5000 + Math.random() * 8000);
 }
 
 const ambient = {
@@ -457,6 +474,7 @@ const ambient = {
     window.clearTimeout(frogTimer);
     window.clearTimeout(owlTimer);
     window.clearTimeout(woodpeckerTimer);
+    window.clearTimeout(ternTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();
