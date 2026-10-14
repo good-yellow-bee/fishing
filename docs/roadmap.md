@@ -661,13 +661,13 @@ Claude picked these after Wave Y; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~Z1~~ | ~~Moths flutter round the dock lanterns after dark~~ (#176) | wildlife | S |
-| Z2 | Puddles on the shore path shimmer after rain | weather | S |
+| ~~Z2~~ | ~~Rain drips off the angler's cap brim~~ (#177) | weather | S |
 | Z3 | The angler sips from the thermos cup now and then while waiting | angler | S/M |
 | Z4 | A fox trots along the far bank at dusk and night | wildlife | M |
 | Z5 | Refresh the "New on the lake" card for Wave Z | onboarding | S |
 
 - **Z1 · Moths.** After dark, when the dock lanterns are lit, a few pale moths circle each lantern in jittery loops.
-- **Z2 · Puddles.** During and after rain, a few shallow puddles on the near shore path catch the sky and ripple as drops hit them.
+- **Z2 · Drips.** In the rain, drops gather round the angler's cap brim and fall one after another. (Swapped in for path puddles: the shore path sits behind the dock camera, out of view.)
 - **Z3 · A sip.** While the float sits and nothing is biting, the angler sometimes lifts the thermos cup for a sip and sets it back down.
 - **Z4 · Fox.** At dusk and at night a red fox now and then trots along the far bank, stops to look across the water, and slips away into the trees.
 - **Z5 · What's new, again.** List whatever Wave Z lands on the card.
