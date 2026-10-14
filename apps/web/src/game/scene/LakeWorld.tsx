@@ -27,6 +27,7 @@ import { Heron } from "./Heron";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
+import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
@@ -1171,6 +1172,9 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
   const ref = useRef<THREE.Group>(null);
   const ripple = useRef<THREE.Group>(null);
   const rippleMaterial = useRef<THREE.MeshBasicMaterial>(null);
+  const leftWing = useRef<THREE.Group>(null);
+  const rightWing = useRef<THREE.Group>(null);
+  const flush = useRef<DuckState>({ mode: "paddling" });
   const curve = useMemo(() => new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)), true, "catmullrom", 0.4), [points]);
   const position = useMemo(() => new THREE.Vector3(), []);
   const tangent = useMemo(() => new THREE.Vector3(), []);
@@ -1183,7 +1187,25 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
     // Heading from a small look-ahead; getTangentAt allocates internally.
     curve.getPointAt((t + 0.01) % 1, tangent).sub(position);
     const time = state.clock.elapsedTime;
-    position.y = waterHeight(position.x, position.z, time) + 0.08 + Math.sin(time * 1.3 + phase * 9) * 0.015;
+    const floatY = waterHeight(position.x, position.z, time) + 0.08;
+    // A cast landing close sends the duck off; it keeps its place on the loop while away.
+    const now = stepDuck(flush.current, time, position, lastSplash);
+    flush.current = now;
+    const flight =
+      now.mode === "flushed" ? duckFlush(time - now.since, now.from, now.dir) : now.mode === "returning" ? duckReturn(time - now.since, position, now.dir) : null;
+    duck.visible = now.mode !== "away";
+    const flying = flight !== null;
+    if (leftWing.current) leftWing.current.visible = flying;
+    if (rightWing.current) rightWing.current.visible = flying;
+    if (ripple.current) ripple.current.visible = !flying;
+    if (flight) {
+      duck.position.set(flight.x, floatY + flight.y, flight.z);
+      duck.rotation.y = flight.yaw;
+      if (leftWing.current) leftWing.current.rotation.z = 0.2 + flight.flap * 0.7;
+      if (rightWing.current) rightWing.current.rotation.z = -0.2 - flight.flap * 0.7;
+      return;
+    }
+    position.y = floatY + Math.sin(time * 1.3 + phase * 9) * 0.015;
     duck.position.copy(position);
     const target = Math.atan2(tangent.x, tangent.z);
     const turn = Math.atan2(Math.sin(target - duck.rotation.y), Math.cos(target - duck.rotation.y));
@@ -1209,6 +1231,19 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
         <coneGeometry args={[0.035, 0.09, 6]} />
         <meshToonMaterial color="#d8a13c" gradientMap={toonRamp()} />
       </mesh>
+      {/* Wings only show in flight, hinged at the shoulders. */}
+      <group ref={leftWing} position={[0.12, 0.14, 0.02]} visible={false}>
+        <mesh position={[0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshToonMaterial color={body} gradientMap={toonRamp()} />
+        </mesh>
+      </group>
+      <group ref={rightWing} position={[-0.12, 0.14, 0.02]} visible={false}>
+        <mesh position={[-0.17, 0, 0]} scale={[0.34, 0.025, 0.16]} castShadow={false}>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshToonMaterial color={body} gradientMap={toonRamp()} />
+        </mesh>
+      </group>
       <group ref={ripple} position={[0, -0.02, -0.18]}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
           <ringGeometry args={[0.32, 0.38, 24]} />
