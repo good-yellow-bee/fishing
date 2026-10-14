@@ -2529,3 +2529,33 @@ html[data-text-size] :is(
 ) {
   zoom: var(--text-zoom);
 }
+
+/* Words for the lake's sounds; nothing to press, so taps fall through. */
+.sound-captions {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  z-index: 7;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.sound-captions li {
+  background: rgba(16, 22, 20, 0.72);
+  color: #f3ead8;
+  font-size: 0.9rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  max-width: min(60vw, 320px);
+}
+
+html[data-contrast="high"] .sound-captions li {
+  background: #0d1210;
+  color: #fff;
+}

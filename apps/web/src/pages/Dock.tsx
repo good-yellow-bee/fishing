@@ -56,6 +56,7 @@ import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { SoundCaptions } from "../components/SoundCaptions";
 import { KeysCard } from "../components/KeysCard";
 import { stormOn } from "../game/scene/storm";
 import { WhatsNew } from "../components/WhatsNew";
@@ -859,6 +860,7 @@ export function DockPage() {
             <span>{t(veil.kind === "hour" ? LAKE_HOUR_BLURB[veil.hour] : skyBlurb(veil.sky, season))}</span>
           </div>
         )}
+        <SoundCaptions />
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
         <div className="level-status" role="status">
           {effectsNotice && (

@@ -1,11 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14m";
+export const NEWS_ID = "2026-10-14n";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "A nibbling fish sends small rings out from the float.",
-  "Miss a strike and water drips off the bobber as it pops up.",
+  "Fish nibble one to three times at varied moments, so the first nibble no longer tells you when the bite comes.",
+  "Sound captions in Settings put the lake's sounds into words: thunder, loons, owls, geese and the beaver.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
