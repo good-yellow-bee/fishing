@@ -240,7 +240,7 @@ export function DockPage() {
 
   useEffect(() => () => fx.ambient.stop(), []);
 
-  useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
+  useEffect(() => fx.ambient.setConditions(hour, sky, season), [hour, sky, season]);
 
   useEffect(() => {
     fx.enabled = !prefs.muted;
