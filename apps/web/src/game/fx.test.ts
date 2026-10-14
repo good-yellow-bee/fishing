@@ -75,7 +75,7 @@ describe("ambient conditions", () => {
     expect(ambientProfile("dawn", "overcast", "fall")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });
-    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false });
+    expect(ambientProfile("night", "rain")).toEqual({ wildlife: "crickets", loons: true, rain: true, geese: false, wind: false, frogs: true });
   });
 
   it("follows the season: geese over in fall, a chickadee and the wind in winter, quiet winter nights", () => {
@@ -215,6 +215,29 @@ describe("dawn chorus", () => {
     fx.ambient.start();
     vi.advanceTimersByTime(10_000);
     expect(dawn).toBeGreaterThan(tones.length * 3);
+  });
+});
+
+describe("frogs", () => {
+  it("call from the reeds on spring and summer evenings and nights only", () => {
+    expect(ambientProfile("dusk", "clear", "summer").frogs).toBe(true);
+    expect(ambientProfile("night", "rain", "spring").frogs).toBe(true);
+    expect(ambientProfile("day", "clear", "summer").frogs).toBe(false);
+    expect(ambientProfile("dusk", "clear", "fall").frogs).toBe(false);
+    expect(ambientProfile("night", "clear", "winter").frogs).toBe(false);
+  });
+
+  it("add their calls to a summer dusk and go quiet when fall comes", () => {
+    fx.ambient.setConditions("dusk", "clear", "fall");
+    fx.ambient.start();
+    vi.advanceTimersByTime(20_000);
+    const fall = tones.length;
+    fx.ambient.stop();
+    tones.length = 0;
+    fx.ambient.setConditions("dusk", "clear", "summer");
+    fx.ambient.start();
+    vi.advanceTimersByTime(20_000);
+    expect(tones.length).toBeGreaterThan(fall + 10);
   });
 });
 

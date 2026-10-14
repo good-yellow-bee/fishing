@@ -164,6 +164,8 @@ export const PL_CONTENT: PlBook = {
   "Release ten fish back into the lake.": "Wypuść dziesięć ryb z powrotem do jeziora.",
   "Regular": "Stały bywalec",
   "Land a fish seven days in a row.": "Złów rybę siedem dni z rzędu.",
+  "Early bird": "Ranny ptaszek",
+  "Land ten fish at dawn.": "Złów dziesięć ryb o świcie.",
 
   // Lure classes (tackle.ts)
   Topwater: "Powierzchniowa",

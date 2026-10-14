@@ -29,7 +29,7 @@ export type BadgeFactRow = {
 /** What the grouped facts can't carry: the longest run of consecutive local days with a fish. */
 export type BadgeHistory = { longestStreak: number };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird";
 
 export type Badge = {
   id: BadgeId;
@@ -142,6 +142,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land a fish seven days in a row.",
     need: REGULAR_DAYS,
     have: (_facts, history) => history.longestStreak,
+  },
+  {
+    id: "early-bird",
+    label: "Early bird",
+    blurb: "Land ten fish at dawn.",
+    need: 10,
+    have: (facts) => count(facts, (row) => row.hour === "dawn"),
   },
 ];
 

@@ -100,6 +100,7 @@ let windSrc: AudioBufferSourceNode | null = null;
 let windLfo: OscillatorNode | null = null;
 let windGain: GainNode | null = null;
 let geeseTimer = 0;
+let frogTimer = 0;
 let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
 let ambientSeason: LakeSeason = "summer";
@@ -122,6 +123,8 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
     // Winter rain falls as snow, which makes no hiss.
     rain: sky === "rain" && !winter,
     geese: season === "fall" && !night && sky !== "rain",
+    // Peepers and green frogs call from the reeds on warm evenings, rain or not.
+    frogs: (hour === "dusk" || hour === "night") && (season === "spring" || season === "summer"),
     wind: winter,
   };
 }
@@ -244,6 +247,20 @@ function geeseCall() {
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
 
+/** The reed bank at dusk: a run of spring peepers (short rising whistles), now and then a green frog's low banjo "gunk". */
+function frogCall() {
+  if (!lapSrc || !profile().frogs) return;
+  if (Math.random() < 0.3) {
+    const base = 150 + Math.random() * 40;
+    tone("triangle", base * 1.15, base, 0.12, 0.012);
+  } else {
+    const peeps = 2 + Math.floor(Math.random() * 4);
+    const base = 2700 + Math.random() * 500;
+    for (let i = 0; i < peeps; i++) tone("sine", base, base * 1.12, 0.07, 0.004, i * (0.32 + Math.random() * 0.1));
+  }
+  frogTimer = window.setTimeout(frogCall, 900 + Math.random() * 2200);
+}
+
 /** Winter wind: band-passed noise that swells and drops on a slow wobble. */
 function startWind() {
   if (windSrc || !profile().wind) return;
@@ -280,11 +297,13 @@ function restartWildlife() {
   window.clearTimeout(wildlifeTimer);
   window.clearTimeout(loonTimer);
   window.clearTimeout(geeseTimer);
+  window.clearTimeout(frogTimer);
   if (!lapSrc) return;
-  const { wildlife, loons, geese } = profile();
+  const { wildlife, loons, geese, frogs } = profile();
   if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" || wildlife === "chorus" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
   if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
+  if (frogs) frogTimer = window.setTimeout(frogCall, 1500 + Math.random() * 2000);
 }
 
 const ambient = {
@@ -334,6 +353,7 @@ const ambient = {
     window.clearTimeout(wildlifeTimer);
     window.clearTimeout(loonTimer);
     window.clearTimeout(geeseTimer);
+    window.clearTimeout(frogTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();
