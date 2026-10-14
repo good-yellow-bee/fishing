@@ -33,6 +33,8 @@ import { Bats } from "./Bats";
 import { batsOut } from "./batFlight";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
+import { Swallows } from "./Swallows";
+import { swallowsOut } from "./swallowFlight";
 import { Otter } from "./Otter";
 import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
 import { FallingLeaves } from "./FallingLeaves";
@@ -1803,6 +1805,7 @@ export const LakeWorld = memo(function LakeWorld({
       {otterOut(hour, season) && <Otter />}
       {batsOut(hour, sky, season) && <Bats />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
+      {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}

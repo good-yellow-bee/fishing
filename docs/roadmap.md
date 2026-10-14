@@ -501,14 +501,32 @@ Claude picked these after Wave P; the owner can reorder or drop any.
 | ~~Q1~~ | ~~A rainbow when the sun breaks through the rain~~ (#141) | sky | S/M |
 | ~~Q2~~ | ~~Bats hawking over the water on summer nights~~ (#142) | wildlife | M |
 | ~~Q3~~ | ~~A kingfisher that perches on a snag and dives~~ (#143) | wildlife | M |
-| Q4 | Swallows skimming the lake on warm summer days | wildlife | M |
-| Q5 | Refresh the "New on the lake" card for Wave Q | onboarding | S |
+| ~~Q4~~ | ~~Swallows skimming the lake on warm summer days~~ (#144) | wildlife | M |
+| ~~Q5~~ | ~~Refresh the "New on the lake" card for Wave Q~~ (#144) | onboarding | S |
 
 - **Q1 · Rainbow.** On rain days at dawn and dusk, a soft rainbow arc stands in the sky across from the sun, and since the hills hide most of the sky from the dock, its fainter twin shows in the lake. Never at night, in winter, or in a thunderstorm.
 - **Q2 · Bats.** From dusk into the night in summer (and on dry spring dusks), a few bats flicker in figure-of-eight loops over the water in front of the dock, jinking after moths. Lite effects keep half; Reduce motion holds them gliding.
 - **Q3 · Kingfisher.** From dawn to dusk outside winter, rain and fog, a bright blue bird sits on a bare snag off the east bank, now and then drops into the water with a little splash ring and flies back up. A cast landing within 5 m sends it off downlake for about 40 seconds. Reduce motion keeps it sitting.
-- **Q4 · Swallows.** On warm, dry summer days, a handful of swallows sweep low over the lake in long arcs, dipping to the surface now and then. They stay away in rain and wind.
+- **Q4 · Swallows.** On clear or partly cloudy summer days in calm or light wind, six swallows sweep long loops over the lake in front of the dock, swooping up and dipping to skim the surface, banking into their turns. Lite effects keep half; Reduce motion holds them gliding.
 - **Q5 · What's new, again.** List whatever Wave Q lands on the card.
+
+## Wave R — Your own float, and a few more neighbours (added 2026-10-14, after Wave Q shipped)
+
+Claude picked these after Wave Q; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| R1 | Pick your float's colour in Settings | personal | S |
+| R2 | A turtle sunning on a log on summer days | wildlife | M |
+| R3 | An owl on a bare branch that hoots after dark | wildlife | M |
+| R4 | Now and then a fish jumps clear out on the open water | lake | S/M |
+| R5 | Refresh the "New on the lake" card for Wave R | onboarding | S |
+
+- **R1 · Float colour.** Settings gains a row of float colours (red, yellow, green, white, orange), remembered in this browser. The float's top takes the colour; the pale night tip stays so it still reads after dark.
+- **R2 · Turtle.** On warm summer days, a turtle basks on a half-sunk log near the west bank, now and then stretching its neck. A cast landing close and it slides off into the water with a little splash, then climbs back a while later.
+- **R3 · Owl.** After dark outside winter, an owl sits on a bare branch at the edge of the near trees, turns its head now and then, and gives a soft two-note hoot every so often (muted with the rest of the sound).
+- **R4 · Jumping fish.** Every minute or two, a fish flips clear of the water somewhere out on the open lake with a splash ring, more often at dawn and dusk. Off with Reduce motion. Purely for looks: it never marks a bite.
+- **R5 · What's new, again.** List whatever Wave R lands on the card.
 
 ## Risks / open questions for the owner
 
