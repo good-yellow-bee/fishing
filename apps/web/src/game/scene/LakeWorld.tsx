@@ -66,6 +66,8 @@ import { batsOut } from "./batFlight";
 import { Geese } from "./Geese";
 import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
+import { Cormorant } from "./Cormorant";
+import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
@@ -1922,6 +1924,8 @@ export const LakeWorld = memo(function LakeWorld({
       <Rock position={[12.8, 0.3, -12.7]} scale={[1.1, 0.55, 0.8]} rotation={0.7} />
       <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
       <Rock position={[19.6, 0.28, -6.4]} scale={[0.9, 0.5, 0.7]} rotation={2.6} />
+      {/* The cormorant's rock, just breaking the surface out in the far water. */}
+      <Rock position={[CORMORANT_ROCK.x, 0.02, CORMORANT_ROCK.z]} scale={[0.75, 0.38, 0.6]} rotation={0.9} />
       <Dock wet={dockWet(weather.rain, season)} />
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
       {dockSnowy(season) && <DockSnow />}
@@ -1978,6 +1982,7 @@ export const LakeWorld = memo(function LakeWorld({
       {batsOut(hour, sky, season) && <Bats />}
       {geeseOut(hour, sky, season) && <Geese />}
       {swansOut(hour, sky, season) && <Swans />}
+      {cormorantOut(hour, season) && <Cormorant />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />
       {turtleOut(hour, sky, season) && <Turtle />}
