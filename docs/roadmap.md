@@ -498,13 +498,13 @@ Claude picked these after Wave P; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| Q1 | A rainbow when the sun breaks through the rain | sky | S/M |
+| ~~Q1~~ | ~~A rainbow when the sun breaks through the rain~~ (#141) | sky | S/M |
 | Q2 | Bats hawking over the water on summer nights | wildlife | M |
 | Q3 | A kingfisher that perches on the reeds and dives | wildlife | M |
 | Q4 | Swallows skimming the lake on warm summer days | wildlife | M |
 | Q5 | Refresh the "New on the lake" card for Wave Q | onboarding | S |
 
-- **Q1 · Rainbow.** On rain days, in the morning and late afternoon when the sun sits low, a soft rainbow arc stands in the sky across from the sun. Hidden at night, in fog, and in winter.
+- **Q1 · Rainbow.** On rain days at dawn and dusk, a soft rainbow arc stands in the sky across from the sun, and since the hills hide most of the sky from the dock, its fainter twin shows in the lake. Never at night, in winter, or in a thunderstorm.
 - **Q2 · Bats.** From dusk into the night in summer (and warm spring nights), a few small bats flicker low over the water in jinking loops. Fewer with Effects set to Lite, still with Reduce motion.
 - **Q3 · Kingfisher.** On calm days outside winter, a bright blue bird sits on a reed stem near the bank, now and then drops into the water with a tiny splash and flies back. It leaves for a while if a lure lands close.
 - **Q4 · Swallows.** On warm, dry summer days, a handful of swallows sweep low over the lake in long arcs, dipping to the surface now and then. They stay away in rain and wind.
