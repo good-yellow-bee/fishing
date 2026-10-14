@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fx } from "../fx";
 import { lastSplash } from "./duckFlush";
+import { mergePainted } from "./mergeParts";
 import { grebePose, grebesScared, grebeUnder } from "./grebeRush";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -21,6 +22,30 @@ const DROPS = [
   [-0.05, -0.18],
 ] as const;
 
+const BILL = "#6d4b3b";
+
+/** The neck, head, ruff, crest and bill bake into one shape that shakes as one. */
+export function grebeShapes() {
+  return {
+    body: new THREE.SphereGeometry(1, 12, 8),
+    head: mergePainted([
+      { geometry: new THREE.CylinderGeometry(0.028, 0.04, 0.18, 8), position: [0, 0.08, 0.01], rotation: [0.2, 0, 0], color: WHITE },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.18, 0.03], scale: [0.045, 0.04, 0.055], color: WHITE },
+      // The chestnut ruff and black crest of a bird in breeding plumage.
+      { geometry: new THREE.SphereGeometry(1, 10, 6), position: [0, 0.165, 0.01], scale: [0.065, 0.035, 0.04], color: RUFF },
+      ...[-1, 1].map((side) => ({
+        geometry: new THREE.ConeGeometry(0.014, 0.06, 5),
+        position: [side * 0.018, 0.225, 0.0] as const,
+        rotation: [-0.5, 0, side * 0.3] as const,
+        color: CREST,
+      })),
+      { geometry: new THREE.ConeGeometry(0.012, 0.07, 5), position: [0, 0.18, 0.1], rotation: [Math.PI / 2, 0, 0], color: BILL },
+    ]),
+    // Each drop hops on its own, so they stay apart and share this.
+    drop: new THREE.SphereGeometry(1, 6, 4),
+  };
+}
+
 /** A pair of grebes courting in spring: head shakes as they float, and now and then a rush across the water side by side; motion lives in grebeRush.ts. */
 export function Grebes() {
   const birds = useRef<(THREE.Group | null)[]>([]);
@@ -28,6 +53,21 @@ export function Grebes() {
   const heads = useRef<(THREE.Group | null)[]>([]);
   const sprays = useRef<(THREE.Group | null)[]>([]);
   const yaws = useRef<(number | null)[]>([null, null]);
+  const shapes = useMemo(grebeShapes, []);
+  const looks = useMemo(
+    () => ({
+      back: new THREE.MeshToonMaterial({ color: BACK, gradientMap: toonRamp() }),
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      spray: new THREE.MeshBasicMaterial({ color: SPRAY, transparent: true, opacity: 0.8, depthWrite: false }),
+    }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      [...Object.values(shapes), ...Object.values(looks)].forEach((thing) => thing.dispose());
+    },
+    [shapes, looks],
+  );
   const dove = useRef({ at: Number.NEGATIVE_INFINITY, heard: Number.NEGATIVE_INFINITY });
   const rushing = useRef(false);
   useFrame(({ clock }, delta) => {
@@ -84,42 +124,14 @@ export function Grebes() {
       {[0, 1].map((k) => (
         <group key={k} ref={(g) => void (birds.current[k] = g)} name="grebe" scale={SCALE}>
           <group ref={(g) => void (bodies.current[k] = g)}>
-            <mesh position={[0, 0.06, 0]} scale={[0.1, 0.07, 0.19]}>
-              <sphereGeometry args={[1, 12, 8]} />
-              <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-            </mesh>
+            <mesh geometry={shapes.body} material={looks.back} position={[0, 0.06, 0]} scale={[0.1, 0.07, 0.19]} />
             <group ref={(g) => void (heads.current[k] = g)} position={[0, 0.1, 0.13]}>
-              <mesh position={[0, 0.08, 0.01]} rotation={[0.2, 0, 0]}>
-                <cylinderGeometry args={[0.028, 0.04, 0.18, 8]} />
-                <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-              </mesh>
-              <mesh position={[0, 0.18, 0.03]} scale={[0.045, 0.04, 0.055]}>
-                <sphereGeometry args={[1, 10, 8]} />
-                <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-              </mesh>
-              {/* The chestnut ruff and black crest of a bird in breeding plumage. */}
-              <mesh position={[0, 0.165, 0.01]} scale={[0.065, 0.035, 0.04]}>
-                <sphereGeometry args={[1, 10, 6]} />
-                <meshToonMaterial color={RUFF} gradientMap={toonRamp()} />
-              </mesh>
-              {[-1, 1].map((side) => (
-                <mesh key={side} position={[side * 0.018, 0.225, 0.0]} rotation={[-0.5, 0, side * 0.3]}>
-                  <coneGeometry args={[0.014, 0.06, 5]} />
-                  <meshToonMaterial color={CREST} gradientMap={toonRamp()} />
-                </mesh>
-              ))}
-              <mesh position={[0, 0.18, 0.1]} rotation={[Math.PI / 2, 0, 0]}>
-                <coneGeometry args={[0.012, 0.07, 5]} />
-                <meshToonMaterial color="#6d4b3b" gradientMap={toonRamp()} />
-              </mesh>
+              <mesh geometry={shapes.head} material={looks.painted} />
             </group>
           </group>
           <group ref={(g) => void (sprays.current[k] = g)} visible={false}>
             {DROPS.map(([x, z], i) => (
-              <mesh key={i} position={[x, 0.03, z]} scale={0.022}>
-                <sphereGeometry args={[1, 6, 4]} />
-                <meshBasicMaterial color={SPRAY} transparent opacity={0.8} depthWrite={false} />
-              </mesh>
+              <mesh key={i} geometry={shapes.drop} material={looks.spray} position={[x, 0.03, z]} scale={0.022} />
             ))}
           </group>
         </group>

@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { TERN_COUNT, ternPose } from "./ternHover";
 import { pitchTurn } from "./bodyPitch";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -16,11 +17,48 @@ const SCALE = 1.8;
 const FOLLOW = 1.5;
 const SPLASH_SEC = 0.6;
 
+/** A tern's body, cap, bill and forked tail bake into one shape; each long, narrow wing into another, hinged at the shoulder. */
+export function ternShapes() {
+  const wing = (side: 1 | -1) =>
+    mergeParts([{ geometry: new THREE.BoxGeometry(0.26, 0.006, 0.05), position: [side * 0.13, 0, -0.01], rotation: [0, side * 0.2, 0] }]);
+  return {
+    body: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 8, 6), scale: [0.035, 0.032, 0.11], color: WHITE },
+      { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.02, 0.09], scale: 0.03, color: CAP },
+      { geometry: new THREE.ConeGeometry(0.008, 0.05, 5), position: [0, 0.015, 0.14], rotation: [Math.PI / 2, 0, 0], color: BILL },
+      // The forked tail.
+      ...[-1, 1].map((side) => ({
+        geometry: new THREE.BoxGeometry(1, 1, 1),
+        position: [side * 0.015, 0, -0.14] as const,
+        rotation: [0, side * 0.3, 0] as const,
+        scale: [0.008, 0.004, 0.07] as const,
+        color: WHITE,
+      })),
+    ]),
+    right: wing(1),
+    left: wing(-1),
+  };
+}
+
 /** Terns circling and plunging over the day's fish patch; motion lives in ternHover.ts. */
 export function Terns({ center }: { center: { x: number; z: number } }) {
   const birds = useRef<(THREE.Group | null)[]>([]);
   const wings = useRef<(THREE.Group | null)[][]>(Array.from({ length: TERN_COUNT }, () => []));
   const splashes = useRef<(THREE.Mesh | null)[]>([]);
+  const shapes = useMemo(ternShapes, []);
+  const looks = useMemo(
+    () => ({
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      wing: new THREE.MeshToonMaterial({ color: GREY, gradientMap: toonRamp() }),
+    }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      [shapes.body, shapes.right, shapes.left, looks.painted, looks.wing].forEach((thing) => thing.dispose());
+    },
+    [shapes, looks],
+  );
   // Where they are working now; it slides over to a new patch rather than jumping.
   const working = useRef<{ x: number; z: number } | null>(null);
   useFrame(({ clock }, delta) => {
@@ -62,32 +100,11 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
       {Array.from({ length: TERN_COUNT }, (_, k) => (
         <group key={k}>
           <group ref={(g) => void (birds.current[k] = g)} name="tern" scale={SCALE}>
-            <mesh scale={[0.035, 0.032, 0.11]}>
-              <sphereGeometry args={[1, 8, 6]} />
-              <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-            </mesh>
-            <mesh position={[0, 0.02, 0.09]} scale={0.03}>
-              <sphereGeometry args={[1, 8, 6]} />
-              <meshToonMaterial color={CAP} gradientMap={toonRamp()} />
-            </mesh>
-            <mesh position={[0, 0.015, 0.14]} rotation={[Math.PI / 2, 0, 0]}>
-              <coneGeometry args={[0.008, 0.05, 5]} />
-              <meshToonMaterial color={BILL} gradientMap={toonRamp()} />
-            </mesh>
-            {/* The forked tail. */}
-            {[-1, 1].map((side) => (
-              <mesh key={side} position={[side * 0.015, 0, -0.14]} rotation={[0, side * 0.3, 0]} scale={[0.008, 0.004, 0.07]}>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-              </mesh>
-            ))}
+            <mesh geometry={shapes.body} material={looks.painted} />
             {/* Long, narrow wings, hinged at the shoulder. */}
             {[1, -1].map((side, i) => (
               <group key={side} ref={(g) => void (wings.current[k]![i] = g)} position={[side * 0.025, 0.01, 0.01]}>
-                <mesh position={[side * 0.13, 0, -0.01]} rotation={[0, side * 0.2, 0]}>
-                  <boxGeometry args={[0.26, 0.006, 0.05]} />
-                  <meshToonMaterial color={GREY} gradientMap={toonRamp()} />
-                </mesh>
+                <mesh geometry={side > 0 ? shapes.right : shapes.left} material={looks.wing} />
               </group>
             ))}
           </group>
