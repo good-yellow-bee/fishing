@@ -239,6 +239,33 @@ describe("useFishingGame strike timing", () => {
     expect(phase()).toBe("hookset:none");
   });
 
+  it("holds the bite and the strike window while the game is in another tab", () => {
+    const surface = mount();
+    const show = (state: "hidden" | "visible") => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+      act(() => void document.dispatchEvent(new Event("visibilitychange")));
+    };
+    try {
+      cast(surface);
+      show("hidden");
+      act(() => vi.advanceTimersByTime(60_000));
+      expect(phase()).toBe("waiting:none");
+      show("visible");
+      act(() => vi.advanceTimersByTime(1_500));
+      expect(phase()).toBe("hookset:none");
+      show("hidden");
+      act(() => vi.advanceTimersByTime(60_000));
+      expect(phase()).toBe("hookset:none");
+      show("visible");
+      act(() => vi.advanceTimersByTime(100));
+      expect(phase()).toBe("hookset:none");
+      act(() => vi.advanceTimersByTime(20_000));
+      expect(phase()).not.toBe("hookset:none");
+    } finally {
+      show("visible");
+    }
+  });
+
   it("strikes and reels from the thumb button, but never casts from it", () => {
     const surface = mount();
     const thumb = surface.querySelector<HTMLButtonElement>("[data-thumb-strike]")!;
