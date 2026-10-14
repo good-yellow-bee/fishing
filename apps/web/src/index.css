@@ -134,6 +134,45 @@ a {
   background: #17211f;
 }
 
+/* Photo mode: only the lake stays; a clear button over it brings the panels back. */
+.dock-page[data-photo] > :not(.scene-wrap, .photo-exit),
+.dock-page[data-photo] .scene-wrap > :not(div:has(canvas)) {
+  display: none !important;
+}
+
+.photo-exit {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 16px 28px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.photo-exit span {
+  padding: 6px 12px;
+  border-radius: 4px;
+  background: rgba(12, 18, 16, 0.6);
+  color: #f1e4ca;
+  font: inherit;
+  font-size: 13px;
+  animation: photo-hint 3s ease-in forwards;
+}
+
+@keyframes photo-hint {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .hud {
   position: absolute;
   top: 18px;
