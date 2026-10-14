@@ -921,6 +921,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~AY1~~ | ~~A bite due while the page is hidden waits until the player is back, then takes the float a beat and a half later (whenShown.ts)~~ (#212) | gameplay fix | S |
 
+## Wave AZ — The strike window waits too (added 2026-10-14, after Wave AY shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AZ1~~ | ~~Leaving the tab while the float is under no longer loses the fish: the strike window reopens in full on the way back~~ (#213) | gameplay fix | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

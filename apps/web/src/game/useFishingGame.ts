@@ -310,13 +310,21 @@ export function useFishingGame(
         fx.haptic("bite");
         setPhaseBoth("hookset");
         setHint(t("NOW — strike!"));
-        timers.current.hook = window.setTimeout(() => {
-          if (phaseRef.current !== "hookset") return;
-          // The missed fish stays in the outcome so the turn-away shows the same fish.
-          setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
-          // Hold result so the miss spring and the turn play out.
-          resetToIdle(t("Strike the moment the bobber goes under."), "result");
-        }, hookWindowMs(current.accuracy, mercyNow));
+        const openWindow = () => {
+          timers.current.hook = window.setTimeout(() => {
+            if (phaseRef.current !== "hookset") return;
+            // Gone to another tab mid-bite: the fish keeps the bait, and a fresh window opens on the way back.
+            if (document.visibilityState === "hidden") {
+              timers.current.shown = whenShown(openWindow, document, 0);
+              return;
+            }
+            // The missed fish stays in the outcome so the turn-away shows the same fish.
+            setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
+            // Hold result so the miss spring and the turn play out.
+            resetToIdle(t("Strike the moment the bobber goes under."), "result");
+          }, hookWindowMs(current.accuracy, mercyNow));
+        };
+        openWindow();
       };
       timers.current.wait = window.setTimeout(() => {
         if (phaseRef.current !== "waiting") return;
