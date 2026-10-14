@@ -752,8 +752,18 @@ Claude picked these from the review's "one fish mesh for all species" note; the 
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AF1~~ | ~~Each species gets its own build: long pike, deep panfish, whiskered catfish and sturgeon~~ (#189) | fish | M |
-| AF2 | Species markings: perch bars, trout spots, a pike's pale flecks | fish | M |
-| AF3 | Refresh the "New on the lake" card for Wave AF | onboarding | S |
+| ~~AF2~~ | ~~Species markings: perch bars, trout spots, a pike's pale flecks~~ (#189) | fish | M |
+| ~~AF3~~ | ~~Refresh the "New on the lake" card for Wave AF~~ (#189) | onboarding | S |
+
+## Wave AG — Shapes everywhere (added 2026-10-14, after Wave AF shipped)
+
+Claude picked these to carry Wave AF's species shapes to every fish on the lake; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AG1 | The fish swimming around the lake wear their species' build and markings | fish | S/M |
+| AG2 | The shadow under the float stretches for long fish and rounds out for deep ones | fish | S |
+| AG3 | Refresh the "New on the lake" card for Wave AG | onboarding | S |
 
 ## Risks / open questions for the owner
 

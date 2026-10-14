@@ -1,7 +1,7 @@
-import { type ReactElement, useRef } from "react";
+import { type ReactElement, useMemo, useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
-import { PLAIN_BUILD, type FishBuild } from "./fishBuild";
+import { markPlacements, PLAIN_BUILD, type FishBuild } from "./fishBuild";
 import { toonRamp } from "./toon";
 
 export type FishDrive = { intensity: number; speed: number };
@@ -18,6 +18,10 @@ type Props = {
   /** The species' proportions; the plain fish when left out. */
   build?: FishBuild;
 };
+
+/** Bars, spots and stripes are dark; a pike's flecks are pale. */
+const DARK_MARK = "#2f3424";
+const PALE_MARK = "#e6e0bd";
 
 /** Where each whisker sits at the mouth, which way it hangs, and how long it is, by how many the species has. */
 const BARBELS: Record<FishBuild["barbels"], { x: number; y: number; yaw: number; length: number }[]> = {
@@ -105,6 +109,7 @@ export function ArticulatedFish({
   const headZ = 0.72 + (build.snout - 1) * 0.18;
   const eyeZ = 0.93 + (build.snout - 1) * 0.12;
   const mouthZ = headZ + 0.3 * build.snout;
+  const marks = useMemo(() => markPlacements(build.marks), [build.marks]);
 
   return (
     <group scale={[build.width, build.depth, build.length]}>
@@ -117,6 +122,16 @@ export function ArticulatedFish({
         // A raised fin along the back: a tall sail on panfish and walleye, set low on pike.
         <FishMesh position={[0, 0.26 + 0.05 * build.dorsal, -0.05]} rotation={[0.12, 0, 0]} scale={[0.04, 0.15 * build.dorsal, 0.8]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 5]} />} material={<FishMaterial color="#465754" unlit={unlit} />} />
       )}
+      {marks.map((mark, i) => (
+        <FishMesh
+          key={`mark-${i}`}
+          position={mark.position}
+          scale={mark.scale}
+          unlit={unlit}
+          shape={<sphereGeometry args={[1, 10, 6]} />}
+          material={<FishMaterial color={build.marks === "flecks" ? PALE_MARK : DARK_MARK} unlit={unlit} />}
+        />
+      ))}
       {BARBELS[build.barbels].map((barbel, i) => (
         <FishMesh
           key={i}

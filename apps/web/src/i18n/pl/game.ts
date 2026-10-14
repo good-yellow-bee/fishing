@@ -28,6 +28,8 @@ export const PL_GAME: PlBook = {
   "On some clear fall and winter nights, northern lights shimmer over the far shore and glow in the lake.": "W niektóre pogodne jesienne i zimowe noce nad dalekim brzegiem migocze zorza polarna, a jezioro lśni jej blaskiem.",
   "In fall, a V of geese crosses high over the far shore. Look for it mirrored in the water.": "Jesienią klucz gęsi przelatuje wysoko nad dalekim brzegiem. Wypatruj jego odbicia w wodzie.",
   "A woodpecker drums in the woods on dry mornings and days.": "W suche poranki i dni w lesie bębni dzięcioł.",
+  "Every species now has its own shape: long pike, deep bluegill, whiskered catfish.": "Każdy gatunek ma teraz własny kształt: długi szczupak, wysoki bass słoneczny, wąsaty sum.",
+  "Perch and walleye wear bars, trout carry spots, and pike show pale flecks.": "Okonie i sandacze mają pręgi, pstrągi kropki, a szczupaki jasne plamki.",
   "Fish nibble one to three times at varied moments, so the first nibble no longer tells you when the bite comes.": "Ryby skubią od jednego do trzech razy w różnych chwilach, więc pierwsze skubnięcie nie zdradza już, kiedy przyjdzie branie.",
   "Sound captions in Settings put the lake's sounds into words: thunder, loons, owls, geese and the beaver.": "Napisy do dźwięków w Ustawieniach opisują słowami odgłosy jeziora: grzmoty, nury, sowy, gęsi i bobra.",
   Full: "Pełne",
