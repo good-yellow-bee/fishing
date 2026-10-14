@@ -119,6 +119,17 @@ describe("dock weather", () => {
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog", "winter");
   });
 
+  it("names a full or new moon in the HUD eyebrow and sends the phase to the scene", async () => {
+    const page = await openDock("/?hour=night&sky=clear&season=fall&moon=0.5");
+    expect(page.querySelector(".hud .eyebrow")?.textContent).toBe("Northern lake · Fall · Full moon");
+    expect((lastScene() as { moon?: number }).moon).toBe(0.5);
+    act(() => root!.unmount());
+    root = null;
+    container?.remove();
+    const crescent = await openDock("/?hour=night&sky=clear&season=fall&moon=0.15");
+    expect(crescent.querySelector(".hud .eyebrow")?.textContent).toBe("Northern lake · Fall");
+  });
+
   it("calls winter rain snow on the HUD, while the scene and the fish still read rain", async () => {
     const page = await openDock("/?hour=day&sky=rain&season=winter");
     expect(lastScene()).toMatchObject({ sky: "rain", season: "winter" });

@@ -135,6 +135,8 @@ type Props = {
   golden?: boolean;
   /** The angler let the landed fish go; it drops from the hand back into the lake. */
   released?: boolean;
+  /** The real moon's phase for the night sky, 0 new to 0.5 full. */
+  moon?: number;
   hotspot: Hotspot | null;
   /** Other anglers' recent catches, as faint rings on their bank's water. */
   tracks?: readonly LodgeTrack[];
@@ -1807,7 +1809,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, hotspot, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, hotspot, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -1831,7 +1833,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
-      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} />
+      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}

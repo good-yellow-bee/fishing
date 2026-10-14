@@ -6,8 +6,10 @@ import {
   SKILL_LABELS,
   SEASON_BLURB,
   SEASON_LABELS,
+  MOON_LABELS,
   skyBlurb,
   skyLabel,
+  type MoonName,
   type LakeHour,
   type LakeSeason,
   type Profile,
@@ -27,9 +29,11 @@ type Props = {
   onPackUp?: () => void;
   /** Consecutive local days with a fish, counting today; shown from two. */
   streak?: number;
+  /** Tonight's moon; the eyebrow names it when it is full or new. */
+  moon?: MoonName;
 };
 
-export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0 }: Props) {
+export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0, moon }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
   const t = useT();
@@ -51,6 +55,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
         {/* The season rides in the eyebrow: one more chip wrapped the HUD on laptop widths. */}
         <span className="eyebrow" title={season ? t(SEASON_BLURB[season]) : undefined}>
           {season ? t("Northern lake · {season}", { season: t(SEASON_LABELS[season]) }) : t("Northern lake")}
+          {(moon === "full" || moon === "new") && ` · ${t(MOON_LABELS[moon])}`}
         </span>
         <strong>Stillwater</strong>
         <div className="hud-user">

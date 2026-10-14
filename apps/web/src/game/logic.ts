@@ -6,6 +6,7 @@ import {
   legendaryCanBite,
   rollWeight,
   biteHourMul,
+  biteMoonMul,
   biteWeatherMul,
   biteSeasonMul,
   LAKE_HOURS,
@@ -179,6 +180,8 @@ export function pickBite(
   hotspot = false,
   mercy = false,
   season?: LakeSeason,
+  /** The moon's lit share; a bright night brings rare fish up a little. */
+  moon?: number,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (mercy) {
@@ -234,8 +237,9 @@ export function pickBite(
     (sky ? biteWeatherMul(fish, sky) : 1) *
     (season ? biteSeasonMul(fish, season) : 1) *
     (hotspot ? HOTSPOT_BITE[fish.rarity] : 1) *
-    (legendaryBonus && fish.rarity === "legendary" ? 2 : 1);
-  const drawWeights = sky || season || hotspot || legendaryBonus ? reshuffle(pool, weights, profile, lift) : weights;
+    (legendaryBonus && fish.rarity === "legendary" ? 2 : 1) *
+    (moon !== undefined ? biteMoonMul(fish, hour, moon) : 1);
+  const drawWeights = sky || season || hotspot || legendaryBonus || moon !== undefined ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;
