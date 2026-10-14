@@ -43,10 +43,18 @@ describe("save a landed fish", () => {
     expect(kept).toMatchObject({
       species: "Bluegill",
       measure: { kind: "weight", pounds: 0.4 },
-      spotId: "spot-cedar",
+      spotId: "spot-stillwater",
       weather: null,
     });
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
+  });
+
+  it("starts a fresh browser's book with the real catch alone, no sample fish", () => {
+    saveLandedCatch(landed);
+    const book = readStoredLogbook()!;
+    expect(book.catches.map((entry) => entry.id)).toEqual([landed.id]);
+    expect(book.spots.map((spot) => spot.id)).toEqual(["spot-stillwater"]);
+    expect(book.trips).toEqual([]);
   });
 
   it("appends to the book already on this browser and does not duplicate the same landing", () => {

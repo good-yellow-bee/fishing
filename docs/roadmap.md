@@ -730,10 +730,20 @@ Claude picked these after Wave AC from the review's "smaller fixes" list. Some m
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AD1 | The lake hour moves on while you play instead of freezing at page load | fix | S |
-| AD2 | Charging a cast stops re-rendering the whole page every frame | performance | S/M |
-| AD3 | The lure picker gives Space back to casting after you choose | fix | S |
-| AD4 | The first game save no longer seeds the sample logbook | fix | S |
+| ~~AD1~~ | ~~The lake hour moves on while you play instead of freezing at page load~~ (already fixed: Dock watches the clock) | fix | S |
+| ~~AD2~~ | ~~Charging a cast stops re-rendering the whole page every frame~~ (#186) | performance | S/M |
+| ~~AD3~~ | ~~The lure picker gives Space back to casting after you choose~~ (already fixed in LureChoice) | fix | S |
+| ~~AD4~~ | ~~The first game save no longer seeds the sample logbook~~ (#186) | fix | S |
+
+## Wave AE — Lighter frames (added 2026-10-14, after Wave AD shipped)
+
+Claude picked the review's remaining performance items. Each is checked first, and nothing should change on screen.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AE1 | Scenery copies share their toon materials instead of each building its own | performance | M |
+| AE2 | The aim raycasts run only when the pointer or the camera has moved | performance | S |
+| AE3 | The water stops recomputing its normals every frame where a cheaper path exists | performance | S/M |
 
 ## Risks / open questions for the owner
 

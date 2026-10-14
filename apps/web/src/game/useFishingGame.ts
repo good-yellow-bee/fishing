@@ -160,7 +160,6 @@ export function useFishingGame(
   const waitHintRef = useRef("");
   const resultAtRef = useRef(0);
   const [phase, setPhase] = useState<ScenePhase>("idle");
-  const [power, setPower] = useState(0);
   const [spot, setSpot] = useState<SpotId>("dock");
   const [aimHint, setAimHint] = useState<AimHint>("dock");
   const [bite, setBite] = useState<{ species: FishSpecies; weight: number } | null>(null);
@@ -220,7 +219,6 @@ export function useFishingGame(
     castRiseRef.current = false;
     powerRef.current = 0;
     clearFight();
-    setPower(0);
     setPhaseBoth(phase);
     const moved = phase === "idle" && movedUnheardRef.current ? hotspotRef.current : null;
     if (moved) movedUnheardRef.current = false;
@@ -335,7 +333,6 @@ export function useFishingGame(
     holdingRef.current = false;
     const castPower = Math.min(1, (performance.now() - holdStartRef.current) / 900);
     powerRef.current = castPower;
-    setPower(castPower);
     fx.cast();
     const surface = surfaceRef.current;
     const aimed = parseAim(surface?.dataset.aim);
@@ -404,7 +401,6 @@ export function useFishingGame(
     holdingRef.current = true;
     holdStartRef.current = performance.now();
     powerRef.current = 0;
-    setPower(0);
     setPhaseBoth("casting");
     setHint(t("Keep the ring on the water. Release in the moss band."));
   }, [profile]);
@@ -548,10 +544,12 @@ export function useFishingGame(
         const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
         last = now;
         if (holdingRef.current && phaseRef.current === "casting") {
-          powerRef.current = Math.min(1, (now - holdStartRef.current) / 900);
-          setPower(powerRef.current);
+          powerRef.current = Math.min(1, Math.max(0, (now - holdStartRef.current) / 900));
         }
         const surface = surfaceRef.current;
+        // The charge is read from the ref by the meter and the scene; the page itself doesn't re-render for it.
+        const shownPower = powerRef.current.toFixed(2);
+        if (surface && surface.dataset.power !== shownPower) surface.dataset.power = shownPower;
         if (surface && (phaseRef.current === "idle" || phaseRef.current === "casting")) {
           const nextHint = hintFromDataset(surface.dataset.spot);
           const nextStance = parseStance(surface.dataset.stance);
@@ -623,7 +621,6 @@ export function useFishingGame(
         castPointerRef.current = null;
         powerRef.current = 0;
         clearFight();
-        setPower(0);
         setPhaseBoth("result");
         setOutcome({ kind: "error", message: t("The fishing loop hit a problem. You can cast again.") });
         setHint(error instanceof Error ? error.message : t("The fishing loop hit a problem."));
@@ -665,7 +662,6 @@ export function useFishingGame(
   return {
     surfaceRef,
     phase,
-    power,
     spot,
     aimHint,
     stance,

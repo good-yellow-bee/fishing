@@ -27,7 +27,6 @@ import {
   keepPlayTrip,
   localDate,
   streakDays,
-  sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
   skyAt,
@@ -62,10 +61,10 @@ import { stormOn } from "../game/scene/storm";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
-import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { bookForPlay, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
-import { readStoredLogbook, saveLogbook } from "../field/storage";
+import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
@@ -208,7 +207,7 @@ export function DockPage() {
   const shotBase = useRef<{ id: string; seq: number } | null>(null);
   const fieldBeat = useMemo(() => {
     if (game.outcome?.kind !== "landed") return null;
-    const book = readStoredLogbook() ?? sampleLogbook(new Date());
+    const book = bookForPlay();
     return fieldLogBestBeat(book, game.outcome.species.name, game.outcome.weight, game.outcome.id);
   }, [game.outcome]);
   const statsRef = useRef(me?.speciesStats ?? []);
@@ -267,7 +266,7 @@ export function DockPage() {
     if (!session) return;
     const title = sessionTitle(session);
     try {
-      const book = readStoredLogbook() ?? sampleLogbook(new Date());
+      const book = bookForPlay();
       saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title, catchIds: session.fish.map((fish) => fish.id), note: t("Season: {season}", { season: t(SEASON_LABELS[season]) }) }));
       setFiledTrip({ id: session.id, title });
       setSession(null);
@@ -595,7 +594,6 @@ export function DockPage() {
         ref={game.surfaceRef}
         data-phase={scenePhase}
         data-points={me.profile.points}
-        data-power={game.power.toFixed(2)}
         data-aim-hint={game.aimHint}
         data-nibble={game.nibble ? "1" : "0"}
         data-hour={hour}
@@ -643,7 +641,7 @@ export function DockPage() {
           </button>
         )}
         {fishing && !shopOpen && (
-          <PowerMeter phase={scenePhase} power={game.power} accuracy={me.profile.accuracy} />
+          <PowerMeter phase={scenePhase} powerRef={game.powerRef} accuracy={me.profile.accuracy} />
         )}
         <p className="hint" aria-live="polite">
           {game.hint}
