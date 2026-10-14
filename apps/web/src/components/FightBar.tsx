@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { fightLines, isCleanFight, RED_TENSION, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type TensionZone } from "../game/fight";
+import { fightLines, isCleanFight, jumpLines, RED_TENSION, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { oneDecimal } from "../game/logic";
@@ -26,6 +26,7 @@ export function FightBar({ fight, sim, performance }: Props) {
   const clean = useRef<HTMLParagraphElement>(null);
   // A language change reads the lines again.
   const lines = useMemo(() => fightLines(fight.species.challenge), [fight.species.challenge, lang]);
+  const leapLines = useMemo(() => jumpLines(), [lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
   const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
@@ -49,7 +50,8 @@ export function FightBar({ fight, sim, performance }: Props) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
         // Written only on a change, so the live region speaks each new call once.
-        if (status.current && status.current.textContent !== lines[state.surge]) status.current.textContent = lines[state.surge]!;
+        const call = (state.jump ? leapLines : lines)[state.surge]!;
+        if (status.current && status.current.textContent !== call) status.current.textContent = call;
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame.
         if (now - spokenAt >= 250) {
           spokenAt = now;
@@ -68,13 +70,14 @@ export function FightBar({ fight, sim, performance }: Props) {
           card.current.dataset.surge = String(state.surge);
           card.current.dataset.challenge = fight.species.challenge;
           card.current.classList.toggle("surging", state.surge === 2);
+          card.current.dataset.jump = state.jump ? "1" : "0";
         }
       }
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [fight.species.challenge, lines, performance, sim, t]);
+  }, [fight.species.challenge, leapLines, lines, performance, sim, t]);
 
   return (
     <div ref={card} className="fight-bar">

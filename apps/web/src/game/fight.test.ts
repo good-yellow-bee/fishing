@@ -243,3 +243,33 @@ describe("tension zones", () => {
     expect(tensionZone(1.2)).toBe("red");
   });
 });
+
+describe("leaps", () => {
+  /** Steps a fight with a fixed hand, recording each run's kind as it starts. */
+  function runs(id: string, reeling: (sim: FightSim) => boolean, ms = 30_000) {
+    const runtime = makeFight(fish(id), fish(id).minWeight, 20, seeded(7));
+    const kinds: boolean[] = [];
+    let before = 0;
+    for (let now = 0; now < ms; now += 20) {
+      const outcome = runtime.step(now, 0.02, reeling(runtime.sim));
+      if (runtime.sim.surge === 2 && before !== 2) kinds.push(runtime.sim.jump === true);
+      before = runtime.sim.surge;
+      if (outcome !== "fighting") break;
+    }
+    return { kinds, runtime };
+  }
+
+  it("makes every second run of a trout, bass or salmon a leap, and never a pike's", () => {
+    const trout = runs("rainbow-trout", () => false).kinds;
+    expect(trout.length).toBeGreaterThan(3);
+    trout.forEach((leap, i) => expect(leap, `run ${i}`).toBe(i % 2 === 1));
+    expect(runs("pike", () => false).kinds.some(Boolean)).toBe(false);
+  });
+
+  it("loads the rod into the red when the line is held through a leap, but bowing keeps it clean", () => {
+    const held = runs("smallmouth-bass", (sim) => sim.jump === true && sim.surge === 2, 12_000).runtime;
+    expect(held.performance.peakTension).toBeGreaterThanOrEqual(RED_TENSION);
+    const bowed = runs("smallmouth-bass", () => false, 12_000).runtime;
+    expect(bowed.performance.peakTension).toBeLessThan(RED_TENSION);
+  });
+});

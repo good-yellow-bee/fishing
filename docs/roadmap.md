@@ -438,6 +438,24 @@ Claude picked these after Wave L; the owner can reorder or drop any.
 - **M4 · Early bird.** A lodge badge for landing ten fish at dawn, counted from the hour already saved on each catch, so earlier dawn catches count.
 - **M5 · Snags.** About three in ten casts that land in the reeds' shallow weed foul on it just after settling (never a new angler's first easy fish). No fish bites until three taps of strike work it free ("Working it free… 2 of 3"), then the wait starts over as usual. Nothing is lost; casting past the weed avoids it.
 
+## Wave N — Fights and finishing touches (added 2026-10-14, after Wave M shipped)
+
+Claude picked these after Wave M; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| N1 | ~~Trout, bass and salmon leap mid-fight~~ (shipped) | fight | M |
+| N2 | A one-line fish story on the landed card and in the log | journal | S/M |
+| N3 | Left-handed layout for the thumb controls | mobile/a11y | S |
+| N4 | High-contrast panels setting | a11y | S/M |
+| N5 | A weather vane on the shack that shows the day's wind | scene | S |
+
+- **N1 · Leaps.** Every second run of a brook or rainbow trout, a bass or a salmon is a leap: a longer warning ("Let go now — it's coming up!"), then the fish clears the water nose first, turns over and falls back with a splash ("BOW — it's jumping!"). Holding the line tight through a leap past a short grace loads the rod into the red and costs the clean bonus, but never the fish, so the slow-angler guarantees still hold.
+- **N2 · Fish story.** The landed card and the catch log get one plain line built from the catch: "A 2.3 lb smallmouth took the spinner off the Point at dusk, on the rise."
+- **N3 · Left-handed.** A Settings choice that mirrors the thumb strike/reel button and the bank signs to the other side.
+- **N4 · High contrast.** A Settings choice for solid panels, bolder borders and brighter text over the lake.
+- **N5 · Weather vane.** A small vane on the shack roof turns to the day's wind and spins idly on a calm day.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

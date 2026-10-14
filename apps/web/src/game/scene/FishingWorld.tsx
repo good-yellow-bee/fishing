@@ -22,7 +22,7 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import type { FightSim } from "../fight";
+import { JUMP_MS, type FightSim } from "../fight";
 import { fx } from "../fx";
 import type { Hotspot } from "../hotspot";
 import { ShoreTracks } from "./ShoreTracks.tsx";
@@ -82,7 +82,7 @@ import { clearCatchShot, postCatchShot, snapCanvas } from "./catchPhoto";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
-import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
+import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd, leapLift } from "./fightFish";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld";
 import { clearDistance, easePull } from "./cameraClear";
@@ -1090,6 +1090,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   restOpacity.current = look.opacity;
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
+  const leapStart = useRef<number | null>(null);
   const sitRing = useRef<THREE.Mesh>(null);
   const lure = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
@@ -1411,7 +1412,18 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
         fightView.localZ = g.position.z;
       }
     }
-    const meet = hookedPose?.show ? fightLineEnd(phase, hookedPose, target) : null;
+    // A leap: the fish clears the water nose first, then turns over and falls back.
+    const leaping = phase === "fight" && sim.current?.jump === true && sim.current.surge === 2;
+    if (!leaping) leapStart.current = null;
+    else if (leapStart.current === null) leapStart.current = t;
+    let leapY = 0;
+    if (leaping && hooked.current?.visible && leapStart.current !== null) {
+      const leap = leapLift((t - leapStart.current) / (JUMP_MS / 1000));
+      leapY = leap.y;
+      hooked.current.position.y += leap.y;
+      hooked.current.rotation.x -= leap.pitch;
+    }
+    const meet = hookedPose?.show ? fightLineEnd(phase, { ...hookedPose, mouthY: hookedPose.mouthY + leapY }, target) : null;
     // Cast trail keeps its own sag. A fight run or pump only lifts the belly.
     const lineX = target.x - rodTip.x;
     const lineZ = target.z - rodTip.z;

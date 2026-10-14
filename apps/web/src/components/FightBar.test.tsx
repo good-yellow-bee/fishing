@@ -107,4 +107,17 @@ describe("FightBar for screen readers", () => {
       expect(status.textContent).toBe(said);
     });
   });
+
+  it("calls a leap by name, warning first and then telling the angler to bow", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.jump = true;
+    sim.current.surge = 1;
+    frame();
+    expect(status()).toBe("Let go now — it's coming up!");
+    sim.current.surge = 2;
+    frame();
+    expect(status()).toBe("BOW — it's jumping!");
+    expect(container!.querySelector(".fight-bar")!.getAttribute("data-jump")).toBe("1");
+  });
 });

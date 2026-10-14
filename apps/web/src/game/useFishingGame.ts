@@ -579,7 +579,8 @@ export function useFishingGame(
             surface.dataset.surge = String(sim.surge);
           }
           if (sim.surge === 2 && prevSurge !== 2) {
-            fx.surge();
+            if (sim.jump) fx.splash();
+            else fx.surge();
             fx.haptic("surge");
           }
           prevSurge = sim.surge;
