@@ -2,12 +2,15 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { canPreviewFish } from "@stillwater/shared";
 import * as THREE from "three";
+import { fishBuild } from "./fishBuild";
 import type { ScenePhase } from "./types";
 import { waterHeight } from "./water";
 
-type Props = { level: number; phase: ScenePhase; weight: number; bobber: { x: number; z: number } };
+type Props = { level: number; phase: ScenePhase; weight: number; bobber: { x: number; z: number }; speciesId?: string };
 
-export function FishShadow({ level, phase, weight, bobber }: Props) {
+export function FishShadow({ level, phase, weight, bobber, speciesId }: Props) {
+  // Seen from above, a pike's shadow runs long and narrow, a bluegill's short.
+  const build = fishBuild(speciesId);
   const visible = canPreviewFish(level) && phase === "hookset" && weight > 0;
   const group = useRef<THREE.Group>(null);
   useFrame((state) => {
@@ -23,8 +26,9 @@ export function FishShadow({ level, phase, weight, bobber }: Props) {
     shadow.position.set(x, waterHeight(x, z, time) - 0.01, z);
     shadow.rotation.y = orbit + Math.PI / 2;
   });
+  const size = 1 + Math.min(1.4, Math.sqrt(weight) / 5);
   return (
-    <group ref={group} visible={false} scale={1 + Math.min(1.4, Math.sqrt(weight) / 5)}>
+    <group ref={group} visible={false} scale={[size * build.width, size, size * build.length]}>
       <mesh scale={[0.55, 0.025, 1.1]} renderOrder={2}>
         <sphereGeometry args={[1, 12, 8]} />
         <meshBasicMaterial color="#06141c" transparent opacity={0.7} depthWrite={false} toneMapped={false} />
