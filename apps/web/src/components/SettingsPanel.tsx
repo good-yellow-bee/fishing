@@ -82,7 +82,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         <Choices
           name="particles"
-          legend="Rain"
+          legend="Effects"
           options={[
             { value: "full", label: "Full" },
             { value: "lite", label: "Lite" },

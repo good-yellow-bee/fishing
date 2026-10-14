@@ -12,7 +12,7 @@ export type Settings = {
   volume: number;
   muted: boolean;
   shake: ShakeLevel;
-  /** Lite draws half the rain. */
+  /** Lite draws half the rain, fireflies and mist, and no sun halo. */
   particles: "full" | "lite";
   shadows: boolean;
   /** Sharp renders up to 1.75 device pixels per CSS pixel; fast renders one. */

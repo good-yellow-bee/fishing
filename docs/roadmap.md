@@ -43,7 +43,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P20 | ~~Fight & landing camera~~ (shipped) | camera | M | E | landing lift, P8 |
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
-| P23 | Atmosphere pass (fireflies, mist, bloom) | visual | M | E | P8, #53 |
+| P23 | ~~Atmosphere pass (fireflies, mist, bloom)~~ (shipped) | visual | M | E | P8, #53 |
 | P24 | Seasons on the lake | progression/content | L | F | #53, #50 |
 | P25 | Species lore + silhouettes | collection | S | F | — |
 
@@ -271,7 +271,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** M. **Deps:** perf memo.
 - **Test:** `water.test.ts` `glitterDirection(discPos)`; visual `?hour=dawn|dusk`.
 
-### P23 · Atmosphere pass (quality-gated)
+### ~~P23 · Atmosphere pass (quality-gated)~~ (shipped: fireflies over the three reed beds on dry nights, blinking; mist puffs in two sheets at dawn and in fog, none in rain; no postprocessing dep, the bloom is a wide additive halo on Full effects. The Rain setting became Effects and Lite halves fireflies and mist too)
 - **Pitch:** fireflies over the reeds at night, mist lying on the water at dawn and in fog, a soft bloom on the sun.
 - **Borrowed:** Sunless Sea / Dredge (atmosphere through light and sound); Stardew (night fireflies); A Short Hike (golden hour).
 - **Why fun:** night is the least-dressed hour (birds off, glitter off) yet carries the best rare odds (`HOUR_RARITY.night.rare` 1.4). It should be the most beautiful.
