@@ -25,6 +25,8 @@ import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { heronOut } from "./heronMotion";
+import { useReducedMotion } from "./reducedMotion";
+import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { mistAmount } from "./mist";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
@@ -458,12 +460,7 @@ const DUCKS: DuckProps[] = [
   },
 ];
 
-type DragonflyProps = { center: Vec3; size: number; speed: number; phase: number };
 
-const DRAGONFLIES: DragonflyProps[] = [
-  { center: [-4.2, 0.85, 9.1], size: 1.1, speed: 0.7, phase: 0 },
-  { center: [-7.6, 0.7, 4.6], size: 0.9, speed: 0.55, phase: 2.4 },
-];
 
 for (const url of Object.values(MODELS)) useGLTF.preload(url);
 
@@ -1222,27 +1219,29 @@ function Duck({ points, speed, phase, body, head }: DuckProps) {
   );
 }
 
-function Dragonfly({ center, size, speed, phase }: DragonflyProps) {
+/** One dragonfly hunting a reed bed: hovers, darts to the next spot; motion lives in dragonflies.ts. */
+function Dragonfly({ index }: { index: number }) {
   const ref = useRef<THREE.Group>(null);
+  const still = useReducedMotion();
   const wingMaterial = useMemo(
     () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
     [],
   );
   useEffect(() => () => wingMaterial.dispose(), [wingMaterial]);
-  useFrame((state) => {
-    const fly = ref.current;
-    if (!fly) return;
-    const t = state.clock.elapsedTime * speed + phase;
-    fly.position.set(
-      center[0] + Math.sin(t) * size,
-      center[1] + Math.sin(t * 2.7) * 0.14,
-      center[2] + Math.sin(t * 2) * size * 0.55,
-    );
-    fly.rotation.y = Math.atan2(Math.cos(t), Math.cos(t * 2) * 1.1);
-    wingMaterial.opacity = 0.18 + (Math.sin(state.clock.elapsedTime * 34 + phase) * 0.5 + 0.5) * 0.16;
+  useFrame((state, delta) => {
+    const group = ref.current;
+    if (!group) return;
+    const time = state.clock.elapsedTime;
+    const pose = dragonfly(index, time, still);
+    group.position.set(pose.x, pose.y, pose.z);
+    // Turn fast but not instantly, so a dart starts with a visible snap of the body.
+    const turn = Math.atan2(Math.sin(pose.yaw - group.rotation.y), Math.cos(pose.yaw - group.rotation.y));
+    group.rotation.y += turn * (1 - Math.exp(-25 * delta));
+    wingMaterial.opacity = 0.18 + (Math.sin(time * 34 + index) * 0.5 + 0.5) * 0.16;
   });
   return (
     <group ref={ref}>
+      {/* Body along +z, the way the pose's yaw faces. */}
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
         <capsuleGeometry args={[0.02, 0.3, 3, 6]} />
         <meshToonMaterial color="#3d6f78" gradientMap={toonRamp()} />
@@ -1638,10 +1637,8 @@ export const LakeWorld = memo(function LakeWorld({
       {DUCKS.map((duck, i) => (
         <Duck key={i} {...duck} />
       ))}
-      {look.birds &&
-        DRAGONFLIES.map((fly, i) => (
-          <Dragonfly key={i} {...fly} />
-        ))}
+      {dragonfliesOut(hour, sky, season) &&
+        Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
       {weather.rain && <LakeRain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {firefliesOut(hour, sky) && <Fireflies />}
