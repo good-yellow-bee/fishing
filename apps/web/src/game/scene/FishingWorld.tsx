@@ -112,7 +112,7 @@ import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
-import { listenForWaterAim } from "./pointerAim";
+import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
@@ -507,6 +507,11 @@ function castAimState(
 
 const GROUND = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
+/** Writes a data attribute only when it changes, so a still frame touches nothing the page's styles watch. */
+function setData(element: HTMLElement, key: string, value: string) {
+  if (element.dataset[key] !== value) element.dataset[key] = value;
+}
+
 type WaterAimProps = { phase: ScenePhase; aim: AimState; level: number; powerRef: { current: number }; accuracy: number };
 
 function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
@@ -526,11 +531,20 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   const now = useRef(0);
   const castState = useRef<CastAimState>("stance");
   const syncAim = useRef((_time: number) => {});
+  // What the last full aim check saw; when none of it has moved, only the marker rides the chop.
+  const lastAim = useRef<(number | string)[]>([]);
   syncAim.current = (time: number) => {
     if (!isAiming(phaseRef.current)) {
       if (marker.current) marker.current.visible = false;
+      lastAim.current = [];
       return;
     }
+    const seen = aimInputs(pointer.current, camera, anglerPose.x, anglerPose.z, aboard() ? boat.mode : "ashore", level);
+    if (sameAim(seen, lastAim.current)) {
+      if (marker.current?.visible) marker.current.position.y = waterHeight(hit.x, hit.z, time) + 0.06;
+      return;
+    }
+    lastAim.current = seen;
     raycaster.setFromCamera(pointer.current, camera);
     const point = waterRayHit(raycaster.ray.origin, raycaster.ray.direction, time, hit);
     const overWater = point != null && inLake(point.x, point.z);
@@ -549,9 +563,9 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
       if (canCast) marker.current.position.set(hit.x, waterHeight(hit.x, hit.z, time) + 0.06, hit.z);
     }
     if (wrap.current) {
-      wrap.current.dataset.aim = overWater ? `${hit.x.toFixed(3)},${hit.z.toFixed(3)}` : "none";
-      wrap.current.dataset.spot = waterSpot ?? "shore";
-      wrap.current.dataset.cast = cast;
+      setData(wrap.current, "aim", overWater ? `${hit.x.toFixed(3)},${hit.z.toFixed(3)}` : "none");
+      setData(wrap.current, "spot", waterSpot ?? "shore");
+      setData(wrap.current, "cast", cast);
     }
   };
 
@@ -597,7 +611,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
         chargeMaterial.current.color.set(CAST_RING_COLORS[ring.tone]);
         chargeMaterial.current.opacity = ring.opacity;
       }
-      if (wrap.current) wrap.current.dataset.castRing = charging ? castRing(powerRef.current, band).tone : "none";
+      if (wrap.current) setData(wrap.current, "castRing", charging ? castRing(powerRef.current, band).tone : "none");
     }
     const goal = anglerPose.route[anglerPose.route.length - 1];
     if (walkMarker.current) {

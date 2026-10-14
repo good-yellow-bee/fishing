@@ -67,6 +67,7 @@ import { geeseOut } from "./geeseSkein";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
+import { fastVertexNormals } from "./waterNormals";
 import { swallowsOut } from "./swallowFlight";
 import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
@@ -761,7 +762,7 @@ function displaceWater(geometry: THREE.BufferGeometry, time: number) {
   }
   colors.needsUpdate = true;
   position.needsUpdate = true;
-  geometry.computeVertexNormals();
+  fastVertexNormals(geometry);
 }
 
 function edgePoints(offset: number) {

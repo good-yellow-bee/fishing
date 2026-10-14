@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest";
-import { listenForWaterAim } from "./pointerAim";
+import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
 
 const cleanups: (() => void)[] = [];
 
@@ -53,5 +53,19 @@ describe("water aim event order", () => {
       document.body.dispatchEvent(new Event(type, { bubbles: true }));
     }
     expect(calls).toBe(0);
+  });
+});
+
+describe("aim inputs", () => {
+  const camera = (x: number) => ({ matrixWorld: { elements: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, 2, 5, 1] } });
+  it("match only while nothing the aim reads has moved", () => {
+    const before = aimInputs({ x: 0.1, y: -0.2 }, camera(0), 0, 6.8, "ashore", 2);
+    expect(sameAim(aimInputs({ x: 0.1, y: -0.2 }, camera(0), 0, 6.8, "ashore", 2), before)).toBe(true);
+    expect(sameAim(aimInputs({ x: 0.11, y: -0.2 }, camera(0), 0, 6.8, "ashore", 2), before)).toBe(false);
+    expect(sameAim(aimInputs({ x: 0.1, y: -0.2 }, camera(0.01), 0, 6.8, "ashore", 2), before)).toBe(false);
+    expect(sameAim(aimInputs({ x: 0.1, y: -0.2 }, camera(0), 0.2, 6.8, "ashore", 2), before)).toBe(false);
+    expect(sameAim(aimInputs({ x: 0.1, y: -0.2 }, camera(0), 0, 6.8, "anchored", 2), before)).toBe(false);
+    expect(sameAim(aimInputs({ x: 0.1, y: -0.2 }, camera(0), 0, 6.8, "ashore", 3), before)).toBe(false);
+    expect(sameAim(before, [])).toBe(false);
   });
 });
