@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ambientProfile, fx } from "./fx";
+import { ambientProfile, fx, onLoonCall } from "./fx";
 
 const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} });
 const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
@@ -8,6 +8,8 @@ const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
 /** Loop sources that are playing right now: the lapping water, plus the rain hiss when it rains. */
 const loops = new Set<object>();
 const tones: number[] = [];
+/** Where each panned call was placed. */
+const pans: number[] = [];
 
 class FakeAudioContext {
   state = "running";
@@ -39,6 +41,10 @@ class FakeAudioContext {
       },
     };
     return source;
+  }
+  createStereoPanner() {
+    const pan = { ...param(), set value(v: number) { pans.push(v); }, get value() { return 0; } };
+    return { ...node(), pan };
   }
   createOscillator() {
     const frequency = { ...param(), setValueAtTime: (value: number) => tones.push(value) };
@@ -90,6 +96,22 @@ describe("ambient conditions", () => {
     expect(tones).toEqual([]);
     fx.ambient.setConditions("night", "clear", "summer");
     expect(loops.size).toBe(1);
+  });
+
+  it("tells the scene when the loon calls, and pans the call to where the loon swims", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    pans.length = 0;
+    const heard = vi.fn();
+    const stop = onLoonCall(heard);
+    fx.ambient.setLoonPlace(-0.6, 0.4);
+    fx.ambient.setConditions("night", "clear", "summer");
+    fx.ambient.start();
+    vi.advanceTimersByTime(10_000);
+    expect(heard).toHaveBeenCalledTimes(1);
+    expect(pans).toEqual([-0.6]);
+    stop();
+    vi.advanceTimersByTime(30_000);
+    expect(heard).toHaveBeenCalledTimes(1);
   });
 
   it("sends geese over on a fall day", () => {
