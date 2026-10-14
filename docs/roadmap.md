@@ -822,6 +822,7 @@ Claude picked these so the birds from Waves AH to AL are heard as well as seen.
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AM1~~ | ~~Terns call over the water on spring and summer days, with a sound caption~~ (#199) | audio | S |
+| ~~AM2~~ | ~~The grebes' rush is heard: feet pattering and a few rattling calls, with a caption~~ (#200) | audio | S |
 
 ## Risks / open questions for the owner
 

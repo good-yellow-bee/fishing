@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { fx } from "../fx";
 import { lastSplash } from "./duckFlush";
 import { grebePose, grebesScared, grebeUnder } from "./grebeRush";
 import { toonRamp } from "./toon";
@@ -28,6 +29,7 @@ export function Grebes() {
   const sprays = useRef<(THREE.Group | null)[]>([]);
   const yaws = useRef<(number | null)[]>([null, null]);
   const dove = useRef({ at: Number.NEGATIVE_INFINITY, heard: Number.NEGATIVE_INFINITY });
+  const rushing = useRef(false);
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
     // Each splash is looked at once; a close one sends the pair under together.
@@ -41,6 +43,10 @@ export function Grebes() {
       }
     }
     const under = grebeUnder(time - d.at);
+    // The pattering and calls start with each rush.
+    const rush = grebePose(0, time).rushing && under === 0;
+    if (rush && !rushing.current) fx.grebeRush();
+    rushing.current = rush;
     for (const k of [0, 1] as const) {
       const bird = birds.current[k];
       if (!bird) continue;
