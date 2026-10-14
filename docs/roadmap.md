@@ -535,13 +535,13 @@ Claude picked these after Wave R; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~S1~~ | ~~A separate volume for nature sounds~~ (#149) | settings | S |
-| S2 | The heron sometimes catches a fish | wildlife | M |
+| ~~S2~~ | ~~The heron sometimes catches a fish~~ (#150) | wildlife | M |
 | S3 | A moon road on the water on clear nights | sky | S/M |
 | S4 | Dock planks that darken and shine in the rain | weather | S |
 | S5 | Refresh the "New on the lake" card for Wave S | onboarding | S |
 
 - **S1 · Nature volume.** Settings gains a "Nature sounds" slider for the lake's own sounds (lapping water, birds, crickets, frogs, geese, loon, owl, rain, wind and thunder), apart from the game's effects (casts, reel, bites, bell). It sits under the main volume and Mute.
-- **S2 · Heron's catch.** Every so often the wading heron freezes, stabs into the water with a splash ring, and lifts its head with a small fish crosswise in its bill before swallowing it.
+- **S2 · Heron's catch.** About one stab in three now comes up with a small fish held crosswise in the heron's bill; it lifts its head to work the fish down and swallows it. Every stab leaves a ring on the water.
 - **S3 · Moon road.** On clear nights with a bright moon, a broken silver path of glints runs across the water toward the moon, like the sun's road by day. Fainter as the moon wanes; none under cloud.
 - **S4 · Wet dock.** When it rains, the dock and pier planks turn darker and pick up a faint sheen, and dry back as the sky clears.
 - **S5 · What's new, again.** List whatever Wave S lands on the card.

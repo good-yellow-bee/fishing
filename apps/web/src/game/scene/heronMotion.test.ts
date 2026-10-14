@@ -5,6 +5,8 @@ import {
   HERON_BEAT,
   HERON_FLEE_RADIUS,
   HERON_FLIGHT_SEC,
+  HERON_HOLD_SEC,
+  heronCatches,
   heronFlight,
   heronLanding,
   heronOut,
@@ -83,5 +85,25 @@ describe("heron", () => {
     expect(Math.hypot(late.x - from.x, late.z - from.z)).toBeGreaterThan(20);
     expect(heronFlight(HERON_FLIGHT_SEC, from)).toBeNull();
     expect(early.flying).toBe(true);
+  });
+
+  it("comes up with a fish on some stabs, holds it up, then swallows it", () => {
+    const caught = Array.from({ length: 40 }, (_, n) => heronCatches(n)).filter(Boolean).length;
+    expect(caught).toBeGreaterThan(5);
+    expect(caught).toBeLessThan(30);
+    let holding = 0;
+    let rings = 0;
+    for (let t = 0; t < 1200; t += 0.1) {
+      const pose = heronWade(t);
+      if (pose.fish >= 0) {
+        holding += 0.1;
+        expect(pose.fish).toBeLessThan(1);
+        expect(pose.stab).toBeLessThan(0.1);
+      }
+      if (pose.ring >= 0) rings += 1;
+    }
+    expect(holding).toBeGreaterThan(HERON_HOLD_SEC * 3);
+    expect(rings).toBeGreaterThan(0);
+    expect(heronWade(500, true).fish).toBe(-1);
   });
 });
