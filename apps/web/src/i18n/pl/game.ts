@@ -58,6 +58,7 @@ export const PL_GAME: PlBook = {
   "Listen for the owl on the far bank after dark.": "Po zmroku nasłuchuj sowy na dalekim brzegu.",
   "Now and then a fish leaps clear out on the open lake.": "Od czasu do czasu na otwartej wodzie wyskakuje ryba.",
   "Float colour": "Kolor spławika",
+  "Nature sounds": "Dźwięki natury",
   Blue: "Niebieski",
   Red: "Czerwony",
   Orange: "Pomarańczowy",
