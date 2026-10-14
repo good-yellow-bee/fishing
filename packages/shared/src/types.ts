@@ -19,6 +19,8 @@ export type FishSpecies = {
   rarity: Rarity;
   color: string;
   accent: string;
+  silhouette: string;
+  lore: string;
 };
 
 export type Profile = {

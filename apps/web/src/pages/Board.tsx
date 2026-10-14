@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BOARD_LIMIT, FISH, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { getBoard, getSpeciesRecords } from "../api";
+import { FishMark } from "../components/FishMark";
 
 const PERIOD_LABEL: Record<BoardPeriod, string> = { all: "All time", week: "This week" };
 
@@ -135,6 +136,7 @@ export function BoardPage() {
               return (
                 <li key={fish.id} className={record ? `rarity-${fish.rarity}` : "empty"}>
                   {/* An empty slot keeps the species secret until someone at the lodge lands one. */}
+                  {record && <FishMark species={fish} />}
                   <strong>{record ? fish.name : "Unknown"}</strong>
                   {record ? (
                     <span>
