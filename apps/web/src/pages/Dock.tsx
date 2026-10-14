@@ -30,10 +30,12 @@ import {
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
-  weatherForDay,
+  skyAt,
+  SKY_BLURB,
   weatherFromSearch,
   type CatchSubmission,
   type LakeHour,
+  type Sky,
   type SkillId,
 } from "@stillwater/shared";
 import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
@@ -77,9 +79,19 @@ import { bestBeatText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
 const HOUR_CHECK_MS = 30_000;
-/** The veil darkens, the hour swaps under it, then it lifts. */
+/** The veil darkens, the hour or the sky swaps under it, then it lifts. */
 const HOUR_SWAP_MS = 1_100;
 const HOUR_VEIL_MS = 3_200;
+
+/** A change the lake waits to show until the bank is calm: a new lake hour, or the day's sky turning. */
+type Turn = { kind: "hour"; hour: LakeHour } | { kind: "sky"; from: Sky; sky: Sky };
+
+function skyTurnLine(from: Sky, to: Sky): string {
+  if (to === "rain") return t("Rain starts falling on the water.");
+  if (to === "overcast") return from === "rain" ? t("The rain eases off.") : t("Clouds roll in over the lake.");
+  if (to === "clear" && from === "fog") return t("The fog burns off.");
+  return t("The weather turns.");
+}
 
 function hourTurnLine(hour: LakeHour): string {
   switch (hour) {
@@ -114,10 +126,13 @@ export function DockPage() {
   const forcedHour = lakeHourFromSearch(params.toString());
   // The real clock keeps running while you fish; ?hour= pins it for testing.
   const [liveHour, setLiveHour] = useState(() => lakeHour(openedAt));
-  const [turningTo, setTurningTo] = useState<LakeHour | null>(null);
-  const [veil, setVeil] = useState<LakeHour | null>(null);
+  const [turningTo, setTurningTo] = useState<Turn | null>(null);
+  const [veil, setVeil] = useState<Turn | null>(null);
   const hour = forcedHour ?? liveHour;
-  const sky = weatherFromSearch(params.toString()) ?? weatherForDay(openedAt);
+  // The day's sky can turn once while you fish, on the forecast's schedule; ?sky= pins it for testing.
+  const forcedSky = weatherFromSearch(params.toString());
+  const [liveSky, setLiveSky] = useState(() => skyAt(openedAt));
+  const sky = forcedSky ?? liveSky;
   // Read once per visit like the day's weather; ?season= pins it for testing.
   const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
   const [me, setMe] = useState<Me | null>(null);
@@ -300,16 +315,21 @@ export function DockPage() {
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
 
-  // Watch the clock; a new lake hour waits for a calm moment so it never lands mid-strike or mid-fight.
+  // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
+  // One change at a time: the hour goes first and the sky follows on a later check.
   useEffect(() => {
-    if (forcedHour) return;
+    if (forcedHour && forcedSky) return;
     const check = () => {
-      const now = lakeHour(new Date());
-      setTurningTo(now === liveHour ? null : now);
+      const now = new Date();
+      const nextHour = lakeHour(now);
+      const nextSky = skyAt(now);
+      if (!forcedHour && nextHour !== liveHour) setTurningTo({ kind: "hour", hour: nextHour });
+      else if (!forcedSky && nextSky !== liveSky) setTurningTo({ kind: "sky", from: liveSky, sky: nextSky });
+      else setTurningTo(null);
     };
     const timer = window.setInterval(check, HOUR_CHECK_MS);
     return () => window.clearInterval(timer);
-  }, [forcedHour, liveHour]);
+  }, [forcedHour, forcedSky, liveHour, liveSky]);
 
   const calmForTurn = scenePhase === "idle" || scenePhase === "waiting" || scenePhase === "result";
   const tracks = useLodgeTracks(Boolean(userId), calmForTurn);
@@ -319,7 +339,8 @@ export function DockPage() {
     // The swap lands under the darkest moment of the veil; with reduced motion there is no veil to wait for.
     const swap = window.setTimeout(
       () => {
-        setLiveHour(turningTo);
+        if (turningTo.kind === "hour") setLiveHour(turningTo.hour);
+        else setLiveSky(turningTo.sky);
         setTurningTo(null);
       },
       prefersReducedMotion() || savedSettings.reduceMotion ? 0 : HOUR_SWAP_MS,
@@ -766,9 +787,9 @@ export function DockPage() {
           </aside>
         )}
         {veil && (
-          <div className="hour-veil" key={veil} role="status">
-            <strong>{hourTurnLine(veil)}</strong>
-            <span>{t(LAKE_HOUR_BLURB[veil])}</span>
+          <div className="hour-veil" key={veil.kind === "hour" ? veil.hour : `sky-${veil.sky}`} role="status">
+            <strong>{veil.kind === "hour" ? hourTurnLine(veil.hour) : skyTurnLine(veil.from, veil.sky)}</strong>
+            <span>{t(veil.kind === "hour" ? LAKE_HOUR_BLURB[veil.hour] : SKY_BLURB[veil.sky])}</span>
           </div>
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}

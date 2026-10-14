@@ -97,13 +97,45 @@ export function weatherForDay(date: Date = new Date()): Sky {
   return DAILY_SKIES[dayHash(date, "sky") % DAILY_SKIES.length]!;
 }
 
-export type ForecastDay = { date: Date; sky: Sky };
+/** Where each day's sky goes when the weather turns: clouds build to rain, rain eases, fog burns off. */
+const SKY_TURNS: Record<Sky, Sky> = {
+  clear: "overcast",
+  "partly-cloudy": "overcast",
+  overcast: "rain",
+  rain: "overcast",
+  fog: "clear",
+};
+
+/** About one day in this many turns once. */
+export const SKY_TURN_ODDS = 3;
+
+export type SkyTurn = { hour: number; to: Sky };
+
+/**
+ * The day's one change of sky, or null on a settled day: at a local hour, the day's sky gives way to the next one.
+ * Fog burns off in the morning; anything else turns in the afternoon. Seeded from the local day like the sky itself.
+ */
+export function skyTurnForDay(date: Date = new Date()): SkyTurn | null {
+  const seed = dayHash(date, "turn");
+  if (seed % SKY_TURN_ODDS !== 0) return null;
+  const from = weatherForDay(date);
+  const hour = from === "fog" ? 9 + ((seed >>> 8) % 3) : 12 + ((seed >>> 8) % 7);
+  return { hour, to: SKY_TURNS[from] };
+}
+
+/** The sky at this moment: the day's sky, until the day's turn if it has one and its hour has come. */
+export function skyAt(date: Date = new Date()): Sky {
+  const turn = skyTurnForDay(date);
+  return turn && date.getHours() >= turn.hour ? turn.to : weatherForDay(date);
+}
+
+export type ForecastDay = { date: Date; sky: Sky; turn: SkyTurn | null };
 
 /** The next `days` local days from `date`, today first. Each is weatherForDay at local noon, so DST never skips a day. */
 export function forecast(date: Date = new Date(), days = 3): ForecastDay[] {
   return Array.from({ length: days }, (_, n) => {
     const day = new Date(date.getFullYear(), date.getMonth(), date.getDate() + n, 12);
-    return { date: day, sky: weatherForDay(day) };
+    return { date: day, sky: weatherForDay(day), turn: skyTurnForDay(day) };
   });
 }
 

@@ -2247,6 +2247,11 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 17px;
 }
 
+.forecast-turn {
+  color: var(--amber);
+  font-size: 12px;
+}
+
 .forecast-board small {
   color: #aa9d86;
   font-size: 11px;

@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, dailyConditions, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
+import { badgeProgress, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -524,6 +524,38 @@ describe("dock lake hour", () => {
       vi.advanceTimersByTime(2_100);
     });
     expect(page.querySelector(".hour-veil")).toBeNull();
+  });
+
+  it("lets the day's sky turn on its schedule, under the same veil, unless ?sky= pins it", async () => {
+    const day = Array.from({ length: 90 }, (_, n) => new Date(2026, 9, 1 + n, 12)).find((d) => {
+      const turn = skyTurnForDay(d);
+      return turn !== null && weatherForDay(d) === "clear";
+    })!;
+    const turn = skyTurnForDay(day)!;
+    vi.useFakeTimers({
+      toFake: ["Date", "setInterval", "clearInterval", "setTimeout", "clearTimeout"],
+      now: new Date(day.getFullYear(), day.getMonth(), day.getDate(), turn.hour - 1, 59, 50),
+    });
+    const page = await openDock("/?hour=day");
+    expect(lastScene().sky).toBe("clear");
+    await act(async () => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(page.querySelector(".hour-veil")?.textContent).toContain("Clouds roll in over the lake.");
+    await act(async () => {
+      vi.advanceTimersByTime(1_200);
+    });
+    expect(lastScene().sky).toBe(turn.to);
+    expect(page.querySelector(".scene-wrap")?.getAttribute("data-sky")).toBe(turn.to);
+    act(() => root!.unmount());
+    root = null;
+    container?.remove();
+    const pinned = await openDock("/?hour=day&sky=clear");
+    await act(async () => {
+      vi.advanceTimersByTime(60_000);
+    });
+    expect(pinned.querySelector(".hour-veil")).toBeNull();
+    expect(lastScene().sky).toBe("clear");
   });
 
   it("keeps a pinned ?hour= however long you stay", async () => {

@@ -376,13 +376,13 @@ Claude picked these after Wave I; the owner can reorder or drop any.
 | J2 | ~~Lanterns on the dock and the shack after dark~~ (shipped) | scene | S/M |
 | J3 | ~~Catch and release~~ (shipped) | gameplay | M/L |
 | J4 | ~~Days-on-the-water streak~~ (shipped) | retention | M |
-| J5 | Weather that turns during a session | weather | M |
+| J5 | ~~Weather that turns during a session~~ (shipped) | weather | M |
 
 - **J1 · Pad hints.** When a controller is connected, the controls strip shows its buttons (A cast, sticks walk and aim, Y shop) instead of the mouse and keyboard ones.
 - **J2 · Lanterns.** At dusk (60%) and night, warm lanterns on the dock's lake-end posts and by the shack light the boards with two point lights, and small glow-only lanterns sit on each bank post, so night fishing has a place to stand in.
 - **J3 · Catch and release.** The landed card offers Release next to Keep fishing. The catch is saved on landing, so releasing marks it afterwards (`POST /api/catches/:requestId/release`): the fish drops from the hand back into the water with a ring, keeps its points (taking points back after the save would race spending and the offline queue), shows "Released" in the catch log, and counts toward the "Steward" badge at ten.
 - **J4 · Streak.** Each catch now carries the angler's local day. Landing a fish on consecutive local days builds a streak shown on the HUD (from two days) and the catch log, with a "Regular" badge at seven days. The current run survives until a whole day is missed; nothing is taken away. Catches saved before days were sent don't count.
-- **J5 · Weather turns.** A long session can see the sky change on the forecast's schedule (clear to overcast to rain), with the change rolling in like the hour turnover rather than snapping.
+- **J5 · Weather turns.** About one day in three the sky turns once, on a seeded local hour: clouds build (clear to overcast, overcast to rain) or rain eases in the afternoon, and fog burns off in the morning. The shack's chalk board shows the turn ("Turns overcast around 16:00"), and on the bank it rolls in under the same veil as the hour turnover, waiting for a calm moment. `?sky=` still pins it.
 
 ## Risks / open questions for the owner
 
