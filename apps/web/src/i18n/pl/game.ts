@@ -288,6 +288,7 @@ export const PL_GAME: PlBook = {
   Tight: "Napięta",
   "Too tight": "Za mocno",
   "Save picture": "Zapisz obrazek",
+  "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
   "The picture could not be made in this browser.": "Ta przeglądarka nie zdołała zrobić obrazka.",
   "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
   "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
