@@ -745,6 +745,16 @@ Claude picked the review's remaining performance items. Each is checked first, a
 | ~~AE2~~ | ~~The aim raycasts run only when the pointer or the camera has moved~~ (#188) | performance | S |
 | ~~AE3~~ | ~~The water stops recomputing its normals every frame where a cheaper path exists~~ (#188: same normals, about 2x faster loop) | performance | S/M |
 
+## Wave AF — Fish that look like their species (added 2026-10-14, after Wave AE shipped)
+
+Claude picked these from the review's "one fish mesh for all species" note; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AF1~~ | ~~Each species gets its own build: long pike, deep panfish, whiskered catfish and sturgeon~~ (#189) | fish | M |
+| AF2 | Species markings: perch bars, trout spots, a pike's pale flecks | fish | M |
+| AF3 | Refresh the "New on the lake" card for Wave AF | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

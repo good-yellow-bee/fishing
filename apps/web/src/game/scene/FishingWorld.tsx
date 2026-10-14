@@ -113,6 +113,7 @@ import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { aimInputs, listenForWaterAim, sameAim } from "./pointerAim";
+import { fishBuild, type FishBuild } from "./fishBuild";
 import { useReducedMotion } from "./reducedMotion";
 import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
@@ -905,11 +906,13 @@ function HookedFish({
   burstRef,
   color,
   accent,
+  build,
 }: {
   fishRef: RefObject<THREE.Group | null>;
   burstRef: BurstRef;
   color: string;
   accent: string;
+  build: FishBuild;
 }) {
   const prevLeap = useRef(-1);
   useFrame(() => {
@@ -918,7 +921,7 @@ function HookedFish({
   });
   return (
     <group ref={fishRef} scale={FIGHT_FISH_SCALE} visible={false}>
-      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} unlit />
+      <ArticulatedFish color={color} accent={accent} speed={3.4} intensity={FIGHT_WAG} unlit build={build} />
     </group>
   );
 }
@@ -1173,7 +1176,7 @@ const LINE_CAP = LINE_POINTS + 4 + LINE_TAIL;
 const FALLBACK_COLOR = "#b96f43";
 const FALLBACK_ACCENT = "#e7bd72";
 
-function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: string; accent: string; size: number }) {
+function RisingFish({ phase, color, accent, size, build }: { phase: ScenePhase; color: string; accent: string; size: number; build: FishBuild }) {
   const fish = useRef<THREE.Group>(null);
   const held = useRef(0);
   useFrame((state) => {
@@ -1205,7 +1208,7 @@ function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: 
   });
   return (
     <group ref={fish} visible={false} scale={RISE_SCALE * size}>
-      <ArticulatedFish color={color} accent={accent} speed={2.6} intensity={1.25} />
+      <ArticulatedFish color={color} accent={accent} speed={2.6} intensity={1.25} build={build} />
     </group>
   );
 }
@@ -1715,6 +1718,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
             size={fishSize(weight)}
+            build={fishBuild(species?.id)}
           />
         )}
         {phase === "fight" && <SurgeSpray sim={sim} burstRef={burstRef} />}
@@ -1724,6 +1728,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
             burstRef={burstRef}
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
+            build={fishBuild(species?.id)}
           />
         )}
       </group>
@@ -1737,12 +1742,14 @@ function CaughtFish({
   accent,
   scale,
   released,
+  build,
 }: {
   phase: ScenePhase;
   color: string;
   accent: string;
   scale: number;
   released: boolean;
+  build: FishBuild;
 }) {
   // Seconds since the fish was let go, and where it left the hand and goes back in; -1 while it is held.
   const release = useRef({ age: -1, splashed: false, hand: new THREE.Vector3(), entry: { x: 0, z: 0 } });
@@ -1854,7 +1861,7 @@ function CaughtFish({
       </group>
       <primitive object={drips} />
       <group ref={group} visible={false} scale={scale}>
-        <ArticulatedFish color={color} accent={accent} drive={drive} />
+        <ArticulatedFish color={color} accent={accent} drive={drive} build={build} />
       </group>
     </>
   );
@@ -2058,6 +2065,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         accent={golden ? GOLDEN_ACCENT : (species?.accent ?? FALLBACK_ACCENT)}
         scale={landedScale(weight)}
         released={released}
+        build={fishBuild(species?.id)}
       />
       {/* Last in the tree, so the snapshot sees every pose written this frame. */}
       <CatchCamera />
