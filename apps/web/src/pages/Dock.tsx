@@ -39,6 +39,7 @@ import { buyUpgrade, errorText, getMe, getSpeciesRecords, type Me } from "../api
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
+import { useGamepad } from "../game/useGamepad";
 import { Hud } from "../components/Hud";
 import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
@@ -148,6 +149,8 @@ export function DockPage() {
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
   const shownFish =
     game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
+  // A controller replays as keys and pointer moves; its cursor is drawn over the scene.
+  const padCursor = useGamepad();
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
@@ -509,6 +512,7 @@ export function DockPage() {
           powerRef={game.powerRef}
           accuracy={me.profile.accuracy}
         />
+        {padCursor && <i className="pad-cursor" aria-hidden style={{ left: padCursor.x, top: padCursor.y }} />}
         {game.phase === "hookset" && (
           <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>
             <strong>{t("Strike!")}</strong>
