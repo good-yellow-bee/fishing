@@ -4,6 +4,7 @@ import {
   dailyRequestProgress,
   dailyRequestsForDay,
   isDailyRequest,
+  seasonForDay,
   type DailyCatch,
   type DailyRequest,
 } from "./dailyRequests.ts";
@@ -73,5 +74,35 @@ describe("daily request labels", () => {
     expect(dailyRequestLabel({ id: "c", speciesId: "perch", spot: "dropoff", count: 1, reward: 25 })).toBe(
       "A yellow perch at the Drop-off",
     );
+  });
+});
+
+describe("daily requests by season", () => {
+  const yearOf = (year: number) =>
+    Array.from({ length: 365 }, (_, index) => new Date(Date.UTC(year, 0, 1 + index)).toISOString().slice(0, 10));
+  const stretchShare = (id: string, season: string) => {
+    const boards = [2026, 2027, 2028].flatMap(yearOf).filter((day) => seasonForDay(day) === season).map(dailyRequestsForDay);
+    return boards.filter((board) => board[2]!.id === id).length / boards.length;
+  };
+
+  it("reads the season off the board day's month", () => {
+    expect(seasonForDay("2026-10-14")).toBe("fall");
+    expect(seasonForDay("2026-01-31")).toBe("winter");
+    expect(seasonForDay("2026-03-01")).toBe("spring");
+    expect(seasonForDay("2026-08-31")).toBe("summer");
+    expect(seasonForDay("2026-12-01")).toBe("winter");
+  });
+
+  it("asks for salmon in their fall run and burbot under the winter ice far more than out of season", () => {
+    expect(stretchShare("salmon-run", "fall")).toBeGreaterThan(stretchShare("salmon-run", "spring") * 2.5);
+    expect(stretchShare("burbot-dropoff", "winter")).toBeGreaterThan(stretchShare("burbot-dropoff", "summer") * 2.5);
+    expect(stretchShare("carp-heavy", "summer")).toBeGreaterThan(stretchShare("carp-heavy", "winter") * 3);
+  });
+
+  it("still asks for every stretch fish at some point in the year", () => {
+    const ids = new Set([2026, 2027].flatMap(yearOf).map((day) => dailyRequestsForDay(day)[2]!.id));
+    for (const id of ["salmon-run", "burbot-dropoff", "carp-heavy", "crappie-dock", "whitefish-dropoff", "catfish-dock", "bass-dock"]) {
+      expect(ids.has(id), id).toBe(true);
+    }
   });
 });
