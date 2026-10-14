@@ -588,7 +588,7 @@ Claude picked these after Wave U; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| V1 | Ducklings peep and a spooked deer snorts | sound | S |
+| ~~V1~~ | ~~Ducklings peep and a spooked deer snorts~~ (#161) | sound | S |
 | V2 | Cat's-paw gusts darkening patches of water on breezy days | weather | S/M |
 | V3 | Snow gathers on the angler's cap in winter snowfall | weather | S |
 | V4 | Frogs on lily pads plop in when a cast lands close | wildlife | S/M |
