@@ -21,6 +21,10 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
+import { firefliesOut } from "./fireflies";
+import { mistAmount } from "./mist";
+import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
 import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
@@ -729,6 +733,10 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
   const look = LAKE_HOUR_LOOK[hour];
   const texture = useMemo(() => makeSkyTexture(...weather.sky), [weather.sky]);
   useEffect(() => () => texture.dispose(), [texture]);
+  // The bloom stand-in: a wide soft additive halo, drawn on full effects only.
+  const full = useSettings().particles === "full";
+  const halo = useMemo(() => makeSoftSpotTexture(0.12), []);
+  useEffect(() => () => halo.dispose(), [halo]);
   return (
     <>
       <mesh scale={90}>
@@ -750,6 +758,21 @@ function Sky({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
           fog={false}
         />
       </mesh>
+      {full && (
+        <mesh position={[look.discPos[0], look.discPos[1], look.discPos[2] + 0.4]}>
+          <circleGeometry args={[hour === "night" ? 13 : 19, 32]} />
+          <meshBasicMaterial
+            map={halo}
+            color={look.glow}
+            transparent
+            opacity={(hour === "night" ? 0.3 : 0.55) * (weather.sunOut ? 1 : 0.35)}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+            fog={false}
+          />
+        </mesh>
+      )}
     </>
   );
 }
@@ -1453,6 +1476,9 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
 export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; hotspot: Hotspot | null }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
+  const mist = mistAmount(hour, sky);
+  // Mist is the fog's own colour, lifted toward white so it reads against the water.
+  const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
   const ground = useMemo(() => makeGroundGeometry(), []);
   useEffect(() => {
@@ -1541,6 +1567,8 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
           <Dragonfly key={i} {...fly} />
         ))}
       {weather.rain && <LakeRain light={weather.rainLight} />}
+      {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {firefliesOut(hour, sky) && <Fireflies />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </>
   );
