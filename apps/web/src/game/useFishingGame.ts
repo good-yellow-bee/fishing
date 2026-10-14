@@ -25,6 +25,7 @@ import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
 import { fx } from "./fx";
+import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
@@ -100,6 +101,8 @@ type Timers = {
   snap?: number;
   nibbles?: number[];
   snag?: number;
+  /** Cancels a bite held back while the page is hidden. */
+  shown?: () => void;
 };
 
 const waitHint = () => t("Watch the bobber. A nibble first — strike on the real dip.");
@@ -184,6 +187,7 @@ export function useFishingGame(
     window.clearTimeout(timers.current.snap);
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
     window.clearTimeout(timers.current.snag);
+    timers.current.shown?.();
     timers.current = {};
     snagRef.current = null;
   };
@@ -297,7 +301,8 @@ export function useFishingGame(
           }, ms));
         }, at));
       }
-      timers.current.wait = window.setTimeout(() => {
+      // A bite that comes while the game is out of sight waits for the player to come back, so no fish is lost unseen.
+      const takeBait = () => {
         if (phaseRef.current !== "waiting") return;
         setNibble(false);
         fx.bite();
@@ -312,6 +317,10 @@ export function useFishingGame(
           // Hold result so the miss spring and the turn play out.
           resetToIdle(t("Strike the moment the bobber goes under."), "result");
         }, hookWindowMs(current.accuracy, mercyNow));
+      };
+      timers.current.wait = window.setTimeout(() => {
+        if (phaseRef.current !== "waiting") return;
+        timers.current.shown = whenShown(takeBait);
       }, wait);
     };
     if (!castSnagRef.current) {
