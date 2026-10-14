@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { updateSettings, useSettings, type Settings } from "../game/settings";
+import { setLang, useLang, useT, type Lang } from "../i18n";
 
 type Choice<K extends keyof Settings> = { value: Settings[K]; label: string };
 
@@ -23,9 +24,29 @@ function Choices<K extends keyof Settings>({ name, legend, options }: { name: K;
   );
 }
 
-/** Sound, camera, effects and reel controls, remembered in this browser. */
+/** Each language is named in its own words, so either reader can find theirs. */
+const LANGUAGE_NAMES: Record<Lang, string> = { en: "English", pl: "Polski" };
+
+function LanguageChoice() {
+  const lang = useLang();
+  const t = useT();
+  return (
+    <fieldset className="settings-choices">
+      <legend>{t("Language")}</legend>
+      {(Object.keys(LANGUAGE_NAMES) as Lang[]).map((value) => (
+        <label key={value} lang={value}>
+          <input type="radio" name="lang" checked={lang === value} onChange={() => setLang(value)} />
+          {LANGUAGE_NAMES[value]}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+/** Language, sound, camera, effects and reel controls, remembered in this browser. */
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const current = useSettings();
+  const t = useT();
   const panel = useRef<HTMLElement>(null);
 
   // Focus moves in on open and back to the gear on close.
@@ -38,9 +59,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   return (
     <div className="settings-overlay" onPointerDown={(event) => event.target === event.currentTarget && onClose()}>
       <section ref={panel} className="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-        <h2 id="settings-title">Settings</h2>
+        <h2 id="settings-title">{t("Settings")}</h2>
+        <LanguageChoice />
         <label className="settings-volume">
-          <span>Volume</span>
+          <span>{t("Volume")}</span>
           <input
             type="range"
             min={0}
@@ -53,23 +75,23 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
         </label>
         <label className="settings-check">
           <input type="checkbox" checked={current.muted} onChange={(event) => updateSettings({ muted: event.target.checked })} />
-          Mute all sound
+          {t("Mute all sound")}
         </label>
         <Choices
           name="reelMode"
-          legend="Reeling"
+          legend={t("Reeling")}
           options={[
-            { value: "hold", label: "Hold to reel" },
-            { value: "toggle", label: "Tap to start and stop" },
+            { value: "hold", label: t("Hold to reel") },
+            { value: "toggle", label: t("Tap to start and stop") },
           ]}
         />
         <Choices
           name="shake"
-          legend="Camera shake"
+          legend={t("Camera shake")}
           options={[
-            { value: "full", label: "Full" },
-            { value: "soft", label: "Soft" },
-            { value: "off", label: "Off" },
+            { value: "full", label: t("Full") },
+            { value: "soft", label: t("Soft") },
+            { value: "off", label: t("Off") },
           ]}
         />
         <label className="settings-check">
@@ -78,31 +100,31 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             checked={current.reduceMotion}
             onChange={(event) => updateSettings({ reduceMotion: event.target.checked })}
           />
-          Reduce motion (no shake, flashes or card animations)
+          {t("Reduce motion (no shake, flashes or card animations)")}
         </label>
         <Choices
           name="particles"
-          legend="Effects"
+          legend={t("Effects")}
           options={[
-            { value: "full", label: "Full" },
-            { value: "lite", label: "Lite" },
+            { value: "full", label: t("Full") },
+            { value: "lite", label: t("Lite") },
           ]}
         />
         <Choices
           name="sharpness"
-          legend="Picture"
+          legend={t("Picture")}
           options={[
-            { value: "sharp", label: "Sharp" },
-            { value: "fast", label: "Fast" },
+            { value: "sharp", label: t("Sharp") },
+            { value: "fast", label: t("Fast") },
           ]}
         />
         <label className="settings-check">
           <input type="checkbox" checked={current.shadows} onChange={(event) => updateSettings({ shadows: event.target.checked })} />
-          Shadows
+          {t("Shadows")}
         </label>
-        <p className="settings-note">Picture and shadows change the next time you open the lake.</p>
+        <p className="settings-note">{t("Picture and shadows change the next time you open the lake.")}</p>
         <button className="panel-btn" type="button" onClick={onClose}>
-          Back to the lake
+          {t("Back to the lake")}
         </button>
       </section>
     </div>
