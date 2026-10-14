@@ -9,7 +9,7 @@ export const KEY_ROWS = [
   { keys: "E", pad: "Y", does: "Open the shop at the shack" },
   { keys: "H", pad: "Back", does: "Photo mode: hide the panels" },
   { keys: "P / Space", pad: "A", does: "In photo mode: save a picture of the lake" },
-  { keys: "Arrows / + −", pad: "", does: "In photo mode: turn and zoom the view" },
+  { keys: "Arrows / + −", pad: "Sticks", does: "In photo mode: turn and zoom the view" },
   { keys: "Escape", pad: "B", does: "Close a panel" },
   { keys: "?", pad: "", does: "Show this card" },
 ] as const;

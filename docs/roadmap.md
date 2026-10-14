@@ -859,6 +859,14 @@ Claude picked this: photo mode's overlay covered the canvas, so the view could n
 | ~~AQ1~~ | ~~In photo mode, drag to turn the view, pinch or scroll to zoom, arrows and + − on a keyboard; only a still tap brings the panels back~~ (#204) | photo mode | S |
 | ~~AQ2~~ | ~~The keys card and the news card mention it~~ (#204) | onboarding | S |
 
+## Wave AR — Photo mode on a controller (added 2026-10-14, after Wave AQ shipped)
+
+Claude picked this so a controller player can frame a shot too: the pad's A already saves, but its sticks did nothing in photo mode.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AR1~~ | ~~In photo mode the right stick turns the view and the left stick's up and down zoom; the keys card says so~~ (#205) | photo mode / controls | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

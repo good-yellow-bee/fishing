@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { takeLook } from "./scene/photoLook";
 import { useGamepad } from "./useGamepad";
 
 let root: Root;
@@ -37,6 +38,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
   frames = [];
   pad.buttons[0] = { pressed: false, value: 0 };
+  pad.axes = [0, 0, 0, 0];
+  takeLook();
 });
 
 describe("useGamepad", () => {
@@ -59,5 +62,22 @@ describe("useGamepad", () => {
     expect(keys).toEqual(["keydown:Space", "keyup:Space"]);
     window.removeEventListener("keydown", listen);
     window.removeEventListener("keyup", listen);
+  });
+
+  it("turns and zooms the view with the sticks in photo mode, and moves no cursor", () => {
+    Object.defineProperty(navigator, "getGamepads", { configurable: true, value: () => [pad] });
+    function Looker() {
+      seen = useGamepad(true, true);
+      return null;
+    }
+    act(() => root.render(<Looker />));
+    step(16);
+    takeLook();
+    pad.axes = [0, 1, 1, 0];
+    step(116);
+    const look = takeLook();
+    expect(look.yaw).toBeLessThan(0);
+    expect(look.zoom).toBeGreaterThan(1);
+    expect(seen?.cursor).toBeNull();
   });
 });
