@@ -88,6 +88,7 @@ db.exec(`
     season TEXT,
     golden INTEGER NOT NULL DEFAULT 0,
     released INTEGER NOT NULL DEFAULT 0,
+    day TEXT,
     created_at TEXT NOT NULL
   );
 
@@ -129,6 +130,10 @@ if (!catchColumns.some((column) => column.name === "golden")) {
 if (!catchColumns.some((column) => column.name === "released")) {
   db.exec(`ALTER TABLE catch ADD COLUMN released INTEGER NOT NULL DEFAULT 0`);
 }
+// Older rows keep null: their local day can't be told from created_at without the angler's time zone.
+if (!catchColumns.some((column) => column.name === "day")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN day TEXT`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
 export type ProfileRow = {
@@ -156,6 +161,7 @@ export type CatchRow = {
   golden: 0 | 1;
   /** Read back from the table; a new catch is never released yet. */
   released?: 0 | 1;
+  day: string | null;
   created_at: string;
 };
 
@@ -196,6 +202,14 @@ export function listSpeciesStats(userId: string) {
     heaviest: row.heaviest,
     lastAt: row.last_at,
   }));
+}
+
+/** Every local day the angler landed a fish on, oldest first; catches saved before days were sent are left out. */
+export function listCatchDays(userId: string): string[] {
+  const rows = db
+    .prepare(`SELECT DISTINCT day FROM catch WHERE user_id = ? AND day IS NOT NULL ORDER BY day`)
+    .all(userId) as { day: string }[];
+  return rows.map((row) => row.day);
 }
 
 /** The whole history grouped into badge facts; `listCatches` stops at 20, so badges can't be read from it. */
@@ -319,8 +333,8 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
       .get(row.user_id, cutoff) as { count: number };
     if (count.count >= 12) return { kind: "rate_limited" } as const;
     db.prepare(
-      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, created_at)
-       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @created_at)`,
+      `INSERT INTO catch (id, user_id, species_id, weight, points, spot, request_id, clean, hour, sky, season, golden, day, created_at)
+       VALUES (@id, @user_id, @species_id, @weight, @points, @spot, @request_id, @clean, @hour, @sky, @season, @golden, @day, @created_at)`,
     ).run(row);
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,

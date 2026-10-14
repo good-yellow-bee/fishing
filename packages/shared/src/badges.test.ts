@@ -36,6 +36,13 @@ describe("lodge badges", () => {
     expect(earned(miss)).not.toContain(id);
   });
 
+  it("earns Regular from the longest run of days, which the grouped facts can't carry", () => {
+    const regular = (longestStreak: number) => badgeProgress([row()], { longestStreak }).find((b) => b.id === "regular")!;
+    expect(regular(6)).toMatchObject({ have: 6, earned: false });
+    expect(regular(9)).toMatchObject({ have: 7, earned: true });
+    expect(badgeProgress([row({ count: 40 })]).find((b) => b.id === "regular")).toMatchObject({ have: 0, earned: false });
+  });
+
   it("keeps Full book to the first thirteen species, so the inlet's fish don't take it away", () => {
     expect(FIRST_BOOK.every((id) => fishById(id))).toBe(true);
     const book = badgeProgress(FIRST_BOOK.map((id) => row({ speciesId: id }))).find((b) => b.id === "full-book")!;

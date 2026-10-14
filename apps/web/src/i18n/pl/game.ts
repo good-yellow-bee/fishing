@@ -101,6 +101,7 @@ export const PL_GAME: PlBook = {
   // HUD
   "Northern lake": "Jezioro na północy",
   "{n} points": ["{n} punkt", "{n} punkty", "{n} punktów"],
+  "{n} days in a row": ["{n} dzień z rzędu", "{n} dni z rzędu", "{n} dni z rzędu"],
   "Catch log": "Rejestr połowów",
   Board: "Tablica",
   Sound: "Dźwięk",

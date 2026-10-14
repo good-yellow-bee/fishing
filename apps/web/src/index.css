@@ -180,6 +180,11 @@ a {
   line-height: 1;
 }
 
+.hud-streak {
+  color: #f0b45a;
+  font-weight: 600;
+}
+
 .hud-user {
   display: grid;
   gap: 1px;

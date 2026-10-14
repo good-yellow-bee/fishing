@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { badgeById, fishById, LAKE_HOUR_LABELS, SEASON_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
+import { badgeById, fishById, LAKE_HOUR_LABELS, localDate, SEASON_LABELS, SKY_LABELS, SPOT_LABELS, streakDays } from "@stillwater/shared";
 import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
@@ -43,6 +43,12 @@ export function LogPage() {
       <p>
         {tn(me.profile.lifetimePoints, "{n} lifetime points", "{n} lifetime points")} ·{" "}
         {tn(catches.length, "{n} recent fish", "{n} recent fish")}
+      </p>
+      <p className="log-streak">
+        {t("Days in a row on the water: {current} now, {best} at best", {
+          current: streakDays(me.recentDays, localDate(new Date())).current,
+          best: me.longestStreak,
+        })}
       </p>
       <section className="badge-wall" aria-label={t("Lodge badges")}>
         <h2>{t("Lodge badges")}</h2>

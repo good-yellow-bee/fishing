@@ -152,6 +152,8 @@ export const PL_CONTENT: PlBook = {
   "Land a golden fish.": "Złów złotą rybę.",
   "Steward": "Opiekun jeziora",
   "Release ten fish back into the lake.": "Wypuść dziesięć ryb z powrotem do jeziora.",
+  "Regular": "Stały bywalec",
+  "Land a fish seven days in a row.": "Złów rybę siedem dni z rzędu.",
 
   // Lure classes (tackle.ts)
   Topwater: "Powierzchniowa",

@@ -45,6 +45,7 @@ export const PL_PAGES: PlBook = {
   "Points": "Punkty",
   "Golden": "Złota",
   "Released": "Wypuszczona",
+  "Days in a row on the water: {current} now, {best} at best": "Dni z rzędu nad wodą: teraz {current}, najwięcej {best}",
   "When": "Kiedy",
   "Nothing landed yet.": "Jeszcze nic nie złowiono.",
 

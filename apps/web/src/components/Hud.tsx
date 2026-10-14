@@ -25,9 +25,11 @@ type Props = {
   onSettings?: () => void;
   /** Shown once the outing has a fish in it. */
   onPackUp?: () => void;
+  /** Consecutive local days with a fish, counting today; shown from two. */
+  streak?: number;
 };
 
-export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props) {
+export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0 }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
   const t = useT();
@@ -53,6 +55,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props)
         <strong>Stillwater</strong>
         <div className="hud-user">
           <span>{profile.displayName}</span>
+          {streak >= 2 && <span className="hud-streak">{tn(streak, "{n} day in a row", "{n} days in a row")}</span>}
         </div>
       </div>
       <div className="hud-stats">

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { isGolden, isLakeHour, isLakeSeason, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { daysBetween, isGolden, isLakeHour, isLakeSeason, isLocalDay, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { findCatchByRequestId, getProfile, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -11,7 +11,7 @@ const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 function sameCatch(row: CatchRow, body: CatchSubmission) {
   return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
     row.clean === (body.clean ? 1 : 0) && row.hour === (body.hour ?? null) && row.sky === (body.sky ?? null) &&
-    row.season === (body.season ?? null);
+    row.season === (body.season ?? null) && row.day === (body.day ?? null);
 }
 
 catchRoutes.post("/catches", async (c) => {
@@ -31,7 +31,9 @@ catchRoutes.post("/catches", async (c) => {
     (body.clean !== undefined && typeof body.clean !== "boolean") ||
     (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
     (body.sky !== undefined && !isSky(body.sky)) ||
-    (body.season !== undefined && !isLakeSeason(body.season))
+    (body.season !== undefined && !isLakeSeason(body.season)) ||
+    // A queued catch may post days late, but no angler's day is more than one ahead of UTC.
+    (body.day !== undefined && (!isLocalDay(body.day) || daysBetween(new Date().toISOString().slice(0, 10), body.day) > 1))
   ) {
     return c.json({ error: "invalid catch" }, 400);
   }
@@ -59,6 +61,7 @@ catchRoutes.post("/catches", async (c) => {
     sky: body.sky ?? null,
     season: body.season ?? null,
     golden: isGolden(body.requestId) ? 1 : 0,
+    day: body.day ?? null,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);

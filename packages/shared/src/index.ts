@@ -19,3 +19,4 @@ export * from "./lodge.ts";
 export * from "./season.ts";
 export * from "./weeklyFish.ts";
 export * from "./golden.ts";
+export * from "./streak.ts";

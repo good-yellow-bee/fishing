@@ -62,6 +62,8 @@ export type CatchRequest = {
   hour?: LakeHour;
   sky?: Sky;
   season?: LakeSeason;
+  /** The angler's local calendar day (YYYY-MM-DD), for days-on-the-water streaks. */
+  day?: string;
 };
 
 export type CatchSubmission = CatchRequest & {
