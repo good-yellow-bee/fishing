@@ -353,6 +353,10 @@ export const PL_GAME: PlBook = {
   "Cast cancelled. Click the water or hold Space to try again.": "Rzut anulowany. Kliknij wodę lub przytrzymaj Spację, by spróbować znowu.",
   "Camera moved. Hold one finger or Space to cast.": "Kamera się ruszyła. Przytrzymaj jeden palec lub Spację, by zarzucić.",
   "Landed. Click the water or hold Space to cast again.": "Wyholowana! Kliknij wodę lub przytrzymaj Spację, by zarzucić ponownie.",
+  "Landed. Touch the water to cast again.": "Wyholowana! Dotknij wody, by zarzucić ponownie.",
+  "Cast cancelled. Touch the water to try again.": "Rzut anulowany. Dotknij wody, by spróbować znowu.",
+  "Overpowered. Lift in the band.": "Za mocno. Podnieś palec w pasku.",
+  "Keep the ring on the water. Lift in the moss band.": "Trzymaj kółko na wodzie. Podnieś palec w zielonym pasku.",
   "{fish} snapped the line — too much tension.": "{fish} — żyłka zerwana, za duże napięcie.",
   "Too much tension — let go when the bar turns red or the fish is about to run.":
     "Za duże napięcie — puść, gdy pasek robi się czerwony albo ryba szykuje się do odjazdu.",

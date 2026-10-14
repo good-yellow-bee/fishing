@@ -1884,6 +1884,16 @@ kbd {
   .hud .eyebrow {
     display: none;
   }
+
+  /* A tall stack of stamps (personal best, trophy, lodge record) must stop under the header, not slide behind it. */
+  .landed-card {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 16px 18px;
+    max-height: calc(100% - 140px);
+    overflow-y: auto;
+  }
 }
 .catch-sync {
   position: absolute;

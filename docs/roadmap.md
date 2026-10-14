@@ -1007,6 +1007,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BM2~~ | ~~Winter dock footprints and post snow caps bake into one shape each, and the three bank-stand posts into one shadow caster (16 draws down to 3)~~ (#227) | perf | S |
 | ~~BM3~~ | ~~The windsock's three stripes bake into one painted shape and the basking log into one with its branch (3 casters down to 1, 3 draws down to 2 by the log)~~ (#228) | perf | S |
 
+## Wave BN — The catch card on a tall phone (added 2026-10-14, after Wave BM shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BN1~~ | ~~On narrow phones the catch card spans the width and stops under the header (scrolling if a stack of stamps runs long) instead of sliding behind it; the landed, cancelled, overpowered and ring hints say touch and lift on touch screens instead of click, Space and release~~ (#229) | phone UX | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

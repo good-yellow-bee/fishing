@@ -95,6 +95,20 @@ export function idleHint(stance: StanceId | null, touch = touchScreen()) {
   return t("Walk to the water.");
 }
 
+/** Hints after a cast ends or goes wrong, worded for a mouse and keyboard or for a finger. */
+export function castHint(kind: "landed" | "cancelled" | "overpowered" | "ring", touch = touchScreen()) {
+  switch (kind) {
+    case "landed":
+      return touch ? t("Landed. Touch the water to cast again.") : t("Landed. Click the water or hold Space to cast again.");
+    case "cancelled":
+      return touch ? t("Cast cancelled. Touch the water to try again.") : t("Cast cancelled. Click the water or hold Space to try again.");
+    case "overpowered":
+      return touch ? t("Overpowered. Lift in the band.") : t("Overpowered. Release in the band.");
+    case "ring":
+      return touch ? t("Keep the ring on the water. Lift in the moss band.") : t("Keep the ring on the water. Release in the moss band.");
+  }
+}
+
 export type Fight = {
   species: FishSpecies;
   weight: number;
@@ -392,7 +406,7 @@ export function useFishingGame(
     }
     if (castPower > BACKLASH_POWER) {
       setOutcome({ kind: "miss", message: t("Backlash. Recast.") });
-      resetToIdle(t("Overpowered. Release in the band."));
+      resetToIdle(castHint("overpowered"));
       return;
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
@@ -431,7 +445,7 @@ export function useFishingGame(
     holdStartRef.current = performance.now();
     powerRef.current = 0;
     setPhaseBoth("casting");
-    setHint(t("Keep the ring on the water. Release in the moss band."));
+    setHint(castHint("ring"));
   }, [profile]);
 
   const strikeOrCast = useCallback((via: "pointer" | "key") => {
@@ -500,7 +514,7 @@ export function useFishingGame(
     const onBlur = () => {
       reelKeyRef.current = false;
       reelPointerRef.current = null;
-      if (phaseRef.current === "casting") resetToIdle(t("Cast cancelled. Click the water or hold Space to try again."));
+      if (phaseRef.current === "casting") resetToIdle(castHint("cancelled"));
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -550,7 +564,7 @@ export function useFishingGame(
       if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
       if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
-      resetToIdle(t("Cast cancelled. Click the water or hold Space to try again."));
+      resetToIdle(castHint("cancelled"));
     };
     surface.addEventListener("pointerdown", down);
     window.addEventListener("pointerup", up);
@@ -630,7 +644,7 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            setHint(t("Landed. Click the water or hold Space to cast again."));
+            setHint(castHint("landed"));
           } else if (result === "snapped") {
             fx.snap();
             fx.haptic("snap");
