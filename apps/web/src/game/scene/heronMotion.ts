@@ -39,7 +39,27 @@ export type HeronPose = {
   /** 0 folded, swinging -1..1 while flying. */
   wing: number;
   flying: boolean;
+  /** A caught fish held crosswise in the bill and swallowed, 0..1 through it; -1 when there is none. */
+  fish: number;
+  /** The ring where the bill went in, 0..1 as it spreads; -1 when there is none. */
+  ring: number;
 };
+
+/** Seconds a caught fish is held up in the bill before it goes down, and how long a stab's ring spreads. */
+export const HERON_HOLD_SEC = 2.2;
+export const HERON_RING_SEC = 1.2;
+/** About one stab in three comes up with a fish. */
+const CATCH_ODDS = 0.36;
+
+function hash(i: number) {
+  const s = Math.sin(i * 47.9 + 13.3) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/** Whether the stab at stop `n` comes up with a fish. */
+export function heronCatches(n: number) {
+  return hash(n) < CATCH_ODDS;
+}
 
 function smooth(t: number) {
   const c = Math.min(1, Math.max(0, t));
@@ -54,7 +74,7 @@ function smooth(t: number) {
 export function heronWade(time: number, still = false): HeronPose {
   const { a, b } = HERON_BEAT;
   const legYaw = Math.atan2(b.x - a.x, b.z - a.z);
-  if (still) return { x: a.x, y: 0, z: a.z, yaw: legYaw, stab: 0, wing: 0, flying: false };
+  if (still) return { x: a.x, y: 0, z: a.z, yaw: legYaw, stab: 0, wing: 0, flying: false, fish: -1, ring: -1 };
   const cycle = 2 * (WALK_SEC + STOP_SEC);
   const t = ((time % cycle) + cycle) % cycle;
   const outbound = t < WALK_SEC + STOP_SEC;
@@ -70,7 +90,13 @@ export function heronWade(time: number, still = false): HeronPose {
   const stopAge = walking ? -1 : leg - WALK_SEC;
   const stabAt = STOP_SEC * 0.62;
   const stab = stopAge < 0 ? 0 : Math.max(0, 1 - Math.abs(stopAge - stabAt) / 0.35);
-  return { x: a.x + (b.x - a.x) * along, y: 0, z: a.z + (b.z - a.z) * along, yaw, stab, wing: 0, flying: false };
+  const sinceStab = stopAge < 0 ? -1 : stopAge - stabAt;
+  const ring = sinceStab >= 0 && sinceStab < HERON_RING_SEC ? sinceStab / HERON_RING_SEC : -1;
+  // Each leg has one stop; some stabs come up with a fish, held up and then swallowed.
+  const stop = Math.floor(time / (WALK_SEC + STOP_SEC));
+  const holding = sinceStab - 0.35;
+  const fish = heronCatches(stop) && holding >= 0 && holding < HERON_HOLD_SEC ? holding / HERON_HOLD_SEC : -1;
+  return { x: a.x + (b.x - a.x) * along, y: 0, z: a.z + (b.z - a.z) * along, yaw, stab, wing: 0, flying: false, fish, ring };
 }
 
 /** The heron `age` seconds after lifting off from `from`; null once it is out of sight. */
@@ -85,7 +111,7 @@ export function heronFlight(age: number, from: { x: number; z: number }): HeronP
   const yaw = Math.atan2(FLIGHT_TO.x - from.x, FLIGHT_TO.z - from.z);
   // Deep, slow wingbeats: about 2.2 a second while climbing, slower once up.
   const rate = age < 2.2 ? 2.2 : 1.5;
-  return { x, y, z, yaw, stab: 0, wing: Math.sin(age * rate * Math.PI * 2), flying: true };
+  return { x, y, z, yaw, stab: 0, wing: Math.sin(age * rate * Math.PI * 2), flying: true, fish: -1, ring: -1 };
 }
 
 export type HeronState =
