@@ -7,6 +7,7 @@ import { FISH, fishById } from "@stillwater/shared";
 import { getBoard, getMe, getSpeciesRecords, type Me } from "../api";
 import { BoardPage } from "./Board";
 import { LogPage } from "./Log";
+import { GOLDEN_COLOR } from "../components/FishMark";
 
 vi.mock("../api", () => ({ getBoard: vi.fn(), getMe: vi.fn(), getSpeciesRecords: vi.fn() }));
 
@@ -57,7 +58,7 @@ describe("species marks on the lodge pages", () => {
       level: 1,
       spots: { dock: true, reeds: true, point: true, dropoff: false, inlet: false, open: false },
       catches: ["pike", "catfish", "old-fish"].map((speciesId) => ({
-        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", season: "fall", createdAt: "2026-10-01T00:00:00Z",
+        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: false, createdAt: "2026-10-01T00:00:00Z",
       })),
       speciesStats: [],
       badges: [],
@@ -77,5 +78,25 @@ describe("species marks on the lodge pages", () => {
     }
     expect(rows[2]!.querySelector("svg")).toBeNull();
     expect(rows[2]!.querySelector("td")?.textContent).toBe("old-fish");
+  });
+
+  it("marks a golden catch in gold on the log", async () => {
+    const pike = fishById("pike")!;
+    vi.mocked(getMe).mockResolvedValue({
+      user: { id: "u1", email: "ash@stillwater.test", name: "Ash" },
+      profile: { userId: "u1", displayName: "Ash", points: 0, lifetimePoints: 0, strength: 1, accuracy: 1, patience: 1 },
+      level: 1,
+      spots: { dock: true, reeds: true, point: true, dropoff: false, inlet: false, open: false },
+      catches: [{ id: "c1", userId: "u1", speciesId: "pike", weight: 4, points: 2, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: true, createdAt: "2026-10-01T00:00:00Z" }],
+      speciesStats: [],
+      badges: [],
+    });
+    await act(async () => {
+      root.render(<MemoryRouter><LogPage /></MemoryRouter>);
+    });
+    const cell = container.querySelector("tbody td")!;
+    expect(cell.querySelector("path")?.getAttribute("fill")).toBe(GOLDEN_COLOR);
+    expect(cell.querySelector("path")?.getAttribute("fill")).not.toBe(pike.color);
+    expect(cell.querySelector(".log-golden")?.textContent).toBe("Golden");
   });
 });

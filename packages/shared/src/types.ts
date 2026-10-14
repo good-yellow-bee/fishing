@@ -46,6 +46,8 @@ export type CatchRecord = {
   sky: Sky | null;
   /** The lake's season when it was landed; null on catches saved before seasons were recorded. */
   season: LakeSeason | null;
+  /** Rolled from the request ID when saved; false on catches saved before golden fish. */
+  golden: boolean;
   createdAt: string;
 };
 

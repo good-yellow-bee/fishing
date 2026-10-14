@@ -175,10 +175,27 @@ describe("POST /catches", () => {
 
     const facts = listBadgeFacts(user.id);
     expect(facts).toHaveLength(2);
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true, count: 2, heaviest: 0.4 });
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, season: null, clean: false, count: 1, heaviest: 0.2 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true, golden: false, count: 2, heaviest: 0.4 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, season: null, clean: false, golden: false, count: 1, heaviest: 0.2 });
     expect(badgeProgress(facts).find((badge) => badge.id === "night-owl")).toMatchObject({ have: 2, earned: false });
     expect(badgeProgress(facts).find((badge) => badge.id === "four-seasons")).toMatchObject({ have: 1, earned: false });
+  });
+
+  it("rolls a golden fish from the request ID, pays it double and counts it for the Gold badge", async () => {
+    const { listBadgeFacts } = await import("../db.ts");
+    const { badgeProgress, isGolden, weeklyBonus, GOLDEN_BONUS } = await import("@stillwater/shared");
+    const ids = Array.from({ length: 400 }, (_, i) => `1e0a0c08-7e6d-4ee2-8718-${i.toString(16).padStart(12, "0")}`);
+    const golden = ids.find(isGolden)!;
+    const plain = ids.find((id) => !isGolden(id))!;
+    const fish = fishById("golden-shiner")!;
+    const paid = await (await post({ requestId: golden, speciesId: fish.id, weight: 0.3, spot: "dock" })).json();
+    expect(paid.points).toBe(catchPoints(fish, 0.3, false, GOLDEN_BONUS * weeklyBonus(fish.id)));
+    await post({ requestId: plain, speciesId: fish.id, weight: 0.3, spot: "dock" });
+    expect(db.prepare(`SELECT request_id, golden FROM catch ORDER BY golden DESC`).all()).toEqual([
+      { request_id: golden, golden: 1 },
+      { request_id: plain, golden: 0 },
+    ]);
+    expect(badgeProgress(listBadgeFacts(user.id)).find((badge) => badge.id === "gold")).toMatchObject({ have: 1, earned: true });
   });
 
   it("limits successful catch submissions per minute", async () => {

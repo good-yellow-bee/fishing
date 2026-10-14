@@ -17,11 +17,13 @@ export type BadgeFactRow = {
   /** Null on catches saved before seasons were recorded. */
   season: LakeSeason | null;
   clean: boolean;
+  /** False on catches saved before golden fish. */
+  golden: boolean;
   count: number;
   heaviest: number;
 };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold";
 
 export type Badge = {
   id: BadgeId;
@@ -113,6 +115,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land a fish in spring, summer, fall and winter.",
     need: 4,
     have: (facts) => distinct(facts.filter((row) => row.season !== null), (row) => row.season!),
+  },
+  {
+    id: "gold",
+    label: "Gold",
+    blurb: "Land a golden fish.",
+    need: 1,
+    have: (facts) => count(facts, (row) => row.golden),
   },
 ];
 

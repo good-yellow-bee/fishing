@@ -1323,6 +1323,26 @@ kbd {
   border-left: 2px solid var(--amber);
 }
 
+/* A golden fish: gold edge on the landed card and a gold word on the log row. */
+.landed-card.golden {
+  border-left: 4px solid #c8961f;
+}
+
+.landed-card .catch-stamp.golden {
+  border-color: #b8860b;
+  background: rgba(226, 178, 60, 0.32);
+  color: #6b4508;
+}
+
+.log-golden {
+  margin-left: 6px;
+  color: #b8860b;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* The season sits under the hour and sky, quieter. */
 .log-season {
   display: block;
