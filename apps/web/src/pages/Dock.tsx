@@ -41,6 +41,7 @@ import { SettingsPanel } from "../components/SettingsPanel";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
+import { useEffectsSteppedDown } from "../game/frameWatch";
 import { readStoredLogbook, saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
@@ -84,6 +85,9 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "shop", label: "Shack" },
 ];
 
+/** How long the "effects set to Lite" notice stays up. */
+const EFFECTS_NOTICE_MS = 5000;
+
 export function DockPage() {
   const [params] = useSearchParams();
   // One clock for the hour and the day's weather, so both turn over together.
@@ -109,6 +113,14 @@ export function DockPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const shopPanel = useRef<HTMLDivElement>(null);
   const prefs = useSettings();
+  const steppedDownAt = useEffectsSteppedDown();
+  const [effectsNotice, setEffectsNotice] = useState(false);
+  useEffect(() => {
+    if (!steppedDownAt) return;
+    setEffectsNotice(true);
+    const timer = window.setTimeout(() => setEffectsNotice(false), EFFECTS_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [steppedDownAt]);
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
@@ -648,6 +660,11 @@ export function DockPage() {
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
         <div className="level-status" role="status">
+          {effectsNotice && (
+            <div className="toast effects-toast">
+              <p>Effects set to Lite to keep the lake smooth. Settings can turn them back.</p>
+            </div>
+          )}
           {shownLevel && (
             <div className="toast level-toast">
               <h2>Level {shownLevel.level}</h2>

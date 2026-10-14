@@ -14,6 +14,8 @@ export type Settings = {
   shake: ShakeLevel;
   /** Lite draws half the rain, fireflies and mist, and no sun halo. */
   particles: "full" | "lite";
+  /** Effects may step down to Lite on their own when frames sag; off once the player picks effects themselves. */
+  autoEffects: boolean;
   shadows: boolean;
   /** Sharp renders up to 1.75 device pixels per CSS pixel; fast renders one. */
   sharpness: "sharp" | "fast";
@@ -32,6 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
   muted: false,
   shake: "full",
   particles: "full",
+  autoEffects: true,
   shadows: true,
   sharpness: "sharp",
   reelMode: "hold",
@@ -61,6 +64,7 @@ export function parseSettings(raw: string | null): Settings {
     muted: typeof data.muted === "boolean" ? data.muted : d.muted,
     shake: pick(data.shake, ["off", "soft", "full"], d.shake),
     particles: pick(data.particles, ["full", "lite"], d.particles),
+    autoEffects: typeof data.autoEffects === "boolean" ? data.autoEffects : d.autoEffects,
     shadows: typeof data.shadows === "boolean" ? data.shadows : d.shadows,
     sharpness: pick(data.sharpness, ["sharp", "fast"], d.sharpness),
     reelMode: pick(data.reelMode, ["hold", "toggle"], d.reelMode),

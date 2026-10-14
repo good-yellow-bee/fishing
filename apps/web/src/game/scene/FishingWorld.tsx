@@ -105,7 +105,8 @@ import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
-import { settings, SHAKE_SCALE } from "../settings";
+import { settings, SHAKE_SCALE, updateSettings } from "../settings";
+import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -1716,6 +1717,18 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
   );
 }
 
+/** Steps the effects down to Lite once if the frame rate sags, unless the player picked effects themselves. */
+function FrameWatch() {
+  const watch = useMemo(() => createFrameWatch(), []);
+  useFrame((_, delta) => {
+    if (!settings.autoEffects || settings.particles !== "full") return;
+    if (!watch(delta)) return;
+    updateSettings({ particles: "lite", autoEffects: false });
+    noteEffectsSteppedDown();
+  });
+  return null;
+}
+
 function Tone({ hour }: { hour: LakeHour }) {
   const { gl } = useThree();
   useEffect(() => {
@@ -1747,6 +1760,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <FightMotion phase={phase} sim={sim} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
+      <FrameWatch />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
