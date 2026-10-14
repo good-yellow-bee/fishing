@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
+import { sipView } from "./sipMotion";
 import { CUP_HEIGHT, CUP_SPOT, STEAM_BLOBS, THERMOS_SPOT, steamBlob } from "./steamWisp";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -19,6 +20,7 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
     [],
   );
   const blobs = useRef<Array<THREE.Mesh | null>>([]);
+  const cup = useRef<THREE.Group>(null);
   useEffect(() => {
     material.color.set(STEAM).multiplyScalar(Math.max(0.35, light));
   }, [light, material]);
@@ -32,9 +34,11 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
   useFrame((state) => {
     const t = still ? 1.2 : state.clock.elapsedTime;
     const count = settings.particles === "lite" ? Math.ceil(STEAM_BLOBS / 2) : STEAM_BLOBS;
+    // The cup leaves the planks while the angler has it up for a sip.
+    if (cup.current) cup.current.visible = !sipView.holding;
     blobs.current.forEach((mesh, i) => {
       if (!mesh) return;
-      mesh.visible = steaming && i < count;
+      mesh.visible = steaming && i < count && !sipView.holding;
       if (!mesh.visible) return;
       const blob = steamBlob(i, t);
       mesh.position.set(CUP_SPOT.x + blob.x, CUP_SPOT.y + CUP_HEIGHT + blob.y, CUP_SPOT.z + blob.z);
@@ -58,14 +62,16 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
           <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
         </mesh>
       </group>
-      <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT / 2, CUP_SPOT.z]} castShadow>
-        <cylinderGeometry args={[0.045, 0.038, CUP_HEIGHT, 12]} />
-        <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT - 0.008, CUP_SPOT.z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.04, 12]} />
-        <meshToonMaterial color="#5a3a24" gradientMap={toonRamp()} />
-      </mesh>
+      <group ref={cup}>
+        <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT / 2, CUP_SPOT.z]} castShadow>
+          <cylinderGeometry args={[0.045, 0.038, CUP_HEIGHT, 12]} />
+          <meshToonMaterial color={STEEL} gradientMap={toonRamp()} />
+        </mesh>
+        <mesh position={[CUP_SPOT.x, CUP_SPOT.y + CUP_HEIGHT - 0.008, CUP_SPOT.z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[0.04, 12]} />
+          <meshToonMaterial color="#5a3a24" gradientMap={toonRamp()} />
+        </mesh>
+      </group>
       {Array.from({ length: STEAM_BLOBS }, (_, i) => (
         <mesh
           key={i}

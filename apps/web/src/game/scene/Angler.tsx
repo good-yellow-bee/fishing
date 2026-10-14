@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
-import { isFishingStance, stanceAt } from "@stillwater/shared";
+import { isFishingStance, onDockPlanks, stanceAt } from "@stillwater/shared";
 import {
   CAST_RELEASE_SEC,
   CAST_ROD_SETTLE_SEC,
@@ -19,6 +19,7 @@ import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } 
 import { Reel } from "./Reel";
 import { capSnow } from "./capSnow";
 import { rodBowAmount, rodBowOffset, rodTipAt } from "./rodBow";
+import { SIP_IN_HAND, sipView, sipWeight } from "./sipMotion";
 import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
@@ -76,6 +77,12 @@ const ROD_BIAS = 0.18;
 /** Center of the right fist in the `arm-right` bone frame; the bind pose holds the arm out along -x. */
 const RIGHT_FIST = new THREE.Vector3(-0.24, 0, 0.02);
 const ROD_REST_Z = 0.12;
+/** Center of the left fist in the `arm-left` bone frame, mirroring the right. */
+const LEFT_FIST = new THREE.Vector3(0.24, 0, 0.02);
+/** The left arm raised to bring the fist up in front of the mouth, from its bind pose along +x. */
+const SIP_ARM = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), new THREE.Vector3(-0.12, 0.72, 0.68).normalize());
+const CUP_COLOR = "#c9cfd2";
+const SIP_HEAD_TILT = 0.35;
 /** Rod held near level at the hip while the arm hangs, so the butt clears the ground. */
 const ROD_CARRY_PITCH = 1.35;
 
@@ -129,6 +136,29 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
     return anchor;
   }, [character]);
   const fistAt = useMemo(() => new THREE.Vector3(), []);
+
+  // The thermos cup, carried in the free hand for a sip; it stands upright while the arm is raised.
+  const sip = useRef(0);
+  const headTilt = useRef(0);
+  const leftArm = useMemo(() => character.getObjectByName("arm-left") ?? null, [character]);
+  const head = useMemo(() => character.getObjectByName("head") ?? null, [character]);
+  const cup = useMemo(() => {
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.06, 10), new THREE.MeshToonMaterial({ color: CUP_COLOR, gradientMap: toonRamp() }));
+    mesh.position.copy(LEFT_FIST);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 1, 0).applyQuaternion(SIP_ARM.clone().invert()));
+    mesh.visible = false;
+    leftArm?.add(mesh);
+    return mesh;
+  }, [leftArm]);
+  useEffect(
+    () => () => {
+      cup.removeFromParent();
+      cup.geometry.dispose();
+      (cup.material as THREE.Material).dispose();
+      sipView.holding = false;
+    },
+    [cup],
+  );
 
   // Snow on the cap and shoulders rides the head and torso bones; it builds while snow falls.
   const snowCover = useRef(0);
@@ -321,6 +351,18 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
       }
     }
     tip.current?.getWorldPosition(rodTip);
+
+    // Now and then, while the float sits quiet on the dock, a sip from the thermos cup.
+    const sipTarget = sitting && !nibble && !twitching && onDockPlanks(anglerPose.x, anglerPose.z) ? sipWeight(waitView.age) : 0;
+    sip.current += (sipTarget - sip.current) * (1 - Math.exp(-12 * delta));
+    if (leftArm && sip.current > 0.001) leftArm.quaternion.slerp(SIP_ARM, sip.current);
+    // The head tips back as the cup comes up.
+    // The fishing clip leaves the head alone, so take back last frame's tilt before adding this one.
+    const tilt = SIP_HEAD_TILT * Math.max(0, sip.current - 0.5) * 2;
+    if (head) head.rotation.x += headTilt.current - tilt;
+    headTilt.current = tilt;
+    cup.visible = sip.current > SIP_IN_HAND;
+    sipView.holding = cup.visible;
 
     if (playing.current !== next) {
       const hold = actions["holding-right"] ?? actions.idle;

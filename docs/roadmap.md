@@ -662,7 +662,7 @@ Claude picked these after Wave Y; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~Z1~~ | ~~Moths flutter round the dock lanterns after dark~~ (#176) | wildlife | S |
 | ~~Z2~~ | ~~Rain drips off the angler's cap brim~~ (#177) | weather | S |
-| Z3 | The angler sips from the thermos cup now and then while waiting | angler | S/M |
+| ~~Z3~~ | ~~The angler sips from the thermos cup now and then while waiting~~ (#178) | angler | S/M |
 | Z4 | A fox trots along the far bank at dusk and night | wildlife | M |
 | Z5 | Refresh the "New on the lake" card for Wave Z | onboarding | S |
 
