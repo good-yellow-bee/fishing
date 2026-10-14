@@ -191,7 +191,9 @@ export function DockPage() {
   const shownFish =
     game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
   // A controller replays as keys and pointer moves; its cursor is drawn over the scene.
-  const { cursor: padCursor, connected: padConnected } = useGamepad();
+  // Photo mode hides every panel for a clean shot; a bite brings them straight back.
+  const [photo, setPhoto] = useState(false);
+  const { cursor: padCursor, connected: padConnected } = useGamepad(true, photo);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
@@ -336,8 +338,6 @@ export function DockPage() {
   }, [prefs.reduceMotion]);
 
   // Held while a strike, fight, result, or the shop is up so it never covers them; the 4s only run while shown.
-  // Photo mode hides every panel for a clean shot; a bite brings them straight back.
-  const [photo, setPhoto] = useState(false);
   const photoAllowed = !shopOpen && scenePhase !== "hookset" && scenePhase !== "fight";
   useEffect(() => {
     if (!photoAllowed) setPhoto(false);

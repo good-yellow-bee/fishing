@@ -135,6 +135,7 @@ export const PL_GAME: PlBook = {
   Controller: "Kontroler",
   "Left stick": "Lewa gałka",
   "Right stick": "Prawa gałka",
+  Sticks: "Gałki",
   "cast, strike, reel": "zarzucasz, zacinasz, zwijasz",
   close: "zamykasz",
   "Personal best": "Rekord osobisty",
