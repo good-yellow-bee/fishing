@@ -11,7 +11,7 @@ const NO_WIND = { x: 0, z: 0 };
 const LEAF_SCALE = 2.4;
 
 /** A pointed leaf, 26 cm long, lying in the xy plane. */
-function leafGeometry() {
+export function leafGeometry() {
   const shape = new THREE.Shape();
   shape.moveTo(0, -0.13);
   shape.quadraticCurveTo(0.1, -0.03, 0, 0.13);

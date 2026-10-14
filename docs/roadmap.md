@@ -624,7 +624,7 @@ Claude picked these after Wave W; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| X1 | Fallen leaves gather on the dock in fall | weather | S |
+| ~~X1~~ | ~~Fallen leaves gather on the dock in fall~~ (#168) | weather | S |
 | X2 | Lightning flashes mirrored in the lake during storms | sky | S |
 | X3 | Dew glints on the shore grass at dawn | weather | S |
 | X4 | A beaver swims past at dusk with a branch, and slaps its tail at a close cast | wildlife | M |
