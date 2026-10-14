@@ -663,14 +663,34 @@ Claude picked these after Wave Y; the owner can reorder or drop any.
 | ~~Z1~~ | ~~Moths flutter round the dock lanterns after dark~~ (#176) | wildlife | S |
 | ~~Z2~~ | ~~Rain drips off the angler's cap brim~~ (#177) | weather | S |
 | ~~Z3~~ | ~~The angler sips from the thermos cup now and then while waiting~~ (#178) | angler | S/M |
-| Z4 | A fox trots along the far bank at dusk and night | wildlife | M |
-| Z5 | Refresh the "New on the lake" card for Wave Z | onboarding | S |
+| ~~Z4~~ | ~~A fox trots along the far bank at dusk and night~~ (#179) | wildlife | M |
+| ~~Z5~~ | ~~Refresh the "New on the lake" card for Wave Z~~ (#179) | onboarding | S |
 
 - **Z1 · Moths.** After dark, when the dock lanterns are lit, a few pale moths circle each lantern in jittery loops.
 - **Z2 · Drips.** In the rain, drops gather round the angler's cap brim and fall one after another. (Swapped in for path puddles: the shore path sits behind the dock camera, out of view.)
 - **Z3 · A sip.** While the float sits and nothing is biting, the angler sometimes lifts the thermos cup for a sip and sets it back down.
 - **Z4 · Fox.** At dusk and at night a red fox now and then trots along the far bank, stops to look across the water, and slips away into the trees.
 - **Z5 · What's new, again.** List whatever Wave Z lands on the card.
+
+## Wave AA — Feel of the catch (added 2026-10-14, after Wave Z shipped)
+
+Claude picked these after Wave Z, turning back from scenery to the fishing itself; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AA1 | A held fish flaps in the angler's hands on the catch card pose | landing | S/M |
+| AA2 | Line hum: the reel's drag pitch rises with tension in a fight | sound | S |
+| AA3 | Water drips from the line and lure as you reel in a miss | reel | S |
+| AA4 | A ring of ripples where the float sits pulses on each nibble | bite | S |
+| AA5 | Refresh the "New on the lake" card for Wave AA | onboarding | S |
+
+- **AA1 · A lively catch.** When a fish is landed and held up, it flaps its tail a few times before going still.
+- **AA2 · Line hum.** During a fight, a faint tone under the drag rises in pitch as the line tightens, so you can hear when it is near breaking.
+- **AA3 · Drips on the retrieve.** After a miss or release, as the lure comes up out of the water, a few drops fall from it.
+- **AA4 · Nibble rings.** Each nibble tap sends a small ring out from the float, so a nibble shows even when the float's bob is hard to see.
+- **AA5 · What's new, again.** List whatever Wave AA lands on the card.
+
+Claude checks each against what already exists before building and swaps any that are already there.
 
 ## Risks / open questions for the owner
 

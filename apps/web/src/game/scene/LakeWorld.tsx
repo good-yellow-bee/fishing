@@ -74,6 +74,8 @@ import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
 import { Osprey } from "./Osprey";
+import { Fox } from "./Fox";
+import { foxOut } from "./foxTrot";
 import { ospreyOut } from "./ospreyFlight";
 import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
@@ -1919,6 +1921,7 @@ export const LakeWorld = memo(function LakeWorld({
       {beaverOut(hour, season) && <Beaver />}
       {butterfliesOut(hour, sky, season) && <Butterflies />}
       {ospreyOut(hour, sky, season) && <Osprey />}
+      {foxOut(hour, sky) && <Fox />}
       {batsOut(hour, sky, season) && <Bats />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />
