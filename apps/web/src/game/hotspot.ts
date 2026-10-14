@@ -63,7 +63,8 @@ function placesOn(spot: SpotId) {
   return places;
 }
 
-const PLACES = Object.fromEntries(SPOT_IDS.map((spot) => [spot, placesOn(spot)])) as Record<SpotId, { x: number; z: number }[]>;
+/** Open-water centers in reach of each bank's stand. */
+export const PLACES = Object.fromEntries(SPOT_IDS.map((spot) => [spot, placesOn(spot)])) as Record<SpotId, { x: number; z: number }[]>;
 
 function mix(value: number) {
   let n = value | 0;
