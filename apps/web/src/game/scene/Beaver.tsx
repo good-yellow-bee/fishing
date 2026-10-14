@@ -1,9 +1,10 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fx } from "../fx";
 import { BEAVER_SLAP_SEC, beaverPose, stepBeaver, type BeaverState } from "./beaverSwim";
 import { lastSplash } from "./duckFlush";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -24,6 +25,41 @@ const SPRAY = [
   [0.32, 1.0],
 ] as const;
 
+/** Everything but the hinged tail bakes into one shape: back, head, nose, ears, eyes and the leafy branch in its teeth. */
+export function beaverShapes() {
+  // A leafy branch held crosswise in its teeth, trailing back along one side.
+  const branch = mergePainted([
+    { geometry: new THREE.CylinderGeometry(0.012, 0.018, 0.75, 6), position: [0.18, 0, -0.32], rotation: [Math.PI / 2, 0, 0.5], color: BARK },
+    ...(
+      [
+        [0.3, 0.03, -0.5],
+        [0.38, 0.05, -0.62],
+        [0.26, 0.04, -0.66],
+        [0.44, 0.02, -0.5],
+      ] as const
+    ).map((position) => ({ geometry: new THREE.SphereGeometry(1, 7, 5), position, scale: [0.08, 0.04, 0.07] as const, color: LEAF })),
+  ]);
+  return {
+    body: mergeParts([
+      // A broad, low back with a darker head held up at the front.
+      {
+        geometry: mergePainted([
+          { geometry: new THREE.SphereGeometry(1, 12, 8), position: [0, 0.03, 0], scale: [0.15, 0.09, 0.26], color: FUR },
+          { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.08, 0.27], scale: [0.09, 0.075, 0.1], color: FUR },
+          { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.07, 0.365], scale: [0.05, 0.04, 0.04], color: DARK },
+          ...[-1, 1].flatMap((side) => [
+            { geometry: new THREE.SphereGeometry(1, 6, 5), position: [side * 0.065, 0.14, 0.24] as const, scale: 0.02, color: DARK },
+            { geometry: new THREE.SphereGeometry(1, 6, 5), position: [side * 0.05, 0.12, 0.33] as const, scale: 0.012, color: DARK },
+          ]),
+        ]),
+      },
+      { geometry: branch, position: [0.02, 0.06, 0.37], rotation: [0, 0.5, 0] },
+    ]),
+    tail: new THREE.SphereGeometry(1, 10, 6),
+    drop: new THREE.SphereGeometry(1, 6, 5),
+  };
+}
+
 /** A beaver crossing the lake at dusk with a branch in its teeth; a close cast makes it slap its tail and dive. */
 export function Beaver() {
   const group = useRef<THREE.Group>(null);
@@ -33,6 +69,21 @@ export function Beaver() {
   const ringMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const state = useRef<BeaverState>({ mode: "swimming" });
   const slapped = useRef(-1);
+  const shapes = useMemo(beaverShapes, []);
+  const looks = useMemo(
+    () => ({
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      tail: new THREE.MeshToonMaterial({ color: TAIL, gradientMap: toonRamp() }),
+      drop: new THREE.MeshBasicMaterial({ color: "#eef6f6", transparent: true, opacity: 0.85 }),
+    }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      [...Object.values(shapes), ...Object.values(looks)].forEach((thing) => thing.dispose());
+    },
+    [shapes, looks],
+  );
 
   useFrame((frame) => {
     const beaver = group.current;
@@ -76,55 +127,10 @@ export function Beaver() {
   return (
     <>
       <group ref={group} name="beaver" scale={3}>
-        {/* A broad, low back with a darker head held up at the front. */}
-        <mesh position={[0, 0.03, 0]} scale={[0.15, 0.09, 0.26]}>
-          <sphereGeometry args={[1, 12, 8]} />
-          <meshToonMaterial color={FUR} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.08, 0.27]} scale={[0.09, 0.075, 0.1]}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={FUR} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.07, 0.365]} scale={[0.05, 0.04, 0.04]}>
-          <sphereGeometry args={[1, 8, 6]} />
-          <meshToonMaterial color={DARK} gradientMap={toonRamp()} />
-        </mesh>
-        {[-1, 1].map((side) => (
-          <group key={side}>
-            <mesh position={[side * 0.065, 0.14, 0.24]} scale={0.02}>
-              <sphereGeometry args={[1, 6, 5]} />
-              <meshToonMaterial color={DARK} gradientMap={toonRamp()} />
-            </mesh>
-            <mesh position={[side * 0.05, 0.12, 0.33]} scale={0.012}>
-              <sphereGeometry args={[1, 6, 5]} />
-              <meshBasicMaterial color={DARK} />
-            </mesh>
-          </group>
-        ))}
+        <mesh geometry={shapes.body} material={looks.painted} />
         {/* The flat paddle tail, hinged at the rump so it can swing up for the slap. */}
         <group ref={tail} position={[0, 0.02, -0.24]}>
-          <mesh position={[0, 0, -0.14]} scale={[0.1, 0.018, 0.15]}>
-            <sphereGeometry args={[1, 10, 6]} />
-            <meshToonMaterial color={TAIL} gradientMap={toonRamp()} />
-          </mesh>
-        </group>
-        {/* A leafy branch held crosswise in its teeth, trailing back along one side. */}
-        <group position={[0.02, 0.06, 0.37]} rotation={[0, 0.5, 0]}>
-          <mesh position={[0.18, 0, -0.32]} rotation={[Math.PI / 2, 0, 0.5]}>
-            <cylinderGeometry args={[0.012, 0.018, 0.75, 6]} />
-            <meshToonMaterial color={BARK} gradientMap={toonRamp()} />
-          </mesh>
-          {[
-            [0.3, 0.03, -0.5],
-            [0.38, 0.05, -0.62],
-            [0.26, 0.04, -0.66],
-            [0.44, 0.02, -0.5],
-          ].map((p, i) => (
-            <mesh key={i} position={p as [number, number, number]} scale={[0.08, 0.04, 0.07]}>
-              <sphereGeometry args={[1, 7, 5]} />
-              <meshToonMaterial color={LEAF} gradientMap={toonRamp()} />
-            </mesh>
-          ))}
+          <mesh geometry={shapes.tail} material={looks.tail} position={[0, 0, -0.14]} scale={[0.1, 0.018, 0.15]} />
         </group>
       </group>
       <group ref={wake} visible={false}>
@@ -141,10 +147,7 @@ export function Beaver() {
           <meshBasicMaterial ref={ringMaterial} color={WAKE} transparent opacity={0} depthWrite={false} />
         </mesh>
         {SPRAY.map((_, i) => (
-          <mesh key={i} scale={0.06}>
-            <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color="#eef6f6" transparent opacity={0.85} />
-          </mesh>
+          <mesh key={i} geometry={shapes.drop} material={looks.drop} scale={0.06} />
         ))}
       </group>
     </>

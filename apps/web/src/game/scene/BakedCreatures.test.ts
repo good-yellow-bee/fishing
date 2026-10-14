@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type * as THREE from "three";
+import { beaverShapes } from "./Beaver";
 import { grebeShapes } from "./Grebes";
 import { heronShapes } from "./Heron";
 import { loonShapes } from "./Loon";
+import { ospreyShapes } from "./Osprey";
+import { otterShape } from "./Otter";
 import { owlShapes, owlTreeShape } from "./Owl";
 import { ternShapes } from "./Terns";
 
@@ -27,6 +30,11 @@ describe("baked creatures", () => {
     expect(tones(owl.head)).toBe(3);
     expect(tones(ternShapes().body)).toBe(3);
     expect(tones(grebeShapes().head)).toBe(4);
+    const osprey = ospreyShapes();
+    expect(tones(osprey.body)).toBe(3);
+    expect(tones(osprey.left)).toBe(2);
+    expect(tones(beaverShapes().body)).toBe(4);
+    expect(tones(otterShape())).toBe(3);
   });
 
   it("reaches the heron's legs down to its feet and the owl's tree up past its perch", () => {
@@ -40,5 +48,9 @@ describe("baked creatures", () => {
     left.computeBoundingBox();
     right.computeBoundingBox();
     expect(left.boundingBox!.min.x).toBeCloseTo(-right.boundingBox!.max.x, 6);
+    // The beaver's branch trails out to its right side.
+    const { body } = beaverShapes();
+    body.computeBoundingBox();
+    expect(body.boundingBox!.max.x).toBeGreaterThan(0.2);
   });
 });

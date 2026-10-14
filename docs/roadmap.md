@@ -969,6 +969,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BG1~~ | ~~Each tern baked into a body and two wings (7 draws to 3, three birds); each grebe's neck, head, ruff, crest and bill into one shape (7 to 2, plus the four spray drops, which hop apart so stay separate)~~ (#220) | performance | S |
 
+## Wave BH — Fewer draws for the osprey, beaver and otter (added 2026-10-14, after Wave BG shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BH1~~ | ~~Osprey baked into a body and two wings (11 draws to 4 with the held fish); beaver's back, head and branch into one shape (14 to 2); otter into one shape (10 to 1); splash drops share one geometry and material~~ (#221) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
