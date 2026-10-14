@@ -465,7 +465,7 @@ Claude picked these after Wave N; the owner can reorder or drop any.
 | O1 | ~~"New on the lake" card for returning anglers~~ (shipped) | onboarding | S |
 | ~~O2~~ | ~~Angler titles by level~~ (#133) | progression | S |
 | ~~O3~~ | ~~Photo mode: hide the panels with H~~ (#134) | QoL | S |
-| O4 | Thunder and lightning on stormy rain days | weather | M |
+| ~~O4~~ | ~~Thunder and lightning on stormy rain days~~ (#135) | weather | M |
 | O5 | An otter along the far bank at dawn and dusk | wildlife | M |
 
 - **O1 · What's new.** An angler who has landed a fish before sees a one-time card listing the latest headline changes (leaps, hot bank, evening rise, snags, stars and the rod bell, the new settings), only while idle on the bank. "Got it" hides it until the next batch; brand-new anglers get the walkthrough instead.

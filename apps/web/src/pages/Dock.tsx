@@ -56,6 +56,7 @@ import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { stormOn } from "../game/scene/storm";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
@@ -152,6 +153,7 @@ export function DockPage() {
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
+  const storm = stormOn(sky, season, wind.wind);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -590,6 +592,7 @@ export function DockPage() {
         data-season={season}
         data-lure={lure}
         data-lure-locked={lureLocked ? "1" : "0"}
+        data-storm={storm ? "1" : undefined}
       >
         <FishingWorld
           level={me.level}
@@ -608,6 +611,7 @@ export function DockPage() {
           wind={wind}
           hotspot={game.hotspot}
           rising={rising}
+          storm={storm}
           tracks={tracks}
           powerRef={game.powerRef}
           accuracy={me.profile.accuracy}
