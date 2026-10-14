@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { lastSplash } from "./duckFlush";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { BASKING_LOG, stepTurtle, turtleEntry, turtlePose, type TurtleState } from "./turtleMotion";
@@ -33,23 +33,28 @@ export function turtleShell() {
   ]);
 }
 
+/** The log and its stub of a branch bake into one shape. */
+export function baskingLogShape() {
+  return mergeParts([
+    { geometry: new THREE.CylinderGeometry(0.16, 0.19, BASKING_LOG.length, 9), rotation: [0, 0, Math.PI / 2] },
+    { geometry: new THREE.CylinderGeometry(0.025, 0.04, 0.4, 5), position: [-0.4, 0.14, 0.05], rotation: [0.4, 0, 0.9] },
+  ]);
+}
+
 /** The half-sunk log off the west bank: there all year, a turtle's seat on summer days. */
 export function BaskingLog() {
+  const wood = useMemo(baskingLogShape, []);
+  useEffect(() => () => wood.dispose(), [wood]);
   return (
     <group position={[BASKING_LOG.x, 0.02, BASKING_LOG.z]} rotation={[0, BASKING_LOG.yaw, 0]}>
       {/* Lying along x, tipped so one end sinks under the water. */}
       <group rotation={[0, 0, -0.08]}>
-        <mesh rotation={[0, 0, Math.PI / 2]} castShadow receiveShadow>
-          <cylinderGeometry args={[0.16, 0.19, BASKING_LOG.length, 9]} />
+        <mesh geometry={wood} castShadow receiveShadow>
           <meshToonMaterial color={LOG} gradientMap={toonRamp()} />
         </mesh>
         <mesh position={[-BASKING_LOG.length / 2 - 0.001, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
           <circleGeometry args={[0.17, 9]} />
           <meshToonMaterial color={LOG_END} gradientMap={toonRamp()} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh position={[-0.4, 0.14, 0.05]} rotation={[0.4, 0, 0.9]}>
-          <cylinderGeometry args={[0.025, 0.04, 0.4, 5]} />
-          <meshToonMaterial color={LOG} gradientMap={toonRamp()} />
         </mesh>
       </group>
     </group>
