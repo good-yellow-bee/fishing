@@ -7,13 +7,15 @@ function pad(pressed: number[] = [], axes: number[] = [0, 0, 0, 0], trigger = 0)
 }
 
 describe("gamepad", () => {
-  it("maps A and the right trigger to Space, B to Escape, Y to the shop and Back to photo mode", () => {
+  it("maps A and the right trigger to Space, B to Escape, Y to the shop, Back to photo mode and the bumpers to the lure", () => {
     expect([...padKeys(pad([0]))]).toEqual(["Space"]);
     expect([...padKeys(pad([], undefined, 0.8))]).toEqual(["Space"]);
     expect([...padKeys(pad([], undefined, 0.3))]).toEqual([]);
     expect([...padKeys(pad([1]))]).toEqual(["Escape"]);
     expect([...padKeys(pad([3]))]).toEqual(["KeyE"]);
     expect([...padKeys(pad([8]))]).toEqual(["KeyH"]);
+    expect([...padKeys(pad([4]))]).toEqual(["KeyQ"]);
+    expect([...padKeys(pad([5]))]).toEqual(["KeyR"]);
   });
 
   it("walks with the left stick past its dead zone, diagonals included", () => {

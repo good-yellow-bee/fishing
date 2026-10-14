@@ -386,6 +386,9 @@ export const PL_GAME: PlBook = {
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
+  "Change the lure": "Zmień przynętę",
+  "Change the lure without the menu: Q and R on a keyboard, or the bumpers on a controller.":
+    "Zmieniaj przynętę bez menu: Q i R na klawiaturze albo bumpery na kontrolerze.",
   "Picture saved": "Zdjęcie zapisane",
   "The picture could not be saved": "Nie udało się zapisać zdjęcia",
   "In photo mode: save a picture of the lake": "W trybie zdjęcia: zapisz zdjęcie jeziora",

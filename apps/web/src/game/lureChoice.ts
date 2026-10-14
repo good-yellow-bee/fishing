@@ -22,6 +22,15 @@ export function smallLuresFirst(choices: readonly string[]): string[] {
   return [...choices.filter((lure) => !favorsLargeFish(lure)), ...choices.filter((lure) => favorsLargeFish(lure))];
 }
 
+/** The lure `step` places on from `current` in the picker's order, wrapping round; `current` itself when nothing else is packed. */
+export function nextLure(choices: readonly string[], current: string, step: 1 | -1): string {
+  const order = smallLuresFirst(choices);
+  if (order.length === 0) return current;
+  const at = order.indexOf(current);
+  if (at < 0) return order[0]!;
+  return order[(at + step + order.length) % order.length]!;
+}
+
 export function lureBlurb(lure: string, spot: SpotId): string {
   if (favorsLargeFish(lure)) return t("Big lure — heavier fish (Strength {rank}+ to land most)", { rank: BIG_LURE_STRENGTH });
   // The light half of every bank still holds fish a Strength 1 line cannot land.

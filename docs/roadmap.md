@@ -889,6 +889,14 @@ Claude picked this as the next probe target: every fish (cruising, shadow, hooke
 |---|---|---|---|
 | ~~AU1~~ | ~~All butterfly wings draw as one instanced mesh coloured per instance and all bodies as another, 15 draws to 2 on a sunny summer day~~ (#208) | performance | S |
 
+## Wave AV — Change the lure without the menu (added 2026-10-14, after Wave AU shipped)
+
+Claude picked this: keyboard and controller players had to reach for the lure menu with the mouse, or could not reach it at all on a pad.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AV1~~ | ~~Q and R step through the packed lures while the lure can change; a controller's bumpers do the same; the keys card and news card say so~~ (#209) | controls | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
