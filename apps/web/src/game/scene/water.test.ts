@@ -17,6 +17,7 @@ import {
   waterShoreWeight,
   type WaterRgb,
 } from "./water.ts";
+import { PIER_TOP } from "./pierDeck.ts";
 
 function luma(color: WaterRgb) {
   return color.r * 0.3 + color.g * 0.59 + color.b * 0.11;
@@ -106,5 +107,16 @@ describe("surfaceScroll", () => {
     const east = surfaceScroll({ x: 0.08, z: 0 });
     expect(east.streak.x).toBeLessThan(calm.streak.x);
     expect(Math.abs(east.detail.x - calm.detail.x)).toBeLessThan(Math.abs(east.streak.x - calm.streak.x));
+  });
+
+  it("keeps the swell off the pier's low approach boards and leaves open water alone", () => {
+    for (let time = 0; time < 30; time += 0.37) {
+      for (const [x, z] of [[0, 8.2], [0, 9.5], [0.6, 10.4], [1.15, 11]] as const) {
+        expect(Math.abs(waterHeight(x, z, time))).toBeLessThan(PIER_TOP);
+      }
+    }
+    expect(waterShoreWeight(0, -2)).toBe(1);
+    // A few meters off the walk, the chop runs as before.
+    expect(waterShoreWeight(-4, 6)).toBeGreaterThan(0.3);
   });
 });

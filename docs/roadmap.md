@@ -783,7 +783,7 @@ Claude measured about 627 draw calls a frame on a summer day (Full effects) and 
 |---|---|---|---|
 | ~~AI1~~ | ~~The trees, bushes and grass scattered around the lake draw as instanced meshes, one draw per model part~~ (#193) | performance | M |
 | ~~AI2~~ | ~~The pier's approach boards draw in two instanced batches instead of one mesh and material each~~ (#193: 627 to 531 draws a frame) | performance | S |
-| AI3 | The approach walkway stops dipping under the swell when the waves run high | fix | S |
+| ~~AI3~~ | ~~The approach walkway stops dipping under the swell when the waves run high~~ (#194: the chop calms in the pier's lee) | fix | S |
 
 ## Risks / open questions for the owner
 

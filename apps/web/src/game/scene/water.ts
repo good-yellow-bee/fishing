@@ -1,4 +1,5 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge } from "@stillwater/shared";
+import { APPROACH } from "./pierDeck";
 
 /** 0 on the bank, 1 at the middle of the basin. */
 function shoreInland(x: number, z: number) {
@@ -10,11 +11,27 @@ function shoreInland(x: number, z: number) {
   return Math.min(1, Math.max(0, 1 - radius / edge));
 }
 
-// Chop dies out at the shoreline so the bank seam stays put.
+/** Within this of the pier's approach boards the chop is gone; it builds back to full this far out. */
+export const PIER_CALM_NEAR = 0.3;
+export const PIER_CALM_FAR = 1.6;
+
+/** 0 under and right beside the approach walk, 1 well clear of it, so the swell never washes over the boards. */
+function pierShelter(x: number, z: number) {
+  let reach = Infinity;
+  for (const box of APPROACH) {
+    const dx = Math.max(box.minX - x, 0, x - box.maxX);
+    const dz = Math.max(box.minZ - z, 0, z - box.maxZ);
+    reach = Math.min(reach, Math.hypot(dx, dz));
+  }
+  const u = Math.min(1, Math.max(0, (reach - PIER_CALM_NEAR) / (PIER_CALM_FAR - PIER_CALM_NEAR)));
+  return u * u * (3 - 2 * u);
+}
+
+// Chop dies out at the shoreline so the bank seam stays put, and in the pier's lee so its low boards stay dry.
 /** Static shoreline fade used by the water surface mesh. */
 export function waterShoreWeight(x: number, z: number) {
   const fade = Math.min(1, shoreInland(x, z) / 0.2);
-  return fade * fade;
+  return fade * fade * pierShelter(x, z);
 }
 
 /** Applies the dynamic wave pattern with a previously sampled shoreline fade. */
