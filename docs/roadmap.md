@@ -824,10 +824,19 @@ Claude picked these so the birds from Waves AH to AL are heard as well as seen.
 | ~~AM1~~ | ~~Terns call over the water on spring and summer days, with a sound caption~~ (#199) | audio | S |
 | ~~AM2~~ | ~~The grebes' rush is heard: feet pattering and a few rattling calls, with a caption~~ (#200) | audio | S |
 
+## Wave AN — A thumb stick for walking (added 2026-10-14, after Wave AM shipped)
+
+The owner's open "tap-to-walk vs joystick" question: Claude keeps tap-to-walk and adds the stick beside it, on by default for touch screens and off in Settings.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AN1~~ | ~~On touch screens a thumb stick walks the angler, analog like a gamepad stick, on the left (right when left-handed)~~ (#201) | controls | M |
+| ~~AN2~~ | ~~A Settings switch for it, and the news card mentions it~~ (#201) | settings | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
 2. **Lures stay bound to packed field-log gear (P17 keeps `luresPacked(readTackle())`).** Keep that link, or move to a server-side tackle inventory bought with points (needs a table + endpoint, and the field-log tie-in weakens)?
 3. **`hour`/`sky`/`clean` on catches are client-asserted until the deferred anti-cheat.** P12 badges and the P13 weekly board raise the stakes of that — acceptable for now, or should C wait for the replay engine on `codex/gameplay`?
 
-Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk vs a joystick for P7.
+Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk vs a joystick for P7 (Claude built both in #201: the stick sits beside tap-to-walk on touch screens).

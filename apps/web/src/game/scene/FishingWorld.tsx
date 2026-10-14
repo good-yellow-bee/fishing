@@ -588,6 +588,8 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
 
   useEffect(() => {
     const onPoint = (event: PointerEvent) => {
+      // A thumb on the walking stick steers the angler, not the aim.
+      if (event.target instanceof Element && event.target.closest("[data-walk-stick]")) return;
       const rect = gl.domElement.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
       pointer.current.set(

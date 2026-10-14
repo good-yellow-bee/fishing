@@ -2496,6 +2496,45 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   color: #fbf3e2;
 }
 
+/* The walking stick: only on touch screens, above the hint on the thumb's side. */
+.walk-stick {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .walk-stick {
+    position: absolute;
+    left: 20px;
+    bottom: 104px;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    border: 2px solid rgba(239, 224, 194, 0.55);
+    border-radius: 50%;
+    background: rgba(20, 28, 25, 0.38);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .walk-stick-knob {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(239, 224, 194, 0.85);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+  }
+
+  html[data-hand="left"] .walk-stick {
+    left: auto;
+    right: 20px;
+  }
+}
+
 /* Left-handed from Settings: the thumb controls move to the other side of a touch screen. */
 @media (pointer: coarse) {
   html[data-hand="left"] .thumb-strike {

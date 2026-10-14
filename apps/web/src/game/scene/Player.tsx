@@ -7,6 +7,7 @@ import { anglerPose, shortestYaw } from "./pose";
 import { routeWish } from "./walkPath";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
+import { walkStick } from "./walkStick";
 import { waterHeight } from "./water";
 
 const MOVE_KEYS = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
@@ -112,11 +113,17 @@ export function PlayerMove({ phase }: { phase: ScenePhase }) {
     }
     const walking = canWalk(phase);
     wish.set(0, 0, 0);
-    if (walking && keys.current.size > 0) {
+    const stick = walkStick.x !== 0 || walkStick.y !== 0;
+    if (walking && (keys.current.size > 0 || stick)) {
       forward.set(anglerPose.x - camera.position.x, 0, anglerPose.z - camera.position.z);
       if (forward.lengthSq() < 1e-4) forward.set(0, 0, -1);
       else forward.normalize();
       right.crossVectors(forward, camera.up).setY(0).normalize();
+      // The thumb stick walks at its own push, like a gamepad stick; a tap-to-walk route gives way to it.
+      if (stick) {
+        wish.addScaledVector(forward, walkStick.y).addScaledVector(right, walkStick.x);
+        anglerPose.route = [];
+      }
       if (keys.current.has("w") || keys.current.has("arrowup")) wish.add(forward);
       if (keys.current.has("s") || keys.current.has("arrowdown")) wish.sub(forward);
       if (keys.current.has("d") || keys.current.has("arrowright")) wish.add(right);

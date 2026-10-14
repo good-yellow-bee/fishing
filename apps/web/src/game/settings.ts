@@ -36,6 +36,8 @@ export type Settings = {
   highContrast: boolean;
   /** Short words at the screen's edge for the lake's sounds: thunder, loons, owls, geese, a beaver's slap. */
   soundCaptions: boolean;
+  /** A thumb stick for walking, on touch screens. */
+  walkStick: boolean;
   /** The float's body colour; the white cap and night tip stay as they are. */
   floatColour: FloatColour;
   /** The lure tied on last, if it is still packed next visit. */
@@ -59,6 +61,7 @@ export const DEFAULT_SETTINGS: Settings = {
   leftHanded: false,
   highContrast: false,
   soundCaptions: false,
+  walkStick: true,
   floatColour: "blue",
   lastLure: null,
 };
@@ -97,6 +100,7 @@ export function parseSettings(raw: string | null): Settings {
     leftHanded: typeof data.leftHanded === "boolean" ? data.leftHanded : d.leftHanded,
     highContrast: typeof data.highContrast === "boolean" ? data.highContrast : d.highContrast,
     soundCaptions: typeof data.soundCaptions === "boolean" ? data.soundCaptions : d.soundCaptions,
+    walkStick: typeof data.walkStick === "boolean" ? data.walkStick : d.walkStick,
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
