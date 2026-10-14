@@ -27,6 +27,8 @@ export type Settings = {
   reduceMotion: boolean;
   /** Words, panels and buttons drawn at 1x, 1.15x or 1.3x; the lake itself keeps its size. */
   textSize: TextSize;
+  /** Puts the thumb strike button and the cast meter on the left of a touch screen. */
+  leftHanded: boolean;
   /** The lure tied on last, if it is still packed next visit. */
   lastLure: string | null;
 };
@@ -44,6 +46,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reelMode: "hold",
   reduceMotion: false,
   textSize: "normal",
+  leftHanded: false,
   lastLure: null,
 };
 
@@ -75,6 +78,7 @@ export function parseSettings(raw: string | null): Settings {
     reelMode: pick(data.reelMode, ["hold", "toggle"], d.reelMode),
     reduceMotion: typeof data.reduceMotion === "boolean" ? data.reduceMotion : d.reduceMotion,
     textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
+    leftHanded: typeof data.leftHanded === "boolean" ? data.leftHanded : d.leftHanded,
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
 }
@@ -114,14 +118,19 @@ export function subscribeSettings(listener: () => void) {
   };
 }
 
-/** Mirrors the text size onto <html>, where the stylesheet scales the words and panels. */
-export function useTextSize() {
-  const { textSize } = useSettings();
+/** Mirrors the text size and handedness onto <html>, where the stylesheet scales the panels and moves the thumb controls. */
+export function useRootSettings() {
+  const { textSize, leftHanded } = useSettings();
   useEffect(() => {
     const root = document.documentElement;
     if (textSize === "normal") delete root.dataset.textSize;
     else root.dataset.textSize = textSize;
   }, [textSize]);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (leftHanded) root.dataset.hand = "left";
+    else delete root.dataset.hand;
+  }, [leftHanded]);
 }
 
 export function useSettings() {

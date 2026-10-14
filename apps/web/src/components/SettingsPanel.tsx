@@ -87,6 +87,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             { value: "larger", label: t("Larger") },
           ]}
         />
+        <label className="settings-check">
+          <input type="checkbox" checked={current.leftHanded} onChange={(event) => updateSettings({ leftHanded: event.target.checked })} />
+          {t("Left-handed (strike button and cast meter on the left of a touch screen)")}
+        </label>
         <Choices
           name="reelMode"
           legend={t("Reeling")}

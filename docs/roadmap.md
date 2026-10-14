@@ -445,14 +445,14 @@ Claude picked these after Wave M; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | N1 | ~~Trout, bass and salmon leap mid-fight~~ (shipped) | fight | M |
-| N2 | A one-line fish story on the landed card and in the log | journal | S/M |
-| N3 | Left-handed layout for the thumb controls | mobile/a11y | S |
+| N2 | ~~A one-line fish story on the landed card and in the log~~ (dropped) | journal | S/M |
+| N3 | ~~Left-handed layout for the thumb controls~~ (shipped) | mobile/a11y | S |
 | N4 | High-contrast panels setting | a11y | S/M |
 | N5 | A weather vane on the shack that shows the day's wind | scene | S |
 
 - **N1 · Leaps.** Every second run of a brook or rainbow trout, a bass or a salmon is a leap: a longer warning ("Let go now — it's coming up!"), then the fish clears the water nose first, turns over and falls back with a splash ("BOW — it's jumping!"). Holding the line tight through a leap past a short grace loads the rod into the red and costs the clean bonus, but never the fish, so the slow-angler guarantees still hold.
-- **N2 · Fish story.** The landed card and the catch log get one plain line built from the catch: "A 2.3 lb smallmouth took the spinner off the Point at dusk, on the rise."
-- **N3 · Left-handed.** A Settings choice that mirrors the thumb strike/reel button and the bank signs to the other side.
+- **N2 · Fish story.** Dropped by Claude: the landed card already shows the fish, weight, bank and lure, and the catch log shows bank, hour, sky and season, so the line would only repeat them.
+- **N3 · Left-handed.** A Settings checkbox that moves the touch-screen Strike/Reel button and the cast meter to the left. On phones the bank signs already span the full width, so they stay put.
 - **N4 · High contrast.** A Settings choice for solid panels, bolder borders and brighter text over the lake.
 - **N5 · Weather vane.** A small vane on the shack roof turns to the day's wind and spins idly on a calm day.
 

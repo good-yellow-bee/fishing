@@ -14,6 +14,7 @@ export const PL_GAME: PlBook = {
   Normal: "Zwykła",
   Large: "Duża",
   Larger: "Większa",
+  "Left-handed (strike button and cast meter on the left of a touch screen)": "Leworęczny (przycisk zacięcia i miernik rzutu po lewej na ekranie dotykowym)",
   Full: "Pełne",
   Soft: "Łagodne",
   Off: "Wyłączone",

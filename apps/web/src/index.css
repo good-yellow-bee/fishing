@@ -2326,6 +2326,19 @@ html[data-reduce-motion="1"] .hour-veil {
   gap: 8px;
 }
 
+/* Left-handed from Settings: the thumb controls move to the other side of a touch screen. */
+@media (pointer: coarse) {
+  html[data-hand="left"] .thumb-strike {
+    right: auto;
+    left: 16px;
+  }
+
+  html[data-hand="left"] .power-meter {
+    right: auto;
+    left: 12px;
+  }
+}
+
 /* Text size from Settings: the words and panels grow, the lake and its canvas keep their size.
    Viewport units inside a zoomed panel grow with it, so their sizes divide by --text-zoom. */
 html[data-text-size="large"] {

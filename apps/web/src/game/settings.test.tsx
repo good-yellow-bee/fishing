@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS, parseSettings, reloadSettings, settings, SETTINGS_KEY, updateSettings, useTextSize } from "./settings";
+import { DEFAULT_SETTINGS, parseSettings, reloadSettings, settings, SETTINGS_KEY, updateSettings, useRootSettings } from "./settings";
 
 // Newer Node ships its own empty `localStorage` global, so borrow a real one.
 const browser = new JSDOM("", { url: "http://localhost" });
@@ -43,11 +43,11 @@ describe("settings", () => {
     expect(settings).toMatchObject({ reelMode: "toggle", shake: "off", lastLure: "Mepps spinner" });
   });
 
-  it("keeps a larger text size and marks the page with it", () => {
+  it("keeps a larger text size and the left hand, and marks the page with them", () => {
     expect(parseSettings(JSON.stringify({ textSize: "larger" })).textSize).toBe("larger");
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     function Page() {
-      useTextSize();
+      useRootSettings();
       return null;
     }
     const root = createRoot(document.createElement("div"));
@@ -57,6 +57,10 @@ describe("settings", () => {
     expect(document.documentElement.dataset.textSize).toBe("large");
     act(() => updateSettings({ textSize: "normal" }));
     expect(document.documentElement.dataset.textSize).toBeUndefined();
+    act(() => updateSettings({ leftHanded: true }));
+    expect(document.documentElement.dataset.hand).toBe("left");
+    act(() => updateSettings({ leftHanded: false }));
+    expect(document.documentElement.dataset.hand).toBeUndefined();
     act(() => root.unmount());
   });
 });
