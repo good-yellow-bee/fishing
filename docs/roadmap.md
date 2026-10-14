@@ -374,13 +374,13 @@ Claude picked these after Wave I; the owner can reorder or drop any.
 |---|---|---|---|
 | J1 | ~~Controller hints on screen~~ (shipped) | input | S |
 | J2 | ~~Lanterns on the dock and the shack after dark~~ (shipped) | scene | S/M |
-| J3 | Catch and release | gameplay | M/L |
+| J3 | ~~Catch and release~~ (shipped) | gameplay | M/L |
 | J4 | Days-on-the-water streak | retention | M |
 | J5 | Weather that turns during a session | weather | M |
 
 - **J1 · Pad hints.** When a controller is connected, the controls strip shows its buttons (A cast, sticks walk and aim, Y shop) instead of the mouse and keyboard ones.
 - **J2 · Lanterns.** At dusk (60%) and night, warm lanterns on the dock's lake-end posts and by the shack light the boards with two point lights, and small glow-only lanterns sit on each bank post, so night fishing has a place to stand in.
-- **J3 · Catch and release.** The landed card offers Keep or Release. A released fish pays half points, is still logged, and counts toward a "Steward" badge; trophies released go back to the lake.
+- **J3 · Catch and release.** The landed card offers Release next to Keep fishing. The catch is saved on landing, so releasing marks it afterwards (`POST /api/catches/:requestId/release`): the fish drops from the hand back into the water with a ring, keeps its points (taking points back after the save would race spending and the offline queue), shows "Released" in the catch log, and counts toward the "Steward" badge at ten.
 - **J4 · Streak.** Landing a fish on consecutive local days builds a streak shown on the HUD and the catch log, with a "Regular" badge at seven days. A missed day resets it; nothing is taken away.
 - **J5 · Weather turns.** A long session can see the sky change on the forecast's schedule (clear to overcast to rain), with the change rolling in like the hour turnover rather than snapping.
 

@@ -175,8 +175,8 @@ describe("POST /catches", () => {
 
     const facts = listBadgeFacts(user.id);
     expect(facts).toHaveLength(2);
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true, golden: false, count: 2, heaviest: 0.4 });
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, season: null, clean: false, golden: false, count: 1, heaviest: 0.2 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true, golden: false, released: false, count: 2, heaviest: 0.4 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, season: null, clean: false, golden: false, released: false, count: 1, heaviest: 0.2 });
     expect(badgeProgress(facts).find((badge) => badge.id === "night-owl")).toMatchObject({ have: 2, earned: false });
     expect(badgeProgress(facts).find((badge) => badge.id === "four-seasons")).toMatchObject({ have: 1, earned: false });
   });
@@ -196,6 +196,25 @@ describe("POST /catches", () => {
       { request_id: plain, golden: 0 },
     ]);
     expect(badgeProgress(listBadgeFacts(user.id)).find((badge) => badge.id === "gold")).toMatchObject({ have: 1, earned: true });
+  });
+
+  it("releases a saved catch once, keeping its points, and counts it for Steward", async () => {
+    const { listBadgeFacts, getProfile } = await import("../db.ts");
+    const { badgeProgress } = await import("@stillwater/shared");
+    await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock" });
+    const points = getProfile(user.id)!.points;
+    const release = () => app.request(`http://test/catches/${requestId}/release`, { method: "POST" });
+    const first = await release();
+    expect(first.status).toBe(200);
+    expect(await first.json()).toMatchObject({ released: true });
+    expect((await release()).status).toBe(200);
+    expect(getProfile(user.id)!.points).toBe(points);
+    expect(badgeProgress(listBadgeFacts(user.id)).find((badge) => badge.id === "steward")).toMatchObject({ have: 1, earned: false });
+  });
+
+  it("refuses to release a catch that is not saved, or a malformed ID", async () => {
+    expect((await app.request(`http://test/catches/${requestId}/release`, { method: "POST" })).status).toBe(404);
+    expect((await app.request("http://test/catches/nope/release", { method: "POST" })).status).toBe(400);
   });
 
   it("limits successful catch submissions per minute", async () => {

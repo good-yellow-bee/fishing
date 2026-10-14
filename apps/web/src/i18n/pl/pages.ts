@@ -44,6 +44,7 @@ export const PL_PAGES: PlBook = {
   "Conditions": "Warunki",
   "Points": "Punkty",
   "Golden": "Złota",
+  "Released": "Wypuszczona",
   "When": "Kiedy",
   "Nothing landed yet.": "Jeszcze nic nie złowiono.",
 

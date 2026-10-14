@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { isGolden, isLakeHour, isLakeSeason, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
-import { findCatchByRequestId, getProfile, recordCatch, toProfile, type CatchRow } from "../db.ts";
+import { findCatchByRequestId, getProfile, recordCatch, releaseCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const catchRoutes = new Hono();
@@ -80,4 +80,14 @@ catchRoutes.post("/catches", async (c) => {
     speciesId: body.speciesId,
     weight: body.weight,
   });
+});
+
+// Letting the fish go is a choice made on the landed card, after the catch is saved; asking twice is harmless.
+catchRoutes.post("/catches/:requestId/release", (c) => {
+  const user = c.get("user") as SessionUser;
+  const requestId = c.req.param("requestId");
+  if (!requestIdPattern.test(requestId)) return c.json({ error: "invalid request ID" }, 400);
+  const row = releaseCatch(user.id, requestId);
+  if (!row) return c.json({ error: "catch not found" }, 404);
+  return c.json({ id: row.id, released: true });
 });

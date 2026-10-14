@@ -87,6 +87,7 @@ db.exec(`
     sky TEXT,
     season TEXT,
     golden INTEGER NOT NULL DEFAULT 0,
+    released INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL
   );
 
@@ -125,6 +126,9 @@ if (!catchColumns.some((column) => column.name === "season")) {
 if (!catchColumns.some((column) => column.name === "golden")) {
   db.exec(`ALTER TABLE catch ADD COLUMN golden INTEGER NOT NULL DEFAULT 0`);
 }
+if (!catchColumns.some((column) => column.name === "released")) {
+  db.exec(`ALTER TABLE catch ADD COLUMN released INTEGER NOT NULL DEFAULT 0`);
+}
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS catch_user_request ON catch (user_id, request_id)`);
 
 export type ProfileRow = {
@@ -150,6 +154,8 @@ export type CatchRow = {
   sky: string | null;
   season: string | null;
   golden: 0 | 1;
+  /** Read back from the table; a new catch is never released yet. */
+  released?: 0 | 1;
   created_at: string;
 };
 
@@ -196,8 +202,8 @@ export function listSpeciesStats(userId: string) {
 export function listBadgeFacts(userId: string): BadgeFactRow[] {
   const rows = db
     .prepare(
-      `SELECT species_id, spot, hour, sky, season, clean, golden, COUNT(*) as count, MAX(weight) as heaviest
-       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden`,
+      `SELECT species_id, spot, hour, sky, season, clean, golden, released, COUNT(*) as count, MAX(weight) as heaviest
+       FROM catch WHERE user_id = ? GROUP BY species_id, spot, hour, sky, season, clean, golden, released`,
     )
     .all(userId) as {
     species_id: string;
@@ -207,6 +213,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     season: string | null;
     clean: 0 | 1;
     golden: 0 | 1;
+    released: 0 | 1;
     count: number;
     heaviest: number;
   }[];
@@ -218,6 +225,7 @@ export function listBadgeFacts(userId: string): BadgeFactRow[] {
     season: isLakeSeason(row.season) ? row.season : null,
     clean: row.clean === 1,
     golden: row.golden === 1,
+    released: row.released === 1,
     count: Number(row.count),
     heaviest: row.heaviest,
   }));
@@ -322,6 +330,12 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 }
 
 /** A catch the offline queue posts late counts on the day the server saved it, not the day it was landed. */
+/** Marks the angler's catch released; it keeps its points. Undefined when there is no such catch. */
+export function releaseCatch(userId: string, requestId: string): CatchRow | undefined {
+  db.prepare(`UPDATE catch SET released = 1 WHERE user_id = ? AND request_id = ?`).run(userId, requestId);
+  return findCatchByRequestId(userId, requestId);
+}
+
 export function listCatchesBetween(userId: string, from: string, to: string): CatchRow[] {
   return db
     .prepare(`SELECT * FROM catch WHERE user_id = ? AND created_at >= ? AND created_at < ?`)
@@ -400,6 +414,7 @@ export function toCatch(row: CatchRow) {
     sky: row.sky,
     season: row.season,
     golden: row.golden === 1,
+    released: row.released === 1,
     createdAt: row.created_at,
   };
 }

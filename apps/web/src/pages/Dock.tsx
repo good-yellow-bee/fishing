@@ -35,7 +35,7 @@ import {
   type LakeHour,
   type SkillId,
 } from "@stillwater/shared";
-import { buyUpgrade, errorText, getMe, getSpeciesRecords, type Me } from "../api";
+import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
@@ -352,6 +352,28 @@ export function DockPage() {
   }, [catchShot, game.outcome, pinPhoto]);
 
   const [shareError, setShareError] = useState(false);
+  // The landed fish let go from the card, by its catch ID; a new landing starts kept.
+  const [releasedId, setReleasedId] = useState<string | null>(null);
+  const [releasing, setReleasing] = useState(false);
+  const [releaseError, setReleaseError] = useState(false);
+  const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
+  const releaseFish = async () => {
+    const outcome = game.outcome;
+    if (outcome?.kind !== "landed" || releasing) return;
+    setReleasing(true);
+    setReleaseError(false);
+    try {
+      // A catch still in the queue goes up first, so the server has it to let go.
+      await catchSync.sync();
+      await releaseCatch(outcome.id);
+      setReleasedId(outcome.id);
+      refresh().catch(() => undefined);
+    } catch {
+      setReleaseError(true);
+    } finally {
+      setReleasing(false);
+    }
+  };
   useEffect(() => setShareError(false), [game.outcome]);
   const savePicture = () => {
     const outcome = game.outcome;
@@ -395,6 +417,7 @@ export function DockPage() {
       setFieldSaved(false);
       setFieldLogError("");
       setPhotoSaved(false);
+      setReleaseError(false);
       return;
     }
     const { id, species, weight, spot: catchSpot, clean } = game.outcome;
@@ -507,6 +530,7 @@ export function DockPage() {
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
           golden={landedGolden}
+          released={landedReleased}
           hotspot={game.hotspot}
           tracks={tracks}
           powerRef={game.powerRef}
@@ -684,6 +708,18 @@ export function DockPage() {
               {fieldLogError && (
                 <p className="warn" role="alert">
                   {fieldLogError}
+                </p>
+              )}
+              {landedReleased ? (
+                <p className="catch-stamp released">{t("Released back into the lake")}</p>
+              ) : (
+                <button className="panel-btn" type="button" onClick={() => void releaseFish()} disabled={releasing}>
+                  {releasing ? t("Releasing…") : t("Release")}
+                </button>
+              )}
+              {releaseError && (
+                <p className="warn" role="alert">
+                  {t("The fish could not be released right now. It is kept; try again when you're online.")}
                 </p>
               )}
               <button className="panel-btn" type="button" onClick={game.dismissResult}>

@@ -150,6 +150,8 @@ export const PL_CONTENT: PlBook = {
   "Land a fish in spring, summer, fall and winter.": "Złów rybę wiosną, latem, jesienią i zimą.",
   "Gold": "Złoto",
   "Land a golden fish.": "Złów złotą rybę.",
+  "Steward": "Opiekun jeziora",
+  "Release ten fish back into the lake.": "Wypuść dziesięć ryb z powrotem do jeziora.",
 
   // Lure classes (tackle.ts)
   Topwater: "Powierzchniowa",

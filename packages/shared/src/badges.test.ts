@@ -4,7 +4,7 @@ import { FISH, fishById } from "./fish.ts";
 import { trophyWeight } from "./guide.ts";
 
 function row(over: Partial<BadgeFactRow> = {}): BadgeFactRow {
-  return { speciesId: "perch", spot: "dock", hour: "day", sky: "clear", season: "summer", clean: false, golden: false, count: 1, heaviest: 0.5, ...over };
+  return { speciesId: "perch", spot: "dock", hour: "day", sky: "clear", season: "summer", clean: false, golden: false, released: false, count: 1, heaviest: 0.5, ...over };
 }
 
 function earned(facts: BadgeFactRow[]): BadgeId[] {
@@ -29,6 +29,7 @@ describe("lodge badges", () => {
       [row({ season: "spring", count: 9 }), row({ season: "summer" }), row({ season: "fall" }), row({ season: null, count: 30 })],
     ],
     ["gold", [row({ golden: true })], [row({ count: 200 })]],
+    ["steward", [row({ released: true, count: 6 }), row({ released: true, spot: "reeds", count: 4 })], [row({ released: true, count: 9 }), row({ count: 50 })]],
     ["full-book", FIRST_BOOK.map((id) => row({ speciesId: id })), FISH.filter((fish) => fish.id !== FIRST_BOOK[0]).map((fish) => row({ speciesId: fish.id }))],
   ])("%s: earned on the first history, not on the near miss", (id, hit, miss) => {
     expect(earned(hit)).toContain(id);

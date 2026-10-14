@@ -97,6 +97,7 @@ import {
   strikeSpray,
 } from "./strikeSplash";
 import { markSplash } from "./duckFlush";
+import { releaseDrop, releaseEntry, releasePitch, releasePoint, releaseRing } from "./releaseMotion";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
 import { ToonModel } from "./ToonModel";
 import type { ScenePhase } from "./types";
@@ -132,6 +133,8 @@ type Props = {
   weight: number;
   /** The landed fish rolled golden; the held-up fish wears the gold coat. */
   golden?: boolean;
+  /** The angler let the landed fish go; it drops from the hand back into the lake. */
+  released?: boolean;
   hotspot: Hotspot | null;
   /** Other anglers' recent catches, as faint rings on their bank's water. */
   tracks?: readonly LodgeTrack[];
@@ -1540,12 +1543,16 @@ function CaughtFish({
   color,
   accent,
   scale,
+  released,
 }: {
   phase: ScenePhase;
   color: string;
   accent: string;
   scale: number;
+  released: boolean;
 }) {
+  // Seconds since the fish was let go, and where it left the hand and goes back in; -1 while it is held.
+  const release = useRef({ age: -1, splashed: false, hand: new THREE.Vector3(), entry: { x: 0, z: 0 } });
   const group = useRef<THREE.Group>(null);
   const exit = useRef<THREE.Group>(null);
   const exitMaterial = useRef<THREE.MeshBasicMaterial>(null);
@@ -1575,13 +1582,35 @@ function CaughtFish({
     };
   }, [drips]);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const g = group.current;
     const active = phase === "result" && landView.active;
-    if (g) g.visible = active;
-    const splash = landExitSplash(active ? landView.age : -1);
-    if (exit.current && exitMaterial.current) {
+    const let_go = release.current;
+    if (!(active && released)) {
+      let_go.age = -1;
+      let_go.splashed = false;
+    } else if (let_go.age < 0) {
+      let_go.age = 0;
+      let_go.hand.copy(landedFish);
+      releaseEntry(let_go.entry, let_go.hand, landedFrom);
+    } else {
+      let_go.age += Math.min(delta, 0.05);
+    }
+    const drop = releaseDrop(let_go.age);
+    if (g) g.visible = active && drop < 1;
+    const ring = releaseRing(let_go.age);
+    if (ring >= 0 && !let_go.splashed) {
+      let_go.splashed = true;
+      markSplash(let_go.entry.x, let_go.entry.z, t);
+    }
+    const splash = ring >= 0 ? ring : landExitSplash(active ? landView.age : -1);
+    if (ring >= 0 && exit.current && exitMaterial.current) {
+      exit.current.visible = true;
+      exit.current.position.set(let_go.entry.x, waterHeight(let_go.entry.x, let_go.entry.z, t) + 0.03, let_go.entry.z);
+      exit.current.scale.setScalar(0.3 + ring * 1.4);
+      exitMaterial.current.opacity = (1 - ring) * 0.6;
+    } else if (exit.current && exitMaterial.current) {
       exit.current.visible = splash >= 0;
       if (splash >= 0) {
         const y = waterHeight(landedFrom.x, landedFrom.z, t);
@@ -1599,10 +1628,17 @@ function CaughtFish({
       g.rotation.y = landFishYaw(landView.swing, landView.haulYaw, landView.presentYaw);
       g.rotation.x = landFishPitch(landView.swing);
       g.rotation.z = landFishRoll(landView.swing, landView.age, t);
+      if (drop >= 0) {
+        const waterY = waterHeight(let_go.entry.x, let_go.entry.z, t);
+        releasePoint(g.position, let_go.hand, let_go.entry, waterY, drop);
+        g.rotation.y = Math.atan2(let_go.entry.x - let_go.hand.x, let_go.entry.z - let_go.hand.z);
+        g.rotation.x = releasePitch(drop);
+        g.rotation.z = 0;
+      }
     }
     for (let i = 0; i < LAND_DRIPS; i += 1) {
       const mesh = drips.children[i] as THREE.Mesh;
-      const fall = active ? landDrip(landView.age, i) : -1;
+      const fall = active && drop < 0 ? landDrip(landView.age, i) : -1;
       mesh.visible = fall >= 0 && g != null;
       if (fall < 0 || !g) continue;
       const side = (i - (LAND_DRIPS - 1) / 2) * 0.07;
@@ -1771,7 +1807,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, hotspot, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, hotspot, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -1820,6 +1856,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         color={golden ? GOLDEN_COLOR : (species?.color ?? FALLBACK_COLOR)}
         accent={golden ? GOLDEN_ACCENT : (species?.accent ?? FALLBACK_ACCENT)}
         scale={landedScale(weight)}
+        released={released}
       />
       {/* Last in the tree, so the snapshot sees every pose written this frame. */}
       <CatchCamera />

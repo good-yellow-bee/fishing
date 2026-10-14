@@ -98,6 +98,7 @@ export function LogPage() {
                     {species && <FishMark species={species} golden={row.golden} />}
                     {species ? t(species.name) : row.speciesId}
                     {row.golden && <small className="log-golden">{t("Golden")}</small>}
+                    {row.released && <small className="log-released">{t("Released")}</small>}
                   </span>
                 </td>
                 <td>{lb(row.weight)} lb</td>
