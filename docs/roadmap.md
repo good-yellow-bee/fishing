@@ -993,6 +993,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BK1~~ | ~~The lake's grey rocks (drop-off pair, creek rocks, shallows and the cormorant's rock) drawn as three instanced clusters instead of one mesh each, saving a draw and a shadow draw per rock~~ (#224) | performance | S |
 
+## Wave BL — A phone held sideways (added 2026-10-14, after Wave BK shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BL1~~ | ~~Short landscape touch screens get a one-row header and panels tucked into the corners, so the lure panel no longer covers the walking stick; the shore help on touch screens names the stick, tapping the shore, touching the water and two-finger looking instead of WASD, clicks and right-drag~~ (#225) | phone UX | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

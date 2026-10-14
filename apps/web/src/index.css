@@ -2646,3 +2646,103 @@ html[data-contrast="high"] .sound-captions li {
   background: #0d1210;
   color: #fff;
 }
+
+/* A phone held sideways: little height, so the header shrinks to one row and the panels tuck into the corners. */
+@media (pointer: coarse) and (max-height: 500px) {
+  .hud {
+    top: 6px;
+    right: 6px;
+    left: 6px;
+    gap: 10px;
+    padding: 5px 10px;
+  }
+
+  .hud-brand .eyebrow,
+  .hud-user,
+  .skill-chip,
+  .camera-help {
+    display: none;
+  }
+
+  .hud strong {
+    font-size: 20px;
+  }
+
+  .hud-stats {
+    gap: 4px;
+  }
+
+  .level-chip,
+  .points-chip,
+  .hour-chip,
+  .sky-chip {
+    padding: 3px 6px;
+  }
+
+  .hud .hud-link {
+    padding: 4px 3px;
+  }
+
+  .stance-chip {
+    top: calc(var(--hud-bottom, 52px) + 6px);
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+
+  .lure-choice {
+    top: calc(var(--hud-bottom, 52px) + 40px);
+    left: 8px;
+    width: min(190px, calc(30vw / var(--text-zoom, 1)));
+    padding: 5px 8px 7px;
+  }
+
+  .lure-choice small {
+    display: none;
+  }
+
+  .walk-signs {
+    top: calc(var(--hud-bottom, 52px) + 6px);
+    right: 8px;
+  }
+
+  .walk-signs .panel-btn {
+    min-height: 36px;
+    padding: 4px 12px;
+  }
+
+  .walkthrough,
+  .whats-new {
+    top: calc(var(--hud-bottom, 52px) + 6px);
+  }
+
+  .walk-stick {
+    bottom: 10px;
+    left: 10px;
+    width: 92px;
+    height: 92px;
+  }
+
+  .hint {
+    bottom: 10px;
+    left: 114px;
+    max-width: 38ch;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .power-meter {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  html[data-hand="left"] .walk-stick {
+    right: 10px;
+    left: auto;
+  }
+
+  html[data-hand="left"] .hint {
+    right: 114px;
+    left: auto;
+  }
+}
