@@ -563,6 +563,12 @@ export const fx = {
     noiseBurst("bandpass", 2200, 600, 0.2, 0.05, 0, natureBus());
     tone("sine", 130, 55, 0.22, 0.03, 0, 0, natureBus());
   },
+  /** A bird hitting the water out on the lake: a soft, far-off plunge. Quiet until the lake's sounds have started. */
+  farSplash() {
+    if (!this.enabled || !lapSrc) return;
+    tone("sine", 300, 70, 0.14, 0.03, 0, 0, natureBus());
+    noiseBurst("bandpass", 1600, 600, 0.22, 0.02, 0.02, natureBus());
+  },
   /** A duckling or two peeping: thin, high, rising notes. Quiet until the lake's sounds have started. */
   peep() {
     if (!this.enabled || !lapSrc) return;
