@@ -1,4 +1,5 @@
 import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
+import type { Splash } from "./duckFlush";
 
 /**
  * A pair of mute swans gliding a slow loop on the far water by day in spring
@@ -48,4 +49,36 @@ export function swanPose(k: 0 | 1, time: number): SwanPose {
   // The follower feeds out of step with the leader, so they never both go under at once.
   const dip = swanDip(time + k * (SWAN_DIP_GAP / 2));
   return { x, z, yaw, dip };
+}
+
+/** A cast landing this close to a swan makes it raise its wings and hiss. */
+export const SWAN_SCARE_RADIUS = 4;
+/** Seconds a splash counts as just landed. */
+export const SWAN_SPLASH_FRESH_SEC = 0.6;
+/** Seconds the wings stay up, from the splash until they fold again. */
+export const SWAN_BUSK_SEC = 3.6;
+
+/** How far the wings are raised and the neck drawn back, `since` seconds after the splash: up fast, held, then folded. */
+export function swanBusk(since: number) {
+  if (since < 0 || since >= SWAN_BUSK_SEC) return 0;
+  if (since < 0.4) return since / 0.4;
+  if (since > SWAN_BUSK_SEC - 0.9) return (SWAN_BUSK_SEC - since) / 0.9;
+  return 1;
+}
+
+/** Which swan a fresh splash lands close to (the nearer one), or -1 when it is stale or far from both. */
+export function swanScared(splash: Splash, time: number): -1 | 0 | 1 {
+  const age = time - splash.at;
+  if (!(age >= 0 && age < SWAN_SPLASH_FRESH_SEC)) return -1;
+  let best: -1 | 0 | 1 = -1;
+  let bestReach = SWAN_SCARE_RADIUS;
+  for (const k of [0, 1] as const) {
+    const pose = swanPose(k, time);
+    const reach = Math.hypot(pose.x - splash.x, pose.z - splash.z);
+    if (reach < bestReach) {
+      best = k;
+      bestReach = reach;
+    }
+  }
+  return best;
 }

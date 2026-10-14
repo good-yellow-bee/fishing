@@ -610,6 +610,14 @@ export const fx = {
     noiseBurst("bandpass", 2200, 600, 0.2, 0.05, 0, natureBus());
     tone("sine", 130, 55, 0.22, 0.03, 0, 0, natureBus());
   },
+  /** A swan hissing at a cast that landed too close: a long, breathy rasp. Quiet until the lake's sounds have started. */
+  swanHiss() {
+    if (!lapSrc) return;
+    captionSound("swanHiss");
+    if (!this.enabled) return;
+    noiseBurst("bandpass", 3400, 2600, 0.7, 0.035, 0, natureBus());
+    noiseBurst("highpass", 5200, 4200, 0.5, 0.02, 0.08, natureBus());
+  },
   /** A bird hitting the water out on the lake: a soft, far-off plunge. Quiet until the lake's sounds have started. */
   farSplash() {
     if (!lapSrc) return;

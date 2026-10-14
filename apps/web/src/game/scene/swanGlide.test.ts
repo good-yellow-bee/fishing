@@ -1,6 +1,6 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { SWAN_DIP_GAP, SWAN_DIP_SEC, swanDip, swanPose, swansOut } from "./swanGlide";
+import { SWAN_BUSK_SEC, SWAN_DIP_GAP, SWAN_DIP_SEC, swanBusk, swanDip, swanPose, swanScared, swansOut } from "./swanGlide";
 
 describe("swans", () => {
   it("are out by day in spring and summer, not in the rain", () => {
@@ -39,5 +39,24 @@ describe("swans", () => {
     for (let time = 0; time < SWAN_DIP_GAP * 3; time += 0.25) {
       expect(Math.min(swanPose(0, time).dip, swanPose(1, time).dip)).toBe(0);
     }
+  });
+
+  it("hisses at a cast that lands close: the nearer swan, only while the splash is fresh", () => {
+    const time = 50;
+    const lead = swanPose(0, time);
+    const near = { x: lead.x + 0.5, z: lead.z, at: time - 0.1 };
+    expect(swanScared(near, time)).toBe(0);
+    expect(swanScared({ ...near, at: time - 2 }, time)).toBe(-1);
+    expect(swanScared({ x: lead.x + 10, z: lead.z + 10, at: time }, time)).toBe(-1);
+    const tail = swanPose(1, time);
+    expect(swanScared({ x: tail.x, z: tail.z, at: time }, time)).toBe(1);
+  });
+
+  it("raises its wings fast, holds them, then folds them again", () => {
+    expect(swanBusk(-1)).toBe(0);
+    expect(swanBusk(0.2)).toBeCloseTo(0.5);
+    expect(swanBusk(1.5)).toBe(1);
+    expect(swanBusk(SWAN_BUSK_SEC - 0.45)).toBeCloseTo(0.5);
+    expect(swanBusk(SWAN_BUSK_SEC)).toBe(0);
   });
 });

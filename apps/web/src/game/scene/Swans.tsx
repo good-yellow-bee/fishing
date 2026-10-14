@@ -1,7 +1,9 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { swanPose } from "./swanGlide";
+import { fx } from "../fx";
+import { lastSplash } from "./duckFlush";
+import { swanBusk, swanPose, swanScared } from "./swanGlide";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -14,7 +16,7 @@ const WAKE_SPREAD = 0.3;
 const WAKE_LENGTH = 2.6;
 
 /** One swan: a deep white body with raised wings, and an S of neck hinged at its base so it can tip under to feed. */
-function SwanBody({ neck }: { neck: (g: THREE.Group | null) => void }) {
+function SwanBody({ neck, wing }: { neck: (g: THREE.Group | null) => void; wing: (side: 0 | 1, g: THREE.Group | null) => void }) {
   return (
     <>
       <mesh position={[0, 0.12, 0]} scale={[0.26, 0.17, 0.5]}>
@@ -22,11 +24,14 @@ function SwanBody({ neck }: { neck: (g: THREE.Group | null) => void }) {
         <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
       </mesh>
       {/* Folded wings held up over the back, the mute swan's arch. */}
+      {/* Hinged at the shoulder, so an angry swan can raise them. */}
       {[-1, 1].map((side) => (
-        <mesh key={side} position={[side * 0.13, 0.24, -0.08]} rotation={[0.25, 0, side * 0.35]} scale={[0.1, 0.1, 0.36]}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-        </mesh>
+        <group key={side} ref={(g) => wing(side < 0 ? 0 : 1, g)} position={[side * 0.1, 0.22, 0.05]}>
+          <mesh position={[side * 0.03, 0.02, -0.13]} rotation={[0.25, 0, side * 0.35]} scale={[0.1, 0.1, 0.36]}>
+            <sphereGeometry args={[1, 10, 8]} />
+            <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
+          </mesh>
+        </group>
       ))}
       <mesh position={[0, 0.2, -0.46]} rotation={[0.7, 0, 0]} scale={[0.08, 0.05, 0.14]}>
         <sphereGeometry args={[1, 8, 6]} />
@@ -63,8 +68,22 @@ export function Swans() {
   const swans = useRef<(THREE.Group | null)[]>([]);
   const necks = useRef<(THREE.Group | null)[]>([]);
   const wakes = useRef<(THREE.Group | null)[]>([]);
+  const wings = useRef<(THREE.Group | null)[][]>([[], []]);
+  const angry = useRef({ at: [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY], heard: Number.NEGATIVE_INFINITY });
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
+    // Each splash is looked at once; the nearer swan raises its wings and hisses at it.
+    const mood = angry.current;
+    if (lastSplash.at !== mood.heard) {
+      const k = swanScared(lastSplash, time);
+      if (k >= 0) {
+        mood.heard = lastSplash.at;
+        mood.at[k] = time;
+        fx.swanHiss();
+      } else if (time - lastSplash.at >= 0.6) {
+        mood.heard = lastSplash.at;
+      }
+    }
     for (const k of [0, 1] as const) {
       const swan = swans.current[k];
       const wake = wakes.current[k];
@@ -73,9 +92,15 @@ export function Swans() {
       const surface = waterHeight(pose.x, pose.z, time);
       swan.position.set(pose.x, surface - 0.04, pose.z);
       // Bottoms up while it feeds: the body tips forward as the neck goes under.
-      swan.rotation.set(pose.dip * 0.5, pose.yaw, 0, "YXZ");
+      const busk = swanBusk(time - mood.at[k]!);
+      // An angry swan keeps its head up.
+      const dip = pose.dip * (1 - busk);
+      swan.rotation.set(dip * 0.5, pose.yaw, 0, "YXZ");
       const neck = necks.current[k];
-      if (neck) neck.rotation.x = pose.dip * 1.9;
+      if (neck) neck.rotation.x = dip * 1.9 - busk * 0.45;
+      wings.current[k]!.forEach((wing, side) => {
+        if (wing) wing.rotation.set(busk * 0.5, 0, (side === 0 ? -1 : 1) * busk * 0.9);
+      });
       wake.position.set(pose.x, surface + 0.04, pose.z);
       wake.rotation.y = pose.yaw;
     }
@@ -85,7 +110,7 @@ export function Swans() {
       {[0, 1].map((k) => (
         <group key={k}>
           <group ref={(g) => void (swans.current[k] = g)} name="swan" scale={k === 0 ? 1.5 : 1.38}>
-            <SwanBody neck={(g) => void (necks.current[k] = g)} />
+            <SwanBody neck={(g) => void (necks.current[k] = g)} wing={(side, g) => void (wings.current[k]![side] = g)} />
           </group>
           <group ref={(g) => void (wakes.current[k] = g)}>
             {[-1, 1].map((side) => (
