@@ -636,6 +636,14 @@ export const fx = {
     noiseBurst("bandpass", 3400, 2600, 0.7, 0.035, 0, natureBus());
     noiseBurst("highpass", 5200, 4200, 0.5, 0.02, 0.08, natureBus());
   },
+  /** Grebes rushing side by side: their feet pattering on the water under a few rattling calls. Quiet until the lake's sounds have started. */
+  grebeRush() {
+    if (!lapSrc) return;
+    captionSound("grebes");
+    if (!this.enabled) return;
+    for (let i = 0; i < 14; i++) noiseBurst("bandpass", 1800, 1400, 0.05, 0.012, i * 0.24, natureBus());
+    for (let i = 0; i < 4; i++) tone("sawtooth", 720, 560, 0.12, 0.0022, 0.2 + i * 0.7, 0, natureBus());
+  },
   /** A bird hitting the water out on the lake: a soft, far-off plunge. Quiet until the lake's sounds have started. */
   farSplash() {
     if (!lapSrc) return;
