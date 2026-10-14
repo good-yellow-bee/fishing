@@ -150,7 +150,7 @@ export function DockPage() {
   const shownFish =
     game.outcome?.kind === "landed" ? game.outcome : game.outcome?.kind === "miss" ? (game.outcome.fish ?? null) : (game.fight ?? game.bite);
   // A controller replays as keys and pointer moves; its cursor is drawn over the scene.
-  const padCursor = useGamepad();
+  const { cursor: padCursor, connected: padConnected } = useGamepad();
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
@@ -615,13 +615,24 @@ export function DockPage() {
             ))}
           </nav>
         )}
-        <aside className="camera-help" data-camera-control>
-          <span>{t("Shore")}</span>
-          <kbd>WASD</kbd> {t("or")} <kbd>{t("Click shore")}</kbd> {t("walk")}
-          <kbd>{t("Click water")}</kbd> {t("aim")}
-          <kbd>E</kbd> {t("shop")}
-          <kbd>{t("Right drag")}</kbd> {t("look")}
-        </aside>
+        {padConnected ? (
+          <aside className="camera-help" data-camera-control data-pad>
+            <span>{t("Controller")}</span>
+            <kbd>{t("Left stick")}</kbd> {t("walk")}
+            <kbd>{t("Right stick")}</kbd> {t("aim")}
+            <kbd>A</kbd> {t("cast, strike, reel")}
+            <kbd>Y</kbd> {t("shop")}
+            <kbd>B</kbd> {t("close")}
+          </aside>
+        ) : (
+          <aside className="camera-help" data-camera-control>
+            <span>{t("Shore")}</span>
+            <kbd>WASD</kbd> {t("or")} <kbd>{t("Click shore")}</kbd> {t("walk")}
+            <kbd>{t("Click water")}</kbd> {t("aim")}
+            <kbd>E</kbd> {t("shop")}
+            <kbd>{t("Right drag")}</kbd> {t("look")}
+          </aside>
+        )}
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}${landedGolden ? " golden" : ""}`}>
