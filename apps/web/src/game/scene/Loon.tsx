@@ -4,12 +4,34 @@ import * as THREE from "three";
 import { pitchTurn } from "./bodyPitch";
 import { fx, onLoonCall } from "../fx";
 import { loonCallLift, loonPose, soundPlace } from "./loonMotion";
+import { mergePainted } from "./mergeParts";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
 const BODY = "#1b1f22";
 const HEAD = "#16241f";
 const WHITE = "#e9ece6";
+
+const EYE = "#b3261e";
+
+/** The body and its white flank bake into one shape, and the neck, collar, head, bill and eyes into another, hinged at the neck's base. */
+export function loonShapes() {
+  return {
+    // Long low body, white below the waterline peeking at the sides.
+    body: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 12, 9), position: [0, 0.08, 0], scale: [0.2, 0.13, 0.42], color: BODY },
+      { geometry: new THREE.SphereGeometry(1, 12, 6), position: [0, 0.02, 0.02], scale: [0.21, 0.07, 0.38], color: WHITE },
+    ]),
+    neck: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.1, 0.02], scale: [0.07, 0.13, 0.07], color: HEAD },
+      { geometry: new THREE.TorusGeometry(0.068, 0.012, 6, 14), position: [0, 0.1, 0.03], rotation: [Math.PI / 2, 0, 0], color: WHITE },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.22, 0.06], scale: 0.085, color: HEAD },
+      { geometry: new THREE.ConeGeometry(0.024, 0.13, 6), position: [0, 0.215, 0.19], rotation: [Math.PI / 2, 0, 0], color: BODY },
+      { geometry: new THREE.SphereGeometry(1, 6, 5), position: [0.06, 0.235, 0.1], scale: 0.014, color: EYE },
+      { geometry: new THREE.SphereGeometry(1, 6, 5), position: [-0.06, 0.235, 0.1], scale: 0.014, color: EYE },
+    ]),
+  };
+}
 
 /** The loon whose call carries across the lake: paddles a slow loop on open water, dives, and comes up elsewhere. */
 export function Loon() {
@@ -18,6 +40,14 @@ export function Loon() {
   const ring = useRef<THREE.Group>(null);
   const ringMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const calledAt = useRef(-Infinity);
+  const shapes = useMemo(loonShapes, []);
+  const painted = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  useEffect(
+    () => () => {
+      [shapes.body, shapes.neck, painted].forEach((thing) => thing.dispose());
+    },
+    [shapes, painted],
+  );
   const clock = useRef(0);
   const right = useMemo(() => new THREE.Vector3(), []);
   const lastPlace = useRef(0);
@@ -56,41 +86,10 @@ export function Loon() {
   return (
     <>
       <group ref={group} name="loon" scale={1.35}>
-        {/* Long low body, white below the waterline peeking at the sides. */}
-        <mesh position={[0, 0.08, 0]} scale={[0.2, 0.13, 0.42]}>
-          <sphereGeometry args={[1, 12, 9]} />
-          <meshToonMaterial color={BODY} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.02, 0.02]} scale={[0.21, 0.07, 0.38]}>
-          <sphereGeometry args={[1, 12, 6]} />
-          <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-        </mesh>
+        <mesh geometry={shapes.body} material={painted} />
         {/* Hinged at the base of the neck, so a call tips the head back. */}
         <group ref={neck} position={[0, 0.14, 0.3]}>
-          <mesh position={[0, 0.1, 0.02]} scale={[0.07, 0.13, 0.07]}>
-            <sphereGeometry args={[1, 10, 8]} />
-            <meshToonMaterial color={HEAD} gradientMap={toonRamp()} />
-          </mesh>
-          <mesh position={[0, 0.1, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.068, 0.012, 6, 14]} />
-            <meshToonMaterial color={WHITE} gradientMap={toonRamp()} />
-          </mesh>
-          <mesh position={[0, 0.22, 0.06]} scale={0.085}>
-            <sphereGeometry args={[1, 10, 8]} />
-            <meshToonMaterial color={HEAD} gradientMap={toonRamp()} />
-          </mesh>
-          <mesh position={[0, 0.215, 0.19]} rotation={[Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[0.024, 0.13, 6]} />
-            <meshToonMaterial color={BODY} gradientMap={toonRamp()} />
-          </mesh>
-          <mesh position={[0.06, 0.235, 0.1]} scale={0.014}>
-            <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color="#b3261e" />
-          </mesh>
-          <mesh position={[-0.06, 0.235, 0.1]} scale={0.014}>
-            <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color="#b3261e" />
-          </mesh>
+          <mesh geometry={shapes.neck} material={painted} />
         </group>
       </group>
       <group ref={ring} visible={false}>

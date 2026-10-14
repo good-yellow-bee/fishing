@@ -957,6 +957,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BE1~~ | ~~Kingfisher's snag and body each baked into one shape (9 draws to 4); turtle's shell, rim and feet baked into one (7 to 2); summer day 343 to 327 with BD~~ (#218) | performance | S |
 
+## Wave BF — Fewer draws for the heron, loon and owl (added 2026-10-14, after Wave BE shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BF1~~ | ~~Heron baked into body, neck, fish, legs and two wings (13 draws to 7); loon into body and neck (8 to 2); owl into body, head and glowing eyes (8 to 3) and its tree into one shape (3 to 1)~~ (#219) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
