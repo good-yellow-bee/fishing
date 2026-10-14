@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type * as THREE from "three";
+import { grebeShapes } from "./Grebes";
 import { heronShapes } from "./Heron";
 import { loonShapes } from "./Loon";
 import { owlShapes, owlTreeShape } from "./Owl";
+import { ternShapes } from "./Terns";
 
 function tones(shape: THREE.BufferGeometry) {
   const color = shape.getAttribute("color");
@@ -23,6 +25,8 @@ describe("baked creatures", () => {
     const owl = owlShapes();
     expect(tones(owl.body)).toBe(2);
     expect(tones(owl.head)).toBe(3);
+    expect(tones(ternShapes().body)).toBe(3);
+    expect(tones(grebeShapes().head)).toBe(4);
   });
 
   it("reaches the heron's legs down to its feet and the owl's tree up past its perch", () => {
@@ -32,5 +36,9 @@ describe("baked creatures", () => {
     const tree = owlTreeShape();
     tree.computeBoundingBox();
     expect(tree.boundingBox!.max.y).toBeGreaterThan(3.3);
+    const { left, right } = ternShapes();
+    left.computeBoundingBox();
+    right.computeBoundingBox();
+    expect(left.boundingBox!.min.x).toBeCloseTo(-right.boundingBox!.max.x, 6);
   });
 });

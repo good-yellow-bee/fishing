@@ -963,6 +963,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BF1~~ | ~~Heron baked into body, neck, fish, legs and two wings (13 draws to 7); loon into body and neck (8 to 2); owl into body, head and glowing eyes (8 to 3) and its tree into one shape (3 to 1)~~ (#219) | performance | S |
 
+## Wave BG — Fewer draws for the terns and grebes (added 2026-10-14, after Wave BF shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BG1~~ | ~~Each tern baked into a body and two wings (7 draws to 3, three birds); each grebe's neck, head, ruff, crest and bill into one shape (7 to 2, plus the four spray drops, which hop apart so stay separate)~~ (#220) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
