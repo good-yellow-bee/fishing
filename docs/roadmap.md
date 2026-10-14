@@ -555,14 +555,32 @@ Claude picked these after Wave S; the owner can reorder or drop any.
 | ~~T1~~ | ~~The angler's breath shows on cold mornings~~ (#153) | weather | S |
 | ~~T2~~ | ~~Shooting stars mirrored in the lake on clear nights~~ (#154) | sky | S |
 | ~~T3~~ | ~~Snow settles on the dock in winter~~ (#155) | weather | S |
-| T4 | A dewy spider web on the dock rail at dawn | wildlife | S |
-| T5 | Refresh the "New on the lake" card for Wave T | onboarding | S |
+| ~~T4~~ | ~~A dewy spider web on the dock rail at dawn~~ (#156) | wildlife | S |
+| ~~T5~~ | ~~Refresh the "New on the lake" card for Wave T~~ (#156) | onboarding | S |
 
 - **T1 · Breath.** At dawn, and any time in winter, small pale puffs drift from the angler's face every few seconds and fade. Off with Reduce motion; Lite effects keep every other puff.
 - **T2 · Shooting stars.** The shooting stars that already crossed the sky now fly low over the far shore, and each one shows as a bright streak crossing the lake's mirror in front of the dock, since the dock camera sees little sky. Still one per 40 seconds at most, off with Reduce motion.
 - **T3 · Snowy dock.** In winter a thin layer of snow covers the dock planks, with a few trodden footprints where the angler stands, and each bridge post wears a cap of snow.
-- **T4 · Spider web.** At dawn a small round web strung between two posts of the dock rail catches the low light, beaded with dew that glints. It fades by full day; not in winter.
+- **T4 · Spider web.** At dawn outside winter a small orb web hangs in the dock's front-right corner by the post, its threads beaded with dew that glints bead by bead (held steady under Reduce motion). Gone by full day.
 - **T5 · What's new, again.** List whatever Wave T lands on the card.
+
+## Wave U — Life around the lake (added 2026-10-14, after Wave T shipped)
+
+Claude picked these after Wave T; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| U1 | A deer comes down to drink on the far bank at dawn and dusk | wildlife | M |
+| U2 | Water striders skating in the calm shallows by the dock | wildlife | S |
+| U3 | Autumn mist curling off the water at dawn | weather | S/M |
+| U4 | Cattail fluff drifting on the breeze in late summer | weather | S |
+| U5 | Refresh the "New on the lake" card for Wave U | onboarding | S |
+
+- **U1 · Deer.** Now and then at dawn or dusk a deer steps out of the far treeline, walks down to the water, lowers its head to drink with small rings at its muzzle, and heads back. A cast landing near it sends it bounding off. Not in winter storms; still under Reduce motion.
+- **U2 · Water striders.** On calm days outside winter a few striders skate in short darts on the still water just off the dock, each foot dimpling the surface. Gone in rain or wind.
+- **U3 · Morning mist.** At dawn in fall, low wisps of mist drift slowly across the water and thin out as they go. Lite effects keep half; off with Reduce motion's drift (they hold still).
+- **U4 · Cattail fluff.** In late summer and fall, white tufts lift from the reeds and float downwind over the water with the day's wind.
+- **U5 · What's new, again.** List whatever Wave U lands on the card.
 
 ## Risks / open questions for the owner
 
