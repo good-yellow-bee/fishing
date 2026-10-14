@@ -1,9 +1,17 @@
-import { keepLandedCatch, putCatchPhoto, sampleLogbook, type LandedFish } from "@stillwater/shared";
+import { keepLandedCatch, putCatchPhoto, type LandedFish, type Logbook } from "@stillwater/shared";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
+/**
+ * The book the game writes into. A browser with no field log yet starts an
+ * empty one, so made-up sample fish never mix with the first real catch.
+ */
+export function bookForPlay(): Logbook {
+  return readStoredLogbook() ?? { spots: [], trips: [], catches: [] };
+}
+
 export function saveLandedCatch(landed: LandedFish) {
-  const book = readStoredLogbook() ?? sampleLogbook(new Date());
+  const book = bookForPlay();
   saveLogbook(keepLandedCatch(book, landed));
 }
 
