@@ -31,6 +31,7 @@ import {
   SPOT_LABELS,
   skyAt,
   isSnow,
+  dailyWind,
   moonFromSearch,
   moonLight,
   moonName,
@@ -144,6 +145,8 @@ export function DockPage() {
   const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
   // The real moon, read once per visit; ?moon= pins the phase for testing.
   const moon = moonFromSearch(params.toString()) ?? moonPhase(openedAt);
+  // The field log's wind for the day, as a drift on the sitting float.
+  const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -538,6 +541,7 @@ export function DockPage() {
         onSettings={() => setSettingsOpen(true)}
         streak={streakDays(me.recentDays, localDate(new Date())).current}
         moon={moonName(moon)}
+        wind={wind.wind}
         onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
       />
       <div
@@ -568,6 +572,7 @@ export function DockPage() {
           golden={landedGolden}
           released={landedReleased}
           moon={moon}
+          wind={wind}
           hotspot={game.hotspot}
           tracks={tracks}
           powerRef={game.powerRef}

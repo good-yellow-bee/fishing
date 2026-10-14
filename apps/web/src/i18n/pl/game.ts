@@ -34,6 +34,7 @@ export const PL_GAME: PlBook = {
   "Clouds roll in over the lake.": "Nad jezioro nadciągają chmury.",
   "The fog burns off.": "Mgła się rozwiewa.",
   "The weather turns.": "Pogoda się zmienia.",
+  "Wind: {wind}.": "Wiatr: {wind}.",
   "Snow starts falling on the lake.": "Nad jeziorem zaczyna padać śnieg.",
   "The snow stops.": "Śnieg przestaje padać.",
   "Turns {sky} around {hour}:00": "Około {hour}:00 {sky}",

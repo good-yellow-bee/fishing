@@ -132,7 +132,16 @@ export function waitNod(x: number, z: number, time: number) {
   };
 }
 
-/** Drift, the creek's current at the inlet, plus the tighten pull. The pull is toward the angler. */
+/** Seconds of sitting the wind keeps walking the float; past this it holds where the line lets it. */
+export const WIND_WALK_SEC = 25;
+
+/** How far the day's wind (meters a second downwind) has walked a float that has sat for `age` seconds. */
+export function windWalk(wind: { x: number; z: number }, age: number) {
+  const held = Math.min(Math.max(age, 0), WIND_WALK_SEC);
+  return { x: wind.x * held, z: wind.z * held };
+}
+
+/** Drift, the creek's current at the inlet, the wind's walk, plus the tighten pull. The pull is toward the angler. */
 export function applyWaitShift(
   x: number,
   z: number,
@@ -140,11 +149,13 @@ export function applyWaitShift(
   anglerZ: number,
   time: number,
   age: number,
+  wind: { x: number; z: number } = { x: 0, z: 0 },
 ) {
   const drift = waitDrift(x, z, time);
   const current = inletCurrent(x, z, time);
-  let nextX = x + drift.x + current.x;
-  let nextZ = z + drift.z + current.z;
+  const walk = windWalk(wind, age);
+  let nextX = x + drift.x + current.x + walk.x;
+  let nextZ = z + drift.z + current.z + walk.z;
   const pull = waitTwitchPull(age);
   if (pull > 0) {
     const dx = anglerX - nextX;

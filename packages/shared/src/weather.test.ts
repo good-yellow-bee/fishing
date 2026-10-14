@@ -4,6 +4,8 @@ import { fishById } from "./fish.ts";
 import { lakeHour } from "./hour.ts";
 import {
   forecast,
+  dailyWind,
+  WIND_DRIFT,
   skyAt,
   skyTurnForDay,
   biteWeatherMul,
@@ -223,6 +225,36 @@ describe("weather that turns during the day", () => {
     }
     const turning = days.find((day) => skyTurnForDay(day))!;
     expect(forecast(turning)[0]!.turn).toEqual(skyTurnForDay(turning));
+  });
+});
+
+describe("the day's wind on the water", () => {
+  const days = Array.from({ length: 200 }, (_, n) => new Date(2026, 0, 1 + n, 10));
+  const skies = ["clear", "overcast", "rain", "fog"] as const;
+
+  it("is the field log's wind, pushing the float away from the quarter it blows from", () => {
+    const toward = { "light-north": [0, 1], "light-east": [-1, 0], "light-south": [0, -1], "light-west": [1, 0] } as const;
+    for (const day of days) {
+      for (const sky of skies) {
+        const drift = dailyWind(day, sky);
+        expect(drift.wind).toBe(dailyConditions(day, sky).wind);
+        const speed = Math.hypot(drift.x, drift.z);
+        expect(speed).toBeCloseTo(WIND_DRIFT[drift.wind]);
+        if (drift.wind in toward) {
+          const [x, z] = toward[drift.wind as keyof typeof toward];
+          expect(drift.x).toBeCloseTo(x * speed);
+          expect(drift.z).toBeCloseTo(z * speed);
+        }
+      }
+    }
+  });
+
+  it("leaves a calm day still and blows hardest on a strong one", () => {
+    const all = days.flatMap((day) => skies.map((sky) => dailyWind(day, sky)));
+    for (const drift of all.filter((d) => d.wind === "calm")) expect(Math.hypot(drift.x, drift.z)).toBe(0);
+    expect(WIND_DRIFT.strong).toBeGreaterThan(WIND_DRIFT.breezy);
+    expect(WIND_DRIFT.breezy).toBeGreaterThan(WIND_DRIFT["light-west"]);
+    expect(new Set(all.map((d) => d.wind)).size).toBeGreaterThan(3);
   });
 });
 

@@ -7,6 +7,8 @@ import {
   WAIT_TIGHT_SEC,
   WAIT_TWITCH_AT,
   applyWaitShift,
+  windWalk,
+  WIND_WALK_SEC,
   lureIsWaiting,
   waitBodyLean,
   waitDrift,
@@ -122,3 +124,21 @@ describe("waiting lure", () => {
     }
   });
 });
+
+describe("wind on a sitting float", () => {
+  it("walks the float downwind while it sits, then holds", () => {
+    const wind = { x: 0.07, z: 0 };
+    expect(windWalk(wind, 0)).toEqual({ x: 0, z: 0 });
+    expect(windWalk(wind, 10).x).toBeCloseTo(0.7);
+    expect(windWalk(wind, WIND_WALK_SEC + 30).x).toBeCloseTo(0.07 * WIND_WALK_SEC);
+  });
+
+  it("carries the float off its cast point on a windy day, and not on a calm one", () => {
+    const time = 3.1;
+    const calm = applyWaitShift(0, -6, 5, 8, time, 12);
+    const windy = applyWaitShift(0, -6, 5, 8, time, 12, { x: 0.05, z: 0 });
+    expect(windy.x - calm.x).toBeCloseTo(0.6, 1);
+    expect(windy.z).toBeCloseTo(calm.z);
+  });
+});
+
