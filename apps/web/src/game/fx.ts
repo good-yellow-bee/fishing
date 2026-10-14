@@ -66,7 +66,8 @@ function tone(
   duration: number,
   gain: number,
   when = 0,
-  detune = 0
+  detune = 0,
+  out: AudioNode = bus(),
 ) {
   const ac = audio();
   const t = ac.currentTime + when;
@@ -78,7 +79,7 @@ function tone(
   const g = ac.createGain();
   g.gain.setValueAtTime(gain, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-  osc.connect(g).connect(bus());
+  osc.connect(g).connect(out);
   osc.start(t);
   osc.stop(t + duration);
 }
@@ -152,13 +153,39 @@ function chirp() {
   wildlifeTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
 }
 
-/** A loon's wail across the water: a slow rise, a held note, then a fall. */
+/** Where the visible loon is for the listener; the scene keeps it current. */
+const loonPlace = { pan: 0, gain: 1 };
+const loonListeners = new Set<() => void>();
+
+/** Runs `listener` each time the loon calls; returns the unsubscribe. */
+export function onLoonCall(listener: () => void) {
+  loonListeners.add(listener);
+  return () => {
+    loonListeners.delete(listener);
+  };
+}
+
+/** A loon's wail across the water: a slow rise, a held note, then a fall, from where the loon is. */
 function loonCall() {
   if (!lapSrc || !profile().loons) return;
+  const ac = audio();
+  const level = ac.createGain();
+  level.gain.value = Math.max(0.35, Math.min(1.6, loonPlace.gain * 2));
+  const out: AudioNode = level;
+  if (typeof ac.createStereoPanner === "function") {
+    const panner = ac.createStereoPanner();
+    panner.pan.value = loonPlace.pan;
+    level.connect(panner);
+    panner.connect(bus());
+  } else {
+    level.connect(bus());
+  }
   const base = 520 + Math.random() * 80;
-  tone("sine", base, base * 1.5, 0.9, 0.012);
-  tone("sine", base * 1.5, base * 1.45, 1.1, 0.01, 0.85);
-  tone("sine", base * 1.45, base * 1.1, 0.8, 0.008, 1.9);
+  tone("sine", base, base * 1.5, 0.9, 0.012, 0, 0, out);
+  tone("sine", base * 1.5, base * 1.45, 1.1, 0.01, 0.85, 0, out);
+  tone("sine", base * 1.45, base * 1.1, 0.8, 0.008, 1.9, 0, out);
+  window.setTimeout(() => level.disconnect(), 3000);
+  for (const listener of loonListeners) listener();
   loonTimer = window.setTimeout(loonCall, 14000 + Math.random() * 12000);
 }
 
@@ -262,6 +289,11 @@ const ambient = {
     startRain();
     startWind();
     restartWildlife();
+  },
+  /** The visible loon's place for the listener, so its call comes from where it swims. */
+  setLoonPlace(pan: number, gain: number) {
+    loonPlace.pan = pan;
+    loonPlace.gain = gain;
   },
   /** Safe before the first cast: the sounds start on the first cast, with the latest conditions. */
   setConditions(hour: LakeHour, sky: Sky, season: LakeSeason = "summer") {
