@@ -29,6 +29,8 @@ export type Settings = {
   textSize: TextSize;
   /** Puts the thumb strike button and the cast meter on the left of a touch screen. */
   leftHanded: boolean;
+  /** Solid panels, brighter borders and full-strength text over the lake. */
+  highContrast: boolean;
   /** The lure tied on last, if it is still packed next visit. */
   lastLure: string | null;
 };
@@ -47,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   reduceMotion: false,
   textSize: "normal",
   leftHanded: false,
+  highContrast: false,
   lastLure: null,
 };
 
@@ -79,6 +82,7 @@ export function parseSettings(raw: string | null): Settings {
     reduceMotion: typeof data.reduceMotion === "boolean" ? data.reduceMotion : d.reduceMotion,
     textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
     leftHanded: typeof data.leftHanded === "boolean" ? data.leftHanded : d.leftHanded,
+    highContrast: typeof data.highContrast === "boolean" ? data.highContrast : d.highContrast,
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
 }
@@ -118,9 +122,9 @@ export function subscribeSettings(listener: () => void) {
   };
 }
 
-/** Mirrors the text size and handedness onto <html>, where the stylesheet scales the panels and moves the thumb controls. */
+/** Mirrors the text size, handedness and contrast onto <html>, where the stylesheet scales the panels, moves the thumb controls and firms up the panels. */
 export function useRootSettings() {
-  const { textSize, leftHanded } = useSettings();
+  const { textSize, leftHanded, highContrast } = useSettings();
   useEffect(() => {
     const root = document.documentElement;
     if (textSize === "normal") delete root.dataset.textSize;
@@ -131,6 +135,11 @@ export function useRootSettings() {
     if (leftHanded) root.dataset.hand = "left";
     else delete root.dataset.hand;
   }, [leftHanded]);
+  useEffect(() => {
+    const root = document.documentElement;
+    if (highContrast) root.dataset.contrast = "high";
+    else delete root.dataset.contrast;
+  }, [highContrast]);
 }
 
 export function useSettings() {

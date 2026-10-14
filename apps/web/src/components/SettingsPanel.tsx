@@ -88,6 +88,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           ]}
         />
         <label className="settings-check">
+          <input type="checkbox" checked={current.highContrast} onChange={(event) => updateSettings({ highContrast: event.target.checked })} />
+          {t("High contrast (solid panels and brighter text)")}
+        </label>
+        <label className="settings-check">
           <input type="checkbox" checked={current.leftHanded} onChange={(event) => updateSettings({ leftHanded: event.target.checked })} />
           {t("Left-handed (strike button and cast meter on the left of a touch screen)")}
         </label>

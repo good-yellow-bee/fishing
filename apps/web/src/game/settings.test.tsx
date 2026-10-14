@@ -61,6 +61,10 @@ describe("settings", () => {
     expect(document.documentElement.dataset.hand).toBe("left");
     act(() => updateSettings({ leftHanded: false }));
     expect(document.documentElement.dataset.hand).toBeUndefined();
+    act(() => updateSettings({ highContrast: true }));
+    expect(document.documentElement.dataset.contrast).toBe("high");
+    act(() => updateSettings({ highContrast: false }));
+    expect(document.documentElement.dataset.contrast).toBeUndefined();
     act(() => root.unmount());
   });
 });
