@@ -140,6 +140,10 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           <input type="checkbox" checked={current.leftHanded} onChange={(event) => updateSettings({ leftHanded: event.target.checked })} />
           {t("Left-handed (strike button and cast meter on the left of a touch screen)")}
         </label>
+        <label className="settings-check">
+          <input type="checkbox" checked={current.walkStick} onChange={(event) => updateSettings({ walkStick: event.target.checked })} />
+          {t("Walking stick (a thumb stick for walking on a touch screen)")}
+        </label>
         <Choices
           name="reelMode"
           legend={t("Reeling")}

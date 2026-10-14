@@ -58,6 +58,7 @@ import { SettingsPanel } from "../components/SettingsPanel";
 import { SoundCaptions } from "../components/SoundCaptions";
 import { KeysCard } from "../components/KeysCard";
 import { stormOn } from "../game/scene/storm";
+import { WalkStick } from "../components/WalkStick";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
@@ -643,6 +644,7 @@ export function DockPage() {
         {fishing && !shopOpen && (
           <PowerMeter phase={scenePhase} powerRef={game.powerRef} accuracy={me.profile.accuracy} />
         )}
+        {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
         <p className="hint" aria-live="polite">
           {game.hint}
         </p>

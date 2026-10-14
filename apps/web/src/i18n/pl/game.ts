@@ -24,6 +24,8 @@ export const PL_GAME: PlBook = {
   "Geese honk overhead": "Gęsi gęgają nad głową",
   "A beaver slaps its tail": "Bóbr klepie ogonem o wodę",
   "A swan hisses": "Łabędź syczy",
+  "On a touch screen, a thumb stick at the bottom corner walks the angler. Settings can hide it.": "Na ekranie dotykowym gałka w dolnym rogu prowadzi wędkarza. W Ustawieniach można ją ukryć.",
+  "Walking stick (a thumb stick for walking on a touch screen)": "Drążek chodzenia (gałka pod kciuk do chodzenia na ekranie dotykowym)",
   "Terns call over the water": "Rybitwy krzyczą nad wodą",
   "Grebes patter and call across the water": "Perkozy pluskają i nawołują, pędząc po wodzie",
   "In spring and summer, terns circle and dive over the bubbling fish patch, so you can spot it from across the lake.": "Wiosną i latem rybitwy krążą i nurkują nad bulgoczącym łowiskiem, więc wypatrzysz je z drugiego końca jeziora.",
