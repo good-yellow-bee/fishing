@@ -2083,6 +2083,14 @@ html[data-reduce-motion="1"] .walkthrough li {
   min-height: 32px;
 }
 
+/* A dab of the colour beside each float choice. */
+.settings-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+}
+
 .settings-panel input[type="radio"],
 .settings-panel input[type="checkbox"] {
   accent-color: var(--amber);
