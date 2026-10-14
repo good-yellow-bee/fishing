@@ -30,6 +30,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, hookWindowMs, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
+import { nibblePlan } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** How long a result stays up before a click or Space can cast straight past it. */
@@ -97,8 +98,7 @@ type Timers = {
   wait?: number;
   hook?: number;
   snap?: number;
-  nibble?: number;
-  nibbleOff?: number;
+  nibbles?: number[];
   snag?: number;
 };
 
@@ -183,8 +183,7 @@ export function useFishingGame(
     window.clearTimeout(timers.current.wait);
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
-    window.clearTimeout(timers.current.nibble);
-    window.clearTimeout(timers.current.nibbleOff);
+    timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
     window.clearTimeout(timers.current.snag);
     timers.current = {};
     snagRef.current = null;
@@ -277,10 +276,12 @@ export function useFishingGame(
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current);
-    const nibbleAt = Math.min(wait - 500, wait * 0.5);
+    const nibbles = nibblePlan(wait);
     const arm = () => {
-      if (nibbleAt >= 480) {
-        timers.current.nibble = window.setTimeout(() => {
+      const nibbleTimers: number[] = [];
+      timers.current.nibbles = nibbleTimers;
+      for (const { at, ms } of nibbles) {
+        nibbleTimers.push(window.setTimeout(() => {
           if (phaseRef.current !== "waiting") return;
           setNibble(true);
           const surface = surfaceRef.current;
@@ -292,11 +293,11 @@ export function useFishingGame(
             fx.rodBell("jingle");
             setHint(t("The rod bell jingles. Just a nibble, not yet…"));
           }
-          timers.current.nibbleOff = window.setTimeout(() => {
+          nibbleTimers.push(window.setTimeout(() => {
             setNibble(false);
             if (surface) delete surface.dataset.nibble;
-          }, 280);
-        }, nibbleAt);
+          }, ms));
+        }, at));
       }
       timers.current.wait = window.setTimeout(() => {
         if (phaseRef.current !== "waiting") return;

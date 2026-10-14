@@ -698,11 +698,11 @@ Claude picked these after Wave AA from the review's open "smaller fixes" and an 
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AB1 | Nibbles come at varied times, sometimes a false one, before the bite | bite | S/M |
+| ~~AB1~~ | ~~Nibbles come at varied times before the bite~~ (#181) | bite | S/M |
 | AB2 | Optional captions for lake sounds (thunder, loon, owl, splashes) | accessibility | M |
 | AB3 | Refresh the "New on the lake" card for Wave AB | onboarding | S |
 
-- **AB1 · Unpredictable nibbles.** Today a single 280 ms nibble always lands at half the wait, so the bite's timing can be learned. Instead, one to three nibbles land at seeded, varied times before the bite, each a little different in length, and now and then a fish nibbles and loses interest without biting.
+- **AB1 · Unpredictable nibbles.** Today a single 280 ms nibble always lands at half the wait, so the bite's timing can be learned. Instead, one to three nibbles land at seeded, varied times before the bite, each a little different in length. (The "fish loses interest" part was dropped so catch rates stay the same.)
 - **AB2 · Sound captions.** A Settings toggle shows short captions at the screen's edge for the lake's sounds ("Thunder rolls", "A loon calls", "An owl hoots", "A beaver slaps its tail"), so players who can't hear them still know what is around. Off by default.
 - **AB3 · What's new, again.** List whatever Wave AB lands on the card.
 
