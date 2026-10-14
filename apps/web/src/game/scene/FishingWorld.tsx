@@ -82,7 +82,8 @@ import { missBobberLift, missLineSag, missView, resetMissView } from "./missMoti
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd } from "./fightFish";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
-import { LakeWorld, weatherLook } from "./LakeWorld";
+import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld";
+import { clearDistance, easePull } from "./cameraClear";
 import { PlayerMove } from "./Player";
 import { beatDistance, dollyStep, fightDistance, landingDistance, landingFramed, landingWeight } from "./cameraBeats";
 import { aboard, ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
@@ -265,6 +266,8 @@ function isAiming(phase: ScenePhase) {
 function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, gl } = useThree();
+  /** How far the camera is drawn in toward the target so a hill or tree never sits in front of the angler. */
+  const clip = useMemo(() => ({ pull: 0, applied: false, target: new THREE.Vector3(), saved: new THREE.Vector3() }), []);
   const chest = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
   const follow = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
   const lastFollow = useMemo(() => new THREE.Vector3(DOCK_STAND_X, CHEST_Y + DOCK_PLANKS.top, DOCK_STAND_Z), []);
@@ -295,10 +298,30 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     return () => canvas.removeEventListener("contextmenu", preventMenu);
   }, [gl]);
 
+  // The pull-in sits on top of the free camera from the end of one frame to the start of the next,
+  // so drawing and pointer picks both see it while OrbitControls and the beats keep the player's own distance.
+  // Priority -2 runs before OrbitControls' own update (-1).
+  useFrame(() => {
+    if (!clip.applied) return;
+    camera.position.copy(clip.saved);
+    clip.applied = false;
+  }, -2);
+  const applyPull = () => {
+    if (clip.pull <= 1e-3) return;
+    const distance = camera.position.distanceTo(clip.target);
+    if (distance < 1e-3) return;
+    clip.saved.copy(camera.position);
+    clip.applied = true;
+    camera.position.sub(clip.target).multiplyScalar((distance - clip.pull) / distance).add(clip.target);
+  };
+
   useFrame((state, delta) => {
     const orbit = controls.current;
     if (!orbit) return;
-    if (isFrozen(state.clock.elapsedTime, fightView.freezeUntil)) return;
+    if (isFrozen(state.clock.elapsedTime, fightView.freezeUntil)) {
+      applyPull();
+      return;
+    }
     orbit.enabled = !fighting;
     const t = state.clock.elapsedTime;
     chest.set(anglerPose.x, CHEST_Y + anglerPose.y, anglerPose.z);
@@ -407,6 +430,12 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     heave.current += (heaveTarget - heave.current) * (1 - Math.exp(-10 * delta));
     camera.position.y += heave.current;
     camera.position.add(shakeOffset);
+
+    clip.target.copy(orbit.target);
+    const free = camera.position.distanceTo(orbit.target);
+    const clear = clearDistance(orbit.target, camera.position, CAMERA_HILLS, CAMERA_TREES);
+    clip.pull = easePull(clip.pull, free - clear, delta);
+    applyPull();
   });
 
   return (

@@ -25,6 +25,7 @@ import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { mistAmount } from "./mist";
 import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
+import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
@@ -309,6 +310,28 @@ const CREEK_TREES: Scatter[] = [
   { url: MODELS.oakDark, position: [-29.4, -0.08, -14.6], scale: 4.6, rot: 3.3 },
   { url: MODELS.pineDark, position: [-35.2, -0.08, -16.8], scale: 5, rot: 0.3 },
 ];
+
+/** The three hills behind the far shore: centre and radii of each icosphere. */
+const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
+  { position: [-28, 4.5, -26], scale: [17, 7, 10], day: "#587a5f", night: "#3d5a44" },
+  { position: [-5, 5.2, -30], scale: [20, 8, 10], day: "#628468", night: "#456348" },
+  { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
+];
+
+/** Shack trees, in world space: the group sits at the shack. */
+const SHACK_TREES: Scatter[] = [
+  { url: MODELS.fat, position: [3.4, 0, 1.2], scale: 3.8, rot: 0 },
+  { url: MODELS.oak, position: [-3.2, 0, 1.6], scale: 3.2, rot: 0 },
+];
+
+/** What the camera must not sink into: the hills and every tree on the shore. */
+export const CAMERA_HILLS: HillShape[] = HILLS.map((hill) => ({ center: hill.position, radii: hill.scale }));
+export const CAMERA_TREES: TreeShape[] = [
+  ...TREES,
+  ...BACK_TREES,
+  ...CREEK_TREES,
+  ...SHACK_TREES.map((tree) => ({ ...tree, position: [tree.position[0] + SHOP_X, 0, tree.position[2] + SHOP_Z] as Vec3 })),
+].map((tree) => treeShape(tree.position, tree.scale));
 
 const CREEK_GRASS: Scatter[] = [
   { url: MODELS.grassLarge, position: [-23.1, -0.02, -7.6], scale: 1.6, rot: 0.9 },
@@ -1339,8 +1362,9 @@ function Shack() {
       <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
       <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
       <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
-      <ToonModel url={MODELS.fat} position={[3.4, 0, 1.2]} scale={3.8} sitOnGround />
-      <ToonModel url={MODELS.oak} position={[-3.2, 0, 1.6]} scale={3.2} sitOnGround />
+      {SHACK_TREES.map((tree) => (
+        <ToonModel key={tree.url} url={tree.url} position={tree.position} scale={tree.scale} sitOnGround />
+      ))}
     </group>
   );
 }
@@ -1572,9 +1596,9 @@ export const LakeWorld = memo(function LakeWorld({
       </mesh>
       <LakeSurface spot={spot} hour={hour} weather={weather} />
 
-      <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color={ground(hour === "night" ? "#3d5a44" : "#587a5f")} />
-      <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color={ground(hour === "night" ? "#456348" : "#628468")} />
-      <Hill position={[20, 4.6, -27]} scale={[18, 7, 11]} color={ground(hour === "night" ? "#385640" : "#547459")} />
+      {HILLS.map((hill) => (
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
+      ))}
       <ScatterModels items={BACK_TREES} />
       <ScatterModels items={TREES} />
       <ScatterModels items={BUSHES} />
