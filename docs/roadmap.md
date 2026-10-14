@@ -537,14 +537,32 @@ Claude picked these after Wave R; the owner can reorder or drop any.
 | ~~S1~~ | ~~A separate volume for nature sounds~~ (#149) | settings | S |
 | ~~S2~~ | ~~The heron sometimes catches a fish~~ (#150) | wildlife | M |
 | ~~S3~~ | ~~A moon road on the water on clear nights~~ (#151) | sky | S/M |
-| S4 | Dock planks that darken and shine in the rain | weather | S |
-| S5 | Refresh the "New on the lake" card for Wave S | onboarding | S |
+| ~~S4~~ | ~~Dock planks that darken and shine in the rain~~ (#152) | weather | S |
+| ~~S5~~ | ~~Refresh the "New on the lake" card for Wave S~~ (#152) | onboarding | S |
 
 - **S1 · Nature volume.** Settings gains a "Nature sounds" slider for the lake's own sounds (lapping water, birds, crickets, frogs, geese, loon, owl, rain, wind and thunder), apart from the game's effects (casts, reel, bites, bell). It sits under the main volume and Mute.
 - **S2 · Heron's catch.** About one stab in three now comes up with a small fish held crosswise in the heron's bill; it lifts its head to work the fish down and swallows it. Every stab leaves a ring on the water.
 - **S3 · Moon road.** On clear nights with a bright moon, a broken silver path of glints runs across the water toward the moon, like the sun's road by day. Fainter as the moon wanes; none under cloud.
-- **S4 · Wet dock.** When it rains, the dock and pier planks turn darker and pick up a faint sheen, and dry back as the sky clears.
+- **S4 · Wet dock.** When it rains, the dock and pier planks turn darker, a faint strip of glare runs down the boards, and drops splash on them in small rings. Dry again when the rain stops; snow leaves them dry.
 - **S5 · What's new, again.** List whatever Wave S lands on the card.
+
+## Wave T — Cold mornings and small wonders (added 2026-10-14, after Wave S shipped)
+
+Claude picked these after Wave S; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| T1 | The angler's breath shows on cold mornings | weather | S |
+| T2 | Shooting stars mirrored in the lake on clear nights | sky | S |
+| T3 | Snow settles on the dock in winter | weather | S |
+| T4 | A dewy spider web on the dock rail at dawn | wildlife | S |
+| T5 | Refresh the "New on the lake" card for Wave T | onboarding | S |
+
+- **T1 · Breath.** At dawn, and any time in winter, small pale puffs drift from the angler's face every few seconds and fade. Off with Reduce motion; Lite effects keep every other puff.
+- **T2 · Shooting stars.** On clear nights a meteor now and then streaks across the sky, seen in the lake's mirror like the stars and rainbow, since the dock camera sees little sky. Rare: about one a minute at most.
+- **T3 · Snowy dock.** In winter the dock and pier planks wear a thin white top, and the posts a cap of snow, like the snow on the banks.
+- **T4 · Spider web.** At dawn a small round web strung between two posts of the dock rail catches the low light, beaded with dew that glints. It fades by full day; not in winter.
+- **T5 · What's new, again.** List whatever Wave T lands on the card.
 
 ## Risks / open questions for the owner
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { applyToon, disposeMaterials } from "./toon";
+import { applyToon, disposeMaterials, shadeColours } from "./toon";
 import { tintPlant, type PlantKind } from "./seasonLook";
 
 type Props = {
@@ -14,6 +14,8 @@ type Props = {
   sitOnGround?: boolean;
   /** Plants take the season's colours; anything else ignores it. */
   plant?: { season: LakeSeason; kind: PlantKind; variant: number };
+  /** Multiplies the colours, e.g. to darken wood soaked by rain. */
+  shade?: number;
 };
 
 export function ToonModel({
@@ -24,18 +26,20 @@ export function ToonModel({
   shadows = true,
   sitOnGround = false,
   plant,
+  shade = 1,
 }: Props) {
   const { scene } = useGLTF(url);
   const cloned = useMemo(() => {
     const next = scene.clone(true);
     applyToon(next, shadows);
     if (plant) tintPlant(next, plant.season, plant.kind, plant.variant);
+    if (shade !== 1) shadeColours(next, shade);
     if (sitOnGround) {
       const box = new THREE.Box3().setFromObject(next);
       next.position.y -= box.min.y;
     }
     return next;
-  }, [scene, shadows, sitOnGround, plant?.season, plant?.kind, plant?.variant]);
+  }, [scene, shadows, sitOnGround, plant?.season, plant?.kind, plant?.variant, shade]);
 
   useEffect(() => () => disposeMaterials(cloned), [cloned]);
 
