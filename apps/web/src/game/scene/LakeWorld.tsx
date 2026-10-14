@@ -21,6 +21,7 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { LakeSnow } from "./LakeSnow";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
@@ -1676,7 +1677,8 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {dragonfliesOut(hour, sky, season) &&
         Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
-      {weather.rain && <LakeRain light={weather.rainLight} />}
+      {weather.rain &&
+        (season === "winter" ? <LakeSnow light={weather.rainLight} /> : <LakeRain light={weather.rainLight} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {firefliesOut(hour, sky) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}

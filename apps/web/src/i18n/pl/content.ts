@@ -90,11 +90,13 @@ export const PL_CONTENT: PlBook = {
   "Partly cloudy": "Częściowe zachmurzenie",
   Overcast: "Pochmurno",
   Rain: "Deszcz",
+  Snow: "Śnieg",
   Fog: "Mgła",
   "Bright water. Commons feed, rare fish hang back.": "Jasna woda. Pospolite żerują, rzadkie się chowają.",
   "Mixed light. No fish favored.": "Zmienne światło. Żadna ryba nie ma przewagi.",
   "Gray light. Trout and bass roam.": "Szare światło. Pstrągi i bassy krążą.",
   "Rain on the water. Pike and muskie hunt.": "Deszcz na wodzie. Szczupaki polują.",
+  "Snow on the water. Pike and muskie hunt.": "Śnieg na wodzie. Szczupaki polują.",
   "Fog on the lake. Catfish and burbot stir.": "Mgła nad jeziorem. Sumiki i miętusy się budzą.",
 
   // WIND_LABELS

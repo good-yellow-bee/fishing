@@ -384,6 +384,24 @@ Claude picked these after Wave I; the owner can reorder or drop any.
 - **J4 · Streak.** Each catch now carries the angler's local day. Landing a fish on consecutive local days builds a streak shown on the HUD (from two days) and the catch log, with a "Regular" badge at seven days. The current run survives until a whole day is missed; nothing is taken away. Catches saved before days were sent don't count.
 - **J5 · Weather turns.** About one day in three the sky turns once, on a seeded local hour: clouds build (clear to overcast, overcast to rain) or rain eases in the afternoon, and fog burns off in the morning. The shack's chalk board shows the turn ("Turns overcast around 16:00"), and on the bank it rolls in under the same veil as the hour turnover, waiting for a calm moment. `?sky=` still pins it.
 
+## Wave K — Weather you can feel (added 2026-10-14, after Wave J shipped)
+
+Claude picked these after Wave J; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| K1 | ~~Snow instead of rain in winter~~ (shipped) | weather | M |
+| K2 | Moon phases at night | sky | M |
+| K3 | A loon you can see on the open water | wildlife | M |
+| K4 | Wind that pushes the float | weather/gameplay | M/L |
+| K5 | Larger text setting | accessibility | S |
+
+- **K1 · Snow.** A rainy winter day snows instead: slow flakes drifting over the lake and shore that melt on the water, no rain hiss, and "Snow" on the HUD, the chalk board, the veil line and the catch log. Fish read it as rain, so nothing about the odds changes.
+- **K2 · Moon phases.** The night moon follows the real lunar phase (new to full), its light on the water scales with it, and the chalk board and HUD eyebrow name a full or new moon. A full moon leans rare fish a little more toward night, like the hour does.
+- **K3 · Loon.** The loon you hear at night gets a body: it swims slow loops on open water at dusk and night, dives near the float and comes up somewhere else, and its call plays from where it is.
+- **K4 · Wind.** The day's wind (already in the field log's conditions) sets a direction and strength: the chop and ripples lean with it, and on a breezy or strong day the float drifts slowly downwind while you wait.
+- **K5 · Text size.** A Settings choice for larger text (HUD, cards, panels), kept per browser like the other settings.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

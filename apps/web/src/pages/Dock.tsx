@@ -21,7 +21,6 @@ import {
   GOLDEN_BONUS,
   isGolden,
   LAKE_HOUR_LABELS,
-  SKY_LABELS,
   SEASON_LABELS,
   luresPacked,
   keepPlayTrip,
@@ -31,10 +30,13 @@ import {
   STANCE_LABELS,
   SPOT_LABELS,
   skyAt,
-  SKY_BLURB,
+  isSnow,
+  skyBlurb,
+  skyLabel,
   weatherFromSearch,
   type CatchSubmission,
   type LakeHour,
+  type LakeSeason,
   type Sky,
   type SkillId,
 } from "@stillwater/shared";
@@ -86,9 +88,10 @@ const HOUR_VEIL_MS = 3_200;
 /** A change the lake waits to show until the bank is calm: a new lake hour, or the day's sky turning. */
 type Turn = { kind: "hour"; hour: LakeHour } | { kind: "sky"; from: Sky; sky: Sky };
 
-function skyTurnLine(from: Sky, to: Sky): string {
-  if (to === "rain") return t("Rain starts falling on the water.");
-  if (to === "overcast") return from === "rain" ? t("The rain eases off.") : t("Clouds roll in over the lake.");
+function skyTurnLine(from: Sky, to: Sky, season: LakeSeason): string {
+  if (to === "rain") return isSnow(to, season) ? t("Snow starts falling on the lake.") : t("Rain starts falling on the water.");
+  if (to === "overcast" && from === "rain") return isSnow(from, season) ? t("The snow stops.") : t("The rain eases off.");
+  if (to === "overcast") return t("Clouds roll in over the lake.");
   if (to === "clear" && from === "fog") return t("The fog burns off.");
   return t("The weather turns.");
 }
@@ -407,7 +410,7 @@ export function DockPage() {
     const text = {
       title: t(outcome.species.name),
       detail: `${oneDecimal(outcome.weight)} lb · ${t(SPOT_LABELS[outcome.spot])}`,
-      conditions: [t(LAKE_HOUR_LABELS[hour]), t(SKY_LABELS[sky]), t(SEASON_LABELS[season])].join(" · "),
+      conditions: [t(LAKE_HOUR_LABELS[hour]), t(skyLabel(sky, season)), t(SEASON_LABELS[season])].join(" · "),
       date: now.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
     };
     saveShareCard(text, photo, shareCardFileName(outcome.species.id, now)).catch(() => setShareError(true));
@@ -788,8 +791,8 @@ export function DockPage() {
         )}
         {veil && (
           <div className="hour-veil" key={veil.kind === "hour" ? veil.hour : `sky-${veil.sky}`} role="status">
-            <strong>{veil.kind === "hour" ? hourTurnLine(veil.hour) : skyTurnLine(veil.from, veil.sky)}</strong>
-            <span>{t(veil.kind === "hour" ? LAKE_HOUR_BLURB[veil.hour] : SKY_BLURB[veil.sky])}</span>
+            <strong>{veil.kind === "hour" ? hourTurnLine(veil.hour) : skyTurnLine(veil.from, veil.sky, season)}</strong>
+            <span>{t(veil.kind === "hour" ? LAKE_HOUR_BLURB[veil.hour] : skyBlurb(veil.sky, season))}</span>
           </div>
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
