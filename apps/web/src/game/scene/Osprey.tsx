@@ -1,7 +1,8 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fx } from "../fx";
+import { mergePainted } from "./mergeParts";
 import { OSPREY_CYCLE_SEC, ospreyAt, ospreyStrikeAt } from "./ospreyFlight";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -10,6 +11,7 @@ import { waterHeight } from "./water";
 const BACK = "#4a3a2c";
 const BELLY = "#f1ece2";
 const FISH = "#b9c4c8";
+const BILL = "#2a2420";
 const SPLASH = "#eef6f6";
 /** A touch larger than life, so it reads against the hills. */
 const SCALE = 1.8;
@@ -22,24 +24,28 @@ const SPRAY = [
   [0.15, 1.2],
 ] as const;
 
-function Wing({ side, wing }: { side: 1 | -1; wing: (g: THREE.Group | null) => void }) {
-  return (
-    <group ref={wing} position={[side * 0.06, 0.03, 0.02]}>
-      {/* Inner wing out to the wrist, then the long hand angled back: the osprey's crooked "M". */}
-      <mesh position={[side * 0.17, 0, 0]} rotation={[0, side * -0.15, side * 0.12]} castShadow>
-        <boxGeometry args={[0.34, 0.025, 0.17]} />
-        <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[side * 0.17, -0.014, 0]} rotation={[0, side * -0.15, side * 0.12]}>
-        <boxGeometry args={[0.33, 0.006, 0.15]} />
-        <meshToonMaterial color={BELLY} gradientMap={toonRamp()} />
-      </mesh>
-      <mesh position={[side * 0.47, 0.02, -0.08]} rotation={[0, side * 0.45, side * -0.12]} castShadow>
-        <boxGeometry args={[0.32, 0.02, 0.12]} />
-        <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-      </mesh>
-    </group>
-  );
+/** The body, head, bill and tail bake into one shape; each wing's inner part, its pale underside and the long hand into another. */
+export function ospreyShapes() {
+  const wing = (side: 1 | -1) =>
+    mergePainted([
+      // Inner wing out to the wrist, then the long hand angled back: the osprey's crooked "M".
+      { geometry: new THREE.BoxGeometry(0.34, 0.025, 0.17), position: [side * 0.17, 0, 0], rotation: [0, side * -0.15, side * 0.12], color: BACK },
+      { geometry: new THREE.BoxGeometry(0.33, 0.006, 0.15), position: [side * 0.17, -0.014, 0], rotation: [0, side * -0.15, side * 0.12], color: BELLY },
+      { geometry: new THREE.BoxGeometry(0.32, 0.02, 0.12), position: [side * 0.47, 0.02, -0.08], rotation: [0, side * 0.45, side * -0.12], color: BACK },
+    ]);
+  return {
+    body: mergePainted([
+      { geometry: new THREE.SphereGeometry(1, 10, 8), scale: [0.07, 0.06, 0.2], color: BELLY },
+      { geometry: new THREE.SphereGeometry(1, 10, 8), position: [0, 0.02, -0.02], scale: [0.066, 0.045, 0.19], color: BACK },
+      { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, 0.03, 0.21], scale: [0.05, 0.05, 0.06], color: BELLY },
+      { geometry: new THREE.ConeGeometry(0.014, 0.05, 6), position: [0, 0.03, 0.27], rotation: [Math.PI / 2, 0, 0], color: BILL },
+      { geometry: new THREE.SphereGeometry(1, 8, 4), position: [0, 0.0, -0.24], scale: [0.06, 0.012, 0.09], color: BACK },
+    ]),
+    right: wing(1),
+    left: wing(-1),
+    fish: new THREE.SphereGeometry(1, 8, 6),
+    drop: new THREE.SphereGeometry(1, 6, 5),
+  };
 }
 
 /** An osprey that circles low over the lake on fine days and plunges for a fish. */
@@ -51,6 +57,21 @@ export function Osprey() {
   const splash = useRef<THREE.Group>(null);
   const ringMaterial = useRef<THREE.MeshBasicMaterial>(null);
   const heard = useRef(-1);
+  const shapes = useMemo(ospreyShapes, []);
+  const looks = useMemo(
+    () => ({
+      painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
+      fish: new THREE.MeshToonMaterial({ color: FISH, gradientMap: toonRamp() }),
+      drop: new THREE.MeshBasicMaterial({ color: SPLASH, transparent: true, opacity: 0.85 }),
+    }),
+    [],
+  );
+  useEffect(
+    () => () => {
+      [...Object.values(shapes), ...Object.values(looks)].forEach((thing) => thing.dispose());
+    },
+    [shapes, looks],
+  );
 
   useFrame((state) => {
     const body = bird.current;
@@ -92,33 +113,15 @@ export function Osprey() {
   return (
     <>
       <group ref={bird} name="osprey" scale={SCALE} visible={false}>
-        <mesh scale={[0.07, 0.06, 0.2]} castShadow>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={BELLY} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.02, -0.02]} scale={[0.066, 0.045, 0.19]}>
-          <sphereGeometry args={[1, 10, 8]} />
-          <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.03, 0.21]} scale={[0.05, 0.05, 0.06]}>
-          <sphereGeometry args={[1, 8, 6]} />
-          <meshToonMaterial color={BELLY} gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.03, 0.27]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[0.014, 0.05, 6]} />
-          <meshToonMaterial color="#2a2420" gradientMap={toonRamp()} />
-        </mesh>
-        <mesh position={[0, 0.0, -0.24]} scale={[0.06, 0.012, 0.09]}>
-          <sphereGeometry args={[1, 8, 4]} />
-          <meshToonMaterial color={BACK} gradientMap={toonRamp()} />
-        </mesh>
-        <Wing side={1} wing={(g) => void (wings.current[0] = g)} />
-        <Wing side={-1} wing={(g) => void (wings.current[1] = g)} />
+        <mesh geometry={shapes.body} material={looks.painted} castShadow />
+        <group ref={(g) => void (wings.current[0] = g)} position={[0.06, 0.03, 0.02]}>
+          <mesh geometry={shapes.right} material={looks.painted} castShadow />
+        </group>
+        <group ref={(g) => void (wings.current[1] = g)} position={[-0.06, 0.03, 0.02]}>
+          <mesh geometry={shapes.left} material={looks.painted} castShadow />
+        </group>
         {/* The catch, held head first in its talons. */}
-        <mesh ref={fish} position={[0, -0.08, 0.02]} scale={[0.03, 0.035, 0.13]} visible={false}>
-          <sphereGeometry args={[1, 8, 6]} />
-          <meshToonMaterial color={FISH} gradientMap={toonRamp()} />
-        </mesh>
+        <mesh ref={fish} geometry={shapes.fish} material={looks.fish} position={[0, -0.08, 0.02]} scale={[0.03, 0.035, 0.13]} visible={false} />
       </group>
       <group ref={splash} visible={false}>
         <mesh rotation={[-Math.PI / 2, 0, 0]} renderOrder={4}>
@@ -126,10 +129,7 @@ export function Osprey() {
           <meshBasicMaterial ref={ringMaterial} color={SPLASH} transparent opacity={0} depthWrite={false} />
         </mesh>
         {SPRAY.map((_, i) => (
-          <mesh key={i} scale={0.08}>
-            <sphereGeometry args={[1, 6, 5]} />
-            <meshBasicMaterial color={SPLASH} transparent opacity={0.85} />
-          </mesh>
+          <mesh key={i} geometry={shapes.drop} material={looks.drop} scale={0.08} />
         ))}
       </group>
     </>
