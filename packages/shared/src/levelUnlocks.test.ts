@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, canPreviewFish, LEVEL_THRESHOLDS } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, LEVEL_THRESHOLDS } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -52,5 +52,19 @@ describe("level unlock boundaries", () => {
       }
       expect(rollWeight(species, 8, () => 1, 8)).toBe(species.maxWeight);
     }
+  });
+});
+
+describe("anglerTitle", () => {
+  it("gives every level its own title, Greenhorn to Lake legend", () => {
+    const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
+    expect(titles[0]).toBe("Greenhorn");
+    expect(titles.at(-1)).toBe("Lake legend");
+    expect(new Set(titles).size).toBe(titles.length);
+  });
+
+  it("clamps levels outside the ladder", () => {
+    expect(anglerTitle(0)).toBe("Greenhorn");
+    expect(anglerTitle(99)).toBe("Lake legend");
   });
 });

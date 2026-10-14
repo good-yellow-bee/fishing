@@ -463,7 +463,7 @@ Claude picked these after Wave N; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | O1 | ~~"New on the lake" card for returning anglers~~ (shipped) | onboarding | S |
-| O2 | Angler titles by level | progression | S |
+| ~~O2~~ | ~~Angler titles by level~~ (#133) | progression | S |
 | O3 | Photo mode: hide the panels with H | QoL | S |
 | O4 | Thunder and lightning on stormy rain days | weather | M |
 | O5 | An otter along the far bank at dawn and dusk | wildlife | M |
