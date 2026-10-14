@@ -228,6 +228,8 @@ describe("frogs", () => {
   });
 
   it("add their calls to a summer dusk and go quiet when fall comes", () => {
+    // Pinned: the calls and their gaps are random, and a run of single peeps once left too few to count.
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
     fx.ambient.setConditions("dusk", "clear", "fall");
     fx.ambient.start();
     vi.advanceTimersByTime(20_000);

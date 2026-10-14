@@ -28,6 +28,7 @@ import type { Hotspot } from "../hotspot";
 import { ShoreTracks } from "./ShoreTracks.tsx";
 import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
+import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
@@ -1871,6 +1872,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {rising && <RiseRings spot={spot} />}
+      {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />
       {storm && <Lightning />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />

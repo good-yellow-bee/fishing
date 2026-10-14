@@ -482,13 +482,13 @@ Claude picked these after Wave O; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~P1~~ | ~~A keys and buttons card on "?"~~ (#137) | QoL | S |
 | ~~P2~~ | ~~Autumn leaves drifting down onto the water~~ (#138) | seasons | M |
-| P3 | A mayfly hatch on spring and summer evenings | wildlife | M |
-| P4 | Water lilies in flower through the summer | seasons | S |
+| ~~P3~~ | ~~A mayfly hatch on spring and summer evenings~~ (#139) | wildlife | M |
+| ~~P4~~ | ~~Water lilies in flower through the summer~~ (#139) | seasons | S |
 | P5 | Refresh the "New on the lake" card for Waves O and P | onboarding | S |
 
 - **P1 · Keys card.** "?" (and a Settings button) opens a small card listing every key and pad button: Space, the mouse, W A S D, E, H, Escape. Escape or "?" closes it.
 - **P2 · Falling leaves.** In fall, now and then a leaf spins down from the shore trees and settles on the water, drifting with the day's wind before it sinks. Fewer with Effects set to Lite.
-- **P3 · Mayfly hatch.** On spring and summer dusks with little wind, small pale flies dance low over the water near the reeds; the evening rise already brings the fish up to meet them.
+- **P3 · Mayfly hatch.** Whenever the evening rise is on (calm or light-wind dry dusks in spring and summer), small pale flies dance over the water in reach of the bank, a quick climb and a slow parachute down, among the rising fish.
 - **P4 · Lilies in flower.** The lily pads by the reeds carry white and pink flowers in summer, a few buds in late spring, and none in fall or winter.
 - **P5 · What's new, again.** Bump the card's batch to list titles, photo mode, storms and the otter, plus whatever Wave P lands.
 
