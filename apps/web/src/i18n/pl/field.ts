@@ -120,6 +120,7 @@ export const PL_FIELD: PlBook = {
   "Delete this outing? Its fish stay in the book.": "Usunąć tę wyprawę? Jej ryby zostaną w dzienniku.",
   "Add a catch": "Dodaj połów",
   Tackle: "Sprzęt",
+  "Tackle for {trip}": "Sprzęt na {trip}",
   "Fish on this outing": "Ryby z tej wyprawy",
   "Nothing logged for this trip yet.": "Na tej wyprawie nic jeszcze nie zapisano.",
   "Add a spot first so the outing has a water.": "Najpierw dodaj łowisko, żeby wyprawa miała swoją wodę.",

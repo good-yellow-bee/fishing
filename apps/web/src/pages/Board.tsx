@@ -62,15 +62,15 @@ export function BoardPage() {
       .catch(() => setRecords([]));
   }, []);
 
-  if (error) return <div className="log-page">{errorText(error)}</div>;
-  if (!board) return <div className="log-page">{t("Reading the lodge board…")}</div>;
+  if (error) return <main className="log-page">{errorText(error)}</main>;
+  if (!board) return <main className="log-page">{t("Reading the lodge board…")}</main>;
 
   const you = board.you;
   const week = board.period === "week";
   const points = week ? t("This week") : t("Lifetime");
 
   return (
-    <div className="log-page board-page">
+    <main className="log-page board-page">
       <p>
         <Link to="/play">{t("Back to the dock")}</Link>
         {" · "}
@@ -178,6 +178,6 @@ export function BoardPage() {
           </ul>
         )}
       </section>
-    </div>
+    </main>
   );
 }

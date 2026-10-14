@@ -30,7 +30,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
           {spot ? ` · ${spot.name}` : ""}
         </span>
       </div>
-      <TackleList tripId={trip.id} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} />
     </section>
   );
 }

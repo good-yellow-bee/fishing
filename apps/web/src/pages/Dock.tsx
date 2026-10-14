@@ -611,7 +611,7 @@ export function DockPage() {
   };
 
   if (!me) {
-    return <div className="dock-page">{error || t("Walking the planks…")}</div>;
+    return <main className="dock-page">{error || t("Walking the planks…")}</main>;
   }
 
   const dropoffOpen = canUseSpot("dropoff", me.level);
@@ -629,7 +629,7 @@ export function DockPage() {
         : t(STANCE_LABELS[game.stance]);
 
   return (
-    <div className="dock-page" data-photo={photo ? "1" : undefined}>
+    <main className="dock-page" data-photo={photo ? "1" : undefined}>
       {photo && (
         <button className="photo-exit" type="button" {...photoDrag.handlers} onClick={() => photoDrag.tapped() && setPhoto(false)}>
           <span>{t("Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.")}</span>
@@ -987,6 +987,6 @@ export function DockPage() {
           onClose={closeRecap}
         />
       )}
-    </div>
+    </main>
   );
 }

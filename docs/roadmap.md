@@ -981,6 +981,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BI1~~ | ~~Each duck's body, head and bill baked into one shape (duckShapes.ts), each spring duckling likewise (3 draws to 1), wings share one box and material; each pad frog's body, eyes and legs baked into one shape beside its puffing throat (8 draws to 2); summer day 327 to 318~~ (#222) | performance | S |
 
+## Wave BJ — Landmarks for screen readers (added 2026-10-14, after Wave BI shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BJ1~~ | ~~axe scan of every page: the dock, catch log and lodge board now sit in a `main` landmark, and each trip's tackle list on the gear page has its own name ("Tackle for {trip}"); all twelve pages scan clean~~ (#223) | accessibility | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
