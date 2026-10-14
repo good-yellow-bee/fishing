@@ -975,6 +975,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BH1~~ | ~~Osprey baked into a body and two wings (11 draws to 4 with the held fish); beaver's back, head and branch into one shape (14 to 2); otter into one shape (10 to 1); splash drops share one geometry and material~~ (#221) | performance | S |
 
+## Wave BI — Fewer draws for the ducks and pad frogs (added 2026-10-14, after Wave BH shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BI1~~ | ~~Each duck's body, head and bill baked into one shape (duckShapes.ts), each spring duckling likewise (3 draws to 1), wings share one box and material; each pad frog's body, eyes and legs baked into one shape beside its puffing throat (8 draws to 2); summer day 327 to 318~~ (#222) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

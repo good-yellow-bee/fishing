@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type * as THREE from "three";
 import { beaverShapes } from "./Beaver";
+import { duckShape, ducklingShape } from "./duckShapes";
+import { frogShape } from "./PadFrog";
 import { grebeShapes } from "./Grebes";
 import { heronShapes } from "./Heron";
 import { loonShapes } from "./Loon";
@@ -35,6 +37,9 @@ describe("baked creatures", () => {
     expect(tones(osprey.left)).toBe(2);
     expect(tones(beaverShapes().body)).toBe(4);
     expect(tones(otterShape())).toBe(3);
+    expect(tones(duckShape("#8a6842", "#3f7d6d"))).toBe(3);
+    expect(tones(ducklingShape())).toBe(3);
+    expect(tones(frogShape())).toBe(2);
   });
 
   it("reaches the heron's legs down to its feet and the owl's tree up past its perch", () => {
