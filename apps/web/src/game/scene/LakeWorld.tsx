@@ -24,6 +24,8 @@ import { LakeRain } from "./LakeRain";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
+import { Lanterns } from "./Lanterns";
+import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
@@ -1678,6 +1680,7 @@ export const LakeWorld = memo(function LakeWorld({
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {firefliesOut(hour, sky) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
+      {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </SeasonContext.Provider>
   );
