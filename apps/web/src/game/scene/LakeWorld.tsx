@@ -5,7 +5,8 @@ import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
-import { toonRamp } from "./toon";
+import { applyToon, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
+import { batchPlaced, placement } from "./scatterBatch";
 import {
   BANK_BOARDS,
   BANK_POST,
@@ -100,7 +101,7 @@ import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
 import { Stars } from "./Stars";
-import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
+import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { fx } from "../fx";
 import { useSettings } from "../settings";
@@ -1583,18 +1584,42 @@ function BankWalks() {
   );
 }
 
+/** Matrix for one pier board; unit geometry keeps the deck in two draw calls, one per plank colour. */
+export function pierPlankMatrix(index: number) {
+  const board = PIER_BOARDS[index]!;
+  return new THREE.Matrix4().compose(
+    new THREE.Vector3(board.x, PIER_TOP - PIER_THICK / 2 + (index % 2) * 0.001, board.z),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(0, board.yaw, 0)),
+    new THREE.Vector3(board.halfX * 2, PIER_THICK, board.halfZ * 2),
+  );
+}
+
+/** Board indices for each of the two plank colours, alternating as they always have. */
+export const PIER_PLANK_BATCHES = [0, 1].map((parity) => PIER_BOARDS.map((_, i) => i).filter((i) => i % 2 === parity));
+
+function PierPlanks({ color, boards }: { color: THREE.Color; boards: readonly number[] }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+
+  useLayoutEffect(() => {
+    const deck = mesh.current;
+    if (!deck) return;
+    boards.forEach((index, instance) => deck.setMatrixAt(instance, pierPlankMatrix(index)));
+    deck.instanceMatrix.needsUpdate = true;
+    deck.computeBoundingBox();
+    deck.computeBoundingSphere();
+  }, [boards]);
+
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, boards.length]} castShadow receiveShadow>
+      <boxGeometry />
+      <meshToonMaterial color={color} gradientMap={toonRamp()} />
+    </instancedMesh>
+  );
+}
+
 function PierDeck({ shade }: { shade: number }) {
-  return PIER_BOARDS.map((board, i) => (
-    <mesh
-      key={i}
-      position={[board.x, PIER_TOP - PIER_THICK / 2 + (i % 2) * 0.001, board.z]}
-      rotation={[0, board.yaw, 0]}
-      castShadow
-      receiveShadow
-    >
-      <boxGeometry args={[board.halfX * 2, PIER_THICK, board.halfZ * 2]} />
-      <meshToonMaterial color={new THREE.Color(PIER_PLANK[i % 2]).multiplyScalar(shade)} gradientMap={toonRamp()} />
-    </mesh>
+  return PIER_PLANK_BATCHES.map((boards, parity) => (
+    <PierPlanks key={parity} boards={boards} color={new THREE.Color(PIER_PLANK[parity]).multiplyScalar(shade)} />
   ));
 }
 
@@ -1771,20 +1796,34 @@ function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
   ));
 }
 
+/** A scatter list drawn as instanced meshes: one draw per model part, however many copies stand around the lake. */
 function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?: boolean }) {
   const season = useContext(SeasonContext);
-  return items.map((item, i) => (
-    <ToonModel
-      key={`${item.url}-${i}`}
-      url={item.url}
-      position={item.position}
-      rotation={[0, item.rot, 0]}
-      scale={item.scale}
-      shadows={shadows}
-      sitOnGround
-      plant={PLANT_KIND[item.url] ? { season, kind: PLANT_KIND[item.url]!, variant: plantVariant(item.position) } : undefined}
-    />
-  ));
+  const urls = useMemo(() => [...new Set(items.map((item) => item.url))], [items]);
+  const models = useGLTF(urls);
+  const batches = useMemo(() => {
+    const byUrl = new Map(urls.map((url, i) => [url, models[i]!.scene]));
+    const placed = items.map((item) => {
+      // Prepared exactly as ToonModel prepares a single copy.
+      const root = byUrl.get(item.url)!.clone(true);
+      applyToon(root, shadows);
+      const kind = PLANT_KIND[item.url];
+      if (kind) tintPlant(root, season, kind, plantVariant(item.position));
+      const box = new THREE.Box3().setFromObject(root);
+      root.position.y -= box.min.y;
+      shareMaterials(root);
+      return { root, matrix: placement(item.position, item.rot, item.scale) };
+    });
+    return { placed, meshes: batchPlaced(placed) };
+  }, [items, urls, models, shadows, season]);
+  useEffect(
+    () => () => {
+      batches.placed.forEach(({ root }) => releaseSharedMaterials(root));
+      batches.meshes.forEach((mesh) => mesh.dispose());
+    },
+    [batches],
+  );
+  return batches.meshes.map((mesh) => <primitive key={mesh.uuid} object={mesh} />);
 }
 
 const CALM = { x: 0, z: 0 };

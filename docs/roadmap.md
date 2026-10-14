@@ -775,6 +775,16 @@ Claude picked these; swans weren't on the lake yet. The owner can reorder or dro
 | ~~AH2~~ | ~~A cast landing near the swans makes the nearer one raise its wings and hiss~~ (#192; swapped in for gulls snatching fish, since the osprey already plunges for fish) | ambient life | S |
 | ~~AH3~~ | ~~Refresh the "New on the lake" card for Wave AH~~ (#192) | onboarding | S |
 
+## Wave AI — Fewer draw calls (added 2026-10-14, after Wave AH shipped)
+
+Claude measured about 627 draw calls a frame on a summer day (Full effects) and picked the biggest easy cuts. Nothing should change on screen.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AI1~~ | ~~The trees, bushes and grass scattered around the lake draw as instanced meshes, one draw per model part~~ (#193) | performance | M |
+| ~~AI2~~ | ~~The pier's approach boards draw in two instanced batches instead of one mesh and material each~~ (#193: 627 to 531 draws a frame) | performance | S |
+| AI3 | The approach walkway stops dipping under the swell when the waves run high | fix | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
