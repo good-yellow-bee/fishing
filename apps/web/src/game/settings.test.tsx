@@ -34,6 +34,11 @@ describe("settings", () => {
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, volume: 1, shake: "soft", shadows: false, reelMode: "toggle" });
   });
 
+  it("keeps a known float colour and drops an unknown one", () => {
+    expect(parseSettings(JSON.stringify({ floatColour: "yellow" })).floatColour).toBe("yellow");
+    expect(parseSettings(JSON.stringify({ floatColour: "plaid" })).floatColour).toBe(DEFAULT_SETTINGS.floatColour);
+  });
+
   it("remembers a change for the next visit", () => {
     updateSettings({ reelMode: "toggle", lastLure: "Mepps spinner" });
     expect(settings.reelMode).toBe("toggle");

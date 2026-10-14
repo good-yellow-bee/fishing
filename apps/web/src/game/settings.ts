@@ -1,4 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
+import { FLOAT_COLOURS, type FloatColour } from "./scene/floatColour";
 
 /**
  * Player settings, remembered in this browser. Frame loops read the live
@@ -31,6 +32,8 @@ export type Settings = {
   leftHanded: boolean;
   /** Solid panels, brighter borders and full-strength text over the lake. */
   highContrast: boolean;
+  /** The float's body colour; the white cap and night tip stay as they are. */
+  floatColour: FloatColour;
   /** The lure tied on last, if it is still packed next visit. */
   lastLure: string | null;
 };
@@ -50,6 +53,7 @@ export const DEFAULT_SETTINGS: Settings = {
   textSize: "normal",
   leftHanded: false,
   highContrast: false,
+  floatColour: "blue",
   lastLure: null,
 };
 
@@ -83,6 +87,7 @@ export function parseSettings(raw: string | null): Settings {
     textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
     leftHanded: typeof data.leftHanded === "boolean" ? data.leftHanded : d.leftHanded,
     highContrast: typeof data.highContrast === "boolean" ? data.highContrast : d.highContrast,
+    floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
 }

@@ -516,13 +516,13 @@ Claude picked these after Wave Q; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| R1 | Pick your float's colour in Settings | personal | S |
+| ~~R1~~ | ~~Pick your float's colour in Settings~~ (#145) | personal | S |
 | R2 | A turtle sunning on a log on summer days | wildlife | M |
 | R3 | An owl on a bare branch that hoots after dark | wildlife | M |
 | R4 | Now and then a fish jumps clear out on the open water | lake | S/M |
 | R5 | Refresh the "New on the lake" card for Wave R | onboarding | S |
 
-- **R1 · Float colour.** Settings gains a row of float colours (red, yellow, green, white, orange), remembered in this browser. The float's top takes the colour; the pale night tip stays so it still reads after dark.
+- **R1 · Float colour.** Settings gains a row of float colours (blue, red, orange, yellow, green, purple), remembered in this browser. The float's body takes the colour by sliding its UVs to another swatch of the shared palette; the white cap and the night glow tip stay.
 - **R2 · Turtle.** On warm summer days, a turtle basks on a half-sunk log near the west bank, now and then stretching its neck. A cast landing close and it slides off into the water with a little splash, then climbs back a while later.
 - **R3 · Owl.** After dark outside winter, an owl sits on a bare branch at the edge of the near trees, turns its head now and then, and gives a soft two-note hoot every so often (muted with the rest of the sound).
 - **R4 · Jumping fish.** Every minute or two, a fish flips clear of the water somewhere out on the open lake with a splash ring, more often at dawn and dusk. Off with Reduce motion. Purely for looks: it never marks a bite.

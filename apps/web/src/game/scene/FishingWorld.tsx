@@ -106,7 +106,7 @@ import {
 import { markSplash } from "./duckFlush";
 import { releaseDrop, releaseEntry, releasePitch, releasePoint, releaseRing } from "./releaseMotion";
 import { bobberRingHeight, waterHeight, waterRayHit } from "./water";
-import { ToonModel } from "./ToonModel";
+import { applyToon, disposeMaterials } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
 import { listenForWaterAim } from "./pointerAim";
@@ -115,7 +115,8 @@ import { GLOW_TIP, lineLook } from "./lineLook";
 import { castRing, CAST_RING_COLORS } from "./castRing";
 import { LIFT_START_AGE, liftDepth, liftFlop } from "./catchLift";
 import { sweetBand } from "../logic";
-import { settings, SHAKE_SCALE, updateSettings } from "../settings";
+import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
+import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 
@@ -1091,6 +1092,38 @@ function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: 
   );
 }
 
+/** The float, its body painted the colour picked in Settings. */
+function FloatModel() {
+  const colour = useSettings().floatColour;
+  const { scene } = useGLTF(BUOY_URL);
+  const model = useMemo(() => {
+    const next = scene.clone(true);
+    next.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh)) return;
+      // The clone shares geometry with the cached model, so repaint a copy.
+      obj.geometry = obj.geometry.clone();
+      const uv = obj.geometry.getAttribute("uv") as THREE.BufferAttribute | undefined;
+      if (uv) recolourFloatUvs(uv.array as Float32Array, colour);
+    });
+    applyToon(next);
+    return next;
+  }, [scene, colour]);
+  useEffect(
+    () => () => {
+      model.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) obj.geometry.dispose();
+      });
+      disposeMaterials(model);
+    },
+    [model],
+  );
+  return (
+    <group scale={0.32}>
+      <primitive object={model} />
+    </group>
+  );
+}
+
 function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND }: LineAndBobberProps) {
   const look = lineLook(hour);
   const restOpacity = useRef(look.opacity);
@@ -1541,7 +1574,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       </mesh>
       <group ref={bobber} visible={false}>
         <group ref={lure}>
-          <ToonModel url={BUOY_URL} scale={0.32} />
+          <FloatModel />
           {look.glowTip && (
             <group position={[0, GLOW_TIP_Y, 0]}>
               <mesh>

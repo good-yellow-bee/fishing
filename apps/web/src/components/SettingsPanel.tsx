@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { updateSettings, useSettings, type Settings } from "../game/settings";
 import { setLang, useLang, useT, type Lang } from "../i18n";
+import { FLOAT_COLOURS, FLOAT_SWATCH_HEX, type FloatColour } from "../game/scene/floatColour";
 
 type Choice<K extends keyof Settings> = { value: Settings[K]; label: string };
 
@@ -38,6 +39,33 @@ function LanguageChoice() {
         <label key={value} lang={value}>
           <input type="radio" name="lang" checked={lang === value} onChange={() => setLang(value)} />
           {LANGUAGE_NAMES[value]}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+const FLOAT_COLOUR_NAMES: Record<FloatColour, string> = {
+  blue: "Blue",
+  red: "Red",
+  orange: "Orange",
+  yellow: "Yellow",
+  green: "Green",
+  purple: "Purple",
+};
+
+/** A row of swatches for the float's body. */
+function FloatColourChoice() {
+  const current = useSettings().floatColour;
+  const t = useT();
+  return (
+    <fieldset className="settings-choices">
+      <legend>{t("Float colour")}</legend>
+      {FLOAT_COLOURS.map((colour) => (
+        <label key={colour} title={t(FLOAT_COLOUR_NAMES[colour])}>
+          <input type="radio" name="floatColour" checked={current === colour} onChange={() => updateSettings({ floatColour: colour })} />
+          <span className="settings-swatch" style={{ background: FLOAT_SWATCH_HEX[colour] }} aria-hidden="true" />
+          {t(FLOAT_COLOUR_NAMES[colour])}
         </label>
       ))}
     </fieldset>
@@ -104,6 +132,7 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
             { value: "toggle", label: t("Tap to start and stop") },
           ]}
         />
+        <FloatColourChoice />
         <Choices
           name="shake"
           legend={t("Camera shake")}
