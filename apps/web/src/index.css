@@ -1040,6 +1040,19 @@ kbd {
   font-size: 28px;
 }
 
+.landed-card .guide-fish {
+  width: 104px;
+  margin: 0 auto 8px;
+}
+
+.landed-card .catch-lore {
+  max-width: 32ch;
+  margin: 0 auto 12px;
+  color: #6f6352;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .landed-card .catch-lure {
   margin: 2px 0 8px;
   font-size: 15px;
@@ -1273,6 +1286,18 @@ kbd {
   border-left: 2px solid var(--amber);
 }
 
+.log-fish {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-fish .guide-fish {
+  flex-shrink: 0;
+  width: 48px;
+  margin: 0;
+}
+
 .board-page {
   overflow-x: auto;
 }
@@ -1370,6 +1395,12 @@ kbd {
   font-size: 11px;
 }
 
+.guide-card .guide-lore {
+  margin-bottom: 8px;
+  color: var(--paper-dim);
+  line-height: 1.4;
+}
+
 .guide-card .rarity-tag {
   display: inline-block;
   font-size: 11px;
@@ -1395,8 +1426,21 @@ kbd {
 .guide-fish {
   display: block;
   width: 78px;
-  height: 34px;
+  max-width: 100%;
+  height: auto;
   margin-bottom: 8px;
+}
+
+.guide-fish.shadow-small {
+  width: 48px;
+}
+
+.guide-fish.shadow-medium {
+  width: 62px;
+}
+
+.guide-fish.shadow-huge {
+  width: 94px;
 }
 
 .guide-card.rarity-common {

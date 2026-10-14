@@ -13,12 +13,11 @@ import {
   type SpotId,
 } from "@stillwater/shared";
 import { bestHourFor, lureSizeFor, type LureSize } from "../game/logic";
+import { FishMark } from "./FishMark";
 
 type Props = {
   stats: CatchStat[];
 };
-
-const SILHOUETTE = "M6 18C16 7 36 4 52 12L74 5L65 18L74 31L52 24C36 32 16 29 6 18Z";
 
 const SHADOW_LABELS: Record<ShadowSize, string> = {
   small: "Small shadow",
@@ -32,14 +31,6 @@ const LURE_LABELS: Record<LureSize, string> = {
   large: "big lure",
   either: "any lure",
 };
-
-function FishMark({ known, color }: { known: boolean; color: string }) {
-  return (
-    <svg className="guide-fish" viewBox="0 0 80 36" aria-hidden>
-      <path d={SILHOUETTE} fill={known ? color : "#161310"} stroke={known ? "none" : "#6d675c"} strokeWidth={known ? 0 : 1.2} />
-    </svg>
-  );
-}
 
 /** The lure classes that pull a species harder, with the hours they work, e.g. "Live bait (night), Spoon". */
 function drawsOn(speciesId: string): string {
@@ -57,12 +48,13 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
   const trophyLanded = entry.heaviest !== null && isTrophyWeight(species, entry.heaviest);
   return (
     <article className={`guide-card ${known ? `rarity-${species.rarity}` : "unknown"}`}>
-      <FishMark known={known} color={species.color} />
+      <FishMark known={known} species={species} />
       {known ? <span className="rarity-tag">{species.rarity}</span> : <span className="rarity-tag">unlogged</span>}
       {trophyLanded && <span className="rarity-tag guide-trophy">Trophy</span>}
       <h3>{known ? species.name : "Unknown"}</h3>
       {known && (
         <>
+          <p className="guide-lore">{species.lore}</p>
           <p>
             {entry.caught} landed · PB {entry.heaviest?.toFixed(1)} lb
           </p>
