@@ -160,18 +160,54 @@ function windFor(mph: number, heading: number): Wind {
   return mph < 19 ? "breezy" : "strong";
 }
 
-/** Field-log conditions for a catch on this lake: wind and water temperature hold for the whole local day. */
-export function dailyConditions(date: Date, sky: Sky): CatchWeather {
+/** Which way the wind from each quarter pushes things on the lake's map: north is the far shore (-z), east is +x. */
+const WIND_TOWARD = [
+  { x: 0, z: 1 },
+  { x: -1, z: 0 },
+  { x: 0, z: -1 },
+  { x: 1, z: 0 },
+] as const;
+
+/** How fast each wind walks a sitting float downwind, meters a second. */
+export const WIND_DRIFT: Record<Wind, number> = {
+  calm: 0,
+  "light-north": 0.04,
+  "light-east": 0.04,
+  "light-south": 0.04,
+  "light-west": 0.04,
+  breezy: 0.08,
+  strong: 0.13,
+};
+
+function windOfDay(date: Date, sky: Sky) {
   const seed = dayHash(date, "conditions");
   const [calmest, windiest] = WIND_MPH[sky];
   const mph = calmest + ((seed % 1000) / 1000) * (windiest - calmest);
+  const heading = seed >>> 20;
+  return { seed, wind: windFor(mph, heading), quarter: heading % LIGHT_WINDS.length };
+}
+
+/**
+ * The day's wind as a drift on the water: the field log's wind, with the way it pushes a float in meters a second.
+ * A light wind blows from its named quarter; breezy and strong days keep the same seeded quarter.
+ */
+export function dailyWind(date: Date, sky: Sky): { wind: Wind; x: number; z: number } {
+  const { wind, quarter } = windOfDay(date, sky);
+  const toward = WIND_TOWARD[quarter]!;
+  const speed = WIND_DRIFT[wind];
+  return { wind, x: toward.x * speed, z: toward.z * speed };
+}
+
+/** Field-log conditions for a catch on this lake: wind and water temperature hold for the whole local day. */
+export function dailyConditions(date: Date, sky: Sky): CatchWeather {
+  const { seed, wind } = windOfDay(date, sky);
   const dayOfYear = Math.round(
     (new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / 86_400_000,
   );
   // A northern lake: coldest water in early February, warmest in early August.
   const season = Math.cos(((dayOfYear - 218) / 365) * 2 * Math.PI);
   const drift = ((seed >>> 10) % 5) - 2;
-  return { sky, wind: windFor(mph, seed >>> 20), waterTempF: Math.round(56 + 19 * season + drift) };
+  return { sky, wind, waterTempF: Math.round(56 + 19 * season + drift) };
 }
 
 const WEATHER_RARITY: Record<Sky, Record<Rarity, number>> = {

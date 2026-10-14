@@ -137,6 +137,8 @@ type Props = {
   released?: boolean;
   /** The real moon's phase for the night sky, 0 new to 0.5 full. */
   moon?: number;
+  /** The day's wind as a downwind drift on a sitting float, meters a second. */
+  wind?: { x: number; z: number };
   hotspot: Hotspot | null;
   /** Other anglers' recent catches, as faint rings on their bank's water. */
   tracks?: readonly LodgeTrack[];
@@ -165,6 +167,8 @@ let lastFightSim: FightSim | null = null;
 function fightEndedLanded() {
   return lastFightSim !== null && lastFightSim.line <= 0;
 }
+
+const NO_WIND = { x: 0, z: 0 };
 
 const landedFrom = new THREE.Vector3();
 const landedFish = new THREE.Vector3();
@@ -1076,7 +1080,7 @@ function RisingFish({ phase, color, accent, size }: { phase: ScenePhase; color: 
   );
 }
 
-function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour }: LineAndBobberProps) {
+function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND }: LineAndBobberProps) {
   const look = lineLook(hour);
   const restOpacity = useRef(look.opacity);
   restOpacity.current = look.opacity;
@@ -1103,6 +1107,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   const flightPower = useRef(0.5);
   const splashStart = useRef(-1);
   const settleAt = useRef(-1);
+  // Where drift, current and wind had carried the sitting float, so a bite and the fight start there instead of snapping back.
+  const heldShift = useRef({ x: 0, z: 0 });
   const missRing = useRef(false);
   const lastLine = useRef(1);
   const burstRef = useRef<() => void>(() => {});
@@ -1213,6 +1219,13 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       return;
     }
     placeBobber(target, Math.max(0.35, power), phase, t, usingAim.current ? castAim : null, nibble, level);
+    if (phase === "hookset" || phase === "fight") {
+      target.x += heldShift.current.x;
+      target.z += heldShift.current.z;
+    } else if (phase !== "waiting") {
+      heldShift.current.x = 0;
+      heldShift.current.z = 0;
+    }
     if (phase === "hookset") {
       const darted = applyBiteDart(target.x, target.z, anglerPose.x, anglerPose.z, fightView.biteAge);
       const anchored = strikeAnchor(darted.x, darted.z);
@@ -1305,7 +1318,9 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     if (sitting) {
       if (settleAt.current < 0) settleAt.current = t;
       waitView.age = t - settleAt.current;
-      const shifted = applyWaitShift(target.x, target.z, anglerPose.x, anglerPose.z, t, waitView.age);
+      const shifted = applyWaitShift(target.x, target.z, anglerPose.x, anglerPose.z, t, waitView.age, wind);
+      heldShift.current.x = shifted.x - target.x;
+      heldShift.current.z = shifted.z - target.z;
       target.x = shifted.x;
       target.z = shifted.z;
     } else {
@@ -1809,7 +1824,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, hotspot, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -1850,6 +1865,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         aim={aim}
         lookAt={lookAt}
         hour={hour}
+        wind={wind}
       />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} />}
       <StrikeSplash phase={phase} />

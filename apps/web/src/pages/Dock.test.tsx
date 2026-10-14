@@ -115,7 +115,7 @@ describe("dock weather", () => {
     const chip = page.querySelector(".sky-chip");
     // Only the label sits in the HUD row; the blurb rides in the tooltip.
     expect(chip?.textContent).toBe("Fog");
-    expect(chip?.getAttribute("title")).toBe(SKY_BLURB.fog);
+    expect(chip?.getAttribute("title")).toMatch(new RegExp(`^${SKY_BLURB.fog} Wind: [A-Z][a-z ]+\\.$`));
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog", "winter");
   });
 
@@ -134,7 +134,7 @@ describe("dock weather", () => {
     const page = await openDock("/?hour=day&sky=rain&season=winter");
     expect(lastScene()).toMatchObject({ sky: "rain", season: "winter" });
     expect(page.querySelector(".sky-chip")?.textContent).toBe("Snow");
-    expect(page.querySelector(".sky-chip")?.getAttribute("title")).toBe("Snow on the water. Pike and muskie hunt.");
+    expect(page.querySelector(".sky-chip")?.getAttribute("title")).toMatch(/^Snow on the water\. Pike and muskie hunt\. Wind: /);
   });
 
   it("uses the day's weather on the same clock as the hour without an override", async () => {

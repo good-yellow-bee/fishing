@@ -10,6 +10,8 @@ import {
   skyBlurb,
   skyLabel,
   type MoonName,
+  type Wind,
+  WIND_LABELS,
   type LakeHour,
   type LakeSeason,
   type Profile,
@@ -31,9 +33,11 @@ type Props = {
   streak?: number;
   /** Tonight's moon; the eyebrow names it when it is full or new. */
   moon?: MoonName;
+  /** The day's wind, named in the sky chip's tooltip. */
+  wind?: Wind;
 };
 
-export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0, moon }: Props) {
+export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0, moon, wind }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
   const t = useT();
@@ -66,7 +70,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
       <div className="hud-stats">
         <span className="hour-chip">{t(LAKE_HOUR_LABELS[hour])}</span>
         {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
-        <span className="sky-chip" title={t(skyBlurb(sky, season))}>
+        <span className="sky-chip" title={wind ? `${t(skyBlurb(sky, season))} ${t("Wind: {wind}.", { wind: t(WIND_LABELS[wind]) })}` : t(skyBlurb(sky, season))}>
           {t(skyLabel(sky, season))}
         </span>
         <span className="level-chip">{t("Level {level}", { level })}</span>
