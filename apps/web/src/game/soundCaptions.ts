@@ -3,7 +3,7 @@
  * sound code calls `captionSound` as each one plays; the captions strip
  * listens while the setting is on.
  */
-export type SoundCaption = "thunderNear" | "thunderFar" | "loon" | "owl" | "geese" | "tailSlap" | "farSplash" | "woodpecker";
+export type SoundCaption = "thunderNear" | "thunderFar" | "loon" | "owl" | "geese" | "tailSlap" | "farSplash" | "woodpecker" | "swanHiss";
 
 export const CAPTION_TEXT: Record<SoundCaption, string> = {
   thunderNear: "Thunder cracks close by",
@@ -14,6 +14,7 @@ export const CAPTION_TEXT: Record<SoundCaption, string> = {
   tailSlap: "A beaver slaps its tail",
   farSplash: "A bird plunges into the lake",
   woodpecker: "A woodpecker drums in the woods",
+  swanHiss: "A swan hisses",
 };
 
 /** How long a caption stays up, ms. */

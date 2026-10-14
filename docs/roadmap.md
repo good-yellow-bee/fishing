@@ -767,13 +767,13 @@ Claude picked these to carry Wave AF's species shapes to every fish on the lake;
 
 ## Wave AH — Birds on the open water (added 2026-10-14, after Wave AG shipped)
 
-Claude picked these; swans and gulls weren't on the lake yet. The owner can reorder or drop any.
+Claude picked these; swans weren't on the lake yet. The owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AH1~~ | ~~A pair of swans glides the far water by day in spring and summer, tipping under to feed~~ (#191) | ambient life | M |
-| AH2 | Gulls wheel over the lake on grey days and drop to snatch a small fish off the top | ambient life | M |
-| AH3 | Refresh the "New on the lake" card for Wave AH | onboarding | S |
+| ~~AH2~~ | ~~A cast landing near the swans makes the nearer one raise its wings and hiss~~ (#192; swapped in for gulls snatching fish, since the osprey already plunges for fish) | ambient life | S |
+| ~~AH3~~ | ~~Refresh the "New on the lake" card for Wave AH~~ (#192) | onboarding | S |
 
 ## Risks / open questions for the owner
 
