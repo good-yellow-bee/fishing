@@ -14,6 +14,7 @@ import {
   lureIsWaiting,
   nibbleBob,
   nibbleHeft,
+  nibbleRingGap,
   nibbleShiver,
   waitBodyLean,
   waitDrift,
@@ -188,5 +189,13 @@ describe("nibbles by size", () => {
     const big = sample(20);
     expect(big.low).toBeLessThan(small.low);
     expect(big.crossings).toBeLessThan(small.crossings);
+  });
+});
+
+describe("nibble rings", () => {
+  it("ring out every other tap, less often for a big slow fish", () => {
+    expect(nibbleRingGap(0.3)).toBeLessThan(nibbleRingGap(20));
+    expect(nibbleRingGap(0.3)).toBeGreaterThan(0.3);
+    expect(nibbleRingGap(20)).toBeLessThan(1.2);
   });
 });

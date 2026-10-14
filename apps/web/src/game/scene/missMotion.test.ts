@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   MISS_POP_SEC,
   MISS_WHIP_SEC,
+  MISS_DRIPS,
   missBobberLift,
   missBodyLean,
+  missDrip,
   missLineSag,
   missRodPitch,
   missRodRoll,
@@ -47,3 +49,19 @@ describe("missed strike", () => {
     expect(Math.abs(missRodRoll(0.85, 0.16))).toBeLessThan(0.04);
   });
 });
+
+describe("miss drips", () => {
+  it("fall from the popped bobber back into the water", () => {
+    expect(missDrip(0, 0.05, 0.3)).toBeNull();
+    const first = missDrip(0, 0.15, 0.3)!;
+    const later = missDrip(0, 0.25, 0.3)!;
+    expect(first.y).toBeGreaterThan(later.y);
+    expect(missDrip(0, 2, 0.3)).toBeNull();
+  });
+
+  it("let go one after another", () => {
+    expect(missDrip(MISS_DRIPS - 1, 0.15, 0.3)).toBeNull();
+    expect(missDrip(MISS_DRIPS - 1, 0.5, 0.3)).not.toBeNull();
+  });
+});
+

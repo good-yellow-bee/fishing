@@ -678,11 +678,11 @@ Claude picked these after Wave Z, turning back from scenery to the fishing itsel
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AA1 | A held fish flaps in the angler's hands on the catch card pose | landing | S/M |
-| AA2 | Line hum: the reel's drag pitch rises with tension in a fight | sound | S |
-| AA3 | Water drips from the line and lure as you reel in a miss | reel | S |
-| AA4 | A ring of ripples where the float sits pulses on each nibble | bite | S |
-| AA5 | Refresh the "New on the lake" card for Wave AA | onboarding | S |
+| ~~AA1~~ | ~~A held fish flaps in the angler's hands on the catch card pose~~ (dropped: already there) | landing | S/M |
+| ~~AA2~~ | ~~Line hum: the reel's drag pitch rises with tension in a fight~~ (dropped: already there) | sound | S |
+| ~~AA3~~ | ~~Water drips from the line and lure as you reel in a miss~~ (#180) | reel | S |
+| ~~AA4~~ | ~~A ring of ripples where the float sits pulses on each nibble~~ (#180) | bite | S |
+| ~~AA5~~ | ~~Refresh the "New on the lake" card for Wave AA~~ (#180) | onboarding | S |
 
 - **AA1 · A lively catch.** When a fish is landed and held up, it flaps its tail a few times before going still.
 - **AA2 · Line hum.** During a fight, a faint tone under the drag rises in pitch as the line tightens, so you can hear when it is near breaking.
@@ -691,6 +691,20 @@ Claude picked these after Wave Z, turning back from scenery to the fishing itsel
 - **AA5 · What's new, again.** List whatever Wave AA lands on the card.
 
 Claude checks each against what already exists before building and swaps any that are already there.
+
+## Wave AB — Fair bites and sound you can read (added 2026-10-14, after Wave AA shipped)
+
+Claude picked these after Wave AA from the review's open "smaller fixes" and an accessibility gap; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AB1 | Nibbles come at varied times, sometimes a false one, before the bite | bite | S/M |
+| AB2 | Optional captions for lake sounds (thunder, loon, owl, splashes) | accessibility | M |
+| AB3 | Refresh the "New on the lake" card for Wave AB | onboarding | S |
+
+- **AB1 · Unpredictable nibbles.** Today a single 280 ms nibble always lands at half the wait, so the bite's timing can be learned. Instead, one to three nibbles land at seeded, varied times before the bite, each a little different in length, and now and then a fish nibbles and loses interest without biting.
+- **AB2 · Sound captions.** A Settings toggle shows short captions at the screen's edge for the lake's sounds ("Thunder rolls", "A loon calls", "An owl hoots", "A beaver slaps its tail"), so players who can't hear them still know what is around. Off by default.
+- **AB3 · What's new, again.** List whatever Wave AB lands on the card.
 
 ## Risks / open questions for the owner
 
