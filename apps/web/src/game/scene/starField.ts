@@ -47,6 +47,20 @@ export function starReflection(star: Star, eye: { x: number; y: number; z: numbe
   return inLake(x, z) ? { x, z } : null;
 }
 
+/**
+ * Where a point in the sky, such as a shooting star, shows in the still lake
+ * for an eye at `eye`: the sight line to its mirror image (x, -y, z), met at
+ * the water. Null when it lands off the water or either sits below it.
+ */
+export function skyPointReflection(point: readonly [number, number, number], eye: { x: number; y: number; z: number }): { x: number; z: number } | null {
+  const [px, py, pz] = point;
+  if (eye.y <= 0 || py <= 0) return null;
+  const t = eye.y / (eye.y + py);
+  const x = eye.x + (px - eye.x) * t;
+  const z = eye.z + (pz - eye.z) * t;
+  return inLake(x, z) ? { x, z } : null;
+}
+
 /** How strongly the stars show: only on a clear night, and a bright moon washes the faint ones out. */
 export function starOpacity(night: boolean, clear: boolean, moonLight: number) {
   if (!night || !clear) return 0;
@@ -55,14 +69,15 @@ export function starOpacity(night: boolean, clear: boolean, moonLight: number) {
 
 export type ShootingStar = { from: [number, number, number]; to: [number, number, number]; progress: number };
 
-/** The shooting star crossing at `time`, if one is: each gap gets a seeded start and a path across the northern sky. */
+/** The shooting star crossing at `time`, if one is: each gap gets a seeded start and a path low across the northern sky. */
 export function shootingStar(time: number): ShootingStar | null {
   const slot = Math.floor(time / SHOOTING_GAP);
   const start = slot * SHOOTING_GAP + unit(slot, 4) * (SHOOTING_GAP - SHOOTING_SEC);
   const progress = (time - start) / SHOOTING_SEC;
   if (progress < 0 || progress > 1) return null;
-  const x = (unit(slot, 5) * 2 - 1) * 40;
-  const y = 30 + unit(slot, 6) * 25;
+  // Low over the far shore, so its mirror image crosses the open lake in view of the dock rather than under it.
+  const x = (unit(slot, 5) * 2 - 1) * 45;
+  const y = 16 + unit(slot, 6) * 14;
   const dir = unit(slot, 7) < 0.5 ? -1 : 1;
-  return { from: [x, y, -70], to: [x + dir * 18, y - 9, -70], progress };
+  return { from: [x, y, -100], to: [x + dir * 24, y - 7, -100], progress };
 }

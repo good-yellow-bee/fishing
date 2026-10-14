@@ -1,6 +1,6 @@
 import { LAKE_CENTER_Z, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { SHOOTING_GAP, SHOOTING_SEC, STAR_COUNT, STAR_LOW, STAR_RADIUS, shootingStar, starAt, starOpacity, starReflection } from "./starField";
+import { SHOOTING_GAP, SHOOTING_SEC, shootingStar, skyPointReflection, STAR_COUNT, STAR_LOW, STAR_RADIUS, starAt, starOpacity, starReflection } from "./starField";
 
 describe("starField", () => {
   it("keeps every star on the dome, above the treeline, the same each night", () => {
@@ -40,5 +40,19 @@ describe("starField", () => {
     expect(far === null || inLake(far.x, far.z)).toBe(true);
     expect(starReflection(low, { x: 0, y: 4, z: LAKE_CENTER_Z })).toBeNull();
     expect(starReflection(star, { ...eye, y: -1 })).toBeNull();
+  });
+});
+
+describe("sky point reflection", () => {
+  const eye = { x: 0, y: 4, z: 13 };
+  it("lands on the lake between the eye and the point, nearer the eye for a higher point", () => {
+    const low = skyPointReflection([0, 20, -70], eye)!;
+    const high = skyPointReflection([0, 50, -70], eye)!;
+    expect(low.z).toBeLessThan(eye.z);
+    expect(high.z).toBeGreaterThan(low.z);
+  });
+  it("is null when the point is under the water or the mirror misses the lake", () => {
+    expect(skyPointReflection([0, -1, -70], eye)).toBeNull();
+    expect(skyPointReflection([400, 2, -70], eye)).toBeNull();
   });
 });
