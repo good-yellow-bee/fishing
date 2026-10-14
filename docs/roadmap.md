@@ -806,6 +806,15 @@ Claude picked these to give Wave AJ's birds the same reactions the ducks, beaver
 | ~~AK3~~ | ~~The loon, otter, kingfisher and beaver tip nose first when they dive, not tail first~~ (#197: bodyPitch.ts) | fix | S |
 | ~~AK4~~ | ~~Refresh the "New on the lake" card for Wave AK~~ (#197) | onboarding | S |
 
+## Wave AL — Birds over the fish (added 2026-10-14, after Wave AK shipped)
+
+Claude picked this to tie the new bird life to fishing: feeding birds give away where the fish are.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AL1~~ | ~~Terns circle and plunge over the day's bubbling fish patch in spring and summer, and fly over when it moves~~ (#198) | ambient life / hint | M |
+| ~~AL2~~ | ~~Refresh the "New on the lake" card for Wave AL~~ (#198) | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
