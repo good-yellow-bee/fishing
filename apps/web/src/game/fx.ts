@@ -376,6 +376,13 @@ const drag = {
   },
 };
 
+/** A small brass rod bell: a struck tone with its inharmonic overtones, so it rings rather than beeps. */
+export const BELL_PARTIALS = [1, 2.76, 5.4] as const;
+export const BELL_PITCH = 1850;
+/** Seconds after the first strike that each further strike lands: a nibble jingles twice, a bite rings hard. */
+export const BELL_STRIKES = { jingle: [0, 0.11], ring: [0, 0.08, 0.17, 0.27, 0.38] } as const;
+export type BellKind = keyof typeof BELL_STRIKES;
+
 /** Buzz patterns in ms for phones that can vibrate (Android Chrome; iOS Safari has no vibrate). */
 export const HAPTICS = {
   nibble: [15],
@@ -427,6 +434,15 @@ export const fx = {
     if (!this.enabled) return;
     tone("sine", 640, 580, 0.05, 0.02);
     waterPlop(0.45);
+  },
+  /** The rod-tip bell after dark: a soft jingle on a nibble, a hard ring on the bite. */
+  rodBell(kind: BellKind) {
+    if (!this.enabled) return;
+    const loud = kind === "ring" ? 0.03 : 0.014;
+    BELL_STRIKES[kind].forEach((when, strike) => {
+      const pitch = BELL_PITCH * (1 + (strike % 2) * 0.012);
+      BELL_PARTIALS.forEach((partial, i) => tone("sine", pitch * partial, pitch * partial * 0.998, 0.5 / (i + 1), loud / (i + 1.5), when));
+    });
   },
   bite() {
     if (!this.enabled) return;
