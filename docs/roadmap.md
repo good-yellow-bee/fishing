@@ -483,7 +483,7 @@ Claude picked these after Wave O; the owner can reorder or drop any.
 | ~~P1~~ | ~~A keys and buttons card on "?"~~ (#137) | QoL | S |
 | ~~P2~~ | ~~Autumn leaves drifting down onto the water~~ (#138) | seasons | M |
 | ~~P3~~ | ~~A mayfly hatch on spring and summer evenings~~ (#139) | wildlife | M |
-| P4 | Water lilies in flower through the summer | seasons | S |
+| ~~P4~~ | ~~Water lilies in flower through the summer~~ (#139) | seasons | S |
 | P5 | Refresh the "New on the lake" card for Waves O and P | onboarding | S |
 
 - **P1 · Keys card.** "?" (and a Settings button) opens a small card listing every key and pad button: Space, the mouse, W A S D, E, H, Escape. Escape or "?" closes it.

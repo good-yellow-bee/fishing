@@ -30,6 +30,7 @@ import { Lanterns } from "./Lanterns";
 import { Loon } from "./Loon";
 import { loonOut } from "./loonMotion";
 import { Otter } from "./Otter";
+import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
 import { FallingLeaves } from "./FallingLeaves";
 import { leavesOut } from "./leafFall";
 import { otterOut } from "./otterMotion";
@@ -1047,8 +1048,38 @@ function Rock({ position, scale, rotation = 0 }: { position: Vec3; scale: Vec3; 
   );
 }
 
-function FloatingLily({ url, position, scale }: Lily) {
+/** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
+function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: string }) {
+  if (bloom === "bud") {
+    return (
+      <mesh position={[0, 0.07, 0]} scale={[0.045, 0.08, 0.045]}>
+        <sphereGeometry args={[1, 8, 6]} />
+        <meshToonMaterial color="#9fb86a" gradientMap={toonRamp()} />
+      </mesh>
+    );
+  }
+  return (
+    <group position={[0, 0.03, 0]}>
+      {petalAngles().map((angle, i) => (
+        // Outer petals lie open; every other one sits a touch higher and more upright.
+        <group key={i} rotation={[0, angle, 0]}>
+          <mesh position={[0, i % 2 ? 0.035 : 0.02, 0.07]} rotation={[i % 2 ? -0.75 : -0.35, 0, 0]} scale={[0.03, 0.012, 0.07]}>
+            <sphereGeometry args={[1, 8, 5]} />
+            <meshToonMaterial color={color} gradientMap={toonRamp()} />
+          </mesh>
+        </group>
+      ))}
+      <mesh position={[0, 0.04, 0]} scale={[0.03, 0.022, 0.03]}>
+        <sphereGeometry args={[1, 8, 6]} />
+        <meshToonMaterial color={LILY_HEART} gradientMap={toonRamp()} />
+      </mesh>
+    </group>
+  );
+}
+
+function FloatingLily({ url, position, scale, index }: Lily & { index: number }) {
   const ref = useRef<THREE.Group>(null);
+  const bloom = lilyBloom(useContext(SeasonContext));
   useFrame((state) => {
     const lily = ref.current;
     if (!lily) return;
@@ -1062,6 +1093,12 @@ function FloatingLily({ url, position, scale }: Lily) {
   return (
     <group ref={ref} position={position}>
       <ToonModel url={url} scale={scale} shadows={false} />
+      {bloom && (
+        // Drawn a little large so the flowers read from the bank.
+        <group position={[0.12 * scale, 0, 0.08 * scale]} scale={scale * 1.8}>
+          <LilyFlower bloom={bloom} color={LILY_PETALS[index % LILY_PETALS.length]!} />
+        </group>
+      )}
     </group>
   );
 }
@@ -1735,7 +1772,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
       {LILIES.map((lily, i) => (
-        <FloatingLily key={`${lily.url}-${i}`} {...lily} />
+        <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} />
       ))}
       {BOATS.map((boat, i) => (
         <Boat key={`${boat.url}-${i}`} {...boat} />
