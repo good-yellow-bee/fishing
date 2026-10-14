@@ -224,7 +224,7 @@ describe("shop overlay", () => {
   it("caps its height to the viewport and scrolls, so the board never lifts the upgrades off a short screen", () => {
     const css = readFileSync(`${import.meta.dirname}/../index.css`, "utf8");
     const block = /^\.shop-overlay \{([^}]*)\}/m.exec(css)?.[1];
-    expect(block).toContain("max-height: calc(100dvh - 48px);");
+    expect(block).toContain("max-height: calc(100dvh / var(--text-zoom, 1) - 48px);");
     expect(block).toContain("overflow-y: auto;");
   });
 });
