@@ -875,6 +875,14 @@ Claude picked this from a draw-call probe: a summer day drew 556 calls a frame, 
 |---|---|---|---|
 | ~~AS1~~ | ~~Water striders draw as two instanced meshes instead of nine meshes each; a fish's spots, bars or stripe as one; a lily's petals as one shared shape (556 to 445 calls a frame, summer day)~~ (#206) | performance | S |
 
+## Wave AT — Fewer draws per fish (added 2026-10-14, after Wave AS shipped)
+
+Claude picked this as the next probe target: every fish (cruising, shadow, hooked, held up) drew 11 to 15 meshes, doubled while hooked.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AT1~~ | ~~A fish bakes its rigid same-colour parts (body and head, eyes, back fins, side fins, tail fins, whiskers) into one shape each: 11 meshes to 7 on a plain fish, 445 to 412 calls a frame on a summer day~~ (#207) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

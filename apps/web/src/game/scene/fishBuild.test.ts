@@ -44,3 +44,10 @@ describe("fish builds", () => {
     }
   });
 });
+
+describe("fishBuild identity", () => {
+  it("hands back the same build for a species every time", () => {
+    expect(fishBuild("pike")).toBe(fishBuild("pike"));
+    expect(fishBuild(undefined)).toBe(fishBuild("no-such-fish"));
+  });
+});
