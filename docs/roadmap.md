@@ -448,13 +448,13 @@ Claude picked these after Wave M; the owner can reorder or drop any.
 | N2 | ~~A one-line fish story on the landed card and in the log~~ (dropped) | journal | S/M |
 | N3 | ~~Left-handed layout for the thumb controls~~ (shipped) | mobile/a11y | S |
 | N4 | ~~High-contrast panels setting~~ (shipped) | a11y | S/M |
-| N5 | A weather vane on the shack that shows the day's wind | scene | S |
+| N5 | ~~A windsock by the pier that shows the day's wind~~ (shipped) | scene | S |
 
 - **N1 · Leaps.** Every second run of a brook or rainbow trout, a bass or a salmon is a leap: a longer warning ("Let go now — it's coming up!"), then the fish clears the water nose first, turns over and falls back with a splash ("BOW — it's jumping!"). Holding the line tight through a leap past a short grace loads the rod into the red and costs the clean bonus, but never the fish, so the slow-angler guarantees still hold.
 - **N2 · Fish story.** Dropped by Claude: the landed card already shows the fish, weight, bank and lure, and the catch log shows bank, hour, sky and season, so the line would only repeat them.
 - **N3 · Left-handed.** A Settings checkbox that moves the touch-screen Strike/Reel button and the cast meter to the left. On phones the bank signs already span the full width, so they stay put.
 - **N4 · High contrast.** A Settings checkbox that makes the panels over the lake solid with 2 px bright borders and no blur, and lifts dimmed text to full strength. The current bank sign and the strike button at the bite keep their amber.
-- **N5 · Weather vane.** A small vane on the shack roof turns to the day's wind and spins idly on a calm day.
+- **N5 · Windsock.** The shack has no roof to put a vane on, so a striped windsock stands on a pole at the pier's left rail, in view from the dock. It points downwind with the day's wind (the one that walks the float), hangs limp on a calm day, stands out on a strong one, and flutters more as it fills.
 
 ## Risks / open questions for the owner
 
