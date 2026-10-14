@@ -913,6 +913,14 @@ Claude picked this: the lake's loops and calls kept playing after the player swi
 |---|---|---|---|
 | ~~AX1~~ | ~~The lake goes quiet while the game is in another tab or app (master gain to zero, sounds keep running so nothing bursts on return); a Settings switch keeps it playing for anyone who likes the ambience~~ (#211) | audio / settings | S |
 
+## Wave AY — No fish lost while away (added 2026-10-14, after Wave AX shipped)
+
+Claude picked this: a bite that came while the game sat in another tab ran out its strike window unseen, so the player came back to "Too slow".
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AY1~~ | ~~A bite due while the page is hidden waits until the player is back, then takes the float a beat and a half later (whenShown.ts)~~ (#212) | gameplay fix | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
