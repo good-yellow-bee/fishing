@@ -627,14 +627,32 @@ Claude picked these after Wave W; the owner can reorder or drop any.
 | ~~X1~~ | ~~Fallen leaves gather on the dock in fall~~ (#168) | weather | S |
 | ~~X2~~ | ~~Lightning flashes mirrored in the lake during storms~~ (#169) | sky | S |
 | ~~X3~~ | ~~Dew glints on the shore grass at dawn~~ (#170) | weather | S |
-| X4 | A beaver swims past at dusk with a branch, and slaps its tail at a close cast | wildlife | M |
-| X5 | Refresh the "New on the lake" card for Wave X | onboarding | S |
+| ~~X4~~ | ~~A beaver swims past at dusk with a branch, and slaps its tail at a close cast~~ (#171) | wildlife | M |
+| ~~X5~~ | ~~Refresh the "New on the lake" card for Wave X~~ (#171) | onboarding | S |
 
 - **X1 · Leaves on the dock.** In fall a scatter of orange and red leaves lies on the dock planks, a few more as the visit goes on, and a gust now and then skitters one across the boards.
 - **X2 · Lightning in the lake.** Each lightning flash also shows as a bright jagged streak in the lake's mirror, since the dock camera sees little sky.
 - **X3 · Dew.** At dawn, outside winter, tiny glints sparkle in the grass along the near bank and fade as the morning goes.
 - **X4 · Beaver.** At dusk outside winter a beaver now and then swims across the far water towing a leafy branch, leaving a V-shaped wake. A cast landing close makes it slap its tail with a loud splash and dive.
 - **X5 · What's new, again.** List whatever Wave X lands on the card.
+
+## Wave Y — Winter details and summer wings (added 2026-10-14, after Wave X shipped)
+
+Claude picked these after Wave X; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| Y1 | Icicles hang from the dock rails in winter | weather | S |
+| Y2 | Butterflies flit along the shore on sunny summer days | wildlife | S |
+| Y3 | An osprey circles high and now and then plunges for a fish | wildlife | M |
+| Y4 | A thermos on the dock steams on cold mornings | props | S |
+| Y5 | Refresh the "New on the lake" card for Wave Y | onboarding | S |
+
+- **Y1 · Icicles.** In winter a row of short icicles hangs under the dock's edge and rails, catching the light.
+- **Y2 · Butterflies.** On clear summer days a few butterflies flutter low along the near banks and over the lily pads.
+- **Y3 · Osprey.** On clear days an osprey circles high over the lake; every few minutes it folds, plunges with a splash, and climbs away, sometimes with a fish.
+- **Y4 · Thermos.** A thermos stands on the dock beside the angler; on cold dawns and in winter a wisp of steam curls from its cup.
+- **Y5 · What's new, again.** List whatever Wave Y lands on the card.
 
 ## Risks / open questions for the owner
 

@@ -289,6 +289,23 @@ describe("rod bell", () => {
   });
 });
 
+describe("beaver", () => {
+  it("slaps its tail once the lake's sounds are going, and not when sound is off", () => {
+    fx.tailSlap();
+    expect(tones).toHaveLength(0);
+    fx.ambient.start();
+    tones.length = 0;
+    fx.tailSlap();
+    expect(tones.length).toBeGreaterThan(0);
+    expect(Math.max(...tones)).toBeLessThan(200);
+    tones.length = 0;
+    fx.enabled = false;
+    fx.tailSlap();
+    fx.enabled = true;
+    expect(tones).toHaveLength(0);
+  });
+});
+
 describe("deer and ducklings", () => {
   it("snort and peep once the lake's sounds are going, and not before", () => {
     fx.snort();

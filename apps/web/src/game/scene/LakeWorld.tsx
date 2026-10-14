@@ -66,6 +66,8 @@ import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
 import { Otter } from "./Otter";
+import { Beaver } from "./Beaver";
+import { beaverOut } from "./beaverSwim";
 import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
 import { FallingLeaves } from "./FallingLeaves";
 import { leavesOut } from "./leafFall";
@@ -1899,6 +1901,7 @@ export const LakeWorld = memo(function LakeWorld({
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
       {otterOut(hour, season) && <Otter />}
+      {beaverOut(hour, season) && <Beaver />}
       {batsOut(hour, sky, season) && <Bats />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />
