@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { FISH, type CatchStat } from "@stillwater/shared";
+import { FISH, fishById, shadowSize, type CatchStat } from "@stillwater/shared";
 import { FieldGuide } from "./FieldGuide";
 
 const render = (stats: CatchStat[]) => JSDOM.fragment(renderToStaticMarkup(<FieldGuide stats={stats} />));
@@ -33,6 +33,7 @@ describe("field guide card", () => {
   it("adds the lure size per bank and the trophy weight once a fish is logged", () => {
     const bass = cards([stat("smallmouth-bass", 2.4)])("smallmouth-bass");
     expect(bass.lines).toEqual([
+      fishById("smallmouth-bass")!.lore,
       "2 landed · PB 2.4 lb",
       "Trophy ≥ 3.6 lb",
       "Medium shadow",
@@ -66,5 +67,30 @@ describe("field guide card", () => {
 
   it("says the clues are for a cast released in the band", () => {
     expect(render([]).querySelector(".guide-note")?.textContent).toBe("Lure and time clues assume a cast released in the band.");
+  });
+
+  it("shows each species' own shadow at its weight-range size without revealing its lore", () => {
+    const articles = [...render([]).querySelectorAll("article")];
+    FISH.forEach((fish, index) => {
+      const card = articles[index]!;
+      const svg = card.querySelector("svg")!;
+      expect(svg.classList.contains(`shadow-${shadowSize(fish)}`)).toBe(true);
+      expect(svg.getAttribute("viewBox")).toBe("0 0 80 36");
+      expect(svg.getAttribute("aria-hidden")).toBe("true");
+      expect(svg.querySelector("path")?.getAttribute("d")).toBe(fish.silhouette);
+      expect(svg.querySelector("path")?.getAttribute("fill")).toBe("#161310");
+      expect(card.textContent).not.toContain(fish.lore);
+      expect(card.textContent).not.toContain(fish.name);
+    });
+  });
+
+  it("colours a caught species' mark and reveals its lore", () => {
+    const fish = fishById("catfish")!;
+    const page = render([stat(fish.id, 4)]);
+    const card = page.querySelectorAll("article")[FISH.indexOf(fish)]!;
+    expect(card.querySelector("path")?.getAttribute("d")).toBe(fish.silhouette);
+    expect(card.querySelector("path")?.getAttribute("fill")).toBe(fish.color);
+    expect(card.querySelector("svg")?.getAttribute("class")).toBe("guide-fish");
+    expect(card.querySelector(".guide-lore")?.textContent).toBe(fish.lore);
   });
 });

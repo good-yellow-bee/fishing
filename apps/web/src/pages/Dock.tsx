@@ -32,6 +32,7 @@ import {
 import { buyUpgrade, getMe, getSpeciesRecords, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
+import { FishMark } from "../components/FishMark";
 import { Hud } from "../components/Hud";
 import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
@@ -578,8 +579,10 @@ export function DockPage() {
                 <span>{fieldBeat.line}</span>
               </p>
             )}
+            <FishMark species={game.outcome.species} />
             <span className="rarity-tag">{game.outcome.species.rarity}</span>
             <h2>{game.outcome.species.name}</h2>
+            <p className="catch-lore">{game.outcome.species.lore}</p>
             <p className="catch-lure">{lure}</p>
             <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
             <p>+{catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean)} pts</p>

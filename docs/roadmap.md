@@ -45,7 +45,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
 | P23 | ~~Atmosphere pass (fireflies, mist, bloom)~~ (shipped) | visual | M | E | P8, #53 |
 | P24 | ~~Seasons on the lake~~ (shipped) | progression/content | L | F | #53, #50 |
-| P25 | Species lore + silhouettes | collection | S | F | — |
+| P25 | ~~Species lore + silhouettes~~ (shipped) | collection | S | F | — |
 
 ---
 
@@ -289,7 +289,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 - **Size:** L. **Deps:** #53, #50.
 - **Test:** `season.test.ts`; `biteMix.test.ts` season tables.
 
-### P25 · Species lore + silhouettes
+### ~~P25 · Species lore + silhouettes~~ (shipped: distinct marks for all 18 species across the guide, landed card, log and record wall; caught fish have lake lore, and empty records stay secret)
 - **Pitch:** each species gets a true silhouette and two lines of lake lore; the landed card and the board use the same mark.
 - **Borrowed:** Dredge (encyclopedia entries); Animal Crossing (Blathers blurbs); Stardew (fish descriptions).
 - **Why fun:** `FieldGuide` draws one shared `SILHOUETTE` path for all 13; the landed card has no picture; names alone do not build attachment.

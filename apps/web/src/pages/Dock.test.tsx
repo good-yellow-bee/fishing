@@ -246,6 +246,10 @@ describe("lodge records", () => {
     });
     const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
     expect(stamps).toContain("Lodge record · was 12.3 lb (Mara)");
+    const pike = fishById("pike")!;
+    expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("d")).toBe(pike.silhouette);
+    expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("fill")).toBe(pike.color);
+    expect(page.querySelector(".landed-card .catch-lore")?.textContent).toBe(pike.lore);
   });
 });
 

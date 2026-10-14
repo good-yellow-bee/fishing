@@ -14,6 +14,8 @@ export const FISH: FishSpecies[] = [
     rarity: "common",
     color: "#d4a84b",
     accent: "#f0d78a",
+    silhouette: "M4 17L10 14Q21 8 34 11L39 4L45 12Q54 14 62 16L76 7L71 18L76 29L62 21L53 23L48 31L44 24L32 25L27 30L25 24Q14 23 8 20L4 20L9 18Z",
+    lore: "Small gold flashes gather where the dock casts its shade. Watch quietly and the whole school turns together.",
   },
   {
     id: "bluegill",
@@ -28,6 +30,8 @@ export const FISH: FishSpecies[] = [
     rarity: "common",
     color: "#3d6b4f",
     accent: "#e8c45c",
+    silhouette: "M8 17L13 13Q16 8 25 7L27 4L30 7L33 3L36 7L39 3L42 7Q50 6 53 11L57 16L65 17L76 9Q74 18 76 27L65 21L57 23L53 29L45 33L41 29Q34 33 27 29L21 33L20 27Q13 24 11 21L8 20L12 18Z",
+    lore: "A bluegill keeps a little patch of sunny shallows. Children at the point know its quick tug before they know its name.",
   },
   {
     id: "perch",
@@ -42,6 +46,8 @@ export const FISH: FishSpecies[] = [
     rarity: "common",
     color: "#c9a13a",
     accent: "#5a3d1c",
+    silhouette: "M5 17L11 13Q18 10 23 11L25 5L28 9L31 4L34 9L37 5L40 12L44 12L47 7Q54 8 57 14L63 16L76 7L71 18L76 29L63 21L57 23L52 30L47 24L34 25L29 31L27 25L20 23L15 28L15 22L6 21L10 18Z",
+    lore: "Perch drift along the reed edge like little lanterns. One gentle bite often means a few more are waiting nearby.",
   },
   {
     id: "crappie",
@@ -56,6 +62,8 @@ export const FISH: FishSpecies[] = [
     rarity: "common",
     color: "#8f978c",
     accent: "#2d3330",
+    silhouette: "M5 15L14 10Q20 7 29 8L32 4L35 7L38 3L41 6L44 3L47 6Q55 5 59 12L61 16L66 17L77 8L72 18L77 29L65 22L59 24Q57 32 43 33L39 29Q30 31 23 26L18 32L17 25L11 22L6 22L11 18Z",
+    lore: "Crappie rest beneath the old dock boards. At dawn they slip out together, as if the lake has rung a tiny breakfast bell.",
   },
   {
     id: "brook-trout",
@@ -70,6 +78,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#8b3a2a",
     accent: "#e8c9a0",
+    silhouette: "M4 17L11 13Q19 10 30 12L33 5L42 7L44 13Q52 14 55 16L56 11L60 12L61 16L66 17L76 11L75 18L76 25L65 22L56 23L52 29L47 24L32 24L26 31L24 24L19 23L15 28L14 22L6 21L10 18Z",
+    lore: "Brook trout hold where the inlet runs cool over stone. A glimpse of one feels like finding a small secret in the current.",
   },
   {
     id: "smallmouth-bass",
@@ -84,6 +94,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#5c4a38",
     accent: "#c4a574",
+    silhouette: "M5 16L12 12Q18 9 25 10L27 6L30 9L33 5L36 9L40 7L43 12L45 7Q52 6 57 13L62 17L67 17L76 10Q73 18 76 27L66 22L58 24L53 30L47 25L35 26L29 32L27 25L20 24L16 29L15 22L6 22L12 18Z",
+    lore: "Smallmouth wait beside the drop-off stones. They turn a quiet cast into a lively story for the walk home.",
   },
   {
     id: "rainbow-trout",
@@ -98,6 +110,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#c47a6a",
     accent: "#7eb8a8",
+    silhouette: "M4 17L11 14Q21 10 31 11L34 4L43 6L46 12Q53 13 57 15L58 10L62 12L63 16L67 17L77 8L72 18L77 28L66 21L59 23L53 30L48 24L35 25L30 31L27 24L20 23L16 27L15 22L5 21L10 18Z",
+    lore: "A rainbow trout brings a brief splash of colour to the grey water. The inlet anglers always pause to admire it.",
   },
   {
     id: "largemouth-bass",
@@ -112,6 +126,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#4f6b3a",
     accent: "#d8d4a0",
+    silhouette: "M3 13L14 10Q20 8 27 10L29 5L32 9L35 5L38 9L41 7L43 14L46 8Q53 5 59 13L63 17L68 17L77 9Q74 18 77 28L67 22L60 24L54 31L47 25L35 27L29 33L26 26L20 25L16 30L15 23L4 23L14 18L3 17Z",
+    lore: "Largemouth lie under the lilies with barely a ripple. Leave a lure there long enough and the still water may answer.",
   },
   {
     id: "lake-whitefish",
@@ -126,6 +142,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#c8ccc4",
     accent: "#6e7a80",
+    silhouette: "M5 18L12 13Q19 9 31 10L36 3L44 12Q53 14 58 16L59 11L62 13L63 17L67 17L77 6L71 18L77 30L66 21L58 23L53 29L48 24L34 25L29 30L26 24Q16 25 10 22L5 22L8 20Z",
+    lore: "Whitefish move through the deep water in quiet company. Their silver sides catch the light on the way up.",
   },
   {
     id: "carp",
@@ -140,6 +158,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#b57a4a",
     accent: "#e8c9a0",
+    silhouette: "M5 17L10 12Q16 5 29 7L32 3L37 5L42 4L48 6L55 10L58 15L64 17L77 7L71 18L77 29L64 22L57 24L52 30L46 26L33 28L27 34L25 27Q15 26 10 22L5 23L7 19ZM8 21Q8 27 3 29L2 28Q6 26 6 21Z",
+    lore: "Carp nose through the soft mud beside the reeds. The oldest dock regulars greet a big one like an old neighbour.",
   },
   {
     id: "pike",
@@ -154,6 +174,8 @@ export const FISH: FishSpecies[] = [
     rarity: "rare",
     color: "#4a6b48",
     accent: "#c9d4a8",
+    silhouette: "M2 17L15 14L24 12Q42 11 53 13L56 5L64 9L65 15L69 17L78 8L73 18L78 28L68 21L63 22L58 29L53 23L37 23L32 28L29 23L20 22L15 26L14 21L3 21L12 19L2 19Z",
+    lore: "Pike wait in the reeds as still as fallen branches. A sudden swirl is often the only warning they give.",
   },
   {
     id: "catfish",
@@ -168,6 +190,8 @@ export const FISH: FishSpecies[] = [
     rarity: "uncommon",
     color: "#4a453c",
     accent: "#c4b89a",
+    silhouette: "M5 15Q12 10 25 12L32 3L39 13Q50 14 57 17L59 12L63 14L64 17L67 17L77 6L70 18L77 30L66 22L59 24L44 30L39 24L29 25L23 32L21 25L16 27L13 24Q7 24 4 21L11 18L4 18ZM6 16Q3 11 1 12L1 13Q4 13 5 17ZM8 21Q6 28 2 29L2 30Q8 29 10 21ZM13 23Q15 29 11 33L12 34Q17 29 15 23Z",
+    lore: "Catfish feel their way along the bottom after dark. Their whiskers know the dock's old posts better than we do.",
   },
   {
     id: "walleye",
@@ -182,6 +206,8 @@ export const FISH: FishSpecies[] = [
     rarity: "rare",
     color: "#8a7a3c",
     accent: "#e6dcb0",
+    silhouette: "M3 15L13 12Q20 9 26 11L28 4L31 8L34 3L37 8L40 4L43 13L46 13L48 6Q55 7 59 15L65 17L77 7L71 18L77 29L65 22L58 24L54 30L49 24L36 25L30 31L28 24L20 23L16 28L15 23L4 22L12 18Z",
+    lore: "Walleye come close when the point falls into dusk. The last light on the water is a good reason to stay a little longer.",
   },
   {
     id: "burbot",
@@ -196,6 +222,8 @@ export const FISH: FishSpecies[] = [
     rarity: "rare",
     color: "#3d4a52",
     accent: "#8aa0a8",
+    silhouette: "M4 17Q10 11 23 13L28 7L34 8L36 14L40 14L43 8Q60 9 71 14Q78 16 78 20Q77 26 70 25L43 29L38 24L29 24L23 29L21 24Q10 26 5 22L11 19L4 20ZM11 23Q11 29 8 32L9 33Q14 29 13 23Z",
+    lore: "Burbot stir in the cold dark below the drop-off. A patient angler may meet one while the rest of the lodge sleeps.",
   },
   {
     id: "salmon",
@@ -210,6 +238,8 @@ export const FISH: FishSpecies[] = [
     rarity: "rare",
     color: "#c45c4a",
     accent: "#e8c4b0",
+    silhouette: "M3 16L13 13Q21 10 32 11L35 4L43 6L46 12Q54 14 58 16L59 10L63 12L64 16L67 17L78 7L72 18L78 29L66 22L59 24L54 30L49 24L36 25L30 30L27 24L20 23L16 28L15 23L6 22Q3 21 3 19L11 18Z",
+    lore: "Salmon follow the inlet's cool thread into the lake. Their strong silver backs carry a little of the creek with them.",
   },
   {
     id: "tiger-muskie",
@@ -224,6 +254,8 @@ export const FISH: FishSpecies[] = [
     rarity: "legendary",
     color: "#6b8f3a",
     accent: "#2a2e24",
+    silhouette: "M2 16L16 12L27 11Q44 10 55 13L58 3L66 8L66 15L69 17L78 5L74 18L78 31L68 22L64 23L59 32L53 24L39 23L33 29L30 23L21 22L15 27L14 22L3 22L14 18L2 18Z",
+    lore: "The tiger muskie leaves wide wakes through the reeds. People at the lodge lower their voices when they tell of one.",
   },
   {
     id: "sturgeon",
@@ -238,6 +270,8 @@ export const FISH: FishSpecies[] = [
     rarity: "legendary",
     color: "#6a7a78",
     accent: "#c5b89a",
+    silhouette: "M1 18L13 13L22 11L25 8L28 11L34 10L37 7L40 11L46 12L50 6L57 10L60 16L66 16L78 2L73 15L69 19L77 25L68 23L61 22L56 29L51 24L34 24L28 33L24 24L18 23L14 25L12 22L7 22L10 20Z M13 22L12 28L11 28L11 22Z M16 23L16 28L15 28L14 22Z",
+    lore: "Sturgeon travel the deep lake with slow, steady strokes. One at the surface makes the whole dock go quiet.",
   },
   {
     id: "ghost-pike",
@@ -252,6 +286,8 @@ export const FISH: FishSpecies[] = [
     rarity: "legendary",
     color: "#d6dccf",
     accent: "#7e8c84",
+    silhouette: "M2 18L17 15L26 13Q43 12 54 14L57 4Q64 6 66 15L70 17L78 6Q74 18 78 30L68 22L63 24Q60 30 55 31L52 24L38 24L32 30L29 24L21 23L15 28L14 22L3 22L13 20L2 20Z",
+    lore: "Some say a pale pike follows the fog out of the inlet. Those who have held it remember the hush more than the weight.",
   },
 ];
 

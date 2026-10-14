@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { badgeById, fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
 import { getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
+import { FishMark } from "../components/FishMark";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
@@ -81,7 +82,12 @@ export function LogPage() {
             const species = fishById(row.speciesId);
             return (
               <tr key={row.id} className={row.id === heaviest?.id ? "heaviest" : ""}>
-                <td className={species ? `rarity-${species.rarity}` : ""}>{species?.name ?? row.speciesId}</td>
+                <td className={species ? `rarity-${species.rarity}` : ""}>
+                  <span className="log-fish">
+                    {species && <FishMark species={species} />}
+                    {species?.name ?? row.speciesId}
+                  </span>
+                </td>
                 <td>{row.weight.toFixed(1)} lb</td>
                 <td>{SPOT_LABELS[row.spot]}</td>
                 <td>{row.hour && row.sky ? `${LAKE_HOUR_LABELS[row.hour]} · ${SKY_LABELS[row.sky]}` : "—"}</td>

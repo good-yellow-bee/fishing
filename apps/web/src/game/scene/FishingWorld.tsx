@@ -25,7 +25,7 @@ import {
 import type { FightSim } from "../fight";
 import { fx } from "../fx";
 import type { Hotspot } from "../hotspot";
-import { ShoreTracks } from "./ShoreTracks";
+import { ShoreTracks } from "./ShoreTracks.tsx";
 import { Angler } from "./Angler";
 import {
   FISH_LEAP_SEC,
