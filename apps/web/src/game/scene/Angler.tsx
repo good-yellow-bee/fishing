@@ -17,9 +17,12 @@ import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion"
 import { anglerPose, shortestYaw } from "./pose";
 import { waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
-import { applyToon, disposeMaterials } from "./toon";
+import { capSnow } from "./capSnow";
+import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
 import { useSceneWrap } from "./useSceneWrap";
+
+const CAP_SNOW_COLOR = "#eef3f6";
 
 type Props = {
   phase: ScenePhase;
@@ -27,6 +30,8 @@ type Props = {
   powerRef: Readonly<{ current: number }>;
   rodTip: THREE.Vector3;
   lookAt: THREE.Vector3;
+  /** Snow is falling, so it settles on the cap and shoulders. */
+  snowfall?: boolean;
 };
 
 useGLTF.preload("/models/character-male-c.glb");
@@ -65,7 +70,7 @@ function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
   return "idle";
 }
 
-export function Angler({ phase, powerRef, rodTip, lookAt }: Props) {
+export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -103,6 +108,34 @@ export function Angler({ phase, powerRef, rodTip, lookAt }: Props) {
   }, [character]);
   const fistAt = useMemo(() => new THREE.Vector3(), []);
 
+  // Snow on the cap and shoulders rides the head and torso bones; it builds while snow falls.
+  const snowCover = useRef(0);
+  const snowMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: CAP_SNOW_COLOR, gradientMap: toonRamp() }), []);
+  const snowParts = useMemo(() => {
+    const blob = new THREE.SphereGeometry(1, 10, 6);
+    const parts: THREE.Mesh[] = [];
+    const add = (bone: string, position: [number, number, number], scale: [number, number, number]) => {
+      const mesh = new THREE.Mesh(blob, snowMaterial);
+      mesh.position.set(...position);
+      mesh.userData.full = scale;
+      mesh.visible = false;
+      character.getObjectByName(bone)?.add(mesh);
+      parts.push(mesh);
+    };
+    add("head", [0, 0.4, 0.0], [0.19, 0.035, 0.17]);
+    add("torso", [0.15, 0.205, -0.02], [0.1, 0.025, 0.08]);
+    add("torso", [-0.15, 0.205, -0.02], [0.1, 0.025, 0.08]);
+    return parts;
+  }, [character, snowMaterial]);
+  useEffect(
+    () => () => {
+      snowParts[0]?.geometry.dispose();
+      snowMaterial.dispose();
+      snowParts.forEach((part) => part.removeFromParent());
+    },
+    [snowParts, snowMaterial],
+  );
+
   const rod = useMemo(() => {
     const next = rodFile.scene.clone(true);
     applyToon(next);
@@ -119,6 +152,14 @@ export function Angler({ phase, powerRef, rodTip, lookAt }: Props) {
   const { actions } = useAnimations(gltf.animations, character);
 
   useFrame((state, delta) => {
+    snowCover.current = capSnow(snowCover.current, delta, snowfall);
+    for (const part of snowParts) {
+      const [x, y, z] = part.userData.full as [number, number, number];
+      part.visible = snowCover.current > 0.02;
+      // Spreads to its full size quickly, then piles up thicker.
+      const spread = Math.min(1, snowCover.current * 2.5);
+      part.scale.set(x * spread, y * snowCover.current, z * spread);
+    }
     const t = state.clock.elapsedTime;
     const power = powerRef.current;
     const fighting = phase === "hookset" || phase === "fight";

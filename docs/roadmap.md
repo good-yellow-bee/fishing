@@ -590,13 +590,13 @@ Claude picked these after Wave U; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~V1~~ | ~~Ducklings peep and a spooked deer snorts~~ (#161) | sound | S |
 | ~~V2~~ | ~~Cat's-paw gusts sweeping patches of water on breezy days~~ (#162) | weather | S/M |
-| V3 | Snow gathers on the angler's cap in winter snowfall | weather | S |
+| ~~V3~~ | ~~Snow gathers on the angler's cap in winter snowfall~~ (#163) | weather | S |
 | V4 | Frogs on lily pads plop in when a cast lands close | wildlife | S/M |
 | V5 | Refresh the "New on the lake" card for Wave V | onboarding | S |
 
 - **V1 · Peeps and snorts.** Soft high peeps now and then while the ducklings are out, and a sharp snort when a cast sends the deer off, both under the Nature sounds slider.
 - **V2 · Gusts.** On breezy and strong-wind days, rippled patches that catch the sky sweep across the water downwind every few seconds, faster in a strong wind, the way a gust roughens the surface. (Darker patches were tried first and vanished against the teal water.) Off with Reduce motion; Lite effects keep half.
-- **V3 · Snowy cap.** While snow falls, a little snow builds up on the angler's cap and shoulders, and is gone when it stops.
+- **V3 · Snowy cap.** While snow falls, snow builds up on the angler's cap and shoulders over about 45 seconds, and melts away within about 12 once it stops.
 - **V4 · Frogs on pads.** On summer evenings a frog or two sits on the lily pads near the reeds; a cast landing close makes them plop into the water with a ring, and they climb back later.
 - **V5 · What's new, again.** List whatever Wave V lands on the card.
 
