@@ -609,7 +609,7 @@ Claude picked these after Wave V, turning from scenery back to the fishing itsel
 | W1 | Line spray: drops flick off the line when a fish surges | fight | S |
 | W2 | The float bobs and dips in a pattern by species before the bite | bite | S/M |
 | W3 | A thrashing fish at the net sends up splashes and spray | landing | S |
-| W4 | Rod tip shivers on a nibble even when the float is out of view | bite | S |
+| ~~W4~~ | ~~Rod tip shivers on a nibble even when the float is out of view~~ (#165) | bite | S |
 | W5 | Refresh the "New on the lake" card for Wave W | onboarding | S |
 
 - **W1 · Line spray.** While a fish surges and the line is under high tension, a few bright drops flick off the line near the water. Off with Reduce motion; Lite effects keep half.

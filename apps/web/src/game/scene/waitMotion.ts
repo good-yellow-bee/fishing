@@ -132,6 +132,15 @@ export function waitNod(x: number, z: number, time: number) {
   };
 }
 
+/** How far a nibble dips and shivers the rod tip, radians of pitch. */
+export const NIBBLE_DIP = 0.035;
+export const NIBBLE_SHIVER = 0.022;
+
+/** Extra rod pitch while a fish nibbles: a small dip with a quick shiver, so the tip tells you even when the float is hard to see. */
+export function nibbleShiver(time: number) {
+  return NIBBLE_DIP + Math.sin(time * 38) * NIBBLE_SHIVER * (0.6 + 0.4 * Math.sin(time * 5.3));
+}
+
 /** Seconds of sitting the wind keeps walking the float; past this it holds where the line lets it. */
 export const WIND_WALK_SEC = 25;
 
