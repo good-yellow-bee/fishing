@@ -1,6 +1,7 @@
 import { fishById } from "./fish.ts";
 import { isTrophyWeight } from "./guide.ts";
 import type { LakeHour } from "./hour.ts";
+import type { LakeSeason } from "./season.ts";
 import type { SpotId } from "./types.ts";
 import type { Sky } from "./weather.ts";
 
@@ -13,12 +14,14 @@ export type BadgeFactRow = {
   spot: SpotId;
   hour: LakeHour | null;
   sky: Sky | null;
+  /** Null on catches saved before seasons were recorded. */
+  season: LakeSeason | null;
   clean: boolean;
   count: number;
   heaviest: number;
 };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons";
 
 export type Badge = {
   id: BadgeId;
@@ -103,6 +106,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land all thirteen species of the lake's first book.",
     need: FIRST_BOOK.length,
     have: (facts) => distinct(facts.filter((row) => FIRST_BOOK.includes(row.speciesId)), (row) => row.speciesId),
+  },
+  {
+    id: "four-seasons",
+    label: "Four seasons",
+    blurb: "Land a fish in spring, summer, fall and winter.",
+    need: 4,
+    have: (facts) => distinct(facts.filter((row) => row.season !== null), (row) => row.season!),
   },
 ];
 

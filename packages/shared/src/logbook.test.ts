@@ -262,6 +262,7 @@ describe("field log", () => {
     expect(filed.catches.find((entry) => entry.id === "play-b")?.tripId).toBe("trip-elsewhere");
     expect(isLogbook(filed)).toBe(true);
     expect(keepPlayTrip(filed, trip)).toBe(filed);
+    expect(keepPlayTrip(next, { ...trip, note: "Season: Fall" }).trips.find((entry) => entry.id === "trip-play-1")?.note).toBe("Season: Fall");
   });
 
   it("records the lure that was tied on", () => {

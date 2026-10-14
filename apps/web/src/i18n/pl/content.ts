@@ -146,6 +146,8 @@ export const PL_CONTENT: PlBook = {
   "Land a fish at trophy weight.": "Złów rybę o wadze trofealnej.",
   "Full book": "Pełny atlas",
   "Land all thirteen species of the lake's first book.": "Złów wszystkie trzynaście gatunków z pierwszego atlasu jeziora.",
+  "Four seasons": "Cztery pory roku",
+  "Land a fish in spring, summer, fall and winter.": "Złów rybę wiosną, latem, jesienią i zimą.",
 
   // Lure classes (tackle.ts)
   Topwater: "Powierzchniowa",

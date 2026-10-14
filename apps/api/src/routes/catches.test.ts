@@ -150,6 +150,14 @@ describe("POST /catches", () => {
     expect(db.prepare(`SELECT COUNT(*) as count FROM catch`).get()).toEqual({ count: 0 });
   });
 
+  it("stores the season the fish came in, and rejects an unknown one", async () => {
+    const payload = { requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "dusk", sky: "rain" };
+    expect((await post({ ...payload, season: "monsoon" })).status).toBe(400);
+    expect((await post({ ...payload, season: "winter" })).status).toBe(200);
+    expect(db.prepare(`SELECT season FROM catch`).get()).toEqual({ season: "winter" });
+    expect((await post({ ...payload, season: "spring" })).status).toBe(409);
+  });
+
   it("rejects a retry that changes the conditions", async () => {
     const payload = { requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "night", sky: "fog" };
     expect((await post(payload)).status).toBe(200);
@@ -161,15 +169,16 @@ describe("POST /catches", () => {
     const { listBadgeFacts } = await import("../db.ts");
     const { badgeProgress } = await import("@stillwater/shared");
     const ids = ["1e0a0c08-7e6d-4ee2-8718-4a938773b7e3", "1e0a0c08-7e6d-4ee2-8718-4a938773b7e4", "1e0a0c08-7e6d-4ee2-8718-4a938773b7e5"];
-    await post({ requestId: ids[0], speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "night", sky: "rain", clean: true });
-    await post({ requestId: ids[1], speciesId: "golden-shiner", weight: 0.4, spot: "dock", hour: "night", sky: "rain", clean: true });
+    await post({ requestId: ids[0], speciesId: "golden-shiner", weight: 0.3, spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true });
+    await post({ requestId: ids[1], speciesId: "golden-shiner", weight: 0.4, spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true });
     await post({ requestId: ids[2], speciesId: "golden-shiner", weight: 0.2, spot: "dock" });
 
     const facts = listBadgeFacts(user.id);
     expect(facts).toHaveLength(2);
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", clean: true, count: 2, heaviest: 0.4 });
-    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, clean: false, count: 1, heaviest: 0.2 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: "night", sky: "rain", season: "fall", clean: true, count: 2, heaviest: 0.4 });
+    expect(facts).toContainEqual({ speciesId: "golden-shiner", spot: "dock", hour: null, sky: null, season: null, clean: false, count: 1, heaviest: 0.2 });
     expect(badgeProgress(facts).find((badge) => badge.id === "night-owl")).toMatchObject({ have: 2, earned: false });
+    expect(badgeProgress(facts).find((badge) => badge.id === "four-seasons")).toMatchObject({ have: 1, earned: false });
   });
 
   it("limits successful catch submissions per minute", async () => {

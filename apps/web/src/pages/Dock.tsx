@@ -17,6 +17,7 @@ import {
   lakeHourFromSearch,
   lakeSeason,
   seasonFromSearch,
+  SEASON_LABELS,
   luresPacked,
   keepPlayTrip,
   localDate,
@@ -216,7 +217,7 @@ export function DockPage() {
     const title = sessionTitle(session);
     try {
       const book = readStoredLogbook() ?? sampleLogbook(new Date());
-      saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title, catchIds: session.fish.map((fish) => fish.id) }));
+      saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title, catchIds: session.fish.map((fish) => fish.id), note: t("Season: {season}", { season: t(SEASON_LABELS[season]) }) }));
       setFiledTrip({ id: session.id, title });
       setSession(null);
     } catch {
@@ -250,7 +251,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky, season });
       return;
     }
     void catchSync.sync();
@@ -373,8 +374,8 @@ export function DockPage() {
     if (posted.current === id) return;
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky });
-  }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky]);
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky, season });
+  }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
     if (game.stance !== "shop") setShopOpen(false);

@@ -321,7 +321,7 @@ describe("dock badges", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
     const pike = fishById("pike")!;
     const none = badgeProgress([]);
-    const rainPike = badgeProgress([{ speciesId: "pike", spot: "reeds", hour: "dusk", sky: "rain", clean: false, count: 1, heaviest: 4 }]);
+    const rainPike = badgeProgress([{ speciesId: "pike", spot: "reeds", hour: "dusk", sky: "rain", season: "fall", clean: false, count: 1, heaviest: 4 }]);
     vi.mocked(getMe).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValue({ ...me, badges: rainPike });
     vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pike", points: 9, speciesId: pike.id, weight: 4 });
     landed.outcome = { kind: "landed", id: "catch-pike", species: pike, weight: 4, spot: "reeds", clean: false };
