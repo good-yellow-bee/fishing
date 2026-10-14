@@ -64,6 +64,8 @@ import { Bats } from "./Bats";
 import { batsOut } from "./batFlight";
 import { Geese } from "./Geese";
 import { geeseOut } from "./geeseSkein";
+import { Swans } from "./Swans";
+import { swansOut } from "./swanGlide";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
@@ -1936,6 +1938,7 @@ export const LakeWorld = memo(function LakeWorld({
       {foxOut(hour, sky) && <Fox />}
       {batsOut(hour, sky, season) && <Bats />}
       {geeseOut(hour, sky, season) && <Geese />}
+      {swansOut(hour, sky, season) && <Swans />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />
       {turtleOut(hour, sky, season) && <Turtle />}

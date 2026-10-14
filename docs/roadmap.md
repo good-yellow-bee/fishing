@@ -765,6 +765,16 @@ Claude picked these to carry Wave AF's species shapes to every fish on the lake;
 | ~~AG2~~ | ~~The shadow under the float runs long for pike and short for panfish~~ (#190) | fish | S |
 | ~~AG3~~ | ~~Refresh the "New on the lake" card for Wave AG~~ (#190) | onboarding | S |
 
+## Wave AH — Birds on the open water (added 2026-10-14, after Wave AG shipped)
+
+Claude picked these; swans and gulls weren't on the lake yet. The owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AH1~~ | ~~A pair of swans glides the far water by day in spring and summer, tipping under to feed~~ (#191) | ambient life | M |
+| AH2 | Gulls wheel over the lake on grey days and drop to snatch a small fish off the top | ambient life | M |
+| AH3 | Refresh the "New on the lake" card for Wave AH | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
