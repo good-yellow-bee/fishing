@@ -87,6 +87,7 @@ import {
   placeLandedFish,
 } from "./landMotion";
 import { clearCatchShot, postCatchShot, snapCanvas } from "./catchPhoto";
+import { lakeShotWanted, takeLakeShot } from "./lakeShot";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { MISS_DRIPS, missBobberLift, missDrip, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
@@ -2071,6 +2072,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       />
       {/* Last in the tree, so the snapshot sees every pose written this frame. */}
       <CatchCamera />
+      <LakeCamera />
     </>
   );
 }
@@ -2093,6 +2095,17 @@ function CatchCamera() {
     } catch {
       // A tainted or lost context leaves this catch without a photo.
     }
+  });
+  return null;
+}
+
+/** Copies a frame for photo mode's shutter when the dock asks for one. */
+function LakeCamera() {
+  useFrame(({ gl, scene, camera }) => {
+    if (!lakeShotWanted()) return;
+    // Render the frame now so the pixels are there to copy; the default render follows.
+    gl.render(scene, camera);
+    takeLakeShot(gl.domElement);
   });
   return null;
 }

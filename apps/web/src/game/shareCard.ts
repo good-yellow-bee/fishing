@@ -85,6 +85,11 @@ export async function drawShareCard(text: ShareCardText, photo: string | null): 
 /** Draws the card and hands it to the browser as a PNG download. */
 export async function saveShareCard(text: ShareCardText, photo: string | null, fileName: string): Promise<void> {
   const canvas = await drawShareCard(text, photo);
+  await savePng(canvas, fileName);
+}
+
+/** Hands a canvas to the browser as a PNG download. */
+export async function savePng(canvas: HTMLCanvasElement, fileName: string): Promise<void> {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("png");
   const url = URL.createObjectURL(blob);

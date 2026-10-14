@@ -516,8 +516,12 @@ describe("settings", () => {
     // The game never sees keys while the panels are away, so Space casts nothing.
     key("Space");
     expect(page.querySelector(".scene-wrap")!.getAttribute("data-phase")).toBe("idle");
+    expect(page.querySelector("[data-photo-shutter]")?.textContent).toBe("Save this view");
+    key("KeyP");
+    expect(root.getAttribute("data-photo")).toBe("1");
     key("Escape");
     expect(root.hasAttribute("data-photo")).toBe(false);
+    expect(page.querySelector("[data-photo-shutter]")).toBeNull();
     key("KeyH");
     act(() => page.querySelector<HTMLButtonElement>(".photo-exit")!.click());
     expect(root.hasAttribute("data-photo")).toBe(false);
