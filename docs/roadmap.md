@@ -355,14 +355,14 @@ Claude picked these after Wave H; the owner can reorder or drop any.
 | # | Title | Area | Size |
 |---|---|---|---|
 | I1 | ~~Install the lake as an app, open offline~~ (shipped) | platform | M |
-| I2 | Dragonflies over the reeds on warm days | wildlife | S/M |
+| I2 | ~~Dragonflies over the reeds on warm days~~ (shipped) | wildlife | S/M |
 | I3 | Ducks on the open water that scatter from a close cast | wildlife | M |
 | I4 | Rare golden fish | collection | M/L |
 | I5 | Play with a gamepad | input | S/M |
 
 - **I1 · Installable, opens offline.** A web manifest and icons so phones and desktops can install Stillwater, and a small service worker (production builds only) that keeps the app shell, built assets and models so the field log opens without a network. The lake itself needs the API, so offline it shows a card pointing to the field log instead of bouncing to sign-in. The API is never cached.
-- **I2 · Dragonflies.** On dry spring and summer days a few dragonflies dart and hover over the reed beds; pure position functions with tests, like the fireflies.
-- **I3 · Ducks.** A small raft of ducks paddles the open water by day; a cast that lands close sends them flapping off, and they drift back later. Motion in pure functions with tests, like the heron.
+- **I2 · Dragonflies.** The two figure-eight dragonflies by the dock become seven that hover and dart over the three reed beds, only on dry spring and summer days and evenings; pure position functions with tests, like the fireflies.
+- **I3 · Ducks.** The ducks already paddle their loops by day; a cast that lands close sends them flapping off, and they drift back later. Motion in pure functions with tests, like the heron.
 - **I4 · Golden fish.** About one fish in forty of a species lands golden. The catch keeps a `golden` flag (server-checked roll), the landed card and log show it, and a "Gold" badge goes to the first one.
 - **I5 · Gamepad.** A connected controller aims with the left stick, casts and strikes with A, reels with the right trigger and walks banks with the shoulder buttons.
 
