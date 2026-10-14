@@ -500,13 +500,13 @@ Claude picked these after Wave P; the owner can reorder or drop any.
 |---|---|---|---|
 | ~~Q1~~ | ~~A rainbow when the sun breaks through the rain~~ (#141) | sky | S/M |
 | ~~Q2~~ | ~~Bats hawking over the water on summer nights~~ (#142) | wildlife | M |
-| Q3 | A kingfisher that perches on the reeds and dives | wildlife | M |
+| ~~Q3~~ | ~~A kingfisher that perches on a snag and dives~~ (#143) | wildlife | M |
 | Q4 | Swallows skimming the lake on warm summer days | wildlife | M |
 | Q5 | Refresh the "New on the lake" card for Wave Q | onboarding | S |
 
 - **Q1 · Rainbow.** On rain days at dawn and dusk, a soft rainbow arc stands in the sky across from the sun, and since the hills hide most of the sky from the dock, its fainter twin shows in the lake. Never at night, in winter, or in a thunderstorm.
 - **Q2 · Bats.** From dusk into the night in summer (and on dry spring dusks), a few bats flicker in figure-of-eight loops over the water in front of the dock, jinking after moths. Lite effects keep half; Reduce motion holds them gliding.
-- **Q3 · Kingfisher.** On calm days outside winter, a bright blue bird sits on a reed stem near the bank, now and then drops into the water with a tiny splash and flies back. It leaves for a while if a lure lands close.
+- **Q3 · Kingfisher.** From dawn to dusk outside winter, rain and fog, a bright blue bird sits on a bare snag off the east bank, now and then drops into the water with a little splash ring and flies back up. A cast landing within 5 m sends it off downlake for about 40 seconds. Reduce motion keeps it sitting.
 - **Q4 · Swallows.** On warm, dry summer days, a handful of swallows sweep low over the lake in long arcs, dipping to the surface now and then. They stay away in rain and wind.
 - **Q5 · What's new, again.** List whatever Wave Q lands on the card.
 
