@@ -349,7 +349,10 @@ export function DockPage() {
         return savePng(canvas, lakePictureFileName(new Date()));
       })
       .then(
-        () => setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: true })),
+        (how) => {
+          // The share sheet is its own answer; a closed sheet needs none.
+          if (how === "downloaded") setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: true }));
+        },
         () => setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: false })),
       );
   }, []);
