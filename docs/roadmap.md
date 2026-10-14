@@ -456,6 +456,24 @@ Claude picked these after Wave M; the owner can reorder or drop any.
 - **N4 · High contrast.** A Settings checkbox that makes the panels over the lake solid with 2 px bright borders and no blur, and lifts dimmed text to full strength. The current bank sign and the strike button at the bite keep their amber.
 - **N5 · Windsock.** The shack has no roof to put a vane on, so a striped windsock stands on a pole at the pier's left rail, in view from the dock. It points downwind with the day's wind (the one that walks the float), hangs limp on a calm day, stands out on a strong one, and flutters more as it fills.
 
+## Wave O — Telling players, and a few more lake moments (added 2026-10-14, after Wave N shipped)
+
+Claude picked these after Wave N; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| O1 | ~~"New on the lake" card for returning anglers~~ (shipped) | onboarding | S |
+| O2 | Angler titles by level | progression | S |
+| O3 | Photo mode: hide the panels with H | QoL | S |
+| O4 | Thunder and lightning on stormy rain days | weather | M |
+| O5 | An otter along the far bank at dawn and dusk | wildlife | M |
+
+- **O1 · What's new.** An angler who has landed a fish before sees a one-time card listing the latest headline changes (leaps, hot bank, evening rise, snags, stars and the rod bell, the new settings), only while idle on the bank. "Got it" hides it until the next batch; brand-new anglers get the walkthrough instead.
+- **O2 · Titles.** A title from the angler's level ("Greenhorn" up to "Lake legend") next to their name on the HUD and the lodge board.
+- **O3 · Photo mode.** H (or a pad button) hides every panel for a clean screenshot; H again or Escape brings them back.
+- **O4 · Storms.** On rain days with a strong wind, now and then the sky flashes and thunder rolls a few seconds later (no flash with Reduce motion).
+- **O5 · Otter.** At dawn and dusk outside winter, an otter swims the far bank, porpoising and diving, and slips away from a close cast like the ducks do.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

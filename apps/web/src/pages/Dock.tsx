@@ -56,6 +56,7 @@ import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
@@ -629,6 +630,7 @@ export function DockPage() {
           outcome={game.outcome?.kind ?? null}
           surfaceRef={game.surfaceRef}
         />
+        <WhatsNew caughtTotal={caughtTotal} hidden={scenePhase !== "idle" || shopOpen} />
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
