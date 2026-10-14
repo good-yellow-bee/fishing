@@ -27,6 +27,8 @@ import { DockRain } from "./DockRain";
 import { DockSnow } from "./DockSnow";
 import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
+import { Striders } from "./Striders";
+import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
 import { dewWebOut } from "./orbWeb";
 import { dockSnowy } from "./snowyDock";
@@ -1793,6 +1795,7 @@ export const LakeWorld = memo(function LakeWorld({
       {dockSnowy(season) && <DockSnow />}
       {dewWebOut(hour, season) && <DewWeb />}
       {deerOut(hour, sky) && <Deer />}
+      {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       <Shack />
       <ShorePath />
       <BankWalks />
