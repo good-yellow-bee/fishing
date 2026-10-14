@@ -4,6 +4,8 @@ import {
   isTrophyWeight,
   LAKE_HOUR_LABELS,
   lureClassesFor,
+  peakSeason,
+  SEASON_LABELS,
   shadowSize,
   SPOT_LABELS,
   trophyWeight,
@@ -85,6 +87,7 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
         <p>{species.spots.map((spot) => t("{spot} at {hour}", { spot: t(SPOT_LABELS[spot]), hour: hourAt(spot) })).join(" · ")}</p>
       )}
       {known && drawsOn(species.id) && <p className="guide-draws">{t("Draws on: {lures}", { lures: drawsOn(species.id) })}</p>}
+      {known && peakSeason(species.id) && <p className="guide-season">{t("Runs in {season}", { season: t(SEASON_LABELS[peakSeason(species.id)!]).toLowerCase() })}</p>}
     </article>
   );
 }

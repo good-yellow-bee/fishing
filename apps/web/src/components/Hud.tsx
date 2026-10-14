@@ -4,9 +4,12 @@ import {
   anglerLevel,
   LAKE_HOUR_LABELS,
   SKILL_LABELS,
+  SEASON_BLURB,
+  SEASON_LABELS,
   SKY_BLURB,
   SKY_LABELS,
   type LakeHour,
+  type LakeSeason,
   type Profile,
   type Sky,
 } from "@stillwater/shared";
@@ -18,12 +21,13 @@ type Props = {
   profile: Profile;
   hour: LakeHour;
   sky: Sky;
+  season?: LakeSeason;
   onSettings?: () => void;
   /** Shown once the outing has a fish in it. */
   onPackUp?: () => void;
 };
 
-export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
+export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
   const t = useT();
@@ -42,7 +46,10 @@ export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
   return (
     <header ref={header} className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
       <div className="hud-brand">
-        <span className="eyebrow">{t("Northern lake")}</span>
+        {/* The season rides in the eyebrow: one more chip wrapped the HUD on laptop widths. */}
+        <span className="eyebrow" title={season ? t(SEASON_BLURB[season]) : undefined}>
+          {season ? t("Northern lake · {season}", { season: t(SEASON_LABELS[season]) }) : t("Northern lake")}
+        </span>
         <strong>Stillwater</strong>
         <div className="hud-user">
           <span>{profile.displayName}</span>
@@ -55,7 +62,7 @@ export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
           {t(SKY_LABELS[sky])}
         </span>
         <span className="level-chip">{t("Level {level}", { level })}</span>
-        <span className="points-chip">{tn(profile.points, "{n} point", "{n} points")}</span>
+        <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
         <span className="skill-chip">
           <small>{t(SKILL_LABELS.strength)}</small> {profile.strength}
         </span>
@@ -82,7 +89,7 @@ export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
         )}
         {onSettings && (
           <button className="hud-link" type="button" onClick={onSettings}>
-            {t("Settings")}
+            {t("Settings|hud")}
           </button>
         )}
         <button className="hud-link" type="button" onClick={() => authClient.signOut()}>

@@ -996,6 +996,22 @@ kbd {
   pointer-events: none;
 }
 
+/* A quiet line low in the frame: it reports a setting, it should not stop play. */
+.effects-toast {
+  top: auto;
+  bottom: 96px;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  min-width: 0;
+  max-width: min(420px, 88vw);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.effects-toast p {
+  margin: 0;
+}
+
 .level-toast p {
   margin: 6px 0 0;
 }

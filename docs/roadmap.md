@@ -44,7 +44,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
 | P23 | ~~Atmosphere pass (fireflies, mist, bloom)~~ (shipped) | visual | M | E | P8, #53 |
-| P24 | Seasons on the lake | progression/content | L | F | #53, #50 |
+| P24 | ~~Seasons on the lake~~ (shipped) | progression/content | L | F | #53, #50 |
 | P25 | ~~Species lore + silhouettes~~ (shipped) | collection | S | F | — |
 
 ---
@@ -281,7 +281,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave F — The long year
 
-### P24 · Seasons on the lake
+### ~~P24 · Seasons on the lake~~ (shipped: real calendar months, with `?season=` to pin one; seasons only lean the odds inside what the angler can land, so no fish is ever locked away; fall turns the broadleaves red and orange, winter frosts the trees, snows the hills and rims the shore with ice, spring freshens the green; the HUD eyebrow names the season and the field guide says when a logged fish runs)
 - **Pitch:** the lake has a year — ice at the edges in winter, cedars red in fall, salmon running in October, burbot in February.
 - **Borrowed:** Animal Crossing (real-calendar availability); Stardew (seasonal fish lists).
 - **Why fun:** #53's `dailyConditions` already computes `dayOfYear` and a seasonal cosine for water temp — a season layer is one step further and the genre's biggest replay driver.
@@ -311,6 +311,24 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | F · The long year | A calendar and a book worth filling. | P24 P25 |
 
 Sequencing notes: A and B are independent of the queued work except P1 (power via ref). C waits for #53 to merge. P20/P21 go after the landing lift since they share `updateLanding`. P22/P23 go after the perf memo and P8.
+
+## Wave G — Lived-in year (added 2026-10-14, after P1-P25 shipped)
+
+Claude picked these to build on the seasons; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| G1 | ~~Seasonal ambience~~ (shipped) | audio | S |
+| G2 | Season on each catch + a Four seasons badge | progression | M |
+| G3 | ~~Daily requests ask for in-season fish~~ (shipped) | retention | S |
+| G4 | Keep the camera out of hills and trees | camera | M |
+| G5 | ~~Auto quality: step down to Lite effects when frames sag~~ (shipped) | perf | S/M |
+
+- **G1 · Seasonal ambience.** Geese pass over on fall days; winter swaps crickets and loons for a chickadee by day, quiet nights and a wind loop. `ambientProfile(hour, sky, season)` in `fx.ts`.
+- **G2 · Season on each catch.** Store the season with hour and sky (P11) and add a badge for landing a fish in all four; the field log trip notes the season.
+- **G3 · In-season requests.** The daily board leans its asks toward fish the season favours (`SEASON_SPECIES`), so the board and the lake tell the same story.
+- **G4 · Camera clipping.** The follow and fight cameras can sink into the hill behind the Point and the trees on the west shore; pull the camera in along its ray when terrain or a trunk sits between it and the angler.
+- **G5 · Auto quality.** If the frame rate stays under ~40 fps for a few seconds, switch effects to Lite once and say so in a toast; Settings can turn it back.
 
 ## Risks / open questions for the owner
 

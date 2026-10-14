@@ -280,4 +280,10 @@ export const PL_GAME: PlBook = {
   // Short forms for the HUD row, which wraps over the coach at laptop widths.
   "Field log|hud": "Dziennik",
   "Catch log|hud": "Połowy",
+  // Seasons and auto quality
+  "Northern lake · {season}": "Jezioro na północy · {season}",
+  "Runs in {season}": "Najlepiej: {season}",
+  "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
+  "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
+  "Settings|hud": "Opcje",
 };

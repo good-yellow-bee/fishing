@@ -15,6 +15,8 @@ import {
   LAKE_HOUR_BLURB,
   lakeHour,
   lakeHourFromSearch,
+  lakeSeason,
+  seasonFromSearch,
   luresPacked,
   keepPlayTrip,
   localDate,
@@ -39,6 +41,7 @@ import { SettingsPanel } from "../components/SettingsPanel";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
+import { useEffectsSteppedDown } from "../game/frameWatch";
 import { readStoredLogbook, saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { hookWindowMs, isMercy } from "../game/logic";
@@ -91,6 +94,9 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "shop", label: "Shack" },
 ];
 
+/** How long the "effects set to Lite" notice stays up. */
+const EFFECTS_NOTICE_MS = 5000;
+
 export function DockPage() {
   useT();
   const [params] = useSearchParams();
@@ -103,6 +109,8 @@ export function DockPage() {
   const [veil, setVeil] = useState<LakeHour | null>(null);
   const hour = forcedHour ?? liveHour;
   const sky = weatherFromSearch(params.toString()) ?? weatherForDay(openedAt);
+  // Read once per visit like the day's weather; ?season= pins it for testing.
+  const season = seasonFromSearch(params.toString()) ?? lakeSeason(openedAt);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -115,11 +123,19 @@ export function DockPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const shopPanel = useRef<HTMLDivElement>(null);
   const prefs = useSettings();
+  const steppedDownAt = useEffectsSteppedDown();
+  const [effectsNotice, setEffectsNotice] = useState(false);
+  useEffect(() => {
+    if (!steppedDownAt) return;
+    setEffectsNotice(true);
+    const timer = window.setTimeout(() => setEffectsNotice(false), EFFECTS_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [steppedDownAt]);
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season);
   const scenePhase = game.outcome ? "result" : game.phase;
   const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
@@ -246,7 +262,7 @@ export function DockPage() {
 
   useEffect(() => () => fx.ambient.stop(), []);
 
-  useEffect(() => fx.ambient.setConditions(hour, sky), [hour, sky]);
+  useEffect(() => fx.ambient.setConditions(hour, sky, season), [hour, sky, season]);
 
   useEffect(() => {
     fx.enabled = !prefs.muted;
@@ -433,6 +449,7 @@ export function DockPage() {
         profile={me.profile}
         hour={hour}
         sky={sky}
+        season={season}
         onSettings={() => setSettingsOpen(true)}
         onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
       />
@@ -446,6 +463,7 @@ export function DockPage() {
         data-nibble={game.nibble ? "1" : "0"}
         data-hour={hour}
         data-sky={sky}
+        data-season={season}
         data-lure={lure}
         data-lure-locked={lureLocked ? "1" : "0"}
       >
@@ -457,6 +475,7 @@ export function DockPage() {
           nibble={game.nibble}
           hour={hour}
           sky={sky}
+          season={season}
           species={shownFish?.species ?? null}
           weight={shownFish?.weight ?? 0}
           hotspot={game.hotspot}
@@ -653,6 +672,11 @@ export function DockPage() {
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
         <div className="level-status" role="status">
+          {effectsNotice && (
+            <div className="toast effects-toast">
+              <p>{t("Effects set to Lite to keep the lake smooth. Settings can turn them back.")}</p>
+            </div>
+          )}
           {shownLevel && (
             <div className="toast level-toast">
               <h2>{t("Level {level}", { level: shownLevel.level })}</h2>

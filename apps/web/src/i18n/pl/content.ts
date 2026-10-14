@@ -297,4 +297,13 @@ export const PL_CONTENT: PlBook = {
   " at the {spot}": " — {spot}",
   "Beats the {size} {species} already in the field log": "Bije wpis z dziennika połowów: {species}, {size}",
   "Beats your {size} {species} already in the field log": "Bije twój wpis z dziennika połowów: {species}, {size}",
+  // Seasons
+  Spring: "Wiosna",
+  Summer: "Lato",
+  Fall: "Jesień",
+  Winter: "Zima",
+  "Ice out. Trout and crappie crowd the shallows.": "Lody puściły. Pstrągi i wielkooczki tłoczą się na płyciznach.",
+  "Warm water. Bass, carp and catfish feed hard.": "Ciepła woda. Bassy, karpie i sumiki żerują na całego.",
+  "Salmon run. Walleye and pike fatten up.": "Łososie ciągną. Sandacze i szczupaki tyją.",
+  "Ice at the edges. Burbot and whitefish stir.": "Lód przy brzegach. Miętusy i sieje ruszają się.",
 };

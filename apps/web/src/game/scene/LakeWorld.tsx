@@ -1,8 +1,8 @@
-import { memo, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { createContext, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
+import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { toonRamp } from "./toon";
@@ -24,6 +24,7 @@ import { LakeRain } from "./LakeRain";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { mistAmount } from "./mist";
+import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, type PlantKind } from "./seasonLook";
 import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
@@ -230,6 +231,29 @@ const MODELS = {
 } as const;
 
 type Scatter = { url: string; position: Vec3; scale: number; rot: number };
+
+/** Plants read the season from here rather than through every scatter list. */
+const SeasonContext = createContext<LakeSeason>("summer");
+
+const PLANT_KIND: Record<string, PlantKind> = {
+  // tree_detailed reads as a blocky broadleaf, so it turns with the oaks.
+  [MODELS.pine]: "leafy",
+  [MODELS.pineDark]: "leafy",
+  [MODELS.oak]: "leafy",
+  [MODELS.oakDark]: "leafy",
+  [MODELS.fat]: "leafy",
+  [MODELS.bushDetailed]: "leafy",
+  [MODELS.bushLarge]: "leafy",
+  [MODELS.grass]: "grass",
+  [MODELS.grassLarge]: "grass",
+  [MODELS.reed]: "grass",
+};
+
+/** A steady 0..1 per spot, so each oak keeps its own fall colour from visit to visit. */
+function plantVariant(position: Vec3) {
+  const s = Math.sin(position[0] * 12.9898 + position[2] * 78.233) * 43758.5453;
+  return s - Math.floor(s);
+}
 type Lily = { url: string; position: Vec3; scale: number };
 type BoatProps = { url: string; position: Vec3; heading: number; delay: number; scale: number };
 type FishProps = {
@@ -1446,6 +1470,7 @@ function AnchorBuoy() {
 }
 
 function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
+  const season = useContext(SeasonContext);
   const keyPrefix = origin.join("-");
   return Array.from({ length: count }, (_, i) => (
     <ToonModel
@@ -1455,11 +1480,13 @@ function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
       rotation={[0, i * 0.73, 0]}
       scale={1.45 + (i % 3) * 0.16}
       shadows={false}
+      plant={{ season, kind: "grass", variant: 0 }}
     />
   ));
 }
 
 function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?: boolean }) {
+  const season = useContext(SeasonContext);
   return items.map((item, i) => (
     <ToonModel
       key={`${item.url}-${i}`}
@@ -1469,26 +1496,43 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
       scale={item.scale}
       shadows={shadows}
       sitOnGround
+      plant={PLANT_KIND[item.url] ? { season, kind: PLANT_KIND[item.url]!, variant: plantVariant(item.position) } : undefined}
     />
   ));
 }
 
-export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; hotspot: Hotspot | null }) {
+export const LakeWorld = memo(function LakeWorld({
+  spot,
+  hour,
+  sky,
+  season = "summer",
+  hotspot,
+}: {
+  spot: SpotId;
+  hour: LakeHour;
+  sky: WeatherSky;
+  season?: LakeSeason;
+  hotspot: Hotspot | null;
+}) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky), [hour, sky]);
   const mist = mistAmount(hour, sky);
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
-  const ground = useMemo(() => makeGroundGeometry(), []);
+  // Shore ice reaches from under the bank out over the shallows.
+  const ice = useMemo(() => (shoreIce(season) ? makeEdgeRingGeometry(0.4, -SHORE_ICE_WIDTH) : null), [season]);
+  useEffect(() => () => ice?.dispose(), [ice]);
+  const ground = (color: string) => seasonGroundColor(color, season);
+  const groundGeo = useMemo(() => makeGroundGeometry(), []);
   useEffect(() => {
     return () => {
       shore.dispose();
-      ground.dispose();
+      groundGeo.dispose();
     };
-  }, [shore, ground]);
+  }, [shore, groundGeo]);
   return (
-    <>
+    <SeasonContext.Provider value={season}>
       <fog attach="fog" args={[weather.fog, weather.fogNear, weather.fogFar]} />
       <hemisphereLight args={[weather.hemiSky, look.hemiGround, look.hemi]} />
       <directionalLight
@@ -1510,21 +1554,27 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       {CLOUDS.map((cloud, i) => (
         <Cloud key={i} {...cloud} color={weather.clouds} />
       ))}
-      <mesh geometry={ground} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, LAKE_CENTER_Z]} receiveShadow>
-        <meshToonMaterial color={hour === "night" ? "#3a5240" : "#4d6c48"} gradientMap={toonRamp()} />
+      <mesh geometry={groundGeo} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, LAKE_CENTER_Z]} receiveShadow>
+        <meshToonMaterial color={ground(hour === "night" ? "#3a5240" : "#4d6c48")} gradientMap={toonRamp()} />
       </mesh>
       <mesh geometry={shore} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.035, LAKE_CENTER_Z]} receiveShadow>
         <meshToonMaterial color={hour === "night" ? "#6a5a42" : "#9a815b"} gradientMap={toonRamp()} />
       </mesh>
+      {ice && (
+        // Above the shoreline chop, which dies out toward the bank.
+        <mesh geometry={ice} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.1, LAKE_CENTER_Z]} receiveShadow>
+          <meshToonMaterial color="#dbe7ec" gradientMap={toonRamp()} transparent opacity={0.88} depthWrite={false} />
+        </mesh>
+      )}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[4, -0.48, -5]} scale={[1.7, 1, 1]}>
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
       <LakeSurface spot={spot} hour={hour} weather={weather} />
 
-      <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color={hour === "night" ? "#3d5a44" : "#587a5f"} />
-      <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color={hour === "night" ? "#456348" : "#628468"} />
-      <Hill position={[20, 4.6, -27]} scale={[18, 7, 11]} color={hour === "night" ? "#385640" : "#547459"} />
+      <Hill position={[-28, 4.5, -26]} scale={[17, 7, 10]} color={ground(hour === "night" ? "#3d5a44" : "#587a5f")} />
+      <Hill position={[-5, 5.2, -30]} scale={[20, 8, 10]} color={ground(hour === "night" ? "#456348" : "#628468")} />
+      <Hill position={[20, 4.6, -27]} scale={[18, 7, 11]} color={ground(hour === "night" ? "#385640" : "#547459")} />
       <ScatterModels items={BACK_TREES} />
       <ScatterModels items={TREES} />
       <ScatterModels items={BUSHES} />
@@ -1570,6 +1620,6 @@ export const LakeWorld = memo(function LakeWorld({ spot, hour, sky, hotspot }: {
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {firefliesOut(hour, sky) && <Fireflies />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
-    </>
+    </SeasonContext.Provider>
   );
 });

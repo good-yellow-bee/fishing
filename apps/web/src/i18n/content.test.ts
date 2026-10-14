@@ -14,6 +14,8 @@ import {
   MAX_SKILL,
   sampleLogbook,
   sampleTackle,
+  SEASON_BLURB,
+  SEASON_LABELS,
   SKILL_LABELS,
   SKY_BLURB,
   SKY_LABELS,
@@ -53,6 +55,8 @@ describe("Polish game content", () => {
 
   it("has every shared label and blurb", () => {
     const records: Record<string, string>[] = [
+      SEASON_LABELS,
+      SEASON_BLURB,
       SKILL_LABELS,
       SPOT_LABELS,
       STANCE_LABELS,

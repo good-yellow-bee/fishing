@@ -130,7 +130,7 @@ export function tn(n: number, one: string, other: string, vars?: Vars): string {
       return fill(form, all);
     }
   }
-  return fill(n === 1 ? one : other, all);
+  return fill(english(n === 1 ? one : other), all);
 }
 
 /** A number with the language's decimal mark, e.g. 2.5 → "2,5" in Polish. */
