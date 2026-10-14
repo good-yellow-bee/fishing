@@ -867,6 +867,14 @@ Claude picked this so a controller player can frame a shot too: the pad's A alre
 |---|---|---|---|
 | ~~AR1~~ | ~~In photo mode the right stick turns the view and the left stick's up and down zoom; the keys card says so~~ (#205) | photo mode / controls | S |
 
+## Wave AS — A lighter lake for phones (added 2026-10-14, after Wave AR shipped)
+
+Claude picked this from a draw-call probe: a summer day drew 556 calls a frame, many of them tiny parts drawn one by one.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AS1~~ | ~~Water striders draw as two instanced meshes instead of nine meshes each; a fish's spots, bars or stripe as one; a lily's petals as one shared shape (556 to 445 calls a frame, summer day)~~ (#206) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

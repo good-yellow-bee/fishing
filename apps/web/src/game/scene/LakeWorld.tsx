@@ -94,7 +94,8 @@ import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
+import { LILY_HEART, LILY_PETALS, lilyBloom, type Bloom } from "./lilyBloom";
+import { sharedLilyPetals } from "./lilyPetals";
 import { FallingLeaves } from "./FallingLeaves";
 import { leavesOut } from "./leafFall";
 import { otterOut } from "./otterMotion";
@@ -1138,15 +1139,9 @@ function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: stri
   }
   return (
     <group position={[0, 0.03, 0]}>
-      {petalAngles().map((angle, i) => (
-        // Outer petals lie open; every other one sits a touch higher and more upright.
-        <group key={i} rotation={[0, angle, 0]}>
-          <mesh position={[0, i % 2 ? 0.035 : 0.02, 0.07]} rotation={[i % 2 ? -0.75 : -0.35, 0, 0]} scale={[0.03, 0.012, 0.07]}>
-            <sphereGeometry args={[1, 8, 5]} />
-            <meshToonMaterial color={color} gradientMap={toonRamp()} />
-          </mesh>
-        </group>
-      ))}
+      <mesh geometry={sharedLilyPetals()}>
+        <meshToonMaterial color={color} gradientMap={toonRamp()} />
+      </mesh>
       <mesh position={[0, 0.04, 0]} scale={[0.03, 0.022, 0.03]}>
         <sphereGeometry args={[1, 8, 6]} />
         <meshToonMaterial color={LILY_HEART} gradientMap={toonRamp()} />

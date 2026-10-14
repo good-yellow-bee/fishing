@@ -1,7 +1,7 @@
-import { type ReactElement, useMemo, useRef } from "react";
+import { type ReactElement, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
-import { markPlacements, PLAIN_BUILD, type FishBuild } from "./fishBuild";
+import { markPlacements, PLAIN_BUILD, type FishBuild, type Mark } from "./fishBuild";
 import { toonRamp } from "./toon";
 
 export type FishDrive = { intensity: number; speed: number };
@@ -84,6 +84,41 @@ function FishMesh({ shape, material, unlit, castShadow = false, ...props }: Fish
   );
 }
 
+/** Every bar, spot or fleck on one fish as a single instanced draw (two when unlit), not a mesh each. */
+function FishMarks({ marks, color, unlit }: { marks: Mark[]; color: string; unlit?: boolean }) {
+  const shape = useMemo(() => new THREE.SphereGeometry(1, 10, 6), []);
+  const prepass = useRef<THREE.InstancedMesh>(null);
+  const coat = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const matrix = new THREE.Matrix4();
+    const turn = new THREE.Quaternion();
+    for (const mesh of [prepass.current, coat.current]) {
+      if (!mesh) continue;
+      marks.forEach((mark, i) => mesh.setMatrixAt(i, matrix.compose(new THREE.Vector3(...mark.position), turn, new THREE.Vector3(...mark.scale))));
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
+  }, [marks, unlit]);
+  useLayoutEffect(() => () => shape.dispose(), [shape]);
+  if (!unlit) {
+    return (
+      <instancedMesh ref={coat} args={[shape, undefined, marks.length]} castShadow={false}>
+        <meshToonMaterial color={color} gradientMap={toonRamp()} />
+      </instancedMesh>
+    );
+  }
+  return (
+    <>
+      <instancedMesh ref={prepass} args={[shape, undefined, marks.length]} renderOrder={1} castShadow={false}>
+        <meshBasicMaterial {...FIGHT_PROGRAM} colorWrite={false} depthWrite />
+      </instancedMesh>
+      <instancedMesh ref={coat} args={[shape, undefined, marks.length]} renderOrder={2} castShadow={false}>
+        <meshBasicMaterial {...fightCoat(color)} />
+      </instancedMesh>
+    </>
+  );
+}
+
 export function ArticulatedFish({
   color = "#c97945",
   accent = "#e9bc72",
@@ -122,16 +157,7 @@ export function ArticulatedFish({
         // A raised fin along the back: a tall sail on panfish and walleye, set low on pike.
         <FishMesh position={[0, 0.26 + 0.05 * build.dorsal, -0.05]} rotation={[0.12, 0, 0]} scale={[0.04, 0.15 * build.dorsal, 0.8]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 5]} />} material={<FishMaterial color="#465754" unlit={unlit} />} />
       )}
-      {marks.map((mark, i) => (
-        <FishMesh
-          key={`mark-${i}`}
-          position={mark.position}
-          scale={mark.scale}
-          unlit={unlit}
-          shape={<sphereGeometry args={[1, 10, 6]} />}
-          material={<FishMaterial color={build.marks === "flecks" ? PALE_MARK : DARK_MARK} unlit={unlit} />}
-        />
-      ))}
+      {marks.length > 0 && <FishMarks marks={marks} color={build.marks === "flecks" ? PALE_MARK : DARK_MARK} unlit={unlit} />}
       {BARBELS[build.barbels].map((barbel, i) => (
         <FishMesh
           key={i}
