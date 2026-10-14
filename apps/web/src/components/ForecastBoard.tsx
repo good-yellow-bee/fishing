@@ -1,4 +1,4 @@
-import { forecast, SKY_BLURB, SKY_LABELS } from "@stillwater/shared";
+import { forecast, lakeSeason, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
 
 function dayName(date: Date, index: number) {
@@ -21,11 +21,11 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
         {forecast(now).map((day, index) => (
           <li key={day.date.toDateString()} data-sky={day.sky}>
             <strong>{dayName(day.date, index)}</strong>
-            <span className="forecast-sky">{t(SKY_LABELS[day.sky])}</span>
+            <span className="forecast-sky">{t(skyLabel(day.sky, lakeSeason(day.date)))}</span>
             {day.turn && (
-              <span className="forecast-turn">{t("Turns {sky} around {hour}:00", { sky: t(SKY_LABELS[day.turn.to]).toLowerCase(), hour: day.turn.hour })}</span>
+              <span className="forecast-turn">{t("Turns {sky} around {hour}:00", { sky: t(skyLabel(day.turn.to, lakeSeason(day.date))).toLowerCase(), hour: day.turn.hour })}</span>
             )}
-            <small>{t(SKY_BLURB[day.sky])}</small>
+            <small>{t(skyBlurb(day.sky, lakeSeason(day.date)))}</small>
           </li>
         ))}
       </ul>

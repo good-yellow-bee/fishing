@@ -116,7 +116,8 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
   return {
     wildlife,
     loons: night && !winter,
-    rain: sky === "rain",
+    // Winter rain falls as snow, which makes no hiss.
+    rain: sky === "rain" && !winter,
     geese: season === "fall" && !night && sky !== "rain",
     wind: winter,
   };

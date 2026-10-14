@@ -64,6 +64,8 @@ afterEach(() => {
 describe("ambient conditions", () => {
   it("plays birds by day, crickets and loons at night, and rain only when it rains", () => {
     expect(ambientProfile("day", "clear")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
+    expect(ambientProfile("day", "rain", "winter")).toMatchObject({ rain: false, wind: true });
+    expect(ambientProfile("day", "rain", "fall")).toMatchObject({ rain: true });
     expect(ambientProfile("dawn", "overcast")).toMatchObject({ wildlife: "birds", loons: false, rain: false });
     expect(ambientProfile("dusk", "rain")).toMatchObject({ wildlife: "birds", loons: false, rain: true });
     expect(ambientProfile("night", "fog")).toMatchObject({ wildlife: "crickets", loons: true, rain: false });

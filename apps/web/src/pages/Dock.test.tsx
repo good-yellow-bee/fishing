@@ -119,6 +119,13 @@ describe("dock weather", () => {
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog", "winter");
   });
 
+  it("calls winter rain snow on the HUD, while the scene and the fish still read rain", async () => {
+    const page = await openDock("/?hour=day&sky=rain&season=winter");
+    expect(lastScene()).toMatchObject({ sky: "rain", season: "winter" });
+    expect(page.querySelector(".sky-chip")?.textContent).toBe("Snow");
+    expect(page.querySelector(".sky-chip")?.getAttribute("title")).toBe("Snow on the water. Pike and muskie hunt.");
+  });
+
   it("uses the day's weather on the same clock as the hour without an override", async () => {
     const now = new Date(2026, 9, 8, 22, 15);
     vi.useFakeTimers({ toFake: ["Date"], now });

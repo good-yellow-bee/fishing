@@ -6,8 +6,8 @@ import {
   SKILL_LABELS,
   SEASON_BLURB,
   SEASON_LABELS,
-  SKY_BLURB,
-  SKY_LABELS,
+  skyBlurb,
+  skyLabel,
   type LakeHour,
   type LakeSeason,
   type Profile,
@@ -61,8 +61,8 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
       <div className="hud-stats">
         <span className="hour-chip">{t(LAKE_HOUR_LABELS[hour])}</span>
         {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
-        <span className="sky-chip" title={t(SKY_BLURB[sky])}>
-          {t(SKY_LABELS[sky])}
+        <span className="sky-chip" title={t(skyBlurb(sky, season))}>
+          {t(skyLabel(sky, season))}
         </span>
         <span className="level-chip">{t("Level {level}", { level })}</span>
         <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
