@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, SPOT_LABELS, type Profile } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, SPOT_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { pickBite, waitMs } from "./logic";
@@ -13,7 +13,7 @@ const step = vi.fn<() => FightOutcome>(() => {
 let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
@@ -57,8 +57,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile }: { current?: Profile }) {
-  const game = useFishingGame(current, "day");
+function Harness({ current = profile, hour = "day" }: { current?: Profile; hour?: LakeHour }) {
+  const game = useFishingGame(current, hour);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -92,7 +92,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day") {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -106,7 +106,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} />));
+  act(() => root!.render(<Harness current={current} hour={hour} />));
   return container.querySelector("div")!;
 }
 
@@ -249,6 +249,23 @@ describe("useFishingGame strike timing", () => {
     } finally {
       updateSettings({ reelMode: "hold" });
     }
+  });
+
+  it("rings the rod bell on the nibble and the bite after dark, and only then", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "night");
+    cast(surface);
+    for (let ms = 0; ms < 20_000 && !vi.mocked(fx.rodBell).mock.calls.length; ms += 50) act(() => vi.advanceTimersByTime(50));
+    expect(fx.rodBell).toHaveBeenCalledWith("jingle");
+    expect(hint()).toBe("The rod bell jingles. Just a nibble, not yet…");
+    for (let ms = 0; ms < 20_000 && phase() !== "hookset:none"; ms += 50) act(() => vi.advanceTimersByTime(50));
+    expect(phase()).toBe("hookset:none");
+    expect(fx.rodBell).toHaveBeenLastCalledWith("ring");
+    act(() => root!.unmount());
+    root = null;
+    vi.mocked(fx.rodBell).mockClear();
+    cast(mount());
+    act(() => vi.advanceTimersByTime(2_201));
+    expect(fx.rodBell).not.toHaveBeenCalled();
   });
 
   it("gives a human reaction time to hook the real bite", () => {

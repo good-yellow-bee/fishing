@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ambientProfile, fx, onLoonCall } from "./fx";
+import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, fx, onLoonCall } from "./fx";
 
 const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} });
 const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
@@ -192,5 +192,24 @@ describe("fx drag", () => {
     fx.drag.set({ gain: 0.01, hz: 200, rasp: false, hiss: false });
     expect(fx.drag.playing).toBe(false);
     fx.enabled = true;
+  });
+});
+
+describe("rod bell", () => {
+  it("jingles twice on a nibble and rings harder on a bite, each strike with its overtones", () => {
+    fx.rodBell("jingle");
+    expect(tones).toHaveLength(BELL_STRIKES.jingle.length * BELL_PARTIALS.length);
+    expect(tones[0]).toBeCloseTo(BELL_PITCH);
+    expect(tones[1]).toBeCloseTo(BELL_PITCH * BELL_PARTIALS[1]);
+    tones.length = 0;
+    fx.rodBell("ring");
+    expect(tones.length).toBeGreaterThan(BELL_STRIKES.jingle.length * BELL_PARTIALS.length);
+  });
+
+  it("stays quiet when sound is off", () => {
+    fx.enabled = false;
+    fx.rodBell("ring");
+    fx.enabled = true;
+    expect(tones).toHaveLength(0);
   });
 });

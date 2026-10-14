@@ -269,6 +269,11 @@ export function useFishingGame(
         if (surface) surface.dataset.nibble = "1";
         fx.nibble();
         fx.haptic("nibble");
+        // After dark the float is hard to see, so the bell on the rod tip tells it too.
+        if (hour === "night") {
+          fx.rodBell("jingle");
+          setHint(t("The rod bell jingles. Just a nibble, not yet…"));
+        }
         timers.current.nibbleOff = window.setTimeout(() => {
           setNibble(false);
           if (surface) delete surface.dataset.nibble;
@@ -279,6 +284,7 @@ export function useFishingGame(
       if (phaseRef.current !== "waiting") return;
       setNibble(false);
       fx.bite();
+      if (hour === "night") fx.rodBell("ring");
       fx.haptic("bite");
       setPhaseBoth("hookset");
       setHint(t("NOW — strike!"));

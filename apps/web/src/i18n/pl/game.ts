@@ -202,6 +202,7 @@ export const PL_GAME: PlBook = {
   "Hold a finger on the water, and lift it in the moss band.": "Przytrzymaj palec na wodzie i podnieś go w zielonym pasku.",
   "Hold the mouse or Space, and let go in the moss band.": "Przytrzymaj mysz lub Spację i puść w zielonym pasku.",
   "Just a nibble. Not yet…": "To tylko skubnięcie. Jeszcze nie…",
+  "The rod bell jingles. Just a nibble, not yet…": "Dzwoneczek na wędce brzęczy. To tylko skubnięcie, jeszcze nie…",
   "Wait. A nibble comes first; strike on the real dip.": "Czekaj. Najpierw skubnięcie; zatnij, gdy spławik naprawdę zanurkuje.",
   "Now! Tap.": "Teraz! Dotknij.",
   "Now! Click or press Space.": "Teraz! Kliknij lub naciśnij Spację.",

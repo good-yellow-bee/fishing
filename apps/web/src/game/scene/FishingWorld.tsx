@@ -27,6 +27,7 @@ import { fx } from "../fx";
 import type { Hotspot } from "../hotspot";
 import { ShoreTracks } from "./ShoreTracks.tsx";
 import { Angler } from "./Angler";
+import { RodBell } from "./RodBell";
 import {
   FISH_LEAP_SEC,
   HOOKSET_SEC,
@@ -1867,6 +1868,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         hour={hour}
         wind={wind}
       />
+      <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} />}
       <StrikeSplash phase={phase} />
       <CaughtFish
