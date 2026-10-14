@@ -883,6 +883,12 @@ Claude picked this as the next probe target: every fish (cruising, shadow, hooke
 |---|---|---|---|
 | ~~AT1~~ | ~~A fish bakes its rigid same-colour parts (body and head, eyes, back fins, side fins, tail fins, whiskers) into one shape each: 11 meshes to 7 on a plain fish, 445 to 412 calls a frame on a summer day~~ (#207) | performance | S |
 
+## Wave AU — Butterflies in two draws (added 2026-10-14, after Wave AT shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AU1~~ | ~~All butterfly wings draw as one instanced mesh coloured per instance and all bodies as another, 15 draws to 2 on a sunny summer day~~ (#208) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
