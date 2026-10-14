@@ -4,6 +4,8 @@ import { fishById } from "./fish.ts";
 import { lakeHour } from "./hour.ts";
 import {
   forecast,
+  skyAt,
+  skyTurnForDay,
   biteWeatherMul,
   DAILY_SKIES,
   dailyConditions,
@@ -183,6 +185,44 @@ describe("daily catch conditions", () => {
     expect(water(4)).toBeGreaterThan(water(1));
     expect(water(7)).toBeGreaterThan(68);
     expect(water(10)).toBeLessThan(water(7));
+  });
+});
+
+describe("weather that turns during the day", () => {
+  const days = Array.from({ length: 120 }, (_, n) => new Date(2026, 9, 1 + n, 6));
+
+  it("turns about one day in three, once, on the day's schedule", () => {
+    const turning = days.filter((day) => skyTurnForDay(day));
+    expect(turning.length).toBeGreaterThan(25);
+    expect(turning.length).toBeLessThan(55);
+    for (const day of turning) {
+      const turn = skyTurnForDay(day)!;
+      const from = weatherForDay(day);
+      expect(turn.to).not.toBe(from);
+      expect(turn.hour).toBeGreaterThanOrEqual(from === "fog" ? 9 : 12);
+      expect(turn.hour).toBeLessThanOrEqual(from === "fog" ? 11 : 18);
+      const at = (h: number, m = 0) => new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
+      expect(skyAt(at(turn.hour - 1, 59))).toBe(from);
+      expect(skyAt(at(turn.hour))).toBe(turn.to);
+      expect(skyAt(at(23, 30))).toBe(turn.to);
+    }
+  });
+
+  it("follows the weather's way: clouds to rain, rain easing, fog burning off", () => {
+    const seen = new Map(days.filter((day) => skyTurnForDay(day)).map((day) => [weatherForDay(day), skyTurnForDay(day)!.to]));
+    expect(seen.get("clear") ?? "overcast").toBe("overcast");
+    expect(seen.get("overcast") ?? "rain").toBe("rain");
+    expect(seen.get("rain") ?? "overcast").toBe("overcast");
+    expect(seen.get("fog") ?? "clear").toBe("clear");
+  });
+
+  it("keeps a settled day's sky all day, and chalks the turn on the forecast", () => {
+    const settled = days.find((day) => !skyTurnForDay(day))!;
+    for (let h = 0; h < 24; h += 1) {
+      expect(skyAt(new Date(settled.getFullYear(), settled.getMonth(), settled.getDate(), h))).toBe(weatherForDay(settled));
+    }
+    const turning = days.find((day) => skyTurnForDay(day))!;
+    expect(forecast(turning)[0]!.turn).toEqual(skyTurnForDay(turning));
   });
 });
 

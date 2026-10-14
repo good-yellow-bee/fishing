@@ -22,6 +22,9 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
           <li key={day.date.toDateString()} data-sky={day.sky}>
             <strong>{dayName(day.date, index)}</strong>
             <span className="forecast-sky">{t(SKY_LABELS[day.sky])}</span>
+            {day.turn && (
+              <span className="forecast-turn">{t("Turns {sky} around {hour}:00", { sky: t(SKY_LABELS[day.turn.to]).toLowerCase(), hour: day.turn.hour })}</span>
+            )}
             <small>{t(SKY_BLURB[day.sky])}</small>
           </li>
         ))}
