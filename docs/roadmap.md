@@ -606,17 +606,35 @@ Claude picked these after Wave V, turning from scenery back to the fishing itsel
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| W1 | Line spray: drops flick off the line when a fish surges | fight | S |
+| ~~W1~~ | ~~The rod bows toward the fish under tension~~ (#167) | fight | S/M |
 | ~~W2~~ | ~~The float bobs and dips in a pattern by fish size before the bite~~ (#166) | bite | S/M |
-| W3 | A thrashing fish at the net sends up splashes and spray | landing | S |
+| ~~W3~~ | ~~A thrashing fish at the net sends up splashes and spray~~ (dropped: already there) | landing | S |
 | ~~W4~~ | ~~Rod tip shivers on a nibble even when the float is out of view~~ (#165) | bite | S |
-| W5 | Refresh the "New on the lake" card for Wave W | onboarding | S |
+| ~~W5~~ | ~~Refresh the "New on the lake" card for Wave W~~ (#167) | onboarding | S |
 
-- **W1 · Line spray.** While a fish surges and the line is under high tension, a few bright drops flick off the line near the water. Off with Reduce motion; Lite effects keep half.
+- **W1 · Rod bow.** Swapped in for line spray, which the fight already has (SurgeSpray). Under a fish the rod now bows from the hand to the tip toward the line, deeper with tension and again in a surge, and straightens when the fight ends; the line stays fixed to the bowed tip.
 - **W2 · Nibbles by size.** Before the bite, small fish (half a pound and under) give the float quick, shallow taps, while big ones (up to 16 lb and over) pull it down in a slower, deeper dip, so a watchful angler can guess what's coming. Keyed to the rolled fish's weight rather than its species, since weight is what a float feels. No change to bite timing or the catch odds.
-- **W3 · Splashy landing.** As the fish comes to the net it thrashes, throwing small splashes and a ring or two.
+- **W3 · Splashy landing.** Dropped: the landing already thrashes in the air, leaves an exit ring and drips water (landMotion.ts).
 - **W4 · Rod tip shiver.** Each nibble also gives the rod tip a small, quick shiver, readable when the float is far away or hard to see.
 - **W5 · What's new, again.** List whatever Wave W lands on the card.
+
+## Wave X — Seasons on the dock and storms in the mirror (added 2026-10-14, after Wave W shipped)
+
+Claude picked these after Wave W; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| X1 | Fallen leaves gather on the dock in fall | weather | S |
+| X2 | Lightning flashes mirrored in the lake during storms | sky | S |
+| X3 | Dew glints on the shore grass at dawn | weather | S |
+| X4 | A beaver swims past at dusk with a branch, and slaps its tail at a close cast | wildlife | M |
+| X5 | Refresh the "New on the lake" card for Wave X | onboarding | S |
+
+- **X1 · Leaves on the dock.** In fall a scatter of orange and red leaves lies on the dock planks, a few more as the visit goes on, and a gust now and then skitters one across the boards.
+- **X2 · Lightning in the lake.** Each lightning flash also shows as a bright jagged streak in the lake's mirror, since the dock camera sees little sky.
+- **X3 · Dew.** At dawn, outside winter, tiny glints sparkle in the grass along the near bank and fade as the morning goes.
+- **X4 · Beaver.** At dusk outside winter a beaver now and then swims across the far water towing a leafy branch, leaving a V-shaped wake. A cast landing close makes it slap its tail with a loud splash and dive.
+- **X5 · What's new, again.** List whatever Wave X lands on the card.
 
 ## Risks / open questions for the owner
 
