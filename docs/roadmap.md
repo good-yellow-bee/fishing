@@ -927,6 +927,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~AZ1~~ | ~~Leaving the tab while the float is under no longer loses the fish: the strike window reopens in full on the way back~~ (#213) | gameplay fix | S |
 
+## Wave BA — Hints that fit the hand (added 2026-10-14, after Wave AZ shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BA1~~ | ~~The idle hint says "touch" and "lift" on phones and names the moss band everywhere (it said "click" and "pale band"); the shop hint drops the E key on touch screens~~ (#214) | phone UX | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
