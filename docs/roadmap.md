@@ -785,6 +785,16 @@ Claude measured about 627 draw calls a frame on a summer day (Full effects) and 
 | ~~AI2~~ | ~~The pier's approach boards draw in two instanced batches instead of one mesh and material each~~ (#193: 627 to 531 draws a frame) | performance | S |
 | ~~AI3~~ | ~~The approach walkway stops dipping under the swell when the waves run high~~ (#194: the chop calms in the pier's lee) | fix | S |
 
+## Wave AJ — More water birds (added 2026-10-14, after Wave AI shipped)
+
+Claude picked these; neither bird was on the lake yet. The owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AJ1~~ | ~~A cormorant dries its wings on a rock in the far water and slips in to fish around it~~ (#195) | ambient life | M |
+| AJ2 | In spring, a pair of grebes does its courtship rush across the water, side by side | ambient life | M |
+| AJ3 | Refresh the "New on the lake" card for Wave AJ | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
