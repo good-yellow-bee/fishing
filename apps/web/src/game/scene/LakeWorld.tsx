@@ -24,6 +24,8 @@ import { LakeRain } from "./LakeRain";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
+import { Breath } from "./Breath";
+import { breathOut } from "./breathPuff";
 import { WET_SHADE, dockWet } from "./dockWet";
 import { moonRoad, moonTexture } from "./moonDisc";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
@@ -1801,6 +1803,7 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {look.glitter && weather.sunOut && <SunGlitter discPos={look.discPos} />}
       {road > 0 && <MoonRoad discPos={look.discPos} strength={road} />}
+      {breathOut(hour, season) && <Breath light={weather.rainLight} />}
       {look.birds &&
         FLOCKS.map((flock, i) => (
           <BirdFlock key={i} {...flock} />

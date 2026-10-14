@@ -552,7 +552,7 @@ Claude picked these after Wave S; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| T1 | The angler's breath shows on cold mornings | weather | S |
+| ~~T1~~ | ~~The angler's breath shows on cold mornings~~ (#153) | weather | S |
 | T2 | Shooting stars mirrored in the lake on clear nights | sky | S |
 | T3 | Snow settles on the dock in winter | weather | S |
 | T4 | A dewy spider web on the dock rail at dawn | wildlife | S |
