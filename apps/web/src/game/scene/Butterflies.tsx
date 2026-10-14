@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
@@ -22,57 +22,80 @@ function wingGeometry() {
   return geo;
 }
 
-/** A few butterflies fluttering over the lily pads and the water by the dock on sunny summer days. */
+/**
+ * A few butterflies fluttering over the lily pads and the water by the dock on sunny summer days.
+ * All the wings are one instanced draw, coloured per instance, and all the bodies another.
+ */
 export function Butterflies() {
   const still = useReducedMotion();
   const wing = useMemo(wingGeometry, []);
-  const materials = useMemo(
-    () => BUTTERFLY_COLORS.map((color) => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })),
+  const body = useMemo(() => new THREE.CapsuleGeometry(0.003, 0.02, 2, 4).rotateX(Math.PI / 2), []);
+  const wingMaterial = useMemo(() => new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }), []);
+  const bodyMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#2a2018" }), []);
+  const wings = useRef<THREE.InstancedMesh>(null);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const work = useMemo(
+    () => ({
+      place: new THREE.Matrix4(),
+      hinge: new THREE.Matrix4(),
+      mirror: new THREE.Matrix4().makeScale(-1, 1, 1),
+      out: new THREE.Matrix4(),
+      at: new THREE.Vector3(),
+      turn: new THREE.Quaternion(),
+      up: new THREE.Vector3(0, 1, 0),
+      size: new THREE.Vector3().setScalar(SCALE),
+    }),
     [],
   );
-  const bodies = useRef<(THREE.Group | null)[]>([]);
-  const lefts = useRef<(THREE.Mesh | null)[]>([]);
-  const rights = useRef<(THREE.Mesh | null)[]>([]);
 
   useEffect(
     () => () => {
-      wing.dispose();
-      materials.forEach((m) => m.dispose());
+      [wing, body, wingMaterial, bodyMaterial].forEach((thing) => thing.dispose());
     },
-    [wing, materials],
+    [wing, body, wingMaterial, bodyMaterial],
   );
+
+  useLayoutEffect(() => {
+    const mesh = wings.current;
+    if (!mesh) return;
+    const color = new THREE.Color();
+    BUTTERFLY_HOMES.forEach((_, i) => {
+      color.set(BUTTERFLY_COLORS[i % BUTTERFLY_COLORS.length]!);
+      mesh.setColorAt(i * 2, color);
+      mesh.setColorAt(i * 2 + 1, color);
+    });
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  }, []);
 
   useFrame((state) => {
     const t = still ? 0 : state.clock.elapsedTime;
     const count = settings.particles === "lite" ? BUTTERFLY_HOMES.length / 2 : BUTTERFLY_HOMES.length;
-    BUTTERFLY_HOMES.forEach((_, i) => {
-      const body = bodies.current[i];
-      if (!body) return;
-      body.visible = i < count;
+    for (let i = 0; i < count; i += 1) {
       const b = butterflyAt(i, t);
-      body.position.set(b.x, b.y, b.z);
-      body.rotation.y = b.yaw;
+      work.at.set(b.x, b.y, b.z);
+      work.turn.setFromAxisAngle(work.up, b.yaw);
+      work.place.compose(work.at, work.turn, work.size);
+      bodies.current?.setMatrixAt(i, work.place);
       const lift = still ? 0.4 : b.flap * BEAT;
-      lefts.current[i]?.rotation.set(0, 0, -lift);
-      rights.current[i]?.rotation.set(0, 0, lift);
-    });
+      // The right wing lifts round +z; the left is its mirror, lifting the other way.
+      wings.current?.setMatrixAt(i * 2, work.out.multiplyMatrices(work.place, work.hinge.makeRotationZ(lift)));
+      wings.current?.setMatrixAt(i * 2 + 1, work.out.multiplyMatrices(work.place, work.hinge.makeRotationZ(-lift)).multiply(work.mirror));
+    }
+    if (wings.current) {
+      wings.current.count = count * 2;
+      wings.current.instanceMatrix.needsUpdate = true;
+    }
+    if (bodies.current) {
+      bodies.current.count = count;
+      bodies.current.instanceMatrix.needsUpdate = true;
+    }
   });
 
+  // They flit about, so the instances' combined bounds would need refitting each frame; a few wings are cheap to draw.
   return (
     <group name="butterflies">
-      {BUTTERFLY_HOMES.map((_, i) => {
-        const material = materials[i % materials.length]!;
-        return (
-          <group key={i} ref={(g) => void (bodies.current[i] = g)} scale={SCALE}>
-            <mesh ref={(m) => void (rights.current[i] = m)} geometry={wing} material={material} />
-            <mesh ref={(m) => void (lefts.current[i] = m)} geometry={wing} material={material} scale={[-1, 1, 1]} />
-            <mesh rotation={[Math.PI / 2, 0, 0]}>
-              <capsuleGeometry args={[0.003, 0.02, 2, 4]} />
-              <meshBasicMaterial color="#2a2018" />
-            </mesh>
-          </group>
-        );
-      })}
+      <instancedMesh ref={wings} args={[wing, wingMaterial, BUTTERFLY_HOMES.length * 2]} frustumCulled={false} />
+      <instancedMesh ref={bodies} args={[body, bodyMaterial, BUTTERFLY_HOMES.length]} frustumCulled={false} />
     </group>
   );
 }
