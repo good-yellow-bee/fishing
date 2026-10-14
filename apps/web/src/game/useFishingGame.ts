@@ -26,6 +26,7 @@ import { settings } from "./settings";
 import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { isRiseCast } from "./eveningRise";
+import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, hookWindowMs, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
@@ -98,6 +99,7 @@ type Timers = {
   snap?: number;
   nibble?: number;
   nibbleOff?: number;
+  snag?: number;
 };
 
 const waitHint = () => t("Watch the bobber. A nibble first — strike on the real dip.");
@@ -124,6 +126,9 @@ export function useFishingGame(
   const risingRef = useRef(rising);
   risingRef.current = rising;
   const castRiseRef = useRef(false);
+  const castSnagRef = useRef(false);
+  /** Taps so far on a snagged lure, and the bite timers it is holding back; null while the lure is free. */
+  const snagRef = useRef<{ taps: number; arm: () => void } | null>(null);
   const mercyRef = useRef(mercy);
   mercyRef.current = mercy;
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -180,7 +185,9 @@ export function useFishingGame(
     window.clearTimeout(timers.current.snap);
     window.clearTimeout(timers.current.nibble);
     window.clearTimeout(timers.current.nibbleOff);
+    window.clearTimeout(timers.current.snag);
     timers.current = {};
+    snagRef.current = null;
   };
 
   const clearFight = () => {
@@ -271,41 +278,55 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
-    if (nibbleAt >= 480) {
-      timers.current.nibble = window.setTimeout(() => {
+    const arm = () => {
+      if (nibbleAt >= 480) {
+        timers.current.nibble = window.setTimeout(() => {
+          if (phaseRef.current !== "waiting") return;
+          setNibble(true);
+          const surface = surfaceRef.current;
+          if (surface) surface.dataset.nibble = "1";
+          fx.nibble();
+          fx.haptic("nibble");
+          // After dark the float is hard to see, so the bell on the rod tip tells it too.
+          if (hour === "night") {
+            fx.rodBell("jingle");
+            setHint(t("The rod bell jingles. Just a nibble, not yet…"));
+          }
+          timers.current.nibbleOff = window.setTimeout(() => {
+            setNibble(false);
+            if (surface) delete surface.dataset.nibble;
+          }, 280);
+        }, nibbleAt);
+      }
+      timers.current.wait = window.setTimeout(() => {
         if (phaseRef.current !== "waiting") return;
-        setNibble(true);
-        const surface = surfaceRef.current;
-        if (surface) surface.dataset.nibble = "1";
-        fx.nibble();
-        fx.haptic("nibble");
-        // After dark the float is hard to see, so the bell on the rod tip tells it too.
-        if (hour === "night") {
-          fx.rodBell("jingle");
-          setHint(t("The rod bell jingles. Just a nibble, not yet…"));
-        }
-        timers.current.nibbleOff = window.setTimeout(() => {
-          setNibble(false);
-          if (surface) delete surface.dataset.nibble;
-        }, 280);
-      }, nibbleAt);
+        setNibble(false);
+        fx.bite();
+        if (hour === "night") fx.rodBell("ring");
+        fx.haptic("bite");
+        setPhaseBoth("hookset");
+        setHint(t("NOW — strike!"));
+        timers.current.hook = window.setTimeout(() => {
+          if (phaseRef.current !== "hookset") return;
+          // The missed fish stays in the outcome so the turn-away shows the same fish.
+          setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
+          // Hold result so the miss spring and the turn play out.
+          resetToIdle(t("Strike the moment the bobber goes under."), "result");
+        }, hookWindowMs(current.accuracy, mercyNow));
+      }, wait);
+    };
+    if (!castSnagRef.current) {
+      arm();
+      return;
     }
-    timers.current.wait = window.setTimeout(() => {
+    // Fouled in the weed: no bite until it is worked free.
+    timers.current.snag = window.setTimeout(() => {
       if (phaseRef.current !== "waiting") return;
-      setNibble(false);
-      fx.bite();
-      if (hour === "night") fx.rodBell("ring");
-      fx.haptic("bite");
-      setPhaseBoth("hookset");
-      setHint(t("NOW — strike!"));
-      timers.current.hook = window.setTimeout(() => {
-        if (phaseRef.current !== "hookset") return;
-        // The missed fish stays in the outcome so the turn-away shows the same fish.
-        setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
-        // Hold result so the miss spring and the turn play out.
-        resetToIdle(t("Strike the moment the bobber goes under."), "result");
-      }, hookWindowMs(current.accuracy, mercyNow));
-    }, wait);
+      snagRef.current = { taps: 0, arm };
+      fx.plop();
+      fx.haptic("nibble");
+      setHint(t("Snagged in the weed. Tap {n} times to work it free.", { n: SNAG_TAPS }));
+    }, SNAG_AT_MS);
   }, [hour, lureRef, moon, resetToIdle, season, sky]);
 
   const releaseCast = useCallback(() => {
@@ -349,6 +370,7 @@ export function useFishingGame(
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
+    castSnagRef.current = aimed !== null && castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random());
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
@@ -394,9 +416,24 @@ export function useFishingGame(
       case "hookset":
         setTheHook();
         break;
-      case "waiting":
-        setHint(t("Too early. Wait for the bobber to go under, then strike."));
+      case "waiting": {
+        const snag = snagRef.current;
+        if (!snag) {
+          setHint(t("Too early. Wait for the bobber to go under, then strike."));
+          break;
+        }
+        snag.taps += 1;
+        fx.reel();
+        if (snag.taps < SNAG_TAPS) {
+          setHint(t("Working it free… {n} of {total}", { n: snag.taps, total: SNAG_TAPS }));
+          break;
+        }
+        snagRef.current = null;
+        waitHintRef.current = t("Free of the weed. Let it settle.");
+        setHint(waitHintRef.current);
+        snag.arm();
         break;
+      }
       case "result":
         // A frantic last click of the fight should not throw away the catch card unread.
         if (performance.now() - resultAtRef.current < RECAST_GUARD_MS) break;

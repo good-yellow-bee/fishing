@@ -13,7 +13,7 @@ const step = vi.fn<() => FightOutcome>(() => {
 let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 // The tests time bites to the usual wait; the day's hot bank is kept off the dock.
 vi.mock("@stillwater/shared", async (importOriginal) => {
@@ -21,6 +21,10 @@ vi.mock("@stillwater/shared", async (importOriginal) => {
   return { ...actual, hotBankForDay: () => "inlet" };
 });
 vi.mock("./eveningRise", () => ({ isRiseCast: () => true }));
+vi.mock("./snag", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./snag")>();
+  return { ...actual, castSnags: vi.fn(() => false) };
+});
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   return { ...actual, pickBite: vi.fn(actual.pickBite) };
@@ -36,6 +40,7 @@ vi.mock("./fight", async (importOriginal) => {
 import { updateSettings } from "./settings";
 import { RECAST_GUARD_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
+import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 
 const profile: Profile = {
   userId: "test", displayName: "Test", points: 0, lifetimePoints: 0, strength: 5, accuracy: 3, patience: 1,
@@ -212,6 +217,26 @@ describe("useFishingGame strike timing", () => {
     expect(phase()).toBe("hookset:none");
     act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
     expect(phase()).toBe("fight:none");
+  });
+
+  it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
+    vi.mocked(castSnags).mockReturnValueOnce(true);
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(SNAG_AT_MS + 1));
+    expect(hint()).toBe(`Snagged in the weed. Tap ${SNAG_TAPS} times to work it free.`);
+    act(() => vi.advanceTimersByTime(20_000));
+    expect(phase()).toBe("waiting:none");
+    for (let tap = 1; tap < SNAG_TAPS; tap += 1) {
+      act(() => surface.dispatchEvent(pointer("pointerdown", 10 + tap)));
+      act(() => window.dispatchEvent(pointer("pointerup", 10 + tap)));
+    }
+    expect(hint()).toBe(`Working it free… ${SNAG_TAPS - 1} of ${SNAG_TAPS}`);
+    act(() => surface.dispatchEvent(pointer("pointerdown", 20)));
+    act(() => window.dispatchEvent(pointer("pointerup", 20)));
+    expect(hint()).toBe("Free of the weed. Let it settle.");
+    act(() => vi.advanceTimersByTime(2_201));
+    expect(phase()).toBe("hookset:none");
   });
 
   it("strikes and reels from the thumb button, but never casts from it", () => {

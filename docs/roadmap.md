@@ -430,13 +430,13 @@ Claude picked these after Wave L; the owner can reorder or drop any.
 | M2 | ~~Evening rise: fish dimpling the water at dusk~~ (shipped) | gameplay/visual | M |
 | M3 | ~~Frogs in the reeds at dusk~~ (shipped) | audio | S |
 | M4 | ~~Early bird badge~~ (shipped) | progression | S |
-| M5 | Snags in the reeds | gameplay | M |
+| M5 | ~~Snags in the reeds~~ (shipped) | gameplay | M |
 
 - **M1 · Hot bank.** Each local day one bank (dock, reeds, drop-off, point or inlet) runs hot: bites come a fifth sooner there. Every bank gets its day once in five, never two days running. The shack's chalk board names it for each of the three days, and the bank chip reads "biting today" while you stand on it.
 - **M2 · Evening rise.** On dry dusks in spring and summer with calm or light wind, rings spread on the water in reach of your bank (a new one every couple of seconds, each fresh for six), and the bank chip says "fish rising". A cast within 1.3 m of a fresh ring says "Right on a rise." and bites in 70% of the usual wait.
 - **M3 · Frogs.** Spring and summer dusks and nights get runs of spring-peeper whistles and the odd green frog's low banjo "gunk", rain or not.
 - **M4 · Early bird.** A lodge badge for landing ten fish at dawn, counted from the hour already saved on each catch, so earlier dawn catches count.
-- **M5 · Snags.** A cast that lands deep in the reeds can snag; a few gentle taps free it, a hard pull loses the lure's cast (no lure lost), so reed casting asks for care.
+- **M5 · Snags.** About three in ten casts that land in the reeds' shallow weed foul on it just after settling (never a new angler's first easy fish). No fish bites until three taps of strike work it free ("Working it free… 2 of 3"), then the wait starts over as usual. Nothing is lost; casting past the weed avoids it.
 
 ## Risks / open questions for the owner
 
