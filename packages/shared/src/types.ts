@@ -48,6 +48,8 @@ export type CatchRecord = {
   season: LakeSeason | null;
   /** Rolled from the request ID when saved; false on catches saved before golden fish. */
   golden: boolean;
+  /** The angler let it go after landing; it keeps its points and counts toward Steward. */
+  released: boolean;
   createdAt: string;
 };
 

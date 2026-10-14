@@ -19,11 +19,13 @@ export type BadgeFactRow = {
   clean: boolean;
   /** False on catches saved before golden fish. */
   golden: boolean;
+  /** Let go after landing; false on catches saved before release. */
+  released: boolean;
   count: number;
   heaviest: number;
 };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward";
 
 export type Badge = {
   id: BadgeId;
@@ -122,6 +124,13 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land a golden fish.",
     need: 1,
     have: (facts) => count(facts, (row) => row.golden),
+  },
+  {
+    id: "steward",
+    label: "Steward",
+    blurb: "Release ten fish back into the lake.",
+    need: 10,
+    have: (facts) => count(facts, (row) => row.released),
   },
 ];
 

@@ -1347,6 +1347,21 @@ kbd {
   color: #6b4508;
 }
 
+.log-released {
+  margin-left: 6px;
+  color: #3d7a6a;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landed-card .catch-stamp.released {
+  border-color: #3d7a6a;
+  background: rgba(61, 122, 106, 0.14);
+  color: #2b5b4f;
+}
+
 .log-golden {
   margin-left: 6px;
   color: #b8860b;

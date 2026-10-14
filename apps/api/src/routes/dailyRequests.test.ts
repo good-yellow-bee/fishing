@@ -239,3 +239,12 @@ describe("POST /api/daily-requests/:id/claim", () => {
     await expect(response.json()).resolves.toEqual({ error: "unknown daily request" });
   });
 });
+
+// The app-level guard, in the file that already mounts the whole app: release sits below /api/catches.
+describe("catch release auth", () => {
+  it("turns away a release without a session", async () => {
+    session.user = null;
+    const response = await app.request(`http://test/api/catches/${randomUUID()}/release`, { method: "POST" });
+    expect(response.status).toBe(401);
+  });
+});

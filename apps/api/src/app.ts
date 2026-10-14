@@ -25,6 +25,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
 app.use("/api/me", requireSession);
 app.use("/api/catches", requireSession);
+app.use("/api/catches/*", requireSession);
 // The wildcard also covers /api/daily-requests itself; an exact path would leave the claim route without a user.
 app.use("/api/daily-requests/*", requireSession);
 app.use("/api/upgrades", requireSession);

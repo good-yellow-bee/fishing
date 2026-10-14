@@ -5,13 +5,13 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, dailyConditions, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
-import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, type Me } from "../api";
+import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
-const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[] }) => void>();
+const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
 const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
 
 vi.mock("../api", async (importOriginal) => ({
@@ -20,6 +20,7 @@ vi.mock("../api", async (importOriginal) => ({
   getSpeciesRecords: vi.fn(async () => []),
   getLodgeTracks: vi.fn(async () => []),
   recordCatch: vi.fn(),
+  releaseCatch: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
 vi.mock("../game/useFishingGame", async (importOriginal) => {
@@ -255,6 +256,37 @@ describe("lodge records", () => {
   });
 });
 
+describe("letting a fish go", () => {
+  it("releases the landed fish from the card and drops it back in the scene", async () => {
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-release", points: 1, speciesId: perch.id, weight: 0.6 });
+    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-release", released: true });
+    landed.outcome = { kind: "landed", id: "catch-release", species: perch, weight: 0.6, spot: "dock", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    const release = [...page.querySelectorAll(".landed-card button")].find((b) => b.textContent === "Release") as HTMLButtonElement;
+    expect(release).toBeDefined();
+    await act(async () => release.click());
+    expect(releaseCatch).toHaveBeenCalledWith("catch-release");
+    expect(page.querySelector(".landed-card .catch-stamp.released")?.textContent).toBe("Released back into the lake");
+    expect([...page.querySelectorAll(".landed-card button")].some((b) => b.textContent === "Release")).toBe(false);
+    expect(scene.mock.lastCall?.[0].released).toBe(true);
+  });
+
+  it("keeps the fish and says so when the release fails", async () => {
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-stuck", points: 1, speciesId: perch.id, weight: 0.6 });
+    vi.mocked(releaseCatch).mockRejectedValue(new Error("offline"));
+    landed.outcome = { kind: "landed", id: "catch-stuck", species: perch, weight: 0.6, spot: "dock", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    const release = [...page.querySelectorAll(".landed-card button")].find((b) => b.textContent === "Release") as HTMLButtonElement;
+    await act(async () => release.click());
+    expect(page.querySelector(".landed-card .warn")?.textContent).toContain("could not be released");
+    expect(scene.mock.lastCall?.[0].released).toBe(false);
+  });
+});
+
 describe("packing up", () => {
   it("recaps the outing from the HUD and files it in the field log as a trip", async () => {
     const perch = fishById("perch")!;
@@ -321,7 +353,7 @@ describe("dock badges", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
     const pike = fishById("pike")!;
     const none = badgeProgress([]);
-    const rainPike = badgeProgress([{ speciesId: "pike", spot: "reeds", hour: "dusk", sky: "rain", season: "fall", clean: false, golden: false, count: 1, heaviest: 4 }]);
+    const rainPike = badgeProgress([{ speciesId: "pike", spot: "reeds", hour: "dusk", sky: "rain", season: "fall", clean: false, golden: false, released: false, count: 1, heaviest: 4 }]);
     vi.mocked(getMe).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValueOnce({ ...me, badges: none }).mockResolvedValue({ ...me, badges: rainPike });
     vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pike", points: 9, speciesId: pike.id, weight: 4 });
     landed.outcome = { kind: "landed", id: "catch-pike", species: pike, weight: 4, spot: "reeds", clean: false };
