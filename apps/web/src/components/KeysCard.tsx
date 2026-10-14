@@ -7,6 +7,7 @@ export const KEY_ROWS = [
   { keys: "Mouse", pad: "Right stick", does: "Aim the cast" },
   { keys: "W A S D", pad: "Left stick", does: "Walk the shore" },
   { keys: "E", pad: "Y", does: "Open the shop at the shack" },
+  { keys: "Q / R", pad: "LB / RB", does: "Change the lure" },
   { keys: "H", pad: "Back", does: "Photo mode: hide the panels" },
   { keys: "P / Space", pad: "A", does: "In photo mode: save a picture of the lake" },
   { keys: "Arrows / + −", pad: "Sticks", does: "In photo mode: turn and zoom the view" },

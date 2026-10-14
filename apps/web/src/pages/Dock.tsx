@@ -74,7 +74,7 @@ import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
 import { trackLabel } from "../game/scene/shoreTracks";
 import { useLevelToast } from "../game/useLevelToast";
-import { defaultLure, lureCanChange } from "../game/lureChoice";
+import { defaultLure, lureCanChange, nextLure } from "../game/lureChoice";
 import { FishingWorld } from "../game/scene/FishingWorld";
 import { walkAnglerTo } from "../game/scene/pose";
 import { aboard, boatMode, rowBack, rowOut, subscribeBoat } from "../game/scene/boat";
@@ -199,6 +199,13 @@ export function DockPage() {
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
+  // Read by the Q and R keys, whose listener is set up once.
+  const scenePhaseRef = useRef(scenePhase);
+  scenePhaseRef.current = scenePhase;
+  const lureChoicesRef = useRef(lureChoices);
+  lureChoicesRef.current = lureChoices;
+  const shopOpenRef = useRef(shopOpen);
+  shopOpenRef.current = shopOpen;
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -558,6 +565,14 @@ export function DockPage() {
         event.preventDefault();
         setSettingsOpen(false);
         setKeysOpen((open) => !open);
+        return;
+      }
+      if ((event.code === "KeyQ" || event.code === "KeyR") && !event.repeat) {
+        if (!lureCanChange(scenePhaseRef.current) || shopOpenRef.current || lureChoicesRef.current.length < 2) return;
+        event.preventDefault();
+        const next = nextLure(lureChoicesRef.current, tiedLure.current, event.code === "KeyR" ? 1 : -1);
+        setPickedLure(next);
+        updateSettings({ lastLure: next });
         return;
       }
       if (event.code !== "KeyE" || event.repeat) return;

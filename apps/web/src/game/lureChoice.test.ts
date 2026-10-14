@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canLand, LAKE_HOURS, luresPacked, SPOT_IDS, type Profile, type SpotId } from "@stillwater/shared";
 import { pickBite } from "./logic";
-import { defaultLure, lureBlurb, lureCanChange, smallLuresFirst } from "./lureChoice";
+import { defaultLure, lureBlurb, lureCanChange, nextLure, smallLuresFirst } from "./lureChoice";
 
 describe("lure choice", () => {
   it("can change while standing and stays tied once the cast is away", () => {
@@ -62,5 +62,21 @@ describe("lure choice", () => {
       expect(snaps(spot, need - 1)).toBe(true);
       expect(snaps(spot, need)).toBe(false);
     }
+  });
+});
+
+describe("nextLure", () => {
+  it("steps through the picker's order and wraps round both ways", () => {
+    const packed = luresPacked([]);
+    const order = smallLuresFirst(packed);
+    expect(order.length).toBeGreaterThan(1);
+    expect(nextLure(packed, order[0]!, 1)).toBe(order[1]);
+    expect(nextLure(packed, order[0]!, -1)).toBe(order.at(-1));
+    expect(nextLure(packed, order.at(-1)!, 1)).toBe(order[0]);
+  });
+
+  it("keeps the lure when nothing else is packed, and starts the order for one that is not", () => {
+    expect(nextLure([], "Spinner", 1)).toBe("Spinner");
+    expect(nextLure(["Worm", "Spinner"], "Gone", 1)).toBe(smallLuresFirst(["Worm", "Spinner"])[0]);
   });
 });

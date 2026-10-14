@@ -547,6 +547,21 @@ describe("settings", () => {
     expect(page.querySelector(".keys-card")).not.toBeNull();
   });
 
+  it("changes the lure with Q and R while it can change", async () => {
+    const page = await openDock("/?hour=day&sky=clear");
+    const options = [...page.querySelectorAll<HTMLOptionElement>(".lure-choice option")].map((o) => o.value);
+    expect(options.length).toBeGreaterThan(1);
+    const select = () => page.querySelector<HTMLSelectElement>(".lure-choice select")!.value;
+    const first = select();
+    const at = options.indexOf(first);
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyR", cancelable: true })));
+    expect(select()).toBe(options[(at + 1) % options.length]);
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyQ", cancelable: true })));
+    expect(select()).toBe(first);
+    localStorage.clear();
+    (await import("../game/settings")).reloadSettings();
+  });
+
   it("ties on last visit's lure when it is still packed", async () => {
     const { reloadSettings, updateSettings } = await import("../game/settings");
     const page = await openDock("/?hour=day&sky=clear");
