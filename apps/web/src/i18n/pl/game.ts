@@ -277,4 +277,7 @@ export const PL_GAME: PlBook = {
   "just now": "przed chwilą",
   "{minutes} min ago": "{minutes} min temu",
   Cast: "Rzut",
+  // Short forms for the HUD row, which wraps over the coach at laptop widths.
+  "Field log|hud": "Dziennik",
+  "Catch log|hud": "Połowy",
 };

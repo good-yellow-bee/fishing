@@ -65,8 +65,8 @@ export function Hud({ profile, hour, sky, onSettings, onPackUp }: Props) {
         <span className="skill-chip">
           <small>{t(SKILL_LABELS.patience)}</small> {profile.patience}
         </span>
-        <Link className="hud-link" to="/catches">{t("Field log")}</Link>
-        <Link className="hud-link" to="/log">{t("Catch log")}</Link>
+        <Link className="hud-link" to="/catches">{t("Field log|hud")}</Link>
+        <Link className="hud-link" to="/log">{t("Catch log|hud")}</Link>
         <Link className="hud-link" to="/board">{t("Board")}</Link>
         <button
           className="hud-link"

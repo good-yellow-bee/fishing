@@ -115,7 +115,7 @@ export const PL_CONTENT: PlBook = {
 
   // LAKE_HOUR_LABELS and LAKE_HOUR_BLURB
   Dawn: "Świt",
-  "High sun": "Pełne słońce",
+  "High sun": "Południe",
   Dusk: "Zmierzch",
   Night: "Noc",
   "Trout work the shallows.": "Pstrągi przeczesują płycizny.",
