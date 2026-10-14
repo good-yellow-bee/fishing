@@ -133,6 +133,10 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           {t("High contrast (solid panels and brighter text)")}
         </label>
         <label className="settings-check">
+          <input type="checkbox" checked={current.soundCaptions} onChange={(event) => updateSettings({ soundCaptions: event.target.checked })} />
+          {t("Sound captions (words for thunder, loons, owls and other lake sounds)")}
+        </label>
+        <label className="settings-check">
           <input type="checkbox" checked={current.leftHanded} onChange={(event) => updateSettings({ leftHanded: event.target.checked })} />
           {t("Left-handed (strike button and cast meter on the left of a touch screen)")}
         </label>

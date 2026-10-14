@@ -1,5 +1,6 @@
 import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 import type { DragTone } from "./dragTone";
+import { captionSound } from "./soundCaptions";
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
@@ -229,6 +230,7 @@ function owlCall() {
   hootNote(base * 0.95, 0.28, 0.024, 0.62);
   hootNote(base * 0.95, 0.36, 0.026, 0.95);
   for (const listener of owlListeners) listener();
+  captionSound("owl");
   owlTimer = window.setTimeout(owlCall, 16000 + Math.random() * 16000);
 }
 
@@ -265,6 +267,7 @@ function loonCall() {
   tone("sine", base * 1.45, base * 1.1, 0.8, 0.008, 1.9, 0, out);
   window.setTimeout(() => level.disconnect(), 3000);
   for (const listener of loonListeners) listener();
+  captionSound("loon");
   loonTimer = window.setTimeout(loonCall, 14000 + Math.random() * 12000);
 }
 
@@ -299,6 +302,7 @@ function geeseCall() {
     const base = 300 + Math.random() * 60;
     tone("sawtooth", base, base * 0.86, 0.16, 0.0035, i * (0.28 + Math.random() * 0.2), 0, natureBus());
   }
+  captionSound("geese");
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
 
@@ -559,13 +563,17 @@ export const fx = {
   },
   /** A beaver's tail slapping the water: a sharp crack of spray over a deep hollow thump. Quiet until the lake's sounds have started. */
   tailSlap() {
-    if (!this.enabled || !lapSrc) return;
+    if (!lapSrc) return;
+    captionSound("tailSlap");
+    if (!this.enabled) return;
     noiseBurst("bandpass", 2200, 600, 0.2, 0.05, 0, natureBus());
     tone("sine", 130, 55, 0.22, 0.03, 0, 0, natureBus());
   },
   /** A bird hitting the water out on the lake: a soft, far-off plunge. Quiet until the lake's sounds have started. */
   farSplash() {
-    if (!this.enabled || !lapSrc) return;
+    if (!lapSrc) return;
+    captionSound("farSplash");
+    if (!this.enabled) return;
     tone("sine", 300, 70, 0.14, 0.03, 0, 0, natureBus());
     noiseBurst("bandpass", 1600, 600, 0.22, 0.02, 0.02, natureBus());
   },
@@ -583,7 +591,9 @@ export const fx = {
    * sharp crack and rolls louder; a far one (0) is only a low rumble. Quiet until the lake's sounds have started.
    */
   thunder(when: number, near: number) {
-    if (!this.enabled || !lapSrc) return;
+    if (!lapSrc) return;
+    window.setTimeout(() => captionSound(near > 0.6 ? "thunderNear" : "thunderFar"), when * 1000);
+    if (!this.enabled) return;
     const ac = audio();
     const t = ac.currentTime + when;
     const length = 3.5 + (1 - near) * 2.5;

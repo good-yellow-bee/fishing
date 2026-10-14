@@ -699,12 +699,30 @@ Claude picked these after Wave AA from the review's open "smaller fixes" and an 
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AB1~~ | ~~Nibbles come at varied times before the bite~~ (#181) | bite | S/M |
-| AB2 | Optional captions for lake sounds (thunder, loon, owl, splashes) | accessibility | M |
-| AB3 | Refresh the "New on the lake" card for Wave AB | onboarding | S |
+| ~~AB2~~ | ~~Optional captions for lake sounds (thunder, loon, owl, splashes)~~ (#182) | accessibility | M |
+| ~~AB3~~ | ~~Refresh the "New on the lake" card for Wave AB~~ (#182) | onboarding | S |
 
 - **AB1 · Unpredictable nibbles.** Today a single 280 ms nibble always lands at half the wait, so the bite's timing can be learned. Instead, one to three nibbles land at seeded, varied times before the bite, each a little different in length. (The "fish loses interest" part was dropped so catch rates stay the same.)
 - **AB2 · Sound captions.** A Settings toggle shows short captions at the screen's edge for the lake's sounds ("Thunder rolls", "A loon calls", "An owl hoots", "A beaver slaps its tail"), so players who can't hear them still know what is around. Off by default.
 - **AB3 · What's new, again.** List whatever Wave AB lands on the card.
+
+## Wave AC — Northern sky and quick wings (added 2026-10-14, after Wave AB shipped)
+
+Claude picked these after Wave AB; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| AC1 | Northern lights on some clear winter and fall nights, low over the far shore and mirrored in the water | scene | M |
+| AC2 | Swallows skim the water on summer dusks, dipping to drink and leaving tiny rings | scene | S/M |
+| AC3 | A woodpecker drums in the woods on mornings, with a caption | sound | S |
+| AC4 | Refresh the "New on the lake" card for Wave AC | onboarding | S |
+
+- **AC1 · Northern lights.** On a few seeded clear nights in fall and winter, green curtains shimmer low over the far treeline. The dock camera sees little sky, so the lake's mirror carries most of it.
+- **AC2 · Swallows.** Three or four swallows sweep fast, low loops over the water at summer dusk. Now and then one dips and leaves a ring.
+- **AC3 · Woodpecker.** A short drum roll comes from the woods now and then on mornings outside winter. The sound captions name it.
+- **AC4 · What's new, again.** List whatever Wave AC lands on the card.
+
+Claude checks each against what already exists before building and swaps any that are already there.
 
 ## Risks / open questions for the owner
 
