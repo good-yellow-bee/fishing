@@ -951,6 +951,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BD1~~ | ~~Cormorant baked into a body and two hinged wings with `mergePainted` (one vertex-coloured toon material): 10 draws to 3~~ (#217) | performance | S |
 
+## Wave BE — Fewer draws for the kingfisher and turtle (added 2026-10-14, after Wave BD shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BE1~~ | ~~Kingfisher's snag and body each baked into one shape (9 draws to 4); turtle's shell, rim and feet baked into one (7 to 2); summer day 343 to 327 with BD~~ (#218) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
