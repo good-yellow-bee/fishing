@@ -68,6 +68,8 @@ import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
 import { Grebes } from "./Grebes";
+import { Terns } from "./Terns";
+import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
@@ -1998,6 +2000,7 @@ export const LakeWorld = memo(function LakeWorld({
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
+      {hotspot && ternsOut(hour, sky, season) && <Terns center={hotspot} />}
     </SeasonContext.Provider>
   );
 });
