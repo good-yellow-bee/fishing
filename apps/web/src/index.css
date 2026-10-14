@@ -2326,6 +2326,49 @@ html[data-reduce-motion="1"] .hour-veil {
   gap: 8px;
 }
 
+/* High contrast from Settings: solid panels with bright borders, and no dimmed text, so words never sit on a see-through lake. */
+html[data-contrast="high"] {
+  --paper: #fbf3e2;
+  --paper-dim: #fbf3e2;
+}
+
+html[data-contrast="high"] :is(
+  .hud,
+  .dock-footer > section,
+  .hint,
+  .stance-chip,
+  .lure-choice,
+  .shop-overlay,
+  .walk-signs .panel-btn,
+  .walkthrough,
+  .camera-help,
+  .thumb-strike,
+  .settings-panel,
+  .power-meter .bar,
+  .catch-sync
+) {
+  border: 2px solid #fbf3e2;
+  background: #0c1210;
+  color: #fbf3e2;
+  backdrop-filter: none;
+}
+
+/* The states the panels above would flatten keep their amber. */
+html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop) {
+  border-color: #ffc95c;
+  color: #ffc95c;
+}
+
+html[data-contrast="high"] .thumb-strike[data-phase="hookset"] {
+  border-color: #ffc95c;
+  background: #ffc95c;
+  color: var(--ink);
+}
+
+html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-note, .lure-choice small, .skill-chip) {
+  color: #fbf3e2;
+}
+
 /* Left-handed from Settings: the thumb controls move to the other side of a touch screen. */
 @media (pointer: coarse) {
   html[data-hand="left"] .thumb-strike {

@@ -15,6 +15,7 @@ export const PL_GAME: PlBook = {
   Large: "Duża",
   Larger: "Większa",
   "Left-handed (strike button and cast meter on the left of a touch screen)": "Leworęczny (przycisk zacięcia i miernik rzutu po lewej na ekranie dotykowym)",
+  "High contrast (solid panels and brighter text)": "Wysoki kontrast (pełne panele i jaśniejszy tekst)",
   Full: "Pełne",
   Soft: "Łagodne",
   Off: "Wyłączone",
