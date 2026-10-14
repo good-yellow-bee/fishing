@@ -27,6 +27,25 @@ export function waterHeightWithShoreWeight(x: number, z: number, time: number, w
   return chop * weight;
 }
 
+/** Texture offset per second for each meter per second of wind; ripples run well ahead of the float they push. */
+export const STREAK_WIND = 0.5;
+export const DETAIL_WIND = 0.25;
+
+const CALM_STREAK = { x: 0.014, y: 0.008 };
+const CALM_DETAIL = { x: -0.006, y: 0.004 };
+
+/**
+ * How fast the surface streaks and dapple scroll, as texture offsets a second.
+ * The texture's u runs with world x and its v against world z, and a growing
+ * offset slides the pattern back, so downwind is (-x, +z) in offset terms.
+ */
+export function surfaceScroll(wind: { x: number; z: number }) {
+  return {
+    streak: { x: CALM_STREAK.x - wind.x * STREAK_WIND, y: CALM_STREAK.y + wind.z * STREAK_WIND },
+    detail: { x: CALM_DETAIL.x - wind.x * DETAIL_WIND, y: CALM_DETAIL.y + wind.z * DETAIL_WIND },
+  };
+}
+
 function smoothstep(edge0: number, edge1: number, value: number) {
   const t = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);

@@ -1848,7 +1848,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
-      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} />
+      <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}

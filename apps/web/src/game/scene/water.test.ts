@@ -4,6 +4,8 @@ import {
   BOBBER_RING_LIFT,
   bedColor,
   bedHeight,
+  STREAK_WIND,
+  surfaceScroll,
   bobberRingHeight,
   causticStrength,
   glitterDirection,
@@ -91,5 +93,18 @@ describe("sun road and caustics", () => {
     expect(causticStrength(0, LAKE_CENTER_Z)).toBe(0);
     const shelf = { x: LAKE_RX * 0.9, z: LAKE_CENTER_Z };
     expect(causticStrength(shelf.x, shelf.z)).toBeGreaterThan(0.9);
+  });
+});
+
+describe("surfaceScroll", () => {
+  it("keeps the calm drift on a still day and runs the streaks downwind on a windy one", () => {
+    const calm = surfaceScroll({ x: 0, z: 0 });
+    // Wind toward +z (south, toward the camera) slides v up; toward +x slides u down.
+    const south = surfaceScroll({ x: 0, z: 0.13 });
+    expect(south.streak.y - calm.streak.y).toBeCloseTo(0.13 * STREAK_WIND);
+    expect(south.streak.x).toBe(calm.streak.x);
+    const east = surfaceScroll({ x: 0.08, z: 0 });
+    expect(east.streak.x).toBeLessThan(calm.streak.x);
+    expect(Math.abs(east.detail.x - calm.detail.x)).toBeLessThan(Math.abs(east.streak.x - calm.streak.x));
   });
 });

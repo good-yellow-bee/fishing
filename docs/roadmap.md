@@ -402,6 +402,24 @@ Claude picked these after Wave J; the owner can reorder or drop any.
 - **K4 · Wind.** The day's wind (the same one the field log records) walks a sitting float downwind: 4 cm a second on a light day, 8 when breezy, 13 when strong, for up to 25 seconds, never onto the shore or the dock. A bite and the fight start where the float drifted to. The sky chip's tooltip names the wind. The chop itself does not lean with it yet.
 - **K5 · Text size.** Settings offers Normal, Large (1.15x) and Larger (1.3x) text, kept per browser like the other settings. It scales the HUD, footer panels, cards, toasts, Settings, the field log and lodge pages, and the sign-in screens; the lake and its canvas keep their size.
 
+## Wave L — Reading the lake (added 2026-10-14, after Wave K shipped)
+
+Claude picked these after Wave K; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| L1 | ~~Ripples that run with the wind~~ (shipped) | weather/visual | S |
+| L2 | Stars and a rare shooting star on clear nights | sky | S/M |
+| L3 | Cloud shadows sliding over the water on fair days | weather/visual | S/M |
+| L4 | A rod bell that rings on a nibble after dark | gameplay/a11y | S/M |
+| L5 | Dawn chorus in spring and summer | audio | S |
+
+- **L1 · Wind on the water.** The surface streaks and dapple scroll downwind with the day's wind (the one that walks the float since K4), faster on breezy and strong days; a calm day keeps the old slow drift.
+- **L2 · Stars.** Clear nights show a field of stars that fades with the moon's light and hides under cloud, rain or fog; now and then a shooting star crosses it.
+- **L3 · Cloud shadows.** On clear and overcast days soft cloud shadows slide across the lake and shore, downwind.
+- **L4 · Rod bell.** After dark, when the float is hard to see, a small bell on the rod tip jingles on each nibble and rings hard on the bite, with a matching screen-reader line.
+- **L5 · Dawn chorus.** Dawn in spring and summer gets a fuller bird chorus that thins out as the morning goes on.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
