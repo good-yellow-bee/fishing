@@ -32,6 +32,8 @@ import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
+import { Rainbow } from "./Rainbow";
+import { rainbowOut } from "./rainbowArc";
 import {
   FISH_LEAP_SEC,
   HOOKSET_SEC,
@@ -1875,6 +1877,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />
       {storm && <Lightning />}
+      {rainbowOut(hour, sky, season, storm) && <Rainbow hour={hour} />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} />
