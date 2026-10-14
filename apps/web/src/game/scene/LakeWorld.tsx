@@ -29,6 +29,8 @@ import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Loon } from "./Loon";
 import { loonOut } from "./loonMotion";
+import { Otter } from "./Otter";
+import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
@@ -1755,6 +1757,7 @@ export const LakeWorld = memo(function LakeWorld({
       {firefliesOut(hour, sky) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
+      {otterOut(hour, season) && <Otter />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </SeasonContext.Provider>
