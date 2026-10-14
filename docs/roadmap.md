@@ -1004,7 +1004,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~BM1~~ | ~~The thermos and its cup bake into one painted shape each, and the reel's spool and crank bake into one each, so they cost 5 draws instead of 12~~ (#226) | perf | S |
-| BM2 | Static shadow casters that never move (logs, path stones, crates) stop casting where their shadow falls out of view or merge into one caster | perf | S |
+| ~~BM2~~ | ~~Winter dock footprints and post snow caps bake into one shape each, and the three bank-stand posts into one shadow caster (16 draws down to 3)~~ (#227) | perf | S |
 
 ## Risks / open questions for the owner
 

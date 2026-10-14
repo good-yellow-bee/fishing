@@ -7,6 +7,7 @@ import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { applyToon, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { batchPlaced, placement } from "./scatterBatch";
+import { mergeParts } from "./mergeParts";
 import {
   BANK_BOARDS,
   BANK_POST,
@@ -1595,18 +1596,28 @@ function BankPlanks({ color, planks }: { color: string; planks: readonly BankPla
   );
 }
 
+/** The lantern posts at the three bank stands, baked into one shape: one draw and one shadow caster. */
+export function bankPostShape() {
+  return mergeParts(BANK_POSTS.map((post) => ({ geometry: new THREE.BoxGeometry(0.16, 1.04, 0.16), position: [post.x, 0.52, post.z] as const })));
+}
+
+function BankPosts() {
+  const shape = useMemo(bankPostShape, []);
+  useEffect(() => () => shape.dispose(), [shape]);
+  return (
+    <mesh geometry={shape} castShadow>
+      <meshToonMaterial color={BANK_POST} gradientMap={toonRamp()} />
+    </mesh>
+  );
+}
+
 function BankWalks() {
   return (
     <group>
       {BANK_PLANK_BATCHES.map(({ color, planks }) => (
         <BankPlanks key={color} color={color} planks={planks} />
       ))}
-      {BANK_POSTS.map((post) => (
-        <mesh key={`${post.spot}-post`} position={[post.x, 0.52, post.z]} castShadow>
-          <boxGeometry args={[0.16, 1.04, 0.16]} />
-          <meshToonMaterial color={BANK_POST} gradientMap={toonRamp()} />
-        </mesh>
-      ))}
+      <BankPosts />
     </group>
   );
 }
