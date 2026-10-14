@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useT } from "../i18n";
 
 export function EditDelete({
   editTo,
@@ -14,6 +15,7 @@ export function EditDelete({
   aside?: ReactNode;
   children: ReactNode;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
 
   return (
@@ -21,9 +23,9 @@ export function EditDelete({
       <header className="sheet-head">
         <div>{children}</div>
         <div className="sheet-actions">
-          <Link to={editTo}>Edit</Link>
+          <Link to={editTo}>{t("Edit")}</Link>
           <button type="button" className="text-button" onClick={() => setOpen(true)}>
-            Delete
+            {t("Delete")}
           </button>
           {aside}
         </div>
@@ -32,10 +34,10 @@ export function EditDelete({
         <p className="confirm-ask">
           {ask}{" "}
           <button type="button" className="text-button" onClick={onDelete}>
-            Delete
+            {t("Delete")}
           </button>
           <button type="button" className="text-button" onClick={() => setOpen(false)}>
-            Keep
+            {t("Keep")}
           </button>
         </p>
       ) : null}

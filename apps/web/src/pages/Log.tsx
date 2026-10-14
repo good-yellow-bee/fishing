@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { badgeById, fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
-import { getMe, type Me } from "../api";
+import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
+import { locale, tn, useT } from "../i18n";
+
+/** A weight to one decimal, with the language's decimal mark. */
+function lb(weight: number): string {
+  return weight.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
+}
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState("");
+  const t = useT();
 
   useEffect(() => {
     getMe()
@@ -15,8 +22,8 @@ export function LogPage() {
       .catch((err: Error) => setError(err.message));
   }, []);
 
-  if (error) return <div className="log-page">{error}</div>;
-  if (!me) return <div className="log-page">Loading the log…</div>;
+  if (error) return <div className="log-page">{errorText(error)}</div>;
+  if (!me) return <div className="log-page">{t("Loading the log…")}</div>;
 
   const catches = me.catches;
   const totalWeight = catches.reduce((sum, row) => sum + row.weight, 0);
@@ -28,53 +35,57 @@ export function LogPage() {
   return (
     <div className="log-page">
       <p>
-        <Link to="/play">Back to the dock</Link>
+        <Link to="/play">{t("Back to the dock")}</Link>
         {" · "}
-        <Link to="/board">Lodge board</Link>
+        <Link to="/board">{t("Lodge board")}</Link>
       </p>
-      <h1>{me.profile.displayName}&rsquo;s catch log</h1>
+      <h1>{t("{name}’s catch log", { name: me.profile.displayName })}</h1>
       <p>
-        {me.profile.lifetimePoints} lifetime points · {catches.length} recent fish
+        {tn(me.profile.lifetimePoints, "{n} lifetime points", "{n} lifetime points")} ·{" "}
+        {tn(catches.length, "{n} recent fish", "{n} recent fish")}
       </p>
-      <section className="badge-wall" aria-label="Lodge badges">
-        <h2>Lodge badges</h2>
+      <section className="badge-wall" aria-label={t("Lodge badges")}>
+        <h2>{t("Lodge badges")}</h2>
         <ul>
-          {me.badges.map((badge) => (
-            <li key={badge.id} className={badge.earned ? "earned" : ""}>
-              <strong>{badgeById(badge.id)?.label ?? badge.id}</strong>
-              <span>{badgeById(badge.id)?.blurb}</span>
-              <small>{badge.earned ? "Earned" : `${badge.have} of ${badge.need}`}</small>
-            </li>
-          ))}
+          {me.badges.map((badge) => {
+            const info = badgeById(badge.id);
+            return (
+              <li key={badge.id} className={badge.earned ? "earned" : ""}>
+                <strong>{info ? t(info.label) : badge.id}</strong>
+                <span>{info ? t(info.blurb) : undefined}</span>
+                <small>{badge.earned ? t("Earned") : t("{have} of {need}", { have: badge.have, need: badge.need })}</small>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <FieldGuide stats={me.speciesStats} />
       {heaviest && (
         <div className="log-summary">
           <div>
-            <span className="eyebrow">Recent</span>
+            <span className="eyebrow">{t("Recent")}</span>
             <strong>{catches.length}</strong>
           </div>
           <div>
-            <span className="eyebrow">Total weight</span>
-            <strong>{totalWeight.toFixed(1)} lb</strong>
+            <span className="eyebrow">{t("Total weight")}</span>
+            <strong>{lb(totalWeight)} lb</strong>
           </div>
           <div>
-            <span className="eyebrow">Heaviest</span>
-            <strong>{heaviest.weight.toFixed(1)} lb</strong>
-            <small>{fishById(heaviest.speciesId)?.name ?? heaviest.speciesId}</small>
+            <span className="eyebrow">{t("Heaviest")}</span>
+            <strong>{lb(heaviest.weight)} lb</strong>
+            <small>{t(fishById(heaviest.speciesId)?.name ?? heaviest.speciesId)}</small>
           </div>
         </div>
       )}
       <table>
         <thead>
           <tr>
-            <th>Fish</th>
-            <th>Weight</th>
-            <th>Spot</th>
-            <th>Conditions</th>
-            <th>Points</th>
-            <th>When</th>
+            <th>{t("Fish")}</th>
+            <th>{t("Weight")}</th>
+            <th>{t("Spot")}</th>
+            <th>{t("Conditions")}</th>
+            <th>{t("Points")}</th>
+            <th>{t("When")}</th>
           </tr>
         </thead>
         <tbody>
@@ -85,20 +96,20 @@ export function LogPage() {
                 <td className={species ? `rarity-${species.rarity}` : ""}>
                   <span className="log-fish">
                     {species && <FishMark species={species} />}
-                    {species?.name ?? row.speciesId}
+                    {species ? t(species.name) : row.speciesId}
                   </span>
                 </td>
-                <td>{row.weight.toFixed(1)} lb</td>
-                <td>{SPOT_LABELS[row.spot]}</td>
-                <td>{row.hour && row.sky ? `${LAKE_HOUR_LABELS[row.hour]} · ${SKY_LABELS[row.sky]}` : "—"}</td>
+                <td>{lb(row.weight)} lb</td>
+                <td>{t(SPOT_LABELS[row.spot])}</td>
+                <td>{row.hour && row.sky ? `${t(LAKE_HOUR_LABELS[row.hour])} · ${t(SKY_LABELS[row.sky])}` : "—"}</td>
                 <td>{row.points}</td>
-                <td>{new Date(row.createdAt).toLocaleString()}</td>
+                <td>{new Date(row.createdAt).toLocaleString(locale())}</td>
               </tr>
             );
           })}
         </tbody>
       </table>
-      {catches.length === 0 && <p>Nothing landed yet.</p>}
+      {catches.length === 0 && <p>{t("Nothing landed yet.")}</p>}
     </div>
   );
 }

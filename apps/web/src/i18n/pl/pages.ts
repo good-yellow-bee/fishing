@@ -1,4 +1,114 @@
 import type { PlBook } from ".";
 
 export const PL_PAGES: PlBook = {
+  // App gate
+  "Fog lifting…": "Mgła się podnosi…",
+
+  // Login and register
+  "Email": "E-mail",
+  "Password": "Hasło",
+  "Could not sign in": "Nie udało się zalogować",
+  "Could not register": "Nie udało się założyć konta",
+  "First light on a northern lake. Cast, wait, fight whatever takes the hook.":
+    "Pierwszy brzask nad północnym jeziorem. Zarzuć, poczekaj i holuj to, co weźmie.",
+  "Enter the dock": "Wejdź na pomost",
+  "New here?": "Nowy tutaj?",
+  "Make a profile": "Załóż konto",
+  "Join Stillwater": "Dołącz do Stillwater",
+  "A name, an email, a password. Points and fish stay on this profile.":
+    "Imię, e-mail i hasło. Punkty i ryby zostaną na tym koncie.",
+  "Display name": "Twoje imię",
+  "Create profile": "Załóż konto",
+  "Already an angler?": "Masz już konto?",
+  "Sign in": "Zaloguj się",
+
+  // Catch log
+  "Loading the log…": "Wczytuję dziennik…",
+  "Back to the dock": "Wróć na pomost",
+  "Lodge board": "Tablica przystani",
+  "{name}’s catch log": "Dziennik połowów: {name}",
+  "{n} lifetime points": ["{n} punkt łącznie", "{n} punkty łącznie", "{n} punktów łącznie"],
+  "{n} recent fish": ["{n} ostatnia ryba", "{n} ostatnie ryby", "{n} ostatnich ryb"],
+  "Lodge badges": "Odznaki przystani",
+  "Earned": "Zdobyta",
+  "{have} of {need}": "{have} z {need}",
+  "Recent": "Ostatnie",
+  "Total weight": "Łączna waga",
+  "Heaviest": "Najcięższa",
+  "Fish": "Ryby",
+  "Weight": "Waga",
+  "Spot": "Łowisko",
+  "Conditions": "Warunki",
+  "Points": "Punkty",
+  "When": "Kiedy",
+  "Nothing landed yet.": "Jeszcze nic nie złowiono.",
+
+  // Lodge board
+  "All time": "Od początku",
+  "This week": "Ten tydzień",
+  "Lifetime": "Łącznie",
+  "Reading the lodge board…": "Czytam tablicę przystani…",
+  "Catch log": "Rejestr połowów",
+  "Board period": "Okres tablicy",
+  "Top {limit} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.":
+    "Najlepsi wędkarze (top {limit}) według punktów zdobytych od poniedziałku 00:00 UTC. Przy remisie decyduje najcięższa ryba tygodnia.",
+  "Top {limit} anglers by lifetime points. Heaviest fish breaks a tie.":
+    "Najlepsi wędkarze (top {limit}) według wszystkich punktów. Przy remisie decyduje najcięższa ryba.",
+  "Your place": "Twoje miejsce",
+  "{n} species": ["{n} gatunek", "{n} gatunki", "{n} gatunków"],
+  "{n} landed": ["{n} złowiona", "{n} złowione", "{n} złowionych"],
+  "Angler": "Wędkarz",
+  "Level": "Poziom",
+  "Species|count": "Gatunki",
+  "Nobody has landed a fish this week. Be first.": "W tym tygodniu nikt jeszcze nic nie złowił. Bądź pierwszy.",
+  "The board is blank. Land a fish.": "Tablica jest pusta. Złów rybę.",
+  "Outside the posted hundred. You sit at #{rank} with {n} points this week.": [
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktem w tym tygodniu.",
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktami w tym tygodniu.",
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktami w tym tygodniu.",
+  ],
+  "Outside the posted hundred. You sit at #{rank} with {n} lifetime points.": [
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktem łącznie.",
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktami łącznie.",
+    "Poza wywieszoną setką. Zajmujesz #{rank} miejsce z {n} punktami łącznie.",
+  ],
+  "Species records": "Rekordy gatunków",
+  "Record wall": "Ściana rekordów",
+  "The heaviest of each fish anyone at the lodge has landed.": "Najcięższa ryba każdego gatunku złowiona przez kogokolwiek z przystani.",
+  "Unknown": "Nieznana",
+  "(you)": "(ty)",
+  "No one yet": "Jeszcze nikt",
+
+  // Lodge (API) errors, shown through errorText(); shared rule errors
+  // (validateCatch / validateUpgrade) live in content.ts
+  "Request failed ({status})": "Żądanie nie powiodło się ({status})",
+  "Failed to fetch": "Brak połączenia z przystanią",
+  "unauthorized": "Zaloguj się ponownie",
+  "invalid JSON": "Nieprawidłowe dane",
+  "invalid skill": "Nieznana umiejętność",
+  "profile missing": "Nie znaleziono profilu",
+  "upgrade failed": "Ulepszenie nie powiodło się",
+  "invalid catch": "Nieprawidłowy połów",
+  "request ID conflicts with an existing catch": "Ten połów jest już zapisany",
+  "catch rate limit exceeded": "Za dużo połowów naraz. Odczekaj chwilę",
+  "invalid day": "Nieprawidłowy dzień",
+  "unknown daily request": "Nieznane zlecenie dnia",
+  "request incomplete": "Zlecenie nie jest jeszcze wykonane",
+  "those hours already count for another day": "Te godziny liczą się już do innego dnia",
+  "request already claimed": "Nagroda za to zlecenie została już odebrana",
+
+  // Sign-in service errors
+  "Invalid email or password": "Nieprawidłowy e-mail lub hasło",
+  "Invalid email": "Nieprawidłowy e-mail",
+  "Invalid password": "Nieprawidłowe hasło",
+  "Password too short": "Hasło jest za krótkie",
+  "Password too long": "Hasło jest za długie",
+  "User already exists.": "Takie konto już istnieje.",
+  "User already exists. Use another email.": "Takie konto już istnieje. Użyj innego e-maila.",
+  "Failed to create user": "Nie udało się założyć konta",
+  "Failed to create session": "Nie udało się zalogować",
+  "Email not verified": "E-mail nie jest potwierdzony",
+  "Invalid origin": "Nieprawidłowe źródło żądania",
+  "Missing or null Origin": "Brak źródła żądania",
+  "Validation Error": "Błąd w danych",
 };

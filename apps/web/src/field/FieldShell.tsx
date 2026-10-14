@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
+import { useLang, useT } from "../i18n";
 
 function FishMark() {
   return (
@@ -17,25 +18,28 @@ function FishMark() {
 }
 
 function FieldLinks() {
+  const t = useT();
   return (
     <>
       <NavLink to="/" end>
-        Home
+        {t("Home")}
       </NavLink>
-      <NavLink to="/catches">Catches</NavLink>
-      <NavLink to="/spots">Spots</NavLink>
-      <NavLink to="/map">Map</NavLink>
-      <NavLink to="/trips">Trips</NavLink>
-      <NavLink to="/gear">Gear</NavLink>
-      <NavLink to="/bests">Bests</NavLink>
+      <NavLink to="/catches">{t("Catches")}</NavLink>
+      <NavLink to="/spots">{t("Spots")}</NavLink>
+      <NavLink to="/map">{t("Map")}</NavLink>
+      <NavLink to="/trips">{t("Trips")}</NavLink>
+      <NavLink to="/gear">{t("Gear")}</NavLink>
+      <NavLink to="/bests">{t("Bests")}</NavLink>
     </>
   );
 }
 
 export function FieldShell({ children }: { children: ReactNode }) {
+  const t = useT();
+  const lang = useLang();
   useEffect(() => {
-    document.title = "Stillwater · Field log";
-  }, []);
+    document.title = t("Stillwater · Field log");
+  }, [t, lang]);
 
   return (
     <div className="field">
@@ -44,14 +48,14 @@ export function FieldShell({ children }: { children: ReactNode }) {
           <FishMark />
           <span>
             <strong>Stillwater</strong>
-            <small>Field log</small>
+            <small>{t("Field log")}</small>
           </span>
         </NavLink>
-        <nav className="field-rail-nav" aria-label="Log">
+        <nav className="field-rail-nav" aria-label={t("Log")}>
           <FieldLinks />
         </nav>
         <NavLink to="/catches/new" className="field-primary">
-          Log a catch
+          {t("Log a catch")}
         </NavLink>
       </aside>
       <div className="field-stage">
@@ -60,16 +64,16 @@ export function FieldShell({ children }: { children: ReactNode }) {
             <FishMark />
             <span>
               <strong>Stillwater</strong>
-              <small>Field log</small>
+              <small>{t("Field log")}</small>
             </span>
           </NavLink>
           <NavLink to="/catches/new" className="field-primary">
-            Log a catch
+            {t("Log a catch")}
           </NavLink>
         </header>
         <main className="field-main">{children}</main>
       </div>
-      <nav className="field-tab" aria-label="Log">
+      <nav className="field-tab" aria-label={t("Log")}>
         <FieldLinks />
       </nav>
     </div>

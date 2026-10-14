@@ -13,6 +13,7 @@ import {
   type SkillId,
   type SpotId,
 } from "@stillwater/shared";
+import { t } from "./i18n";
 
 export type Me = {
   user: { id: string; email: string; name: string };
@@ -36,6 +37,17 @@ export class ApiError extends Error {
     this.name = "ApiError";
     this.status = status;
   }
+}
+
+/**
+ * An error from the lodge or the sign-in service, in the player's language.
+ * The server speaks English (and the code compares those words), so the
+ * message is translated only here, where it is shown.
+ */
+export function errorText(message: string): string {
+  const failed = /^request failed \((\d+)\)$/.exec(message);
+  if (failed) return t("Request failed ({status})", { status: failed[1]! });
+  return t(message);
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

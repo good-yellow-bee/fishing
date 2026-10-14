@@ -112,3 +112,12 @@ describe("Polish book", () => {
     expect(broken.map(([key]) => key)).toEqual([]);
   });
 });
+
+describe("context keys", () => {
+  it("shows the word before the bar in English and its own line in Polish", () => {
+    expect(t("Species|count")).toBe("Species");
+    setLang("pl");
+    expect(t("Species|count")).toBe("Gatunki");
+    expect(t("Species")).toBe("Gatunek");
+  });
+});

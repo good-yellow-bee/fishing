@@ -1,4 +1,5 @@
 import { fishById, spotAt, SPOT_LABELS, TRACK_WINDOW_MS, type LodgeTrack, type SpotId } from "@stillwater/shared";
+import { t } from "../../i18n";
 
 /** Open water in front of each bank, and how far tracks spread around it. */
 const TRACK_WATER: Record<SpotId, { x: number; z: number; spread: number }> = {
@@ -51,11 +52,12 @@ export function trackPulse(id: string, time: number) {
 
 export function trackAgeLabel(ageMs: number) {
   const minutes = Math.max(0, Math.floor(ageMs / 60_000));
-  return minutes < 1 ? "just now" : `${minutes} min ago`;
+  return minutes < 1 ? t("just now") : t("{minutes} min ago", { minutes });
 }
 
 /** "Mara · pike · Reeds · 12 min ago" */
 export function trackLabel(track: LodgeTrack, now: number) {
-  const fish = fishById(track.speciesId)?.name.toLowerCase() ?? track.speciesId;
-  return `${track.displayName} · ${fish} · ${SPOT_LABELS[track.spot]} · ${trackAgeLabel(now - Date.parse(track.createdAt))}`;
+  const name = fishById(track.speciesId)?.name;
+  const fish = name ? t(name).toLowerCase() : track.speciesId;
+  return `${track.displayName} · ${fish} · ${t(SPOT_LABELS[track.spot])} · ${trackAgeLabel(now - Date.parse(track.createdAt))}`;
 }

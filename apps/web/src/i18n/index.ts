@@ -87,6 +87,15 @@ export function useLang(): Lang {
 
 export type Vars = Record<string, string | number>;
 
+/**
+ * A key may carry a context after a bar, "Species|board", when one English
+ * word needs two Polish ones; English shows only the part before the bar.
+ */
+function english(text: string): string {
+  const bar = text.indexOf("|");
+  return bar === -1 ? text : text.slice(0, bar);
+}
+
 function fill(text: string, vars?: Vars): string {
   if (!vars) return text;
   return text.replace(/\{(\w+)\}/g, (whole, key: string) => (key in vars ? String(vars[key]) : whole));
@@ -101,7 +110,7 @@ export function t(text: string, vars?: Vars): string {
     const line = PL[text];
     if (typeof line === "string") return fill(line, vars);
   }
-  return fill(text, vars);
+  return fill(english(text), vars);
 }
 
 const plRules = new Intl.PluralRules("pl-PL");

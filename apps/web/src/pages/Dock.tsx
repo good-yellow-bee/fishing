@@ -27,7 +27,7 @@ import {
   type LakeHour,
   type SkillId,
 } from "@stillwater/shared";
-import { buyUpgrade, getMe, getSpeciesRecords, type Me } from "../api";
+import { buyUpgrade, errorText, getMe, getSpeciesRecords, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
@@ -59,6 +59,9 @@ import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
+import { oneDecimal, rarityLabel } from "../game/logic";
+import { t, tn, useT } from "../i18n";
+import { bestBeatText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
 const HOUR_CHECK_MS = 30_000;
@@ -66,12 +69,18 @@ const HOUR_CHECK_MS = 30_000;
 const HOUR_SWAP_MS = 1_100;
 const HOUR_VEIL_MS = 3_200;
 
-const HOUR_TURN_LINE: Record<LakeHour, string> = {
-  dawn: "Dawn breaks over the lake.",
-  day: "The sun is up.",
-  dusk: "Dusk settles on the water.",
-  night: "Night falls.",
-};
+function hourTurnLine(hour: LakeHour): string {
+  switch (hour) {
+    case "dawn":
+      return t("Dawn breaks over the lake.");
+    case "day":
+      return t("The sun is up.");
+    case "dusk":
+      return t("Dusk settles on the water.");
+    case "night":
+      return t("Night falls.");
+  }
+}
 
 const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
   { target: "dock", label: STANCE_LABELS.dock },
@@ -83,6 +92,7 @@ const SIGNPOSTS: readonly { target: WalkTarget; label: string }[] = [
 ];
 
 export function DockPage() {
+  useT();
   const [params] = useSearchParams();
   // One clock for the hour and the day's weather, so both turn over together.
   const [openedAt] = useState(() => new Date());
@@ -194,7 +204,7 @@ export function DockPage() {
       setFiledTrip({ id: session.id, title });
       setSession(null);
     } catch {
-      setFieldLogError("The field log could not be saved in this browser.");
+      setFieldLogError(t("The field log could not be saved in this browser."));
     }
   };
   const closeRecap = () => {
@@ -231,7 +241,7 @@ export function DockPage() {
   };
 
   useEffect(() => {
-    refresh().catch((err: Error) => setError(err.message));
+    refresh().catch((err: Error) => setError(errorText(err.message)));
   }, [refresh]);
 
   useEffect(() => () => fx.ambient.stop(), []);
@@ -330,7 +340,7 @@ export function DockPage() {
       setFieldLogError("");
     } catch (err) {
       setFieldSaved(false);
-      setFieldLogError(err instanceof Error ? err.message : "The field log could not be saved.");
+      setFieldLogError(err instanceof Error ? errorText(err.message) : t("The field log could not be saved."));
     }
     pinPhoto(id);
   }, [game.outcome, openedAt, sky, pinPhoto]);
@@ -393,14 +403,14 @@ export function DockPage() {
       await buyUpgrade(skill);
       await refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "upgrade failed");
+      setError(err instanceof Error ? errorText(err.message) : t("upgrade failed"));
     } finally {
       setBusy(false);
     }
   };
 
   if (!me) {
-    return <div className="dock-page">{error || "Walking the planks…"}</div>;
+    return <div className="dock-page">{error || t("Walking the planks…")}</div>;
   }
 
   const dropoffOpen = canUseSpot("dropoff", me.level);
@@ -410,12 +420,12 @@ export function DockPage() {
   const boatOpen = canUseSpot("open", me.level);
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
   const stanceLabel = rowing
-    ? "Rowing"
+    ? t("Rowing")
     : game.stance === "dropoff" && !dropoffOpen
-      ? `${STANCE_LABELS.dropoff} (lv ${DROPOFF_LEVEL})`
+      ? t("{spot} (lv {level})", { spot: t(STANCE_LABELS.dropoff), level: DROPOFF_LEVEL })
       : game.stance === "inlet" && !inletOpen
-        ? `${STANCE_LABELS.inlet} (lv ${INLET_LEVEL})`
-        : STANCE_LABELS[game.stance];
+        ? t("{spot} (lv {level})", { spot: t(STANCE_LABELS.inlet), level: INLET_LEVEL })
+        : t(STANCE_LABELS[game.stance]);
 
   return (
     <div className="dock-page">
@@ -456,16 +466,16 @@ export function DockPage() {
         />
         {game.phase === "hookset" && (
           <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>
-            <strong>Strike!</strong>
-            <span className="cue-keys">Click or Space</span>
-            <span className="cue-touch">Tap anywhere</span>
+            <strong>{t("Strike!")}</strong>
+            <span className="cue-keys">{t("Click or Space")}</span>
+            <span className="cue-touch">{t("Tap anywhere")}</span>
             <i />
           </div>
         )}
         {(scenePhase === "waiting" || scenePhase === "hookset" || scenePhase === "fight") && (
           // Space and a tap on the water do the same; this is just where a thumb rests on a phone.
           <button className="thumb-strike" type="button" data-thumb-strike data-phase={scenePhase} tabIndex={-1} aria-hidden>
-            {scenePhase === "fight" ? "Reel" : "Strike"}
+            {scenePhase === "fight" ? t("Reel") : t("Strike")}
           </button>
         )}
         {fishing && !shopOpen && (
@@ -478,14 +488,14 @@ export function DockPage() {
           <aside className="catch-sync" data-camera-control role="status">
             {(catchSync.pendingCount > 0 || catchSync.error) && (
               <>
-                <p>{catchSync.error || `${catchSync.pendingCount} catch${catchSync.pendingCount === 1 ? "" : "es"} waiting to sync.`}</p>
-                <button className="panel-btn" type="button" onClick={retryServerSave}>Retry server save</button>
+                <p>{catchSync.error || tn(catchSync.pendingCount, "{n} catch waiting to sync.", "{n} catches waiting to sync.")}</p>
+                <button className="panel-btn" type="button" onClick={retryServerSave}>{t("Retry server save")}</button>
               </>
             )}
             {catchSync.rejectedCount > 0 && (
               <>
-                <p>{catchSync.rejectedCount} catch{catchSync.rejectedCount === 1 ? "" : "es"} could not be verified. Your field-log entries are kept.</p>
-                <button className="panel-btn" type="button" onClick={catchSync.dismissRejected}>Dismiss</button>
+                <p>{tn(catchSync.rejectedCount, "{n} catch could not be verified. Your field-log entries are kept.", "{n} catches could not be verified. Your field-log entries are kept.")}</p>
+                <button className="panel-btn" type="button" onClick={catchSync.dismissRejected}>{t("Dismiss")}</button>
               </>
             )}
           </aside>
@@ -514,10 +524,10 @@ export function DockPage() {
           }}
         />
         {scenePhase === "idle" && !shopOpen && (
-          <nav className="walk-signs" data-camera-control aria-label="Walk to">
+          <nav className="walk-signs" data-camera-control aria-label={t("Walk to")}>
             {game.stance === "shop" && (
               <button className="panel-btn walk-shop" type="button" onClick={() => setShopOpen(true)}>
-                Open shop
+                {t("Open shop")}
               </button>
             )}
             {boatState === "anchored" && (
@@ -525,7 +535,7 @@ export function DockPage() {
                 event.currentTarget.blur();
                 rowBack();
               }}>
-                Row back
+                {t("Row back")}
               </button>
             )}
             {/* The rowboat is tied to the pier; it unties at the level that opens the deep water. */}
@@ -534,7 +544,7 @@ export function DockPage() {
                 event.currentTarget.blur();
                 rowOut();
               }}>
-                Row out
+                {t("Row out")}
               </button>
             )}
             {/* The inlet's signpost goes up with the level that opens it; until then the west shore is just a walk. */}
@@ -551,52 +561,54 @@ export function DockPage() {
                   walkAnglerTo(WALK_TARGETS[target].x, WALK_TARGETS[target].z);
                 }}
               >
-                {label}
+                {t(label)}
               </button>
             ))}
           </nav>
         )}
         <aside className="camera-help" data-camera-control>
-          <span>Shore</span>
-          <kbd>WASD</kbd> or <kbd>Click shore</kbd> walk
-          <kbd>Click water</kbd> aim
-          <kbd>E</kbd> shop
-          <kbd>Right drag</kbd> look
+          <span>{t("Shore")}</span>
+          <kbd>WASD</kbd> {t("or")} <kbd>{t("Click shore")}</kbd> {t("walk")}
+          <kbd>{t("Click water")}</kbd> {t("aim")}
+          <kbd>E</kbd> {t("shop")}
+          <kbd>{t("Right drag")}</kbd> {t("look")}
         </aside>
         {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}`}>
             {fieldBeat && (
               <p className="catch-best" role="status">
-                <strong>Personal best</strong>
-                <span>{fieldBeat.line}</span>
+                <strong>{t("Personal best")}</strong>
+                <span>{bestBeatText(fieldBeat)}</span>
               </p>
             )}
             <FishMark species={game.outcome.species} />
-            <span className="rarity-tag">{game.outcome.species.rarity}</span>
-            <h2>{game.outcome.species.name}</h2>
-            <p className="catch-lore">{game.outcome.species.lore}</p>
-            <p className="catch-lure">{lure}</p>
-            <p>{game.outcome.weight.toFixed(1)} lb · {SPOT_LABELS[game.outcome.spot]}</p>
-            <p>+{catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean)} pts</p>
-            {game.outcome.clean && <p className="catch-stamp">Clean fight</p>}
-            {stamp?.kind === "first" && <p className="catch-stamp">New in the field guide</p>}
+            <span className="rarity-tag">{rarityLabel(game.outcome.species.rarity)}</span>
+            <h2>{t(game.outcome.species.name)}</h2>
+            <p className="catch-lore">{t(game.outcome.species.lore)}</p>
+            <p className="catch-lure">{t(lure)}</p>
+            <p>{oneDecimal(game.outcome.weight)} lb · {t(SPOT_LABELS[game.outcome.spot])}</p>
+            <p>{t("+{points} pts", { points: catchPoints(game.outcome.species, game.outcome.weight, game.outcome.clean) })}</p>
+            {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
+            {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
-              <p className="catch-stamp">Personal best · was {stamp.previous.toFixed(1)} lb</p>
+              <p className="catch-stamp">{t("Personal best · was {weight} lb", { weight: oneDecimal(stamp.previous) })}</p>
             )}
             {stamp?.kind === "repeat" && (
-              <p className="catch-stamp quiet">Book PB {stamp.heaviest.toFixed(1)} lb</p>
+              <p className="catch-stamp quiet">{t("Book PB {weight} lb", { weight: oneDecimal(stamp.heaviest) })}</p>
             )}
-            {stamp?.trophy && <p className="catch-stamp">Trophy</p>}
-            {lodge?.kind === "first" && <p className="catch-stamp">First on the lodge wall</p>}
+            {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
+            {lodge?.kind === "first" && <p className="catch-stamp">{t("First on the lodge wall")}</p>}
             {lodge?.kind === "record" && (
               <p className="catch-stamp">
-                Lodge record · {lodge.yours ? `beat your ${lodge.previous.toFixed(1)} lb` : `was ${lodge.previous.toFixed(1)} lb (${lodge.holder})`}
+                {lodge.yours
+                  ? t("Lodge record · beat your {weight} lb", { weight: oneDecimal(lodge.previous) })
+                  : t("Lodge record · was {weight} lb ({holder})", { weight: oneDecimal(lodge.previous), holder: lodge.holder })}
               </p>
             )}
             <div className="catch-actions">
               {fieldSaved && (
-                <p className="catch-stamp quiet">{photoSaved ? "Saved in the field log, with a photo" : "Saved in the field log"}</p>
+                <p className="catch-stamp quiet">{photoSaved ? t("Saved in the field log, with a photo") : t("Saved in the field log")}</p>
               )}
               {fieldLogError && (
                 <p className="warn" role="alert">
@@ -604,15 +616,15 @@ export function DockPage() {
                 </p>
               )}
               <button className="panel-btn" type="button" onClick={game.dismissResult}>
-                Keep fishing
+                {t("Keep fishing")}
               </button>
               {fieldLogError && (
                 <button className="panel-btn" type="button" onClick={saveFieldLog}>
-                  Try saving again
+                  {t("Try saving again")}
                 </button>
               )}
               <Link className="panel-btn" to="/catches">
-                Field log
+                {t("Field log")}
               </Link>
             </div>
           </div>
@@ -621,13 +633,13 @@ export function DockPage() {
           <div className="toast">
             <p>{game.outcome.message}</p>
             <button className="panel-btn" type="button" onClick={game.dismissResult}>
-              Cast again
+              {t("Cast again")}
             </button>
           </div>
         )}
         {bankClear && tracks.length > 0 && (
-          <aside className="lodge-tracks" aria-label="Lately on the lake">
-            <span className="eyebrow">Lately on the lake</span>
+          <aside className="lodge-tracks" aria-label={t("Lately on the lake")}>
+            <span className="eyebrow">{t("Lately on the lake")}</span>
             {tracks.slice(0, 2).map((track) => (
               <p key={track.id}>{trackLabel(track, Date.now())}</p>
             ))}
@@ -635,33 +647,33 @@ export function DockPage() {
         )}
         {veil && (
           <div className="hour-veil" key={veil} role="status">
-            <strong>{HOUR_TURN_LINE[veil]}</strong>
-            <span>{LAKE_HOUR_BLURB[veil]}</span>
+            <strong>{hourTurnLine(veil)}</strong>
+            <span>{t(LAKE_HOUR_BLURB[veil])}</span>
           </div>
         )}
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
         <div className="level-status" role="status">
           {shownLevel && (
             <div className="toast level-toast">
-              <h2>Level {shownLevel.level}</h2>
+              <h2>{t("Level {level}", { level: shownLevel.level })}</h2>
               {shownLevel.opened && <p>{shownLevel.opened}</p>}
             </div>
           )}
           {shownBadges && (
             <div className="toast level-toast badge-toast">
-              <span className="eyebrow">{shownBadges.length > 1 ? "Badges" : "Badge"}</span>
-              <h2>{shownBadges.map((id) => badgeById(id)?.label ?? id).join(" · ")}</h2>
-              {shownBadges.length === 1 && <p>{badgeById(shownBadges[0])?.blurb}</p>}
+              <span className="eyebrow">{shownBadges.length > 1 ? t("Badges") : t("Badge")}</span>
+              <h2>{shownBadges.map((id) => (badgeById(id) ? t(badgeById(id)!.label) : id)).join(" · ")}</h2>
+              {shownBadges.length === 1 && <p>{t(badgeById(shownBadges[0])?.blurb ?? "")}</p>}
             </div>
           )}
         </div>
         {shopOpen && (
-          <div className="shop-overlay" role="dialog" aria-modal="true" aria-label="The shack" ref={shopPanel} tabIndex={-1}>
+          <div className="shop-overlay" role="dialog" aria-modal="true" aria-label={t("The shack")} ref={shopPanel} tabIndex={-1}>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
-              Back to the path
+              {t("Back to the path")}
             </button>
             {error && <p className="warn">{error}</p>}
           </div>

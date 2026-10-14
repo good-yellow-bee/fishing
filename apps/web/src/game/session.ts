@@ -10,6 +10,7 @@ import {
   type Sky,
   type SpotId,
 } from "@stillwater/shared";
+import { t } from "../i18n";
 
 /** One fish from today's outing, as the recap and the field-log trip need it. */
 export type SessionFish = {
@@ -83,9 +84,9 @@ export function sessionSummary(draft: SessionDraft): SessionSummary {
 /** "Dusk at the dock · overcast" */
 export function sessionTitle(draft: SessionDraft): string {
   const summary = sessionSummary(draft);
-  const when = summary.hour ? LAKE_HOUR_LABELS[summary.hour] : "A day";
-  const where = summary.bank ? `at the ${SPOT_LABELS[summary.bank].toLowerCase()}` : "on the lake";
-  return `${when} ${where} · ${SKY_LABELS[draft.sky].toLowerCase()}`;
+  const when = summary.hour ? t(LAKE_HOUR_LABELS[summary.hour]) : t("A day");
+  const where = summary.bank ? t("at the {spot}", { spot: t(SPOT_LABELS[summary.bank]).toLowerCase() }) : t("on the lake");
+  return t("{when} {where} · {sky}", { when, where, sky: t(SKY_LABELS[draft.sky]).toLowerCase() });
 }
 
 function isSessionFish(value: unknown): value is SessionFish {

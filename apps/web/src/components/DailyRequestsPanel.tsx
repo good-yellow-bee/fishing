@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { dailyRequestLabel, localDate } from "@stillwater/shared";
-import { ApiError, claimDailyRequest, getDailyRequests, type DailyBoard } from "../api";
+import { localDate } from "@stillwater/shared";
+import { ApiError, claimDailyRequest, errorText, getDailyRequests, type DailyBoard } from "../api";
+import { t, useT } from "../i18n";
+import { dailyRequestText } from "../i18n/content";
 
 type Props = {
   /** Changes once a catch reaches the server, so progress reloads. */
@@ -9,6 +11,7 @@ type Props = {
 };
 
 export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
+  useT();
   const [board, setBoard] = useState<DailyBoard | null>(null);
   const [claiming, setClaiming] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -34,7 +37,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
       })
       .catch((err: Error) => {
         if (!live) return;
-        setError(err.message);
+        setError(errorText(err.message));
         setLoadFailed(true);
       });
     return () => {
@@ -72,7 +75,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
     } catch (err) {
       // Already paid, from another tab or a claim whose response was lost: settle the row instead.
       if (!(err instanceof ApiError && err.message === "request already claimed")) {
-        setError(err instanceof Error ? err.message : "The request could not be claimed.");
+        setError(err instanceof Error ? errorText(err.message) : t("The request could not be claimed."));
         setClaiming(null);
         return;
       }
@@ -87,7 +90,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
     try {
       await onClaimed();
     } catch {
-      setError("Claimed, but your points could not be refreshed.");
+      setError(t("Claimed, but your points could not be refreshed."));
     }
     setClaiming(null);
   };
@@ -95,36 +98,36 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
   return (
     <section className="daily-requests">
       <div className="panel-heading">
-        <span className="eyebrow">Shack board</span>
-        <h3>Today's requests</h3>
+        <span className="eyebrow">{t("Shack board")}</span>
+        <h3>{t("Today's requests")}</h3>
       </div>
       {board ? (
         <ul>
           {board.requests.map((row) => (
             // A live row reads out "Claimed" once its button is replaced.
             <li key={row.id} data-claimed={row.claimed ? "1" : "0"} aria-live="polite">
-              <span className="daily-request-label">{dailyRequestLabel(row)}</span>
+              <span className="daily-request-label">{dailyRequestText(row)}</span>
               <span className="daily-request-progress" data-done={row.progress >= row.count ? "1" : "0"}>
                 {row.progress}/{row.count}
               </span>
-              <span className="daily-request-reward">+{row.reward} pts</span>
+              <span className="daily-request-reward">{t("+{reward} pts", { reward: row.reward })}</span>
               {row.claimed ? (
-                <span className="daily-request-claimed">Claimed</span>
+                <span className="daily-request-claimed">{t("Claimed")}</span>
               ) : (
                 <button
                   type="button"
-                  aria-label={`Claim ${dailyRequestLabel(row)}`}
+                  aria-label={t("Claim {request}", { request: dailyRequestText(row) })}
                   disabled={row.progress < row.count || claiming !== null}
                   onClick={() => void claim(board.day, row.id)}
                 >
-                  Claim
+                  {t("Claim")}
                 </button>
               )}
             </li>
           ))}
         </ul>
       ) : (
-        !error && <p className="daily-requests-note">Reading the board…</p>
+        !error && <p className="daily-requests-note">{t("Reading the board…")}</p>
       )}
       {error && (
         <p className="warn" role="alert">
@@ -141,7 +144,7 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
             setReload((count) => count + 1);
           }}
         >
-          Read the board again
+          {t("Read the board again")}
         </button>
       )}
     </section>

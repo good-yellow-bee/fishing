@@ -2,8 +2,7 @@ import type { FieldArchive } from "@stillwater/shared";
 import { TACKLE_STORAGE_KEY, saveTackle } from "./gear/storage";
 import { PHOTO_STORAGE_KEY, savePhotos } from "./photoStore";
 import { LOGBOOK_STORAGE_KEY, saveLogbook } from "./storage";
-
-const FIT_REFUSAL = "That file does not fit in this browser, so this book was left as it is.";
+import { t } from "../i18n";
 
 function restore(key: string, raw: string | null) {
   try {
@@ -30,6 +29,6 @@ export function commitFieldArchive(archive: FieldArchive): { ok: true } | { ok: 
     restore(PHOTO_STORAGE_KEY, previous.photos);
     restore(TACKLE_STORAGE_KEY, previous.tackle);
     restore(LOGBOOK_STORAGE_KEY, previous.book);
-    return { ok: false, message: FIT_REFUSAL };
+    return { ok: false, message: t("That file does not fit in this browser, so this book was left as it is.") };
   }
 }

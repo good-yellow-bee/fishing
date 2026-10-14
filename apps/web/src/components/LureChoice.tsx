@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import type { SpotId } from "@stillwater/shared";
 import { lureBlurb, smallLuresFirst } from "../game/lureChoice";
+import { useT } from "../i18n";
 
 type Props = {
   choices: string[];
@@ -13,6 +14,7 @@ type Props = {
 export function LureChoice({ choices, value, spot, locked, onChange }: Props) {
   // Arrow keys and type-ahead change a closed select, so only a pointer pick hands focus back.
   const pointerPick = useRef(false);
+  const t = useT();
   return (
     <label
       className="lure-choice"
@@ -21,9 +23,9 @@ export function LureChoice({ choices, value, spot, locked, onChange }: Props) {
       data-lure={value}
       data-lure-locked={locked ? "1" : "0"}
     >
-      <span>Lure</span>
+      <span>{t("Lure")}</span>
       <select
-        aria-label="Lure"
+        aria-label={t("Lure")}
         value={value}
         disabled={locked}
         onPointerDown={(event) => {
@@ -41,7 +43,7 @@ export function LureChoice({ choices, value, spot, locked, onChange }: Props) {
       >
         {smallLuresFirst(choices).map((label) => (
           <option key={label} value={label}>
-            {label}
+            {t(label)}
           </option>
         ))}
       </select>

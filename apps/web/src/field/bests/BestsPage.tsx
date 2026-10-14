@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
-import { formatMeasure, personalBests, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { personalBests, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
+import { t, useT } from "../../i18n";
+import { measureText } from "../../i18n/content";
 import { fishCountLabel } from "../format";
 import { useLogbook } from "../LogbookState";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
-  if (longest) parts.push(formatMeasure(longest.measure));
-  if (heaviest) parts.push(formatMeasure(heaviest.measure));
+  if (longest) parts.push(measureText(longest.measure));
+  if (heaviest) parts.push(measureText(heaviest.measure));
   return parts.join(" · ");
 }
 
@@ -22,9 +24,10 @@ function LargeFish({
   spotName: string;
   tripTitle: string | null;
 }) {
+  useT();
   return (
     <div>
-      <h3 className="subhead">Large · {label}</h3>
+      <h3 className="subhead">{t("Large · {label}", { label })}</h3>
       <CatchCard entry={entry} spotName={spotName} tripTitle={tripTitle} />
     </div>
   );
@@ -32,77 +35,80 @@ function LargeFish({
 
 export function BestsPage() {
   const { book } = useLogbook();
+  useT();
   const bests = personalBests(book);
-  const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? "Unknown water";
+  const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
   return (
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">Personal bests</p>
-          <h1>Bests</h1>
+          <p className="eyebrow">{t("Personal bests")}</p>
+          <h1>{t("Bests")}</h1>
           <p className="lede">
-            The largest fish in this book, how the species add up, and which waters have given one up.
+            {t("The largest fish in this book, how the species add up, and which waters have given one up.")}
           </p>
         </div>
       </header>
 
-      <section className="stat-row" aria-label="Personal bests">
+      <section className="stat-row" aria-label={t("Personal bests")}>
         <div>
-          <span className="eyebrow">Longest</span>
-          <strong>{bests.longest ? formatMeasure(bests.longest.measure) : "None"}</strong>
-          <small>{bests.longest?.species ?? "No length in the book"}</small>
+          <span className="eyebrow">{t("Longest")}</span>
+          <strong>{bests.longest ? measureText(bests.longest.measure) : t("None")}</strong>
+          <small>{bests.longest ? t(bests.longest.species) : t("No length in the book")}</small>
         </div>
         <div>
-          <span className="eyebrow">Heaviest</span>
-          <strong>{bests.heaviest ? formatMeasure(bests.heaviest.measure) : "None"}</strong>
-          <small>{bests.heaviest?.species ?? "No weight in the book"}</small>
+          <span className="eyebrow">{t("Heaviest")}</span>
+          <strong>{bests.heaviest ? measureText(bests.heaviest.measure) : t("None")}</strong>
+          <small>{bests.heaviest ? t(bests.heaviest.species) : t("No weight in the book")}</small>
         </div>
         <div>
-          <span className="eyebrow">Waters with fish</span>
+          <span className="eyebrow">{t("Waters with fish")}</span>
           <strong>{bests.watersWithFish}</strong>
           <small>
-            {book.spots.length === 0 ? "No waters in the book" : `${bests.watersWithFish} of ${book.spots.length}`}
+            {book.spots.length === 0
+              ? t("No waters in the book")
+              : t("{count} of {total}", { count: bests.watersWithFish, total: book.spots.length })}
           </small>
         </div>
       </section>
 
       {book.catches.length === 0 ? (
-        <p className="empty">Nothing landed in the book yet.</p>
+        <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
         <>
           <section>
             <div className="section-head">
-              <h2>Biggest fish</h2>
+              <h2>{t("Biggest fish")}</h2>
             </div>
             <div className="stack">
               {bests.longest ? (
                 <LargeFish
-                  label="longest"
+                  label={t("longest")}
                   entry={bests.longest}
                   spotName={nameOf(bests.longest.spotId)}
                   tripTitle={titleOf(bests.longest.tripId)}
                 />
               ) : (
-                <p className="empty">No length in the book.</p>
+                <p className="empty">{t("No length in the book.")}</p>
               )}
               {bests.heaviest ? (
                 <LargeFish
-                  label="heaviest"
+                  label={t("heaviest")}
                   entry={bests.heaviest}
                   spotName={nameOf(bests.heaviest.spotId)}
                   tripTitle={titleOf(bests.heaviest.tripId)}
                 />
               ) : (
-                <p className="empty">No weight in the book.</p>
+                <p className="empty">{t("No weight in the book.")}</p>
               )}
             </div>
           </section>
 
           <section>
             <div className="section-head">
-              <h2>By species</h2>
+              <h2>{t("By species")}</h2>
             </div>
             <div className="card-grid">
               {bests.species.map((row) => {
@@ -110,8 +116,8 @@ export function BestsPage() {
                 return (
                   <article key={row.species} className="spot-card">
                     <div className="spot-card-top">
-                      <h2>{row.species}</h2>
-                      {row.large ? <span className="stamp">Large</span> : null}
+                      <h2>{t(row.species)}</h2>
+                      {row.large ? <span className="stamp">{t("Large")}</span> : null}
                     </div>
                     <p className="meta">
                       {fishCountLabel(row.count)}
@@ -125,7 +131,7 @@ export function BestsPage() {
 
           <section>
             <div className="section-head">
-              <h2>Waters with fish</h2>
+              <h2>{t("Waters with fish")}</h2>
             </div>
             <div className="card-grid">
               {bests.waters.map((water) => (
