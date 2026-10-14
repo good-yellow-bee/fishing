@@ -30,6 +30,8 @@ import { Deer } from "./Deer";
 import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
 import { ReedFluff } from "./ReedFluff";
+import { Gusts } from "./Gusts";
+import { gustsOut } from "./gustPatch";
 import { fluffOut } from "./cattailTufts";
 import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
@@ -1898,6 +1900,7 @@ export const LakeWorld = memo(function LakeWorld({
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
+      {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
     </SeasonContext.Provider>
