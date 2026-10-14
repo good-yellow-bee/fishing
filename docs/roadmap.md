@@ -939,6 +939,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BB1~~ | ~~Swallows drawn as two instanced meshes (body, belly and tail baked with vertex colours; wings mirrored per instance): 30 draws to 2, 381 to 353 on a summer day~~ (#215) | performance | S |
 
+## Wave BC — Fewer draws for the swans (added 2026-10-14, after Wave BB shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BC1~~ | ~~Each swan's body and tail baked into one shape, and its neck, head, beak and knob into one vertex-coloured shape (`mergePainted`, now shared with the swallows): 9 draws a swan to 4, 353 to 343 on a summer day~~ (#216) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

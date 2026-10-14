@@ -25,3 +25,24 @@ export function mergeParts(parts: readonly Part[]): THREE.BufferGeometry {
   if (!shape) throw new Error("parts do not share attributes");
   return shape;
 }
+
+export type PaintedPart = Part & { color: THREE.ColorRepresentation };
+
+/**
+ * Parts in different colours baked into one shape: each part's colour goes into a vertex colour attribute,
+ * so they share one material with `vertexColors` (a white base colour) and cost one draw.
+ */
+export function mergePainted(parts: readonly PaintedPart[]): THREE.BufferGeometry {
+  return mergeParts(
+    parts.map(({ color, geometry, ...placement }) => {
+      const tint = new THREE.Color(color);
+      const flat = geometry.index ? geometry.toNonIndexed() : geometry;
+      if (flat !== geometry) geometry.dispose();
+      const count = flat.getAttribute("position").count;
+      const colors = new Float32Array(count * 3);
+      for (let i = 0; i < count; i += 1) colors.set([tint.r, tint.g, tint.b], i * 3);
+      flat.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+      return { ...placement, geometry: flat };
+    }),
+  );
+}
