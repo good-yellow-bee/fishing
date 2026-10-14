@@ -596,6 +596,8 @@ export type PlayTrip = {
   date: string;
   title: string;
   catchIds: readonly string[];
+  /** A line for the trip's notes, such as the season it was fished in. */
+  note?: string;
 };
 
 /**
@@ -606,7 +608,7 @@ export function keepPlayTrip(book: Logbook, trip: PlayTrip): Logbook {
   if (book.trips.some((entry) => entry.id === trip.id)) return book;
   const placed = withPlayLake(book);
   const ids = new Set(trip.catchIds);
-  const kept = withTrip(placed.book, { id: trip.id, date: trip.date, spotId: placed.spotId, title: trip.title, note: "" });
+  const kept = withTrip(placed.book, { id: trip.id, date: trip.date, spotId: placed.spotId, title: trip.title, note: trip.note ?? "" });
   return {
     ...kept,
     catches: kept.catches.map((entry) => (ids.has(entry.id) && entry.tripId === null ? { ...entry, tripId: trip.id } : entry)),

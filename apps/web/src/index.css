@@ -1302,6 +1302,13 @@ kbd {
   border-left: 2px solid var(--amber);
 }
 
+/* The season sits under the hour and sky, quieter. */
+.log-season {
+  display: block;
+  opacity: 0.72;
+  font-size: 0.85em;
+}
+
 .log-fish {
   display: flex;
   align-items: center;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { badgeById, fishById, LAKE_HOUR_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
+import { badgeById, fishById, LAKE_HOUR_LABELS, SEASON_LABELS, SKY_LABELS, SPOT_LABELS } from "@stillwater/shared";
 import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
@@ -101,7 +101,10 @@ export function LogPage() {
                 </td>
                 <td>{lb(row.weight)} lb</td>
                 <td>{t(SPOT_LABELS[row.spot])}</td>
-                <td>{row.hour && row.sky ? `${t(LAKE_HOUR_LABELS[row.hour])} · ${t(SKY_LABELS[row.sky])}` : "—"}</td>
+                <td>
+                  {row.hour && row.sky ? `${t(LAKE_HOUR_LABELS[row.hour])} · ${t(SKY_LABELS[row.sky])}` : "—"}
+                  {row.season && <small className="log-season">{t(SEASON_LABELS[row.season])}</small>}
+                </td>
                 <td>{row.points}</td>
                 <td>{new Date(row.createdAt).toLocaleString(locale())}</td>
               </tr>

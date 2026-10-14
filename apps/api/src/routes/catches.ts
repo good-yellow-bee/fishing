@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
-import { isLakeHour, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
+import { isLakeHour, isLakeSeason, isSky, validateCatch, SPOT_IDS, type CatchSubmission } from "@stillwater/shared";
 import { findCatchByRequestId, getProfile, recordCatch, toProfile, type CatchRow } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -10,7 +10,8 @@ const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 
 function sameCatch(row: CatchRow, body: CatchSubmission) {
   return row.species_id === body.speciesId && row.weight === body.weight && row.spot === body.spot &&
-    row.clean === (body.clean ? 1 : 0) && row.hour === (body.hour ?? null) && row.sky === (body.sky ?? null);
+    row.clean === (body.clean ? 1 : 0) && row.hour === (body.hour ?? null) && row.sky === (body.sky ?? null) &&
+    row.season === (body.season ?? null);
 }
 
 catchRoutes.post("/catches", async (c) => {
@@ -29,7 +30,8 @@ catchRoutes.post("/catches", async (c) => {
     !requestIdPattern.test(body.requestId) ||
     (body.clean !== undefined && typeof body.clean !== "boolean") ||
     (body.hour !== undefined && (typeof body.hour !== "string" || !isLakeHour(body.hour))) ||
-    (body.sky !== undefined && !isSky(body.sky))
+    (body.sky !== undefined && !isSky(body.sky)) ||
+    (body.season !== undefined && !isLakeSeason(body.season))
   ) {
     return c.json({ error: "invalid catch" }, 400);
   }
@@ -55,6 +57,7 @@ catchRoutes.post("/catches", async (c) => {
     clean: body.clean ? 1 : 0,
     hour: body.hour ?? null,
     sky: body.sky ?? null,
+    season: body.season ?? null,
     created_at: new Date().toISOString(),
   };
   const saved = recordCatch(record);

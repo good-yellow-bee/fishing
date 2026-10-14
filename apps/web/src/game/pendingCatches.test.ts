@@ -66,6 +66,13 @@ describe("pending catch submissions", () => {
     expect(() => pendingCatches("angler")).toThrow("could not be read");
   });
 
+  it("keeps the season, and refuses one it does not know", () => {
+    queueCatch("angler", { ...caught, season: "winter" });
+    expect(pendingCatches("angler")).toEqual([{ ...caught, season: "winter" }]);
+    localStorage.setItem("stillwater.pending-catches.angler", JSON.stringify([{ ...caught, season: "monsoon" }]));
+    expect(() => pendingCatches("angler")).toThrow("could not be read");
+  });
+
   it("surfaces corrupt storage without replacing it", () => {
     localStorage.setItem("stillwater.pending-catches.angler", "[{}]");
     expect(() => pendingCatches("angler")).toThrow("could not be read");

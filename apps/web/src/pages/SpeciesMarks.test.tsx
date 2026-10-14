@@ -57,7 +57,7 @@ describe("species marks on the lodge pages", () => {
       level: 1,
       spots: { dock: true, reeds: true, point: true, dropoff: false, inlet: false, open: false },
       catches: ["pike", "catfish", "old-fish"].map((speciesId) => ({
-        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", createdAt: "2026-10-01T00:00:00Z",
+        id: speciesId, userId: "u1", speciesId, weight: 4, points: 1, spot: "dock", hour: "dusk", sky: "clear", season: "fall", createdAt: "2026-10-01T00:00:00Z",
       })),
       speciesStats: [],
       badges: [],

@@ -283,6 +283,7 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Season: {season}": "Pora roku: {season}",
   "Effects set to Lite to keep the lake smooth. Settings can turn them back.": "Efekty przełączone na lekkie, by jezioro działało płynnie. Możesz je przywrócić w Ustawieniach.",
   "{n} points|hud": ["{n} pkt", "{n} pkt", "{n} pkt"],
   "Settings|hud": "Opcje",
