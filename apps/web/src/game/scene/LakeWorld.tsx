@@ -67,6 +67,8 @@ import { Geese } from "./Geese";
 import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
+import { Grebes } from "./Grebes";
+import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
 import { Kingfisher } from "./Kingfisher";
@@ -1983,6 +1985,7 @@ export const LakeWorld = memo(function LakeWorld({
       {geeseOut(hour, sky, season) && <Geese />}
       {swansOut(hour, sky, season) && <Swans />}
       {cormorantOut(hour, season) && <Cormorant />}
+      {grebesOut(hour, sky, season) && <Grebes />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
       <BaskingLog />
       {turtleOut(hour, sky, season) && <Turtle />}

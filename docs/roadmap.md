@@ -792,8 +792,8 @@ Claude picked these; neither bird was on the lake yet. The owner can reorder or 
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~AJ1~~ | ~~A cormorant dries its wings on a rock in the far water and slips in to fish around it~~ (#195) | ambient life | M |
-| AJ2 | In spring, a pair of grebes does its courtship rush across the water, side by side | ambient life | M |
-| AJ3 | Refresh the "New on the lake" card for Wave AJ | onboarding | S |
+| ~~AJ2~~ | ~~In spring, a pair of grebes does its courtship rush across the water, side by side~~ (#196) | ambient life | M |
+| ~~AJ3~~ | ~~Refresh the "New on the lake" card for Wave AJ~~ (#196) | onboarding | S |
 
 ## Risks / open questions for the owner
 
