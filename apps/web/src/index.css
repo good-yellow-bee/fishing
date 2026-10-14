@@ -1973,6 +1973,38 @@ html[data-reduce-motion="1"] .walkthrough li {
   transition: none;
 }
 
+.keys-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.keys-card th {
+  text-align: left;
+  color: #c9b48c;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.keys-card td,
+.keys-card th {
+  padding: 5px 6px 5px 0;
+  border-bottom: 1px solid rgba(215, 190, 142, 0.16);
+  vertical-align: top;
+}
+
+.keys-card kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid rgba(215, 190, 142, 0.45);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .settings-overlay {
   position: absolute;
   inset: 0;
