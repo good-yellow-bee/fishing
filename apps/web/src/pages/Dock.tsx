@@ -82,7 +82,7 @@ import { latestCatchShot, subscribeCatchShot } from "../game/scene/catchPhoto";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
-import { useFishingGame } from "../game/useFishingGame";
+import { touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { oneDecimal, rarityLabel } from "../game/logic";
@@ -807,6 +807,18 @@ export function DockPage() {
             <kbd>A</kbd> {t("cast, strike, reel")}
             <kbd>Y</kbd> {t("shop")}
             <kbd>B</kbd> {t("close")}
+          </aside>
+        ) : touchScreen() ? (
+          <aside className="camera-help" data-camera-control data-touch>
+            <span>{t("Shore")}</span>
+            {prefs.walkStick && (
+              <>
+                <kbd>{t("Stick")}</kbd> {t("or")}{" "}
+              </>
+            )}
+            <kbd>{t("Tap shore")}</kbd> {t("walk")}
+            <kbd>{t("Touch water")}</kbd> {t("aim")}
+            <kbd>{t("Two fingers")}</kbd> {t("look")}
           </aside>
         ) : (
           <aside className="camera-help" data-camera-control>
