@@ -86,10 +86,10 @@ import {
 } from "./landMotion";
 import { clearCatchShot, postCatchShot, snapCanvas } from "./catchPhoto";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
-import { missBobberLift, missLineSag, missView, resetMissView } from "./missMotion";
+import { MISS_DRIPS, missBobberLift, missDrip, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
 import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd, leapLift } from "./fightFish";
-import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, nibbleBob, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
+import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, nibbleBob, nibbleRingGap, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld";
 import { clearDistance, easePull } from "./cameraClear";
 import { PlayerMove } from "./Player";
@@ -974,6 +974,106 @@ function RetrieveWake() {
   );
 }
 
+const NIBBLE_RINGS = 6;
+const NIBBLE_RING_LIFE = 0.9;
+
+/** Small rings spreading from the float with each nibble's tap, so a nibble shows even when the bob is hard to see. */
+function NibbleRings({ nibble, weight }: { nibble: boolean; weight: number }) {
+  const rings = useMemo(() => {
+    const geometry = new THREE.RingGeometry(0.22, 0.3, 24);
+    return Array.from({ length: NIBBLE_RINGS }, () => {
+      const material = new THREE.MeshBasicMaterial({ color: 0xeef8f2, transparent: true, opacity: 0, depthWrite: false });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.renderOrder = 3;
+      mesh.visible = false;
+      mesh.userData.born = -1;
+      return mesh;
+    });
+  }, []);
+  const cursor = useRef(0);
+  const lastRing = useRef(-Infinity);
+
+  useEffect(() => {
+    return () => {
+      rings[0]?.geometry.dispose();
+      rings.forEach((ring) => (ring.material as THREE.Material).dispose());
+    };
+  }, [rings]);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    if (nibble && time - lastRing.current >= nibbleRingGap(weight)) {
+      lastRing.current = time;
+      const ring = rings[cursor.current % rings.length]!;
+      cursor.current += 1;
+      ring.userData.born = time;
+      ring.userData.x = bobberWorld.x;
+      ring.userData.z = bobberWorld.z;
+    }
+    rings.forEach((ring) => {
+      const born = ring.userData.born as number;
+      const age = time - born;
+      if (born < 0 || age > NIBBLE_RING_LIFE) {
+        ring.visible = false;
+        return;
+      }
+      const x = ring.userData.x as number;
+      const z = ring.userData.z as number;
+      const u = age / NIBBLE_RING_LIFE;
+      ring.visible = true;
+      ring.position.set(x, waterHeight(x, z, time) + 0.04, z);
+      ring.scale.setScalar(0.7 + u * 2.2);
+      (ring.material as THREE.MeshBasicMaterial).opacity = (1 - u) * (1 - u) * 0.7;
+    });
+  });
+
+  return (
+    <group>
+      {rings.map((ring, i) => (
+        <primitive key={i} object={ring} />
+      ))}
+    </group>
+  );
+}
+
+/** Water shaken off the bobber as it pops clear on a missed strike. */
+function MissDrips() {
+  const pool = useMemo(() => {
+    const geometry = new THREE.SphereGeometry(0.022, 5, 4);
+    const material = new THREE.MeshBasicMaterial({ color: 0xe8f6f4, transparent: true, opacity: 0.85, depthWrite: false });
+    const holder = new THREE.Group();
+    for (let i = 0; i < MISS_DRIPS; i += 1) {
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.visible = false;
+      holder.add(mesh);
+    }
+    return holder;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      const first = pool.children[0] as THREE.Mesh;
+      first.geometry.dispose();
+      (first.material as THREE.Material).dispose();
+    };
+  }, [pool]);
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime;
+    pool.children.forEach((child, i) => {
+      const drop = missView.active ? missDrip(i, missView.age, missView.fromPlunge) : null;
+      child.visible = !!drop;
+      if (!drop) return;
+      const x = missView.x + drop.x;
+      const z = missView.z + drop.z;
+      child.position.set(x, waterHeight(x, z, time) + drop.y, z);
+    });
+  });
+
+  return <primitive object={pool} />;
+}
+
 const RETRIEVE_DROPS = 8;
 
 function RetrieveSplash() {
@@ -1569,6 +1669,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
         <EntrySpray burstRef={entryBurst} />
       </group>
       {phase === "fight" && <RetrieveWake />}
+      {phase === "waiting" && <NibbleRings nibble={nibble} weight={weight} />}
+      {phase === "result" && <MissDrips />}
       {phase === "fight" && <RetrieveSplash />}
       <mesh ref={sitRing} visible={false} rotation={[-Math.PI / 2, 0, 0]} renderOrder={3}>
         <ringGeometry args={[0.4, 0.55, 32]} />

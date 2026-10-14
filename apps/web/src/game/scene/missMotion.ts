@@ -88,3 +88,29 @@ export function missBobberLift(age: number, fromPlunge: number) {
   const ring = Math.sin((u / 0.28) * Math.PI * 2) * 0.09 * damp;
   return settle + ring;
 }
+
+/** Drops shaken off the bobber as it pops clear on a miss. */
+export const MISS_DRIPS = 6;
+const DRIP_FIRST = 0.1;
+const DRIP_GAP = 0.06;
+const DRIP_GRAVITY = 9.8;
+
+function dripUnit(i: number, salt: number) {
+  const s = Math.sin(i * 51.3 + salt * 9.7) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/**
+ * Drop `i` at `age` into the miss, as metres off the float's spot and height
+ * above it, or null before it lets go and once it is back in the water.
+ */
+export function missDrip(i: number, age: number, fromPlunge: number) {
+  const release = DRIP_FIRST + i * DRIP_GAP;
+  if (age < release) return null;
+  const fall = age - release;
+  const y = 0.07 + missBobberLift(release, fromPlunge) - 0.5 * DRIP_GRAVITY * fall * fall;
+  if (y <= 0) return null;
+  const spread = 0.03 + fall * 0.25;
+  return { x: (dripUnit(i, 1) - 0.5) * spread, y, z: (dripUnit(i, 2) - 0.5) * spread };
+}
+

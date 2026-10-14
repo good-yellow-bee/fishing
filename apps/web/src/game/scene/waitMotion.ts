@@ -151,6 +151,12 @@ export function nibbleBob(time: number, weight: number) {
   return -depth + Math.sin(time * rate) * swing;
 }
 
+/** Seconds between the rings a nibbling fish sends out from the float: one every other tap, so a big slow fish rings less often. */
+export function nibbleRingGap(weight: number) {
+  const rate = 30 - nibbleHeft(weight) * 18;
+  return (2 * 2 * Math.PI) / rate;
+}
+
 /** How far a nibble dips and shivers the rod tip, radians of pitch. */
 export const NIBBLE_DIP = 0.035;
 export const NIBBLE_SHIVER = 0.022;

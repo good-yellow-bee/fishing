@@ -678,10 +678,10 @@ Claude picked these after Wave Z, turning back from scenery to the fishing itsel
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AA1 | A held fish flaps in the angler's hands on the catch card pose | landing | S/M |
-| AA2 | Line hum: the reel's drag pitch rises with tension in a fight | sound | S |
-| AA3 | Water drips from the line and lure as you reel in a miss | reel | S |
-| AA4 | A ring of ripples where the float sits pulses on each nibble | bite | S |
+| ~~AA1~~ | ~~A held fish flaps in the angler's hands on the catch card pose~~ (dropped: already there) | landing | S/M |
+| ~~AA2~~ | ~~Line hum: the reel's drag pitch rises with tension in a fight~~ (dropped: already there) | sound | S |
+| ~~AA3~~ | ~~Water drips from the line and lure as you reel in a miss~~ (#180) | reel | S |
+| ~~AA4~~ | ~~A ring of ripples where the float sits pulses on each nibble~~ (#180) | bite | S |
 | AA5 | Refresh the "New on the lake" card for Wave AA | onboarding | S |
 
 - **AA1 · A lively catch.** When a fish is landed and held up, it flaps its tail a few times before going still.
