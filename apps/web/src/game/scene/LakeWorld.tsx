@@ -40,7 +40,7 @@ import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { useSettings } from "../settings";
 import { BOAT_DECK, boat, boatPathPoint } from "./boat";
 import { CREEK_BANK, CREEK_HALF_WIDTH, CREEK_ROCKS, creekRibbon, nearCreek } from "./creek";
-import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, waterShoreWeight } from "./water";
+import { bedColor, bedHeight, causticStrength, glitterDirection, glitterOnWater, waterDepthColor, waterHeight, waterHeightWithShoreWeight, surfaceScroll, waterShoreWeight } from "./water";
 
 type Vec3 = [number, number, number];
 
@@ -869,7 +869,7 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
-function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; weather: WeatherLook }) {
+function LakeSurface({ spot, hour, weather, wind }: { spot: SpotId; hour: LakeHour; weather: WeatherLook; wind: { x: number; z: number } }) {
   const material = useRef<THREE.MeshToonMaterial>(null);
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
@@ -890,6 +890,7 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
   rimColor.value.set(weather.sky[1]);
   const withRim = useMemo(() => (shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }) => addWaterRim(shader, rimColor), [rimColor]);
   const causticLight = weather.glint * 0.22;
+  const scroll = surfaceScroll(wind);
 
   useEffect(() => {
     return () => {
@@ -907,10 +908,11 @@ function LakeSurface({ spot, hour, weather }: { spot: SpotId; hour: LakeHour; we
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     displaceWater(geometry, t);
-    waterMap.offset.x += delta * 0.014;
-    waterMap.offset.y += delta * 0.008;
-    detailMap.offset.x -= delta * 0.006;
-    detailMap.offset.y += delta * 0.004;
+    // The streaks and dapple run downwind, faster on a windier day.
+    waterMap.offset.x += delta * scroll.streak.x;
+    waterMap.offset.y += delta * scroll.streak.y;
+    detailMap.offset.x += delta * scroll.detail.x;
+    detailMap.offset.y += delta * scroll.detail.y;
     // Two nets drifting across each other, so the light shifts instead of sliding.
     causticA.offset.x += delta * 0.045;
     causticA.offset.y += delta * 0.02;
@@ -1575,6 +1577,8 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
   ));
 }
 
+const CALM = { x: 0, z: 0 };
+
 export const LakeWorld = memo(function LakeWorld({
   spot,
   hour,
@@ -1582,6 +1586,7 @@ export const LakeWorld = memo(function LakeWorld({
   season = "summer",
   hotspot,
   moon = 0.5,
+  wind = CALM,
 }: {
   spot: SpotId;
   hour: LakeHour;
@@ -1590,6 +1595,8 @@ export const LakeWorld = memo(function LakeWorld({
   hotspot: Hotspot | null;
   /** The real moon's phase, 0 new to 0.5 full to 1 new again. */
   moon?: number;
+  /** The day's wind, meters a second toward world x and z. */
+  wind?: { x: number; z: number };
 }) {
   const look = LAKE_HOUR_LOOK[hour];
   const weather = useMemo(() => weatherLook(hour, sky, moonLight(moon)), [hour, sky, moon]);
@@ -1647,7 +1654,7 @@ export const LakeWorld = memo(function LakeWorld({
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
-      <LakeSurface spot={spot} hour={hour} weather={weather} />
+      <LakeSurface spot={spot} hour={hour} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
