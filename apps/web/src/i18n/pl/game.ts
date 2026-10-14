@@ -24,6 +24,8 @@ export const PL_GAME: PlBook = {
   "Geese honk overhead": "Gęsi gęgają nad głową",
   "A beaver slaps its tail": "Bóbr klepie ogonem o wodę",
   "A swan hisses": "Łabędź syczy",
+  "In photo mode, drag to look around and pinch, scroll or press + and − to zoom before you save.":
+    "W trybie zdjęcia przeciągnij, by się rozejrzeć, a uszczypnij, przewiń albo naciśnij + i −, by przybliżyć przed zapisem.",
   "Photo mode (H) can now save the view: press P or Space, or tap Save this view, and the lake is saved as a picture.":
     "Tryb zdjęcia (H) zapisuje teraz widok: naciśnij P albo spację, albo stuknij Zapisz ten widok, a jezioro zapisze się jako zdjęcie.",
   "On a touch screen, a thumb stick at the bottom corner walks the angler. Settings can hide it.": "Na ekranie dotykowym gałka w dolnym rogu prowadzi wędkarza. W Ustawieniach można ją ukryć.",
@@ -379,8 +381,9 @@ export const PL_GAME: PlBook = {
   "Fish whisperer": "Zaklinacz ryb",
   "Lake master": "Mistrz jeziora",
   "Lake legend": "Legenda jeziora",
-  "Photo mode. Press P or Space to save a picture, H or tap to bring the panels back.":
-    "Tryb zdjęcia. Naciśnij P albo spację, by zapisać zdjęcie, H albo stuknij, by przywrócić panele.",
+  "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
+    "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
+  "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Picture saved": "Zdjęcie zapisane",
   "The picture could not be saved": "Nie udało się zapisać zdjęcia",

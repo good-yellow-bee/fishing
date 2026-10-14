@@ -88,6 +88,7 @@ import {
 } from "./landMotion";
 import { clearCatchShot, postCatchShot, snapCanvas } from "./catchPhoto";
 import { lakeShotWanted, takeLakeShot } from "./lakeShot";
+import { PHOTO_LIMITS, lookedOffset, lookIdle, takeLook } from "./photoLook";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { MISS_DRIPS, missBobberLift, missDrip, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
@@ -389,6 +390,13 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       desired.z += (holdScratch.z - desired.z) * landing;
     }
 
+    // Photo mode's drags and pinches, spent before OrbitControls settles the frame.
+    const look = takeLook();
+    if (!fighting && !lookIdle(look)) {
+      const turned = lookedOffset(camera.position.clone().sub(orbit.target), look);
+      camera.position.set(orbit.target.x + turned.x, orbit.target.y + turned.y, orbit.target.z + turned.z);
+    }
+
     if (fighting) {
       if (!wasFight.current) {
         wasFight.current = true;
@@ -476,10 +484,10 @@ function CameraRig({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       enableDamping
       dampingFactor={0.14}
       enablePan={false}
-      minDistance={3.4}
-      maxDistance={15}
-      minPolarAngle={0.48}
-      maxPolarAngle={1.38}
+      minDistance={PHOTO_LIMITS.minDistance}
+      maxDistance={PHOTO_LIMITS.maxDistance}
+      minPolarAngle={PHOTO_LIMITS.minPolar}
+      maxPolarAngle={PHOTO_LIMITS.maxPolar}
       mouseButtons={{ LEFT: -1 as THREE.MOUSE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.ROTATE }}
       touches={{ ONE: -1 as THREE.TOUCH, TWO: THREE.TOUCH.DOLLY_ROTATE }}
     />
