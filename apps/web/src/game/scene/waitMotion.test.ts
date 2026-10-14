@@ -9,7 +9,10 @@ import {
   applyWaitShift,
   windWalk,
   WIND_WALK_SEC,
+  NIBBLE_DIP,
+  NIBBLE_SHIVER,
   lureIsWaiting,
+  nibbleShiver,
   waitBodyLean,
   waitDrift,
   waitLineSag,
@@ -142,3 +145,17 @@ describe("wind on a sitting float", () => {
   });
 });
 
+describe("nibble on the rod tip", () => {
+  it("dips the tip and shivers it quickly, within a small range", () => {
+    let low = Infinity;
+    let high = -Infinity;
+    for (let t = 0; t < 2; t += 0.005) {
+      const pitch = nibbleShiver(t);
+      low = Math.min(low, pitch);
+      high = Math.max(high, pitch);
+    }
+    expect(low).toBeGreaterThanOrEqual(NIBBLE_DIP - NIBBLE_SHIVER - 1e-9);
+    expect(high).toBeLessThanOrEqual(NIBBLE_DIP + NIBBLE_SHIVER + 1e-9);
+    expect(high - low).toBeGreaterThan(NIBBLE_SHIVER);
+  });
+});

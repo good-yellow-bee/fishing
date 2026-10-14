@@ -15,7 +15,7 @@ import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } fr
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
 import { anglerPose, shortestYaw } from "./pose";
-import { waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
+import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
 import { capSnow } from "./capSnow";
 import { applyToon, disposeMaterials, toonRamp } from "./toon";
@@ -32,6 +32,8 @@ type Props = {
   lookAt: THREE.Vector3;
   /** Snow is falling, so it settles on the cap and shoulders. */
   snowfall?: boolean;
+  /** A fish is nibbling, so the rod tip shivers. */
+  nibble?: boolean;
 };
 
 useGLTF.preload("/models/character-male-c.glb");
@@ -70,7 +72,7 @@ function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
   return "idle";
 }
 
-export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false }: Props) {
+export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -219,9 +221,10 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false }: Pr
         : whipping
           ? thrownRodPitch(power, throwAge, whipFrom.current)
           : sitting
-            ? waitRodPitch(waitView.age)
+            ? waitRodPitch(waitView.age) + (nibble ? nibbleShiver(t) : 0)
             : swing(phase, power, t);
-      if (whipping || twitching) rodPitch.current = rodTarget;
+      // A nibble's shiver is too quick to smooth; it goes straight to the tip.
+      if (whipping || twitching || (sitting && nibble)) rodPitch.current = rodTarget;
       else {
         const follow = phase === "casting" ? 7 : 16;
         rodPitch.current += (rodTarget - rodPitch.current) * (1 - Math.exp(-follow * delta));
