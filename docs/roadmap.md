@@ -850,6 +850,15 @@ Claude picked this: on a phone a downloaded PNG lands in Files (or Downloads), w
 |---|---|---|---|
 | ~~AP1~~ | ~~On a touch screen that can share files, the lake picture and the catch card open the share sheet (Save Image puts them in the photos); a refused sheet falls back to the download~~ (#203) | photo mode | S |
 
+## Wave AQ — Frame the shot in photo mode (added 2026-10-14, after Wave AP shipped)
+
+Claude picked this: photo mode's overlay covered the canvas, so the view could not be turned once the panels were hidden.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AQ1~~ | ~~In photo mode, drag to turn the view, pinch or scroll to zoom, arrows and + − on a keyboard; only a still tap brings the panels back~~ (#204) | photo mode | S |
+| ~~AQ2~~ | ~~The keys card and the news card mention it~~ (#204) | onboarding | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

@@ -89,6 +89,8 @@ import { oneDecimal, rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
+import { lookDrag, lookZoom } from "../game/scene/photoLook";
+import { PHOTO_KEY_TURNS, usePhotoDrag } from "../game/usePhotoDrag";
 import { bestBeatText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
@@ -356,6 +358,7 @@ export function DockPage() {
         () => setPictureNote((note) => ({ seq: (note?.seq ?? 0) + 1, saved: false })),
       );
   }, []);
+  const photoDrag = usePhotoDrag();
   useEffect(() => {
     if (!photo) setPictureNote(null);
   }, [photo]);
@@ -368,6 +371,10 @@ export function DockPage() {
         event.preventDefault();
         if ((event.code === "KeyH" || event.code === "Escape") && !event.repeat) setPhoto(false);
         if ((event.code === "Space" || event.code === "KeyP" || event.code === "Enter") && !event.repeat) saveLakePicture();
+        const turn = PHOTO_KEY_TURNS[event.code];
+        if (turn) lookDrag(turn[0], turn[1]);
+        if (event.code === "Equal" || event.code === "NumpadAdd") lookZoom(0.9);
+        if (event.code === "Minus" || event.code === "NumpadSubtract") lookZoom(1 / 0.9);
         return;
       }
       if (event.code !== "KeyH" || event.repeat || !photoAllowed || settingsOpen || keysOpen) return;
@@ -596,8 +603,8 @@ export function DockPage() {
   return (
     <div className="dock-page" data-photo={photo ? "1" : undefined}>
       {photo && (
-        <button className="photo-exit" type="button" onClick={() => setPhoto(false)}>
-          <span>{t("Photo mode. Press P or Space to save a picture, H or tap to bring the panels back.")}</span>
+        <button className="photo-exit" type="button" {...photoDrag.handlers} onClick={() => photoDrag.tapped() && setPhoto(false)}>
+          <span>{t("Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.")}</span>
         </button>
       )}
       {photo && (

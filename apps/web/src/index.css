@@ -150,7 +150,12 @@ a {
   padding: 0 16px 28px;
   border: 0;
   background: transparent;
-  cursor: pointer;
+  cursor: grab;
+  touch-action: none;
+}
+
+.photo-exit:active {
+  cursor: grabbing;
 }
 
 .photo-exit span {

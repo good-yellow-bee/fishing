@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14w";
+export const NEWS_ID = "2026-10-14x";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
   "Photo mode (H) can now save the view: press P or Space, or tap Save this view, and the lake is saved as a picture.",
+  "In photo mode, drag to look around and pinch, scroll or press + and − to zoom before you save.",
   "On a touch screen, a thumb stick at the bottom corner walks the angler. Settings can hide it.",
   "In spring and summer, terns circle and dive over the bubbling fish patch, so you can spot it from across the lake.",
   "A cormorant stands on a rock out in the lake drying its wings, and slips in now and then to fish.",
