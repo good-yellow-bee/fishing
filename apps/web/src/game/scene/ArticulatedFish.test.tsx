@@ -43,7 +43,7 @@ afterEach(() => {
 describe("ArticulatedFish", () => {
   it("draws each hooked part as a depth prepass on the coat's shader program, then one coat over the nearest surface", async () => {
     const meshes = await fishMeshes(true);
-    expect(meshes).toHaveLength(22);
+    expect(meshes).toHaveLength(14);
     for (let i = 0; i < meshes.length; i += 2) {
       const [prepass, coat] = [meshes[i], meshes[i + 1]];
       const depth = prepass.material as THREE.MeshBasicMaterial;
@@ -62,10 +62,10 @@ describe("ArticulatedFish", () => {
     }
   });
 
-  it("keeps the lit fish as single opaque toon meshes with body shadows", async () => {
+  it("keeps the lit fish as a few opaque toon meshes, parts that share a colour baked together, with body shadows", async () => {
     const meshes = await fishMeshes(false);
-    expect(meshes).toHaveLength(11);
+    expect(meshes).toHaveLength(7);
     expect(meshes.every((mesh) => mesh.renderOrder === 0 && !(mesh.material as THREE.Material).transparent)).toBe(true);
-    expect(meshes.filter((mesh) => mesh.castShadow)).toHaveLength(4);
+    expect(meshes.filter((mesh) => mesh.castShadow)).toHaveLength(3);
   });
 });

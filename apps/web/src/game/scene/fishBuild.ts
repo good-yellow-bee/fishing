@@ -43,9 +43,18 @@ const BUILDS: Record<string, Partial<FishBuild>> = {
   "ghost-pike": { marks: "flecks", length: 1.5, depth: 0.75, width: 0.8, snout: 1.5, dorsal: 0.7 },
 };
 
+const built = new Map<string, FishBuild>();
+
+/** The same object for a species every time, so a fish's baked shapes are only made once per species. */
 export function fishBuild(speciesId: string | undefined): FishBuild {
   const own = speciesId ? BUILDS[speciesId] : undefined;
-  return own ? { ...PLAIN_BUILD, ...own } : PLAIN_BUILD;
+  if (!own || !speciesId) return PLAIN_BUILD;
+  let build = built.get(speciesId);
+  if (!build) {
+    build = { ...PLAIN_BUILD, ...own };
+    built.set(speciesId, build);
+  }
+  return build;
 }
 
 /** The main body, as ArticulatedFish draws it: an ellipsoid centred here, with these half-axes. */

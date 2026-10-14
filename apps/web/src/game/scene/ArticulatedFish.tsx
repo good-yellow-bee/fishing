@@ -1,7 +1,8 @@
-import { type ReactElement, useLayoutEffect, useMemo, useRef } from "react";
+import { type ReactElement, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
 import { markPlacements, PLAIN_BUILD, type FishBuild, type Mark } from "./fishBuild";
+import { mergeParts, type Part } from "./mergeParts";
 import { toonRamp } from "./toon";
 
 export type FishDrive = { intensity: number; speed: number };
@@ -119,6 +120,53 @@ function FishMarks({ marks, color, unlit }: { marks: Mark[]; color: string; unli
   );
 }
 
+/**
+ * The parts of a fish that share a colour and never move apart, each baked into one shape, so a fish is a
+ * handful of draws instead of one per part. The middle and tail stay separate since they swing.
+ */
+function fishShapes(build: FishBuild) {
+  // A longer snout reaches forward from the same neck; the eyes ride a little way with it, the whiskers to its tip.
+  const headZ = 0.72 + (build.snout - 1) * 0.18;
+  const eyeZ = 0.93 + (build.snout - 1) * 0.12;
+  const mouthZ = headZ + 0.3 * build.snout;
+  const backFins: Part[] = [{ geometry: new THREE.SphereGeometry(0.32, 7, 4), position: [0, 0.27, -0.02], rotation: [0.2, 0, 0], scale: [0.5, 0.08, 0.48] }];
+  // A raised fin along the back: a tall sail on panfish and walleye, set low on pike.
+  if (build.dorsal !== 1) {
+    backFins.push({ geometry: new THREE.SphereGeometry(0.5, 7, 5), position: [0, 0.26 + 0.05 * build.dorsal, -0.05], rotation: [0.12, 0, 0], scale: [0.04, 0.15 * build.dorsal, 0.8] });
+  }
+  const barbels = BARBELS[build.barbels];
+  return {
+    body: mergeParts([
+      { geometry: new THREE.SphereGeometry(0.42, 12, 8), position: [0, 0, 0.1], scale: [1, 0.78, 1.65] },
+      { geometry: new THREE.SphereGeometry(0.36, 12, 8), position: [0, 0.02, headZ], scale: [0.9, 0.8, build.snout] },
+    ]),
+    eyes: mergeParts([
+      { geometry: new THREE.SphereGeometry(0.045, 7, 5), position: [0.17, 0.17, eyeZ] },
+      { geometry: new THREE.SphereGeometry(0.045, 7, 5), position: [-0.17, 0.17, eyeZ] },
+    ]),
+    backFins: mergeParts(backFins),
+    barbels:
+      barbels.length > 0
+        ? mergeParts(
+            barbels.map((barbel) => ({
+              geometry: new THREE.ConeGeometry(0.018, 0.3, 4),
+              position: [barbel.x, barbel.y, mouthZ] as const,
+              rotation: [Math.PI / 2 + 0.5, barbel.yaw, 0] as const,
+              scale: [1, barbel.length / 0.3, 1] as const,
+            })),
+          )
+        : null,
+    tailFins: mergeParts([
+      { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [0.23, 0, -0.34], rotation: [0, -0.55, 0], scale: [0.5, 0.08, 0.42] },
+      { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [-0.23, 0, -0.34], rotation: [0, 0.55, 0], scale: [0.5, 0.08, 0.42] },
+    ]),
+    sideFins: mergeParts([
+      { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [0.38, -0.02, 0.03], rotation: [0, -0.35, 0], scale: [0.34, 0.06, 0.25] },
+      { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [-0.38, -0.02, 0.03], rotation: [0, 0.35, 0], scale: [0.34, 0.06, 0.25] },
+    ]),
+  };
+}
+
 export function ArticulatedFish({
   color = "#c97945",
   accent = "#e9bc72",
@@ -140,45 +188,27 @@ export function ArticulatedFish({
     if (tail.current) tail.current.rotation.y = Math.sin(wave - 0.8) * 0.46 * amp;
   });
 
-  // A longer snout reaches forward from the same neck; the eyes ride a little way with it, the whiskers to its tip.
-  const headZ = 0.72 + (build.snout - 1) * 0.18;
-  const eyeZ = 0.93 + (build.snout - 1) * 0.12;
-  const mouthZ = headZ + 0.3 * build.snout;
   const marks = useMemo(() => markPlacements(build.marks), [build.marks]);
+
+  const shapes = useMemo(() => fishShapes(build), [build]);
+  useEffect(() => () => Object.values(shapes).forEach((shape) => shape?.dispose()), [shapes]);
+  const baked = (shape: THREE.BufferGeometry) => <primitive object={shape} attach="geometry" />;
 
   return (
     <group scale={[build.width, build.depth, build.length]}>
-      <FishMesh position={[0, 0, 0.1]} scale={[1, 0.78, 1.65]} castShadow unlit={unlit} shape={<sphereGeometry args={[0.42, 12, 8]} />} material={<FishMaterial color={color} unlit={unlit} />} />
-      <FishMesh position={[0, 0.02, headZ]} scale={[0.9, 0.8, build.snout]} castShadow unlit={unlit} shape={<sphereGeometry args={[0.36, 12, 8]} />} material={<FishMaterial color={color} unlit={unlit} />} />
-      <FishMesh position={[0.17, 0.17, eyeZ]} unlit={unlit} shape={<sphereGeometry args={[0.045, 7, 5]} />} material={<meshBasicMaterial {...(unlit ? fightCoat("#101719") : { color: "#101719" })} />} />
-      <FishMesh position={[-0.17, 0.17, eyeZ]} unlit={unlit} shape={<sphereGeometry args={[0.045, 7, 5]} />} material={<meshBasicMaterial {...(unlit ? fightCoat("#101719") : { color: "#101719" })} />} />
-      <FishMesh position={[0, 0.27, -0.02]} rotation={[0.2, 0, 0]} scale={[0.5, 0.08, 0.48]} unlit={unlit} shape={<sphereGeometry args={[0.32, 7, 4]} />} material={<FishMaterial color="#465754" unlit={unlit} />} />
-      {build.dorsal !== 1 && (
-        // A raised fin along the back: a tall sail on panfish and walleye, set low on pike.
-        <FishMesh position={[0, 0.26 + 0.05 * build.dorsal, -0.05]} rotation={[0.12, 0, 0]} scale={[0.04, 0.15 * build.dorsal, 0.8]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 5]} />} material={<FishMaterial color="#465754" unlit={unlit} />} />
-      )}
+      <FishMesh castShadow unlit={unlit} shape={baked(shapes.body)} material={<FishMaterial color={color} unlit={unlit} />} />
+      <FishMesh unlit={unlit} shape={baked(shapes.eyes)} material={<meshBasicMaterial {...(unlit ? fightCoat("#101719") : { color: "#101719" })} />} />
+      <FishMesh unlit={unlit} shape={baked(shapes.backFins)} material={<FishMaterial color="#465754" unlit={unlit} />} />
       {marks.length > 0 && <FishMarks marks={marks} color={build.marks === "flecks" ? PALE_MARK : DARK_MARK} unlit={unlit} />}
-      {BARBELS[build.barbels].map((barbel, i) => (
-        <FishMesh
-          key={i}
-          position={[barbel.x, barbel.y, mouthZ]}
-          rotation={[Math.PI / 2 + 0.5, barbel.yaw, 0]}
-          scale={[1, barbel.length / 0.3, 1]}
-          unlit={unlit}
-          shape={<coneGeometry args={[0.018, 0.3, 4]} />}
-          material={<FishMaterial color="#3a332c" unlit={unlit} />}
-        />
-      ))}
+      {shapes.barbels && <FishMesh unlit={unlit} shape={baked(shapes.barbels)} material={<FishMaterial color="#3a332c" unlit={unlit} />} />}
       <group ref={middle} position={[0, 0, -0.45]}>
         <FishMesh position={[0, 0, -0.15]} scale={[0.85, 0.75, 1]} castShadow unlit={unlit} shape={<sphereGeometry args={[0.34, 10, 7]} />} material={<FishMaterial color={color} unlit={unlit} />} />
         <group ref={tail} position={[0, 0, -0.4]}>
           <FishMesh position={[0, 0, -0.14]} rotation={[Math.PI / 2, 0, 0]} castShadow unlit={unlit} shape={<coneGeometry args={[0.2, 0.5, 7]} />} material={<FishMaterial color={color} unlit={unlit} />} />
-          <FishMesh position={[0.23, 0, -0.34]} rotation={[0, -0.55, 0]} scale={[0.5, 0.08, 0.42]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 4]} />} material={<FishMaterial color={accent} unlit={unlit} />} />
-          <FishMesh position={[-0.23, 0, -0.34]} rotation={[0, 0.55, 0]} scale={[0.5, 0.08, 0.42]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 4]} />} material={<FishMaterial color={accent} unlit={unlit} />} />
+          <FishMesh unlit={unlit} shape={baked(shapes.tailFins)} material={<FishMaterial color={accent} unlit={unlit} />} />
         </group>
       </group>
-      <FishMesh position={[0.38, -0.02, 0.03]} rotation={[0, -0.35, 0]} scale={[0.34, 0.06, 0.25]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 4]} />} material={<FishMaterial color={accent} unlit={unlit} />} />
-      <FishMesh position={[-0.38, -0.02, 0.03]} rotation={[0, 0.35, 0]} scale={[0.34, 0.06, 0.25]} unlit={unlit} shape={<sphereGeometry args={[0.5, 7, 4]} />} material={<FishMaterial color={accent} unlit={unlit} />} />
+      <FishMesh unlit={unlit} shape={baked(shapes.sideFins)} material={<FishMaterial color={accent} unlit={unlit} />} />
     </group>
   );
 }
