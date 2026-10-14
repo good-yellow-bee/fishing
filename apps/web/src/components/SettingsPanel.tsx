@@ -14,7 +14,8 @@ function Choices<K extends keyof Settings>({ name, legend, options }: { name: K;
             type="radio"
             name={name}
             checked={current === option.value}
-            onChange={() => updateSettings({ [name]: option.value } as Partial<Settings>)}
+            // Picking effects by hand stops them stepping down on their own.
+            onChange={() => updateSettings({ [name]: option.value, ...(name === "particles" ? { autoEffects: false } : {}) } as Partial<Settings>)}
           />
           {option.label}
         </label>

@@ -322,7 +322,7 @@ Claude picked these to build on the seasons; the owner can reorder or drop any.
 | G2 | Season on each catch + a Four seasons badge | progression | M |
 | G3 | ~~Daily requests ask for in-season fish~~ (shipped) | retention | S |
 | G4 | Keep the camera out of hills and trees | camera | M |
-| G5 | Auto quality: step down to Lite effects when frames sag | perf | S/M |
+| G5 | ~~Auto quality: step down to Lite effects when frames sag~~ (shipped) | perf | S/M |
 
 - **G1 · Seasonal ambience.** Geese pass over on fall days; winter swaps crickets and loons for a chickadee by day, quiet nights and a wind loop. `ambientProfile(hour, sky, season)` in `fx.ts`.
 - **G2 · Season on each catch.** Store the season with hour and sky (P11) and add a badge for landing a fish in all four; the field log trip notes the season.
