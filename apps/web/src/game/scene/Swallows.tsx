@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
 import { SWALLOW_COUNT, swallowAt } from "./swallowFlight";
-import { mergeParts } from "./mergeParts";
+import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 
 const BACK = "#22305a";
@@ -44,20 +44,10 @@ function makeTail() {
 
 /** A bird's body, belly and tail baked into one shape, coloured per vertex so all of them share one draw. */
 export function swallowBody() {
-  const tinted = (geometry: THREE.BufferGeometry, hex: string) => {
-    const color = new THREE.Color(hex);
-    const flat = geometry.index ? geometry.toNonIndexed() : geometry;
-    if (flat !== geometry) geometry.dispose();
-    const count = flat.getAttribute("position").count;
-    const colors = new Float32Array(count * 3);
-    for (let i = 0; i < count; i += 1) colors.set([color.r, color.g, color.b], i * 3);
-    flat.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    return flat;
-  };
-  return mergeParts([
-    { geometry: tinted(new THREE.SphereGeometry(1, 8, 6), BACK), scale: [0.022, 0.02, 0.06] },
-    { geometry: tinted(new THREE.SphereGeometry(1, 8, 6), BELLY), position: [0, -0.006, 0.005], scale: [0.018, 0.015, 0.045] },
-    { geometry: tinted(makeTail(), BACK), position: [0, 0, -0.045] },
+  return mergePainted([
+    { geometry: new THREE.SphereGeometry(1, 8, 6), scale: [0.022, 0.02, 0.06], color: BACK },
+    { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0, -0.006, 0.005], scale: [0.018, 0.015, 0.045], color: BELLY },
+    { geometry: makeTail(), position: [0, 0, -0.045], color: BACK },
   ]);
 }
 
