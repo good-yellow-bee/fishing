@@ -41,8 +41,8 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P18 | ~~Five new species + the Inlet bank~~ (shipped) | content | L | D | level unlocks |
 | P19 | ~~Rowboat open-water stance~~ (shipped) | content | L | D | P18, landing lift |
 | P20 | ~~Fight & landing camera~~ (shipped) | camera | M | E | landing lift, P8 |
-| P21 | Catch photo → field log | journal/visual | M | E | P20 |
-| P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
+| P21 | ~~Catch photo → field log~~ (shipped) | journal/visual | M | E | P20 |
+| P22 | ~~Water: caustics, sun road, rim~~ (shipped) | visual | M | E | perf memo |
 | P23 | ~~Atmosphere pass (fireflies, mist, bloom)~~ (shipped) | visual | M | E | P8, #53 |
 | P24 | ~~Seasons on the lake~~ (shipped) | progression/content | L | F | #53, #50 |
 | P25 | ~~Species lore + silhouettes~~ (shipped) | collection | S | F | — |
@@ -329,6 +329,24 @@ Claude picked these to build on the seasons; the owner can reorder or drop any.
 - **G3 · In-season requests.** The daily board leans its asks toward fish the season favours (`SEASON_SPECIES`), so the board and the lake tell the same story.
 - **G4 · Camera clipping.** The follow and fight cameras can sink into the hill behind the Point and the trees on the west shore; pull the camera in along its ray when terrain or a trunk sits between it and the angler.
 - **G5 · Auto quality.** If the frame rate stays under ~40 fps for a few seconds, switch effects to Lite once and say so in a toast; Settings can turn it back.
+
+## Wave H — Lighter, livelier lake (added 2026-10-14, after Wave G shipped)
+
+Claude picked these after Wave G; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| H1 | ~~Load the 3D lake on demand~~ (shipped) | perf | S/M |
+| H2 | A heron wades the reed shallows | wildlife | M |
+| H3 | Save the landed card as a picture | share | S/M |
+| H4 | Tension bar that reads without colour | a11y | S |
+| H5 | Species of the week on the weekly board | retention | M |
+
+- **H1 · Split the bundle.** The whole game ships as one 1.6 MB script (466 kB gzipped), so the sign-in page waits for three.js. Lazy-load the play scene and the field log routes so sign-in, the board and the catch log open fast.
+- **H2 · Heron.** By day a grey heron stands in the reed shallows, stalks and stabs now and then, and lifts off when the angler walks close; gone at night and in rain. Pure position functions with tests, like the fireflies.
+- **H3 · Share card.** From the landed card, save a PNG with the catch photo, species, weight, bank, hour and season; no upload, the file stays on the device.
+- **H4 · Tension without colour.** The fight bar marks its danger zone with a pattern and a notch, and says "too tight" / "slack" in text for screen readers, so the fight reads for colour-blind players.
+- **H5 · Species of the week.** The weekly board names one species each Monday (seeded, in season) and pays a small bonus for it, so the week has a target.
 
 ## Risks / open questions for the owner
 
