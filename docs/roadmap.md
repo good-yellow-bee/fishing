@@ -842,6 +842,14 @@ Claude picked this: photo mode (H) already hides the panels, but saving the view
 | ~~AO1~~ | ~~In photo mode, P, Space, the pad's A or a Save this view button saves the lake at full size as a PNG, without the panels~~ (#202) | photo mode | S |
 | ~~AO2~~ | ~~The keys card lists it, and the news card mentions it~~ (#202) | onboarding | S |
 
+## Wave AP — Pictures land in the phone's photos (added 2026-10-14, after Wave AO shipped)
+
+Claude picked this: on a phone a downloaded PNG lands in Files (or Downloads), where few players look for it.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AP1~~ | ~~On a touch screen that can share files, the lake picture and the catch card open the share sheet (Save Image puts them in the photos); a refused sheet falls back to the download~~ (#203) | photo mode | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

@@ -82,16 +82,63 @@ export async function drawShareCard(text: ShareCardText, photo: string | null): 
   return canvas;
 }
 
-/** Draws the card and hands it to the browser as a PNG download. */
-export async function saveShareCard(text: ShareCardText, photo: string | null, fileName: string): Promise<void> {
+/** Draws the card and hands it on as a PNG: the share sheet on a touch screen, a download elsewhere. */
+export async function saveShareCard(text: ShareCardText, photo: string | null, fileName: string): Promise<PngSaved> {
   const canvas = await drawShareCard(text, photo);
-  await savePng(canvas, fileName);
+  return savePng(canvas, fileName);
 }
 
-/** Hands a canvas to the browser as a PNG download. */
-export async function savePng(canvas: HTMLCanvasElement, fileName: string): Promise<void> {
+/** "shared": the share sheet took it; "cancelled": the player closed the sheet; "downloaded": the browser saved a file. */
+export type PngSaved = "shared" | "cancelled" | "downloaded";
+
+type ShareNavigator = {
+  canShare?: (data: { files: File[] }) => boolean;
+  share?: (data: { files: File[] }) => Promise<void>;
+};
+
+/** Whether this device should get the share sheet: a touch screen that can share image files. */
+export function shareSheetFor(nav: ShareNavigator, coarse: boolean, file: File) {
+  if (!coarse || typeof nav.share !== "function" || typeof nav.canShare !== "function") return false;
+  try {
+    return nav.canShare({ files: [file] });
+  } catch {
+    return false;
+  }
+}
+
+function coarsePointer() {
+  try {
+    return window.matchMedia?.("(pointer: coarse)").matches ?? false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Hands a canvas on as a PNG. Phones get the share sheet, where Save Image puts it in the photos
+ * (a download lands in Files, which is hard to find); anything else, or a sheet the browser refuses, downloads.
+ */
+export async function savePng(canvas: HTMLCanvasElement, fileName: string): Promise<PngSaved> {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("png");
+  const nav = navigator as unknown as ShareNavigator;
+  if (typeof File === "function") {
+    const file = new File([blob], fileName, { type: "image/png" });
+    if (shareSheetFor(nav, coarsePointer(), file)) {
+      try {
+        await nav.share!({ files: [file] });
+        return "shared";
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return "cancelled";
+        // Refused (the tap's activation ran out while drawing): download instead.
+      }
+    }
+  }
+  downloadBlob(blob, fileName);
+  return "downloaded";
+}
+
+function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
