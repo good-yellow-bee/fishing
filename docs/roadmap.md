@@ -1013,6 +1013,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BN1~~ | ~~On narrow phones the catch card spans the width and stops under the header (scrolling if a stack of stamps runs long) instead of sliding behind it, with a smaller fish, a tighter banner and its buttons two to a row; the landed, cancelled, overpowered and ring hints say touch and lift on touch screens instead of click, Space and release~~ (#229) | phone UX | S |
 | ~~BN2~~ | ~~The field log's seven bottom tabs fit a 360 px phone in Polish (REKORDY was pushed off screen and unreachable)~~ (#230) | phone UX | S |
+| ~~BN3~~ | ~~On narrow phones the first-cast coach's Skip link sits under its line instead of on the last step chip (ODPUŚĆ in Polish), the chips may wrap, and the hint below leaves room for a two-line coach line~~ (#231) | phone UX | S |
 
 ## Risks / open questions for the owner
 

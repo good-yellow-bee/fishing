@@ -1808,14 +1808,21 @@ kbd {
     font-size: 13px;
   }
 
+  /* In the flow under the line, so it never sits on the last step chip (ODPUŚĆ in Polish). */
   .walkthrough-skip {
-    top: 0;
-    right: 0;
-    padding: 10px 10px;
+    position: static;
+    justify-self: end;
+    margin: -4px -6px -6px 0;
+    padding: 6px 10px;
+  }
+
+  .walkthrough ol {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .scene-wrap[data-walkthrough="1"] .hint {
-    top: calc(var(--hud-bottom, 140px) + 168px);
+    top: calc(var(--hud-bottom, 140px) + 212px);
   }
 
   .hint {
