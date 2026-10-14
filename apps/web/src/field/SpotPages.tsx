@@ -12,25 +12,28 @@ import {
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { EditDelete } from "./EditDelete";
+import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
+import { t, useT } from "../i18n";
 
 export function SpotsPage() {
   const { book } = useLogbook();
+  useT();
 
   return (
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">Waters</p>
-          <h1>Spots</h1>
-          <p className="lede">The places you actually go back to, and the day they fish well.</p>
+          <p className="eyebrow">{t("Waters")}</p>
+          <h1>{t("Spots")}</h1>
+          <p className="lede">{t("The places you actually go back to, and the day they fish well.")}</p>
         </div>
         <Link to="/spots/new" className="field-primary inline">
-          Add a spot
+          {t("Add a spot")}
         </Link>
       </header>
       {book.spots.length === 0 ? (
-        <p className="empty">No waters yet.</p>
+        <p className="empty">{t("No waters yet.")}</p>
       ) : (
         <div className="card-grid">
           {book.spots.map((spot) => (
@@ -49,6 +52,7 @@ export function SpotsPage() {
 
 export function SpotPage() {
   const { book, deleteSpot } = useLogbook();
+  useT();
   const navigate = useNavigate();
   const { spotId = "" } = useParams();
   const spot = spotById(book, spotId);
@@ -58,9 +62,9 @@ export function SpotPage() {
   if (!spot) {
     return (
       <div className="sheet">
-        <h1>Missing water</h1>
-        <p className="lede">That spot is not in this book.</p>
-        <Link to="/spots">Back to spots</Link>
+        <h1>{t("Missing water")}</h1>
+        <p className="lede">{t("That spot is not in this book.")}</p>
+        <Link to="/spots">{t("Back to spots")}</Link>
       </div>
     );
   }
@@ -72,35 +76,35 @@ export function SpotPage() {
     <div className="sheet">
       <EditDelete
         editTo={`/spots/${spot.id}/edit`}
-        ask="Delete this water? Its outings and fish leave the book too."
+        ask={t("Delete this water? Its outings and fish leave the book too.")}
         onDelete={() => {
           deleteSpot(spot.id);
           navigate("/spots");
         }}
         aside={
           <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">
-            Log a catch here
+            {t("Log a catch here")}
           </Link>
         }
       >
         <p className="eyebrow">
-          <Link to="/spots">Spots</Link>
+          <Link to="/spots">{t("Spots")}</Link>
         </p>
         <h1>{spot.name}</h1>
-        <span className={`stamp stamp-${spot.waterType}`}>{WATER_LABELS[spot.waterType]}</span>
+        <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
       </EditDelete>
       {spot.notes ? <p className="prose">{spot.notes}</p> : null}
       <aside className="conditions">
-        <span className="eyebrow">Best conditions</span>
-        <p>{spot.bestConditions || "Not noted yet."}</p>
+        <span className="eyebrow">{t("Best conditions")}</span>
+        <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
 
       <div className="section-head">
-        <h2>Outings</h2>
-        <Link to={`/trips/new?spot=${spot.id}`}>Plan one</Link>
+        <h2>{t("Outings")}</h2>
+        <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>
       </div>
       {trips.length === 0 ? (
-        <p className="empty">No outings on this water yet.</p>
+        <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
         <div className="stack">
           {trips.map((trip) => (
@@ -118,10 +122,10 @@ export function SpotPage() {
       )}
 
       <div className="section-head">
-        <h2>Fish from this water</h2>
+        <h2>{t("Fish from this water")}</h2>
       </div>
       {catches.length === 0 ? (
-        <p className="empty">Nothing logged here yet.</p>
+        <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
         <div className="stack">
           {catches.map((entry) => (
@@ -145,6 +149,7 @@ export function SpotFormPage() {
 
 function SpotForm() {
   const { book, addSpot, updateSpot } = useLogbook();
+  useT();
   const navigate = useNavigate();
   const { spotId } = useParams();
   const existing = spotId ? spotById(book, spotId) : undefined;
@@ -168,9 +173,9 @@ function SpotForm() {
   if (spotId && !existing) {
     return (
       <div className="sheet">
-        <h1>Missing water</h1>
-        <p className="lede">That spot is not in this book.</p>
-        <Link to="/spots">Back to spots</Link>
+        <h1>{t("Missing water")}</h1>
+        <p className="lede">{t("That spot is not in this book.")}</p>
+        <Link to="/spots">{t("Back to spots")}</Link>
       </div>
     );
   }
@@ -179,20 +184,20 @@ function SpotForm() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">{existing ? "Edit water" : "New water"}</p>
-          <h1>{existing ? existing.name : "Add a spot"}</h1>
+          <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
+          <h1>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
-        <Link to={existing ? `/spots/${existing.id}` : "/spots"}>Cancel</Link>
+        <Link to={existing ? `/spots/${existing.id}` : "/spots"}>{t("Cancel")}</Link>
       </header>
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
           <label>
-            Name
-            <input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Cedar Bend" required />
+            {t("Name")}
+            <input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={t("Cedar Bend")} required />
           </label>
           <fieldset>
-            <legend>Water type</legend>
-            <div className="choice-row wrap" role="radiogroup" aria-label="Water type">
+            <legend>{t("Water type")}</legend>
+            <div className="choice-row wrap" role="radiogroup" aria-label={t("Water type")}>
               {WATER_TYPES.map((type) => (
                 <button
                   key={type}
@@ -208,32 +213,32 @@ function SpotForm() {
             </div>
           </fieldset>
           <label className="wide">
-            Notes
+            {t("Notes")}
             <textarea
               name="notes"
               rows={4}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Where the fish sit, and how you get there."
+              placeholder={t("Where the fish sit, and how you get there.")}
             />
           </label>
           <label className="wide">
-            Best conditions
+            {t("Best conditions")}
             <input
               name="bestConditions"
               value={bestConditions}
               onChange={(event) => setBestConditions(event.target.value)}
-              placeholder="Overcast, light west wind"
+              placeholder={t("Overcast, light west wind")}
             />
           </label>
         </div>
         {error ? (
           <p className="field-error" role="alert">
-            {error}
+            {messageText(error)}
           </p>
         ) : null}
         <button type="submit" className="field-primary inline">
-          {existing ? "Save changes" : "Save spot"}
+          {existing ? t("Save changes") : t("Save spot")}
         </button>
       </form>
     </div>

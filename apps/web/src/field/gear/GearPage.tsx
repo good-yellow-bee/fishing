@@ -12,9 +12,11 @@ import {
 import { formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
+import { t, useT } from "../../i18n";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
+  useT();
   const spot = spotById(book, trip.spotId);
 
   return (
@@ -35,6 +37,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
 
 export function GearPage() {
   const { book } = useLogbook();
+  useT();
   const { tripId } = useParams();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
@@ -44,9 +47,9 @@ export function GearPage() {
     if (!trip) {
       return (
         <div className="sheet">
-          <h1>Missing outing</h1>
-          <p className="lede">That trip is not in this book.</p>
-          <Link to="/gear">Back to tackle</Link>
+          <h1>{t("Missing outing")}</h1>
+          <p className="lede">{t("That trip is not in this book.")}</p>
+          <Link to="/gear">{t("Back to tackle")}</Link>
         </div>
       );
     }
@@ -56,7 +59,7 @@ export function GearPage() {
         <header className="sheet-head">
           <div>
             <p className="eyebrow">
-              <Link to="/gear">Tackle</Link>
+              <Link to="/gear">{t("Tackle")}</Link>
               {" · "}
               {tripWhen(trip.date, today, tomorrow)}
             </p>
@@ -68,14 +71,14 @@ export function GearPage() {
                   {" · "}
                   <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
                   {" · "}
-                  {WATER_LABELS[spot.waterType]}
+                  {t(WATER_LABELS[spot.waterType])}
                 </>
               ) : null}
             </p>
           </div>
-          <Link to={`/trips/${trip.id}`}>Outing</Link>
+          <Link to={`/trips/${trip.id}`}>{t("Outing")}</Link>
         </header>
-        <TackleList tripId={trip.id} heading="In the bag" />
+        <TackleList tripId={trip.id} heading={t("In the bag")} />
       </div>
     );
   }
@@ -87,20 +90,20 @@ export function GearPage() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">Before you leave</p>
-          <h1>Tackle</h1>
-          <p className="lede">What goes in the bag for each outing. A check stays in this browser.</p>
+          <p className="eyebrow">{t("Before you leave")}</p>
+          <h1>{t("Tackle")}</h1>
+          <p className="lede">{t("What goes in the bag for each outing. A check stays in this browser.")}</p>
         </div>
       </header>
-      <h2 className="subhead">Coming up</h2>
+      <h2 className="subhead">{t("Coming up")}</h2>
       {upcoming.length === 0 ? (
-        <p className="empty">No upcoming outings.</p>
+        <p className="empty">{t("No upcoming outings.")}</p>
       ) : (
         upcoming.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}
-      <h2 className="subhead">Recent</h2>
+      <h2 className="subhead">{t("Recent")}</h2>
       {recent.length === 0 ? (
-        <p className="empty">No past outings.</p>
+        <p className="empty">{t("No past outings.")}</p>
       ) : (
         recent.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}

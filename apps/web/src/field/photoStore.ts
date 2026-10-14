@@ -1,4 +1,5 @@
 import { catchPhotoWriteBlocked, catchPhotosFromUnknown, type CatchPhotoMap } from "@stillwater/shared";
+import { t } from "../i18n";
 
 export const PHOTO_STORAGE_KEY = "stillwater.field-log.photos.v1";
 
@@ -27,7 +28,7 @@ export function savePhotos(photos: CatchPhotoMap) {
   const previousChars = previous === null ? 0 : PHOTO_STORAGE_KEY.length + previous.length;
   const nextChars = PHOTO_STORAGE_KEY.length + json.length;
   if (nextChars > previousChars && catchPhotoWriteBlocked(storageChars(), previousChars, nextChars)) {
-    throw new Error("That photo does not fit alongside the book, so the change was not saved.");
+    throw new Error(t("That photo does not fit alongside the book, so the change was not saved."));
   }
   try {
     localStorage.setItem(PHOTO_STORAGE_KEY, json);

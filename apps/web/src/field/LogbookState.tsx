@@ -23,6 +23,7 @@ import {
   type SpotDraft,
   type TripDraft,
 } from "@stillwater/shared";
+import { t } from "../i18n";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
@@ -74,7 +75,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       try {
         saveLogbook(nextBook);
       } catch {
-        return { ok: false, message: "The book could not be saved in this browser." };
+        return { ok: false, message: t("The book could not be saved in this browser.") };
       }
       if (nextPhotos !== photos) {
         try {
@@ -84,9 +85,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
             saveLogbook(book);
           } catch {
             setBook(nextBook);
-            return { ok: false, message: "The catch was saved, but the photo did not fit in this browser." };
+            return { ok: false, message: t("The catch was saved, but the photo did not fit in this browser.") };
           }
-          return { ok: false, message: "That photo does not fit alongside the book, so the change was not saved." };
+          return { ok: false, message: t("That photo does not fit alongside the book, so the change was not saved.") };
         }
       }
       setBook(nextBook);
@@ -132,7 +133,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       updateCatch: (id, draft, photo) => {
         if (!book.catches.some((entry) => entry.id === id)) {
-          return { ok: false, message: "That catch is not in this book." };
+          return { ok: false, message: t("That catch is not in this book.") };
         }
         const parsed = parseCatchDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message };
@@ -153,7 +154,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       updateSpot: (id, draft) => {
         if (!book.spots.some((spot) => spot.id === id)) {
-          return { ok: false, message: "That spot is not in this book." };
+          return { ok: false, message: t("That spot is not in this book.") };
         }
         const parsed = parseSpotDraft(draft);
         if (!parsed.ok) return { ok: false, message: parsed.message };
@@ -162,7 +163,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       updateTrip: (id, draft) => {
         if (!book.trips.some((trip) => trip.id === id)) {
-          return { ok: false, message: "That outing is not in this book." };
+          return { ok: false, message: t("That outing is not in this book.") };
         }
         const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message };

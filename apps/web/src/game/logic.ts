@@ -20,6 +20,26 @@ import {
   type Sky,
   type SpotId,
 } from "@stillwater/shared";
+import { locale, t } from "../i18n";
+
+/** A weight with one decimal in the player's number style: 3.0 / 3,0. */
+export function oneDecimal(value: number): string {
+  return value.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
+}
+
+/** The rarity tag on a card, in the player's language. */
+export function rarityLabel(rarity: FishSpecies["rarity"]): string {
+  switch (rarity) {
+    case "common":
+      return t("common");
+    case "uncommon":
+      return t("uncommon");
+    case "rare":
+      return t("rare");
+    case "legendary":
+      return t("legendary");
+  }
+}
 
 const rarityWeight: Record<FishSpecies["rarity"], number> = {
   common: 1,

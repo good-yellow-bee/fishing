@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
-  formatMeasure,
   type CatchEntry,
   type Spot,
   type Trip,
   type WaterType,
 } from "@stillwater/shared";
-import { fishCountLabel, formatClock, tripWhen } from "./format";
+import { tn, useT } from "../i18n";
+import { measureText } from "../i18n/content";
+import { fishCountLabel, formatClock, noteText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { WeatherLine } from "./Weather";
 
@@ -20,25 +21,26 @@ export function CatchCard({
   spotName: string;
   tripTitle: string | null;
 }) {
+  const t = useT();
   const { photoFor } = useLogbook();
   const photo = photoFor(entry.id);
   return (
     <article className={photo ? "catch-card has-photo" : "catch-card"}>
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
-      <p className={`measure measure-${entry.measure.kind}`}>{formatMeasure(entry.measure)}</p>
+      <p className={`measure measure-${entry.measure.kind}`}>{measureText(entry.measure)}</p>
       <div>
         <h2>
-          <Link to={`/catches/${entry.id}`}>{entry.species}</Link>
+          <Link to={`/catches/${entry.id}`}>{t(entry.species)}</Link>
         </h2>
         <p className="meta">
-          <span>{entry.lure}</span>
+          <span>{t(entry.lure)}</span>
           <span aria-hidden="true">·</span>
           <Link to={`/spots/${entry.spotId}`}>{spotName}</Link>
           <span aria-hidden="true">·</span>
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
         </p>
         <WeatherLine weather={entry.weather} />
-        {entry.note ? <p className="note">{entry.note}</p> : null}
+        {entry.note ? <p className="note">{noteText(entry.note)}</p> : null}
         {entry.tripId && tripTitle ? (
           <p className="trip-link">
             <Link to={`/trips/${entry.tripId}`}>{tripTitle}</Link>
@@ -64,6 +66,7 @@ export function TripCard({
   today: string;
   tomorrow: string;
 }) {
+  const t = useT();
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card">
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
@@ -71,7 +74,7 @@ export function TripCard({
         <h2>{trip.title}</h2>
         <p className="meta">
           {spotName}
-          {waterType ? ` · ${WATER_LABELS[waterType]}` : ""}
+          {waterType ? ` · ${t(WATER_LABELS[waterType])}` : ""}
           {" · "}
           {fishCountLabel(fishCount)}
         </p>
@@ -81,17 +84,18 @@ export function TripCard({
 }
 
 export function SpotCard({ spot, fishCount, tripCount }: { spot: Spot; fishCount: number; tripCount: number }) {
+  const t = useT();
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card">
       <div className="spot-card-top">
         <h2>{spot.name}</h2>
-        <span className={`stamp stamp-${spot.waterType}`}>{WATER_LABELS[spot.waterType]}</span>
+        <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
       </div>
-      <p className="conditions-line">{spot.bestConditions || "Conditions not noted"}</p>
+      <p className="conditions-line">{spot.bestConditions || t("Conditions not noted")}</p>
       <p className="meta">
         {fishCountLabel(fishCount)}
         {" · "}
-        {tripCount === 1 ? "1 outing" : `${tripCount} outings`}
+        {tn(tripCount, "{n} outing", "{n} outings")}
       </p>
     </Link>
   );

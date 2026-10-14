@@ -13,12 +13,14 @@ import {
 import { CatchCard, TripCard } from "./cards";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
-import { formatDay, tripWhen } from "./format";
+import { formatDay, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
+import { t, useT } from "../i18n";
 
 export function TripsPage() {
   const { book } = useLogbook();
+  useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingTrips(book, today);
@@ -28,24 +30,24 @@ export function TripsPage() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">Calendar</p>
-          <h1>Trips</h1>
-          <p className="lede">A day on a water, and the fish that came with it.</p>
+          <p className="eyebrow">{t("Calendar")}</p>
+          <h1>{t("Trips")}</h1>
+          <p className="lede">{t("A day on a water, and the fish that came with it.")}</p>
         </div>
         <Link to="/trips/new" className="field-primary inline">
-          Add a trip
+          {t("Add a trip")}
         </Link>
       </header>
-      <h2 className="subhead">Coming up</h2>
+      <h2 className="subhead">{t("Coming up")}</h2>
       {upcoming.length === 0 ? (
-        <p className="empty">No upcoming outings.</p>
+        <p className="empty">{t("No upcoming outings.")}</p>
       ) : (
         <div className="stack">
           {upcoming.map((trip) => (
             <TripCard
               key={trip.id}
               trip={trip}
-              spotName={spotById(book, trip.spotId)?.name ?? "Unknown water"}
+              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
               waterType={spotById(book, trip.spotId)?.waterType ?? null}
               fishCount={catchesForTrip(book, trip.id).length}
               today={today}
@@ -54,16 +56,16 @@ export function TripsPage() {
           ))}
         </div>
       )}
-      <h2 className="subhead">Recent</h2>
+      <h2 className="subhead">{t("Recent")}</h2>
       {recent.length === 0 ? (
-        <p className="empty">No past outings.</p>
+        <p className="empty">{t("No past outings.")}</p>
       ) : (
         <div className="stack">
           {recent.map((trip) => (
             <TripCard
               key={trip.id}
               trip={trip}
-              spotName={spotById(book, trip.spotId)?.name ?? "Unknown water"}
+              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
               waterType={spotById(book, trip.spotId)?.waterType ?? null}
               fishCount={catchesForTrip(book, trip.id).length}
               today={today}
@@ -78,6 +80,7 @@ export function TripsPage() {
 
 export function TripPage() {
   const { book, deleteTrip } = useLogbook();
+  useT();
   const navigate = useNavigate();
   const { tripId = "" } = useParams();
   const trip = tripById(book, tripId);
@@ -85,9 +88,9 @@ export function TripPage() {
   if (!trip) {
     return (
       <div className="sheet">
-        <h1>Missing outing</h1>
-        <p className="lede">That trip is not in this book.</p>
-        <Link to="/trips">Back to trips</Link>
+        <h1>{t("Missing outing")}</h1>
+        <p className="lede">{t("That trip is not in this book.")}</p>
+        <Link to="/trips">{t("Back to trips")}</Link>
       </div>
     );
   }
@@ -101,19 +104,19 @@ export function TripPage() {
     <div className="sheet">
       <EditDelete
         editTo={`/trips/${trip.id}/edit`}
-        ask="Delete this outing? Its fish stay in the book."
+        ask={t("Delete this outing? Its fish stay in the book.")}
         onDelete={() => {
           deleteTrip(trip.id);
           navigate("/trips");
         }}
         aside={
           <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
-            Add a catch
+            {t("Add a catch")}
           </Link>
         }
       >
         <p className="eyebrow">
-          <Link to="/trips">Trips</Link>
+          <Link to="/trips">{t("Trips")}</Link>
           {" · "}
           {tripWhen(trip.date, today, tomorrow)}
         </p>
@@ -125,23 +128,23 @@ export function TripPage() {
               {" · "}
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               {" · "}
-              {WATER_LABELS[spot.waterType]}
+              {t(WATER_LABELS[spot.waterType])}
             </>
           ) : null}
         </p>
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
       <TripWeather catches={catches} />
-      <TackleList tripId={trip.id} heading="Tackle" />
+      <TackleList tripId={trip.id} heading={t("Tackle")} />
       <div className="section-head">
-        <h2>Fish on this outing</h2>
+        <h2>{t("Fish on this outing")}</h2>
       </div>
       {catches.length === 0 ? (
-        <p className="empty">Nothing logged for this trip yet.</p>
+        <p className="empty">{t("Nothing logged for this trip yet.")}</p>
       ) : (
         <div className="stack">
           {catches.map((entry) => (
-            <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? "Unknown water"} tripTitle={null} />
+            <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />
           ))}
         </div>
       )}
@@ -157,6 +160,7 @@ export function TripFormPage() {
 
 function TripForm() {
   const { book, addTrip, updateTrip } = useLogbook();
+  useT();
   const navigate = useNavigate();
   const { tripId } = useParams();
   const [params] = useSearchParams();
@@ -182,9 +186,9 @@ function TripForm() {
   if (tripId && !existing) {
     return (
       <div className="sheet">
-        <h1>Missing outing</h1>
-        <p className="lede">That trip is not in this book.</p>
-        <Link to="/trips">Back to trips</Link>
+        <h1>{t("Missing outing")}</h1>
+        <p className="lede">{t("That trip is not in this book.")}</p>
+        <Link to="/trips">{t("Back to trips")}</Link>
       </div>
     );
   }
@@ -192,10 +196,10 @@ function TripForm() {
   if (!existing && book.spots.length === 0) {
     return (
       <div className="sheet">
-        <h1>Add a trip</h1>
-        <p className="lede">Add a spot first so the outing has a water.</p>
+        <h1>{t("Add a trip")}</h1>
+        <p className="lede">{t("Add a spot first so the outing has a water.")}</p>
         <Link to="/spots/new" className="field-primary inline">
-          Add a spot
+          {t("Add a spot")}
         </Link>
       </div>
     );
@@ -205,19 +209,19 @@ function TripForm() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">{existing ? "Edit outing" : "New outing"}</p>
-          <h1>{existing ? existing.title : "Add a trip"}</h1>
+          <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
+          <h1>{existing ? existing.title : t("Add a trip")}</h1>
         </div>
-        <Link to={existing ? `/trips/${existing.id}` : "/trips"}>Cancel</Link>
+        <Link to={existing ? `/trips/${existing.id}` : "/trips"}>{t("Cancel")}</Link>
       </header>
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
           <label>
-            Date
+            {t("Date")}
             <input name="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           </label>
           <label>
-            Spot
+            {t("Spot")}
             <select name="spot" value={spotId} onChange={(event) => setSpotId(event.target.value)}>
               {book.spots.map((spot) => (
                 <option key={spot.id} value={spot.id}>
@@ -227,32 +231,32 @@ function TripForm() {
             </select>
           </label>
           <label className="wide">
-            Title
+            {t("Title")}
             <input
               name="title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Dawn patrol"
+              placeholder={t("Dawn patrol")}
             />
           </label>
           <label className="wide">
-            Note
+            {t("Note")}
             <textarea
               name="note"
               rows={3}
               value={note}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Wind, water color, what you meant to try."
+              placeholder={t("Wind, water color, what you meant to try.")}
             />
           </label>
         </div>
         {error ? (
           <p className="field-error" role="alert">
-            {error}
+            {messageText(error)}
           </p>
         ) : null}
         <button type="submit" className="field-primary inline">
-          {existing ? "Save changes" : "Save trip"}
+          {existing ? t("Save changes") : t("Save trip")}
         </button>
       </form>
     </div>

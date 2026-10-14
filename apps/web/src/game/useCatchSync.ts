@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CatchSubmission } from "@stillwater/shared";
 import { ApiError, getMe, recordCatch, type Me } from "../api";
+import { t } from "../i18n";
 import {
   clearRejectedCatches,
   isPermanentRejection,
@@ -14,6 +15,7 @@ import {
 /** Matches the server's per-minute catch limit. */
 export const RATE_LIMIT_RETRY_MS = 60_000;
 
+/** Errors are kept in English (one is compared by value) and put in the player's language by `t()` as they are set. */
 const SAVE_FAILED = "The catch could not be saved to the server.";
 const OTHER_ANGLER = "Another angler is signed in here. Sign back in as yourself to sync these catches.";
 const SAVED_OTHER_ANGLER = "Catch saved, but another angler is now signed in here.";
@@ -126,10 +128,10 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
             staleProfile.current = true;
             failure ||= err instanceof Error && err.message === OTHER_ANGLER
               ? saved ? SAVED_OTHER_ANGLER : OTHER_ANGLER
-              : `Catch saved. Points will update once the server answers (${message(err, "no response")}).`;
+              : t("Catch saved. Points will update once the server answers ({reason}).", { reason: t(message(err, "no response")) });
           }
         }
-        setError(failure);
+        setError(t(failure));
       } while (syncAgain.current);
     } finally {
       syncing.current = false;
@@ -165,7 +167,7 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
       clearRejectedCatches(userId);
       setRejectedCount(0);
     } catch (err) {
-      setError(message(err, "Rejected catches could not be cleared."));
+      setError(t(message(err, "Rejected catches could not be cleared.")));
     }
   }, [userId]);
 
@@ -174,7 +176,7 @@ export function useCatchSync(userId: string | undefined, onMe: (me: Me) => void)
     try {
       countQueue(userId);
     } catch (err) {
-      setError(message(err, "Pending catches could not be read."));
+      setError(t(message(err, "Pending catches could not be read.")));
     }
     void sync();
     const onOnline = () => void sync();

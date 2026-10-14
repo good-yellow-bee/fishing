@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BOARD_LIMIT, FISH, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
-import { getBoard, getSpeciesRecords } from "../api";
+import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { FishMark } from "../components/FishMark";
+import { locale, t, tn, useT } from "../i18n";
 
-const PERIOD_LABEL: Record<BoardPeriod, string> = { all: "All time", week: "This week" };
+function periodLabel(period: BoardPeriod): string {
+  return period === "all" ? t("All time") : t("This week");
+}
+
+/** A weight to one decimal, with the language's decimal mark. */
+function lb(weight: number): string {
+  return weight.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
+}
 
 function RankMark({ rank }: { rank: number }) {
   if (rank === 1) return <span className="rank-mark gold">1</span>;
@@ -22,7 +30,7 @@ function BoardRow({ row, you }: { row: BoardEntry; you: boolean }) {
       <td>{row.displayName}</td>
       <td>{row.level}</td>
       <td>{row.score}</td>
-      <td>{row.heaviest > 0 ? `${row.heaviest.toFixed(1)} lb` : "—"}</td>
+      <td>{row.heaviest > 0 ? `${lb(row.heaviest)} lb` : "—"}</td>
       <td>{row.species}</td>
     </tr>
   );
@@ -33,6 +41,7 @@ export function BoardPage() {
   const [board, setBoard] = useState<BoardView | null>(null);
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const [error, setError] = useState("");
+  const t = useT();
 
   useEffect(() => {
     let live = true;
@@ -50,22 +59,22 @@ export function BoardPage() {
       .catch(() => setRecords([]));
   }, []);
 
-  if (error) return <div className="log-page">{error}</div>;
-  if (!board) return <div className="log-page">Reading the lodge board…</div>;
+  if (error) return <div className="log-page">{errorText(error)}</div>;
+  if (!board) return <div className="log-page">{t("Reading the lodge board…")}</div>;
 
   const you = board.you;
   const week = board.period === "week";
-  const points = week ? "This week" : "Lifetime";
+  const points = week ? t("This week") : t("Lifetime");
 
   return (
     <div className="log-page board-page">
       <p>
-        <Link to="/play">Back to the dock</Link>
+        <Link to="/play">{t("Back to the dock")}</Link>
         {" · "}
-        <Link to="/log">Catch log</Link>
+        <Link to="/log">{t("Catch log")}</Link>
       </p>
-      <h1>Lodge board</h1>
-      <div className="board-tabs" role="tablist" aria-label="Board period">
+      <h1>{t("Lodge board")}</h1>
+      <div className="board-tabs" role="tablist" aria-label={t("Board period")}>
         {(["all", "week"] as const).map((option) => (
           <button
             key={option}
@@ -75,19 +84,19 @@ export function BoardPage() {
             className={period === option ? "active" : ""}
             onClick={() => setPeriod(option)}
           >
-            {PERIOD_LABEL[option]}
+            {periodLabel(option)}
           </button>
         ))}
       </div>
       <p>
         {week
-          ? `Top ${BOARD_LIMIT} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.`
-          : `Top ${BOARD_LIMIT} anglers by lifetime points. Heaviest fish breaks a tie.`}
+          ? t("Top {limit} anglers by points landed since Monday 00:00 UTC. Heaviest fish this week breaks a tie.", { limit: BOARD_LIMIT })
+          : t("Top {limit} anglers by lifetime points. Heaviest fish breaks a tie.", { limit: BOARD_LIMIT })}
       </p>
       {you && (
         <div className="log-summary">
           <div>
-            <span className="eyebrow">Your place</span>
+            <span className="eyebrow">{t("Your place")}</span>
             <strong>#{you.rank}</strong>
           </div>
           <div>
@@ -95,10 +104,10 @@ export function BoardPage() {
             <strong>{you.score}</strong>
           </div>
           <div>
-            <span className="eyebrow">Heaviest</span>
-            <strong>{you.heaviest > 0 ? `${you.heaviest.toFixed(1)} lb` : "—"}</strong>
+            <span className="eyebrow">{t("Heaviest")}</span>
+            <strong>{you.heaviest > 0 ? `${lb(you.heaviest)} lb` : "—"}</strong>
             <small>
-              {you.species} species · {you.catches} landed
+              {tn(you.species, "{n} species", "{n} species")} · {tn(you.catches, "{n} landed", "{n} landed")}
             </small>
           </div>
         </div>
@@ -107,11 +116,11 @@ export function BoardPage() {
         <thead>
           <tr>
             <th>#</th>
-            <th>Angler</th>
-            <th>Level</th>
+            <th>{t("Angler")}</th>
+            <th>{t("Level")}</th>
             <th>{points}</th>
-            <th>Heaviest</th>
-            <th>Species</th>
+            <th>{t("Heaviest")}</th>
+            <th>{t("Species|count")}</th>
           </tr>
         </thead>
         <tbody>
@@ -120,15 +129,17 @@ export function BoardPage() {
           ))}
         </tbody>
       </table>
-      {board.entries.length === 0 && <p>{week ? "Nobody has landed a fish this week. Be first." : "The board is blank. Land a fish."}</p>}
+      {board.entries.length === 0 && <p>{week ? t("Nobody has landed a fish this week. Be first.") : t("The board is blank. Land a fish.")}</p>}
       {you && you.rank > BOARD_LIMIT && (
         <p className="board-standing">
-          Outside the posted hundred. You sit at #{you.rank} with {you.score} {week ? "points this week" : "lifetime points"}.
+          {week
+            ? tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} point this week.", "Outside the posted hundred. You sit at #{rank} with {n} points this week.", { rank: you.rank })
+            : tn(you.score, "Outside the posted hundred. You sit at #{rank} with {n} lifetime point.", "Outside the posted hundred. You sit at #{rank} with {n} lifetime points.", { rank: you.rank })}
         </p>
       )}
-      <section className="record-wall" aria-label="Species records">
-        <h2>Record wall</h2>
-        <p>The heaviest of each fish anyone at the lodge has landed.</p>
+      <section className="record-wall" aria-label={t("Species records")}>
+        <h2>{t("Record wall")}</h2>
+        <p>{t("The heaviest of each fish anyone at the lodge has landed.")}</p>
         {records && (
           <ul>
             {FISH.map((fish) => {
@@ -137,14 +148,14 @@ export function BoardPage() {
                 <li key={fish.id} className={record ? `rarity-${fish.rarity}` : "empty"}>
                   {/* An empty slot keeps the species secret until someone at the lodge lands one. */}
                   {record && <FishMark species={fish} />}
-                  <strong>{record ? fish.name : "Unknown"}</strong>
+                  <strong>{record ? t(fish.name) : t("Unknown")}</strong>
                   {record ? (
                     <span>
-                      {record.weight.toFixed(1)} lb · {record.holder}
-                      {record.userId === you?.userId ? " (you)" : ""}
+                      {lb(record.weight)} lb · {record.holder}
+                      {record.userId === you?.userId ? ` ${t("(you)")}` : ""}
                     </span>
                   ) : (
-                    <span>No one yet</span>
+                    <span>{t("No one yet")}</span>
                   )}
                 </li>
               );

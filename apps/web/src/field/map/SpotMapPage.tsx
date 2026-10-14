@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { WATER_LABELS, type Spot } from "@stillwater/shared";
+import { t, useT } from "../../i18n";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -53,7 +54,7 @@ function MapPlate() {
       className="spot-map-plate"
       viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
       role="img"
-      aria-label="Schematic of the sample waters, north up"
+      aria-label={t("Schematic of the sample waters, north up")}
     >
       <rect width={MAP_WIDTH} height={MAP_HEIGHT} className="map-land" />
       <ellipse cx="430" cy="150" rx="150" ry="70" className="map-hill" />
@@ -101,7 +102,7 @@ function MapPlate() {
         <path d="M0 -16 L5 6 L0 2 L-5 6 Z" className="map-compass-north" />
         <path d="M0 16 L5 -4 L0 0 L-5 -4 Z" className="map-compass-south" />
         <text y="-30" textAnchor="middle" className="map-compass-n">
-          N
+          {t("N")}
         </text>
       </g>
 
@@ -110,7 +111,7 @@ function MapPlate() {
         <line x1="0" x2="0" y1="-5" y2="5" />
         <line x1="191" x2="191" y1="-5" y2="5" />
         <text x="84" y="16" textAnchor="middle">
-          about 2 miles
+          {t("about 2 miles")}
         </text>
       </g>
 
@@ -129,12 +130,12 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
         left: `${(point.x / MAP_WIDTH) * 100}%`,
         top: `${(point.y / MAP_HEIGHT) * 100}%`,
       }}
-      aria-label={`${spot.name}, ${formatCoord(place.lat, place.lng)}. Open spot.`}
+      aria-label={t("{name}, {place}. Open spot.", { name: spot.name, place: formatCoord(place.lat, place.lng) })}
     >
       <span className="map-pin-dot" />
       <span className="map-pin-label">
         {spot.name}
-        <small>{WATER_LABELS[spot.waterType]}</small>
+        <small>{t(WATER_LABELS[spot.waterType])}</small>
       </span>
     </Link>
   );
@@ -142,6 +143,7 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
 
 export function SpotMapPage() {
   const { book } = useLogbook();
+  useT();
   const plotted = book.spots.flatMap((spot) => {
     const place = placeFor(spot.id);
     return place ? [{ spot, place }] : [];
@@ -152,16 +154,16 @@ export function SpotMapPage() {
     <div className="sheet">
       <header className="sheet-head">
         <div>
-          <p className="eyebrow">Waters</p>
-          <h1>Map</h1>
+          <p className="eyebrow">{t("Waters")}</p>
+          <h1>{t("Map")}</h1>
           <p className="lede">
-            Sample spots on a north-woods sheet. The ink is local — no tile service and no key.
+            {t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")}
           </p>
         </div>
       </header>
 
       {plotted.length === 0 ? (
-        <p className="empty">None of the waters in this book are drawn on the sheet.</p>
+        <p className="empty">{t("None of the waters in this book are drawn on the sheet.")}</p>
       ) : (
         <div className="spot-map">
           <MapPlate />
@@ -178,7 +180,7 @@ export function SpotMapPage() {
           {plotted.map(({ spot, place }) => (
             <li key={spot.id}>
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-              <span>{WATER_LABELS[spot.waterType]}</span>
+              <span>{t(WATER_LABELS[spot.waterType])}</span>
               <span>{formatCoord(place.lat, place.lng)}</span>
             </li>
           ))}
@@ -187,7 +189,7 @@ export function SpotMapPage() {
 
       {unplotted.length > 0 ? (
         <p className="map-note">
-          Not on this sheet:{" "}
+          {t("Not on this sheet:")}{" "}
           {unplotted.map((spot, index) => (
             <span key={spot.id}>
               {index > 0 ? ", " : null}

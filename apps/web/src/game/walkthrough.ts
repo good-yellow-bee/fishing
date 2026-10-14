@@ -1,3 +1,5 @@
+import { t } from "../i18n";
+
 /**
  * The first-cast walkthrough. Five chips light up as a new angler does each
  * thing once: aim, charge, wait for the real dip, strike, ease on the run.
@@ -14,6 +16,22 @@ export const WALKTHROUGH_CHIPS: readonly { step: Exclude<WalkthroughStep, "lande
   { step: "strike", label: "Strike" },
   { step: "ease", label: "Ease" },
 ];
+
+/** A chip's label in the player's language. */
+export function chipLabel(step: Exclude<WalkthroughStep, "landed">): string {
+  switch (step) {
+    case "aim":
+      return t("Aim");
+    case "charge":
+      return t("Charge");
+    case "wait":
+      return t("Wait");
+    case "strike":
+      return t("Strike");
+    case "ease":
+      return t("Ease");
+  }
+}
 
 export type WalkthroughSnapshot = {
   /** Standing on a bank, so the water can be aimed at. */
@@ -52,19 +70,19 @@ export function nextStep(step: WalkthroughStep, snap: WalkthroughSnapshot): Walk
 export function stepLine(step: WalkthroughStep, snap: WalkthroughSnapshot): string {
   switch (step) {
     case "aim":
-      return snap.fishing ? "Point at open water until the ring shows." : "Walk onto a bank: tap a signpost, the shore, or use WASD.";
+      return snap.fishing ? t("Point at open water until the ring shows.") : t("Walk onto a bank: tap a signpost, the shore, or use WASD.");
     case "charge":
-      if (snap.outcome) return "It got away. Cast again.";
-      return snap.touch ? "Hold a finger on the water, and lift it in the moss band." : "Hold the mouse or Space, and let go in the moss band.";
+      if (snap.outcome) return t("It got away. Cast again.");
+      return snap.touch ? t("Hold a finger on the water, and lift it in the moss band.") : t("Hold the mouse or Space, and let go in the moss band.");
     case "wait":
-      return snap.nibble ? "Just a nibble. Not yet…" : "Wait. A nibble comes first; strike on the real dip.";
+      return snap.nibble ? t("Just a nibble. Not yet…") : t("Wait. A nibble comes first; strike on the real dip.");
     case "strike":
-      return snap.touch ? "Now! Tap." : "Now! Click or press Space.";
+      return snap.touch ? t("Now! Tap.") : t("Now! Click or press Space.");
     case "ease":
-      if (snap.surge === 2) return snap.reeling ? "It's running. Let go!" : "Good. Let it run, then reel again.";
-      return "Hold to reel it in. Ease off when the line runs hot.";
+      if (snap.surge === 2) return snap.reeling ? t("It's running. Let go!") : t("Good. Let it run, then reel again.");
+      return t("Hold to reel it in. Ease off when the line runs hot.");
     case "landed":
-      return "Your first fish. You've got it from here.";
+      return t("Your first fish. You've got it from here.");
   }
 }
 

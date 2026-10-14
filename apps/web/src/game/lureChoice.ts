@@ -1,4 +1,5 @@
 import type { SpotId } from "@stillwater/shared";
+import { t } from "../i18n";
 import { favorsLargeFish, lureStrengthAt } from "./logic";
 import type { ScenePhase } from "./scene/types";
 
@@ -22,7 +23,7 @@ export function smallLuresFirst(choices: readonly string[]): string[] {
 }
 
 export function lureBlurb(lure: string, spot: SpotId): string {
-  if (favorsLargeFish(lure)) return `Big lure — heavier fish (Strength ${BIG_LURE_STRENGTH}+ to land most)`;
+  if (favorsLargeFish(lure)) return t("Big lure — heavier fish (Strength {rank}+ to land most)", { rank: BIG_LURE_STRENGTH });
   // The light half of every bank still holds fish a Strength 1 line cannot land.
-  return `Small lure — lighter fish (some here need Strength ${lureStrengthAt(spot, lure)})`;
+  return t("Small lure — lighter fish (some here need Strength {rank})", { rank: lureStrengthAt(spot, lure) });
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { fightInput } from "../game/scene/fightMotion";
+import { useT } from "../i18n";
 import {
+  chipLabel,
   finishWalkthrough,
   nextStep,
   stepLine,
@@ -25,6 +27,7 @@ const POLL_MS = 150;
 
 export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outcome, surfaceRef }: Props) {
   // Decided once per visit, so the first landing does not hide its own send-off.
+  const t = useT();
   const [open, setOpen] = useState(() => caughtTotal === 0 && !walkthroughDone(userId));
   const [step, setStep] = useState<WalkthroughStep>("aim");
   const stepRef = useRef<WalkthroughStep>("aim");
@@ -76,13 +79,13 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
   const at = WALKTHROUGH_CHIPS.findIndex((chip) => chip.step === step);
 
   return (
-    <aside className="walkthrough" data-camera-control data-step={step} aria-label="First cast">
+    <aside className="walkthrough" data-camera-control data-step={step} aria-label={t("First cast")}>
       <ol>
         {WALKTHROUGH_CHIPS.map((chip, index) => {
           const state = step === "landed" || index < at ? "done" : index === at ? "now" : "todo";
           return (
             <li key={chip.step} data-state={state} aria-current={state === "now" ? "step" : undefined}>
-              {chip.label}
+              {chipLabel(chip.step)}
             </li>
           );
         })}
@@ -99,7 +102,7 @@ export function Walkthrough({ userId, caughtTotal, fishing, phase, nibble, outco
             setOpen(false);
           }}
         >
-          Skip
+          {t("Skip")}
         </button>
       )}
     </aside>

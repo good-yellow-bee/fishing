@@ -1,4 +1,5 @@
 import { CATCH_PHOTO_MAX_BYTES, catchPhotoRejection } from "@stillwater/shared";
+import { t } from "../i18n";
 
 const EDGES = [1280, 960, 720, 560];
 const QUALITIES = [0.72, 0.56, 0.42];
@@ -19,13 +20,13 @@ function jpegDataUrl(source: CanvasImageSource, width: number, height: number, m
 
 export async function compressCatchPhoto(file: File): Promise<CompressedPhoto> {
   if (file.type && !file.type.startsWith("image/")) {
-    return { ok: false, message: "Choose a JPEG, PNG, or WebP photo." };
+    return { ok: false, message: t("Choose a JPEG, PNG, or WebP photo.") };
   }
   if (file.size > FILE_CEILING) {
     const megabytes = FILE_CEILING / (1024 * 1024);
     return {
       ok: false,
-      message: `That file is too large to reduce here. Photos over ${megabytes} MB are turned away before they are reduced.`,
+      message: t("That file is too large to reduce here. Photos over {mb} MB are turned away before they are reduced.", { mb: megabytes }),
     };
   }
 
@@ -33,7 +34,7 @@ export async function compressCatchPhoto(file: File): Promise<CompressedPhoto> {
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    return { ok: false, message: "That photo could not be read. Choose a JPEG, PNG, or WebP." };
+    return { ok: false, message: t("That photo could not be read. Choose a JPEG, PNG, or WebP.") };
   }
 
   try {
@@ -45,10 +46,10 @@ export async function compressCatchPhoto(file: File): Promise<CompressedPhoto> {
     }
     return {
       ok: false,
-      message: `That photo is still over ${CATCH_PHOTO_MAX_BYTES / 1024} KB after it is reduced, so it was not saved.`,
+      message: t("That photo is still over {kb} KB after it is reduced, so it was not saved.", { kb: CATCH_PHOTO_MAX_BYTES / 1024 }),
     };
   } catch {
-    return { ok: false, message: "That photo could not be read. Choose a JPEG, PNG, or WebP." };
+    return { ok: false, message: t("That photo could not be read. Choose a JPEG, PNG, or WebP.") };
   } finally {
     try {
       bitmap.close();

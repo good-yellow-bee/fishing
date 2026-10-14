@@ -1,7 +1,9 @@
-import { useEffect, useRef } from "react";
-import { FIGHT_LINES, isCleanFight, RED_TENSION, type FightPerformance, type FightSim } from "../game/fight";
+import { useEffect, useMemo, useRef } from "react";
+import { fightLines, isCleanFight, RED_TENSION, type FightPerformance, type FightSim } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
+import { oneDecimal } from "../game/logic";
+import { useLang, useT } from "../i18n";
 
 type Props = {
   fight: Fight;
@@ -17,12 +19,15 @@ function tensionColor(tension: number) {
 
 export function FightBar({ fight, sim, performance }: Props) {
   const { reelMode } = useSettings();
+  const t = useT();
+  const lang = useLang();
   const card = useRef<HTMLDivElement>(null);
   const tensionFill = useRef<HTMLDivElement>(null);
   const lineFill = useRef<HTMLDivElement>(null);
   const status = useRef<HTMLParagraphElement>(null);
   const clean = useRef<HTMLParagraphElement>(null);
-  const lines = FIGHT_LINES[fight.species.challenge];
+  // A language change reads the lines again.
+  const lines = useMemo(() => fightLines(fight.species.challenge), [fight.species.challenge, lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
 
@@ -50,7 +55,7 @@ export function FightBar({ fight, sim, performance }: Props) {
         const record = performance.current;
         if (clean.current && record) {
           const stillClean = isCleanFight(record);
-          clean.current.textContent = stillClean ? "Clean fight · 1.5× points" : "Clean bonus lost";
+          clean.current.textContent = stillClean ? t("Clean fight · 1.5× points") : t("Clean bonus lost");
           clean.current.classList.toggle("lost", !stillClean);
         }
         if (card.current) {
@@ -63,19 +68,19 @@ export function FightBar({ fight, sim, performance }: Props) {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [fight.species.challenge, lines, performance, sim]);
+  }, [fight.species.challenge, lines, performance, sim, t]);
 
   return (
     <div ref={card} className="fight-bar">
       <header>
-        <h2>{fight.species.name}</h2>
-        <span>{fight.weight.toFixed(1)} lb</span>
+        <h2>{t(fight.species.name)}</h2>
+        <span>{oneDecimal(fight.weight)} lb</span>
       </header>
       {fight.underpowered ? (
-        <p className="warn">This fish is too heavy for your line.</p>
+        <p className="warn">{t("This fish is too heavy for your line.")}</p>
       ) : (
         <>
-          <span className="fight-label" id="fight-tension-label">Tension</span>
+          <span className="fight-label" id="fight-tension-label">{t("Tension")}</span>
           <div
             ref={tensionMeter}
             className="bar"
@@ -89,25 +94,27 @@ export function FightBar({ fight, sim, performance }: Props) {
             <i className="tick" style={{ left: "55%" }} />
             <i className="tick" style={{ left: "80%" }} />
           </div>
-          <span className="fight-label" id="fight-line-label">Line in</span>
+          <span className="fight-label" id="fight-line-label">{t("Line in")}</span>
           <div ref={lineMeter} className="bar" role="meter" aria-labelledby="fight-line-label" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
             <div ref={lineFill} className="fill" />
           </div>
           <p ref={status} className="fight-status" role="status" aria-live="assertive">
             {lines[0]}
           </p>
-          <p ref={clean} className="fight-clean">Clean fight · 1.5× points</p>
+          <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">
-              <span className="on-pointer">TAP click / Space to start reeling</span>
-              <span className="on-touch">TAP the screen to start reeling</span>
-              {" · "}TAP again when the fish is about to run or tension goes red
+              <span className="on-pointer">{t("TAP click / Space to start reeling")}</span>
+              <span className="on-touch">{t("TAP the screen to start reeling")}</span>
+              {" · "}
+              {t("TAP again when the fish is about to run or tension goes red")}
             </p>
           ) : (
             <p className="fight-controls">
-              <span className="on-pointer">HOLD click / Space to reel</span>
-              <span className="on-touch">HOLD the screen to reel</span>
-              {" · "}LET GO when the fish is about to run or tension goes red
+              <span className="on-pointer">{t("HOLD click / Space to reel")}</span>
+              <span className="on-touch">{t("HOLD the screen to reel")}</span>
+              {" · "}
+              {t("LET GO when the fish is about to run or tension goes red")}
             </p>
           )}
         </>

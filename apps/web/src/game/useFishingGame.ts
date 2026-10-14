@@ -18,7 +18,8 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import { isCleanFight, makeFight, FIGHT_LINES, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { t } from "../i18n";
+import { fightLines, isCleanFight, makeFight, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -33,46 +34,48 @@ export const RECAST_GUARD_MS = 450;
 
 export type AimHint = SpotId | "shore";
 
-const CAST_FAIL_HINT: Record<CastFail, string> = {
-  stance: "Walk to the water to fish.",
-  range: "Too far for this bank. Walk closer.",
-  basin: "Wrong water from here. Walk to that bank.",
-  locked: "Drop-off unlocks at level 3. Cast closer in, or toward the reeds.",
-  shore: "Bait landed on shore. Aim at the water.",
-};
+function castFailHint(reason: CastFail, stance?: StanceId): string {
+  // Only the inlet stance locks with its own words; the drop-off's are the defaults.
+  if (reason === "locked" && stance === "inlet") return t("The inlet opens at level {level}. Fish the other banks for now.", { level: INLET_LEVEL });
+  switch (reason) {
+    case "stance":
+      return t("Walk to the water to fish.");
+    case "range":
+      return t("Too far for this bank. Walk closer.");
+    case "basin":
+      return t("Wrong water from here. Walk to that bank.");
+    case "locked":
+      return t("Drop-off unlocks at level 3. Cast closer in, or toward the reeds.");
+    default:
+      return t("Bait landed on shore. Aim at the water.");
+  }
+}
 
-const CAST_MISS: Record<CastFail, string> = {
-  locked: "Drop-off is too deep until level 3.",
-  basin: "Wrong water from here.",
-  range: "The lure fell short.",
-  stance: "Walk to a bank first.",
-  shore: "Missed the lake.",
-};
-
-/** Only the inlet stance locks with its own words; the drop-off's are the defaults above. */
-const INLET_LOCKED = {
-  hint: `The inlet opens at level ${INLET_LEVEL}. Fish the other banks for now.`,
-  miss: `The inlet is closed until level ${INLET_LEVEL}.`,
-};
+function castMiss(reason: CastFail, stance: StanceId): string {
+  if (reason === "locked" && stance === "inlet") return t("The inlet is closed until level {level}.", { level: INLET_LEVEL });
+  switch (reason) {
+    case "locked":
+      return t("Drop-off is too deep until level 3.");
+    case "basin":
+      return t("Wrong water from here.");
+    case "range":
+      return t("The lure fell short.");
+    case "stance":
+      return t("Walk to a bank first.");
+    default:
+      return t("Missed the lake.");
+  }
+}
 
 function hintFromDataset(raw: string | undefined): AimHint | null {
   if (raw === "dock" || raw === "reeds" || raw === "dropoff" || raw === "point" || raw === "inlet" || raw === "open" || raw === "shore") return raw;
   return null;
 }
 
-function castFailHint(reason: CastFail, stance?: StanceId): string {
-  if (reason === "locked" && stance === "inlet") return INLET_LOCKED.hint;
-  return CAST_FAIL_HINT[reason] ?? CAST_FAIL_HINT.shore;
-}
-
-function castMiss(reason: CastFail, stance: StanceId): string {
-  return reason === "locked" && stance === "inlet" ? INLET_LOCKED.miss : CAST_MISS[reason];
-}
-
 function idleHint(stance: StanceId | null) {
-  if (stance === "shop") return "Open the tackle shack with E or the Open shop button. Walk down to the water to fish.";
-  if (stance && isFishingStance(stance)) return "Click the water to aim. Hold to charge, release in the pale band.";
-  return "Walk to the water.";
+  if (stance === "shop") return t("Open the tackle shack with E or the Open shop button. Walk down to the water to fish.");
+  if (stance && isFishingStance(stance)) return t("Click the water to aim. Hold to charge, release in the pale band.");
+  return t("Walk to the water.");
 }
 
 export type Fight = {
@@ -95,12 +98,12 @@ type Timers = {
   nibbleOff?: number;
 };
 
-const WAIT_HINT = "Watch the bobber. A nibble first — strike on the real dip.";
-const HOTSPOT_WAIT_HINT = "Your lure is in the bubbles. Watch the bobber — strike on the real dip.";
-const SHORT_CAST_HINT = "Short cast — only small fish will look.";
+const waitHint = () => t("Watch the bobber. A nibble first — strike on the real dip.");
+const hotspotWaitHint = () => t("Your lure is in the bubbles. Watch the bobber — strike on the real dip.");
+const shortCastHint = () => t("Short cast — only small fish will look.");
 
 function movedHint(spot: SpotId) {
-  return `The bubbles moved to the ${SPOT_LABELS[spot]}.`;
+  return t("The bubbles moved to the {spot}.", { spot: t(SPOT_LABELS[spot]) });
 }
 
 export function useFishingGame(
@@ -140,7 +143,7 @@ export function useFishingGame(
   const aimHintRef = useRef<AimHint>("dock");
   const stanceRef = useRef<StanceId>("shop");
   const timers = useRef<Timers>({});
-  const waitHintRef = useRef(WAIT_HINT);
+  const waitHintRef = useRef("");
   const resultAtRef = useRef(0);
   const [phase, setPhase] = useState<ScenePhase>("idle");
   const [power, setPower] = useState(0);
@@ -150,7 +153,7 @@ export function useFishingGame(
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [nibble, setNibble] = useState(false);
-  const [hint, setHint] = useState("Walk to the water.");
+  const [hint, setHint] = useState(() => t("Walk to the water."));
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
   const [hotspot, setHotspot] = useState<Hotspot | null>(null);
@@ -215,19 +218,19 @@ export function useFishingGame(
     setFight(next);
     setPhaseBoth("fight");
     if (underpowered) {
-      setHint("This fish is too heavy for your line.");
+      setHint(t("This fish is too heavy for your line."));
       timers.current.snap = window.setTimeout(() => {
         fx.snap();
         fx.haptic("snap");
-        setOutcome({ kind: "broke", message: `${species.name} snapped the line.` });
-        resetToIdle(`Line parted. Spend points on ${current.strength < species.minStrength ? "Strength" : "Accuracy"}.`);
+        setOutcome({ kind: "broke", message: t("{fish} snapped the line.", { fish: t(species.name) }) });
+        resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
       const runtime = makeFight(species, weight, current.strength);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
-      setHint(`${FIGHT_LINES[species.challenge][0]}. Ease off when it runs.`);
+      setHint(t("{line}. Ease off when it runs.", { line: fightLines(species.challenge)[0] }));
     }
   }, [resetToIdle]);
 
@@ -245,8 +248,8 @@ export function useFishingGame(
     setPhaseBoth("waiting");
     setNibble(false);
     // A short cast only draws commons, even in the bubbles.
-    waitHintRef.current = short ? SHORT_CAST_HINT : WAIT_HINT;
-    if (castHotspotRef.current) waitHintRef.current = short ? `${SHORT_CAST_HINT} ${HOTSPOT_WAIT_HINT}` : HOTSPOT_WAIT_HINT;
+    waitHintRef.current = short ? shortCastHint() : waitHint();
+    if (castHotspotRef.current) waitHintRef.current = short ? `${shortCastHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -276,13 +279,13 @@ export function useFishingGame(
       fx.bite();
       fx.haptic("bite");
       setPhaseBoth("hookset");
-      setHint("NOW — strike!");
+      setHint(t("NOW — strike!"));
       timers.current.hook = window.setTimeout(() => {
         if (phaseRef.current !== "hookset") return;
         // The missed fish stays in the outcome so the turn-away shows the same fish.
-        setOutcome({ kind: "miss", message: "Too slow. The fish dropped the bait.", fish: bitten });
+        setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
         // Hold result so the miss spring and the turn play out.
-        resetToIdle("Strike the moment the bobber goes under.", "result");
+        resetToIdle(t("Strike the moment the bobber goes under."), "result");
       }, hookWindowMs(current.accuracy, mercyNow));
     }, wait);
   }, [hour, lureRef, resetToIdle, season, sky]);
@@ -317,13 +320,13 @@ export function useFishingGame(
     setAimHint(landing.spot);
     aimHintRef.current = landing.spot;
     if (castPower < SLAP_POWER) {
-      setOutcome({ kind: "miss", message: "The lure slapped the dock." });
-      resetToIdle("Too little power. Hold longer.");
+      setOutcome({ kind: "miss", message: t("The lure slapped the dock.") });
+      resetToIdle(t("Too little power. Hold longer."));
       return;
     }
     if (castPower > BACKLASH_POWER) {
-      setOutcome({ kind: "miss", message: "Backlash. Recast." });
-      resetToIdle("Overpowered. Release in the band.");
+      setOutcome({ kind: "miss", message: t("Backlash. Recast.") });
+      resetToIdle(t("Overpowered. Release in the band."));
       return;
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
@@ -361,7 +364,7 @@ export function useFishingGame(
     powerRef.current = 0;
     setPower(0);
     setPhaseBoth("casting");
-    setHint("Keep the ring on the water. Release in the moss band.");
+    setHint(t("Keep the ring on the water. Release in the moss band."));
   }, [profile]);
 
   const strikeOrCast = useCallback((via: "pointer" | "key") => {
@@ -373,7 +376,7 @@ export function useFishingGame(
         setTheHook();
         break;
       case "waiting":
-        setHint("Too early. Wait for the bobber to go under, then strike.");
+        setHint(t("Too early. Wait for the bobber to go under, then strike."));
         break;
       case "result":
         // A frantic last click of the fight should not throw away the catch card unread.
@@ -415,7 +418,7 @@ export function useFishingGame(
     const onBlur = () => {
       reelKeyRef.current = false;
       reelPointerRef.current = null;
-      if (phaseRef.current === "casting") resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
+      if (phaseRef.current === "casting") resetToIdle(t("Cast cancelled. Click the water or hold Space to try again."));
     };
     window.addEventListener("keydown", down);
     window.addEventListener("keyup", up);
@@ -432,7 +435,7 @@ export function useFishingGame(
     if (!surface) return;
     const down = (event: PointerEvent) => {
       if (event.pointerType === "touch" && !event.isPrimary) {
-        if (phaseRef.current === "casting") resetToIdle("Camera moved. Hold one finger or Space to cast.");
+        if (phaseRef.current === "casting") resetToIdle(t("Camera moved. Hold one finger or Space to cast."));
         // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
         if (phaseRef.current === "waiting") setHint(waitHintRef.current);
         return;
@@ -465,7 +468,7 @@ export function useFishingGame(
       if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
       if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
-      resetToIdle("Cast cancelled. Click the water or hold Space to try again.");
+      resetToIdle(t("Cast cancelled. Click the water or hold Space to try again."));
     };
     surface.addEventListener("pointerdown", down);
     window.addEventListener("pointerup", up);
@@ -542,17 +545,17 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            setHint("Landed. Click the water or hold Space to cast again.");
+            setHint(t("Landed. Click the water or hold Space to cast again."));
           } else if (result === "snapped") {
             fx.snap();
             fx.haptic("snap");
-            setOutcome({ kind: "broke", message: `${current.species.name} snapped the line — too much tension.` });
-            resetToIdle("Too much tension — let go when the bar turns red or the fish is about to run.");
+            setOutcome({ kind: "broke", message: t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) }) });
+            resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run."));
           } else if (result === "escaped") {
             fx.snap();
             fx.haptic("snap");
-            setOutcome({ kind: "broke", message: `${current.species.name} took all the line and threw the hook.` });
-            resetToIdle("Ran out of line — hold to reel whenever the fish is calm.");
+            setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
+            resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm."));
           }
         }
       } catch (error) {
@@ -564,8 +567,8 @@ export function useFishingGame(
         clearFight();
         setPower(0);
         setPhaseBoth("result");
-        setOutcome({ kind: "error", message: "The fishing loop hit a problem. You can cast again." });
-        setHint(error instanceof Error ? error.message : "The fishing loop hit a problem.");
+        setOutcome({ kind: "error", message: t("The fishing loop hit a problem. You can cast again.") });
+        setHint(error instanceof Error ? error.message : t("The fishing loop hit a problem."));
       }
     };
     frame = requestAnimationFrame(loop);

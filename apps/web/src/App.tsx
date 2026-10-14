@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
+import { useT } from "./i18n";
 import { BestsPage } from "./field/bests/BestsPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
@@ -19,12 +20,13 @@ import { RegisterPage } from "./pages/Register";
 
 function Gate({ children }: { children: ReactNode }) {
   const session = authClient.useSession();
+  const t = useT();
   if (session.isPending) {
     return (
       <div className="auth-shell">
         <div className="auth-card">
           <h1>Stillwater</h1>
-          <p className="lede">Fog lifting…</p>
+          <p className="lede">{t("Fog lifting…")}</p>
         </div>
       </div>
     );

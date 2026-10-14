@@ -15,6 +15,7 @@ import {
 } from "@stillwater/shared";
 import { authClient } from "../auth-client";
 import { updateSettings, useSettings } from "../game/settings";
+import { tn, useT } from "../i18n";
 
 type Props = {
   profile: Profile;
@@ -29,6 +30,7 @@ type Props = {
 export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props) {
   const level = anglerLevel(profile.lifetimePoints);
   const { muted } = useSettings();
+  const t = useT();
   const header = useRef<HTMLElement>(null);
   // Phones stack the scene's chips under the HUD, whose height changes as it wraps.
   useEffect(() => {
@@ -45,8 +47,8 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props)
     <header ref={header} className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
       <div className="hud-brand">
         {/* The season rides in the eyebrow: one more chip wrapped the HUD on laptop widths. */}
-        <span className="eyebrow" title={season ? SEASON_BLURB[season] : undefined}>
-          {season ? `Northern lake · ${SEASON_LABELS[season]}` : "Northern lake"}
+        <span className="eyebrow" title={season ? t(SEASON_BLURB[season]) : undefined}>
+          {season ? t("Northern lake · {season}", { season: t(SEASON_LABELS[season]) }) : t("Northern lake")}
         </span>
         <strong>Stillwater</strong>
         <div className="hud-user">
@@ -54,44 +56,44 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp }: Props)
         </div>
       </div>
       <div className="hud-stats">
-        <span className="hour-chip">{LAKE_HOUR_LABELS[hour]}</span>
+        <span className="hour-chip">{t(LAKE_HOUR_LABELS[hour])}</span>
         {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
-        <span className="sky-chip" title={SKY_BLURB[sky]}>
-          {SKY_LABELS[sky]}
+        <span className="sky-chip" title={t(SKY_BLURB[sky])}>
+          {t(SKY_LABELS[sky])}
         </span>
-        <span className="level-chip">Level {level}</span>
-        <span className="points-chip">{profile.points} points</span>
+        <span className="level-chip">{t("Level {level}", { level })}</span>
+        <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
         <span className="skill-chip">
-          <small>{SKILL_LABELS.strength}</small> {profile.strength}
-        </span>
-        <span className="skill-chip">
-          <small>{SKILL_LABELS.accuracy}</small> {profile.accuracy}
+          <small>{t(SKILL_LABELS.strength)}</small> {profile.strength}
         </span>
         <span className="skill-chip">
-          <small>{SKILL_LABELS.patience}</small> {profile.patience}
+          <small>{t(SKILL_LABELS.accuracy)}</small> {profile.accuracy}
         </span>
-        <Link className="hud-link" to="/catches">Field log</Link>
-        <Link className="hud-link" to="/log">Catch log</Link>
-        <Link className="hud-link" to="/board">Board</Link>
+        <span className="skill-chip">
+          <small>{t(SKILL_LABELS.patience)}</small> {profile.patience}
+        </span>
+        <Link className="hud-link" to="/catches">{t("Field log|hud")}</Link>
+        <Link className="hud-link" to="/log">{t("Catch log|hud")}</Link>
+        <Link className="hud-link" to="/board">{t("Board")}</Link>
         <button
           className="hud-link"
           type="button"
           onClick={() => updateSettings({ muted: !muted })}
         >
-          {muted ? "Sound" : "Mute"}
+          {muted ? t("Sound") : t("Mute")}
         </button>
         {onPackUp && (
           <button className="hud-link" type="button" onClick={onPackUp}>
-            Pack up
+            {t("Pack up")}
           </button>
         )}
         {onSettings && (
           <button className="hud-link" type="button" onClick={onSettings}>
-            Settings
+            {t("Settings|hud")}
           </button>
         )}
         <button className="hud-link" type="button" onClick={() => authClient.signOut()}>
-          Logout
+          {t("Logout")}
         </button>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import type { ChallengeId, FishSpecies } from "@stillwater/shared";
+import { t } from "../i18n";
 import { difficulty01 } from "./logic";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
@@ -51,13 +52,21 @@ const SURGE_PULL = 0.6;
 const RUN_GRACE_MS = 300;
 const GRACE_TENSION = 0.95;
 
-export const FIGHT_LINES: Record<ChallengeId, [string, string, string]> = {
-  mash: ["Reel in quick pumps", "Let go now — it's shaking", "LET GO — head shake!"],
-  timing: ["Reel a steady retrieve", "Let go now — it's lining up", "LET GO — it's running!"],
-  tension: ["Reel and grind it in", "Let go now — the rod loads", "LET GO — bulldog run!"],
-  sequence: ["Reel in short pumps", "Let go now — another burst", "LET GO — double run!"],
-  surge: ["Reel easy — don't horse it", "Let go now — it's gathering", "LET GO — long run!"],
-};
+/** The fight card's three calls for a challenge (calm, warning, run), in the player's language. */
+export function fightLines(challenge: ChallengeId): [string, string, string] {
+  switch (challenge) {
+    case "mash":
+      return [t("Reel in quick pumps"), t("Let go now — it's shaking"), t("LET GO — head shake!")];
+    case "timing":
+      return [t("Reel a steady retrieve"), t("Let go now — it's lining up"), t("LET GO — it's running!")];
+    case "tension":
+      return [t("Reel and grind it in"), t("Let go now — the rod loads"), t("LET GO — bulldog run!")];
+    case "sequence":
+      return [t("Reel in short pumps"), t("Let go now — another burst"), t("LET GO — double run!")];
+    case "surge":
+      return [t("Reel easy — don't horse it"), t("Let go now — it's gathering"), t("LET GO — long run!")];
+  }
+}
 
 export function makeFight(
   species: FishSpecies,
