@@ -324,7 +324,10 @@ export const PL_GAME: PlBook = {
   "Missed the lake.": "Chybiony rzut — nie w jezioro.",
   "Open the tackle shack with E or the Open shop button. Walk down to the water to fish.":
     "Otwórz szopę ze sprzętem klawiszem E albo przyciskiem Otwórz sklep. Zejdź nad wodę, by łowić.",
-  "Click the water to aim. Hold to charge, release in the pale band.": "Kliknij wodę, by wycelować. Przytrzymaj, by napiąć, puść w jasnym pasku.",
+  "Click the water to aim. Hold to charge, release in the moss band.": "Kliknij wodę, by wycelować. Przytrzymaj, by napiąć, puść w zielonym pasku.",
+  "Touch the water to aim. Hold to charge, lift in the moss band.": "Dotknij wody, by wycelować. Przytrzymaj, by napiąć, podnieś palec w zielonym pasku.",
+  "Tap Open shop to visit the tackle shack. Walk down to the water to fish.":
+    "Stuknij Otwórz sklep, by zajrzeć do szopy ze sprzętem. Zejdź nad wodę, by łowić.",
   "Walk to the water.": "Podejdź do wody.",
   "Watch the bobber. A nibble first — strike on the real dip.": "Obserwuj spławik. Najpierw skubnięcie — zatnij, gdy naprawdę zanurkuje.",
   "Your lure is in the bubbles. Watch the bobber — strike on the real dip.": "Przynęta jest w bąblach. Obserwuj spławik — zatnij, gdy naprawdę zanurkuje.",

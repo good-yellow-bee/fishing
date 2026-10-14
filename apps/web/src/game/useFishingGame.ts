@@ -77,9 +77,21 @@ function hintFromDataset(raw: string | undefined): AimHint | null {
   return null;
 }
 
-function idleHint(stance: StanceId | null) {
-  if (stance === "shop") return t("Open the tackle shack with E or the Open shop button. Walk down to the water to fish.");
-  if (stance && isFishingStance(stance)) return t("Click the water to aim. Hold to charge, release in the pale band.");
+export function touchScreen() {
+  return typeof window !== "undefined" && Boolean(window.matchMedia?.("(pointer: coarse)").matches);
+}
+
+export function idleHint(stance: StanceId | null, touch = touchScreen()) {
+  if (stance === "shop") {
+    return touch
+      ? t("Tap Open shop to visit the tackle shack. Walk down to the water to fish.")
+      : t("Open the tackle shack with E or the Open shop button. Walk down to the water to fish.");
+  }
+  if (stance && isFishingStance(stance)) {
+    return touch
+      ? t("Touch the water to aim. Hold to charge, lift in the moss band.")
+      : t("Click the water to aim. Hold to charge, release in the moss band.");
+  }
   return t("Walk to the water.");
 }
 
