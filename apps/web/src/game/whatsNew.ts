@@ -1,13 +1,13 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14d";
+export const NEWS_ID = "2026-10-14e";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "Pick your float's colour in Settings.",
-  "A turtle basks on a log on bright summer days. Cast close and it slides off.",
-  "Listen for the owl on the far bank after dark.",
-  "Now and then a fish leaps clear out on the open lake.",
+  "Turn birdsong, frogs and rain up or down with the new Nature sounds slider in Settings.",
+  "Watch the heron: now and then it comes up with a fish.",
+  "On clear nights the moon lays a silver road across the water.",
+  "Rain soaks the dock planks dark, and you can see the drops land.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */

@@ -40,6 +40,15 @@ export function applyToon(root: THREE.Object3D, shadows = true) {
   });
 }
 
+/** Scales every material colour under `root`; materials must be the root's own (as applyToon makes them). */
+export function shadeColours(root: THREE.Object3D, shade: number) {
+  root.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const current = Array.isArray(obj.material) ? obj.material : [obj.material];
+    current.forEach((material) => (material as THREE.MeshToonMaterial).color?.multiplyScalar(shade));
+  });
+}
+
 export function disposeMaterials(root: THREE.Object3D) {
   const materials = new Set<THREE.Material>();
   root.traverse((obj) => {

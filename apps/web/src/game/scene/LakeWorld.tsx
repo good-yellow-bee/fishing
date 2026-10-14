@@ -23,6 +23,8 @@ import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
+import { DockRain } from "./DockRain";
+import { WET_SHADE, dockWet } from "./dockWet";
 import { moonRoad, moonTexture } from "./moonDisc";
 import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
@@ -1478,7 +1480,7 @@ function BankWalks() {
   );
 }
 
-function PierDeck() {
+function PierDeck({ shade }: { shade: number }) {
   return PIER_BOARDS.map((board, i) => (
     <mesh
       key={i}
@@ -1488,21 +1490,23 @@ function PierDeck() {
       receiveShadow
     >
       <boxGeometry args={[board.halfX * 2, PIER_THICK, board.halfZ * 2]} />
-      <meshToonMaterial color={PIER_PLANK[i % 2]} gradientMap={toonRamp()} />
+      <meshToonMaterial color={new THREE.Color(PIER_PLANK[i % 2]).multiplyScalar(shade)} gradientMap={toonRamp()} />
     </mesh>
   ));
 }
 
-function Dock() {
+/** The pier and its planks; rain soaks the wood darker (`wet`). */
+function Dock({ wet }: { wet: boolean }) {
+  const shade = wet ? WET_SHADE : 1;
   return (
     <group>
       {BRIDGE_SPANS.map((z) => (
-        <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} />
+        <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} shade={shade} />
       ))}
-      <PierDeck />
-      <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} />
-      <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} />
-      <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} />
+      <PierDeck shade={shade} />
+      <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} shade={shade} />
+      <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} shade={shade} />
+      <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} shade={shade} />
     </group>
   );
 }
@@ -1776,7 +1780,8 @@ export const LakeWorld = memo(function LakeWorld({
       <Rock position={[12.8, 0.3, -12.7]} scale={[1.1, 0.55, 0.8]} rotation={0.7} />
       <Rock position={[-14.8, 0.35, -10.9]} scale={[1.2, 0.6, 0.9]} rotation={1.8} />
       <Rock position={[19.6, 0.28, -6.4]} scale={[0.9, 0.5, 0.7]} rotation={2.6} />
-      <Dock />
+      <Dock wet={dockWet(weather.rain, season)} />
+      {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
       <Shack />
       <ShorePath />
       <BankWalks />
