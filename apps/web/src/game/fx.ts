@@ -485,6 +485,37 @@ export const fx = {
       BELL_PARTIALS.forEach((partial, i) => tone("sine", pitch * partial, pitch * partial * 0.998, 0.5 / (i + 1), loud / (i + 1.5), when));
     });
   },
+  /**
+   * Thunder `when` seconds from now: low-passed noise that rolls and grumbles away. A near strike (1) opens on a
+   * sharp crack and rolls louder; a far one (0) is only a low rumble. Quiet until the lake's sounds have started.
+   */
+  thunder(when: number, near: number) {
+    if (!this.enabled || !lapSrc) return;
+    const ac = audio();
+    const t = ac.currentTime + when;
+    const length = 3.5 + (1 - near) * 2.5;
+    const src = ac.createBufferSource();
+    src.buffer = noise();
+    src.loop = true;
+    const filter = ac.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(160 + near * 340, t);
+    filter.frequency.exponentialRampToValueAtTime(70, t + length);
+    const level = ac.createGain();
+    const peak = 0.05 * (0.35 + 0.65 * near);
+    level.gain.setValueAtTime(0.0001, t);
+    level.gain.exponentialRampToValueAtTime(peak, t + 0.06 + (1 - near) * 0.5);
+    // A few grumbles as the roll comes back off the hills.
+    for (let i = 1; i <= 3; i++) {
+      const at = t + (length * i) / 4.5;
+      level.gain.setTargetAtTime(peak * (0.9 - i * 0.2) * (0.6 + Math.random() * 0.4), at, 0.25);
+    }
+    level.gain.setTargetAtTime(0.0001, t + length * 0.8, 0.3);
+    src.connect(filter).connect(level).connect(bus());
+    src.start(t);
+    src.stop(t + length + 1.5);
+    if (near > 0.6) noiseBurst("bandpass", 1500, 400, 0.18, 0.03 * near, when);
+  },
   bite() {
     if (!this.enabled) return;
     tone("sine", 880, 900, 0.07, 0.035);

@@ -30,6 +30,7 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { RodBell } from "./RodBell";
 import { Windsock } from "./Windsock";
+import { Lightning } from "./Lightning";
 import {
   FISH_LEAP_SEC,
   HOOKSET_SEC,
@@ -145,6 +146,8 @@ type Props = {
   hotspot: Hotspot | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
   rising?: boolean;
+  /** A thunderstorm: the sky flashes now and then and thunder follows. */
+  storm?: boolean;
   /** Other anglers' recent catches, as faint rings on their bank's water. */
   tracks?: readonly LodgeTrack[];
   /** Live cast power, read each frame so the ring grows without a re-render. */
@@ -1841,7 +1844,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -1869,6 +1872,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {rising && <RiseRings spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />
+      {storm && <Lightning />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} />
