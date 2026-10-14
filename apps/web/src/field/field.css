@@ -650,7 +650,7 @@ button.field-primary:disabled {
 
   .field-tab {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     position: fixed;
     left: 0;
     right: 0;
@@ -675,6 +675,17 @@ button.field-primary:disabled {
     border-top-color: #d9a94e;
     background: transparent;
     color: #fff8ec;
+  }
+}
+
+/* Seven tabs on a narrow phone: long labels such as WYPRAWY and REKORDY must still fit their column. */
+@media (max-width: 420px) {
+  .field-tab a {
+    padding-inline: 0;
+    font-size: 10px;
+    letter-spacing: 0;
+    overflow: hidden;
+    text-overflow: clip;
   }
 
   .catch-card,
