@@ -547,6 +547,26 @@ describe("settings", () => {
     expect(page.querySelector(".keys-card")).not.toBeNull();
   });
 
+  it("quiets the lake in another tab unless the player keeps it playing there", async () => {
+    const { fx } = await import("../game/fx");
+    const { reloadSettings, updateSettings } = await import("../game/settings");
+    await openDock("/?hour=day&sky=clear");
+    const hide = (state: "hidden" | "visible") => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+      act(() => void document.dispatchEvent(new Event("visibilitychange")));
+    };
+    hide("hidden");
+    expect(fx.away).toBe(true);
+    hide("visible");
+    expect(fx.away).toBe(false);
+    act(() => updateSettings({ backgroundSound: true }));
+    hide("hidden");
+    expect(fx.away).toBe(false);
+    hide("visible");
+    localStorage.clear();
+    reloadSettings();
+  });
+
   it("changes the lure with Q and R while it can change", async () => {
     const page = await openDock("/?hour=day&sky=clear");
     const options = [...page.querySelectorAll<HTMLOptionElement>(".lure-choice option")].map((o) => o.value);

@@ -389,6 +389,7 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "Settings has a battery saver: the lake draws 30 frames a second to spare a phone's battery.":
     "Ustawienia mają oszczędzanie baterii: jezioro rysuje 30 klatek na sekundę, by oszczędzać baterię telefonu.",
+  "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",
   "Battery saver (30 a second)": "Oszczędzanie baterii (30 klatek na sekundę)",

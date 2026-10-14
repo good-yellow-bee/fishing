@@ -6,6 +6,8 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let enabledFlag = true;
+/** The page is in the background and the player wants the lake quiet there. */
+let awayFlag = false;
 let volumeLevel = 1;
 let nature: GainNode | null = null;
 let natureLevel = 1;
@@ -14,12 +16,17 @@ function audio() {
   if (!ctx) {
     ctx = new AudioContext();
     master = ctx.createGain();
-    master.gain.value = enabledFlag ? volumeLevel : 0;
+    master.gain.value = masterLevel();
     master.connect(ctx.destination);
   }
   // Recover from suspension (e.g. iOS Safari audio interruption).
   if (ctx.state !== "running") void ctx.resume();
   return ctx;
+}
+
+/** The master gain: the volume, or nothing when muted or quieted in the background. */
+function masterLevel() {
+  return enabledFlag && !awayFlag ? volumeLevel : 0;
 }
 
 function bus() {
@@ -563,7 +570,7 @@ export const fx = {
   },
   set enabled(v: boolean) {
     enabledFlag = v;
-    if (ctx && master) master.gain.setTargetAtTime(v ? volumeLevel : 0, ctx.currentTime, 0.01);
+    if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.01);
   },
   /** Master volume, 0..1, under the mute switch. */
   get volume() {
@@ -571,7 +578,18 @@ export const fx = {
   },
   set volume(v: number) {
     volumeLevel = Math.min(1, Math.max(0, v));
-    if (ctx && master) master.gain.setTargetAtTime(enabledFlag ? volumeLevel : 0, ctx.currentTime, 0.01);
+    if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.01);
+  },
+  /**
+   * Quiets everything while the page is in the background. The sounds keep running silently,
+   * so nothing queued up plays in a burst when the player comes back.
+   */
+  get away() {
+    return awayFlag;
+  },
+  set away(v: boolean) {
+    awayFlag = v;
+    if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.05);
   },
   /** The lake's own sounds, 0..1, under the master volume. */
   get natureVolume() {
