@@ -905,6 +905,14 @@ Claude picked this for phones: the lake drew every screen refresh (60 or 120 a s
 |---|---|---|---|
 | ~~AW1~~ | ~~A Frame rate setting: Smooth, or Battery saver at 30 frames a second (the canvas draws on demand, asked 30 times a second); the auto step-down to Lite ignores the saver's own 30~~ (#210) | settings / performance | S |
 
+## Wave AX — Quiet in the background (added 2026-10-14, after Wave AW shipped)
+
+Claude picked this: the lake's loops and calls kept playing after the player switched to another tab or app.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AX1~~ | ~~The lake goes quiet while the game is in another tab or app (master gain to zero, sounds keep running so nothing bursts on return); a Settings switch keeps it playing for anyone who likes the ambience~~ (#211) | audio / settings | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

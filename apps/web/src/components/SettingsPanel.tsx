@@ -119,6 +119,10 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           <input type="checkbox" checked={current.muted} onChange={(event) => updateSettings({ muted: event.target.checked })} />
           {t("Mute all sound")}
         </label>
+        <label className="settings-check">
+          <input type="checkbox" checked={current.backgroundSound} onChange={(event) => updateSettings({ backgroundSound: event.target.checked })} />
+          {t("Keep the lake's sounds playing in another tab or app")}
+        </label>
         <Choices
           name="textSize"
           legend={t("Text size")}

@@ -334,6 +334,19 @@ export function DockPage() {
     fx.natureVolume = prefs.natureVolume;
   }, [prefs.muted, prefs.volume, prefs.natureVolume]);
 
+  // The lake goes quiet in another tab or app unless the player keeps it playing there.
+  useEffect(() => {
+    const follow = () => {
+      fx.away = !prefs.backgroundSound && document.visibilityState === "hidden";
+    };
+    follow();
+    document.addEventListener("visibilitychange", follow);
+    return () => {
+      document.removeEventListener("visibilitychange", follow);
+      fx.away = false;
+    };
+  }, [prefs.backgroundSound]);
+
   // The page's CSS mirrors the system reduced-motion rules under this flag.
   useEffect(() => {
     const root = document.documentElement;
