@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { fightLines, isCleanFight, RED_TENSION, type FightPerformance, type FightSim } from "../game/fight";
+import { fightLines, isCleanFight, RED_TENSION, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { oneDecimal } from "../game/logic";
@@ -11,11 +11,9 @@ type Props = {
   performance: { current: FightPerformance | null };
 };
 
-function tensionColor(tension: number) {
-  if (tension < 0.55) return "#6a8f5a";
-  if (tension < RED_TENSION) return "#d9a94e";
-  return "#b85c38";
-}
+const ZONE_COLOR: Record<TensionZone, string> = { easy: "#6a8f5a", tight: "#d9a94e", red: "#b85c38" };
+/** Said in words next to the bar, so the zone reads without telling green from red. */
+const ZONE_WORD: Record<TensionZone, string> = { easy: "Easy", tight: "Tight", red: "Too tight" };
 
 export function FightBar({ fight, sim, performance }: Props) {
   const { reelMode } = useSettings();
@@ -29,6 +27,7 @@ export function FightBar({ fight, sim, performance }: Props) {
   // A language change reads the lines again.
   const lines = useMemo(() => fightLines(fight.species.challenge), [fight.species.challenge, lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
+  const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,9 +36,14 @@ export function FightBar({ fight, sim, performance }: Props) {
     const loop = (now: number) => {
       const state = sim.current;
       if (state) {
+        const zone = tensionZone(state.tension);
         if (tensionFill.current) {
           tensionFill.current.style.width = `${Math.min(100, state.tension * 100)}%`;
-          tensionFill.current.style.background = tensionColor(state.tension);
+          tensionFill.current.style.backgroundColor = ZONE_COLOR[zone];
+        }
+        if (tensionMeter.current && tensionMeter.current.dataset.zone !== zone) {
+          tensionMeter.current.dataset.zone = zone;
+          if (zoneWord.current) zoneWord.current.textContent = t(ZONE_WORD[zone]);
         }
         if (lineFill.current) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
@@ -49,7 +53,9 @@ export function FightBar({ fight, sim, performance }: Props) {
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame.
         if (now - spokenAt >= 250) {
           spokenAt = now;
-          tensionMeter.current?.setAttribute("aria-valuenow", String(Math.round(Math.min(1, state.tension) * 100)));
+          const percent = Math.round(Math.min(1, state.tension) * 100);
+          tensionMeter.current?.setAttribute("aria-valuenow", String(percent));
+          tensionMeter.current?.setAttribute("aria-valuetext", `${percent}% · ${t(ZONE_WORD[tensionZone(state.tension)])}`);
           lineMeter.current?.setAttribute("aria-valuenow", String(Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100)));
         }
         const record = performance.current;
@@ -80,7 +86,12 @@ export function FightBar({ fight, sim, performance }: Props) {
         <p className="warn">{t("This fish is too heavy for your line.")}</p>
       ) : (
         <>
-          <span className="fight-label" id="fight-tension-label">{t("Tension")}</span>
+          <span className="fight-label" id="fight-tension-label">
+            {t("Tension")}
+            <span ref={zoneWord} className="fight-zone" aria-hidden="true">
+              {t(ZONE_WORD.easy)}
+            </span>
+          </span>
           <div
             ref={tensionMeter}
             className="bar"
@@ -89,10 +100,13 @@ export function FightBar({ fight, sim, performance }: Props) {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={0}
+            data-zone="easy"
           >
+            {/* The red zone is hatched, so it stands out without colour. */}
+            <i className="danger-zone" style={{ left: `${RED_TENSION * 100}%` }} />
             <div ref={tensionFill} className="fill" />
-            <i className="tick" style={{ left: "55%" }} />
-            <i className="tick" style={{ left: "80%" }} />
+            <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
+            <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
           </div>
           <span className="fight-label" id="fight-line-label">{t("Line in")}</span>
           <div ref={lineMeter} className="bar" role="meter" aria-labelledby="fight-line-label" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>

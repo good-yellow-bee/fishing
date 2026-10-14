@@ -339,7 +339,7 @@ Claude picked these after Wave G; the owner can reorder or drop any.
 | H1 | ~~Load the 3D lake on demand~~ (shipped) | perf | S/M |
 | H2 | ~~A heron wades the reed shallows~~ (shipped) | wildlife | M |
 | H3 | Save the landed card as a picture | share | S/M |
-| H4 | Tension bar that reads without colour | a11y | S |
+| H4 | ~~Tension bar that reads without colour~~ (shipped) | a11y | S |
 | H5 | Species of the week on the weekly board | retention | M |
 
 - **H1 · Split the bundle.** The whole game ships as one 1.6 MB script (466 kB gzipped), so the sign-in page waits for three.js. Lazy-load the play scene and the field log routes so sign-in, the board and the catch log open fast.
