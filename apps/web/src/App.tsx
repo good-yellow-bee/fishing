@@ -2,6 +2,7 @@ import { lazy, Suspense, type ReactNode } from "react";
 import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
+import { useTextSize } from "./game/settings";
 import { BestsPage } from "./field/bests/BestsPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
@@ -70,6 +71,7 @@ function FieldLayout() {
 }
 
 export function App() {
+  useTextSize();
   return (
     <Routes>
       <Route element={<FieldLayout />}>

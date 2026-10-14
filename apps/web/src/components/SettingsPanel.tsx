@@ -44,7 +44,7 @@ function LanguageChoice() {
   );
 }
 
-/** Language, sound, camera, effects and reel controls, remembered in this browser. */
+/** Language, text size, sound, camera, effects and reel controls, remembered in this browser. */
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const current = useSettings();
   const t = useT();
@@ -78,6 +78,15 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           <input type="checkbox" checked={current.muted} onChange={(event) => updateSettings({ muted: event.target.checked })} />
           {t("Mute all sound")}
         </label>
+        <Choices
+          name="textSize"
+          legend={t("Text size")}
+          options={[
+            { value: "normal", label: t("Normal") },
+            { value: "large", label: t("Large") },
+            { value: "larger", label: t("Larger") },
+          ]}
+        />
         <Choices
           name="reelMode"
           legend={t("Reeling")}

@@ -394,13 +394,13 @@ Claude picked these after Wave J; the owner can reorder or drop any.
 | K2 | ~~Moon phases at night~~ (shipped) | sky | M |
 | K3 | ~~A loon you can see on the open water~~ (shipped) | wildlife | M |
 | K4 | ~~Wind that pushes the float~~ (shipped) | weather/gameplay | M/L |
-| K5 | Larger text setting | accessibility | S |
+| K5 | ~~Larger text setting~~ (shipped) | accessibility | S |
 
 - **K1 · Snow.** A rainy winter day snows instead: slow flakes drifting over the lake and shore that melt on the water, no rain hiss, and "Snow" on the HUD, the chalk board, the veil line and the catch log. Fish read it as rain, so nothing about the odds changes.
 - **K2 · Moon phases.** The night moon shows the real lunar phase (a lit crescent, quarter or gibbous with a faint earthshine side), the moonlight and its glow scale with how much is lit (a new moon keeps 55% of the light so night stays playable), and the HUD eyebrow and the chalk board name a full or new moon. Near full (over 75% lit), rare and legendary fish come up to 15% more at night, reshuffled within what the angler can land. `?moon=0..1` pins the phase.
 - **K3 · Loon.** The loon you hear at night gets a body: at dusk and night (not in winter) it paddles a slow loop on open water north of the dock, dives every half minute and comes up well along the loop with a ring, tips its head back when it calls, and its call is panned and softened by where it swims relative to the camera. It keeps to its loop rather than chasing the float.
 - **K4 · Wind.** The day's wind (the same one the field log records) walks a sitting float downwind: 4 cm a second on a light day, 8 when breezy, 13 when strong, for up to 25 seconds, never onto the shore or the dock. A bite and the fight start where the float drifted to. The sky chip's tooltip names the wind. The chop itself does not lean with it yet.
-- **K5 · Text size.** A Settings choice for larger text (HUD, cards, panels), kept per browser like the other settings.
+- **K5 · Text size.** Settings offers Normal, Large (1.15x) and Larger (1.3x) text, kept per browser like the other settings. It scales the HUD, footer panels, cards, toasts, Settings, the field log and lodge pages, and the sign-in screens; the lake and its canvas keep their size.
 
 ## Risks / open questions for the owner
 
