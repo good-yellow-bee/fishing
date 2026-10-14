@@ -29,6 +29,8 @@ import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Loon } from "./Loon";
 import { loonOut } from "./loonMotion";
+import { Bats } from "./Bats";
+import { batsOut } from "./batFlight";
 import { Otter } from "./Otter";
 import { LILY_HEART, LILY_PETALS, lilyBloom, petalAngles, type Bloom } from "./lilyBloom";
 import { FallingLeaves } from "./FallingLeaves";
@@ -1797,6 +1799,7 @@ export const LakeWorld = memo(function LakeWorld({
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
       {otterOut(hour, season) && <Otter />}
+      {batsOut(hour, sky, season) && <Bats />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
