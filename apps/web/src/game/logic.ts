@@ -7,6 +7,7 @@ import {
   rollWeight,
   biteHourMul,
   biteWeatherMul,
+  biteSeasonMul,
   LAKE_HOURS,
   lakeHour,
   lakeHourWaitMul,
@@ -14,6 +15,7 @@ import {
   lurePull,
   type FishSpecies,
   type LakeHour,
+  type LakeSeason,
   type Profile,
   type Sky,
   type SpotId,
@@ -156,6 +158,7 @@ export function pickBite(
   sky?: Sky,
   hotspot = false,
   mercy = false,
+  season?: LakeSeason,
 ): FishSpecies {
   let home = FISH.filter((fish) => fish.spots.includes(spot));
   if (mercy) {
@@ -206,11 +209,13 @@ export function pickBite(
   ];
   pool = [...drawing, ...fillers];
   const legendaryBonus = anglerLevel(profile.lifetimePoints) >= 6 && (hour === "night" || sky === "rain");
+  // Like the sky, the season reshuffles within what the angler can land, so it never moves the landable share.
   const lift = (fish: FishSpecies) =>
     (sky ? biteWeatherMul(fish, sky) : 1) *
+    (season ? biteSeasonMul(fish, season) : 1) *
     (hotspot ? HOTSPOT_BITE[fish.rarity] : 1) *
     (legendaryBonus && fish.rarity === "legendary" ? 2 : 1);
-  const drawWeights = sky || hotspot || legendaryBonus ? reshuffle(pool, weights, profile, lift) : weights;
+  const drawWeights = sky || season || hotspot || legendaryBonus ? reshuffle(pool, weights, profile, lift) : weights;
   let roll = random() * drawWeights.reduce((sum, weight) => sum + weight, 0);
   for (let i = 0; i < pool.length; i++) {
     roll -= drawWeights[i]!;

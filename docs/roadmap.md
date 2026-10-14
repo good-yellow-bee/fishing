@@ -44,7 +44,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 | P21 | Catch photo → field log | journal/visual | M | E | P20 |
 | P22 | Water: caustics, sun road, rim | visual | M | E | perf memo |
 | P23 | ~~Atmosphere pass (fireflies, mist, bloom)~~ (shipped) | visual | M | E | P8, #53 |
-| P24 | Seasons on the lake | progression/content | L | F | #53, #50 |
+| P24 | ~~Seasons on the lake~~ (shipped) | progression/content | L | F | #53, #50 |
 | P25 | ~~Species lore + silhouettes~~ (shipped) | collection | S | F | — |
 
 ---
@@ -281,7 +281,7 @@ Already queued from the original plan: bubbling hotspot, level 4-8 unlocks, dail
 
 ## Wave F — The long year
 
-### P24 · Seasons on the lake
+### ~~P24 · Seasons on the lake~~ (shipped: real calendar months, with `?season=` to pin one; seasons only lean the odds inside what the angler can land, so no fish is ever locked away; fall turns the broadleaves red and orange, winter frosts the trees, snows the hills and rims the shore with ice, spring freshens the green; the HUD eyebrow names the season and the field guide says when a logged fish runs)
 - **Pitch:** the lake has a year — ice at the edges in winter, cedars red in fall, salmon running in October, burbot in February.
 - **Borrowed:** Animal Crossing (real-calendar availability); Stardew (seasonal fish lists).
 - **Why fun:** #53's `dailyConditions` already computes `dayOfYear` and a seasonal cosine for water temp — a season layer is one step further and the genre's biggest replay driver.
