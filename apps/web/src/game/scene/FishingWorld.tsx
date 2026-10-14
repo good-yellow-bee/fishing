@@ -34,6 +34,8 @@ import { RodBell } from "./RodBell";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
 import { Rainbow } from "./Rainbow";
+import { Aurora } from "./Aurora";
+import { auroraOut } from "./auroraCurtain";
 import { rainbowOut } from "./rainbowArc";
 import {
   FISH_LEAP_SEC,
@@ -2015,6 +2017,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <Windsock wind={wind ?? NO_WIND} />
       {storm && <Lightning />}
       {rainbowOut(hour, sky, season, storm) && <Rainbow hour={hour} />}
+      {auroraOut(new Date(), hour, sky, season) && <Aurora />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
       <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} />

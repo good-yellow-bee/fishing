@@ -712,7 +712,7 @@ Claude picked these after Wave AB; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| AC1 | Northern lights on some clear winter and fall nights, low over the far shore and mirrored in the water | scene | M |
+| ~~AC1~~ | ~~Northern lights on some clear winter and fall nights, low over the far shore and mirrored in the water~~ (#183) | scene | M |
 | AC2 | Swallows skim the water on summer dusks, dipping to drink and leaving tiny rings | scene | S/M |
 | AC3 | A woodpecker drums in the woods on mornings, with a caption | sound | S |
 | AC4 | Refresh the "New on the lake" card for Wave AC | onboarding | S |
