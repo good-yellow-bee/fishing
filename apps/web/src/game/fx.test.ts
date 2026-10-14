@@ -67,6 +67,18 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe("nature volume", () => {
+  it("keeps its own level inside 0..1", () => {
+    fx.natureVolume = 2;
+    expect(fx.natureVolume).toBe(1);
+    fx.natureVolume = -1;
+    expect(fx.natureVolume).toBe(0);
+    fx.natureVolume = 0.4;
+    expect(fx.natureVolume).toBe(0.4);
+    fx.natureVolume = 1;
+  });
+});
+
 describe("ambient conditions", () => {
   it("plays birds by day, crickets and loons at night, and rain only when it rains", () => {
     expect(ambientProfile("day", "clear")).toMatchObject({ wildlife: "birds", loons: false, rain: false });

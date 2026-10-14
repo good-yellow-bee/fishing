@@ -6,6 +6,8 @@ let master: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
 let enabledFlag = true;
 let volumeLevel = 1;
+let nature: GainNode | null = null;
+let natureLevel = 1;
 
 function audio() {
   if (!ctx) {
@@ -24,6 +26,17 @@ function bus() {
   return master!;
 }
 
+/** The lake's own sounds (water, wildlife, rain, wind, thunder) run through here, under the master, so they have a level of their own. */
+function natureBus() {
+  const ac = audio();
+  if (!nature) {
+    nature = ac.createGain();
+    nature.gain.value = natureLevel;
+    nature.connect(master!);
+  }
+  return nature;
+}
+
 function noise() {
   const ac = audio();
   if (!noiseBuf) {
@@ -40,7 +53,8 @@ function noiseBurst(
   freqTo: number,
   duration: number,
   gain: number,
-  when = 0
+  when = 0,
+  out: AudioNode = bus(),
 ) {
   const ac = audio();
   const t = ac.currentTime + when;
@@ -54,7 +68,7 @@ function noiseBurst(
   const g = ac.createGain();
   g.gain.setValueAtTime(gain, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-  src.connect(f).connect(g).connect(bus());
+  src.connect(f).connect(g).connect(out);
   src.start(t);
   src.stop(t + duration);
 }
@@ -141,12 +155,12 @@ function chorusSong(kind: number) {
   const base = 1900 + Math.random() * 1800;
   const quiet = 0.005 + Math.random() * 0.006;
   if (kind === 0) {
-    for (let n = 0; n < 4; n += 1) tone("sine", base * (1.25 - n * 0.08), base * (1.1 - n * 0.08), 0.11, quiet, n * 0.14);
+    for (let n = 0; n < 4; n += 1) tone("sine", base * (1.25 - n * 0.08), base * (1.1 - n * 0.08), 0.11, quiet, n * 0.14, 0, natureBus());
   } else if (kind === 1) {
-    for (let n = 0; n < 7; n += 1) tone("sine", base * 1.4, base * 1.3, 0.035, quiet * 0.8, n * 0.05);
+    for (let n = 0; n < 7; n += 1) tone("sine", base * 1.4, base * 1.3, 0.035, quiet * 0.8, n * 0.05, 0, natureBus());
   } else {
-    tone("sine", base, base * 1.5, 0.09, quiet);
-    tone("sine", base * 1.2, base * 1.9, 0.08, quiet * 0.85, 0.13);
+    tone("sine", base, base * 1.5, 0.09, quiet, 0, 0, natureBus());
+    tone("sine", base * 1.2, base * 1.9, 0.08, quiet * 0.85, 0.13, 0, natureBus());
   }
 }
 
@@ -157,15 +171,15 @@ function chirp() {
   if (wildlife === "chickadees") {
     // "Fee-bee": a clean high whistle, then one a step lower.
     const base = 3900 + Math.random() * 300;
-    tone("sine", base, base * 0.98, 0.32, 0.009);
-    tone("sine", base * 0.84, base * 0.82, 0.36, 0.008, 0.42);
+    tone("sine", base, base * 0.98, 0.32, 0.009, 0, 0, natureBus());
+    tone("sine", base * 0.84, base * 0.82, 0.36, 0.008, 0.42, 0, natureBus());
     wildlifeTimer = window.setTimeout(chirp, 4000 + Math.random() * 5000);
     return;
   }
   if (wildlife === "crickets") {
     const base = 3600 + Math.random() * 700;
-    tone("square", base, base * 0.96, 0.035, 0.003);
-    tone("square", base * 1.06, base, 0.025, 0.002, 0.07);
+    tone("square", base, base * 0.96, 0.035, 0.003, 0, 0, natureBus());
+    tone("square", base * 1.06, base, 0.025, 0.002, 0.07, 0, natureBus());
     wildlifeTimer = window.setTimeout(chirp, 180 + Math.random() * 420);
     return;
   }
@@ -175,8 +189,8 @@ function chirp() {
     return;
   }
   const base = 2000 + Math.random() * 1400;
-  tone("sine", base, base * 1.5, 0.09, 0.012);
-  tone("sine", base * 1.2, base * 1.9, 0.08, 0.01, 0.13);
+  tone("sine", base, base * 1.5, 0.09, 0.012, 0, 0, natureBus());
+  tone("sine", base * 1.2, base * 1.9, 0.08, 0.01, 0.13, 0, natureBus());
   wildlifeTimer = window.setTimeout(chirp, 2000 + Math.random() * 2000);
 }
 
@@ -202,7 +216,7 @@ function hootNote(freq: number, duration: number, gain: number, when: number) {
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(gain, t + duration * 0.25);
   g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-  osc.connect(g).connect(bus());
+  osc.connect(g).connect(natureBus());
   osc.start(t);
   osc.stop(t + duration);
 }
@@ -241,9 +255,9 @@ function loonCall() {
     const panner = ac.createStereoPanner();
     panner.pan.value = loonPlace.pan;
     level.connect(panner);
-    panner.connect(bus());
+    panner.connect(natureBus());
   } else {
-    level.connect(bus());
+    level.connect(natureBus());
   }
   const base = 520 + Math.random() * 80;
   tone("sine", base, base * 1.5, 0.9, 0.012, 0, 0, out);
@@ -265,7 +279,7 @@ function startRain() {
   filter.frequency.value = 1200;
   rainGain = ac.createGain();
   rainGain.gain.value = 0.0035;
-  rainSrc.connect(filter).connect(rainGain).connect(bus());
+  rainSrc.connect(filter).connect(rainGain).connect(natureBus());
   rainSrc.start();
 }
 
@@ -283,7 +297,7 @@ function geeseCall() {
   const honks = 3 + Math.floor(Math.random() * 4);
   for (let i = 0; i < honks; i++) {
     const base = 300 + Math.random() * 60;
-    tone("sawtooth", base, base * 0.86, 0.16, 0.0035, i * (0.28 + Math.random() * 0.2));
+    tone("sawtooth", base, base * 0.86, 0.16, 0.0035, i * (0.28 + Math.random() * 0.2), 0, natureBus());
   }
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
@@ -293,11 +307,11 @@ function frogCall() {
   if (!lapSrc || !profile().frogs) return;
   if (Math.random() < 0.3) {
     const base = 150 + Math.random() * 40;
-    tone("triangle", base * 1.15, base, 0.12, 0.012);
+    tone("triangle", base * 1.15, base, 0.12, 0.012, 0, 0, natureBus());
   } else {
     const peeps = 2 + Math.floor(Math.random() * 4);
     const base = 2700 + Math.random() * 500;
-    for (let i = 0; i < peeps; i++) tone("sine", base, base * 1.12, 0.07, 0.004, i * (0.32 + Math.random() * 0.1));
+    for (let i = 0; i < peeps; i++) tone("sine", base, base * 1.12, 0.07, 0.004, i * (0.32 + Math.random() * 0.1), 0, natureBus());
   }
   frogTimer = window.setTimeout(frogCall, 900 + Math.random() * 2200);
 }
@@ -319,7 +333,7 @@ function startWind() {
   const depth = ac.createGain();
   depth.gain.value = 0.004;
   windLfo.connect(depth).connect(windGain.gain);
-  windSrc.connect(filter).connect(windGain).connect(bus());
+  windSrc.connect(filter).connect(windGain).connect(natureBus());
   windSrc.start();
   windLfo.start();
 }
@@ -366,7 +380,7 @@ const ambient = {
     const lfoDepth = ac.createGain();
     lfoDepth.gain.value = 0.005;
     lapLfo.connect(lfoDepth).connect(lapGain.gain);
-    lapSrc.connect(f).connect(lapGain).connect(bus());
+    lapSrc.connect(f).connect(lapGain).connect(natureBus());
     lapSrc.start();
     lapLfo.start();
     startRain();
@@ -496,6 +510,14 @@ export const fx = {
     volumeLevel = Math.min(1, Math.max(0, v));
     if (ctx && master) master.gain.setTargetAtTime(enabledFlag ? volumeLevel : 0, ctx.currentTime, 0.01);
   },
+  /** The lake's own sounds, 0..1, under the master volume. */
+  get natureVolume() {
+    return natureLevel;
+  },
+  set natureVolume(v: number) {
+    natureLevel = Math.min(1, Math.max(0, v));
+    if (ctx && nature) nature.gain.setTargetAtTime(natureLevel, ctx.currentTime, 0.01);
+  },
   ambient,
   drag,
   /** Felt rather than heard, so it follows its own switch, not the sound. */
@@ -555,10 +577,10 @@ export const fx = {
       level.gain.setTargetAtTime(peak * (0.9 - i * 0.2) * (0.6 + Math.random() * 0.4), at, 0.25);
     }
     level.gain.setTargetAtTime(0.0001, t + length * 0.8, 0.3);
-    src.connect(filter).connect(level).connect(bus());
+    src.connect(filter).connect(level).connect(natureBus());
     src.start(t);
     src.stop(t + length + 1.5);
-    if (near > 0.6) noiseBurst("bandpass", 1500, 400, 0.18, 0.03 * near, when);
+    if (near > 0.6) noiseBurst("bandpass", 1500, 400, 0.18, 0.03 * near, when, natureBus());
   },
   bite() {
     if (!this.enabled) return;

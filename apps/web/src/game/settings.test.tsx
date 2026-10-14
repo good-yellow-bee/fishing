@@ -34,6 +34,12 @@ describe("settings", () => {
     expect(parsed).toEqual({ ...DEFAULT_SETTINGS, volume: 1, shake: "soft", shadows: false, reelMode: "toggle" });
   });
 
+  it("keeps the nature volume inside 0..1", () => {
+    expect(parseSettings(JSON.stringify({ natureVolume: 0.3 })).natureVolume).toBe(0.3);
+    expect(parseSettings(JSON.stringify({ natureVolume: 7 })).natureVolume).toBe(1);
+    expect(parseSettings(JSON.stringify({ natureVolume: "loud" })).natureVolume).toBe(DEFAULT_SETTINGS.natureVolume);
+  });
+
   it("keeps a known float colour and drops an unknown one", () => {
     expect(parseSettings(JSON.stringify({ floatColour: "yellow" })).floatColour).toBe("yellow");
     expect(parseSettings(JSON.stringify({ floatColour: "plaid" })).floatColour).toBe(DEFAULT_SETTINGS.floatColour);

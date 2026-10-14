@@ -103,6 +103,18 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           />
           <output>{Math.round(current.volume * 100)}%</output>
         </label>
+        <label className="settings-volume">
+          <span>{t("Nature sounds")}</span>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.05}
+            value={current.natureVolume}
+            onChange={(event) => updateSettings({ natureVolume: Number(event.target.value) })}
+          />
+          <output>{Math.round(current.natureVolume * 100)}%</output>
+        </label>
         <label className="settings-check">
           <input type="checkbox" checked={current.muted} onChange={(event) => updateSettings({ muted: event.target.checked })} />
           {t("Mute all sound")}

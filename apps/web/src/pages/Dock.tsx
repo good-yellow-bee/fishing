@@ -318,7 +318,8 @@ export function DockPage() {
   useEffect(() => {
     fx.enabled = !prefs.muted;
     fx.volume = prefs.volume;
-  }, [prefs.muted, prefs.volume]);
+    fx.natureVolume = prefs.natureVolume;
+  }, [prefs.muted, prefs.volume, prefs.natureVolume]);
 
   // The page's CSS mirrors the system reduced-motion rules under this flag.
   useEffect(() => {

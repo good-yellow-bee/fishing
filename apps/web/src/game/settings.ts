@@ -13,6 +13,8 @@ export type TextSize = "normal" | "large" | "larger";
 export type Settings = {
   /** 0..1, on top of Mute. */
   volume: number;
+  /** 0..1 for the lake's own sounds (water, wildlife, rain, wind), under the main volume. */
+  natureVolume: number;
   muted: boolean;
   shake: ShakeLevel;
   /** Lite draws half the rain, fireflies and mist, and no sun halo. */
@@ -42,6 +44,7 @@ export const SETTINGS_KEY = "stillwater.settings.v1";
 
 export const DEFAULT_SETTINGS: Settings = {
   volume: 0.8,
+  natureVolume: 1,
   muted: false,
   shake: "full",
   particles: "full",
@@ -74,8 +77,11 @@ export function parseSettings(raw: string | null): Settings {
   }
   const d = DEFAULT_SETTINGS;
   const volume = typeof data.volume === "number" && Number.isFinite(data.volume) ? Math.min(1, Math.max(0, data.volume)) : d.volume;
+  const natureVolume =
+    typeof data.natureVolume === "number" && Number.isFinite(data.natureVolume) ? Math.min(1, Math.max(0, data.natureVolume)) : d.natureVolume;
   return {
     volume,
+    natureVolume,
     muted: typeof data.muted === "boolean" ? data.muted : d.muted,
     shake: pick(data.shake, ["off", "soft", "full"], d.shake),
     particles: pick(data.particles, ["full", "lite"], d.particles),
