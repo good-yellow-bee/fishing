@@ -31,6 +31,8 @@ import { DockLeaves } from "./DockLeaves";
 import { DockSnow } from "./DockSnow";
 import { Icicles } from "./Icicles";
 import { Thermos } from "./Thermos";
+import { Moths } from "./Moths";
+import { mothsOut } from "./mothOrbit";
 import { iciclesOut } from "./icicleRow";
 import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
@@ -1894,6 +1896,7 @@ export const LakeWorld = memo(function LakeWorld({
       {road > 0 && <MoonRoad discPos={look.discPos} strength={road} />}
       {breathOut(hour, season) && <Breath light={weather.rainLight} />}
       <Thermos steaming={breathOut(hour, season)} light={weather.rainLight} />
+      {mothsOut(hour, season) && <Moths />}
       {look.birds &&
         FLOCKS.map((flock, i) => (
           <BirdFlock key={i} {...flock} />

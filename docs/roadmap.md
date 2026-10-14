@@ -660,7 +660,7 @@ Claude picked these after Wave Y; the owner can reorder or drop any.
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| Z1 | Moths flutter round the dock lanterns after dark | wildlife | S |
+| ~~Z1~~ | ~~Moths flutter round the dock lanterns after dark~~ (#176) | wildlife | S |
 | Z2 | Puddles on the shore path shimmer after rain | weather | S |
 | Z3 | The angler sips from the thermos cup now and then while waiting | angler | S/M |
 | Z4 | A fox trots along the far bank at dusk and night | wildlife | M |
