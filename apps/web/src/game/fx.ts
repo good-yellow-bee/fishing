@@ -117,6 +117,7 @@ let windGain: GainNode | null = null;
 let geeseTimer = 0;
 let frogTimer = 0;
 let owlTimer = 0;
+let woodpeckerTimer = 0;
 let ambientHour: LakeHour = "day";
 let ambientSky: Sky = "clear";
 let ambientSeason: LakeSeason = "summer";
@@ -144,6 +145,8 @@ export function ambientProfile(hour: LakeHour, sky: Sky, season: LakeSeason = "s
     wind: winter,
     // The owl on the far bank calls through the night, all but winter.
     owls: night && !winter,
+    // A woodpecker drums in the woods on dry mornings and days, all but winter.
+    woodpecker: (hour === "dawn" || hour === "day") && !winter && sky !== "rain",
   };
 }
 
@@ -317,6 +320,30 @@ function geeseCall() {
   geeseTimer = window.setTimeout(geeseCall, 18000 + Math.random() * 16000);
 }
 
+/** Seconds into a drum roll that each knock lands: a quick burst that slows a touch toward its end. */
+export function drumKnocks(count: number) {
+  const out: number[] = [];
+  let at = 0;
+  for (let i = 0; i < count; i += 1) {
+    out.push(at);
+    at += 0.05 + (i / count) * 0.025;
+  }
+  return out;
+}
+
+/** A woodpecker drumming on a dead trunk back in the woods: a fast roll of dry knocks, fading as it goes. */
+function woodpeckerCall() {
+  if (!lapSrc || !profile().woodpecker) return;
+  const knocks = drumKnocks(12 + Math.floor(Math.random() * 8));
+  const pitch = 700 + Math.random() * 300;
+  knocks.forEach((at, i) => {
+    const fade = 1 - (i / knocks.length) * 0.6;
+    noiseBurst("bandpass", pitch * 1.4, pitch, 0.03, 0.02 * fade, at, natureBus());
+  });
+  captionSound("woodpecker");
+  woodpeckerTimer = window.setTimeout(woodpeckerCall, 22000 + Math.random() * 20000);
+}
+
 /** The reed bank at dusk: a run of spring peepers (short rising whistles), now and then a green frog's low banjo "gunk". */
 function frogCall() {
   if (!lapSrc || !profile().frogs) return;
@@ -369,13 +396,15 @@ function restartWildlife() {
   window.clearTimeout(geeseTimer);
   window.clearTimeout(frogTimer);
   window.clearTimeout(owlTimer);
+  window.clearTimeout(woodpeckerTimer);
   if (!lapSrc) return;
-  const { wildlife, loons, geese, frogs, owls } = profile();
+  const { wildlife, loons, geese, frogs, owls, woodpecker } = profile();
   if (wildlife !== "quiet") wildlifeTimer = window.setTimeout(chirp, wildlife === "crickets" || wildlife === "chorus" ? 300 : 2000 + Math.random() * 2000);
   if (loons) loonTimer = window.setTimeout(loonCall, 4000 + Math.random() * 6000);
   if (geese) geeseTimer = window.setTimeout(geeseCall, 6000 + Math.random() * 8000);
   if (frogs) frogTimer = window.setTimeout(frogCall, 1500 + Math.random() * 2000);
   if (owls) owlTimer = window.setTimeout(owlCall, 7000 + Math.random() * 8000);
+  if (woodpecker) woodpeckerTimer = window.setTimeout(woodpeckerCall, 9000 + Math.random() * 10000);
 }
 
 const ambient = {
@@ -427,6 +456,7 @@ const ambient = {
     window.clearTimeout(geeseTimer);
     window.clearTimeout(frogTimer);
     window.clearTimeout(owlTimer);
+    window.clearTimeout(woodpeckerTimer);
     lapSrc.stop();
     lapLfo!.stop();
     lapGain!.disconnect();

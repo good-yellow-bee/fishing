@@ -1,11 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14n";
+export const NEWS_ID = "2026-10-14o";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "Fish nibble one to three times at varied moments, so the first nibble no longer tells you when the bite comes.",
-  "Sound captions in Settings put the lake's sounds into words: thunder, loons, owls, geese and the beaver.",
+  "On some clear fall and winter nights, northern lights shimmer over the far shore and glow in the lake.",
+  "In fall, a V of geese crosses high over the far shore. Look for it mirrored in the water.",
+  "A woodpecker drums in the woods on dry mornings and days.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
