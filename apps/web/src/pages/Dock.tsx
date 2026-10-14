@@ -56,6 +56,7 @@ import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
 import { SettingsPanel } from "../components/SettingsPanel";
+import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
 import { saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
@@ -149,6 +150,7 @@ export function DockPage() {
   const hotBank = useMemo(() => hotBankForDay(openedAt), [openedAt]);
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
+  const rising = eveningRiseOn(hour, season, sky, wind.wind);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -173,7 +175,7 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon));
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising);
   const scenePhase = game.outcome ? "result" : game.phase;
   const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
@@ -576,6 +578,7 @@ export function DockPage() {
           moon={moon}
           wind={wind}
           hotspot={game.hotspot}
+          rising={rising}
           tracks={tracks}
           powerRef={game.powerRef}
           accuracy={me.profile.accuracy}
@@ -629,6 +632,7 @@ export function DockPage() {
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
+          {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}

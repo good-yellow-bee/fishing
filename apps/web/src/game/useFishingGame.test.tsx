@@ -20,6 +20,7 @@ vi.mock("@stillwater/shared", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@stillwater/shared")>();
   return { ...actual, hotBankForDay: () => "inlet" };
 });
+vi.mock("./eveningRise", () => ({ isRiseCast: () => true }));
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   return { ...actual, pickBite: vi.fn(actual.pickBite) };
@@ -62,8 +63,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile, hour = "day" }: { current?: Profile; hour?: LakeHour }) {
-  const game = useFishingGame(current, hour);
+function Harness({ current = profile, hour = "day", rising = false }: { current?: Profile; hour?: LakeHour; rising?: boolean }) {
+  const game = useFishingGame(current, hour, undefined, undefined, false, undefined, undefined, rising);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -97,7 +98,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day") {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -111,7 +112,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day") 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} />));
   return container.querySelector("div")!;
 }
 
@@ -271,6 +272,15 @@ describe("useFishingGame strike timing", () => {
     cast(mount());
     act(() => vi.advanceTimersByTime(2_201));
     expect(fx.rodBell).not.toHaveBeenCalled();
+  });
+
+  it("says a cast landed on a rise only while the evening rise is on", () => {
+    cast(mount(DOCK_BUBBLES.at + HOTSPOT_PERIOD_MS, profile, "dusk", true));
+    expect(hint()).toMatch(/^Right on a rise\. /);
+    act(() => root!.unmount());
+    root = null;
+    cast(mount(DOCK_BUBBLES.at + HOTSPOT_PERIOD_MS, profile, "dusk", false));
+    expect(hint()).not.toMatch(/rise/);
   });
 
   it("gives a human reaction time to hook the real bite", () => {

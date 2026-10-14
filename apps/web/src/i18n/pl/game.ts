@@ -44,6 +44,8 @@ export const PL_GAME: PlBook = {
   "Turns {sky} around {hour}:00": "Około {hour}:00 {sky}",
   "Biting best at the {bank}": "Najlepiej bierze: {bank}",
   "biting today": "dziś bierze",
+  "fish rising": "ryby się spławiają",
+  "Right on a rise.": "Prosto w spław ryby.",
   Shack: "Szopa",
   "The field log could not be saved in this browser.": "Nie udało się zapisać dziennika połowów w tej przeglądarce.",
   "The field log could not be saved.": "Nie udało się zapisać dziennika połowów.",

@@ -25,6 +25,7 @@ import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
 import { fx } from "./fx";
+import { isRiseCast } from "./eveningRise";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, hookWindowMs, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
@@ -117,7 +118,12 @@ export function useFishingGame(
   season?: LakeSeason,
   /** The moon's lit share, 0 new to 1 full. */
   moon?: number,
+  /** An evening rise is on: a cast onto a fresh ring bites sooner. */
+  rising = false,
 ) {
+  const risingRef = useRef(rising);
+  risingRef.current = rising;
+  const castRiseRef = useRef(false);
   const mercyRef = useRef(mercy);
   mercyRef.current = mercy;
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -205,6 +211,7 @@ export function useFishingGame(
     holdingRef.current = false;
     castPointerRef.current = null;
     castHotspotRef.current = false;
+    castRiseRef.current = false;
     powerRef.current = 0;
     clearFight();
     setPower(0);
@@ -253,6 +260,7 @@ export function useFishingGame(
     // A short cast only draws commons, even in the bubbles.
     waitHintRef.current = short ? shortCastHint() : waitHint();
     if (castHotspotRef.current) waitHintRef.current = short ? `${shortCastHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
+    else if (castRiseRef.current) waitHintRef.current = `${t("Right on a rise.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -261,7 +269,7 @@ export function useFishingGame(
     biteRef.current = bitten;
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
-    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank);
+    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current);
     const nibbleAt = Math.min(wait - 500, wait * 0.5);
     if (nibbleAt >= 480) {
       timers.current.nibble = window.setTimeout(() => {
@@ -340,6 +348,7 @@ export function useFishingGame(
       return;
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
+    castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 

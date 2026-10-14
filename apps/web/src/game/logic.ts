@@ -67,6 +67,8 @@ const HOTSPOT_BITE: Record<FishSpecies["rarity"], number> = {
 
 /** Casting into the bubbles cuts the wait. The floor still leaves room for the nibble. */
 const HOTSPOT_WAIT = 0.6;
+/** Waits on a fresh ring of the evening rise are this share of the usual. */
+export const RISE_WAIT = 0.7;
 
 /** Weather and the bubbles reshuffle fish within what the angler can land and within what they cannot, so neither moves the landable share. */
 function reshuffle(pool: FishSpecies[], weights: number[], profile: Profile, lift: (fish: FishSpecies) => number): number[] {
@@ -164,11 +166,11 @@ export function hookWindowMs(accuracy: number, mercy = false) {
   return 1000 + accuracy * 100 + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(
     1100,
-    base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1),
+    base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1) * (rise ? RISE_WAIT : 1),
   );
   return mercy ? Math.min(wait, MERCY_WAIT_MAX_MS) : wait;
 }
