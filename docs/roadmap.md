@@ -321,7 +321,7 @@ Claude picked these to build on the seasons; the owner can reorder or drop any.
 | G1 | ~~Seasonal ambience~~ (shipped) | audio | S |
 | G2 | Season on each catch + a Four seasons badge | progression | M |
 | G3 | ~~Daily requests ask for in-season fish~~ (shipped) | retention | S |
-| G4 | Keep the camera out of hills and trees | camera | M |
+| G4 | ~~Keep the camera out of hills and trees~~ (shipped) | camera | M |
 | G5 | ~~Auto quality: step down to Lite effects when frames sag~~ (shipped) | perf | S/M |
 
 - **G1 · Seasonal ambience.** Geese pass over on fall days; winter swaps crickets and loons for a chickadee by day, quiet nights and a wind loop. `ambientProfile(hour, sky, season)` in `fx.ts`.
