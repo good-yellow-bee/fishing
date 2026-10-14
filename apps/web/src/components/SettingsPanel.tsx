@@ -186,6 +186,14 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
             { value: "fast", label: t("Fast") },
           ]}
         />
+        <Choices
+          name="frameRate"
+          legend={t("Frame rate")}
+          options={[
+            { value: "smooth", label: t("Smooth") },
+            { value: "saver", label: t("Battery saver (30 a second)") },
+          ]}
+        />
         <label className="settings-check">
           <input type="checkbox" checked={current.shadows} onChange={(event) => updateSettings({ shadows: event.target.checked })} />
           {t("Shadows")}

@@ -897,6 +897,14 @@ Claude picked this: keyboard and controller players had to reach for the lure me
 |---|---|---|---|
 | ~~AV1~~ | ~~Q and R step through the packed lures while the lure can change; a controller's bumpers do the same; the keys card and news card say so~~ (#209) | controls | S |
 
+## Wave AW — Battery saver (added 2026-10-14, after Wave AV shipped)
+
+Claude picked this for phones: the lake drew every screen refresh (60 or 120 a second) even when nothing needs that.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~AW1~~ | ~~A Frame rate setting: Smooth, or Battery saver at 30 frames a second (the canvas draws on demand, asked 30 times a second); the auto step-down to Lite ignores the saver's own 30~~ (#210) | settings / performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?

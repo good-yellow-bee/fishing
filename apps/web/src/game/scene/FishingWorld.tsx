@@ -124,6 +124,7 @@ import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
 import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
+import { frameDue } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 
 const BUOY_URL = "/models/buoy.glb";
@@ -1998,11 +1999,38 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
   );
 }
 
+/** Battery saver: the canvas draws on demand, asked for 30 times a second, instead of every screen refresh. */
+function FrameCap() {
+  const saver = useSettings().frameRate === "saver";
+  const setFrameloop = useThree((state) => state.setFrameloop);
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    if (!saver) {
+      setFrameloop("always");
+      return;
+    }
+    setFrameloop("demand");
+    let last = -Infinity;
+    let frame = requestAnimationFrame(function tick(now) {
+      frame = requestAnimationFrame(tick);
+      if (!frameDue(now, last)) return;
+      last = now;
+      invalidate();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      setFrameloop("always");
+    };
+  }, [saver, setFrameloop, invalidate]);
+  return null;
+}
+
 /** Steps the effects down to Lite once if the frame rate sags, unless the player picked effects themselves. */
 function FrameWatch() {
   const watch = useMemo(() => createFrameWatch(), []);
   useFrame((_, delta) => {
-    if (!settings.autoEffects || settings.particles !== "full") return;
+    // Battery saver runs at 30 a second on purpose; that is no sign of a slow machine.
+    if (!settings.autoEffects || settings.particles !== "full" || settings.frameRate === "saver") return;
     if (!watch(delta)) return;
     updateSettings({ particles: "lite", autoEffects: false });
     noteEffectsSteppedDown();
@@ -2042,6 +2070,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
+      <FrameCap />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
       {rising && <RiseRings spot={spot} />}

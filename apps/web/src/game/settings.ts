@@ -24,6 +24,8 @@ export type Settings = {
   shadows: boolean;
   /** Sharp renders up to 1.75 device pixels per CSS pixel; fast renders one. */
   sharpness: "sharp" | "fast";
+  /** Smooth draws as often as the screen refreshes; saver draws 30 frames a second to spare a phone's battery. */
+  frameRate: "smooth" | "saver";
   /** Hold to reel, or tap once to start reeling and again to stop. */
   reelMode: "hold" | "toggle";
   /** On top of the system setting: no shake, flashes or card animations. */
@@ -55,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoEffects: true,
   shadows: true,
   sharpness: "sharp",
+  frameRate: "smooth",
   reelMode: "hold",
   reduceMotion: false,
   textSize: "normal",
@@ -94,6 +97,7 @@ export function parseSettings(raw: string | null): Settings {
     autoEffects: typeof data.autoEffects === "boolean" ? data.autoEffects : d.autoEffects,
     shadows: typeof data.shadows === "boolean" ? data.shadows : d.shadows,
     sharpness: pick(data.sharpness, ["sharp", "fast"], d.sharpness),
+    frameRate: pick(data.frameRate, ["smooth", "saver"], d.frameRate),
     reelMode: pick(data.reelMode, ["hold", "toggle"], d.reelMode),
     reduceMotion: typeof data.reduceMotion === "boolean" ? data.reduceMotion : d.reduceMotion,
     textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
