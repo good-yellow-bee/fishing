@@ -9,7 +9,8 @@ import {
   BANK_WALK_PLANK,
   type BankBoard,
 } from "./bankWalk.ts";
-import { BANK_PLANK_BATCHES, bankPlankMatrix, placeBankPlanks } from "./LakeWorld.tsx";
+import { BANK_PLANK_BATCHES, bankPlankMatrix, PIER_PLANK_BATCHES, pierPlankMatrix, placeBankPlanks } from "./LakeWorld.tsx";
+import { PIER_BOARDS, PIER_THICK, PIER_TOP } from "./pierDeck.ts";
 
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1);
 
@@ -65,5 +66,21 @@ describe("bank plank instancing", () => {
         }
       }
     }
+  });
+});
+
+describe("pier deck", () => {
+  it("puts every pier board where its own mesh used to be, each once, in two batches", () => {
+    expect(PIER_PLANK_BATCHES).toHaveLength(2);
+    expect(PIER_PLANK_BATCHES.flat().sort((a, b) => a - b)).toEqual(PIER_BOARDS.map((_, i) => i));
+    PIER_BOARDS.forEach((board, index) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(board.halfX * 2, PIER_THICK, board.halfZ * 2));
+      mesh.position.set(board.x, PIER_TOP - PIER_THICK / 2 + (index % 2) * 0.001, board.z);
+      mesh.rotation.set(0, board.yaw, 0);
+      mesh.updateMatrixWorld();
+      const before = corners(mesh.geometry, mesh.matrixWorld);
+      const after = corners(UNIT_BOX, pierPlankMatrix(index));
+      after.forEach((corner, i) => expect(corner.distanceTo(before[i]!)).toBeLessThan(1e-6));
+    });
   });
 });
