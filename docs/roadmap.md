@@ -933,6 +933,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BA1~~ | ~~The idle hint says "touch" and "lift" on phones and names the moss band everywhere (it said "click" and "pale band"); the shop hint drops the E key on touch screens~~ (#214) | phone UX | S |
 
+## Wave BB — Fewer draws for the swallows (added 2026-10-14, after Wave BA shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BB1~~ | ~~Swallows drawn as two instanced meshes (body, belly and tail baked with vertex colours; wings mirrored per instance): 30 draws to 2, 381 to 353 on a summer day~~ (#215) | performance | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
