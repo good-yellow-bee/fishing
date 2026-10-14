@@ -348,6 +348,24 @@ Claude picked these after Wave G; the owner can reorder or drop any.
 - **H4 · Tension without colour.** The fight bar marks its danger zone with a pattern and a notch, and says "too tight" / "slack" in text for screen readers, so the fight reads for colour-blind players.
 - **H5 · Species of the week.** The weekly board names one species each Monday (seeded, in season) and pays a small bonus for it, so the week has a target.
 
+## Wave I — Out on the water more often (added 2026-10-14, after Wave H shipped)
+
+Claude picked these after Wave H; the owner can reorder or drop any.
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| I1 | ~~Install the lake as an app, open offline~~ (shipped) | platform | M |
+| I2 | Dragonflies over the reeds on warm days | wildlife | S/M |
+| I3 | Ducks on the open water that scatter from a close cast | wildlife | M |
+| I4 | Rare golden fish | collection | M/L |
+| I5 | Play with a gamepad | input | S/M |
+
+- **I1 · Installable, opens offline.** A web manifest and icons so phones and desktops can install Stillwater, and a small service worker (production builds only) that keeps the app shell, built assets and models so the field log opens without a network. The lake itself needs the API, so offline it shows a card pointing to the field log instead of bouncing to sign-in. The API is never cached.
+- **I2 · Dragonflies.** On dry spring and summer days a few dragonflies dart and hover over the reed beds; pure position functions with tests, like the fireflies.
+- **I3 · Ducks.** A small raft of ducks paddles the open water by day; a cast that lands close sends them flapping off, and they drift back later. Motion in pure functions with tests, like the heron.
+- **I4 · Golden fish.** About one fish in forty of a species lands golden. The catch keeps a `golden` flag (server-checked roll), the landed card and log show it, and a "Gold" badge goes to the first one.
+- **I5 · Gamepad.** A connected controller aims with the left stick, casts and strikes with A, reels with the right trigger and walks banks with the shoulder buttons.
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
