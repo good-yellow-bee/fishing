@@ -23,6 +23,10 @@ export type Me = {
   catches: CatchRecord[];
   speciesStats: CatchStat[];
   badges: BadgeProgress[];
+  /** The angler's longest run of consecutive days with a fish. */
+  longestStreak: number;
+  /** The last 60 local days with a fish, oldest first, for the current streak on this device's calendar. */
+  recentDays: string[];
 };
 
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };

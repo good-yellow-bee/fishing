@@ -62,6 +62,8 @@ describe("species marks on the lodge pages", () => {
       })),
       speciesStats: [],
       badges: [],
+      longestStreak: 0,
+      recentDays: [],
     };
     vi.mocked(getMe).mockResolvedValue(me);
     await act(async () => {
@@ -90,6 +92,8 @@ describe("species marks on the lodge pages", () => {
       catches: [{ id: "c1", userId: "u1", speciesId: "pike", weight: 4, points: 2, spot: "dock", hour: "dusk", sky: "clear", season: "fall", golden: true, released: false, createdAt: "2026-10-01T00:00:00Z" }],
       speciesStats: [],
       badges: [],
+      longestStreak: 0,
+      recentDays: [],
     });
     await act(async () => {
       root.render(<MemoryRouter><LogPage /></MemoryRouter>);

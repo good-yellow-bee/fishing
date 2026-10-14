@@ -3,6 +3,7 @@ import { isTrophyWeight } from "./guide.ts";
 import type { LakeHour } from "./hour.ts";
 import type { LakeSeason } from "./season.ts";
 import type { SpotId } from "./types.ts";
+import { REGULAR_DAYS } from "./streak.ts";
 import type { Sky } from "./weather.ts";
 
 /**
@@ -25,7 +26,10 @@ export type BadgeFactRow = {
   heaviest: number;
 };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward";
+/** What the grouped facts can't carry: the longest run of consecutive local days with a fish. */
+export type BadgeHistory = { longestStreak: number };
+
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular";
 
 export type Badge = {
   id: BadgeId;
@@ -33,7 +37,7 @@ export type Badge = {
   blurb: string;
   need: number;
   /** How far along the angler is, before capping at `need`. */
-  have: (facts: BadgeFactRow[]) => number;
+  have: (facts: BadgeFactRow[], history: BadgeHistory) => number;
 };
 
 function count(facts: BadgeFactRow[], keep: (row: BadgeFactRow) => boolean) {
@@ -132,13 +136,20 @@ export const BADGES: readonly Badge[] = [
     need: 10,
     have: (facts) => count(facts, (row) => row.released),
   },
+  {
+    id: "regular",
+    label: "Regular",
+    blurb: "Land a fish seven days in a row.",
+    need: REGULAR_DAYS,
+    have: (_facts, history) => history.longestStreak,
+  },
 ];
 
 export type BadgeProgress = { id: BadgeId; have: number; need: number; earned: boolean };
 
-export function badgeProgress(facts: BadgeFactRow[]): BadgeProgress[] {
+export function badgeProgress(facts: BadgeFactRow[], history: BadgeHistory = { longestStreak: 0 }): BadgeProgress[] {
   return BADGES.map((badge) => {
-    const have = Math.min(badge.need, badge.have(facts));
+    const have = Math.min(badge.need, badge.have(facts, history));
     return { id: badge.id, have, need: badge.need, earned: have >= badge.need };
   });
 }

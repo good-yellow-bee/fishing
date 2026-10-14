@@ -26,6 +26,7 @@ import {
   luresPacked,
   keepPlayTrip,
   localDate,
+  streakDays,
   sampleLogbook,
   STANCE_LABELS,
   SPOT_LABELS,
@@ -157,6 +158,8 @@ export function DockPage() {
   const lure = tiedLure.current;
   const lureLocked = !lureCanChange(scenePhase);
   const posted = useRef<string | null>(null);
+  // The local day the fish landed on, kept so a later retry files it under the same day.
+  const landedDay = useRef(localDate(new Date()));
   const userId = me?.profile.userId;
   const catchSync = useCatchSync(userId, setMe);
   const [fieldSaved, setFieldSaved] = useState(false);
@@ -262,7 +265,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky, season });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky, season, day: landedDay.current });
       return;
     }
     void catchSync.sync();
@@ -422,9 +425,10 @@ export function DockPage() {
     }
     const { id, species, weight, spot: catchSpot, clean } = game.outcome;
     if (posted.current === id) return;
+    landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky, season });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky, season, day: landedDay.current });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -502,6 +506,7 @@ export function DockPage() {
         sky={sky}
         season={season}
         onSettings={() => setSettingsOpen(true)}
+        streak={streakDays(me.recentDays, localDate(new Date())).current}
         onPackUp={session && session.fish.length > 0 && bankClear ? () => setRecap({ leftover: false }) : undefined}
       />
       <div

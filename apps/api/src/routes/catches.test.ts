@@ -217,6 +217,20 @@ describe("POST /catches", () => {
     expect((await app.request("http://test/catches/nope/release", { method: "POST" })).status).toBe(400);
   });
 
+  it("files each catch under the angler's local day, and turns away a day that isn't one or is ahead of every time zone", async () => {
+    const { listCatchDays } = await import("../db.ts");
+    const id = (n: number) => `1e0a0c08-7e6d-4ee2-8718-${String(n).padStart(12, "0")}`;
+    const fish = { speciesId: "golden-shiner", weight: 0.3, spot: "dock" };
+    for (const [n, day] of [[1, "2026-10-11"], [2, "2026-10-10"], [3, "2026-10-11"]] as const) {
+      expect((await post({ ...fish, requestId: id(n), day })).status).toBe(200);
+    }
+    expect((await post({ ...fish, requestId: id(4) })).status).toBe(200);
+    expect(listCatchDays(user.id)).toEqual(["2026-10-10", "2026-10-11"]);
+    expect((await post({ ...fish, requestId: id(5), day: "2026-02-30" })).status).toBe(400);
+    expect((await post({ ...fish, requestId: id(6), day: "2999-01-01" })).status).toBe(400);
+    expect((await post({ ...fish, requestId: id(1), day: "2026-10-12" })).status).toBe(409);
+  });
+
   it("limits successful catch submissions per minute", async () => {
     const results = await Promise.all(
       Array.from({ length: 13 }, (_, index) =>

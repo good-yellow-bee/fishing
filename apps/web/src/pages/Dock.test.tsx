@@ -52,6 +52,8 @@ const me: Me = {
   catches: [],
   speciesStats: [],
   badges: [],
+  longestStreak: 0,
+  recentDays: [],
 };
 
 // Node ships its own empty `localStorage` global, so borrow a real one.
@@ -253,6 +255,24 @@ describe("lodge records", () => {
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("d")).toBe(pike.silhouette);
     expect(page.querySelector(".landed-card .guide-fish path")?.getAttribute("fill")).toBe(pike.color);
     expect(page.querySelector(".landed-card .catch-lore")?.textContent).toBe(pike.lore);
+  });
+});
+
+describe("days on the water", () => {
+  it("shows the run of days on the HUD and files the catch under today's local day", async () => {
+    const today = new Date();
+    const day = (back: number) => {
+      const at = new Date(today.getFullYear(), today.getMonth(), today.getDate() - back);
+      return `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, "0")}-${String(at.getDate()).padStart(2, "0")}`;
+    };
+    vi.mocked(getMe).mockResolvedValue({ ...me, recentDays: [day(3), day(2), day(1)], longestStreak: 3 });
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-today", points: 1, speciesId: perch.id, weight: 0.6 });
+    landed.outcome = { kind: "landed", id: "catch-today", species: perch, weight: 0.6, spot: "dock", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    expect(page.querySelector(".hud-streak")?.textContent).toBe("3 days in a row");
+    expect(vi.mocked(recordCatch).mock.lastCall?.[0]).toMatchObject({ requestId: "catch-today", day: day(0) });
   });
 });
 

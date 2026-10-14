@@ -28,6 +28,8 @@ function me(userId: string): Me {
     catches: [],
     speciesStats: [],
     badges: [],
+    longestStreak: 0,
+    recentDays: [],
   } as Me;
 }
 
