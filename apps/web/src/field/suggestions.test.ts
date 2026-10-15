@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -18,6 +18,19 @@ describe("suggest the player's own names first", () => {
     const newest = [...book.catches].filter((entry) => entry.tripId).sort((a, b) => b.caughtAt.localeCompare(a.caughtAt))[0]!;
     expect(tripLure(book, newest.tripId!)).toBe(newest.lure);
     expect(tripLure(book, undefined)).toBe("");
+  });
+
+  it("offers the newest noted weather on a trip, never the fish being edited", () => {
+    const book = sampleLogbook(new Date(2026, 9, 1));
+    const onTrip = [...book.catches]
+      .filter((entry) => entry.tripId && entry.weather)
+      .sort((a, b) => b.caughtAt.localeCompare(a.caughtAt));
+    const newest = onTrip[0]!;
+    expect(tripWeather(book, newest.tripId!)).toEqual(newest.weather);
+    const second = onTrip.find((entry) => entry.tripId === newest.tripId && entry.id !== newest.id);
+    expect(tripWeather(book, newest.tripId!, newest.id)).toEqual(second?.weather ?? null);
+    expect(tripWeather(book, undefined)).toBeNull();
+    expect(tripWeather({ ...book, catches: book.catches.map((entry) => ({ ...entry, weather: null })) }, newest.tripId!)).toBeNull();
   });
 });
 

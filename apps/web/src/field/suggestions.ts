@@ -33,6 +33,12 @@ export function tripLure(book: Logbook, tripId: string | undefined) {
   return catchesNewestFirst(book).find((entry) => entry.tripId === tripId)?.lure ?? "";
 }
 
+/** The weather on the newest fish of a trip that noted it, so the next fish there can take it in one tap. */
+export function tripWeather(book: Logbook, tripId: string | undefined, skipId?: string) {
+  if (!tripId) return null;
+  return catchesNewestFirst(book).find((entry) => entry.tripId === tripId && entry.id !== skipId && entry.weather)?.weather ?? null;
+}
+
 /** Length or weight, as the player measured their newest fish by hand; length for a book with none yet. */
 export function lastMeasureKind(book: Logbook): Measure["kind"] {
   const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);

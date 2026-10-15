@@ -22,7 +22,7 @@ import { anotherCatchLink } from "./anotherCatch";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -215,6 +215,7 @@ function CatchForm() {
   };
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  const outingWeather = tripWeather(book, tripId, existing?.id);
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
@@ -496,6 +497,21 @@ function CatchForm() {
           ) : null}
 
           <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
+          {outingWeather && !weatherStarted ? (
+            <p className="wide form-note lure-tips">
+              <button
+                type="button"
+                className="lure-tip"
+                onClick={() => {
+                  setSky(outingWeather.sky);
+                  setWind(outingWeather.wind);
+                  setWaterTemp(fromBookTemp(outingWeather.waterTempF, units));
+                }}
+              >
+                {t("Same as the last fish on this outing: {weather}", { weather: weatherText(outingWeather) })}
+              </button>
+            </p>
+          ) : null}
 
           <label>
             {t("Sky")}
