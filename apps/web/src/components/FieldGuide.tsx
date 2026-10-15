@@ -15,8 +15,9 @@ import {
   type ShadowSize,
   type SpotId,
 } from "@stillwater/shared";
-import { bestHourFor, lureSizeFor, oneDecimal, rarityLabel, type LureSize } from "../game/logic";
+import { bestHourFor, lureSizeFor, rarityLabel, type LureSize } from "../game/logic";
 import { t, useT } from "../i18n";
+import { weightText } from "../i18n/content";
 import { FishMark } from "./FishMark";
 
 type Props = {
@@ -71,9 +72,9 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
         <>
           <p className="guide-lore">{t(species.lore)}</p>
           <p>
-            {t("{caught} landed · PB {weight} lb", { caught: entry.caught, weight: oneDecimal(entry.heaviest ?? 0) })}
+            {t("{caught} landed · PB {weight}", { caught: entry.caught, weight: weightText(entry.heaviest ?? 0) })}
           </p>
-          <p>{t("Trophy ≥ {weight} lb", { weight: oneDecimal(trophyWeight(species)) })}</p>
+          <p>{t("Trophy ≥ {weight}", { weight: weightText(trophyWeight(species)) })}</p>
         </>
       )}
       <p>{shadowLabel(shadowSize(species))}</p>

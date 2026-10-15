@@ -18,14 +18,17 @@ import { CatchCard } from "./cards";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
-import { t, useT } from "../i18n";
+import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp } from "./unitsInput";
+import { getUnits, t, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 
-function amountText(entry: CatchEntry): string {
-  return String(entry.measure.kind === "length" ? entry.measure.inches : entry.measure.pounds);
+function amountText(entry: CatchEntry, units: Units): string {
+  return entry.measure.kind === "length"
+    ? fromBookAmount(entry.measure.inches, "length", units)
+    : fromBookAmount(entry.measure.pounds, "weight", units);
 }
 
 const SPECIES = [...FISH].map((fish) => fish.name);
@@ -108,7 +111,10 @@ function CatchForm() {
 
   const [species, setSpecies] = useState(existing ? t(existing.species) : "");
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? "length");
-  const [amount, setAmount] = useState(existing ? amountText(existing) : "");
+  // The form reads and writes in the units the player picked; the book keeps imperial.
+  const units = getUnits();
+  const [startAmount] = useState(() => (existing ? amountText(existing, units) : ""));
+  const [amount, setAmount] = useState(startAmount);
   const [lure, setLure] = useState(() => t(existing ? existing.lure : tripLure(book, presetTrip?.id)));
   const [spotId, setSpotId] = useState(presetSpot);
   const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
@@ -118,7 +124,8 @@ function CatchForm() {
   const [note, setNote] = useState(existing?.note ?? "");
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
-  const [waterTemp, setWaterTemp] = useState(existing?.weather ? String(existing.weather.waterTempF) : "");
+  const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
+  const [waterTemp, setWaterTemp] = useState(startTemp);
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
   const [photo, setPhoto] = useState<string | null>(existing ? photoFor(existing.id) : null);
@@ -177,7 +184,11 @@ function CatchForm() {
     const draft: CatchDraft = {
       species: bookName(species, existing ? [existing.species, ...SPECIES] : SPECIES),
       measureKind,
-      amount,
+      // An untouched number keeps its stored value, so a metric round trip doesn't nudge it.
+      amount:
+        existing && amount === startAmount && measureKind === existing.measure.kind
+          ? amountText(existing, "imperial")
+          : toBookAmount(amount, measureKind, units),
       lure: bookName(lure, [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS]),
       spotId,
       tripId,
@@ -185,7 +196,7 @@ function CatchForm() {
       note,
       sky,
       wind,
-      waterTemp,
+      waterTemp: existing?.weather && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
     };
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
@@ -280,8 +291,24 @@ function CatchForm() {
               inputMode="decimal"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              placeholder={measureKind === "length" ? t("Inches") : t("Pounds")}
-              aria-label={measureKind === "length" ? t("Length in inches") : t("Weight in pounds")}
+              placeholder={
+                units === "metric"
+                  ? measureKind === "length"
+                    ? t("Centimetres")
+                    : t("Kilograms")
+                  : measureKind === "length"
+                    ? t("Inches")
+                    : t("Pounds")
+              }
+              aria-label={
+                units === "metric"
+                  ? measureKind === "length"
+                    ? t("Length in centimetres")
+                    : t("Weight in kilograms")
+                  : measureKind === "length"
+                    ? t("Length in inches")
+                    : t("Weight in pounds")
+              }
               required
             />
           </fieldset>
@@ -365,14 +392,14 @@ function CatchForm() {
           </label>
 
           <label>
-            {t("Water °F")}
+            {units === "metric" ? t("Water °C") : t("Water °F")}
             <input
               name="waterTemp"
               inputMode="decimal"
               value={waterTemp}
               onChange={(event) => setWaterTemp(event.target.value)}
-              placeholder="58"
-              aria-label={t("Water temperature in Fahrenheit")}
+              placeholder={units === "metric" ? "14" : "58"}
+              aria-label={units === "metric" ? t("Water temperature in Celsius") : t("Water temperature in Fahrenheit")}
               required={weatherStarted}
             />
           </label>

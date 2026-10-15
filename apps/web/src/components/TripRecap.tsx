@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { oneDecimal } from "../game/logic";
 import { sessionSummary, sessionTitle, type SessionDraft } from "../game/session";
 import { useT } from "../i18n";
+import { weightText } from "../i18n/content";
 
 type Props = {
   draft: SessionDraft;
@@ -38,7 +38,7 @@ export function TripRecap({ draft, leftover, filed, onFile, onClose }: Props) {
           </div>
           <div>
             <dt>{t("Heaviest")}</dt>
-            <dd>{summary.heaviest ? `${oneDecimal(summary.heaviest.weight)} lb` : "—"}</dd>
+            <dd>{summary.heaviest ? weightText(summary.heaviest.weight) : "—"}</dd>
             {summary.heaviest && <small>{t(summary.heaviest.speciesName)}</small>}
           </div>
           <div>
