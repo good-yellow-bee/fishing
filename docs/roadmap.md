@@ -1075,7 +1075,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT30~~ | ~~A missed bite says how long the fish held the bait: Too slow. The fish dropped the bait after 0.92 s, so the bite window is learnable like the strike time~~ (#420) | fish | S |
 | ~~GT31~~ | ~~Striking while the float nibbles says That was only a nibble, instead of the plain Too early, so the angler learns which dip was the fake~~ (#422) | fish | S |
 | ~~GT32~~ | ~~News card (2026-10-15zg) covers GT29 to GT31: the fight time, how long a missed fish held the bait, and the nibble strike~~ (#425) | news | S |
-| GT33 | The landed card counts the leaps the angler bowed to (let go before the line loaded the rod): Bowed to 2 leaps | fight | S |
+| ~~GT33~~ | ~~The landed card counts the leaps the angler bowed to (let go before the line loaded the rod): Bowed to 2 leaps~~ (#428) | fight | S |
+| GT34 | The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came | fight | S |
 
 ## Risks / open questions for the owner
 
