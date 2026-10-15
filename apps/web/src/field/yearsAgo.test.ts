@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { thisWeekInPastYears } from "./yearsAgo";
+import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 
 describe("this week in past years", () => {
   const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
@@ -23,5 +23,16 @@ describe("this week in past years", () => {
       2,
     );
     expect(found.map((entry) => entry.id)).toEqual(["b", "a"]);
+  });
+
+  it("reaches across New Year and counts the years from the nearer date", () => {
+    const newYear = new Date(2027, 0, 1, 12);
+    const found = thisWeekInPastYears([at("a", "2025-12-30T08:00:00"), at("b", "2026-12-30T08:00:00"), at("c", "2025-12-20T08:00:00")], newYear);
+    expect(found.map((entry) => entry.id)).toEqual(["a"]);
+    expect(yearsBack(found[0]!, newYear)).toBe(1);
+    const yearEnd = new Date(2026, 11, 30, 12);
+    const early = at("d", "2026-01-01T08:00:00");
+    expect(thisWeekInPastYears([early], yearEnd).map((entry) => entry.id)).toEqual(["d"]);
+    expect(yearsBack(early, yearEnd)).toBe(1);
   });
 });
