@@ -1055,7 +1055,8 @@ button.field-primary:disabled {
   color: var(--field-rust);
 }
 
-.month-head {
+.month-head,
+.sheet h2.month-head {
   margin: 14px 0 8px;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 12px;
