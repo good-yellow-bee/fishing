@@ -796,3 +796,7 @@ button.field-primary:disabled {
   color: var(--field-muted);
   font-size: 13px;
 }
+
+.outing-sum {
+  margin: -4px 0 12px;
+}
