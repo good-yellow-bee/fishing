@@ -10,6 +10,7 @@ import { FieldShell } from "./field/FieldShell";
 import { GearPage } from "./field/gear/GearPage";
 import { TackleProvider } from "./field/gear/TackleState";
 import { HomePage } from "./field/HomePage";
+import { PhotosPage } from "./field/PhotosPage";
 import { LogbookProvider } from "./field/LogbookState";
 import { SpotFormPage, SpotPage, SpotsPage } from "./field/SpotPages";
 import { TripFormPage, TripPage, TripsPage } from "./field/TripPages";
@@ -82,6 +83,7 @@ export function App() {
       <Route element={<FieldLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/catches" element={<CatchesPage />} />
+        <Route path="/photos" element={<PhotosPage />} />
         <Route path="/catches/new" element={<CatchFormPage />} />
         <Route path="/catches/:catchId/edit" element={<CatchFormPage />} />
         <Route path="/catches/:catchId" element={<CatchPage />} />

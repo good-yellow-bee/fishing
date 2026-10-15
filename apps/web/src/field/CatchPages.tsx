@@ -59,9 +59,10 @@ function bookName(typed: string, names: readonly string[]): string {
 }
 
 export function CatchesPage() {
-  const { book } = useLogbook();
+  const { book, photos } = useLogbook();
   useT();
   const catches = catchesNewestFirst(book);
+  const photoCount = catches.filter((entry) => photos[entry.id]).length;
 
   return (
     <div className="sheet">
@@ -71,9 +72,12 @@ export function CatchesPage() {
           <h1>{t("Fish")}</h1>
           <p className="lede">{t("Species, what was on the hook, the water, the hour, the weather, and a photo if you kept one.")}</p>
         </div>
-        <Link to="/catches/new" className="field-primary inline">
-          {t("Log a catch")}
-        </Link>
+        <div className="sheet-actions">
+          {photoCount > 0 ? <Link to="/photos">{t("Photos ({count})", { count: photoCount })}</Link> : null}
+          <Link to="/catches/new" className="field-primary inline">
+            {t("Log a catch")}
+          </Link>
+        </div>
       </header>
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing landed in the book yet.")}</p>

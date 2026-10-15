@@ -174,6 +174,12 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   Trip: "Wyprawa",
+  Photos: "Zdjęcia",
+  "Photos ({count})": "Zdjęcia ({count})",
+  "Every fish in the book with a picture, newest first.": "Każda ryba z dziennika, która ma zdjęcie, od najnowszej.",
+  "No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.":
+    "Nie ma jeszcze zdjęć. Ryby wyłowione na jeziorze zachowują ujęcie, a wpisany połów może mieć własne zdjęcie.",
+  "{shown} of {total} photos": "{shown} z {total} zdjęć",
   "Largest: {species}, {size}": "Największa: {species}, {size}",
   "To keep the app and its book on this device, tap Share, then Add to Home Screen.":
     "Aby zachować aplikację i dziennik na tym urządzeniu, stuknij Udostępnij, a potem Do ekranu początkowego.",
