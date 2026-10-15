@@ -36,3 +36,8 @@
   color: var(--field-muted);
   font-size: 13px;
 }
+
+.catch-search .search-save {
+  margin: 0;
+  font-size: 13px;
+}
