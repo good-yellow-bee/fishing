@@ -300,6 +300,8 @@ export function fishSideMeters(surge: FightSurge, runSide: number, worn = 0) {
 
 /** How deep a sulking bottom feeder digs in, well under its calm depth. */
 export const SULK_DEPTH = 0.68;
+/** How far the inlet's current carries a resting fish sideways, downstream, while the angler isn't reeling. */
+export const CURRENT_SIDE = 0.5;
 /** How deep a run at the drop-off dives: below a calm fish, above a sulking one. */
 export const DIVE_DEPTH = 0.6;
 

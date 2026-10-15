@@ -687,3 +687,16 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
     expect(twoRuns("open", true)).toBeUndefined();
   });
 });
+
+describe("the inlet's current on a resting fish", () => {
+  it("carries a fish the angler isn't reeling, and not one being reeled or on open water", () => {
+    const current = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, "current");
+    current.step(0, 0.05, false);
+    expect(current.sim.carried).toBe(true);
+    current.step(50, 0.05, true);
+    expect(current.sim.carried).toBe(false);
+    const open = makeFight(fish("lake-whitefish"), 2, 3, () => 0);
+    open.step(0, 0.05, false);
+    expect(open.sim.carried).toBe(false);
+  });
+});
