@@ -1176,3 +1176,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR116~~ | ~~News card (2026-10-15s) tells players about the / search key, Largest links and the same-name water heads-up~~ (#356) | field log | S |
 | ~~BR117~~ | ~~A fish logged without its outing offers to join the outing on its water that day~~ (#358) | field | S |
 | ~~BR118~~ | ~~An outing page offers to add its water's loose fish from that day~~ (#360) | field | S |
+| ~~BR119~~ | ~~News card (2026-10-15t) tells players about adding loose fish to their outing~~ (#361) | field log | S |

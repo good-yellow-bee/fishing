@@ -403,6 +403,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "A fish logged without its outing can join it in one tap, from the fish's page or from the outing's page, which counts the loose fish from its water that day.":
+    "Rybę zapisaną bez wyprawy dodasz do niej jednym stuknięciem, ze strony ryby albo ze strony wyprawy, która liczy niezapisane do niej ryby z tego łowiska i dnia.",
   "In the field log, press / on the home page to search, and the largest fish in a trip, water or species summary opens its catch. Adding a water with a name already in the book gets a heads-up.":
     "W dzienniku połowów naciśnij / na stronie głównej, by szukać, a największa ryba w podsumowaniu wyprawy, łowiska lub gatunku otwiera swój połów. Dodając łowisko o nazwie, która już jest w dzienniku, dostaniesz ostrzeżenie.",
   "The game's field guide (under Catch log) and the field log's species pages now link to each other, so a kind you caught on the lake opens its page in the book.":
