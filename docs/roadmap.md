@@ -1052,3 +1052,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~BR1~~ | ~~The game's catch snapshots stop going missing after about 60 landings: when the browser's photo room is full, the game's oldest snapshots make way for the new one, never a species' heaviest fish or a photo the player chose~~ (#241) | field log | S |
+| ~~BR2~~ | ~~The first catch the player keeps in a visit (landed in the game or written in the field log) asks the browser to keep this site's storage, so a clean-up of quiet sites or a full disk doesn't wipe the book; the sample book never asks~~ (#242) | field log | S |
