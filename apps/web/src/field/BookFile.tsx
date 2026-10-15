@@ -28,6 +28,7 @@ export function BookFile() {
     downloadFile(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })), "application/json", "stillwater-field-log.json");
     saveCopiedAt(own);
     setCopiedAt(own);
+    setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
   };
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +87,14 @@ export function BookFile() {
           {t("Download this book")}
         </button>
         {book.catches.length > 0 ? (
-          <button type="button" className="text-button" onClick={() => downloadFile(catchesCsv(book), "text/csv;charset=utf-8", "stillwater-catches.csv")}>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              downloadFile(catchesCsv(book), "text/csv;charset=utf-8", "stillwater-catches.csv");
+              setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
+            }}
+          >
             {t("Download catches as a spreadsheet")}
           </button>
         ) : null}
