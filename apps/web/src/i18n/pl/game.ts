@@ -452,6 +452,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "At the inlet the current takes slack line out faster, so keep the fish coming. The fight card now says what the water does at the reeds and the inlet.":
+    "W ujściu nurt szybciej zabiera luźną linkę, więc nie dawaj rybie wytchnienia. Karta holu mówi teraz, co robi woda przy trzcinach i w ujściu.",
   "Fishing from the reeds, turn the runs: a run you leave alone ends with the fish in the weeds, where it rests and line comes in only slowly.":
     "Łowiąc z trzcin, zawracaj odjazdy: odjazd, którego nie zawrócisz, kończy się rybą w zielsku, gdzie odpoczywa, a linka wraca tylko powoli.",
   "Levels 11 and 12 are open: from level 11 (12000 points) fish hold the bait longer before they let go, and from level 12 (17000) the gold perfect-cast mark is wider.":
