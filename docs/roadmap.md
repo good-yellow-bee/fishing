@@ -1114,3 +1114,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR61~~ | ~~Bests counts fish by the week of the moon~~ (#301) | field | S |
 | ~~BR62~~ | ~~News card (2026-10-15i) tells players about the moon in the field log and released lake fish~~ (#302) | field log | S |
 | ~~BR63~~ | ~~A page per species: count, size, best lures and time, waters, every fish~~ (#303) | field | S |
+| ~~BR64~~ | ~~Field log pages open at the top after a link; Back keeps the place~~ (#304) | field | S |
