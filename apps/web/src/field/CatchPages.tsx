@@ -17,6 +17,7 @@ import {
 import { CatchCard } from "./cards";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
+import { bookLures, ownFirst, tripLure } from "./suggestions";
 import { t, useT } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
@@ -108,7 +109,7 @@ function CatchForm() {
   const [species, setSpecies] = useState(existing ? t(existing.species) : "");
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? "length");
   const [amount, setAmount] = useState(existing ? amountText(existing) : "");
-  const [lure, setLure] = useState(existing ? t(existing.lure) : "");
+  const [lure, setLure] = useState(() => t(existing ? existing.lure : tripLure(book, presetTrip?.id)));
   const [spotId, setSpotId] = useState(presetSpot);
   const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
   const [caughtAt, setCaughtAt] = useState(() =>
@@ -175,7 +176,7 @@ function CatchForm() {
       species: bookName(species, existing ? [existing.species, ...SPECIES] : SPECIES),
       measureKind,
       amount,
-      lure: bookName(lure, existing ? [existing.lure, ...BAITS] : BAITS),
+      lure: bookName(lure, [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS]),
       spotId,
       tripId,
       caughtAt,
@@ -238,7 +239,11 @@ function CatchForm() {
               required
             />
             <datalist id="species-list">
-              {SPECIES.map((name) => t(name))
+              {ownFirst(
+                book.catches.map((entry) => entry.species),
+                SPECIES,
+                t,
+              )
                 .sort((a, b) => a.localeCompare(b))
                 .map((name) => (
                   <option key={name} value={name} />
@@ -291,8 +296,8 @@ function CatchForm() {
               required
             />
             <datalist id="bait-list">
-              {BAITS.map((bait) => (
-                <option key={bait} value={t(bait)} />
+              {ownFirst(bookLures(book), BAITS, t).map((bait) => (
+                <option key={bait} value={bait} />
               ))}
             </datalist>
           </label>
