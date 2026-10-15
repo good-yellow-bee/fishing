@@ -22,6 +22,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatDay, messageText, tripWhen } from "./format";
+import { tripsByMonth } from "./tripMonths";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -30,12 +31,19 @@ import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
-import { t, useT } from "../i18n";
+import { locale, t, useT } from "../i18n";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, 22);
+}
+
+/** "October 2026", in the reader's language. */
+function monthName(month: string): string {
+  const name = new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(new Date(`${month}-15T12:00:00`));
+  // Polish month names come lower case; a heading starts with a capital.
+  return name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
 }
 
 export function TripsPage() {
@@ -80,19 +88,24 @@ export function TripsPage() {
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
-        <div className="stack">
-          {recent.map((trip) => (
-            <TripCard
-              key={trip.id}
-              trip={trip}
-              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
-              waterType={spotById(book, trip.spotId)?.waterType ?? null}
-              fishCount={catchesForTrip(book, trip.id).length}
-              today={today}
-              tomorrow={tomorrow}
-            />
-          ))}
-        </div>
+        tripsByMonth(recent).map((group) => (
+          <section key={group.month} aria-label={monthName(group.month)}>
+            <h3 className="month-head">{monthName(group.month)}</h3>
+            <div className="stack">
+              {group.trips.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  trip={trip}
+                  spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
+                  waterType={spotById(book, trip.spotId)?.waterType ?? null}
+                  fishCount={catchesForTrip(book, trip.id).length}
+                  today={today}
+                  tomorrow={tomorrow}
+                />
+              ))}
+            </div>
+          </section>
+        ))
       )}
     </div>
   );
