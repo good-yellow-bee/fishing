@@ -1225,3 +1225,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR142~~ | ~~News card line for the newer search features~~ (#404) | field | S |
 | ~~BR143~~ | ~~Past outings paged, fish counted in one pass (Trips 26 s to 0.4 s on 4,200 outings)~~ (#406) | field | S |
 | ~~BR144~~ | ~~Map labels no longer overlap on phones~~ (#408) | field | S |
+| ~~BR145~~ | ~~Search suggests what to try when nothing matches~~ (#410) | field | S |
