@@ -694,6 +694,24 @@ a:focus-visible {
   cursor: not-allowed;
 }
 
+/* On a phone the request takes its own line, with the count, reward and Claim beneath it. */
+@media (max-width: 520px) {
+  .daily-requests li {
+    grid-template-columns: auto auto minmax(74px, 1fr);
+    row-gap: 4px;
+  }
+
+  .daily-request-label {
+    grid-column: 1 / -1;
+  }
+
+  .daily-requests li button,
+  .daily-requests li .daily-request-claimed {
+    justify-self: end;
+    min-width: 74px;
+  }
+}
+
 .daily-request-claimed {
   color: var(--moss);
   font-size: 11px;
@@ -1828,6 +1846,11 @@ kbd {
     top: calc(var(--hud-bottom, 140px) + 212px);
   }
 
+  /* With larger text there is no room for both under the header: the coach already says what the hint says. */
+  html[data-text-size] .scene-wrap[data-walkthrough="1"] .hint {
+    display: none;
+  }
+
   .hint {
     top: calc(var(--hud-bottom, 140px) + 90px);
     right: 8px;
@@ -2116,6 +2139,8 @@ html[data-reduce-motion="1"] .walkthrough li {
 
 .settings-panel {
   display: grid;
+  /* One column that may shrink below a slider's default width, so larger text never pushes the panel past a phone's edge. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   width: min(380px, 100%);
   max-height: calc(100dvh / var(--text-zoom, 1) - 32px);
@@ -2143,7 +2168,18 @@ html[data-reduce-motion="1"] .walkthrough li {
 }
 
 .settings-volume input {
+  min-width: 0;
   accent-color: var(--amber);
+}
+
+/* With larger text the label takes its own line, so the slider keeps a usable length. */
+html[data-text-size] .settings-volume {
+  grid-template-columns: minmax(0, 1fr) 3.5em;
+  row-gap: 2px;
+}
+
+html[data-text-size] .settings-volume > span {
+  grid-column: 1 / -1;
 }
 
 .settings-volume output {
@@ -2429,6 +2465,13 @@ html[data-reduce-motion="1"] .hour-veil {
   background: rgba(17, 24, 22, 0.55);
   color: var(--paper-dim);
   pointer-events: none;
+}
+
+/* On a touch phone the walking stick owns the bottom-left corner; the lake's news gives way to it. */
+@media (pointer: coarse) and (max-width: 520px) {
+  .lodge-tracks {
+    display: none;
+  }
 }
 
 .lodge-tracks p {
