@@ -4,7 +4,7 @@ import { catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry,
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
-import { catchMonth } from "./tripMonths";
+import { catchMonth, monthName } from "./tripMonths";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 
@@ -12,15 +12,23 @@ function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-/** The shared search, plus species and lure names as they read in the player's language. */
+/** True when a word of the fish's month ("October 2026", "Październik 2026") starts with what was typed. */
+function monthHas(entry: CatchEntry, want: string): boolean {
+  if (want.length < 3) return false;
+  const name = normalize(monthName(catchMonth(entry)));
+  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
+}
+
+/** The shared search, plus species and lure names as they read in the player's language, and the month a fish came in. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
-  if (getLang() === "en") return found;
+  const translated = getLang() !== "en";
   const want = normalize(needle);
   const hit = new Set(found.map((entry) => entry.id));
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
-    if (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want)) hit.add(entry.id);
+    if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
+    else if (monthHas(entry, want)) hit.add(entry.id);
   }
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
@@ -76,7 +84,7 @@ export function CatchSearch() {
         type="search"
         aria-keyshortcuts="/"
         value={query}
-        placeholder={t("Species, water, or lure")}
+        placeholder={t("Species, water, lure, or month")}
         autoComplete="off"
         onChange={(event) => {
           const next = event.target.value;
