@@ -554,9 +554,9 @@ const PLAY_LAKE: Spot = {
   bestConditions: "",
 };
 
+/** The game's fish go to the game's own lake, never to a real water the player keeps notes on. */
 function withPlayLake(book: Logbook): { book: Logbook; spotId: string } {
-  const lake = book.spots.find((spot) => spot.waterType === "lake");
-  if (lake) return { book, spotId: lake.id };
+  if (book.spots.some((spot) => spot.id === PLAY_LAKE.id)) return { book, spotId: PLAY_LAKE.id };
   return { book: withSpot(book, PLAY_LAKE), spotId: PLAY_LAKE.id };
 }
 
