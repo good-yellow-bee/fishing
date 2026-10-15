@@ -1074,3 +1074,7 @@ button.field-primary:disabled {
   display: block;
   margin: -6px 0 12px;
 }
+
+.years-ago > .meta {
+  margin: 0 0 4px;
+}
