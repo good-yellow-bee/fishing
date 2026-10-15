@@ -173,15 +173,16 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         const parsed = parseSpotDraft(draft);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
-        commit(withSpot(book, { ...parsed.value, id }));
-        return { ok: true, id };
+        // A full browser says so on the form instead of the save silently not happening.
+        const saved = persist(withSpot(book, { ...parsed.value, id }), photos);
+        return saved.ok ? { ok: true, id } : saved;
       },
       addTrip: (draft) => {
         const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
-        commit(withTrip(book, { ...parsed.value, id }));
-        return { ok: true, id };
+        const saved = persist(withTrip(book, { ...parsed.value, id }), photos);
+        return saved.ok ? { ok: true, id } : saved;
       },
       updateCatch: (id, draft, photo) => {
         if (!book.catches.some((entry) => entry.id === id)) {
@@ -210,8 +211,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const parsed = parseSpotDraft(draft);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
-        commit(replaceSpot(book, { ...parsed.value, id }));
-        return { ok: true, id };
+        const saved = persist(replaceSpot(book, { ...parsed.value, id }), photos);
+        return saved.ok ? { ok: true, id } : saved;
       },
       updateTrip: (id, draft) => {
         if (!book.trips.some((trip) => trip.id === id)) {
@@ -219,8 +220,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
-        commit(replaceTrip(book, { ...parsed.value, id }));
-        return { ok: true, id };
+        const saved = persist(replaceTrip(book, { ...parsed.value, id }), photos);
+        return saved.ok ? { ok: true, id } : saved;
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
       fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
