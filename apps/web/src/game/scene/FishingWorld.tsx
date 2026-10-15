@@ -718,9 +718,11 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
 
     if (live) {
       const worn = 1 - (sim.current?.stamina ?? 1);
-      const leadTarget = fishLeadMeters(surge, fightView.reeling, worn);
+      // A fish in the weeds stays out where its run ended, rather than swinging back in.
+      const weeded = sim.current?.weeded === true;
+      const leadTarget = fishLeadMeters(weeded ? 2 : surge, fightView.reeling || weeded, worn);
       // A turned run swings back in toward the line.
-      const sideTarget = fishSideMeters(surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1);
+      const sideTarget = fishSideMeters(weeded ? 2 : surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1);
       const depthTarget = fishDepthMeters(surge, worn, sim.current?.sulk === true);
       const pullTarget = bobberPull(surge, fightView.reeling);
       const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;
