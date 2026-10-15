@@ -1163,3 +1163,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR110~~ | ~~News card (2026-10-15r) tells players the game field guide and species pages link to each other~~ (#350) | game | S |
 | ~~BR111~~ | ~~"/" jumps to the catch search on the field log home~~ (#351) | field | S |
 | ~~BR112~~ | ~~Month headings on the Fish page and in search are h2, so no heading level is skipped~~ (#352) | field | S |
+| ~~BR113~~ | ~~An upcoming trip says its fish will show up once logged on the day~~ (#353) | field | S |

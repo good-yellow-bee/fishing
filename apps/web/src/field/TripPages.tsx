@@ -145,7 +145,9 @@ export function TripPage() {
       ) : null}
       <SpeciesChips catches={catches} />
       {catches.length === 0 ? (
-        <p className="empty">{t("Nothing logged for this trip yet.")}</p>
+        <p className="empty">
+          {trip.date > today ? t("Fish you log on the day show up here.") : t("Nothing logged for this trip yet.")}
+        </p>
       ) : (
         <PagedCatches items={catches}>
           {(entry) => (
