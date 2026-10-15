@@ -865,3 +865,13 @@ button.field-primary:disabled {
   display: inline-flex;
   align-items: center;
 }
+
+.best-badge {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border: 1px solid var(--field-rust);
+  color: var(--field-rust);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
