@@ -151,7 +151,9 @@ export function HomePage() {
           </div>
           <h3 className="subhead">{t("Coming up")}</h3>
           {upcoming.length === 0 ? (
-            <p className="empty">{t("Nothing on the calendar.")}</p>
+            <p className="empty">
+          {t("Nothing on the calendar.")} <Link to="/trips/new">{t("Plan one")}</Link>
+        </p>
           ) : (
             <div className="stack">
               {upcoming.map((trip) => (
