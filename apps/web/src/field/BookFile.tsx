@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
+import { catchesCsv } from "./catchCsv";
 import { copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
@@ -8,12 +9,12 @@ import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
-function downloadBook(json: string) {
-  const blob = new Blob([json], { type: "application/json" });
+function downloadFile(text: string, type: string, name: string) {
+  const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "stillwater-field-log.json";
+  link.download = name;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -35,7 +36,7 @@ export function BookFile() {
   const [tip] = useState(() => homeScreenTip());
 
   const onDownload = () => {
-    downloadBook(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })));
+    downloadFile(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })), "application/json", "stillwater-field-log.json");
     saveCopiedAt(own);
     setCopiedAt(own);
   };
@@ -91,6 +92,11 @@ export function BookFile() {
         <button type="button" className="text-button" onClick={onDownload}>
           {t("Download this book")}
         </button>
+        {book.catches.length > 0 ? (
+          <button type="button" className="text-button" onClick={() => downloadFile(catchesCsv(book), "text/csv;charset=utf-8", "stillwater-catches.csv")}>
+            {t("Download catches as a spreadsheet")}
+          </button>
+        ) : null}
         <button type="button" className="text-button" onClick={() => fileRef.current?.click()}>
           {t("Load a book")}
         </button>
