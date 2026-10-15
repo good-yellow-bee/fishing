@@ -3,15 +3,11 @@ import { Link } from "react-router-dom";
 import { anglerTitle, BOARD_LIMIT, FISH, weeklyFish, type BoardEntry, type BoardPeriod, type BoardView, type SpeciesRecord } from "@stillwater/shared";
 import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { FishMark } from "../components/FishMark";
-import { locale, t, tn, useT } from "../i18n";
+import { t, tn, useT } from "../i18n";
+import { weightText } from "../i18n/content";
 
 function periodLabel(period: BoardPeriod): string {
   return period === "all" ? t("All time") : t("This week");
-}
-
-/** A weight to one decimal, with the language's decimal mark. */
-function lb(weight: number): string {
-  return weight.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
 }
 
 function RankMark({ rank }: { rank: number }) {
@@ -33,7 +29,7 @@ function BoardRow({ row, you }: { row: BoardEntry; you: boolean }) {
       </td>
       <td>{row.level}</td>
       <td>{row.score}</td>
-      <td>{row.heaviest > 0 ? `${lb(row.heaviest)} lb` : "—"}</td>
+      <td>{row.heaviest > 0 ? weightText(row.heaviest) : "—"}</td>
       <td>{row.species}</td>
     </tr>
   );
@@ -120,7 +116,7 @@ export function BoardPage() {
           </div>
           <div>
             <span className="eyebrow">{t("Heaviest")}</span>
-            <strong>{you.heaviest > 0 ? `${lb(you.heaviest)} lb` : "—"}</strong>
+            <strong>{you.heaviest > 0 ? weightText(you.heaviest) : "—"}</strong>
             <small>
               {tn(you.species, "{n} species", "{n} species")} · {tn(you.catches, "{n} landed", "{n} landed")}
             </small>
@@ -166,7 +162,7 @@ export function BoardPage() {
                   <strong>{record ? t(fish.name) : t("Unknown")}</strong>
                   {record ? (
                     <span>
-                      {lb(record.weight)} lb · {record.holder}
+                      {weightText(record.weight)} · {record.holder}
                       {record.userId === you?.userId ? ` ${t("(you)")}` : ""}
                     </span>
                   ) : (

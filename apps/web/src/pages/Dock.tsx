@@ -85,13 +85,13 @@ import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
-import { oneDecimal, rarityLabel } from "../game/logic";
+import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
 import { lookDrag, lookZoom } from "../game/scene/photoLook";
 import { PHOTO_KEY_TURNS, usePhotoDrag } from "../game/usePhotoDrag";
-import { bestBeatText } from "../i18n/content";
+import { bestBeatText, weightText } from "../i18n/content";
 
 /** How often the page reads the clock for a new lake hour. */
 const HOUR_CHECK_MS = 30_000;
@@ -500,7 +500,7 @@ export function DockPage() {
     const photo = shotFor.current?.id === outcome.id ? shotFor.current.dataUrl : null;
     const text = {
       title: t(outcome.species.name),
-      detail: `${oneDecimal(outcome.weight)} lb · ${t(SPOT_LABELS[outcome.spot])}`,
+      detail: `${weightText(outcome.weight)} · ${t(SPOT_LABELS[outcome.spot])}`,
       conditions: [t(LAKE_HOUR_LABELS[hour]), t(skyLabel(sky, season)), t(SEASON_LABELS[season])].join(" · "),
       date: now.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
     };
@@ -844,7 +844,7 @@ export function DockPage() {
             <h2>{t(game.outcome.species.name)}</h2>
             <p className="catch-lore">{t(game.outcome.species.lore)}</p>
             <p className="catch-lure">{t(lure)}</p>
-            <p>{oneDecimal(game.outcome.weight)} lb · {t(SPOT_LABELS[game.outcome.spot])}</p>
+            <p>{weightText(game.outcome.weight)} · {t(SPOT_LABELS[game.outcome.spot])}</p>
             <p>
               {t("+{points} pts", {
                 points: catchPoints(
@@ -860,18 +860,18 @@ export function DockPage() {
             {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
-              <p className="catch-stamp">{t("Personal best · was {weight} lb", { weight: oneDecimal(stamp.previous) })}</p>
+              <p className="catch-stamp">{t("Personal best · was {weight}", { weight: weightText(stamp.previous) })}</p>
             )}
             {stamp?.kind === "repeat" && (
-              <p className="catch-stamp quiet">{t("Book PB {weight} lb", { weight: oneDecimal(stamp.heaviest) })}</p>
+              <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
             )}
             {stamp?.trophy && <p className="catch-stamp">{t("Trophy")}</p>}
             {lodge?.kind === "first" && <p className="catch-stamp">{t("First on the lodge wall")}</p>}
             {lodge?.kind === "record" && (
               <p className="catch-stamp">
                 {lodge.yours
-                  ? t("Lodge record · beat your {weight} lb", { weight: oneDecimal(lodge.previous) })
-                  : t("Lodge record · was {weight} lb ({holder})", { weight: oneDecimal(lodge.previous), holder: lodge.holder })}
+                  ? t("Lodge record · beat your {weight}", { weight: weightText(lodge.previous) })
+                  : t("Lodge record · was {weight} ({holder})", { weight: weightText(lodge.previous), holder: lodge.holder })}
               </p>
             )}
             <div className="catch-actions">

@@ -1,9 +1,12 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-14z";
+export const NEWS_ID = "2026-10-15a";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Weights, lengths and water temperature can show in kilograms, centimetres and °C: pick the units in Settings.",
+  "The field log's Bests page shows when the fish bite, your best lures, the catch by season and your best day.",
+  "Logging a catch in the field log suggests your own lures first, and the weather can be left blank.",
   "Settings has a battery saver: the lake draws 30 frames a second to spare a phone's battery.",
   "Change the lure without the menu: Q and R on a keyboard, or the bumpers on a controller.",
   "Photo mode (H) can now save the view: press P or Space, or tap Save this view, and the lake is saved as a picture.",

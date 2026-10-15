@@ -5,11 +5,7 @@ import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
 import { locale, tn, useT } from "../i18n";
-
-/** A weight to one decimal, with the language's decimal mark. */
-function lb(weight: number): string {
-  return weight.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1, useGrouping: false });
-}
+import { weightText } from "../i18n/content";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
@@ -74,11 +70,11 @@ export function LogPage() {
           </div>
           <div>
             <span className="eyebrow">{t("Total weight")}</span>
-            <strong>{lb(totalWeight)} lb</strong>
+            <strong>{weightText(totalWeight)}</strong>
           </div>
           <div>
             <span className="eyebrow">{t("Heaviest")}</span>
-            <strong>{lb(heaviest.weight)} lb</strong>
+            <strong>{weightText(heaviest.weight)}</strong>
             <small>{t(fishById(heaviest.speciesId)?.name ?? heaviest.speciesId)}</small>
           </div>
         </div>
@@ -107,7 +103,7 @@ export function LogPage() {
                     {row.released && <small className="log-released">{t("Released")}</small>}
                   </span>
                 </td>
-                <td>{lb(row.weight)} lb</td>
+                <td>{weightText(row.weight)}</td>
                 <td>{t(SPOT_LABELS[row.spot])}</td>
                 <td>
                   {row.hour && row.sky ? `${t(LAKE_HOUR_LABELS[row.hour])} · ${t(skyLabel(row.sky, row.season))}` : "—"}

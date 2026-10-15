@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { updateSettings, useSettings, type Settings } from "../game/settings";
-import { setLang, useLang, useT, type Lang } from "../i18n";
+import { setLang, setUnits, useLang, useT, useUnits, type Lang, type Units } from "../i18n";
 import { FLOAT_COLOURS, FLOAT_SWATCH_HEX, type FloatColour } from "../game/scene/floatColour";
 
 type Choice<K extends keyof Settings> = { value: Settings[K]; label: string };
@@ -39,6 +39,24 @@ function LanguageChoice() {
         <label key={value} lang={value}>
           <input type="radio" name="lang" checked={lang === value} onChange={() => setLang(value)} />
           {LANGUAGE_NAMES[value]}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
+const UNIT_NAMES: Record<Units, string> = { imperial: "lb · in · °F", metric: "kg · cm · °C" };
+
+function UnitsChoice() {
+  const units = useUnits();
+  const t = useT();
+  return (
+    <fieldset className="settings-choices">
+      <legend>{t("Units")}</legend>
+      {(Object.keys(UNIT_NAMES) as Units[]).map((value) => (
+        <label key={value}>
+          <input type="radio" name="units" checked={units === value} onChange={() => setUnits(value)} />
+          {UNIT_NAMES[value]}
         </label>
       ))}
     </fieldset>
@@ -91,6 +109,7 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
       <section ref={panel} className="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <h2 id="settings-title">{t("Settings")}</h2>
         <LanguageChoice />
+        <UnitsChoice />
         <label className="settings-volume">
           <span>{t("Volume")}</span>
           <input

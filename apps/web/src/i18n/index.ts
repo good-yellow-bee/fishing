@@ -55,6 +55,13 @@ export function locale(): string {
   return lang === "pl" ? "pl-PL" : "en-US";
 }
 
+/** Bumped on any change that rewrites the words on screen: the language or the units. */
+let version = 0;
+function changed() {
+  version += 1;
+  listeners.forEach((listener) => listener());
+}
+
 export function setLang(next: Lang) {
   if (next === lang) return;
   lang = next;
@@ -64,14 +71,53 @@ export function setLang(next: Lang) {
     // Private mode: the choice holds for this visit.
   }
   mark();
-  listeners.forEach((listener) => listener());
+  changed();
+}
+
+export type Units = "imperial" | "metric";
+export const UNITS_KEY = "stillwater.units.v1";
+
+function loadUnits(): Units | null {
+  try {
+    const stored = localStorage.getItem(UNITS_KEY);
+    return stored === "imperial" || stored === "metric" ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+let chosenUnits: Units | null = loadUnits();
+
+/**
+ * Pounds, inches and °F, or kilograms, centimetres and °C. Until the player
+ * picks, the units follow the language: a Polish reader gets metric. The book
+ * always stores the lake's own imperial numbers; only the words change.
+ */
+export function getUnits(): Units {
+  return chosenUnits ?? (lang === "pl" ? "metric" : "imperial");
+}
+
+export function setUnits(next: Units) {
+  if (next === chosenUnits) return;
+  chosenUnits = next;
+  try {
+    localStorage.setItem(UNITS_KEY, next);
+  } catch {
+    // Private mode: the choice holds for this visit.
+  }
+  changed();
+}
+
+export function useUnits(): Units {
+  return useSyncExternalStore(subscribeLang, getUnits, getUnits);
 }
 
 /** Reload from storage and the browser; for tests. */
 export function reloadLang() {
   lang = load();
+  chosenUnits = loadUnits();
   mark();
-  listeners.forEach((listener) => listener());
+  changed();
 }
 
 export function subscribeLang(listener: () => void) {
@@ -140,6 +186,6 @@ export function num(value: number, maxDigits = 1): string {
 
 /** For components: re-renders on a language change and hands back `t`. */
 export function useT() {
-  useLang();
+  useSyncExternalStore(subscribeLang, () => version, () => version);
   return t;
 }

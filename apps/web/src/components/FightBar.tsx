@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { fightLines, isCleanFight, jumpLines, RED_TENSION, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
-import { oneDecimal } from "../game/logic";
 import { useLang, useT } from "../i18n";
+import { weightText } from "../i18n/content";
 
 type Props = {
   fight: Fight;
@@ -83,7 +83,7 @@ export function FightBar({ fight, sim, performance }: Props) {
     <div ref={card} className="fight-bar">
       <header>
         <h2>{t(fight.species.name)}</h2>
-        <span>{oneDecimal(fight.weight)} lb</span>
+        <span>{weightText(fight.weight)}</span>
       </header>
       {fight.underpowered ? (
         <p className="warn">{t("This fish is too heavy for your line.")}</p>

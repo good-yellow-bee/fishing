@@ -25,8 +25,8 @@ import {
   WIND_LABELS,
   type DailyRequest,
 } from "@stillwater/shared";
-import { reloadLang, setLang } from ".";
-import { bestBeatText, dailyRequestText, measureText, skillUnlockText, weatherText } from "./content";
+import { getUnits, reloadLang, setLang, setUnits } from ".";
+import { bestBeatText, dailyRequestText, lengthText, measureText, skillUnlockText, tempText, weatherText, weightText } from "./content";
 import { PL } from "./pl";
 
 const browser = new JSDOM("", { url: "http://localhost" });
@@ -105,6 +105,7 @@ describe("content sentences in Polish", () => {
 
   it("builds daily requests, weather, measures, unlocks and beats in Polish", () => {
     setLang("pl");
+    setUnits("imperial");
     expect(dailyRequestText(perch)).toBe("1 × okoń żółty powyżej 0,9 lb");
     expect(dailyRequestText(shiners)).toBe("3 × złotawiec — Pomost");
     expect(weatherText({ sky: "overcast", wind: "light-north", waterTempF: 52.5 })).toBe("Pochmurno · Słaby z północy · 52,5°F");
@@ -118,5 +119,31 @@ describe("content sentences in Polish", () => {
     expect(bestBeatText({ scope: "species", previousPounds: 2.1, previousSpecies: "Walleye", line: "" })).toBe(
       "Bije twój wpis z dziennika połowów: Sandacz amerykański, 2,1 lb",
     );
+  });
+});
+
+describe("units", () => {
+  it("follow the language until the player picks, then stay picked", () => {
+    expect(getUnits()).toBe("imperial");
+    setLang("pl");
+    expect(getUnits()).toBe("metric");
+    setUnits("imperial");
+    setLang("en");
+    setLang("pl");
+    expect(getUnits()).toBe("imperial");
+    reloadLang();
+    expect(getUnits()).toBe("imperial");
+  });
+
+  it("turn the lake's pounds, inches and °F into kilograms, centimetres and °C", () => {
+    setUnits("metric");
+    expect(weightText(2.4)).toBe("1.1 kg");
+    expect(weightText(0.4)).toBe("0.18 kg");
+    expect(lengthText(28)).toBe("71 cm");
+    expect(tempText(61)).toBe("16°C");
+    expect(measureText({ kind: "length", inches: 11.5 })).toBe("29 cm");
+    setLang("pl");
+    expect(weatherText({ sky: "overcast", wind: "light-north", waterTempF: 52.5 })).toBe("Pochmurno · Słaby z północy · 11°C");
+    expect(dailyRequestText({ id: "p", speciesId: "perch", minWeight: 0.9, count: 1, reward: 1 })).toBe("1 × okoń żółty powyżej 0,41 kg");
   });
 });

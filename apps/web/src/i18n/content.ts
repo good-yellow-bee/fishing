@@ -14,7 +14,7 @@ import {
   type Profile,
   type SkillId,
 } from "@stillwater/shared";
-import { num, t } from ".";
+import { getUnits, num, t } from ".";
 
 /**
  * Lines the shared package builds in English, rebuilt here in the player's
@@ -22,22 +22,39 @@ import { num, t } from ".";
  * `t()` directly; these cover the sentences with parts in them.
  */
 
-/** "2.4 lb" / "2,4 lb". Units stay as the lake measures them. */
-export function measureText(measure: Measure): string {
-  const amount = measure.kind === "length" ? measure.inches : measure.pounds;
-  return `${num(amount)} ${measure.kind === "length" ? "in" : "lb"}`;
+export const KG_PER_LB = 0.45359237;
+export const CM_PER_IN = 2.54;
+
+/** "2.4 lb", or "1,1 kg" for a metric reader. The book keeps pounds. */
+export function weightText(pounds: number): string {
+  return getUnits() === "metric" ? `${num(pounds * KG_PER_LB, pounds * KG_PER_LB < 1 ? 2 : 1)} kg` : `${num(pounds)} lb`;
 }
 
-/** "Clear · Calm · 61°F" in the player's words. */
+/** "28 in", or "71 cm" for a metric reader. The book keeps inches. */
+export function lengthText(inches: number): string {
+  return getUnits() === "metric" ? `${num(inches * CM_PER_IN, 0)} cm` : `${num(inches)} in`;
+}
+
+/** "61°F", or "16°C" for a metric reader. The book keeps °F. */
+export function tempText(fahrenheit: number): string {
+  return getUnits() === "metric" ? `${num(((fahrenheit - 32) * 5) / 9, 0)}°C` : `${num(fahrenheit)}°F`;
+}
+
+/** "2.4 lb" / "2,4 lb" / "1,1 kg". */
+export function measureText(measure: Measure): string {
+  return measure.kind === "length" ? lengthText(measure.inches) : weightText(measure.pounds);
+}
+
+/** "Clear · Calm · 61°F" in the player's words and units. */
 export function weatherText(weather: CatchWeather): string {
-  return `${t(SKY_LABELS[weather.sky])} · ${t(WIND_LABELS[weather.wind])} · ${num(weather.waterTempF)}°F`;
+  return `${t(SKY_LABELS[weather.sky])} · ${t(WIND_LABELS[weather.wind])} · ${tempText(weather.waterTempF)}`;
 }
 
 /** "A yellow perch over 1 lb at the Dock" / "3 × bluegill". */
 export function dailyRequestText(request: DailyRequest): string {
   const name = t(fishById(request.speciesId)!.name);
   const fish = request.count === 1 ? t("A {fish}", { fish: name.toLowerCase() }) : `${request.count} × ${name.toLowerCase()}`;
-  const size = request.minWeight === undefined ? "" : t(" over {weight} lb", { weight: num(request.minWeight) });
+  const size = request.minWeight === undefined ? "" : t(" over {weight}", { weight: weightText(request.minWeight) });
   const bank = request.spot ? t(" at the {spot}", { spot: t(SPOT_LABELS[request.spot]) }) : "";
   return `${fish}${size}${bank}`;
 }

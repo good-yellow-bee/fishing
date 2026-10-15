@@ -313,7 +313,7 @@ export const PL_CONTENT: PlBook = {
 
   // Sentences rebuilt in i18n/content.ts
   "A {fish}": "1 × {fish}",
-  " over {weight} lb": " powyżej {weight} lb",
+  " over {weight}": " powyżej {weight}",
   " at the {spot}": " — {spot}",
   "Beats the {size} {species} already in the field log": "Bije wpis z dziennika połowów: {species}, {size}",
   "Beats your {size} {species} already in the field log": "Bije twój wpis z dziennika połowów: {species}, {size}",
