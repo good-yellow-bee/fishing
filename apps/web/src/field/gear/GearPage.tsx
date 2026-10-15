@@ -130,7 +130,9 @@ export function GearPage() {
       </header>
       <h2 className="subhead">{t("Coming up")}</h2>
       {upcoming.length === 0 ? (
-        <p className="empty">{t("No upcoming outings.")}</p>
+        <p className="empty">
+          {t("No upcoming outings.")} <Link to="/trips/new">{t("Plan one")}</Link>
+        </p>
       ) : (
         upcoming.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}
