@@ -191,6 +191,8 @@ export function useFishingGame(
   const surfaceRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<ScenePhase>("idle");
   const powerRef = useRef(0);
+  /** The power the last cast was released at, failed casts included, for the cast meter's aiming mark. */
+  const lastCastRef = useRef<number | null>(null);
   const holdingRef = useRef(false);
   const holdStartRef = useRef(0);
   const castPointerRef = useRef<number | null>(null);
@@ -452,6 +454,7 @@ export function useFishingGame(
     holdingRef.current = false;
     const castPower = Math.min(1, (performance.now() - holdStartRef.current) / 900);
     powerRef.current = castPower;
+    lastCastRef.current = castPower;
     fx.cast();
     const surface = surfaceRef.current;
     const aimed = parseAim(surface?.dataset.aim);
@@ -837,6 +840,7 @@ export function useFishingGame(
     sim: simRef,
     performance: performanceRef,
     powerRef,
+    lastCastRef,
     dismissResult,
   };
 }

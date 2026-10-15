@@ -30,10 +30,12 @@ describe("PowerMeter", () => {
     vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
     vi.stubGlobal("cancelAnimationFrame", () => undefined);
     const power = { current: 0 };
+    const lastCast: { current: number | null } = { current: null };
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    const show = (phase: ScenePhase) => act(() => root!.render(<PowerMeter phase={phase} powerRef={power} accuracy={1} />));
+    const show = (phase: ScenePhase) =>
+      act(() => root!.render(<PowerMeter phase={phase} powerRef={power} lastCastRef={lastCast} accuracy={1} />));
     const ghost = () => container!.querySelector<HTMLElement>(".last-cast");
 
     show("idle");
@@ -41,9 +43,11 @@ describe("PowerMeter", () => {
     show("casting");
     power.current = 0.62;
     frame();
-    show("waiting");
+    lastCast.current = 0.62;
     power.current = 0;
     show("idle");
+    expect(ghost()!.style.left).toBe("62%");
+    show("casting");
     expect(ghost()!.style.left).toBe("62%");
   });
 });
