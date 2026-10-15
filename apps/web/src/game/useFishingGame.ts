@@ -35,6 +35,9 @@ import { localId } from "./localId";
 import { biteStyle, nibblePlan, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
+/** Milliseconds as seconds with two decimals, in the angler's own number format. */
+const seconds = (ms: number) => (ms / 1000).toLocaleString(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 /** How long a result stays up before a click or Space can cast straight past it. */
 export const RECAST_GUARD_MS = 450;
 
@@ -312,7 +315,6 @@ export function useFishingGame(
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
-      const seconds = (ms: number) => (ms / 1000).toLocaleString(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       setHint(
         !strike
           ? t("{line}. Ease off when it runs.", { line })
@@ -414,7 +416,8 @@ export function useFishingGame(
               return;
             }
             // The missed fish stays in the outcome so the turn-away shows the same fish.
-            setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
+            // How long it held on, so the angler learns the window they have.
+            setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait after {time} s.", { time: seconds(windowMs) }), fish: bitten });
             // Hold result so the miss spring and the turn play out.
             resetToIdle(t("Strike the moment the bobber goes under."), "result");
           }, windowMs);

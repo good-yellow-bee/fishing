@@ -1071,7 +1071,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT26~~ | ~~A played-out fish between runs gets its own call on the fight card: It's played out — reel it in!~~ (#411) | fight | S |
 | ~~GT27~~ | ~~Bottom feeders sulk: after every second run a carp, catfish, burbot or sturgeon with fight left digs in for up to 2.2 s; reeling moves it at a fifth of the rate and no line goes out, and easing off for 0.4 s then reeling pumps it up. The fight card says It's sulking on the bottom — ease off, then pump!~~ (#413) | fight | M |
 | ~~GT28~~ | ~~News card (2026-10-15zf) covers GT25 to GT27: the sulk, the played-out call, and the second-take twitch~~ (#415) | news | S |
-| GT29 | The landed card says how long the fight took: Landed in 24 s, or Landed in 1 min 5 s, counted in game time | fight | S |
+| ~~GT29~~ | ~~The landed card says how long the fight took: Landed in 24 s, or Landed in 1 min 5 s, counted in game time~~ (#418) | fight | S |
+| GT30 | A missed bite says how long the fish held the bait: Too slow. The fish dropped the bait after 0.92 s, so the bite window is learnable like the strike time | fish | S |
 
 ## Risks / open questions for the owner
 
