@@ -273,6 +273,22 @@
     display: none;
   }
 
+  /* On a phone the labels crowd: the pond's goes to its pin's left, the quarry's level with its pin, and the mill's a little lower, clear of the creek's. */
+  .map-pin-spot-duck .map-pin-label {
+    left: auto;
+    right: 28px;
+    top: 14px;
+  }
+
+  .map-pin-spot-quarry .map-pin-label {
+    bottom: auto;
+    top: 12px;
+  }
+
+  .map-pin-spot-mill .map-pin-label {
+    top: 12px;
+  }
+
   .map-index li {
     grid-template-columns: 1fr;
     gap: 2px;
