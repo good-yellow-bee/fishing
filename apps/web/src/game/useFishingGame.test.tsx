@@ -681,6 +681,7 @@ describe("level unlock integration", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(2201));
     expect(phase()).toBe("hookset:none");
+    expect(hint()).toBe("It's taking it — strike!");
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/second take/i);
@@ -689,6 +690,20 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
+  });
+
+  it("calls a predator's bite as a hit and a usual fish's as NOW", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    expect(hint()).toBe("WHAM — it hit! Strike!");
+    act(() => vi.advanceTimersByTime(1400));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    expect(hint()).toBe("NOW — strike!");
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {
