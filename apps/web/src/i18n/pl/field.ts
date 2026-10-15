@@ -171,6 +171,7 @@ export const PL_FIELD: PlBook = {
   "Back to spots": "Wróć do łowisk",
   "Delete this water? Its outings and fish leave the book too.": "Usunąć to łowisko? Jego wyprawy i ryby też znikną z dziennika.",
   "Log a catch here": "Zapisz tu połów",
+  "Log another": "Zapisz kolejną",
   "Best conditions": "Najlepsze warunki",
   "Not noted yet.": "Jeszcze nie zanotowano.",
   "Plan one": "Zaplanuj",

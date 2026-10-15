@@ -38,6 +38,11 @@ export function SpeciesPage() {
           </p>
           <h1>{t(name)}</h1>
         </div>
+        <div className="sheet-actions">
+          <Link to={`/catches/new?species=${encodeURIComponent(name)}`} className="field-primary inline">
+            {t("Log another")}
+          </Link>
+        </div>
       </header>
       <FishSum catches={catches} oneKind />
       <WaterTipsBox catches={catches} label={t("What it takes")} />
