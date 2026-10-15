@@ -1165,3 +1165,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR112~~ | ~~Month headings on the Fish page and in search are h2, so no heading level is skipped~~ (#352) | field | S |
 | ~~BR113~~ | ~~An upcoming trip says its fish will show up once logged on the day~~ (#353) | field | S |
 | ~~BR114~~ | ~~Spot form points out a water already in the book by the same name~~ (#354) | field | S |
+| ~~BR115~~ | ~~The Largest in a fish summary links to that catch~~ (#355) | field | S |

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { personalBests, type CatchEntry } from "@stillwater/shared";
 import { t, tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
@@ -17,13 +18,17 @@ export function FishSum({ catches, oneKind = false }: { catches: readonly CatchE
       {fishCountLabel(catches.length)}
       {oneKind ? "" : ` · ${tn(species, "{n} species", "{n} species")}`}
       {released > 0 ? ` · ${tn(released, "{n} released", "{n} released")}` : ""}
-      {largest
-        ? ` · ${
-            oneKind
+      {largest ? (
+        <>
+          {" · "}
+          {/* The largest opens its own catch page. */}
+          <Link to={`/catches/${largest.id}`}>
+            {oneKind
               ? t("Largest: {size}", { size: measureText(largest.measure) })
-              : t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })
-          }`
-        : ""}
+              : t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })}
+          </Link>
+        </>
+      ) : null}
     </p>
   );
 }
