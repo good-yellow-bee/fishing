@@ -1095,3 +1095,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR42~~ | ~~A catch added from an earlier outing starts on that outing's day (at the current clock time) instead of today~~ (#282) | field log | S |
 | ~~BR43~~ | ~~Picking an earlier outing in the catch form moves the catch to that day, until the player sets the time themselves~~ (#283) | field log | S |
 | ~~BR44~~ | ~~A trip still ahead hides "Add a catch" (a catch cannot be dated in the future, so it would land on today under a future outing)~~ (#284) | field log | S |
+| ~~BR45~~ | ~~The catch form notes when the fish is dated a different day from its outing (a gentle line, not a block)~~ (#285) | field log | S |
