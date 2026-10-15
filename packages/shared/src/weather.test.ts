@@ -83,6 +83,8 @@ describe("catch weather", () => {
       expect(saved.value.weather).toEqual({ sky: "fog", wind: "calm", waterTempF: 54 });
     }
     expect(parseWeatherDraft({ sky: "", wind: "calm", waterTemp: "54" })).toMatchObject({ ok: false, field: "sky" });
+    expect(parseWeatherDraft({ sky: "", wind: "", waterTemp: " " })).toEqual({ ok: true, value: null });
+    expect(parseWeatherDraft({ sky: "", wind: "", waterTemp: "54" })).toMatchObject({ ok: false, field: "sky" });
     expect(parseWeatherDraft({ sky: "rain", wind: "nope", waterTemp: "54" })).toMatchObject({ ok: false, field: "wind" });
     expect(parseCatchDraft(draft({ waterTemp: "hot" }), book)).toMatchObject({ ok: false, field: "waterTemp" });
     expect(parseCatchDraft(draft({ waterTemp: "31" }), book)).toMatchObject({ ok: false, field: "waterTemp" });

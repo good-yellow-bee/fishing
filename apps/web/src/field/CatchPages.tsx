@@ -119,6 +119,8 @@ function CatchForm() {
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [waterTemp, setWaterTemp] = useState(existing?.weather ? String(existing.weather.waterTempF) : "");
+  // Conditions are optional, but once one is noted the other two are needed.
+  const weatherStarted = Boolean(sky || wind || waterTemp.trim());
   const [photo, setPhoto] = useState<string | null>(existing ? photoFor(existing.id) : null);
   const [photoError, setPhotoError] = useState("");
   const [reducing, setReducing] = useState(false);
@@ -336,9 +338,11 @@ function CatchForm() {
             </select>
           </label>
 
+          <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
+
           <label>
             {t("Sky")}
-            <select name="sky" value={sky} onChange={(event) => setSky(event.target.value)} required>
+            <select name="sky" value={sky} onChange={(event) => setSky(event.target.value)} required={weatherStarted}>
               <option value="">{t("Choose")}</option>
               {SKIES.map((option) => (
                 <option key={option} value={option}>
@@ -350,7 +354,7 @@ function CatchForm() {
 
           <label>
             {t("Wind")}
-            <select name="wind" value={wind} onChange={(event) => setWind(event.target.value)} required>
+            <select name="wind" value={wind} onChange={(event) => setWind(event.target.value)} required={weatherStarted}>
               <option value="">{t("Choose")}</option>
               {WINDS.map((option) => (
                 <option key={option} value={option}>
@@ -369,7 +373,7 @@ function CatchForm() {
               onChange={(event) => setWaterTemp(event.target.value)}
               placeholder="58"
               aria-label={t("Water temperature in Fahrenheit")}
-              required
+              required={weatherStarted}
             />
           </label>
 

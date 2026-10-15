@@ -57,7 +57,7 @@ export type WeatherDraft = {
 };
 
 type WeatherError = { ok: false; field: string; message: string };
-type WeatherParsed = { ok: true; value: CatchWeather } | WeatherError;
+type WeatherParsed = { ok: true; value: CatchWeather | null } | WeatherError;
 
 const SAMPLE_CATCH_WEATHER: Record<string, CatchWeather> = {
   "catch-brook-bugger": { sky: "overcast", wind: "light-north", waterTempF: 52 },
@@ -260,7 +260,9 @@ function parseTemp(raw: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
+/** Conditions are optional: all three left blank keep no weather; once one is noted, all three are needed. */
 export function parseWeatherDraft(draft: WeatherDraft): WeatherParsed {
+  if (!draft.sky && !draft.wind && !draft.waterTemp.trim()) return { ok: true, value: null };
   if (!isSky(draft.sky)) return fail("sky", "Note the sky.");
   if (!isWind(draft.wind)) return fail("wind", "Note the wind.");
   const waterTempF = parseTemp(draft.waterTemp);
