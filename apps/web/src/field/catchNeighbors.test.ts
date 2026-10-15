@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { catchesNewestFirst, sampleLogbook } from "@stillwater/shared";
-import { catchNeighbors } from "./catchNeighbors";
+import { catchNeighbors, tripNeighbors } from "./catchNeighbors";
 
 describe("catch neighbours", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -21,5 +21,20 @@ describe("catch neighbours", () => {
 
   it("finds nothing for a missing fish", () => {
     expect(catchNeighbors(book, "gone")).toEqual({ newer: null, older: null });
+  });
+});
+
+describe("trip neighbours", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const rows = [...book.trips].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+
+  it("orders outings by date, newest first", () => {
+    expect(tripNeighbors(book, rows[0]!.id)).toEqual({ newer: null, older: rows[1] ?? null });
+    const last = rows.length - 1;
+    expect(tripNeighbors(book, rows[last]!.id)).toEqual({ newer: rows[last - 1] ?? null, older: null });
+  });
+
+  it("finds nothing for a missing outing", () => {
+    expect(tripNeighbors(book, "gone")).toEqual({ newer: null, older: null });
   });
 });

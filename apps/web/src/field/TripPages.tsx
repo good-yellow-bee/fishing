@@ -11,6 +11,7 @@ import {
   recentTrips,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
+import { tripNeighbors } from "./catchNeighbors";
 import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
@@ -101,6 +102,7 @@ export function TripPage() {
   const catches = catchesForTrip(book, trip.id);
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
+  const { newer, older } = tripNeighbors(book, trip.id);
 
   return (
     <div className="sheet">
@@ -149,6 +151,22 @@ export function TripPage() {
           {(entry) => <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />}
         </PagedCatches>
       )}
+      {newer || older ? (
+        <nav className="catch-steps" aria-label={t("More outings")}>
+          {newer ? (
+            <Link to={`/trips/${newer.id}`} rel="prev">
+              {t("← Later: {title}", { title: newer.title })}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {older ? (
+            <Link to={`/trips/${older.id}`} rel="next">
+              {t("Earlier: {title} →", { title: older.title })}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
     </div>
   );
 }
