@@ -399,6 +399,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "In the field log, your record fish wear a tag, and each catch and trip page links to the next one, newer or older.":
+    "W dzienniku rekordowe ryby mają znaczek, a każda strona połowu i wyprawy prowadzi do następnej, nowszej albo starszej.",
   "The field log has a photo wall: every fish you kept a snapshot of, big, newest first. Open it from the catch log.":
     "Dziennik ma ścianę zdjęć: każda ryba z zachowanym ujęciem, w dużym formacie, od najnowszej. Otworzysz ją z listy połowów.",
   "The field log can save your catches as a spreadsheet, and trip and water pages sum up their fish.":
