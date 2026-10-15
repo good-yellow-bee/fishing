@@ -399,6 +399,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "Spot cards name your next outing on each water, past trips sit under month headings, and a trip page says between which times its fish came. On the Gear page, past outings fold their lists away.":
+    "Karty łowisk podają najbliższą wyprawę na każde z nich, minione wyprawy są pogrupowane według miesięcy, a strona wyprawy mówi, między którymi godzinami brały ryby. Na stronie Sprzęt listy minionych wypraw są zwinięte.",
   "Typing a species on the catch form shows your biggest of that kind so far, and planning a trip says how your last outing on that water went. The map lists each water's fish.":
     "Gdy wpisujesz gatunek w formularzu połowu, widzisz swoją największą rybę tego gatunku, a planując wyprawę zobaczysz, jak poszła ostatnia na tym łowisku. Mapa podaje liczbę ryb z każdego łowiska.",
   "In the field log, lures link to every fish they took: on catch pages, in Bests and in What works here. The Bests tiles open the record fish, and past trips show their fish before the tackle.":
