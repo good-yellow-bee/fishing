@@ -412,6 +412,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
+    "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
   "Fish now tire as you play them: the fight card says when one is tiring or played out, and it comes up near the surface. Turn a run by holding ← or A (→ or D) the other way, or the side buttons on a touch screen.":
     "Ryby męczą się teraz w trakcie holu: karta walki mówi, kiedy ryba słabnie albo jest wymęczona, a ona sama podchodzi pod powierzchnię. Zawróć odjazd, przytrzymując ← albo A (→ albo D) w drugą stronę, albo boczne przyciski na ekranie dotykowym.",
   "A fish logged without its outing can join it in one tap, from the fish's page or from the outing's page, which counts the loose fish from its water that day.":
