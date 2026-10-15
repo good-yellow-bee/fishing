@@ -23,6 +23,7 @@ import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
 import { monthName, tripsByMonth } from "./tripMonths";
+import { TripMonthHead } from "./TripMonthHead";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -83,13 +84,7 @@ export function TripsPage() {
       ) : (
         tripsByMonth(recent).map((group) => (
           <section key={group.month} aria-label={monthName(group.month)}>
-            <h3 className="month-head">
-              {monthName(group.month)}
-              {" · "}
-              {tn(group.trips.length, "{n} outing", "{n} outings")}
-              {" · "}
-              {fishCountLabel(group.trips.reduce((sum, trip) => sum + catchesForTrip(book, trip.id).length, 0))}
-            </h3>
+            <TripMonthHead month={group.month} trips={group.trips} fishOn={(id) => catchesForTrip(book, id).length} />
             <div className="stack">
               {group.trips.map((trip) => (
                 <TripCard

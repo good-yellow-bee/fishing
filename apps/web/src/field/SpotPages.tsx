@@ -19,6 +19,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth, monthName, tripsByMonth } from "./tripMonths";
+import { TripMonthHead } from "./TripMonthHead";
 import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -127,7 +128,11 @@ export function SpotPage() {
       ) : (
         tripsByMonth(trips).map((group) => (
           <section key={group.month} aria-label={monthName(group.month)}>
-            <h3 className="month-head">{monthName(group.month)}</h3>
+            <TripMonthHead
+              month={group.month}
+              trips={group.trips}
+              fishOn={(id) => catches.filter((entry) => entry.tripId === id).length}
+            />
             <div className="stack">
               {group.trips.map((trip) => (
                 <TripCard
