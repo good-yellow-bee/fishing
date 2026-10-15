@@ -1257,3 +1257,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR160~~ | ~~What works here time, weather and season link to searches~~ (#437) | field | S |
 | ~~BR161~~ | ~~Catch search joins terms with +; species page bars link to it~~ (#439) | field | S |
 | ~~BR162~~ | ~~What works here links narrow to the water or species~~ (#441) | field | S |
+| ~~BR163~~ | ~~Spot form kind-of-water buttons translated~~ (#442) | field | S |
