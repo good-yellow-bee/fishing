@@ -1126,3 +1126,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR73~~ | ~~A catch page says which of its kind it is, like Brook trout: 2 of 3~~ (#313) | field | S |
 | ~~BR74~~ | ~~Home tiles link to the catch log and waters and count species and outings~~ (#314) | field | S |
 | ~~BR75~~ | ~~A packed tackle list says All packed and can be unpacked in one tap~~ (#315) | field | S |
+| ~~BR76~~ | ~~Upcoming trip cards show how the bag is packed instead of Nothing logged~~ (#316) | field | S |
