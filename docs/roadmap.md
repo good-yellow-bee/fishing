@@ -1295,3 +1295,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR184~~ | ~~An unreadable stored book is set aside and offered for download instead of overwritten~~ (#476) | field | S |
 | ~~BR185~~ | ~~Field-log tabs pick up the book when another tab changes it~~ (#478) | field | S |
 | ~~BR186~~ | ~~Book files with bad catch times or outing days are turned away~~ (#479) | field | S |
+| ~~BR187~~ | ~~One species however its name is capitalised (form, Bests, counts)~~ (#480) | field | S |
