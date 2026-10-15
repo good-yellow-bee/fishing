@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { localId as newId } from "../game/localId";
 import {
   parseCatchDraft,
@@ -25,10 +25,10 @@ import {
   type TripDraft,
 } from "@stillwater/shared";
 import { t, useLang } from "../i18n";
-import { readStoredPhotos, savePhotos } from "./photoStore";
+import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { localizeSample } from "./sampleText";
-import { readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -89,6 +89,24 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
   });
 
   const [undo, setUndo] = useState<Undo | null>(null);
+
+  useEffect(() => {
+    // Another tab (the game, or the field log open twice) changed the book: carry on from its copy,
+    // so the next save here doesn't write over the fish it added.
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === LOGBOOK_STORAGE_KEY || event.key === null) {
+        const stored = readStoredLogbook();
+        if (stored) {
+          setBook(stored);
+          // An undo from before would put back the other tab's changes too.
+          setUndo(null);
+        }
+      }
+      if (event.key === PHOTO_STORAGE_KEY || event.key === null) setPhotos(readStoredPhotos());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const api = useMemo<LogbookApi>(() => {
     const persist = (nextBook: Logbook, nextPhotos: CatchPhotoMap): { ok: true } | { ok: false; message: string } => {

@@ -1293,3 +1293,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR182~~ | ~~Undo bar buttons get 44px tap targets~~ (#473) | field | S |
 | ~~BR183~~ | ~~News line for the saved-catch note, download notices and sample undo~~ (#474) | field | S |
 | ~~BR184~~ | ~~An unreadable stored book is set aside and offered for download instead of overwritten~~ (#476) | field | S |
+| ~~BR185~~ | ~~Field-log tabs pick up the book when another tab changes it~~ (#478) | field | S |
