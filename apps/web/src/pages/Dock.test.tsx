@@ -501,7 +501,8 @@ describe("settings", () => {
     act(() => mute.querySelector("input")!.click());
     expect(fx.enabled).toBe(false);
     expect([...page.querySelectorAll(".hud button")].some((b) => b.textContent === "Sound")).toBe(true);
-    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { code: "Escape" })));
+    // From the checkbox that has focus, as a keyboard player would press it.
+    act(() => mute.querySelector("input")!.dispatchEvent(new KeyboardEvent("keydown", { code: "Escape", bubbles: true })));
     expect(page.querySelector('[role="dialog"]')).toBeNull();
     act(() => [...page.querySelectorAll<HTMLButtonElement>(".hud button")].find((b) => b.textContent === "Sound")!.click());
     expect(fx.enabled).toBe(true);
