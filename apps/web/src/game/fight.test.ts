@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -550,5 +550,42 @@ describe("sulking on the bottom", () => {
       runtime.step(now, 0.05, false);
       expect(runtime.sim.sulk).toBeFalsy();
     }
+  });
+});
+
+describe("runs into the weeds at the reeds", () => {
+  /** Plays slack until the first run ends, steering against it the whole time or not at all. */
+  function firstRun(runtime: FightRuntime, turn: boolean) {
+    let ran = false;
+    for (let now = 0; now < 30_000; now += 50) {
+      const steer = turn && runtime.sim.surge === 2 ? (-runtime.sim.runSide as Steer) : 0;
+      runtime.step(now, 0.05, false, steer);
+      if (runtime.sim.surge === 2) ran = true;
+      else if (ran && runtime.sim.surge === 0) return now;
+    }
+    throw new Error("never ran");
+  }
+
+  it("sends an unturned run into the weeds, where line comes in slowly and none goes out, until it comes free", () => {
+    const runtime = makeFight(fish("pike"), 6, 3, () => 0, 1, true);
+    const at = firstRun(runtime, false);
+    expect(runtime.sim.weeded).toBe(true);
+    const line = runtime.sim.line;
+    runtime.step(at + 50, 0.05, false);
+    expect(runtime.sim.line).toBe(line);
+    runtime.step(at + 100, 0.05, true);
+    expect(line - runtime.sim.line).toBeGreaterThan(0);
+    expect(line - runtime.sim.line).toBeLessThan(0.14 * 0.05 * WEED_REEL * 2);
+    runtime.step(at + WEED_MS + 100, 0.05, false);
+    expect(runtime.sim.weeded).toBe(false);
+  });
+
+  it("keeps a turned run out of the weeds, and open water never weeds a fish", () => {
+    const turned = makeFight(fish("pike"), 6, 3, () => 0, 1, true);
+    firstRun(turned, true);
+    expect(turned.sim.weeded).toBeFalsy();
+    const open = makeFight(fish("pike"), 6, 3, () => 0);
+    firstRun(open, false);
+    expect(open.sim.weeded).toBeFalsy();
   });
 });

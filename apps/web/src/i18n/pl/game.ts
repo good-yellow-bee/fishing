@@ -408,6 +408,7 @@ export const PL_GAME: PlBook = {
   "Fish played out": "Ryba wymęczona",
   "It's played out — reel it in!": "Wymęczona — zwijaj ją!",
   "It's sulking on the bottom — ease off, then pump!": "Zaległa na dnie — odpuść, potem pompuj!",
+  "It ran into the weeds — reel slow and steady!": "Wpłynęła w zielsko — zwijaj powoli i równo!",
   "Running out of line!": "Kończy się żyłka!",
   "Turn a run: hold ← A or → D the other way": "Zawróć odjazd: przytrzymaj ← A albo → D w drugą stronę",
   "Turn a run: hold the side button the other way": "Zawróć odjazd: przytrzymaj boczny przycisk w drugą stronę",
