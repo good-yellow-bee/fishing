@@ -447,6 +447,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "The cast meter keeps a dashed mark where your last cast stopped, so the next one can be aimed from it. A fish on the line that outweighs your best of its kind says so on the fight card.":
+    "Wskaźnik rzutu zostawia przerywaną kreskę tam, gdzie zatrzymał się ostatni rzut, żeby następny dało się od niej poprawić. Ryba na haczyku cięższa od twojego rekordu tego gatunku mówi o tym na karcie holu.",
   "On the lake, a sulking carp, catfish, burbot or sturgeon now sinks deep until you pump it up, and a pike, muskie or largemouth bass pulls the float straight under with no warning tap.":
     "Na jeziorze zaległy karp, sumik, miętus czy jesiotr schodzi teraz głęboko, dopóki go nie podpompujesz, a szczupak, tygrysi szczupak czy bass wielkogębowy wciąga spławik od razu, bez ostrzegawczego skubnięcia.",
   "Bow to a trout's or bass's leap and the landed card counts it, as it does a carp hooked on its second take. The tension bar keeps a notch at the fight's highest tension, red once it touched the red.":
