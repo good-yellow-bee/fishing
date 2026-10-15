@@ -1068,3 +1068,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR15~~ | ~~"Download catches as a spreadsheet" in the field log's footer: a CSV of every catch, newest first, in the reader's language and units (semicolons and decimal commas for Polish spreadsheets, UTF-8 with a byte-order mark)~~ (#255) | field log | S |
 | ~~BR16~~ | ~~A trip's page sums up its fish above the cards: how many, how many species, and the largest (by weight, else length)~~ (#256) | field log | S |
 | ~~BR17~~ | ~~A water's page gets the same fish summary as a trip (count, species, largest), from one shared FishSum~~ (#257) | field log | S |
+| ~~BR18~~ | ~~The sample week's invented waters, trips and notes show in the reader's language (their Polish lines existed but were never used); the stored book keeps the English lines, and the player's own words are never translated~~ (#258) | field log, i18n | S |
