@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests } from "./bests.ts";
+import { biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests, seasonTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -140,6 +140,21 @@ describe("when and on what the fish came", () => {
     expect(lures).toEqual([
       { lure: "Woolly bugger", count: 3 },
       { lure: "Spinner", count: 2 },
+    ]);
+  });
+});
+
+describe("the seasons the fish came in", () => {
+  it("counts all four seasons by the month each fish was caught", () => {
+    const base = sampleLogbook(now);
+    const template = base.catches[0]!;
+    const on = (month: number, i: number) => ({ ...template, id: `s${i}`, caughtAt: new Date(2026, month, 10, 9).toISOString() });
+    const book = { ...base, catches: [on(3, 1), on(4, 2), on(7, 3), on(11, 4), on(0, 5)] };
+    expect(seasonTally(book).map((row) => [row.id, row.label, row.count])).toEqual([
+      ["spring", "Spring", 2],
+      ["summer", "Summer", 1],
+      ["fall", "Fall", 0],
+      ["winter", "Winter", 2],
     ]);
   });
 });
