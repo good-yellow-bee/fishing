@@ -407,6 +407,8 @@ export const PL_GAME: PlBook = {
   "Fish whisperer": "Zaklinacz ryb",
   "Lake master": "Mistrz jeziora",
   "Lake legend": "Legenda jeziora",
+  "Keeper of the lake": "Strażnik jeziora",
+  "Stillwater sage": "Mędrzec Stillwater",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",

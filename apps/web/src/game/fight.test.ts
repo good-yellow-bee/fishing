@@ -281,6 +281,18 @@ describe("stamina", () => {
     }
   });
 
+  it("tires a fish faster for a level 9 angler, but rests it the same", () => {
+    const plain = makeFight(fish("pike"), 10, 3, () => 0.5);
+    const keeper = makeFight(fish("pike"), 10, 3, () => 0.5, 1.2);
+    plain.step(0, 1, true);
+    keeper.step(0, 1, true);
+    expect(1 - keeper.sim.stamina).toBeCloseTo((1 - plain.sim.stamina) * 1.2);
+    const before = [plain.sim.stamina, keeper.sim.stamina];
+    plain.step(1000, 0.5, false);
+    keeper.step(1000, 0.5, false);
+    expect(keeper.sim.stamina - before[1]!).toBeCloseTo(plain.sim.stamina - before[0]!);
+  });
+
   it("lands a tired fish faster than a fresh one would come in", () => {
     const fresh = makeFight(fish("pike"), 10, 3, () => 0.5);
     const tired = makeFight(fish("pike"), 10, 3, () => 0.5);

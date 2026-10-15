@@ -142,6 +142,8 @@ export const PL_CONTENT: PlBook = {
   "Fish bite 15% faster. The rowboat is yours — untie it at the dock and row out to open water.":
     "Ryby biorą o 15% szybciej. Łódka jest twoja — odwiąż ją przy pomoście i wypłyń na otwartą wodę.",
   "Better odds of trophy-size fish.": "Większa szansa na ryby trofealne.",
+  "Hooked fish tire 20% faster.": "Zaholowane ryby męczą się o 20% szybciej.",
+  "Rare and legendary fish bite more often.": "Rzadkie i legendarne ryby biorą częściej.",
 
   // Badges (badges.ts)
   "Four banks": "Cztery brzegi",

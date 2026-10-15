@@ -133,6 +133,8 @@ export function makeFight(
   weight: number,
   strength: number,
   random: () => number = Math.random,
+  /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
+  tireMul = 1,
 ): FightRuntime {
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
@@ -204,7 +206,7 @@ export function makeFight(
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
     const tire = sim.surge === 2 ? TIRE_RUN + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
-    sim.stamina = Math.min(1, Math.max(0, sim.stamina - tire * dtSec));
+    sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
