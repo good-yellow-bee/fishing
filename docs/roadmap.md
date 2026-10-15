@@ -1153,3 +1153,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR100~~ | ~~Home Next tile says when the next outing is, before its water~~ (#340) | field | S |
 | ~~BR101~~ | ~~News card (2026-10-15p) tells players about month headings on fish lists and search, and the Next tile day~~ (#341) | field log | S |
 | ~~BR102~~ | ~~Photos wall split under month headings~~ (#342) | field | S |
+| ~~BR103~~ | ~~Bests water cards say which kind a water gives most~~ (#343) | field | S |
