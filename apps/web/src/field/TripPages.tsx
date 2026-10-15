@@ -133,7 +133,15 @@ export function TripPage() {
         <p className="empty">{t("Nothing logged for this trip yet.")}</p>
       ) : (
         <PagedCatches items={catches}>
-          {(entry) => <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />}
+          {(entry) => (
+            <CatchCard
+              key={entry.id}
+              entry={entry}
+              // The outing's own water is in its header; only a fish from elsewhere names its water.
+              spotName={entry.spotId === trip.spotId ? null : (spotById(book, entry.spotId)?.name ?? t("Unknown water"))}
+              tripTitle={null}
+            />
+          )}
         </PagedCatches>
       )}
     </>
