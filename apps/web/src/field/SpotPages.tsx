@@ -26,6 +26,7 @@ import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
+import { ChoiceRow } from "./ChoiceRow";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -241,20 +242,13 @@ function SpotForm() {
           ) : null}
           <fieldset>
             <legend>{t("Water type")}</legend>
-            <div className="choice-row wrap" role="radiogroup" aria-label={t("Water type")}>
-              {WATER_TYPES.map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  role="radio"
-                  aria-checked={waterType === type}
-                  className={waterType === type ? "on" : ""}
-                  onClick={() => setWaterType(type)}
-                >
-                  {t(WATER_LABELS[type])}
-                </button>
-              ))}
-            </div>
+            <ChoiceRow
+              label={t("Water type")}
+              value={waterType}
+              options={WATER_TYPES.map((type) => ({ id: type, label: t(WATER_LABELS[type]) }))}
+              onChange={setWaterType}
+              wrap
+            />
           </fieldset>
           <label className="wide">
             {t("Notes")}
