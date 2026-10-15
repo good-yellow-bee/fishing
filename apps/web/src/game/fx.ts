@@ -560,6 +560,7 @@ export const HAPTICS = {
   surge: [30, 40, 30],
   snap: [80],
   land: [20, 30, 60],
+  scrape: [12, 30, 12],
 } as const;
 
 export type HapticBeat = keyof typeof HAPTICS;
@@ -572,6 +573,7 @@ export const RUMBLES: Record<HapticBeat, { ms: number; strong: number; weak: num
   surge: { ms: 160, strong: 0.5, weak: 0.5 },
   snap: { ms: 200, strong: 1, weak: 0.3 },
   land: { ms: 220, strong: 0.35, weak: 0.7 },
+  scrape: { ms: 70, strong: 0.15, weak: 0.55 },
 };
 
 type RumblePad = { connected?: boolean; vibrationActuator?: { playEffect?: (type: string, params: object) => Promise<unknown> } | null };
@@ -744,6 +746,12 @@ export const fx = {
   reel() {
     if (!this.enabled) return;
     noiseBurst("bandpass", 2200 * (0.9 + Math.random() * 0.2), 1500, 0.03, 0.02);
+  },
+  /** Line grating over the rocks off the point: two rough, low rasps. */
+  scrape() {
+    if (!this.enabled) return;
+    noiseBurst("bandpass", 900, 450, 0.07, 0.035);
+    noiseBurst("bandpass", 750, 400, 0.06, 0.025, 0.05);
   },
   surge() {
     if (!this.enabled) return;
