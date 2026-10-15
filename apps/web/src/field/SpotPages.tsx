@@ -18,6 +18,7 @@ import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
+import { monthName, tripsByMonth } from "./tripMonths";
 import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -124,19 +125,24 @@ export function SpotPage() {
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
-        <div className="stack">
-          {trips.map((trip) => (
-            <TripCard
-              key={trip.id}
-              trip={trip}
-              spotName={null}
-              waterType={null}
-              fishCount={catches.filter((entry) => entry.tripId === trip.id).length}
-              today={today}
-              tomorrow={tomorrow}
-            />
-          ))}
-        </div>
+        tripsByMonth(trips).map((group) => (
+          <section key={group.month} aria-label={monthName(group.month)}>
+            <h3 className="month-head">{monthName(group.month)}</h3>
+            <div className="stack">
+              {group.trips.map((trip) => (
+                <TripCard
+                  key={trip.id}
+                  trip={trip}
+                  spotName={null}
+                  waterType={null}
+                  fishCount={catches.filter((entry) => entry.tripId === trip.id).length}
+                  today={today}
+                  tomorrow={tomorrow}
+                />
+              ))}
+            </div>
+          </section>
+        ))
       )}
 
       <div className="section-head">

@@ -1,4 +1,5 @@
 import type { Trip } from "@stillwater/shared";
+import { locale } from "../i18n";
 
 export type TripMonth = { month: string; trips: Trip[] };
 
@@ -12,4 +13,11 @@ export function tripsByMonth(trips: readonly Trip[]): TripMonth[] {
     else months.push({ month, trips: [trip] });
   }
   return months;
+}
+
+/** "October 2026", in the reader's language. */
+export function monthName(month: string): string {
+  const name = new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(new Date(`${month}-15T12:00:00`));
+  // Polish month names come lower case; a heading starts with a capital.
+  return name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
 }

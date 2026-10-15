@@ -22,7 +22,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
-import { tripsByMonth } from "./tripMonths";
+import { monthName, tripsByMonth } from "./tripMonths";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -31,19 +31,12 @@ import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
-import { locale, t, useT } from "../i18n";
+import { t, useT } from "../i18n";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, 22);
-}
-
-/** "October 2026", in the reader's language. */
-function monthName(month: string): string {
-  const name = new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(new Date(`${month}-15T12:00:00`));
-  // Polish month names come lower case; a heading starts with a capital.
-  return name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
 }
 
 export function TripsPage() {
