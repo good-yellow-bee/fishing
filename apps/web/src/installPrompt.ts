@@ -48,3 +48,13 @@ export function useInstallOffer() {
     () => false,
   );
 }
+
+/**
+ * Safari on an iPhone or iPad never offers an install, but Share, then Add to
+ * Home Screen does the same. True there when the app isn't already on the
+ * home screen.
+ */
+export function homeScreenTip(nav: Navigator & { standalone?: boolean } = navigator) {
+  if (nav.standalone !== false) return false;
+  return /iPhone|iPad|iPod/.test(nav.userAgent) || (nav.platform === "MacIntel" && nav.maxTouchPoints > 1);
+}
