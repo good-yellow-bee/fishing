@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { speciesCounts, speciesLink } from "../speciesLink";
+import { bestDay, biteTimes, catchesForSpot, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -44,6 +44,15 @@ function soleTripOn(book: Logbook, ymd: string): string | null {
 
 function DayTally({ count, tripId }: { count: number; tripId: string | null }) {
   return tripId ? <Link to={`/trips/${tripId}`}>{fishCountLabel(count)}</Link> : <>{fishCountLabel(count)}</>;
+}
+
+/** A water's fish count, and which kind it gives most when one kind leads. */
+function waterFishLine(catches: readonly CatchEntry[]): string {
+  const fish = fishCountLabel(catches.length);
+  const [top, next] = speciesCounts(catches);
+  if (!top || catches.length < 2) return fish;
+  if (!next) return t("{fish}, all {species}", { fish, species: t(top.species) });
+  return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
 }
 
 export function BestsPage() {
@@ -198,7 +207,7 @@ export function BestsPage() {
                   <div className="spot-card-top">
                     <h2>{water.name}</h2>
                   </div>
-                  <p className="meta">{fishCountLabel(water.count)}</p>
+                  <p className="meta">{waterFishLine(catchesForSpot(book, water.spotId))}</p>
                 </Link>
               ))}
             </div>

@@ -104,6 +104,8 @@ export const PL_FIELD: PlBook = {
   "Outing:": "Wyprawa:",
   "Open the outing": "Otwórz wyprawę",
   "Fish came between {from} and {to}": "Ryby brały między {from} a {to}",
+  "{fish}, all {species}": "{fish}, wszystkie: {species}",
+  "{fish}, mostly {species}": "{fish}, głównie {species}",
   "Next outing: {when}": "Następna wyprawa: {when}",
   "Last here: {title}, {day} · {fish}": "Ostatnio tutaj: {title}, {day} · {fish}",
   "Not on a trip": "Poza wyprawą",
