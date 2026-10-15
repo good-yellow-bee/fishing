@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -31,7 +31,7 @@ import { catchMonth } from "./tripMonths";
 import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
-import { getUnits, locale, t, useT, type Units } from "../i18n";
+import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -124,6 +124,7 @@ export function CatchFormPage() {
 function CatchForm() {
   const { book, addCatch, updateCatch, photoFor } = useLogbook();
   useT();
+  const lang = useLang();
   const navigate = useNavigate();
   const { catchId } = useParams();
   const [params] = useSearchParams();
@@ -132,10 +133,12 @@ function CatchForm() {
   const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
 
   const asked = params.get("kind");
-  const presetKind = asked === "weight" || asked === "length" ? asked : lastMeasureKind(book);
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
   const bestSoFar = speciesBestSoFar(book, species, t, existing?.id);
-  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? presetKind);
+  // Starting values that look through the whole book are worked out once, not on every keystroke.
+  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(
+    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : lastMeasureKind(book)),
+  );
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
   const [startAmount] = useState(() => (existing ? amountText(existing, units) : ""));
@@ -154,7 +157,7 @@ function CatchForm() {
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   const [note, setNote] = useState(existing?.note ?? "");
-  const [released, setReleased] = useState(existing ? existing.released === true : lastReleased(book));
+  const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
@@ -226,8 +229,29 @@ function CatchForm() {
     setWaiting(null);
   };
 
-  const spotTrips = tripsForSpot(book, spotId);
-  const hereLures = (waterTips(catchesForSpot(book, spotId))?.lures ?? []).map((row) => t(row.lure));
+  // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
+  const spotTrips = useMemo(() => tripsForSpot(book, spotId), [book, spotId]);
+  const hereLures = useMemo(() => (waterTips(catchesForSpot(book, spotId))?.lures ?? []).map((row) => t(row.lure)), [book, spotId, lang]);
+  const speciesOptions = useMemo(
+    () =>
+      ownFirst(
+        book.catches.map((entry) => entry.species),
+        SPECIES,
+        t,
+      ).sort((a, b) => a.localeCompare(b)),
+    [book, lang],
+  );
+  const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
+  // Made once per water: a water fished for years lists hundreds of outings.
+  const tripOptions = useMemo(
+    () =>
+      spotTrips.map((trip) => (
+        <option key={trip.id} value={trip.id}>
+          {formatDay(trip.date)} · {trip.title}
+        </option>
+      )),
+    [spotTrips, lang],
+  );
   const heading = existing ? t(existing.species) : presetTrip ? presetTrip.title : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
@@ -238,7 +262,7 @@ function CatchForm() {
   };
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
-  const outingWeather = tripWeather(book, tripId, existing?.id);
+  const outingWeather = useMemo(() => tripWeather(book, tripId, existing?.id), [book, tripId, existing?.id]);
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
@@ -384,15 +408,9 @@ function CatchForm() {
               required
             />
             <datalist id="species-list">
-              {ownFirst(
-                book.catches.map((entry) => entry.species),
-                SPECIES,
-                t,
-              )
-                .sort((a, b) => a.localeCompare(b))
-                .map((name) => (
-                  <option key={name} value={name} />
-                ))}
+              {speciesOptions.map((name) => (
+                <option key={name} value={name} />
+              ))}
             </datalist>
             {bestSoFar ? (
               <small className="field-hint">
@@ -464,7 +482,7 @@ function CatchForm() {
               required
             />
             <datalist id="bait-list">
-              {ownFirst(bookLures(book), BAITS, t).map((bait) => (
+              {lureOptions.map((bait) => (
                 <option key={bait} value={bait} />
               ))}
             </datalist>
@@ -516,11 +534,7 @@ function CatchForm() {
             {t("Outing")}
             <select name="trip" value={tripId} onChange={(event) => onTrip(event.target.value)}>
               <option value="">{t("Not on a trip")}</option>
-              {spotTrips.map((trip) => (
-                <option key={trip.id} value={trip.id}>
-                  {formatDay(trip.date)} · {trip.title}
-                </option>
-              ))}
+              {tripOptions}
             </select>
           </label>
           {pickedTrip && caughtAt.slice(0, 10) !== pickedTrip.date ? (
