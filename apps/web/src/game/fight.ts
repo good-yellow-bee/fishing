@@ -24,6 +24,8 @@ export type FightSim = {
   sulk?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
   weeded?: boolean;
+  /** Off the point, a run the angler isn't turning, dragging the line over the rocks. */
+  rocky?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -300,6 +302,7 @@ export function makeFight(
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning;
+    sim.rocky = rocky && sim.surge === 2 && !sim.jump;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
