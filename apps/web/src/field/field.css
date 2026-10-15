@@ -397,10 +397,16 @@ button.field-primary:disabled {
   cursor: wait;
 }
 
-.catch-card h2,
-.trip-card h2,
+/* A card's heading is h2, h3 or h4 by where the card is listed, and looks the same at each. */
+.catch-card :is(h2, h3, h4),
+.trip-card :is(h2, h3, h4),
 .spot-card h2 {
+  font-family: Fraunces, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
   font-size: 22px;
+  line-height: 1;
 }
 
 .measure {
@@ -771,8 +777,8 @@ button.field-primary:disabled {
     grid-template-columns: 64px 76px minmax(0, 1fr);
   }
 
-  .catch-card h2,
-  .trip-card h2 {
+  .catch-card :is(h2, h3, h4),
+  .trip-card :is(h2, h3, h4) {
     overflow-wrap: anywhere;
   }
 

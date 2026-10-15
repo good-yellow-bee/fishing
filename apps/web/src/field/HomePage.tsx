@@ -137,6 +137,7 @@ export function HomePage() {
                     {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">{tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}</p>
                     <CatchCard
+                      level={4}
                       entry={entry}
                       spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                       tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
@@ -162,6 +163,7 @@ export function HomePage() {
             <div className="stack">
               {upcoming.map((trip) => (
                 <TripCard
+                  level={4}
                   key={trip.id}
                   trip={trip}
                   spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
@@ -180,6 +182,7 @@ export function HomePage() {
             <div className="stack">
               {recent.map((trip) => (
                 <TripCard
+                  level={4}
                   key={trip.id}
                   trip={trip}
                   spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
