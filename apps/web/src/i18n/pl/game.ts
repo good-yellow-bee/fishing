@@ -399,6 +399,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "Tackle lists say when everything is packed and can be unpacked in one tap, and upcoming trips show how the bag is coming along. Each catch says which of its kind it is, and the Fish page lists every species.":
+    "Listy sprzętu mówią, kiedy wszystko jest spakowane, i dają się rozpakować jednym dotknięciem, a nadchodzące wyprawy pokazują, jak idzie pakowanie. Każdy połów mówi, którą rybą swojego gatunku jest, a strona Ryby wymienia wszystkie gatunki.",
   "Water and trip pages in the field log list the kinds of fish caught there. Each species page shows when that fish bites, and Log another starts a catch of that kind.":
     "Strony łowisk i wypraw w dzienniku wymieniają gatunki tam złowione. Strona każdego gatunku pokazuje, kiedy ta ryba bierze, a Zapisz kolejną zaczyna połów tego gatunku.",
   "Every kind of fish has its own page in the field log: how many, the biggest, what it takes, and where it comes from. Open it from Bests or from any catch.":
