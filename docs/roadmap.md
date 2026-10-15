@@ -1236,3 +1236,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR148~~ | ~~Trip form notes this week in earlier years on the water~~ (#416) | field | S |
 | ~~BR149~~ | ~~Same week in earlier years on a planned outing page~~ (#417) | field | S |
 | ~~BR150~~ | ~~Same week in earlier years on a water page~~ (#419) | field | S |
+| ~~BR151~~ | ~~Outing fish count beside the outing link on a catch page~~ (#421) | field | S |
