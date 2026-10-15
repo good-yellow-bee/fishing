@@ -1,9 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15c";
+export const NEWS_ID = "2026-10-15d";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Each water in the field log shows what works there: its best lures and the time of day with the most fish, also on upcoming trips.",
+  "Logging a catch offers the water's best lures as one-tap picks, and Log another like this starts the next fish from the last.",
   "In the field log, your record fish wear a tag, and each catch and trip page links to the next one, newer or older.",
   "The field log has a photo wall: every fish you kept a snapshot of, big, newest first. Open it from the catch log.",
   "The field log can save your catches as a spreadsheet, and trip and water pages sum up their fish.",
