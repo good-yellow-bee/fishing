@@ -21,7 +21,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { formatDay, messageText, tripWhen } from "./format";
+import { fishCountLabel, formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -249,6 +249,8 @@ function TripForm() {
   const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : (book.spots[0]?.id ?? "");
   const [date, setDate] = useState(existing?.date ?? localDate(new Date()));
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
+  // Planning a day on a water: how the last one there went.
+  const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
@@ -311,6 +313,15 @@ function TripForm() {
                 </option>
               ))}
             </select>
+            {lastHere ? (
+              <small className="field-hint">
+                {t("Last here: {title}, {day} · {fish}", {
+                  title: lastHere.title,
+                  day: formatDay(lastHere.date),
+                  fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
+                })}
+              </small>
+            ) : null}
           </label>
           <label className="wide">
             {t("Title")}

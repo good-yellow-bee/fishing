@@ -1138,3 +1138,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR85~~ | ~~A water page stops repeating its own name on its trip and catch cards~~ (#325) | field | S |
 | ~~BR86~~ | ~~A trip page names a water on its catch cards only when the fish came from another one~~ (#326) | field | S |
 | ~~BR87~~ | ~~The map list counts the fish from each water~~ (#327) | field | S |
+| ~~BR88~~ | ~~The trip form says how the last outing on the chosen water went~~ (#328) | field | S |
