@@ -9,6 +9,7 @@ import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
 import { TallyBars } from "./TallyBars";
+import { findWithLink } from "./CatchSearch";
 import { WaterTipsBox } from "./WaterTipsBox";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -70,7 +71,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       {seasons.filter((row) => row.count > 0).length > 1 ? (
@@ -78,7 +79,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By season")}</h2>
           </div>
-          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       {catches.filter((entry) => entry.weather).length > 1 ? (
@@ -86,7 +87,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By the weather")}</h2>
           </div>
-          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       <div className="section-head">
