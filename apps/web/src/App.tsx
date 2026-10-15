@@ -5,6 +5,7 @@ import { useT } from "./i18n";
 import { useRootSettings } from "./game/settings";
 import { warmLake } from "./warmLake";
 import { BestsPage } from "./field/bests/BestsPage";
+import { SpeciesPage } from "./field/SpeciesPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
 import { GearPage } from "./field/gear/GearPage";
@@ -106,6 +107,7 @@ export function App() {
         <Route path="/gear" element={<GearPage />} />
         <Route path="/gear/:tripId" element={<GearPage />} />
         <Route path="/bests" element={<BestsPage />} />
+        <Route path="/species/:species" element={<SpeciesPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

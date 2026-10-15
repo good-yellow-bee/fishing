@@ -22,6 +22,7 @@ import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
 import { anotherCatchLink } from "./anotherCatch";
+import { speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
@@ -666,6 +667,8 @@ export function CatchPage() {
       >
         <p className="eyebrow">
           <Link to="/catches">{t("Catches")}</Link>
+          {" · "}
+          <Link to={speciesLink(entry.species)}>{t("All {species}", { species: t(entry.species) })}</Link>
         </p>
         <h1>{t(entry.species)}</h1>
         <p className="meta stand">

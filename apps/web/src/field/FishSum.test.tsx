@@ -11,4 +11,12 @@ describe("fish sum", () => {
     const marked = catches.map((entry, index) => (index < 2 ? { ...entry, released: true } : entry));
     expect(renderToStaticMarkup(<FishSum catches={marked} />)).toContain(" · 2 released · ");
   });
+
+  it("leaves the species out on a page about one kind", () => {
+    const one = catches.filter((entry) => entry.species === catches[0]!.species);
+    const html = renderToStaticMarkup(<FishSum catches={one} oneKind />);
+    expect(html).not.toContain("species");
+    expect(html).toContain("Largest: ");
+    expect(html).not.toContain(`Largest: ${one[0]!.species}`);
+  });
 });

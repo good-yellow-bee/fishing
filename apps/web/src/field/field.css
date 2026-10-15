@@ -1009,3 +1009,17 @@ button.field-primary:disabled {
 .moon-line {
   margin: 6px 0 0;
 }
+
+.species-waters {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.species-waters li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--field-line);
+}
