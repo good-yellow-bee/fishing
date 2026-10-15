@@ -442,6 +442,8 @@ export const PL_GAME: PlBook = {
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
   "The catch search also finds released fish and kinds of water (“river”, “pond”), sums up what it found, and can save those fish as a spreadsheet.":
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
+  "The landed card now says how long the fight took. A missed bite says how long the fish held the bait, and a strike at a nibble says it was only a nibble, so the timing is easier to learn.":
+    "Karta złowionej ryby mówi teraz, jak długo trwał hol. Przegapione branie mówi, jak długo ryba trzymała przynętę, a zacięcie przy skubnięciu mówi, że to było tylko skubnięcie — łatwiej wyczuć moment.",
   "Carp, catfish, burbot and sturgeon now sulk on the bottom between runs: reeling barely moves them, so ease off for a moment, then pump. The fight card also says when a fish is played out and ready to reel in, and the float twitches while a bottom feeder comes back for a second take.":
     "Karpie, sumy, miętusy i jesiotry zalegają teraz na dnie między odjazdami: zwijanie ledwo je rusza, więc odpuść na chwilę, a potem pompuj. Karta walki mówi też, kiedy ryba jest wymęczona i można ją zwijać, a spławik drga, gdy ryba denna wraca po drugie branie.",
   "Miss the strike on a carp, catfish, burbot or sturgeon and it comes back once for a second take. Each bite is called the way the fish takes it: a predator's WHAM, a bottom feeder's slow take. A fish landed on the edge of a snap is noted as a Close call.":
