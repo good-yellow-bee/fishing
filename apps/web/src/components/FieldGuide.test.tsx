@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { FISH, fishById, shadowSize, type CatchStat } from "@stillwater/shared";
 import { FieldGuide } from "./FieldGuide";
@@ -92,5 +93,17 @@ describe("field guide card", () => {
     expect(card.querySelector("path")?.getAttribute("fill")).toBe(fish.color);
     expect(card.querySelector("svg")?.getAttribute("class")).toBe("guide-fish");
     expect(card.querySelector(".guide-lore")?.textContent).toBe(fish.lore);
+  });
+
+  it("links a logged kind to its field log page when the book on this device holds some", () => {
+    const page = JSDOM.fragment(
+      renderToStaticMarkup(
+        <MemoryRouter>
+          <FieldGuide stats={[stat("smallmouth-bass", 2.4), stat("perch", 0.4)]} inBook={(name) => (name === "Smallmouth bass" ? 3 : 0)} />
+        </MemoryRouter>,
+      ),
+    );
+    const links = [...page.querySelectorAll(".guide-book a")];
+    expect(links.map((link) => [link.textContent, link.getAttribute("href")])).toEqual([["In your field log: 3", "/species/Smallmouth%20bass"]]);
   });
 });

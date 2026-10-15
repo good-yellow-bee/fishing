@@ -376,6 +376,7 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "In your field log: {count}": "W dzienniku połowów: {count}",
   "Season: {season}": "Pora roku: {season}",
   Easy: "Luźno",
   Tight: "Napięta",
