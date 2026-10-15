@@ -48,15 +48,19 @@ export function CatchSearch() {
   // The search lives in the address too, so Back from a catch returns to the same matches.
   const [query, setQuery] = useState(() => params.get(FIND_PARAM) ?? "");
   const box = useRef<HTMLElement>(null);
+  const linked = params.get(FIND_PARAM) ?? "";
+  // What was last typed here, so the address catching up with the box is not taken for a new link.
+  const typed = useRef<string | null>(null);
   useEffect(() => {
-    // Arriving from a link with a search typed in: show the matches, not the top of home.
+    // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
     const at = box.current;
-    if (!params.get(FIND_PARAM) || !at) return;
+    if (!linked || linked === typed.current || !at) return;
+    setQuery(linked);
     // The phone's sticky bar would cover the search box, so stop below it.
     const bar = document.querySelector<HTMLElement>(".field-mobile-bar");
     const below = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
     window.scrollTo({ top: at.getBoundingClientRect().top + window.scrollY - below - 12 });
-  }, []);
+  }, [linked]);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // "/" jumps to the search from anywhere on home, as on many sites; typing in a field is left alone.
@@ -88,6 +92,7 @@ export function CatchSearch() {
         autoComplete="off"
         onChange={(event) => {
           const next = event.target.value;
+          typed.current = next;
           setQuery(next);
           setParams(
             (current) => {
