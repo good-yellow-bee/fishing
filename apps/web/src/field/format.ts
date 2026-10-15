@@ -25,6 +25,11 @@ export function formatDay(ymd: string): string {
   return format("day").format(new Date(`${ymd}T12:00:00`));
 }
 
+/** The day a fish was caught, read from its full time so a UTC stamp lands on the local day. */
+export function formatCatchDay(iso: string): string {
+  return format("day").format(new Date(iso));
+}
+
 export function formatLongDay(date: Date): string {
   return format("long").format(date);
 }

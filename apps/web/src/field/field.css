@@ -1044,3 +1044,8 @@ button.field-primary:disabled {
   border-color: var(--field-rust);
   color: var(--field-rust);
 }
+
+.species-span {
+  display: block;
+  margin: -6px 0 16px;
+}

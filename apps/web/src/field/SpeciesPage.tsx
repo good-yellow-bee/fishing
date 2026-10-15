@@ -1,9 +1,9 @@
 import { Link, useParams } from "react-router-dom";
-import { biteTimes } from "@stillwater/shared";
+import { biteTimes, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
-import { fishCountLabel } from "./format";
+import { fishCountLabel, formatCatchDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
@@ -47,6 +47,7 @@ export function SpeciesPage() {
         </div>
       </header>
       <FishSum catches={catches} oneKind />
+      {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
@@ -81,5 +82,16 @@ export function SpeciesPage() {
         )}
       </PagedCatches>
     </div>
+  );
+}
+
+/** The first and the newest fish of the kind, each a link to its catch. */
+function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
+  const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
+  const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;
+  return (
+    <p className="meta species-span">
+      {t("First in the book")} {firstDay} · {t("newest")} {lastDay}
+    </p>
   );
 }
