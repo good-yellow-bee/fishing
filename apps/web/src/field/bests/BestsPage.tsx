@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { findLink } from "../CatchSearch";
 import { bestDay, biteTimes, lureTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
@@ -140,7 +141,9 @@ export function BestsPage() {
                 return (
                   <article key={row.species} className="spot-card">
                     <div className="spot-card-top">
-                      <h2>{t(row.species)}</h2>
+                      <h2>
+                        <Link to={findLink(t(row.species))}>{t(row.species)}</Link>
+                      </h2>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                     </div>
                     <p className="meta">
