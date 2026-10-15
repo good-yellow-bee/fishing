@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
+  localDate,
   type CatchEntry,
   type Spot,
   type Trip,
@@ -8,7 +9,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
-import { fishCountLabel, formatClock, noteText, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -86,7 +87,17 @@ export function TripCard({
   );
 }
 
-export function SpotCard({ spot, fishCount, tripCount }: { spot: Spot; fishCount: number; tripCount: number }) {
+export function SpotCard({
+  spot,
+  fishCount,
+  tripCount,
+  lastFishAt = null,
+}: {
+  spot: Spot;
+  fishCount: number;
+  tripCount: number;
+  lastFishAt?: string | null;
+}) {
   const t = useT();
   return (
     <Link to={`/spots/${spot.id}`} className="spot-card">
@@ -99,6 +110,7 @@ export function SpotCard({ spot, fishCount, tripCount }: { spot: Spot; fishCount
         {fishCountLabel(fishCount)}
         {" · "}
         {tn(tripCount, "{n} outing", "{n} outings")}
+        {lastFishAt ? ` · ${t("Last fish: {day}", { day: formatDay(localDate(new Date(lastFishAt))) })}` : ""}
       </p>
     </Link>
   );

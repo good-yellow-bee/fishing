@@ -14,6 +14,7 @@ import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
+import { spotsByLastFish } from "./spotOrder";
 import { EditDelete } from "./EditDelete";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -39,12 +40,13 @@ export function SpotsPage() {
         <p className="empty">{t("No waters yet.")}</p>
       ) : (
         <div className="card-grid">
-          {book.spots.map((spot) => (
+          {spotsByLastFish(book).map((row) => (
             <SpotCard
-              key={spot.id}
-              spot={spot}
-              fishCount={catchesForSpot(book, spot.id).length}
-              tripCount={tripsForSpot(book, spot.id).length}
+              key={row.spot.id}
+              spot={row.spot}
+              fishCount={row.fishCount}
+              tripCount={tripsForSpot(book, row.spot.id).length}
+              lastFishAt={row.lastFishAt}
             />
           ))}
         </div>
