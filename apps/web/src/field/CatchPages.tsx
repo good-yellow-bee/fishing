@@ -99,7 +99,7 @@ export function CatchesPage() {
       ) : (
         <>
           <SpeciesChips catches={catches} />
-          <PagedCatches items={catches} monthOf={catchMonth}>
+          <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
             {(entry) => (
               <CatchCard
                 key={entry.id}

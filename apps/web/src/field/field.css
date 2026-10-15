@@ -1066,7 +1066,7 @@ button.field-primary:disabled {
 }
 
 /* Inside a card stack the grid gap already spaces the heading. */
-.stack > .month-head {
+.sheet .stack > .month-head {
   margin: 8px 0 -2px;
 }
 
