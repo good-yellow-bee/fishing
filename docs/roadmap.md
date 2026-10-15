@@ -1161,3 +1161,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR108~~ | ~~Game field guide cards link to the kind's field log page when the book holds some~~ (#348) | game | S |
 | ~~BR109~~ | ~~Species pages for lake kinds link to the game field guide~~ (#349) | field | S |
 | ~~BR110~~ | ~~News card (2026-10-15r) tells players the game field guide and species pages link to each other~~ (#350) | game | S |
+| ~~BR111~~ | ~~"/" jumps to the catch search on the field log home~~ (#351) | field | S |

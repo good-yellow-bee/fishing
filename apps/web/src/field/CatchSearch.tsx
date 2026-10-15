@@ -49,6 +49,19 @@ export function CatchSearch() {
     const below = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
     window.scrollTo({ top: at.getBoundingClientRect().top + window.scrollY - below - 12 });
   }, []);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // "/" jumps to the search from anywhere on home, as on many sites; typing in a field is left alone.
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
+      event.preventDefault();
+      input.current?.focus();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
@@ -58,8 +71,10 @@ export function CatchSearch() {
     <section ref={box} className="catch-search" aria-label={t("Find a catch")}>
       <label htmlFor="catch-search">{t("Find a catch")}</label>
       <input
+        ref={input}
         id="catch-search"
         type="search"
+        aria-keyshortcuts="/"
         value={query}
         placeholder={t("Species, water, or lure")}
         autoComplete="off"
