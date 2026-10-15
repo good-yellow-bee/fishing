@@ -1214,3 +1214,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR137~~ | ~~Past tackle lists say how many fish each piece took~~ (#395) | field | S |
 | ~~BR138~~ | ~~Search sums up its matches~~ (#396) | field | S |
 | ~~BR139~~ | ~~Catch search finds fish by kind of water~~ (#398) | field | S |
+| ~~BR140~~ | ~~Month names cached so big-book searches stay quick~~ (#400) | field | S |
