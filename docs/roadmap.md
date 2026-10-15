@@ -1093,7 +1093,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT48~~ | ~~The inlet's current takes slack line out 1.6× faster, and the fight card names what the water does at the reeds and the inlet~~ (#465) | fight | S |
 | ~~GT49~~ | ~~News card (2026-10-15zo) covers GT47 and GT48: the inlet's current and the water line on the fight card~~ (#467) | news | S |
 | ~~GT50~~ | ~~Drop-off runs dive: they pull 25% harder against a reeling line and tire the fish 30% faster, so letting them go pays most there; the fight card says so~~ (#470) | fight | S |
-| GT51 | News card (2026-10-15zp) covers GT50: drop-off dives | news | S |
+| ~~GT51~~ | ~~News card (2026-10-15zp) covers GT50: drop-off dives~~ (#472) | news | S |
+| GT52 | Rocks off the point: reeling against a run the angler doesn't turn loads the line 20% harder; the fight card says so, and the news card (2026-10-15zq) covers it | fight | S |
 
 ## Risks / open questions for the owner
 

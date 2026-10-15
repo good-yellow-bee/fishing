@@ -605,6 +605,7 @@ describe("the inlet's current", () => {
     expect(fightWater("reeds")).toBe("weeds");
     expect(fightWater("inlet")).toBe("current");
     expect(fightWater("dropoff")).toBe("deep");
+    expect(fightWater("point")).toBe("rocks");
     expect(fightWater("dock")).toBe("open");
   });
 });
@@ -637,5 +638,24 @@ describe("runs at the drop-off", () => {
     pullOpen.step(at[0]!, 0.05, true);
     pullDeep.step(at[1]!, 0.05, true);
     expect(pullDeep.sim.tension - before[1]!).toBeGreaterThan(pullOpen.sim.tension - before[0]!);
+  });
+});
+
+describe("runs off the point", () => {
+  /** How much one reeling step, past the run's opening grace, loads the line. */
+  function runPull(water: "open" | "rocks", steer: Steer) {
+    const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
+    let now = 0;
+    for (; runtime.sim.surge !== 2 && now < 30_000; now += 50) runtime.step(now, 0.05, false);
+    for (let i = 0; i < 7; i++, now += 50) runtime.step(now, 0.05, false);
+    const before = runtime.sim.tension;
+    runtime.step(now, 0.05, true, steer === 0 ? 0 : (-runtime.sim.runSide as Steer));
+    expect(runtime.sim.surge).toBe(2);
+    return runtime.sim.tension - before;
+  }
+
+  it("loads the line harder on a run left unturned, and no harder on a turned one", () => {
+    expect(runPull("rocks", 0)).toBeGreaterThan(runPull("open", 0));
+    expect(runPull("rocks", 1)).toBeCloseTo(runPull("open", 1));
   });
 });
