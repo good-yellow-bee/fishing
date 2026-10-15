@@ -300,13 +300,16 @@ export function fishSideMeters(surge: FightSurge, runSide: number, worn = 0) {
 
 /** How deep a sulking bottom feeder digs in, well under its calm depth. */
 export const SULK_DEPTH = 0.68;
+/** How deep a run at the drop-off dives: below a calm fish, above a sulking one. */
+export const DIVE_DEPTH = 0.6;
 
 /**
  * Meters under the surface. The calm depth covers the body (about 0.31m
  * at fight scale). A run lifts the back out of the water.
  */
-export function fishDepthMeters(surge: FightSurge, worn = 0, sulk = false) {
-  if (surge === 2) return 0.04;
+export function fishDepthMeters(surge: FightSurge, worn = 0, sulk = false, diving = false) {
+  // At the drop-off a run heads down the ledge instead of thrashing at the top.
+  if (surge === 2) return diving ? DIVE_DEPTH : 0.04;
   if (surge === 1) return 0.22;
   // A sulking fish goes down to the bottom and stays there until it is pumped up.
   if (sulk) return SULK_DEPTH;

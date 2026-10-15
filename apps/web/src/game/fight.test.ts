@@ -638,6 +638,8 @@ describe("runs at the drop-off", () => {
     pullOpen.step(at[0]!, 0.05, true);
     pullDeep.step(at[1]!, 0.05, true);
     expect(pullDeep.sim.tension - before[1]!).toBeGreaterThan(pullOpen.sim.tension - before[0]!);
+    expect(pullDeep.sim.diving).toBe(true);
+    expect(pullOpen.sim.diving).toBe(false);
   });
 });
 
