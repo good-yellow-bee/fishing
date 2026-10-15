@@ -1061,3 +1061,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR8~~ | ~~The Bests page shows when the fish bite (dawn to night, from each catch's clock time) and the five lures that took the most fish, as labelled bars with the count in words~~ (#248) | field log | S |
 | ~~BR9~~ | ~~The Bests page also counts fish by season (spring to winter, by the month each was caught)~~ (#249) | field log | S |
 | ~~BR10~~ | ~~The Bests page's top row adds the best day: the most fish landed on one local day, with its date~~ (#250) | field log | S |
+| ~~BR11~~ | ~~Logging a catch suggests the player's own lures first (most fish on top) and their own species alongside the stock list, and a new catch on a trip starts with the lure of that trip's last fish~~ (#251) | field log | S |
