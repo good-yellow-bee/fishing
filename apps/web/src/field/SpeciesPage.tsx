@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { biteTimes, type CatchEntry } from "@stillwater/shared";
+import { FISH, biteTimes, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -42,6 +42,8 @@ export function SpeciesPage() {
           <h1>{t(name)}</h1>
         </div>
         <div className="sheet-actions">
+          {/* Lake fish also have a card in the game's field guide, on its Log page. */}
+          {FISH.some((fish) => fish.name.toLowerCase() === name.trim().toLowerCase()) ? <Link to="/log">{t("Field guide")}</Link> : null}
           <Link to={`/catches/new?species=${encodeURIComponent(name)}`} className="field-primary inline">
             {t("Log another")}
           </Link>
