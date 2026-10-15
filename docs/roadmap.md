@@ -1092,3 +1092,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR39~~ | ~~The Spots list shows each water's last fish date and puts the most recently fished waters first; waters with no fish keep book order after them~~ (#279) | field log | S |
 | ~~BR40~~ | ~~The Tackle page's upcoming outings offer the same one-tap "+ lure" picks as the trip page (packingTips in field/waterTips.ts)~~ (#280) | field log, gear | S |
 | ~~BR41~~ | ~~Upcoming trips have "Add to calendar": an all-day .ics event with the outing's title, water and note, made on the device (field/tripIcs.ts; downloadFile moved to field/download.ts)~~ (#281) | field log | S |
+| ~~BR42~~ | ~~A catch added from an earlier outing starts on that outing's day (at the current clock time) instead of today~~ (#282) | field log | S |

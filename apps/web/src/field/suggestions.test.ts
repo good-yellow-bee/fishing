@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, tripLure } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -39,5 +39,19 @@ describe("the measure a new catch starts with", () => {
   it("follows the player's newest fish logged by hand", () => {
     const own = { ...book, catches: [...book.catches, fish("old", "length", "2026-10-18T08:00:00"), fish("new", "weight", "2026-10-19T08:00:00")] };
     expect(lastMeasureKind(own)).toBe("weight");
+  });
+});
+
+describe("when a new catch starts", () => {
+  const now = new Date(2026, 9, 15, 7, 42);
+
+  it("starts now without an outing, or for one today or ahead", () => {
+    expect(startTimeFor(undefined, now)).toBe(now);
+    expect(startTimeFor({ date: "2026-10-15" }, now)).toBe(now);
+    expect(startTimeFor({ date: "2026-10-20" }, now)).toBe(now);
+  });
+
+  it("starts on an earlier outing's day at this clock time", () => {
+    expect(startTimeFor({ date: "2026-10-12" }, now)).toEqual(new Date(2026, 9, 12, 7, 42));
   });
 });

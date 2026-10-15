@@ -1,4 +1,4 @@
-import { catchesNewestFirst, lureTally, type Logbook, type Measure } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, lureTally, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
 
 /** The game files its fish here, always by weight, so they say nothing about how the player measures. */
@@ -37,4 +37,14 @@ export function tripLure(book: Logbook, tripId: string | undefined) {
 export function lastMeasureKind(book: Logbook): Measure["kind"] {
   const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
   return own?.measure.kind ?? "length";
+}
+
+/**
+ * When a new catch starts: now, unless it is logged for an outing on an earlier day.
+ * Then it starts on that day at this clock time, so it lands on the outing's date.
+ */
+export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = new Date()): Date {
+  if (!trip || trip.date >= localDate(now)) return now;
+  const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
+  return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
 }
