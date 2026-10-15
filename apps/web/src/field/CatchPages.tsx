@@ -133,6 +133,8 @@ function CatchForm() {
   const [caughtAt, setCaughtAt] = useState(() =>
     existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
+  // Until the player sets the time themselves, picking an outing moves the catch to its day.
+  const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   const [note, setNote] = useState(existing?.note ?? "");
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
@@ -153,6 +155,11 @@ function CatchForm() {
   const onSpot = (nextSpot: string) => {
     setSpotId(nextSpot);
     if (tripId && !tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) setTripId("");
+  };
+
+  const onTrip = (nextTrip: string) => {
+    setTripId(nextTrip);
+    if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
   };
 
   const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
@@ -377,14 +384,17 @@ function CatchForm() {
               name="caughtAt"
               type="datetime-local"
               value={caughtAt}
-              onChange={(event) => setCaughtAt(event.target.value)}
+              onChange={(event) => {
+                setCaughtAt(event.target.value);
+                setTimeTouched(true);
+              }}
               required
             />
           </label>
 
           <label>
             {t("Outing")}
-            <select name="trip" value={tripId} onChange={(event) => setTripId(event.target.value)}>
+            <select name="trip" value={tripId} onChange={(event) => onTrip(event.target.value)}>
               <option value="">{t("Not on a trip")}</option>
               {spotTrips.map((trip) => (
                 <option key={trip.id} value={trip.id}>
