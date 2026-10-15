@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
+  itemsForTrip,
   localDate,
+  packedCount,
   type CatchEntry,
   type Spot,
   type Trip,
@@ -13,6 +15,7 @@ import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./fo
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
+import { useTackleItems } from "./gear/TackleState";
 
 export function CatchCard({
   entry,
@@ -77,6 +80,16 @@ export function TripCard({
   tomorrow: string;
 }) {
   const t = useT();
+  const tackle = useTackleItems();
+  // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
+  const bag = tackle && fishCount === 0 && trip.date >= today ? itemsForTrip(tackle, trip.id) : [];
+  const packed = packedCount(bag);
+  const tally =
+    bag.length === 0
+      ? fishCountLabel(fishCount)
+      : packed === bag.length
+        ? t("All packed")
+        : t("{packed} of {total} packed", { packed, total: bag.length });
   return (
     <Link to={`/trips/${trip.id}`} className="trip-card">
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
@@ -86,7 +99,7 @@ export function TripCard({
           {spotName}
           {waterType ? ` · ${t(WATER_LABELS[waterType])}` : ""}
           {" · "}
-          {fishCountLabel(fishCount)}
+          {tally}
         </p>
       </div>
     </Link>

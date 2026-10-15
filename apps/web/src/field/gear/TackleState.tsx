@@ -83,3 +83,8 @@ export function useTackle(): TackleApi {
   if (!api) throw new Error("Tackle is only available inside the field log");
   return api;
 }
+
+/** The tackle lists where a page can show them, or null outside the field log (a card rendered on its own). */
+export function useTackleItems(): TackleItem[] | null {
+  return useContext(TackleContext)?.items ?? null;
+}
