@@ -6,20 +6,9 @@ import { copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
+import { downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
-
-function downloadFile(text: string, type: string, name: string) {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-}
 
 export function BookFile() {
   const { book, photos, replaceBook, restoreSample } = useLogbook();

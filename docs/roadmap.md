@@ -1091,3 +1091,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR38~~ | ~~News card (2026-10-15e) tells players about picture cards from catch pages and the game's fish filed under Stillwater~~ (#278) | field log | S |
 | ~~BR39~~ | ~~The Spots list shows each water's last fish date and puts the most recently fished waters first; waters with no fish keep book order after them~~ (#279) | field log | S |
 | ~~BR40~~ | ~~The Tackle page's upcoming outings offer the same one-tap "+ lure" picks as the trip page (packingTips in field/waterTips.ts)~~ (#280) | field log, gear | S |
+| ~~BR41~~ | ~~Upcoming trips have "Add to calendar": an all-day .ics event with the outing's title, water and note, made on the device (field/tripIcs.ts; downloadFile moved to field/download.ts)~~ (#281) | field log | S |

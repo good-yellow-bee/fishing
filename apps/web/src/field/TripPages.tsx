@@ -20,6 +20,8 @@ import { formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { packingTips } from "./waterTips";
+import { downloadFile } from "./download";
+import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, useT } from "../i18n";
@@ -141,6 +143,17 @@ export function TripPage() {
         </p>
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
+      {trip.date >= today ? (
+        <p className="trip-calendar">
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => downloadFile(tripIcs(trip, spot?.name ?? null), "text/calendar;charset=utf-8", tripIcsName(trip))}
+          >
+            {t("Add to calendar")}
+          </button>
+        </p>
+      ) : null}
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
       <TripWeather catches={catches} />
