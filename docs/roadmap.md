@@ -1127,3 +1127,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR74~~ | ~~Home tiles link to the catch log and waters and count species and outings~~ (#314) | field | S |
 | ~~BR75~~ | ~~A packed tackle list says All packed and can be unpacked in one tap~~ (#315) | field | S |
 | ~~BR76~~ | ~~Upcoming trip cards show how the bag is packed instead of Nothing logged~~ (#316) | field | S |
+| ~~BR77~~ | ~~News card (2026-10-15l) tells players about packing, kind numbers and the species list~~ (#317) | field log | S |
