@@ -1133,3 +1133,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR80~~ | ~~A catch page links its lure to every fish on that lure and labels its outing~~ (#320) | field | S |
 | ~~BR81~~ | ~~Bests lures link to every fish taken on them~~ (#321) | field | S |
 | ~~BR82~~ | ~~What works here lures link to every fish taken on them~~ (#322) | field | S |
+| ~~BR83~~ | ~~News card (2026-10-15m) tells players about lure links, Bests tile links and trip page order~~ (#323) | field log | S |
