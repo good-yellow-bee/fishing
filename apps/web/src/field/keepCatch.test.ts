@@ -66,7 +66,7 @@ describe("save a landed fish", () => {
     const kept = book?.catches.filter((entry) => entry.id === landed.id);
     expect(book?.catches).toHaveLength(seeded.catches.length + 1);
     expect(kept).toHaveLength(1);
-    expect(book?.spots).toEqual(seeded.spots);
+    expect(book?.spots).toEqual([...seeded.spots, expect.objectContaining({ id: "spot-stillwater" })]);
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
   });
 
@@ -86,11 +86,11 @@ describe("save a landed fish", () => {
     expect(kept).toMatchObject({
       species: "Bluegill",
       measure: { kind: "weight", pounds: 0.4 },
-      spotId: "spot-cedar",
+      spotId: "spot-stillwater",
       note: "Landed at the point.",
     });
     expect(book?.catches).toHaveLength(seeded.catches.length + 1);
-    expect(book?.spots).toEqual(seeded.spots);
+    expect(book?.spots).toEqual([...seeded.spots, expect.objectContaining({ id: "spot-stillwater" })]);
     expect(book?.trips).toEqual(seeded.trips);
     expect(book?.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(seeded.catches);
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();

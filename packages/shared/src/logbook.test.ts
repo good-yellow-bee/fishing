@@ -212,7 +212,7 @@ describe("field log", () => {
     expect(isLogbook(next)).toBe(true);
   });
 
-  it("keeps a landed fish on the lake already in the book", () => {
+  it("keeps a landed fish on the game's own lake, added once", () => {
     const next = keepLandedCatch(book, {
       id: "catch-play-gill",
       species: "Bluegill",
@@ -221,14 +221,14 @@ describe("field log", () => {
       caughtAt: "2026-10-07T18:04:00.000Z",
     });
     const kept = next.catches.find((entry) => entry.id === "catch-play-gill");
-    expect(next.spots).toEqual(book.spots);
+    expect(next.spots.map((spot) => spot.id)).toEqual([...book.spots.map((spot) => spot.id), "spot-stillwater"]);
     expect(next.catches).toHaveLength(book.catches.length + 1);
     expect(kept).toEqual({
       id: "catch-play-gill",
       species: "Bluegill",
       measure: { kind: "weight", pounds: 0.4 },
       lure: "Bobber",
-      spotId: "spot-cedar",
+      spotId: "spot-stillwater",
       tripId: null,
       caughtAt: "2026-10-07T18:04:00.000Z",
       note: "Landed at the dock.",
@@ -254,7 +254,7 @@ describe("field log", () => {
     expect(filed.trips.find((entry) => entry.id === "trip-play-1")).toEqual({
       id: "trip-play-1",
       date: "2026-10-07",
-      spotId: "spot-cedar",
+      spotId: "spot-stillwater",
       title: "Dusk at the dock · overcast",
       note: "",
     });
@@ -337,7 +337,7 @@ describe("field log", () => {
     expect(isLogbook(next)).toBe(true);
   });
 
-  it("keeps a point landing on this lake and leaves the other fish", () => {
+  it("files a point landing on the game's own lake, not a real lake in the book", () => {
     const next = keepLandedCatch(book, {
       id: "catch-play-point",
       species: "Bluegill",
@@ -349,12 +349,14 @@ describe("field log", () => {
     expect(kept).toMatchObject({
       species: "Bluegill",
       measure: { kind: "weight", pounds: 0.4 },
-      spotId: "spot-cedar",
+      spotId: "spot-stillwater",
       note: "Landed at the point.",
       weather: null,
     });
     expect(next.catches).toHaveLength(book.catches.length + 1);
-    expect(next.spots).toEqual(book.spots);
+    expect(next.spots).toEqual([...book.spots, expect.objectContaining({ id: "spot-stillwater", name: "Stillwater", waterType: "lake" })]);
+    const again = keepLandedCatch(next, { id: "catch-play-again", species: "Bluegill", pounds: 0.3, bank: "Point", caughtAt: "2026-10-07T19:10:00.000Z" });
+    expect(again.spots).toHaveLength(next.spots.length);
     expect(next.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(book.catches);
     expect(isLogbook(next)).toBe(true);
   });
