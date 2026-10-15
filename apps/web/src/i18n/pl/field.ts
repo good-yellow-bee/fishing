@@ -42,6 +42,7 @@ export const PL_FIELD: PlBook = {
   Tomorrow: "Jutro",
   "Nothing logged": "Nic nie zapisano",
   "{n} outings": ["{n} wyprawa", "{n} wyprawy", "{n} wypraw"],
+  "{n} photos": ["{n} zdjęcie", "{n} zdjęcia", "{n} zdjęć"],
   "Conditions not noted": "Warunków nie zanotowano",
   "Landed on the lake.": "Złowiona na jeziorze.",
   "Landed at the {spot}.": "Złowiona na łowisku: {spot}.",
