@@ -44,3 +44,12 @@ export function saveCopiedAt(own: number) {
     // Only the reminder forgets; the download itself went through.
   }
 }
+
+/** A fresh start, as after restoring the sample: the next reminder is the first-copy one. */
+export function clearCopiedAt() {
+  try {
+    localStorage.removeItem(BOOK_COPY_STORAGE_KEY);
+  } catch {
+    // Nothing kept, nothing to forget.
+  }
+}
