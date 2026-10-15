@@ -8,5 +8,6 @@ export function downloadFile(text: string, type: string, name: string) {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  URL.revokeObjectURL(url);
+  // Some browsers read the file after click() returns, so let it go a little later.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
