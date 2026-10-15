@@ -34,6 +34,13 @@ describe("water tips", () => {
     expect(waterTips([under("a", "overcast"), under("b", "clear"), under("c", null)])!.sky).toBeNull();
     expect(waterTips([under("a", "overcast"), under("b", null), under("c", null)])!.sky).toBeNull();
   });
+
+  it("names the season most fish came in, only once they span more than one", () => {
+    const on = (id: string, month: number) => ({ ...book.catches[0]!, id, caughtAt: `2026-${String(month).padStart(2, "0")}-10T09:00:00` });
+    expect(waterTips([on("a", 10), on("b", 10), on("c", 7)])!.season).toBe("fall");
+    expect(waterTips([on("a", 10), on("b", 10), on("c", 10)])!.season).toBeNull();
+    expect(waterTips([on("a", 10), on("b", 7), on("c", 4)])!.season).toBeNull();
+  });
 });
 
 describe("packing tips", () => {

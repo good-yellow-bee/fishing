@@ -107,6 +107,7 @@ export const PL_FIELD: PlBook = {
   "Fish came between {from} and {to}": "Ryby brały między {from} a {to}",
   "By the weather": "Według pogody",
   "Best weather: {sky}": "Najlepsza pogoda: {sky}",
+  "Best season: {season}": "Najlepsza pora roku: {season}",
   "{n} fish from this water that day are not on this outing.": [
     "{n} ryba z tego łowiska z tego dnia nie jest w tej wyprawie.",
     "{n} ryby z tego łowiska z tego dnia nie są w tej wyprawie.",
