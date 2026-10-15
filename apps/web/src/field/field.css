@@ -996,3 +996,7 @@ button.field-primary:disabled {
   padding: 0;
   accent-color: var(--field-rust);
 }
+
+.released-share {
+  margin: -8px 0 18px;
+}
