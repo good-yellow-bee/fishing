@@ -1205,3 +1205,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR132~~ | ~~Home Fish tile shows this month, search links work from home~~ (#386) | field | S |
 | ~~BR133~~ | ~~News card line for searching by month~~ (#388) | field | S |
 | ~~BR134~~ | ~~Catch search finds released fish, linked from Bests~~ (#390) | field | S |
+| ~~BR135~~ | ~~What works here names the best season~~ (#392) | field | S |
