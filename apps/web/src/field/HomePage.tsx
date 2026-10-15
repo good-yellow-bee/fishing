@@ -6,7 +6,8 @@ import { CatchCard, TripCard } from "./cards";
 import { formatLongDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { readKeptDraft } from "./catchDraft";
-import { t, useT } from "../i18n";
+import { t, tn, useT } from "../i18n";
+import { speciesCounts } from "./speciesLink";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -25,6 +26,7 @@ export function HomePage() {
   const catches = recentCatches(book, 4);
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today, 3);
+  const kinds = speciesCounts(book.catches).length;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -56,11 +58,17 @@ export function HomePage() {
       <section className="stat-row" aria-label={t("This book")}>
         <div>
           <span className="eyebrow">{t("Fish")}</span>
-          <strong>{book.catches.length}</strong>
+          <strong>
+            <Link to="/catches">{book.catches.length}</Link>
+          </strong>
+          {book.catches.length > 0 ? <small>{tn(kinds, "{n} species", "{n} species")}</small> : null}
         </div>
         <div>
           <span className="eyebrow">{t("Waters")}</span>
-          <strong>{book.spots.length}</strong>
+          <strong>
+            <Link to="/spots">{book.spots.length}</Link>
+          </strong>
+          {book.trips.length > 0 ? <small>{tn(book.trips.length, "{n} outing", "{n} outings")}</small> : null}
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>
