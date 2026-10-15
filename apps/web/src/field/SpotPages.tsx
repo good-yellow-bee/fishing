@@ -184,6 +184,10 @@ function SpotForm() {
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [bestConditions, setBestConditions] = useState(existing?.bestConditions ?? "");
   const [error, setError] = useState("");
+  // Two waters with one name split their fish and outings; point at the one already in the book.
+  const sameName = name.trim()
+    ? book.spots.find((spot) => spot.id !== existing?.id && spot.name.trim().toLowerCase() === name.trim().toLowerCase())
+    : undefined;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -221,6 +225,11 @@ function SpotForm() {
             {t("Name")}
             <input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={t("Cedar Bend")} required />
           </label>
+          {sameName ? (
+            <p className="wide form-note" role="status">
+              {t("This book already has a water by that name:")} <Link to={`/spots/${sameName.id}`}>{sameName.name}</Link>
+            </p>
+          ) : null}
           <fieldset>
             <legend>{t("Water type")}</legend>
             <div className="choice-row wrap" role="radiogroup" aria-label={t("Water type")}>
