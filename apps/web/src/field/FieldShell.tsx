@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { useLang, useT } from "../i18n";
+import { UndoBar } from "./UndoBar";
 
 function FishMark() {
   return (
@@ -72,6 +73,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
           </NavLink>
         </header>
         <main className="field-main">{children}</main>
+        <UndoBar />
       </div>
       <nav className="field-tab" aria-label={t("Log")}>
         <FieldLinks />
