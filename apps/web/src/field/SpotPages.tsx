@@ -221,7 +221,7 @@ function SpotForm() {
         <div className="form-grid">
           <label>
             {t("Name")}
-            <input name="name" value={name} onChange={(event) => setName(event.target.value)} placeholder={t("Cedar Bend")} required />
+            <input name="name" maxLength={48} value={name} onChange={(event) => setName(event.target.value)} placeholder={t("Cedar Bend")} required />
           </label>
           {sameName ? (
             <p className="wide form-note" role="status">
@@ -249,6 +249,7 @@ function SpotForm() {
             {t("Notes")}
             <textarea
               name="notes"
+              maxLength={400}
               rows={4}
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
@@ -259,6 +260,7 @@ function SpotForm() {
             {t("Best conditions")}
             <input
               name="bestConditions"
+              maxLength={160}
               value={bestConditions}
               onChange={(event) => setBestConditions(event.target.value)}
               placeholder={t("Overcast, light west wind")}
