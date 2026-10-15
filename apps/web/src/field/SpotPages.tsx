@@ -240,7 +240,7 @@ function SpotForm() {
                   className={waterType === type ? "on" : ""}
                   onClick={() => setWaterType(type)}
                 >
-                  {WATER_LABELS[type]}
+                  {t(WATER_LABELS[type])}
                 </button>
               ))}
             </div>
