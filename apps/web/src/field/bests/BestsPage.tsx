@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { biteTimes, lureTally, personalBests, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { biteTimes, lureTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -152,6 +152,13 @@ export function BestsPage() {
               <h2>{t("When they bite")}</h2>
             </div>
             <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+          </section>
+
+          <section>
+            <div className="section-head">
+              <h2>{t("By season")}</h2>
+            </div>
+            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
           </section>
 
           <section>

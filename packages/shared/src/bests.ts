@@ -1,3 +1,4 @@
+import { LAKE_SEASONS, SEASON_LABELS, lakeSeason, type LakeSeason } from "./season.ts";
 import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
@@ -166,4 +167,18 @@ export function lureTally(book: Logbook, limit = 5): LureTally[] {
     else tallies.set(key, { lure: name, count: 1 });
   }
   return [...tallies.values()].sort((a, b) => b.count - a.count || a.lure.localeCompare(b.lure)).slice(0, limit);
+}
+
+export type SeasonTally = { id: LakeSeason; label: string; count: number };
+
+/** How many fish came in each season, by the calendar month where the book is read. Always all four, spring first. */
+export function seasonTally(book: Logbook): SeasonTally[] {
+  const counts = new Map<LakeSeason, number>();
+  for (const entry of book.catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime())) continue;
+    const season = lakeSeason(at);
+    counts.set(season, (counts.get(season) ?? 0) + 1);
+  }
+  return LAKE_SEASONS.map((id) => ({ id, label: SEASON_LABELS[id], count: counts.get(id) ?? 0 }));
 }
