@@ -5,6 +5,7 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { formatLongDay } from "./format";
 import { useLogbook } from "./LogbookState";
+import { readKeptDraft } from "./catchDraft";
 import { t, useT } from "../i18n";
 
 function deskLine(now: Date): string {
@@ -26,6 +27,8 @@ export function HomePage() {
   const recent = recentTrips(book, today, 3);
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
+  // A fish started on the catch form and never saved: the first thing worth finishing.
+  const kept = readKeptDraft(now);
 
   return (
     <div className="sheet">
@@ -36,6 +39,19 @@ export function HomePage() {
           <p className="lede">{deskLine(now)}</p>
         </div>
       </header>
+
+      {kept ? (
+        <div className="kept-draft" role="status">
+          <p>
+            {kept.species.trim()
+              ? t("A fish you started logging was not saved: {species}.", { species: kept.species.trim() })
+              : t("A fish you started logging was not saved.")}
+          </p>
+          <Link to="/catches/new" className="field-primary inline">
+            {t("Pick it up")}
+          </Link>
+        </div>
+      ) : null}
 
       <section className="stat-row" aria-label={t("This book")}>
         <div>
