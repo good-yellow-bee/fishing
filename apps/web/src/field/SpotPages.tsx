@@ -119,7 +119,7 @@ export function SpotPage() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      <WaterTipsBox catches={catches} />
+      <WaterTipsBox catches={catches} on={today} />
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>
