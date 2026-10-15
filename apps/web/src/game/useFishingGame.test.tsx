@@ -220,6 +220,24 @@ describe("useFishingGame strike timing", () => {
     expect(phase()).toBe("fight:none");
   });
 
+  it("says the hook is solid on a quick strike, and not on a slow one", () => {
+    let surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/hooked solid/i);
+    act(() => root!.unmount());
+    container!.remove();
+
+    surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 900;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("fight:none");
+    expect(hint()).not.toMatch(/hooked solid/i);
+  });
+
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
     vi.mocked(castSnags).mockReturnValueOnce(true);
     const surface = mount();

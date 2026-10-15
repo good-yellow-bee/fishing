@@ -21,7 +21,7 @@ import {
   type StanceId,
 } from "@stillwater/shared";
 import { t } from "../i18n";
-import { fightLines, isCleanFight, makeFight, steerSide, type FightPerformance, type FightRuntime, type FightSim, type Steer, type SurgeState } from "./fight";
+import { fightLines, isCleanFight, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -30,7 +30,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, hookWindowMs, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
+import { BACKLASH_POWER, hookWindowMs, isSolidStrike, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import { nibblePlan } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -168,6 +168,8 @@ export function useFishingGame(
   const holdStartRef = useRef(0);
   const castPointerRef = useRef<number | null>(null);
   const biteRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
+  /** When the bite's strike window opened, and how long it stays open. */
+  const biteWindowRef = useRef({ at: 0, ms: 0 });
   const fightRef = useRef<Fight | null>(null);
   const runtimeRef = useRef<FightRuntime | null>(null);
   const simRef = useRef<FightSim | null>(null);
@@ -262,7 +264,7 @@ export function useFishingGame(
     setHint(moved ? movedHint(moved.spot) : message);
   }, []);
 
-  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile) => {
+  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, solid = false) => {
     const underpowered = !canLand(current, species);
     const next = { species, weight, underpowered };
     fightRef.current = next;
@@ -281,7 +283,10 @@ export function useFishingGame(
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
-      setHint(t("{line}. Ease off when it runs.", { line: fightLines(species.challenge)[0] }));
+      // A quick strike drives the hook home, so the fish starts the fight a little worn.
+      if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
+      const line = fightLines(species.challenge)[0];
+      setHint(solid ? t("Hooked solid! {line}. Ease off when it runs.", { line }) : t("{line}. Ease off when it runs.", { line }));
     }
   }, [resetToIdle]);
 
@@ -290,9 +295,11 @@ export function useFishingGame(
     const bitten = biteRef.current;
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
+    const { at, ms } = biteWindowRef.current;
+    const solid = isSolidStrike(performance.now() - at, ms);
     fx.splash();
     fx.haptic("strike");
-    beginFight(bitten.species, bitten.weight, profile);
+    beginFight(bitten.species, bitten.weight, profile, solid);
   }, [beginFight, profile]);
 
   const startWait = useCallback((current: Profile, short: boolean) => {
@@ -344,6 +351,8 @@ export function useFishingGame(
         setPhaseBoth("hookset");
         setHint(t("NOW — strike!"));
         const openWindow = () => {
+          const windowMs = hookWindowMs(current.accuracy, mercyNow);
+          biteWindowRef.current = { at: performance.now(), ms: windowMs };
           timers.current.hook = window.setTimeout(() => {
             if (phaseRef.current !== "hookset") return;
             // Gone to another tab mid-bite: the fish keeps the bait, and a fresh window opens on the way back.
@@ -355,7 +364,7 @@ export function useFishingGame(
             setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait."), fish: bitten });
             // Hold result so the miss spring and the turn play out.
             resetToIdle(t("Strike the moment the bobber goes under."), "result");
-          }, hookWindowMs(current.accuracy, mercyNow));
+          }, windowMs);
         };
         openWindow();
       };
