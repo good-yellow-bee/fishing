@@ -382,6 +382,7 @@ function TripForm() {
             {t("Title")}
             <input
               name="title"
+              maxLength={60}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t("Dawn patrol")}
@@ -391,6 +392,7 @@ function TripForm() {
             {t("Note")}
             <textarea
               name="note"
+              maxLength={400}
               rows={3}
               value={note}
               onChange={(event) => setNote(event.target.value)}

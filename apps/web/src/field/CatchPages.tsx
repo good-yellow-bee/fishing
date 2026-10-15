@@ -523,6 +523,7 @@ function CatchForm() {
               name="caughtAt"
               type="datetime-local"
               value={caughtAt}
+              max={toLocalInput(new Date())}
               onChange={(event) => {
                 setCaughtAt(event.target.value);
                 if (!tripPicked) setTripId(tripOnDay(book, spotId, event.target.value.slice(0, 10))?.id ?? "");
