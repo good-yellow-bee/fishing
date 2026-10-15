@@ -8,6 +8,19 @@ import { thisWeekInPastYears } from "./yearsAgo";
 import { fishCountLabel } from "./format";
 import { speciesCounts } from "./speciesLink";
 
+/** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
+function TipLine({ text, name, value }: { text: string; name: string; value: string }) {
+  const [before, after] = t(text, { [name]: "\u0000" }).split("\u0000");
+  return (
+    <>
+      <br />
+      {before}
+      <Link to={findLink(value)}>{value}</Link>
+      {after}
+    </>
+  );
+}
+
 /**
  * "What works here": a water's best lures and busiest time of day, once it has a few fish.
  * Given an outing's day (`on`, YYYY-MM-DD), it also says what the same week gave in earlier years.
@@ -29,24 +42,9 @@ export function WaterTipsBox({ catches, label, on }: { catches: readonly CatchEn
             <Link to={findLink(t(row.lure))}>{t(row.lure)}</Link> ({row.count})
           </Fragment>
         ))}
-        {tips.time ? (
-          <>
-            <br />
-            {t("Most fish at: {time}", { time: t(tips.time.label) })}
-          </>
-        ) : null}
-        {tips.sky ? (
-          <>
-            <br />
-            {t("Best weather: {sky}", { sky: t(SKY_LABELS[tips.sky]) })}
-          </>
-        ) : null}
-        {tips.season ? (
-          <>
-            <br />
-            {t("Best season: {season}", { season: t(SEASON_LABELS[tips.season]) })}
-          </>
-        ) : null}
+        {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} /> : null}
+        {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} /> : null}
+        {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} /> : null}
         {pastWeek.length > 0 ? (
           <>
             <br />
