@@ -3,7 +3,7 @@ import { localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, u
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay } from "./format";
+import { formatLongDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
@@ -73,7 +73,11 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Next")}</span>
           <strong>{next ? <Link to={`/trips/${next.id}`}>{next.title}</Link> : t("None planned")}</strong>
-          <small>{nextSpot ? nextSpot.name : t("Add an outing when you know the day")}</small>
+          <small>
+            {next
+              ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
+              : t("Add an outing when you know the day")}
+          </small>
         </div>
       </section>
 
