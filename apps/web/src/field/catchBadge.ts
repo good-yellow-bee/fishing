@@ -11,13 +11,13 @@ export function bookBadges(book: Logbook): Map<string, Exclude<CatchBadge, null>
   const bests = personalBests(book);
   const rivals = new Map<string, number>();
   for (const entry of book.catches) {
-    const key = `${entry.species}\u0000${entry.measure.kind}`;
+    const key = `${entry.species.trim().toLowerCase()}\u0000${entry.measure.kind}`;
     rivals.set(key, (rivals.get(key) ?? 0) + 1);
   }
   const badges = new Map<string, Exclude<CatchBadge, null>>();
   for (const row of bests.species) {
     for (const best of [row.heaviest, row.longest]) {
-      if (best && (rivals.get(`${best.species}\u0000${best.measure.kind}`) ?? 0) > 1) badges.set(best.id, "species");
+      if (best && (rivals.get(`${best.species.trim().toLowerCase()}\u0000${best.measure.kind}`) ?? 0) > 1) badges.set(best.id, "species");
     }
   }
   for (const best of [bests.heaviest, bests.longest]) if (best) badges.set(best.id, "book");

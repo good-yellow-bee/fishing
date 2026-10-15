@@ -133,6 +133,7 @@ export function SpotPage() {
         <PagedTrips trips={trips} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
           {(trip) => (
             <TripCard
+              level={4}
               key={trip.id}
               trip={trip}
               spotName={null}

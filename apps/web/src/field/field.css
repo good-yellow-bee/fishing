@@ -400,7 +400,7 @@ button.field-primary:disabled {
 /* A card's heading is h2, h3 or h4 by where the card is listed, and looks the same at each. */
 .catch-card :is(h2, h3, h4),
 .trip-card :is(h2, h3, h4),
-.spot-card h2 {
+.spot-card :is(h2, h3) {
   font-family: Fraunces, "Times New Roman", serif;
   font-weight: 700;
   letter-spacing: -0.02em;

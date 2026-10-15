@@ -22,7 +22,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { thisWeekInPastYears } from "./yearsAgo";
 import { speciesCounts } from "./speciesLink";
@@ -41,6 +41,14 @@ import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 function tripNight(date: string) {
   const [y, m, d] = date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, 22);
+}
+
+
+/** "Fish came between 06:40 and 09:15", with the day too when the first and last fish fell on different days. */
+function fishSpan(first: string, last: string): string {
+  const sameDay = localDate(new Date(first)) === localDate(new Date(last));
+  const show = sameDay ? formatTimeOfDay : formatClock;
+  return t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
 }
 
 export function TripsPage() {
@@ -91,6 +99,7 @@ export function TripsPage() {
         <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
           {(trip) => (
             <TripCard
+              level={4}
               key={trip.id}
               trip={trip}
               spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
@@ -144,11 +153,8 @@ export function TripPage() {
       <FishSum catches={catches} />
       {catches.length > 1 ? (
         <p className="meta fish-span">
-          {t("Fish came between {from} and {to}", {
-            // Newest first: the last in the list came first.
-            from: formatTimeOfDay(catches[catches.length - 1]!.caughtAt),
-            to: formatTimeOfDay(catches[0]!.caughtAt),
-          })}
+          {/* Newest first: the last in the list came first. */}
+          {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt)}
         </p>
       ) : null}
       <SpeciesChips catches={catches} />

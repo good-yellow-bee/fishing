@@ -158,9 +158,9 @@ export function BestsPage() {
                 return (
                   <article key={row.species} className="spot-card">
                     <div className="spot-card-top">
-                      <h2>
+                      <h3>
                         <Link to={speciesLink(row.species)}>{t(row.species)}</Link>
-                      </h2>
+                      </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                     </div>
                     <p className="meta">
@@ -235,7 +235,7 @@ export function BestsPage() {
               {bests.waters.map((water) => (
                 <Link key={water.spotId} to={`/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
-                    <h2>{water.name}</h2>
+                    <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
                   <p className="meta">{waterFishLine(catchesForSpot(book, water.spotId))}</p>
                 </Link>
