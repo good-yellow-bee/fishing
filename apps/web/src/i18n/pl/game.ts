@@ -444,6 +444,8 @@ export const PL_GAME: PlBook = {
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
   "The catch search also finds released fish and kinds of water (“river”, “pond”), sums up what it found, and can save those fish as a spreadsheet.":
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
+  "Bow to a trout's or bass's leap and the landed card counts it, as it does a carp hooked on its second take. The tension bar keeps a notch at the fight's highest tension, red once it touched the red.":
+    "Gdy odpuścisz przy skoku pstrąga czy bassa, karta złowionej ryby to policzy, tak samo jak karpia zaciętego przy drugim braniu. Pasek napięcia zostawia znacznik w najwyższym punkcie holu, czerwony, jeśli dotknął czerwieni.",
   "The landed card now says how long the fight took. A missed bite says how long the fish held the bait, and a strike at a nibble says it was only a nibble, so the timing is easier to learn.":
     "Karta złowionej ryby mówi teraz, jak długo trwał hol. Przegapione branie mówi, jak długo ryba trzymała przynętę, a zacięcie przy skubnięciu mówi, że to było tylko skubnięcie — łatwiej wyczuć moment.",
   "Carp, catfish, burbot and sturgeon now sulk on the bottom between runs: reeling barely moves them, so ease off for a moment, then pump. The fight card also says when a fish is played out and ready to reel in, and the float twitches while a bottom feeder comes back for a second take.":
