@@ -157,6 +157,8 @@ function CatchForm() {
     if (tripId && !tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) setTripId("");
   };
 
+  const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
     if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
@@ -403,6 +405,11 @@ function CatchForm() {
               ))}
             </select>
           </label>
+          {pickedTrip && caughtAt.slice(0, 10) !== pickedTrip.date ? (
+            <p className="wide form-note" role="status">
+              {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}
+            </p>
+          ) : null}
 
           <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
 
