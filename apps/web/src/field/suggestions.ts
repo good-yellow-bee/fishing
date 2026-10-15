@@ -61,6 +61,11 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
   return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
 }
 
+/** The outing planned on this water for this day, which a fish caught there that day most likely belongs to. */
+export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | undefined {
+  return book.trips.find((trip) => trip.spotId === spotId && trip.date === ymd);
+}
+
 /**
  * The longest and heaviest fish of the kind being typed, so the form can say what a new one has to beat.
  * `shown` turns a stored name into the words on screen; `skipId` leaves out the fish being edited.

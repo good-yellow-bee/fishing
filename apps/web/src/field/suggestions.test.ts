@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -96,5 +96,15 @@ describe("when a new catch starts", () => {
 
   it("starts on an earlier outing's day at this clock time", () => {
     expect(startTimeFor({ date: "2026-10-12" }, now)).toEqual(new Date(2026, 9, 12, 7, 42));
+  });
+});
+
+describe("the outing a new catch files under", () => {
+  it("finds the trip on that water that day, and nothing on another day or water", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const trip = book.trips[0]!;
+    expect(tripOnDay(book, trip.spotId, trip.date)?.id).toBe(trip.id);
+    expect(tripOnDay(book, trip.spotId, "1999-01-01")).toBeUndefined();
+    expect(tripOnDay(book, "no-such-water", trip.date)).toBeUndefined();
   });
 });
