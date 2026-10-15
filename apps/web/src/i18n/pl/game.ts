@@ -400,6 +400,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "In the field log, press / on the home page to search, and the largest fish in a trip, water or species summary opens its catch. Adding a water with a name already in the book gets a heads-up.":
+    "W dzienniku połowów naciśnij / na stronie głównej, by szukać, a największa ryba w podsumowaniu wyprawy, łowiska lub gatunku otwiera swój połów. Dodając łowisko o nazwie, która już jest w dzienniku, dostaniesz ostrzeżenie.",
   "The game's field guide (under Catch log) and the field log's species pages now link to each other, so a kind you caught on the lake opens its page in the book.":
     "Atlas ryb w grze (w zakładce Połowy) i strony gatunków w dzienniku połowów prowadzą teraz do siebie nawzajem, więc gatunek złowiony na jeziorze otwiera swoją stronę w dzienniku.",
   "A new catch files itself under the outing on its water that day, and planning a second outing on the same water and day gets a heads-up. Photos sit under month headings, and Bests says which kind each water gives most.":
