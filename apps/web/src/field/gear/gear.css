@@ -132,6 +132,17 @@
   grid-column: 1 / -1;
 }
 
+.tackle-row .tackle-caught {
+  margin-left: auto;
+  color: #9a3f2c;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tackle-row .lure-tag + .tackle-caught {
+  margin-left: 0;
+}
+
 .tackle-row .lure-tag {
   margin-left: auto;
   padding: 2px 8px;

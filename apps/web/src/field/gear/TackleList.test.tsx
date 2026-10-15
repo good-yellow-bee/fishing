@@ -1,6 +1,7 @@
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { sampleLogbook } from "@stillwater/shared";
 import { TackleList } from "./TackleList";
 import { TackleProvider } from "./TackleState";
 
@@ -30,6 +31,19 @@ describe("tackle list", () => {
       ["Pencil bobbers", "Float rig"],
       ["Hemostats", null],
     ]);
+  });
+
+  it("says how many of the outing's fish each piece took, plural on the list or not", () => {
+    const fish = (id: string, lure: string) => ({ ...sampleLogbook(new Date(2026, 9, 1)).catches[0]!, id, lure });
+    const page = JSDOM.fragment(
+      renderToStaticMarkup(
+        <TackleProvider>
+          <TackleList tripId="trip-duck" caught={[fish("a", "Popper"), fish("b", "Nightcrawler"), fish("c", "nightcrawler")]} />
+        </TackleProvider>,
+      ),
+    );
+    const took = [...page.querySelectorAll(".tackle-row")].map((row) => row.querySelector(".tackle-caught")?.textContent ?? null);
+    expect(took).toEqual(["1 fish", "2 fish", null, null, null]);
   });
 
   it("offers only the suggested lures that are not on the list yet", () => {
