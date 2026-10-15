@@ -33,7 +33,7 @@ import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
-import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
+import { fishCountLabel, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
@@ -678,6 +678,7 @@ export function CatchPage() {
 
   const spot = spotById(book, entry.spotId);
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
+  const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
   const looseTrip = trip ? undefined : tripOnDay(book, entry.spotId, localDate(new Date(entry.caughtAt)));
   const photo = photoFor(entry.id);
@@ -770,6 +771,7 @@ export function CatchPage() {
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+          {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
