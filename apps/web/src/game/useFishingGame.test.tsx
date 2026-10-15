@@ -11,6 +11,7 @@ const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
 });
 let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
+let fightLine = 1;
 
 vi.mock("./fx", () => ({
   fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
@@ -33,7 +34,7 @@ vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
   return {
     ...actual,
-    makeFight: () => ({ sim: { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step }),
+    makeFight: () => ({ sim: { line: fightLine, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step }),
   };
 });
 
@@ -78,6 +79,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       </div>
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
+      <i data-testid="broke">{game.outcome?.kind === "broke" ? game.outcome.message : ""}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
@@ -97,6 +99,7 @@ afterEach(() => {
   frames = [];
   now = 0;
   fightPerformance = { peakTension: 0.2, maxLine: 1 };
+  fightLine = 1;
   step.mockClear();
   vi.mocked(pickBite).mockClear();
   vi.unstubAllGlobals();
@@ -232,6 +235,22 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
     expect(hint()).toMatch(/ran out of line.*reel whenever the fish is calm/i);
+  });
+
+  it("says how close a snapped fish came to the net", () => {
+    const surface = mount();
+    const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
+
+    fightLine = 0.15;
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(message()).toMatch(/snapped the line — too much tension\. It was 85% of the way in\.$/);
+
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    fightLine = 0.95;
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 2);
+    expect(message()).toMatch(/too much tension\.$/);
   });
 });
 

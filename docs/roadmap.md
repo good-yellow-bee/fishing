@@ -1060,7 +1060,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT15~~ | ~~The strike says how quick it was: Hooked solid in 0.31 s!, or Hooked in 0.62 s (solid under 0.44 s), so the solid-hook mark is learnable~~ (#387) | fight | S |
 | ~~GT16~~ | ~~Bite styles: pike, muskies and largemouth bass ambush with no nibble; carp, catfish, burbot and sturgeon mouth the bait two to four times; the wait hint no longer promises a nibble. News card (2026-10-15zb)~~ (#389) | fish | S |
 | ~~GT17~~ | ~~Line running out: line a fish takes back past the hookset stripes the line bar red from the right, and a third of the way to escape the card says Running out of line! (also in the line meter for screen readers)~~ (#391) | fight | S |
-| GT18 | Clean fights in a row: from the second clean fight landed in a row this session, the landed card notes 3 clean fights in a row; a dirty landing, a snapped line or an escape starts it again | fight | S |
+| ~~GT18~~ | ~~Clean fights in a row: from the second clean fight landed in a row this session, the landed card notes 3 clean fights in a row; a dirty landing, a snapped line or an escape starts it again~~ (#394) | fight | S |
+| GT19 | A snapped line says how close the fish came: It was 85% of the way in (from 10% in), so a break near the net reads as nearly there | fight | S |
 
 ## Risks / open questions for the owner
 

@@ -370,6 +370,7 @@ export const PL_GAME: PlBook = {
   "Overpowered. Lift in the band.": "Za mocno. Podnieś palec w pasku.",
   "Keep the ring on the water. Lift in the moss band.": "Trzymaj kółko na wodzie. Podnieś palec w zielonym pasku.",
   "{fish} snapped the line — too much tension.": "{fish} — żyłka zerwana, za duże napięcie.",
+  "It was {n}% of the way in.": "Ryba była już przyciągnięta w {n}%.",
   "Too much tension — let go when the bar turns red or the fish is about to run.":
     "Za duże napięcie — puść, gdy pasek robi się czerwony albo ryba szykuje się do odjazdu.",
   "{fish} took all the line and threw the hook.": "{fish} — cała żyłka wybrana, haczyk zrzucony.",
