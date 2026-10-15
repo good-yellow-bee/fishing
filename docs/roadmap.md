@@ -1092,7 +1092,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT47~~ | ~~On the lake, a fish in the weeds holds out wide where its run ended instead of swinging back in, so the scene shows what the fight card says~~ (#462) | fight | S |
 | ~~GT48~~ | ~~The inlet's current takes slack line out 1.6× faster, and the fight card names what the water does at the reeds and the inlet~~ (#465) | fight | S |
 | ~~GT49~~ | ~~News card (2026-10-15zo) covers GT47 and GT48: the inlet's current and the water line on the fight card~~ (#467) | news | S |
-| GT50 | Drop-off runs dive: they pull 25% harder against a reeling line and tire the fish 30% faster, so letting them go pays most there; the fight card says so | fight | S |
+| ~~GT50~~ | ~~Drop-off runs dive: they pull 25% harder against a reeling line and tire the fish 30% faster, so letting them go pays most there; the fight card says so~~ (#470) | fight | S |
+| GT51 | News card (2026-10-15zp) covers GT50: drop-off dives | news | S |
 
 ## Risks / open questions for the owner
 
