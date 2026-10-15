@@ -1298,3 +1298,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR187~~ | ~~One species however its name is capitalised (form, Bests, counts)~~ (#480) | field | S |
 | ~~BR188~~ | ~~Calendar files escape semicolons and fold long lines~~ (#481) | field | S |
 | ~~BR189~~ | ~~Long links and words wrap on phone-width pages~~ (#482) | field | S |
+| ~~BR190~~ | ~~The load-a-book question is announced and starts on Keep~~ (#483) | field | S |
