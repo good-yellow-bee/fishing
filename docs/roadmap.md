@@ -1131,3 +1131,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR78~~ | ~~Bests tiles link to the record fish, the waters and the best day's outing~~ (#318) | field | S |
 | ~~BR79~~ | ~~A trip page puts its fish above the tackle once the outing is past or has fish~~ (#319) | field | S |
 | ~~BR80~~ | ~~A catch page links its lure to every fish on that lure and labels its outing~~ (#320) | field | S |
+| ~~BR81~~ | ~~Bests lures link to every fish taken on them~~ (#321) | field | S |
