@@ -329,4 +329,5 @@ export const PL_FIELD: PlBook = {
   "A fish you started logging was not saved.": "Ryba, którą zacząłeś zapisywać, nie została zapisana.",
   "Pick it up": "Wróć do niej",
   "Let it go": "Porzuć",
+  "Same as the last fish on this outing: {weather}": "Jak przy ostatniej rybie z tej wyprawy: {weather}",
 };
