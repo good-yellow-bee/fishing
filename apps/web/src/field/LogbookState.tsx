@@ -46,7 +46,8 @@ type LogbookApi = {
   restoreSample: () => void;
   /** What the last delete took out, until the next change to the book. */
   undoable: DeletedKind | null;
-  undoDelete: () => void;
+  /** Puts the book back and gives the page the delete was made from, to return to. */
+  undoDelete: () => string | null;
   dismissUndo: () => void;
   photos: CatchPhotoMap;
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
@@ -54,7 +55,7 @@ type LogbookApi = {
 
 export type DeletedKind = "catch" | "spot" | "trip";
 
-type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap };
+type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
 
@@ -111,7 +112,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     };
 
     const remove = (kind: DeletedKind, next: Logbook) => {
-      const before = { kind, book, photos };
+      // Deletes are made from the entry's own page, before it navigates away.
+      const before = { kind, book, photos, from: window.location.pathname };
       commit(next);
       setUndo(before);
     };
@@ -197,9 +199,10 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       undoable: undo?.kind ?? null,
       undoDelete: () => {
-        if (!undo) return;
+        if (!undo) return null;
         const result = persist(undo.book, undo.photos);
         if (!result.ok) throw new Error(result.message);
+        return undo.from;
       },
       dismissUndo: () => setUndo(null),
       restoreSample: () => commit(sampleLogbook(new Date())),
