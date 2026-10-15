@@ -2,7 +2,29 @@ import type { Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+}
+
+const encoder = new TextEncoder();
+
+/** Calendar lines stop at 75 bytes; longer ones go on over lines that start with a space. */
+function fold(line: string): string {
+  const parts: string[] = [];
+  let part = "";
+  let bytes = 0;
+  for (const char of line) {
+    const size = encoder.encode(char).length;
+    // The space that opens a carried-on line counts toward its 75.
+    if (bytes + size > (parts.length === 0 ? 75 : 74)) {
+      parts.push(part);
+      part = "";
+      bytes = 0;
+    }
+    part += char;
+    bytes += size;
+  }
+  parts.push(part);
+  return parts.join("\r\n ");
 }
 
 function nextDay(ymd: string): string {
@@ -29,7 +51,7 @@ export function tripIcs(trip: Trip, place: string | null, now: Date = new Date()
     "END:VEVENT",
     "END:VCALENDAR",
   ];
-  return `${lines.join("\r\n")}\r\n`;
+  return `${lines.map(fold).join("\r\n")}\r\n`;
 }
 
 export function tripIcsName(trip: Trip): string {
