@@ -99,7 +99,7 @@ export function CatchSearch() {
             {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
           </p>
           {matches.length > 0 && (
-            <PagedCatches key={settled} items={matches} monthOf={catchMonth}>
+            <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}

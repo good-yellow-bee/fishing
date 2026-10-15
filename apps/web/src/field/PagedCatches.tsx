@@ -13,17 +13,21 @@ export function catchPage<T>(all: readonly T[], shown: number) {
 
 /**
  * A stack of catch cards, a page at a time, with a Show more button under it while any are left.
- * Given monthOf ("2026-10"), a month heading goes above the first card of each month.
+ * Given monthOf ("2026-10"), a month heading goes above the first card of each month, at headLevel
+ * (2 where nothing else heads the list, 3 under a section's h2).
  */
 export function PagedCatches<T>({
   items,
   children,
   monthOf,
+  headLevel = 3,
 }: {
   items: readonly T[];
   children: (item: T) => ReactNode;
   monthOf?: (item: T) => string;
+  headLevel?: 2 | 3;
 }) {
+  const Head = headLevel === 2 ? "h2" : "h3";
   const [shown, setShown] = useState(CATCH_PAGE);
   const { visible, more } = catchPage(items, shown);
   return (
@@ -34,7 +38,7 @@ export function PagedCatches<T>({
             const head = index === 0 || monthOf(visible[index - 1] as T) !== month;
             return (
               <Fragment key={index}>
-                {head ? <h3 className="month-head">{monthName(month)}</h3> : null}
+                {head ? <Head className="month-head">{monthName(month)}</Head> : null}
                 {children(item)}
               </Fragment>
             );
