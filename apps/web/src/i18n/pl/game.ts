@@ -359,7 +359,7 @@ export const PL_GAME: PlBook = {
   "NOW — strike!": "TERAZ — zatnij!",
   "WHAM — it hit! Strike!": "ŁUP — uderzyła! Zatnij!",
   "It's taking it — strike!": "Bierze — zatnij!",
-  "Too slow. The fish dropped the bait.": "Za wolno. Ryba wypuściła przynętę.",
+  "Too slow. The fish dropped the bait after {time} s.": "Za wolno. Ryba wypuściła przynętę po {time} s.",
   "It dropped the bait but it's still there. Watch for a second take…": "Wypuściła przynętę, ale wciąż tam jest. Czekaj na drugie branie…",
   "Strike the moment the bobber goes under.": "Zatnij w chwili, gdy spławik zanurkuje.",
   "The lure slapped the dock.": "Przynęta plasnęła o pomost.",

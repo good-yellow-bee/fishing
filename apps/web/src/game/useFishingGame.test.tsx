@@ -85,6 +85,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       <p data-testid="hint">{game.hint}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
+      <i data-testid="miss-message">{game.outcome?.kind === "miss" ? game.outcome.message : ""}</i>
       <b data-testid="missed">{game.outcome?.kind === "miss" && game.outcome.fish ? `${game.outcome.fish.species.id}|${game.outcome.fish.weight}` : ""}</b>
       <i data-testid="rarity">{game.fight?.species.rarity ?? ""}</i>
     </>
@@ -693,6 +694,7 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
+    expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toMatch(/^Too slow\. The fish dropped the bait after \d\.\d\d s\.$/);
   });
 
   it("calls a predator's bite as a hit and a usual fish's as NOW", () => {
