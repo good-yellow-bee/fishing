@@ -1079,7 +1079,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT34~~ | ~~The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came~~ (#430) | fight | S |
 | ~~GT35~~ | ~~A bottom feeder hooked on its second take is noted on the landed card: On the second take~~ (#432) | fish | S |
 | ~~GT36~~ | ~~News card (2026-10-15zh) covers GT33 to GT35: bowed leaps, the peak-tension notch, and the second-take note~~ (#434) | news | S |
-| GT37 | A sulking bottom feeder sinks deep on the lake (0.68 m, under its 0.42 m calm depth) and comes back up once pumped, so the scene shows the sulk the fight card calls | fish | S |
+| ~~GT37~~ | ~~A sulking bottom feeder sinks deep on the lake (0.68 m, under its 0.42 m calm depth) and comes back up once pumped, so the scene shows the sulk the fight card calls~~ (#436) | fish | S |
+| GT38 | An ambush predator's bite starts at the yank: the float goes straight under with no opening tap or slack pause, matching the WHAM call | fish | S |
 
 ## Risks / open questions for the owner
 

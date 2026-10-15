@@ -55,6 +55,7 @@ import {
   HIT_STOP_SEC,
   isFrozen,
   fishDepthMeters,
+  biteLeadIn,
   fishLeadMeters,
   fishSideMeters,
   hooksetTug,
@@ -126,6 +127,7 @@ import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
+import { biteStyle } from "../nibblePlan";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -660,7 +662,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
+function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; ambush: boolean }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -678,7 +680,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     const live = phase === "fight" && sim.current != null;
 
     if (phase === "hookset") {
-      if (biteAt.current < 0) biteAt.current = t;
+      if (biteAt.current < 0) biteAt.current = t - biteLeadIn(ambush);
       strikeAt.current = -1;
     } else if (phase === "fight") {
       if (prevPhase.current !== "fight") {
@@ -2097,7 +2099,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} />
+      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
