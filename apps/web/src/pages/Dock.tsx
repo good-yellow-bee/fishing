@@ -903,7 +903,11 @@ export function DockPage() {
                   {t("Try saving again")}
                 </button>
               )}
-              <Link className="panel-btn" to="/catches">
+              {/* Once the fish is in the book, the button opens its page there. */}
+              <Link
+                className="panel-btn"
+                to={fieldSaved && game.outcome?.kind === "landed" ? `/catches/${game.outcome.id}` : "/catches"}
+              >
                 {t("Field log")}
               </Link>
               <button className="panel-btn" type="button" onClick={savePicture}>
