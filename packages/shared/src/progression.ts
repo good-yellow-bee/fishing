@@ -16,6 +16,26 @@ export function anglerLevel(lifetimePoints: number): number {
   return level;
 }
 
+export type LevelProgress = {
+  level: number;
+  /** The next level, or null at the top. */
+  next: number | null;
+  /** Lifetime points still to earn for the next level; 0 at the top. */
+  toNext: number;
+  /** How far through the current level, 0 to 1 (1 at the top). */
+  share: number;
+};
+
+/** Where an angler stands between their level and the next, for the HUD's level chip. */
+export function levelProgress(lifetimePoints: number): LevelProgress {
+  const level = anglerLevel(lifetimePoints);
+  if (level >= LEVEL_THRESHOLDS.length) return { level, next: null, toNext: 0, share: 1 };
+  const from = LEVEL_THRESHOLDS[level - 1]!;
+  const to = LEVEL_THRESHOLDS[level]!;
+  const points = Math.max(from, lifetimePoints);
+  return { level, next: level + 1, toNext: to - points, share: (points - from) / (to - from) };
+}
+
 /** What the lake calls an angler at each level, from the first cast to the top of the board. */
 export const ANGLER_TITLES = [
   "Greenhorn",

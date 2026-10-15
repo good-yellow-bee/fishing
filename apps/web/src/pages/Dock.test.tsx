@@ -200,7 +200,12 @@ describe("level-up toast", () => {
     landed.outcome = { kind: "landed", id: "catch-level", species: perch, weight: 0.6, spot: "dock", clean: false };
     const page = await openDock("/");
     await act(async () => undefined);
-    expect(page.querySelector(".level-chip")?.textContent).toBe("Level 3");
+    const chip = page.querySelector<HTMLElement>(".level-chip")!;
+    expect(chip.firstChild?.textContent).toBe("Level 3");
+    // 150 of 350 lifetime points: level 4 is 200 points off, and the chip says what it opens.
+    expect(chip.title).toBe("200 points to level 4 · See a fish shadow before you strike.");
+    expect(chip.querySelector(".sr-only")?.textContent).toBe(` · ${chip.title}`);
+    expect(chip.querySelector<HTMLElement>(".level-fill")?.style.width).toBe("0%");
     expect(page.querySelector(".landed-card")).not.toBeNull();
     const status = page.querySelector(".level-status");
     expect(status?.getAttribute("role")).toBe("status");

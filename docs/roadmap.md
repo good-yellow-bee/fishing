@@ -1046,7 +1046,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT1~~ | ~~Fish tire as the fight goes on: runs pull softer, calm spells last longer and line comes in faster; the fight card says Fish fresh, tiring or played out~~ (#357) | fight | S |
 | ~~GT2~~ | ~~A tiring fish comes up toward the surface and its runs go shorter and less wide, so the scene shows what the fight card says~~ (#359) | fight | S |
 | ~~GT3~~ | ~~Turn a run: each run heads left or right, and holding ← A or → D (a pad's stick, or a side button on touch) the other way cuts it short and tires the fish; the fight card says which way to pull~~ (#362) | fight | M |
-| GT4 | News card (2026-10-15u) tells players fish tire and runs can be turned | game | S |
+| ~~GT4~~ | ~~News card (2026-10-15u) tells players fish tire and runs can be turned~~ (#364) | game | S |
+| GT5 | The level chip fills toward the next level and says how many points are left and what it opens | progression | S |
 
 ## Risks / open questions for the owner
 

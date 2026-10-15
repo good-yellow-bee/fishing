@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  anglerLevel,
+  levelProgress,
+  levelUnlock,
+  type LevelProgress,
   anglerTitle,
   LAKE_HOUR_LABELS,
   SKILL_LABELS,
@@ -39,7 +41,8 @@ type Props = {
 };
 
 export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak = 0, moon, wind }: Props) {
-  const level = anglerLevel(profile.lifetimePoints);
+  const progress = levelProgress(profile.lifetimePoints);
+  const level = progress.level;
   const { muted } = useSettings();
   const t = useT();
   const header = useRef<HTMLElement>(null);
@@ -75,7 +78,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
         <span className="sky-chip" title={wind ? `${t(skyBlurb(sky, season))} ${t("Wind: {wind}.", { wind: t(WIND_LABELS[wind]) })}` : t(skyBlurb(sky, season))}>
           {t(skyLabel(sky, season))}
         </span>
-        <span className="level-chip" title={t(anglerTitle(level))}>{t("Level {level}", { level })}</span>
+        <LevelChip progress={progress} />
         <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
         <span className="skill-chip">
           <small>{t(SKILL_LABELS.strength)}</small> {profile.strength}
@@ -111,5 +114,22 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
         </button>
       </div>
     </header>
+  );
+}
+
+/** The level, with a fill along its foot for the way to the next one, which the tooltip names with what it opens. */
+function LevelChip({ progress }: { progress: LevelProgress }) {
+  const t = useT();
+  const unlock = progress.next === null ? null : levelUnlock(progress.next);
+  const way =
+    progress.next === null
+      ? t("Top level: {title}", { title: t(anglerTitle(progress.level)) })
+      : `${tn(progress.toNext, "{n} point to level {level}", "{n} points to level {level}", { level: progress.next })}${unlock ? ` · ${t(unlock)}` : ""}`;
+  return (
+    <span className="level-chip" title={way} data-to-next={progress.toNext}>
+      {t("Level {level}", { level: progress.level })}
+      <span className="sr-only">{` · ${way}`}</span>
+      <i className="level-fill" aria-hidden="true" style={{ width: `${Math.round(progress.share * 100)}%` }} />
+    </span>
   );
 }

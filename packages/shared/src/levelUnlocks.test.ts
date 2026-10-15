@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, LEVEL_THRESHOLDS } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, LEVEL_THRESHOLDS, levelProgress } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -66,5 +66,20 @@ describe("anglerTitle", () => {
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
     expect(anglerTitle(99)).toBe("Lake legend");
+  });
+});
+
+describe("levelProgress", () => {
+  it("counts the points to the next level and how far through this one the angler is", () => {
+    expect(levelProgress(0)).toEqual({ level: 1, next: 2, toNext: 50, share: 0 });
+    expect(levelProgress(25)).toEqual({ level: 1, next: 2, toNext: 25, share: 0.5 });
+    expect(levelProgress(50)).toEqual({ level: 2, next: 3, toNext: 100, share: 0 });
+    expect(levelProgress(3199)).toMatchObject({ level: 7, next: 8, toNext: 1 });
+  });
+
+  it("stops at the top level", () => {
+    const top = LEVEL_THRESHOLDS.length;
+    expect(levelProgress(LEVEL_THRESHOLDS[top - 1]!)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
+    expect(levelProgress(1_000_000)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
   });
 });
