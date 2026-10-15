@@ -915,3 +915,7 @@ button.field-primary:disabled {
   border-color: var(--field-rust);
   color: var(--field-rust);
 }
+
+.another-catch {
+  margin: 20px 0 0;
+}

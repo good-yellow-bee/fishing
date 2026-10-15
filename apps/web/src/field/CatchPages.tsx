@@ -18,6 +18,7 @@ import {
 import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
+import { anotherCatchLink } from "./anotherCatch";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
@@ -117,13 +118,14 @@ function CatchForm() {
   const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
   const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
 
-  const [species, setSpecies] = useState(existing ? t(existing.species) : "");
-  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? "length");
+  const presetKind = params.get("kind") === "weight" ? "weight" : "length";
+  const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
+  const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? presetKind);
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
   const [startAmount] = useState(() => (existing ? amountText(existing, units) : ""));
   const [amount, setAmount] = useState(startAmount);
-  const [lure, setLure] = useState(() => t(existing ? existing.lure : tripLure(book, presetTrip?.id)));
+  const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
   const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
   const [caughtAt, setCaughtAt] = useState(() =>
@@ -565,6 +567,11 @@ export function CatchPage() {
           <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
         </p>
       ) : null}
+      <p className="another-catch">
+        <Link to={anotherCatchLink(entry)} className="field-primary inline">
+          {t("Log another like this")}
+        </Link>
+      </p>
       {newer || older ? (
         <nav className="catch-steps" aria-label={t("More catches")}>
           {newer ? (
