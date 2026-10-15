@@ -1088,3 +1088,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR35~~ | ~~An upcoming trip's tackle list offers the water's best lures that are not on it yet as one-tap "+ lure" buttons~~ (#275) | field log, gear | S |
 | ~~BR36~~ | ~~Each catch page can save the game's picture card (photo, species, size, water, weather, date) for any fish in the book, shared on phones or downloaded~~ (#276) | field log | S |
 | ~~BR37~~ | ~~A new catch form starts on length or weight as the player measured their newest fish by hand (sample and game fish do not count); length until then~~ (#277) | field log | S |
+| ~~BR38~~ | ~~News card (2026-10-15e) tells players about picture cards from catch pages and the game's fish filed under Stillwater~~ (#278) | field log | S |
