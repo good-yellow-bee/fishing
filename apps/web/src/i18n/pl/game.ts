@@ -164,6 +164,8 @@ export const PL_GAME: PlBook = {
   "Cast again": "Zarzuć ponownie",
   "Lately on the lake": "Ostatnio na jeziorze",
   "Level {level}": "Poziom {level}",
+  "{n} points to level {level}": ["{n} punkt do poziomu {level}", "{n} punkty do poziomu {level}", "{n} punktów do poziomu {level}"],
+  "Top level: {title}": "Najwyższy poziom: {title}",
   Badges: "Odznaki",
   Badge: "Odznaka",
   "The shack": "Szopa",
