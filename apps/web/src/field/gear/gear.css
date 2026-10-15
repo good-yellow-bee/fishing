@@ -9,6 +9,13 @@
   text-transform: uppercase;
 }
 
+.tackle-unpack {
+  margin-left: 12px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .tackle-block > .tackle-count {
   margin: 0 0 8px;
 }

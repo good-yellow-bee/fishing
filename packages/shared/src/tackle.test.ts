@@ -13,6 +13,7 @@ import {
   sampleTackle,
   isLureLabel,
   withPacked,
+  withTripUnpacked,
   withTackleItem,
   withoutTackleItem,
 } from "./tackle.ts";
@@ -42,6 +43,14 @@ describe("tackle", () => {
     expect(next.find((item) => item.id === "gear-dawn-spinner")?.packed).toBe(true);
     expect(packedCount(itemsForTrip(next, "trip-dawn"))).toBe(1);
     expect(packedCount(itemsForTrip(next, "trip-mill"))).toBe(0);
+    expect(next).toHaveLength(items.length);
+  });
+
+  it("unpacks one outing's list and leaves the other lists packed", () => {
+    const packed = withPacked(withPacked(withPacked(items, "gear-dawn-spinner", true), "gear-dawn-mepps", true), "gear-mill-rod", true);
+    const next = withTripUnpacked(packed, "trip-dawn");
+    expect(packedCount(itemsForTrip(next, "trip-dawn"))).toBe(0);
+    expect(packedCount(itemsForTrip(next, "trip-mill"))).toBe(1);
     expect(next).toHaveLength(items.length);
   });
 

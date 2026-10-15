@@ -3,6 +3,7 @@ import {
   parseTackleLabel,
   sampleTackle,
   withPacked,
+  withTripUnpacked,
   withTackleItem,
   withoutTackleItem,
   type TackleItem,
@@ -15,6 +16,7 @@ type TackleApi = {
   toggle: (id: string, packed: boolean) => void;
   add: (tripId: string, label: string) => string | null;
   remove: (id: string) => void;
+  unpackTrip: (tripId: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
 };
 
@@ -58,6 +60,13 @@ export function TackleProvider({ children }: { children: ReactNode }) {
       remove: (id) => {
         setItems((current) => {
           const next = withoutTackleItem(current, id);
+          saveTackle(next);
+          return next;
+        });
+      },
+      unpackTrip: (tripId) => {
+        setItems((current) => {
+          const next = withTripUnpacked(current, tripId);
           saveTackle(next);
           return next;
         });

@@ -19,7 +19,7 @@ export function TackleList({
   suggest?: readonly string[];
 }) {
   const t = useT();
-  const { items, toggle, add, remove } = useTackle();
+  const { items, toggle, add, remove, unpackTrip } = useTackle();
   const rows = itemsForTrip(items, tripId);
   const packed = packedCount(rows);
   const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
@@ -38,17 +38,35 @@ export function TackleList({
     setError("");
   };
 
-  const count = rows.length === 0 ? t("Nothing packed") : t("{packed} of {total} packed", { packed, total: rows.length });
+  const count =
+    rows.length === 0
+      ? t("Nothing packed")
+      : packed === rows.length
+        ? t("All packed")
+        : t("{packed} of {total} packed", { packed, total: rows.length });
+  // After an outing, the same list can go back in the bag for the next one.
+  const unpack =
+    packed > 0 ? (
+      <button type="button" className="text-button tackle-unpack" onClick={() => unpackTrip(tripId)}>
+        {t("Unpack all")}
+      </button>
+    ) : null;
 
   return (
     <section className="tackle-block" aria-label={name ?? heading ?? t("Tackle")}>
       {heading ? (
         <div className="section-head">
           <h2>{heading}</h2>
-          <span className="tackle-count">{count}</span>
+          <span className="tackle-count">
+            {count}
+            {unpack}
+          </span>
         </div>
       ) : (
-        <p className="tackle-count">{count}</p>
+        <p className="tackle-count">
+          {count}
+          {unpack}
+        </p>
       )}
       {rows.length === 0 ? (
         <p className="empty">{t("Nothing on this list yet.")}</p>

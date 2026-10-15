@@ -308,6 +308,8 @@ export const PL_FIELD: PlBook = {
     "Co pakujesz na każdą wyprawę. Zaznaczenia zostają w tej przeglądarce.",
   "Nothing packed": "Nic nie spakowano",
   "{packed} of {total} packed": "Spakowano {packed} z {total}",
+  "All packed": "Wszystko spakowane",
+  "Unpack all": "Rozpakuj wszystko",
   "Nothing on this list yet.": "Na tej liście jeszcze nic nie ma.",
   "Add a piece": "Dodaj element",
   "Spare leader": "Zapasowy przypon",
