@@ -1022,6 +1022,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~BO1~~ | ~~With larger text on a 360 px phone in Polish: the settings panel no longer runs past the screen edge (a slider's default width held its column open) and each slider gets its own line; the shop's requests take their own line above the count, reward and Claim; the hint gives way to the first-cast coach so they do not overlap; and the lake's news gives way to the walking stick on touch phones~~ (#233) | access, phone UX | S |
 | ~~BO2~~ | ~~With larger text the field log pages no longer run wider than a 360 px phone: the header's Log a catch button may drop under the brand, catch and trip cards and the entry form shrink to fit, gear tags wrap inside their pill, and the bottom tabs scroll sideways if they must~~ (#234) | access, phone UX | S |
+| ~~BO3~~ | ~~With larger text on a phone the catch card stops under the (taller) header, keeps Release, Keep fishing, Field log and Save picture pinned at its foot while the rest scrolls, and the fight card hangs from the header instead of sliding under it~~ (#235) | access, phone UX | S |
 
 ## Risks / open questions for the owner
 
