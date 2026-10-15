@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
 import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
@@ -16,7 +16,18 @@ export function BookFile() {
   useT();
   const { items, replaceTackle } = useTackle();
   const fileRef = useRef<HTMLInputElement>(null);
+  const loadButton = useRef<HTMLButtonElement>(null);
+  const keepButton = useRef<HTMLButtonElement>(null);
+  const askId = useId();
   const [pending, setPending] = useState<FieldArchive | null>(null);
+  // A picked file waits on a question: it takes focus on the safe answer, as the delete question does.
+  useEffect(() => {
+    if (pending) keepButton.current?.focus();
+  }, [pending]);
+  const keepBook = () => {
+    setPending(null);
+    loadButton.current?.focus();
+  };
   const [notice, setNotice] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
 
   const own = ownCatches(book);
@@ -71,6 +82,7 @@ export function BookFile() {
     setCopiedAt(loaded);
     setPending(null);
     setNotice({ tone: "ok", text: t("This browser now has the book from that file.") });
+    loadButton.current?.focus();
   };
 
   return (
@@ -121,7 +133,7 @@ export function BookFile() {
             {t("Download catches as a spreadsheet")}
           </button>
         ) : null}
-        <button type="button" className="text-button" onClick={() => fileRef.current?.click()}>
+        <button ref={loadButton} type="button" className="text-button" onClick={() => fileRef.current?.click()}>
           {t("Load a book")}
         </button>
         {canInstall ? (
@@ -156,20 +168,23 @@ export function BookFile() {
         />
       </div>
       {pending ? (
-        <p className="confirm-ask">
-          {t(
-            "Replace the book in this browser with this file? Spots, trips, catches, weather, tackle checks, and photos here will be replaced.",
-          )}{" "}
+        <p
+          className="confirm-ask"
+          role="alertdialog"
+          aria-labelledby={askId}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") keepBook();
+          }}
+        >
+          <span id={askId}>
+            {t(
+              "Replace the book in this browser with this file? Spots, trips, catches, weather, tackle checks, and photos here will be replaced.",
+            )}
+          </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>
-          <button
-            type="button"
-            className="text-button"
-            onClick={() => {
-              setPending(null);
-            }}
-          >
+          <button ref={keepButton} type="button" className="text-button" onClick={keepBook}>
             {t("Keep")}
           </button>
         </p>
