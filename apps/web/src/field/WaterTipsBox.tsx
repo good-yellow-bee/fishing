@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import type { CatchEntry } from "@stillwater/shared";
+import { SKY_LABELS, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { findLink } from "./CatchSearch";
 import { waterTips } from "./waterTips";
@@ -25,6 +25,12 @@ export function WaterTipsBox({ catches, label }: { catches: readonly CatchEntry[
           <>
             <br />
             {t("Most fish at: {time}", { time: t(tips.time.label) })}
+          </>
+        ) : null}
+        {tips.sky ? (
+          <>
+            <br />
+            {t("Best weather: {sky}", { sky: t(SKY_LABELS[tips.sky]) })}
           </>
         ) : null}
       </p>

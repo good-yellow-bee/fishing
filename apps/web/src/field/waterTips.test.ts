@@ -23,6 +23,17 @@ describe("water tips", () => {
     const tips = waterTips([at("2026-10-01T06:00:00", "a"), at("2026-10-01T19:00:00", "b"), at("2026-10-01T12:00:00", "c")])!;
     expect(tips.time?.id).toBe("dawn");
   });
+
+  it("names the sky most fish came under, only when one clearly leads", () => {
+    const under = (id: string, sky: "clear" | "overcast" | null) => ({
+      ...book.catches[0]!,
+      id,
+      weather: sky ? { sky, wind: "calm" as const, waterTempF: 60 } : null,
+    });
+    expect(waterTips([under("a", "overcast"), under("b", "overcast"), under("c", "clear")])!.sky).toBe("overcast");
+    expect(waterTips([under("a", "overcast"), under("b", "clear"), under("c", null)])!.sky).toBeNull();
+    expect(waterTips([under("a", "overcast"), under("b", null), under("c", null)])!.sky).toBeNull();
+  });
 });
 
 describe("packing tips", () => {
