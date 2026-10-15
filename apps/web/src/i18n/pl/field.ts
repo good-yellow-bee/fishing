@@ -13,6 +13,8 @@ export const PL_FIELD: PlBook = {
   "Field log": "Dziennik połowów",
   Log: "Dziennik",
   "Log a catch": "Zapisz połów",
+  "{shown} of {total} fish": "{shown} z {total} ryb",
+  "Show {count} more": "Pokaż jeszcze {count}",
 
   // Home
   "Write it down before the coffee gets cold.": "Zapisz, zanim kawa wystygnie.",

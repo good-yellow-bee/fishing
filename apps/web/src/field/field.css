@@ -103,6 +103,19 @@
   background: #d9a94e;
 }
 
+.show-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  color: var(--field-muted);
+}
+
+.show-more p {
+  margin: 0;
+}
+
 .field-primary.inline {
   margin-top: 0;
   width: auto;

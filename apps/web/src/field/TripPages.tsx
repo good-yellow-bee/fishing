@@ -11,6 +11,7 @@ import {
   recentTrips,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
+import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { formatDay, messageText, tripWhen } from "./format";
@@ -142,11 +143,9 @@ export function TripPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged for this trip yet.")}</p>
       ) : (
-        <div className="stack">
-          {catches.map((entry) => (
-            <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />
-          ))}
-        </div>
+        <PagedCatches items={catches}>
+          {(entry) => <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />}
+        </PagedCatches>
       )}
     </div>
   );
