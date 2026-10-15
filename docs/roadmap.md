@@ -1078,3 +1078,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR25~~ | ~~News card (2026-10-15c) tells players about record tags and the newer and older links~~ (#265) | field log | S |
 | ~~BR26~~ | ~~The home catch search keeps its words in the address (?find=), so Back from a catch returns to the same matches; each species on the Bests page links to its matches~~ (#266) | field log | S |
 | ~~BR27~~ | ~~A water with three or more fish shows "What works here": its top three lures with counts and the time of day that gave the most fish~~ (#267) | field log | S |
+| ~~BR28~~ | ~~The catch form offers the chosen water's top lures as one-tap buttons under the lure field (from three fish on that water)~~ (#268) | field log | S |
