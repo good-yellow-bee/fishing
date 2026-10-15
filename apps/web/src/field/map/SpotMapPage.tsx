@@ -164,7 +164,15 @@ export function SpotMapPage() {
       </header>
 
       {plotted.length === 0 ? (
-        <p className="empty">{t("None of the waters in this book are drawn on the sheet.")}</p>
+        <p className="empty">
+          {t("None of the waters in this book are drawn on the sheet.")}
+          {book.spots.length === 0 ? (
+            <>
+              {" "}
+              <Link to="/spots/new">{t("Add a spot")}</Link>
+            </>
+          ) : null}
+        </p>
       ) : (
         <div className="spot-map">
           <MapPlate />
