@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { catchesOfSpecies, speciesLink, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, speciesCounts, speciesLink, speciesWaters } from "./speciesLink";
 
 describe("species page", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -24,5 +24,15 @@ describe("species page", () => {
     expect(waters.reduce((sum, row) => sum + row.count, 0)).toBe(trout.length);
     expect(waters[0]!.name).not.toBeNull();
     for (let i = 1; i < waters.length; i += 1) expect(waters[i - 1]!.count).toBeGreaterThanOrEqual(waters[i]!.count);
+  });
+
+  it("counts the kinds among some fish, most first, whatever the case", () => {
+    const base = book.catches[0]!;
+    const fish = (id: string, species: string) => ({ ...base, id, species });
+    expect(speciesCounts([fish("a", "Perch"), fish("b", "Pike"), fish("c", "perch"), fish("d", "Bass")])).toEqual([
+      { species: "Perch", count: 2 },
+      { species: "Bass", count: 1 },
+      { species: "Pike", count: 1 },
+    ]);
   });
 });
