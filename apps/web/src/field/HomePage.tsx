@@ -70,7 +70,7 @@ export function HomePage() {
           </strong>
           {book.catches.length > 0 ? (
             <small>
-              {tn(kinds, "{n} species", "{n} species")}
+              <Link to="/bests">{tn(kinds, "{n} species", "{n} species")}</Link>
               {monthFish > 0 ? (
                 <>
                   {" · "}
@@ -86,7 +86,11 @@ export function HomePage() {
           <strong>
             <Link to="/spots">{book.spots.length}</Link>
           </strong>
-          {book.trips.length > 0 ? <small>{tn(book.trips.length, "{n} outing", "{n} outings")}</small> : null}
+          {book.trips.length > 0 ? (
+            <small>
+              <Link to="/trips">{tn(book.trips.length, "{n} outing", "{n} outings")}</Link>
+            </small>
+          ) : null}
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>

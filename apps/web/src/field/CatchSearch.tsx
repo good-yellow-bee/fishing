@@ -10,6 +10,7 @@ import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
+import { FIND_PARAM } from "./findLinks";
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -96,17 +97,7 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
   return found;
 }
 
-/** The catch search for a fish of one kind that also matches `text`, such as a sky or a season. */
-export function findWithLink(species: string, text: string): string {
-  return findLink(`${species} + ${text}`);
-}
-
-export const FIND_PARAM = "find";
-
-/** The field log home, opened with this catch search already typed in. */
-export function findLink(text: string): string {
-  return `/?${new URLSearchParams({ [FIND_PARAM]: text }).toString()}`;
-}
+export { FIND_PARAM, findLink, findWithLink } from "./findLinks";
 
 export function CatchSearch() {
   const { book } = useLogbook();

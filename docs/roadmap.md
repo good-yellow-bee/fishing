@@ -1262,3 +1262,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR164~~ | ~~Year on field log dates outside the current year~~ (#443) | field | S |
 | ~~BR165~~ | ~~Plan one link on empty upcoming lists~~ (#444) | field | S |
 | ~~BR166~~ | ~~Species page water counts link; By the moon bars~~ (#445) | field | S |
+| ~~BR167~~ | ~~Lure link on catch cards; home species and outing counts link~~ (#447) | field | S |
