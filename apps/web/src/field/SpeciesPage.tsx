@@ -6,6 +6,7 @@ import { FishSum } from "./FishSum";
 import { fishCountLabel, formatCatchDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
+import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
 import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -71,7 +72,7 @@ export function SpeciesPage() {
       <div className="section-head">
         <h2>{t("Every one in the book")}</h2>
       </div>
-      <PagedCatches items={catches}>
+      <PagedCatches items={catches} monthOf={catchMonth}>
         {(entry) => (
           <CatchCard
             key={entry.id}

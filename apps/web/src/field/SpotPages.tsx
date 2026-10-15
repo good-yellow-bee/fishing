@@ -18,7 +18,7 @@ import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
-import { monthName, tripsByMonth } from "./tripMonths";
+import { catchMonth, monthName, tripsByMonth } from "./tripMonths";
 import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -153,7 +153,7 @@ export function SpotPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
-        <PagedCatches items={catches}>
+        <PagedCatches items={catches} monthOf={catchMonth}>
           {(entry) => (
             <CatchCard
               key={entry.id}
