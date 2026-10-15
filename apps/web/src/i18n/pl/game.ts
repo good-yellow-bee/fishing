@@ -338,7 +338,7 @@ export const PL_GAME: PlBook = {
   "Tap Open shop to visit the tackle shack. Walk down to the water to fish.":
     "Stuknij Otwórz sklep, by zajrzeć do szopy ze sprzętem. Zejdź nad wodę, by łowić.",
   "Walk to the water.": "Podejdź do wody.",
-  "Watch the bobber. A nibble first — strike on the real dip.": "Obserwuj spławik. Najpierw skubnięcie — zatnij, gdy naprawdę zanurkuje.",
+  "Watch the bobber. Strike on the real dip, not a nibble.": "Obserwuj spławik. Zatnij, gdy naprawdę zanurkuje, nie przy skubnięciu.",
   "Your lure is in the bubbles. Watch the bobber — strike on the real dip.": "Przynęta jest w bąblach. Obserwuj spławik — zatnij, gdy naprawdę zanurkuje.",
   "Short cast — only small fish will look.": "Krótki rzut — zainteresują się tylko małe ryby.",
   "The bubbles moved to the {spot}.": "Bąble przeniosły się. Łowisko: {spot}.",
@@ -428,6 +428,8 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
+  "Fish take the bait their own way: pike, muskies and largemouth bass hit with no nibble first, while carp, catfish, burbot and sturgeon mouth it a few times before the real bite. The strike also says how quick it was, and how quick a solid hook needs to be.":
+    "Ryby biorą przynętę po swojemu: szczupaki, muskie i bassy wielkogębowe uderzają bez skubnięcia, a karpie, sumy, miętusy i jesiotry kilka razy ją skubią przed prawdziwym braniem. Zacięcie podaje też, jak było szybkie i jak szybkie musi być, by hak wszedł pewnie.",
   "Reel while the tension bar is amber (Tight) and the line comes in a quarter faster, but let go before it turns red. The landed card notes a perfect cast, a solid hook and the runs you turned, and a controller's buttons show on the fight card.":
     "Zwijaj, gdy pasek napięcia jest bursztynowy (Napięta), a żyłka wchodzi o jedną czwartą szybciej, ale puść, zanim zrobi się czerwony. Karta złowionej ryby notuje idealny rzut, pewnie wbity hak i zawrócone odjazdy, a karta walki pokazuje przyciski kontrolera.",
   "A cast that stops on the gold mark in the middle of the cast meter is a perfect cast, and the bite comes sooner. A fish reeled close while it still has fight in it makes one last run at the net, and a controller now rumbles with the fight (Vibration in Settings turns it off).":

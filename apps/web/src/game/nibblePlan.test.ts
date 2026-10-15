@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { nibblePlan } from "./nibblePlan";
+import { FISH } from "@stillwater/shared";
+import { biteStyle, nibblePlan } from "./nibblePlan";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -38,5 +39,28 @@ describe("nibble plan", () => {
     }
     expect(firsts.size).toBeGreaterThan(3);
     expect(counts.size).toBe(3);
+  });
+
+  it("gives a predator's ambush no nibble, and a bottom feeder more", () => {
+    expect(nibblePlan(8000, seeded(3), "ambush")).toEqual([]);
+    let usual = 0;
+    let mouthed = 0;
+    for (let seed = 1; seed < 200; seed += 1) {
+      const plan = nibblePlan(8000, seeded(seed), "mouth");
+      expect(plan.length).toBeGreaterThanOrEqual(1);
+      expect(plan.length).toBeLessThanOrEqual(4);
+      plan.forEach((n) => expect(n.at + n.ms).toBeLessThanOrEqual(8000 - 350));
+      mouthed += plan.length;
+      usual += nibblePlan(8000, seeded(seed)).length;
+    }
+    expect(mouthed).toBeGreaterThan(usual * 1.3);
+  });
+
+  it("names every kind's style, with only known ids set apart", () => {
+    const styles = new Set(FISH.map((fish) => biteStyle(fish.id)));
+    expect(styles).toEqual(new Set(["ambush", "mouth", "usual"]));
+    expect(biteStyle("perch")).toBe("usual");
+    expect(biteStyle("pike")).toBe("ambush");
+    expect(biteStyle("carp")).toBe("mouth");
   });
 });

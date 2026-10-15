@@ -32,7 +32,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, hookWindowMs, isPerfectCast, makeCatch, pickBite, SLAP_POWER, solidStrikeMs, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
-import { nibblePlan } from "./nibblePlan";
+import { biteStyle, nibblePlan } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** How long a result stays up before a click or Space can cast straight past it. */
@@ -135,7 +135,7 @@ type Timers = {
   shown?: () => void;
 };
 
-const waitHint = () => t("Watch the bobber. A nibble first — strike on the real dip.");
+const waitHint = () => t("Watch the bobber. Strike on the real dip, not a nibble.");
 const hotspotWaitHint = () => t("Your lure is in the bubbles. Watch the bobber — strike on the real dip.");
 const shortCastHint = () => t("Short cast — only small fish will look.");
 
@@ -341,7 +341,7 @@ export function useFishingGame(
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
-    const nibbles = nibblePlan(wait);
+    const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
     const arm = () => {
       const nibbleTimers: number[] = [];
       timers.current.nibbles = nibbleTimers;
