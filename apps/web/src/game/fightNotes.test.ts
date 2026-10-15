@@ -16,6 +16,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, fightSec: 23.6 })).toBe("Turned 2 runs · Landed in 24 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 0.2 })).toBe("Landed in 1 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, bowedLeaps: 2 })).toBe("Turned 1 run · Bowed to 2 leaps");
+    expect(fightNotesText({ perfectCast: true, hookedSolid: true, turnedRuns: 0, secondTake: true })).toBe("Perfect cast · Hooked solid · On the second take");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 65.2 })).toBe("Landed in 1 min 5 s");
   });
 
@@ -25,6 +26,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, cleanRun: 2 })).toBe("Czyste hole z rzędu: 2");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 75 })).toBe("Wyholowana w 1 min 15 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, bowedLeaps: 5 })).toBe("5 przetrwanych skoków");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, secondTake: true })).toBe("Przy drugim braniu");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, closeCall: true })).toBe("O włos");
   });
 });

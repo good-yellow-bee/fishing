@@ -80,6 +80,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
       <i data-testid="broke">{game.outcome?.kind === "broke" ? game.outcome.message : ""}</i>
+      <i data-testid="second-take">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.secondTake) : ""}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
@@ -695,6 +696,26 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
     expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toMatch(/^Too slow\. The fish dropped the bait after \d\.\d\d s\.$/);
+  });
+
+  it("notes a bottom feeder hooked on its second take, and not the next fish hooked at once", () => {
+    const surface = mount();
+    const secondTake = () => container!.querySelector("[data-testid=second-take]")?.textContent;
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("waiting:none");
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS));
+    expect(phase()).toBe("hookset:none");
+    step.mockReturnValueOnce("landed");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 9)));
+    act(() => frames.at(-1)!(now));
+    expect(secondTake()).toBe("true");
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 10);
+    expect(secondTake()).toBe("false");
   });
 
   it("says a strike at a nibble was only a nibble, and a strike at a still float was too early", () => {

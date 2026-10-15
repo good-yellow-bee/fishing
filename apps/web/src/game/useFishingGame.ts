@@ -121,7 +121,7 @@ export type Fight = {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; secondTake?: boolean };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -179,6 +179,8 @@ export function useFishingGame(
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
   const hookedSolidRef = useRef(false);
+  /** This fish came back for a second take after dropping the bait. */
+  const secondTakeRef = useRef(false);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
   const castSnagRef = useRef(false);
@@ -282,6 +284,7 @@ export function useFishingGame(
     castHotspotRef.current = false;
     castRiseRef.current = false;
     castPerfectRef.current = false;
+    secondTakeRef.current = false;
     powerRef.current = 0;
     clearFight();
     setPhaseBoth(phase);
@@ -405,6 +408,7 @@ export function useFishingGame(
             // A bottom feeder that dropped the bait noses back for one more go before it leaves.
             if (!secondTake && biteStyle(species.id) === "mouth") {
               secondTake = true;
+              secondTakeRef.current = true;
               setPhaseBoth("waiting");
               setHint(t("It dropped the bait but it's still there. Watch for a second take…"));
               // The float twitches as it noses back, so the eye knows where to look.
@@ -485,6 +489,7 @@ export function useFishingGame(
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null && castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random());
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy);
+    secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
@@ -743,6 +748,7 @@ export function useFishingGame(
               notes: {
                 perfectCast: castPerfectRef.current,
                 hookedSolid: hookedSolidRef.current,
+                secondTake: secondTakeRef.current,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
                 cleanRun: cleanRunRef.current,
                 closeCall: isCloseCall(runtime.performance),

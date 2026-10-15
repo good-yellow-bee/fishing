@@ -1076,7 +1076,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT31~~ | ~~Striking while the float nibbles says That was only a nibble, instead of the plain Too early, so the angler learns which dip was the fake~~ (#422) | fish | S |
 | ~~GT32~~ | ~~News card (2026-10-15zg) covers GT29 to GT31: the fight time, how long a missed fish held the bait, and the nibble strike~~ (#425) | news | S |
 | ~~GT33~~ | ~~The landed card counts the leaps the angler bowed to (let go before the line loaded the rod): Bowed to 2 leaps~~ (#428) | fight | S |
-| GT34 | The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came | fight | S |
+| ~~GT34~~ | ~~The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came~~ (#430) | fight | S |
+| GT35 | A bottom feeder hooked on its second take is noted on the landed card: On the second take | fish | S |
 
 ## Risks / open questions for the owner
 
