@@ -1077,7 +1077,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT32~~ | ~~News card (2026-10-15zg) covers GT29 to GT31: the fight time, how long a missed fish held the bait, and the nibble strike~~ (#425) | news | S |
 | ~~GT33~~ | ~~The landed card counts the leaps the angler bowed to (let go before the line loaded the rod): Bowed to 2 leaps~~ (#428) | fight | S |
 | ~~GT34~~ | ~~The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came~~ (#430) | fight | S |
-| GT35 | A bottom feeder hooked on its second take is noted on the landed card: On the second take | fish | S |
+| ~~GT35~~ | ~~A bottom feeder hooked on its second take is noted on the landed card: On the second take~~ (#432) | fish | S |
+| GT36 | News card (2026-10-15zh) covers GT33 to GT35: bowed leaps, the peak-tension notch, and the second-take note | news | S |
 
 ## Risks / open questions for the owner
 
