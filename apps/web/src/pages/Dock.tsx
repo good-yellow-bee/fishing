@@ -62,7 +62,7 @@ import { WalkStick } from "../components/WalkStick";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
-import { bookForPlay, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
@@ -485,6 +485,11 @@ export function DockPage() {
       await catchSync.sync();
       await releaseCatch(outcome.id);
       setReleasedId(outcome.id);
+      try {
+        markReleasedInBook(outcome.id);
+      } catch {
+        // The lake has let it go; the book's mark is a nicety a full store can skip.
+      }
       refresh().catch(() => undefined);
     } catch {
       setReleaseError(true);
