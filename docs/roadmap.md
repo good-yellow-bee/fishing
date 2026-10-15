@@ -1082,3 +1082,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR29~~ | ~~The water page's Best conditions and What works here boxes are labelled, so each aside landmark is unique (axe landmark-unique)~~ (#269) | field log, a11y | S |
 | ~~BR30~~ | ~~An outing today or ahead shows its water's What works here box (WaterTipsBox shared with the water page), and the home page's Next stat links to that outing~~ (#270) | field log | S |
 | ~~BR31~~ | ~~"Log another like this" on each catch page opens the catch form with the same water, outing, species, lure and measure, timed now~~ (#271) | field log | S |
+| ~~BR32~~ | ~~News card (2026-10-15d) tells players about What works here, the one-tap lure picks and Log another like this~~ (#272) | field log | S |
