@@ -10,12 +10,14 @@ import {
   tripById,
   upcomingTrips,
   recentTrips,
+  itemsForTrip,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
 import { tripNeighbors } from "./catchNeighbors";
 import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
+import { useTackle } from "./gear/TackleState";
 import { formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -156,7 +158,13 @@ export function TripPage() {
             {t("Add to calendar")}
           </button>
         </p>
-      ) : null}
+      ) : (
+        spot ? (
+          <p className="trip-again">
+            <Link to={`/trips/new?spot=${spot.id}&again=${trip.id}`}>{t("Go again")}</Link>
+          </p>
+        ) : null
+      )}
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
       <TripWeather catches={catches} />
@@ -209,10 +217,14 @@ function TripForm() {
   const { tripId } = useParams();
   const [params] = useSearchParams();
   const existing = tripId ? tripById(book, tripId) : undefined;
+  // "Go again" from a past outing: same water and title, and its tackle list comes along.
+  const again = existing ? undefined : tripById(book, params.get("again") ?? "");
+  const { items, add } = useTackle();
+  const againTackle = again ? itemsForTrip(items, again.id) : [];
   const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : (book.spots[0]?.id ?? "");
   const [date, setDate] = useState(existing?.date ?? localDate(new Date()));
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
-  const [title, setTitle] = useState(existing?.title ?? "");
+  const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
 
@@ -224,6 +236,7 @@ function TripForm() {
       setError(result.message);
       return;
     }
+    for (const item of againTackle) add(result.id, item.label);
     navigate(`/trips/${result.id}`);
   };
 
@@ -294,6 +307,11 @@ function TripForm() {
             />
           </label>
         </div>
+        {again && againTackle.length > 0 ? (
+          <p className="again-note">
+            {t("The tackle list from “{title}” comes along, unpacked.", { title: again.title })}
+          </p>
+        ) : null}
         {error ? (
           <p className="field-error" role="alert">
             {messageText(error)}

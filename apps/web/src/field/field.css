@@ -950,6 +950,12 @@ button.field-primary:disabled {
   margin: 20px 0 0;
 }
 
-.trip-calendar {
+.trip-calendar,
+.trip-again {
   margin: 12px 0 0;
+}
+
+.again-note {
+  margin: 0 0 14px;
+  color: var(--field-muted);
 }

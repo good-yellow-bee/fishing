@@ -322,4 +322,6 @@ export const PL_FIELD: PlBook = {
   "Water deleted, with its outings and fish.": "Łowisko usunięte razem z wyprawami i rybami.",
   "Outing deleted; its fish stay in the book.": "Wyprawa usunięta; jej ryby zostają w dzienniku.",
   Undo: "Cofnij",
+  "Go again": "Jedź znowu",
+  "The tackle list from “{title}” comes along, unpacked.": "Lista sprzętu z „{title}” zostanie skopiowana, jeszcze nic nie spakowane.",
 };
