@@ -46,6 +46,8 @@ export type FightRuntime = {
 export type FightPerformance = {
   peakTension: number;
   maxLine: number;
+  /** Runs the angler cut short by pulling the rod the other way. */
+  turnedRuns?: number;
 };
 
 /** Where FightBar turns the tension bar red. */
@@ -170,12 +172,13 @@ export function makeFight(
   const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
-  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
+  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0 };
   let completedSurges = 0;
   let nextAt: number | null = null;
   let graceUntil = -Infinity;
   let jumpAge = 0;
   let lastRunDone = false;
+  let turnedThisRun = false;
   const leaper = LEAPERS.has(species.id);
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
@@ -204,6 +207,8 @@ export function makeFight(
         sim.jump = false;
         sim.lastRun = false;
         completedSurges += 1;
+        if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
+        turnedThisRun = false;
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
       }
@@ -212,6 +217,7 @@ export function makeFight(
     // A leap goes up, not sideways, so only a run can be turned.
     sim.turning = sim.surge === 2 && !sim.jump && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
+    if (sim.turning) turnedThisRun = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL));
     if (reeling) {

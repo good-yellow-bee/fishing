@@ -344,9 +344,9 @@ describe("turning runs", () => {
       const outcome = runtime.step(frame * FRAME_SEC * 1000, FRAME_SEC, hand.shift()!, steer);
       if (runtime.sim.surge === 2 && !wasRunning) runs += 1;
       wasRunning = runtime.sim.surge === 2;
-      if (outcome !== "fighting") return { outcome, seconds: frame * FRAME_SEC, clean: isCleanFight(runtime.performance), runs };
+      if (outcome !== "fighting") return { outcome, seconds: frame * FRAME_SEC, clean: isCleanFight(runtime.performance), runs, turnedRuns: runtime.performance.turnedRuns };
     }
-    return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false, runs };
+    return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false, runs, turnedRuns: runtime.performance.turnedRuns };
   }
 
   it("maps ← A to the left and → D to the right, and nothing else", () => {
@@ -409,6 +409,10 @@ describe("turning runs", () => {
       expect(turned.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(plain.filter((fight) => fight.clean).length);
       const average = (fights: { seconds: number }[]) => fights.reduce((sum, fight) => sum + fight.seconds, 0) / fights.length;
       expect(average(turned), label).toBeLessThan(average(plain) * 0.92);
+      // The landed card counts the turned runs; a leap can't be turned, so it never counts.
+      expect(plain.every((fight) => fight.turnedRuns === 0), label).toBe(true);
+      for (const fight of turned) expect(fight.turnedRuns, label).toBeGreaterThan(0);
+      for (const fight of turned) expect(fight.turnedRuns, label).toBeLessThanOrEqual(fight.runs);
     }
   });
 });
