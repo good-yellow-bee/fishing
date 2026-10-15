@@ -123,6 +123,18 @@ describe("FightBar for screen readers", () => {
     expect(word().textContent).toBe("Fish played out");
   });
 
+  it("warns of the last run at the net", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 1;
+    sim.current.lastRun = true;
+    frame();
+    expect(status()).toBe("Let go now — it sees the net!");
+    sim.current.lastRun = false;
+    frame();
+    expect(status()).not.toBe("Let go now — it sees the net!");
+  });
+
   it("says which way to pull the rod against a run, cheers a turn, and stays quiet on a leap", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);

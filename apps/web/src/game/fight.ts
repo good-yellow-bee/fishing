@@ -9,7 +9,17 @@ export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
  * `runSide`: which way the coming or current run heads across the view, -1 left or 1 right.
  * `turning`: the angler is pulling the rod against the run, so it is cut short.
  */
-export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean; stamina: number; runSide: -1 | 1; turning?: boolean };
+export type FightSim = {
+  line: number;
+  tension: number;
+  surge: SurgeState;
+  jump?: boolean;
+  stamina: number;
+  runSide: -1 | 1;
+  turning?: boolean;
+  /** The run it makes on seeing the net, while that run lasts. */
+  lastRun?: boolean;
+};
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
 
@@ -65,6 +75,9 @@ export type StaminaState = "fresh" | "tiring" | "spent";
 
 /** A fish hooked solid on a quick strike starts the fight this worn. */
 export const SOLID_HOOK_STAMINA = 0.8;
+
+/** Reeled this close with fight still in it, a fish sees the net and makes one last run; a played-out fish comes in quietly. */
+export const LAST_RUN_LINE = 0.15;
 
 export function staminaState(stamina: number): StaminaState {
   if (stamina < SPENT_STAMINA) return "spent";
@@ -162,10 +175,16 @@ export function makeFight(
   let nextAt: number | null = null;
   let graceUntil = -Infinity;
   let jumpAge = 0;
+  let lastRunDone = false;
   const leaper = LEAPERS.has(species.id);
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
+    if (!lastRunDone && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+      lastRunDone = true;
+      sim.lastRun = true;
+      nextAt = nowMs;
+    }
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;
@@ -183,6 +202,7 @@ export function makeFight(
       } else {
         sim.surge = 0;
         sim.jump = false;
+        sim.lastRun = false;
         completedSurges += 1;
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));

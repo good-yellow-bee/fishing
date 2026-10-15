@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, LAST_RUN_LINE, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -145,6 +145,32 @@ describe("makeFight", () => {
     expect(runtime.performance.peakTension).toBeLessThan(RED_TENSION);
     expect(runtime.performance.maxLine).toBeGreaterThanOrEqual(RUN_OUT_LINE);
     expect(isCleanFight(runtime.performance)).toBe(false);
+  });
+
+  it("makes one last run at the net when reeled close with fight left in it", () => {
+    const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+    runtime.step(0, 0, false);
+    runtime.sim.line = LAST_RUN_LINE - 0.01;
+    runtime.step(100, 0, true);
+    expect(runtime.sim.surge).toBe(1);
+    expect(runtime.sim.lastRun).toBe(true);
+    let now = 100;
+    while (runtime.sim.surge !== 0) runtime.step((now += 50), 0.05, false);
+    expect(runtime.sim.lastRun).toBe(false);
+    // Only once: back near the net, it comes in on the next calm.
+    runtime.sim.line = LAST_RUN_LINE - 0.01;
+    runtime.step((now += 16), 0.016, true);
+    expect(runtime.sim.surge).toBe(0);
+  });
+
+  it("brings a played-out fish to the net without a last run", () => {
+    const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+    runtime.step(0, 0, false);
+    runtime.sim.stamina = SPENT_STAMINA - 0.05;
+    runtime.sim.line = LAST_RUN_LINE - 0.01;
+    runtime.step(100, 0, true);
+    expect(runtime.sim.surge).toBe(0);
+    expect(runtime.sim.lastRun).toBeFalsy();
   });
 
   it("marks a fight unclean once tension reaches the red band", () => {
