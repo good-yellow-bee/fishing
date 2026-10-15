@@ -14,6 +14,7 @@ import {
   isLureLabel,
   withPacked,
   withTackleItem,
+  withoutTackleItem,
 } from "./tackle.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -42,6 +43,13 @@ describe("tackle", () => {
     expect(packedCount(itemsForTrip(next, "trip-dawn"))).toBe(1);
     expect(packedCount(itemsForTrip(next, "trip-mill"))).toBe(0);
     expect(next).toHaveLength(items.length);
+  });
+
+  it("takes one piece off its list and leaves the rest", () => {
+    const next = withoutTackleItem(items, "gear-dawn-leader");
+    expect(next).toHaveLength(items.length - 1);
+    expect(itemsForTrip(next, "trip-dawn").map((item) => item.id)).not.toContain("gear-dawn-leader");
+    expect(withoutTackleItem(items, "no-such-piece")).toEqual(items);
   });
 
   it("accepts a stored bag and rejects a broken one", () => {

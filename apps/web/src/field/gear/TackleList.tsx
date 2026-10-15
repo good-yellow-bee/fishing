@@ -19,7 +19,7 @@ export function TackleList({
   suggest?: readonly string[];
 }) {
   const t = useT();
-  const { items, toggle, add } = useTackle();
+  const { items, toggle, add, remove } = useTackle();
   const rows = itemsForTrip(items, tripId);
   const packed = packedCount(rows);
   const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
@@ -65,6 +65,14 @@ export function TackleList({
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
               </label>
+              <button
+                type="button"
+                className="tackle-remove"
+                onClick={() => remove(item.id)}
+                aria-label={t("Take {piece} off the list", { piece: t(item.label) })}
+              >
+                ×
+              </button>
             </li>
           ))}
         </ul>
