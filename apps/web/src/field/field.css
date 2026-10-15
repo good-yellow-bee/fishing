@@ -744,3 +744,44 @@ button.field-primary:disabled {
     font-size: 18px;
   }
 }
+
+.tally-bars {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tally-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 9em) minmax(0, 1fr) minmax(0, 6.5em);
+  align-items: center;
+  gap: 10px;
+}
+
+.tally-label {
+  overflow-wrap: anywhere;
+}
+
+.tally-bar {
+  height: 10px;
+  background: var(--field-card);
+  border: 1px solid var(--field-line);
+}
+
+.tally-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--field-water);
+}
+
+.tally-count {
+  color: var(--field-muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.tally-bars li[data-empty="1"] .tally-label {
+  color: var(--field-muted);
+}

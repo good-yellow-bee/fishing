@@ -231,8 +231,14 @@ export const PL_FIELD: PlBook = {
   // Bests
   "Large · {label}": "Okaz · {label}",
   "Personal bests": "Rekordy osobiste",
-  "The largest fish in this book, how the species add up, and which waters have given one up.":
-    "Największe ryby w dzienniku, zestawienie gatunków i łowiska, które coś oddały.",
+  "The largest fish in this book, how the species add up, when and on what they bite, and which waters have given one up.":
+    "Największe ryby w dzienniku, zestawienie gatunków, kiedy i na co biorą oraz łowiska, które coś oddały.",
+  "When they bite": "Kiedy biorą",
+  "Lures that worked": "Przynęty, które łowiły",
+  Morning: "Rano",
+  Midday: "Południe",
+  Afternoon: "Popołudnie",
+  Evening: "Wieczór",
   Longest: "Najdłuższa",
   Heaviest: "Najcięższa",
   None: "Brak",

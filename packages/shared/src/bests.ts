@@ -121,3 +121,49 @@ export function fieldLogBestBeat(
   }
   return null;
 }
+
+/** Parts of the day an angler talks about, by local clock hour they start at; night wraps past midnight. */
+export const BITE_TIMES = [
+  { id: "dawn", label: "Dawn", from: 4 },
+  { id: "morning", label: "Morning", from: 8 },
+  { id: "midday", label: "Midday", from: 11 },
+  { id: "afternoon", label: "Afternoon", from: 15 },
+  { id: "evening", label: "Evening", from: 18 },
+  { id: "night", label: "Night", from: 21 },
+] as const;
+
+export type BiteTime = { id: (typeof BITE_TIMES)[number]["id"]; label: string; count: number };
+
+export function biteTimeOf(hour: number): (typeof BITE_TIMES)[number]["id"] {
+  let found: (typeof BITE_TIMES)[number] = BITE_TIMES[BITE_TIMES.length - 1]!;
+  for (const band of BITE_TIMES) if (hour >= band.from) found = band;
+  return found.id;
+}
+
+/** How many fish came at each part of the day, by the clock where the book is read. Always all six, in order. */
+export function biteTimes(book: Logbook): BiteTime[] {
+  const counts = new Map<string, number>();
+  for (const entry of book.catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime())) continue;
+    const id = biteTimeOf(at.getHours());
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return BITE_TIMES.map((band) => ({ id: band.id, label: band.label, count: counts.get(band.id) ?? 0 }));
+}
+
+export type LureTally = { lure: string; count: number };
+
+/** The lures that took the most fish, most first; spelling and case don't split a lure in two. */
+export function lureTally(book: Logbook, limit = 5): LureTally[] {
+  const tallies = new Map<string, LureTally>();
+  for (const entry of book.catches) {
+    const name = entry.lure.trim().replace(/\s+/g, " ");
+    if (!name) continue;
+    const key = name.toLowerCase();
+    const row = tallies.get(key);
+    if (row) row.count += 1;
+    else tallies.set(key, { lure: name, count: 1 });
+  }
+  return [...tallies.values()].sort((a, b) => b.count - a.count || a.lure.localeCompare(b.lure)).slice(0, limit);
+}

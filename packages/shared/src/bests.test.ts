@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fieldLogBestBeat, personalBests } from "./bests.ts";
+import { biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -108,5 +108,38 @@ describe("personal bests", () => {
       previousPounds: 0.6,
       line: "Beats your 0.6 lb Yellow perch already in the field log",
     });
+  });
+});
+
+describe("when and on what the fish came", () => {
+  const at = (hours: number) => new Date(2026, 5, 1, hours, 30).toISOString();
+  const book = (rows: Array<[number, string]>) => {
+    const base = sampleLogbook(new Date(2026, 5, 2));
+    const template = base.catches[0]!;
+    return { ...base, catches: rows.map(([hour, lure], i) => ({ ...template, id: `c${i}`, caughtAt: at(hour), lure })) };
+  };
+
+  it("files each hour under its part of the day, night wrapping past midnight", () => {
+    expect([4, 8, 11, 15, 18, 21, 0, 3].map(biteTimeOf)).toEqual(["dawn", "morning", "midday", "afternoon", "evening", "night", "night", "night"]);
+  });
+
+  it("counts every part of the day, even the empty ones", () => {
+    const times = biteTimes(book([[5, "a"], [6, "a"], [22, "b"], [2, "b"]]));
+    expect(times.map((row) => [row.id, row.count])).toEqual([
+      ["dawn", 2],
+      ["morning", 0],
+      ["midday", 0],
+      ["afternoon", 0],
+      ["evening", 0],
+      ["night", 2],
+    ]);
+  });
+
+  it("ranks lures by fish, without splitting one lure by case or spaces", () => {
+    const lures = lureTally(book([[5, "Woolly bugger"], [6, "woolly  bugger"], [7, "Spinner"], [8, "Bobber"], [9, "Spinner"], [10, "Woolly Bugger"]]), 2);
+    expect(lures).toEqual([
+      { lure: "Woolly bugger", count: 3 },
+      { lure: "Spinner", count: 2 },
+    ]);
   });
 });
