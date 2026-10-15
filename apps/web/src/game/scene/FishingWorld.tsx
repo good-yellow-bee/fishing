@@ -2179,7 +2179,8 @@ export const FishingWorld = memo(function FishingWorld(props: Props) {
   const [quality] = useState(() => ({ shadows: settings.shadows, dpr: settings.sharpness === "sharp" ? ([1, 1.75] as [number, number]) : 1 }));
   return (
     <Canvas
-      shadows={quality.shadows}
+      // "percentage" is PCF: three already draws its deprecated soft default that way, and saying so keeps the console quiet.
+      shadows={quality.shadows ? "percentage" : false}
       dpr={quality.dpr}
       camera={{ position: CAM_START, fov: 48, near: 0.1, far: 160 }}
       gl={{ antialias: true }}
