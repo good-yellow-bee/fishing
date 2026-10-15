@@ -25,6 +25,7 @@ import {
 } from "@stillwater/shared";
 import { t } from "../i18n";
 import { readStoredPhotos, savePhotos } from "./photoStore";
+import { keepBookStorage } from "./keepStorage";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string };
@@ -115,6 +116,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const saved = persist(withCatch(book, { ...parsed.value, id }), nextPhotos);
         if (!saved.ok) return saved;
+        void keepBookStorage();
         return { ok: true, id };
       },
       addSpot: (draft) => {

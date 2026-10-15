@@ -1,5 +1,6 @@
 import { keepLandedCatch, putCatchPhoto, withoutCatchPhoto, type CatchPhotoMap, type LandedFish, type Logbook } from "@stillwater/shared";
 import { readStoredPhotos, savePhotos } from "./photoStore";
+import { keepBookStorage } from "./keepStorage";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
 /**
@@ -13,6 +14,7 @@ export function bookForPlay(): Logbook {
 export function saveLandedCatch(landed: LandedFish) {
   const book = bookForPlay();
   saveLogbook(keepLandedCatch(book, landed));
+  void keepBookStorage();
 }
 
 /** The game's own snapshots, oldest first, so the oldest can make room for a new one. */
