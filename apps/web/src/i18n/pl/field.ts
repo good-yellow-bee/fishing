@@ -238,6 +238,11 @@ export const PL_FIELD: PlBook = {
   "Load a book": "Wczytaj dziennik",
   "Replace this book with the sample week?": "Zastąpić ten dziennik przykładowym tygodniem?",
   "Restore sample book": "Przywróć przykładowy dziennik",
+  "An earlier book in this browser could not be read, so it was set aside instead of being lost.":
+    "Wcześniejszego dziennika w tej przeglądarce nie dało się odczytać, więc odłożono go, zamiast go stracić.",
+  "Download the set-aside book": "Pobierz odłożony dziennik",
+  "Forget it": "Zapomnij o nim",
+  "Forget the set-aside book for good?": "Zapomnieć odłożony dziennik na dobre?",
   "A copy of this book was downloaded.": "Pobrano kopię dziennika.",
   "The catches were downloaded as a spreadsheet.": "Pobrano połowy jako arkusz.",
   "Field log file": "Plik dziennika połowów",
