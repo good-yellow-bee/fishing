@@ -43,6 +43,7 @@ import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { SpeciesChips } from "./SpeciesChips";
 import { findLink } from "./CatchSearch";
+import { savedState } from "./SavedNote";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return entry.measure.kind === "length"
@@ -338,12 +339,12 @@ function CatchForm() {
       return;
     }
     if (existing) {
-      navigate(`/catches/${existing.id}`);
+      navigate(`/catches/${existing.id}`, savedState("catchEdit"));
       return;
     }
     // The waiting draft, if any, stays for later; this one is saved.
     if (!waiting) dropKeptDraft();
-    navigate(tripId ? `/trips/${tripId}` : "/catches");
+    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch"));
   };
 
   if (catchId && !existing) {

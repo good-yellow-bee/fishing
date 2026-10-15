@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { NavLink, useLocation, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
+import { SavedNote } from "./SavedNote";
 import { UndoBar } from "./UndoBar";
 
 function FishMark() {
@@ -99,6 +100,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
           </NavLink>
         </header>
         <main className="field-main">{children}</main>
+        <SavedNote />
         <UndoBar />
       </div>
       <nav className="field-tab" aria-label={t("Log")}>
