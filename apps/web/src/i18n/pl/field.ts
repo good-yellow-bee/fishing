@@ -318,4 +318,8 @@ export const PL_FIELD: PlBook = {
     "Przykładowe łowiska na arkuszu z północnych lasów. Rysunek jest lokalny — bez serwera map i bez klucza.",
   "None of the waters in this book are drawn on the sheet.": "Żadne z łowisk w tym dzienniku nie jest narysowane na arkuszu.",
   "Not on this sheet:": "Poza arkuszem:",
+  "Fish deleted.": "Ryba usunięta.",
+  "Water deleted, with its outings and fish.": "Łowisko usunięte razem z wyprawami i rybami.",
+  "Outing deleted; its fish stay in the book.": "Wyprawa usunięta; jej ryby zostają w dzienniku.",
+  Undo: "Cofnij",
 };

@@ -44,9 +44,17 @@ type LogbookApi = {
   deleteSpot: (id: string) => void;
   deleteTrip: (id: string) => void;
   restoreSample: () => void;
+  /** What the last delete took out, until the next change to the book. */
+  undoable: DeletedKind | null;
+  undoDelete: () => void;
+  dismissUndo: () => void;
   photos: CatchPhotoMap;
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
+
+export type DeletedKind = "catch" | "spot" | "trip";
+
+type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
 
@@ -73,6 +81,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     return pruned;
   });
 
+  const [undo, setUndo] = useState<Undo | null>(null);
+
   const api = useMemo<LogbookApi>(() => {
     const persist = (nextBook: Logbook, nextPhotos: CatchPhotoMap): { ok: true } | { ok: false; message: string } => {
       try {
@@ -95,7 +105,15 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       }
       setBook(nextBook);
       setPhotos(nextPhotos);
+      // Any later change to the book ends the chance to undo a delete.
+      setUndo(null);
       return { ok: true };
+    };
+
+    const remove = (kind: DeletedKind, next: Logbook) => {
+      const before = { kind, book, photos };
+      commit(next);
+      setUndo(before);
     };
 
     const commit = (next: Logbook) => {
@@ -174,18 +192,26 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         commit(replaceTrip(book, { ...parsed.value, id }));
         return { ok: true, id };
       },
-      deleteCatch: (id) => commit(withoutCatch(book, id)),
-      deleteSpot: (id) => commit(withoutSpot(book, id)),
-      deleteTrip: (id) => commit(withoutTrip(book, id)),
+      deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
+      deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
+      deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
+      undoable: undo?.kind ?? null,
+      undoDelete: () => {
+        if (!undo) return;
+        const result = persist(undo.book, undo.photos);
+        if (!result.ok) throw new Error(result.message);
+      },
+      dismissUndo: () => setUndo(null),
       restoreSample: () => commit(sampleLogbook(new Date())),
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);
         setPhotos(photosForBook(nextBook, nextPhotos));
+        setUndo(null);
       },
     };
     // The language is a dependency: the sample week's lines are shown in it.
-  }, [book, photos, lang]);
+  }, [book, photos, lang, undo]);
 
   return <LogbookContext.Provider value={api}>{children}</LogbookContext.Provider>;
 }
