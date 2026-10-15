@@ -114,11 +114,14 @@ export function SpotCard({
   fishCount,
   tripCount,
   lastFishAt = null,
+  nextOuting = null,
 }: {
   spot: Spot;
   fishCount: number;
   tripCount: number;
   lastFishAt?: string | null;
+  /** The soonest planned outing here, already in words. */
+  nextOuting?: string | null;
 }) {
   const t = useT();
   return (
@@ -134,6 +137,7 @@ export function SpotCard({
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishAt ? ` · ${t("Last fish: {day}", { day: formatDay(localDate(new Date(lastFishAt))) })}` : ""}
       </p>
+      {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
     </Link>
   );
 }

@@ -9,6 +9,8 @@ import {
   spotById,
   tripById,
   tripsForSpot,
+  upcomingTrips,
+  type Trip,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
@@ -17,13 +19,21 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { EditDelete } from "./EditDelete";
-import { messageText } from "./format";
+import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
+
+/** The soonest planned outing on a water, as the card says it. */
+function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
+  return trip ? t("Next outing: {when}", { when: tripWhen(trip.date, today, tomorrow) }) : null;
+}
 
 export function SpotsPage() {
   const { book } = useLogbook();
   useT();
+  const today = localDate(new Date());
+  const tomorrow = shiftDate(new Date(), 1);
+  const upcoming = upcomingTrips(book, today);
 
   return (
     <div className="sheet">
@@ -48,6 +58,7 @@ export function SpotsPage() {
               fishCount={row.fishCount}
               tripCount={tripsForSpot(book, row.spot.id).length}
               lastFishAt={row.lastFishAt}
+              nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
             />
           ))}
         </div>

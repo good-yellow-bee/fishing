@@ -1140,3 +1140,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR87~~ | ~~The map list counts the fish from each water~~ (#327) | field | S |
 | ~~BR88~~ | ~~The trip form says how the last outing on the chosen water went~~ (#328) | field | S |
 | ~~BR89~~ | ~~News card (2026-10-15n) tells players about biggest so far, last outing hints and map counts~~ (#329) | field log | S |
+| ~~BR90~~ | ~~Spot cards name the next planned outing on that water~~ (#330) | field | S |
