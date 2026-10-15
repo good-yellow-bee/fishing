@@ -1,4 +1,4 @@
-import type { Trip } from "@stillwater/shared";
+import { localDate, type CatchEntry, type Trip } from "@stillwater/shared";
 import { locale } from "../i18n";
 
 export type TripMonth = { month: string; trips: Trip[] };
@@ -20,4 +20,9 @@ export function monthName(month: string): string {
   const name = new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(new Date(`${month}-15T12:00:00`));
   // Polish month names come lower case; a heading starts with a capital.
   return name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
+}
+
+/** The calendar month ("2026-10") a fish was landed in, by the reader's clock. */
+export function catchMonth(entry: CatchEntry): string {
+  return localDate(new Date(entry.caughtAt)).slice(0, 7);
 }

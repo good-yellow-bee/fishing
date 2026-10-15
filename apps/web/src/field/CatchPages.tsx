@@ -12,7 +12,6 @@ import {
   WIND_LABELS,
   catchesForSpot,
   catchesNewestFirst,
-  localDate,
   spotById,
   tripById,
   tripsForSpot,
@@ -27,6 +26,7 @@ import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
+import { catchMonth } from "./tripMonths";
 import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
@@ -98,7 +98,7 @@ export function CatchesPage() {
       ) : (
         <>
           <SpeciesChips catches={catches} />
-          <PagedCatches items={catches} monthOf={(entry) => localDate(new Date(entry.caughtAt)).slice(0, 7)}>
+          <PagedCatches items={catches} monthOf={catchMonth}>
             {(entry) => (
               <CatchCard
                 key={entry.id}
