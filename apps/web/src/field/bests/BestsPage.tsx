@@ -208,7 +208,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("By the moon")}</h2>
             </div>
-            <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+            <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
           </section>
 
           {skyTally(book).some((row) => row.count > 0) ? (
