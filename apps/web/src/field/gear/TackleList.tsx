@@ -1,22 +1,30 @@
 import { useState, type FormEvent } from "react";
-import { isLureLabel, itemsForTrip, lureClass, packedCount } from "@stillwater/shared";
+import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry } from "@stillwater/shared";
 import { useT } from "../../i18n";
-import { messageText } from "../format";
+import { fishCountLabel, messageText } from "../format";
 import { useTackle } from "./TackleState";
 import "./gear.css";
 
+/** "Woolly buggers" on the list and "Woolly bugger" on the catch are the same piece. */
+function pieceKey(label: string): string {
+  return label.trim().toLowerCase().replace(/s$/, "");
+}
+
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
 /** `suggest` offers lures to add in one tap (those already on the list are left out). */
+/** `caught` is the outing's fish: a piece named like the lure that took some says how many. */
 export function TackleList({
   tripId,
   heading,
   name,
   suggest = [],
+  caught = [],
 }: {
   tripId: string;
   heading?: string;
   name?: string;
   suggest?: readonly string[];
+  caught?: readonly CatchEntry[];
 }) {
   const t = useT();
   const { items, toggle, add, remove, unpackTrip } = useTackle();
@@ -24,6 +32,8 @@ export function TackleList({
   const packed = packedCount(rows);
   const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
   const missing = suggest.filter((lure) => !onList.has(lure.trim().toLowerCase()));
+  const took = new Map<string, number>();
+  for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
 
@@ -82,6 +92,7 @@ export function TackleList({
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
+                {took.get(pieceKey(item.label)) ? <span className="tackle-caught">{fishCountLabel(took.get(pieceKey(item.label))!)}</span> : null}
               </label>
               <button
                 type="button"

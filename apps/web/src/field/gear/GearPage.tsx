@@ -62,7 +62,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} caught={catchesForTrip(book, trip.id)} />
     </details>
   );
 }

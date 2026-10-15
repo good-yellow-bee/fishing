@@ -132,7 +132,9 @@ export function TripPage() {
   const loose = book.catches.filter(
     (entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) === trip.date,
   );
-  const tackle = <TackleList tripId={trip.id} heading={t("Tackle")} suggest={packingTips(book, trip, today)} />;
+  const tackle = (
+    <TackleList tripId={trip.id} heading={t("Tackle")} suggest={packingTips(book, trip, today)} caught={catchesForTrip(book, trip.id)} />
+  );
   const fish = (
     <>
       <div className="section-head">
