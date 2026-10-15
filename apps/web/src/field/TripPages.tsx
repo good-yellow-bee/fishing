@@ -21,7 +21,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { fishCountLabel, formatDay, messageText, tripWhen } from "./format";
+import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
 import { tripsByMonth } from "./tripMonths";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
@@ -141,6 +141,15 @@ export function TripPage() {
         <h2>{t("Fish on this outing")}</h2>
       </div>
       <FishSum catches={catches} />
+      {catches.length > 1 ? (
+        <p className="meta fish-span">
+          {t("Fish came between {from} and {to}", {
+            // Newest first: the last in the list came first.
+            from: formatTimeOfDay(catches[catches.length - 1]!.caughtAt),
+            to: formatTimeOfDay(catches[0]!.caughtAt),
+          })}
+        </p>
+      ) : null}
       <SpeciesChips catches={catches} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged for this trip yet.")}</p>

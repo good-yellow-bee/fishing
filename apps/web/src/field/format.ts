@@ -4,7 +4,7 @@ import { getLang, locale, t, tn } from "../i18n";
 /** Formatters per language, built on first use so a language change takes effect. */
 const formats = new Map<string, Intl.DateTimeFormat>();
 
-function format(name: "day" | "long" | "clock"): Intl.DateTimeFormat {
+function format(name: "day" | "long" | "clock" | "time"): Intl.DateTimeFormat {
   const tag = locale();
   const key = `${tag}:${name}`;
   let found = formats.get(key);
@@ -14,7 +14,9 @@ function format(name: "day" | "long" | "clock"): Intl.DateTimeFormat {
         ? { weekday: "short", month: "short", day: "numeric" }
         : name === "long"
           ? { weekday: "long", month: "long", day: "numeric" }
-          : { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+          : name === "time"
+            ? { hour: "numeric", minute: "2-digit" }
+            : { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
     found = new Intl.DateTimeFormat(tag, options);
     formats.set(key, found);
   }
@@ -32,6 +34,11 @@ export function formatCatchDay(iso: string): string {
 
 export function formatLongDay(date: Date): string {
   return format("long").format(date);
+}
+
+/** Just the time of day, for spans within one outing. */
+export function formatTimeOfDay(iso: string): string {
+  return format("time").format(new Date(iso));
 }
 
 export function formatClock(iso: string): string {
