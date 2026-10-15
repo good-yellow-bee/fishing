@@ -333,4 +333,5 @@ export const PL_FIELD: PlBook = {
   "Released it": "Wypuściłem ją",
   Yes: "Tak",
   "{n} released": ["{n} wypuszczona", "{n} wypuszczone", "{n} wypuszczonych"],
+  "Released: {count} of {total}": "Wypuszczone: {count} z {total}",
 };

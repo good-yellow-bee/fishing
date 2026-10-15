@@ -57,6 +57,7 @@ export function BestsPage() {
   useT();
   const bests = personalBests(book);
   const topDay = bestDay(book);
+  const released = book.catches.filter((entry) => entry.released).length;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
@@ -98,6 +99,9 @@ export function BestsPage() {
           <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>
+      {released > 0 ? (
+        <p className="meta released-share">{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</p>
+      ) : null}
 
       {book.catches.length === 0 ? (
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
