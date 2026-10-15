@@ -11,6 +11,7 @@ import { catchMonth, monthName } from "./tripMonths";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM } from "./findLinks";
+import { parseSizeQuery, sizeMatches } from "./sizeQuery";
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -62,6 +63,9 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 
 /** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, and released fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+  // ">2 lb", "<30 cm": the fish on that side of a size.
+  const size = parseSizeQuery(needle);
+  if (size) return catchesNewestFirst(book).filter((entry) => sizeMatches(entry.measure, size));
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
   const want = normalize(needle);
@@ -178,7 +182,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, or “released”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, a size such as “>2 lb”, or “released”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">

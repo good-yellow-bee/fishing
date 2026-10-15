@@ -1084,7 +1084,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT39~~ | ~~News card (2026-10-15zj) covers GT37 and GT38: the deep sulk and the ambush bite on the lake~~ (#440) | news | S |
 | ~~GT40~~ | ~~The cast meter keeps a faint mark where the last cast stopped, so the next cast can be aimed at the gold perfect mark by correcting from it~~ (#446) | casting | S |
 | ~~GT41~~ | ~~The fight card says Heavier than your best (1.1 lb) when the fish on the line outweighs the field log's heaviest of its species, so a big one feels like one before it is landed~~ (#448) | fight | S |
-| GT42 | News card (2026-10-15zk) covers GT40 and GT41: the last-cast mark and the heavier-than-your-best line | news | S |
+| GT42 | News card (2026-10-15zl) covers GT40 and GT41: the last-cast mark and the heavier-than-your-best line | news | S |
 
 ## Risks / open questions for the owner
 
@@ -1265,3 +1265,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR165~~ | ~~Plan one link on empty upcoming lists~~ (#444) | field | S |
 | ~~BR166~~ | ~~Species page water counts link; By the moon bars~~ (#445) | field | S |
 | ~~BR167~~ | ~~Lure link on catch cards; home species and outing counts link~~ (#447) | field | S |
+| ~~BR168~~ | ~~Catch search by size bound (>2 lb, <30 cm)~~ (#449) | field | S |
+| ~~BR169~~ | ~~News line for size and joined searches~~ (#450) | field | S |
