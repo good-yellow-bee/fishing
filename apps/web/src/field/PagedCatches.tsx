@@ -1,5 +1,6 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { t } from "../i18n";
+import { fishCountLabel } from "./format";
 import { monthName } from "./tripMonths";
 
 /** Catch lists draw this many cards at a time; every landing in the game adds one, so a keen angler's lists run long. */
@@ -14,7 +15,7 @@ export function catchPage<T>(all: readonly T[], shown: number) {
 /**
  * A stack of catch cards, a page at a time, with a Show more button under it while any are left.
  * Given monthOf ("2026-10"), a month heading goes above the first card of each month, at headLevel
- * (2 where nothing else heads the list, 3 under a section's h2).
+ * (2 where nothing else heads the list, 3 under a section's h2), counting that month's fish in the whole list.
  */
 export function PagedCatches<T>({
   items,
@@ -30,6 +31,8 @@ export function PagedCatches<T>({
   const Head = headLevel === 2 ? "h2" : "h3";
   const [shown, setShown] = useState(CATCH_PAGE);
   const { visible, more } = catchPage(items, shown);
+  const monthCounts = new Map<string, number>();
+  if (monthOf) for (const item of items) monthCounts.set(monthOf(item), (monthCounts.get(monthOf(item)) ?? 0) + 1);
   return (
     <div className="stack">
       {monthOf
@@ -38,7 +41,11 @@ export function PagedCatches<T>({
             const head = index === 0 || monthOf(visible[index - 1] as T) !== month;
             return (
               <Fragment key={index}>
-                {head ? <Head className="month-head">{monthName(month)}</Head> : null}
+                {head ? (
+                  <Head className="month-head">
+                    {monthName(month)} · {fishCountLabel(monthCounts.get(month) ?? 0)}
+                  </Head>
+                ) : null}
                 {children(item)}
               </Fragment>
             );
