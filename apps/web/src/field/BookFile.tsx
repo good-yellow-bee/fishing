@@ -2,7 +2,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
+import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -62,6 +62,10 @@ export function BookFile() {
     }
     replaceBook(pending.book, pending.photos);
     replaceTackle(pending.tackle);
+    // The file is itself a copy of the book now in this browser, so the reminder counts from it.
+    const loaded = ownCatches(pending.book);
+    saveCopiedAt(loaded);
+    setCopiedAt(loaded);
     setPending(null);
     setNotice({ tone: "ok", text: t("This browser now has the book from that file.") });
   };
@@ -102,6 +106,8 @@ export function BookFile() {
             setPending(null);
             setNotice(null);
             restoreSample();
+            clearCopiedAt();
+            setCopiedAt(null);
           }}
         >
           {t("Restore sample book")}

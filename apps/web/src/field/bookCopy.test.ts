@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { COPY_AGAIN_AFTER, FIRST_COPY_AT, copyNudge, ownCatches } from "./bookCopy";
+import { COPY_AGAIN_AFTER, FIRST_COPY_AT, clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 
 describe("remind to download a copy of the book", () => {
   it("stays quiet until the book has some of the player's own catches", () => {
@@ -20,5 +20,20 @@ describe("remind to download a copy of the book", () => {
     expect(ownCatches(sample)).toBe(0);
     const mine = { ...sample.catches[0]!, id: "mine-1" };
     expect(ownCatches({ ...sample, catches: [...sample.catches, mine] })).toBe(1);
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("remembers the last copy and forgets it for a fresh start", () => {
+    const data = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+      removeItem: (key: string) => void data.delete(key),
+    });
+    saveCopiedAt(12);
+    expect(readCopiedAt()).toBe(12);
+    clearCopiedAt();
+    expect(readCopiedAt()).toBeNull();
   });
 });
