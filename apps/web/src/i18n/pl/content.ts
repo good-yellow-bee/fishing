@@ -229,7 +229,7 @@ export const PL_CONTENT: PlBook = {
   "Oxbow Creek": "Potok Starorzecze",
   "North shore of the big lake. Cedars lean over a gravel shelf, then a weed edge that drops to about twelve feet.":
     "Północny brzeg dużego jeziora. Cedry pochylają się nad żwirową półką, dalej krawędź zielska opada na jakieś dwanaście stóp.",
-  "Overcast, light west wind, water in the high 50s": "Pochmurno, słaby wiatr z zachodu, woda pod 60°F",
+  "Overcast, light west wind, water in the high 50s": "Pochmurno, słaby wiatr z zachodu, woda dość chłodna",
   "Pocket water below the old mill dam. Brook trout sit in the tailouts and the soft seam along the wall.":
     "Kieszenie wody pod starą tamą młyńską. Pstrągi źródlane stoją w wypłyceniach i w spokojnym szwie wzdłuż muru.",
   "Modest rise, tea-stained and clearing, first light": "Lekki przybór, woda koloru herbaty i się klaruje, pierwsze światło",

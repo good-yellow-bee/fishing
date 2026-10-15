@@ -26,7 +26,11 @@
     linear-gradient(180deg, rgba(216, 176, 112, 0.08), transparent 28%),
     var(--field-rail);
   color: var(--field-rail-ink);
-  min-height: 100dvh;
+  /* As tall as the window, not the page, so it stays put while a long page scrolls. */
+  height: 100dvh;
+  align-self: start;
+  overflow-y: auto;
+  box-sizing: border-box;
   position: sticky;
   top: 0;
 }
