@@ -1228,3 +1228,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR144~~ | ~~Map labels no longer overlap on phones~~ (#408) | field | S |
 | ~~BR145~~ | ~~Search suggests what to try when nothing matches~~ (#410) | field | S |
 | ~~BR146~~ | ~~Catch form stays quick to type in on a long book~~ (#412) | field | S |
+| ~~BR147~~ | ~~Home shows this week in years past~~ (#414) | field | S |
