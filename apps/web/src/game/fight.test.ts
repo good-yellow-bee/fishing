@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, LAST_RUN_LINE, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, LAST_RUN_LINE, makeFight, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -161,6 +161,18 @@ describe("makeFight", () => {
     runtime.sim.line = LAST_RUN_LINE - 0.01;
     runtime.step((now += 16), 0.016, true);
     expect(runtime.sim.surge).toBe(0);
+  });
+
+  it("reels line in faster with the tension in the tight zone, and not in the red", () => {
+    const reeled = (tension: number) => {
+      const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+      runtime.step(0, 0, false);
+      runtime.sim.tension = tension;
+      runtime.step(10, 0.01, true);
+      return 1 - runtime.sim.line;
+    };
+    expect(reeled(TIGHT_TENSION + 0.05) / reeled(0.2)).toBeCloseTo(PRESSURE_REEL, 2);
+    expect(reeled(RED_TENSION + 0.05) / reeled(0.2)).toBeCloseTo(1, 2);
   });
 
   it("brings a played-out fish to the net without a last run", () => {
