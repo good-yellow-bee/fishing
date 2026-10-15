@@ -1225,6 +1225,14 @@ kbd {
   background: #6a8f5a99;
 }
 
+/* The perfect cast: the middle of the sweet band. */
+.bar .perfect {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #d9a94ecc;
+}
+
 .landed-card,
 .toast {
   position: absolute;

@@ -152,6 +152,22 @@ export function sweetBand(accuracy: number) {
   };
 }
 
+/** A cast this close to the middle of the sweet band is a perfect cast, and the bite comes sooner. */
+export const PERFECT_CAST_HALF = 0.035;
+export const PERFECT_CAST_WAIT = 0.8;
+
+/** The perfect-cast mark on the cast meter: the middle of the sweet band, PERFECT_CAST_HALF either side. */
+export function perfectCastBand(accuracy: number) {
+  const band = sweetBand(accuracy);
+  const center = (band.min + band.max) / 2;
+  return { min: center - PERFECT_CAST_HALF, max: center + PERFECT_CAST_HALF };
+}
+
+export function isPerfectCast(power: number, accuracy: number) {
+  const band = perfectCastBand(accuracy);
+  return power >= band.min && power <= band.max;
+}
+
 /** A new angler's first fish come easy: this many landed fish keep the mercy on. */
 export const MERCY_CATCHES = 3;
 /** Mercy bites come quickly and give a little longer to strike. */
@@ -175,11 +191,11 @@ export function isSolidStrike(elapsedMs: number, windowMs: number) {
   return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;
 }
 
-export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false) {
+export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false, perfect = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(
     1100,
-    base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1) * (rise ? RISE_WAIT : 1),
+    base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1) * (rise ? RISE_WAIT : 1) * (perfect ? PERFECT_CAST_WAIT : 1),
   );
   return mercy ? Math.min(wait, MERCY_WAIT_MAX_MS) : wait;
 }

@@ -375,6 +375,20 @@ describe("useFishingGame strike timing", () => {
     expect(fx.rodBell).not.toHaveBeenCalled();
   });
 
+  it("calls a cast stopped in the middle of the sweet band a perfect cast", () => {
+    let surface = mount(DOCK_BUBBLES.at + HOTSPOT_PERIOD_MS);
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    now += 560;
+    act(() => window.dispatchEvent(pointer("pointerup")));
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Perfect cast\. /);
+    act(() => root!.unmount());
+    root = null;
+    surface = mount(DOCK_BUBBLES.at + HOTSPOT_PERIOD_MS);
+    cast(surface);
+    expect(hint()).not.toMatch(/Perfect/);
+  });
+
   it("says a cast landed on a rise only while the evening rise is on", () => {
     cast(mount(DOCK_BUBBLES.at + HOTSPOT_PERIOD_MS, profile, "dusk", true));
     expect(hint()).toMatch(/^Right on a rise\. /);
