@@ -4,6 +4,7 @@ import { catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry,
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
+import { catchMonth } from "./tripMonths";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 
@@ -83,7 +84,7 @@ export function CatchSearch() {
             {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
           </p>
           {matches.length > 0 && (
-            <PagedCatches key={settled} items={matches}>
+            <PagedCatches key={settled} items={matches} monthOf={catchMonth}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}
