@@ -6,11 +6,24 @@ import { useTackle } from "./TackleState";
 import "./gear.css";
 
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
-export function TackleList({ tripId, heading, name }: { tripId: string; heading?: string; name?: string }) {
+/** `suggest` offers lures to add in one tap (those already on the list are left out). */
+export function TackleList({
+  tripId,
+  heading,
+  name,
+  suggest = [],
+}: {
+  tripId: string;
+  heading?: string;
+  name?: string;
+  suggest?: readonly string[];
+}) {
   const t = useT();
   const { items, toggle, add } = useTackle();
   const rows = itemsForTrip(items, tripId);
   const packed = packedCount(rows);
+  const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
+  const missing = suggest.filter((lure) => !onList.has(lure.trim().toLowerCase()));
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
 
@@ -56,6 +69,16 @@ export function TackleList({ tripId, heading, name }: { tripId: string; heading?
           ))}
         </ul>
       )}
+      {missing.length > 0 ? (
+        <p className="form-note lure-tips tackle-suggest">
+          {t("Works on this water:")}{" "}
+          {missing.map((lure) => (
+            <button key={lure} type="button" className="lure-tip" onClick={() => setError(add(tripId, lure) ?? "")}>
+              {t("+ {lure}", { lure: t(lure) })}
+            </button>
+          ))}
+        </p>
+      ) : null}
       <form className="tackle-add" onSubmit={onSubmit}>
         <label>
           {t("Add a piece")}

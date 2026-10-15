@@ -1085,3 +1085,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR32~~ | ~~News card (2026-10-15d) tells players about What works here, the one-tap lure picks and Log another like this~~ (#272) | field log | S |
 | ~~BR33~~ | ~~The landed-fish card's Field log button opens that fish's own page in the book once it is saved (else the catch log)~~ (#273) | game, field log | S |
 | ~~BR34~~ | ~~Fish and day trips from the game go to the game's own Stillwater lake (added once), never to the first real lake in the player's book, so What works here and records for real waters stay real; earlier game fish stay where they are~~ (#274) | game, field log | S |
+| ~~BR35~~ | ~~An upcoming trip's tackle list offers the water's best lures that are not on it yet as one-tap "+ lure" buttons~~ (#275) | field log, gear | S |
