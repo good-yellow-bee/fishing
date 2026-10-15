@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15l";
+export const NEWS_ID = "2026-10-15m";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In the field log, lures link to every fish they took: on catch pages, in Bests and in What works here. The Bests tiles open the record fish, and past trips show their fish before the tackle.",
   "Tackle lists say when everything is packed and can be unpacked in one tap, and upcoming trips show how the bag is coming along. Each catch says which of its kind it is, and the Fish page lists every species.",
   "Water and trip pages in the field log list the kinds of fish caught there. Each species page shows when that fish bites, and Log another starts a catch of that kind.",
   "Every kind of fish has its own page in the field log: how many, the biggest, what it takes, and where it comes from. Open it from Bests or from any catch.",
