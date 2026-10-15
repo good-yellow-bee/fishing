@@ -8,6 +8,7 @@ import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { findLink } from "../CatchSearch";
+import { monthName, monthTally } from "../tripMonths";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -175,6 +176,23 @@ export function BestsPage() {
             </div>
             <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
           </section>
+
+          {monthTally(book.catches).length > 1 ? (
+            <section>
+              <div className="section-head">
+                <h2>{t("By month")}</h2>
+              </div>
+              {/* Each month opens the catch search for its fish. */}
+              <TallyBars
+                rows={monthTally(book.catches).map((row) => ({
+                  key: row.month,
+                  label: monthName(row.month),
+                  count: row.count,
+                  to: findLink(monthName(row.month)),
+                }))}
+              />
+            </section>
+          ) : null}
 
           <section>
             <div className="section-head">

@@ -26,3 +26,17 @@ export function monthName(month: string): string {
 export function catchMonth(entry: CatchEntry): string {
   return localDate(new Date(entry.caughtAt)).slice(0, 7);
 }
+
+/** Fish per calendar month, newest month first, for the latest `limit` months that have any. */
+export function monthTally(catches: readonly CatchEntry[], limit = 12): { month: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const entry of catches) {
+    if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
+    const month = catchMonth(entry);
+    counts.set(month, (counts.get(month) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .slice(0, limit)
+    .map(([month, count]) => ({ month, count }));
+}
