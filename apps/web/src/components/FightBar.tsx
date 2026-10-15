@@ -146,12 +146,15 @@ export function FightBar({ fight, sim, performance }: Props) {
             <span data-for="calm">
               <span className="on-pointer">{t("Turn a run: hold ← A or → D the other way")}</span>
               <span className="on-touch">{t("Turn a run: hold the side button the other way")}</span>
+              <span className="on-pad">{t("Turn a run: push the left stick the other way")}</span>
             </span>
             <span data-for="left" hidden>
               {t("It runs right — pull left")} <span className="on-pointer">{t("(← or A)")}</span>
+              <span className="on-pad">{t("(left stick)")}</span>
             </span>
             <span data-for="right" hidden>
               {t("It runs left — pull right")} <span className="on-pointer">{t("(→ or D)")}</span>
+              <span className="on-pad">{t("(left stick)")}</span>
             </span>
             <span data-for="turning" hidden>
               {t("Turning it!")}
@@ -163,6 +166,7 @@ export function FightBar({ fight, sim, performance }: Props) {
             <p className="fight-controls">
               <span className="on-pointer">{t("TAP click / Space to start reeling")}</span>
               <span className="on-touch">{t("TAP the screen to start reeling")}</span>
+              <span className="on-pad">{t("TAP A or RT to start reeling")}</span>
               {" · "}
               {t("TAP again when the fish is about to run or tension goes red")}
             </p>
@@ -170,6 +174,7 @@ export function FightBar({ fight, sim, performance }: Props) {
             <p className="fight-controls">
               <span className="on-pointer">{t("HOLD click / Space to reel")}</span>
               <span className="on-touch">{t("HOLD the screen to reel")}</span>
+              <span className="on-pad">{t("HOLD A or RT to reel")}</span>
               {" · "}
               {t("LET GO when the fish is about to run or tension goes red")}
             </p>

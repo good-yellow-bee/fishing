@@ -1054,7 +1054,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT9~~ | ~~A fish reeled close (last 15% of line) with fight still in it sees the net and makes one last run, warned on the fight card; a played-out fish comes in quietly, so tiring it first pays~~ (#374) | fight | S |
 | ~~GT10~~ | ~~Perfect cast: a gold mark in the middle of the cast meter's sweet band (±0.035 power); stopping on it says Perfect cast and the bite comes 20% sooner. News card (2026-10-15y) covers GT8 to GT10~~ (#377) | casting | S |
 | ~~GT11~~ | ~~The landed card notes how the fish was played: Perfect cast · Hooked solid · Turned N runs~~ (#380) | fight | S |
-| GT12 | A starter fish's head shake (shiner, bluegill, perch, crappie) can't be turned, so their fight card and touch screen drop the steering; a played shiner no longer says Turned 21 runs | fight | S |
+| ~~GT12~~ | ~~A starter fish's head shake (shiner, bluegill, perch, crappie) can't be turned, so their fight card and touch screen drop the steering; a played shiner no longer says Turned 21 runs~~ (#381) | fight | S |
+| GT13 | With a controller connected, the fight card names its buttons and stick (HOLD A or RT to reel, push the left stick the other way) instead of keys or the screen | game feel | S |
 
 ## Risks / open questions for the owner
 

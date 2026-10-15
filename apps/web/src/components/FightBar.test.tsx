@@ -159,6 +159,14 @@ describe("FightBar for screen readers", () => {
     expect(shown()).toEqual(["calm"]);
   });
 
+  it("has controller words beside the key and screen ones", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
+    const pad = [...container!.querySelectorAll(".on-pad")].map((part) => part.textContent);
+    expect(pad).toContain("Turn a run: push the left stick the other way");
+    expect(pad).toContain("(left stick)");
+    expect(pad).toContain("HOLD A or RT to reel");
+  });
+
   it("leaves the steering out for a starter fish's head shakes", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     sim.current.surge = 2;

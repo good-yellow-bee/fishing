@@ -1134,7 +1134,8 @@ kbd {
   color: #4a3b2a;
 }
 
-.fight-bar .on-touch {
+.fight-bar .on-touch,
+.fight-bar .on-pad {
   display: none;
 }
 
@@ -1146,6 +1147,16 @@ kbd {
   .fight-bar .on-touch {
     display: inline;
   }
+}
+
+/* With a controller in hand, the fight card names its buttons and stick instead. */
+html[data-input="pad"] .fight-bar .on-pointer,
+html[data-input="pad"] .fight-bar .on-touch {
+  display: none;
+}
+
+html[data-input="pad"] .fight-bar .on-pad {
+  display: inline;
 }
 
 .fight-bar .tick {
