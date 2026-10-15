@@ -37,7 +37,7 @@ export function UndoBar() {
       <button type="button" className="text-button" onClick={onUndo}>
         {t("Undo")}
       </button>
-      <button type="button" className="text-button" onClick={dismissUndo} aria-label={t("Dismiss")}>
+      <button type="button" className="text-button undo-close" onClick={dismissUndo} aria-label={t("Dismiss")}>
         ×
       </button>
     </div>
