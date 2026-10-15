@@ -1,4 +1,4 @@
-import { biteTimes, lureTally, type BiteTime, type CatchEntry, type LureTally } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lureTally, type BiteTime, type CatchEntry, type Logbook, type LureTally, type Trip } from "@stillwater/shared";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
@@ -13,4 +13,10 @@ export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   let time: BiteTime | null = null;
   for (const band of biteTimes(book)) if (band.count > 0 && (!time || band.count > time.count)) time = band;
   return { lures, time };
+}
+
+/** Lures worth packing for an outing still ahead: what has worked on its water. Nothing for a past outing. */
+export function packingTips(book: Logbook, trip: Trip, today: string): string[] {
+  if (trip.date < today) return [];
+  return waterTips(catchesForSpot(book, trip.spotId))?.lures.map((row) => row.lure) ?? [];
 }
