@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15f";
+export const NEWS_ID = "2026-10-15g";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Deleted something in the field log by mistake? Undo brings it back. Past outings have Go again, which copies the tackle list, and pieces can be taken off a list.",
   "Upcoming trips in the field log can go straight into your calendar, and the Spots list puts the waters you fished last on top.",
   "Any catch page in the field log can save a picture card of the fish, and the lake's fish now go in the book under Stillwater, apart from your own waters.",
   "Each water in the field log shows what works there: its best lures and the time of day with the most fish, also on upcoming trips.",
