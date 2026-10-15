@@ -55,6 +55,7 @@ import {
   HIT_STOP_SEC,
   isFrozen,
   fishDepthMeters,
+  CURRENT_SIDE,
   biteLeadIn,
   fishLeadMeters,
   fishSideMeters,
@@ -722,7 +723,8 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
       const weeded = sim.current?.weeded === true;
       const leadTarget = fishLeadMeters(weeded ? 2 : surge, fightView.reeling || weeded, worn);
       // A turned run swings back in toward the line.
-      const sideTarget = fishSideMeters(weeded ? 2 : surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1);
+      // At the inlet the current carries a resting fish off downstream until the angler reels it back.
+      const sideTarget = fishSideMeters(weeded ? 2 : surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1) + (sim.current?.carried ? CURRENT_SIDE : 0);
       const depthTarget = fishDepthMeters(surge, worn, sim.current?.sulk === true, sim.current?.diving === true);
       const pullTarget = bobberPull(surge, fightView.reeling);
       const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;

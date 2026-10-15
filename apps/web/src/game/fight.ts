@@ -28,6 +28,8 @@ export type FightSim = {
   rocky?: boolean;
   /** At the drop-off, a run heading down the ledge. */
   diving?: boolean;
+  /** At the inlet, a resting fish the current is carrying off while the angler isn't reeling. */
+  carried?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -316,6 +318,7 @@ export function makeFight(
     const rocky = water === "rocks" && turnable && !sim.turning;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
     sim.diving = water === "deep" && sim.surge === 2 && !sim.jump;
+    sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;
