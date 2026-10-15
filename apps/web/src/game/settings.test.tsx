@@ -45,6 +45,12 @@ describe("settings", () => {
     expect(parseSettings(JSON.stringify({ floatColour: "plaid" })).floatColour).toBe(DEFAULT_SETTINGS.floatColour);
   });
 
+  it("keeps vibration on unless it was switched off", () => {
+    expect(parseSettings(null).vibration).toBe(true);
+    expect(parseSettings(JSON.stringify({ vibration: false })).vibration).toBe(false);
+    expect(parseSettings(JSON.stringify({ vibration: "no" })).vibration).toBe(true);
+  });
+
   it("remembers a change for the next visit", () => {
     updateSettings({ reelMode: "toggle", lastLure: "Mepps spinner" });
     expect(settings.reelMode).toBe("toggle");

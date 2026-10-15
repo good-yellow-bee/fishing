@@ -564,6 +564,29 @@ export const HAPTICS = {
 
 export type HapticBeat = keyof typeof HAPTICS;
 
+/** The same beats as one controller rumble each: how long, and how hard the heavy and light motors turn (0..1). */
+export const RUMBLES: Record<HapticBeat, { ms: number; strong: number; weak: number }> = {
+  nibble: { ms: 40, strong: 0, weak: 0.35 },
+  bite: { ms: 90, strong: 0.3, weak: 0.6 },
+  strike: { ms: 110, strong: 0.7, weak: 0.4 },
+  surge: { ms: 160, strong: 0.5, weak: 0.5 },
+  snap: { ms: 200, strong: 1, weak: 0.3 },
+  land: { ms: 220, strong: 0.35, weak: 0.7 },
+};
+
+type RumblePad = { connected?: boolean; vibrationActuator?: { playEffect?: (type: string, params: object) => Promise<unknown> } | null };
+
+/** Rumbles every connected controller that can; browsers without the Gamepad API or rumble skip it. */
+function rumble(beat: HapticBeat) {
+  if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return;
+  const { ms, strong, weak } = RUMBLES[beat];
+  for (const pad of navigator.getGamepads() as readonly (RumblePad | null)[]) {
+    const actuator = pad?.connected ? pad.vibrationActuator : null;
+    if (!actuator?.playEffect) continue;
+    actuator.playEffect("dual-rumble", { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => undefined);
+  }
+}
+
 export const fx = {
   get enabled() {
     return enabledFlag;
@@ -604,8 +627,9 @@ export const fx = {
   /** Felt rather than heard, so it follows its own switch, not the sound. */
   hapticsEnabled: true,
   haptic(beat: HapticBeat) {
-    if (!this.hapticsEnabled || typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
-    navigator.vibrate([...HAPTICS[beat]]);
+    if (!this.hapticsEnabled || typeof navigator === "undefined") return;
+    if (typeof navigator.vibrate === "function") navigator.vibrate([...HAPTICS[beat]]);
+    rumble(beat);
   },
   cast() {
     ambient.start();

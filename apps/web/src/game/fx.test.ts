@@ -207,6 +207,17 @@ describe("fx haptics", () => {
     expect(vibrate).toHaveBeenCalledWith([30, 40, 30]);
   });
 
+  it("rumbles a connected controller with the beat, and skips pads without rumble", () => {
+    const playEffect = vi.fn(() => Promise.resolve("complete"));
+    const getGamepads = () => [null, { connected: true, vibrationActuator: null }, { connected: true, vibrationActuator: { playEffect } }];
+    vi.stubGlobal("navigator", { ...navigator, vibrate: undefined, getGamepads });
+    fx.haptic("snap");
+    expect(playEffect).toHaveBeenCalledWith("dual-rumble", { duration: 200, strongMagnitude: 1, weakMagnitude: 0.3 });
+    fx.hapticsEnabled = false;
+    fx.haptic("bite");
+    expect(playEffect).toHaveBeenCalledTimes(1);
+  });
+
   it("stays quiet without vibrate, or when switched off", () => {
     vi.stubGlobal("navigator", { ...navigator, vibrate: undefined });
     expect(() => fx.haptic("bite")).not.toThrow();

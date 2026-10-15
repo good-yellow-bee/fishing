@@ -332,7 +332,8 @@ export function DockPage() {
     fx.enabled = !prefs.muted;
     fx.volume = prefs.volume;
     fx.natureVolume = prefs.natureVolume;
-  }, [prefs.muted, prefs.volume, prefs.natureVolume]);
+    fx.hapticsEnabled = prefs.vibration;
+  }, [prefs.muted, prefs.volume, prefs.natureVolume, prefs.vibration]);
 
   // The lake goes quiet in another tab or app unless the player keeps it playing there.
   useEffect(() => {

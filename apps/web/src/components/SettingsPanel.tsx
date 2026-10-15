@@ -167,6 +167,10 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
           <input type="checkbox" checked={current.walkStick} onChange={(event) => updateSettings({ walkStick: event.target.checked })} />
           {t("Walking stick (a thumb stick for walking on a touch screen)")}
         </label>
+        <label className="settings-check">
+          <input type="checkbox" checked={current.vibration} onChange={(event) => updateSettings({ vibration: event.target.checked })} />
+          {t("Vibration (a phone buzzes and a controller rumbles on bites, runs and the catch)")}
+        </label>
         <Choices
           name="reelMode"
           legend={t("Reeling")}

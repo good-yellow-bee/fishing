@@ -42,6 +42,8 @@ export type Settings = {
   backgroundSound: boolean;
   /** A thumb stick for walking, on touch screens. */
   walkStick: boolean;
+  /** A phone buzzes, and a controller rumbles, on nibbles, bites, runs and the end of a fight. */
+  vibration: boolean;
   /** The float's body colour; the white cap and night tip stay as they are. */
   floatColour: FloatColour;
   /** The lure tied on last, if it is still packed next visit. */
@@ -68,6 +70,7 @@ export const DEFAULT_SETTINGS: Settings = {
   soundCaptions: false,
   backgroundSound: false,
   walkStick: true,
+  vibration: true,
   floatColour: "blue",
   lastLure: null,
 };
@@ -109,6 +112,7 @@ export function parseSettings(raw: string | null): Settings {
     soundCaptions: typeof data.soundCaptions === "boolean" ? data.soundCaptions : d.soundCaptions,
     backgroundSound: typeof data.backgroundSound === "boolean" ? data.backgroundSound : d.backgroundSound,
     walkStick: typeof data.walkStick === "boolean" ? data.walkStick : d.walkStick,
+    vibration: typeof data.vibration === "boolean" ? data.vibration : d.vibration,
     floatColour: pick(data.floatColour, FLOAT_COLOURS, d.floatColour),
     lastLure: typeof data.lastLure === "string" && data.lastLure ? data.lastLure : null,
   };
