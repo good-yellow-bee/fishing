@@ -790,3 +790,9 @@ button.field-primary:disabled {
 .tally-bars li[data-empty="1"] .tally-label {
   color: var(--field-muted);
 }
+
+.form-grid .form-note {
+  margin: 4px 0 -6px;
+  color: var(--field-muted);
+  font-size: 13px;
+}

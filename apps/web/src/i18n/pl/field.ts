@@ -236,6 +236,7 @@ export const PL_FIELD: PlBook = {
   "When they bite": "Kiedy biorą",
   "By season": "Według pory roku",
   "Best day": "Najlepszy dzień",
+  "Weather is optional: note all three, or leave them blank.": "Pogoda jest opcjonalna: wpisz wszystkie trzy albo zostaw puste.",
   "Lures that worked": "Przynęty, które łowiły",
   Morning: "Rano",
   Midday: "Południe",
