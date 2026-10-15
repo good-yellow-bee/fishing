@@ -1208,3 +1208,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR134~~ | ~~Catch search finds released fish, linked from Bests~~ (#390) | field | S |
 | ~~BR135~~ | ~~What works here names the best season~~ (#392) | field | S |
 | ~~BR136~~ | ~~Tackle page past outings count their fish~~ (#393) | field | S |
+| ~~BR137~~ | ~~Past tackle lists say how many fish each piece took~~ (#395) | field | S |
