@@ -4,6 +4,7 @@ import {
   WATER_LABELS,
   WATER_TYPES,
   catchesForSpot,
+  fishCountsByTrip,
   localDate,
   shiftDate,
   spotById,
@@ -18,8 +19,8 @@ import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
-import { catchMonth, monthName, tripsByMonth } from "./tripMonths";
-import { TripMonthHead } from "./TripMonthHead";
+import { catchMonth } from "./tripMonths";
+import { PagedTrips } from "./PagedTrips";
 import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -90,6 +91,7 @@ export function SpotPage() {
 
   const trips = tripsForSpot(book, spot.id);
   const catches = catchesForSpot(book, spot.id);
+  const fishByTrip = fishCountsByTrip({ ...book, catches });
 
   return (
     <div className="sheet">
@@ -126,28 +128,19 @@ export function SpotPage() {
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
-        tripsByMonth(trips).map((group) => (
-          <section key={group.month} aria-label={monthName(group.month)}>
-            <TripMonthHead
-              month={group.month}
-              trips={group.trips}
-              fishOn={(id) => catches.filter((entry) => entry.tripId === id).length}
+        <PagedTrips trips={trips} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+          {(trip) => (
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              spotName={null}
+              waterType={null}
+              fishCount={fishByTrip.get(trip.id) ?? 0}
+              today={today}
+              tomorrow={tomorrow}
             />
-            <div className="stack">
-              {group.trips.map((trip) => (
-                <TripCard
-                  key={trip.id}
-                  trip={trip}
-                  spotName={null}
-                  waterType={null}
-                  fishCount={catches.filter((entry) => entry.tripId === trip.id).length}
-                  today={today}
-                  tomorrow={tomorrow}
-                />
-              ))}
-            </div>
-          </section>
-        ))
+          )}
+        </PagedTrips>
       )}
 
       <div className="section-head">

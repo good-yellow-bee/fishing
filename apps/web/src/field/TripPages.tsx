@@ -7,6 +7,7 @@ import {
   moonPhase,
   catchesForSpot,
   catchesForTrip,
+  fishCountsByTrip,
   localDate,
   shiftDate,
   spotById,
@@ -22,8 +23,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
-import { monthName, tripsByMonth } from "./tripMonths";
-import { TripMonthHead } from "./TripMonthHead";
+import { PagedTrips } from "./PagedTrips";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -47,6 +47,7 @@ export function TripsPage() {
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today);
+  const fishByTrip = fishCountsByTrip(book);
 
   return (
     <div className="sheet">
@@ -71,7 +72,7 @@ export function TripsPage() {
               trip={trip}
               spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
               waterType={spotById(book, trip.spotId)?.waterType ?? null}
-              fishCount={catchesForTrip(book, trip.id).length}
+              fishCount={fishByTrip.get(trip.id) ?? 0}
               today={today}
               tomorrow={tomorrow}
             />
@@ -82,24 +83,19 @@ export function TripsPage() {
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
-        tripsByMonth(recent).map((group) => (
-          <section key={group.month} aria-label={monthName(group.month)}>
-            <TripMonthHead month={group.month} trips={group.trips} fishOn={(id) => catchesForTrip(book, id).length} />
-            <div className="stack">
-              {group.trips.map((trip) => (
-                <TripCard
-                  key={trip.id}
-                  trip={trip}
-                  spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
-                  waterType={spotById(book, trip.spotId)?.waterType ?? null}
-                  fishCount={catchesForTrip(book, trip.id).length}
-                  today={today}
-                  tomorrow={tomorrow}
-                />
-              ))}
-            </div>
-          </section>
-        ))
+        <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+          {(trip) => (
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
+              waterType={spotById(book, trip.spotId)?.waterType ?? null}
+              fishCount={fishByTrip.get(trip.id) ?? 0}
+              today={today}
+              tomorrow={tomorrow}
+            />
+          )}
+        </PagedTrips>
       )}
     </div>
   );

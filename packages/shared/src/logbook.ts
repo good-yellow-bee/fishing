@@ -397,6 +397,13 @@ export function catchesForTrip(book: Logbook, tripId: string): CatchEntry[] {
   return catchesNewestFirst(book).filter((entry) => entry.tripId === tripId);
 }
 
+/** How many fish each outing brought, in one pass: for lists of many outings, where catchesForTrip per outing would sort the book each time. */
+export function fishCountsByTrip(book: Logbook): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const entry of book.catches) if (entry.tripId) counts.set(entry.tripId, (counts.get(entry.tripId) ?? 0) + 1);
+  return counts;
+}
+
 export function catchesForSpot(book: Logbook, spotId: string): CatchEntry[] {
   return catchesNewestFirst(book).filter((entry) => entry.spotId === spotId);
 }
