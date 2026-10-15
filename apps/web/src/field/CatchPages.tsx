@@ -15,6 +15,7 @@ import {
   type CatchEntry,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
+import { catchNeighbors } from "./catchNeighbors";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
@@ -484,6 +485,7 @@ export function CatchPage() {
   const spot = spotById(book, entry.spotId);
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const photo = photoFor(entry.id);
+  const { newer, older } = catchNeighbors(book, entry.id);
 
   return (
     <div className="sheet">
@@ -529,6 +531,22 @@ export function CatchPage() {
         <p className="trip-link">
           <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
         </p>
+      ) : null}
+      {newer || older ? (
+        <nav className="catch-steps" aria-label={t("More catches")}>
+          {newer ? (
+            <Link to={`/catches/${newer.id}`} rel="prev">
+              {t("← Newer: {species}", { species: t(newer.species) })}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {older ? (
+            <Link to={`/catches/${older.id}`} rel="next">
+              {t("Older: {species} →", { species: t(older.species) })}
+            </Link>
+          ) : null}
+        </nav>
       ) : null}
     </div>
   );
