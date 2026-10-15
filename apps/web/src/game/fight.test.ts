@@ -660,3 +660,28 @@ describe("runs off the point", () => {
     expect(runPull("rocks", 1)).toBeCloseTo(runPull("open", 1));
   });
 });
+
+describe("keeping a fish clear of the reeds' weeds and the point's rocks", () => {
+  /** Plays two runs, turning them or not, reeling between and through them, and returns what the landed card would note. */
+  function twoRuns(water: "weeds" | "rocks" | "open", turn: boolean) {
+    const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
+    let runs = 0;
+    let was = runtime.sim.surge;
+    for (let now = 0; now < 60_000 && runs < 2; now += 50) {
+      const steer = turn && runtime.sim.surge === 2 ? (-runtime.sim.runSide as Steer) : 0;
+      if (runtime.step(now, 0.05, runtime.sim.surge !== 1 && runtime.sim.tension < 0.6, steer) !== "fighting") break;
+      if (was === 2 && runtime.sim.surge === 0) runs += 1;
+      was = runtime.sim.surge;
+    }
+    expect(runs).toBe(2);
+    return runtime.performance.clearOf;
+  }
+
+  it("notes runs turned clear of them, and not runs that went in", () => {
+    expect(twoRuns("weeds", true)).toBe("weeds");
+    expect(twoRuns("weeds", false)).toBeUndefined();
+    expect(twoRuns("rocks", true)).toBe("rocks");
+    expect(twoRuns("rocks", false)).toBeUndefined();
+    expect(twoRuns("open", true)).toBeUndefined();
+  });
+});

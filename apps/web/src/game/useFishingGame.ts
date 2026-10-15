@@ -123,7 +123,7 @@ export type Fight = {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; secondTake?: boolean };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; secondTake?: boolean; clearOf?: "weeds" | "rocks" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -760,6 +760,7 @@ export function useFishingGame(
                 closeCall: isCloseCall(runtime.performance),
                 fightSec: runtime.performance.fightSec,
                 bowedLeaps: runtime.performance.bowedLeaps,
+                clearOf: runtime.performance.clearOf,
               },
             });
             clearFight();

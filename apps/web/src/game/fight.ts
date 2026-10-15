@@ -64,6 +64,8 @@ export type FightPerformance = {
   bowedLeaps?: number;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
+  /** At the reeds or the point, every run so far kept out of the weeds or off the rocks; unset once one wasn't. */
+  clearOf?: "weeds" | "rocks";
 };
 
 /** Where FightBar turns the tension bar red. */
@@ -241,6 +243,8 @@ export function makeFight(
   let sulkUntil = -Infinity;
   let slackSec = 0;
   let weedUntil = -Infinity;
+  let rockedThisRun = false;
+  let fouled = false;
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -271,6 +275,12 @@ export function makeFight(
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS;
         }
+        // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
+        if ((weedy || water === "rocks") && turnable && !sim.jump) {
+          if (sim.weeded || rockedThisRun) fouled = true;
+          performance.clearOf = fouled ? undefined : weedy ? "weeds" : "rocks";
+        }
+        rockedThisRun = false;
         sim.surge = 0;
         sim.jump = false;
         sim.lastRun = false;
@@ -303,6 +313,7 @@ export function makeFight(
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
+    if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
