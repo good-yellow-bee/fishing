@@ -1064,7 +1064,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT19~~ | ~~A snapped line says how close the fish came: It was 85% of the way in (from 10% in), so a break near the net reads as nearly there~~ (#397) | fight | S |
 | ~~GT20~~ | ~~News card (2026-10-15zc) covers GT17 to GT19: the line running out, clean fights in a row, and how close a snapped fish came~~ (#399) | news | S |
 | ~~GT21~~ | ~~Second take: a bottom feeder (carp, catfish, burbot, sturgeon) that drops the bait on a missed strike comes back once 1.8 s later, with a hint to watch for it; other fish leave as before~~ (#401) | fish | S |
-| GT22 | The bite call fits the fish: WHAM — it hit! Strike! for an ambush predator, It's taking it — strike! for a bottom feeder, NOW — strike! for the rest | fish | S |
+| ~~GT22~~ | ~~The bite call fits the fish: WHAM — it hit! Strike! for an ambush predator, It's taking it — strike! for a bottom feeder, NOW — strike! for the rest~~ (#403) | fish | S |
+| GT23 | Close call: a fish landed after the tension touched 0.95 or the line reached the run-out mark leads its landed-card notes with Close call | fight | S |
 
 ## Risks / open questions for the owner
 

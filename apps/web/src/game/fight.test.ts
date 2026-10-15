@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, LAST_RUN_LINE, makeFight, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -466,5 +466,13 @@ describe("leaps", () => {
     expect(held.performance.peakTension).toBeGreaterThanOrEqual(RED_TENSION);
     const bowed = runs("smallmouth-bass", () => false, 12_000).runtime;
     expect(bowed.performance.peakTension).toBeLessThan(RED_TENSION);
+  });
+});
+
+describe("close call", () => {
+  it("is a fish landed with tension at the edge of a snap or the line at the edge of an escape", () => {
+    expect(isCloseCall({ peakTension: 0.9, maxLine: 1.1 })).toBe(false);
+    expect(isCloseCall({ peakTension: 0.96, maxLine: 1 })).toBe(true);
+    expect(isCloseCall({ peakTension: 0.3, maxLine: RUN_OUT_LINE })).toBe(true);
   });
 });

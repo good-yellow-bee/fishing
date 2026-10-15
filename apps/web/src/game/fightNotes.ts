@@ -5,6 +5,8 @@ import type { FightNotes } from "./useFishingGame";
 export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (!notes) return null;
   const parts: string[] = [];
+  // Landed on the edge of a snap or an escape: said first, as the story of the fight.
+  if (notes.closeCall) parts.push(t("Close call"));
   if (notes.perfectCast) parts.push(t("Perfect cast"));
   if (notes.hookedSolid) parts.push(t("Hooked solid"));
   if (notes.turnedRuns > 0) parts.push(tn(notes.turnedRuns, "Turned {n} run", "Turned {n} runs"));
