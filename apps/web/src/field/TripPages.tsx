@@ -23,6 +23,7 @@ import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
+import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
@@ -187,6 +188,7 @@ export function TripPage() {
         <h2>{t("Fish on this outing")}</h2>
       </div>
       <FishSum catches={catches} />
+      <SpeciesChips catches={catches} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged for this trip yet.")}</p>
       ) : (

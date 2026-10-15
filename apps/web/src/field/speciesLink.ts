@@ -19,3 +19,15 @@ export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
     .map(([spotId, count]) => ({ spotId, name: book.spots.find((spot) => spot.id === spotId)?.name ?? null, count }))
     .sort((a, b) => b.count - a.count || (a.name ?? "").localeCompare(b.name ?? ""));
 }
+
+/** The kinds among some fish, most first, then by name, keeping the book's name for each. */
+export function speciesCounts(catches: readonly CatchEntry[]) {
+  const counts = new Map<string, { species: string; count: number }>();
+  for (const entry of catches) {
+    const key = entry.species.trim().toLowerCase();
+    const row = counts.get(key) ?? { species: entry.species, count: 0 };
+    row.count += 1;
+    counts.set(key, row);
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
+}

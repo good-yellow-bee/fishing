@@ -1023,3 +1023,24 @@ button.field-primary:disabled {
   padding: 8px 0;
   border-bottom: 1px solid var(--field-line);
 }
+
+.species-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.species-chips a {
+  padding: 4px 10px;
+  border: 1px solid var(--field-line);
+  background: var(--field-card);
+  color: var(--field-ink);
+  text-decoration: none;
+}
+
+.species-chips a:hover,
+.species-chips a:focus-visible {
+  border-color: var(--field-rust);
+  color: var(--field-rust);
+}
