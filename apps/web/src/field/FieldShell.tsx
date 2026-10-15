@@ -1,5 +1,5 @@
-import { useEffect, type ReactNode } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { NavLink, useLocation, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
 import { UndoBar } from "./UndoBar";
 
@@ -41,6 +41,16 @@ export function FieldShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.title = t("Stillwater · Field log");
   }, [t, lang]);
+
+  // A link to another page opens at its top; Back and Forward keep where the browser left it.
+  const { pathname } = useLocation();
+  const how = useNavigationType();
+  const lastPath = useRef(pathname);
+  useLayoutEffect(() => {
+    if (lastPath.current === pathname) return;
+    lastPath.current = pathname;
+    if (how !== "POP") window.scrollTo(0, 0);
+  }, [pathname, how]);
 
   return (
     <div className="field">
