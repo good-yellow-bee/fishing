@@ -164,6 +164,8 @@ export const PL_FIELD: PlBook = {
   "What works here": "Co tu działa",
   "Last fish: {day}": "Ostatnia ryba: {day}",
   "Works on this water:": "Działa na tym łowisku:",
+  "Took this kind here:": "Ten gatunek brał tu na:",
+  "Comes from this water:": "Z tego łowiska:",
   "+ {lure}": "+ {lure}",
   "Most fish at: {time}": "Najwięcej ryb: {time}",
   "More outings": "Więcej wypraw",

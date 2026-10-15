@@ -31,7 +31,7 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
-import { waterTips } from "./waterTips";
+import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
@@ -238,7 +238,15 @@ function CatchForm() {
 
   // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
   const spotTrips = useMemo(() => tripsForSpot(book, spotId), [book, spotId]);
-  const hereLures = useMemo(() => (waterTips(catchesForSpot(book, spotId))?.lures ?? []).map((row) => t(row.lure)), [book, spotId, lang]);
+  const hereCatches = useMemo(() => catchesForSpot(book, spotId), [book, spotId]);
+  const hereLures = useMemo(() => (waterTips(hereCatches)?.lures ?? []).map((row) => t(row.lure)), [hereCatches, lang]);
+  // One-tap picks: the kinds this water gives, and once a kind is typed, the lures that took it here.
+  const hereSpecies = useMemo(() => waterSpecies(hereCatches).map((name) => t(name)), [hereCatches, lang]);
+  const kindLures = useMemo(
+    () => speciesLures(hereCatches.map((entry) => ({ ...entry, species: t(entry.species) })), species).map((name) => t(name)),
+    [hereCatches, species, lang],
+  );
+  const lurePicks = kindLures.length > 0 ? kindLures : hereLures;
   const speciesOptions = useMemo(
     () =>
       ownFirst(
@@ -438,6 +446,22 @@ function CatchForm() {
               </small>
             ) : null}
           </label>
+          {hereSpecies.length > 0 ? (
+            <p className="wide form-note lure-tips">
+              {t("Comes from this water:")}{" "}
+              {hereSpecies.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  className="lure-tip"
+                  aria-pressed={species.trim().toLowerCase() === name.toLowerCase()}
+                  onClick={() => setSpecies(name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </p>
+          ) : null}
 
           <fieldset className="wide">
             <legend>{t("Measure")}</legend>
@@ -494,10 +518,10 @@ function CatchForm() {
               ))}
             </datalist>
           </label>
-          {hereLures.length > 0 ? (
+          {lurePicks.length > 0 ? (
             <p className="wide form-note lure-tips">
-              {t("Works on this water:")}{" "}
-              {hereLures.map((name) => (
+              {kindLures.length > 0 ? t("Took this kind here:") : t("Works on this water:")}{" "}
+              {lurePicks.map((name) => (
                 <button
                   key={name}
                   type="button"
