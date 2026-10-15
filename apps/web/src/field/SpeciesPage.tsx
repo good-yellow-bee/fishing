@@ -54,7 +54,7 @@ export function SpeciesPage() {
       </header>
       <FishSum catches={catches} oneKind />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
-      <WaterTipsBox catches={catches} label={t("What it takes")} />
+      <WaterTipsBox catches={catches} label={t("What it takes")} within={t(name)} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>
