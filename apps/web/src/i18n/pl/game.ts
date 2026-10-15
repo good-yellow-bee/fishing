@@ -368,6 +368,7 @@ export const PL_GAME: PlBook = {
   "Overpowered. Release in the band.": "Za mocno. Puść w pasku.",
   "Keep the ring on the water. Release in the moss band.": "Trzymaj kółko na wodzie. Puść w zielonym pasku.",
   "Too early. Wait for the bobber to go under, then strike.": "Za wcześnie. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
+  "That was only a nibble. Wait for the bobber to go under, then strike.": "To było tylko skubnięcie. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
   "Cast cancelled. Click the water or hold Space to try again.": "Rzut anulowany. Kliknij wodę lub przytrzymaj Spację, by spróbować znowu.",
   "Camera moved. Hold one finger or Space to cast.": "Kamera się ruszyła. Przytrzymaj jeden palec lub Spację, by zarzucić.",
   "Landed. Click the water or hold Space to cast again.": "Wyholowana! Kliknij wodę lub przytrzymaj Spację, by zarzucić ponownie.",

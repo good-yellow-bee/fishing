@@ -39,7 +39,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { RECAST_GUARD_MS, SECOND_TAKE_MS, useFishingGame } from "./useFishingGame";
+import { RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 
@@ -261,7 +261,7 @@ describe("useFishingGame strike timing", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early/i);
+    expect(hint()).toMatch(/too early|only a nibble/i);
     expect(phase()).toBe("waiting:none");
     act(() => window.dispatchEvent(pointer("pointerup", 2)));
     act(() => vi.advanceTimersByTime(1_601));
@@ -465,7 +465,7 @@ describe("useFishingGame strike timing", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early/i);
+    expect(hint()).toMatch(/too early|only a nibble/i);
     const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(second));
@@ -489,7 +489,7 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(hint()).toMatch(/your lure is in the bubbles/i);
     // A camera pinch takes back the early strike's hint, not the bubbles line.
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early/i);
+    expect(hint()).toMatch(/too early|only a nibble/i);
     const pinch = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(pinch, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(pinch));
@@ -638,7 +638,7 @@ describe("useFishingGame cast feedback", () => {
     castFor(surface, 300);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early/i);
+    expect(hint()).toMatch(/too early|only a nibble/i);
     const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(second));
@@ -695,6 +695,23 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
     expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toMatch(/^Too slow\. The fish dropped the bait after \d\.\d\d s\.$/);
+  });
+
+  it("says a strike at a nibble was only a nibble, and a strike at a still float was too early", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("waiting:none");
+    for (let waited = 0; surface.dataset.nibble !== "1" && waited < SECOND_TAKE_MS; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(surface.dataset.nibble).toBe("1");
+    act(() => surface.dispatchEvent(pointer("pointerdown", 7)));
+    expect(hint()).toBe("That was only a nibble. Wait for the bobber to go under, then strike.");
+    act(() => window.dispatchEvent(pointer("pointerup", 7)));
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_NIBBLE_MS));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 8)));
+    expect(hint()).toBe("Too early. Wait for the bobber to go under, then strike.");
   });
 
   it("calls a predator's bite as a hit and a usual fish's as NOW", () => {

@@ -532,7 +532,9 @@ export function useFishingGame(
       case "waiting": {
         const snag = snagRef.current;
         if (!snag) {
-          setHint(t("Too early. Wait for the bobber to go under, then strike."));
+          // Striking at a nibble is the usual early strike, so say what it was.
+          const atNibble = surfaceRef.current?.dataset.nibble === "1";
+          setHint(atNibble ? t("That was only a nibble. Wait for the bobber to go under, then strike.") : t("Too early. Wait for the bobber to go under, then strike."));
           break;
         }
         snag.taps += 1;
