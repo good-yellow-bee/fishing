@@ -893,3 +893,25 @@ button.field-primary:disabled {
   font-size: 17px;
   line-height: 1.4;
 }
+
+.lure-tips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.lure-tip {
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--field-line);
+  background: var(--field-card);
+  color: var(--field-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lure-tip[aria-pressed="true"] {
+  border-color: var(--field-rust);
+  color: var(--field-rust);
+}

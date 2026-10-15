@@ -7,6 +7,7 @@ import {
   SKY_LABELS,
   WINDS,
   WIND_LABELS,
+  catchesForSpot,
   catchesNewestFirst,
   spotById,
   tripById,
@@ -20,6 +21,7 @@ import { catchBadge } from "./catchBadge";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
+import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, t, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
@@ -141,6 +143,7 @@ function CatchForm() {
   const photoPick = useRef(0);
 
   const spotTrips = tripsForSpot(book, spotId);
+  const hereLures = (waterTips(catchesForSpot(book, spotId))?.lures ?? []).map((row) => t(row.lure));
   const heading = existing ? t(existing.species) : presetTrip ? presetTrip.title : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
@@ -336,6 +339,22 @@ function CatchForm() {
               ))}
             </datalist>
           </label>
+          {hereLures.length > 0 ? (
+            <p className="wide form-note lure-tips">
+              {t("Works on this water:")}{" "}
+              {hereLures.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  className="lure-tip"
+                  aria-pressed={lure === name}
+                  onClick={() => setLure(name)}
+                >
+                  {name}
+                </button>
+              ))}
+            </p>
+          ) : null}
 
           <label>
             {t("Water")}
