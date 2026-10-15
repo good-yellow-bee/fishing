@@ -8,6 +8,8 @@ import { useLogbook } from "./LogbookState";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
+import { findLink } from "./CatchSearch";
+import { catchMonth, monthName } from "./tripMonths";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -27,6 +29,8 @@ export function HomePage() {
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today, 3);
   const kinds = speciesCounts(book.catches).length;
+  const thisMonth = today.slice(0, 7);
+  const monthFish = book.catches.filter((entry) => catchMonth(entry) === thisMonth).length;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -61,7 +65,18 @@ export function HomePage() {
           <strong>
             <Link to="/catches">{book.catches.length}</Link>
           </strong>
-          {book.catches.length > 0 ? <small>{tn(kinds, "{n} species", "{n} species")}</small> : null}
+          {book.catches.length > 0 ? (
+            <small>
+              {tn(kinds, "{n} species", "{n} species")}
+              {monthFish > 0 ? (
+                <>
+                  {" · "}
+                  {/* This month's fish, through the catch search. */}
+                  <Link to={findLink(monthName(thisMonth))}>{t("{n} this month", { n: monthFish })}</Link>
+                </>
+              ) : null}
+            </small>
+          ) : null}
         </div>
         <div>
           <span className="eyebrow">{t("Waters")}</span>
