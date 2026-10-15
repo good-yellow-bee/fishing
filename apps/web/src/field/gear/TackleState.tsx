@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   parseTackleLabel,
   sampleTackle,
@@ -9,7 +9,7 @@ import {
   type TackleItem,
 } from "@stillwater/shared";
 import { localId } from "../../game/localId";
-import { readTackle, saveTackle } from "./storage";
+import { TACKLE_STORAGE_KEY, readTackle, saveTackle } from "./storage";
 
 type TackleApi = {
   items: TackleItem[];
@@ -22,24 +22,39 @@ type TackleApi = {
 
 const TackleContext = createContext<TackleApi | null>(null);
 
+/** Saves the lists; storage that is full or blocked leaves them working for this visit rather than stopping the page. */
+function keep(items: TackleItem[]) {
+  try {
+    saveTackle(items);
+  } catch {
+    // Kept in memory only.
+  }
+}
+
 export function TackleProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<TackleItem[]>(() => {
     const stored = readTackle();
     if (stored) return stored;
-    const seeded = sampleTackle();
-    saveTackle(seeded);
-    return seeded;
+    return sampleTackle();
   });
+
+  // Saved after each change rather than inside it, so a full or blocked storage can't stop the page drawing.
+  useEffect(() => keep(items), [items]);
+
+  useEffect(() => {
+    // Another tab changed the lists (or loaded a book): carry on from its copy, so the next tick here keeps its items.
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === TACKLE_STORAGE_KEY || event.key === null) setItems(readTackle() ?? []);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const api = useMemo<TackleApi>(() => {
     return {
       items,
       toggle: (id, packed) => {
-        setItems((current) => {
-          const next = withPacked(current, id, packed);
-          saveTackle(next);
-          return next;
-        });
+        setItems((current) => withPacked(current, id, packed));
       },
       add: (tripId, label) => {
         const parsed = parseTackleLabel(label);
@@ -50,26 +65,14 @@ export function TackleProvider({ children }: { children: ReactNode }) {
           label: parsed.value,
           packed: false,
         };
-        setItems((current) => {
-          const next = withTackleItem(current, item);
-          saveTackle(next);
-          return next;
-        });
+        setItems((current) => withTackleItem(current, item));
         return null;
       },
       remove: (id) => {
-        setItems((current) => {
-          const next = withoutTackleItem(current, id);
-          saveTackle(next);
-          return next;
-        });
+        setItems((current) => withoutTackleItem(current, id));
       },
       unpackTrip: (tripId) => {
-        setItems((current) => {
-          const next = withTripUnpacked(current, tripId);
-          saveTackle(next);
-          return next;
-        });
+        setItems((current) => withTripUnpacked(current, tripId));
       },
       replaceTackle: (next) => setItems(next),
     };
