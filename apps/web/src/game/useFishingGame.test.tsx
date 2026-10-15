@@ -225,7 +225,7 @@ describe("useFishingGame strike timing", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/hooked solid/i);
+    expect(hint()).toMatch(/^Hooked solid in 0\.00 s! /);
     act(() => root!.unmount());
     container!.remove();
 
@@ -236,6 +236,8 @@ describe("useFishingGame strike timing", () => {
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(phase()).toBe("fight:none");
     expect(hint()).not.toMatch(/hooked solid/i);
+    // The limit is 40% of the strike window, which Accuracy and the starter mercy both widen.
+    expect(hint()).toMatch(/^Hooked in 0\.90 s \(solid under 0\.\d\d s\)\. /);
   });
 
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {

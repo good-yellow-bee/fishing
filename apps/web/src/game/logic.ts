@@ -186,6 +186,11 @@ export function hookWindowMs(accuracy: number, mercy = false) {
 /** A strike in this first share of the hook window sets the hook solid. */
 export const SOLID_STRIKE_SHARE = 0.4;
 
+/** How quick a strike must be, in ms, to set the hook solid in a window this long. */
+export function solidStrikeMs(windowMs: number) {
+  return windowMs * SOLID_STRIKE_SHARE;
+}
+
 /** True when the strike came quick enough on the bite to set the hook solid. */
 export function isSolidStrike(elapsedMs: number, windowMs: number) {
   return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;

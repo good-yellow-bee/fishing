@@ -20,7 +20,7 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import { t } from "../i18n";
+import { locale, t } from "../i18n";
 import { fightLines, isCleanFight, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
@@ -30,7 +30,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, hookWindowMs, isPerfectCast, isSolidStrike, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
+import { BACKLASH_POWER, hookWindowMs, isPerfectCast, makeCatch, pickBite, SLAP_POWER, solidStrikeMs, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import { nibblePlan } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -272,7 +272,8 @@ export function useFishingGame(
     setHint(moved ? movedHint(moved.spot) : message);
   }, []);
 
-  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, solid = false) => {
+  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number }) => {
+    const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
     const underpowered = !canLand(current, species);
     const next = { species, weight, underpowered };
     fightRef.current = next;
@@ -295,7 +296,19 @@ export function useFishingGame(
       hookedSolidRef.current = solid;
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
-      setHint(solid ? t("Hooked solid! {line}. Ease off when it runs.", { line }) : t("{line}. Ease off when it runs.", { line }));
+      // The strike's time is told, so the angler learns how quick a solid hook has to be.
+      const seconds = (ms: number) => (ms / 1000).toLocaleString(locale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      setHint(
+        !strike
+          ? t("{line}. Ease off when it runs.", { line })
+          : solid
+            ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
+            : t("Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.", {
+                time: seconds(strike.elapsedMs),
+                limit: seconds(strike.solidMs),
+                line,
+              }),
+      );
     }
   }, [resetToIdle]);
 
@@ -305,10 +318,10 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const solid = isSolidStrike(performance.now() - at, ms);
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms) };
     fx.splash();
     fx.haptic("strike");
-    beginFight(bitten.species, bitten.weight, profile, solid);
+    beginFight(bitten.species, bitten.weight, profile, strike);
   }, [beginFight, profile]);
 
   const startWait = useCallback((current: Profile, short: boolean) => {
