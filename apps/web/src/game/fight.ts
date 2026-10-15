@@ -56,6 +56,8 @@ export type FightPerformance = {
   maxLine: number;
   /** Runs the angler cut short by pulling the rod the other way. */
   turnedRuns?: number;
+  /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
+  fightSec?: number;
 };
 
 /** Where FightBar turns the tension bar red. */
@@ -201,7 +203,7 @@ export function makeFight(
   const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
-  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0 };
+  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0, fightSec: 0 };
   let completedSurges = 0;
   let nextAt: number | null = null;
   let graceUntil = -Infinity;
@@ -287,6 +289,7 @@ export function makeFight(
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
+    performance.fightSec = (performance.fightSec ?? 0) + dtSec;
 
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";

@@ -125,6 +125,19 @@ describe("makeFight", () => {
     expect(isCleanFight(runtime.performance)).toBe(true);
   });
 
+  it("counts the fight's length in game time, not wall-clock time", () => {
+    const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
+    let steps = 0;
+    let outcome: FightOutcome = "fighting";
+    // Frames 50 ms apart on the clock but only 0.05 s of game time each, as when the loop clamps a slow frame.
+    for (let now = 0; outcome === "fighting" && now < 60_000; now += 50) {
+      outcome = runtime.step(now, 0.05, runtime.sim.surge !== 2 && runtime.sim.tension < 0.6);
+      steps++;
+    }
+    expect(outcome).toBe("landed");
+    expect(runtime.performance.fightSec).toBeCloseTo(steps * 0.05);
+  });
+
   it("stays clean when a hookset tap leaves the line idle before reeling", () => {
     const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
     let now = 0;

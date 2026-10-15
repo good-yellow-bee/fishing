@@ -351,6 +351,8 @@ export const PL_GAME: PlBook = {
   "Hooked solid": "Hak siedzi pewnie",
   "Turned {n} runs": ["{n} zawrócony odjazd", "{n} zawrócone odjazdy", "{n} zawróconych odjazdów"],
   "{n} clean fights in a row": "Czyste hole z rzędu: {n}",
+  "Landed in {s} s": "Wyholowana w {s} s",
+  "Landed in {m} min {s} s": "Wyholowana w {m} min {s} s",
   "Close call": "O włos",
   "Hooked solid in {time} s! {line}. Ease off when it runs.": "Hak siedzi pewnie po {time} s! {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.": "Zacięte po {time} s (pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
