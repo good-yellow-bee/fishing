@@ -7,6 +7,7 @@ import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
+import { findLink } from "../CatchSearch";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -184,7 +185,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("Lures that worked")}</h2>
             </div>
-            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count }))} />
+            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findLink(t(row.lure)) }))} />
           </section>
 
           <section>
