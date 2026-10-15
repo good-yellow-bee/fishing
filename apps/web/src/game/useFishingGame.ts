@@ -722,7 +722,10 @@ export function useFishingGame(
             fx.snap();
             fx.haptic("snap");
             cleanRunRef.current = 0;
-            setOutcome({ kind: "broke", message: t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) }) });
+            // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
+            const reeledIn = Math.round((1 - sim.line) * 100);
+            const snapped = t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
+            setOutcome({ kind: "broke", message: reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run."));
           } else if (result === "escaped") {
             fx.snap();
