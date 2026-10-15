@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   hotBankForDay,
   anglerLevel,
+  fishTireMulForLevel,
   INLET_LEVEL,
   canLand,
   isFishingStance,
@@ -276,7 +277,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength);
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)));
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;

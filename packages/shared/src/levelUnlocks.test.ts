@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, LEVEL_THRESHOLDS, levelProgress } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, fishTireMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Lake legend", () => {
+  it("gives every level its own title, Greenhorn to Stillwater sage", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Lake legend");
+    expect(titles.at(-1)).toBe("Stillwater sage");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Lake legend");
+    expect(anglerTitle(99)).toBe("Stillwater sage");
   });
 });
 
@@ -81,5 +81,23 @@ describe("levelProgress", () => {
     const top = LEVEL_THRESHOLDS.length;
     expect(levelProgress(LEVEL_THRESHOLDS[top - 1]!)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
     expect(levelProgress(1_000_000)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
+  });
+});
+
+describe("levels 9 and 10", () => {
+  it("open at 5000 and 8000 lifetime points, each with its own unlock", () => {
+    expect(anglerLevel(4999)).toBe(8);
+    expect(anglerLevel(5000)).toBe(9);
+    expect(anglerLevel(8000)).toBe(10);
+    expect(levelUnlock(9)).toBe("Hooked fish tire 20% faster.");
+    expect(levelUnlock(10)).toBe("Rare and legendary fish bite more often.");
+    expect(levelProgress(3200)).toMatchObject({ level: 8, next: 9, toNext: 1800 });
+  });
+
+  it("tire fish faster from level 9 and draw rarer fish from level 10", () => {
+    expect(fishTireMulForLevel(8)).toBe(1);
+    expect(fishTireMulForLevel(9)).toBeGreaterThan(1);
+    expect(rareBiteMulForLevel(9)).toBe(1);
+    expect(rareBiteMulForLevel(10)).toBeGreaterThan(1);
   });
 });

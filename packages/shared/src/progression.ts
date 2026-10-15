@@ -6,7 +6,7 @@ export const INLET_LEVEL = 6;
 export const OPEN_LEVEL = 7;
 export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet", "open"];
 
-export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200];
+export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000];
 
 export function anglerLevel(lifetimePoints: number): number {
   let level = 1;
@@ -46,6 +46,8 @@ export const ANGLER_TITLES = [
   "Fish whisperer",
   "Lake master",
   "Lake legend",
+  "Keeper of the lake",
+  "Stillwater sage",
 ] as const;
 
 export function anglerTitle(level: number): string {
@@ -71,6 +73,8 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   6: "The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain.",
   7: "Fish bite 15% faster. The rowboat is yours — untie it at the dock and row out to open water.",
   8: "Better odds of trophy-size fish.",
+  9: "Hooked fish tire 20% faster.",
+  10: "Rare and legendary fish bite more often.",
 };
 
 export function levelUnlock(level: number): string | null {
@@ -83,6 +87,16 @@ export function canPreviewFish(level: number): boolean {
 
 export function castRangeMultiplier(level: number): number {
   return level >= 5 ? 1.25 : 1;
+}
+
+/** How much faster a hooked fish tires at this level. */
+export function fishTireMulForLevel(level: number): number {
+  return level >= 9 ? 1.2 : 1;
+}
+
+/** How much more often rare and legendary fish are drawn at this level, within what the angler can land. */
+export function rareBiteMulForLevel(level: number): number {
+  return level >= 10 ? 1.5 : 1;
 }
 
 export function biteWaitMulForLevel(level: number): number {

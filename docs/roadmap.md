@@ -1047,7 +1047,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT2~~ | ~~A tiring fish comes up toward the surface and its runs go shorter and less wide, so the scene shows what the fight card says~~ (#359) | fight | S |
 | ~~GT3~~ | ~~Turn a run: each run heads left or right, and holding ← A or → D (a pad's stick, or a side button on touch) the other way cuts it short and tires the fish; the fight card says which way to pull~~ (#362) | fight | M |
 | ~~GT4~~ | ~~News card (2026-10-15u) tells players fish tire and runs can be turned~~ (#364) | game | S |
-| GT5 | The level chip fills toward the next level and says how many points are left and what it opens | progression | S |
+| ~~GT5~~ | ~~The level chip fills toward the next level and says how many points are left and what it opens~~ (#365) | progression | S |
+| GT6 | Levels 9 (5000 points, Keeper of the lake: hooked fish tire 20% faster) and 10 (8000, Stillwater sage: rare and legendary fish bite more often, within what the angler can land) | progression | S |
 
 ## Risks / open questions for the owner
 

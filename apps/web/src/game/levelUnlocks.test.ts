@@ -52,6 +52,35 @@ describe("level 6 legendary bonus", () => {
   });
 });
 
+describe("level 10 rare bites", () => {
+  const atNine = { ...profile, lifetimePoints: 5000 };
+  const atTen = { ...profile, lifetimePoints: 8000 };
+  const rare = (fish: { rarity: string }) => fish.rarity === "rare" || fish.rarity === "legendary";
+
+  it("draws more rare and legendary fish at level 10 than at level 9", () => {
+    for (const spot of ["reeds", "dropoff"] as const) {
+      for (const hour of ["day", "night"] as const) {
+        const nine = draws(atNine, spot, hour, "clear").filter(rare).length;
+        const ten = draws(atTen, spot, hour, "clear").filter(rare).length;
+        expect(nine).toBeGreaterThan(0);
+        expect(ten / nine).toBeGreaterThan(1.12);
+        expect(ten / nine).toBeLessThan(1.5);
+      }
+    }
+  });
+
+  it("preserves the landable share at all banks", () => {
+    for (const skills of [{ strength: 1, accuracy: 1 }, { strength: 5, accuracy: 2 }]) {
+      for (const spot of SPOT_IDS) {
+        for (const hour of LAKE_HOURS) {
+          const count = (current: Profile) => draws(current, spot, hour, "clear", false, 480).filter((fish) => canLand(current, fish)).length;
+          expect(Math.abs(count({ ...atTen, ...skills }) - count({ ...atNine, ...skills }))).toBeLessThanOrEqual(2);
+        }
+      }
+    }
+  });
+});
+
 describe("level 7 bite wait", () => {
   it("cuts waits by 15%, composing with the hotspot before the floor", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.5);
