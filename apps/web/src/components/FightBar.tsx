@@ -72,7 +72,11 @@ export function FightBar({ fight, sim, performance }: Props) {
         }
         // Written only on a change, so the live region speaks each new call once.
         const call =
-          state.lastRun && state.surge === 1 && !state.jump ? t("Let go now — it sees the net!") : (state.jump ? leapLines : lines)[state.surge]!;
+          state.lastRun && state.surge === 1 && !state.jump
+            ? t("Let go now — it sees the net!")
+            : state.surge === 0 && tired === "spent"
+              ? t("It's played out — reel it in!")
+              : (state.jump ? leapLines : lines)[state.surge]!;
         if (status.current && status.current.textContent !== call) status.current.textContent = call;
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame,
         // ...or at once when the line starts running out.
