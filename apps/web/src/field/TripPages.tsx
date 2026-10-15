@@ -121,6 +121,25 @@ export function TripPage() {
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
 
+  const tackle = <TackleList tripId={trip.id} heading={t("Tackle")} suggest={packingTips(book, trip, today)} />;
+  const fish = (
+    <>
+      <div className="section-head">
+        <h2>{t("Fish on this outing")}</h2>
+      </div>
+      <FishSum catches={catches} />
+      <SpeciesChips catches={catches} />
+      {catches.length === 0 ? (
+        <p className="empty">{t("Nothing logged for this trip yet.")}</p>
+      ) : (
+        <PagedCatches items={catches}>
+          {(entry) => <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />}
+        </PagedCatches>
+      )}
+    </>
+  );
+  const fishFirst = catches.length > 0 || trip.date < today;
+
   return (
     <div className="sheet">
       <EditDelete
@@ -179,23 +198,9 @@ export function TripPage() {
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
       <TripWeather catches={catches} />
-      <TackleList
-        tripId={trip.id}
-        heading={t("Tackle")}
-        suggest={packingTips(book, trip, today)}
-      />
-      <div className="section-head">
-        <h2>{t("Fish on this outing")}</h2>
-      </div>
-      <FishSum catches={catches} />
-      <SpeciesChips catches={catches} />
-      {catches.length === 0 ? (
-        <p className="empty">{t("Nothing logged for this trip yet.")}</p>
-      ) : (
-        <PagedCatches items={catches}>
-          {(entry) => <CatchCard key={entry.id} entry={entry} spotName={spot?.name ?? t("Unknown water")} tripTitle={null} />}
-        </PagedCatches>
-      )}
+      {/* Once fish are in, they lead; before that, the bag does. */}
+      {fishFirst ? fish : tackle}
+      {fishFirst ? tackle : fish}
       {newer || older ? (
         <nav className="catch-steps" aria-label={t("More outings")}>
           {newer ? (
