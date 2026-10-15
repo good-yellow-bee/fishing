@@ -1094,7 +1094,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT49~~ | ~~News card (2026-10-15zo) covers GT47 and GT48: the inlet's current and the water line on the fight card~~ (#467) | news | S |
 | ~~GT50~~ | ~~Drop-off runs dive: they pull 25% harder against a reeling line and tire the fish 30% faster, so letting them go pays most there; the fight card says so~~ (#470) | fight | S |
 | ~~GT51~~ | ~~News card (2026-10-15zp) covers GT50: drop-off dives~~ (#472) | news | S |
-| GT52 | Rocks off the point: reeling against a run the angler doesn't turn loads the line 20% harder; the fight card says so, and the news card (2026-10-15zq) covers it | fight | S |
+| GT52 | Rocks off the point: reeling against a run the angler doesn't turn loads the line 20% harder; the fight card says so, and the news card (2026-10-15zr) covers it | fight | S |
 
 ## Risks / open questions for the owner
 
@@ -1288,3 +1288,6 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR178~~ | ~~Download reminder counts from a loaded book and restarts after restoring the sample~~ (#466) | field | S |
 | ~~BR179~~ | ~~Restoring the sample book can be undone from the undo bar~~ (#468) | field | S |
 | ~~BR180~~ | ~~Downloads say they happened; the file link is released later~~ (#469) | field | S |
+| ~~BR181~~ | ~~Saving a catch says Fish saved or Changes saved~~ (#471) | field | S |
+| ~~BR182~~ | ~~Undo bar buttons get 44px tap targets~~ (#473) | field | S |
+| ~~BR183~~ | ~~News line for the saved-catch note, download notices and sample undo~~ (#474) | field | S |

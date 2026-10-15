@@ -456,6 +456,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
   "Off the point, turn the runs: a run you leave alone drags the line over the rocks, so reeling against it strains the line harder.":
     "Przy cyplu zawracaj odjazdy: odjazd, którego nie zawrócisz, przeciąga linkę po kamieniach, więc zwijanie pod niego mocniej napina linkę.",
+  "In the field log, saving a catch now says “Fish saved.” for a moment, downloading the book says it went through, and restoring the sample book can be undone from the bar at the bottom.":
+    "W dzienniku zapisanie połowu pokazuje teraz na chwilę „Ryba zapisana.”, pobranie dziennika potwierdza, że się udało, a przywrócenie przykładowego dziennika można cofnąć z paska na dole.",
   "At the drop-off a run dives: it pulls harder against a reeling line but tires the fish faster, so let it go and reel between runs.":
     "Na spadzie odjazd nurkuje: mocniej ciągnie, gdy zwijasz, ale szybciej męczy rybę, więc puść ją i zwijaj między odjazdami.",
   "At the inlet the current takes slack line out faster, so keep the fish coming. The fight card now says what the water does at the reeds and the inlet.":
