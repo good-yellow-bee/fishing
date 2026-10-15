@@ -1305,3 +1305,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR192~~ | ~~Stale water link in the catch form, metric length bounds, metric map scale~~ (#485) | field | S |
 | ~~BR193~~ | ~~Loaded catch times are stored in the book's own form~~ (#488) | field | S |
 | ~~BR194~~ | ~~Tackle lists sync across tabs; blocked storage no longer blanks the field log~~ (#489) | field | S |
+| ~~BR195~~ | ~~Trip and water forms say when a save fails~~ (#491) | field | S |
