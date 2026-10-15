@@ -134,6 +134,9 @@ export function CatchSearch() {
               {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
             </p>
           )}
+          {matches.length === 0 ? (
+            <p className="search-tip">{t("Try a species, a water, a lure, a month, a kind of water such as “river”, or “released”.")}</p>
+          ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
               <button

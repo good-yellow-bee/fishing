@@ -41,3 +41,9 @@
   margin: 0;
   font-size: 13px;
 }
+
+.catch-search .search-tip {
+  margin: 0;
+  color: var(--field-muted);
+  font-size: 13px;
+}

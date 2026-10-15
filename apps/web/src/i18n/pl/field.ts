@@ -218,6 +218,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
+  "Try a species, a water, a lure, a month, a kind of water such as “river”, or “released”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca, rodzaju wody (np. „rzeka”) albo słowa „wypuszczona”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
