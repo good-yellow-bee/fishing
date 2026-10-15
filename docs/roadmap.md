@@ -1087,3 +1087,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR34~~ | ~~Fish and day trips from the game go to the game's own Stillwater lake (added once), never to the first real lake in the player's book, so What works here and records for real waters stay real; earlier game fish stay where they are~~ (#274) | game, field log | S |
 | ~~BR35~~ | ~~An upcoming trip's tackle list offers the water's best lures that are not on it yet as one-tap "+ lure" buttons~~ (#275) | field log, gear | S |
 | ~~BR36~~ | ~~Each catch page can save the game's picture card (photo, species, size, water, weather, date) for any fish in the book, shared on phones or downloaded~~ (#276) | field log | S |
+| ~~BR37~~ | ~~A new catch form starts on length or weight as the player measured their newest fish by hand (sample and game fish do not count); length until then~~ (#277) | field log | S |

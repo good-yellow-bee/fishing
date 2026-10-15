@@ -1,4 +1,8 @@
-import { catchesNewestFirst, lureTally, type Logbook } from "@stillwater/shared";
+import { catchesNewestFirst, lureTally, type Logbook, type Measure } from "@stillwater/shared";
+import { isSampleCatch } from "./bookCopy";
+
+/** The game files its fish here, always by weight, so they say nothing about how the player measures. */
+const PLAY_LAKE_ID = "spot-stillwater";
 
 /**
  * Names for a form's suggestion list: the player's own first, most used on
@@ -27,4 +31,10 @@ export function bookLures(book: Logbook, limit = 12) {
 export function tripLure(book: Logbook, tripId: string | undefined) {
   if (!tripId) return "";
   return catchesNewestFirst(book).find((entry) => entry.tripId === tripId)?.lure ?? "";
+}
+
+/** Length or weight, as the player measured their newest fish by hand; length for a book with none yet. */
+export function lastMeasureKind(book: Logbook): Measure["kind"] {
+  const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
+  return own?.measure.kind ?? "length";
 }

@@ -8,6 +8,10 @@ export const COPY_AGAIN_AFTER = 25;
 
 const SAMPLE_IDS = new Set(sampleLogbook(new Date()).catches.map((entry) => entry.id));
 
+export function isSampleCatch(id: string) {
+  return SAMPLE_IDS.has(id);
+}
+
 /** The player's own catches; the sample week's fish don't need a copy. */
 export function ownCatches(book: Logbook) {
   return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id)).length;
