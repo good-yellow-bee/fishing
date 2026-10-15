@@ -596,6 +596,11 @@ button.field-primary:disabled {
   color: var(--field-water);
 }
 
+.sheet-foot .copy-nudge {
+  flex: 1 0 100%;
+  color: var(--field-ink);
+}
+
 .sheet-foot p {
   margin: 0;
 }
