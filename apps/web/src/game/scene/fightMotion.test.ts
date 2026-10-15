@@ -111,6 +111,19 @@ describe("fight motion", () => {
     expect(bobberPull(0, false)).toBe(0);
   });
 
+  it("brings a tired fish up and shortens its runs, leaving a fresh one as it was", () => {
+    expect(fishDepthMeters(0, 0)).toBe(fishDepthMeters(0));
+    expect(fishDepthMeters(0, 1)).toBeLessThan(0.22);
+    expect(fishDepthMeters(0, 0.5)).toBeLessThan(fishDepthMeters(0, 0));
+    expect(fishDepthMeters(2, 1)).toBe(fishDepthMeters(2, 0));
+    expect(fishLeadMeters(2, false, 1)).toBeLessThan(fishLeadMeters(2, false) * 0.6);
+    expect(fishLeadMeters(2, false, 1)).toBeGreaterThan(fishLeadMeters(0, false));
+    expect(fishLeadMeters(0, true, 1)).toBe(fishLeadMeters(0, true));
+    expect(Math.abs(fishSideMeters(2, 1, 1))).toBeLessThan(fishSideMeters(2, 1));
+    expect(fishSideMeters(0, 1, 1)).toBe(fishSideMeters(0, 1));
+    expect(fishDepthMeters(0, 5)).toBe(fishDepthMeters(0, 1));
+  });
+
   it("tightens the line on a run without a deeper belly than a slack fight", () => {
     const slack = fightLineSag(0, 0, false, 0);
     expect(slack).toBeCloseTo(0.54);
