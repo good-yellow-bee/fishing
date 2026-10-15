@@ -32,7 +32,7 @@ export type RodInput = {
 };
 
 /** Written by the game loop. The scene reads it on the next frame. */
-export const fightInput = { reeling: false };
+export const fightInput = { reeling: false, steer: 0 as -1 | 0 | 1 };
 
 /** Shared pose so the rod, line, and fish agree on one fight. */
 export const fightView = {
@@ -45,6 +45,10 @@ export const fightView = {
   pump: 0,
   time: 0,
   runSide: 0,
+  /** The angler's rod pull, -1 left to 1 right (positive rolls the tip the way a positive run goes). */
+  steer: 0,
+  /** The pull is against the run, so the run is being turned. */
+  turning: false,
   lead: 0.32,
   side: 0,
   depth: 0.42,
@@ -65,6 +69,7 @@ const FIGHT_VIEW_START = { ...fightView };
 
 export function resetFightView() {
   fightInput.reeling = false;
+  fightInput.steer = 0;
   Object.assign(fightView, FIGHT_VIEW_START);
 }
 
@@ -224,6 +229,11 @@ export function fightRodPitch(input: RodInput) {
   if (input.strikeAge < 0) return biteRodPitch(input.biteAge, input.time);
   if (input.strikeAge < HOOKSET_SEC) return strikeRodPitch(input.strikeAge, input.fromPitch, loaded);
   return loaded;
+}
+
+/** The rod swept over against a run: added to the roll, so it fights the twist the run puts in it. */
+export function steerRodRoll(steer: number) {
+  return steer * 0.32;
 }
 
 /** Tip twists toward a side run. Positive runSide rolls positive. */

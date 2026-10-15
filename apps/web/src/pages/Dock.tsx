@@ -713,6 +713,17 @@ export function DockPage() {
             {scenePhase === "fight" ? t("Reel") : t("Strike")}
           </button>
         )}
+        {scenePhase === "fight" && (
+          // A second thumb holds one of these to pull the rod against a run; keys do the same with ← → or A D.
+          <div className="steer-buttons" aria-hidden>
+            <button type="button" className="steer-btn" data-steer="-1" tabIndex={-1}>
+              ◀
+            </button>
+            <button type="button" className="steer-btn" data-steer="1" tabIndex={-1}>
+              ▶
+            </button>
+          </div>
+        )}
         {fishing && !shopOpen && (
           <PowerMeter phase={scenePhase} powerRef={game.powerRef} accuracy={me.profile.accuracy} />
         )}

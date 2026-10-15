@@ -703,18 +703,22 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     fightView.biteAge = biteAt.current >= 0 ? t - biteAt.current : 0;
 
     if (live && surge === 1 && prevSurge.current === 0) {
-      const sign = Math.random() < 0.5 ? -1 : 1;
+      // The sim picks the run's way, so the fight card and a pulled rod agree with what the fish does.
+      const sign = sim.current?.runSide ?? (Math.random() < 0.5 ? -1 : 1);
       runSide.current = sign * (0.65 + Math.random() * 0.35);
     }
     if (!active) runSide.current = 0.75;
     fightView.runSide = runSide.current;
+    fightView.steer = live ? fightInput.steer : 0;
+    fightView.turning = live && sim.current?.turning === true;
 
     if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15);
 
     if (live) {
       const worn = 1 - (sim.current?.stamina ?? 1);
       const leadTarget = fishLeadMeters(surge, fightView.reeling, worn);
-      const sideTarget = fishSideMeters(surge, runSide.current, worn);
+      // A turned run swings back in toward the line.
+      const sideTarget = fishSideMeters(surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1);
       const depthTarget = fishDepthMeters(surge, worn);
       const pullTarget = bobberPull(surge, fightView.reeling);
       const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;

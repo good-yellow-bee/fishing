@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -288,6 +288,90 @@ describe("stamina", () => {
     fresh.step(0, 0.5, true);
     tired.step(0, 0.5, true);
     expect(1 - tired.sim.line).toBeGreaterThan((1 - fresh.sim.line) * 1.15);
+  });
+});
+
+describe("turning runs", () => {
+  /** Lets go on the telegraph and, if `turn` is set, pulls the rod against each run. */
+  function playTurning(species: FishSpecies, weight: number, seed: number, turn: boolean) {
+    const runtime = makeFight(species, weight, species.minStrength, seeded(seed));
+    const hand: boolean[] = Array(REACTION_FRAMES).fill(false);
+    let intent = false;
+    let runs = 0;
+    let wasRunning = false;
+    for (let frame = 0; frame < 120 / FRAME_SEC; frame++) {
+      intent = releaseOnTelegraph(runtime.sim, intent);
+      hand.push(intent);
+      const steer = turn && runtime.sim.surge === 2 ? (-runtime.sim.runSide as -1 | 1) : 0;
+      const outcome = runtime.step(frame * FRAME_SEC * 1000, FRAME_SEC, hand.shift()!, steer);
+      if (runtime.sim.surge === 2 && !wasRunning) runs += 1;
+      wasRunning = runtime.sim.surge === 2;
+      if (outcome !== "fighting") return { outcome, seconds: frame * FRAME_SEC, clean: isCleanFight(runtime.performance), runs };
+    }
+    return { outcome: "fighting" as FightOutcome, seconds: 120, clean: false, runs };
+  }
+
+  it("maps ← A to the left and → D to the right, and nothing else", () => {
+    expect(steerSide("ArrowLeft")).toBe(-1);
+    expect(steerSide("KeyA")).toBe(-1);
+    expect(steerSide("ArrowRight")).toBe(1);
+    expect(steerSide("KeyD")).toBe(1);
+    expect(steerSide("Space")).toBeNull();
+  });
+
+  it("swings each run to the other side", () => {
+    const runtime = makeFight(fish("pike"), 10, 3, () => 0.5);
+    const sides: number[] = [];
+    let prev = 0;
+    for (let now = 0; now < 30_000; now += 50) {
+      runtime.step(now, 0.05, false);
+      if (runtime.sim.surge === 1 && prev === 0) sides.push(runtime.sim.runSide);
+      prev = runtime.sim.surge;
+    }
+    expect(sides.length).toBeGreaterThan(3);
+    sides.forEach((side, i) => i > 0 && expect(side).toBe(-sides[i - 1]!));
+  });
+
+  it("cuts runs short when the rod pulls against them, and only then", () => {
+    const pike = fish("pike");
+    const lengths: Record<string, number> = {};
+    for (const pull of [0, 1, -1] as const) {
+      const runtime = makeFight(pike, 10, 3, () => 0.5);
+      let now = 0;
+      while (runtime.sim.surge !== 2) runtime.step((now += 50), 0.05, false);
+      const against = pull === -runtime.sim.runSide;
+      let runMs = 0;
+      while (runtime.sim.surge === 2) {
+        runtime.step((now += 50), 0.05, false, pull);
+        runMs += 50;
+        if (runtime.sim.surge === 2) expect(runtime.sim.turning).toBe(against);
+      }
+      lengths[pull === 0 ? "straight" : against ? "against" : "with"] = runMs;
+    }
+    expect(lengths.with).toBe(lengths.straight);
+    expect(lengths.against).toBeLessThan(lengths.straight! * 0.6);
+  });
+
+  it("never turns a leap", () => {
+    const runtime = makeFight(fish("salmon"), 20, 5, () => 0.5);
+    let now = 0;
+    for (let i = 0; i < 2000 && !(runtime.sim.surge === 2 && runtime.sim.jump); i++) runtime.step((now += 50), 0.05, false);
+    expect(runtime.sim.jump).toBe(true);
+    runtime.step((now += 50), 0.05, false, (-runtime.sim.runSide) as -1 | 1);
+    expect(runtime.sim.turning).toBe(false);
+  });
+
+  it("lands every fish sooner, still landed and as clean, for an angler who turns each run", () => {
+    for (const species of FISH.filter((candidate) => candidate.challenge !== "mash")) {
+      const weight = species.maxWeight;
+      const plain = SEEDS.map((seed) => playTurning(species, weight, seed, false));
+      const turned = SEEDS.map((seed) => playTurning(species, weight, seed, true));
+      const label = `${species.id} ${weight} lb`;
+      expect(turned.map((fight) => fight.outcome), label).toEqual(SEEDS.map(() => "landed"));
+      expect(turned.filter((fight) => fight.clean).length, label).toBeGreaterThanOrEqual(plain.filter((fight) => fight.clean).length);
+      const average = (fights: { seconds: number }[]) => fights.reduce((sum, fight) => sum + fight.seconds, 0) / fights.length;
+      expect(average(turned), label).toBeLessThan(average(plain) * 0.92);
+    }
   });
 });
 

@@ -4,8 +4,21 @@ import { difficulty01 } from "./logic";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
 /** `jump`: the coming or current run is a leap clear of the water. */
-/** `stamina`: the fish's fight left, 1 fresh to 0 played out. */
-export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean; stamina: number };
+/**
+ * `stamina`: the fish's fight left, 1 fresh to 0 played out.
+ * `runSide`: which way the coming or current run heads across the view, -1 left or 1 right.
+ * `turning`: the angler is pulling the rod against the run, so it is cut short.
+ */
+export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean; stamina: number; runSide: -1 | 1; turning?: boolean };
+/** -1 rod pulled left, 1 right, 0 straight. */
+export type Steer = -1 | 0 | 1;
+
+/** The keys that pull the rod in a fight: ← or A left, → or D right (a pad's stick sends A and D). */
+export function steerSide(code: string): -1 | 1 | null {
+  if (code === "ArrowLeft" || code === "KeyA") return -1;
+  if (code === "ArrowRight" || code === "KeyD") return 1;
+  return null;
+}
 export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 
 /** Trout, bass and salmon jump: every second run of theirs is a leap. */
@@ -17,7 +30,7 @@ export const JUMP_GRACE_SEC = 0.15;
 export type FightRuntime = {
   sim: FightSim;
   performance: FightPerformance;
-  step(nowMs: number, dtSec: number, reeling: boolean): FightOutcome;
+  step(nowMs: number, dtSec: number, reeling: boolean, steer?: Steer): FightOutcome;
 };
 
 export type FightPerformance = {
@@ -41,6 +54,9 @@ const SPENT_PULL = 0.55;
 const SPENT_CALM = 1.3;
 /** A played-out fish comes in this much faster. */
 const SPENT_REEL = 1.2;
+/** Pulling the rod against a run eats this many extra seconds of it each second, and tires the fish this much more. */
+const TURN_CUT = 0.9;
+const TIRE_TURN = 0.06;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
@@ -131,7 +147,9 @@ export function makeFight(
   const surgeScale = 0.55 + t * 0.35;
   const range = (min: number, max: number) => min + random() * (max - min);
 
-  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1 };
+  // Runs swing from side to side; the first way is the fish's own, not a dice roll, so seeded fights replay unchanged.
+  const firstSide = Math.floor(weight * 10) % 2 === 0 ? 1 : -1;
+  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
@@ -141,12 +159,13 @@ export function makeFight(
   let jumpAge = 0;
   const leaper = LEAPERS.has(species.id);
 
-  const step = (nowMs: number, dtSec: number, reeling: boolean): FightOutcome => {
+  const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;
         sim.jump = leaper && completedSurges % 2 === 1;
+        sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
         // A leap gets a longer warning: it is the one mistake that ends the fight outright.
         nextAt = nowMs + (sim.jump ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
@@ -165,6 +184,9 @@ export function makeFight(
       }
     }
 
+    // A leap goes up, not sideways, so only a run can be turned.
+    sim.turning = sim.surge === 2 && !sim.jump && steer === -sim.runSide;
+    if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL));
     if (reeling) {
@@ -181,7 +203,7 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.surge === 2 ? TIRE_RUN : reeling ? TIRE_REEL : -REST;
+    const tire = sim.surge === 2 ? TIRE_RUN + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - tire * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);

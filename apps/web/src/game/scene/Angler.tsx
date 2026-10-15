@@ -11,7 +11,8 @@ import {
   loadedRodPitch,
   thrownRodPitch,
 } from "./castMotion";
-import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll, fightView } from "./fightMotion";
+import { HOOKSET_SEC, fightBodyLean, fightRodPitch, fightRodRoll,
+  steerRodRoll, fightView } from "./fightMotion";
 import { landBodyLean, landRodPitch, landView } from "./landMotion";
 import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion";
 import { anglerPose, shortestYaw } from "./pose";
@@ -325,7 +326,7 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
       if (root.current) grip.current.position.copy(root.current.worldToLocal(fist.getWorldPosition(fistAt)));
       grip.current.rotation.x = rodPitch.current;
       if (fighting) {
-        const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge);
+        const rollTarget = fightRodRoll(fightView.surge, fightView.runSide, t, fightView.strikeAge, fightView.biteAge) + steerRodRoll(fightView.steer);
         if (phase === "hookset") rodRoll.current = rollTarget;
         else rodRoll.current += (rollTarget - rodRoll.current) * (1 - Math.exp(-14 * delta));
         grip.current.rotation.z = ROD_REST_Z + rodRoll.current;
