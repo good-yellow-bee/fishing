@@ -987,6 +987,21 @@ kbd {
 }
 
 /* Drawn over the fill, so a fill that reaches it turns striped: "too tight" is a pattern as well as a colour. */
+.fight-bar .fight-stamina {
+  float: right;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: #6b5a44;
+}
+
+.fight-bar .fight-stamina[data-stamina="tiring"] {
+  color: #8a6420;
+}
+
+.fight-bar .fight-stamina[data-stamina="spent"] {
+  color: #4d6b3f;
+}
+
 .fight-bar .danger-zone {
   position: absolute;
   top: 0;

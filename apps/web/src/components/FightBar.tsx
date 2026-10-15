@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { fightLines, isCleanFight, jumpLines, RED_TENSION, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type TensionZone } from "../game/fight";
+import { fightLines, isCleanFight, jumpLines, RED_TENSION, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -14,6 +14,8 @@ type Props = {
 const ZONE_COLOR: Record<TensionZone, string> = { easy: "#6a8f5a", tight: "#d9a94e", red: "#b85c38" };
 /** Said in words next to the bar, so the zone reads without telling green from red. */
 const ZONE_WORD: Record<TensionZone, string> = { easy: "Easy", tight: "Tight", red: "Too tight" };
+/** How much fight the fish has left, beside the line bar: its runs weaken and it comes in faster as it tires. */
+const STAMINA_WORD: Record<StaminaState, string> = { fresh: "Fish fresh", tiring: "Fish tiring", spent: "Fish played out" };
 
 export function FightBar({ fight, sim, performance }: Props) {
   const { reelMode } = useSettings();
@@ -30,6 +32,7 @@ export function FightBar({ fight, sim, performance }: Props) {
   const tensionMeter = useRef<HTMLDivElement>(null);
   const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
+  const staminaWord = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     let frame = 0;
@@ -46,6 +49,11 @@ export function FightBar({ fight, sim, performance }: Props) {
           tensionMeter.current.dataset.zone = zone;
           if (zoneWord.current) zoneWord.current.textContent = t(ZONE_WORD[zone]);
         }
+        const tired = staminaState(state.stamina);
+        if (staminaWord.current && staminaWord.current.dataset.stamina !== tired) {
+          staminaWord.current.dataset.stamina = tired;
+          staminaWord.current.textContent = t(STAMINA_WORD[tired]);
+        }
         if (lineFill.current) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
@@ -58,7 +66,9 @@ export function FightBar({ fight, sim, performance }: Props) {
           const percent = Math.round(Math.min(1, state.tension) * 100);
           tensionMeter.current?.setAttribute("aria-valuenow", String(percent));
           tensionMeter.current?.setAttribute("aria-valuetext", `${percent}% · ${t(ZONE_WORD[tensionZone(state.tension)])}`);
-          lineMeter.current?.setAttribute("aria-valuenow", String(Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100)));
+          const lineIn = Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100);
+          lineMeter.current?.setAttribute("aria-valuenow", String(lineIn));
+          lineMeter.current?.setAttribute("aria-valuetext", `${lineIn}% · ${t(STAMINA_WORD[tired])}`);
         }
         const record = performance.current;
         if (clean.current && record) {
@@ -111,7 +121,12 @@ export function FightBar({ fight, sim, performance }: Props) {
             <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
             <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
           </div>
-          <span className="fight-label" id="fight-line-label">{t("Line in")}</span>
+          <span className="fight-label" id="fight-line-label">
+            {t("Line in")}
+            <span ref={staminaWord} className="fight-stamina" aria-hidden="true" data-stamina="fresh">
+              {t(STAMINA_WORD.fresh)}
+            </span>
+          </span>
           <div ref={lineMeter} className="bar" role="meter" aria-labelledby="fight-line-label" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
             <div ref={lineFill} className="fill" />
           </div>

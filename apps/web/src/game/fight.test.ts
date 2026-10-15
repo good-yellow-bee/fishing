@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, TIGHT_TENSION, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, makeFight, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -241,6 +241,53 @@ describe("tension zones", () => {
     expect(tensionZone(RED_TENSION - 0.001)).toBe("tight");
     expect(tensionZone(RED_TENSION)).toBe("red");
     expect(tensionZone(1.2)).toBe("red");
+  });
+});
+
+describe("stamina", () => {
+  it("names how tired a fish is at its edges", () => {
+    expect(staminaState(1)).toBe("fresh");
+    expect(staminaState(TIRING_STAMINA)).toBe("fresh");
+    expect(staminaState(TIRING_STAMINA - 0.001)).toBe("tiring");
+    expect(staminaState(SPENT_STAMINA)).toBe("tiring");
+    expect(staminaState(SPENT_STAMINA - 0.001)).toBe("spent");
+  });
+
+  it("wears a fish down while it is reeled and runs, and lets it rest on a slack line", () => {
+    const runtime = makeFight(fish("catfish"), 20, 3, () => 0.5);
+    for (let now = 0; now < 1000; now += 50) runtime.step(now, 0.05, true);
+    const reeled = runtime.sim.stamina;
+    expect(reeled).toBeLessThan(1);
+    for (let now = 1000; now < 1200; now += 50) runtime.step(now, 0.05, false);
+    expect(runtime.sim.surge).toBe(0);
+    expect(runtime.sim.stamina).toBeGreaterThan(reeled);
+  });
+
+  it("plays out every big fish before it reaches the net, and its runs pull softer by then", () => {
+    for (const species of FISH.filter((candidate) => candidate.challenge !== "mash")) {
+      for (const seed of SEEDS) {
+        const runtime = makeFight(species, species.maxWeight, species.minStrength, seeded(seed));
+        const hand: boolean[] = Array(REACTION_FRAMES).fill(false);
+        let intent = false;
+        let lowest = 1;
+        for (let frame = 0; frame < 120 / FRAME_SEC; frame++) {
+          intent = releaseOnTelegraph(runtime.sim, intent);
+          hand.push(intent);
+          if (runtime.step(frame * FRAME_SEC * 1000, FRAME_SEC, hand.shift()!) !== "fighting") break;
+          lowest = Math.min(lowest, runtime.sim.stamina);
+        }
+        expect(lowest, `${species.id} seed ${seed}`).toBeLessThan(TIRING_STAMINA);
+      }
+    }
+  });
+
+  it("lands a tired fish faster than a fresh one would come in", () => {
+    const fresh = makeFight(fish("pike"), 10, 3, () => 0.5);
+    const tired = makeFight(fish("pike"), 10, 3, () => 0.5);
+    tired.sim.stamina = 0;
+    fresh.step(0, 0.5, true);
+    tired.step(0, 0.5, true);
+    expect(1 - tired.sim.line).toBeGreaterThan((1 - fresh.sim.line) * 1.15);
   });
 });
 
