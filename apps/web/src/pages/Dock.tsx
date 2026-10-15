@@ -87,6 +87,7 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
+import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
 import { lookDrag, lookZoom } from "../game/scene/photoLook";
@@ -875,6 +876,7 @@ export function DockPage() {
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
             {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
             {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
+            {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">{t("Personal best · was {weight}", { weight: weightText(stamp.previous) })}</p>

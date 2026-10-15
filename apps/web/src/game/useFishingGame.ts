@@ -116,8 +116,11 @@ export type Fight = {
   underpowered: boolean;
 };
 
+/** How the angler played this fish, for a line on the landed card. */
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number };
+
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -158,6 +161,8 @@ export function useFishingGame(
   const castRiseRef = useRef(false);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
+  /** The hook went in solid on a quick strike. */
+  const hookedSolidRef = useRef(false);
   const castSnagRef = useRef(false);
   /** Taps so far on a snagged lure, and the bite timers it is holding back; null while the lure is free. */
   const snagRef = useRef<{ taps: number; arm: () => void } | null>(null);
@@ -287,6 +292,7 @@ export function useFishingGame(
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
       // A quick strike drives the hook home, so the fish starts the fight a little worn.
+      hookedSolidRef.current = solid;
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
       setHint(solid ? t("Hooked solid! {line}. Ease off when it runs.", { line }) : t("{line}. Ease off when it runs.", { line }));
@@ -684,6 +690,7 @@ export function useFishingGame(
               weight: current.weight,
               spot: spotRef.current,
               clean: isCleanFight(runtime.performance),
+              notes: { perfectCast: castPerfectRef.current, hookedSolid: hookedSolidRef.current, turnedRuns: runtime.performance.turnedRuns ?? 0 },
             });
             clearFight();
             setPhaseBoth("result");
