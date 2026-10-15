@@ -26,6 +26,8 @@ export type FightSim = {
   weeded?: boolean;
   /** Off the point, a run the angler isn't turning, dragging the line over the rocks. */
   rocky?: boolean;
+  /** At the drop-off, a run heading down the ledge. */
+  diving?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -313,6 +315,7 @@ export function makeFight(
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
+    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump;
     if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;

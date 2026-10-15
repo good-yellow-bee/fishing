@@ -133,6 +133,10 @@ describe("fight motion", () => {
     expect(fishDepthMeters(0, 5)).toBe(fishDepthMeters(0, 1));
     // A sulking fish sits deepest of all, tired or not, until its next run lifts it.
     expect(fishDepthMeters(0, 0, true)).toBeGreaterThan(fishDepthMeters(0, 0));
+    // A run at the drop-off dives deep, though not as deep as a sulk.
+    expect(fishDepthMeters(2, 0, false, true)).toBeGreaterThan(fishDepthMeters(0, 0));
+    expect(fishDepthMeters(2, 0, false, true)).toBeLessThan(fishDepthMeters(0, 0, true));
+    expect(fishDepthMeters(0, 0, false, true)).toBe(fishDepthMeters(0, 0));
     expect(fishDepthMeters(0, 1, true)).toBe(fishDepthMeters(0, 0, true));
     expect(fishDepthMeters(2, 0, true)).toBe(fishDepthMeters(2, 0));
   });
