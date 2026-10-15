@@ -124,7 +124,7 @@ import { sweetBand } from "../logic";
 import { settings, SHAKE_SCALE, updateSettings, useSettings } from "../settings";
 import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
-import { frameDue } from "./frameCap";
+import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
 
 const BUOY_URL = "/models/buoy.glb";
@@ -2005,20 +2005,46 @@ function FrameCap() {
   const setFrameloop = useThree((state) => state.setFrameloop);
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => {
-    if (!saver) {
-      setFrameloop("always");
-      return;
-    }
-    setFrameloop("demand");
+    // A player who has not touched anything for a while (waiting on a bite, or away) gets the saver rate too.
+    let lastInput = performance.now();
+    let pointersDown = 0;
+    const touched = () => {
+      lastInput = performance.now();
+    };
+    const down = () => {
+      pointersDown += 1;
+      touched();
+    };
+    const up = () => {
+      pointersDown = Math.max(0, pointersDown - 1);
+      touched();
+    };
+    window.addEventListener("pointerdown", down, true);
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
+    for (const type of ["pointermove", "keydown", "keyup", "wheel"] as const) window.addEventListener(type, touched, { capture: true, passive: true });
+    let mode: "always" | "demand" = "always";
     let last = -Infinity;
     let frame = requestAnimationFrame(function tick(now) {
       frame = requestAnimationFrame(tick);
-      if (!frameDue(now, last)) return;
+      frameThrottle.idle = !saver && idleNow(now, lastInput, pointersDown);
+      const slow = saver || frameThrottle.idle;
+      const want = slow ? "demand" : "always";
+      if (want !== mode) {
+        mode = want;
+        setFrameloop(want);
+      }
+      if (!slow || !frameDue(now, last)) return;
       last = now;
       invalidate();
     });
     return () => {
       cancelAnimationFrame(frame);
+      frameThrottle.idle = false;
+      window.removeEventListener("pointerdown", down, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
+      for (const type of ["pointermove", "keydown", "keyup", "wheel"] as const) window.removeEventListener(type, touched, true);
       setFrameloop("always");
     };
   }, [saver, setFrameloop, invalidate]);
@@ -2029,8 +2055,8 @@ function FrameCap() {
 function FrameWatch() {
   const watch = useMemo(() => createFrameWatch(), []);
   useFrame((_, delta) => {
-    // Battery saver runs at 30 a second on purpose; that is no sign of a slow machine.
-    if (!settings.autoEffects || settings.particles !== "full" || settings.frameRate === "saver") return;
+    // Battery saver and the idle drop run at 30 a second on purpose; that is no sign of a slow machine.
+    if (!settings.autoEffects || settings.particles !== "full" || settings.frameRate === "saver" || frameThrottle.idle) return;
     if (!watch(delta)) return;
     updateSettings({ particles: "lite", autoEffects: false });
     noteEffectsSteppedDown();
