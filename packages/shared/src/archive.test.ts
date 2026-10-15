@@ -36,6 +36,15 @@ describe("field archive", () => {
     expect(parsed.value.photos["catch-gill"]).toBe(jpeg);
   });
 
+  it("keeps a released mark through the file", () => {
+    const marked = { ...book, catches: book.catches.map((entry) => (entry.id === "catch-gill" ? { ...entry, released: true } : entry)) };
+    const parsed = parseFieldArchive(fieldArchiveDocument(archiveFor(marked)));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.value.book.catches.find((entry) => entry.id === "catch-gill")?.released).toBe(true);
+    expect(parsed.value.book.catches.filter((entry) => "released" in entry)).toHaveLength(1);
+  });
+
   it("keeps photos beside the book in the file", () => {
     const document = fieldArchiveDocument(archiveFor(book));
     expect(document.photos["catch-gill"]).toBe(jpeg);

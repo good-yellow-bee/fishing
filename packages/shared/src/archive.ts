@@ -74,6 +74,7 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
     weather: entry.weather
       ? { sky: entry.weather.sky, wind: entry.weather.wind, waterTempF: entry.weather.waterTempF }
       : null,
+    ...(entry.released ? { released: true } : {}),
   };
 }
 

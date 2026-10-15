@@ -117,6 +117,17 @@ describe("field log", () => {
     }
   });
 
+  it("marks a released fish and leaves a kept one unmarked", () => {
+    const released = parseCatchDraft(draft("spot-cedar", { released: true }), book);
+    expect(released.ok && released.value.released).toBe(true);
+    const kept = parseCatchDraft(draft("spot-cedar", { released: false }), book);
+    expect(kept.ok && "released" in kept.value).toBe(false);
+    const entry = { ...book.catches[0]!, released: true };
+    expect(isLogbook({ ...book, catches: [entry] })).toBe(true);
+    expect(isLogbook({ ...book, catches: [{ ...entry, released: false }] })).toBe(true);
+    expect(isLogbook({ ...book, catches: [{ ...entry, released: "yes" }] })).toBe(false);
+  });
+
   it("rejects a time that has not happened yet", () => {
     expect(parseCatchDraft(draft("spot-cedar", { caughtAt: "2999-01-01T08:00" }), book)).toMatchObject({
       ok: false,
