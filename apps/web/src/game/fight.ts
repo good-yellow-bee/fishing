@@ -80,6 +80,9 @@ export const TIRING_STAMINA = 0.6;
 export const SPENT_STAMINA = 0.25;
 export type StaminaState = "fresh" | "tiring" | "spent";
 
+/** Reeling with the tension bar in the tight (amber) zone brings line in this much faster. */
+export const PRESSURE_REEL = 1.25;
+
 /** A fish hooked solid on a quick strike starts the fight this worn. */
 export const SOLID_HOOK_STAMINA = 0.8;
 
@@ -228,7 +231,9 @@ export function makeFight(
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL));
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
-      sim.line -= reelRate * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
+      // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
+      const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;

@@ -427,6 +427,8 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
+  "Reel while the tension bar is amber (Tight) and the line comes in a quarter faster, but let go before it turns red. The landed card notes a perfect cast, a solid hook and the runs you turned, and a controller's buttons show on the fight card.":
+    "Zwijaj, gdy pasek napięcia jest bursztynowy (Napięta), a żyłka wchodzi o jedną czwartą szybciej, ale puść, zanim zrobi się czerwony. Karta złowionej ryby notuje idealny rzut, pewnie wbity hak i zawrócone odjazdy, a karta walki pokazuje przyciski kontrolera.",
   "A cast that stops on the gold mark in the middle of the cast meter is a perfect cast, and the bite comes sooner. A fish reeled close while it still has fight in it makes one last run at the net, and a controller now rumbles with the fight (Vibration in Settings turns it off).":
     "Rzut zatrzymany na złotym znaczniku w środku miernika to idealny rzut, a branie przychodzi szybciej. Ryba przyciągnięta blisko, która ma jeszcze siłę, robi ostatni odjazd przy podbieraku, a kontroler drży teraz w trakcie holu (wyłączysz to opcją Wibracje w Ustawieniach).",
   "Month headings in the field log now count what each month holds: outings and fish on the Trips and water pages, fish in the catch lists, and pictures on Photos.":
