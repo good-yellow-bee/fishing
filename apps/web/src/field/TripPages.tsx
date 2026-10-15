@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -24,6 +24,8 @@ import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
+import { thisWeekInPastYears } from "./yearsAgo";
+import { speciesCounts } from "./speciesLink";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
@@ -281,6 +283,12 @@ function TripForm() {
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
+  // What this water gave in the same week of earlier years, for an outing being planned.
+  const pastWeek = useMemo(() => {
+    const [y, m, d] = date.split("-").map(Number);
+    if (existing || !y || !m || !d) return [];
+    return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), 3, Infinity);
+  }, [book, spotId, date, existing]);
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
@@ -353,6 +361,16 @@ function TripForm() {
               </small>
             ) : null}
           </label>
+          {pastWeek.length > 0 ? (
+            <p className="wide form-note">
+              {t("This week in earlier years here: {fish}, {species}.", {
+                fish: fishCountLabel(pastWeek.length),
+                species: speciesCounts(pastWeek)
+                  .map((row) => t(row.species))
+                  .join(", "),
+              })}
+            </p>
+          ) : null}
           {sameDay ? (
             <p className="wide form-note" role="status">
               {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
