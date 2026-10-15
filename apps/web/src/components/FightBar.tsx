@@ -65,7 +65,11 @@ export function FightBar({ fight, sim, performance }: Props) {
         const overrun = Math.min(1, Math.max(0, (state.line - 1) / (ESCAPE_LINE - 1)));
         if (overrunFill.current) overrunFill.current.style.width = `${overrun * 100}%`;
         const short = state.line >= SHORT_LINE;
-        if (shortWord.current && shortWord.current.hidden === short) shortWord.current.hidden = !short;
+        // The warning takes the stamina word's place, so a long translation still fits on one line.
+        if (shortWord.current && shortWord.current.hidden === short) {
+          shortWord.current.hidden = !short;
+          if (staminaWord.current) staminaWord.current.hidden = short;
+        }
         // Written only on a change, so the live region speaks each new call once.
         const call =
           state.lastRun && state.surge === 1 && !state.jump ? t("Let go now — it sees the net!") : (state.jump ? leapLines : lines)[state.surge]!;

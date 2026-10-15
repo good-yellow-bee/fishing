@@ -138,10 +138,12 @@ describe("FightBar for screen readers", () => {
     frame();
     expect(word().hidden).toBe(false);
     expect(word().textContent).toBe("Running out of line!");
+    expect(container!.querySelector<HTMLElement>(".fight-stamina")!.hidden).toBe(true);
     expect(line()).toMatch(/Running out of line!$/);
     sim.current.line = 0.6;
     frame();
     expect(word().hidden).toBe(true);
+    expect(container!.querySelector<HTMLElement>(".fight-stamina")!.hidden).toBe(false);
     expect(overrun()).toBe("0%");
   });
 

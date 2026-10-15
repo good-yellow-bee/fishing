@@ -1061,7 +1061,6 @@ kbd {
 /* Line given back past the hookset: striped red from the right, so it reads without colour. */
 .fight-bar .fight-short {
   float: right;
-  margin-right: 8px;
   letter-spacing: 0.04em;
   font-weight: 700;
   color: #b85c38;
