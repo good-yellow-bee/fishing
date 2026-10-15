@@ -715,7 +715,7 @@ export function DockPage() {
         />
         {padCursor && <i className="pad-cursor" aria-hidden style={{ left: padCursor.x, top: padCursor.y }} />}
         {game.phase === "hookset" && (
-          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy)}ms` } as CSSProperties}>
+          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy, me.level)}ms` } as CSSProperties}>
             <strong>{t("Strike!")}</strong>
             <span className="cue-keys">{t("Click or Space")}</span>
             <span className="cue-touch">{t("Tap anywhere")}</span>
@@ -740,7 +740,7 @@ export function DockPage() {
           </div>
         )}
         {fishing && !shopOpen && (
-          <PowerMeter phase={scenePhase} powerRef={game.powerRef} lastCastRef={game.lastCastRef} accuracy={me.profile.accuracy} />
+          <PowerMeter phase={scenePhase} powerRef={game.powerRef} lastCastRef={game.lastCastRef} accuracy={me.profile.accuracy} level={me.level} />
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
         <p className="hint" aria-live="polite">

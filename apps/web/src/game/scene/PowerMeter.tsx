@@ -9,10 +9,12 @@ type Props = {
   /** Where the last cast stopped, left on the bar as a faint mark to aim the next one by. */
   lastCastRef: MutableRefObject<number | null>;
   accuracy: number;
+  /** The angler's level: from level 12 the perfect-cast mark is wider. */
+  level?: number;
 };
 
 /** The cast meter. The marker follows the charge each frame on its own, so charging never re-renders the page. */
-export function PowerMeter({ phase, powerRef, lastCastRef, accuracy }: Props) {
+export function PowerMeter({ phase, powerRef, lastCastRef, accuracy, level = 1 }: Props) {
   const t = useT();
   const marker = useRef<HTMLDivElement>(null);
   const shown = phase === "idle" || phase === "casting";
@@ -32,7 +34,7 @@ export function PowerMeter({ phase, powerRef, lastCastRef, accuracy }: Props) {
   }, [shown, powerRef]);
   if (!shown) return null;
   const band = sweetBand(accuracy);
-  const perfect = perfectCastBand(accuracy);
+  const perfect = perfectCastBand(accuracy, level);
   return (
     <div className="power-meter" aria-hidden>
       <span>{t("Cast")}</span>

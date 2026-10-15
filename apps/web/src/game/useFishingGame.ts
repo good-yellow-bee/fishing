@@ -398,7 +398,7 @@ export function useFishingGame(
         setPhaseBoth("hookset");
         setHint(strikeCall(biteStyle(species.id)));
         const openWindow = () => {
-          const windowMs = hookWindowMs(current.accuracy, mercyNow);
+          const windowMs = hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints));
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
           timers.current.hook = window.setTimeout(() => {
             if (phaseRef.current !== "hookset") return;
@@ -491,7 +491,7 @@ export function useFishingGame(
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null && castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random());
-    castPerfectRef.current = isPerfectCast(castPower, profile.accuracy);
+    castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);

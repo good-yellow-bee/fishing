@@ -1084,7 +1084,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT39~~ | ~~News card (2026-10-15zj) covers GT37 and GT38: the deep sulk and the ambush bite on the lake~~ (#440) | news | S |
 | ~~GT40~~ | ~~The cast meter keeps a faint mark where the last cast stopped, so the next cast can be aimed at the gold perfect mark by correcting from it~~ (#446) | casting | S |
 | ~~GT41~~ | ~~The fight card says Heavier than your best (1.1 lb) when the fish on the line outweighs the field log's heaviest of its species, so a big one feels like one before it is landed~~ (#448) | fight | S |
-| GT42 | News card (2026-10-15zl) covers GT40 and GT41: the last-cast mark and the heavier-than-your-best line | news | S |
+| ~~GT42~~ | ~~News card (2026-10-15zl) covers GT40 and GT41: the last-cast mark and the heavier-than-your-best line~~ (#451) | news | S |
+| GT43 | Levels 11 (12000 points, Lake elder: fish hold the bait 20% longer) and 12 (17000, Spirit of the lake: the gold perfect-cast mark is ±0.05 instead of ±0.035) | progression | S |
 
 ## Risks / open questions for the owner
 
