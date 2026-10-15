@@ -109,10 +109,13 @@ export const WEED_MS = 1600;
 export const WEED_REEL = 0.3;
 /** How much faster slack line drifts out in the inlet's current. */
 export const CURRENT_DRIFT = 1.6;
-export type FightWater = "open" | "weeds" | "current";
+/** At the drop-off a run dives down the ledge: it pulls this much harder, and tires the fish this much more. */
+export const DEEP_PULL = 1.25;
+export const DEEP_TIRE = 1.3;
+export type FightWater = "open" | "weeds" | "current" | "deep";
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
-  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : "open";
+  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : "open";
 }
 
 export function staminaState(stamina: number): StaminaState {
@@ -198,7 +201,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive. */
   water: FightWater = "open",
 ): FightRuntime {
   const weedy = water === "weeds";
@@ -293,7 +296,7 @@ export function makeFight(
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
-    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL));
+    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
@@ -314,7 +317,7 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
+    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);

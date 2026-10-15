@@ -604,6 +604,38 @@ describe("the inlet's current", () => {
   it("gives the reeds weeds and the inlet a current", () => {
     expect(fightWater("reeds")).toBe("weeds");
     expect(fightWater("inlet")).toBe("current");
+    expect(fightWater("dropoff")).toBe("deep");
     expect(fightWater("dock")).toBe("open");
+  });
+});
+
+describe("runs at the drop-off", () => {
+  /** Reels through the first run and returns the tension and stamina it ended with. */
+  function throughFirstRun(runtime: FightRuntime) {
+    let ran = false;
+    for (let now = 0; now < 30_000; now += 50) {
+      runtime.step(now, 0.05, runtime.sim.surge !== 2);
+      if (runtime.sim.surge === 2) ran = true;
+      else if (ran) return runtime.sim.stamina;
+    }
+    throw new Error("never ran");
+  }
+
+  it("dives harder and tires the fish faster than on open water", () => {
+    const open = makeFight(fish("pike"), 6, 3, () => 0);
+    const deep = makeFight(fish("pike"), 6, 3, () => 0, 1, "deep");
+    expect(throughFirstRun(deep)).toBeLessThan(throughFirstRun(open));
+    const pullOpen = makeFight(fish("pike"), 6, 3, () => 0);
+    const pullDeep = makeFight(fish("pike"), 6, 3, () => 0, 1, "deep");
+    const at: number[] = [];
+    for (const runtime of [pullOpen, pullDeep]) {
+      let now = 0;
+      for (; runtime.sim.surge !== 2 && now < 30_000; now += 50) runtime.step(now, 0.05, false);
+      at.push(now);
+    }
+    const before = [pullOpen.sim.tension, pullDeep.sim.tension];
+    pullOpen.step(at[0]!, 0.05, true);
+    pullDeep.step(at[1]!, 0.05, true);
+    expect(pullDeep.sim.tension - before[1]!).toBeGreaterThan(pullOpen.sim.tension - before[0]!);
   });
 });
