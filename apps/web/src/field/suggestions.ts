@@ -45,6 +45,12 @@ export function lastMeasureKind(book: Logbook): Measure["kind"] {
   return own?.measure.kind ?? "length";
 }
 
+/** Whether the player's newest own fish went back, so a catch-and-release angler starts each new one ticked. */
+export function lastReleased(book: Logbook): boolean {
+  const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
+  return own?.released === true;
+}
+
 /**
  * When a new catch starts: now, unless it is logged for an outing on an earlier day.
  * Then it starts on that day at this clock time, so it lands on the outing's date.
