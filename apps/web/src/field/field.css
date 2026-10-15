@@ -1063,3 +1063,8 @@ button.field-primary:disabled {
   letter-spacing: 0.08em;
   color: var(--field-muted);
 }
+
+.fish-span {
+  display: block;
+  margin: -6px 0 12px;
+}
