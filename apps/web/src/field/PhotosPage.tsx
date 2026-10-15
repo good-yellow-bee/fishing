@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
-import { t, useT } from "../i18n";
+import { t, tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
 import { formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -32,6 +32,7 @@ export function PhotosPage() {
   const [shown, setShown] = useState(CATCH_PAGE);
   const all = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const { visible, more } = catchPage(all, shown);
+  const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
 
   return (
     <div className="sheet">
@@ -50,7 +51,11 @@ export function PhotosPage() {
         <>
           {photoMonths(visible).map((group) => (
             <section key={group.month} aria-label={monthName(group.month)}>
-              <h2 className="month-head">{monthName(group.month)}</h2>
+              <h2 className="month-head">
+                {monthName(group.month)}
+                {" · "}
+                {tn(monthCounts.get(group.month) ?? group.entries.length, "{n} photo", "{n} photos")}
+              </h2>
               <ul className="photo-wall">
                 {group.entries.map((entry) => {
                   const size = measureText(entry.measure);
