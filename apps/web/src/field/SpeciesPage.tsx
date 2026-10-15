@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, type CatchEntry } from "@stillwater/shared";
+import { FISH, biteTimes, skyTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -69,6 +69,14 @@ export function SpeciesPage() {
             <h2>{t("When it bites")}</h2>
           </div>
           <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+        </>
+      ) : null}
+      {catches.filter((entry) => entry.weather).length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By the weather")}</h2>
+          </div>
+          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
         </>
       ) : null}
       <div className="section-head">
