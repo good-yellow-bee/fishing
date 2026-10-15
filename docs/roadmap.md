@@ -1098,3 +1098,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR45~~ | ~~The catch form notes when the fish is dated a different day from its outing (a gentle line, not a block)~~ (#285) | field log | S |
 | ~~BR46~~ | ~~News card (2026-10-15f) tells players about Add to calendar and the Spots order~~ (#286) | field log | S |
 | ~~BR47~~ | ~~Undo after deleting a fish, outing or water in the field log~~ (#287) | field | S |
+| ~~BR48~~ | ~~Go again: plan a new outing from a past one, with its water, title and tackle list~~ (#288) | field | S |
