@@ -1052,7 +1052,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT7~~ | ~~A quick strike (in the first 40% of the bite window) sets the hook solid: the fish starts the fight a little tired and the hint says Hooked solid. News card (2026-10-15w) tells of it and of levels 9 and 10~~ (#370) | fight | S |
 | ~~GT8~~ | ~~A connected controller rumbles on nibbles, bites, the strike, runs, a snap and the catch, and Settings has a Vibration switch for phone and controller (the phone buzz had no switch)~~ (#372) | game feel | S |
 | ~~GT9~~ | ~~A fish reeled close (last 15% of line) with fight still in it sees the net and makes one last run, warned on the fight card; a played-out fish comes in quietly, so tiring it first pays~~ (#374) | fight | S |
-| GT10 | Perfect cast: a gold mark in the middle of the cast meter's sweet band (±0.035 power); stopping on it says Perfect cast and the bite comes 20% sooner. News card (2026-10-15x) covers GT8 to GT10 | casting | S |
+| GT10 | Perfect cast: a gold mark in the middle of the cast meter's sweet band (±0.035 power); stopping on it says Perfect cast and the bite comes 20% sooner. News card (2026-10-15y) covers GT8 to GT10 | casting | S |
 
 ## Risks / open questions for the owner
 
@@ -1192,3 +1192,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR124~~ | ~~Water page month headings count the month's outings and fish~~ (#371) | field | S |
 | ~~BR125~~ | ~~Photos page month headings count the month's photos~~ (#373) | field | S |
 | ~~BR126~~ | ~~Catch list month headings count the month's fish~~ (#375) | field | S |
+| ~~BR127~~ | ~~News card line for the month totals~~ (#376) | field | S |
