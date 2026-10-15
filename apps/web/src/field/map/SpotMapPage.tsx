@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { WATER_LABELS, type Spot } from "@stillwater/shared";
-import { t, useT } from "../../i18n";
+import { getUnits, t, useT } from "../../i18n";
 import { fishCountLabel } from "../format";
 import { useLogbook } from "../LogbookState";
 import {
@@ -112,7 +112,7 @@ function MapPlate() {
         <line x1="0" x2="0" y1="-5" y2="5" />
         <line x1="191" x2="191" y1="-5" y2="5" />
         <text x="84" y="16" textAnchor="middle">
-          {t("about 2 miles")}
+          {getUnits() === "metric" ? t("about 3 km") : t("about 2 miles")}
         </text>
       </g>
 

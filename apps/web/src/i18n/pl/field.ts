@@ -290,7 +290,7 @@ export const PL_FIELD: PlBook = {
   "Note the wind.": "Zanotuj wiatr.",
   "Use a number for the water temperature.": "Podaj temperaturę wody liczbą.",
   "Water temperature should sit between 32 and 90.": "Temperatura wody powinna mieścić się między 32 a 90.",
-  "Length should sit between 2.5 and 305 centimetres.": "Długość powinna mieścić się między 2,5 a 305 cm.",
+  "Length should sit between 3 and 304 centimetres.": "Długość powinna mieścić się między 3 a 304 cm.",
   "Weight should sit between 0.05 and 36 kilograms.": "Waga powinna mieścić się między 0,05 a 36 kg.",
   "Water temperature should sit between 0 and 32 °C.": "Temperatura wody powinna mieścić się między 0 a 32 °C.",
   "The book already holds as many photos as this browser should keep.":
@@ -358,6 +358,7 @@ export const PL_FIELD: PlBook = {
   "Schematic of the sample waters, north up": "Schemat przykładowych łowisk, północ u góry",
   N: "N",
   "about 2 miles": "około 2 mil",
+  "about 3 km": "około 3 km",
   "{name}, {place}. Open spot.": "{name}, {place}. Otwórz łowisko.",
   "Sample spots on a north-woods sheet. The ink is local — no tile service and no key.":
     "Przykładowe łowiska na arkuszu z północnych lasów. Rysunek jest lokalny — bez serwera map i bez klucza.",
