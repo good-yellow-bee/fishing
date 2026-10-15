@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { personalBests, sampleLogbook } from "@stillwater/shared";
-import { catchBadge } from "./catchBadge";
+import { bookBadges, catchBadge } from "./catchBadge";
 
 describe("catch badges", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -25,5 +25,13 @@ describe("catch badges", () => {
   it("leaves a smaller fish unmarked", () => {
     const small = book.catches.find((entry) => catchBadge(book, entry) === null);
     expect(small).toBeDefined();
+  });
+});
+
+describe("book badges", () => {
+  it("works the badges out once per book", () => {
+    const book = sampleLogbook(new Date(2026, 9, 1));
+    expect(bookBadges(book)).toBe(bookBadges(book));
+    expect([...bookBadges(book).values()].filter((badge) => badge === "book")).toHaveLength(2);
   });
 });
