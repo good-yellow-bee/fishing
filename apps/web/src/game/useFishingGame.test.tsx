@@ -295,7 +295,7 @@ describe("useFishingGame strike timing", () => {
       step.mockReturnValueOnce("fighting");
       now += 16;
       act(() => frames.at(-1)!(now));
-      return step.mock.lastCall![3];
+      return (step.mock.lastCall as unknown[])[3];
     };
     act(() => void window.dispatchEvent(new KeyboardEvent("keydown", { code: "ArrowRight", bubbles: true })));
     expect(frame()).toBe(1);
@@ -308,7 +308,7 @@ describe("useFishingGame strike timing", () => {
     act(() => left.dispatchEvent(pointer("pointerdown", 4)));
     expect(frame()).toBe(-1);
     // The side button is not a reel.
-    expect(step.mock.lastCall![2]).toBe(false);
+    expect((step.mock.lastCall as unknown[])[2]).toBe(false);
     act(() => window.dispatchEvent(pointer("pointerup", 4)));
     expect(frame()).toBe(0);
   });
