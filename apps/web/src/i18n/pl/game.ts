@@ -351,6 +351,8 @@ export const PL_GAME: PlBook = {
   "Perfect cast": "Idealny rzut",
   "Hooked solid": "Hak siedzi pewnie",
   "On the second take": "Przy drugim braniu",
+  "Kept it out of the weeds": "Z dala od zielska",
+  "Kept it off the rocks": "Z dala od kamieni",
   "Turned {n} runs": ["{n} zawrócony odjazd", "{n} zawrócone odjazdy", "{n} zawróconych odjazdów"],
   "Bowed to {n} leaps": ["{n} przetrwany skok", "{n} przetrwane skoki", "{n} przetrwanych skoków"],
   "{n} clean fights in a row": "Czyste hole z rzędu: {n}",
