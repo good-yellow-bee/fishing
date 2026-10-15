@@ -22,7 +22,7 @@ import { anotherCatchLink } from "./anotherCatch";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookLures, lastMeasureKind, ownFirst, tripLure } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -131,7 +131,7 @@ function CatchForm() {
   const [spotId, setSpotId] = useState(presetSpot);
   const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
   const [caughtAt, setCaughtAt] = useState(() =>
-    existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(new Date()),
+    existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
   const [note, setNote] = useState(existing?.note ?? "");
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
