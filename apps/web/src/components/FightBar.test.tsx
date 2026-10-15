@@ -222,6 +222,18 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toMatch(/weeds/);
   });
 
+  it("tells the angler a run is dragging the line over the rocks", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 2;
+    sim.current.rocky = true;
+    frame();
+    expect(status()).toBe("It's dragging the line over the rocks — turn it!");
+    sim.current.rocky = false;
+    frame();
+    expect(status()).not.toMatch(/rocks/);
+  });
+
   it("warns of the last run at the net", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

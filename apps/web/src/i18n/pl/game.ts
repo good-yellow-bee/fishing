@@ -409,6 +409,7 @@ export const PL_GAME: PlBook = {
   "It's played out — reel it in!": "Wymęczona — zwijaj ją!",
   "It's sulking on the bottom — ease off, then pump!": "Zaległa na dnie — odpuść, potem pompuj!",
   "It ran into the weeds — reel slow and steady!": "Wpłynęła w zielsko — zwijaj powoli i równo!",
+  "It's dragging the line over the rocks — turn it!": "Ciągnie linkę po kamieniach — zawróć ją!",
   "Reeds: turn every run, or it goes into the weeds": "Trzciny: zawracaj każdy odjazd, bo wpłynie w zielsko",
   "Inlet: the current takes line while you rest": "Ujście: nurt zabiera linkę, gdy odpoczywasz",
   "Drop-off: runs dive and pull harder, but tire the fish faster": "Spad: odjazdy nurkują i ciągną mocniej, ale szybciej męczą rybę",

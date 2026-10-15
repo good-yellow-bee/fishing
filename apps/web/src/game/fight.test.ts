@@ -651,6 +651,7 @@ describe("runs off the point", () => {
     const before = runtime.sim.tension;
     runtime.step(now, 0.05, true, steer === 0 ? 0 : (-runtime.sim.runSide as Steer));
     expect(runtime.sim.surge).toBe(2);
+    expect(runtime.sim.rocky).toBe(water === "rocks" && steer === 0);
     return runtime.sim.tension - before;
   }
 

@@ -81,6 +81,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
               ? t("It's sulking on the bottom — ease off, then pump!")
               : state.surge === 0 && state.weeded
               ? t("It ran into the weeds — reel slow and steady!")
+              : state.surge === 2 && state.rocky
+              ? t("It's dragging the line over the rocks — turn it!")
               : state.surge === 0 && tired === "spent"
               ? t("It's played out — reel it in!")
               : (state.jump ? leapLines : lines)[state.surge]!;
