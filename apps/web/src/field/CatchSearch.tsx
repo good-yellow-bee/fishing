@@ -146,7 +146,14 @@ export function CatchSearch() {
   const matches = useMemo(() => (settled ? findCatches(book, settled, t) : []), [book, settled, t, lang]);
 
   return (
-    <section ref={box} className="catch-search" aria-label={t("Find a catch")}>
+    <section
+      ref={box}
+      className="catch-search"
+      aria-label={t("Find a catch")}
+      // Arriving by a search link, focus lands here rather than on the page heading.
+      tabIndex={linked ? -1 : undefined}
+      data-focus-target={linked ? "" : undefined}
+    >
       <label htmlFor="catch-search">{t("Find a catch")}</label>
       <input
         ref={input}

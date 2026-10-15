@@ -52,6 +52,22 @@ export function FieldShell({ children }: { children: ReactNode }) {
     if (how !== "POP") window.scrollTo(0, 0);
   }, [pathname, how]);
 
+  // After a link, the new page's heading takes focus, so a screen reader reads where it landed
+  // and the keyboard carries on from the top of the page. A page can name another place with
+  // data-focus-target; a field the page focused itself is left alone.
+  const lastFocused = useRef(pathname);
+  useEffect(() => {
+    if (lastFocused.current === pathname) return;
+    lastFocused.current = pathname;
+    if (how === "POP") return;
+    const main = document.querySelector<HTMLElement>(".field-main");
+    const active = document.activeElement;
+    if (!main || (active && main.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) return;
+    const heading = main.querySelector<HTMLElement>("[data-focus-target]") ?? main.querySelector<HTMLElement>("h1") ?? main;
+    if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+    heading.focus({ preventScroll: true });
+  }, [pathname, how]);
+
   return (
     <div className="field">
       <aside className="field-rail">
