@@ -138,6 +138,23 @@ describe("makeFight", () => {
     expect(runtime.performance.fightSec).toBeCloseTo(steps * 0.05);
   });
 
+  it("counts the leaps the angler bowed to, and not one held tight", () => {
+    const bowed = makeFight(fish("rainbow-trout"), 1.5, 2, () => 0);
+    expect(land(bowed)).toBe("landed");
+    expect(bowed.performance.bowedLeaps).toBeGreaterThan(0);
+
+    const held = makeFight(fish("rainbow-trout"), 1.5, 2, () => 0);
+    let outcome: FightOutcome = "fighting";
+    let leaps = 0;
+    for (let now = 0; outcome === "fighting" && now < 60_000; now += 50) {
+      if (held.sim.jump && held.sim.surge === 2) leaps++;
+      // Lets go on ordinary runs but holds the line through every leap.
+      outcome = held.step(now, 0.05, held.sim.jump === true || (held.sim.surge !== 2 && held.sim.tension < 0.6));
+    }
+    expect(leaps).toBeGreaterThan(0);
+    expect(held.performance.bowedLeaps).toBe(0);
+  });
+
   it("stays clean when a hookset tap leaves the line idle before reeling", () => {
     const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
     let now = 0;

@@ -350,6 +350,7 @@ export const PL_GAME: PlBook = {
   "Perfect cast": "Idealny rzut",
   "Hooked solid": "Hak siedzi pewnie",
   "Turned {n} runs": ["{n} zawrócony odjazd", "{n} zawrócone odjazdy", "{n} zawróconych odjazdów"],
+  "Bowed to {n} leaps": ["{n} przetrwany skok", "{n} przetrwane skoki", "{n} przetrwanych skoków"],
   "{n} clean fights in a row": "Czyste hole z rzędu: {n}",
   "Landed in {s} s": "Wyholowana w {s} s",
   "Landed in {m} min {s} s": "Wyholowana w {m} min {s} s",
