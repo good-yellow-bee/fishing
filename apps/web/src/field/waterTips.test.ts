@@ -78,4 +78,3 @@ describe("catch form picks", () => {
     expect(speciesLures(here, "")).toEqual([]);
   });
 });
-
