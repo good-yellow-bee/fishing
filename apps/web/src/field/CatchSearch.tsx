@@ -61,7 +61,7 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, and released fish. */
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, the outing's title, and released fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
   const size = parseSizeQuery(needle);
@@ -71,6 +71,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   const want = normalize(needle);
   const hit = new Set(found.map((entry) => entry.id));
   // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
+  // An outing's title ("Opening day") finds the fish filed on it, from three letters up.
+  const tripsNamed = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.title).includes(want)).map((trip) => trip.id));
   const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
@@ -82,7 +84,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       skyHas(entry, want, t) ||
       seasonHas(entry, want, t) ||
       timeHas(entry, want, t) ||
-      moonHas(entry, want, t)
+      moonHas(entry, want, t) ||
+      (entry.tripId !== null && tripsNamed.has(entry.tripId))
     )
       hit.add(entry.id);
   }
