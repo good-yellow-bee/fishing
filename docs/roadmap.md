@@ -1099,7 +1099,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT54~~ | ~~The landed card notes Kept it out of the weeds (reeds) or Kept it off the rocks (point) when no run went in or was reeled against unturned~~ (#486) | fight | S |
 | ~~GT55~~ | ~~News card (2026-10-15zs) covers GT53 and GT54: the rocky run call and the kept-clear note~~ (#487) | news | S |
 | ~~GT56~~ | ~~Reeling against an unturned run off the point grates: a low rasp every 220 ms and a light buzz or controller rumble, so the rocks are felt as well as read~~ (#490) | feel | S |
-| GT57 | A fish going into the weeds at the reeds swishes once, with a soft buzz or controller thump | feel | S |
+| ~~GT57~~ | ~~A fish going into the weeds at the reeds swishes once, with a soft buzz or controller thump~~ (#492) | feel | S |
+| GT58 | News card (2026-10-15zt) covers GT56 and GT57: the rock scrape and the weeds swish | news | S |
 
 ## Risks / open questions for the owner
 
