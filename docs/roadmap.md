@@ -1060,3 +1060,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR7~~ | ~~The field log fetches the lake's code once the browser is idle, so "Go fishing" opens without waiting for the 3D bundle (skipped with data saver on or on a 2G link)~~ (#247) | perf | S |
 | ~~BR8~~ | ~~The Bests page shows when the fish bite (dawn to night, from each catch's clock time) and the five lures that took the most fish, as labelled bars with the count in words~~ (#248) | field log | S |
 | ~~BR9~~ | ~~The Bests page also counts fish by season (spring to winter, by the month each was caught)~~ (#249) | field log | S |
+| ~~BR10~~ | ~~The Bests page's top row adds the best day: the most fish landed on one local day, with its date~~ (#250) | field log | S |

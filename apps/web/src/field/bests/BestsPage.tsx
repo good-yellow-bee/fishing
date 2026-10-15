@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { biteTimes, lureTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, lureTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { fishCountLabel } from "../format";
+import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -55,6 +55,7 @@ export function BestsPage() {
   const { book } = useLogbook();
   useT();
   const bests = personalBests(book);
+  const topDay = bestDay(book);
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
@@ -70,7 +71,7 @@ export function BestsPage() {
         </div>
       </header>
 
-      <section className="stat-row" aria-label={t("Personal bests")}>
+      <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>
           <span className="eyebrow">{t("Longest")}</span>
           <strong>{bests.longest ? measureText(bests.longest.measure) : t("None")}</strong>
@@ -89,6 +90,11 @@ export function BestsPage() {
               ? t("No waters in the book")
               : t("{count} of {total}", { count: bests.watersWithFish, total: book.spots.length })}
           </small>
+        </div>
+        <div>
+          <span className="eyebrow">{t("Best day")}</span>
+          <strong>{topDay ? fishCountLabel(topDay.count) : t("None")}</strong>
+          <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>
 

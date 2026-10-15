@@ -182,3 +182,26 @@ export function seasonTally(book: Logbook): SeasonTally[] {
   }
   return LAKE_SEASONS.map((id) => ({ id, label: SEASON_LABELS[id], count: counts.get(id) ?? 0 }));
 }
+
+export type BestDay = { date: string; count: number };
+
+function localYmd(date: Date) {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** The local day with the most fish in the book; a tie goes to the latest day. Null for an empty book. */
+export function bestDay(book: Logbook): BestDay | null {
+  const counts = new Map<string, number>();
+  for (const entry of book.catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime())) continue;
+    const day = localYmd(at);
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  let best: BestDay | null = null;
+  for (const [date, count] of counts) {
+    if (!best || count > best.count || (count === best.count && date > best.date)) best = { date, count };
+  }
+  return best;
+}
