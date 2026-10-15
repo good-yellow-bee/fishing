@@ -266,6 +266,8 @@ function TripForm() {
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
+  // A second outing on the same water and day is usually a slip; say which one is already there.
+  const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
@@ -338,6 +340,11 @@ function TripForm() {
               </small>
             ) : null}
           </label>
+          {sameDay ? (
+            <p className="wide form-note" role="status">
+              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
+            </p>
+          ) : null}
           <label className="wide">
             {t("Title")}
             <input

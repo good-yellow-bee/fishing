@@ -1156,3 +1156,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR103~~ | ~~Bests water cards say which kind a water gives most~~ (#343) | field | S |
 | ~~BR104~~ | ~~A new catch on a water with an outing that day files under that outing~~ (#344) | field | S |
 | ~~BR105~~ | ~~The outing on a new catch follows its day until the player picks one~~ (#345) | field | S |
+| ~~BR106~~ | ~~Trip form points out an outing already on that water that day~~ (#346) | field | S |
