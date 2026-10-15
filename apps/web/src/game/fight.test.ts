@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, type FightOutcome, type FightRuntime, type FightSim } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -474,5 +474,51 @@ describe("close call", () => {
     expect(isCloseCall({ peakTension: 0.9, maxLine: 1.1 })).toBe(false);
     expect(isCloseCall({ peakTension: 0.96, maxLine: 1 })).toBe(true);
     expect(isCloseCall({ peakTension: 0.3, maxLine: RUN_OUT_LINE })).toBe(true);
+  });
+});
+
+describe("sulking on the bottom", () => {
+  /** Plays slack until the fish digs in, and returns when it did. */
+  function untilSulk(runtime: FightRuntime) {
+    for (let now = 0; now < 30_000; now += 50) {
+      runtime.step(now, 0.05, false);
+      if (runtime.sim.sulk) return now;
+    }
+    throw new Error("never sulked");
+  }
+
+  it("digs a bottom feeder in after its second run, where reeling barely moves it and no line goes out", () => {
+    const runtime = makeFight(fish("carp"), 10, 3, () => 0);
+    const at = untilSulk(runtime);
+    expect(runtime.sim.surge).toBe(0);
+    const line = runtime.sim.line;
+    runtime.step(at + 50, 0.05, false);
+    expect(runtime.sim.line).toBe(line);
+    runtime.step(at + 100, 0.05, true);
+    expect(runtime.sim.sulk).toBe(true);
+    expect(line - runtime.sim.line).toBeGreaterThan(0);
+    expect(line - runtime.sim.line).toBeLessThan(0.14 * 0.05 * SULK_REEL * 2);
+  });
+
+  it("comes up when the angler eases off and pumps, or on its own after a while", () => {
+    const pumped = makeFight(fish("catfish"), 10, 3, () => 0);
+    let now = untilSulk(pumped);
+    for (const end = now + SULK_PUMP_SEC * 1000 + 50; now < end; now += 50) pumped.step(now, 0.05, false);
+    expect(pumped.sim.sulk).toBe(true);
+    pumped.step(now, 0.05, true);
+    expect(pumped.sim.sulk).toBe(false);
+
+    const waited = makeFight(fish("catfish"), 10, 3, () => 0);
+    now = untilSulk(waited);
+    waited.step(now + SULK_MS, 0.05, false);
+    expect(waited.sim.sulk).toBe(false);
+  });
+
+  it("leaves every other fish to fight as before", () => {
+    const runtime = makeFight(fish("largemouth-bass"), 3, 3, () => 0);
+    for (let now = 0; now < 20_000; now += 50) {
+      runtime.step(now, 0.05, false);
+      expect(runtime.sim.sulk).toBeFalsy();
+    }
   });
 });
