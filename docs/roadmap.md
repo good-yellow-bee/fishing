@@ -1194,3 +1194,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR126~~ | ~~Catch list month headings count the month's fish~~ (#375) | field | S |
 | ~~BR127~~ | ~~News card line for the month totals~~ (#376) | field | S |
 | ~~BR128~~ | ~~Species pages show fish by the weather~~ (#378) | field | S |
+| ~~BR129~~ | ~~Species pages show fish by season when they span more than one~~ (#379) | field | S |
