@@ -1121,3 +1121,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR68~~ | ~~Species page has a Log another button that starts a catch of that kind~~ (#308) | field | S |
 | ~~BR69~~ | ~~Species page shows when that fish bites, by part of the day~~ (#309) | field | S |
 | ~~BR70~~ | ~~News card (2026-10-15k) tells players about species chips, bite times and Log another~~ (#310) | field log | S |
+| ~~BR71~~ | ~~Species page shows the first and newest fish of the kind, each a link~~ (#311) | field | S |
