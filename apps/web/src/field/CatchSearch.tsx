@@ -60,7 +60,7 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 }
 
 /** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, and released fish. */
-function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
   const want = normalize(needle);
@@ -82,6 +82,23 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
       hit.add(entry.id);
   }
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
+}
+
+/** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
+function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+  const parts = needle.split("+").map((part) => part.trim()).filter(Boolean);
+  if (parts.length < 2) return findOne(book, needle, t);
+  let found = findOne(book, parts[0]!, t);
+  for (const part of parts.slice(1)) {
+    const hit = new Set(findOne(book, part, t).map((entry) => entry.id));
+    found = found.filter((entry) => hit.has(entry.id));
+  }
+  return found;
+}
+
+/** The catch search for a fish of one kind that also matches `text`, such as a sky or a season. */
+export function findWithLink(species: string, text: string): string {
+  return findLink(`${species} + ${text}`);
 }
 
 export const FIND_PARAM = "find";
