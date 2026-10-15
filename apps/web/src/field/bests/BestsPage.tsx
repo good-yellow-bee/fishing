@@ -177,7 +177,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("When they bite")}</h2>
             </div>
-            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
           </section>
 
           {monthTally(book.catches).length > 1 ? (

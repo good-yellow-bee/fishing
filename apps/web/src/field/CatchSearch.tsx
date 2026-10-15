@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { SEASON_LABELS, SKY_LABELS, WATER_LABELS, catchesNewestFirst, lakeSeason, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, SEASON_LABELS, SKY_LABELS, WATER_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -42,7 +42,17 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
   return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, and released fish. */
+/** True when the part of the day the fish came at ("Dawn", "Wieczór") starts with what was typed, from three letters up. */
+function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  if (want.length < 3) return false;
+  const at = new Date(entry.caughtAt);
+  if (Number.isNaN(at.getTime())) return false;
+  const id = biteTimeOf(at.getHours());
+  const band = BITE_TIMES.find((row) => row.id === id)!;
+  return normalize(t(band.label)).startsWith(want);
+}
+
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, and released fish. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
@@ -58,7 +68,8 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
       (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
       waterTypeHas(book, entry, want, t) ||
       skyHas(entry, want, t) ||
-      seasonHas(entry, want, t)
+      seasonHas(entry, want, t) ||
+      timeHas(entry, want, t)
     )
       hit.add(entry.id);
   }
