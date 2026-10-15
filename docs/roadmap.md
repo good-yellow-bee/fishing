@@ -1046,3 +1046,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 3. **`hour`/`sky`/`clean` on catches are client-asserted until the deferred anti-cheat.** P12 badges and the P13 weekly board raise the stakes of that — acceptable for now, or should C wait for the replay engine on `codex/gameplay`?
 
 Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk vs a joystick for P7 (Claude built both in #201: the stick sits beside tap-to-walk on touch screens).
+
+## Wave BR — Room for photos (added 2026-10-15, after Wave BQ shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BR1~~ | ~~The game's catch snapshots stop going missing after about 60 landings: when the browser's photo room is full, the game's oldest snapshots make way for the new one, never a species' heaviest fish or a photo the player chose~~ (#241) | field log | S |
