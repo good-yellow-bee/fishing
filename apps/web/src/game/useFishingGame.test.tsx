@@ -685,7 +685,10 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/second take/i);
-    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS));
+    const nibbles = vi.mocked(fx.nibble).mock.calls.length;
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS * 0.5));
+    expect(vi.mocked(fx.nibble).mock.calls.length).toBe(nibbles + 1);
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS * 0.5));
     expect(phase()).toBe("hookset:none");
     act(() => vi.advanceTimersByTime(1400));
     expect(phase()).toBe("result:miss");
