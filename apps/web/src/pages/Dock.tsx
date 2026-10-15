@@ -62,6 +62,7 @@ import { WalkStick } from "../components/WalkStick";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
+import { bestPounds } from "../game/bestWeight";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
@@ -245,6 +246,8 @@ export function DockPage() {
   const recordsRef = useRef(records);
   recordsRef.current = records;
   const lastCatch = me?.catches[0]?.id;
+  // Read once per hooked fish, so the fight card can say when it beats the field log's best.
+  const fightBest = useMemo(() => (game.fight ? bestPounds(bookForPlay(), game.fight.species.name) : null), [game.fight]);
   useEffect(() => {
     if (!userId) return;
     let live = true;
@@ -858,7 +861,7 @@ export function DockPage() {
             <kbd>{t("Right drag")}</kbd> {t("look")}
           </aside>
         )}
-        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} />}
+        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} best={fightBest} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}${landedGolden ? " golden" : ""}`}>
             {fieldBeat && (

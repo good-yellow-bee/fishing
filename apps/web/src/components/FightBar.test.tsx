@@ -14,7 +14,7 @@ let frames: FrameRequestCallback[] = [];
 
 let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
-function mount(performance: FightPerformance | null, underpowered = false, species = perch) {
+function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
@@ -23,7 +23,7 @@ function mount(performance: FightPerformance | null, underpowered = false, speci
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} />));
+  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} />));
   return record;
 }
 
@@ -59,6 +59,22 @@ describe("FightBar controls", () => {
     frame();
     expect(container!.querySelector(".fight-status")!.textContent).toMatch(/^let go/i);
     expect(container!.querySelector(".fight-controls")!.textContent).toBe(controls);
+  });
+});
+
+describe("FightBar personal best", () => {
+  it("says when the fish on the line is heavier than the field log's best", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, perch, 0.6);
+    expect(container!.querySelector(".fight-best")!.textContent).toBe("Heavier than your best (0.6 lb)");
+  });
+
+  it("stays quiet for a lighter fish and before the first of its kind", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, perch, 1.2);
+    expect(container!.querySelector(".fight-best")).toBeNull();
+    act(() => root?.unmount());
+    container?.remove();
+    mount({ peakTension: 0.3, maxLine: 1 });
+    expect(container!.querySelector(".fight-best")).toBeNull();
   });
 });
 
