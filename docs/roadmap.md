@@ -1030,6 +1030,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~BP1~~ | ~~After 90 seconds with no touch, click, key or pad press (and nothing held), the lake draws at the battery saver's 30 frames a second until the next input; the frame watch ignores the drop so it never steps effects down for it~~ (#237) | perf, battery | S |
+| ~~BP2~~ | ~~Drop two files nothing loads: a 1.1 MB dawn.hdr sky map and a stray textures/colormap.png (the models use models/Textures/colormap.png)~~ (#238) | cleanup | S |
 
 ## Risks / open questions for the owner
 
