@@ -1314,3 +1314,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR197~~ | ~~Search keeps names with their own plus sign whole~~ (#495) | field | S |
 | ~~BR198~~ | ~~Desktop side menu stays in view on long pages~~ (#497) | field | S |
 | ~~BR199~~ | ~~Catch form offers the water's fish as picks and narrows lure picks to the kind~~ (#498) | field | S |
+| ~~BR200~~ | ~~Catch form offers the same day's weather for a fish with no outing weather~~ (#500) | field | S |
