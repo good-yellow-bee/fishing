@@ -95,6 +95,14 @@ describe("field archive", () => {
     expect(parseFieldArchive({ ...document, photos: [] })).toMatchObject({ ok: false });
   });
 
+  it("refuses a file whose catch time or outing day isn't a date", () => {
+    const document = fieldArchiveDocument(archiveFor(book, null));
+    const badCatch = { ...document.book, catches: document.book.catches.map((entry, i) => (i === 0 ? { ...entry, caughtAt: "yesterday" } : entry)) };
+    const badTrip = { ...document.book, trips: document.book.trips.map((trip, i) => (i === 0 ? { ...trip, date: "soon" } : trip)) };
+    expect(parseFieldArchive({ ...document, book: badCatch })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
+    expect(parseFieldArchive({ ...document, book: badTrip })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
+  });
+
   it("accepts an empty book", () => {
     const parsed = parseFieldArchive({
       kind: "stillwater-field-log",
