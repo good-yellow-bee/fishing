@@ -119,9 +119,12 @@ export function TripPage() {
           navigate("/trips");
         }}
         aside={
-          <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
-            {t("Add a catch")}
-          </Link>
+          // An outing still ahead has no fish to log yet; a catch can't be dated in the future.
+          trip.date <= today ? (
+            <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
+              {t("Add a catch")}
+            </Link>
+          ) : null
         }
       >
         <p className="eyebrow">
