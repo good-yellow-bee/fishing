@@ -167,6 +167,14 @@ export function hookWindowMs(accuracy: number, mercy = false) {
   return 1000 + accuracy * 100 + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
+/** A strike in this first share of the hook window sets the hook solid. */
+export const SOLID_STRIKE_SHARE = 0.4;
+
+/** True when the strike came quick enough on the bite to set the hook solid. */
+export function isSolidStrike(elapsedMs: number, windowMs: number) {
+  return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;
+}
+
 export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(

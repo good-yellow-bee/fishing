@@ -63,6 +63,9 @@ export const TIRING_STAMINA = 0.6;
 export const SPENT_STAMINA = 0.25;
 export type StaminaState = "fresh" | "tiring" | "spent";
 
+/** A fish hooked solid on a quick strike starts the fight this worn. */
+export const SOLID_HOOK_STAMINA = 0.8;
+
 export function staminaState(stamina: number): StaminaState {
   if (stamina < SPENT_STAMINA) return "spent";
   return stamina < TIRING_STAMINA ? "tiring" : "fresh";

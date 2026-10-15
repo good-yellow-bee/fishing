@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15v";
+export const NEWS_ID = "2026-10-15w";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Levels 9 and 10 are open: from level 9 hooked fish tire faster, and from level 10 rare fish bite more often. Strike quickly on a bite and the hook sets solid, so the fish starts the fight a little tired.",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.",
   "Fish now tire as you play them: the fight card says when one is tiring or played out, and it comes up near the surface. Turn a run by holding ← or A (→ or D) the other way, or the side buttons on a touch screen.",
   "A fish logged without its outing can join it in one tap, from the fish's page or from the outing's page, which counts the loose fish from its water that day.",
