@@ -1016,6 +1016,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BN3~~ | ~~On narrow phones the first-cast coach's Skip link sits under its line instead of on the last step chip (ODPUŚĆ in Polish), the chips may wrap, and the hint below leaves room for a two-line coach line~~ (#231) | phone UX | S |
 | ~~BN4~~ | ~~Escape closes the settings panel even from its sliders and checkboxes (it only worked when focus was elsewhere); settings checkboxes keep their size beside two-line labels and the sliders line up; at 360 px in Polish the shop's long request names wrap instead of running under the count, and the forecast's sky fits its card~~ (#232) | phone UX, access | S |
 
+## Wave BO — The largest text on a phone (added 2026-10-15, after Wave BN shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BO1~~ | ~~With larger text on a 360 px phone in Polish: the settings panel no longer runs past the screen edge (a slider's default width held its column open) and each slider gets its own line; the shop's requests take their own line above the count, reward and Claim; the hint gives way to the first-cast coach so they do not overlap; and the lake's news gives way to the walking stick on touch phones~~ (#233) | access, phone UX | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
