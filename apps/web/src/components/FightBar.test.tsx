@@ -81,6 +81,19 @@ describe("FightBar clean-fight chip", () => {
     expect(container!.querySelector(".fight-clean")!.classList.contains("lost")).toBe(true);
   });
 
+  it("marks the fight's highest tension on the bar, red once it reached the red", () => {
+    const record = mount({ peakTension: 0.3, maxLine: 1 });
+    frame();
+    const peak = container!.querySelector<HTMLElement>(".peak")!;
+    expect(peak.hidden).toBe(false);
+    expect(peak.style.left).toBe("30%");
+    expect(peak.dataset.zone).toBe("easy");
+    record.current = { peakTension: 0.86, maxLine: 1 };
+    frame();
+    expect(parseFloat(peak.style.left)).toBeCloseTo(86);
+    expect(peak.dataset.zone).toBe("red");
+  });
+
   it("shows no chip for a fish too heavy to fight", () => {
     mount(null, true);
     frame();

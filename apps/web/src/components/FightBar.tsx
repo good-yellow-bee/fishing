@@ -35,6 +35,7 @@ export function FightBar({ fight, sim, performance }: Props) {
   const staminaWord = useRef<HTMLSpanElement>(null);
   const steerLine = useRef<HTMLParagraphElement>(null);
   const overrunFill = useRef<HTMLElement>(null);
+  const peakMark = useRef<HTMLElement>(null);
   const shortWord = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -102,6 +103,12 @@ export function FightBar({ fight, sim, performance }: Props) {
           for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
         }
         const record = performance.current;
+        // The fight's highest tension stays marked, so the angler sees how near the red they came.
+        if (peakMark.current && record) {
+          peakMark.current.hidden = false;
+          peakMark.current.style.left = `${Math.min(100, record.peakTension * 100)}%`;
+          peakMark.current.dataset.zone = tensionZone(record.peakTension);
+        }
         if (clean.current && record) {
           const stillClean = isCleanFight(record);
           clean.current.textContent = stillClean ? t("Clean fight · 1.5× points") : t("Clean bonus lost");
@@ -151,6 +158,7 @@ export function FightBar({ fight, sim, performance }: Props) {
             <div ref={tensionFill} className="fill" />
             <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
             <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
+            <i ref={peakMark} className="peak" hidden />
           </div>
           <span className="fight-label" id="fight-line-label">
             {t("Line in")}
