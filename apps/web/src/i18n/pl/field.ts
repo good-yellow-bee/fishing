@@ -299,6 +299,7 @@ export const PL_FIELD: PlBook = {
   "First in the book": "Pierwsza w dzienniku",
   "newest": "najnowsza",
   "By season": "Według pory roku",
+  "By month": "Według miesiąca",
   "Best day": "Najlepszy dzień",
   "Weather is optional: note all three, or leave them blank.": "Pogoda jest opcjonalna: wpisz wszystkie trzy albo zostaw puste.",
   "Lures that worked": "Przynęty, które łowiły",
