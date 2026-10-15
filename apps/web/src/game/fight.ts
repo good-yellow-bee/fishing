@@ -56,6 +56,8 @@ export type FightPerformance = {
   maxLine: number;
   /** Runs the angler cut short by pulling the rod the other way. */
   turnedRuns?: number;
+  /** Leaps the angler bowed to, letting go before the line loaded the rod. */
+  bowedLeaps?: number;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
 };
@@ -203,13 +205,14 @@ export function makeFight(
   const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
-  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0, fightSec: 0 };
+  const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0, bowedLeaps: 0, fightSec: 0 };
   let completedSurges = 0;
   let nextAt: number | null = null;
   let graceUntil = -Infinity;
   let jumpAge = 0;
   let lastRunDone = false;
   let turnedThisRun = false;
+  let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
@@ -229,6 +232,7 @@ export function makeFight(
         sim.jump = leaper && completedSurges % 2 === 1;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
+        heldThroughLeap = false;
         // A leap gets a longer warning: it is the one mistake that ends the fight outright.
         nextAt = nowMs + (sim.jump ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
@@ -238,6 +242,7 @@ export function makeFight(
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
       } else {
+        if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
         sim.surge = 0;
         sim.jump = false;
         sim.lastRun = false;
@@ -280,7 +285,10 @@ export function makeFight(
     // A line held tight through a leap loads the rod into the red: the clean bonus goes, but never the fish.
     if (sim.jump && sim.surge === 2) {
       jumpAge += dtSec;
-      if (reeling && jumpAge > JUMP_GRACE_SEC) sim.tension = Math.max(sim.tension, RED_TENSION);
+      if (reeling && jumpAge > JUMP_GRACE_SEC) {
+        sim.tension = Math.max(sim.tension, RED_TENSION);
+        heldThroughLeap = true;
+      }
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
