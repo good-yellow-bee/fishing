@@ -78,6 +78,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       </div>
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
+      <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
@@ -183,6 +184,35 @@ describe("useFishingGame landed outcome", () => {
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("result:landed");
     expect(container!.querySelector("span")?.textContent).toBe("false");
+  });
+
+  it("counts clean fights in a row, and starts again after a dirty landing or a lost fish", () => {
+    const surface = mount();
+    const run = () => container!.querySelector("[data-testid=clean-run]")?.textContent;
+    const dismiss = () => act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    const land = (peakTension: number, seed: number) => {
+      fightPerformance = { peakTension, maxLine: 1 };
+      step.mockReturnValueOnce("landed");
+      castAndFight(surface, seed);
+    };
+
+    land(0.5, 1);
+    expect(run()).toBe("1");
+    dismiss();
+    land(0.5, 2);
+    expect(run()).toBe("2");
+    dismiss();
+    land(0.9, 3);
+    expect(run()).toBe("0");
+    dismiss();
+    land(0.5, 4);
+    expect(run()).toBe("1");
+    dismiss();
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 5);
+    act(() => vi.advanceTimersByTime(5_000));
+    land(0.5, 6);
+    expect(run()).toBe("1");
   });
 });
 

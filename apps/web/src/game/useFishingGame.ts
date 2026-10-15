@@ -117,7 +117,8 @@ export type Fight = {
 };
 
 /** How the angler played this fish, for a line on the landed card. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number };
+/** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -163,6 +164,8 @@ export function useFishingGame(
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
   const hookedSolidRef = useRef(false);
+  /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
+  const cleanRunRef = useRef(0);
   const castSnagRef = useRef(false);
   /** Taps so far on a snagged lure, and the bite timers it is holding back; null while the lure is free. */
   const snagRef = useRef<{ taps: number; arm: () => void } | null>(null);
@@ -696,14 +699,21 @@ export function useFishingGame(
           if (result === "landed") {
             fx.land();
             fx.haptic("land");
+            const clean = isCleanFight(runtime.performance);
+            cleanRunRef.current = clean ? cleanRunRef.current + 1 : 0;
             setOutcome({
               kind: "landed",
               id: localId(),
               species: current.species,
               weight: current.weight,
               spot: spotRef.current,
-              clean: isCleanFight(runtime.performance),
-              notes: { perfectCast: castPerfectRef.current, hookedSolid: hookedSolidRef.current, turnedRuns: runtime.performance.turnedRuns ?? 0 },
+              clean,
+              notes: {
+                perfectCast: castPerfectRef.current,
+                hookedSolid: hookedSolidRef.current,
+                turnedRuns: runtime.performance.turnedRuns ?? 0,
+                cleanRun: cleanRunRef.current,
+              },
             });
             clearFight();
             setPhaseBoth("result");
@@ -711,11 +721,13 @@ export function useFishingGame(
           } else if (result === "snapped") {
             fx.snap();
             fx.haptic("snap");
+            cleanRunRef.current = 0;
             setOutcome({ kind: "broke", message: t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) }) });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run."));
           } else if (result === "escaped") {
             fx.snap();
             fx.haptic("snap");
+            cleanRunRef.current = 0;
             setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
             resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm."));
           }
