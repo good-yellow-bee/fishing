@@ -174,6 +174,7 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   Trip: "Wyprawa",
+  "Largest: {species}, {size}": "Największa: {species}, {size}",
   "To keep the app and its book on this device, tap Share, then Add to Home Screen.":
     "Aby zachować aplikację i dziennik na tym urządzeniu, stuknij Udostępnij, a potem Do ekranu początkowego.",
   "This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.":
