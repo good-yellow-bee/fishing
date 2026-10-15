@@ -346,6 +346,7 @@ export const PL_GAME: PlBook = {
   "Line parted. Spend points on Strength.": "Żyłka pękła. Wydaj punkty na Siłę.",
   "Line parted. Spend points on Accuracy.": "Żyłka pękła. Wydaj punkty na Celność.",
   "{line}. Ease off when it runs.": "{line}. Odpuść, gdy odjeżdża.",
+  "Perfect cast.": "Idealny rzut.",
   "Hooked solid! {line}. Ease off when it runs.": "Hak siedzi pewnie! {line}. Odpuść, gdy odjeżdża.",
   "NOW — strike!": "TERAZ — zatnij!",
   "Too slow. The fish dropped the bait.": "Za wolno. Ryba wypuściła przynętę.",
@@ -419,6 +420,8 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
+  "A cast that stops on the gold mark in the middle of the cast meter is a perfect cast, and the bite comes sooner. A fish reeled close while it still has fight in it makes one last run at the net, and a controller now rumbles with the fight (Vibration in Settings turns it off).":
+    "Rzut zatrzymany na złotym znaczniku w środku miernika to idealny rzut, a branie przychodzi szybciej. Ryba przyciągnięta blisko, która ma jeszcze siłę, robi ostatni odjazd przy podbieraku, a kontroler drży teraz w trakcie holu (wyłączysz to opcją Wibracje w Ustawieniach).",
   "Levels 9 and 10 are open: from level 9 hooked fish tire faster, and from level 10 rare fish bite more often. Strike quickly on a bite and the hook sets solid, so the fish starts the fight a little tired.":
     "Otwarte są poziomy 9 i 10: od poziomu 9 ryby na haczyku szybciej się męczą, a od 10 rzadkie ryby częściej biorą. Zatnij szybko po braniu, a hak wejdzie pewnie i ryba zacznie hol trochę zmęczona.",
   "Fish now tire as you play them: the fight card says when one is tiring or played out, and it comes up near the surface. Turn a run by holding ← or A (→ or D) the other way, or the side buttons on a touch screen.":

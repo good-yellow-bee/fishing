@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hookWindowMs, isSolidStrike } from "./logic";
+import { hookWindowMs, isPerfectCast, isSolidStrike, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -18,5 +18,27 @@ describe("solid strike", () => {
     expect(isSolidStrike(ms * 0.6, ms)).toBe(false);
     // A strike a starter can make on reflex still counts.
     expect(isSolidStrike(300, hookWindowMs(1))).toBe(true);
+  });
+});
+
+describe("perfect cast", () => {
+  it("is the middle of the sweet band, at every Accuracy", () => {
+    for (let accuracy = 1; accuracy <= 10; accuracy++) {
+      const band = sweetBand(accuracy);
+      const middle = (band.min + band.max) / 2;
+      expect(isPerfectCast(middle, accuracy)).toBe(true);
+      expect(isPerfectCast(band.min, accuracy)).toBe(false);
+      expect(isPerfectCast(band.max, accuracy)).toBe(false);
+    }
+  });
+
+  it("brings the bite sooner", () => {
+    const random = Math.random;
+    Math.random = () => 0.5;
+    try {
+      expect(waitMs(1, "day", false, 1, false, false, false, true)).toBeCloseTo(waitMs(1, "day") * PERFECT_CAST_WAIT, 6);
+    } finally {
+      Math.random = random;
+    }
   });
 });

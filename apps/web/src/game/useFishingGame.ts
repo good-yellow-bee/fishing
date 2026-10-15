@@ -30,7 +30,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, hookWindowMs, isSolidStrike, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
+import { BACKLASH_POWER, hookWindowMs, isPerfectCast, isSolidStrike, makeCatch, pickBite, SLAP_POWER, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
 import { nibblePlan } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -156,6 +156,8 @@ export function useFishingGame(
   const risingRef = useRef(rising);
   risingRef.current = rising;
   const castRiseRef = useRef(false);
+  /** The last cast landed in the middle of the sweet band. */
+  const castPerfectRef = useRef(false);
   const castSnagRef = useRef(false);
   /** Taps so far on a snagged lure, and the bite timers it is holding back; null while the lure is free. */
   const snagRef = useRef<{ taps: number; arm: () => void } | null>(null);
@@ -256,6 +258,7 @@ export function useFishingGame(
     castPointerRef.current = null;
     castHotspotRef.current = false;
     castRiseRef.current = false;
+    castPerfectRef.current = false;
     powerRef.current = 0;
     clearFight();
     setPhaseBoth(phase);
@@ -309,6 +312,7 @@ export function useFishingGame(
     waitHintRef.current = short ? shortCastHint() : waitHint();
     if (castHotspotRef.current) waitHintRef.current = short ? `${shortCastHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
     else if (castRiseRef.current) waitHintRef.current = `${t("Right on a rise.")} ${waitHintRef.current}`;
+    if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -317,7 +321,7 @@ export function useFishingGame(
     biteRef.current = bitten;
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
-    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current);
+    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     const nibbles = nibblePlan(wait);
     const arm = () => {
       const nibbleTimers: number[] = [];
@@ -428,6 +432,7 @@ export function useFishingGame(
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null && castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random());
+    castPerfectRef.current = isPerfectCast(castPower, profile.accuracy);
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, startWait]);
 
