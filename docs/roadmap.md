@@ -1062,7 +1062,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT17~~ | ~~Line running out: line a fish takes back past the hookset stripes the line bar red from the right, and a third of the way to escape the card says Running out of line! (also in the line meter for screen readers)~~ (#391) | fight | S |
 | ~~GT18~~ | ~~Clean fights in a row: from the second clean fight landed in a row this session, the landed card notes 3 clean fights in a row; a dirty landing, a snapped line or an escape starts it again~~ (#394) | fight | S |
 | ~~GT19~~ | ~~A snapped line says how close the fish came: It was 85% of the way in (from 10% in), so a break near the net reads as nearly there~~ (#397) | fight | S |
-| GT20 | News card (2026-10-15zc) covers GT17 to GT19: the line running out, clean fights in a row, and how close a snapped fish came | news | S |
+| ~~GT20~~ | ~~News card (2026-10-15zc) covers GT17 to GT19: the line running out, clean fights in a row, and how close a snapped fish came~~ (#399) | news | S |
+| GT21 | Second take: a bottom feeder (carp, catfish, burbot, sturgeon) that drops the bait on a missed strike comes back once 1.8 s later, with a hint to watch for it; other fish leave as before | fish | S |
 
 ## Risks / open questions for the owner
 

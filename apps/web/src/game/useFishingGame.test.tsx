@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, SPOT_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { pickBite, waitMs } from "./logic";
@@ -39,7 +39,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { RECAST_GUARD_MS, useFishingGame } from "./useFishingGame";
+import { RECAST_GUARD_MS, SECOND_TAKE_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 
@@ -673,6 +673,22 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toBe("");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toBe(seen);
+  });
+
+  it("gives a bottom feeder that dropped the bait one more take before it leaves", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    expect(phase()).toBe("hookset:none");
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/second take/i);
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS));
+    expect(phase()).toBe("hookset:none");
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("result:miss");
+    expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {
