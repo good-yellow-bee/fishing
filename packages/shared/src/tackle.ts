@@ -128,6 +128,10 @@ export function withPacked(items: TackleItem[], id: string, packed: boolean): Ta
   return items.map((item) => (item.id === id ? { ...item, packed } : item));
 }
 
+export function withoutTackleItem(items: TackleItem[], id: string): TackleItem[] {
+  return items.filter((item) => item.id !== id);
+}
+
 export function withTackleItem(items: TackleItem[], item: TackleItem): TackleItem[] {
   return [...items, item];
 }

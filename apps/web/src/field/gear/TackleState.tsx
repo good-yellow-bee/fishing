@@ -4,6 +4,7 @@ import {
   sampleTackle,
   withPacked,
   withTackleItem,
+  withoutTackleItem,
   type TackleItem,
 } from "@stillwater/shared";
 import { localId } from "../../game/localId";
@@ -13,6 +14,7 @@ type TackleApi = {
   items: TackleItem[];
   toggle: (id: string, packed: boolean) => void;
   add: (tripId: string, label: string) => string | null;
+  remove: (id: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
 };
 
@@ -52,6 +54,13 @@ export function TackleProvider({ children }: { children: ReactNode }) {
           return next;
         });
         return null;
+      },
+      remove: (id) => {
+        setItems((current) => {
+          const next = withoutTackleItem(current, id);
+          saveTackle(next);
+          return next;
+        });
       },
       replaceTackle: (next) => setItems(next),
     };
