@@ -92,9 +92,28 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
 
+/** Splits a search on "+", but not inside a name in the book that has a "+" of its own ("Pond + creek"). */
+export function searchParts(book: Logbook, needle: string): string[] {
+  const names = [...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])]
+    .filter((name) => name.includes("+"))
+    .sort((a, b) => b.length - a.length);
+  const kept: string[] = [];
+  let text = needle;
+  for (const name of names) {
+    const at = text.toLowerCase().indexOf(name.toLowerCase());
+    if (at < 0) continue;
+    kept.push(text.slice(at, at + name.length));
+    text = `${text.slice(0, at)}\u0000${kept.length - 1}\u0000${text.slice(at + name.length)}`;
+  }
+  return text
+    .split("+")
+    .map((part) => part.replace(/\u0000(\d+)\u0000/g, (_, index: string) => kept[Number(index)]!).trim())
+    .filter(Boolean);
+}
+
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
-  const parts = needle.split("+").map((part) => part.trim()).filter(Boolean);
+  const parts = searchParts(book, needle);
   if (parts.length < 2) return findOne(book, needle, t);
   let found = findOne(book, parts[0]!, t);
   for (const part of parts.slice(1)) {

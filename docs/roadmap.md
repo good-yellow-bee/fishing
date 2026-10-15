@@ -1310,3 +1310,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR194~~ | ~~Tackle lists sync across tabs; blocked storage no longer blanks the field log~~ (#489) | field | S |
 | ~~BR195~~ | ~~Trip and water forms say when a save fails~~ (#491) | field | S |
 | ~~BR196~~ | ~~Outing time span shows days, badge ignores case, card headings, empty map link~~ (#493) | field | S |
+| ~~BR197~~ | ~~Search keeps names with their own plus sign whole~~ (#495) | field | S |
