@@ -147,7 +147,7 @@ export function SpotPage() {
         <h2>{t("Fish from this water")}</h2>
       </div>
       <FishSum catches={catches} />
-      <SpeciesChips catches={catches} />
+      <SpeciesChips catches={catches} within={spot.name} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
