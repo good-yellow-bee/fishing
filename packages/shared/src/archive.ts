@@ -78,6 +78,14 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
   };
 }
 
+/** Every catch time and outing day is a real date, as the book writes them: a file with "yesterday" in it would stop the pages that show it. */
+function datesReadable(book: Logbook): boolean {
+  return (
+    book.catches.every((entry) => !Number.isNaN(Date.parse(entry.caughtAt))) &&
+    book.trips.every((trip) => /^\d{4}-\d{2}-\d{2}$/.test(trip.date) && !Number.isNaN(new Date(`${trip.date}T12:00:00`).getTime()))
+  );
+}
+
 function cleanBook(book: Logbook): Logbook {
   return {
     spots: book.spots.map(cleanSpot),
@@ -121,7 +129,7 @@ export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isRecord(value)) return refuse();
   if (value.kind !== FIELD_ARCHIVE_KIND || value.version !== FIELD_ARCHIVE_VERSION) return refuse();
   const prepared = prepareStoredLogbook(value.book);
-  if (!isLogbook(prepared)) return refuse();
+  if (!isLogbook(prepared) || !datesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();
   const book = cleanBook(prepared);
   const photos = readPhotos(value.photos, book);
