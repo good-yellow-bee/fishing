@@ -399,6 +399,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "Deleted something in the field log by mistake? Undo brings it back. Past outings have Go again, which copies the tackle list, and pieces can be taken off a list.":
+    "Usunąłeś coś w dzienniku przez pomyłkę? Cofnij przywraca to od razu. Minione wyprawy mają Jedź znowu, które kopiuje listę sprzętu, a z listy można już usuwać rzeczy.",
   "Upcoming trips in the field log can go straight into your calendar, and the Spots list puts the waters you fished last on top.":
     "Nadchodzące wyprawy z dziennika dodasz prosto do kalendarza, a lista łowisk pokazuje na górze te, na których łowiłeś ostatnio.",
   "Any catch page in the field log can save a picture card of the fish, and the lake's fish now go in the book under Stillwater, apart from your own waters.":
