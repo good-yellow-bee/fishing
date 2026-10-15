@@ -1182,3 +1182,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR119~~ | ~~News card (2026-10-15t) tells players about adding loose fish to their outing~~ (#361) | field log | S |
 | ~~BR120~~ | ~~What works here names the weather most fish came in~~ (#363) | field | S |
 | ~~BR121~~ | ~~Bests counts fish by the weather~~ (#366) | field | S |
+| ~~BR122~~ | ~~News card (2026-10-15v) tells players about the weather lines in What works here and Bests~~ (#368) | field log | S |
