@@ -6,6 +6,7 @@ import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
+import { installApp, useInstallOffer } from "../installPrompt";
 
 function downloadBook(json: string) {
   const blob = new Blob([json], { type: "application/json" });
@@ -30,6 +31,7 @@ export function BookFile() {
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
   const nudge = copyNudge(own, copiedAt);
+  const canInstall = useInstallOffer();
 
   const onDownload = () => {
     downloadBook(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })));
@@ -90,6 +92,11 @@ export function BookFile() {
         <button type="button" className="text-button" onClick={() => fileRef.current?.click()}>
           {t("Load a book")}
         </button>
+        {canInstall ? (
+          <button type="button" className="text-button" onClick={() => void installApp()}>
+            {t("Install the app")}
+          </button>
+        ) : null}
         <button
           type="button"
           className="text-button"
