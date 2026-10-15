@@ -11,13 +11,13 @@ let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let frames: FrameRequestCallback[] = [];
 
-let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0 } };
+let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1 } };
 
 function mount(performance: FightPerformance | null, underpowered = false) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
-  sim = { current: { line: 1, tension: 0.3, surge: 0 } };
+  sim = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1 } };
   const record = { current: performance };
   container = document.createElement("div");
   document.body.append(container);
@@ -106,6 +106,21 @@ describe("FightBar for screen readers", () => {
       expect(writes).toBe(0);
       expect(status.textContent).toBe(said);
     });
+  });
+
+  it("says how much fight the fish has left beside the line bar and in the line meter", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const word = () => container!.querySelector(".fight-stamina")!;
+    expect(word().textContent).toBe("Fish fresh");
+    sim.current.stamina = 0.4;
+    frame();
+    expect(word().textContent).toBe("Fish tiring");
+    expect(word().getAttribute("data-stamina")).toBe("tiring");
+    const line = container!.querySelectorAll('[role="meter"]')[1]!;
+    expect(line.getAttribute("aria-valuetext")).toMatch(/Fish tiring$/);
+    sim.current.stamina = 0.1;
+    frame();
+    expect(word().textContent).toBe("Fish played out");
   });
 
   it("calls a leap by name, warning first and then telling the angler to bow", () => {

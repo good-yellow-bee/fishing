@@ -4,7 +4,8 @@ import { difficulty01 } from "./logic";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
 /** `jump`: the coming or current run is a leap clear of the water. */
-export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean };
+/** `stamina`: the fish's fight left, 1 fresh to 0 played out. */
+export type FightSim = { line: number; tension: number; surge: SurgeState; jump?: boolean; stamina: number };
 export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 
 /** Trout, bass and salmon jump: every second run of theirs is a leap. */
@@ -30,6 +31,26 @@ export const RED_TENSION = 0.8;
 export const TIGHT_TENSION = 0.55;
 
 export type TensionZone = "easy" | "tight" | "red";
+
+/** A fish tires against a reeling line and faster on its runs; a slack line in calm water lets it rest. */
+const TIRE_REEL = 0.05;
+const TIRE_RUN = 0.07;
+const REST = 0.015;
+/** At the bottom of its stamina a fish's runs pull this share as hard, and its calm spells last this much longer. */
+const SPENT_PULL = 0.55;
+const SPENT_CALM = 1.3;
+/** A played-out fish comes in this much faster. */
+const SPENT_REEL = 1.2;
+
+/** Under this the fish is tiring; under the other it is played out. */
+export const TIRING_STAMINA = 0.6;
+export const SPENT_STAMINA = 0.25;
+export type StaminaState = "fresh" | "tiring" | "spent";
+
+export function staminaState(stamina: number): StaminaState {
+  if (stamina < SPENT_STAMINA) return "spent";
+  return stamina < TIRING_STAMINA ? "tiring" : "fresh";
+}
 
 /** The fight bar's zone for a tension, so it can be named in words and patterns as well as colour. */
 export function tensionZone(tension: number): TensionZone {
@@ -110,7 +131,9 @@ export function makeFight(
   const surgeScale = 0.55 + t * 0.35;
   const range = (min: number, max: number) => min + random() * (max - min);
 
-  const sim: FightSim = { line: 1, tension: 0.2, surge: 0 };
+  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1 };
+  /** 0 fresh, 1 spent: how far the fish has tired. */
+  const worn = () => 1 - sim.stamina;
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line };
   let completedSurges = 0;
   let nextAt: number | null = null;
@@ -138,15 +161,15 @@ export function makeFight(
         sim.jump = false;
         completedSurges += 1;
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
-        nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax));
+        nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
       }
     }
 
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
-    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL;
+    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL));
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
-      sim.line -= reelRate * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
+      sim.line -= reelRate * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
@@ -157,6 +180,9 @@ export function makeFight(
       if (reeling && jumpAge > JUMP_GRACE_SEC) sim.tension = Math.max(sim.tension, RED_TENSION);
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
+    // Bigger fish have more fight in them.
+    const tire = sim.surge === 2 ? TIRE_RUN : reeling ? TIRE_REEL : -REST;
+    sim.stamina = Math.min(1, Math.max(0, sim.stamina - tire * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
