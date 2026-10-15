@@ -1303,3 +1303,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR190~~ | ~~The load-a-book question is announced and starts on Keep~~ (#483) | field | S |
 | ~~BR191~~ | ~~Card headings nest one level below their section~~ (#484) | field | S |
 | ~~BR192~~ | ~~Stale water link in the catch form, metric length bounds, metric map scale~~ (#485) | field | S |
+| ~~BR193~~ | ~~Loaded catch times are stored in the book's own form~~ (#488) | field | S |

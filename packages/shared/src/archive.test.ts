@@ -103,6 +103,19 @@ describe("field archive", () => {
     expect(parseFieldArchive({ ...document, book: badTrip })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
   });
 
+  it("writes a file's catch times the way the book does, so newest first holds", () => {
+    const document = fieldArchiveDocument(archiveFor(book, null));
+    const stamps = ["October 1, 2020", "2026-10-14T23:30:00-05:00", "2026-10-15T01:00:00.000Z"];
+    const catches = document.book.catches.slice(0, 3).map((entry, i) => ({ ...entry, caughtAt: stamps[i]! }));
+    const parsed = parseFieldArchive({ ...document, book: { ...document.book, catches } });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const times = parsed.value.book.catches.map((entry) => entry.caughtAt);
+    expect(times[1]).toBe("2026-10-15T04:30:00.000Z");
+    expect(times[2]).toBe("2026-10-15T01:00:00.000Z");
+    expect(times.every((time) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(time))).toBe(true);
+  });
+
   it("accepts an empty book", () => {
     const parsed = parseFieldArchive({
       kind: "stillwater-field-log",
