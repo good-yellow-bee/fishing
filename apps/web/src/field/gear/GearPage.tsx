@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
   catchesForTrip,
+  fishCountsByTrip,
   localDate,
   recentTrips,
   shiftDate,
@@ -14,8 +15,7 @@ import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { packingTips } from "../waterTips";
-import { monthName, tripsByMonth } from "../tripMonths";
-import { TripMonthHead } from "../TripMonthHead";
+import { PagedTrips } from "../PagedTrips";
 import { t, useT } from "../../i18n";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -117,6 +117,7 @@ export function GearPage() {
 
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today);
+  const fishByTrip = fishCountsByTrip(book);
 
   return (
     <div className="sheet">
@@ -137,14 +138,9 @@ export function GearPage() {
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
-        tripsByMonth(recent).map((group) => (
-          <section key={group.month} aria-label={monthName(group.month)}>
-            <TripMonthHead month={group.month} trips={group.trips} fishOn={(id) => catchesForTrip(book, id).length} />
-            {group.trips.map((trip) => (
-              <PastTripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />
-            ))}
-          </section>
-        ))
+        <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0}>
+          {(trip) => <PastTripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />}
+        </PagedTrips>
       )}
     </div>
   );

@@ -1221,3 +1221,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR140~~ | ~~Month names cached so big-book searches stay quick~~ (#400) | field | S |
 | ~~BR141~~ | ~~Search saves its matches as a spreadsheet~~ (#402) | field | S |
 | ~~BR142~~ | ~~News card line for the newer search features~~ (#404) | field | S |
+| ~~BR143~~ | ~~Past outings paged, fish counted in one pass (Trips 26 s to 0.4 s on 4,200 outings)~~ (#406) | field | S |

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   catchesForTrip,
+  fishCountsByTrip,
   formatMeasure,
   isLogbook,
   keepLandedCatch,
@@ -71,6 +72,8 @@ describe("field log", () => {
     }
     expect(catchesForTrip(book, "trip-dawn")).toHaveLength(0);
     expect(catchesForTrip(book, "trip-mill")).toHaveLength(2);
+    expect(fishCountsByTrip(book).get("trip-mill")).toBe(2);
+    expect(fishCountsByTrip(book).get("trip-dawn")).toBeUndefined();
   });
 
   it("sorts recent catches newest first", () => {
