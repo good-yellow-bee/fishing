@@ -10,6 +10,7 @@ import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { catchMonth, monthName } from "./tripMonths";
+import { thisWeekInPastYears } from "./yearsAgo";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -29,6 +30,8 @@ export function HomePage() {
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today, 3);
   const kinds = speciesCounts(book.catches).length;
+  // A look back: what came out of the water this same week in earlier years.
+  const yearsAgo = thisWeekInPastYears(book.catches, now);
   const thisMonth = today.slice(0, 7);
   const monthFish = book.catches.filter((entry) => catchMonth(entry) === thisMonth).length;
   const next = upcoming[0];
@@ -121,6 +124,24 @@ export function HomePage() {
               ))}
             </div>
           )}
+          {yearsAgo.length > 0 ? (
+            <>
+              <h3 className="subhead">{t("This week in years past")}</h3>
+              <div className="stack">
+                {yearsAgo.map((entry) => (
+                  <div key={entry.id} className="years-ago">
+                    {/* The card gives the day but not the year, so say how long ago. */}
+                    <p className="meta">{tn(now.getFullYear() - new Date(entry.caughtAt).getFullYear(), "{n} year ago", "{n} years ago")}</p>
+                    <CatchCard
+                      entry={entry}
+                      spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
+                      tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
         </section>
 
         <section>

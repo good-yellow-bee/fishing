@@ -306,6 +306,8 @@ export const PL_FIELD: PlBook = {
   "By season": "Według pory roku",
   "By month": "Według miesiąca",
   "{n} this month": "{n} w tym miesiącu",
+  "This week in years past": "Ten tydzień w minionych latach",
+  "{n} years ago": ["{n} rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Weather is optional: note all three, or leave them blank.": "Pogoda jest opcjonalna: wpisz wszystkie trzy albo zostaw puste.",
   "Lures that worked": "Przynęty, które łowiły",
