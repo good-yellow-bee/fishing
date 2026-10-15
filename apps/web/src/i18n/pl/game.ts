@@ -449,6 +449,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "Levels 11 and 12 are open: from level 11 (12000 points) fish hold the bait longer before they let go, and from level 12 (17000) the gold perfect-cast mark is wider.":
+    "Otwarte są poziomy 11 i 12: od poziomu 11 (12000 punktów) ryby dłużej trzymają przynętę, zanim ją puszczą, a od poziomu 12 (17000) złoty znacznik idealnego rzutu jest szerszy.",
   "The cast meter keeps a dashed mark where your last cast stopped, so the next one can be aimed from it. A fish on the line that outweighs your best of its kind says so on the fight card.":
     "Wskaźnik rzutu zostawia przerywaną kreskę tam, gdzie zatrzymał się ostatni rzut, żeby następny dało się od niej poprawić. Ryba na haczyku cięższa od twojego rekordu tego gatunku mówi o tym na karcie holu.",
   "The catch search now finds fish by size (“>2 lb”, “<30 cm”) and joins two searches with “+”, so “Northern pike + >2 lb” finds just the big pike. Lures on catch cards, the species page’s water counts and its new moon bars open those fish too.":

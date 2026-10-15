@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15zl";
+export const NEWS_ID = "2026-10-15zm";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Levels 11 and 12 are open: from level 11 (12000 points) fish hold the bait longer before they let go, and from level 12 (17000) the gold perfect-cast mark is wider.",
   "The cast meter keeps a dashed mark where your last cast stopped, so the next one can be aimed from it. A fish on the line that outweighs your best of its kind says so on the fight card.",
   "The catch search now finds fish by size (“>2 lb”, “<30 cm”) and joins two searches with “+”, so “Northern pike + >2 lb” finds just the big pike. Lures on catch cards, the species page’s water counts and its new moon bars open those fish too.",
   "On the lake, a sulking carp, catfish, burbot or sturgeon now sinks deep until you pump it up, and a pike, muskie or largemouth bass pulls the float straight under with no warning tap.",
