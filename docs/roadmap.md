@@ -1273,3 +1273,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR171~~ | ~~Catch search by outing title~~ (#453) | field | S |
 | ~~BR172~~ | ~~Catch time max now; trip and spot field length caps~~ (#455) | field | S |
 | ~~BR173~~ | ~~Refused save focuses and marks the field; message clears on change~~ (#457) | field | S |
+| ~~BR174~~ | ~~Arrow keys in the measure and water-type radio rows~~ (#458) | field | S |
