@@ -218,8 +218,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, or “released”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), rodzaju wody (np. „rzeka”) albo słowa „wypuszczona”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, a size such as “>2 lb”, or “released”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”) albo słowa „wypuszczona”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
