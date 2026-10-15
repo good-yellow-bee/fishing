@@ -1149,3 +1149,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR96~~ | ~~Gear page past trips grouped under month headings~~ (#336) | field | S |
 | ~~BR97~~ | ~~Fish page catch log split under month headings~~ (#337) | field | S |
 | ~~BR98~~ | ~~Species and spot fish lists split under month headings~~ (#338) | field | S |
+| ~~BR99~~ | ~~Catch search results split under month headings~~ (#339) | field | S |
