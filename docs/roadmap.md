@@ -1124,3 +1124,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR71~~ | ~~Species page shows the first and newest fish of the kind, each a link~~ (#311) | field | S |
 | ~~BR72~~ | ~~The Fish page lists every species in the book, each linking to its page~~ (#312) | field | S |
 | ~~BR73~~ | ~~A catch page says which of its kind it is, like Brook trout: 2 of 3~~ (#313) | field | S |
+| ~~BR74~~ | ~~Home tiles link to the catch log and waters and count species and outings~~ (#314) | field | S |
