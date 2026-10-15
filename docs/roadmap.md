@@ -1044,6 +1044,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | GT1 | Fish tire as the fight goes on: runs pull softer, calm spells last longer and line comes in faster; the fight card says Fish fresh, tiring or played out | fight | S |
+| GT2 | A tiring fish comes up toward the surface and its runs go shorter and less wide, so the scene shows what the fight card says | fight | S |
 
 ## Risks / open questions for the owner
 

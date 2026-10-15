@@ -254,27 +254,41 @@ export function fightBodyLean(surge: FightSurge, reeling: boolean, strikeAge: nu
   return lean;
 }
 
-/** How far the fish leads the lure, meters, along the cast. A run clears the rod tip. */
-export function fishLeadMeters(surge: FightSurge, reeling: boolean) {
-  if (surge === 2) return reeling ? 2.6 : 5.2;
-  if (surge === 1) return 2.1;
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value));
+}
+
+/** A played-out fish's runs reach this share of a fresh one's. */
+const WORN_REACH = 0.55;
+/** A played-out fish wallows this deep in calm water, its back near the top. */
+const WORN_CALM_DEPTH = 0.18;
+
+/**
+ * How far the fish leads the lure, meters, along the cast. A run clears the rod tip.
+ * `worn` is how far the fish has tired, 0 fresh to 1 played out: its runs get shorter.
+ */
+export function fishLeadMeters(surge: FightSurge, reeling: boolean, worn = 0) {
+  const reach = 1 - clamp01(worn) * (1 - WORN_REACH);
+  if (surge === 2) return (reeling ? 2.6 : 5.2) * reach;
+  if (surge === 1) return 2.1 * reach;
   return reeling ? 0.35 : 1.2;
 }
 
-/** Lateral lead. runSide is about -1..1. */
-export function fishSideMeters(surge: FightSurge, runSide: number) {
+/** Lateral lead. runSide is about -1..1. A tired fish swings less wide. */
+export function fishSideMeters(surge: FightSurge, runSide: number, worn = 0) {
   const reach = surge === 2 ? 3.2 : surge === 1 ? 1.15 : 0.2;
-  return runSide * reach;
+  return runSide * reach * (surge === 0 ? 1 : 1 - clamp01(worn) * (1 - WORN_REACH));
 }
 
 /**
  * Meters under the surface. The calm depth covers the body (about 0.31m
  * at fight scale). A run lifts the back out of the water.
  */
-export function fishDepthMeters(surge: FightSurge) {
+export function fishDepthMeters(surge: FightSurge, worn = 0) {
   if (surge === 2) return 0.04;
   if (surge === 1) return 0.22;
-  return 0.42;
+  // A tiring fish comes up: played out, it rolls just under the surface.
+  return 0.42 - clamp01(worn) * (0.42 - WORN_CALM_DEPTH);
 }
 
 /** 0..1 arc. Zero outside the leap. */

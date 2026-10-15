@@ -712,9 +712,10 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
     if (fightView.reeling) fightView.pump += dt * (surge === 2 ? 0.7 : 1.15);
 
     if (live) {
-      const leadTarget = fishLeadMeters(surge, fightView.reeling);
-      const sideTarget = fishSideMeters(surge, runSide.current);
-      const depthTarget = fishDepthMeters(surge);
+      const worn = 1 - (sim.current?.stamina ?? 1);
+      const leadTarget = fishLeadMeters(surge, fightView.reeling, worn);
+      const sideTarget = fishSideMeters(surge, runSide.current, worn);
+      const depthTarget = fishDepthMeters(surge, worn);
       const pullTarget = bobberPull(surge, fightView.reeling);
       const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;
       const pullRate = surge === 2 && !fightView.reeling ? 5.4 : 3.4;
