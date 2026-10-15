@@ -1098,7 +1098,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT53~~ | ~~Off the point, the fight card calls an unturned run: It's dragging the line over the rocks — turn it! The call goes back to the usual run call once the angler turns it~~ (#477) | fight | S |
 | ~~GT54~~ | ~~The landed card notes Kept it out of the weeds (reeds) or Kept it off the rocks (point) when no run went in or was reeled against unturned~~ (#486) | fight | S |
 | ~~GT55~~ | ~~News card (2026-10-15zs) covers GT53 and GT54: the rocky run call and the kept-clear note~~ (#487) | news | S |
-| GT56 | Reeling against an unturned run off the point grates: a low rasp every 220 ms and a light buzz or controller rumble, so the rocks are felt as well as read | feel | S |
+| ~~GT56~~ | ~~Reeling against an unturned run off the point grates: a low rasp every 220 ms and a light buzz or controller rumble, so the rocks are felt as well as read~~ (#490) | feel | S |
+| GT57 | A fish going into the weeds at the reeds swishes once, with a soft buzz or controller thump | feel | S |
 
 ## Risks / open questions for the owner
 
