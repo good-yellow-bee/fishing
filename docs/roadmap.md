@@ -1118,3 +1118,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR65~~ | ~~News card (2026-10-15j) tells players about species pages~~ (#305) | field log | S |
 | ~~BR66~~ | ~~A new catch starts ticked as released when the last own fish went back~~ (#306) | field | S |
 | ~~BR67~~ | ~~Water and trip pages list their species, each linking to its page~~ (#307) | field | S |
+| ~~BR68~~ | ~~Species page has a Log another button that starts a catch of that kind~~ (#308) | field | S |
