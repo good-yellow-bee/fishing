@@ -4,7 +4,7 @@ export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "Miss the strike on a carp, catfish, burbot or sturgeon and it may come back for a second take. Each bite is called the way the fish takes it: a predator's WHAM, a bottom feeder's slow take. A fish landed on the edge of a snap is noted as a Close call.",
+  "Miss the strike on a carp, catfish, burbot or sturgeon and it comes back once for a second take. Each bite is called the way the fish takes it: a predator's WHAM, a bottom feeder's slow take. A fish landed on the edge of a snap is noted as a Close call.",
   "The catch search also finds released fish and kinds of water (“river”, “pond”), sums up what it found, and can save those fish as a spreadsheet.",
   "When a fish takes line back, the line bar fills red from the right and the fight card says Running out of line! before it gets away. The landed card counts clean fights in a row, and a snapped line says how close the fish came.",
   "Fish take the bait their own way: pike, muskies and largemouth bass hit with no nibble first, while carp, catfish, burbot and sturgeon mouth it a few times before the real bite. The strike also says how quick it was, and how quick a solid hook needs to be.",
