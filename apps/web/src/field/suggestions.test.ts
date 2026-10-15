@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather, lastReleased } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -52,6 +52,16 @@ describe("the measure a new catch starts with", () => {
   it("follows the player's newest fish logged by hand", () => {
     const own = { ...book, catches: [...book.catches, fish("old", "length", "2026-10-18T08:00:00"), fish("new", "weight", "2026-10-19T08:00:00")] };
     expect(lastMeasureKind(own)).toBe("weight");
+  });
+
+  it("starts ticked as released only when the player's newest own fish went back", () => {
+    expect(lastReleased(book)).toBe(false);
+    const back = { ...fish("new", "length", "2026-10-19T08:00:00"), released: true };
+    expect(lastReleased({ ...book, catches: [...book.catches, back] })).toBe(true);
+    const kept = fish("newer", "length", "2026-10-20T08:00:00");
+    expect(lastReleased({ ...book, catches: [...book.catches, back, kept] })).toBe(false);
+    const lake = { ...fish("game", "weight", "2026-10-21T08:00:00", "spot-stillwater"), released: false };
+    expect(lastReleased({ ...book, catches: [...book.catches, back, lake] })).toBe(true);
   });
 });
 

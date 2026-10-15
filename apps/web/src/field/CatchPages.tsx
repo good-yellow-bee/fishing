@@ -26,7 +26,7 @@ import { speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
+import { bookLures, lastMeasureKind, lastReleased, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -141,7 +141,7 @@ function CatchForm() {
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   const [note, setNote] = useState(existing?.note ?? "");
-  const [released, setReleased] = useState(existing?.released === true);
+  const [released, setReleased] = useState(existing ? existing.released === true : lastReleased(book));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
