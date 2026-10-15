@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { WATER_LABELS, catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { SKY_LABELS, WATER_LABELS, catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -28,7 +28,14 @@ function waterTypeHas(book: Logbook, entry: CatchEntry, want: string, t: (text: 
   return type !== undefined && normalize(t(WATER_LABELS[type])).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, and released fish. */
+/** True when a word of the sky the fish came under ("Partly cloudy", "Deszcz") starts with what was typed, from three letters up. */
+function skyHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  if (want.length < 3 || !entry.weather) return false;
+  const name = normalize(t(SKY_LABELS[entry.weather.sky]));
+  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
+}
+
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, and released fish. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
@@ -42,7 +49,8 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
     else if (
       monthHas(entry, want) ||
       (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
-      waterTypeHas(book, entry, want, t)
+      waterTypeHas(book, entry, want, t) ||
+      skyHas(entry, want, t)
     )
       hit.add(entry.id);
   }
