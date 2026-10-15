@@ -22,6 +22,8 @@ export type FightSim = {
   lastRun?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
+  /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
+  weeded?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -102,6 +104,9 @@ export const SULK_MS = 2200;
 export const SULK_REEL = 0.2;
 /** A slack line held this long while it sulks, then a turn of the reel, pumps the fish off the bottom. */
 export const SULK_PUMP_SEC = 0.4;
+/** How long a fish that ran into the weeds sits there, and how much of the usual line a turn of the reel wins back meanwhile. */
+export const WEED_MS = 1600;
+export const WEED_REEL = 0.3;
 
 export function staminaState(stamina: number): StaminaState {
   if (stamina < SPENT_STAMINA) return "spent";
@@ -186,6 +191,8 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
+  /** Fished from the reeds: a run the angler doesn't turn ends in the weeds. */
+  weedy = false,
 ): FightRuntime {
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
@@ -218,6 +225,7 @@ export function makeFight(
   const sulker = biteStyle(species.id) === "mouth";
   let sulkUntil = -Infinity;
   let slackSec = 0;
+  let weedUntil = -Infinity;
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -243,6 +251,11 @@ export function makeFight(
         graceUntil = nowMs + RUN_GRACE_MS;
       } else {
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
+        // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
+        if (weedy && turnable && !sim.jump && !turnedThisRun && sim.line > 0) {
+          sim.weeded = true;
+          weedUntil = nowMs + WEED_MS;
+        }
         sim.surge = 0;
         sim.jump = false;
         sim.lastRun = false;
@@ -260,6 +273,7 @@ export function makeFight(
       }
     }
 
+    if (sim.weeded && (sim.surge !== 0 || nowMs >= weedUntil)) sim.weeded = false;
     if (sim.sulk) {
       if (sim.surge !== 0 || nowMs >= sulkUntil) sim.sulk = false;
       else if (!reeling) slackSec += dtSec;
@@ -276,11 +290,11 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
     // A line held tight through a leap loads the rod into the red: the clean bonus goes, but never the fish.
     if (sim.jump && sim.surge === 2) {
@@ -292,7 +306,7 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.surge === 2 ? TIRE_RUN + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
+    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);

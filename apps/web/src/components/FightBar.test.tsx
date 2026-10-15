@@ -198,6 +198,17 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toMatch(/sulking/);
   });
 
+  it("tells the angler a fish is in the weeds", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.weeded = true;
+    frame();
+    expect(status()).toBe("It ran into the weeds — reel slow and steady!");
+    sim.current.weeded = false;
+    frame();
+    expect(status()).not.toMatch(/weeds/);
+  });
+
   it("warns of the last run at the net", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
