@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { packingTips, waterTips } from "./waterTips";
+import { packingTips, speciesLures, waterSpecies, waterTips } from "./waterTips";
 
 describe("water tips", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -55,5 +55,26 @@ describe("packing tips", () => {
 
   it("offers nothing for an outing already past", () => {
     expect(packingTips(fished, trip, "2026-11-02")).toEqual([]);
+  });
+});
+
+describe("catch form picks", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const base = book.catches.find((entry) => entry.spotId === "spot-mill")!;
+  const here = [
+    { ...base, id: "a", species: "Brook trout", lure: "Pheasant tail" },
+    { ...base, id: "b", species: "brook trout", lure: "Pheasant tail" },
+    { ...base, id: "c", species: "Brook trout", lure: "Elk hair caddis" },
+    { ...base, id: "d", species: "Rainbow trout", lure: "Woolly bugger" },
+  ];
+
+  it("names the kinds a water has given, most first, as one", () => {
+    expect(waterSpecies(here)).toEqual(["Brook trout", "Rainbow trout"]);
+  });
+
+  it("names the lures that took the kind being logged", () => {
+    expect(speciesLures(here, " brook TROUT")).toEqual(["Pheasant tail", "Elk hair caddis"]);
+    expect(speciesLures(here, "Northern pike")).toEqual([]);
+    expect(speciesLures(here, "")).toEqual([]);
   });
 });

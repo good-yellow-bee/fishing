@@ -43,3 +43,26 @@ export function packingTips(book: Logbook, trip: Trip, today: string): string[] 
   if (trip.date < today) return [];
   return waterTips(catchesForSpot(book, trip.spotId))?.lures.map((row) => row.lure) ?? [];
 }
+
+/** The kinds of fish a water has given, most first: one-tap picks for the species on the catch form. */
+export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[] {
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const entry of catches) {
+    const key = entry.species.trim().toLowerCase();
+    const row = counts.get(key) ?? { name: entry.species, count: 0 };
+    row.count += 1;
+    counts.set(key, row);
+  }
+  return [...counts.values()]
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .slice(0, limit)
+    .map((row) => row.name);
+}
+
+/** The lures that took this kind of fish on this water, most first; empty when the water hasn't given that kind. */
+export function speciesLures(catches: readonly CatchEntry[], species: string, limit = 3): string[] {
+  const want = species.trim().toLowerCase();
+  if (!want) return [];
+  const kind = catches.filter((entry) => entry.species.trim().toLowerCase() === want);
+  return lureTally({ spots: [], trips: [], catches: kind }, limit).map((row) => row.lure);
+}
