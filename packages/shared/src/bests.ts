@@ -1,4 +1,5 @@
 import { LAKE_SEASONS, SEASON_LABELS, lakeSeason, type LakeSeason } from "./season.ts";
+import { moonPhase } from "./moon.ts";
 import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
@@ -181,6 +182,36 @@ export function seasonTally(book: Logbook): SeasonTally[] {
     counts.set(season, (counts.get(season) ?? 0) + 1);
   }
   return LAKE_SEASONS.map((id) => ({ id, label: SEASON_LABELS[id], count: counts.get(id) ?? 0 }));
+}
+
+export type MoonQuarter = "new" | "waxing" | "full" | "waning";
+
+export const MOON_QUARTER_LABELS: Record<MoonQuarter, string> = {
+  new: "Near the new moon",
+  waxing: "Waxing moon",
+  full: "Near the full moon",
+  waning: "Waning moon",
+};
+
+const MOON_QUARTERS: MoonQuarter[] = ["new", "waxing", "full", "waning"];
+
+/** The moon's month cut in four even weeks, each centred on new, first quarter, full and last quarter. */
+export function moonQuarterOf(date: Date): MoonQuarter {
+  return MOON_QUARTERS[Math.floor(moonPhase(date) * 4 + 0.5) % 4]!;
+}
+
+export type MoonTally = { id: MoonQuarter; label: string; count: number };
+
+/** How many fish came in each week of the moon's month. */
+export function moonTally(book: Logbook): MoonTally[] {
+  const counts = new Map<MoonQuarter, number>();
+  for (const entry of book.catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime())) continue;
+    const quarter = moonQuarterOf(at);
+    counts.set(quarter, (counts.get(quarter) ?? 0) + 1);
+  }
+  return MOON_QUARTERS.map((id) => ({ id, label: MOON_QUARTER_LABELS[id], count: counts.get(id) ?? 0 }));
 }
 
 export type BestDay = { date: string; count: number };

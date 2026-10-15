@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests, seasonTally } from "./bests.ts";
+import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -155,6 +155,32 @@ describe("the seasons the fish came in", () => {
       ["summer", "Summer", 1],
       ["fall", "Fall", 0],
       ["winter", "Winter", 2],
+    ]);
+  });
+});
+
+describe("the moon the fish came under", () => {
+  it("names the week of the moon around known phases", () => {
+    expect(moonQuarterOf(new Date(Date.UTC(2024, 0, 11, 12)))).toBe("new");
+    expect(moonQuarterOf(new Date(Date.UTC(2024, 0, 18, 3)))).toBe("waxing");
+    expect(moonQuarterOf(new Date(Date.UTC(2024, 0, 25, 18)))).toBe("full");
+    expect(moonQuarterOf(new Date(Date.UTC(2024, 1, 2, 23)))).toBe("waning");
+    expect(moonQuarterOf(new Date(Date.UTC(2000, 0, 21, 5)))).toBe("full");
+  });
+
+  it("counts every fish in one of the four weeks", () => {
+    const base = sampleLogbook(now);
+    const template = base.catches[0]!;
+    const at = (ms: number, i: number) => ({ ...template, id: `m${i}`, caughtAt: new Date(ms).toISOString() });
+    const book = {
+      ...base,
+      catches: [at(Date.UTC(2024, 0, 25, 18), 1), at(Date.UTC(2024, 0, 26, 2), 2), at(Date.UTC(2024, 0, 11, 12), 3)],
+    };
+    expect(moonTally(book).map((row) => [row.id, row.count])).toEqual([
+      ["new", 1],
+      ["waxing", 0],
+      ["full", 2],
+      ["waning", 0],
     ]);
   });
 });

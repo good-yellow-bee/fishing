@@ -1111,3 +1111,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR58~~ | ~~Bests page says how many fish in the book were released~~ (#298) | field | S |
 | ~~BR59~~ | ~~Undo returns to the restored entry's page; Escape closes the Undo bar~~ (#299) | field | S |
 | ~~BR60~~ | ~~Moon phase on catch and trip pages~~ (#300) | field | S |
+| ~~BR61~~ | ~~Bests counts fish by the week of the moon~~ (#301) | field | S |

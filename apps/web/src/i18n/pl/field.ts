@@ -336,4 +336,9 @@ export const PL_FIELD: PlBook = {
   "Released: {count} of {total}": "Wypuszczone: {count} z {total}",
   Moon: "Księżyc",
   "Moon: {phase}": "Księżyc: {phase}",
+  "By the moon": "Według księżyca",
+  "Near the new moon": "Około nowiu",
+  "Waxing moon": "Księżyc przybywa",
+  "Near the full moon": "Około pełni",
+  "Waning moon": "Księżyc ubywa",
 };
