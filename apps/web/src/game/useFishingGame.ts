@@ -684,6 +684,7 @@ export function useFishingGame(
     let frame = 0;
     let last = 0;
     let lastReelFx = 0;
+    let lastScrapeFx = 0;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
@@ -735,6 +736,12 @@ export function useFishingGame(
           }
           prevSurge = sim.surge;
           fx.drag.set(dragTone(sim.tension, sim.surge, reeling));
+          // Reeling against a run off the point grates the line over the rocks.
+          if (reeling && sim.rocky && now - lastScrapeFx > 220) {
+            fx.scrape();
+            fx.haptic("scrape");
+            lastScrapeFx = now;
+          }
           if (reeling && now - lastReelFx > 90) {
             fx.reel();
             lastReelFx = now;
