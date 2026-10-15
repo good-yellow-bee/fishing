@@ -1266,6 +1266,17 @@ html[data-input="pad"] .fight-bar .on-pad {
   background: #f4efe4;
 }
 
+/* The last cast's stop: a faint ghost of the marker to aim the next cast by. */
+.bar .last-cast {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  width: 3px;
+  height: 100%;
+  margin-left: 0.5px;
+  background: repeating-linear-gradient(to bottom, rgba(244, 239, 228, 0.75) 0 3px, transparent 3px 5px);
+}
+
 .bar .zone {
   position: absolute;
   top: 0;

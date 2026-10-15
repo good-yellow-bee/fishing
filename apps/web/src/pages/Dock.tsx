@@ -737,7 +737,7 @@ export function DockPage() {
           </div>
         )}
         {fishing && !shopOpen && (
-          <PowerMeter phase={scenePhase} powerRef={game.powerRef} accuracy={me.profile.accuracy} />
+          <PowerMeter phase={scenePhase} powerRef={game.powerRef} lastCastRef={game.lastCastRef} accuracy={me.profile.accuracy} />
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
         <p className="hint" aria-live="polite">
