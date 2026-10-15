@@ -1049,3 +1049,8 @@ button.field-primary:disabled {
   display: block;
   margin: -6px 0 16px;
 }
+
+.spot-card .next-outing {
+  margin-top: 4px;
+  color: var(--field-rust);
+}
