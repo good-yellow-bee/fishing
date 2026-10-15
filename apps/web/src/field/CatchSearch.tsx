@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, SEASON_LABELS, SKY_LABELS, WATER_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -52,7 +52,14 @@ function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   return normalize(t(band.label)).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, and released fish. */
+/** True when the week of the moon the fish came in ("Waxing moon", "Near the full moon") starts with what was typed, from three letters up. */
+function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  if (want.length < 3) return false;
+  const at = new Date(entry.caughtAt);
+  return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
+}
+
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, and released fish. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
@@ -69,7 +76,8 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
       waterTypeHas(book, entry, want, t) ||
       skyHas(entry, want, t) ||
       seasonHas(entry, want, t) ||
-      timeHas(entry, want, t)
+      timeHas(entry, want, t) ||
+      moonHas(entry, want, t)
     )
       hit.add(entry.id);
   }
