@@ -719,7 +719,7 @@ function FightMotion({ phase, sim }: { phase: ScenePhase; sim: SimRef }) {
       const leadTarget = fishLeadMeters(surge, fightView.reeling, worn);
       // A turned run swings back in toward the line.
       const sideTarget = fishSideMeters(surge, runSide.current, worn) * (fightView.turning ? 0.45 : 1);
-      const depthTarget = fishDepthMeters(surge, worn);
+      const depthTarget = fishDepthMeters(surge, worn, sim.current?.sulk === true);
       const pullTarget = bobberPull(surge, fightView.reeling);
       const leadRate = surge === 2 && !fightView.reeling ? 4.8 : fightView.reeling ? 6.2 : 3.6;
       const pullRate = surge === 2 && !fightView.reeling ? 5.4 : 3.4;

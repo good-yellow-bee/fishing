@@ -1078,7 +1078,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT33~~ | ~~The landed card counts the leaps the angler bowed to (let go before the line loaded the rod): Bowed to 2 leaps~~ (#428) | fight | S |
 | ~~GT34~~ | ~~The tension bar keeps a notch at the fight's highest tension, turning red once it reached the red, so the angler sees how near the edge they came~~ (#430) | fight | S |
 | ~~GT35~~ | ~~A bottom feeder hooked on its second take is noted on the landed card: On the second take~~ (#432) | fish | S |
-| GT36 | News card (2026-10-15zh) covers GT33 to GT35: bowed leaps, the peak-tension notch, and the second-take note | news | S |
+| ~~GT36~~ | ~~News card (2026-10-15zh) covers GT33 to GT35: bowed leaps, the peak-tension notch, and the second-take note~~ (#434) | news | S |
+| GT37 | A sulking bottom feeder sinks deep on the lake (0.68 m, under its 0.42 m calm depth) and comes back up once pumped, so the scene shows the sulk the fight card calls | fish | S |
 
 ## Risks / open questions for the owner
 
