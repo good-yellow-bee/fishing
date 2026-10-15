@@ -35,6 +35,7 @@ import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./f
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
+import { SpeciesChips } from "./SpeciesChips";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return entry.measure.kind === "length"
@@ -93,16 +94,19 @@ export function CatchesPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
-        <PagedCatches items={catches}>
-          {(entry) => (
-            <CatchCard
-              key={entry.id}
-              entry={entry}
-              spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-              tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
-            />
-          )}
-        </PagedCatches>
+        <>
+          <SpeciesChips catches={catches} />
+          <PagedCatches items={catches}>
+            {(entry) => (
+              <CatchCard
+                key={entry.id}
+                entry={entry}
+                spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
+                tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+              />
+            )}
+          </PagedCatches>
+        </>
       )}
     </div>
   );
