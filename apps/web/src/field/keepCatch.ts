@@ -17,6 +17,13 @@ export function saveLandedCatch(landed: LandedFish) {
   void keepBookStorage();
 }
 
+/** A fish let go from the game's catch card is marked released in the book too, if it is there. */
+export function markReleasedInBook(id: string) {
+  const book = readStoredLogbook();
+  if (!book || !book.catches.some((entry) => entry.id === id && !entry.released)) return;
+  saveLogbook({ ...book, catches: book.catches.map((entry) => (entry.id === id ? { ...entry, released: true } : entry)) });
+}
+
 /** The game's own snapshots, oldest first, so the oldest can make room for a new one. */
 export const AUTO_PHOTO_STORAGE_KEY = "stillwater.field-log.auto-photos.v1";
 

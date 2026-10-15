@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
-import { saveLandedCatch, saveLandedPhoto } from "./keepCatch";
+import { markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "./keepCatch";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook } from "./storage";
 import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, sampleLogbook } from "@stillwater/shared";
 
@@ -47,6 +47,18 @@ describe("save a landed fish", () => {
       weather: null,
     });
     expect(localStorage.getItem(PHOTO_STORAGE_KEY)).toBeNull();
+  });
+
+  it("marks a fish let go from the card as released, and leaves other books alone", () => {
+    markReleasedInBook(landed.id);
+    expect(localStorage.getItem(LOGBOOK_STORAGE_KEY)).toBeNull();
+    saveLandedCatch(landed);
+    markReleasedInBook("not-in-the-book");
+    expect(readStoredLogbook()?.catches[0]?.released).toBeUndefined();
+    markReleasedInBook(landed.id);
+    expect(readStoredLogbook()?.catches.find((entry) => entry.id === landed.id)?.released).toBe(true);
+    saveLandedCatch(landed);
+    expect(readStoredLogbook()?.catches.find((entry) => entry.id === landed.id)?.released).toBe(true);
   });
 
   it("starts a fresh browser's book with the real catch alone, no sample fish", () => {

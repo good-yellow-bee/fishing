@@ -1107,3 +1107,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR54~~ | ~~Mark a catch as released; shown on the catch page and card, kept in the book file and the spreadsheet~~ (#294) | field | S |
 | ~~BR55~~ | ~~Trip and water sums count the released fish~~ (#295) | field | S |
 | ~~BR56~~ | ~~News card (2026-10-15h) tells players about Released, kept drafts and same weather~~ (#296) | field log | S |
+| ~~BR57~~ | ~~A fish released from the game catch card is marked released in the field log~~ (#297) | field log | S |
