@@ -1151,3 +1151,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR98~~ | ~~Species and spot fish lists split under month headings~~ (#338) | field | S |
 | ~~BR99~~ | ~~Catch search results split under month headings~~ (#339) | field | S |
 | ~~BR100~~ | ~~Home Next tile says when the next outing is, before its water~~ (#340) | field | S |
+| ~~BR101~~ | ~~News card (2026-10-15p) tells players about month headings on fish lists and search, and the Next tile day~~ (#341) | field log | S |
