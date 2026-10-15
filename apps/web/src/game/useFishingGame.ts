@@ -685,6 +685,7 @@ export function useFishingGame(
     let last = 0;
     let lastReelFx = 0;
     let lastScrapeFx = 0;
+    let wasWeeded = false;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
@@ -736,6 +737,12 @@ export function useFishingGame(
           }
           prevSurge = sim.surge;
           fx.drag.set(dragTone(sim.tension, sim.surge, reeling));
+          // A fish ploughing into the weeds at the reeds swishes and thumps once.
+          if (sim.weeded && !wasWeeded) {
+            fx.weeds();
+            fx.haptic("weeds");
+          }
+          wasWeeded = !!sim.weeded;
           // Reeling against a run off the point grates the line over the rocks.
           if (reeling && sim.rocky && now - lastScrapeFx > 220) {
             fx.scrape();
