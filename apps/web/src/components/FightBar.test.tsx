@@ -124,6 +124,29 @@ describe("FightBar for screen readers", () => {
     expect(word().textContent).toBe("Fish played out");
   });
 
+  it("warns once the fish takes a third of the way to escaping, and stripes the line bar from the right", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const word = () => container!.querySelector<HTMLElement>(".fight-short")!;
+    const overrun = () => container!.querySelector<HTMLElement>(".overrun")!.style.width;
+    const line = () => container!.querySelectorAll('[role="meter"]')[1]!.getAttribute("aria-valuetext");
+    sim.current.line = 1.05;
+    frame();
+    expect(word().hidden).toBe(true);
+    expect(parseFloat(overrun())).toBeCloseTo(20);
+    expect(line()).not.toMatch(/running out/i);
+    sim.current.line = 1.15;
+    frame();
+    expect(word().hidden).toBe(false);
+    expect(word().textContent).toBe("Running out of line!");
+    expect(container!.querySelector<HTMLElement>(".fight-stamina")!.hidden).toBe(true);
+    expect(line()).toMatch(/Running out of line!$/);
+    sim.current.line = 0.6;
+    frame();
+    expect(word().hidden).toBe(true);
+    expect(container!.querySelector<HTMLElement>(".fight-stamina")!.hidden).toBe(false);
+    expect(overrun()).toBe("0%");
+  });
+
   it("warns of the last run at the net", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

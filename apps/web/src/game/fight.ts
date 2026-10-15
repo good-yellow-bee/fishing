@@ -100,8 +100,12 @@ export function tensionZone(tension: number): TensionZone {
   return tension < RED_TENSION ? "tight" : "red";
 }
 
+/** Line out past this and the fish is gone. */
+export const ESCAPE_LINE = 1.25;
 /** 80% of the way from hookset (1) to escape (1.25), like RED_TENSION; a hookset tap's idle frames stay far below it. */
 export const RUN_OUT_LINE = 1.2;
+/** A third of the way from hookset to escape, the fight card warns that the line is running out. */
+export const SHORT_LINE = 1 + (ESCAPE_LINE - 1) / 3;
 
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
@@ -253,7 +257,7 @@ export function makeFight(
 
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";
-    if (sim.line >= 1.25) return "escaped";
+    if (sim.line >= ESCAPE_LINE) return "escaped";
     return "fighting";
   };
 

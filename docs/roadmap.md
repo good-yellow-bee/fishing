@@ -1058,7 +1058,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT13~~ | ~~With a controller connected, the fight card names its buttons and stick (HOLD A or RT to reel, push the left stick the other way) instead of keys or the screen~~ (#384) | game feel | S |
 | ~~GT14~~ | ~~Reeling with the tension in the tight (amber) zone brings line in 25% faster, so holding the reel into the amber pays and the red still punishes. News card (2026-10-15z) covers it, the landed-card notes and the pad words~~ (#385) | fight | S |
 | ~~GT15~~ | ~~The strike says how quick it was: Hooked solid in 0.31 s!, or Hooked in 0.62 s (solid under 0.44 s), so the solid-hook mark is learnable~~ (#387) | fight | S |
-| GT16 | Bite styles: pike, muskies and largemouth bass ambush with no nibble; carp, catfish, burbot and sturgeon mouth the bait two to four times; the wait hint no longer promises a nibble. News card (2026-10-15za) | fish | S |
+| ~~GT16~~ | ~~Bite styles: pike, muskies and largemouth bass ambush with no nibble; carp, catfish, burbot and sturgeon mouth the bait two to four times; the wait hint no longer promises a nibble. News card (2026-10-15zb)~~ (#389) | fish | S |
+| GT17 | Line running out: line a fish takes back past the hookset stripes the line bar red from the right, and a third of the way to escape the card says Running out of line! (also in the line meter for screen readers) | fight | S |
 
 ## Risks / open questions for the owner
 

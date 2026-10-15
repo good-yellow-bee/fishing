@@ -1058,6 +1058,23 @@ kbd {
   color: #4d6b3f;
 }
 
+/* Line given back past the hookset: striped red from the right, so it reads without colour. */
+.fight-bar .fight-short {
+  float: right;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: #b85c38;
+}
+
+.fight-bar .overrun {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  background: repeating-linear-gradient(-45deg, #b85c38 0 3px, rgba(184, 92, 56, 0.55) 3px 7px);
+}
+
 .fight-bar .danger-zone {
   position: absolute;
   top: 0;
