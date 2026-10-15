@@ -9,6 +9,8 @@ type Props = {
   fight: Fight;
   sim: { current: FightSim | null };
   performance: { current: FightPerformance | null };
+  /** The heaviest of this species in the field log, in pounds; a heavier fish on the line says so. */
+  best?: number | null;
 };
 
 const ZONE_COLOR: Record<TensionZone, string> = { easy: "#6a8f5a", tight: "#d9a94e", red: "#b85c38" };
@@ -17,7 +19,7 @@ const ZONE_WORD: Record<TensionZone, string> = { easy: "Easy", tight: "Tight", r
 /** How much fight the fish has left, beside the line bar: its runs weaken and it comes in faster as it tires. */
 const STAMINA_WORD: Record<StaminaState, string> = { fresh: "Fish fresh", tiring: "Fish tiring", spent: "Fish played out" };
 
-export function FightBar({ fight, sim, performance }: Props) {
+export function FightBar({ fight, sim, performance, best = null }: Props) {
   const { reelMode } = useSettings();
   const t = useT();
   const lang = useLang();
@@ -133,6 +135,9 @@ export function FightBar({ fight, sim, performance }: Props) {
         <h2>{t(fight.species.name)}</h2>
         <span>{weightText(fight.weight)}</span>
       </header>
+      {best !== null && fight.weight > best && (
+        <p className="fight-best">{t("Heavier than your best ({weight})", { weight: weightText(best) })}</p>
+      )}
       {fight.underpowered ? (
         <p className="warn">{t("This fish is too heavy for your line.")}</p>
       ) : (

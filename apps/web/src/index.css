@@ -1142,6 +1142,13 @@ kbd {
   font-weight: 600;
 }
 
+.fight-bar .fight-best {
+  margin: 2px 0 6px;
+  color: #a8771f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .fight-bar .fight-clean {
   margin: 8px auto 0;
   width: fit-content;

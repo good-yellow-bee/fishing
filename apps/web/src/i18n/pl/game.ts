@@ -185,6 +185,7 @@ export const PL_GAME: PlBook = {
 
   // Fight
   "Clean fight · 1.5× points": "Czysty hol · 1,5× punktów",
+  "Heavier than your best ({weight})": "Cięższa od twojego rekordu ({weight})",
   "Clean bonus lost": "Premia za czysty hol przepadła",
   "This fish is too heavy for your line.": "Ta ryba jest za ciężka na twoją żyłkę.",
   Tension: "Napięcie",
