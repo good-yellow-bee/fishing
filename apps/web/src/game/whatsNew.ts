@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15zf";
+export const NEWS_ID = "2026-10-15zg";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The landed card now says how long the fight took. A missed bite says how long the fish held the bait, and a strike at a nibble says it was only a nibble, so the timing is easier to learn.",
   "Carp, catfish, burbot and sturgeon now sulk on the bottom between runs: reeling barely moves them, so ease off for a moment, then pump. The fight card also says when a fish is played out and ready to reel in, and the float twitches while a bottom feeder comes back for a second take.",
   "Miss the strike on a carp, catfish, burbot or sturgeon and it comes back once for a second take. Each bite is called the way the fish takes it: a predator's WHAM, a bottom feeder's slow take. A fish landed on the edge of a snap is noted as a Close call.",
   "The catch search also finds released fish and kinds of water (“river”, “pond”), sums up what it found, and can save those fish as a spreadsheet.",
