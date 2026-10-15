@@ -136,6 +136,9 @@ type Timers = {
   shown?: () => void;
 };
 
+/** How long a bottom feeder that dropped the bait takes to come back for its second take. */
+export const SECOND_TAKE_MS = 1800;
+
 const waitHint = () => t("Watch the bobber. Strike on the real dip, not a nibble.");
 const hotspotWaitHint = () => t("Your lure is in the bubbles. Watch the bobber — strike on the real dip.");
 const shortCastHint = () => t("Short cast — only small fish will look.");
@@ -346,6 +349,7 @@ export function useFishingGame(
     const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
     const arm = () => {
+      let secondTake = false;
       const nibbleTimers: number[] = [];
       timers.current.nibbles = nibbleTimers;
       for (const { at, ms } of nibbles) {
@@ -384,6 +388,17 @@ export function useFishingGame(
             // Gone to another tab mid-bite: the fish keeps the bait, and a fresh window opens on the way back.
             if (document.visibilityState === "hidden") {
               timers.current.shown = whenShown(openWindow, document, 0);
+              return;
+            }
+            // A bottom feeder that dropped the bait noses back for one more go before it leaves.
+            if (!secondTake && biteStyle(species.id) === "mouth") {
+              secondTake = true;
+              setPhaseBoth("waiting");
+              setHint(t("It dropped the bait but it's still there. Watch for a second take…"));
+              timers.current.wait = window.setTimeout(() => {
+                if (phaseRef.current !== "waiting") return;
+                timers.current.shown = whenShown(takeBait);
+              }, SECOND_TAKE_MS);
               return;
             }
             // The missed fish stays in the outcome so the turn-away shows the same fish.

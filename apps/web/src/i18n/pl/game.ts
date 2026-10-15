@@ -355,6 +355,7 @@ export const PL_GAME: PlBook = {
   "Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.": "Zacięte po {time} s (pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "NOW — strike!": "TERAZ — zatnij!",
   "Too slow. The fish dropped the bait.": "Za wolno. Ryba wypuściła przynętę.",
+  "It dropped the bait but it's still there. Watch for a second take…": "Wypuściła przynętę, ale wciąż tam jest. Czekaj na drugie branie…",
   "Strike the moment the bobber goes under.": "Zatnij w chwili, gdy spławik zanurkuje.",
   "The lure slapped the dock.": "Przynęta plasnęła o pomost.",
   "Too little power. Hold longer.": "Za słabo. Trzymaj dłużej.",
