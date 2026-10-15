@@ -2839,6 +2839,29 @@ html[data-contrast="high"] .sound-captions li {
     top: calc(var(--hud-bottom, 52px) + 6px);
   }
 
+  /* Between the lure panel on the left and the shore signs on the right, at any text size. */
+  .walkthrough {
+    left: 56%;
+    width: min(420px, calc(40vw / var(--text-zoom, 1)));
+  }
+
+  .walkthrough ol {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .walkthrough-skip {
+    position: static;
+    justify-self: end;
+    margin: -4px -6px -6px 0;
+    padding: 4px 8px;
+  }
+
+  /* The stick owns the bottom-left corner. */
+  .lodge-tracks {
+    display: none;
+  }
+
   .walk-stick {
     bottom: 10px;
     left: 10px;
@@ -2849,7 +2872,8 @@ html[data-contrast="high"] .sound-captions li {
   .hint {
     bottom: 10px;
     left: 114px;
-    max-width: 38ch;
+    /* Stops short of the power meter (42vw wide at the right) whatever the text size. */
+    max-width: min(38ch, calc((58vw - 30px) / var(--text-zoom, 1) - 114px));
     padding: 7px 10px;
     font-size: 12px;
   }
