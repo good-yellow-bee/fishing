@@ -166,6 +166,8 @@ export const PL_FIELD: PlBook = {
   "Sample waters are invented. This book stays in this browser.": "Przykładowe łowiska są zmyślone. Ten dziennik zostaje w tej przeglądarce.",
   "Download this book": "Pobierz ten dziennik",
   "Install the app": "Zainstaluj aplikację",
+  "To keep the app and its book on this device, tap Share, then Add to Home Screen.":
+    "Aby zachować aplikację i dziennik na tym urządzeniu, stuknij Udostępnij, a potem Do ekranu początkowego.",
   "This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.":
     "Ten dziennik nie był jeszcze pobrany. Kopia zachowa połowy, gdyby przeglądarka wyczyściła swoje dane.",
   "Catches since the last download: {count}. A fresh copy keeps them safe.":

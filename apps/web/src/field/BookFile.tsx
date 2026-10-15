@@ -6,7 +6,7 @@ import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
-import { installApp, useInstallOffer } from "../installPrompt";
+import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
 function downloadBook(json: string) {
   const blob = new Blob([json], { type: "application/json" });
@@ -32,6 +32,7 @@ export function BookFile() {
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
   const nudge = copyNudge(own, copiedAt);
   const canInstall = useInstallOffer();
+  const [tip] = useState(() => homeScreenTip());
 
   const onDownload = () => {
     downloadBook(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })));
@@ -85,6 +86,7 @@ export function BookFile() {
             : t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })}
         </p>
       ) : null}
+      {tip && own > 0 ? <p className="copy-nudge">{t("To keep the app and its book on this device, tap Share, then Add to Home Screen.")}</p> : null}
       <div className="book-file">
         <button type="button" className="text-button" onClick={onDownload}>
           {t("Download this book")}
