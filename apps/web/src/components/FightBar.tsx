@@ -59,7 +59,8 @@ export function FightBar({ fight, sim, performance }: Props) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
         // Written only on a change, so the live region speaks each new call once.
-        const call = (state.jump ? leapLines : lines)[state.surge]!;
+        const call =
+          state.lastRun && state.surge === 1 && !state.jump ? t("Let go now — it sees the net!") : (state.jump ? leapLines : lines)[state.surge]!;
         if (status.current && status.current.textContent !== call) status.current.textContent = call;
         // Screen readers get the bars as meters, refreshed four times a second rather than every frame.
         if (now - spokenAt >= 250) {
