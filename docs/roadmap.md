@@ -1277,3 +1277,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR173~~ | ~~Refused save focuses and marks the field; message clears on change~~ (#457) | field | S |
 | ~~BR174~~ | ~~Arrow keys in the measure and water-type radio rows~~ (#458) | field | S |
 | ~~BR175~~ | ~~Focus the heading (or search) after in-app navigation~~ (#461) | field | S |
+| ~~BR176~~ | ~~Delete question as an alert dialog, focus on Keep, Escape closes~~ (#463) | field | S |
