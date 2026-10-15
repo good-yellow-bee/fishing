@@ -32,3 +32,14 @@ export function toBookTemp(text: string, units: Units) {
 export function fromBookTemp(fahrenheit: number, units: Units) {
   return units === "imperial" ? String(fahrenheit) : round(((fahrenheit - 32) * 5) / 9, 1);
 }
+
+/** The book's range messages name imperial bounds; a metric reader gets the same bounds in their units. */
+const METRIC_MESSAGES: Record<string, string> = {
+  "Length should sit between 1 and 120 inches.": "Length should sit between 2.5 and 305 centimetres.",
+  "Weight should sit between 0.1 and 80 pounds.": "Weight should sit between 0.05 and 36 kilograms.",
+  "Water temperature should sit between 32 and 90.": "Water temperature should sit between 0 and 32 °C.",
+};
+
+export function unitsMessage(message: string, units: Units) {
+  return units === "metric" ? (METRIC_MESSAGES[message] ?? message) : message;
+}

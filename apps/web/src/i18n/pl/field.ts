@@ -226,6 +226,9 @@ export const PL_FIELD: PlBook = {
   "Note the wind.": "Zanotuj wiatr.",
   "Use a number for the water temperature.": "Podaj temperaturę wody liczbą.",
   "Water temperature should sit between 32 and 90.": "Temperatura wody powinna mieścić się między 32 a 90.",
+  "Length should sit between 2.5 and 305 centimetres.": "Długość powinna mieścić się między 2,5 a 305 cm.",
+  "Weight should sit between 0.05 and 36 kilograms.": "Waga powinna mieścić się między 0,05 a 36 kg.",
+  "Water temperature should sit between 0 and 32 °C.": "Temperatura wody powinna mieścić się między 0 a 32 °C.",
   "The book already holds as many photos as this browser should keep.":
     "Dziennik ma już tyle zdjęć, ile ta przeglądarka powinna przechować.",
   "That file is not a Stillwater field log. This book was left as it is.":

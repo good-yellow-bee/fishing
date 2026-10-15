@@ -18,7 +18,7 @@ import { CatchCard } from "./cards";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
-import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp } from "./unitsInput";
+import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, t, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
@@ -200,7 +200,7 @@ function CatchForm() {
     };
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
-      setError(result.message);
+      setError(unitsMessage(result.message, units));
       return;
     }
     if (existing) navigate(`/catches/${existing.id}`);

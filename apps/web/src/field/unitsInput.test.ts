@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp } from "./unitsInput";
+import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 
 describe("metric entry in the field log", () => {
   it("leaves imperial entry as typed", () => {
@@ -23,5 +23,13 @@ describe("metric entry in the field log", () => {
     expect(fromBookAmount(2.4, "weight", "metric")).toBe("1.09");
     expect(fromBookTemp(61, "metric")).toBe("16.1");
     expect(fromBookAmount(2.4, "weight", "imperial")).toBe("2.4");
+  });
+});
+
+describe("range messages in metric", () => {
+  it("names metric bounds for a metric reader and leaves other messages alone", () => {
+    expect(unitsMessage("Length should sit between 1 and 120 inches.", "metric")).toBe("Length should sit between 2.5 and 305 centimetres.");
+    expect(unitsMessage("Length should sit between 1 and 120 inches.", "imperial")).toBe("Length should sit between 1 and 120 inches.");
+    expect(unitsMessage("Note the sky.", "metric")).toBe("Note the sky.");
   });
 });
