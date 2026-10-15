@@ -1110,3 +1110,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR57~~ | ~~A fish released from the game catch card is marked released in the field log~~ (#297) | field log | S |
 | ~~BR58~~ | ~~Bests page says how many fish in the book were released~~ (#298) | field | S |
 | ~~BR59~~ | ~~Undo returns to the restored entry's page; Escape closes the Undo bar~~ (#299) | field | S |
+| ~~BR60~~ | ~~Moon phase on catch and trip pages~~ (#300) | field | S |

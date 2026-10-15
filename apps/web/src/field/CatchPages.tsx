@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  MOON_LABELS,
+  moonName,
+  moonPhase,
   CATCH_PHOTO_MAX_BYTES,
   FISH,
   SKIES,
@@ -701,12 +704,16 @@ export function CatchPage() {
           <img src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} />
         </figure>
       ) : null}
-      {entry.weather ? (
-        <aside className="conditions" aria-label={t("Weather")}>
-          <span className="eyebrow">{t("Weather")}</span>
-          <p>{weatherText(entry.weather)}</p>
-        </aside>
-      ) : null}
+      <aside className="conditions" aria-label={t("Conditions")}>
+        {entry.weather ? (
+          <>
+            <span className="eyebrow">{t("Weather")}</span>
+            <p>{weatherText(entry.weather)}</p>
+          </>
+        ) : null}
+        <span className="eyebrow">{t("Moon")}</span>
+        <p>{t(MOON_LABELS[moonName(moonPhase(new Date(entry.caughtAt)))])}</p>
+      </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
       {trip ? (
         <p className="trip-link">
