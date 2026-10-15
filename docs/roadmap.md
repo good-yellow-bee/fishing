@@ -1143,3 +1143,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR90~~ | ~~Spot cards name the next planned outing on that water~~ (#330) | field | S |
 | ~~BR91~~ | ~~Past trips are grouped under month headings~~ (#331) | field | S |
 | ~~BR92~~ | ~~A trip page says between which times its fish came~~ (#332) | field | S |
+| ~~BR93~~ | ~~Past trips on the Gear page fold their tackle lists away~~ (#333) | field | S |

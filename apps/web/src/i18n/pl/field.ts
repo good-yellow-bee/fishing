@@ -102,6 +102,7 @@ export const PL_FIELD: PlBook = {
   Time: "Godzina",
   Outing: "Wyprawa",
   "Outing:": "Wyprawa:",
+  "Open the outing": "Otwórz wyprawę",
   "Fish came between {from} and {to}": "Ryby brały między {from} a {to}",
   "Next outing: {when}": "Następna wyprawa: {when}",
   "Last here: {title}, {day} · {fish}": "Ostatnio tutaj: {title}, {day} · {fish}",
