@@ -418,6 +418,8 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
+  "Month headings in the field log now count what each month holds: outings and fish on the Trips and water pages, fish in the catch lists, and pictures on Photos.":
+    "Nagłówki miesięcy w dzienniku liczą teraz, co mieści każdy miesiąc: wyprawy i ryby na stronach wypraw i łowisk, ryby na listach połowów, a zdjęcia na stronie Zdjęcia.",
   "Levels 9 and 10 are open: from level 9 hooked fish tire faster, and from level 10 rare fish bite more often. Strike quickly on a bite and the hook sets solid, so the fish starts the fight a little tired.":
     "Otwarte są poziomy 9 i 10: od poziomu 9 ryby na haczyku szybciej się męczą, a od 10 rzadkie ryby częściej biorą. Zatnij szybko po braniu, a hak wejdzie pewnie i ryba zacznie hol trochę zmęczona.",
   "Fish now tire as you play them: the fight card says when one is tiring or played out, and it comes up near the surface. Turn a run by holding ← or A (→ or D) the other way, or the side buttons on a touch screen.":
