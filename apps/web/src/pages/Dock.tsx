@@ -567,13 +567,14 @@ export function DockPage() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
+      // Escape closes a panel even from its sliders and checkboxes, where the settings panel puts focus.
       if (event.code === "Escape") {
         setShopOpen(false);
         setSettingsOpen(false);
         setKeysOpen(false);
         return;
       }
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, select")) return;
       if (event.key === "?") {
         event.preventDefault();
         setSettingsOpen(false);
