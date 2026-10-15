@@ -19,16 +19,18 @@ function monthHas(entry: CatchEntry, want: string): boolean {
   return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, and the month a fish came in. */
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, and released fish. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
   const want = normalize(needle);
   const hit = new Set(found.map((entry) => entry.id));
+  // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
+  const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
     if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
-    else if (monthHas(entry, want)) hit.add(entry.id);
+    else if (monthHas(entry, want) || (entry.released && releasedWords.some((word) => word.startsWith(want)))) hit.add(entry.id);
   }
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }

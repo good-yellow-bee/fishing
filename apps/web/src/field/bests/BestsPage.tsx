@@ -110,7 +110,10 @@ export function BestsPage() {
         </div>
       </section>
       {released > 0 ? (
-        <p className="meta released-share">{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</p>
+        <p className="meta released-share">
+          {/* Opens the released fish in the catch search. */}
+          <Link to={findLink(t("Released"))}>{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</Link>
+        </p>
       ) : null}
 
       {book.catches.length === 0 ? (
