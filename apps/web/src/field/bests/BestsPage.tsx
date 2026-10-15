@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { personalBests, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { biteTimes, lureTally, personalBests, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -33,6 +33,24 @@ function LargeFish({
   );
 }
 
+/** A count per row with a bar drawn to scale; the bar is for the eye, the words carry the number. */
+function TallyBars({ rows }: { rows: Array<{ key: string; label: string; count: number }> }) {
+  const most = Math.max(1, ...rows.map((row) => row.count));
+  return (
+    <ol className="tally-bars">
+      {rows.map((row) => (
+        <li key={row.key} data-empty={row.count === 0 ? "1" : "0"}>
+          <span className="tally-label">{row.label}</span>
+          <span className="tally-bar" aria-hidden="true">
+            <span style={{ width: `${(row.count / most) * 100}%` }} />
+          </span>
+          <span className="tally-count">{row.count === 0 ? t("None") : fishCountLabel(row.count)}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 export function BestsPage() {
   const { book } = useLogbook();
   useT();
@@ -47,7 +65,7 @@ export function BestsPage() {
           <p className="eyebrow">{t("Personal bests")}</p>
           <h1>{t("Bests")}</h1>
           <p className="lede">
-            {t("The largest fish in this book, how the species add up, and which waters have given one up.")}
+            {t("The largest fish in this book, how the species add up, when and on what they bite, and which waters have given one up.")}
           </p>
         </div>
       </header>
@@ -127,6 +145,20 @@ export function BestsPage() {
                 );
               })}
             </div>
+          </section>
+
+          <section>
+            <div className="section-head">
+              <h2>{t("When they bite")}</h2>
+            </div>
+            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+          </section>
+
+          <section>
+            <div className="section-head">
+              <h2>{t("Lures that worked")}</h2>
+            </div>
+            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count }))} />
           </section>
 
           <section>
