@@ -1267,3 +1267,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR167~~ | ~~Lure link on catch cards; home species and outing counts link~~ (#447) | field | S |
 | ~~BR168~~ | ~~Catch search by size bound (>2 lb, <30 cm)~~ (#449) | field | S |
 | ~~BR169~~ | ~~News line for size and joined searches~~ (#450) | field | S |
+| ~~BR170~~ | ~~Spot page species chips open that water's fish of the kind~~ (#452) | field | S |
