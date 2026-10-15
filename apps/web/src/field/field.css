@@ -849,3 +849,19 @@ button.field-primary:disabled {
   justify-content: flex-end;
   gap: 4px 14px;
 }
+
+.catch-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--field-line);
+}
+
+.catch-steps a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}

@@ -1071,3 +1071,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR18~~ | ~~The sample week's invented waters, trips and notes show in the reader's language (their Polish lines existed but were never used); the stored book keeps the English lines, and the player's own words are never translated~~ (#258) | field log, i18n | S |
 | ~~BR19~~ | ~~A photo wall at /photos: every catch with a picture (the game's snapshots and the player's own), newest first, 50 at a time, each opening its catch; linked as "Photos (N)" from the catch log~~ (#259) | field log | S |
 | ~~BR20~~ | ~~The field log's home links the photo wall beside All catches, and the news card tells players about the photo wall, the spreadsheet download and the trip and water summaries~~ (#260) | field log | S |
+| ~~BR21~~ | ~~Newer and older catch links at the foot of each catch page~~ (#261) | field log | S |
