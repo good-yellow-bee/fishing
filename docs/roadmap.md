@@ -1066,7 +1066,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT21~~ | ~~Second take: a bottom feeder (carp, catfish, burbot, sturgeon) that drops the bait on a missed strike comes back once 1.8 s later, with a hint to watch for it; other fish leave as before~~ (#401) | fish | S |
 | ~~GT22~~ | ~~The bite call fits the fish: WHAM — it hit! Strike! for an ambush predator, It's taking it — strike! for a bottom feeder, NOW — strike! for the rest~~ (#403) | fish | S |
 | ~~GT23~~ | ~~Close call: a fish landed after the tension touched 0.95 or the line reached the run-out mark leads its landed-card notes with Close call~~ (#405) | fight | S |
-| GT24 | News card (2026-10-15ze) covers GT21 to GT23: the second take, the bite calls, and the close call | news | S |
+| ~~GT24~~ | ~~News card (2026-10-15ze) covers GT21 to GT23: the second take, the bite calls, and the close call~~ (#407) | news | S |
+| GT25 | The float twitches once halfway through a second-take wait, so the eye knows the fish is still there | fish | S |
 
 ## Risks / open questions for the owner
 

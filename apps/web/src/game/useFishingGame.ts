@@ -145,6 +145,8 @@ function strikeCall(style: BiteStyle) {
 
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
 export const SECOND_TAKE_MS = 1800;
+/** The twitch of the float halfway through that wait. */
+export const SECOND_TAKE_NIBBLE_MS = 300;
 
 const waitHint = () => t("Watch the bobber. Strike on the real dip, not a nibble.");
 const hotspotWaitHint = () => t("Your lure is in the bubbles. Watch the bobber — strike on the real dip.");
@@ -359,7 +361,7 @@ export function useFishingGame(
       let secondTake = false;
       const nibbleTimers: number[] = [];
       timers.current.nibbles = nibbleTimers;
-      for (const { at, ms } of nibbles) {
+      const nibbleAt = (at: number, ms: number) => {
         nibbleTimers.push(window.setTimeout(() => {
           if (phaseRef.current !== "waiting") return;
           setNibble(true);
@@ -377,7 +379,8 @@ export function useFishingGame(
             if (surface) delete surface.dataset.nibble;
           }, ms));
         }, at));
-      }
+      };
+      for (const { at, ms } of nibbles) nibbleAt(at, ms);
       // A bite that comes while the game is out of sight waits for the player to come back, so no fish is lost unseen.
       const takeBait = () => {
         if (phaseRef.current !== "waiting") return;
@@ -402,6 +405,8 @@ export function useFishingGame(
               secondTake = true;
               setPhaseBoth("waiting");
               setHint(t("It dropped the bait but it's still there. Watch for a second take…"));
+              // The float twitches as it noses back, so the eye knows where to look.
+              nibbleAt(SECOND_TAKE_MS * 0.45, SECOND_TAKE_NIBBLE_MS);
               timers.current.wait = window.setTimeout(() => {
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
