@@ -15,6 +15,7 @@ import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./fo
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
+import { findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
 
 export function CatchCard({
@@ -41,7 +42,8 @@ export function CatchCard({
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </h2>
         <p className="meta">
-          <span>{t(entry.lure)}</span>
+          {/* Every fish taken on this lure, as on the catch page. */}
+          <Link to={findLink(t(entry.lure))}>{t(entry.lure)}</Link>
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
