@@ -16,6 +16,7 @@ import {
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
+import { catchBadge } from "./catchBadge";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
@@ -486,6 +487,8 @@ export function CatchPage() {
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const photo = photoFor(entry.id);
   const { newer, older } = catchNeighbors(book, entry.id);
+  const badge = catchBadge(book, entry);
+  const heavy = entry.measure.kind === "weight";
 
   return (
     <div className="sheet">
@@ -514,6 +517,17 @@ export function CatchPage() {
           {" · "}
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
         </p>
+        {badge ? (
+          <p className="best-badge">
+            {badge === "book"
+              ? heavy
+                ? t("Heaviest fish in the book")
+                : t("Longest fish in the book")
+              : heavy
+                ? t("Your heaviest of this kind")
+                : t("Your longest of this kind")}
+          </p>
+        ) : null}
       </EditDelete>
       {photo ? (
         <figure className="catch-photo">
