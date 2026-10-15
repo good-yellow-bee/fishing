@@ -170,7 +170,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month, a kind of water such as “river”, or “released”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, or “released”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
