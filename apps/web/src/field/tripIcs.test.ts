@@ -17,7 +17,7 @@ describe("trip calendar file", () => {
   it("escapes commas, semicolons and line breaks", () => {
     const text = tripIcs(trip, "Cedar Bend", new Date("2026-10-15T04:00:00.000Z"));
     expect(text).toContain("SUMMARY:Dawn patrol\\, weed edge\r\n");
-    expect(text).toContain("DESCRIPTION:Bring the net\; early\\nstart\r\n");
+    expect(text).toContain("DESCRIPTION:Bring the net\\; early\\nstart\r\n");
     expect(text).toContain("LOCATION:Cedar Bend\r\n");
   });
 
@@ -30,5 +30,14 @@ describe("trip calendar file", () => {
   it("names the file by day and title", () => {
     expect(tripIcsName(trip)).toBe("stillwater-2026-10-31-dawn-patrol-weed-edge.ics");
     expect(tripIcsName({ ...trip, title: "Łódź o świcie" })).toBe("stillwater-2026-10-31-odz-o-swicie.ics");
+  });
+
+  it("folds a long line at 75 bytes without splitting a letter", () => {
+    const note = "Łowimy przy trzcinach, potem zmiana na głęboką wodę przy spadzie i powrót o zmierzchu.";
+    const text = tripIcs({ ...trip, note }, null);
+    const lines = text.split("\r\n");
+    for (const line of lines) expect(new TextEncoder().encode(line).length).toBeLessThanOrEqual(75);
+    const description = text.slice(text.indexOf("DESCRIPTION:")).split("\r\nEND")[0]!.replace(/\r\n /g, "");
+    expect(description).toBe(`DESCRIPTION:${note.replace(/,/g, "\\,")}`);
   });
 });
