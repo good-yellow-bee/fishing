@@ -130,7 +130,7 @@ export function HomePage() {
               <div className="stack">
                 {yearsAgo.map((entry) => (
                   <div key={entry.id} className="years-ago">
-                    {/* The card gives the day but not the year, so say how long ago. */}
+                    {/* Say plainly how long ago, beside the date on the card. */}
                     <p className="meta">{tn(now.getFullYear() - new Date(entry.caughtAt).getFullYear(), "{n} year ago", "{n} years ago")}</p>
                     <CatchCard
                       entry={entry}

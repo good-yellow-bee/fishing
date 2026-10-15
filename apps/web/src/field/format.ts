@@ -4,9 +4,9 @@ import { getLang, locale, t, tn } from "../i18n";
 /** Formatters per language, built on first use so a language change takes effect. */
 const formats = new Map<string, Intl.DateTimeFormat>();
 
-function format(name: "day" | "long" | "clock" | "time"): Intl.DateTimeFormat {
+function format(name: "day" | "long" | "clock" | "time", withYear = false): Intl.DateTimeFormat {
   const tag = locale();
-  const key = `${tag}:${name}`;
+  const key = `${tag}:${name}:${withYear}`;
   let found = formats.get(key);
   if (!found) {
     const options: Intl.DateTimeFormatOptions =
@@ -17,19 +17,26 @@ function format(name: "day" | "long" | "clock" | "time"): Intl.DateTimeFormat {
           : name === "time"
             ? { hour: "numeric", minute: "2-digit" }
             : { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
-    found = new Intl.DateTimeFormat(tag, options);
+    found = new Intl.DateTimeFormat(tag, withYear ? { ...options, year: "numeric" } : options);
     formats.set(key, found);
   }
   return found;
 }
 
+/** A day outside this year carries its year, so an old fish or a far-off outing isn't read as this year's. */
+function otherYear(date: Date): boolean {
+  return date.getFullYear() !== new Date().getFullYear();
+}
+
 export function formatDay(ymd: string): string {
-  return format("day").format(new Date(`${ymd}T12:00:00`));
+  const date = new Date(`${ymd}T12:00:00`);
+  return format("day", otherYear(date)).format(date);
 }
 
 /** The day a fish was caught, read from its full time so a UTC stamp lands on the local day. */
 export function formatCatchDay(iso: string): string {
-  return format("day").format(new Date(iso));
+  const date = new Date(iso);
+  return format("day", otherYear(date)).format(date);
 }
 
 export function formatLongDay(date: Date): string {
@@ -42,7 +49,8 @@ export function formatTimeOfDay(iso: string): string {
 }
 
 export function formatClock(iso: string): string {
-  return format("clock").format(new Date(iso));
+  const date = new Date(iso);
+  return format("clock", otherYear(date)).format(date);
 }
 
 export function tripWhen(ymd: string, today: string, tomorrow: string): string {
