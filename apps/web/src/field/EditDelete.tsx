@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useT } from "../i18n";
 
@@ -17,6 +17,17 @@ export function EditDelete({
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  const askId = useId();
+  const deleteButton = useRef<HTMLButtonElement>(null);
+  const keepButton = useRef<HTMLButtonElement>(null);
+  // The question takes focus on the safe answer, so a stray Enter keeps the entry.
+  useEffect(() => {
+    if (open) keepButton.current?.focus();
+  }, [open]);
+  const keep = () => {
+    setOpen(false);
+    deleteButton.current?.focus();
+  };
 
   return (
     <>
@@ -24,19 +35,26 @@ export function EditDelete({
         <div>{children}</div>
         <div className="sheet-actions">
           <Link to={editTo}>{t("Edit")}</Link>
-          <button type="button" className="text-button" onClick={() => setOpen(true)}>
+          <button ref={deleteButton} type="button" className="text-button" onClick={() => setOpen(true)} aria-expanded={open}>
             {t("Delete")}
           </button>
           {aside}
         </div>
       </header>
       {open ? (
-        <p className="confirm-ask">
-          {ask}{" "}
+        <p
+          className="confirm-ask"
+          role="alertdialog"
+          aria-labelledby={askId}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") keep();
+          }}
+        >
+          <span id={askId}>{ask}</span>{" "}
           <button type="button" className="text-button" onClick={onDelete}>
             {t("Delete")}
           </button>
-          <button type="button" className="text-button" onClick={() => setOpen(false)}>
+          <button ref={keepButton} type="button" className="text-button" onClick={keep}>
             {t("Keep")}
           </button>
         </p>
