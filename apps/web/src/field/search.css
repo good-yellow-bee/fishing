@@ -30,3 +30,9 @@
 .catch-search .stack {
   margin-top: 8px;
 }
+
+.catch-search .search-count {
+  margin: 0;
+  color: var(--field-muted);
+  font-size: 13px;
+}

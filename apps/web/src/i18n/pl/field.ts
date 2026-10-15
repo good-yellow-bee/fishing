@@ -50,6 +50,7 @@ export const PL_FIELD: PlBook = {
   "Find a catch": "Znajdź połów",
   "Species, water, or lure": "Gatunek, łowisko lub przynęta",
   "Nothing in the book matches that.": "Nic w dzienniku do tego nie pasuje.",
+  "Matches: {count}": "Pasujące: {count}",
 
   // Edit and delete
   Edit: "Edytuj",
