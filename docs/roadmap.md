@@ -1288,3 +1288,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR179~~ | ~~Restoring the sample book can be undone from the undo bar~~ (#468) | field | S |
 | ~~BR180~~ | ~~Downloads say they happened; the file link is released later~~ (#469) | field | S |
 | ~~BR181~~ | ~~Saving a catch says Fish saved or Changes saved~~ (#471) | field | S |
+| ~~BR182~~ | ~~Undo bar buttons get 44px tap targets~~ (#473) | field | S |
