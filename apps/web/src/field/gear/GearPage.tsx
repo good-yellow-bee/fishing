@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
+  catchesForTrip,
   localDate,
   recentTrips,
   shiftDate,
@@ -9,11 +10,12 @@ import {
   upcomingTrips,
   type Trip,
 } from "@stillwater/shared";
-import { formatDay, tripWhen } from "../format";
+import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { packingTips } from "../waterTips";
 import { monthName, tripsByMonth } from "../tripMonths";
+import { TripMonthHead } from "../TripMonthHead";
 import { t, useT } from "../../i18n";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -54,6 +56,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
           {spot ? ` · ${spot.name}` : ""}
+          {` · ${fishCountLabel(catchesForTrip(book, trip.id).length)}`}
         </span>
       </summary>
       <p className="tackle-past-link">
@@ -136,7 +139,7 @@ export function GearPage() {
       ) : (
         tripsByMonth(recent).map((group) => (
           <section key={group.month} aria-label={monthName(group.month)}>
-            <h3 className="month-head">{monthName(group.month)}</h3>
+            <TripMonthHead month={group.month} trips={group.trips} fishOn={(id) => catchesForTrip(book, id).length} />
             {group.trips.map((trip) => (
               <PastTripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />
             ))}
