@@ -1025,6 +1025,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BO3~~ | ~~With larger text on a phone the catch card stops under the (taller) header, keeps Release, Keep fishing, Field log and Save picture pinned at its foot while the rest scrolls, and the fight card hangs from the header instead of sliding under it~~ (#235) | access, phone UX | S |
 | ~~BO4~~ | ~~On a phone held sideways (with any text size) the first-cast coach sits between the lure panel and the shore signs, its chips wrap and Skip has its own row, the hint stops short of the power meter, and the lake's news leaves the walking stick's corner~~ (#236) | access, phone UX | S |
 
+## Wave BP — Battery on an idle lake (added 2026-10-15, after Wave BO shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BP1~~ | ~~After 90 seconds with no touch, click, key or pad press (and nothing held), the lake draws at the battery saver's 30 frames a second until the next input; the frame watch ignores the drop so it never steps effects down for it~~ (#237) | perf, battery | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
