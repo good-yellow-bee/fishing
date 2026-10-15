@@ -217,6 +217,7 @@ export const PL_FIELD: PlBook = {
   "Download this book": "Pobierz ten dziennik",
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
+  "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",

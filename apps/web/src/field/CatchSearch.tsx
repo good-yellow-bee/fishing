@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { WATER_LABELS, catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
+import { catchesCsv } from "./catchCsv";
+import { downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
@@ -132,6 +134,17 @@ export function CatchSearch() {
               {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
             </p>
           )}
+          {matches.length > 0 ? (
+            <p className="search-save">
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => downloadFile(catchesCsv({ ...book, catches: matches }), "text/csv;charset=utf-8", "stillwater-catches.csv")}
+              >
+                {t("Download these as a spreadsheet")}
+              </button>
+            </p>
+          ) : null}
           {matches.length > 0 && (
             <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>
               {(entry) => (
