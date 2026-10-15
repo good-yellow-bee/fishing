@@ -412,6 +412,7 @@ export const PL_GAME: PlBook = {
   "Reeds: turn every run, or it goes into the weeds": "Trzciny: zawracaj każdy odjazd, bo wpłynie w zielsko",
   "Inlet: the current takes line while you rest": "Ujście: nurt zabiera linkę, gdy odpoczywasz",
   "Drop-off: runs dive and pull harder, but tire the fish faster": "Spad: odjazdy nurkują i ciągną mocniej, ale szybciej męczą rybę",
+  "Point: turn every run, or it drags the line over the rocks": "Cypel: zawracaj każdy odjazd, bo przeciągnie linkę po kamieniach",
   "Running out of line!": "Kończy się żyłka!",
   "Turn a run: hold ← A or → D the other way": "Zawróć odjazd: przytrzymaj ← A albo → D w drugą stronę",
   "Turn a run: hold the side button the other way": "Zawróć odjazd: przytrzymaj boczny przycisk w drugą stronę",
@@ -453,6 +454,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "Off the point, turn the runs: a run you leave alone drags the line over the rocks, so reeling against it strains the line harder.":
+    "Przy cyplu zawracaj odjazdy: odjazd, którego nie zawrócisz, przeciąga linkę po kamieniach, więc zwijanie pod niego mocniej napina linkę.",
   "In the field log, saving a catch now says “Fish saved.” for a moment, downloading the book says it went through, and restoring the sample book can be undone from the bar at the bottom.":
     "W dzienniku zapisanie połowu pokazuje teraz na chwilę „Ryba zapisana.”, pobranie dziennika potwierdza, że się udało, a przywrócenie przykładowego dziennika można cofnąć z paska na dole.",
   "At the drop-off a run dives: it pulls harder against a reeling line but tires the fish faster, so let it go and reel between runs.":

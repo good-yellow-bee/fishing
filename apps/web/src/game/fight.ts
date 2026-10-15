@@ -112,10 +112,12 @@ export const CURRENT_DRIFT = 1.6;
 /** At the drop-off a run dives down the ledge: it pulls this much harder, and tires the fish this much more. */
 export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
-export type FightWater = "open" | "weeds" | "current" | "deep";
+/** Off the point a run left unturned drags the line over the rocks: reeling against it loads the line this much harder. */
+export const ROCK_PULL = 1.2;
+export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks";
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
-  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : "open";
+  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : "open";
 }
 
 export function staminaState(stamina: number): StaminaState {
@@ -201,7 +203,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks. */
   water: FightWater = "open",
 ): FightRuntime {
   const weedy = water === "weeds";
@@ -297,8 +299,9 @@ export function makeFight(
     if (sim.turning) turnedThisRun = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
+    const rocky = water === "rocks" && turnable && !sim.turning;
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
       sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * dtSec;

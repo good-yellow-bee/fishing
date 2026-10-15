@@ -199,7 +199,7 @@ describe("FightBar for screen readers", () => {
   });
 
   it("says what the reeds and the inlet do to a fight, and nothing on open water", () => {
-    const water = (w?: "weeds" | "current" | "deep") => {
+    const water = (w?: "weeds" | "current" | "deep" | "rocks") => {
       act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, water: w }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
       return container!.querySelector(".fight-water")?.textContent ?? null;
     };
@@ -208,6 +208,7 @@ describe("FightBar for screen readers", () => {
     expect(water("weeds")).toMatch(/weeds/);
     expect(water("current")).toMatch(/current takes line/);
     expect(water("deep")).toMatch(/dive/);
+    expect(water("rocks")).toMatch(/rocks/);
   });
 
   it("tells the angler a fish is in the weeds", () => {
