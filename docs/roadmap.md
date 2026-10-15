@@ -1147,3 +1147,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR94~~ | ~~News card (2026-10-15o) tells players about spot card outings, month headings, trip times and folded gear~~ (#334) | field log | S |
 | ~~BR95~~ | ~~Spot page outings grouped under month headings like the Trips page~~ (#335) | field | S |
 | ~~BR96~~ | ~~Gear page past trips grouped under month headings~~ (#336) | field | S |
+| ~~BR97~~ | ~~Fish page catch log split under month headings~~ (#337) | field | S |

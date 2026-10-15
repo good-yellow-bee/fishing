@@ -12,6 +12,7 @@ import {
   WIND_LABELS,
   catchesForSpot,
   catchesNewestFirst,
+  localDate,
   spotById,
   tripById,
   tripsForSpot,
@@ -97,7 +98,7 @@ export function CatchesPage() {
       ) : (
         <>
           <SpeciesChips catches={catches} />
-          <PagedCatches items={catches}>
+          <PagedCatches items={catches} monthOf={(entry) => localDate(new Date(entry.caughtAt)).slice(0, 7)}>
             {(entry) => (
               <CatchCard
                 key={entry.id}
