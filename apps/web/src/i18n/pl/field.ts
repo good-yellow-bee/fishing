@@ -357,6 +357,7 @@ export const PL_FIELD: PlBook = {
   "None of the waters in this book are drawn on the sheet.": "Żadne z łowisk w tym dzienniku nie jest narysowane na arkuszu.",
   "Not on this sheet:": "Poza arkuszem:",
   "Fish deleted.": "Ryba usunięta.",
+  "Sample book restored.": "Przywrócono przykładowy dziennik.",
   "Water deleted, with its outings and fish.": "Łowisko usunięte razem z wyprawami i rybami.",
   "Outing deleted; its fish stay in the book.": "Wyprawa usunięta; jej ryby zostają w dzienniku.",
   Undo: "Cofnij",

@@ -1283,3 +1283,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR176~~ | ~~Delete question as an alert dialog, focus on Keep, Escape closes~~ (#463) | field | S |
 | ~~BR177~~ | ~~This week in years past reaches across New Year and counts years from the nearer date~~ (#464) | field | S |
 | ~~BR178~~ | ~~Download reminder counts from a loaded book and restarts after restoring the sample~~ (#466) | field | S |
+| ~~BR179~~ | ~~Restoring the sample book can be undone from the undo bar~~ (#468) | field | S |
