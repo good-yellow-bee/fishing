@@ -1083,7 +1083,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT38~~ | ~~An ambush predator's bite starts at the yank: the float goes straight under with no opening tap or slack pause, matching the WHAM call~~ (#438) | fish | S |
 | ~~GT39~~ | ~~News card (2026-10-15zj) covers GT37 and GT38: the deep sulk and the ambush bite on the lake~~ (#440) | news | S |
 | ~~GT40~~ | ~~The cast meter keeps a faint mark where the last cast stopped, so the next cast can be aimed at the gold perfect mark by correcting from it~~ (#446) | casting | S |
-| GT41 | The fight card says Heavier than your best (1.1 lb) when the fish on the line outweighs the field log's heaviest of its species, so a big one feels like one before it is landed | fight | S |
+| ~~GT41~~ | ~~The fight card says Heavier than your best (1.1 lb) when the fish on the line outweighs the field log's heaviest of its species, so a big one feels like one before it is landed~~ (#448) | fight | S |
+| GT42 | News card (2026-10-15zl) covers GT40 and GT41: the last-cast mark and the heavier-than-your-best line | news | S |
 
 ## Risks / open questions for the owner
 
