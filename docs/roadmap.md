@@ -1219,3 +1219,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR139~~ | ~~Catch search finds fish by kind of water~~ (#398) | field | S |
 | ~~BR140~~ | ~~Month names cached so big-book searches stay quick~~ (#400) | field | S |
 | ~~BR141~~ | ~~Search saves its matches as a spreadsheet~~ (#402) | field | S |
+| ~~BR142~~ | ~~News card line for the newer search features~~ (#404) | field | S |
