@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally } from "./bests.ts";
+import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally, skyTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -197,5 +197,15 @@ describe("the best day", () => {
 
   it("is empty for an empty book", () => {
     expect(bestDay({ ...base, catches: [] })).toBeNull();
+  });
+});
+
+describe("fish by sky", () => {
+  it("counts the fish under each sky and leaves out fish without weather", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const rows = skyTally(book);
+    expect(rows.map((row) => row.id)).toEqual(["clear", "partly-cloudy", "overcast", "rain", "fog"]);
+    expect(rows.reduce((sum, row) => sum + row.count, 0)).toBe(book.catches.filter((entry) => entry.weather).length);
+    expect(rows.find((row) => row.id === "overcast")!.count).toBeGreaterThan(0);
   });
 });

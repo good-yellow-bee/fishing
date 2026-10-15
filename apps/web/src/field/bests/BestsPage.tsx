@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesForSpot, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, catchesForSpot, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -189,6 +189,15 @@ export function BestsPage() {
             </div>
             <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
           </section>
+
+          {skyTally(book).some((row) => row.count > 0) ? (
+            <section>
+              <div className="section-head">
+                <h2>{t("By the weather")}</h2>
+              </div>
+              <TallyBars rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+            </section>
+          ) : null}
 
           <section>
             <div className="section-head">

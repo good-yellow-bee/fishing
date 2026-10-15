@@ -1,5 +1,6 @@
 import { LAKE_SEASONS, SEASON_LABELS, lakeSeason, type LakeSeason } from "./season.ts";
 import { moonPhase } from "./moon.ts";
+import { SKIES, SKY_LABELS, type Sky } from "./weather.ts";
 import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
@@ -212,6 +213,15 @@ export function moonTally(book: Logbook): MoonTally[] {
     counts.set(quarter, (counts.get(quarter) ?? 0) + 1);
   }
   return MOON_QUARTERS.map((id) => ({ id, label: MOON_QUARTER_LABELS[id], count: counts.get(id) ?? 0 }));
+}
+
+export type SkyTally = { id: Sky; label: string; count: number };
+
+/** Fish by the sky they were caught under, in the usual order of skies; fish without weather are left out. */
+export function skyTally(book: Logbook): SkyTally[] {
+  const counts = new Map<Sky, number>();
+  for (const entry of book.catches) if (entry.weather) counts.set(entry.weather.sky, (counts.get(entry.weather.sky) ?? 0) + 1);
+  return SKIES.map((id) => ({ id, label: SKY_LABELS[id], count: counts.get(id) ?? 0 }));
 }
 
 export type BestDay = { date: string; count: number };
