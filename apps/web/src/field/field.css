@@ -1078,3 +1078,9 @@ button.field-primary:disabled {
 .years-ago > .meta {
   margin: 0 0 4px;
 }
+
+/* Headings take focus after a link so screen readers read the new page; they need no ring. */
+.field-main h1[tabindex="-1"]:focus,
+.field-main [data-focus-target]:focus {
+  outline: none;
+}
