@@ -842,3 +842,10 @@ button.field-primary:disabled {
   outline: 3px solid var(--field-rust);
   outline-offset: 2px;
 }
+
+.section-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 14px;
+}

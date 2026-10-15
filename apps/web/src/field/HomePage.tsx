@@ -15,7 +15,8 @@ function deskLine(now: Date): string {
 }
 
 export function HomePage() {
-  const { book } = useLogbook();
+  const { book, photos } = useLogbook();
+  const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
   useT();
   const now = new Date();
   const today = localDate(now);
@@ -58,7 +59,10 @@ export function HomePage() {
         <section>
           <div className="section-head">
             <h2>{t("Recent fish")}</h2>
-            <Link to="/catches">{t("All catches")}</Link>
+            <span className="section-links">
+              {photoCount > 0 ? <Link to="/photos">{t("Photos ({count})", { count: photoCount })}</Link> : null}
+              <Link to="/catches">{t("All catches")}</Link>
+            </span>
           </div>
           {catches.length === 0 ? (
             <p className="empty">{t("The book is blank. Log the first fish before the details fade.")}</p>

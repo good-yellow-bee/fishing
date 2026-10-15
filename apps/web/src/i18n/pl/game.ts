@@ -399,6 +399,10 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "The field log has a photo wall: every fish you kept a snapshot of, big, newest first. Open it from the catch log.":
+    "Dziennik ma ścianę zdjęć: każda ryba z zachowanym ujęciem, w dużym formacie, od najnowszej. Otworzysz ją z listy połowów.",
+  "The field log can save your catches as a spreadsheet, and trip and water pages sum up their fish.":
+    "Dziennik zapisze twoje połowy jako arkusz, a strony wypraw i łowisk podsumowują swoje ryby.",
   "Weights, lengths and water temperature can show in kilograms, centimetres and °C: pick the units in Settings.":
     "Wagi, długości i temperatura wody mogą być w kilogramach, centymetrach i °C: jednostki wybierzesz w Ustawieniach.",
   "The field log's Bests page shows when the fish bite, your best lures, the catch by season and your best day.":
