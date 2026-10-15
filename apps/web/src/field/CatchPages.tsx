@@ -315,7 +315,8 @@ function CatchForm() {
       return;
     }
     const draft: CatchDraft = {
-      species: bookName(species, existing ? [existing.species, ...SPECIES] : SPECIES),
+      // A name already in the book is kept as written there, so "rock bass" joins "Rock bass".
+      species: bookName(species, [...(existing ? [existing.species] : []), ...SPECIES, ...book.catches.map((entry) => entry.species)]),
       measureKind,
       // An untouched number keeps its stored value, so a metric round trip doesn't nudge it.
       amount:

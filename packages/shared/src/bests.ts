@@ -42,23 +42,25 @@ export function personalBests(book: Logbook): PersonalBests {
   const longest = bestOf(book.catches, "length");
   const heaviest = bestOf(book.catches, "weight");
   const largeSpecies = new Set(
-    [longest, heaviest].flatMap((entry) => (entry ? [entry.species] : [])),
+    [longest, heaviest].flatMap((entry) => (entry ? [entry.species.trim().toLowerCase()] : [])),
   );
 
-  const bySpecies = new Map<string, CatchEntry[]>();
+  // "Rock bass" and "rock bass" are one fish: grouped under the name first written.
+  const bySpecies = new Map<string, { name: string; rows: CatchEntry[] }>();
   for (const entry of book.catches) {
-    const rows = bySpecies.get(entry.species) ?? [];
-    rows.push(entry);
-    bySpecies.set(entry.species, rows);
+    const key = entry.species.trim().toLowerCase();
+    const group = bySpecies.get(key) ?? { name: entry.species, rows: [] };
+    group.rows.push(entry);
+    bySpecies.set(key, group);
   }
 
-  const species = [...bySpecies.entries()]
-    .map(([name, rows]) => ({
+  const species = [...bySpecies.values()]
+    .map(({ name, rows }) => ({
       species: name,
       count: rows.length,
       longest: bestOf(rows, "length"),
       heaviest: bestOf(rows, "weight"),
-      large: largeSpecies.has(name),
+      large: largeSpecies.has(name.trim().toLowerCase()),
     }))
     .sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
 

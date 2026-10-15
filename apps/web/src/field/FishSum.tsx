@@ -9,7 +9,7 @@ import { fishCountLabel } from "./format";
 export function FishSum({ catches, oneKind = false }: { catches: readonly CatchEntry[]; oneKind?: boolean }) {
   useT();
   if (catches.length === 0) return null;
-  const species = new Set(catches.map((entry) => entry.species)).size;
+  const species = new Set(catches.map((entry) => entry.species.trim().toLowerCase())).size;
   const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
   const largest = bests.heaviest ?? bests.longest;
   const released = catches.filter((entry) => entry.released).length;

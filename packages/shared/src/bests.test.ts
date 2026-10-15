@@ -55,6 +55,15 @@ describe("personal bests", () => {
     expect(quiet.waters.some((water) => water.spotId === "spot-oxbow")).toBe(false);
   });
 
+  it("counts one species however its name is capitalised", () => {
+    const pike = book.catches.find((entry) => entry.species === "Northern pike")!;
+    const mixed = { ...book, catches: [...book.catches, { ...pike, id: "catch-lower-pike", species: "northern pike " }] };
+    const rows = personalBests(mixed).species.filter((row) => row.species.toLowerCase().trim() === "northern pike");
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.species).toBe("Northern pike");
+    expect(rows[0]!.count).toBe(personalBests(book).species.find((row) => row.species === "Northern pike")!.count + 1);
+  });
+
   it("stays empty when the book has no fish", () => {
     expect(personalBests({ spots: book.spots, trips: book.trips, catches: [] })).toEqual({
       longest: null,
