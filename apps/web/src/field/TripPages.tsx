@@ -31,7 +31,7 @@ import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
-import { t, useT } from "../i18n";
+import { t, tn, useT } from "../i18n";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -105,7 +105,7 @@ export function TripsPage() {
 }
 
 export function TripPage() {
-  const { book, deleteTrip } = useLogbook();
+  const { book, deleteTrip, fileCatches } = useLogbook();
   useT();
   const navigate = useNavigate();
   const { tripId = "" } = useParams();
@@ -127,6 +127,10 @@ export function TripPage() {
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
 
+  // Fish from this water on the outing's day that were logged without it.
+  const loose = book.catches.filter(
+    (entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) === trip.date,
+  );
   const tackle = <TackleList tripId={trip.id} heading={t("Tackle")} suggest={packingTips(book, trip, today)} />;
   const fish = (
     <>
@@ -144,6 +148,14 @@ export function TripPage() {
         </p>
       ) : null}
       <SpeciesChips catches={catches} />
+      {loose.length > 0 ? (
+        <p className="meta loose-fish" role="status">
+          {tn(loose.length, "{n} fish from this water that day is not on this outing.", "{n} fish from this water that day are not on this outing.")}{" "}
+          <button type="button" className="text-button" onClick={() => fileCatches(loose.map((entry) => entry.id), trip.id)}>
+            {t("Add them")}
+          </button>
+        </p>
+      ) : null}
       {catches.length === 0 ? (
         <p className="empty">
           {trip.date > today ? t("Fish you log on the day show up here.") : t("Nothing logged for this trip yet.")}

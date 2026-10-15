@@ -104,6 +104,12 @@ export const PL_FIELD: PlBook = {
   "Outing:": "Wyprawa:",
   "Open the outing": "Otwórz wyprawę",
   "Fish came between {from} and {to}": "Ryby brały między {from} a {to}",
+  "{n} fish from this water that day are not on this outing.": [
+    "{n} ryba z tego łowiska z tego dnia nie jest w tej wyprawie.",
+    "{n} ryby z tego łowiska z tego dnia nie są w tej wyprawie.",
+    "{n} ryb z tego łowiska z tego dnia nie jest w tej wyprawie.",
+  ],
+  "Add them": "Dodaj je",
   "An outing on this water that day:": "Tego dnia na tym łowisku była wyprawa:",
   "Add this fish to it": "Dodaj do niej tę rybę",
   "This book already has a water by that name:": "W dzienniku jest już łowisko o tej nazwie:",
