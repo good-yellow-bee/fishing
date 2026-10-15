@@ -1037,6 +1037,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~BQ1~~ | ~~The catch log, a spot's page and a trip's page draw their catches 50 at a time with a "Show 50 more" button and an "N of M fish" count, instead of every card at once (a 2,000-catch log drew 30,000 elements and took 1.6 s to open; now about 800 and 0.7 s)~~ (#239) | perf | S |
+| ~~BQ2~~ | ~~Find a catch keeps up with typing in a long log (2.6 s to type a word over 2,000 catches, now under 0.1 s): results follow the keys a beat behind, show 50 at a time, and only a "Matches: N" line is read out instead of every card~~ (#240) | perf, access | S |
 
 ## Risks / open questions for the owner
 
