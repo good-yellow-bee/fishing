@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15j";
+export const NEWS_ID = "2026-10-15k";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Water and trip pages in the field log list the kinds of fish caught there. Each species page shows when that fish bites, and Log another starts a catch of that kind.",
   "Every kind of fish has its own page in the field log: how many, the biggest, what it takes, and where it comes from. Open it from Bests or from any catch.",
   "The field log shows the moon on each catch and trip, and Bests counts your fish by the week of the moon. Fish released from the lake are marked released in the book too.",
   "Mark a fish as released and the field log counts it on trips and waters. A catch you start but don't save is kept for a day, and the next fish on an outing can take the last one's weather in one tap.",
