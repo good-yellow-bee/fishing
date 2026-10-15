@@ -11,13 +11,13 @@ let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let frames: FrameRequestCallback[] = [];
 
-let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1 } };
+let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
 function mount(performance: FightPerformance | null, underpowered = false) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
-  sim = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1 } };
+  sim = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
   const record = { current: performance };
   container = document.createElement("div");
   document.body.append(container);
@@ -121,6 +121,29 @@ describe("FightBar for screen readers", () => {
     sim.current.stamina = 0.1;
     frame();
     expect(word().textContent).toBe("Fish played out");
+  });
+
+  it("says which way to pull the rod against a run, cheers a turn, and stays quiet on a leap", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);
+    frame();
+    expect(shown()).toEqual(["calm"]);
+    sim.current.surge = 1;
+    sim.current.runSide = 1;
+    frame();
+    expect(shown()).toEqual(["left"]);
+    expect(container!.querySelector(".fight-steer")!.textContent).toContain("It runs right — pull left");
+    sim.current.surge = 2;
+    sim.current.runSide = -1;
+    frame();
+    expect(shown()).toEqual(["right"]);
+    sim.current.turning = true;
+    frame();
+    expect(shown()).toEqual(["turning"]);
+    sim.current.turning = false;
+    sim.current.jump = true;
+    frame();
+    expect(shown()).toEqual(["calm"]);
   });
 
   it("calls a leap by name, warning first and then telling the angler to bow", () => {

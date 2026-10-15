@@ -33,6 +33,7 @@ export function FightBar({ fight, sim, performance }: Props) {
   const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
   const staminaWord = useRef<HTMLSpanElement>(null);
+  const steerLine = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     let frame = 0;
@@ -69,6 +70,12 @@ export function FightBar({ fight, sim, performance }: Props) {
           const lineIn = Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100);
           lineMeter.current?.setAttribute("aria-valuenow", String(lineIn));
           lineMeter.current?.setAttribute("aria-valuetext", `${lineIn}% · ${t(STAMINA_WORD[tired])}`);
+        }
+        // Which way to pull the rod: said once a run is coming, and cheered while it is being turned.
+        const steerCall = state.surge === 0 || state.jump ? "calm" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
+        if (steerLine.current && steerLine.current.dataset.call !== steerCall) {
+          steerLine.current.dataset.call = steerCall;
+          for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
         }
         const record = performance.current;
         if (clean.current && record) {
@@ -132,6 +139,21 @@ export function FightBar({ fight, sim, performance }: Props) {
           </div>
           <p ref={status} className="fight-status" role="status" aria-live="assertive">
             {lines[0]}
+          </p>
+          <p ref={steerLine} className="fight-steer" data-call="calm">
+            <span data-for="calm">
+              <span className="on-pointer">{t("Turn a run: hold ← A or → D the other way")}</span>
+              <span className="on-touch">{t("Turn a run: hold the side button the other way")}</span>
+            </span>
+            <span data-for="left" hidden>
+              {t("It runs right — pull left")} <span className="on-pointer">{t("(← or A)")}</span>
+            </span>
+            <span data-for="right" hidden>
+              {t("It runs left — pull right")} <span className="on-pointer">{t("(→ or D)")}</span>
+            </span>
+            <span data-for="turning" hidden>
+              {t("Turning it!")}
+            </span>
           </p>
           <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
           {reelMode === "toggle" ? (

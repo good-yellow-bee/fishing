@@ -858,6 +858,7 @@ a:focus-visible {
 }
 
 /* A thumb-sized strike and reel button; only on touch screens, where a mouse is not the tool. */
+.steer-buttons,
 .thumb-strike,
 .strike-cue .cue-touch {
   display: none;
@@ -901,6 +902,36 @@ a:focus-visible {
 
   .thumb-strike:active {
     transform: scale(0.94);
+  }
+
+  /* The rod's left and right pull, for the other thumb. */
+  .steer-buttons {
+    position: absolute;
+    left: 16px;
+    bottom: 24px;
+    z-index: 8;
+    display: flex;
+    gap: 10px;
+  }
+
+  .steer-btn {
+    width: 64px;
+    height: 64px;
+    border: 2px solid rgba(239, 224, 194, 0.85);
+    border-radius: 50%;
+    background: rgba(20, 28, 25, 0.78);
+    color: #f0dfbf;
+    font-size: 22px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .steer-btn:active {
+    transform: scale(0.94);
+    background: rgba(217, 169, 78, 0.92);
+    color: var(--ink);
   }
 }
 
@@ -1029,6 +1060,24 @@ kbd {
 
 .fight-bar[data-surge="2"] .fight-status {
   color: var(--rust);
+}
+
+.fight-bar .fight-steer {
+  margin: 6px 0 0;
+  font-size: 11px;
+  text-align: center;
+  color: #6b5a44;
+}
+
+.fight-bar .fight-steer[data-call="left"],
+.fight-bar .fight-steer[data-call="right"] {
+  color: #8a6420;
+  font-weight: 600;
+}
+
+.fight-bar .fight-steer[data-call="turning"] {
+  color: #4d6b3f;
+  font-weight: 600;
 }
 
 .fight-bar .fight-clean {
@@ -2655,6 +2704,7 @@ html[data-contrast="high"] :is(
   .walkthrough,
   .camera-help,
   .thumb-strike,
+  .steer-btn,
   .settings-panel,
   .power-meter .bar,
   .catch-sync,

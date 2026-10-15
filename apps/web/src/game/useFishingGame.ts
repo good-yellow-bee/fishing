@@ -20,7 +20,7 @@ import {
   type StanceId,
 } from "@stillwater/shared";
 import { t } from "../i18n";
-import { fightLines, isCleanFight, makeFight, type FightPerformance, type FightRuntime, type FightSim, type SurgeState } from "./fight";
+import { fightLines, isCleanFight, makeFight, steerSide, type FightPerformance, type FightRuntime, type FightSim, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -173,6 +173,9 @@ export function useFishingGame(
   const performanceRef = useRef<FightPerformance | null>(null);
   const reelKeyRef = useRef(false);
   const reelPointerRef = useRef<number | null>(null);
+  /** Rod pulled left or right against a run: from ← → / A D (and a pad's stick) or a held side button. */
+  const steerKeysRef = useRef({ left: false, right: false });
+  const steerPointerRef = useRef<{ id: number; side: -1 | 1 } | null>(null);
   /** Toggle reel mode: on until the next press. */
   const reelLatchRef = useRef(false);
   /** In toggle mode a press flips reeling; the press that set the hook always starts it. */
@@ -229,6 +232,9 @@ export function useFishingGame(
     reelPointerRef.current = null;
     reelLatchRef.current = false;
     fightInput.reeling = false;
+    steerKeysRef.current = { left: false, right: false };
+    steerPointerRef.current = null;
+    fightInput.steer = 0;
     fx.drag.stop();
     const surface = surfaceRef.current;
     if (surface) {
@@ -492,6 +498,12 @@ export function useFishingGame(
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
+      const side = steerSide(event.code);
+      if (side && phaseRef.current === "fight") {
+        event.preventDefault();
+        steerKeysRef.current[side < 0 ? "left" : "right"] = true;
+        return;
+      }
       if (event.code !== "Space" || event.repeat) return;
       event.preventDefault();
       const striking = phaseRef.current !== "fight";
@@ -503,6 +515,9 @@ export function useFishingGame(
       }
     };
     const up = (event: KeyboardEvent) => {
+      // Let go of a steer key wherever focus went, so the rod never stays pulled.
+      const side = steerSide(event.code);
+      if (side) steerKeysRef.current[side < 0 ? "left" : "right"] = false;
       if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable]")) return;
       if (event.code !== "Space") return;
       reelKeyRef.current = false;
@@ -513,6 +528,7 @@ export function useFishingGame(
     };
     const onBlur = () => {
       reelKeyRef.current = false;
+      steerKeysRef.current = { left: false, right: false };
       reelPointerRef.current = null;
       if (phaseRef.current === "casting") resetToIdle(castHint("cancelled"));
     };
@@ -536,8 +552,14 @@ export function useFishingGame(
         if (phaseRef.current === "waiting") setHint(waitHintRef.current);
         return;
       }
-      if (!event.isPrimary || event.button !== 0) return;
       const target = event.target as HTMLElement;
+      // The side buttons pull the rod against a run; a second finger may hold one while the first reels.
+      const steerButton = target.closest<HTMLElement>("[data-steer]");
+      if (steerButton) {
+        if (phaseRef.current === "fight") steerPointerRef.current = { id: event.pointerId, side: steerButton.dataset.steer === "-1" ? -1 : 1 };
+        return;
+      }
+      if (!event.isPrimary || event.button !== 0) return;
       // The thumb button is a press on the water that sits under a thumb.
       const thumb = target.closest("[data-thumb-strike]") !== null;
       if (!thumb && target.closest("button, a, input, select, label, [data-camera-control], [data-lure-choice]")) return;
@@ -555,6 +577,7 @@ export function useFishingGame(
     };
     const up = (event: PointerEvent) => {
       if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
+      if (event.pointerId === steerPointerRef.current?.id) steerPointerRef.current = null;
       if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
       castPointerRef.current = null;
@@ -562,6 +585,7 @@ export function useFishingGame(
     };
     const cancel = (event: PointerEvent) => {
       if (event.pointerId === reelPointerRef.current) reelPointerRef.current = null;
+      if (event.pointerId === steerPointerRef.current?.id) steerPointerRef.current = null;
       if (phaseRef.current === "fight") return;
       if (event.pointerId !== castPointerRef.current) return;
       resetToIdle(castHint("cancelled"));
@@ -609,11 +633,15 @@ export function useFishingGame(
         const runtime = runtimeRef.current;
         const current = fightRef.current;
         fightInput.reeling = false;
+        fightInput.steer = 0;
         if (phaseRef.current === "fight" && runtime && current && !current.underpowered) {
           const reeling =
             settings.reelMode === "toggle" ? reelLatchRef.current : reelKeyRef.current || reelPointerRef.current !== null;
           fightInput.reeling = reeling;
-          const result = runtime.step(now, dt, reeling);
+          const keys = steerKeysRef.current;
+          const steer: Steer = steerPointerRef.current?.side ?? (keys.left === keys.right ? 0 : keys.left ? -1 : 1);
+          fightInput.steer = steer;
+          const result = runtime.step(now, dt, reeling, steer);
           const sim = runtime.sim;
           if (surface) {
             surface.dataset.tension = sim.tension.toFixed(2);

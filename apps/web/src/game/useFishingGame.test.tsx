@@ -33,7 +33,7 @@ vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
   return {
     ...actual,
-    makeFight: () => ({ sim: { line: 1, tension: 0.2, surge: 0 }, performance: fightPerformance, step }),
+    makeFight: () => ({ sim: { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step }),
   };
 });
 
@@ -74,6 +74,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
         <button type="button" data-thumb-strike>Strike</button>
+        <button type="button" data-steer="-1">Left</button>
       </div>
       <output data-testid="phase">{game.phase}:{game.outcome?.kind ?? "none"}</output>
       <span data-testid="clean">{game.outcome?.kind === "landed" ? String(game.outcome.clean) : ""}</span>
@@ -160,7 +161,7 @@ describe("useFishingGame animation recovery", () => {
     expect(frames.length).toBe(scheduled + 1);
     act(() => frames.at(-1)!(1_016));
     expect(frames.length).toBe(scheduled + 2);
-    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(container!.querySelector("output")?.textContent).toBe("casting:none");
   });
@@ -176,7 +177,7 @@ describe("useFishingGame landed outcome", () => {
     expect(container!.querySelector("output")?.textContent).toBe("result:landed");
     expect(container!.querySelector("span")?.textContent).toBe("true");
 
-    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     fightPerformance = { peakTension: 0.9, maxLine: 1 };
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 2);
@@ -196,7 +197,7 @@ describe("useFishingGame lost fight", () => {
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
     expect(hint()).toMatch(/too much tension.*let go when the bar turns red or the fish is about to run/i);
 
-    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     step.mockReturnValueOnce("escaped");
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
@@ -279,7 +280,37 @@ describe("useFishingGame strike timing", () => {
     step.mockReturnValueOnce("fighting");
     now += 16;
     act(() => frames.at(-1)!(now));
-    expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true);
+    expect(step).toHaveBeenLastCalledWith(expect.any(Number), expect.any(Number), true, 0);
+  });
+
+  it("pulls the rod with ← → or A D and a held side button in a fight, and lets go when they do", () => {
+    const surface = mount();
+    const left = surface.querySelector<HTMLButtonElement>("[data-steer]")!;
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
+    act(() => window.dispatchEvent(pointer("pointerup", 3)));
+    expect(phase()).toBe("fight:none");
+    const frame = () => {
+      step.mockReturnValueOnce("fighting");
+      now += 16;
+      act(() => frames.at(-1)!(now));
+      return (step.mock.lastCall as unknown[])[3];
+    };
+    act(() => void window.dispatchEvent(new KeyboardEvent("keydown", { code: "ArrowRight", bubbles: true })));
+    expect(frame()).toBe(1);
+    act(() => void window.dispatchEvent(new KeyboardEvent("keydown", { code: "KeyA", bubbles: true })));
+    expect(frame()).toBe(0);
+    act(() => void window.dispatchEvent(new KeyboardEvent("keyup", { code: "ArrowRight", bubbles: true })));
+    expect(frame()).toBe(-1);
+    act(() => void window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyA", bubbles: true })));
+    expect(frame()).toBe(0);
+    act(() => left.dispatchEvent(pointer("pointerdown", 4)));
+    expect(frame()).toBe(-1);
+    // The side button is not a reel.
+    expect((step.mock.lastCall as unknown[])[2]).toBe(false);
+    act(() => window.dispatchEvent(pointer("pointerup", 4)));
+    expect(frame()).toBe(0);
   });
 
   it("keeps reeling between taps in toggle mode", () => {
@@ -456,14 +487,14 @@ describe("useFishingGame bubbling hotspot", () => {
     act(() => vi.advanceTimersByTime(5_000));
     expect(phase()).toBe("result:miss");
     expect(hint()).not.toBe(movedLine);
-    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     expect(phase()).toBe("idle:none");
     expect(hint()).toBe(movedLine);
 
     cast(surface);
     act(() => vi.advanceTimersByTime(usual()));
     act(() => vi.advanceTimersByTime(5_000));
-    act(() => (container!.querySelector("button:not([data-thumb-strike])") as HTMLButtonElement).click());
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     expect(hint()).not.toBe(movedLine);
   });
 });
