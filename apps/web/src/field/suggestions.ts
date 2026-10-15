@@ -39,6 +39,12 @@ export function tripWeather(book: Logbook, tripId: string | undefined, skipId?: 
   return catchesNewestFirst(book).find((entry) => entry.tripId === tripId && entry.id !== skipId && entry.weather)?.weather ?? null;
 }
 
+/** The weather on the newest fish of a day (YYYY-MM-DD, local) that noted it, for a fish with no outing weather to go by. */
+export function dayWeather(book: Logbook, ymd: string, skipId?: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  return catchesNewestFirst(book).find((entry) => entry.id !== skipId && entry.weather && localDate(new Date(entry.caughtAt)) === ymd)?.weather ?? null;
+}
+
 /** Length or weight, as the player measured their newest fish by hand; length for a book with none yet. */
 export function lastMeasureKind(book: Logbook): Measure["kind"] {
   const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
