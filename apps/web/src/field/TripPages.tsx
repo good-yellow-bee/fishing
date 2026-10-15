@@ -234,7 +234,7 @@ export function TripPage() {
         ) : null
       )}
       {/* Planning ahead: what has worked on this water before. */}
-      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
+      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} /> : null}
       <TripWeather catches={catches} />
       {/* Once fish are in, they lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
