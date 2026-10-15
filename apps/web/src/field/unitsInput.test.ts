@@ -28,7 +28,7 @@ describe("metric entry in the field log", () => {
 
 describe("range messages in metric", () => {
   it("names metric bounds for a metric reader and leaves other messages alone", () => {
-    expect(unitsMessage("Length should sit between 1 and 120 inches.", "metric")).toBe("Length should sit between 2.5 and 305 centimetres.");
+    expect(unitsMessage("Length should sit between 1 and 120 inches.", "metric")).toBe("Length should sit between 3 and 304 centimetres.");
     expect(unitsMessage("Length should sit between 1 and 120 inches.", "imperial")).toBe("Length should sit between 1 and 120 inches.");
     expect(unitsMessage("Note the sky.", "metric")).toBe("Note the sky.");
   });

@@ -135,7 +135,9 @@ function CatchForm() {
   const [params] = useSearchParams();
   const existing = catchId ? book.catches.find((row) => row.id === catchId) : undefined;
   const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
-  const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
+  // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
+  const linkedSpot = book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
+  const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? book.spots[0]?.id ?? "";
 
   const asked = params.get("kind");
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
