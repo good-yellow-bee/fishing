@@ -959,3 +959,20 @@ button.field-primary:disabled {
   margin: 0 0 14px;
   color: var(--field-muted);
 }
+
+.kept-draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  background: var(--field-card);
+  border: 1px solid var(--field-line);
+  border-left: 4px solid var(--field-rust);
+}
+
+.kept-draft p {
+  flex: 1 1 100%;
+  margin: 0;
+}

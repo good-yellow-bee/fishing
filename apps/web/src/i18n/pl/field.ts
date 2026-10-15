@@ -325,4 +325,8 @@ export const PL_FIELD: PlBook = {
   "Go again": "Jedź znowu",
   "The tackle list from “{title}” comes along, unpacked.": "Lista sprzętu z „{title}” zostanie skopiowana, jeszcze nic nie spakowane.",
   "Take {piece} off the list": "Usuń z listy: {piece}",
+  "A fish you started logging was not saved: {species}.": "Ryba, którą zacząłeś zapisywać, nie została zapisana: {species}.",
+  "A fish you started logging was not saved.": "Ryba, którą zacząłeś zapisywać, nie została zapisana.",
+  "Pick it up": "Wróć do niej",
+  "Let it go": "Porzuć",
 };

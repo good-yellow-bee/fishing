@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CATCH_PHOTO_MAX_BYTES,
@@ -30,6 +30,7 @@ import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
+import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return entry.measure.kind === "length"
@@ -147,6 +148,62 @@ function CatchForm() {
   const [reducing, setReducing] = useState(false);
   const [error, setError] = useState("");
   const photoPick = useRef(0);
+  // A new fish typed but never saved waits here until it is picked up or let go.
+  const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? null : readKeptDraft()));
+
+  // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
+  const opened = useRef<string | null>(null);
+
+  useEffect(() => {
+    // While an older draft waits, keep it rather than overwrite it with this one.
+    if (existing || waiting) return;
+    const fields = { species, measureKind, amount, lure, spotId, tripId, note, sky, wind, waterTemp };
+    const now = JSON.stringify(fields);
+    if (opened.current === null) opened.current = now;
+    if (now === opened.current) {
+      dropKeptDraft();
+      return;
+    }
+    keepDraft({
+      species,
+      measureKind,
+      amount,
+      lure,
+      spotId,
+      tripId,
+      caughtAt,
+      note,
+      sky,
+      wind,
+      waterTemp,
+      timeTouched,
+      units,
+      savedAt: new Date().toISOString(),
+    });
+  }, [existing, waiting, species, measureKind, amount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, timeTouched, units]);
+
+  const pickUp = (kept: KeptDraft) => {
+    const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
+    const keptTrip = tripsForSpot(book, keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
+    setSpecies(kept.species);
+    setMeasureKind(kept.measureKind);
+    setLure(kept.lure);
+    setSpotId(keptSpot);
+    setTripId(keptTrip);
+    setCaughtAt(kept.caughtAt);
+    setTimeTouched(kept.timeTouched);
+    setNote(kept.note);
+    setSky(kept.sky);
+    setWind(kept.wind);
+    // Numbers typed in other units would mean something else now.
+    if (kept.units === units) {
+      setAmount(kept.amount);
+      setWaterTemp(kept.waterTemp);
+    }
+    // Picked up counts as typed: it stays kept even before the next keystroke.
+    opened.current = "";
+    setWaiting(null);
+  };
 
   const spotTrips = tripsForSpot(book, spotId);
   const hereLures = (waterTips(catchesForSpot(book, spotId))?.lures ?? []).map((row) => t(row.lure));
@@ -225,8 +282,13 @@ function CatchForm() {
       setError(unitsMessage(result.message, units));
       return;
     }
-    if (existing) navigate(`/catches/${existing.id}`);
-    else navigate(tripId ? `/trips/${tripId}` : "/catches");
+    if (existing) {
+      navigate(`/catches/${existing.id}`);
+      return;
+    }
+    // The waiting draft, if any, stays for later; this one is saved.
+    if (!waiting) dropKeptDraft();
+    navigate(tripId ? `/trips/${tripId}` : "/catches");
   };
 
   if (catchId && !existing) {
@@ -260,6 +322,28 @@ function CatchForm() {
         </div>
         <Link to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}>{t("Cancel")}</Link>
       </header>
+      {waiting ? (
+        <div className="kept-draft" role="status">
+          <p>
+            {waiting.species.trim()
+              ? t("A fish you started logging was not saved: {species}.", { species: waiting.species.trim() })
+              : t("A fish you started logging was not saved.")}
+          </p>
+          <button type="button" className="field-primary inline" onClick={() => pickUp(waiting)}>
+            {t("Pick it up")}
+          </button>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              dropKeptDraft();
+              setWaiting(null);
+            }}
+          >
+            {t("Let it go")}
+          </button>
+        </div>
+      ) : null}
       <form className="entry-form" onSubmit={onSubmit}>
         <div className="form-grid">
           <label className="wide">
