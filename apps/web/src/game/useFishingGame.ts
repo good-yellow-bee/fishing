@@ -32,7 +32,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, hookWindowMs, isPerfectCast, makeCatch, pickBite, SLAP_POWER, solidStrikeMs, sweetBand, waitMs } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, nibblePlan } from "./nibblePlan";
+import { biteStyle, nibblePlan, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** How long a result stays up before a click or Space can cast straight past it. */
@@ -135,6 +135,13 @@ type Timers = {
   /** Cancels a bite held back while the page is hidden. */
   shown?: () => void;
 };
+
+/** The bite call fits how the fish took the bait: a predator slams it, a bottom feeder draws it away. */
+function strikeCall(style: BiteStyle) {
+  if (style === "ambush") return t("WHAM — it hit! Strike!");
+  if (style === "mouth") return t("It's taking it — strike!");
+  return t("NOW — strike!");
+}
 
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
 export const SECOND_TAKE_MS = 1800;
@@ -379,7 +386,7 @@ export function useFishingGame(
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
         setPhaseBoth("hookset");
-        setHint(t("NOW — strike!"));
+        setHint(strikeCall(biteStyle(species.id)));
         const openWindow = () => {
           const windowMs = hookWindowMs(current.accuracy, mercyNow);
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
