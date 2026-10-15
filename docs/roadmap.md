@@ -1101,3 +1101,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR48~~ | ~~Go again: plan a new outing from a past one, with its water, title and tackle list~~ (#288) | field | S |
 | ~~BR49~~ | ~~Take a piece off a tackle list~~ (#289) | gear | S |
 | ~~BR50~~ | ~~News card (2026-10-15g) tells players about Undo, Go again and taking tackle off a list~~ (#290) | field log | S |
+| ~~BR51~~ | ~~An unsaved new catch is kept for a day and offered back on the catch form~~ (#291) | field | S |
