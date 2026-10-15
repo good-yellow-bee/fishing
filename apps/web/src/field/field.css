@@ -1054,3 +1054,12 @@ button.field-primary:disabled {
   margin-top: 4px;
   color: var(--field-rust);
 }
+
+.month-head {
+  margin: 14px 0 8px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--field-muted);
+}
