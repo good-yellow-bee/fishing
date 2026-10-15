@@ -22,6 +22,8 @@ import {
   type SpotId,
   HOT_BANK_WAIT,
   rareBiteMulForLevel,
+  hookWindowMulForLevel,
+  perfectCastHalfForLevel,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -156,15 +158,16 @@ export function sweetBand(accuracy: number) {
 export const PERFECT_CAST_HALF = 0.035;
 export const PERFECT_CAST_WAIT = 0.8;
 
-/** The perfect-cast mark on the cast meter: the middle of the sweet band, PERFECT_CAST_HALF either side. */
-export function perfectCastBand(accuracy: number) {
+/** The perfect-cast mark on the cast meter: the middle of the sweet band, PERFECT_CAST_HALF either side (wider from level 12). */
+export function perfectCastBand(accuracy: number, level = 1) {
   const band = sweetBand(accuracy);
   const center = (band.min + band.max) / 2;
-  return { min: center - PERFECT_CAST_HALF, max: center + PERFECT_CAST_HALF };
+  const half = Math.max(PERFECT_CAST_HALF, perfectCastHalfForLevel(level));
+  return { min: center - half, max: center + half };
 }
 
-export function isPerfectCast(power: number, accuracy: number) {
-  const band = perfectCastBand(accuracy);
+export function isPerfectCast(power: number, accuracy: number, level = 1) {
+  const band = perfectCastBand(accuracy, level);
   return power >= band.min && power <= band.max;
 }
 
@@ -179,8 +182,8 @@ export function isMercy(caughtTotal: number) {
 }
 
 /** Long enough to react to the real dip rather than guess it; Accuracy still widens it. */
-export function hookWindowMs(accuracy: number, mercy = false) {
-  return 1000 + accuracy * 100 + (mercy ? MERCY_HOOK_BONUS_MS : 0);
+export function hookWindowMs(accuracy: number, mercy = false, level = 1) {
+  return Math.round((1000 + accuracy * 100) * hookWindowMulForLevel(level)) + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
 /** A strike in this first share of the hook window sets the hook solid. */

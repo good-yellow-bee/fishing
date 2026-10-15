@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, fishTireMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, rareBiteMulForLevel } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Stillwater sage", () => {
+  it("gives every level its own title, Greenhorn to Spirit of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Stillwater sage");
+    expect(titles.at(-1)).toBe("Spirit of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Stillwater sage");
+    expect(anglerTitle(99)).toBe("Spirit of the lake");
   });
 });
 
@@ -99,5 +99,23 @@ describe("levels 9 and 10", () => {
     expect(fishTireMulForLevel(9)).toBeGreaterThan(1);
     expect(rareBiteMulForLevel(9)).toBe(1);
     expect(rareBiteMulForLevel(10)).toBeGreaterThan(1);
+  });
+});
+
+describe("levels 11 and 12", () => {
+  it("open at 12000 and 17000 lifetime points, each with its own unlock and title", () => {
+    expect(anglerLevel(11999)).toBe(10);
+    expect(anglerLevel(12000)).toBe(11);
+    expect(anglerLevel(17000)).toBe(12);
+    expect(levelUnlock(11)).toMatch(/hold the bait/);
+    expect(levelUnlock(12)).toMatch(/perfect-cast mark/);
+    expect(anglerTitle(11)).toBe("Lake elder");
+  });
+
+  it("lets fish hold the bait longer from level 11 and widens the perfect cast from level 12", () => {
+    expect(hookWindowMulForLevel(10)).toBe(1);
+    expect(hookWindowMulForLevel(11)).toBeGreaterThan(1);
+    expect(perfectCastHalfForLevel(11)).toBe(0.035);
+    expect(perfectCastHalfForLevel(12)).toBeGreaterThan(0.035);
   });
 });

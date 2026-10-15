@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hookWindowMs, isPerfectCast, isSolidStrike, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
+import { hookWindowMs, isPerfectCast, isSolidStrike, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -40,5 +40,17 @@ describe("perfect cast", () => {
     } finally {
       Math.random = random;
     }
+  });
+});
+
+describe("level 11 and 12 strike and cast help", () => {
+  it("gives a level 11 angler a longer hook window and a level 12 angler a wider perfect cast", () => {
+    expect(hookWindowMs(1, false, 11)).toBe(Math.round(hookWindowMs(1) * 1.2));
+    expect(hookWindowMs(1, true, 11)).toBe(hookWindowMs(1, false, 11) + 400);
+    const narrow = perfectCastBand(1);
+    const wide = perfectCastBand(1, 12);
+    expect(wide.max - wide.min).toBeGreaterThan(narrow.max - narrow.min);
+    expect(isPerfectCast(wide.max - 0.001, 1, 12)).toBe(true);
+    expect(isPerfectCast(wide.max - 0.001, 1)).toBe(false);
   });
 });

@@ -144,6 +144,8 @@ export const PL_CONTENT: PlBook = {
   "Better odds of trophy-size fish.": "Większa szansa na ryby trofealne.",
   "Hooked fish tire 20% faster.": "Zaholowane ryby męczą się o 20% szybciej.",
   "Rare and legendary fish bite more often.": "Rzadkie i legendarne ryby biorą częściej.",
+  "Fish hold the bait 20% longer before they let go.": "Ryby trzymają przynętę o 20% dłużej, zanim ją puszczą.",
+  "The gold perfect-cast mark is wider.": "Złoty znacznik idealnego rzutu jest szerszy.",
 
   // Badges (badges.ts)
   "Four banks": "Cztery brzegi",
