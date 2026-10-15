@@ -431,6 +431,8 @@ export const PL_GAME: PlBook = {
   "Change the lure": "Zmień przynętę",
   "The field log says what weather a water's fish came in, under What works here, and Bests counts all your fish by the weather.":
     "Dziennik połowów podaje, przy jakiej pogodzie brały ryby z danego łowiska (w ramce Co tu działa), a Rekordy liczą wszystkie ryby według pogody.",
+  "When a fish takes line back, the line bar fills red from the right and the fight card says Running out of line! before it gets away. The landed card counts clean fights in a row, and a snapped line says how close the fish came.":
+    "Gdy ryba odbiera żyłkę, pasek żyłki zapełnia się na czerwono od prawej, a karta walki woła „Kończy się żyłka!”, zanim ryba ucieknie. Karta złowionej ryby liczy czyste hole z rzędu, a zerwana żyłka mówi, jak blisko była ryba.",
   "Fish take the bait their own way: pike, muskies and largemouth bass hit with no nibble first, while carp, catfish, burbot and sturgeon mouth it a few times before the real bite. The strike also says how quick it was, and how quick a solid hook needs to be.":
     "Ryby biorą przynętę po swojemu: szczupaki, muskie i bassy wielkogębowe uderzają bez skubnięcia, a karpie, sumy, miętusy i jesiotry kilka razy ją skubią przed prawdziwym braniem. Zacięcie podaje też, jak było szybkie i jak szybkie musi być, by hak wszedł pewnie.",
   "The field log's catch search finds fish by month too: type “sep” or “October 2026”. Bests counts fish by month, and the home Fish tile shows this month's catch.":
