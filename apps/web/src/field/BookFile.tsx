@@ -1,6 +1,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
+import { copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -26,8 +27,14 @@ export function BookFile() {
   const [pending, setPending] = useState<FieldArchive | null>(null);
   const [notice, setNotice] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
 
+  const own = ownCatches(book);
+  const [copiedAt, setCopiedAt] = useState(readCopiedAt);
+  const nudge = copyNudge(own, copiedAt);
+
   const onDownload = () => {
     downloadBook(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })));
+    saveCopiedAt(own);
+    setCopiedAt(own);
   };
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +76,13 @@ export function BookFile() {
   return (
     <footer className="sheet-foot">
       <p>{t("Sample waters are invented. This book stays in this browser.")}</p>
+      {nudge ? (
+        <p className="copy-nudge">
+          {nudge.kind === "never"
+            ? t("This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.")
+            : t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })}
+        </p>
+      ) : null}
       <div className="book-file">
         <button type="button" className="text-button" onClick={onDownload}>
           {t("Download this book")}
