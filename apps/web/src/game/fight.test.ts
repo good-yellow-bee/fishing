@@ -399,6 +399,16 @@ describe("turning runs", () => {
     expect(runtime.sim.turning).toBe(false);
   });
 
+  it("never turns a starter fish's head shake", () => {
+    for (const species of FISH.filter((candidate) => candidate.challenge === "mash")) {
+      for (const seed of SEEDS) {
+        const fight = playTurning(species, species.maxWeight, seed, true);
+        expect(fight.turnedRuns, species.id).toBe(0);
+        expect(fight.outcome, species.id).toBe("landed");
+      }
+    }
+  });
+
   it("lands every fish sooner, still landed and as clean, for an angler who turns each run", () => {
     for (const species of FISH.filter((candidate) => candidate.challenge !== "mash")) {
       const weight = species.maxWeight;

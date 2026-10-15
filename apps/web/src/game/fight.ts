@@ -24,6 +24,11 @@ export type FightSim = {
 export type Steer = -1 | 0 | 1;
 
 /** The keys that pull the rod in a fight: ← or A left, → or D right (a pad's stick sends A and D). */
+/** A head shake is a twist on the spot, not a run, so the starter fish that shake can't be turned. */
+export function canTurnRuns(challenge: ChallengeId) {
+  return challenge !== "mash";
+}
+
 export function steerSide(code: string): -1 | 1 | null {
   if (code === "ArrowLeft" || code === "KeyA") return -1;
   if (code === "ArrowRight" || code === "KeyD") return 1;
@@ -180,6 +185,7 @@ export function makeFight(
   let lastRunDone = false;
   let turnedThisRun = false;
   const leaper = LEAPERS.has(species.id);
+  const turnable = canTurnRuns(species.challenge);
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -215,7 +221,7 @@ export function makeFight(
     }
 
     // A leap goes up, not sideways, so only a run can be turned.
-    sim.turning = sim.surge === 2 && !sim.jump && steer === -sim.runSide;
+    sim.turning = turnable && sim.surge === 2 && !sim.jump && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
