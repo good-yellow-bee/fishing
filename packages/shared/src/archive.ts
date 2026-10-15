@@ -69,7 +69,8 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
     lure: entry.lure,
     spotId: entry.spotId,
     tripId: entry.tripId,
-    caughtAt: entry.caughtAt,
+    // Written the way the book writes it, so newest-first (which compares the text) holds for a file's own spellings too.
+    caughtAt: new Date(entry.caughtAt).toISOString(),
     note: entry.note,
     weather: entry.weather
       ? { sky: entry.weather.sky, wind: entry.weather.wind, waterTempF: entry.weather.waterTempF }
