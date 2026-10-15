@@ -12,6 +12,7 @@ import {
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
+import { FishSum } from "./FishSum";
 import { EditDelete } from "./EditDelete";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -125,6 +126,7 @@ export function SpotPage() {
       <div className="section-head">
         <h2>{t("Fish from this water")}</h2>
       </div>
+      <FishSum catches={catches} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (

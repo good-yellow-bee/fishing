@@ -1067,3 +1067,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR14~~ | ~~With metric units on, the catch form's out-of-range messages name centimetres, kilograms and °C bounds instead of inches, pounds and °F~~ (#254) | field log | S |
 | ~~BR15~~ | ~~"Download catches as a spreadsheet" in the field log's footer: a CSV of every catch, newest first, in the reader's language and units (semicolons and decimal commas for Polish spreadsheets, UTF-8 with a byte-order mark)~~ (#255) | field log | S |
 | ~~BR16~~ | ~~A trip's page sums up its fish above the cards: how many, how many species, and the largest (by weight, else length)~~ (#256) | field log | S |
+| ~~BR17~~ | ~~A water's page gets the same fish summary as a trip (count, species, largest), from one shared FishSum~~ (#257) | field log | S |

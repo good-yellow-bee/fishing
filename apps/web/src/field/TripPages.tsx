@@ -9,18 +9,16 @@ import {
   tripById,
   upcomingTrips,
   recentTrips,
-  personalBests,
-  type CatchEntry,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
-import { fishCountLabel, formatDay, messageText, tripWhen } from "./format";
+import { formatDay, messageText, tripWhen } from "./format";
+import { FishSum } from "./FishSum";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
-import { t, tn, useT } from "../i18n";
-import { measureText } from "../i18n/content";
+import { t, useT } from "../i18n";
 
 export function TripsPage() {
   const { book } = useLogbook();
@@ -79,20 +77,6 @@ export function TripsPage() {
         </div>
       )}
     </div>
-  );
-}
-
-/** "6 fish · 3 species · Largest: Northern pike, 28 in" for the fish of one outing. */
-function OutingSum({ catches }: { catches: readonly CatchEntry[] }) {
-  if (catches.length === 0) return null;
-  const species = new Set(catches.map((entry) => entry.species)).size;
-  const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
-  const largest = bests.heaviest ?? bests.longest;
-  return (
-    <p className="meta outing-sum">
-      {fishCountLabel(catches.length)} · {tn(species, "{n} species", "{n} species")}
-      {largest ? ` · ${t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })}` : ""}
-    </p>
   );
 }
 
@@ -157,7 +141,7 @@ export function TripPage() {
       <div className="section-head">
         <h2>{t("Fish on this outing")}</h2>
       </div>
-      <OutingSum catches={catches} />
+      <FishSum catches={catches} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged for this trip yet.")}</p>
       ) : (
