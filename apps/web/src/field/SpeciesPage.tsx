@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, seasonTally, skyTally, type CatchEntry } from "@stillwater/shared";
+import { FISH, biteTimes, moonTally, seasonTally, skyTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -62,7 +62,10 @@ export function SpeciesPage() {
         {waters.map((water) => (
           <li key={water.spotId}>
             {water.name ? <Link to={`/spots/${water.spotId}`}>{water.name}</Link> : t("Unknown water")}
-            <span className="meta">{fishCountLabel(water.count)}</span>
+            <span className="meta">
+              {/* The count opens just those fish, through the catch search. */}
+              {water.name ? <Link to={findWithLink(t(name), water.name)}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
+            </span>
           </li>
         ))}
       </ul>
@@ -71,7 +74,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
+          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       {seasons.filter((row) => row.count > 0).length > 1 ? (
@@ -79,7 +82,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By season")}</h2>
           </div>
-          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
+          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       {catches.filter((entry) => entry.weather).length > 1 ? (
@@ -87,7 +90,15 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By the weather")}</h2>
           </div>
-          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count , to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
+          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
+        </>
+      ) : null}
+      {catches.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By the moon")}</h2>
+          </div>
+          <TallyBars rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
       <div className="section-head">
