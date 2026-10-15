@@ -16,6 +16,7 @@ import {
   replaceTrip,
   sampleLogbook,
   upcomingTrips,
+  withCatchOnTrip,
   withoutCatch,
   withoutSpot,
   withoutTrip,
@@ -194,6 +195,16 @@ describe("field log", () => {
     expect(fish).toHaveLength(2);
     expect(fish.every((entry) => entry.spotId === "spot-cedar")).toBe(true);
     expect(next.trips.find((trip) => trip.id === "trip-mill")?.title).toBe("Moved");
+  });
+
+  it("files a loose fish under an outing on its water, and nowhere else", () => {
+    const loose = { ...book, catches: book.catches.map((entry) => (entry.id === "catch-brook-bugger" ? { ...entry, tripId: null } : entry)) };
+    const filed = withCatchOnTrip(loose, "catch-brook-bugger", "trip-mill");
+    expect(filed.catches.find((entry) => entry.id === "catch-brook-bugger")?.tripId).toBe("trip-mill");
+    expect(isLogbook(filed)).toBe(true);
+    const other = book.trips.find((trip) => trip.spotId !== "spot-mill")!;
+    expect(withCatchOnTrip(loose, "catch-brook-bugger", other.id)).toBe(loose);
+    expect(withCatchOnTrip(loose, "no-such-fish", "trip-mill")).toBe(loose);
   });
 
   it("drops one fish", () => {

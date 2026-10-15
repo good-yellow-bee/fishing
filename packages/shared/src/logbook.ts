@@ -548,6 +548,14 @@ export function replaceTrip(book: Logbook, trip: Trip): Logbook {
   };
 }
 
+/** Files one fish under an outing on its own water; anything else leaves the book as it was. */
+export function withCatchOnTrip(book: Logbook, catchId: string, tripId: string): Logbook {
+  const entry = book.catches.find((row) => row.id === catchId);
+  const trip = book.trips.find((row) => row.id === tripId);
+  if (!entry || !trip || trip.spotId !== entry.spotId || entry.tripId === tripId) return book;
+  return { ...book, catches: book.catches.map((row) => (row.id === catchId ? { ...row, tripId } : row)) };
+}
+
 export function withoutCatch(book: Logbook, id: string): Logbook {
   return { ...book, catches: book.catches.filter((entry) => entry.id !== id) };
 }

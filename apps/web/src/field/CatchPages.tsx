@@ -645,7 +645,7 @@ function CatchForm() {
 }
 
 export function CatchPage() {
-  const { book, deleteCatch, photoFor } = useLogbook();
+  const { book, deleteCatch, fileCatch, photoFor } = useLogbook();
   useT();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
@@ -664,6 +664,8 @@ export function CatchPage() {
 
   const spot = spotById(book, entry.spotId);
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
+  // A fish logged on its own while an outing was on this water that day: offer to file it there.
+  const looseTrip = trip ? undefined : tripOnDay(book, entry.spotId, localDate(new Date(entry.caughtAt)));
   const photo = photoFor(entry.id);
   const { newer, older } = catchNeighbors(book, entry.id);
   const badge = catchBadge(book, entry);
@@ -754,6 +756,13 @@ export function CatchPage() {
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+        </p>
+      ) : looseTrip ? (
+        <p className="trip-link">
+          {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{looseTrip.title}</Link>{" "}
+          <button type="button" className="text-button" onClick={() => fileCatch(entry.id, looseTrip.id)}>
+            {t("Add this fish to it")}
+          </button>
         </p>
       ) : null}
       <p className="another-catch">

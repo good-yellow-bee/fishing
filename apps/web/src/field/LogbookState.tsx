@@ -13,6 +13,7 @@ import {
   withCatch,
   withSpot,
   withTrip,
+  withCatchOnTrip,
   withoutCatch,
   withoutCatchPhoto,
   withoutSpot,
@@ -41,6 +42,8 @@ type LogbookApi = {
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
   deleteCatch: (id: string) => void;
+  /** Files a fish logged without an outing under one on its water. */
+  fileCatch: (catchId: string, tripId: string) => void;
   deleteSpot: (id: string) => void;
   deleteTrip: (id: string) => void;
   restoreSample: () => void;
@@ -195,6 +198,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return { ok: true, id };
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
+      fileCatch: (catchId, tripId) => commit(withCatchOnTrip(book, catchId, tripId)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       undoable: undo?.kind ?? null,
