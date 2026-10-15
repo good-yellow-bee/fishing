@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PHOTO_STORAGE_KEY, readStoredPhotos } from "./photoStore";
+import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { saveLandedCatch, saveLandedPhoto } from "./keepCatch";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook } from "./storage";
-import { sampleLogbook } from "@stillwater/shared";
+import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, sampleLogbook } from "@stillwater/shared";
 
 function memoryStorage() {
   const data = new Map<string, string>();
@@ -116,5 +116,33 @@ describe("save a landed fish", () => {
     expect(readStoredPhotos()[landed.id]).toBe("data:image/jpeg;base64,AAAA");
     expect(saveLandedPhoto("catch-missing", "data:image/jpeg;base64,CCCC")).toBe(false);
     expect(readStoredPhotos()["catch-missing"]).toBeUndefined();
+  });
+
+  it("makes room for a new snapshot by dropping the game's oldest, but not a best fish or the player's photo", () => {
+    const shot = (letter: string) => `data:image/jpeg;base64,${letter.repeat(60_000)}`;
+    const land = (id: string, pounds: number) => saveLandedCatch({ ...landed, id, pounds });
+    land("small-1", 0.2);
+    land("small-2", 0.3);
+    land("best", 2);
+    land("new", 0.5);
+    expect(saveLandedPhoto("best", shot("A"))).toBe(true);
+    expect(saveLandedPhoto("small-1", shot("B"))).toBe(true);
+    expect(saveLandedPhoto("small-2", shot("C"))).toBe(true);
+    // The player swapped in their own picture on the second small fish.
+    savePhotos({ ...readStoredPhotos(), "small-2": shot("D") });
+    // Fill the browser so one more snapshot no longer fits.
+    const used = [...Array(localStorage.length).keys()].reduce((sum, i) => sum + localStorage.getItem(localStorage.key(i)!)!.length, 0);
+    localStorage.setItem("filler", "x".repeat(CATCH_PHOTO_QUOTA_CHARS - CATCH_PHOTO_BOOK_HEADROOM_CHARS - used - 30_000));
+    expect(saveLandedPhoto("new", shot("E"))).toBe(true);
+    const photos = readStoredPhotos();
+    expect(Object.keys(photos).sort()).toEqual(["best", "new", "small-2"]);
+    expect(photos["small-2"]).toBe(shot("D"));
+  });
+
+  it("still throws when nothing of the game's may go", () => {
+    saveLandedCatch(landed);
+    localStorage.setItem("filler", "x".repeat(CATCH_PHOTO_QUOTA_CHARS - CATCH_PHOTO_BOOK_HEADROOM_CHARS - 20_000));
+    expect(() => saveLandedPhoto(landed.id, `data:image/jpeg;base64,${"A".repeat(60_000)}`)).toThrow();
+    expect(readStoredPhotos()).toEqual({});
   });
 });
