@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { waterTips } from "./waterTips";
+import { packingTips, waterTips } from "./waterTips";
 
 describe("water tips", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -22,5 +22,20 @@ describe("water tips", () => {
     const at = (iso: string, id: string) => ({ ...book.catches[0]!, id, caughtAt: iso });
     const tips = waterTips([at("2026-10-01T06:00:00", "a"), at("2026-10-01T19:00:00", "b"), at("2026-10-01T12:00:00", "c")])!;
     expect(tips.time?.id).toBe("dawn");
+  });
+});
+
+describe("packing tips", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const trip = { id: "trip-ahead", date: "2026-11-01", spotId: "spot-cedar", title: "Ahead", note: "" };
+  const fish = (id: string, lure: string) => ({ ...book.catches[0]!, id, spotId: "spot-cedar", lure });
+  const fished = { ...book, catches: [fish("a", "Jig"), fish("b", "Jig"), fish("c", "Spoon")] };
+
+  it("offers the water's best lures for an outing ahead", () => {
+    expect(packingTips(fished, trip, "2026-10-15")).toEqual(["Jig", "Spoon"]);
+  });
+
+  it("offers nothing for an outing already past", () => {
+    expect(packingTips(fished, trip, "2026-11-02")).toEqual([]);
   });
 });

@@ -12,6 +12,7 @@ import {
 import { formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
+import { packingTips } from "../waterTips";
 import { t, useT } from "../../i18n";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -30,7 +31,11 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
           {spot ? ` · ${spot.name}` : ""}
         </span>
       </div>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} />
+      <TackleList
+        tripId={trip.id}
+        name={t("Tackle for {trip}", { trip: trip.title })}
+        suggest={packingTips(book, trip, today)}
+      />
     </section>
   );
 }
@@ -78,7 +83,7 @@ export function GearPage() {
           </div>
           <Link to={`/trips/${trip.id}`}>{t("Outing")}</Link>
         </header>
-        <TackleList tripId={trip.id} heading={t("In the bag")} />
+        <TackleList tripId={trip.id} heading={t("In the bag")} suggest={packingTips(book, trip, today)} />
       </div>
     );
   }
