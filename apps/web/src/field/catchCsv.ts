@@ -30,6 +30,7 @@ export function catchesCsv(book: Logbook): string {
     t("Sky"),
     t("Wind"),
     metric ? t("Water °C") : t("Water °F"),
+    t("Released"),
     t("Note"),
   ];
   const rows = catchesNewestFirst(book).map((entry) => {
@@ -47,6 +48,7 @@ export function catchesCsv(book: Logbook): string {
       weather ? t(SKY_LABELS[weather.sky]) : "",
       weather ? t(WIND_LABELS[weather.wind]) : "",
       weather ? num(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF) : "",
+      entry.released ? t("Yes") : "",
       noteText(entry.note),
     ];
   });

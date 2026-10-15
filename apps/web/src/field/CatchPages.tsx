@@ -137,6 +137,7 @@ function CatchForm() {
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   const [note, setNote] = useState(existing?.note ?? "");
+  const [released, setReleased] = useState(existing?.released === true);
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
@@ -157,7 +158,7 @@ function CatchForm() {
   useEffect(() => {
     // While an older draft waits, keep it rather than overwrite it with this one.
     if (existing || waiting) return;
-    const fields = { species, measureKind, amount, lure, spotId, tripId, note, sky, wind, waterTemp };
+    const fields = { species, measureKind, amount, lure, spotId, tripId, note, sky, wind, waterTemp, released };
     const now = JSON.stringify(fields);
     if (opened.current === null) opened.current = now;
     if (now === opened.current) {
@@ -176,11 +177,12 @@ function CatchForm() {
       sky,
       wind,
       waterTemp,
+      released,
       timeTouched,
       units,
       savedAt: new Date().toISOString(),
     });
-  }, [existing, waiting, species, measureKind, amount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, timeTouched, units]);
+  }, [existing, waiting, species, measureKind, amount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, released, timeTouched, units]);
 
   const pickUp = (kept: KeptDraft) => {
     const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
@@ -193,6 +195,7 @@ function CatchForm() {
     setCaughtAt(kept.caughtAt);
     setTimeTouched(kept.timeTouched);
     setNote(kept.note);
+    setReleased(kept.released === true);
     setSky(kept.sky);
     setWind(kept.wind);
     // Numbers typed in other units would mean something else now.
@@ -277,6 +280,7 @@ function CatchForm() {
       sky,
       wind,
       waterTemp: existing?.weather && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
+      released,
     };
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
@@ -550,6 +554,11 @@ function CatchForm() {
             />
           </label>
 
+          <label className="wide check-field">
+            <input name="released" type="checkbox" checked={released} onChange={(event) => setReleased(event.target.checked)} />
+            {t("Released it")}
+          </label>
+
           <label className="wide">
             {t("Note")}
             <textarea
@@ -668,6 +677,12 @@ export function CatchPage() {
           ) : null}
           {" · "}
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+          {entry.released ? (
+            <>
+              {" · "}
+              <span>{t("Released")}</span>
+            </>
+          ) : null}
         </p>
         {badge ? (
           <p className="best-badge">

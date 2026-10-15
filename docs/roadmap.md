@@ -1104,3 +1104,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR51~~ | ~~An unsaved new catch is kept for a day and offered back on the catch form~~ (#291) | field | S |
 | ~~BR52~~ | ~~Home page points to an unsaved catch waiting on the form~~ (#292) | field | S |
 | ~~BR53~~ | ~~Catch form offers the weather from the last fish on the same outing~~ (#293) | field | S |
+| ~~BR54~~ | ~~Mark a catch as released; shown on the catch page and card, kept in the book file and the spreadsheet~~ (#294) | field | S |

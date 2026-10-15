@@ -42,6 +42,8 @@ export type CatchEntry = {
   caughtAt: string;
   note: string;
   weather: CatchWeather | null;
+  /** Put back alive. Left out on kept fish and on books from before it existed. */
+  released?: boolean;
 };
 
 export type Logbook = {
@@ -65,6 +67,7 @@ export type CatchDraft = {
   sky: string;
   wind: string;
   waterTemp: string;
+  released?: boolean;
 };
 
 export type SpotDraft = {
@@ -348,7 +351,8 @@ function isCatch(value: unknown): value is CatchEntry {
     (value.tripId === null || typeof value.tripId === "string") &&
     typeof value.caughtAt === "string" &&
     typeof value.note === "string" &&
-    (value.weather === null || isWeather(value.weather))
+    (value.weather === null || isWeather(value.weather)) &&
+    (value.released === undefined || typeof value.released === "boolean")
   );
 }
 
@@ -473,7 +477,17 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
 
   return {
     ok: true,
-    value: { species, measure, lure, spotId: spot.id, tripId, caughtAt: when.toISOString(), note, weather: weather.value },
+    value: {
+      species,
+      measure,
+      lure,
+      spotId: spot.id,
+      tripId,
+      caughtAt: when.toISOString(),
+      note,
+      weather: weather.value,
+      ...(draft.released ? { released: true } : {}),
+    },
   };
 }
 

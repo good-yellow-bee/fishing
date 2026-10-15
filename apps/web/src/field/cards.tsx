@@ -42,6 +42,12 @@ export function CatchCard({
           <Link to={`/spots/${entry.spotId}`}>{spotName}</Link>
           <span aria-hidden="true">·</span>
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+          {entry.released ? (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{t("Released")}</span>
+            </>
+          ) : null}
         </p>
         <WeatherLine weather={entry.weather} />
         {entry.note ? <p className="note">{noteText(entry.note)}</p> : null}
