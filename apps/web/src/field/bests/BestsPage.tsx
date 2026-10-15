@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, lureTally, moonTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -35,11 +35,23 @@ function LargeFish({
   );
 }
 
+function soleTripOn(book: Logbook, ymd: string): string | null {
+  const trips = new Set(book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === ymd).map((entry) => entry.tripId ?? ""));
+  const [only] = [...trips];
+  return trips.size === 1 && only ? only : null;
+}
+
+function DayTally({ count, tripId }: { count: number; tripId: string | null }) {
+  return tripId ? <Link to={`/trips/${tripId}`}>{fishCountLabel(count)}</Link> : <>{fishCountLabel(count)}</>;
+}
+
 export function BestsPage() {
   const { book } = useLogbook();
   useT();
   const bests = personalBests(book);
   const topDay = bestDay(book);
+  // When every fish of the best day came on one outing, the tile opens that outing.
+  const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
   const released = book.catches.filter((entry) => entry.released).length;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
@@ -59,17 +71,21 @@ export function BestsPage() {
       <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>
           <span className="eyebrow">{t("Longest")}</span>
-          <strong>{bests.longest ? measureText(bests.longest.measure) : t("None")}</strong>
+          <strong>
+            {bests.longest ? <Link to={`/catches/${bests.longest.id}`}>{measureText(bests.longest.measure)}</Link> : t("None")}
+          </strong>
           <small>{bests.longest ? t(bests.longest.species) : t("No length in the book")}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
-          <strong>{bests.heaviest ? measureText(bests.heaviest.measure) : t("None")}</strong>
+          <strong>
+            {bests.heaviest ? <Link to={`/catches/${bests.heaviest.id}`}>{measureText(bests.heaviest.measure)}</Link> : t("None")}
+          </strong>
           <small>{bests.heaviest ? t(bests.heaviest.species) : t("No weight in the book")}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>
-          <strong>{bests.watersWithFish}</strong>
+          <strong>{book.spots.length > 0 ? <Link to="/spots">{bests.watersWithFish}</Link> : bests.watersWithFish}</strong>
           <small>
             {book.spots.length === 0
               ? t("No waters in the book")
@@ -78,7 +94,7 @@ export function BestsPage() {
         </div>
         <div>
           <span className="eyebrow">{t("Best day")}</span>
-          <strong>{topDay ? fishCountLabel(topDay.count) : t("None")}</strong>
+          <strong>{topDay ? <DayTally count={topDay.count} tripId={topDayTrip} /> : t("None")}</strong>
           <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>
