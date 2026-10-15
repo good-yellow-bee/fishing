@@ -146,6 +146,8 @@ function CatchForm() {
   const [tripId, setTripId] = useState(() =>
     existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripOnDay(book, presetSpot, localDate(new Date()))?.id ?? ""),
   );
+  // Until the player picks an outing themselves, the outing follows the water and the day.
+  const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
   const [caughtAt, setCaughtAt] = useState(() =>
     existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
@@ -207,6 +209,7 @@ function CatchForm() {
     setLure(kept.lure);
     setSpotId(keptSpot);
     setTripId(keptTrip);
+    setTripPicked(true);
     setCaughtAt(kept.caughtAt);
     setTimeTouched(kept.timeTouched);
     setNote(kept.note);
@@ -231,6 +234,7 @@ function CatchForm() {
     setSpotId(nextSpot);
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
     setTripId(existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? ""));
+    setTripPicked(Boolean(existing));
   };
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
@@ -238,6 +242,7 @@ function CatchForm() {
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
+    setTripPicked(true);
     if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
   };
 
@@ -500,6 +505,7 @@ function CatchForm() {
               value={caughtAt}
               onChange={(event) => {
                 setCaughtAt(event.target.value);
+                if (!tripPicked) setTripId(tripOnDay(book, spotId, event.target.value.slice(0, 10))?.id ?? "");
                 setTimeTouched(true);
               }}
               required
