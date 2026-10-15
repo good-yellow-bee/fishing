@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { WATER_LABELS, catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -20,7 +20,13 @@ function monthHas(entry: CatchEntry, want: string): boolean {
   return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, and released fish. */
+/** True when the kind of water the fish came from ("River", "Rzeka") starts with what was typed, from three letters up. */
+function waterTypeHas(book: Logbook, entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  const type = want.length < 3 ? undefined : spotById(book, entry.spotId)?.waterType;
+  return type !== undefined && normalize(t(WATER_LABELS[type])).startsWith(want);
+}
+
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, and released fish. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
@@ -31,7 +37,12 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
     if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
-    else if (monthHas(entry, want) || (entry.released && releasedWords.some((word) => word.startsWith(want)))) hit.add(entry.id);
+    else if (
+      monthHas(entry, want) ||
+      (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
+      waterTypeHas(book, entry, want, t)
+    )
+      hit.add(entry.id);
   }
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
