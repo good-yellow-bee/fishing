@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { WATER_LABELS, type Spot } from "@stillwater/shared";
 import { t, useT } from "../../i18n";
+import { fishCountLabel } from "../format";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -181,6 +182,7 @@ export function SpotMapPage() {
             <li key={spot.id}>
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               <span>{t(WATER_LABELS[spot.waterType])}</span>
+              <span>{fishCountLabel(book.catches.filter((entry) => entry.spotId === spot.id).length)}</span>
               <span>{formatCoord(place.lat, place.lng)}</span>
             </li>
           ))}
