@@ -96,6 +96,14 @@ export const BITE_TAP_SEC = 0.08;
 /** End of the slack pause, when the yank starts. */
 export const BITE_SLACK_END = 0.15;
 
+/**
+ * Seconds of the bite to skip at its start. An ambush predator hits with no
+ * tap and no slack pause: the float goes straight into the yank.
+ */
+export function biteLeadIn(ambush: boolean) {
+  return ambush ? BITE_SLACK_END : 0;
+}
+
 /** End of the hard yank. The tip throbs after this. */
 export const BITE_YANK_END = 0.29;
 

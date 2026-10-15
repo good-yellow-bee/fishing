@@ -26,6 +26,7 @@ import {
   dockLineLips,
   liftDockSample,
   fishDepthMeters,
+  biteLeadIn,
   fishLeadMeters,
   fishLeapHeight,
   fishSideMeters,
@@ -109,6 +110,14 @@ describe("fight motion", () => {
     expect(fishSideMeters(1, 1)).toBeGreaterThan(fishSideMeters(0, 1));
     expect(bobberPull(2, false)).toBeGreaterThan(bobberPull(2, true));
     expect(bobberPull(0, false)).toBe(0);
+  });
+
+  it("starts an ambush bite at the yank, with no tap or slack before it", () => {
+    expect(biteLeadIn(false)).toBe(0);
+    const skip = biteLeadIn(true);
+    // The usual bite opens on a light tap; an ambush is already dunking the float on its first frame.
+    expect(bitePlunge(0)).toBeLessThan(0.01);
+    expect(bitePlunge(skip + 0.05)).toBeGreaterThan(0.2);
   });
 
   it("brings a tired fish up and shortens its runs, leaving a fresh one as it was", () => {
