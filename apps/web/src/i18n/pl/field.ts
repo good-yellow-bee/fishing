@@ -396,6 +396,8 @@ export const PL_FIELD: PlBook = {
   "Back to bests": "Wróć do rekordów",
   "What it takes": "Na co bierze",
   "Where it comes from": "Skąd pochodzi",
+  "How the best grew": "Jak rósł rekord",
+  "the first": "pierwsza",
   "Every one in the book": "Wszystkie w dzienniku",
   "All {species}": "Gatunek: {species}",
   "{species}: {n} of {total}": "{species}: {n} z {total}",
