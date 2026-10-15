@@ -118,8 +118,8 @@ export function SpotPage() {
             <TripCard
               key={trip.id}
               trip={trip}
-              spotName={spot.name}
-              waterType={spot.waterType}
+              spotName={null}
+              waterType={null}
               fishCount={catches.filter((entry) => entry.tripId === trip.id).length}
               today={today}
               tomorrow={tomorrow}
@@ -141,7 +141,7 @@ export function SpotPage() {
             <CatchCard
               key={entry.id}
               entry={entry}
-              spotName={spot.name}
+              spotName={null}
               tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
             />
           )}
