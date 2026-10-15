@@ -1870,6 +1870,12 @@ kbd {
     width: min(340px, calc(92vw / var(--text-zoom, 1)));
   }
 
+  /* Larger text makes the header and this card taller: hang it from the header instead, so they never overlap. */
+  html[data-text-size] .fight-bar {
+    top: calc(var(--hud-bottom, 140px) + 8px);
+    bottom: auto;
+  }
+
   .power-meter {
     right: 12px;
     bottom: 226px;
@@ -1924,7 +1930,7 @@ kbd {
     right: 12px;
     bottom: 12px;
     padding: 16px 18px;
-    max-height: calc(100% - 140px);
+    max-height: calc(100% - var(--hud-bottom, 128px) - 24px);
     overflow-y: auto;
   }
 
@@ -1951,6 +1957,15 @@ kbd {
   .landed-card .catch-actions .catch-stamp,
   .landed-card .catch-actions .warn {
     grid-column: 1 / -1;
+  }
+
+  /* When the card has to scroll (the largest text), Release and Keep fishing stay in reach at its foot. */
+  .landed-card .catch-actions {
+    position: sticky;
+    bottom: -16px;
+    margin: 0 -18px -16px;
+    padding: 8px 18px 12px;
+    background: rgba(239, 224, 194, 0.98);
   }
 
   .landed-card .catch-actions .panel-btn {
