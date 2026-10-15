@@ -83,7 +83,13 @@ export function TripsPage() {
       ) : (
         tripsByMonth(recent).map((group) => (
           <section key={group.month} aria-label={monthName(group.month)}>
-            <h3 className="month-head">{monthName(group.month)}</h3>
+            <h3 className="month-head">
+              {monthName(group.month)}
+              {" · "}
+              {tn(group.trips.length, "{n} outing", "{n} outings")}
+              {" · "}
+              {fishCountLabel(group.trips.reduce((sum, trip) => sum + catchesForTrip(book, trip.id).length, 0))}
+            </h3>
             <div className="stack">
               {group.trips.map((trip) => (
                 <TripCard
