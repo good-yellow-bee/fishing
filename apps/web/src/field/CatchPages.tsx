@@ -19,12 +19,13 @@ import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
 import { anotherCatchLink } from "./anotherCatch";
+import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookLures, ownFirst, tripLure } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
-import { getUnits, t, useT, type Units } from "../i18n";
+import { getUnits, locale, t, useT, type Units } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -492,6 +493,7 @@ export function CatchPage() {
   useT();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
+  const [pictureError, setPictureError] = useState(false);
   const entry = book.catches.find((row) => row.id === catchId);
 
   if (!entry) {
@@ -509,6 +511,17 @@ export function CatchPage() {
   const photo = photoFor(entry.id);
   const { newer, older } = catchNeighbors(book, entry.id);
   const badge = catchBadge(book, entry);
+  const savePicture = () => {
+    const caught = new Date(entry.caughtAt);
+    const text = {
+      title: t(entry.species),
+      detail: [measureText(entry.measure), spot?.name].filter(Boolean).join(" · "),
+      conditions: entry.weather ? weatherText(entry.weather) : t(entry.lure),
+      date: caught.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
+    };
+    setPictureError(false);
+    saveShareCard(text, photo ?? null, shareCardFileName(entry.species, caught)).catch(() => setPictureError(true));
+  };
   const heavy = entry.measure.kind === "weight";
 
   return (
@@ -571,7 +584,15 @@ export function CatchPage() {
         <Link to={anotherCatchLink(entry)} className="field-primary inline">
           {t("Log another like this")}
         </Link>
+        <button type="button" className="field-primary inline" onClick={savePicture}>
+          {t("Save picture")}
+        </button>
       </p>
+      {pictureError ? (
+        <p className="field-error" role="alert">
+          {t("The picture could not be made in this browser.")}
+        </p>
+      ) : null}
       {newer || older ? (
         <nav className="catch-steps" aria-label={t("More catches")}>
           {newer ? (

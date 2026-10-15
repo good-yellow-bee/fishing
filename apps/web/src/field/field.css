@@ -917,5 +917,8 @@ button.field-primary:disabled {
 }
 
 .another-catch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin: 20px 0 0;
 }
