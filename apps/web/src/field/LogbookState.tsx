@@ -56,7 +56,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
@@ -209,7 +209,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return undo.from;
       },
       dismissUndo: () => setUndo(null),
-      restoreSample: () => commit(sampleLogbook(new Date())),
+      // The sample takes the whole book's place, so it can be undone like a delete.
+      restoreSample: () => remove("sample", sampleLogbook(new Date())),
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);
