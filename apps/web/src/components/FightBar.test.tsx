@@ -147,6 +147,17 @@ describe("FightBar for screen readers", () => {
     expect(overrun()).toBe("0%");
   });
 
+  it("tells the angler to reel a played-out fish in while it is calm", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.stamina = 0.1;
+    frame();
+    expect(status()).toBe("It's played out — reel it in!");
+    sim.current.surge = 1;
+    frame();
+    expect(status()).not.toBe("It's played out — reel it in!");
+  });
+
   it("warns of the last run at the net", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
