@@ -22,7 +22,7 @@ import { anotherCatchLink } from "./anotherCatch";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookLures, ownFirst, tripLure } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, tripLure } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -119,7 +119,8 @@ function CatchForm() {
   const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
   const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? params.get("spot") ?? book.spots[0]?.id ?? "";
 
-  const presetKind = params.get("kind") === "weight" ? "weight" : "length";
+  const asked = params.get("kind");
+  const presetKind = asked === "weight" || asked === "length" ? asked : lastMeasureKind(book);
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? presetKind);
   // The form reads and writes in the units the player picked; the book keeps imperial.
