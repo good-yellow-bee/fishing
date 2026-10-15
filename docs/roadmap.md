@@ -1166,3 +1166,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR113~~ | ~~An upcoming trip says its fish will show up once logged on the day~~ (#353) | field | S |
 | ~~BR114~~ | ~~Spot form points out a water already in the book by the same name~~ (#354) | field | S |
 | ~~BR115~~ | ~~The Largest in a fish summary links to that catch~~ (#355) | field | S |
+| ~~BR116~~ | ~~News card (2026-10-15s) tells players about the / search key, Largest links and the same-name water heads-up~~ (#356) | field log | S |

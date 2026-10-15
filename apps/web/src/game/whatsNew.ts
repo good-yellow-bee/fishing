@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15r";
+export const NEWS_ID = "2026-10-15s";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In the field log, press / on the home page to search, and the largest fish in a trip, water or species summary opens its catch. Adding a water with a name already in the book gets a heads-up.",
   "The game's field guide (under Catch log) and the field log's species pages now link to each other, so a kind you caught on the lake opens its page in the book.",
   "A new catch files itself under the outing on its water that day, and planning a second outing on the same water and day gets a heads-up. Photos sit under month headings, and Bests says which kind each water gives most.",
   "Every fish list in the field log, and the catch search, now sits under month headings. The home page says when your next outing is.",
