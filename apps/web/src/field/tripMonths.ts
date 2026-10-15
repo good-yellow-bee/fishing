@@ -15,11 +15,19 @@ export function tripsByMonth(trips: readonly Trip[]): TripMonth[] {
   return months;
 }
 
+// Building a date formatter is slow next to using one, and a search may name thousands of fish's months.
+const monthNames = new Map<string, string>();
+
 /** "October 2026", in the reader's language. */
 export function monthName(month: string): string {
+  const key = `${locale()} ${month}`;
+  const known = monthNames.get(key);
+  if (known) return known;
   const name = new Intl.DateTimeFormat(locale(), { month: "long", year: "numeric" }).format(new Date(`${month}-15T12:00:00`));
   // Polish month names come lower case; a heading starts with a capital.
-  return name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
+  const heading = name.charAt(0).toLocaleUpperCase(locale()) + name.slice(1);
+  monthNames.set(key, heading);
+  return heading;
 }
 
 /** The calendar month ("2026-10") a fish was landed in, by the reader's clock. */
