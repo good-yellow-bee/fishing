@@ -23,9 +23,10 @@ import {
   type SpotDraft,
   type TripDraft,
 } from "@stillwater/shared";
-import { t } from "../i18n";
+import { t, useLang } from "../i18n";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
+import { localizeSample } from "./sampleText";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string };
@@ -50,6 +51,7 @@ type LogbookApi = {
 const LogbookContext = createContext<LogbookApi | null>(null);
 
 export function LogbookProvider({ children }: { children: ReactNode }) {
+  const lang = useLang();
   const [book, setBook] = useState<Logbook>(() => {
     const stored = readStoredLogbook();
     if (stored) return stored;
@@ -102,7 +104,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     };
 
     return {
-      book,
+      book: localizeSample(book),
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
         const parsed = parseCatchDraft(draft, book);
@@ -182,7 +184,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         setPhotos(photosForBook(nextBook, nextPhotos));
       },
     };
-  }, [book, photos]);
+    // The language is a dependency: the sample week's lines are shown in it.
+  }, [book, photos, lang]);
 
   return <LogbookContext.Provider value={api}>{children}</LogbookContext.Provider>;
 }
