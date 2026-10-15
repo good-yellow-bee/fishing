@@ -98,12 +98,12 @@ export function SpotPage() {
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
       </EditDelete>
       {spot.notes ? <p className="prose">{spot.notes}</p> : null}
-      <aside className="conditions">
+      <aside className="conditions" aria-label={t("Best conditions")}>
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
       {tips ? (
-        <aside className="conditions water-tips">
+        <aside className="conditions water-tips" aria-label={t("What works here")}>
           <span className="eyebrow">{t("What works here")}</span>
           <p>
             {tips.lures.map((row) => `${t(row.lure)}\u00a0(${row.count})`).join(" · ")}
