@@ -645,7 +645,7 @@ function CatchForm() {
 }
 
 export function CatchPage() {
-  const { book, deleteCatch, fileCatch, photoFor } = useLogbook();
+  const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   useT();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
@@ -760,7 +760,7 @@ export function CatchPage() {
       ) : looseTrip ? (
         <p className="trip-link">
           {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{looseTrip.title}</Link>{" "}
-          <button type="button" className="text-button" onClick={() => fileCatch(entry.id, looseTrip.id)}>
+          <button type="button" className="text-button" onClick={() => fileCatches([entry.id], looseTrip.id)}>
             {t("Add this fish to it")}
           </button>
         </p>

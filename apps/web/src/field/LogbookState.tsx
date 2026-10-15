@@ -42,8 +42,8 @@ type LogbookApi = {
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
   deleteCatch: (id: string) => void;
-  /** Files a fish logged without an outing under one on its water. */
-  fileCatch: (catchId: string, tripId: string) => void;
+  /** Files fish logged without an outing under one on their water. */
+  fileCatches: (catchIds: readonly string[], tripId: string) => void;
   deleteSpot: (id: string) => void;
   deleteTrip: (id: string) => void;
   restoreSample: () => void;
@@ -198,7 +198,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return { ok: true, id };
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
-      fileCatch: (catchId, tripId) => commit(withCatchOnTrip(book, catchId, tripId)),
+      fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       undoable: undo?.kind ?? null,
