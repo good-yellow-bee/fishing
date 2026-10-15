@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15zj";
+export const NEWS_ID = "2026-10-15zk";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The catch search now finds fish by size (“>2 lb”, “<30 cm”) and joins two searches with “+”, so “Northern pike + >2 lb” finds just the big pike. Lures on catch cards, the species page’s water counts and its new moon bars open those fish too.",
   "On the lake, a sulking carp, catfish, burbot or sturgeon now sinks deep until you pump it up, and a pike, muskie or largemouth bass pulls the float straight under with no warning tap.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.",
   "Bow to a trout's or bass's leap and the landed card counts it, as it does a carp hooked on its second take. The tension bar keeps a notch at the fight's highest tension, red once it touched the red.",
