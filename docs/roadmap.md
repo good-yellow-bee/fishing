@@ -1242,3 +1242,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR152~~ | ~~Released mark on a catch page links to the released-fish search~~ (#423) | field | S |
 | ~~BR153~~ | ~~Catch search by sky; Bests weather bars link to it~~ (#424) | field | S |
 | ~~BR154~~ | ~~Catch search by season; Bests season bars link to it~~ (#426) | field | S |
+| ~~BR155~~ | ~~Catch search by time of day; Bests bite-time bars link to it~~ (#427) | field | S |
