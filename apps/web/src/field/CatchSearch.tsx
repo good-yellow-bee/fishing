@@ -1,4 +1,5 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
@@ -23,18 +24,37 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
 
+export const FIND_PARAM = "find";
+
+/** The field log home, opened with this catch search already typed in. */
+export function findLink(text: string): string {
+  return `/?${new URLSearchParams({ [FIND_PARAM]: text }).toString()}`;
+}
+
 export function CatchSearch() {
   const { book } = useLogbook();
   const t = useT();
   const lang = useLang();
-  const [query, setQuery] = useState("");
+  const [params, setParams] = useSearchParams();
+  // The search lives in the address too, so Back from a catch returns to the same matches.
+  const [query, setQuery] = useState(() => params.get(FIND_PARAM) ?? "");
+  const box = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // Arriving from a link with a search typed in: show the matches, not the top of home.
+    const at = box.current;
+    if (!params.get(FIND_PARAM) || !at) return;
+    // The phone's sticky bar would cover the search box, so stop below it.
+    const bar = document.querySelector<HTMLElement>(".field-mobile-bar");
+    const below = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
+    window.scrollTo({ top: at.getBoundingClientRect().top + window.scrollY - below - 12 });
+  }, []);
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
   const matches = useMemo(() => (settled ? findCatches(book, settled, t) : []), [book, settled, t, lang]);
 
   return (
-    <section className="catch-search" aria-label={t("Find a catch")}>
+    <section ref={box} className="catch-search" aria-label={t("Find a catch")}>
       <label htmlFor="catch-search">{t("Find a catch")}</label>
       <input
         id="catch-search"
@@ -42,7 +62,19 @@ export function CatchSearch() {
         value={query}
         placeholder={t("Species, water, or lure")}
         autoComplete="off"
-        onChange={(event) => setQuery(event.target.value)}
+        onChange={(event) => {
+          const next = event.target.value;
+          setQuery(next);
+          setParams(
+            (current) => {
+              const out = new URLSearchParams(current);
+              if (next.trim()) out.set(FIND_PARAM, next);
+              else out.delete(FIND_PARAM);
+              return out;
+            },
+            { replace: true },
+          );
+        }}
       />
       {settled ? (
         <>
