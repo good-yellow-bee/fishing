@@ -1279,3 +1279,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR174~~ | ~~Arrow keys in the measure and water-type radio rows~~ (#458) | field | S |
 | ~~BR175~~ | ~~Focus the heading (or search) after in-app navigation~~ (#461) | field | S |
 | ~~BR176~~ | ~~Delete question as an alert dialog, focus on Keep, Escape closes~~ (#463) | field | S |
+| ~~BR177~~ | ~~This week in years past reaches across New Year and counts years from the nearer date~~ (#464) | field | S |

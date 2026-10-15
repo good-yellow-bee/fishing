@@ -10,7 +10,7 @@ import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { catchMonth, monthName } from "./tripMonths";
-import { thisWeekInPastYears } from "./yearsAgo";
+import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -135,7 +135,7 @@ export function HomePage() {
                 {yearsAgo.map((entry) => (
                   <div key={entry.id} className="years-ago">
                     {/* Say plainly how long ago, beside the date on the card. */}
-                    <p className="meta">{tn(now.getFullYear() - new Date(entry.caughtAt).getFullYear(), "{n} year ago", "{n} years ago")}</p>
+                    <p className="meta">{tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}</p>
                     <CatchCard
                       entry={entry}
                       spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
