@@ -1068,7 +1068,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT23~~ | ~~Close call: a fish landed after the tension touched 0.95 or the line reached the run-out mark leads its landed-card notes with Close call~~ (#405) | fight | S |
 | ~~GT24~~ | ~~News card (2026-10-15ze) covers GT21 to GT23: the second take, the bite calls, and the close call~~ (#407) | news | S |
 | ~~GT25~~ | ~~The float twitches once halfway through a second-take wait, so the eye knows the fish is still there~~ (#409) | fish | S |
-| GT26 | A played-out fish between runs gets its own call on the fight card: It's played out — reel it in! | fight | S |
+| ~~GT26~~ | ~~A played-out fish between runs gets its own call on the fight card: It's played out — reel it in!~~ (#411) | fight | S |
+| GT27 | Bottom feeders sulk: after every second run a carp, catfish, burbot or sturgeon with fight left digs in for up to 2.2 s; reeling moves it at a fifth of the rate and no line goes out, and easing off for 0.4 s then reeling pumps it up. The fight card says It's sulking on the bottom — ease off, then pump! | fight | M |
 
 ## Risks / open questions for the owner
 

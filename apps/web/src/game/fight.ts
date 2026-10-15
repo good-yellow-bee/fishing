@@ -1,6 +1,7 @@
 import type { ChallengeId, FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { difficulty01 } from "./logic";
+import { biteStyle } from "./nibblePlan";
 
 export type SurgeState = 0 | 1 | 2; // 0 calm, 1 warning (telegraph), 2 surging
 /** `jump`: the coming or current run is a leap clear of the water. */
@@ -19,6 +20,8 @@ export type FightSim = {
   turning?: boolean;
   /** The run it makes on seeing the net, while that run lasts. */
   lastRun?: boolean;
+  /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
+  sulk?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -88,6 +91,13 @@ export const SOLID_HOOK_STAMINA = 0.8;
 
 /** Reeled this close with fight still in it, a fish sees the net and makes one last run; a played-out fish comes in quietly. */
 export const LAST_RUN_LINE = 0.15;
+
+/** Bottom feeders sulk after every second run, for this long at most, unless the angler pumps them up first. */
+export const SULK_MS = 2200;
+/** While it sulks, reeling brings line in at this share of the usual rate. */
+export const SULK_REEL = 0.2;
+/** A slack line held this long while it sulks, then a turn of the reel, pumps the fish off the bottom. */
+export const SULK_PUMP_SEC = 0.4;
 
 export function staminaState(stamina: number): StaminaState {
   if (stamina < SPENT_STAMINA) return "spent";
@@ -200,6 +210,9 @@ export function makeFight(
   let turnedThisRun = false;
   const leaper = LEAPERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
+  const sulker = biteStyle(species.id) === "mouth";
+  let sulkUntil = -Infinity;
+  let slackSec = 0;
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
@@ -229,9 +242,21 @@ export function makeFight(
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
         turnedThisRun = false;
+        // A bottom feeder with fight left digs in after every second run.
+        if (sulker && completedSurges % 2 === 0 && sim.stamina > SPENT_STAMINA && !lastRunDone) {
+          sim.sulk = true;
+          sulkUntil = nowMs + SULK_MS;
+          slackSec = 0;
+        }
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
       }
+    }
+
+    if (sim.sulk) {
+      if (sim.surge !== 0 || nowMs >= sulkUntil) sim.sulk = false;
+      else if (!reeling) slackSec += dtSec;
+      else if (slackSec >= SULK_PUMP_SEC) sim.sulk = false;
     }
 
     // A leap goes up, not sideways, so only a run can be turned.
@@ -244,10 +269,11 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
-      sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
+      // A sulking fish sits where it is: no line goes out.
+      if (!sim.sulk) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
     // A line held tight through a leap loads the rod into the red: the clean bonus goes, but never the fish.
     if (sim.jump && sim.surge === 2) {

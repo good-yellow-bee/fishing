@@ -158,6 +158,17 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("It's played out — reel it in!");
   });
 
+  it("tells the angler to pump a sulking fish off the bottom", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.sulk = true;
+    frame();
+    expect(status()).toBe("It's sulking on the bottom — ease off, then pump!");
+    sim.current.sulk = false;
+    frame();
+    expect(status()).not.toMatch(/sulking/);
+  });
+
   it("warns of the last run at the net", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
