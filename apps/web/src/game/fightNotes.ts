@@ -8,5 +8,6 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (notes.perfectCast) parts.push(t("Perfect cast"));
   if (notes.hookedSolid) parts.push(t("Hooked solid"));
   if (notes.turnedRuns > 0) parts.push(tn(notes.turnedRuns, "Turned {n} run", "Turned {n} runs"));
+  if ((notes.cleanRun ?? 0) >= 2) parts.push(t("{n} clean fights in a row", { n: notes.cleanRun! }));
   return parts.length ? parts.join(" · ") : null;
 }
