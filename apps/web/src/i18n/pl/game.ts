@@ -399,6 +399,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "Every kind of fish has its own page in the field log: how many, the biggest, what it takes, and where it comes from. Open it from Bests or from any catch.":
+    "Każdy gatunek ma w dzienniku własną stronę: ile ryb, największa, na co bierze i skąd pochodzi. Otworzysz ją z Rekordów albo z każdego połowu.",
   "The field log shows the moon on each catch and trip, and Bests counts your fish by the week of the moon. Fish released from the lake are marked released in the book too.":
     "Dziennik pokazuje księżyc przy każdym połowie i wyprawie, a Rekordy liczą ryby według tygodnia księżyca. Ryby wypuszczone z jeziora są też oznaczone w dzienniku jako wypuszczone.",
   "Mark a fish as released and the field log counts it on trips and waters. A catch you start but don't save is kept for a day, and the next fish on an outing can take the last one's weather in one tap.":
