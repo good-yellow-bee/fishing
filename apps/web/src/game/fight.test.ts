@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -567,7 +567,7 @@ describe("runs into the weeds at the reeds", () => {
   }
 
   it("sends an unturned run into the weeds, where line comes in slowly and none goes out, until it comes free", () => {
-    const runtime = makeFight(fish("pike"), 6, 3, () => 0, 1, true);
+    const runtime = makeFight(fish("pike"), 6, 3, () => 0, 1, "weeds");
     const at = firstRun(runtime, false);
     expect(runtime.sim.weeded).toBe(true);
     const line = runtime.sim.line;
@@ -581,11 +581,29 @@ describe("runs into the weeds at the reeds", () => {
   });
 
   it("keeps a turned run out of the weeds, and open water never weeds a fish", () => {
-    const turned = makeFight(fish("pike"), 6, 3, () => 0, 1, true);
+    const turned = makeFight(fish("pike"), 6, 3, () => 0, 1, "weeds");
     firstRun(turned, true);
     expect(turned.sim.weeded).toBeFalsy();
     const open = makeFight(fish("pike"), 6, 3, () => 0);
     firstRun(open, false);
     expect(open.sim.weeded).toBeFalsy();
+  });
+});
+
+describe("the inlet's current", () => {
+  it("takes slack line out faster at the inlet than on open water", () => {
+    const still = makeFight(fish("pike"), 6, 3, () => 0);
+    const current = makeFight(fish("pike"), 6, 3, () => 0, 1, "current");
+    still.step(0, 0.05, false);
+    current.step(0, 0.05, false);
+    still.step(50, 0.5, false);
+    current.step(50, 0.5, false);
+    expect(current.sim.line - 1).toBeCloseTo((still.sim.line - 1) * CURRENT_DRIFT);
+  });
+
+  it("gives the reeds weeds and the inlet a current", () => {
+    expect(fightWater("reeds")).toBe("weeds");
+    expect(fightWater("inlet")).toBe("current");
+    expect(fightWater("dock")).toBe("open");
   });
 });

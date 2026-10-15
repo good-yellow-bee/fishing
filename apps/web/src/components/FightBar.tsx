@@ -203,6 +203,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             </span>
           </p>
           )}
+          {fight.water === "weeds" && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
+          {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest")}</p>}
           <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">

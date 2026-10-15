@@ -1089,7 +1089,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT44~~ | ~~News card (2026-10-15zm) covers GT43: levels 11 and 12~~ (#456) | news | S |
 | ~~GT45~~ | ~~Weeds at the reeds: fished from the reeds, a run the angler doesn't turn ends with the fish in the weeds for 1.6 s, where reeling wins back 30% of the usual line, no line goes out and the fish rests; the fight card says so~~ (#459) | fight | S |
 | ~~GT46~~ | ~~News card (2026-10-15zn) covers GT45: weeds at the reeds~~ (#460) | news | S |
-| GT47 | On the lake, a fish in the weeds holds out wide where its run ended instead of swinging back in, so the scene shows what the fight card says | fight | S |
+| ~~GT47~~ | ~~On the lake, a fish in the weeds holds out wide where its run ended instead of swinging back in, so the scene shows what the fight card says~~ (#462) | fight | S |
+| GT48 | The inlet's current takes slack line out 1.6× faster, and the fight card names what the water does at the reeds and the inlet | fight | S |
 
 ## Risks / open questions for the owner
 

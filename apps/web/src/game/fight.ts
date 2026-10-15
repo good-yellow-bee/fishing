@@ -107,6 +107,13 @@ export const SULK_PUMP_SEC = 0.4;
 /** How long a fish that ran into the weeds sits there, and how much of the usual line a turn of the reel wins back meanwhile. */
 export const WEED_MS = 1600;
 export const WEED_REEL = 0.3;
+/** How much faster slack line drifts out in the inlet's current. */
+export const CURRENT_DRIFT = 1.6;
+export type FightWater = "open" | "weeds" | "current";
+/** The water a spot gives the fight. */
+export function fightWater(spot: string): FightWater {
+  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : "open";
+}
 
 export function staminaState(stamina: number): StaminaState {
   if (stamina < SPENT_STAMINA) return "spent";
@@ -191,13 +198,14 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** Fished from the reeds: a run the angler doesn't turn ends in the weeds. */
-  weedy = false,
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line. */
+  water: FightWater = "open",
 ): FightRuntime {
+  const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
-  const driftCalm = 0.012 + t * 0.015;
+  const driftCalm = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT : 1);
   const driftSurge = driftCalm * (species.challenge === "tension" ? 1.35 : 2);
   const tensionUpCalm = Math.max(
     0.12,

@@ -21,7 +21,7 @@ import {
   type StanceId,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, isCleanFight, isCloseCall, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type Steer, type SurgeState } from "./fight";
+import { fightLines, fightWater, isCleanFight, isCloseCall, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -117,6 +117,8 @@ export type Fight = {
   species: FishSpecies;
   weight: number;
   underpowered: boolean;
+  /** What the spot's water does to the fight; open water when left out. */
+  water?: FightWater;
 };
 
 /** How the angler played this fish, for a line on the landed card. */
@@ -298,7 +300,8 @@ export function useFishingGame(
   const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number }) => {
     const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
     const underpowered = !canLand(current, species);
-    const next = { species, weight, underpowered };
+    const water = fightWater(spotRef.current);
+    const next = { species, weight, underpowered, water };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -311,7 +314,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), spotRef.current === "reeds");
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), water);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
