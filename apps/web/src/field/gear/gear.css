@@ -40,6 +40,7 @@
 }
 
 .tackle-row input {
+  flex-shrink: 0;
   width: 18px;
   height: 18px;
   margin: 0;
@@ -107,5 +108,6 @@
   border-radius: 999px;
   color: var(--field-muted);
   font-size: 12px;
-  white-space: nowrap;
+  /* Two words may stack inside the pill rather than push the row past a phone's edge with larger text. */
+  text-align: center;
 }

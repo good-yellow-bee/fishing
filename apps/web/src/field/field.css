@@ -496,6 +496,7 @@ button.field-primary:disabled {
 .entry-form select,
 .entry-form textarea {
   width: 100%;
+  min-width: 0;
   border: 1px solid #6b5233;
   background: #fffaf2;
   color: var(--field-ink);
@@ -592,7 +593,7 @@ button.field-primary:disabled {
 
 @media (max-width: 860px) {
   .field {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .field-rail {
@@ -610,6 +611,11 @@ button.field-primary:disabled {
     position: sticky;
     top: 0;
     z-index: 5;
+  }
+
+  /* Larger text: the Log a catch button may drop under the brand rather than run off the screen. */
+  .field-mobile-bar {
+    flex-wrap: wrap;
   }
 
   .field-mobile-bar .field-primary {
@@ -635,7 +641,7 @@ button.field-primary:disabled {
   .form-grid,
   .sheet-head,
   .sheet-foot {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     display: grid;
   }
 
@@ -678,6 +684,14 @@ button.field-primary:disabled {
   }
 }
 
+/* Larger text: the seven tabs keep their size and the bar scrolls sideways instead of clipping the last one. */
+@media (max-width: 860px) {
+  html[data-text-size] .field-tab {
+    grid-template-columns: repeat(7, max-content);
+    overflow-x: auto;
+  }
+}
+
 /* Seven tabs on a narrow phone: long labels such as WYPRAWY and REKORDY must still fit their column. */
 @media (max-width: 420px) {
   .field-tab a {
@@ -690,11 +704,16 @@ button.field-primary:disabled {
 
   .catch-card,
   .trip-card {
-    grid-template-columns: 76px 1fr;
+    grid-template-columns: 76px minmax(0, 1fr);
   }
 
   .catch-card.has-photo {
-    grid-template-columns: 64px 76px 1fr;
+    grid-template-columns: 64px 76px minmax(0, 1fr);
+  }
+
+  .catch-card h2,
+  .trip-card h2 {
+    overflow-wrap: anywhere;
   }
 
   .catch-thumb {
