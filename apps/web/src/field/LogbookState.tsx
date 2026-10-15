@@ -30,7 +30,7 @@ import { keepBookStorage } from "./keepStorage";
 import { localizeSample } from "./sampleText";
 import { readStoredLogbook, saveLogbook } from "./storage";
 
-type SaveResult = { ok: true; id: string } | { ok: false; message: string };
+type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
 type LogbookApi = {
   book: Logbook;
@@ -131,7 +131,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
         const parsed = parseCatchDraft(draft, book);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         let nextPhotos = photos;
         if (photo) {
@@ -146,14 +146,14 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       addSpot: (draft) => {
         const parsed = parseSpotDraft(draft);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         commit(withSpot(book, { ...parsed.value, id }));
         return { ok: true, id };
       },
       addTrip: (draft) => {
         const parsed = parseTripDraft(draft, book);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         commit(withTrip(book, { ...parsed.value, id }));
         return { ok: true, id };
@@ -163,7 +163,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
           return { ok: false, message: t("That catch is not in this book.") };
         }
         const parsed = parseCatchDraft(draft, book);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const current = photos[id] ?? null;
         let nextPhotos = photos;
         if (photo !== current) {
@@ -184,7 +184,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
           return { ok: false, message: t("That spot is not in this book.") };
         }
         const parsed = parseSpotDraft(draft);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         commit(replaceSpot(book, { ...parsed.value, id }));
         return { ok: true, id };
       },
@@ -193,7 +193,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
           return { ok: false, message: t("That outing is not in this book.") };
         }
         const parsed = parseTripDraft(draft, book);
-        if (!parsed.ok) return { ok: false, message: parsed.message };
+        if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         commit(replaceTrip(book, { ...parsed.value, id }));
         return { ok: true, id };
       },

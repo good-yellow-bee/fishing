@@ -35,6 +35,7 @@ import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, tn, useT } from "../i18n";
+import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -301,6 +302,7 @@ function TripForm() {
     const result = existing ? updateTrip(existing.id, draft) : addTrip(draft);
     if (!result.ok) {
       setError(result.message);
+      markInvalid(event.currentTarget as HTMLFormElement, result.field);
       return;
     }
     for (const item of againTackle) add(result.id, item.label);
@@ -338,7 +340,16 @@ function TripForm() {
         </div>
         <Link to={existing ? `/trips/${existing.id}` : "/trips"}>{t("Cancel")}</Link>
       </header>
-      <form className="entry-form" onSubmit={onSubmit}>
+      <form
+        className="entry-form"
+        onSubmit={onSubmit}
+        onInput={(event) => {
+          // A change after a refused save clears the complaint.
+          if (!error) return;
+          setError("");
+          clearInvalid(event.currentTarget);
+        }}
+      >
         <div className="form-grid">
           <label>
             {t("Date")}
@@ -406,7 +417,7 @@ function TripForm() {
           </p>
         ) : null}
         {error ? (
-          <p className="field-error" role="alert">
+          <p className="field-error" role="alert" id={FORM_ERROR_ID}>
             {messageText(error)}
           </p>
         ) : null}

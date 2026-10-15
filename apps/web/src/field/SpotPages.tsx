@@ -25,6 +25,7 @@ import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
+import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -193,6 +194,7 @@ function SpotForm() {
     const result = existing ? updateSpot(existing.id, draft) : addSpot(draft);
     if (!result.ok) {
       setError(result.message);
+      markInvalid(event.currentTarget as HTMLFormElement, result.field);
       return;
     }
     navigate(`/spots/${result.id}`);
@@ -217,7 +219,16 @@ function SpotForm() {
         </div>
         <Link to={existing ? `/spots/${existing.id}` : "/spots"}>{t("Cancel")}</Link>
       </header>
-      <form className="entry-form" onSubmit={onSubmit}>
+      <form
+        className="entry-form"
+        onSubmit={onSubmit}
+        onInput={(event) => {
+          // A change after a refused save clears the complaint.
+          if (!error) return;
+          setError("");
+          clearInvalid(event.currentTarget);
+        }}
+      >
         <div className="form-grid">
           <label>
             {t("Name")}
@@ -268,7 +279,7 @@ function SpotForm() {
           </label>
         </div>
         {error ? (
-          <p className="field-error" role="alert">
+          <p className="field-error" role="alert" id={FORM_ERROR_ID}>
             {messageText(error)}
           </p>
         ) : null}
