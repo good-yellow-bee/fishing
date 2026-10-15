@@ -1289,3 +1289,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR180~~ | ~~Downloads say they happened; the file link is released later~~ (#469) | field | S |
 | ~~BR181~~ | ~~Saving a catch says Fish saved or Changes saved~~ (#471) | field | S |
 | ~~BR182~~ | ~~Undo bar buttons get 44px tap targets~~ (#473) | field | S |
+| ~~BR183~~ | ~~News line for the saved-catch note, download notices and sample undo~~ (#474) | field | S |
