@@ -36,6 +36,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { SpeciesChips } from "./SpeciesChips";
+import { findLink } from "./CatchSearch";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return entry.measure.kind === "length"
@@ -685,7 +686,8 @@ export function CatchPage() {
         <p className="meta stand">
           <span>{measureText(entry.measure)}</span>
           {" · "}
-          <span>{t(entry.lure)}</span>
+          {/* Every fish taken on this lure, through the catch search. */}
+          <Link to={findLink(t(entry.lure))}>{t(entry.lure)}</Link>
           {spot ? (
             <>
               {" · "}
@@ -731,7 +733,7 @@ export function CatchPage() {
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
       {trip ? (
         <p className="trip-link">
-          <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+          {t("Outing:")} <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
         </p>
       ) : null}
       <p className="another-catch">

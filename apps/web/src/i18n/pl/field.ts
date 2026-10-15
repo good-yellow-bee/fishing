@@ -100,6 +100,7 @@ export const PL_FIELD: PlBook = {
   Water: "Łowisko",
   Time: "Godzina",
   Outing: "Wyprawa",
+  "Outing:": "Wyprawa:",
   "Not on a trip": "Poza wyprawą",
   Sky: "Niebo",
   Wind: "Wiatr",
