@@ -135,6 +135,8 @@ export const PL_FIELD: PlBook = {
   "Missing outing": "Brak wyprawy",
   "That trip is not in this book.": "Tej wyprawy nie ma w dzienniku.",
   "Back to trips": "Wróć do wypraw",
+  "What works here": "Co tu działa",
+  "Most fish at: {time}": "Najwięcej ryb: {time}",
   "More outings": "Więcej wypraw",
   "← Later: {title}": "← Późniejsza: {title}",
   "Earlier: {title} →": "Wcześniejsza: {title} →",
