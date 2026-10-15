@@ -1057,3 +1057,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR4~~ | ~~"Install the app" in the field log's footer when the browser offers it (Chrome, Edge, Android): an installed app keeps its storage better than a tab~~ (#244) | field log | S |
 | ~~BR5~~ | ~~On an iPhone or iPad in Safari (no install offer there), the field log's footer tells a player with their own catches to tap Share, then Add to Home Screen; it hides once the app is on the home screen~~ (#245) | field log | S |
 | ~~BR6~~ | ~~The lake asks three for PCF shadows by name instead of the deprecated soft default it already fell back to: same picture, and the console no longer repeats a deprecation warning dozens of times a session~~ (#246) | polish | S |
+| ~~BR7~~ | ~~The field log fetches the lake's code once the browser is idle, so "Go fishing" opens without waiting for the 3D bundle (skipped with data saver on or on a 2G link)~~ (#247) | perf | S |

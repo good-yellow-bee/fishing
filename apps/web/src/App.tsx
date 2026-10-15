@@ -1,8 +1,9 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Link, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { authClient } from "./auth-client";
 import { useT } from "./i18n";
 import { useRootSettings } from "./game/settings";
+import { warmLake } from "./warmLake";
 import { BestsPage } from "./field/bests/BestsPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
@@ -17,7 +18,8 @@ import { RegisterPage } from "./pages/Register";
 
 // The lake pulls in three.js and the models, so it and the pages around it load on demand:
 // sign-in and the field log open without waiting for the 3D bundle.
-const DockPage = lazy(() => import("./pages/Dock").then((module) => ({ default: module.DockPage })));
+const loadDock = () => import("./pages/Dock");
+const DockPage = lazy(() => loadDock().then((module) => ({ default: module.DockPage })));
 const LogPage = lazy(() => import("./pages/Log").then((module) => ({ default: module.LogPage })));
 const BoardPage = lazy(() => import("./pages/Board").then((module) => ({ default: module.BoardPage })));
 const SpotMapPage = lazy(() => import("./field/map/SpotMapPage").then((module) => ({ default: module.SpotMapPage })));
@@ -59,6 +61,9 @@ function Gate({ children }: { children: ReactNode }) {
 }
 
 function FieldLayout() {
+  useEffect(() => {
+    warmLake(loadDock);
+  }, []);
   return (
     <LogbookProvider>
       <TackleProvider>
