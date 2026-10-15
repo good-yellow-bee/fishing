@@ -176,6 +176,8 @@ button.field-primary {
   box-shadow: 0 22px 50px rgba(8, 10, 9, 0.35);
   padding: 28px 32px 36px 26px;
   min-height: calc(100dvh - 56px);
+  /* A pasted map link or a long Polish species name wraps instead of pushing the page sideways. */
+  overflow-wrap: break-word;
 }
 
 .sheet-head {
