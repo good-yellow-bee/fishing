@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   WATER_LABELS,
+  catchesForSpot,
   catchesForTrip,
   localDate,
   shiftDate,
@@ -17,6 +18,7 @@ import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
+import { WaterTipsBox } from "./WaterTipsBox";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, useT } from "../i18n";
@@ -138,6 +140,8 @@ export function TripPage() {
         </p>
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
+      {/* Planning ahead: what has worked on this water before. */}
+      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
       <TripWeather catches={catches} />
       <TackleList tripId={trip.id} heading={t("Tackle")} />
       <div className="section-head">

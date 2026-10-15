@@ -48,7 +48,7 @@ export function HomePage() {
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>
-          <strong>{next ? next.title : t("None planned")}</strong>
+          <strong>{next ? <Link to={`/trips/${next.id}`}>{next.title}</Link> : t("None planned")}</strong>
           <small>{nextSpot ? nextSpot.name : t("Add an outing when you know the day")}</small>
         </div>
       </section>

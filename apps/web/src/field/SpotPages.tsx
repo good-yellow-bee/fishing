@@ -13,7 +13,7 @@ import {
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
-import { waterTips } from "./waterTips";
+import { WaterTipsBox } from "./WaterTipsBox";
 import { EditDelete } from "./EditDelete";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -74,7 +74,6 @@ export function SpotPage() {
 
   const trips = tripsForSpot(book, spot.id);
   const catches = catchesForSpot(book, spot.id);
-  const tips = waterTips(catches);
 
   return (
     <div className="sheet">
@@ -102,20 +101,7 @@ export function SpotPage() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      {tips ? (
-        <aside className="conditions water-tips" aria-label={t("What works here")}>
-          <span className="eyebrow">{t("What works here")}</span>
-          <p>
-            {tips.lures.map((row) => `${t(row.lure)}\u00a0(${row.count})`).join(" · ")}
-            {tips.time ? (
-              <>
-                <br />
-                {t("Most fish at: {time}", { time: t(tips.time.label) })}
-              </>
-            ) : null}
-          </p>
-        </aside>
-      ) : null}
+      <WaterTipsBox catches={catches} />
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>
