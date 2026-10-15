@@ -40,6 +40,29 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   );
 }
 
+/** A past outing's list, folded away: it matters again only when the same bag goes out. */
+function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
+  const { book } = useLogbook();
+  useT();
+  const spot = spotById(book, trip.spotId);
+
+  return (
+    <details className="tackle-trip tackle-past">
+      <summary>
+        <span className="tackle-past-title">{trip.title}</span>
+        <span className="meta">
+          {tripWhen(trip.date, today, tomorrow)}
+          {spot ? ` · ${spot.name}` : ""}
+        </span>
+      </summary>
+      <p className="tackle-past-link">
+        <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
+      </p>
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} />
+    </details>
+  );
+}
+
 export function GearPage() {
   const { book } = useLogbook();
   useT();
@@ -110,7 +133,7 @@ export function GearPage() {
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
-        recent.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
+        recent.map((trip) => <PastTripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}
     </div>
   );

@@ -148,3 +148,47 @@
   color: var(--field-muted);
   font-size: 13px;
 }
+
+.tackle-past {
+  border-bottom: 1px solid var(--field-line);
+  padding: 4px 0 8px;
+}
+
+.tackle-past summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.tackle-past-title {
+  font-family: Fraunces, "Iowan Old Style", Palatino, serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--field-rust);
+}
+
+.tackle-past-link {
+  margin: 4px 0 8px;
+}
+
+.tackle-past summary {
+  list-style: none;
+}
+
+.tackle-past summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The fold mark goes in front of the title, since a flex summary drops the browser's own. */
+.tackle-past-title::before {
+  content: "▸ ";
+  color: var(--field-muted);
+}
+
+.tackle-past[open] .tackle-past-title::before {
+  content: "▾ ";
+}
