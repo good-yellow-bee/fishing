@@ -1074,3 +1074,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR21~~ | ~~Newer and older catch links at the foot of each catch page~~ (#261) | field log | S |
 | ~~BR22~~ | ~~Later and earlier outing links at the foot of each trip page, sharing the catch page's neighbour helper~~ (#262) | field log | S |
 | ~~BR23~~ | ~~A catch page marks the book's heaviest or longest fish, or the biggest of its kind when it beat another fish of that kind on the same measure~~ (#263) | field log | S |
+| ~~BR24~~ | ~~Catch cards in every list carry a small "Book record" or "Best of its kind" tag, worked out once per book~~ (#264) | field log | S |

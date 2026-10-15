@@ -10,6 +10,7 @@ import { tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
 import { fishCountLabel, formatClock, noteText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
+import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
 
 export function CatchCard({
@@ -22,8 +23,9 @@ export function CatchCard({
   tripTitle: string | null;
 }) {
   const t = useT();
-  const { photoFor } = useLogbook();
+  const { book, photoFor } = useLogbook();
   const photo = photoFor(entry.id);
+  const badge = catchBadge(book, entry);
   return (
     <article className={photo ? "catch-card has-photo" : "catch-card"}>
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
@@ -31,6 +33,7 @@ export function CatchCard({
       <div>
         <h2>
           <Link to={`/catches/${entry.id}`}>{t(entry.species)}</Link>
+          {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </h2>
         <p className="meta">
           <span>{t(entry.lure)}</span>
