@@ -201,7 +201,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("By season")}</h2>
             </div>
-            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
           </section>
 
           <section>
