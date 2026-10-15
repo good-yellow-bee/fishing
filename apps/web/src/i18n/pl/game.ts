@@ -394,6 +394,7 @@ export const PL_GAME: PlBook = {
   "Fish fresh": "Ryba pełna sił",
   "Fish tiring": "Ryba słabnie",
   "Fish played out": "Ryba wymęczona",
+  "Running out of line!": "Kończy się żyłka!",
   "Turn a run: hold ← A or → D the other way": "Zawróć odjazd: przytrzymaj ← A albo → D w drugą stronę",
   "Turn a run: hold the side button the other way": "Zawróć odjazd: przytrzymaj boczny przycisk w drugą stronę",
   "It runs right — pull left": "Odjeżdża w prawo — ciągnij w lewo",

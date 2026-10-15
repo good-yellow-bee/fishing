@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { canTurnRuns, fightLines, isCleanFight, jumpLines, RED_TENSION, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -34,10 +34,13 @@ export function FightBar({ fight, sim, performance }: Props) {
   const lineMeter = useRef<HTMLDivElement>(null);
   const staminaWord = useRef<HTMLSpanElement>(null);
   const steerLine = useRef<HTMLParagraphElement>(null);
+  const overrunFill = useRef<HTMLElement>(null);
+  const shortWord = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     let frame = 0;
     let spokenAt = -Infinity;
+    let spokenShort = false;
     const loop = (now: number) => {
       const state = sim.current;
       if (state) {
@@ -58,19 +61,29 @@ export function FightBar({ fight, sim, performance }: Props) {
         if (lineFill.current) {
           lineFill.current.style.width = `${Math.min(100, Math.max(0, (1 - state.line) * 100))}%`;
         }
+        // Line the fish takes past where it was hooked eats the bar from the right, toward the escape.
+        const overrun = Math.min(1, Math.max(0, (state.line - 1) / (ESCAPE_LINE - 1)));
+        if (overrunFill.current) overrunFill.current.style.width = `${overrun * 100}%`;
+        const short = state.line >= SHORT_LINE;
+        if (shortWord.current && shortWord.current.hidden === short) shortWord.current.hidden = !short;
         // Written only on a change, so the live region speaks each new call once.
         const call =
           state.lastRun && state.surge === 1 && !state.jump ? t("Let go now — it sees the net!") : (state.jump ? leapLines : lines)[state.surge]!;
         if (status.current && status.current.textContent !== call) status.current.textContent = call;
-        // Screen readers get the bars as meters, refreshed four times a second rather than every frame.
-        if (now - spokenAt >= 250) {
+        // Screen readers get the bars as meters, refreshed four times a second rather than every frame,
+        // ...or at once when the line starts running out.
+        if (now - spokenAt >= 250 || short !== spokenShort) {
           spokenAt = now;
+          spokenShort = short;
           const percent = Math.round(Math.min(1, state.tension) * 100);
           tensionMeter.current?.setAttribute("aria-valuenow", String(percent));
           tensionMeter.current?.setAttribute("aria-valuetext", `${percent}% · ${t(ZONE_WORD[tensionZone(state.tension)])}`);
           const lineIn = Math.round(Math.min(1, Math.max(0, 1 - state.line)) * 100);
           lineMeter.current?.setAttribute("aria-valuenow", String(lineIn));
-          lineMeter.current?.setAttribute("aria-valuetext", `${lineIn}% · ${t(STAMINA_WORD[tired])}`);
+          lineMeter.current?.setAttribute(
+            "aria-valuetext",
+            `${lineIn}% · ${t(STAMINA_WORD[tired])}${short ? ` · ${t("Running out of line!")}` : ""}`,
+          );
         }
         // Which way to pull the rod: said once a run is coming, and cheered while it is being turned.
         const steerCall = state.surge === 0 || state.jump ? "calm" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
@@ -134,9 +147,13 @@ export function FightBar({ fight, sim, performance }: Props) {
             <span ref={staminaWord} className="fight-stamina" aria-hidden="true" data-stamina="fresh">
               {t(STAMINA_WORD.fresh)}
             </span>
+            <span ref={shortWord} className="fight-short" aria-hidden="true" hidden>
+              {t("Running out of line!")}
+            </span>
           </span>
           <div ref={lineMeter} className="bar" role="meter" aria-labelledby="fight-line-label" aria-valuemin={0} aria-valuemax={100} aria-valuenow={0}>
             <div ref={lineFill} className="fill" />
+            <i ref={overrunFill} className="overrun" />
           </div>
           <p ref={status} className="fight-status" role="status" aria-live="assertive">
             {lines[0]}
