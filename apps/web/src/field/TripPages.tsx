@@ -1,7 +1,10 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  MOON_LABELS,
   WATER_LABELS,
+  moonName,
+  moonPhase,
   catchesForSpot,
   catchesForTrip,
   localDate,
@@ -27,6 +30,12 @@ import { tripIcs, tripIcsName } from "./tripIcs";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, useT } from "../i18n";
+
+/** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
+function tripNight(date: string) {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  return new Date(y, m - 1, d, 22);
+}
 
 export function TripsPage() {
   const { book } = useLogbook();
@@ -146,6 +155,7 @@ export function TripPage() {
             </>
           ) : null}
         </p>
+        <p className="meta moon-line">{t("Moon: {phase}", { phase: t(MOON_LABELS[moonName(moonPhase(tripNight(trip.date)))]) })}</p>
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
       {trip.date >= today ? (

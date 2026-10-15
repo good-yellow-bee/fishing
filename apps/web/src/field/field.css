@@ -1000,3 +1000,12 @@ button.field-primary:disabled {
 .released-share {
   margin: -8px 0 18px;
 }
+
+.conditions .eyebrow + p + .eyebrow {
+  display: block;
+  margin-top: 12px;
+}
+
+.moon-line {
+  margin: 6px 0 0;
+}
