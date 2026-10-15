@@ -34,6 +34,7 @@ import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, s
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
+import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { measureText, tempText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -332,6 +333,7 @@ function CatchForm() {
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
       setError(unitsMessage(result.message, units));
+      markInvalid(event.currentTarget as HTMLFormElement, result.field);
       return;
     }
     if (existing) {
@@ -396,7 +398,16 @@ function CatchForm() {
           </button>
         </div>
       ) : null}
-      <form className="entry-form" onSubmit={onSubmit}>
+      <form
+        className="entry-form"
+        onSubmit={onSubmit}
+        onInput={(event) => {
+          // A change after a refused save clears the complaint.
+          if (!error) return;
+          setError("");
+          clearInvalid(event.currentTarget);
+        }}
+      >
         <div className="form-grid">
           <label className="wide">
             {t("Species")}
@@ -649,7 +660,7 @@ function CatchForm() {
           </div>
         </div>
         {error ? (
-          <p className="field-error" role="alert">
+          <p className="field-error" role="alert" id={FORM_ERROR_ID}>
             {messageText(error)}
           </p>
         ) : null}
