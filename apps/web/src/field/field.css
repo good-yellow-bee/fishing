@@ -922,3 +922,7 @@ button.field-primary:disabled {
   gap: 8px;
   margin: 20px 0 0;
 }
+
+.trip-calendar {
+  margin: 12px 0 0;
+}
