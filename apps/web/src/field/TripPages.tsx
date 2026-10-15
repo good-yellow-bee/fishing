@@ -19,6 +19,7 @@ import { TackleList } from "./gear/TackleList";
 import { formatDay, messageText, tripWhen } from "./format";
 import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
+import { waterTips } from "./waterTips";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, useT } from "../i18n";
@@ -143,7 +144,11 @@ export function TripPage() {
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} /> : null}
       <TripWeather catches={catches} />
-      <TackleList tripId={trip.id} heading={t("Tackle")} />
+      <TackleList
+        tripId={trip.id}
+        heading={t("Tackle")}
+        suggest={trip.date >= today && spot ? (waterTips(catchesForSpot(book, spot.id))?.lures.map((row) => row.lure) ?? []) : []}
+      />
       <div className="section-head">
         <h2>{t("Fish on this outing")}</h2>
       </div>

@@ -111,3 +111,9 @@
   /* Two words may stack inside the pill rather than push the row past a phone's edge with larger text. */
   text-align: center;
 }
+
+.tackle-suggest {
+  margin: 10px 0 0;
+  color: var(--field-muted);
+  font-size: 13px;
+}

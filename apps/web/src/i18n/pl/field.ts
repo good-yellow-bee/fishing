@@ -138,6 +138,7 @@ export const PL_FIELD: PlBook = {
   "Back to trips": "Wróć do wypraw",
   "What works here": "Co tu działa",
   "Works on this water:": "Działa na tym łowisku:",
+  "+ {lure}": "+ {lure}",
   "Most fish at: {time}": "Najwięcej ryb: {time}",
   "More outings": "Więcej wypraw",
   "← Later: {title}": "← Późniejsza: {title}",

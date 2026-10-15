@@ -31,4 +31,26 @@ describe("tackle list", () => {
       ["Hemostats", null],
     ]);
   });
+
+  it("offers only the suggested lures that are not on the list yet", () => {
+    const page = JSDOM.fragment(
+      renderToStaticMarkup(
+        <TackleProvider>
+          <TackleList tripId="trip-duck" suggest={["popper", "Spinnerbait"]} />
+        </TackleProvider>,
+      ),
+    );
+    expect([...page.querySelectorAll(".tackle-suggest button")].map((button) => button.textContent)).toEqual(["+ Spinnerbait"]);
+  });
+
+  it("offers nothing when every suggestion is packed or listed", () => {
+    const page = JSDOM.fragment(
+      renderToStaticMarkup(
+        <TackleProvider>
+          <TackleList tripId="trip-duck" suggest={["Popper"]} />
+        </TackleProvider>,
+      ),
+    );
+    expect(page.querySelector(".tackle-suggest")).toBeNull();
+  });
 });
