@@ -107,6 +107,13 @@ export const RUN_OUT_LINE = 1.2;
 /** A third of the way from hookset to escape, the fight card warns that the line is running out. */
 export const SHORT_LINE = 1 + (ESCAPE_LINE - 1) / 3;
 
+/** Tension this close to snapping, or the line this near the escape, and a landed fish was a close call. */
+export const CLOSE_CALL_TENSION = 0.95;
+
+export function isCloseCall(performance: FightPerformance) {
+  return performance.peakTension >= CLOSE_CALL_TENSION || performance.maxLine >= RUN_OUT_LINE;
+}
+
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
   return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE;
