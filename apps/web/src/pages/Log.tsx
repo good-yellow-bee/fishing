@@ -4,12 +4,16 @@ import { badgeById, fishById, LAKE_HOUR_LABELS, localDate, SEASON_LABELS, skyLab
 import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
+import { readStoredLogbook } from "../field/storage";
+import { catchesOfSpecies } from "../field/speciesLink";
 import { locale, tn, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState("");
+  // The field log lives on this device; the guide links each kind it holds.
+  const [book] = useState(readStoredLogbook);
   const t = useT();
 
   useEffect(() => {
@@ -61,7 +65,7 @@ export function LogPage() {
           })}
         </ul>
       </section>
-      <FieldGuide stats={me.speciesStats} />
+      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? catchesOfSpecies(book, name).length : 0)} />
       {heaviest && (
         <div className="log-summary">
           <div>

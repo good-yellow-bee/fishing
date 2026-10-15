@@ -15,13 +15,17 @@ import {
   type ShadowSize,
   type SpotId,
 } from "@stillwater/shared";
+import { Link } from "react-router-dom";
 import { bestHourFor, lureSizeFor, rarityLabel, type LureSize } from "../game/logic";
 import { t, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 import { FishMark } from "./FishMark";
+import { speciesLink } from "../field/speciesLink";
 
 type Props = {
   stats: CatchStat[];
+  /** How many fish of a kind the field log on this device holds, so a card can open that page. */
+  inBook?: (name: string) => number;
 };
 
 function shadowLabel(size: ShadowSize): string {
@@ -57,7 +61,7 @@ function drawsOn(speciesId: string): string {
     .join(", ");
 }
 
-function GuideCard({ entry }: { entry: GuideEntry }) {
+function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }) {
   const { species } = entry;
   const known = entry.caught > 0;
   const hourAt = (spot: SpotId) => hourName(bestHourFor(species, spot));
@@ -89,11 +93,16 @@ function GuideCard({ entry }: { entry: GuideEntry }) {
       )}
       {known && drawsOn(species.id) && <p className="guide-draws">{t("Draws on: {lures}", { lures: drawsOn(species.id) })}</p>}
       {known && peakSeason(species.id) && <p className="guide-season">{t("Runs in {season}", { season: t(SEASON_LABELS[peakSeason(species.id)!]).toLowerCase() })}</p>}
+      {known && inBook > 0 && (
+        <p className="guide-book">
+          <Link to={speciesLink(species.name)}>{t("In your field log: {count}", { count: inBook })}</Link>
+        </p>
+      )}
     </article>
   );
 }
 
-export function FieldGuide({ stats }: Props) {
+export function FieldGuide({ stats, inBook }: Props) {
   useT();
   const entries = fieldGuide(stats);
   const { found, total } = guideProgress(entries);
@@ -108,7 +117,7 @@ export function FieldGuide({ stats }: Props) {
       <p className="guide-note">{t("Lure and time clues assume a cast released in the band.")}</p>
       <div className="guide-grid">
         {entries.map((entry) => (
-          <GuideCard key={entry.species.id} entry={entry} />
+          <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} />
         ))}
       </div>
     </section>
