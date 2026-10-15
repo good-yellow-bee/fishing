@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather, lastReleased } from "./suggestions";
+import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -62,6 +62,26 @@ describe("the measure a new catch starts with", () => {
     expect(lastReleased({ ...book, catches: [...book.catches, back, kept] })).toBe(false);
     const lake = { ...fish("game", "weight", "2026-10-21T08:00:00", "spot-stillwater"), released: false };
     expect(lastReleased({ ...book, catches: [...book.catches, back, lake] })).toBe(true);
+  });
+});
+
+describe("the biggest of the kind being typed", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+
+  it("finds the longest and heaviest of the kind, whatever the case or language", () => {
+    const pike = speciesBestSoFar(book, " northern PIKE ");
+    expect(pike?.longest?.id).toBe("catch-pike-mepps");
+    expect(pike?.heaviest?.id).toBe("catch-pike-spin");
+    const pl: Record<string, string> = { "Northern pike": "Szczupak" };
+    expect(speciesBestSoFar(book, "szczupak", (name) => pl[name] ?? name)?.heaviest?.id).toBe("catch-pike-spin");
+  });
+
+  it("says nothing for a blank or new kind, or when the only fish is the one being edited", () => {
+    expect(speciesBestSoFar(book, "")).toBeNull();
+    expect(speciesBestSoFar(book, "Swordfish")).toBeNull();
+    const pike = speciesBestSoFar(book, "Northern pike", undefined, "catch-pike-spin");
+    expect(pike?.heaviest).toBeNull();
+    expect(pike?.longest?.id).toBe("catch-pike-mepps");
   });
 });
 
