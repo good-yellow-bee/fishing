@@ -128,6 +128,11 @@ export function withPacked(items: TackleItem[], id: string, packed: boolean): Ta
   return items.map((item) => (item.id === id ? { ...item, packed } : item));
 }
 
+/** Every piece on one outing's list back out of the bag, the lists of other outings untouched. */
+export function withTripUnpacked(items: TackleItem[], tripId: string): TackleItem[] {
+  return items.map((item) => (item.tripId === tripId && item.packed ? { ...item, packed: false } : item));
+}
+
 export function withoutTackleItem(items: TackleItem[], id: string): TackleItem[] {
   return items.filter((item) => item.id !== id);
 }
