@@ -70,7 +70,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     const stored = readStoredLogbook();
     if (stored) return stored;
     const seeded = sampleLogbook(new Date());
-    saveLogbook(seeded);
+    try {
+      saveLogbook(seeded);
+    } catch {
+      // Storage blocked or full: the sample still shows, and a save later says what went wrong.
+    }
     return seeded;
   });
   const [photos, setPhotos] = useState<CatchPhotoMap>(() => {
