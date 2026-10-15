@@ -196,6 +196,15 @@ export function DockPage() {
   // Photo mode hides every panel for a clean shot; a bite brings them straight back.
   const [photo, setPhoto] = useState(false);
   const { cursor: padCursor, connected: padConnected } = useGamepad(true, photo);
+  // The fight card swaps its key and screen words for the controller's while one is connected.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (padConnected) root.dataset.input = "pad";
+    else delete root.dataset.input;
+    return () => {
+      delete root.dataset.input;
+    };
+  }, [padConnected]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
