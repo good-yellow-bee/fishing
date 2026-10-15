@@ -35,6 +35,7 @@ import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
+import { ChoiceRow } from "./ChoiceRow";
 import { measureText, tempText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -436,26 +437,15 @@ function CatchForm() {
 
           <fieldset className="wide">
             <legend>{t("Measure")}</legend>
-            <div className="choice-row" role="radiogroup" aria-label={t("Length or weight")}>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={measureKind === "length"}
-                className={measureKind === "length" ? "on" : ""}
-                onClick={() => setMeasureKind("length")}
-              >
-                {t("Length")}
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={measureKind === "weight"}
-                className={measureKind === "weight" ? "on" : ""}
-                onClick={() => setMeasureKind("weight")}
-              >
-                {t("Weight")}
-              </button>
-            </div>
+            <ChoiceRow
+              label={t("Length or weight")}
+              value={measureKind}
+              options={[
+                { id: "length", label: t("Length") },
+                { id: "weight", label: t("Weight") },
+              ]}
+              onChange={setMeasureKind}
+            />
             <input
               name="amount"
               inputMode="decimal"
