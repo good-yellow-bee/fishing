@@ -26,7 +26,7 @@ import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookLures, lastMeasureKind, lastReleased, ownFirst, startTimeFor, tripLure, tripWeather } from "./suggestions";
+import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -132,6 +132,7 @@ function CatchForm() {
   const asked = params.get("kind");
   const presetKind = asked === "weight" || asked === "length" ? asked : lastMeasureKind(book);
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
+  const bestSoFar = speciesBestSoFar(book, species, t, existing?.id);
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(existing?.measure.kind ?? presetKind);
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
@@ -382,6 +383,13 @@ function CatchForm() {
                   <option key={name} value={name} />
                 ))}
             </datalist>
+            {bestSoFar ? (
+              <small className="field-hint">
+                {t("Your biggest so far: {measures}", {
+                  measures: [bestSoFar.longest, bestSoFar.heaviest].flatMap((entry) => (entry ? [measureText(entry.measure)] : [])).join(" · "),
+                })}
+              </small>
+            ) : null}
           </label>
 
           <fieldset className="wide">

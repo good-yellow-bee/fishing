@@ -1,4 +1,4 @@
-import { catchesNewestFirst, localDate, lureTally, type Logbook, type Measure, type Trip } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, lureTally, personalBests, type CatchEntry, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
 
 /** The game files its fish here, always by weight, so they say nothing about how the player measures. */
@@ -59,4 +59,24 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
   if (!trip || trip.date >= localDate(now)) return now;
   const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
+}
+
+/**
+ * The longest and heaviest fish of the kind being typed, so the form can say what a new one has to beat.
+ * `shown` turns a stored name into the words on screen; `skipId` leaves out the fish being edited.
+ */
+export function speciesBestSoFar(
+  book: Logbook,
+  typed: string,
+  shown: (name: string) => string = (name) => name,
+  skipId?: string,
+): { longest: CatchEntry | null; heaviest: CatchEntry | null } | null {
+  const want = typed.trim().toLowerCase();
+  if (!want) return null;
+  const catches = book.catches.filter(
+    (entry) => entry.id !== skipId && (entry.species.toLowerCase() === want || shown(entry.species).toLowerCase() === want),
+  );
+  if (catches.length === 0) return null;
+  const { longest, heaviest } = personalBests({ ...book, catches });
+  return { longest, heaviest };
 }
