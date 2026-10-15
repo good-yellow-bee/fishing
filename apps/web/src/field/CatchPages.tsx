@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent 
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
+  MOON_QUARTER_LABELS,
   moonName,
+  moonQuarterOf,
   moonPhase,
   CATCH_PHOTO_MAX_BYTES,
   FISH,
@@ -32,7 +34,7 @@ import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, s
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
-import { measureText, weatherText } from "../i18n/content";
+import { measureText, tempText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
@@ -761,11 +763,20 @@ export function CatchPage() {
         {entry.weather ? (
           <>
             <span className="eyebrow">{t("Weather")}</span>
-            <p>{weatherText(entry.weather)}</p>
+            <p>
+              {/* The sky opens every fish caught under it, through the catch search. */}
+              <Link to={findLink(t(SKY_LABELS[entry.weather.sky]))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
+              {` · ${t(WIND_LABELS[entry.weather.wind])} · ${tempText(entry.weather.waterTempF)}`}
+            </p>
           </>
         ) : null}
         <span className="eyebrow">{t("Moon")}</span>
-        <p>{t(MOON_LABELS[moonName(moonPhase(new Date(entry.caughtAt)))])}</p>
+        <p>
+          {/* The phase opens every fish from the same week of the moon. */}
+          <Link to={findLink(t(MOON_QUARTER_LABELS[moonQuarterOf(new Date(entry.caughtAt))]))}>
+            {t(MOON_LABELS[moonName(moonPhase(new Date(entry.caughtAt)))])}
+          </Link>
+        </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
       {trip ? (

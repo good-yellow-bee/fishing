@@ -1248,3 +1248,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR155~~ | ~~Catch search by time of day; Bests bite-time bars link to it~~ (#427) | field | S |
 | ~~BR156~~ | ~~Catch search by moon week; Bests moon bars link to it~~ (#429) | field | S |
 | ~~BR157~~ | ~~Search no-match tip names seasons, times of day and skies~~ (#431) | field | S |
+| ~~BR158~~ | ~~Catch page sky and moon link to their searches~~ (#433) | field | S |
