@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "./keepCatch";
-import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook } from "./storage";
+import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, sampleLogbook } from "@stillwater/shared";
 
 function memoryStorage() {
@@ -156,5 +156,29 @@ describe("save a landed fish", () => {
     localStorage.setItem("filler", "x".repeat(CATCH_PHOTO_QUOTA_CHARS - CATCH_PHOTO_BOOK_HEADROOM_CHARS - 20_000));
     expect(() => saveLandedPhoto(landed.id, `data:image/jpeg;base64,${"A".repeat(60_000)}`)).toThrow();
     expect(readStoredPhotos()).toEqual({});
+  });
+});
+
+describe("a stored book that can't be read", () => {
+  beforeEach(() => {
+    vi.stubGlobal("localStorage", memoryStorage());
+  });
+
+  it("is set aside before a landed fish starts a new book over it", () => {
+    const broken = JSON.stringify({ spots: [], trips: [], catches: [{ id: "x", pounds: null }] });
+    localStorage.setItem(LOGBOOK_STORAGE_KEY, broken);
+    expect(storedBookUnreadable()).toBe(true);
+    saveLandedCatch(landed);
+    expect(localStorage.getItem(UNREADABLE_BOOK_KEY)).toBe(broken);
+    expect(readStoredLogbook()?.catches.map((entry) => entry.id)).toEqual([landed.id]);
+    expect(storedBookUnreadable()).toBe(false);
+  });
+
+  it("keeps the first one set aside, not a later one", () => {
+    localStorage.setItem(LOGBOOK_STORAGE_KEY, "{not json");
+    readStoredLogbook();
+    localStorage.setItem(LOGBOOK_STORAGE_KEY, "[]");
+    readStoredLogbook();
+    expect(localStorage.getItem(UNREADABLE_BOOK_KEY)).toBe("{not json");
   });
 });

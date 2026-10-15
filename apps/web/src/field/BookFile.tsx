@@ -3,6 +3,7 @@ import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, typ
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
+import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { useTackle } from "./gear/TackleState";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -23,6 +24,7 @@ export function BookFile() {
   const nudge = copyNudge(own, copiedAt);
   const canInstall = useInstallOffer();
   const [tip] = useState(() => homeScreenTip());
+  const [setAside, setSetAside] = useState(readUnreadableBook);
 
   const onDownload = () => {
     downloadFile(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })), "application/json", "stillwater-field-log.json");
@@ -80,6 +82,27 @@ export function BookFile() {
             ? t("This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.")
             : t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })}
         </p>
+      ) : null}
+      {setAside ? (
+        <div className="copy-nudge">
+          <p>{t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")}</p>
+          <div className="book-file">
+            <button type="button" className="text-button" onClick={() => downloadFile(setAside, "application/json", "stillwater-field-log-set-aside.json")}>
+              {t("Download the set-aside book")}
+            </button>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => {
+                if (!window.confirm(t("Forget the set-aside book for good?"))) return;
+                forgetUnreadableBook();
+                setSetAside(null);
+              }}
+            >
+              {t("Forget it")}
+            </button>
+          </div>
+        </div>
       ) : null}
       {tip && own > 0 ? <p className="copy-nudge">{t("To keep the app and its book on this device, tap Share, then Add to Home Screen.")}</p> : null}
       <div className="book-file">

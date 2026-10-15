@@ -28,7 +28,7 @@ import { t, useLang } from "../i18n";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { localizeSample } from "./sampleText";
-import { readStoredLogbook, saveLogbook } from "./storage";
+import { readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -64,6 +64,8 @@ const LogbookContext = createContext<LogbookApi | null>(null);
 
 export function LogbookProvider({ children }: { children: ReactNode }) {
   const lang = useLang();
+  // Read before the sample is put in its place: a book that is there but unreadable keeps its photos for now.
+  const [startedUnreadable] = useState(storedBookUnreadable);
   const [book, setBook] = useState<Logbook>(() => {
     const stored = readStoredLogbook();
     if (stored) return stored;
@@ -72,8 +74,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     return seeded;
   });
   const [photos, setPhotos] = useState<CatchPhotoMap>(() => {
-    const storedBook = readStoredLogbook() ?? { catches: [] };
     const storedPhotos = readStoredPhotos();
+    if (startedUnreadable) return storedPhotos;
+    const storedBook = readStoredLogbook() ?? { catches: [] };
     const pruned = photosForBook(storedBook, storedPhotos);
     if (pruned !== storedPhotos) {
       try {
