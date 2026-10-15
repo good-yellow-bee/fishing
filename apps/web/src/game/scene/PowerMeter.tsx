@@ -13,10 +13,11 @@ type Props = {
 export function PowerMeter({ phase, powerRef, accuracy }: Props) {
   const t = useT();
   const marker = useRef<HTMLDivElement>(null);
-  const phaseRef = useRef(phase);
-  phaseRef.current = phase;
   /** Where the last cast stopped, left on the bar as a faint mark to aim the next one by. */
   const lastCast = useRef<number | null>(null);
+  const prevPhase = useRef(phase);
+  if (prevPhase.current === "casting" && phase !== "casting" && powerRef.current > 0) lastCast.current = powerRef.current;
+  prevPhase.current = phase;
   const shown = phase === "idle" || phase === "casting";
   useEffect(() => {
     if (!shown) return;
@@ -25,7 +26,6 @@ export function PowerMeter({ phase, powerRef, accuracy }: Props) {
     const follow = () => {
       frame = requestAnimationFrame(follow);
       const power = powerRef.current;
-      if (phaseRef.current === "casting" && power > 0) lastCast.current = power;
       if (power === last || !marker.current) return;
       last = power;
       marker.current.style.left = `${power * 100}%`;
