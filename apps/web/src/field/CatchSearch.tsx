@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { catchesNewestFirst, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
+import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
 import { useLogbook } from "./LogbookState";
@@ -110,9 +111,16 @@ export function CatchSearch() {
       {settled ? (
         <>
           {/* Only the count is read out; the cards themselves are not a live region. */}
-          <p role="status" className={matches.length === 0 ? "empty" : "search-count"}>
-            {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
-          </p>
+          {matches.length > 1 ? (
+            // Several matches: what they add up to, from the count to the largest among them.
+            <div role="status" className="search-count">
+              <FishSum catches={matches} />
+            </div>
+          ) : (
+            <p role="status" className={matches.length === 0 ? "empty" : "search-count"}>
+              {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
+            </p>
+          )}
           {matches.length > 0 && (
             <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>
               {(entry) => (
