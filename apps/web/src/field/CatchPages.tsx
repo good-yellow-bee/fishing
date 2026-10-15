@@ -12,6 +12,7 @@ import {
   WIND_LABELS,
   catchesForSpot,
   catchesNewestFirst,
+  localDate,
   spotById,
   tripById,
   tripsForSpot,
@@ -27,7 +28,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripWeather } from "./suggestions";
+import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
 import { waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useT, type Units } from "../i18n";
@@ -141,7 +142,10 @@ function CatchForm() {
   const [amount, setAmount] = useState(startAmount);
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
-  const [tripId, setTripId] = useState(existing ? (existing.tripId ?? "") : (presetTrip?.id ?? ""));
+  // A new fish on a water with an outing planned today files under that outing.
+  const [tripId, setTripId] = useState(() =>
+    existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripOnDay(book, presetSpot, localDate(new Date()))?.id ?? ""),
+  );
   const [caughtAt, setCaughtAt] = useState(() =>
     existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
@@ -225,7 +229,8 @@ function CatchForm() {
 
   const onSpot = (nextSpot: string) => {
     setSpotId(nextSpot);
-    if (tripId && !tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) setTripId("");
+    if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
+    setTripId(existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? ""));
   };
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
