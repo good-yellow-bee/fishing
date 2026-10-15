@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { biteTimes } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -6,6 +7,7 @@ import { fishCountLabel } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
+import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -57,6 +59,14 @@ export function SpeciesPage() {
           </li>
         ))}
       </ul>
+      {catches.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("When it bites")}</h2>
+          </div>
+          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count }))} />
+        </>
+      ) : null}
       <div className="section-head">
         <h2>{t("Every one in the book")}</h2>
       </div>

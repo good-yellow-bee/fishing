@@ -273,6 +273,7 @@ export const PL_FIELD: PlBook = {
   "The largest fish in this book, how the species add up, when and on what they bite, and which waters have given one up.":
     "Największe ryby w dzienniku, zestawienie gatunków, kiedy i na co biorą oraz łowiska, które coś oddały.",
   "When they bite": "Kiedy biorą",
+  "When it bites": "Kiedy bierze",
   "By season": "Według pory roku",
   "Best day": "Najlepszy dzień",
   "Weather is optional: note all three, or leave them blank.": "Pogoda jest opcjonalna: wpisz wszystkie trzy albo zostaw puste.",
