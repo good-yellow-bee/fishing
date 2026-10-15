@@ -18,16 +18,22 @@ import { WeatherLine } from "./Weather";
 import { findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
 
+/** A card's heading sits one below the section it is listed under. */
+type CardLevel = 2 | 3 | 4;
+
 export function CatchCard({
   entry,
   spotName,
   tripTitle,
+  level = 3,
 }: {
   entry: CatchEntry;
   /** Null on the water's own page, where naming the water again says nothing. */
   spotName: string | null;
   tripTitle: string | null;
+  level?: CardLevel;
 }) {
+  const Head = `h${level}` as const;
   const t = useT();
   const { book, photoFor } = useLogbook();
   const photo = photoFor(entry.id);
@@ -37,10 +43,10 @@ export function CatchCard({
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
       <p className={`measure measure-${entry.measure.kind}`}>{measureText(entry.measure)}</p>
       <div>
-        <h2>
+        <Head>
           <Link to={`/catches/${entry.id}`}>{t(entry.species)}</Link>
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
-        </h2>
+        </Head>
         <p className="meta">
           {/* Every fish taken on this lure, as on the catch page. */}
           <Link to={findLink(t(entry.lure))}>{t(entry.lure)}</Link>
@@ -78,6 +84,7 @@ export function TripCard({
   fishCount,
   today,
   tomorrow,
+  level = 3,
 }: {
   trip: Trip;
   /** Null on the water's own page, where the water and its type go without saying. */
@@ -86,7 +93,9 @@ export function TripCard({
   fishCount: number;
   today: string;
   tomorrow: string;
+  level?: CardLevel;
 }) {
+  const Head = `h${level}` as const;
   const t = useT();
   const tackle = useTackleItems();
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
@@ -102,7 +111,7 @@ export function TripCard({
     <Link to={`/trips/${trip.id}`} className="trip-card">
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
       <div>
-        <h2>{trip.title}</h2>
+        <Head>{trip.title}</Head>
         <p className="meta">
           {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
         </p>

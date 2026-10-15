@@ -32,7 +32,7 @@ function LargeFish({
   return (
     <div>
       <h3 className="subhead">{t("Large · {label}", { label })}</h3>
-      <CatchCard entry={entry} spotName={spotName} tripTitle={tripTitle} />
+      <CatchCard entry={entry} spotName={spotName} tripTitle={tripTitle} level={4} />
     </div>
   );
 }

@@ -107,6 +107,7 @@ export function SpeciesPage() {
       <PagedCatches items={catches} monthOf={catchMonth}>
         {(entry) => (
           <CatchCard
+            level={4}
             key={entry.id}
             entry={entry}
             spotName={book.spots.find((spot) => spot.id === entry.spotId)?.name ?? t("Unknown water")}

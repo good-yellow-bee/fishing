@@ -156,6 +156,7 @@ export function SpotPage() {
         <PagedCatches items={catches} monthOf={catchMonth}>
           {(entry) => (
             <CatchCard
+              level={4}
               key={entry.id}
               entry={entry}
               spotName={null}
