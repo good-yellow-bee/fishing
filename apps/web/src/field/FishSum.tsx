@@ -4,7 +4,8 @@ import { measureText } from "../i18n/content";
 import { fishCountLabel } from "./format";
 
 /** "6 fish · 3 species · 2 released · Largest: Northern pike, 28 in" for the fish of one outing or one water. */
-export function FishSum({ catches }: { catches: readonly CatchEntry[] }) {
+/** `oneKind` is for a page about one species, where naming it again says nothing. */
+export function FishSum({ catches, oneKind = false }: { catches: readonly CatchEntry[]; oneKind?: boolean }) {
   useT();
   if (catches.length === 0) return null;
   const species = new Set(catches.map((entry) => entry.species)).size;
@@ -13,9 +14,16 @@ export function FishSum({ catches }: { catches: readonly CatchEntry[] }) {
   const released = catches.filter((entry) => entry.released).length;
   return (
     <p className="meta fish-sum">
-      {fishCountLabel(catches.length)} · {tn(species, "{n} species", "{n} species")}
+      {fishCountLabel(catches.length)}
+      {oneKind ? "" : ` · ${tn(species, "{n} species", "{n} species")}`}
       {released > 0 ? ` · ${tn(released, "{n} released", "{n} released")}` : ""}
-      {largest ? ` · ${t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })}` : ""}
+      {largest
+        ? ` · ${
+            oneKind
+              ? t("Largest: {size}", { size: measureText(largest.measure) })
+              : t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })
+          }`
+        : ""}
     </p>
   );
 }

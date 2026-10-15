@@ -341,4 +341,11 @@ export const PL_FIELD: PlBook = {
   "Waxing moon": "Księżyc przybywa",
   "Near the full moon": "Około pełni",
   "Waning moon": "Księżyc ubywa",
+  "No fish of this kind in the book.": "W dzienniku nie ma ryb tego gatunku.",
+  "Back to bests": "Wróć do rekordów",
+  "What it takes": "Na co bierze",
+  "Where it comes from": "Skąd pochodzi",
+  "Every one in the book": "Wszystkie w dzienniku",
+  "All {species}": "Gatunek: {species}",
+  "Largest: {size}": "Największa: {size}",
 };
