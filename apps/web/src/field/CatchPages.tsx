@@ -736,7 +736,7 @@ export function CatchPage() {
           {entry.released ? (
             <>
               {" · "}
-              <span>{t("Released")}</span>
+              <Link to={findLink(t("Released"))}>{t("Released")}</Link>
             </>
           ) : null}
         </p>
