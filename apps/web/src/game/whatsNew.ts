@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15zr";
+export const NEWS_ID = "2026-10-15zs";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Off the point the fight card calls a run that is dragging the line over the rocks, and the landed card notes a fish kept out of the weeds or off the rocks.",
   "Off the point, turn the runs: a run you leave alone drags the line over the rocks, so reeling against it strains the line harder.",
   "In the field log, saving a catch now says “Fish saved.” for a moment, downloading the book says it went through, and restoring the sample book can be undone from the bar at the bottom.",
   "At the drop-off a run dives: it pulls harder against a reeling line but tires the fish faster, so let it go and reel between runs.",
