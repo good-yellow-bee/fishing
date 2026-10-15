@@ -23,7 +23,8 @@ export function CatchCard({
   tripTitle,
 }: {
   entry: CatchEntry;
-  spotName: string;
+  /** Null on the water's own page, where naming the water again says nothing. */
+  spotName: string | null;
   tripTitle: string | null;
 }) {
   const t = useT();
@@ -42,8 +43,12 @@ export function CatchCard({
         <p className="meta">
           <span>{t(entry.lure)}</span>
           <span aria-hidden="true">·</span>
-          <Link to={`/spots/${entry.spotId}`}>{spotName}</Link>
-          <span aria-hidden="true">·</span>
+          {spotName !== null ? (
+            <>
+              <Link to={`/spots/${entry.spotId}`}>{spotName}</Link>
+              <span aria-hidden="true">·</span>
+            </>
+          ) : null}
           <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
           {entry.released ? (
             <>
@@ -73,7 +78,8 @@ export function TripCard({
   tomorrow,
 }: {
   trip: Trip;
-  spotName: string;
+  /** Null on the water's own page, where the water and its type go without saying. */
+  spotName: string | null;
   waterType: WaterType | null;
   fishCount: number;
   today: string;
@@ -96,10 +102,7 @@ export function TripCard({
       <div>
         <h2>{trip.title}</h2>
         <p className="meta">
-          {spotName}
-          {waterType ? ` · ${t(WATER_LABELS[waterType])}` : ""}
-          {" · "}
-          {tally}
+          {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>

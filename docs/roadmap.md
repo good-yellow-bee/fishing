@@ -1135,3 +1135,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR82~~ | ~~What works here lures link to every fish taken on them~~ (#322) | field | S |
 | ~~BR83~~ | ~~News card (2026-10-15m) tells players about lure links, Bests tile links and trip page order~~ (#323) | field log | S |
 | ~~BR84~~ | ~~The catch form shows the biggest fish of the kind being typed~~ (#324) | field | S |
+| ~~BR85~~ | ~~A water page stops repeating its own name on its trip and catch cards~~ (#325) | field | S |
