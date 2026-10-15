@@ -22,7 +22,7 @@ import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
 import { anotherCatchLink } from "./anotherCatch";
-import { speciesLink } from "./speciesLink";
+import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
@@ -646,6 +646,9 @@ export function CatchPage() {
   const photo = photoFor(entry.id);
   const { newer, older } = catchNeighbors(book, entry.id);
   const badge = catchBadge(book, entry);
+  // Newest first, so the oldest fish of the kind is number one.
+  const kind = catchesOfSpecies(book, entry.species);
+  const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -672,7 +675,11 @@ export function CatchPage() {
         <p className="eyebrow">
           <Link to="/catches">{t("Catches")}</Link>
           {" · "}
-          <Link to={speciesLink(entry.species)}>{t("All {species}", { species: t(entry.species) })}</Link>
+          <Link to={speciesLink(entry.species)}>
+            {kind.length > 1
+              ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: kind.length })
+              : t("All {species}", { species: t(entry.species) })}
+          </Link>
         </p>
         <h1>{t(entry.species)}</h1>
         <p className="meta stand">
