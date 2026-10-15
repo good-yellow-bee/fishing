@@ -457,6 +457,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "You can hear the water now: the line grates while you reel against a run on the rocks off the point, and a fish going into the weeds at the reeds swishes, with a buzz on phones and controllers.":
+    "Teraz słychać wodę: linka zgrzyta, gdy przy cyplu zwijasz pod odjazd na kamieniach, a ryba wpływająca w zielsko przy trzcinach szeleści, z wibracją na telefonach i padach.",
   "Off the point the fight card calls a run that is dragging the line over the rocks, and the landed card notes a fish kept out of the weeds or off the rocks.":
     "Przy cyplu karta holu ostrzega, gdy odjazd ciągnie linkę po kamieniach, a karta połowu odnotowuje rybę utrzymaną z dala od zielska albo kamieni.",
   "Off the point, turn the runs: a run you leave alone drags the line over the rocks, so reeling against it strains the line harder.":
