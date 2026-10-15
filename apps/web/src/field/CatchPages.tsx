@@ -30,7 +30,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
@@ -278,6 +278,12 @@ function CatchForm() {
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
   const outingWeather = useMemo(() => tripWeather(book, tripId, existing?.id), [book, tripId, existing?.id]);
+  // No outing weather to go by: the newest fish logged the same day may still say what the sky was doing.
+  const sameDayWeather = useMemo(
+    () => (outingWeather ? null : dayWeather(book, caughtAt.slice(0, 10), existing?.id)),
+    [book, outingWeather, caughtAt, existing?.id],
+  );
+  const offeredWeather = outingWeather ?? sameDayWeather;
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
@@ -576,18 +582,20 @@ function CatchForm() {
           ) : null}
 
           <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
-          {outingWeather && !weatherStarted ? (
+          {offeredWeather && !weatherStarted ? (
             <p className="wide form-note lure-tips">
               <button
                 type="button"
                 className="lure-tip"
                 onClick={() => {
-                  setSky(outingWeather.sky);
-                  setWind(outingWeather.wind);
-                  setWaterTemp(fromBookTemp(outingWeather.waterTempF, units));
+                  setSky(offeredWeather.sky);
+                  setWind(offeredWeather.wind);
+                  setWaterTemp(fromBookTemp(offeredWeather.waterTempF, units));
                 }}
               >
-                {t("Same as the last fish on this outing: {weather}", { weather: weatherText(outingWeather) })}
+                {outingWeather
+                  ? t("Same as the last fish on this outing: {weather}", { weather: weatherText(outingWeather) })
+                  : t("Same as the last fish that day: {weather}", { weather: weatherText(offeredWeather) })}
               </button>
             </p>
           ) : null}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -106,5 +106,23 @@ describe("the outing a new catch files under", () => {
     expect(tripOnDay(book, trip.spotId, trip.date)?.id).toBe(trip.id);
     expect(tripOnDay(book, trip.spotId, "1999-01-01")).toBeUndefined();
     expect(tripOnDay(book, "no-such-water", trip.date)).toBeUndefined();
+  });
+});
+
+describe("weather from the same day", () => {
+  const book = sampleLogbook(new Date(2026, 9, 15));
+  const base = book.catches.find((entry) => entry.weather)!;
+  const morning = { ...base, id: "m", caughtAt: new Date(2026, 9, 10, 9, 0).toISOString(), weather: { sky: "fog" as const, wind: "calm" as const, waterTempF: 50 } };
+  const noon = { ...base, id: "n", caughtAt: new Date(2026, 9, 10, 12, 0).toISOString(), weather: { sky: "clear" as const, wind: "calm" as const, waterTempF: 55 } };
+  const day = { ...book, catches: [morning, noon] };
+
+  it("offers the newest same-day fish's weather", () => {
+    expect(dayWeather(day, "2026-10-10")).toEqual(noon.weather);
+    expect(dayWeather(day, "2026-10-10", "n")).toEqual(morning.weather);
+  });
+
+  it("offers nothing for a day with no fish or a half-typed day", () => {
+    expect(dayWeather(day, "2026-10-11")).toBeNull();
+    expect(dayWeather(day, "2026-10")).toBeNull();
   });
 });
