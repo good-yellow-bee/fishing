@@ -235,6 +235,7 @@ export const PL_FIELD: PlBook = {
     "Największe ryby w dzienniku, zestawienie gatunków, kiedy i na co biorą oraz łowiska, które coś oddały.",
   "When they bite": "Kiedy biorą",
   "By season": "Według pory roku",
+  "Best day": "Najlepszy dzień",
   "Lures that worked": "Przynęty, które łowiły",
   Morning: "Rano",
   Midday: "Południe",

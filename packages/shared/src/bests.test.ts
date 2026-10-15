@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests, seasonTally } from "./bests.ts";
+import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, personalBests, seasonTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -156,5 +156,20 @@ describe("the seasons the fish came in", () => {
       ["fall", "Fall", 0],
       ["winter", "Winter", 2],
     ]);
+  });
+});
+
+describe("the best day", () => {
+  const base = sampleLogbook(now);
+  const template = base.catches[0]!;
+  const on = (day: number, hour: number, i: number) => ({ ...template, id: `d${i}`, caughtAt: new Date(2026, 6, day, hour).toISOString() });
+
+  it("finds the local day with the most fish, the latest on a tie", () => {
+    const book = { ...base, catches: [on(3, 6, 1), on(3, 23, 2), on(5, 7, 3), on(5, 8, 4), on(4, 9, 5)] };
+    expect(bestDay(book)).toEqual({ date: "2026-07-05", count: 2 });
+  });
+
+  it("is empty for an empty book", () => {
+    expect(bestDay({ ...base, catches: [] })).toBeNull();
   });
 });

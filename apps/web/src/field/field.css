@@ -215,6 +215,10 @@ button.field-primary {
   margin: 8px 0 28px;
 }
 
+.stat-row[data-cols="4"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .stat-row > div,
 .conditions,
 .catch-card,
@@ -656,6 +660,7 @@ button.field-primary:disabled {
   .home-grid,
   .card-grid,
   .stat-row,
+  .stat-row[data-cols="4"],
   .form-grid,
   .sheet-head,
   .sheet-foot {
