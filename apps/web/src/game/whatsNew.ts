@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-15za";
+export const NEWS_ID = "2026-10-15zb";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Fish take the bait their own way: pike, muskies and largemouth bass hit with no nibble first, while carp, catfish, burbot and sturgeon mouth it a few times before the real bite. The strike also says how quick it was, and how quick a solid hook needs to be.",
   "The field log's catch search finds fish by month too: type “sep” or “October 2026”. Bests counts fish by month, and the home Fish tile shows this month's catch.",
   "Reel while the tension bar is amber (Tight) and the line comes in a quarter faster, but let go before it turns red. The landed card notes a perfect cast, a solid hook and the runs you turned, and a controller's buttons show on the fight card.",
   "A cast that stops on the gold mark in the middle of the cast meter is a perfect cast, and the bite comes sooner. A fish reeled close while it still has fight in it makes one last run at the net, and a controller now rumbles with the fight (Vibration in Settings turns it off).",

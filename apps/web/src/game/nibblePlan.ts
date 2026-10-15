@@ -15,9 +15,31 @@ const GAP_SPREAD = 700;
 const MS_MIN = 220;
 const MS_SPREAD = 220;
 
-export function nibblePlan(wait: number, rand: () => number = Math.random): Nibble[] {
-  if (wait < MIN_WAIT) return [];
-  const count = 1 + Math.floor(rand() * 3);
+/**
+ * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
+ * bottom feeders mouth it over and over, and the rest nibble a time or three.
+ */
+export type BiteStyle = "ambush" | "mouth" | "usual";
+
+const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
+  pike: "ambush",
+  "tiger-muskie": "ambush",
+  "ghost-pike": "ambush",
+  "largemouth-bass": "ambush",
+  carp: "mouth",
+  catfish: "mouth",
+  sturgeon: "mouth",
+  burbot: "mouth",
+};
+
+export function biteStyle(speciesId: string): BiteStyle {
+  return BITE_STYLES[speciesId] ?? "usual";
+}
+
+export function nibblePlan(wait: number, rand: () => number = Math.random, style: BiteStyle = "usual"): Nibble[] {
+  if (wait < MIN_WAIT || style === "ambush") return [];
+  // A mouther tries the bait two to four times; the rest one to three.
+  const count = (style === "mouth" ? 2 : 1) + Math.floor(rand() * 3);
   const plan: Nibble[] = [];
   const ms = () => Math.round(MS_MIN + rand() * MS_SPREAD);
   const firstMs = ms();
