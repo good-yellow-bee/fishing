@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { fightLines, isCleanFight, jumpLines, RED_TENSION, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, fightLines, isCleanFight, jumpLines, RED_TENSION, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -141,6 +141,7 @@ export function FightBar({ fight, sim, performance }: Props) {
           <p ref={status} className="fight-status" role="status" aria-live="assertive">
             {lines[0]}
           </p>
+          {canTurnRuns(fight.species.challenge) && (
           <p ref={steerLine} className="fight-steer" data-call="calm">
             <span data-for="calm">
               <span className="on-pointer">{t("Turn a run: hold ← A or → D the other way")}</span>
@@ -156,6 +157,7 @@ export function FightBar({ fight, sim, performance }: Props) {
               {t("Turning it!")}
             </span>
           </p>
+          )}
           <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">

@@ -7,13 +7,14 @@ import type { FightPerformance, FightSim } from "../game/fight";
 import { FightBar } from "./FightBar";
 
 const perch = FISH.find((fish) => fish.id === "perch")!;
+const trout = FISH.find((fish) => fish.id === "rainbow-trout")!;
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let frames: FrameRequestCallback[] = [];
 
 let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
-function mount(performance: FightPerformance | null, underpowered = false) {
+function mount(performance: FightPerformance | null, underpowered = false, species = perch) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
@@ -22,7 +23,7 @@ function mount(performance: FightPerformance | null, underpowered = false) {
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered }} sim={sim} performance={record} />));
+  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} />));
   return record;
 }
 
@@ -136,7 +137,7 @@ describe("FightBar for screen readers", () => {
   });
 
   it("says which way to pull the rod against a run, cheers a turn, and stays quiet on a leap", () => {
-    mount({ peakTension: 0.3, maxLine: 1 });
+    mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
     const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);
     frame();
     expect(shown()).toEqual(["calm"]);
@@ -156,6 +157,13 @@ describe("FightBar for screen readers", () => {
     sim.current.jump = true;
     frame();
     expect(shown()).toEqual(["calm"]);
+  });
+
+  it("leaves the steering out for a starter fish's head shakes", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    sim.current.surge = 2;
+    frame();
+    expect(container!.querySelector(".fight-steer")).toBeNull();
   });
 
   it("calls a leap by name, warning first and then telling the angler to bow", () => {

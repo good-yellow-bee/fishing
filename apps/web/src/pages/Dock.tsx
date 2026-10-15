@@ -87,6 +87,7 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
+import { canTurnRuns } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
@@ -715,7 +716,7 @@ export function DockPage() {
             {scenePhase === "fight" ? t("Reel") : t("Strike")}
           </button>
         )}
-        {scenePhase === "fight" && (
+        {scenePhase === "fight" && game.fight && canTurnRuns(game.fight.species.challenge) && (
           // A second thumb holds one of these to pull the rod against a run; keys do the same with ← → or A D.
           <div className="steer-buttons" aria-hidden>
             <button type="button" className="steer-btn" data-steer="-1" tabIndex={-1}>
