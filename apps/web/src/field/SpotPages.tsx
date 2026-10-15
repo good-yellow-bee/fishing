@@ -11,6 +11,7 @@ import {
   tripsForSpot,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
+import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -127,16 +128,16 @@ export function SpotPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
-        <div className="stack">
-          {catches.map((entry) => (
+        <PagedCatches items={catches}>
+          {(entry) => (
             <CatchCard
               key={entry.id}
               entry={entry}
               spotName={spot.name}
               tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
             />
-          ))}
-        </div>
+          )}
+        </PagedCatches>
       )}
     </div>
   );

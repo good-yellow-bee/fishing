@@ -16,6 +16,7 @@ import {
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { EditDelete } from "./EditDelete";
+import { PagedCatches } from "./PagedCatches";
 import { t, useT } from "../i18n";
 import { measureText, weatherText } from "../i18n/content";
 import { formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
@@ -73,16 +74,16 @@ export function CatchesPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
-        <div className="stack">
-          {catches.map((entry) => (
+        <PagedCatches items={catches}>
+          {(entry) => (
             <CatchCard
               key={entry.id}
               entry={entry}
               spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
               tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
             />
-          ))}
-        </div>
+          )}
+        </PagedCatches>
       )}
     </div>
   );

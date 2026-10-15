@@ -1032,6 +1032,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BP1~~ | ~~After 90 seconds with no touch, click, key or pad press (and nothing held), the lake draws at the battery saver's 30 frames a second until the next input; the frame watch ignores the drop so it never steps effects down for it~~ (#237) | perf, battery | S |
 | ~~BP2~~ | ~~Drop two files nothing loads: a 1.1 MB dawn.hdr sky map and a stray textures/colormap.png (the models use models/Textures/colormap.png)~~ (#238) | cleanup | S |
 
+## Wave BQ — A long catch log (added 2026-10-15, after Wave BP shipped)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~BQ1~~ | ~~The catch log, a spot's page and a trip's page draw their catches 50 at a time with a "Show 50 more" button and an "N of M fish" count, instead of every card at once (a 2,000-catch log drew 30,000 elements and took 1.6 s to open; now about 800 and 0.7 s)~~ (#239) | perf | S |
+
 ## Risks / open questions for the owner
 
 1. **Boat stance (P19) and the Inlet (P18) both widen `SpotId` across shared, API (`me.ts` spots record), scene, and tests — L each.** Go, or keep the lake at four banks and spend D on P17 + species only?
