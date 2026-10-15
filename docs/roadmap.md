@@ -1203,3 +1203,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR130~~ | ~~Catch search finds fish by month~~ (#382) | field | S |
 | ~~BR131~~ | ~~Bests counts fish by month, linking to the month search~~ (#383) | field | S |
 | ~~BR132~~ | ~~Home Fish tile shows this month, search links work from home~~ (#386) | field | S |
+| ~~BR133~~ | ~~News card line for searching by month~~ (#388) | field | S |
