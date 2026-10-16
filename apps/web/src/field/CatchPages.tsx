@@ -755,7 +755,13 @@ function CatchForm() {
   );
 }
 
+/** Keyed by the fish, so stepping to the next one starts fresh: no open delete question or photo error carried over. */
 export function CatchPage() {
+  const { catchId = "" } = useParams();
+  return <CatchView key={catchId} />;
+}
+
+function CatchView() {
   const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   useT();
   const navigate = useNavigate();

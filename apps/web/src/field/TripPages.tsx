@@ -116,7 +116,13 @@ export function TripsPage() {
   );
 }
 
+/** Keyed by the outing, so stepping to the next one starts fresh: no open delete question or half-typed tackle carried over. */
 export function TripPage() {
+  const { tripId = "" } = useParams();
+  return <TripView key={tripId} />;
+}
+
+function TripView() {
   const { book, deleteTrip, fileCatches } = useLogbook();
   useT();
   const navigate = useNavigate();
