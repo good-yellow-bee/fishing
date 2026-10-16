@@ -25,4 +25,11 @@ describe("search words without +", () => {
     expect(ids("sunrise")).toEqual(ids("dawn"));
     expect(ids("dawn").length).toBeGreaterThan(0);
   });
+
+  it("doesn't take the words every moon week shares for a phase", () => {
+    // Notes, waters and outings cleared, so only the moon could match.
+    const bare = { spots: book.spots.map((spot) => ({ ...spot, name: "X", notes: "", bestConditions: "" })), trips: [], catches: book.catches.map((entry) => ({ ...entry, note: "", tripId: null })) };
+    expect(findCatches(bare, "moon", t)).toEqual([]);
+    expect(findCatches(bare, "full moon", t).length + findCatches(bare, "new moon", t).length).toBeGreaterThan(0);
+  });
 });

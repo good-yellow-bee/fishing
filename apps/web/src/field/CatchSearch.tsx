@@ -83,8 +83,14 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   const at = new Date(entry.caughtAt);
   if (Number.isNaN(at.getTime())) return false;
   const label = normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)]));
-  return label.startsWith(want) || label.includes(` ${want}`);
+  if (label.startsWith(want)) return true;
+  // From a later word only when it names the phase: "full moon", not "the" or "moon", which every moon week has.
+  const words = label.split(" ");
+  return words.some((word, i) => i > 0 && !MOON_FILLER.has(word) && words.slice(i).join(" ").startsWith(want));
 }
+
+/** Words the moon weeks share, in English and Polish, which say nothing about the phase. */
+const MOON_FILLER = new Set(["near", "the", "moon", "około", "księżyc"]);
 
 /** What an exact term compares for one fish, in the book's English: its kind, lure, water, sky, wind, time of day, season or moon. */
 function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string | null {

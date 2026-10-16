@@ -219,7 +219,8 @@ export function BestsPage() {
                   <article key={row.species} className="spot-card">
                     <div className="spot-card-top">
                       <h3>
-                        <Link to={speciesLink(row.species)}>{t(row.species)}</Link>
+                        {/* In a picked season, the kind's fish of that season, as counted here. */}
+                        <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{t(row.species)}</Link>
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                     </div>
@@ -244,7 +245,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("This year's goal")}</h2>
             </div>
-            <YearGoal catches={book.catches} />
+            <YearGoal catches={whole.catches} />
             {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
             {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
             {streak.best > 1 ? (
@@ -253,8 +254,8 @@ export function BestsPage() {
               </p>
             ) : null}
             {/* The year so far as text for a message, once it has a fish. */}
-            {book.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-              <CopySummary text={() => yearSummary(book, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+            {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+              <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
             ) : null}
           </section>
 
@@ -322,7 +323,7 @@ export function BestsPage() {
             </div>
             <div className="card-grid">
               {bests.waters.map((water) => (
-                <Link key={water.spotId} to={`/spots/${water.spotId}`} className="spot-card">
+                <Link key={water.spotId} to={year ? linkFor(exactTerm("water", water.name)) : `/spots/${water.spotId}`} className="spot-card">
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
