@@ -331,6 +331,8 @@ button.field-primary {
 
 .section-head {
   display: flex;
+  /* On a narrow phone with larger text, the side link drops below the heading instead of past the edge. */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
@@ -525,6 +527,7 @@ button.field-primary:disabled {
 
 .spot-card-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
@@ -532,6 +535,7 @@ button.field-primary:disabled {
 
 .stamp {
   display: inline-block;
+  max-width: 100%;
   margin-top: 8px;
   padding: 3px 7px 2px;
   border: 1.5px dashed currentColor;
@@ -970,7 +974,8 @@ button.field-primary:disabled {
   font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  white-space: nowrap;
+  /* One line where it fits; on a narrow phone with larger text it wraps inside its box. */
+  max-width: 100%;
 }
 
 .water-tips p {
