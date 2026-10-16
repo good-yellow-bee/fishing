@@ -78,6 +78,8 @@ export const PL_FIELD: PlBook = {
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
   "Share": "Udostępnij",
+  "Note where it is": "Zapisz, gdzie to jest",
+  "Open one to note where it is.": "Otwórz jedno, by zapisać, gdzie jest.",
   "Download the outings as a spreadsheet": "Pobierz wyprawy jako arkusz",
   "Order of the matches": "Kolejność wyników",
   "Newest first": "Najnowsze najpierw",

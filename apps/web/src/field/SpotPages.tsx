@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
   WATER_TYPES,
@@ -134,7 +134,11 @@ export function SpotPage() {
               {t("Open on a map")}
             </a>
           </p>
-        ) : null}
+        ) : (
+          <p className="meta spot-place">
+            <Link to={`/spots/${spot.id}/edit#place`}>{t("Note where it is")}</Link>
+          </p>
+        )}
       </EditDelete>
       {spot.notes ? <p className="prose">{spot.notes}</p> : null}
       <aside className="conditions" aria-label={t("Best conditions")}>
@@ -216,6 +220,15 @@ function SpotForm() {
   const navigate = useNavigate();
   const { spotId } = useParams();
   const existing = spotId ? spotById(book, spotId) : undefined;
+  // Sent here to note where the water is (from the map, or its page): straight to the place field.
+  const toPlace = useLocation().hash === "#place";
+  const placeInput = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // After the page's own scroll to the top has run.
+    if (!toPlace) return;
+    const frame = requestAnimationFrame(() => placeInput.current?.scrollIntoView({ block: "center" }));
+    return () => cancelAnimationFrame(frame);
+  }, [toPlace]);
   const [name, setName] = useState(existing?.name ?? "");
   const [waterType, setWaterType] = useState<string>(existing?.waterType ?? "lake");
   const [notes, setNotes] = useState(existing?.notes ?? "");
@@ -314,7 +327,9 @@ function SpotForm() {
           <label className="wide">
             {t("Place, latitude then longitude (optional)")}
             <input
+              ref={placeInput}
               name="place"
+              autoFocus={toPlace}
               autoComplete="off"
               value={place}
               onChange={(event) => {
