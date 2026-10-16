@@ -527,10 +527,19 @@ button.field-primary:disabled {
 
 .spot-card-top {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
+}
+
+/* The name gives way, so the stamp keeps its place at the right even on a narrow phone with larger text. */
+.spot-card-top > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.spot-card-top > .stamp {
+  flex-shrink: 0;
 }
 
 .stamp {

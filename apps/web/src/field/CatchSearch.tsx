@@ -285,7 +285,7 @@ export function CatchSearch() {
             </p>
           ) : null}
           {matches.length > 0 ? (
-            <CopySummary text={() => searchSummary(settled, matches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-search.txt" />
+            <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 0 && (
             <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>

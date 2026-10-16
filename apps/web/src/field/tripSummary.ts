@@ -3,6 +3,7 @@ import { t, tn } from "../i18n";
 import { measureText, measuresText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText } from "./format";
 import { catchMonth, daysOut } from "./tripMonths";
+import { parseExactTerm } from "./findLinks";
 import { speciesCounts, speciesWaters } from "./speciesLink";
 
 /**
@@ -116,16 +117,24 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
 }
 
 /**
+ * A search as a reader would say it, from its parts as the search split them: a term a link typed in
+ * ("species:\"Pike\"") is just its name, anything typed by hand sits in quotes, and the parts keep their "+".
+ */
+function searchLabel(parts: readonly string[]): string {
+  return parts.map((part) => parseExactTerm(part)?.name ?? t("“{query}”", { query: part })).join(" + ");
+}
+
+/**
  * The fish a search found, as plain text: what was searched, how many, then each fish oldest first
  * with its day, kind, size, lure and water.
  */
-export function searchSummary(query: string, matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null): string {
+export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null): string {
   const fish = [...matches]
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
       const water = waterOf(entry.spotId);
-      const parts = [`${formatDatedDay(new Date(entry.caughtAt))} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
-      return `- ${parts.join(", ")}`;
+      const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
+      return `- ${bits.join(", ")}`;
     });
-  return [t("“{query}”", { query: query.trim() }), fishCountLabel(matches.length), ...fish].join("\n");
+  return [searchLabel(parts), fishCountLabel(matches.length), ...fish].join("\n");
 }
