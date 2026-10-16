@@ -87,6 +87,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             ? t("Let go now — its first run is the long one!")
             : state.firstRun && state.surge === 2
             ? t("Let it run — the first run is the longest!")
+            : state.lastRun && state.encore && state.surge === 1 && !state.jump
+            ? t("Not done yet — let go, one more run!")
             : state.lastRun && state.surge === 1 && !state.jump
             ? t("Let go now — it sees the net!")
             : state.surge === 0 && state.shake
