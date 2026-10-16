@@ -29,3 +29,13 @@ export function localizeSample(book: Logbook): Logbook {
     catches: book.catches.map((entry) => (SAMPLE_LINES.has(entry.note) ? { ...entry, note: t(entry.note) } : entry)),
   };
 }
+
+/**
+ * Text from a form, as the book keeps it: a sample line left as it was shown (in the reader's language) goes back
+ * to its English original, so switching language still switches it; anything else is the player's own words.
+ */
+export function bookLine(text: string): string {
+  if (SAMPLE_LINES.has(text)) return text;
+  for (const line of SAMPLE_LINES) if (t(line) === text) return line;
+  return text;
+}

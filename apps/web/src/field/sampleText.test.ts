@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
 import { setLang } from "../i18n";
-import { localizeSample } from "./sampleText";
+import { bookLine, localizeSample } from "./sampleText";
 
 describe("the sample week in the reader's language", () => {
   afterEach(() => setLang("en"));
@@ -21,5 +21,13 @@ describe("the sample week in the reader's language", () => {
   it("changes nothing in English", () => {
     const book = sampleLogbook(new Date(2026, 9, 1));
     expect(localizeSample(book)).toEqual(book);
+  });
+
+  it("keeps a sample line saved unchanged from a Polish form in English", () => {
+    setLang("pl");
+    expect(bookLine("Młynówka")).toBe("Mill Race");
+    expect(bookLine("Pod młynem")).toBe(sampleLogbook(new Date(2026, 9, 1)).trips.find((trip) => trip.spotId === "spot-mill")!.title);
+    expect(bookLine("Młynówka nocą")).toBe("Młynówka nocą");
+    expect(bookLine("")).toBe("");
   });
 });
