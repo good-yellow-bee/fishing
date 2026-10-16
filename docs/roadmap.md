@@ -1431,3 +1431,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR275~~ | ~~Save and log another, sticky save bar on the catch form~~ (#615) | field | S |
 | ~~BR276~~ | ~~Water temperature optional in a fish's weather~~ (#616) | field | S |
 | ~~BR277~~ | ~~Catch time from the photo's EXIF~~ (#617) | field | S |
+| ~~BR278~~ | ~~Rename or merge a species across the book~~ (#618) | field | S |
