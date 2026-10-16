@@ -497,8 +497,20 @@ function TripForm() {
     },
   );
 
+  // An outing with fish already on it: they go where it goes, but they keep the times they were caught.
+  const ownFish = existing ? catchesForTrip(book, existing.id) : [];
+  const fishDays = ownFish.filter((entry) => fishOnOutingDay(book, spotId, toLocalInput(new Date(entry.caughtAt)), date)).length;
+  const firstFishDay = ownFish.length > 0 ? localDate(new Date([...ownFish].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))[0]!.caughtAt)) : null;
+  const today = localDate(new Date());
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
+    // Fish already caught can't sit on an outing still to come.
+    if (firstFishDay && date > today) {
+      setError(t("This outing already has fish, so it can't be moved to a day still to come."));
+      markInvalid(event.currentTarget as HTMLFormElement, "date");
+      return;
+    }
     const draft = { date, spotId, title, note };
     const result = existing ? updateTrip(existing.id, draft) : addTrip(draft, loose);
     if (!result.ok) {
@@ -595,6 +607,16 @@ function TripForm() {
           {sameDay ? (
             <p className="wide form-note" role="status">
               {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
+            </p>
+          ) : null}
+          {existing && ownFish.length > 0 && spotId !== existing.spotId ? (
+            <p className="wide form-note" role="status">
+              {tn(ownFish.length, "Its fish moves to this water too.", "Its {n} fish move to this water too.")}
+            </p>
+          ) : null}
+          {existing && firstFishDay && date !== existing.date && fishDays === 0 ? (
+            <p className="wide form-note" role="status">
+              {t("Its fish were caught on {day} and keep that day.", { day: formatDay(firstFishDay) })}
             </p>
           ) : null}
           {loose.length > 0 ? (
