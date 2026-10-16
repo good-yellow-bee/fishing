@@ -1414,3 +1414,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR258~~ | ~~Print layout for the field log~~ (#597) | field | S |
 | ~~BR259~~ | ~~Print the packing list button~~ (#598) | field | S |
 | ~~BR260~~ | ~~Light / dark / device choice for the field log~~ (#600) | field | S |
+| ~~BR261~~ | ~~Copy a summary of a water~~ (#601) | field | S |
