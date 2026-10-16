@@ -1448,3 +1448,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR286~~ | ~~Search words without a plus~~ (#630) | field | S |
 | ~~BR287~~ | ~~Catch search on the Catches page~~ (#632) | field | S |
 | ~~BR288~~ | ~~Map link on outings and Home's next outing~~ (#634) | field | S |
+| ~~BR289~~ | ~~Note when a new water drops the fish's outing~~ (#635) | field | S |
