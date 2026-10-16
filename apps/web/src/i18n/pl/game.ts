@@ -479,6 +479,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
   "When you cast back into a school, you can now see small fish shadows milling round the float while you wait.":
     "Gdy zarzucisz z powrotem w ławicę, przy spławiku krążą teraz małe cienie ryb, póki czekasz.",
+  "A hooked lake sturgeon breaches: its first run is a leap clear of the water. Let go when the fight card calls it, then fight the rest of it on the bottom.":
+    "Zacięty jesiotr jeziorowy wyskakuje z wody: jego pierwszy odjazd to skok ponad powierzchnię. Puść, gdy karta holu to zapowie, a resztę holu stocz przy dnie.",
   "Lose a fish in a fight and it spooks that bank: the next cast there waits longer for a bite, and any school there scatters. Try another bank, or give it a cast.":
     "Zgubiona w holu ryba płoszy ten brzeg: następny rzut tam dłużej czeka na branie, a ławica się rozprasza. Spróbuj innego brzegu albo przeczekaj jeden rzut.",
   "A golden shiner is a bait thief: now and then it nibbles the bait clean off the hook instead of biting. When that happens, just cast again.":

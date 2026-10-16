@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16p";
+export const NEWS_ID = "2026-10-16q";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A hooked lake sturgeon breaches: its first run is a leap clear of the water. Let go when the fight card calls it, then fight the rest of it on the bottom.",
   "Lose a fish in a fight and it spooks that bank: the next cast there waits longer for a bite, and any school there scatters. Try another bank, or give it a cast.",
   "A golden shiner is a bait thief: now and then it nibbles the bait clean off the hook instead of biting. When that happens, just cast again.",
   "A walleye takes the bait lightly: the float only slides under, with no jolt. The call says so, and a walleye holds on a little longer, so watch closely and strike.",
