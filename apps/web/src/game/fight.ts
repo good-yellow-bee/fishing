@@ -24,6 +24,8 @@ export type FightSim = {
   roll?: boolean;
   /** A long runner's first run after the hook: the long one, coming and while it lasts. */
   firstRun?: boolean;
+  /** A rainbow trout's first leap: a long tail-walk across the top, coming and while it lasts. */
+  tailWalk?: boolean;
   /** A soft-mouthed fish reeled in the red: the hook is tearing and pulls free if it goes on. */
   tearing?: boolean;
   /** The hook tore out of a soft mouth: why the fish got away. */
@@ -61,6 +63,9 @@ export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 
 /** Trout, bass and salmon jump: every second run of theirs is a leap. */
 export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "smallmouth-bass", "largemouth-bass", "salmon"]);
+/** A rainbow trout tail-walks: its first leap dances across the top this much longer than a usual one. */
+export const TAIL_WALKERS: ReadonlySet<string> = new Set(["rainbow-trout"]);
+export const TAIL_WALK = 1.8;
 /** A sturgeon breaches once: its first run after the hook is a leap clear of the water. */
 export const BREACHERS: ReadonlySet<string> = new Set(["sturgeon"]);
 /** Pike roll on the line at the net instead of making a last run, and a burbot coils on it the same way. */
@@ -295,6 +300,8 @@ export function makeFight(
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
   const breacher = BREACHERS.has(species.id);
+  const tailWalker = TAIL_WALKERS.has(species.id);
+  let walked = false;
   const roller = ROLLERS.has(species.id);
   const longRunner = LONG_RUNNERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
@@ -325,6 +332,8 @@ export function makeFight(
         sim.roll = roller && sim.lastRun === true && !sim.jump;
         // A carp's or a salmon's first run is the long one.
         sim.firstRun = longRunner && completedSurges === 0 && !sim.jump && !sim.roll;
+        sim.tailWalk = tailWalker && sim.jump === true && !walked;
+        if (sim.tailWalk) walked = true;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
         heldThroughLeap = false;
@@ -332,7 +341,7 @@ export function makeFight(
         nextAt = nowMs + (sim.jump || sim.roll ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
         sim.surge = 2;
-        nextAt = nowMs + (sim.jump ? JUMP_MS : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
+        nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
@@ -363,6 +372,7 @@ export function makeFight(
         sim.jump = false;
         sim.roll = false;
         sim.firstRun = false;
+        sim.tailWalk = false;
         sim.lastRun = false;
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
