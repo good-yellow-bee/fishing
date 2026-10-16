@@ -1353,3 +1353,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR220~~ | ~~News card: both measures, copying a bag, undoing a load~~ (#533) | field | S |
 | ~~BR221~~ | ~~Note where a water is (typed or device location)~~ (#535) | field | S |
 | ~~BR222~~ | ~~Audit 9 fixes: map pins, load warning and undo, tackle focus~~ (#537) | field | S |
+| ~~BR223~~ | ~~Heaviest and longest in summaries; exact month links; steady search count~~ (#539) | field | S |
