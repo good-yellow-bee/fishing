@@ -63,6 +63,7 @@ import {
   retrieveHop,
   retrieveWake,
   retrieveWeave,
+  windBellyMeters,
   type FightSurge,
 } from "./fightMotion";
 import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
@@ -1298,6 +1299,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   const flightDist = useRef(0);
   const flightDur = useRef(0.6);
   const flightPower = useRef(0.5);
+  /** How far the wind has bowed a slack fight line, in meters at mid-span. */
+  const windBow = useRef(0);
   const splashStart = useRef(-1);
   const settleAt = useRef(-1);
   // Where drift, current and wind had carried the sitting float, so a bite and the fight start there instead of snapping back.
@@ -1652,6 +1655,13 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     (line.material as THREE.LineBasicMaterial).opacity = phase === "fight" && fightView.surge === 2 ? 0.9 : restOpacity.current;
     const sideX = -lineZ / span;
     const sideZ = lineX / span;
+    // On a windy day a slack fight line bows downwind, and pulls straight again once reeled or run on.
+    const windSpeed = Math.hypot(wind.x, wind.z);
+    const slackFight = phase === "fight" && sim.current != null && fightView.surge === 0 && !fightView.reeling;
+    if (phase !== "fight") windBow.current = 0;
+    else windBow.current += (windBellyMeters(windSpeed, slackFight) - windBow.current) * (1 - Math.exp(-2 * Math.min(delta, 0.05)));
+    const bowX = windSpeed > 0 ? (wind.x / windSpeed) * windBow.current : 0;
+    const bowZ = windSpeed > 0 ? (wind.z / windSpeed) * windBow.current : 0;
     const lag = flying ? (1 - castAlong(flightP)) * Math.min(1.35, span * 0.2) : 0;
     const dirX = lineX / span;
     const dirZ = lineZ / span;
@@ -1670,8 +1680,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     for (let i = 0; i < LINE_POINTS; i += 1) {
       const s = i / (LINE_POINTS - 1);
       const belly = 4 * s * (1 - s);
-      const x = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly;
-      const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly;
+      const x = rodTip.x + lineX * s - dirX * lag * belly + sideX * sway * belly + bowX * belly;
+      const z = rodTip.z + lineZ * s - dirZ * lag * belly + sideZ * sway * belly + bowZ * belly;
       let y = rodTip.y + (target.y - rodTip.y) * s - sag * belly;
       const holdLine = dipped || missing;
       if (holdLine) y = clearFightLine(y, x, z);
