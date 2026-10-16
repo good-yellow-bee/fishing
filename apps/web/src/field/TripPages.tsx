@@ -16,6 +16,7 @@ import {
   recentTrips,
   itemsForTrip,
   tripsForSpot,
+  type Spot,
   type Trip,
   type TripCount,
 } from "@stillwater/shared";
@@ -42,6 +43,8 @@ import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
 import { osmLink } from "./osmLink";
+import { placeFor } from "./map/places";
+import { sunTimes } from "./sunTimes";
 import { NearestWater, canFindNearest } from "./NearestWater";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
@@ -183,6 +186,22 @@ function TripCounts({ trip, landed }: { trip: Trip; landed: number }) {
       ))}
       {lost > 0 && landed > 0 ? <p className="meta">{t("Landed {landed} of {hooked} hooked.", { landed, hooked: landed + lost })}</p> : null}
     </div>
+  );
+}
+
+/** The day's sunrise and sunset at the water, for a water with a place (its own pin or the sample sheet's), in this device's clock. */
+function SunLine({ date, spot }: { date: string; spot: Spot }) {
+  const place = spot.place ?? placeFor(spot.id);
+  if (!place) return null;
+  const sun = sunTimes(date, place.lat, place.lng);
+  return (
+    <p className="meta sun-line">
+      {"rise" in sun
+        ? t("Sunrise {rise} · sunset {set}", { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) })
+        : sun.always === "up"
+          ? t("The sun doesn't set that day.")
+          : t("The sun doesn't rise that day.")}
+    </p>
   );
 }
 
@@ -331,6 +350,7 @@ function TripView() {
           ) : null}
         </p>
         <p className="meta moon-line">{t("Moon: {phase}", { phase: t(MOON_LABELS[moonName(moonPhase(tripNight(trip.date)))]) })}</p>
+        {spot ? <SunLine date={trip.date} spot={spot} /> : null}
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
       {trip.date >= today ? (
