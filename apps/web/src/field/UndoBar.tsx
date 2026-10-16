@@ -8,6 +8,7 @@ const DELETED = {
   spot: "Water deleted, with its outings and fish.",
   trip: "Outing deleted; its fish stay in the book.",
   sample: "Sample book restored.",
+  rename: "Fish renamed.",
 } as const;
 
 /** After a delete, a quiet bar with one way back, until the book changes again. */

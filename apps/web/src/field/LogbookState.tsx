@@ -51,6 +51,8 @@ type LogbookApi = {
   deleteSpot: (id: string) => boolean;
   deleteTrip: (id: string) => boolean;
   restoreSample: () => boolean;
+  /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
+  changeBook: (kind: "rename", next: Logbook) => boolean;
   /** Takes these photos off their catches, leaving the fish. */
   removePhotos: (ids: readonly string[]) => boolean;
   /** Why the last delete, filing, sample or undo didn't save, until the next one or a dismiss. */
@@ -65,7 +67,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip" | "sample";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "rename";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
@@ -246,6 +248,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
+      changeBook: (kind, next) => remove(kind, next),
       undoable: undo?.kind ?? null,
       undoDelete: () => {
         if (!undo) return null;
