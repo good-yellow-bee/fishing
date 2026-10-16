@@ -221,6 +221,18 @@ describe("FightBar for screen readers", () => {
     expect(container!.querySelector(".fight-water")?.textContent).toBe("Dock: turn every run, or it wraps the line round a piling");
   });
 
+  it("tells the angler a run is heading downstream", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 2;
+    sim.current.downstream = true;
+    frame();
+    expect(status()).toBe("It's running with the current — turn it upstream!");
+    sim.current.downstream = false;
+    frame();
+    expect(status()).not.toMatch(/current/);
+  });
+
   it("tells the angler the line is wrapped round a piling", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

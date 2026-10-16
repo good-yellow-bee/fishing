@@ -93,6 +93,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
               ? t("It ran into the weeds — reel slow and steady!")
               : state.surge === 0 && state.wrapped
               ? t("It wrapped the line round a piling — ease off till it swings free!")
+              : state.surge === 2 && state.downstream
+              ? t("It's running with the current — turn it upstream!")
               : state.surge === 2 && state.rocky
               ? t("It's dragging the line over the rocks — turn it!")
               : state.surge === 0 && tired === "spent"
@@ -224,7 +226,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           </p>
           )}
           {fight.water === "weeds" && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
-          {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest")}</p>}
+          {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
           {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling")}</p>}

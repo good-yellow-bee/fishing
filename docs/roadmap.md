@@ -1145,7 +1145,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT100~~ | ~~Point rocks snag: a cast into the point's rocky shallows can snag, like the reeds' weed~~ (#599) | cast | S |
 | ~~GT101~~ | ~~News card (2026-10-16z) covers GT100: point rocks snag~~ (#620) | news | S |
 | ~~GT102~~ | ~~Dock pilings: a run left unturned at the dock wraps the line round a piling; ease off till it swings free~~ (#623) | fight | S |
-| GT103 | News card (2026-10-16zb) covers GT102: dock pilings | news | S |
+| ~~GT103~~ | ~~News card (2026-10-16zb) covers GT102: dock pilings~~ (#626) | news | S |
+| GT104 | Inlet downstream runs: a run heading with the current, left unturned, takes 30% more line | fight | S |
 
 ## Risks / open questions for the owner
 
