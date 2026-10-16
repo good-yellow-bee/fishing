@@ -3,18 +3,60 @@
  * Cameras and phones write the wall-clock time where the photo was taken, with no zone, which is what the form's time field holds.
  */
 export function photoTakenAt(bytes: Uint8Array): string | null {
+  const notes = exifBlock(bytes);
+  return notes ? fromTiff(bytes, notes.start, notes.end) : null;
+}
+
+/** Where the camera's notes sit in a JPEG: the TIFF block inside its APP1 "Exif" segment. */
+function exifBlock(bytes: Uint8Array): { start: number; end: number } | null {
   if (bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
   let at = 2;
   while (at + 4 <= bytes.length && bytes[at] === 0xff) {
     const marker = bytes[at + 1]!;
     const size = (bytes[at + 2]! << 8) | bytes[at + 3]!;
     // APP1 holding "Exif\0\0": the camera's notes.
-    if (marker === 0xe1 && ascii(bytes, at + 4, 6) === "Exif\0\0") return fromTiff(bytes, at + 10, at + 2 + size);
+    if (marker === 0xe1 && ascii(bytes, at + 4, 6) === "Exif\0\0") return { start: at + 10, end: at + 2 + size };
     // The picture itself starts; there are no notes before it.
     if (marker === 0xda) return null;
     at += 2 + size;
   }
   return null;
+}
+
+/** Where a photo was taken, from the GPS notes a phone writes into it, or null when it wrote none. */
+export function photoPlace(bytes: Uint8Array): { lat: number; lng: number } | null {
+  const notes = exifBlock(bytes);
+  if (!notes) return null;
+  const reader = tiffReader(bytes, notes.start, notes.end);
+  if (!reader) return null;
+  const { u16, u32, tags, start, end } = reader;
+  const first = u32(start + 4);
+  if (first < 0) return null;
+  const gpsEntry = tags(first).get(GPS_IFD);
+  if (gpsEntry === undefined) return null;
+  const gps = tags(u32(gpsEntry + 8));
+  /** Degrees, minutes and seconds, three fractions, as decimal degrees. */
+  const degrees = (entry: number | undefined) => {
+    if (entry === undefined || u16(entry + 2) !== 5 || u32(entry + 4) !== 3) return null;
+    const at = start + u32(entry + 8);
+    if (at + 24 > end) return null;
+    const parts = [0, 1, 2].map((index) => {
+      const top = u32(at + index * 8);
+      const bottom = u32(at + index * 8 + 4);
+      return bottom > 0 ? top / bottom : NaN;
+    });
+    const [d, m, sec] = parts as [number, number, number];
+    const value = d + m / 60 + sec / 3600;
+    return Number.isFinite(value) ? value : null;
+  };
+  /** "N", "S", "E" or "W", written inline in the entry. */
+  const side = (entry: number | undefined) => (entry === undefined ? "" : String.fromCharCode(bytes[entry + 8] ?? 0));
+  const lat = degrees(gps.get(2));
+  const lng = degrees(gps.get(4));
+  if (lat === null || lng === null || lat > 90 || lng > 180) return null;
+  // 0, 0 is a phone that had no fix, not a fish off the coast of Africa.
+  if (lat === 0 && lng === 0) return null;
+  return { lat: side(gps.get(1)) === "S" ? -lat : lat, lng: side(gps.get(3)) === "W" ? -lng : lng };
 }
 
 function ascii(bytes: Uint8Array, at: number, length: number) {
@@ -25,8 +67,10 @@ const DATE_TIME_ORIGINAL = 0x9003;
 const DATE_TIME_DIGITIZED = 0x9004;
 const DATE_TIME = 0x0132;
 const EXIF_IFD = 0x8769;
+const GPS_IFD = 0x8825;
 
-function fromTiff(bytes: Uint8Array, start: number, blockEnd: number): string | null {
+/** Reads numbers and tag folders out of a TIFF block, in its own byte order, never past what was read. */
+function tiffReader(bytes: Uint8Array, start: number, blockEnd: number) {
   // Only as much as was read: a cut-off file stops short instead of reading past it.
   const end = Math.min(blockEnd, bytes.length);
   const little = ascii(bytes, start, 2) === "II";
@@ -50,6 +94,13 @@ function fromTiff(bytes: Uint8Array, start: number, blockEnd: number): string | 
     }
     return found;
   };
+  return { u16, u32, tags, start, end };
+}
+
+function fromTiff(bytes: Uint8Array, start: number, blockEnd: number): string | null {
+  const reader = tiffReader(bytes, start, blockEnd);
+  if (!reader) return null;
+  const { u16, u32, tags, end } = reader;
   /** A 20-character date text, "2026:10:16 06:42:10", turned into the form's time. */
   const dateAt = (entry: number | undefined) => {
     if (entry === undefined || u16(entry + 2) !== 2) return null;
