@@ -63,10 +63,13 @@ export const BREACHERS: ReadonlySet<string> = new Set(["sturgeon"]);
 export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike", "burbot"]);
 /** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
 export const ROLL_MS = 900;
-/** Whitefish have soft mouths: reeled hard in the red, the hook tears out. */
-export const SOFT_MOUTHS: ReadonlySet<string> = new Set(["lake-whitefish"]);
+/** Whitefish and crappie have soft mouths: reeled hard in the red, the hook tears out. */
+export const SOFT_MOUTHS: ReadonlySet<string> = new Set(["lake-whitefish", "crappie"]);
 /** Seconds of reeling in the red before the hook tears out of a soft mouth. */
 export const TEAR_SEC = 0.8;
+/** A crappie's "paper mouth" is softer still: it tears out of it sooner, before the line would snap. */
+export const PAPER_MOUTHS: ReadonlySet<string> = new Set(["crappie"]);
+export const PAPER_TEAR_SEC = 0.45;
 /** Carp make one long run straight after the hook. */
 export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp"]);
 /** How much longer that first run lasts than the carp's other runs. */
@@ -286,6 +289,7 @@ export function makeFight(
   let sulkUntil = -Infinity;
   let slackSec = 0;
   const softMouth = SOFT_MOUTHS.has(species.id);
+  const tearAt = PAPER_MOUTHS.has(species.id) ? PAPER_TEAR_SEC : TEAR_SEC;
   let tearSec = 0;
   let weedUntil = -Infinity;
   let rockedThisRun = false;
@@ -401,7 +405,7 @@ export function makeFight(
 
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";
-    if (tearSec >= TEAR_SEC) {
+    if (tearSec >= tearAt) {
       sim.tornOut = true;
       return "escaped";
     }

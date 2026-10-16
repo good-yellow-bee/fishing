@@ -286,6 +286,7 @@ describe("FightBar for screen readers", () => {
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running"]);
     expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
+    expect(habit("crappie")).toEqual(["Soft mouth: reel in the red and the hook tears out"]);
     expect(habit("perch")).toEqual([]);
   });
 

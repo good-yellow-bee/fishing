@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { BREACHERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -896,6 +896,13 @@ describe("a whitefish's soft mouth", () => {
     expect(runtime.sim.tearing).toBe(false);
     runtime.sim.tension = RED_TENSION + 0.05;
     expect(runtime.step(100, 0.05, true)).toBe("fighting");
+  });
+
+  it("tears out of a crappie's paper mouth too", () => {
+    const { runtime, outcome, now } = reelInTheRed("crappie", 3);
+    expect(outcome).toBe("escaped");
+    expect(runtime.sim.tornOut).toBe(true);
+    expect(now).toBeLessThanOrEqual(PAPER_TEAR_SEC * 1000 + 100);
   });
 
   it("is a whitefish's trait only", () => {
