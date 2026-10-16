@@ -16,6 +16,15 @@ export function isSampleCatch(id: string) {
 
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
 
+/** Whether the book is still only the sample: its waters and nothing of the player's own. */
+export function isSampleOnly(book: Logbook) {
+  return (
+    book.spots.length > 0 &&
+    book.spots.every((spot) => SAMPLE_SPOT_IDS.has(spot.id)) &&
+    book.catches.every((entry) => SAMPLE_IDS.has(entry.id))
+  );
+}
+
 /** Whether any of the sample's invented waters is still in the book. */
 export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));

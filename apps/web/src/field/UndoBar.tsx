@@ -8,6 +8,7 @@ const DELETED = {
   spot: "Water deleted, with its outings and fish.",
   trip: "Outing deleted; its fish stay in the book.",
   sample: "Sample book restored.",
+  blank: "The sample waters and fish are gone. Add your first water to begin.",
   rename: "Fish renamed.",
 } as const;
 
