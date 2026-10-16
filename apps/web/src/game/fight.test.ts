@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -833,5 +833,46 @@ describe("a carp's first run", () => {
   it("is a carp's habit only", () => {
     const { flags } = runLengths("walleye");
     expect(flags.every((flag) => !flag)).toBe(true);
+  });
+});
+
+describe("a whitefish's soft mouth", () => {
+  /** Holds the reel down with the tension pinned in the red, between runs. */
+  const reelInTheRed = (id: string, seconds: number) => {
+    const runtime = makeFight(fish(id), 1.5, 5, () => 0.5);
+    let outcome: FightOutcome = "fighting";
+    let now = 0;
+    for (; outcome === "fighting" && now < seconds * 1000; now += 50) {
+      runtime.sim.surge = 0;
+      runtime.sim.tension = Math.max(runtime.sim.tension, RED_TENSION + 0.05);
+      outcome = runtime.step(now, 0.05, true);
+    }
+    return { runtime, outcome, now };
+  };
+
+  it("tears the hook out when it is reeled in the red", () => {
+    const { runtime, outcome, now } = reelInTheRed("lake-whitefish", 3);
+    expect(outcome).toBe("escaped");
+    expect(runtime.sim.tornOut).toBe(true);
+    expect(now).toBeGreaterThanOrEqual(TEAR_SEC * 1000);
+    expect(now).toBeLessThanOrEqual(TEAR_SEC * 1000 + 100);
+  });
+
+  it("warns while the hook is tearing, and forgives a brief touch of red", () => {
+    const runtime = makeFight(fish("lake-whitefish"), 1.5, 5, () => 0.5);
+    runtime.sim.tension = RED_TENSION + 0.05;
+    runtime.step(0, 0.05, true);
+    expect(runtime.sim.tearing).toBe(true);
+    runtime.sim.tension = 0.3;
+    runtime.step(50, 0.05, false);
+    expect(runtime.sim.tearing).toBe(false);
+    runtime.sim.tension = RED_TENSION + 0.05;
+    expect(runtime.step(100, 0.05, true)).toBe("fighting");
+  });
+
+  it("is a whitefish's trait only", () => {
+    const { runtime, outcome } = reelInTheRed("walleye", 3);
+    expect(runtime.sim.tornOut).toBeFalsy();
+    expect(outcome).not.toBe("escaped");
   });
 });

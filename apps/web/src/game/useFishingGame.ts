@@ -807,8 +807,13 @@ export function useFishingGame(
             fx.snap();
             fx.haptic("snap");
             cleanRunRef.current = 0;
-            setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
-            resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm."));
+            if (sim.tornOut) {
+              setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) });
+              resetToIdle(t("Soft mouth — ease off as soon as the bar turns red."));
+            } else {
+              setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
+              resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm."));
+            }
           }
         }
       } catch (error) {

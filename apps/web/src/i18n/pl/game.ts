@@ -390,6 +390,10 @@ export const PL_GAME: PlBook = {
     "Za duże napięcie — puść, gdy pasek robi się czerwony albo ryba szykuje się do odjazdu.",
   "{fish} took all the line and threw the hook.": "{fish} — cała żyłka wybrana, haczyk zrzucony.",
   "Ran out of line — hold to reel whenever the fish is calm.": "Skończyła się żyłka — przytrzymuj, by zwijać, gdy ryba jest spokojna.",
+  "The hook tore out of the {fish}'s soft mouth.": "{fish} — haczyk wyrwał się z miękkiego pyska.",
+  "Soft mouth — ease off as soon as the bar turns red.": "Miękki pysk — odpuść, gdy tylko pasek zrobi się czerwony.",
+  "EASE OFF — the hook is tearing out!": "ODPUŚĆ — haczyk się wyrywa!",
+  "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",
   "The fishing loop hit a problem. You can cast again.": "Coś poszło nie tak z łowieniem. Możesz zarzucić ponownie.",
   "The fishing loop hit a problem.": "Coś poszło nie tak z łowieniem.",
 

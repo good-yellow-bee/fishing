@@ -24,6 +24,10 @@ export type FightSim = {
   roll?: boolean;
   /** A carp's first run after the hook: the long one, coming and while it lasts. */
   firstRun?: boolean;
+  /** A soft-mouthed fish reeled in the red: the hook is tearing and pulls free if it goes on. */
+  tearing?: boolean;
+  /** The hook tore out of a soft mouth: why the fish got away. */
+  tornOut?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
@@ -57,6 +61,10 @@ export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-tro
 export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
 /** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
 export const ROLL_MS = 900;
+/** Whitefish have soft mouths: reeled hard in the red, the hook tears out. */
+export const SOFT_MOUTHS: ReadonlySet<string> = new Set(["lake-whitefish"]);
+/** Seconds of reeling in the red before the hook tears out of a soft mouth. */
+export const TEAR_SEC = 0.8;
 /** Carp make one long run straight after the hook. */
 export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp"]);
 /** How much longer that first run lasts than the carp's other runs. */
@@ -274,6 +282,8 @@ export function makeFight(
   const sulker = biteStyle(species.id) === "mouth";
   let sulkUntil = -Infinity;
   let slackSec = 0;
+  const softMouth = SOFT_MOUTHS.has(species.id);
+  let tearSec = 0;
   let weedUntil = -Infinity;
   let rockedThisRun = false;
   let fouled = false;
@@ -381,8 +391,17 @@ export function makeFight(
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
 
+    // Reeling a soft mouth in the red tears the hook hole wider until it pulls free.
+    if (softMouth && reeling && sim.tension >= RED_TENSION) tearSec += dtSec;
+    else tearSec = 0;
+    sim.tearing = tearSec > 0;
+
     if (sim.line <= 0) return "landed";
     if (sim.tension >= 1) return "snapped";
+    if (tearSec >= TEAR_SEC) {
+      sim.tornOut = true;
+      return "escaped";
+    }
     if (sim.line >= ESCAPE_LINE) return "escaped";
     return "fighting";
   };
