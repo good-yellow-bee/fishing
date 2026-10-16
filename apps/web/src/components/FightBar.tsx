@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { BREACHERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -227,6 +227,10 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
           {SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Soft mouth: reel in the red and the hook tears out")}</p>}
+          {LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Jumper: every second run is a leap, so let go when it comes up")}</p>}
+          {BREACHERS.has(fight.species.id) && <p className="fight-water">{t("Breacher: its first run is a leap, so let go when it comes up")}</p>}
+          {ROLLERS.has(fight.species.id) && <p className="fight-water">{t("Roller: at the net it rolls on the line instead of running")}</p>}
+          {LONG_RUNNERS.has(fight.species.id) && <p className="fight-water">{t("Long runner: the first run is the long one, so let it go")}</p>}
           {fight.windy && (
             <p className="fight-water fight-wind">
               {fight.windy === "strong" ? t("Strong wind: a slack line drifts out much faster") : t("Breezy: a slack line drifts out faster")}

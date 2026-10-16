@@ -277,6 +277,18 @@ describe("FightBar for screen readers", () => {
     expect(container!.textContent).not.toContain("Soft mouth");
   });
 
+  it("names each fish's habit on the card, and only its own", () => {
+    const habit = (id: string) => {
+      mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Breacher|Roller|Long runner|Soft mouth):/.test(line ?? ""));
+    };
+    expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up"]);
+    expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
+    expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running"]);
+    expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
+    expect(habit("perch")).toEqual([]);
+  });
+
   it("calls a carp's long first run", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
