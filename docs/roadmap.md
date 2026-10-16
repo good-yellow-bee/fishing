@@ -1364,3 +1364,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR226~~ | ~~Audit 10 fixes: snapshot room, fresh pages, real dates~~ (#546) | field | S |
 | ~~BR227~~ | ~~Failed saves say so; focus after Show more and filing~~ (#547) | field | S |
 | ~~BR228~~ | ~~One-pass counts on big books; spreadsheet per outing, water, kind~~ (#549) | field | S |
+| ~~BR229~~ | ~~Photo room meter and Make room~~ (#550) | field | S |
