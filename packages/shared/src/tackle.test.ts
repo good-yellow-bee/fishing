@@ -123,6 +123,15 @@ describe("tackle", () => {
     }
   });
 
+  it("knows Polish tools and line, and waders, whatever their ending or accents", () => {
+    for (const lure of ["Obrotówka", "Wahadłówka", "Woblery", "Gumka 7 cm", "Kogut", "Mucha sucha", "Twister", "Rosówka"]) {
+      expect(isLureLabel(lure), lure).toBe(true);
+    }
+    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz"]) {
+      expect(isLureLabel(tool), tool).toBe(false);
+    }
+  });
+
   it("asks for a short name", () => {
     expect(parseTackleLabel("  spare leader  ")).toEqual({ ok: true, value: "spare leader" });
     expect(parseTackleLabel(" ")).toMatchObject({ ok: false });

@@ -368,7 +368,8 @@ function SpotForm() {
                 setPlace(event.target.value);
                 setLocating("idle");
               }}
-              placeholder="46.85, -94.24"
+              // An example place near the reader: a north-woods lake in English, a Masurian one in Polish.
+              placeholder={t("46.85, -94.24")}
             />
           </label>
           {canLocate ? (
