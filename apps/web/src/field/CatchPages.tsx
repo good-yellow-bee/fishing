@@ -976,7 +976,7 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
-      <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" />
+      <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{trip.title}</Link>

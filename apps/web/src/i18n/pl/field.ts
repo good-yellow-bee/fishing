@@ -77,6 +77,7 @@ export const PL_FIELD: PlBook = {
   "Save and log another": "Zapisz i dodaj kolejną",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
+  "Share": "Udostępnij",
   "Order of the matches": "Kolejność wyników",
   "Newest first": "Najnowsze najpierw",
   "Largest first": "Największe najpierw",
