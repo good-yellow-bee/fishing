@@ -36,6 +36,8 @@ export function HomePage() {
   const yearsAgo = thisWeekInPastYears(book.catches, now);
   const thisMonth = today.slice(0, 7);
   const monthFish = book.catches.filter((entry) => catchMonth(entry) === thisMonth).length;
+  const thisYear = today.slice(0, 4);
+  const yearFish = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`)).length;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -78,6 +80,13 @@ export function HomePage() {
                   {" · "}
                   {/* This month's fish, through the catch search. */}
                   <Link to={findLink(thisMonth)}>{t("{n} this month", { n: monthFish })}</Link>
+                </>
+              ) : null}
+              {yearFish > monthFish ? (
+                <>
+                  {" · "}
+                  {/* And this year's, once the year holds more than the month. */}
+                  <Link to={findLink(thisYear)}>{t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
             </small>

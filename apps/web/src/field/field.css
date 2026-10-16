@@ -306,6 +306,11 @@ button.field-primary {
   font-size: 12px;
 }
 
+/* Each count stays whole when the line wraps on a phone. */
+.stat-row small a {
+  white-space: nowrap;
+}
+
 .home-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
