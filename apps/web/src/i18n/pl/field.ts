@@ -294,6 +294,8 @@ export const PL_FIELD: PlBook = {
   // Book file
   "This browser now has the book from that file.": "Ta przeglądarka ma teraz dziennik z tego pliku.",
   "Sample waters are invented. This book stays in this browser.": "Przykładowe łowiska są zmyślone. Ten dziennik zostaje w tej przeglądarce.",
+  "This book stays in this browser.": "Ten dziennik zostaje w tej przeglądarce.",
+  "Skip to the page": "Przejdź do strony",
   "This browser: {here}. The file: {there}.": "W tej przeglądarce: {here}. W pliku: {there}.",
   "Fish here that aren't in the file, and would be lost: {count}.": "Ryby zapisane tu, których nie ma w pliku i które przepadłyby: {count}.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",

@@ -825,6 +825,11 @@ button.field-primary:disabled {
     text-align: start;
   }
 
+  /* Keyboard focus scrolled into view stops above the fixed tab bar rather than under it. */
+  html {
+    scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
   /* Clear of the save bar and the tab bar together. */
   .entry-form :is(input, select, textarea) {
     scroll-margin-bottom: calc(150px + env(safe-area-inset-bottom));
@@ -1341,6 +1346,7 @@ button.field-primary:disabled {
     background: #fff;
   }
 
+  .skip-link,
   .field-rail,
   .field-mobile-bar,
   .field-tab,
@@ -1558,4 +1564,19 @@ button.field-primary:disabled {
 .season-recap p {
   font-size: 15px;
   line-height: 1.45;
+}
+
+/* Out of sight until the keyboard reaches it, then over the top corner of the page. */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -60px;
+  z-index: 20;
+  padding: 10px 14px;
+  background: var(--field-ink);
+  color: var(--field-paper);
+}
+
+.skip-link:focus {
+  top: 8px;
 }
