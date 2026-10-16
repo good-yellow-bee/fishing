@@ -1482,3 +1482,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR309~~ | ~~Tackle: several at once, today's fish on gear, plural duplicates~~ (#664) | field | S |
 | ~~BR310~~ | ~~Photo as a search word~~ (#665) | field | S |
 | ~~BR311~~ | ~~Species page photos~~ (#667) | field | S |
+| ~~BR312~~ | ~~Lure record on the gear page~~ (#668) | field | S |
