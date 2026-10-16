@@ -18,7 +18,6 @@ import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
 import { dateWords } from "./dateWords";
-import { pieceKey } from "./gear/pieceKey";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 const ORDER_PARAM = "order";
@@ -125,9 +124,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (exact) {
     // One name whole, as stored or as it reads in the player's language.
     const want = normalize(exact.name);
-    // A lure takes its plural too ("Spinnerbaits" finds "Spinnerbait"), as the tackle lists count it.
-    const same = exact.field === "lure" ? (a: string) => pieceKey(a) === pieceKey(want) : (a: string) => normalize(a) === want;
-    const named = (name: string) => same(name) || same(t(name));
+    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want;
     return catchesNewestFirst(book).filter((entry) => {
       const name = exactName(book, entry, exact.field);
       return name !== null && named(name);
@@ -207,12 +204,20 @@ export function searchParts(book: Logbook, needle: string): string[] {
 
 /**
  * The terms of one part for the word-by-word fallback: a size or temperature bound kept whole (">5 lb", "< 3 lb 2 oz",
- * ">60°F"), every other word on its own. One- and two-letter words ("a", "na") match nearly every fish, so they are left out.
+ * ">60°F"), and a date of a few words ("last week", "Oct 15"), every other word on its own. One- and two-letter words ("a", "na") match nearly every fish, so they are left out.
  */
 export function searchTerms(part: string): string[] {
   const tokens = part.trim().split(/\s+/);
   const terms: string[] = [];
   for (let i = 0; i < tokens.length; i++) {
+    // A date of a few words ("last week", "oct 15") stays one term.
+    let dated = 0;
+    for (let j = Math.min(tokens.length, i + 3); j > i + 1 && dated === 0; j--) if (dateWords(tokens.slice(i, j).join(" "))) dated = j;
+    if (dated > 0) {
+      terms.push(tokens.slice(i, dated).join(" "));
+      i = dated - 1;
+      continue;
+    }
     if (/^[<>]/.test(tokens[i]!)) {
       // The longest run from here that reads as one bound.
       let end = 0;

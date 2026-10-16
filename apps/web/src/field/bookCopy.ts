@@ -1,4 +1,4 @@
-import { sampleLogbook, type Logbook } from "@stillwater/shared";
+import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
 
 export const BOOK_COPY_STORAGE_KEY = "stillwater.field-log.copied.v1";
 
@@ -32,9 +32,12 @@ export function copyNudge(own: number, copiedAt: number | null, changedDays: num
   return own > 0 && changedDays !== null && changedDays >= COPY_AGAIN_DAYS ? { kind: "old", days: changedDays } : null;
 }
 
-/** A short fingerprint of the book, to tell whether anything changed since a copy was made. */
-export function bookSignature(book: Logbook): string {
-  const text = JSON.stringify(book);
+/**
+ * A short fingerprint of what a copy holds (the book, the tackle lists, which fish have photos, the year's goals), to
+ * tell whether anything changed since a copy was made.
+ */
+export function bookSignature(book: Logbook, tackle: readonly TackleItem[] = [], photoIds: readonly string[] = [], goals: unknown = null): string {
+  const text = JSON.stringify([book, tackle, [...photoIds].sort(), goals]);
   let hash = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
     hash ^= text.charCodeAt(i);
@@ -77,6 +80,24 @@ export function saveCopiedAt(own: number, sig?: string) {
     localStorage.setItem(BOOK_COPY_STORAGE_KEY, JSON.stringify({ catches: own, at: new Date().toISOString(), ...(sig ? { sig } : {}) }));
   } catch {
     // Only the reminder forgets; the download itself went through.
+  }
+}
+
+/** The copy record as stored, to put back whole when a file load is undone. */
+export function readCopyRecord(): string | null {
+  try {
+    return localStorage.getItem(BOOK_COPY_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function restoreCopyRecord(raw: string | null) {
+  try {
+    if (raw === null) localStorage.removeItem(BOOK_COPY_STORAGE_KEY);
+    else localStorage.setItem(BOOK_COPY_STORAGE_KEY, raw);
+  } catch {
+    // Only the reminder forgets.
   }
 }
 

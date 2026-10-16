@@ -64,11 +64,23 @@ export function dropKeptDraft() {
 /** Changes to a fish already in the book, typed but not saved: kept for that fish while it still reads as it did. */
 export type EditDraft = KeptDraft & { catchId: string; base: string };
 
-export const CATCH_EDIT_KEY = "stillwater.catch-edit.v1";
+/** Each fish's kept changes, by its id, so changes to one fish never overwrite another's. */
+export const CATCH_EDIT_KEY = "stillwater.catch-edit.v2";
 
-/** The kept changes to this fish, unless it was changed since (another tab, an undo), which would make them stale. */
+function readEdits(raw: string | null): Record<string, unknown> {
+  if (!raw) return {};
+  try {
+    const value = JSON.parse(raw) as unknown;
+    return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/** The kept changes to this fish, unless the fish was changed since (another tab, an undo), which would make them stale. */
 export function parseEditDraft(raw: string | null, catchId: string, base: string, now: Date): EditDraft | null {
-  const draft = parseKeptDraft(raw, now) as EditDraft | null;
+  const row = readEdits(raw)[catchId];
+  const draft = row === undefined ? null : (parseKeptDraft(JSON.stringify(row), now) as EditDraft | null);
   return draft && draft.catchId === catchId && draft.base === base ? draft : null;
 }
 
@@ -80,20 +92,29 @@ export function readEditDraft(catchId: string, base: string, now = new Date()): 
   }
 }
 
-export function keepEditDraft(draft: EditDraft) {
+/** Every fish's kept changes, less those a day old, with `change` applied. */
+function writeEdits(change: (edits: Record<string, unknown>) => void) {
   try {
-    localStorage.setItem(CATCH_EDIT_KEY, JSON.stringify(draft));
+    const now = new Date();
+    const edits = readEdits(localStorage.getItem(CATCH_EDIT_KEY));
+    for (const [id, row] of Object.entries(edits)) if (!parseKeptDraft(JSON.stringify(row), now)) delete edits[id];
+    change(edits);
+    if (Object.keys(edits).length === 0) localStorage.removeItem(CATCH_EDIT_KEY);
+    else localStorage.setItem(CATCH_EDIT_KEY, JSON.stringify(edits));
   } catch {
     // A full or blocked store only costs the safety net.
   }
 }
 
+export function keepEditDraft(draft: EditDraft) {
+  writeEdits((edits) => {
+    edits[draft.catchId] = draft;
+  });
+}
+
 /** Lets go of the kept changes to this fish; another fish's stay. */
 export function dropEditDraft(catchId: string) {
-  try {
-    const raw = localStorage.getItem(CATCH_EDIT_KEY);
-    if (raw && (JSON.parse(raw) as { catchId?: unknown }).catchId === catchId) localStorage.removeItem(CATCH_EDIT_KEY);
-  } catch {
-    // Nothing to drop.
-  }
+  writeEdits((edits) => {
+    delete edits[catchId];
+  });
 }

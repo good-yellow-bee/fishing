@@ -52,9 +52,9 @@ describe("search words without +", () => {
     expect(ids("pike > 1 lb").length).toBeGreaterThan(0);
   });
 
-  it("finds a lure by its plural too", () => {
-    const lure = book.catches[0]!.lure;
-    expect(ids(`lure:"${lure}s"`)).toEqual(ids(`lure:"${lure}"`));
+  it("keeps a date of a few words whole beside other words", () => {
+    expect(searchTerms("pike last week")).toEqual(["pike", "last week"]);
+    expect(searchTerms("pike oct 15")).toEqual(["pike", "oct 15"]);
   });
 
   it("finds the fish with a photo by “photo”", () => {

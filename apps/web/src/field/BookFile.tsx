@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "r
 import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, ownCatches, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, ownCatches, readCopiedAt, readCopyMark, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
@@ -84,21 +84,22 @@ export function BookFile() {
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
   const [copyMark, setCopyMark] = useState(readCopyMark);
-  const signature = useMemo(() => bookSignature(storedBook), [storedBook]);
+  // What a download would hold; the goals are read fresh whenever the page shows.
+  const signature = useMemo(() => bookSignature(storedBook, items, Object.keys(photos), readYearGoals()), [storedBook, items, photos]);
   const nudge = copyNudge(own, copiedAt, changedDaysSince(copyMark, signature));
   const canInstall = useInstallOffer();
   const [tip] = useState(() => homeScreenTip());
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
   // What a loaded file replaced, while nothing has changed since: the load can be taken back.
-  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; goals: YearGoals } | null>(null);
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   const onDownload = () => {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
     // The year's goals ride along, so a new browser keeps them too.
     downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", datedName("stillwater-field-log.json"));
-    saveCopiedAt(own, signature);
+    saveCopiedAt(own, bookSignature(storedBook, items, Object.keys(photos), readYearGoals()));
     setCopiedAt(own);
     setCopyMark(readCopyMark());
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
@@ -142,7 +143,7 @@ export function BookFile() {
     }
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
     const goalsHere = readYearGoals();
-    setBeforeLoad({ archive: here, loaded: next, copiedAt, goals: goalsHere });
+    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
@@ -153,7 +154,7 @@ export function BookFile() {
     if (!merged) {
       // The file is itself a copy of the book now in this browser, so the reminder counts from it.
       const loaded = ownCatches(next.book);
-      saveCopiedAt(loaded, bookSignature(next.book));
+      saveCopiedAt(loaded, bookSignature(next.book, next.tackle, Object.keys(next.photos), readYearGoals()));
       setCopiedAt(loaded);
       setCopyMark(readCopyMark());
     }
@@ -192,8 +193,8 @@ export function BookFile() {
     replaceBook(beforeLoad.archive.book, beforeLoad.archive.photos);
     replaceTackle(beforeLoad.archive.tackle);
     writeYearGoals(beforeLoad.goals);
-    if (beforeLoad.copiedAt === null) clearCopiedAt();
-    else saveCopiedAt(beforeLoad.copiedAt);
+    // The copy record as it was, its time and fingerprint included.
+    restoreCopyRecord(beforeLoad.copyRecord);
     setCopiedAt(beforeLoad.copiedAt);
     setCopyMark(readCopyMark());
     setBeforeLoad(null);
