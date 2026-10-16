@@ -5,8 +5,8 @@ import { pieceKey } from "./pieceKey";
 export type PieceRecord = { label: string; outings: number; fish: number; lure?: string };
 
 /**
- * Each lure's record over the outings it went on, up to `today`: how many lists it was on, and how many fish came on it
- * during those outings. Tools and line are left out. Most fish first, then most outings; pieces never taken are left out.
+ * Each lure packed for outings up to `today`: how many lists it was on, and every fish in the book logged on it (however
+ * the plural was written), as its search link opens them. Tools and line are left out. Most fish first, then most outings.
  */
 export function pieceRecords(book: Logbook, items: readonly TackleItem[], today: string): PieceRecord[] {
   const past = new Set(book.trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
@@ -20,7 +20,7 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   }
   return [...byPiece.entries()]
     .map(([key, row]) => {
-      const took = book.catches.filter((entry) => entry.tripId && row.trips.has(entry.tripId) && pieceKey(entry.lure) === key);
+      const took = book.catches.filter((entry) => pieceKey(entry.lure) === key);
       return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] ? { lure: took[0].lure } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));

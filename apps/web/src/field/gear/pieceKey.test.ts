@@ -7,5 +7,7 @@ describe("pieceKey", () => {
     expect(pieceKey("Polarized glasses")).toBe("polarized glass");
     expect(pieceKey("Floss")).toBe("floss");
     expect(pieceKey("Long  nose pliers")).toBe("long nose plier");
+    expect(pieceKey("Leeches")).toBe(pieceKey("leech"));
+    expect(pieceKey("Tackle boxes")).toBe(pieceKey("tackle box"));
   });
 });

@@ -101,7 +101,7 @@ export function SpeciesPage() {
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
-      <SpeciesPhotos key={species} catches={catches} name={name} />
+      <SpeciesPhotos catches={catches} name={name} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>

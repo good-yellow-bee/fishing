@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
@@ -17,6 +17,7 @@ import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
+import { pieceKey } from "./gear/pieceKey";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 const ORDER_PARAM = "order";
@@ -82,7 +83,10 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   if (want.length < 3) return false;
   const at = new Date(entry.caughtAt);
   if (Number.isNaN(at.getTime())) return false;
-  const label = normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)]));
+  const quarter = moonQuarterOf(at);
+  if ((MOON_WORDS[quarter] ?? []).some((word) => normalize(word).startsWith(want))) return true;
+  if (MOON_FILLER.has(want)) return false;
+  const label = normalize(t(MOON_QUARTER_LABELS[quarter]));
   if (label.startsWith(want)) return true;
   // From a later word only when it names the phase: "full moon", not "the" or "moon", which every moon week has.
   const words = label.split(" ");
@@ -91,6 +95,12 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 
 /** Words the moon weeks share, in English and Polish, which say nothing about the phase. */
 const MOON_FILLER = new Set(["near", "the", "moon", "około", "księżyc"]);
+
+/** Other words for a moon week than its label: the phase itself, as "full moon" and "pełnia" read elsewhere in the app. */
+const MOON_WORDS: Partial<Record<MoonQuarter, string[]>> = {
+  full: ["full moon", "pełnia"],
+  new: ["new moon", "nów"],
+};
 
 /** What an exact term compares for one fish, in the book's English: its kind, lure, water, sky, wind, time of day, season or moon. */
 function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string | null {
@@ -114,7 +124,9 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (exact) {
     // One name whole, as stored or as it reads in the player's language.
     const want = normalize(exact.name);
-    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want;
+    // A lure takes its plural too ("Spinnerbaits" finds "Spinnerbait"), as the tackle lists count it.
+    const same = exact.field === "lure" ? (a: string) => pieceKey(a) === pieceKey(want) : (a: string) => normalize(a) === want;
+    const named = (name: string) => same(name) || same(t(name));
     return catchesNewestFirst(book).filter((entry) => {
       const name = exactName(book, entry, exact.field);
       return name !== null && named(name);
