@@ -34,6 +34,7 @@ import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
+import { tripSummary } from "./tripSummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, tn, useT } from "../i18n";
@@ -272,6 +273,7 @@ function TripView() {
           </p>
         ) : null
       )}
+      {catches.length > 0 ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches)} /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
@@ -462,5 +464,28 @@ function TripForm() {
         </button>
       </form>
     </div>
+  );
+}
+
+/** The outing as text for a message: copied when the browser allows it, else saved as a file. */
+function CopySummary({ text }: { text: () => string }) {
+  const [said, setSaid] = useState("");
+  const copy = async () => {
+    const summary = text();
+    try {
+      await navigator.clipboard.writeText(summary);
+      setSaid(t("Summary copied."));
+    } catch {
+      downloadFile(summary, "text/plain;charset=utf-8", "stillwater-outing.txt");
+      setSaid(t("The summary was downloaded instead."));
+    }
+  };
+  return (
+    <p className="trip-again">
+      <button type="button" className="text-button" onClick={() => void copy()}>
+        {t("Copy a summary")}
+      </button>{" "}
+      <span role="status">{said}</span>
+    </p>
   );
 }
