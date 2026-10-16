@@ -9,7 +9,7 @@ import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
-import { monthName, monthTally } from "../tripMonths";
+import { monthName, monthTally, yearTally } from "../tripMonths";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -189,6 +189,16 @@ export function BestsPage() {
             </div>
             <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("time", t(row.label))) : undefined }))} />
           </section>
+
+          {yearTally(book.catches).length > 1 ? (
+            <section>
+              <div className="section-head">
+                <h2>{t("By year")}</h2>
+              </div>
+              {/* Each year opens the catch search for its fish. */}
+              <TallyBars rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(row.year) }))} />
+            </section>
+          ) : null}
 
           {monthTally(book.catches).length > 1 ? (
             <section>

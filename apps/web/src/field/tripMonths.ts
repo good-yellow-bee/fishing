@@ -48,3 +48,14 @@ export function monthTally(catches: readonly CatchEntry[], limit = 12): { month:
     .slice(0, limit)
     .map(([month, count]) => ({ month, count }));
 }
+
+/** Fish per calendar year they came in, newest year first. */
+export function yearTally(catches: readonly CatchEntry[]): { year: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const entry of catches) {
+    if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
+    const year = catchMonth(entry).slice(0, 4);
+    counts.set(year, (counts.get(year) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([year, count]) => ({ year, count }));
+}
