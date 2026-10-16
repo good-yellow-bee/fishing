@@ -7,7 +7,7 @@ import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
-import { downloadFile } from "./download";
+import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
@@ -326,7 +326,7 @@ export function CatchSearch() {
               <button
                 type="button"
                 className="text-button"
-                onClick={() => downloadFile(catchesCsv({ ...book, catches: matches }), "text/csv;charset=utf-8", "stillwater-catches.csv")}
+                onClick={() => downloadFile(catchesCsv({ ...book, catches: matches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"))}
               >
                 {t("Download these as a spreadsheet")}
               </button>

@@ -36,7 +36,7 @@ import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
-import { downloadFile } from "./download";
+import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
@@ -113,7 +113,7 @@ export function TripsPage() {
       {average ? <p className="meta">{average}</p> : null}
       {book.trips.length > 0 ? (
         <p className="fish-csv">
-          <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", "stillwater-outings.csv")}>
+          <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
             {t("Download the outings as a spreadsheet")}
           </button>
         </p>
