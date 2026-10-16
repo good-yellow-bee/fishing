@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import type { CatchEntry } from "@stillwater/shared";
 import { t } from "../i18n";
 import { catchMonth } from "./tripMonths";
@@ -53,6 +53,19 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
   const errorId = useId();
+  // The form and the buttons take each other's place, so focus is handed back to the goal's own button.
+  const back = useRef<HTMLButtonElement>(null);
+  const [refocus, setRefocus] = useState(false);
+  useEffect(() => {
+    if (refocus && !editing) {
+      back.current?.focus();
+      setRefocus(false);
+    }
+  }, [refocus, editing, goal]);
+  const close = () => {
+    setEditing(false);
+    setRefocus(true);
+  };
   const count = catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)).length;
 
   const onSubmit = (event: FormEvent) => {
@@ -64,8 +77,8 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
     }
     saveYearGoal(year, value);
     setGoal(value);
-    setEditing(false);
     setError("");
+    close();
   };
 
   if (editing) {
@@ -87,7 +100,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
           />
         </label>
         <button type="submit">{t("Save goal")}</button>
-        <button type="button" className="text-button" onClick={() => setEditing(false)}>
+        <button type="button" className="text-button" onClick={close}>
           {t("Cancel")}
         </button>
         {error ? (
@@ -106,7 +119,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
   if (goal === null) {
     return (
       <p className="year-goal">
-        <button type="button" className="text-button" onClick={open}>
+        <button ref={back} type="button" className="text-button" onClick={open}>
           {t("Set a goal for {year}", { year })}
         </button>
       </p>
@@ -116,7 +129,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
     <div className="year-goal">
       <p>
         {count >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count, goal, year }) : t("{count} of {goal} fish in {year}", { count, goal, year })}{" "}
-        <button type="button" className="text-button" onClick={open}>
+        <button ref={back} type="button" className="text-button" onClick={open}>
           {t("Change goal")}
         </button>{" "}
         <button
@@ -125,6 +138,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
           onClick={() => {
             saveYearGoal(year, null);
             setGoal(null);
+            setRefocus(true);
           }}
         >
           {t("Remove goal")}

@@ -13,4 +13,9 @@ describe("outing average", () => {
   it("says nothing with fewer than two outings fished", () => {
     expect(outingAverage([trip("a", "2026-10-01"), trip("later", "2026-11-01")], () => 2, "2026-10-15")).toBeNull();
   });
+
+  it("leaves out today's outing until it has a fish", () => {
+    const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("today", "2026-10-15")];
+    expect(outingAverage(trips, (id) => (id === "today" ? 0 : 2), "2026-10-15")).toBe("2 fish an outing on average");
+  });
 });

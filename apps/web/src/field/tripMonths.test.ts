@@ -49,7 +49,7 @@ describe("days out", () => {
   it("counts each day with a fish or a fished outing once, and not outings still to come", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const today = "2026-10-15";
-    const days = new Set([...book.catches.map((entry) => localDate(new Date(entry.caughtAt))), ...book.trips.filter((trip) => trip.date <= today).map((trip) => trip.date)]);
+    const days = new Set([...book.catches.map((entry) => localDate(new Date(entry.caughtAt))), ...book.trips.filter((trip) => trip.date < today).map((trip) => trip.date)]);
     expect(daysOut(book, "2026", today)).toBe([...days].filter((day) => day.startsWith("2026-")).length);
     expect(daysOut({ ...book, trips: [...book.trips, { ...book.trips[0]!, id: "later", date: "2026-12-01" }] }, "2026", today)).toBe(daysOut(book, "2026", today));
     expect(daysOut(book, "2020", today)).toBe(0);
