@@ -302,6 +302,15 @@ export function fishSideMeters(surge: FightSurge, runSide: number, worn = 0) {
 export const SULK_DEPTH = 0.68;
 /** How far the inlet's current carries a resting fish sideways, downstream, while the angler isn't reeling. */
 export const CURRENT_SIDE = 0.5;
+/** How far a slack fight line bows downwind, per meter a second of the day's drift, and at most. */
+export const WIND_BELLY_PER = 5;
+export const WIND_BELLY_MAX = 0.7;
+
+/** Meters a slack fight line bows downwind at mid-span; a reeled or running line is pulled straight. */
+export function windBellyMeters(windSpeed: number, slack: boolean) {
+  return slack ? Math.min(WIND_BELLY_MAX, Math.max(0, windSpeed) * WIND_BELLY_PER) : 0;
+}
+
 /** How deep a run at the drop-off dives: below a calm fish, above a sulking one. */
 export const DIVE_DEPTH = 0.6;
 

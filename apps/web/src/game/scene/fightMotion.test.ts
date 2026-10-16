@@ -1,6 +1,8 @@
 import { DOCK_STAND_X, DOCK_STAND_Z, footHeight, inLake } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
+  WIND_BELLY_MAX,
+  windBellyMeters,
   BITE_SLACK_END,
   HIT_STOP_SEC,
   isFrozen,
@@ -255,5 +257,18 @@ describe("strike hit-stop", () => {
     expect(isFrozen(strikeAt + 0.05, until)).toBe(true);
     expect(isFrozen(until, until)).toBe(false);
     expect(isFrozen(strikeAt, -1)).toBe(false);
+  });
+});
+
+describe("the wind on a slack fight line", () => {
+  it("bows a slack line further the stronger the day's wind, up to a cap", () => {
+    expect(windBellyMeters(0, true)).toBe(0);
+    expect(windBellyMeters(0.08, true)).toBeGreaterThan(windBellyMeters(0.04, true));
+    expect(windBellyMeters(0.13, true)).toBeGreaterThan(windBellyMeters(0.08, true));
+    expect(windBellyMeters(1, true)).toBe(WIND_BELLY_MAX);
+  });
+
+  it("leaves a reeled or running line straight", () => {
+    expect(windBellyMeters(0.13, false)).toBe(0);
   });
 });
