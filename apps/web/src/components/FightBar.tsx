@@ -82,7 +82,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             : state.roll && state.surge === 2
             ? t("EASE OFF — it's rolling on the line!")
             : state.firstRun && state.surge === 1
-            ? t("Let go now — a carp's first run is the long one!")
+            ? t("Let go now — its first run is the long one!")
             : state.firstRun && state.surge === 2
             ? t("Let it run — the first run is the longest!")
             : state.lastRun && state.surge === 1 && !state.jump

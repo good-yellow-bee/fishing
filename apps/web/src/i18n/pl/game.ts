@@ -447,7 +447,7 @@ export const PL_GAME: PlBook = {
   "TAP A or RT to start reeling": "DOTKNIJ: A albo RT, by zacząć zwijać",
   "HOLD A or RT to reel": "PRZYTRZYMAJ A albo RT, by zwijać",
   "(→ or D)": "(→ albo D)",
-  "Let go now — a carp's first run is the long one!": "Odpuść teraz — pierwszy odjazd karpia jest najdłuższy!",
+  "Let go now — its first run is the long one!": "Odpuść teraz — pierwszy odjazd jest najdłuższy!",
   "Let it run — the first run is the longest!": "Niech płynie — pierwszy odjazd jest najdłuższy!",
   "A leap can't be turned — just let go": "Skoku nie da się zawrócić — po prostu odpuść",
   "A roll can't be turned — just let go": "Obrotu nie da się zawrócić — po prostu odpuść",

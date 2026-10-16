@@ -22,7 +22,7 @@ export type FightSim = {
   lastRun?: boolean;
   /** A pike's last run is a roll on the line instead, coming and while it lasts. */
   roll?: boolean;
-  /** A carp's first run after the hook: the long one, coming and while it lasts. */
+  /** A long runner's first run after the hook: the long one, coming and while it lasts. */
   firstRun?: boolean;
   /** A soft-mouthed fish reeled in the red: the hook is tearing and pulls free if it goes on. */
   tearing?: boolean;
@@ -70,8 +70,8 @@ export const TEAR_SEC = 0.8;
 /** A crappie's "paper mouth" is softer still: it tears out of it sooner, before the line would snap. */
 export const PAPER_MOUTHS: ReadonlySet<string> = new Set(["crappie"]);
 export const PAPER_TEAR_SEC = 0.45;
-/** Carp make one long run straight after the hook. */
-export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp"]);
+/** Carp and salmon make one long run straight after the hook. */
+export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp", "salmon"]);
 /** How much longer that first run lasts than the carp's other runs. */
 export const FIRST_RUN_LONGER = 1.6;
 /** A leap is in the air this long. */
@@ -308,7 +308,7 @@ export function makeFight(
         sim.jump = (leaper && completedSurges % 2 === 1) || (breacher && completedSurges === 0);
         // A pike that sees the net rolls on the line rather than running.
         sim.roll = roller && sim.lastRun === true && !sim.jump;
-        // A carp's first run is the long one.
+        // A carp's or a salmon's first run is the long one.
         sim.firstRun = longRunner && completedSurges === 0 && !sim.jump && !sim.roll;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
