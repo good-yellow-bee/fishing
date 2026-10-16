@@ -17,6 +17,12 @@ function newestAt(book: Logbook): string {
   return catchesNewestFirst(book)[0]?.caughtAt ?? "";
 }
 
+/** Fish in this browser's book that the file doesn't have: what replacing it with the file would drop. */
+function lostOnLoad(here: Logbook, file: Logbook): number {
+  const kept = new Set(file.catches.map((entry) => entry.id));
+  return here.catches.filter((entry) => !kept.has(entry.id)).length;
+}
+
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
   const newest = newestAt(book);
@@ -63,7 +69,7 @@ export function BookFile() {
     setPending(null);
     loadButton.current?.focus();
   };
-  const [notice, setNotice] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
+  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string } | null>(null);
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
@@ -122,7 +128,7 @@ export function BookFile() {
     saveCopiedAt(loaded);
     setCopiedAt(loaded);
     setPending(null);
-    setNotice({ tone: "ok", text: t("This browser now has the book from that file.") });
+    setNotice({ tone: "loaded", text: t("This browser now has the book from that file.") });
     loadButton.current?.focus();
   };
 
@@ -247,7 +253,9 @@ export function BookFile() {
             )}{" "}
             {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
-            {newestAt(pending.book) < newestAt(storedBook) ? ` ${t("Fish logged here after the file's newest would be lost.")}` : ""}
+            {lostOnLoad(storedBook, pending.book) > 0
+              ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lostOnLoad(storedBook, pending.book) })}`
+              : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
@@ -257,19 +265,22 @@ export function BookFile() {
           </button>
         </p>
       ) : null}
-      {notice ? (
-        <p className={notice.tone === "ok" ? "book-note" : "field-error"} role="status">
-          {messageText(notice.text)}
-          {notice.tone === "ok" && canUndoLoad ? (
-            <>
-              {" "}
-              <button type="button" className="text-button" onClick={onUndoLoad}>
-                {t("Undo")}
-              </button>
-            </>
-          ) : null}
-        </p>
-      ) : null}
+      {/* Always there, so a screen reader hears each new notice as it changes. */}
+      <div role="status">
+        {notice ? (
+          <p className={notice.tone === "bad" ? "field-error" : "book-note"}>
+            {messageText(notice.text)}
+            {notice.tone === "loaded" && canUndoLoad ? (
+              <>
+                {" "}
+                <button type="button" className="text-button" onClick={onUndoLoad}>
+                  {t("Undo")}
+                </button>
+              </>
+            ) : null}
+          </p>
+        ) : null}
+      </div>
     </footer>
   );
 }

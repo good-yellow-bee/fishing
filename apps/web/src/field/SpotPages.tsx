@@ -201,7 +201,7 @@ function SpotForm() {
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [bestConditions, setBestConditions] = useState(existing?.bestConditions ?? "");
   const [place, setPlace] = useState(existing?.place ? `${existing.place.lat}, ${existing.place.lng}` : "");
-  const [locating, setLocating] = useState<"idle" | "busy" | "failed">("idle");
+  const [locating, setLocating] = useState<"idle" | "busy" | "found" | "failed">("idle");
   const canLocate = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [error, setError] = useState("");
   // Two waters with one name split their fish and outings; point at the one already in the book.
@@ -297,7 +297,10 @@ function SpotForm() {
               name="place"
               autoComplete="off"
               value={place}
-              onChange={(event) => setPlace(event.target.value)}
+              onChange={(event) => {
+                setPlace(event.target.value);
+                setLocating("idle");
+              }}
               placeholder="46.85, -94.24"
             />
           </label>
@@ -306,13 +309,18 @@ function SpotForm() {
               <button
                 type="button"
                 className="text-button"
-                disabled={locating === "busy"}
-                onClick={() => {
+                aria-disabled={locating === "busy" ? true : undefined}
+                onClick={(event) => {
+                  if (locating === "busy") return;
+                  const form = event.currentTarget.form;
                   setLocating("busy");
                   navigator.geolocation.getCurrentPosition(
                     (position) => {
                       setPlace(`${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}`);
-                      setLocating("idle");
+                      setLocating("found");
+                      // Filled in by the page rather than typed, so the form's own clearing doesn't run.
+                      setError("");
+                      if (form) clearInvalid(form);
                     },
                     () => setLocating("failed"),
                     { enableHighAccuracy: true, timeout: 15000 },
@@ -321,7 +329,9 @@ function SpotForm() {
               >
                 {locating === "busy" ? t("Finding you…") : t("Use where I am")}
               </button>
-              {locating === "failed" ? <span role="status"> {t("The browser didn't give a place.")}</span> : null}
+              <span role="status">
+                {locating === "failed" ? ` ${t("The browser didn't give a place.")}` : locating === "found" ? ` ${t("Place filled in.")}` : ""}
+              </span>
             </p>
           ) : null}
         </div>

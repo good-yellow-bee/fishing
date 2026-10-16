@@ -1,7 +1,8 @@
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { sampleLogbook, shiftDate } from "@stillwater/shared";
+import { localDate, sampleLogbook, shiftDate } from "@stillwater/shared";
+import { formatDay } from "../format";
 import { TackleList } from "./TackleList";
 import { TackleProvider } from "./TackleState";
 
@@ -79,6 +80,6 @@ describe("tackle list", () => {
         </TackleProvider>,
       ),
     );
-    expect([...page.querySelectorAll(".empty button")].map((button) => button.textContent)).toEqual(["Copy the list from Dawn patrol"]);
+    expect([...page.querySelectorAll(".empty button")].map((button) => button.textContent)).toEqual([`Copy the list from Dawn patrol, ${formatDay(localDate(now))}`]);
   });
 });

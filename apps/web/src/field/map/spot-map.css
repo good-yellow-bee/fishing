@@ -4,6 +4,8 @@
   background: #e7d3ae;
   border: 1px solid var(--field-ink);
   box-shadow: inset 0 0 0 5px #f4e7cc, inset 0 0 0 6px var(--field-ink);
+  /* A long label near the edge stays on the sheet instead of pushing the page sideways. */
+  overflow: hidden;
 }
 
 .spot-map-plate {
@@ -200,6 +202,20 @@
 .map-pin-spot-quarry .map-pin-label {
   right: 28px;
   bottom: 26px;
+}
+
+/* The angler's own waters: the label sits right of the pin, or left of it in the east half. */
+.map-pin-own .map-pin-label {
+  left: 26px;
+  top: 14px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-pin-own.map-pin-east .map-pin-label {
+  left: auto;
+  right: 26px;
 }
 
 .map-pin-label small {

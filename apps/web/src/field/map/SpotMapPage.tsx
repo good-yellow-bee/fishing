@@ -123,10 +123,12 @@ function MapPlate() {
 
 function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
   const point = project(place);
+  // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
+  const own = spot.place ? ` map-pin-own${point.x > MAP_WIDTH * 0.6 ? " map-pin-east" : ""}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
-      className={`map-pin map-pin-${spot.id}`}
+      className={own ? `map-pin${own}` : `map-pin map-pin-${spot.id}`}
       style={{
         left: `${(point.x / MAP_WIDTH) * 100}%`,
         top: `${(point.y / MAP_HEIGHT) * 100}%`,
@@ -145,10 +147,9 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
 
 /** Where a spot sits on the sheet: a sample water's own place, or the angler's place for a water inside the frame. */
 function sheetPlace(spot: Spot): SamplePlace | undefined {
-  const sample = placeFor(spot.id);
-  if (sample) return sample;
+  // A place the angler set wins over the sample's, even on a sample water.
   const place = spot.place;
-  if (!place) return undefined;
+  if (!place) return placeFor(spot.id);
   const inside = place.lat <= MAP_FRAME.north && place.lat >= MAP_FRAME.south && place.lng >= MAP_FRAME.west && place.lng <= MAP_FRAME.east;
   return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
 }

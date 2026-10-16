@@ -211,6 +211,7 @@ export const PL_FIELD: PlBook = {
   "Open on a map": "Otwórz na mapie",
   "Place, latitude then longitude (optional)": "Miejsce: szerokość, potem długość geograficzna (opcjonalnie)",
   "Use where I am": "Użyj mojego położenia",
+  "Place filled in.": "Wpisano miejsce.",
   "Finding you…": "Szukam położenia…",
   "The browser didn't give a place.": "Przeglądarka nie podała położenia.",
   "Give the place as latitude, then longitude, like 46.85, -94.24.": "Podaj miejsce jako szerokość, potem długość, np. 46.85, -94.24.",
@@ -233,7 +234,7 @@ export const PL_FIELD: PlBook = {
   "This browser now has the book from that file.": "Ta przeglądarka ma teraz dziennik z tego pliku.",
   "Sample waters are invented. This book stays in this browser.": "Przykładowe łowiska są zmyślone. Ten dziennik zostaje w tej przeglądarce.",
   "This browser: {here}. The file: {there}.": "W tej przeglądarce: {here}. W pliku: {there}.",
-  "Fish logged here after the file's newest would be lost.": "Ryby zapisane tu po najnowszej z pliku przepadłyby.",
+  "Fish here that aren't in the file, and would be lost: {count}.": "Ryby zapisane tu, których nie ma w pliku i które przepadłyby: {count}.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",
   "The book from before the file is back.": "Dziennik sprzed wczytania pliku wrócił.",
   "no fish": "brak ryb",
@@ -329,7 +330,7 @@ export const PL_FIELD: PlBook = {
     "Ten plik ma więcej zdjęć, niż ta przeglądarka powinna przechować. Dziennik został bez zmian.",
   "Name the piece in a few words.": "Nazwij sprzęt w kilku słowach.",
   "That piece is already on this list.": "Ten sprzęt już jest na liście.",
-  "Copy the list from {trip}": "Skopiuj listę z wyprawy „{trip}”",
+  "Copy the list from {trip}, {day}": "Skopiuj listę z wyprawy „{trip}”, {day}",
 
   // Bests
   "Large · {label}": "Okaz · {label}",
