@@ -312,7 +312,7 @@ export function BestsPage() {
                   key: row.month,
                   label: monthName(row.month),
                   count: row.count,
-                  to: findLink(row.month),
+                  to: row.count > 0 ? findLink(row.month) : undefined,
                 }))}
               />
             </section>

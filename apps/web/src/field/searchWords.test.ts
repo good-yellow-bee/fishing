@@ -70,4 +70,9 @@ describe("search words without +", () => {
     expect(found("jezioro biale")).toEqual(found("Jezioro Białe"));
     expect(found("biale").length).toBe(book.catches.length);
   });
+
+  it("takes a size with a + after it as that size and up", () => {
+    expect(ids("pike 20in+")).toEqual(ids("pike + >20in"));
+    expect(ids("pike 20in+").length).toBeGreaterThan(0);
+  });
 });
