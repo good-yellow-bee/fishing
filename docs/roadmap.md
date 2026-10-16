@@ -1388,3 +1388,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR240~~ | ~~Audit 12 fixes~~ (#572) | field | S |
 | ~~BR241~~ | ~~Year goal on Bests~~ (#573) | field | S |
 | ~~BR242~~ | ~~Year goal on the home tile~~ (#574) | field | S |
+| ~~BR243~~ | ~~News 2026-10-16r for field-log features~~ (#575) | field | S |
