@@ -160,6 +160,7 @@ function strikeCall(style: BiteStyle) {
   if (style === "light") return t("A light take, the float just slides under — strike!");
   if (style === "lift") return t("The float lifts and lies flat — strike!");
   if (style === "peck") return t("The pecking turns into a pull — strike!");
+  if (style === "run") return t("It's running off with it — strike!");
   return t("NOW — strike!");
 }
 

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zy";
+export const NEWS_ID = "2026-10-16zz";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A smallmouth bass now runs off with the bait: the float slides away along the top as it goes under. Strike while it's moving.",
   "A bluegill now pecks at the bait in quick little taps before it takes it. Wait for the pecking to turn into a pull, then strike.",
   "A crappie takes the bait rising, so its bite lifts the float and lays it flat instead of pulling it under. Strike on the lift.",
   "When the big shadow round your float starts closing in, get ready: that's the fish coming back for the bait.",

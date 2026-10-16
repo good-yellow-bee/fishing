@@ -131,7 +131,7 @@ import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
-import { biteStyle, LIFT_RISE, LIGHT_PLUNGE, liftTilt } from "../nibblePlan";
+import { biteStyle, LIFT_RISE, LIGHT_PLUNGE, liftTilt, RUN_PLUNGE, runSlide } from "../nibblePlan";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -672,7 +672,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim, ambush, light, lift }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean }) {
+function FightMotion({ phase, sim, ambush, light, lift, run }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean; lift: boolean; run: boolean }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -757,8 +757,8 @@ function FightMotion({ phase, sim, ambush, light, lift }: { phase: ScenePhase; s
       fightView.tug = 0;
       fightView.pump = 0;
       if (phase !== "fight") fightView.leapAge = -1;
-      // A light biter only slides the float under; a lift bite raises it instead.
-      fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : lift ? -LIFT_RISE : 1) : 0;
+      // A light biter only slides the float under; a lift bite raises it instead; a running bite takes it shallower as it slides away.
+      fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : lift ? -LIFT_RISE : run ? RUN_PLUNGE : 1) : 0;
     }
 
     // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
@@ -1343,6 +1343,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   }, []);
   const dipped = isFighting(phase);
   const lifting = species !== null && biteStyle(species.id) === "lift";
+  const running = species !== null && biteStyle(species.id) === "run";
 
   useEffect(() => {
     return () => {
@@ -1553,6 +1554,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     }
     if (phase === "fight" && fightView.reeling) target.y += retrieveHop(fightView.pump, true, fightView.surge);
     if (dipped && fightView.plunge !== 0) target.y -= fightView.plunge;
+    // A running bite slides the float off along the top as it pulls it down.
+    if (phase === "hookset" && running) target.x += runSlide(fightView.plunge);
     if (dipped) target.y = clearFightLine(target.y, target.x, target.z);
     if (phase === "hookset" && !lifting) target.y -= strikeDunk(phase, fightView.biteAge);
     if (lure.current && !flying) {
@@ -2153,7 +2156,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} light={species !== null && biteStyle(species.id) === "light"} lift={species !== null && biteStyle(species.id) === "lift"} />
+      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} light={species !== null && biteStyle(species.id) === "light"} lift={species !== null && biteStyle(species.id) === "lift"} run={species !== null && biteStyle(species.id) === "run"} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
