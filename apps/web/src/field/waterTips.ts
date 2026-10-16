@@ -1,9 +1,18 @@
-import { biteTimes, catchesForSpot, lakeSeason, lureTally, type BiteTime, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lakeSeason, lureTally, waterTempTally, type BiteTime, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type WaterTempTally } from "@stillwater/shared";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
 
-export type WaterTips = { lures: LureTally[]; time: BiteTime | null; sky: Sky | null; season: LakeSeason | null };
+export type WaterReading = { fahrenheit: number; at: string };
+
+export type WaterTips = {
+  lures: LureTally[];
+  time: BiteTime | null;
+  sky: Sky | null;
+  season: LakeSeason | null;
+  temp: WaterTempTally | null;
+  lastTemp: WaterReading | null;
+};
 
 /** The lures that took the most fish on one water, and the time of day that gave the most. */
 export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
@@ -13,7 +22,25 @@ export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   // The time of day most fish came at, when at least two did and no other time ties it.
   const [top, next] = [...biteTimes(book)].sort((a, b) => b.count - a.count);
   const time: BiteTime | null = top && top.count >= 2 && (!next || next.count < top.count) ? top : null;
-  return { lures, time, sky: leadingSky(catches), season: leadingSeason(catches) };
+  return { lures, time, sky: leadingSky(catches), season: leadingSeason(catches), temp: leadingTemp(catches), lastTemp: lastReading(catches) };
+}
+
+/** The band of water temperature most of the fish came in, when at least two noted it and one band clearly leads. */
+function leadingTemp(catches: readonly CatchEntry[]): WaterTempTally | null {
+  const [top, next] = waterTempTally({ spots: [], trips: [], catches: [...catches] }).sort((a, b) => b.count - a.count);
+  if (!top || top.count < 2 || (next && next.count === top.count)) return null;
+  return top;
+}
+
+/** The newest water temperature noted with a fish, and when. */
+export function lastReading(catches: readonly CatchEntry[]): WaterReading | null {
+  let last: WaterReading | null = null;
+  for (const entry of catches) {
+    const fahrenheit = entry.weather?.waterTempF;
+    if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(Date.parse(entry.caughtAt))) continue;
+    if (!last || Date.parse(entry.caughtAt) > Date.parse(last.at)) last = { fahrenheit, at: entry.caughtAt };
+  }
+  return last;
 }
 
 /** The sky most of the fish came under, when at least two noted it and one sky clearly leads. */

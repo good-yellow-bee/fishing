@@ -5,7 +5,9 @@ import { t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { waterTips } from "./waterTips";
 import { thisWeekInPastYears } from "./yearsAgo";
-import { fishCountLabel } from "./format";
+import { fishCountLabel, formatCatchDay } from "./format";
+import { tempText } from "../i18n/content";
+import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { speciesCounts } from "./speciesLink";
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
@@ -23,7 +25,8 @@ function TipLine({ text, name, value, to }: { text: string; name: string; value:
 
 /**
  * "What works here": a water's best lures and busiest time of day, once it has a few fish.
- * Given an outing's day (`on`, YYYY-MM-DD), it also says what the same week gave in earlier years.
+ * Given an outing's day (`on`, YYYY-MM-DD), it also says the last water temperature noted and what the same week gave in
+ * earlier years.
  */
 export function WaterTipsBox({ catches, label, on, within }: { catches: readonly CatchEntry[]; label?: string; on?: string; within?: string }) {
   useT();
@@ -47,6 +50,13 @@ export function WaterTipsBox({ catches, label, on, within }: { catches: readonly
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
         {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} to={find(exactTerm("sky", t(SKY_LABELS[tips.sky])))} /> : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
+        {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}
+        {on && tips.lastTemp ? (
+          <>
+            <br />
+            {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: formatCatchDay(tips.lastTemp.at) })}
+          </>
+        ) : null}
         {pastWeek.length > 0 ? (
           <>
             <br />

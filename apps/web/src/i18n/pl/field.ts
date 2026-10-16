@@ -154,6 +154,8 @@ export const PL_FIELD: PlBook = {
   "{temp} and up": "{temp} i więcej",
   "{from} to {to}": "Od {from} do {to}",
   "Best weather: {sky}": "Najlepsza pogoda: {sky}",
+  "Best water temperature: {temp}": "Najlepsza temperatura wody: {temp}",
+  "Last water temperature noted: {temp} on {day}.": "Ostatnia zapisana temperatura wody: {temp}, {day}.",
   "Best season: {season}": "Najlepsza pora roku: {season}",
   "{n} fish from this water that day are not on this outing.": [
     "{n} ryba z tego łowiska z tego dnia nie jest w tej wyprawie.",
