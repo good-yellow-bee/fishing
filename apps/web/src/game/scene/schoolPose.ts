@@ -19,11 +19,15 @@ export function schoolPose(i: number, time: number): { dx: number; dz: number; h
 /** How far out the big lurking shadow circles the float, and how fast (radians a second). */
 export const LURKER_RADIUS = 1.6;
 export const LURKER_SPEED = 0.22;
+/** How much of its ring the lurking shadow closes in by as it comes for the bait. */
+export const LURKER_CLOSE = 0.75;
 
-/** Where the one big shadow of a fish still about the bank sits round the float: a wide, slow ring, well outside the school's. */
-export function lurkerPose(time: number): { dx: number; dz: number; heading: number } {
+/** Where the one big shadow of a fish still about the bank sits round the float: a wide, slow ring, well outside the school's.
+ * close (0 to 1) tightens the ring as the fish comes in to take the bait. */
+export function lurkerPose(time: number, close = 0): { dx: number; dz: number; heading: number } {
   const angle = time * LURKER_SPEED;
-  const dx = Math.sin(angle) * LURKER_RADIUS;
-  const dz = Math.cos(angle) * LURKER_RADIUS * 0.8;
+  const radius = LURKER_RADIUS * (1 - LURKER_CLOSE * Math.min(1, Math.max(0, close)));
+  const dx = Math.sin(angle) * radius;
+  const dz = Math.cos(angle) * radius * 0.8;
   return { dx, dz, heading: angle + Math.PI / 2 };
 }

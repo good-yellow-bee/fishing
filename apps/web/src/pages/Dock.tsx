@@ -699,6 +699,7 @@ export function DockPage() {
           nibble={game.nibble}
           schooled={game.schooled}
           lurking={game.lurking}
+          lurkerCloseInMs={game.lurkerCloseInMs}
           hour={hour}
           sky={sky}
           season={season}

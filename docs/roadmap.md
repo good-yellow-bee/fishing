@@ -1180,7 +1180,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT135~~ | ~~News card for the big lure tempting a waiting fish back~~ (#712) | ui | S |
 | ~~GT136~~ | ~~While a fish that got away, or a hunter, is still about the bank, one big shadow circles wide and slow round the float as you wait there~~ (#714) | scene | S |
 | ~~GT137~~ | ~~News card for the big shadow round the float~~ (#716) | ui | S |
-| GT138 | Lift the circling shadow above the water so it shows | ui | S |
+| ~~GT138~~ | ~~Lift the circling shadow above the water so it shows~~ (#720) | ui | S |
+| GT139 | When the fish still about the bank is the one coming to bite, its shadow closes in on the float over the wait; news card | scene | S |
 
 ## Risks / open questions for the owner
 

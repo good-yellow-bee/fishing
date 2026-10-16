@@ -270,6 +270,7 @@ export function useFishingGame(
   /** This cast landed in a school; the scene shows it milling round the float while it waits. */
   const [schooled, setSchooled] = useState(false);
   const [lurking, setLurking] = useState(false);
+  const [lurkerCloseInMs, setLurkerCloseInMs] = useState(0);
   const [hint, setHint] = useState(() => t("Walk to the water."));
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
@@ -446,6 +447,8 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1);
+    // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
+    setLurkerCloseInMs(lost.again ? wait : 0);
     const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
     const stolen = stealsBait(species.id, nibbles.length);
     const arm = () => {
@@ -1035,6 +1038,7 @@ export function useFishingGame(
     nibble,
     schooled,
     lurking,
+    lurkerCloseInMs,
     hotspot,
     sim: simRef,
     performance: performanceRef,
