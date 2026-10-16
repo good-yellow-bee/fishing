@@ -164,14 +164,31 @@ export function searchParts(book: Logbook, needle: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * One part of a search; words that find nothing together ("cedar pike") are then each taken as a part, so the fish
+ * every word finds come back, as "cedar + pike" would. Sizes, temperatures and exact terms are left whole.
+ */
+function findWords(book: Logbook, part: string, t: (text: string) => string): CatchEntry[] {
+  const found = findOne(book, part, t);
+  const words = part.split(/\s+/).filter(Boolean);
+  if (found.length > 0 || words.length < 2 || /[\d<>=:"“”„]/.test(part)) return found;
+  let matched = findOne(book, words[0]!, t);
+  for (const word of words.slice(1)) {
+    if (matched.length === 0) break;
+    const hit = new Set(findOne(book, word, t).map((entry) => entry.id));
+    matched = matched.filter((entry) => hit.has(entry.id));
+  }
+  return matched;
+}
+
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
-function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+export function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const parts = searchParts(book, needle);
   // "pike +" while the second part is still being typed: just the first.
-  if (parts.length < 2) return parts[0] ? findOne(book, parts[0], t) : [];
-  let found = findOne(book, parts[0]!, t);
+  if (parts.length < 2) return parts[0] ? findWords(book, parts[0], t) : [];
+  let found = findWords(book, parts[0]!, t);
   for (const part of parts.slice(1)) {
-    const hit = new Set(findOne(book, part, t).map((entry) => entry.id));
+    const hit = new Set(findWords(book, part, t).map((entry) => entry.id));
     found = found.filter((entry) => hit.has(entry.id));
   }
   return found;
