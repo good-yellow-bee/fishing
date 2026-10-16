@@ -1439,3 +1439,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR280~~ | ~~Audit 17 fixes: written units, repeat save-and-another, Polish rename~~ (#621) | field | S |
 | ~~BR281~~ | ~~Nearest water from the phone's location on the catch form~~ (#622) | field | S |
 | ~~BR282~~ | ~~News card for the catch form changes~~ (#624) | field | S |
+| ~~BR283~~ | ~~Lost fish and missed strikes on an outing~~ (#625) | field | S |
