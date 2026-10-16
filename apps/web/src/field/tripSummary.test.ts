@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { catchSummary, speciesSummary, spotSummary, tripSummary } from "./tripSummary";
+import { catchSummary, speciesSummary, spotSummary, tripSummary, yearSummary } from "./tripSummary";
 
 const trip = { id: "trip-dawn", date: "2026-10-10", spotId: "spot-cedar", title: "Dawn patrol", note: "Fog until eight." };
 const fish = (id: string, at: string, released = false): CatchEntry => ({
@@ -88,5 +88,29 @@ describe("species summary", () => {
 
   it("leaves out the day span for a single fish", () => {
     expect(speciesSummary("Largemouth bass", [fish("a", "2026-09-10T12:00:00.000Z")], [])).toBe("Largemouth bass\n1 fish\nHeaviest: 3.2 lb\nLures that took the most: Texas-rig worm (1)");
+  });
+});
+
+describe("year summary", () => {
+  it("counts the year's fish, days and goal, and names its sizes, waters and lures", () => {
+    const book = {
+      spots: [{ id: "spot-cedar", name: "Cedar Bend", waterType: "lake" as const, notes: "", bestConditions: "" }],
+      trips: [trip],
+      catches: [
+        fish("a", "2026-10-10T12:00:00.000Z"),
+        { ...fish("b", "2026-06-10T12:00:00.000Z"), species: "Bluegill", measure: { kind: "length" as const, inches: 8 } },
+        fish("old", "2025-06-10T12:00:00.000Z"),
+      ],
+    };
+    expect(yearSummary(book, "2026", "2026-10-15", 40).split("\n")).toEqual([
+      "2026 in the book",
+      "2 fish · 2 species",
+      "Days on the water in 2026: 2",
+      "2 of 40 fish in 2026",
+      "Longest: Bluegill, 8 in",
+      "Heaviest: Largemouth bass, 3.2 lb",
+      "Waters: Cedar Bend (2)",
+      "Lures that took the most: Texas-rig worm (2)",
+    ]);
   });
 });
