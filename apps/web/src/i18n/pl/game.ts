@@ -383,6 +383,7 @@ export const PL_GAME: PlBook = {
   "It feels heavy — could be a trophy!": "Ciężka — może być trofeum!",
   "Not done yet — let go, one more run!": "To jeszcze nie koniec — puść, jeszcze jeden odjazd!",
   "It looked like a trophy.": "Wyglądało to na trofeum.",
+  "A big lure tempts it back sooner.": "Duża przynęta szybciej ją zwabi.",
   "It's still about: cast here again.": "Wciąż tu krąży: zarzuć tu jeszcze raz.",
   "A largemouth bass grabbed your bluegill! {line}. Ease off when it runs.": "Bass wielkogębowy chwycił twojego bassa niebieskoskrzelego! {line}. Odpuść, gdy odjeżdża.",
   "A walleye grabbed your perch! {line}. Ease off when it runs.": "Sandacz chwycił twojego okonia! {line}. Odpuść, gdy odjeżdża.",

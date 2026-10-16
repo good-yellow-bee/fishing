@@ -35,7 +35,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { biteStyle, FOLLOWERS, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -433,7 +433,7 @@ export function useFishingGame(
     const mercyNow = mercyRef.current;
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
     // The fish that broke off here may come back, at the same weight.
-    const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random());
+    const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random(), favorsLargeFish(lureRef?.current ?? ""));
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
     followedRef.current = !!lost.again?.follow;
@@ -794,7 +794,9 @@ export function useFishingGame(
     let wasLifting = false;
     let prevSurge: SurgeState = 0;
     /** After a loss, a fish that may bite again is said to be still about. */
-    const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}` : "");
+    // On a small lure, say a big one tempts it back sooner.
+    const tempt = () => (lureRef && !favorsLargeFish(lureRef.current) ? ` ${t("A big lure tempts it back sooner.")}` : "");
+    const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}${tempt()}` : "");
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
       try {
@@ -934,7 +936,7 @@ export function useFishingGame(
             const follow = followRef.current;
             followRef.current = null;
             if (follow && !gotAwayRef.current) gotAwayRef.current = { spot: spotRef.current, species: follow.species, weight: follow.weight, casts: AGAIN_CASTS, follow: true };
-            const followed = follow && gotAwayRef.current?.follow ? ` ${followCall(follow.species)} ${t("It's still about: cast here again.")}` : "";
+            const followed = follow && gotAwayRef.current?.follow ? ` ${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
             setHint(
               (schoolRef.current
                 ? `${castHint("landed")} ${t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
@@ -989,7 +991,7 @@ export function useFishingGame(
       cancelAnimationFrame(frame);
       fx.drag.stop();
     };
-  }, [beginFight, resetToIdle]);
+  }, [beginFight, lureRef, resetToIdle]);
 
   useEffect(() => clearTimers, []);
 

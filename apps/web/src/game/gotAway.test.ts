@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { AGAIN_CASTS, AGAIN_ODDS, castForGotAway, gotAwayAfterLoss } from "./gotAway";
+import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, gotAwayAfterLoss } from "./gotAway";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const perch = FISH.find((fish) => fish.id === "perch")!;
@@ -14,6 +14,13 @@ describe("the one that got away", () => {
   it("can bite again at its own bank, same fish and weight", () => {
     const lost = gotAwayAfterLoss(pike, 9.2, "reeds");
     expect(castForGotAway(lost, "reeds", AGAIN_ODDS - 0.01)).toEqual({ again: lost, next: null });
+  });
+
+  it("comes back sooner to a big lure", () => {
+    const lost = gotAwayAfterLoss(pike, 9.2, "reeds");
+    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01).again).toBeNull();
+    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01, true).again).toBe(lost);
+    expect(castForGotAway(lost, "reeds", BIG_LURE_AGAIN_ODDS, true).again).toBeNull();
   });
 
   it("waits through casts elsewhere or misses, then moves off", () => {
