@@ -3,6 +3,7 @@ import { NavLink, useLocation, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
 import { SavedNote } from "./SavedNote";
 import { UndoBar } from "./UndoBar";
+import { useFieldTheme } from "./fieldTheme";
 
 function FishMark() {
   return (
@@ -39,6 +40,7 @@ function FieldLinks() {
 export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
+  const theme = useFieldTheme();
   const { pathname } = useLocation();
   useEffect(() => {
     // Each page's tab and history entry carries its own heading ("Northern pike · Stillwater"); home keeps the
@@ -92,7 +94,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
   }, [pathname, how]);
 
   return (
-    <div className="field">
+    <div className="field" data-theme={theme === "device" ? undefined : theme}>
       <aside className="field-rail">
         <NavLink to="/" className="field-brand" end>
           <FishMark />

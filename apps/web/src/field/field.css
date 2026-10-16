@@ -1195,8 +1195,29 @@ button.field-primary:disabled {
 }
 
 /* After dark on the water: the same book, read from a dim screen. On screen only, so a printed page keeps dark ink on white paper. */
+/* Dark when the device is, unless the page is held light; and dark whenever it is held dark. */
 @media screen and (prefers-color-scheme: dark) {
-  .field {
+  .field:not([data-theme="light"]) {
+    --field-ink: #ece1cc;
+    --field-muted: #b8a78c;
+    --field-paper: #25201b;
+    --field-card: #2d2721;
+    --field-line: #4b4033;
+    --field-rust: #e6957a;
+    --field-water: #93b8c7;
+    --field-input: #171411;
+    --field-input-line: #8a7356;
+    --field-stamp-lake: #93b8c7;
+    --field-stamp-river: #7fc3cf;
+    --field-stamp-pond: #8fc4a2;
+    --field-stamp-creek: #d2b47e;
+    --field-stamp-reservoir: #d9a07e;
+    color-scheme: dark;
+  }
+}
+
+@media screen {
+  .field[data-theme="dark"] {
     --field-ink: #ece1cc;
     --field-muted: #b8a78c;
     --field-paper: #25201b;
@@ -1217,6 +1238,10 @@ button.field-primary:disabled {
 
 /* On paper: just the sheet, ink on white, without the shell, the bars or the buttons. */
 @media print {
+  .theme-choice {
+    display: none;
+  }
+
   /* Keep the filled badges filled, or their light figures vanish into the paper. */
   .field * {
     -webkit-print-color-adjust: exact;
