@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zze";
+export const NEWS_ID = "2026-10-16zzf";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Search now finds Polish names typed without accents, and “30in+” works as a size. Species and water pages show which months your fish came in, and a fish opened from a search, a species, an outing or a water steps through that list. The catch form asks before a size far past your best becomes a record in the wrong unit.",
   "A brook or rainbow trout now snatches the bait and lets go fast, so strike quick. The field guide says so once you've landed one.",
   "A perch now gulps the bait down and holds on, so you get a moment longer to strike. The field guide says so once you've landed one.",
   "Hook a bluegill and it turns its flat side to you and circles, so it comes in slowly until it tires. The fight card says so.",
