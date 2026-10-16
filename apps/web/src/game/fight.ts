@@ -90,6 +90,9 @@ export const PAPER_TEAR_SEC = 0.45;
 /** Pound for pound a smallmouth bass fights hardest: it tires this much slower than its size says. */
 export const SCRAPPERS: ReadonlySet<string> = new Set(["smallmouth-bass"]);
 export const SCRAPPER_TIRE = 0.8;
+/** A bluegill turns its flat side to the pull and circles: while it's fresh, reeling brings it in this much slower. */
+export const BROADSIDERS: ReadonlySet<string> = new Set(["bluegill"]);
+export const BROADSIDE_REEL = 0.7;
 /** Carp and salmon make one long run straight after the hook. */
 /** Brook trout dart: halfway through each run they cut back the other way, so a turn has to switch sides. */
 export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
@@ -351,6 +354,7 @@ export function makeFight(
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
   const scrapper = SCRAPPERS.has(species.id);
+  const broadsider = BROADSIDERS.has(species.id);
   let sulkUntil = -Infinity;
   let slackSec = 0;
   const softMouth = SOFT_MOUTHS.has(species.id);
@@ -496,7 +500,7 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
