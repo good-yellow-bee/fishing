@@ -68,6 +68,11 @@ export function spareSnapshots(book: Logbook, photos: CatchPhotoMap, auto: reado
     .map((shot) => shot.id);
 }
 
+/** The game's snapshots in this book that may go to make room, oldest first, for the Photos page to offer. */
+export function spareGameSnapshots(book: Logbook, photos: CatchPhotoMap): string[] {
+  return spareSnapshots(book, photos, readAutoPhotos(), "");
+}
+
 /**
  * Pin the scene's snapshot to a catch already in the book. A photo the player
  * chose themselves is never replaced. When the browser is full, the game's

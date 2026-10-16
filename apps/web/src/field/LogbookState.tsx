@@ -50,6 +50,8 @@ type LogbookApi = {
   deleteSpot: (id: string) => boolean;
   deleteTrip: (id: string) => boolean;
   restoreSample: () => boolean;
+  /** Takes these photos off their catches, leaving the fish. */
+  removePhotos: (ids: readonly string[]) => boolean;
   /** Why the last delete, filing, sample or undo didn't save, until the next one or a dismiss. */
   saveError: string | null;
   dismissSaveError: () => void;
@@ -248,6 +250,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       saveError,
       dismissSaveError: () => setSaveError(null),
       dismissUndo: () => setUndo(null),
+      removePhotos: (ids) => {
+        const result = persist(book, ids.reduce(withoutCatchPhoto, photos));
+        setSaveError(result.ok ? null : result.message);
+        return result.ok;
+      },
       // The sample takes the whole book's place, so it can be undone like a delete.
       restoreSample: () => remove("sample", sampleLogbook(new Date())),
       photos,

@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { CATCH_PHOTO_STORE_MAX_CHARS, catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
 import { formatDay } from "./format";
@@ -26,9 +28,18 @@ function photoMonths(entries: readonly CatchEntry[]) {
 
 /** Every photo in the book as a wall of pictures, each opening its catch. */
 export function PhotosPage() {
-  const { book, photoFor } = useLogbook();
+  const { book, storedBook, photos, photoFor, removePhotos } = useLogbook();
   useT();
   const { shown, showMore, box } = useShowMore();
+  const [made, setMade] = useState<number | null>(null);
+  // How full the room kept for photos is, and what of the game's could go to free some.
+  const fill = Math.min(100, Math.round((JSON.stringify(photos).length / CATCH_PHOTO_STORE_MAX_CHARS) * 100));
+  const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
+  const clear = spare.slice(0, 10);
+  const makeRoom = () => {
+    if (!window.confirm(t("Remove the lake's {count} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.", { count: clear.length }))) return;
+    if (removePhotos(clear)) setMade(clear.length);
+  };
   const all = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const { visible, more } = catchPage(all, shown);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
@@ -44,6 +55,20 @@ export function PhotosPage() {
           <p className="lede">{t("Every fish in the book with a picture, newest first.")}</p>
         </div>
       </header>
+      {all.length > 0 ? (
+        <p className="meta photo-room">
+          {t("Photos fill {percent}% of the room this browser keeps for them.", { percent: fill })}
+          {clear.length > 0 ? (
+            <>
+              {" "}
+              <button type="button" className="text-button" onClick={makeRoom}>
+                {t("Make room")}
+              </button>
+            </>
+          ) : null}
+          <span role="status">{made !== null ? ` ${t("Snapshots removed: {count}.", { count: made })}` : ""}</span>
+        </p>
+      ) : null}
       {all.length === 0 ? (
         <p className="empty">{t("No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.")}</p>
       ) : (

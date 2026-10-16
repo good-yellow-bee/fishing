@@ -239,6 +239,11 @@ export const PL_FIELD: PlBook = {
   "The book from before the file is back.": "Dziennik sprzed wczytania pliku wrócił.",
   "Fish added from the file: {count}.": "Dodane ryby z pliku: {count}.",
   "Length and weight": "Długość i waga",
+  "Remove the lake's {count} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.":
+    "Usunąć {count} najstarszych zdjęć z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
+  "Photos fill {percent}% of the room this browser keeps for them.": "Zdjęcia zajmują {percent}% miejsca, które ta przeglądarka dla nich trzyma.",
+  "Make room": "Zrób miejsce",
+  "Snapshots removed: {count}.": "Usunięte zdjęcia: {count}.",
   "Your other fish of this kind suggest about {size}.": "Twoje inne ryby tego gatunku podpowiadają około {size}.",
   "Add only the new fish ({count})": "Dodaj tylko nowe ryby ({count})",
   "no fish": "brak ryb",
