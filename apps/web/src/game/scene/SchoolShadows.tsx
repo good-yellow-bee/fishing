@@ -28,9 +28,9 @@ export function SchoolShadows({ phase, schooled, bobber }: Props) {
   return (
     <group ref={group} visible={false}>
       {Array.from({ length: SCHOOL_SIZE }, (_, i) => (
-        <mesh key={i} scale={[0.07, 0.01, 0.16]} renderOrder={2}>
+        <mesh key={i} scale={[0.12, 0.012, 0.3]} renderOrder={2}>
           <sphereGeometry args={[1, 10, 6]} />
-          <meshBasicMaterial color="#06141c" transparent opacity={0.45} depthWrite={false} toneMapped={false} />
+          <meshBasicMaterial color="#06141c" transparent opacity={0.6} depthWrite={false} toneMapped={false} />
         </mesh>
       ))}
     </group>
