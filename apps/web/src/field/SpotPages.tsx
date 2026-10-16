@@ -147,7 +147,7 @@ export function SpotPage() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} />
+      <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
       {catches.length > 0 ? (
         <CopySummary
           text={() => spotSummary(spot, fishedOutings, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}

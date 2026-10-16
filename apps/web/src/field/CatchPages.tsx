@@ -39,6 +39,8 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { sunMark, type SunMark } from "./sunLight";
+import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
@@ -924,6 +926,18 @@ function CatchForm() {
   );
 }
 
+/** "40 min after sunrise", "1 h 5 min before sunset", "At sunrise", or "In daylight" / "After dark" away from both. */
+function sunMarkText(mark: SunMark): string {
+  if (!mark.edge) return mark.light === "day" ? t("In daylight") : t("After dark");
+  const away = Math.abs(mark.minutes);
+  if (away < 3) return mark.edge === "rise" ? t("At sunrise") : t("At sunset");
+  const hours = Math.floor(away / 60);
+  const minutes = away % 60;
+  const time = hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{h} h", { h: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+  if (mark.edge === "rise") return mark.minutes < 0 ? t("{time} before sunrise", { time }) : t("{time} after sunrise", { time });
+  return mark.minutes < 0 ? t("{time} before sunset", { time }) : t("{time} after sunset", { time });
+}
+
 /** Keyed by the fish, so stepping to the next one starts fresh: no open delete question or photo error carried over. */
 export function CatchPage() {
   const { catchId = "" } = useParams();
@@ -962,6 +976,9 @@ function CatchView() {
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
   const caughtDay = localDate(new Date(entry.caughtAt));
+  // Where the fish's time sat against the sun at its water, for a water with a place.
+  const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
+  const sun = place ? sunMark(entry.caughtAt, place) : null;
   const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
@@ -1055,6 +1072,12 @@ function CatchView() {
               {` · ${t(WIND_LABELS[entry.weather.wind])}`}
               {entry.weather.waterTempF === undefined ? null : ` · ${tempText(entry.weather.waterTempF)}`}
             </p>
+          </>
+        ) : null}
+        {sun ? (
+          <>
+            <span className="eyebrow">{t("Sun")}</span>
+            <p>{sunMarkText(sun)}</p>
           </>
         ) : null}
         <span className="eyebrow">{t("Moon")}</span>
