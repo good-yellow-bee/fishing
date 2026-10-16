@@ -405,6 +405,11 @@ function CatchForm() {
     }
     // The waiting draft, if any, stays for later; this one is saved.
     if (!waiting) dropKeptDraft();
+    // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now.
+    if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }), savedState("catch"));
+      return;
+    }
     navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch"));
   };
 
@@ -755,9 +760,17 @@ function CatchForm() {
             {messageText(error)}
           </p>
         ) : null}
-        <button type="submit" className="field-primary inline" disabled={reducing}>
-          {existing ? t("Save changes") : t("Save to the book")}
-        </button>
+        {/* Stays on screen while a long form scrolls, so the save is always a thumb away. */}
+        <div className="form-save">
+          <button type="submit" className="field-primary inline" disabled={reducing}>
+            {existing ? t("Save changes") : t("Save to the book")}
+          </button>
+          {existing ? null : (
+            <button type="submit" name="another" className="text-button" disabled={reducing}>
+              {t("Save and log another")}
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

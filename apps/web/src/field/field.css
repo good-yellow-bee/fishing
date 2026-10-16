@@ -620,6 +620,26 @@ button.field-primary:disabled {
   resize: vertical;
 }
 
+/* The save buttons ride along the bottom of the window while the form scrolls. */
+.form-save {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0 -8px;
+  padding: 8px;
+  background: var(--field-paper);
+  border-top: 1px solid var(--field-input-line);
+}
+
+/* A "Fish saved." line after Save and log another sits above the save buttons, not over them. */
+.field:has(.form-save) .undo-bar {
+  bottom: 92px;
+}
+
 .choice-row {
   display: flex;
   gap: 8px;
@@ -772,6 +792,15 @@ button.field-primary:disabled {
 
   .undo-bar {
     bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  /* Above the tab bar, which is fixed to the bottom of a phone screen. */
+  .form-save {
+    bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+
+  .field:has(.form-save) .undo-bar {
+    bottom: calc(150px + env(safe-area-inset-bottom));
   }
 
   .field-tab {
