@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isPerfectCast, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -53,6 +53,14 @@ describe("level 11 and 12 strike and cast help", () => {
     expect(wide.max - wide.min).toBeGreaterThan(narrow.max - narrow.min);
     expect(isPerfectCast(wide.max - 0.001, 1, 12)).toBe(true);
     expect(isPerfectCast(wide.max - 0.001, 1)).toBe(false);
+  });
+});
+
+describe("a light hook", () => {
+  it("comes only from a strike in the last quarter of the window", () => {
+    expect(isLightHook(999 * LIGHT_HOOK_SHARE, 999)).toBe(false);
+    expect(isLightHook(1000 * LIGHT_HOOK_SHARE + 1, 1000)).toBe(true);
+    expect(isLightHook(200, 1000)).toBe(false);
   });
 });
 

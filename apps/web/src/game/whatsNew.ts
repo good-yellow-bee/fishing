@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zzm";
+export const NEWS_ID = "2026-10-16zzn";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Strike late in the bite and the hook only just catches: keep that fish out of the red, or the hook pulls out like a soft mouth's. The fight card says so.",
   "Search now finds Polish names typed without accents, and “30in+” works as a size. Species and water pages show which months your fish came in, and a fish opened from a search, a species, an outing or a water steps through that list. The catch form asks before a size far past your best becomes a record in the wrong unit.",
   "Hook a perch and it fights hard for a moment, then gives up fast. The fight card says so.",
   "A landlocked salmon now rolls on the bait at the top, with a bigger splash than other fish. The field guide says so once you've landed one.",

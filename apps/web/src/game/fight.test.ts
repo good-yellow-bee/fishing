@@ -1237,6 +1237,21 @@ describe("a whitefish's soft mouth", () => {
     expect(now).toBeLessThanOrEqual(PAPER_TEAR_SEC * 1000 + 100);
   });
 
+  it("tears out of any fish hooked light", () => {
+    const runtime = makeFight(fish("perch"), 0.4, 5, () => 0.5);
+    runtime.sim.lightHook = true;
+    let outcome: FightOutcome = "fighting";
+    let now = 0;
+    for (; outcome === "fighting" && now < 3000; now += 50) {
+      runtime.sim.surge = 0;
+      runtime.sim.tension = Math.max(runtime.sim.tension, RED_TENSION + 0.05);
+      outcome = runtime.step(now, 0.05, true);
+    }
+    expect(outcome).toBe("escaped");
+    expect(runtime.sim.tornOut).toBe(true);
+    expect(now).toBeLessThanOrEqual(TEAR_SEC * 1000 + 100);
+  });
+
   it("is a whitefish's trait only", () => {
     const { runtime, outcome } = reelInTheRed("walleye", 3);
     expect(runtime.sim.tornOut).toBeFalsy();

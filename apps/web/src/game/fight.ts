@@ -36,6 +36,8 @@ export type FightSim = {
   tearing?: boolean;
   /** The hook tore out of a soft mouth: why the fish got away. */
   tornOut?: boolean;
+  /** Hooked light on a late strike: reeled in the red, the hook pulls out as it would from a soft mouth. */
+  lightHook?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
   /** A catfish pumped once off the bottom: it has started to lift, and one more pump brings it up. */
@@ -531,8 +533,8 @@ export function makeFight(
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
 
-    // Reeling a soft mouth in the red tears the hook hole wider until it pulls free.
-    if (softMouth && reeling && sim.tension >= RED_TENSION) tearSec += dtSec;
+    // Reeling a soft mouth, or a fish hooked light, in the red tears the hook hole wider until it pulls free.
+    if ((softMouth || sim.lightHook) && reeling && sim.tension >= RED_TENSION) tearSec += dtSec;
     else tearSec = 0;
     sim.tearing = tearSec > 0;
 

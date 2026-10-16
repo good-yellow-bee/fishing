@@ -24,7 +24,7 @@ import {
   type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, makeFight, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -35,7 +35,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isLightHook, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { biteStyle, FOLLOWERS, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -122,6 +122,8 @@ export type Fight = {
   species: FishSpecies;
   weight: number;
   underpowered: boolean;
+  /** Struck late, so the hook only just caught: reeled in the red, it pulls out. */
+  lightHook?: boolean;
   /** What the spot's water does to the fight; open water when left out. */
   water?: FightWater;
   /** A breezy or strong day, when the wind bellies a slack line. */
@@ -344,12 +346,13 @@ export function useFishingGame(
     setHint(moved ? movedHint(moved.spot) : message);
   }, []);
 
-  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number }) => {
+  const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number; windowMs: number }) => {
     const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
+    const lightHook = strike !== undefined && !solid && isLightHook(strike.elapsedMs, strike.windowMs);
     const underpowered = !canLand(current, species);
     const water = fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
-    const next = { species, weight, underpowered, water, windy };
+    const next = { species, weight, underpowered, water, windy, lightHook };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -377,6 +380,8 @@ export function useFishingGame(
         followRef.current = follower ? makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)) : null;
       }
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
+      // A late strike only just catches, so the hook can pull out like a soft mouth's.
+      runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
       const again = strike && againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : t("It's the one that got away!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
@@ -392,6 +397,8 @@ export function useFishingGame(
           ? t("{line}. Ease off when it runs.", { line })
           : solid
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
+            : lightHook
+              ? t("Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.", { time: seconds(strike.elapsedMs), line })
             : fightWind(windRef.current)
               ? t("Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.", {
                   time: seconds(strike.elapsedMs),
@@ -413,7 +420,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current)) };
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current)), windowMs: ms };
     fx.splash();
     fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile, strike);
@@ -977,7 +984,10 @@ export function useFishingGame(
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
             const trophy = lostTrophy(current.species, current.weight);
-            if (sim.tornOut) {
+            if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
+              setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
+              resetToIdle(t("Hooked light — strike sooner, and ease off as soon as the bar turns red.") + stillAbout());
+            } else if (sim.tornOut) {
               setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Soft mouth — ease off as soon as the bar turns red.") + stillAbout());
             } else {
