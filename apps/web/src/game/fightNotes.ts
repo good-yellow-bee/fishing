@@ -11,6 +11,7 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (notes.perfectCast) parts.push(t("Perfect cast"));
   if (notes.hookedSolid) parts.push(t("Hooked solid"));
   if (notes.secondTake) parts.push(t("On the second take"));
+  if (notes.gotAway) parts.push(t("The one that got away"));
   if (notes.grabbed) parts.push(grabNote(notes.grabbed));
   if (notes.turnedRuns > 0) parts.push(tn(notes.turnedRuns, "Turned {n} run", "Turned {n} runs"));
   if (notes.clearOf === "weeds") parts.push(t("Kept it out of the weeds"));

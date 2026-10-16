@@ -37,6 +37,11 @@ vi.mock("./grab", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./grab")>();
   return { ...actual, grabberFor: vi.fn(() => null) };
 });
+// The fish that got away comes back only when a test says so.
+vi.mock("./gotAway", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./gotAway")>();
+  return { ...actual, castForGotAway: vi.fn(() => ({ again: null, next: null })) };
+});
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
@@ -55,6 +60,7 @@ import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useF
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { grabberFor } from "./grab";
+import { castForGotAway } from "./gotAway";
 
 const profile: Profile = {
   userId: "test", displayName: "Test", points: 0, lifetimePoints: 0, strength: 5, accuracy: 3, patience: 1,
@@ -95,6 +101,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       <i data-testid="broke">{game.outcome?.kind === "broke" ? game.outcome.message : ""}</i>
       <i data-testid="second-take">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.secondTake) : ""}</i>
       <i data-testid="grabbed">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.grabbed) : ""}</i>
+      <i data-testid="got-away">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.gotAway) : ""}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
@@ -254,6 +261,28 @@ describe("useFishingGame lost fight", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("golden-shiner");
+  });
+
+  it("brings a fish that broke off back at the same weight, and says so", () => {
+    const surface = mount();
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    vi.mocked(pickBite).mockReturnValueOnce(pike);
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("idle:broke");
+    const lost = vi.mocked(castForGotAway).mock.calls.length;
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    const waiting = vi.mocked(castForGotAway).mock.calls[lost]?.[0];
+    expect(waiting).toMatchObject({ spot: "dock", species: { id: "pike" } });
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toBe(`pike|${waiting!.weight}`);
+    expect(hint()).toContain("It's the one that got away!");
+    step.mockReturnValueOnce("landed");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("true");
   });
 
   it("says why the line broke and what to do next time", () => {
