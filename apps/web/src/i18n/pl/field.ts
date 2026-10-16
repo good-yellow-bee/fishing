@@ -74,6 +74,7 @@ export const PL_FIELD: PlBook = {
   "Back to catches": "Wróć do połowów",
   "More catches": "Więcej połowów",
   "Log another like this": "Zapisz kolejną taką rybę",
+  "Save and log another": "Zapisz i dodaj kolejną",
   "Book record": "Rekord dziennika",
   "Best of its kind": "Najlepszy w gatunku",
   "Heaviest fish in the book": "Najcięższa ryba w dzienniku",
