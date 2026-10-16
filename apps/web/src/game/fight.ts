@@ -20,6 +20,8 @@ export type FightSim = {
   turning?: boolean;
   /** The run it makes on seeing the net, while that run lasts. */
   lastRun?: boolean;
+  /** A pike's last run is a roll on the line instead, coming and while it lasts. */
+  roll?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
@@ -49,6 +51,10 @@ export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 
 /** Trout, bass and salmon jump: every second run of theirs is a leap. */
 export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "smallmouth-bass", "largemouth-bass", "salmon"]);
+/** Pike roll on the line at the net instead of making a last run. */
+export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
+/** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
+export const ROLL_MS = 900;
 /** A leap is in the air this long. */
 export const JUMP_MS = 750;
 /** Seconds into a leap before a held line costs anything: a prompt bow is always in time. */
@@ -256,6 +262,7 @@ export function makeFight(
   let turnedThisRun = false;
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
+  const roller = ROLLERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
   let sulkUntil = -Infinity;
@@ -275,32 +282,35 @@ export function makeFight(
       if (sim.surge === 0) {
         sim.surge = 1;
         sim.jump = leaper && completedSurges % 2 === 1;
+        // A pike that sees the net rolls on the line rather than running.
+        sim.roll = roller && sim.lastRun === true && !sim.jump;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
         heldThroughLeap = false;
         // A leap gets a longer warning: it is the one mistake that ends the fight outright.
-        nextAt = nowMs + (sim.jump ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
+        nextAt = nowMs + (sim.jump || sim.roll ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
         sim.surge = 2;
-        nextAt = nowMs + (sim.jump ? JUMP_MS : range(pattern.surgeMin, pattern.surgeMax));
+        nextAt = nowMs + (sim.jump ? JUMP_MS : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
       } else {
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
-        if (weedy && turnable && !sim.jump && !turnedThisRun && sim.line > 0) {
+        if (weedy && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks") && turnable && !sim.jump) {
+        if ((weedy || water === "rocks") && turnable && !sim.jump && !sim.roll) {
           if (sim.weeded || rockedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : weedy ? "weeds" : "rocks";
         }
         rockedThisRun = false;
         sim.surge = 0;
         sim.jump = false;
+        sim.roll = false;
         sim.lastRun = false;
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
@@ -324,14 +334,14 @@ export function makeFight(
     }
 
     // A leap goes up, not sideways, so only a run can be turned.
-    sim.turning = turnable && sim.surge === 2 && !sim.jump && steer === -sim.runSide;
+    sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
-    const rocky = water === "rocks" && turnable && !sim.turning;
+    const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
-    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump;
+    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump && !sim.roll;
     sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
@@ -344,12 +354,12 @@ export function makeFight(
       // A sulking fish sits where it is: no line goes out.
       if (!sim.sulk && !sim.weeded) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
-    // A line held tight through a leap loads the rod into the red: the clean bonus goes, but never the fish.
-    if (sim.jump && sim.surge === 2) {
+    // A line held tight through a leap or a roll loads the rod into the red: the clean bonus goes, but never the fish.
+    if ((sim.jump || sim.roll) && sim.surge === 2) {
       jumpAge += dtSec;
       if (reeling && jumpAge > JUMP_GRACE_SEC) {
         sim.tension = Math.max(sim.tension, RED_TENSION);
-        heldThroughLeap = true;
+        if (sim.jump) heldThroughLeap = true;
       }
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);

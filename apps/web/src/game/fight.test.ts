@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -757,5 +757,50 @@ describe("a windy day", () => {
     expect(fightWind("light-west")).toBeUndefined();
     expect(fightWind("calm")).toBeUndefined();
     expect(fightWind(undefined)).toBeUndefined();
+  });
+});
+
+describe("a pike rolling at the net", () => {
+  const atTheNet = (id: string, weight: number) => {
+    const runtime = makeFight(fish(id), weight, 5, () => 0);
+    runtime.step(0, 0, false);
+    runtime.sim.line = LAST_RUN_LINE - 0.01;
+    runtime.step(100, 0, false);
+    let now = 100;
+    while (runtime.sim.surge !== 2) runtime.step((now += 50), 0.05, false);
+    return { runtime, now };
+  };
+
+  it("rolls on the line instead of making a last run, for a short spell", () => {
+    const { runtime, now } = atTheNet("pike", 3);
+    expect(runtime.sim.roll).toBe(true);
+    let t = now;
+    while (runtime.sim.surge === 2) runtime.step((t += 50), 0.05, false);
+    expect(t - now).toBeLessThanOrEqual(ROLL_MS + 50);
+    expect(runtime.sim.roll).toBe(false);
+  });
+
+  it("loads a line held tight through the roll into the red, but not one eased off for it", () => {
+    const held = atTheNet("pike", 3);
+    let t = held.now;
+    for (let i = 0; i < 10; i += 1) held.runtime.step((t += 50), 0.05, true);
+    expect(held.runtime.performance.peakTension).toBeGreaterThanOrEqual(RED_TENSION);
+    const eased = atTheNet("pike", 3);
+    t = eased.now;
+    for (let i = 0; i < 10; i += 1) eased.runtime.step((t += 50), 0.05, false);
+    expect(eased.runtime.performance.peakTension).toBeLessThan(RED_TENSION);
+    expect(JUMP_GRACE_SEC).toBeLessThan(0.5);
+  });
+
+  it("can't be turned", () => {
+    const { runtime, now } = atTheNet("pike", 3);
+    runtime.step(now + 50, 0.05, false, (-runtime.sim.runSide) as Steer);
+    expect(runtime.sim.turning).toBe(false);
+  });
+
+  it("is a pike's habit only: other fish still make a last run", () => {
+    const { runtime } = atTheNet("walleye", 2);
+    expect(runtime.sim.roll).toBeFalsy();
+    expect(runtime.sim.lastRun).toBe(true);
   });
 });

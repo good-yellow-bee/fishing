@@ -75,7 +75,11 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
         }
         // Written only on a change, so the live region speaks each new call once.
         const call =
-          state.lastRun && state.surge === 1 && !state.jump
+          state.roll && state.surge === 1
+            ? t("Let go now — it's going to roll!")
+            : state.roll && state.surge === 2
+            ? t("EASE OFF — it's rolling on the line!")
+            : state.lastRun && state.surge === 1 && !state.jump
             ? t("Let go now — it sees the net!")
             : state.surge === 0 && state.sulk
               ? t("It's sulking on the bottom — ease off, then pump!")
@@ -103,7 +107,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           );
         }
         // Which way to pull the rod: said once a run is coming, and cheered while it is being turned.
-        const steerCall = state.surge === 0 || state.jump ? "calm" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
+        const steerCall = state.surge === 0 || state.jump || state.roll ? "calm" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
         if (steerLine.current && steerLine.current.dataset.call !== steerCall) {
           steerLine.current.dataset.call = steerCall;
           for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
