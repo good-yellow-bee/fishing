@@ -1,18 +1,29 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
-import { FIELD_ARCHIVE_REFUSAL, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive } from "@stillwater/shared";
+import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { useTackle } from "./gear/TackleState";
-import { messageText } from "./format";
+import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
+/** When a book's newest fish came in, or "" for a book with none. */
+function newestAt(book: Logbook): string {
+  return catchesNewestFirst(book)[0]?.caughtAt ?? "";
+}
+
+/** "12 fish, newest Oct 13", or "no fish". */
+function bookSummary(book: Logbook): string {
+  const newest = newestAt(book);
+  return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
+}
+
 export function BookFile() {
-  const { book, photos, replaceBook, restoreSample } = useLogbook();
+  const { book, storedBook, photos, replaceBook, restoreSample } = useLogbook();
   useT();
   const { items, replaceTackle } = useTackle();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -38,7 +49,8 @@ export function BookFile() {
   const [setAside, setSetAside] = useState(readUnreadableBook);
 
   const onDownload = () => {
-    downloadFile(JSON.stringify(fieldArchiveDocument({ book, tackle: items, photos })), "application/json", "stillwater-field-log.json");
+    // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
+    downloadFile(JSON.stringify(fieldArchiveDocument({ book: storedBook, tackle: items, photos })), "application/json", "stillwater-field-log.json");
     saveCopiedAt(own);
     setCopiedAt(own);
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
@@ -179,7 +191,10 @@ export function BookFile() {
           <span id={askId}>
             {t(
               "Replace the book in this browser with this file? Spots, trips, catches, weather, tackle checks, and photos here will be replaced.",
-            )}
+            )}{" "}
+            {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
+            {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
+            {newestAt(pending.book) < newestAt(storedBook) ? ` ${t("Fish logged here after the file's newest would be lost.")}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
