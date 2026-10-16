@@ -1335,3 +1335,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR210~~ | ~~Search bounds keep fish on the edge; trailing plus; best gains to a decimal; photo alt text~~ (#516) | field | S |
 | ~~BR211~~ | ~~Bar and condition links search sky, wind, time, season and moon exactly~~ (#518) | field | S |
 | ~~BR212~~ | ~~Search links on home move focus; Home clears the search; undo bar ignores Escape in fields and prompts~~ (#520) | field | S |
+| ~~BR213~~ | ~~Search finds kept fish and water notes; "released" finds just released fish~~ (#521) | field | S |
