@@ -209,6 +209,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
+          {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
           <p ref={clean} className="fight-clean">{t("Clean fight · 1.5× points")}</p>
           {reelMode === "toggle" ? (
             <p className="fight-controls">
