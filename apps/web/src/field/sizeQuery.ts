@@ -1,5 +1,6 @@
 import type { Measure } from "@stillwater/shared";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
+import { imperialAmount } from "./unitsInput";
 
 const UNITS: Record<string, { kind: Measure["kind"]; toBase: number }> = {
   lb: { kind: "weight", toBase: 1 },
@@ -16,7 +17,15 @@ export type SizeQuery = { kind: Measure["kind"]; over: boolean; amount: number }
 /** ">2 lb", "< 30 cm", ">=1,5 kg": a size bound in pounds or inches, or null when the text isn't one. */
 export function parseSizeQuery(text: string): SizeQuery | null {
   const found = /^([<>])=?\s*(\d+(?:[.,]\d+)?)\s*([a-z]+)$/i.exec(text.trim());
-  if (!found) return null;
+  if (!found) {
+    // ">3 lb 2 oz", "<18 1/4 in": a bound as the scale or the tape reads it, the same way the catch form takes it.
+    const bound = /^([<>])=?\s*(.+)$/.exec(text.trim());
+    if (!bound) return null;
+    const pounds = imperialAmount(bound[2]!, "weight");
+    if (pounds !== null) return { kind: "weight", over: bound[1] === ">", amount: pounds };
+    const inches = imperialAmount(bound[2]!, "length");
+    return inches === null ? null : { kind: "length", over: bound[1] === ">", amount: inches };
+  }
   const unit = UNITS[found[3]!.toLowerCase()];
   if (!unit) return null;
   return { kind: unit.kind, over: found[1] === ">", amount: Number(found[2]!.replace(",", ".")) * unit.toBase };

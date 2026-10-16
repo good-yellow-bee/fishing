@@ -10,6 +10,12 @@ describe("size queries", () => {
     expect(parseSizeQuery("> 30 cm")?.amount).toBeCloseTo(11.81, 1);
   });
 
+  it("reads a bound as the scale or the tape gives it", () => {
+    expect(parseSizeQuery(">3 lb 2 oz")).toEqual({ kind: "weight", over: true, amount: 3.125 });
+    expect(parseSizeQuery("<12 oz")).toEqual({ kind: "weight", over: false, amount: 0.75 });
+    expect(parseSizeQuery(">18 1/4")).toEqual({ kind: "length", over: true, amount: 18.25 });
+  });
+
   it("leaves ordinary words and unknown units alone", () => {
     expect(parseSizeQuery("pike")).toBeNull();
     expect(parseSizeQuery(">2")).toBeNull();

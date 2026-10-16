@@ -24,7 +24,7 @@ const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|kg
 const num = (text: string | undefined) => (text ? Number(text.replace(",", ".")) : 0);
 
 /** Pounds and ounces or a fraction of an inch, as one imperial number; null for anything else. */
-function imperialAmount(text: string, kind: "length" | "weight"): number | null {
+export function imperialAmount(text: string, kind: "length" | "weight"): number | null {
   const clean = text.trim();
   if (kind === "weight") {
     const match = POUNDS_OUNCES.exec(clean);

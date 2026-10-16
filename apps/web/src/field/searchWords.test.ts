@@ -18,4 +18,11 @@ describe("search words without +", () => {
     expect(ids("> 90 lb")).toEqual([]);
     expect(ids("cedar zebra")).toEqual([]);
   });
+
+  it("finds a moon week by any of its words, and a time of day by the words anglers use", () => {
+    for (const phase of ["new moon", "full moon"]) expect(ids(phase)).toEqual(ids(`near the ${phase}`));
+    expect(ids("dusk")).toEqual(ids("evening"));
+    expect(ids("sunrise")).toEqual(ids("dawn"));
+    expect(ids("dawn").length).toBeGreaterThan(0);
+  });
 });
