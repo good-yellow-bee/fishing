@@ -1446,3 +1446,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR283~~ | ~~Lost fish and missed strikes on an outing~~ (#625) | field | S |
 | ~~BR284~~ | ~~Sample lines saved unchanged from a Polish form stay English~~ (#627) | field | S |
 | ~~BR285~~ | ~~One-row phone save bar and same-minute fish span~~ (#629) | field | S |
+| ~~BR286~~ | ~~Search words without a plus~~ (#630) | field | S |
+| ~~BR287~~ | ~~Catch search on the Catches page~~ (#632) | field | S |
