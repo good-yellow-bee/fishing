@@ -28,6 +28,8 @@ export type FightSim = {
   tailWalk?: boolean;
   /** A brook trout's run that darted the other way halfway: the turn has to switch sides. */
   darted?: boolean;
+  /** A walleye shaking its head between runs: reeling through it sends the line into the red. */
+  shake?: boolean;
   /** A soft-mouthed fish reeled in the red: the hook is tearing and pulls free if it goes on. */
   tearing?: boolean;
   /** The hook tore out of a soft mouth: why the fish got away. */
@@ -87,6 +89,12 @@ export const SCRAPPER_TIRE = 0.8;
 /** Carp and salmon make one long run straight after the hook. */
 /** Brook trout dart: halfway through each run they cut back the other way, so a turn has to switch sides. */
 export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
+
+/** Walleye shake their heads between runs: reel through a shake and the line goes into the red. */
+export const HEAD_SHAKERS: ReadonlySet<string> = new Set(["walleye"]);
+export const SHAKE_MS = 600;
+/** A shake gives about a reaction time to let go before a tight line goes into the red. */
+export const SHAKE_GRACE_SEC = 0.3;
 
 /** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
 export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);
@@ -315,6 +323,8 @@ export function makeFight(
   const longRunner = LONG_RUNNERS.has(species.id);
   const coverDiver = COVER_DIVERS.has(species.id);
   const darter = DARTERS.has(species.id);
+  const headShaker = HEAD_SHAKERS.has(species.id);
+  let shakeAt = Infinity;
   /** How much of a darter's run is left when it cuts back: half of it, so turning it, which shortens the run, brings the dart sooner. */
   let dartLeft: number | null = null;
   const coverHold = coverDiver ? COVER_HOLD : 1;
@@ -402,6 +412,8 @@ export function makeFight(
         }
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
+        // A walleye with fight left shakes its head partway through the calm.
+        shakeAt = headShaker && !double && !sim.sulk && sim.stamina > SPENT_STAMINA ? nowMs + (nextAt - nowMs) * 0.4 : Infinity;
         // A bass buried in cover doesn't run again till it comes out.
         if (coverDiver && sim.weeded) nextAt = Math.max(nextAt, weedUntil);
         if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
@@ -416,6 +428,7 @@ export function makeFight(
       else if (slackSec >= SULK_PUMP_SEC) sim.sulk = false;
     }
 
+    sim.shake = sim.surge === 0 && nowMs >= shakeAt && nowMs < shakeAt + SHAKE_MS;
     // A brook trout cuts back the other way halfway through its run.
     if (dartLeft !== null && sim.surge === 2 && nextAt !== null && nextAt - nowMs <= dartLeft) {
       dartLeft = null;
@@ -444,6 +457,8 @@ export function makeFight(
       // A sulking fish sits where it is: no line goes out.
       if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
     }
+    // Like a leap, a shake reeled through costs the clean bonus, never the fish.
+    if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) sim.tension = Math.max(sim.tension, RED_TENSION);
     // A line held tight through a leap or a roll loads the rod into the red: the clean bonus goes, but never the fish.
     if ((sim.jump || sim.roll) && sim.surge === 2) {
       jumpAge += dtSec;
