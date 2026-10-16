@@ -415,6 +415,8 @@ export const PL_GAME: PlBook = {
   "Reeds: turn every run, or it goes into the weeds": "Trzciny: zawracaj każdy odjazd, bo wpłynie w zielsko",
   "Inlet: the current takes line while you rest": "Ujście: nurt zabiera linkę, gdy odpoczywasz",
   "Drop-off: runs dive and pull harder, but tire the fish faster": "Spad: odjazdy nurkują i ciągną mocniej, ale szybciej męczą rybę",
+  "Breezy: a slack line drifts out faster": "Wietrznie: luźna linka szybciej odpływa",
+  "Strong wind: a slack line drifts out much faster": "Silny wiatr: luźna linka odpływa dużo szybciej",
   "Boat: it swings to follow a run, so runs take less line": "Łódka: obraca się za rybą, więc odjazd zabiera mniej linki",
   "Point: turn every run, or it drags the line over the rocks": "Cypel: zawracaj każdy odjazd, bo przeciągnie linkę po kamieniach",
   "Running out of line!": "Kończy się żyłka!",

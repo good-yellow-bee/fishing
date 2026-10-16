@@ -212,6 +212,17 @@ describe("FightBar for screen readers", () => {
     expect(water("boat")).toMatch(/swings to follow a run/);
   });
 
+  it("says when the wind bellies a slack line, and nothing on a calm day", () => {
+    const wind = (w?: "breezy" | "strong") => {
+      act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, windy: w }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+      return container!.querySelector(".fight-wind")?.textContent ?? null;
+    };
+    mount({ peakTension: 0.3, maxLine: 1 });
+    expect(wind()).toBeNull();
+    expect(wind("breezy")).toMatch(/^Breezy/);
+    expect(wind("strong")).toMatch(/much faster/);
+  });
+
   it("tells the angler a fish is in the weeds", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

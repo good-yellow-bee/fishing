@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -723,5 +723,39 @@ describe("the inlet's current on a resting fish", () => {
     const open = makeFight(fish("lake-whitefish"), 2, 3, () => 0);
     open.step(0, 0.05, false);
     expect(open.sim.carried).toBe(false);
+  });
+});
+
+describe("a windy day", () => {
+  const calmDrift = (wind?: "breezy" | "strong") => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", wind);
+    f.step(0, 0.5, false);
+    return f.sim.line - 1;
+  };
+  const runDrift = (wind?: "breezy" | "strong") => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0, 1, "open", wind);
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
+    const before = f.sim.line;
+    f.step((now += 50), 0.2, false);
+    return f.sim.line - before;
+  };
+
+  it("bellies a slack line, so it drifts out faster between runs", () => {
+    expect(calmDrift()).toBeGreaterThan(0);
+    expect(calmDrift("breezy")).toBeCloseTo(calmDrift() * WIND_SLACK.breezy);
+    expect(calmDrift("strong")).toBeCloseTo(calmDrift() * WIND_SLACK.strong);
+  });
+
+  it("leaves a run's pull as it is", () => {
+    expect(runDrift("strong")).toBeCloseTo(runDrift());
+  });
+
+  it("only counts breezy and strong days", () => {
+    expect(fightWind("strong")).toBe("strong");
+    expect(fightWind("breezy")).toBe("breezy");
+    expect(fightWind("light-west")).toBeUndefined();
+    expect(fightWind("calm")).toBeUndefined();
+    expect(fightWind(undefined)).toBeUndefined();
   });
 });
