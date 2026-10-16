@@ -1150,7 +1150,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT105~~ | ~~News card (2026-10-16zc) covers GT104: inlet downstream runs~~ (#631) | news | S |
 | ~~GT106~~ | ~~Muskie follow: a tiger muskie that misses the strike follows the bait and hits once more, with no nibble~~ (#633) | bite | S |
 | ~~GT107~~ | ~~News card (2026-10-16zd) covers GT106: muskie follow~~ (#636) | news | S |
-| GT108 | The landed card notes Turned it upstream every time when every run downstream at the inlet was turned | fight | S |
+| ~~GT108~~ | ~~The landed card notes Turned it upstream every time when every run downstream at the inlet was turned~~ (#638) | fight | S |
+| GT109 | Rainbow tail-walk: a rainbow trout's first leap is a long tail-walk across the top (1.8x a usual leap), with its own call and habit line | fight | S |
 
 ## Risks / open questions for the owner
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -483,6 +483,29 @@ describe("leaps", () => {
     }
     return { kinds, runtime };
   }
+
+  it("makes a rainbow trout's first leap a long tail-walk, and only that one", () => {
+    const runtime = makeFight(fish("rainbow-trout"), fish("rainbow-trout").minWeight, 20, seeded(7));
+    const leaps: { walk: boolean; ms: number }[] = [];
+    let start = 0;
+    let before = 0;
+    let leap = false;
+    let walk = false;
+    for (let now = 0; now < 30_000; now += 20) {
+      if (runtime.step(now, 0.02, false) !== "fighting") break;
+      if (runtime.sim.surge === 2 && before !== 2) {
+        start = now;
+        leap = runtime.sim.jump === true;
+        walk = runtime.sim.tailWalk === true;
+      }
+      if (runtime.sim.surge !== 2 && before === 2 && leap) leaps.push({ walk, ms: now - start });
+      before = runtime.sim.surge;
+    }
+    expect(leaps.length).toBeGreaterThan(1);
+    expect(leaps.map((l) => l.walk)).toEqual([true, ...leaps.slice(1).map(() => false)]);
+    expect(leaps[0]!.ms).toBeCloseTo(JUMP_MS * TAIL_WALK, -2);
+    expect(leaps[1]!.ms).toBeCloseTo(JUMP_MS, -2);
+  });
 
   it("makes every second run of a trout, bass or salmon a leap, and never a pike's", () => {
     const trout = runs("rainbow-trout", () => false).kinds;

@@ -221,6 +221,19 @@ describe("FightBar for screen readers", () => {
     expect(container!.querySelector(".fight-water")?.textContent).toBe("Dock: turn every run, or it wraps the line round a piling");
   });
 
+  it("calls a rainbow trout's tail-walk while it dances", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 2;
+    sim.current.jump = true;
+    sim.current.tailWalk = true;
+    frame();
+    expect(status()).toBe("BOW — it's tail-walking across the top!");
+    sim.current.tailWalk = false;
+    frame();
+    expect(status()).toBe("BOW — it's jumping!");
+  });
+
   it("tells the angler a run is heading downstream", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;
@@ -311,9 +324,9 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Breacher|Roller|Scrapper|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Long runner|Soft mouth):/.test(line ?? ""));
     };
-    expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up"]);
+    expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running"]);
     expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);

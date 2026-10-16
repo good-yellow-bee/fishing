@@ -402,6 +402,8 @@ export const PL_GAME: PlBook = {
   "The hook tore out of the {fish}'s soft mouth.": "{fish} — haczyk wyrwał się z miękkiego pyska.",
   "Soft mouth — ease off as soon as the bar turns red.": "Miękki pysk — odpuść, gdy tylko pasek zrobi się czerwony.",
   "EASE OFF — the hook is tearing out!": "ODPUŚĆ — haczyk się wyrywa!",
+  "Tail-walker: its first leap dances across the top, so keep bowing till it's down": "Tańczy na ogonie: pierwszy skok to taniec po powierzchni, więc puszczaj, aż opadnie",
+  "BOW — it's tail-walking across the top!": "PUŚĆ — tańczy na ogonie po powierzchni!",
   "Jumper: every second run is a leap, so let go when it comes up": "Skoczek: co drugi odjazd to skok, więc puść, gdy idzie do góry",
   "Breacher: its first run is a leap, so let go when it comes up": "Wyskakuje: jego pierwszy odjazd to skok, więc puść, gdy idzie do góry",
   "Roller: at the net it rolls on the line instead of running": "Kręci się: przy podbieraku obraca się na żyłce zamiast odjeżdżać",
