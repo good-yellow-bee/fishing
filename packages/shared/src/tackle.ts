@@ -86,7 +86,9 @@ function isTackleItem(value: unknown): value is TackleItem {
 }
 
 export function isTackleBox(value: unknown): value is TackleBox {
-  return isRecord(value) && Array.isArray(value.items) && value.items.every(isTackleItem);
+  if (!isRecord(value) || !Array.isArray(value.items) || !value.items.every(isTackleItem)) return false;
+  // Two pieces under one id would tick and come off the list together.
+  return new Set(value.items.map((item: TackleItem) => item.id)).size === value.items.length;
 }
 
 export function itemsForTrip(items: TackleItem[], tripId: string): TackleItem[] {

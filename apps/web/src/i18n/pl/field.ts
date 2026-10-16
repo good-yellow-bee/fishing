@@ -230,6 +230,11 @@ export const PL_FIELD: PlBook = {
   "Fish logged here after the file's newest would be lost.": "Ryby zapisane tu po najnowszej z pliku przepadłyby.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",
   "no fish": "brak ryb",
+  "Earlier tackle lists in this browser could not be read, so they were set aside instead of being lost.":
+    "Wcześniejszych list sprzętu w tej przeglądarce nie dało się odczytać, więc odłożono je, zamiast je stracić.",
+  "Download the set-aside lists": "Pobierz odłożone listy",
+  "Forget the set-aside lists for good?": "Zapomnieć odłożone listy na dobre?",
+  "Forget them": "Zapomnij o nich",
   "Download this book": "Pobierz ten dziennik",
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
@@ -316,6 +321,7 @@ export const PL_FIELD: PlBook = {
   "That file has more photos than this browser should keep. This book was left as it is.":
     "Ten plik ma więcej zdjęć, niż ta przeglądarka powinna przechować. Dziennik został bez zmian.",
   "Name the piece in a few words.": "Nazwij sprzęt w kilku słowach.",
+  "That piece is already on this list.": "Ten sprzęt już jest na liście.",
 
   // Bests
   "Large · {label}": "Okaz · {label}",
