@@ -47,6 +47,7 @@ import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, no
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
+import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
@@ -120,6 +121,8 @@ export function CatchesPage() {
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
         <>
+          {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
+          <FishSum catches={catches} />
           <SpeciesChips catches={catches} />
           <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
             {(entry) => (
