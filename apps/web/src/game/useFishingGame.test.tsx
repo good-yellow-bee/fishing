@@ -242,6 +242,7 @@ describe("useFishingGame lost fight", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;
     vi.mocked(grabberFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
     fightLine = 0.4;
     step.mockReturnValueOnce("fighting");
     castAndFight(surface, 1);
@@ -252,7 +253,7 @@ describe("useFishingGame lost fight", () => {
     now += 16;
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
-    expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("true");
+    expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("golden-shiner");
   });
 
   it("says why the line broke and what to do next time", () => {

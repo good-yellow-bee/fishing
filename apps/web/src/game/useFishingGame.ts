@@ -31,7 +31,7 @@ import { fx } from "./fx";
 import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
-import { GRAB_LINE, grabberFor } from "./grab";
+import { GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
@@ -128,7 +128,7 @@ export type Fight = {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; secondTake?: boolean; grabbed?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; secondTake?: boolean; grabbed?: string; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -199,8 +199,8 @@ export function useFishingGame(
   const hookedSolidRef = useRef(false);
   /** A pike waiting to hit the shiner on the line, and the angler it was rolled for. */
   const grabRef = useRef<{ predator: FishSpecies; profile: Profile } | null>(null);
-  /** The fish on the line took a hooked shiner. */
-  const grabbedRef = useRef(false);
+  /** The small fish the one on the line took, by id. */
+  const grabbedRef = useRef<string | undefined>(undefined);
   /** This fish came back for a second take after dropping the bait. */
   const secondTakeRef = useRef(false);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
@@ -279,7 +279,7 @@ export function useFishingGame(
 
   const clearFight = () => {
     grabRef.current = null;
-    grabbedRef.current = false;
+    grabbedRef.current = undefined;
     biteRef.current = null;
     setBite(null);
     fightRef.current = null;
@@ -345,9 +345,9 @@ export function useFishingGame(
       performanceRef.current = runtime.performance;
       // A quick strike drives the hook home, so the fish starts the fight a little worn.
       hookedSolidRef.current = solid;
-      // Only a struck fish can be grabbed: the pike that took it is the fish now.
+      // Only a struck fish can be grabbed: the fish that took it is the one on the line now.
       if (strike) {
-        grabbedRef.current = false;
+        grabbedRef.current = undefined;
         const predator = grabberFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
         grabRef.current = predator ? { predator, profile: current } : null;
       }
@@ -801,11 +801,11 @@ export function useFishingGame(
           fightInput.steer = steer;
           const result = runtime.step(now, dt, reeling, steer);
           const sim = runtime.sim;
-          // Halfway in, a pike hits the shiner: the fight starts again with the pike.
+          // Halfway in, a bigger fish hits the small one: the fight starts again with it.
           const grab = grabRef.current;
           if (grab && result === "fighting" && sim.line <= GRAB_LINE) {
             grabRef.current = null;
-            grabbedRef.current = true;
+            grabbedRef.current = current.species.id;
             const taken = makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints));
             biteRef.current = taken;
             setBite(taken);
@@ -815,7 +815,7 @@ export function useFishingGame(
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
-            setHint(t("A pike grabbed your shiner! {line}. Ease off when it runs.", { line: fightLines(taken.species.challenge)[0] }));
+            setHint(grabCall(current.species.id, fightLines(taken.species.challenge)[0]));
             return;
           }
           if (surface) {
