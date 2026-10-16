@@ -123,9 +123,25 @@ function MapPlate() {
   );
 }
 
-function SpotPin({ spot, place, point = project(place), width = MAP_WIDTH, height = MAP_HEIGHT }: { spot: Spot; place: SamplePlace; point?: { x: number; y: number }; width?: number; height?: number }) {
+function SpotPin({
+  spot,
+  place,
+  point = project(place),
+  width = MAP_WIDTH,
+  height = MAP_HEIGHT,
+  crowded = false,
+}: {
+  spot: Spot;
+  place: SamplePlace;
+  point?: { x: number; y: number };
+  width?: number;
+  height?: number;
+  crowded?: boolean;
+}) {
   // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
-  const own = spot.place ? ` map-pin-own${point.x > width * 0.6 ? " map-pin-east" : ""}` : "";
+  // A pin just beside an earlier one moves its label a line down (or up, near the foot of the sheet), off the other label.
+  const shift = crowded ? (point.y > height * 0.7 ? " map-pin-up" : " map-pin-down") : "";
+  const own = spot.place ? ` map-pin-own${point.x > width * 0.6 ? " map-pin-east" : ""}${shift}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
@@ -155,12 +171,16 @@ function sheetPlace(spot: Spot): SamplePlace | undefined {
   return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
 }
 
+/** Sheet units within which two pins' labels would sit on each other. */
+const CROWDED = 80;
+
 /** The angler's own pins away from the sample sheet, on a plain sheet of their own: a grid fitted to them, north up. */
 function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) {
   const frame = fitFrame(pinned.map(({ place }) => place));
   const lats = gridLines(frame.south, frame.north);
   const lngs = gridLines(frame.west, frame.east);
   const corner = 16;
+  const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
   return (
     <div className="spot-map own-sheet">
       <svg className="spot-map-plate" viewBox={`0 0 ${OWN_WIDTH} ${OWN_HEIGHT}`} role="img" aria-label={t("Your own waters, north up")}>
@@ -190,8 +210,8 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
         <rect x="14" y="14" width={OWN_WIDTH - 28} height={OWN_HEIGHT - 28} className="map-frame" />
       </svg>
       <div className="spot-map-pins" aria-hidden="true">
-        {pinned.map(({ spot, place }) => (
-          <SpotPin key={spot.id} spot={spot} place={place} point={projectIn(frame, place)} width={OWN_WIDTH} height={OWN_HEIGHT} />
+        {points.map(({ spot, place, point }, i) => (
+          <SpotPin key={spot.id} spot={spot} place={place} point={point} width={OWN_WIDTH} height={OWN_HEIGHT} crowded={points.slice(0, i).some((other) => Math.hypot(other.point.x - point.x, other.point.y - point.y) < CROWDED)} />
         ))}
       </div>
     </div>
@@ -267,7 +287,7 @@ export function SpotMapPage() {
                 <span>{t(WATER_LABELS[spot.waterType])}</span>
                 <span>{fishCountLabel(book.catches.filter((entry) => entry.spotId === spot.id).length)}</span>
                 <span>
-                  <a href={osmLink(place.lat, place.lng)} target="_blank" rel="noreferrer">
+                  <a className="map-coord-link" href={osmLink(place.lat, place.lng)} target="_blank" rel="noreferrer">
                     {formatCoord(place.lat, place.lng)}
                   </a>
                 </span>

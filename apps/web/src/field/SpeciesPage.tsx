@@ -105,7 +105,7 @@ export function SpeciesPage() {
           <TallyBars key={species} rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("sky", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <WeatherBars book={{ ...book, catches }} within={exactTerm("species", t(name))} />
+      <WeatherBars key={species} book={{ ...book, catches }} within={exactTerm("species", t(name))} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">
