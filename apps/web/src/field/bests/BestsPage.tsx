@@ -5,6 +5,7 @@ import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay } from "../format";
+import { hookTally, hookText } from "../hookTally";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
@@ -82,6 +83,7 @@ export function BestsPage() {
   // When every fish of the best day came on one outing, the tile opens that outing.
   const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
   const released = book.catches.filter((entry) => entry.released).length;
+  const hooks = hookTally(book);
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
@@ -133,6 +135,7 @@ export function BestsPage() {
           <Link to={findLink(t("Released"))}>{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</Link>
         </p>
       ) : null}
+      {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
 
       {book.catches.length === 0 ? (
         <p className="empty">{t("Nothing landed in the book yet.")}</p>

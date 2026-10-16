@@ -34,6 +34,7 @@ import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { formatCoord } from "./map/places";
 import { osmLink } from "./osmLink";
+import { hookTally, hookText } from "./hookTally";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -101,6 +102,7 @@ export function SpotPage() {
   const trips = tripsForSpot(book, spot.id);
   const catches = catchesForSpot(book, spot.id);
   const fishByTrip = fishCountsByTrip({ ...book, catches });
+  const hooks = hookTally(book, spot.id);
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
@@ -152,6 +154,7 @@ export function SpotPage() {
         <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>
       </div>
       {average ? <p className="meta">{average}</p> : null}
+      {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}
