@@ -19,7 +19,7 @@ const POUNDS_OUNCES = new RegExp(String.raw`^(?:${NUM}\s*(?:lbs?|#)\s*)?(?:${NUM
 /** "18 1/4", "3/4", "18 1/4 in": inches as a tape is marked. */
 const INCH_FRACTION = new RegExp(String.raw`^(?:(\d+)\s+)?(\d+)\s*/\s*(\d+)\s*(?:in|inch|inches|")?$`, "i");
 /** A plain number with its unit written after it: "28 in", "3.2 lb", "71 cm", "1,4 kg". */
-const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(?:in|inch|inches|"|lbs?|#|cm|kg)$`, "i");
+const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|kg)$`, "i");
 
 const num = (text: string | undefined) => (text ? Number(text.replace(",", ".")) : 0);
 
@@ -30,6 +30,8 @@ function imperialAmount(text: string, kind: "length" | "weight"): number | null 
     const match = POUNDS_OUNCES.exec(clean);
     // A bare number is left to the plain reading; this is for text that names lb or oz.
     if (!match || !/lb|#|oz/i.test(clean) || (!match[1] && !match[2])) return null;
+    // Ounces after pounds are the scale's: a whole number of pounds, and under 16 ounces.
+    if (match[1] && match[2] && (/[.,]/.test(match[1]) || num(match[2]) >= 16)) return null;
     // "3 lb 4" means four ounces, as on the scale; "3.5 lb" stays pounds.
     return num(match[1]) + num(match[2]) / 16;
   }
@@ -40,12 +42,24 @@ function imperialAmount(text: string, kind: "length" | "weight"): number | null 
 
 /** What the player typed, in the book's inches or pounds; text that isn't a number passes through for the form to refuse. */
 export function toBookAmount(text: string, kind: "length" | "weight", units: Units) {
-  if (units === "imperial") {
-    const imperial = imperialAmount(text, kind);
+  const clean = text.trim();
+  // A unit written after the number wins over the units picked in Settings: "71 cm" is 71 cm either way.
+  const unit = WITH_UNIT.exec(clean);
+  if (unit) {
+    const written = unit[2]!.toLowerCase();
+    const isLength = written === "cm" || /^(in|inch|inches|")$/.test(written);
+    // A weight's unit on a length, or the other way round, is left for the form to refuse.
+    if (isLength !== (kind === "length")) return text;
+    const value = num(unit[1]);
+    if (written === "cm") return round(value / CM_PER_IN, 3);
+    if (written === "kg") return round(value / KG_PER_LB, 3);
+    return round(value, 3);
+  }
+  // Pounds and ounces in any units; a tape's fractions in inches, or with the inches written.
+  if (units === "imperial" || /lb|#|oz|in|"/i.test(clean)) {
+    const imperial = imperialAmount(clean, kind);
     if (imperial !== null) return round(imperial, 3);
   }
-  const unit = WITH_UNIT.exec(text.trim());
-  if (unit) text = unit[1]!;
   const value = parse(text);
   if (value === null) return text;
   if (units === "imperial") return decimal(text);

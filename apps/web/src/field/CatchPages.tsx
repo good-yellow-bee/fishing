@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   likelyLength,
   likelyWeight,
@@ -145,7 +145,9 @@ export function CatchesPage() {
 export function CatchFormPage() {
   const { catchId } = useParams();
   const [params] = useSearchParams();
-  return <CatchForm key={`${catchId ?? ""}:${params.toString()}`} />;
+  // Each arrival starts afresh, even at the same address: a second "Save and log another" lands on the same link.
+  const { key } = useLocation();
+  return <CatchForm key={`${catchId ?? ""}:${params.toString()}:${key}`} />;
 }
 
 /** Camera notes sit at the start of a JPEG; this much is plenty to find the time a photo was taken. */
@@ -207,6 +209,9 @@ function CatchForm() {
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   // The time read from a photo's camera notes, while the time field still holds it.
   const [photoTime, setPhotoTime] = useState("");
+  // Read when the photo's notes come in, so a time typed while they were read is kept.
+  const timeTouchedNow = useRef(timeTouched);
+  timeTouchedNow.current = timeTouched;
   const [note, setNote] = useState(existing?.note ?? "");
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
@@ -352,7 +357,7 @@ function CatchForm() {
         .arrayBuffer()
         .then((head) => {
           const taken = photoTakenAt(new Uint8Array(head));
-          if (photoPick.current !== ticket || !taken || taken > toLocalInput(new Date())) return;
+          if (photoPick.current !== ticket || timeTouchedNow.current || !taken || taken > toLocalInput(new Date())) return;
           setCaughtAt(taken);
           setPhotoTime(taken);
           // Read off the camera, so picking an outing afterwards keeps it.

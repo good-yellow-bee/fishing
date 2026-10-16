@@ -12,7 +12,8 @@ function pageOf(field: NameField, name: string) {
 
 /** A name fixed once for every fish of the kind, or on the lure; a name already in the book merges the two. */
 export function RenameKind({ field, name }: { field: NameField; name: string }) {
-  const { book, changeBook } = useLogbook();
+  // The book as stored: the shown one has the sample week in the player's language, which must not be saved.
+  const { storedBook, changeBook } = useLogbook();
   useT();
   const navigate = useNavigate();
   const [typed, setTyped] = useState(() => t(name));
@@ -20,9 +21,14 @@ export function RenameKind({ field, name }: { field: NameField; name: string }) 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (typed.trim() === t(name)) return;
-    const result = renameInBook(book, field, name, typed);
+    const result = renameInBook(storedBook, field, name, typed);
     if (!result.ok) {
       setError(result.message);
+      return;
+    }
+    // Typed the way the book already has it: nothing to save or undo.
+    if (result.book.catches.every((entry, index) => entry === storedBook.catches[index])) {
+      navigate(pageOf(field, result.name), { replace: true });
       return;
     }
     if (changeBook("rename", result.book)) navigate(pageOf(field, result.name), { replace: true });
