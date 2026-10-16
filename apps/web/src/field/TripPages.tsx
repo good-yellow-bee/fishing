@@ -52,6 +52,8 @@ import { TripWeather } from "./Weather";
 import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
+import { findTrips } from "./tripSearch";
+import "./search.css";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -70,9 +72,14 @@ function fishSpan(first: string, last: string, count: number): string {
   return pace ? `${span}, ${pace}` : span;
 }
 
+/** The search for outings, kept in the address so Back from an outing returns to the same matches. */
+const TRIP_FIND = "find";
+
 export function TripsPage() {
   const { book } = useLogbook();
   useT();
+  const [params, setParams] = useSearchParams();
+  const query = params.get(TRIP_FIND) ?? "";
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingTrips(book, today);
@@ -80,6 +87,20 @@ export function TripsPage() {
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
   const average = outingAverage(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const needle = query.trim();
+  const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t) : [];
+  const card = (trip: Trip, level?: 4) => (
+    <TripCard
+      level={level}
+      key={trip.id}
+      trip={trip}
+      spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
+      waterType={spotById(book, trip.spotId)?.waterType ?? null}
+      fishCount={fishByTrip.get(trip.id) ?? 0}
+      today={today}
+      tomorrow={tomorrow}
+    />
+  );
 
   return (
     <div className="sheet">
@@ -93,52 +114,67 @@ export function TripsPage() {
           {t("Add a trip")}
         </Link>
       </header>
-      <h2 className="subhead">{t("Coming up")}</h2>
-      {upcoming.length === 0 ? (
-        <p className="empty">
-          {t("No upcoming outings.")} <Link to="/trips/new">{t("Plan one")}</Link>
-        </p>
-      ) : (
-        <div className="stack">
-          {upcoming.map((trip) => (
-            <TripCard
-              key={trip.id}
-              trip={trip}
-              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
-              waterType={spotById(book, trip.spotId)?.waterType ?? null}
-              fishCount={fishByTrip.get(trip.id) ?? 0}
-              today={today}
-              tomorrow={tomorrow}
-            />
-          ))}
-        </div>
-      )}
-      <h2 className="subhead">{t("Recent")}</h2>
-      {average ? <p className="meta">{average}</p> : null}
       {book.trips.length > 0 ? (
-        <p className="fish-csv">
-          <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
-            {t("Download the outings as a spreadsheet")}
-          </button>
-        </p>
+        <section className="catch-search trip-search" aria-label={t("Find an outing")}>
+          <label htmlFor="trip-search">{t("Find an outing")}</label>
+          <input
+            id="trip-search"
+            type="search"
+            value={query}
+            placeholder={t("Title, water, note, month, or “no fish”")}
+            autoComplete="off"
+            onChange={(event) => {
+              const next = event.target.value;
+              setParams(
+                (current) => {
+                  const out = new URLSearchParams(current);
+                  if (next.trim()) out.set(TRIP_FIND, next);
+                  else out.delete(TRIP_FIND);
+                  return out;
+                },
+                { replace: true },
+              );
+            }}
+          />
+          <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
+            {needle ? <p>{found.length === 0 ? t("No outing matches that.") : t("Outings: {count}", { count: found.length })}</p> : null}
+          </div>
+          {found.length > 0 ? (
+            <PagedTrips key={needle} trips={found} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+              {(trip) => card(trip, 4)}
+            </PagedTrips>
+          ) : null}
+        </section>
       ) : null}
-      {recent.length === 0 ? (
-        <p className="empty">{t("No past outings.")}</p>
-      ) : (
-        <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
-          {(trip) => (
-            <TripCard
-              level={4}
-              key={trip.id}
-              trip={trip}
-              spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
-              waterType={spotById(book, trip.spotId)?.waterType ?? null}
-              fishCount={fishByTrip.get(trip.id) ?? 0}
-              today={today}
-              tomorrow={tomorrow}
-            />
+      {needle ? null : (
+        <>
+          <h2 className="subhead">{t("Coming up")}</h2>
+          {upcoming.length === 0 ? (
+            <p className="empty">
+              {t("No upcoming outings.")} <Link to="/trips/new">{t("Plan one")}</Link>
+            </p>
+          ) : (
+            <div className="stack">
+              {upcoming.map((trip) => card(trip))}
+            </div>
           )}
-        </PagedTrips>
+          <h2 className="subhead">{t("Recent")}</h2>
+          {average ? <p className="meta">{average}</p> : null}
+          {book.trips.length > 0 ? (
+            <p className="fish-csv">
+              <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
+                {t("Download the outings as a spreadsheet")}
+              </button>
+            </p>
+          ) : null}
+          {recent.length === 0 ? (
+            <p className="empty">{t("No past outings.")}</p>
+          ) : (
+            <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+              {(trip) => card(trip, 4)}
+            </PagedTrips>
+          )}
+        </>
       )}
     </div>
   );

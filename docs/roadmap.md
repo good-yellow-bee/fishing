@@ -1507,3 +1507,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR325~~ | ~~Photo GPS picks the water~~ (#688) | field | S |
 | ~~BR326~~ | ~~Water temperature in a water's tips~~ (#690) | field | S |
 | ~~BR327~~ | ~~After-midnight fish join last night's outing~~ (#692) | field | S |
+| ~~BR328~~ | ~~Find an outing; calendar blanks open outings~~ (#693) | field | S |

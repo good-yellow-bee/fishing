@@ -1518,7 +1518,8 @@ button.field-primary:disabled {
   background: transparent;
 }
 
-.day-grid li.day-fish a {
+.day-grid li.day-fish a,
+.day-grid li.day-blank a {
   display: block;
   width: 100%;
   height: 100%;
@@ -1547,7 +1548,8 @@ button.field-primary:disabled {
   box-shadow: inset 0 0 0 1px var(--field-muted);
 }
 
-.day-grid li.day-fish a:focus-visible {
+.day-grid li.day-fish a:focus-visible,
+.day-grid li.day-blank a:focus-visible {
   outline: 2px solid var(--field-rust);
   outline-offset: 2px;
 }

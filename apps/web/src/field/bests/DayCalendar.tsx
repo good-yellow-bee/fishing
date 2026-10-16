@@ -13,7 +13,7 @@ function level(fish: number): string {
 
 /**
  * A season at a glance: each month with a day out, Monday first, each fished day shaded by its fish and opening them,
- * and an outing that landed nothing marked as a blank.
+ * and an outing that landed nothing marked as a blank that opens it.
  */
 export function DayCalendar({ book, year, today }: { book: Logbook; year: string; today: string }) {
   useT();
@@ -45,10 +45,16 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                     </li>
                   );
                 }
-                if (mark?.outing && day < today) {
-                  return <li key={day} className="day-blank" aria-label={`${formatDay(day)}: ${t("an outing with no fish")}`} title={`${formatDay(day)}: ${t("an outing with no fish")}`} />;
+                if (mark && mark.trips.length > 0 && day < today) {
+                  // The blank opens its outing, or the day's outings when there were several.
+                  const label = `${formatDay(day)}: ${t("an outing with no fish")}`;
+                  return (
+                    <li key={day} className="day-blank">
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} />
+                    </li>
+                  );
                 }
-                return <li key={day} aria-hidden="true" className={mark?.outing ? "day-planned" : undefined} />;
+                return <li key={day} aria-hidden="true" className={mark && mark.trips.length > 0 ? "day-planned" : undefined} />;
               })}
             </ol>
           </section>
