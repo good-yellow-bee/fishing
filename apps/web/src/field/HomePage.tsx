@@ -11,6 +11,7 @@ import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { catchMonth } from "./tripMonths";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
+import { readYearGoal } from "./YearGoal";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -38,6 +39,7 @@ export function HomePage() {
   const monthFish = book.catches.filter((entry) => catchMonth(entry) === thisMonth).length;
   const thisYear = today.slice(0, 4);
   const yearFish = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`)).length;
+  const goal = readYearGoal(thisYear);
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -82,11 +84,11 @@ export function HomePage() {
                   <Link to={findLink(thisMonth)}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
-              {yearFish > monthFish ? (
+              {yearFish > monthFish || goal !== null ? (
                 <>
                   {" · "}
-                  {/* And this year's, once the year holds more than the month. */}
-                  <Link to={findLink(thisYear)}>{t("{n} this year", { n: yearFish })}</Link>
+                  {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
+                  <Link to={findLink(thisYear)}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
             </small>
