@@ -37,6 +37,10 @@
   font-size: 13px;
 }
 
+.catch-search [role="status"] > p {
+  margin: 0;
+}
+
 .catch-search .search-save {
   margin: 0;
   font-size: 13px;

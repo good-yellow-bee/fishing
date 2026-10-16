@@ -9,7 +9,7 @@ import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
-import { catchMonth, monthName } from "./tripMonths";
+import { catchMonth } from "./tripMonths";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 
 function deskLine(now: Date): string {
@@ -75,7 +75,7 @@ export function HomePage() {
                 <>
                   {" · "}
                   {/* This month's fish, through the catch search. */}
-                  <Link to={findLink(monthName(thisMonth))}>{t("{n} this month", { n: monthFish })}</Link>
+                  <Link to={findLink(thisMonth)}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
             </small>
