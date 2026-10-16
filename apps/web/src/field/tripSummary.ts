@@ -1,7 +1,9 @@
-import { WATER_LABELS, lureTally, measureOf, personalBests, type CatchEntry, type Spot, type Trip } from "@stillwater/shared";
+import { WATER_LABELS, lureTally, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { measureText, measuresText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText } from "./format";
+import { catchMonth, daysOut } from "./tripMonths";
+import { speciesCounts, speciesWaters } from "./speciesLink";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -78,6 +80,37 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
       ? [`${t("First in the book")} ${formatDatedDay(new Date(first.caughtAt))} · ${t("newest")} ${formatDatedDay(new Date(newest.caughtAt))}`]
       : []),
     ...(named.length > 0 ? [t("Waters: {waters}", { waters: named.join(", ") })] : []),
+    ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
+  ].join("\n");
+}
+
+/**
+ * A year in the book as plain text: its fish and kinds, the days out and the goal,
+ * its longest and heaviest, and the waters and lures that gave the most.
+ */
+export function yearSummary(book: Logbook, year: string, today: string, goal: number | null): string {
+  const catches = book.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`));
+  const days = daysOut(book, year, today);
+  const bests = personalBests({ ...book, catches });
+  const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
+    entry
+      ? [t(kind === "length" ? "Longest: {species}, {size}" : "Heaviest: {species}, {size}", { species: t(entry.species), size: measureText(measureOf(entry, kind)!) })]
+      : [];
+  const waters = speciesWaters(book, catches)
+    .filter((row) => row.name)
+    .slice(0, 3)
+    .map((row) => `${row.name} (${row.count})`);
+  const lures = lureTally({ ...book, catches }, 3)
+    .map((row) => `${t(row.lure)} (${row.count})`)
+    .join(", ");
+  return [
+    t("{year} in the book", { year }),
+    `${fishCountLabel(catches.length)} · ${tn(speciesCounts(catches).length, "{n} species", "{n} species")}`,
+    ...(days > 0 ? [t("Days on the water in {year}: {count}", { year, count: days })] : []),
+    ...(goal !== null ? [t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })] : []),
+    ...best(bests.longest, "length"),
+    ...best(bests.heaviest, "weight"),
+    ...(waters.length > 0 ? [t("Waters: {waters}", { waters: waters.join(", ") })] : []),
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
   ].join("\n");
 }
