@@ -103,6 +103,13 @@ describe("field archive", () => {
     expect(parseFieldArchive({ ...document, book: badTrip })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
   });
 
+  it("keeps a water's place through the file", () => {
+    const placed = { ...book, spots: book.spots.map((spot, i) => (i === 0 ? { ...spot, place: { lat: 46.85, lng: -94.24 } } : spot)) };
+    const parsed = parseFieldArchiveText(JSON.stringify(fieldArchiveDocument(archiveFor(placed, null))));
+    expect(parsed.ok && parsed.value.book.spots[0]!.place).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parsed.ok && "place" in parsed.value.book.spots[1]!).toBe(false);
+  });
+
   it("refuses a file with a size no fish could have", () => {
     const document = fieldArchiveDocument(archiveFor(book, null));
     const sized = (patch: Partial<CatchEntry>) => ({

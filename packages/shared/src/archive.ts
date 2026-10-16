@@ -44,6 +44,7 @@ function cleanSpot(spot: Spot): Spot {
     waterType: spot.waterType,
     notes: spot.notes,
     bestConditions: spot.bestConditions,
+    ...(spot.place ? { place: { lat: spot.place.lat, lng: spot.place.lng } } : {}),
   };
 }
 
