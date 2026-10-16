@@ -12,6 +12,7 @@ import { findLink } from "./CatchSearch";
 import { catchMonth } from "./tripMonths";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
+import { ThemeChoice } from "./ThemeChoice";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -216,6 +217,7 @@ export function HomePage() {
       </div>
 
       <BookFile />
+      <ThemeChoice />
     </div>
   );
 }
