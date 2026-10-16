@@ -1321,3 +1321,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR201~~ | ~~Species pages show how the best of the kind grew~~ (#501) | field | S |
 | ~~BR202~~ | ~~Outing pages lead with their fish from the outing's own day on~~ (#503) | field | S |
 | ~~BR203~~ | ~~Bests and species pages count fish by wind and water temperature; search finds a wind~~ (#505) | field | S |
+| ~~BR204~~ | ~~Notes keep line breaks; imperial reads a decimal comma; CSV formula guard; localised map coordinates~~ (#507) | field | S |
