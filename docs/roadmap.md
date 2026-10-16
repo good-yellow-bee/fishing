@@ -1543,3 +1543,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR343~~ | ~~Accent-blind search~~ (#723) | field | S |
 | ~~BR344~~ | ~~Empty months, size+ search, wrong-measure hint~~ (#724) | field | S |
 | ~~BR345~~ | ~~Through the year, dated outing steps, delete counts, phone map labels~~ (#728) | field | S |
+| ~~BR346~~ | ~~Catch steps stay in the list~~ (#730) | field | S |
