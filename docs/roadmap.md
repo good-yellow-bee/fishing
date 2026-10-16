@@ -1500,3 +1500,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR321~~ | ~~Review round 23 fixes and same-fish-twice note~~ (#682) | field | S |
 | ~~BR322~~ | ~~News 2026-10-16zm~~ (#684) | field | S |
 | ~~BR323~~ | ~~Kept outing/water edits; same-water temp; time-of-day tie~~ (#686) | field | S |
+| ~~BR324~~ | ~~Send a copy through the share sheet~~ (#687) | field | S |
