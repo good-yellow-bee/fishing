@@ -38,7 +38,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -207,6 +207,8 @@ function CatchForm() {
   // From this kind's fish that were both measured and weighed: about what the other measure of this one would be.
   const typedAmount = Number(toBookAmount(amount, measureKind, units));
   const pairs = sizePairs(speciesCatches(book, species, t, existing?.id));
+  // A number far past this kind's best that fits the other measure: likely typed in the wrong one, as the form keeps the last.
+  const otherMeasure = looksLikeOtherMeasure(bestSoFar, measureKind, typedAmount, Number(toBookAmount(amount, otherKind, units)));
   const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
     // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
@@ -715,6 +717,16 @@ function CatchForm() {
                 }
               />
             </label>
+            {otherMeasure ? (
+              <p className="field-hint wrong-measure" role="status">
+                {measureKind === "weight"
+                  ? t("Far past your heaviest of this kind ({size}). Was it a length?", { size: measureOfBest(bestSoFar!.heaviest, "weight") })
+                  : t("Far past your longest of this kind ({size}). Was it a weight?", { size: measureOfBest(bestSoFar!.longest, "length") })}{" "}
+                <button type="button" className="text-button" onClick={() => pickMeasureKind(otherKind)}>
+                  {otherKind === "length" ? t("Make it a length") : t("Make it a weight")}
+                </button>
+              </p>
+            ) : null}
             {likely !== null && !alsoAmount.trim() ? (
               <small className="field-hint">
                 {t("Your other fish of this kind suggest about {size}.", { size: otherKind === "weight" ? weightText(likely) : lengthText(likely) })}

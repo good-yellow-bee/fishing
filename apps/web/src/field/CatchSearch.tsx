@@ -181,13 +181,14 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
 
-/** Splits a search on "+", but not inside a name in the book that has a "+" of its own ("Pond + creek"). */
+/** Splits a search on "+", but not inside a name in the book that has a "+" of its own ("Pond + creek") or after a size ("30in+"). */
 export function searchParts(book: Logbook, needle: string): string[] {
   const names = [...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])]
     .filter((name) => name.includes("+"))
     .sort((a, b) => b.length - a.length);
   const kept: string[] = [];
-  let text = needle;
+  // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
+  let text = needle.replace(/(^|\s)(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=\s|$)/gi, "$1>$2");
   for (const name of names) {
     const at = text.toLowerCase().indexOf(name.toLowerCase());
     if (at < 0) continue;

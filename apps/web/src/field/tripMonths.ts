@@ -36,18 +36,29 @@ export function catchMonth(entry: CatchEntry): string {
   return localDate(new Date(entry.caughtAt)).slice(0, 7);
 }
 
-/** Fish per calendar month, newest month first, for the latest `limit` months that have any. */
-export function monthTally(catches: readonly CatchEntry[], limit = 12): { month: string; count: number }[] {
+/**
+ * Fish per calendar month, newest month first, from the latest month with a fish back over `limit` months (13, so
+ * this month sits beside the same month a year ago) or to the first fish. A month between with none is there at 0,
+ * not left out.
+ */
+export function monthTally(catches: readonly CatchEntry[], limit = 13): { month: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const entry of catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
     const month = catchMonth(entry);
     counts.set(month, (counts.get(month) ?? 0) + 1);
   }
-  return [...counts.entries()]
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .slice(0, limit)
-    .map(([month, count]) => ({ month, count }));
+  const months = [...counts.keys()].sort();
+  if (months.length === 0) return [];
+  const [y, m] = months[months.length - 1]!.split("-").map(Number) as [number, number];
+  const rows: { month: string; count: number }[] = [];
+  for (let back = 0; back < limit; back++) {
+    const at = new Date(y, m - 1 - back, 1);
+    const month = `${at.getFullYear()}-${String(at.getMonth() + 1).padStart(2, "0")}`;
+    if (month < months[0]!) break;
+    rows.push({ month, count: counts.get(month) ?? 0 });
+  }
+  return rows;
 }
 
 /** Fish per calendar year they came in, newest year first. */

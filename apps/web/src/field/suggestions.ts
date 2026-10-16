@@ -1,4 +1,4 @@
-import { catchesNewestFirst, localDate, lureTally, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
 
 /** The game files its fish here, always by weight, so they say nothing about how the player measures. */
@@ -140,3 +140,29 @@ export function speciesBestSoFar(
   const { longest, heaviest } = personalBests({ ...book, catches });
   return { longest, heaviest };
 }
+
+/** A size this many times the kind's best so far is more likely typed in the other measure than a new record. */
+export const FAR_PAST_BEST = 2;
+
+/**
+ * True when `amount` (inches or pounds, by `kind`) is more than FAR_PAST_BEST times this kind's best of that measure,
+ * and `asOther` (the same typed number read as the other measure) would sit no further past that one's best: "41" for
+ * a 41-inch pike typed as pounds.
+ */
+export function looksLikeOtherMeasure(
+  best: { longest: CatchEntry | null; heaviest: CatchEntry | null } | null,
+  kind: Measure["kind"],
+  amount: number,
+  asOther: number,
+): boolean {
+  if (!best || !(amount > 0)) return false;
+  const size = (entry: CatchEntry | null, of: Measure["kind"]) => {
+    const measure = entry ? measureOf(entry, of) : null;
+    return measure ? (measure.kind === "length" ? measure.inches : measure.pounds) : null;
+  };
+  const same = size(kind === "length" ? best.longest : best.heaviest, kind);
+  if (same === null || amount <= same * FAR_PAST_BEST) return false;
+  const other = size(kind === "length" ? best.heaviest : best.longest, kind === "length" ? "weight" : "length");
+  return other === null || asOther <= other * FAR_PAST_BEST;
+}
+
