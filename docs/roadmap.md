@@ -1377,3 +1377,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR230~~ | ~~That-day link on last year's fish~~ (#552) | field | S |
 | ~~BR231~~ | ~~Audit 11: merge photo room, unneeded waters, make-room focus, small weights~~ (#553) | field | S |
 | ~~BR233~~ | ~~Deleted fish stay out of merges~~ (#557) | field | S |
+| ~~BR234~~ | ~~Copy an outing as a text summary~~ (#564) | field | S |
