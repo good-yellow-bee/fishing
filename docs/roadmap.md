@@ -1466,3 +1466,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR296~~ | ~~Search results largest first~~ (#649) | field | S |
 | ~~BR297~~ | ~~Share button beside Copy a summary~~ (#650) | field | S |
 | ~~BR298~~ | ~~Outings spreadsheet with lost and missed~~ (#652) | field | S |
+| ~~BR299~~ | ~~Note where it is: place links from map and water page~~ (#653) | field | S |
