@@ -14,9 +14,12 @@ import {
 import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
+import { useTackle } from "./TackleState";
+import { pieceRecords } from "./pieceRecord";
+import { exactTerm, findLink } from "../findLinks";
 import { packingTips } from "../waterTips";
 import { PagedTrips } from "../PagedTrips";
-import { t, useT } from "../../i18n";
+import { t, tn, useT } from "../../i18n";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -43,6 +46,33 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
       />
     </section>
+  );
+}
+
+/** How many lures the record lists before the rest. */
+const RECORD_ROWS = 8;
+
+/** Each lure taken on past outings: the outings it went on and the fish it took there, most fish first. */
+function LureRecord({ today }: { today: string }) {
+  const { book } = useLogbook();
+  const { items } = useTackle();
+  const records = pieceRecords(book, items, today);
+  if (records.length === 0) return null;
+  return (
+    <>
+      <h2 className="subhead">{t("Lure record")}</h2>
+      <ul className="species-waters lure-record">
+        {records.slice(0, RECORD_ROWS).map((row) => (
+          <li key={row.label}>
+            {/* A lure that took fish opens them in the catch search. */}
+            {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            <span className="meta">
+              {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
 
@@ -139,6 +169,7 @@ export function GearPage() {
       ) : (
         upcoming.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}
+      <LureRecord today={today} />
       <h2 className="subhead">{t("Recent")}</h2>
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
