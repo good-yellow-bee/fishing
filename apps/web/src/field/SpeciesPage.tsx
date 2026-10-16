@@ -1,6 +1,7 @@
+import { Fragment } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, moonTally, seasonTally, skyTally, type CatchEntry } from "@stillwater/shared";
-import { t, useT } from "../i18n";
+import { FISH, biteTimes, moonTally, seasonTally, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { getUnits, num, t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { fishCountLabel, formatCatchDay } from "./format";
@@ -12,7 +13,7 @@ import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
-import { measureText } from "../i18n/content";
+import { CM_PER_IN, KG_PER_LB, measureText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -135,6 +136,13 @@ function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   );
 }
 
+/** A gain in size, with a place more than a size shows, so a small step does not read "+0 cm" or "+0 lb". */
+function gainText(gain: Measure): string {
+  const metric = getUnits() === "metric";
+  if (gain.kind === "length") return metric ? `${num(gain.inches * CM_PER_IN, 1)} cm` : `${num(gain.inches, 2)} in`;
+  return metric ? `${num(gain.pounds * KG_PER_LB, 2)} kg` : `${num(gain.pounds, 2)} lb`;
+}
+
 /** Each fish that beat the best of the kind before it, oldest first, with what it added; shown once the first was ever beaten. */
 function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
   const lists = [bestSteps(catches, "length"), bestSteps(catches, "weight")].filter((steps): steps is BestStep[] => steps !== null);
@@ -144,19 +152,26 @@ function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
       <div className="section-head">
         <h2>{t("How the best grew")}</h2>
       </div>
-      {lists.map((steps) => (
-        <ol key={steps[0]!.entry.measure.kind} className="species-waters best-steps">
-          {steps.map(({ entry, gain }) => (
-            <li key={entry.id}>
-              <Link to={`/catches/${entry.id}`}>{measureText(entry.measure)}</Link>
-              <span className="meta">
-                {formatCatchDay(entry.caughtAt)}
-                {gain ? ` · +${measureText(gain)}` : ` · ${t("the first")}`}
-              </span>
-            </li>
-          ))}
-        </ol>
-      ))}
+      {lists.map((steps) => {
+        const label = steps[0]!.entry.measure.kind === "length" ? t("By length") : t("By weight");
+        return (
+          <Fragment key={steps[0]!.entry.measure.kind}>
+            {/* Both measures have a story: each list says which it is. */}
+            {lists.length > 1 ? <h3 className="subhead">{label}</h3> : null}
+            <ol className="species-waters best-steps" aria-label={label}>
+              {steps.map(({ entry, gain }) => (
+                <li key={entry.id}>
+                  <Link to={`/catches/${entry.id}`}>{measureText(entry.measure)}</Link>
+                  <span className="meta">
+                    {formatCatchDay(entry.caughtAt)}
+                    {gain ? ` · +${gainText(gain)}` : ` · ${t("the first")}`}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </Fragment>
+        );
+      })}
     </>
   );
 }

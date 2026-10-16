@@ -62,7 +62,7 @@ export function PhotosPage() {
                   return (
                     <li key={entry.id}>
                       <Link to={`/catches/${entry.id}`}>
-                        <img src={photoFor(entry.id)!} alt={`${t(entry.species)}, ${size}`} loading="lazy" />
+                        <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>
                           <small>

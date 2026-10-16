@@ -44,3 +44,19 @@ describe("water-temperature queries", () => {
     expect(tempBandSearch({ from: null, to: 50, count: 1 })).toBe("<50°F");
   });
 });
+
+describe("bounds on the edge", () => {
+  it("keeps a fish logged in metric right on a size bound", () => {
+    expect(sizeMatches({ kind: "length", inches: 19.685 }, parseSizeQuery(">50 cm")!)).toBe(true);
+    expect(sizeMatches({ kind: "weight", pounds: 4.409 }, parseSizeQuery(">2 kg")!)).toBe(true);
+    expect(sizeMatches({ kind: "weight", pounds: 2.205 }, parseSizeQuery("<1 kg")!)).toBe(true);
+    expect(sizeMatches({ kind: "weight", pounds: 2.3 }, parseSizeQuery("<1 kg")!)).toBe(false);
+  });
+
+  it("keeps a water temperature logged in °C right on its bound, and reads <= as up to it", () => {
+    expect(tempMatches(59.5, parseTempQuery(">15.3°C")!)).toBe(true);
+    expect(tempMatches(59.5, parseTempQuery("<15.3°C")!)).toBe(false);
+    expect(tempMatches(60, parseTempQuery("<=60°F")!)).toBe(true);
+    expect(tempMatches(60, parseTempQuery("<60°F")!)).toBe(false);
+  });
+});

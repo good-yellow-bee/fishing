@@ -141,7 +141,8 @@ export function searchParts(book: Logbook, needle: string): string[] {
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   const parts = searchParts(book, needle);
-  if (parts.length < 2) return findOne(book, needle, t);
+  // "pike +" while the second part is still being typed: just the first.
+  if (parts.length < 2) return parts[0] ? findOne(book, parts[0], t) : [];
   let found = findOne(book, parts[0]!, t);
   for (const part of parts.slice(1)) {
     const hit = new Set(findOne(book, part, t).map((entry) => entry.id));
