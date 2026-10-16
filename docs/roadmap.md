@@ -1351,3 +1351,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR219~~ | ~~Copy the last outing's bag; undo loading a book file~~ (#532) | field | S |
 | ~~BR220~~ | ~~News card: both measures, copying a bag, undoing a load~~ (#533) | field | S |
 | ~~BR221~~ | ~~Note where a water is (typed or device location)~~ (#535) | field | S |
+| ~~BR222~~ | ~~Audit 9 fixes: map pins, load warning and undo, tackle focus~~ (#537) | field | S |
