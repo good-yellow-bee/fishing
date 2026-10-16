@@ -128,6 +128,11 @@ export type Fight = {
   windy?: FightWind;
 };
 
+/** Said after a lost fish's outcome when it was trophy-sized, so the one that got away is remembered as big. */
+export function lostTrophy(species: FishSpecies, weight: number) {
+  return isTrophyWeight(species, weight) ? ` ${t("It looked like a trophy.")}` : "";
+}
+
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
@@ -929,10 +934,11 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
+            const trophy = lostTrophy(current.species, current.weight);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             const snapped = t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
-            setOutcome({ kind: "broke", message: reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped });
+            setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
           } else if (result === "escaped") {
             fx.snap();
@@ -942,11 +948,12 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
+            const trophy = lostTrophy(current.species, current.weight);
             if (sim.tornOut) {
-              setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) });
+              setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Soft mouth — ease off as soon as the bar turns red.") + stillAbout());
             } else {
-              setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
+              setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm.") + stillAbout());
             }
           }
