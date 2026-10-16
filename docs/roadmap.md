@@ -1471,3 +1471,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR300~~ | ~~Review 20 fixes: outing restore only after a water change, no place link on sample waters~~ (#654) | field | S |
 | ~~BR301~~ | ~~News 2026-10-16zg for field log round 3~~ (#656) | field | S |
 | ~~BR302~~ | ~~Search: moon words, dusk/sunrise, lb-oz sizes~~ (#657) | field | S |
+| ~~BR303~~ | ~~Dated backup and spreadsheet names~~ (#658) | field | S |
