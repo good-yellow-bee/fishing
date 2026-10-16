@@ -23,9 +23,9 @@ import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
-import { outingAverage } from "./outingAverage";
+import { outingAverage, topOuting } from "./outingAverage";
 import { EditDelete } from "./EditDelete";
-import { messageText, tripWhen } from "./format";
+import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
@@ -99,6 +99,7 @@ export function SpotPage() {
   const catches = catchesForSpot(book, spot.id);
   const fishByTrip = fishCountsByTrip({ ...book, catches });
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
 
   return (
     <div className="sheet">
@@ -140,6 +141,12 @@ export function SpotPage() {
         <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>
       </div>
       {average ? <p className="meta">{average}</p> : null}
+      {top ? (
+        <p className="meta stand">
+          {/* The best day here, opening that outing. */}
+          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{top.title}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
+        </p>
+      ) : null}
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
