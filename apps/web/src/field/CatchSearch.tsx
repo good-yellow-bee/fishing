@@ -11,7 +11,7 @@ import { catchMonth, monthName } from "./tripMonths";
 import { noteText } from "./format";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
-import { FIND_PARAM, parseExactTerm } from "./findLinks";
+import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 
 function normalize(value: string): string {
@@ -69,6 +69,21 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
 }
 
+/** What an exact term compares for one fish, in the book's English: its kind, lure, water, sky, wind, time of day, season or moon. */
+function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string | null {
+  if (field === "species") return entry.species;
+  if (field === "lure") return entry.lure;
+  if (field === "water") return spotById(book, entry.spotId)?.name ?? null;
+  if (field === "sky") return entry.weather ? SKY_LABELS[entry.weather.sky] : null;
+  if (field === "wind") return entry.weather ? WIND_LABELS[entry.weather.wind] : null;
+  const at = new Date(entry.caughtAt);
+  if (Number.isNaN(at.getTime())) return null;
+  if (field === "season") return SEASON_LABELS[lakeSeason(at)];
+  if (field === "moon") return MOON_QUARTER_LABELS[moonQuarterOf(at)];
+  const id = biteTimeOf(at.getHours());
+  return BITE_TIMES.find((row) => row.id === id)!.label;
+}
+
 /** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, words from a note, and released fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
@@ -77,9 +92,10 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
     // One name whole, as stored or as it reads in the player's language.
     const want = normalize(exact.name);
     const named = (name: string) => normalize(name) === want || normalize(t(name)) === want;
-    return catchesNewestFirst(book).filter((entry) =>
-      exact.field === "species" ? named(entry.species) : exact.field === "lure" ? named(entry.lure) : named(spotById(book, entry.spotId)?.name ?? ""),
-    );
+    return catchesNewestFirst(book).filter((entry) => {
+      const name = exactName(book, entry, exact.field);
+      return name !== null && named(name);
+    });
   }
   // "2026-10-12": the fish of that local day.
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());

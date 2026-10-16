@@ -44,9 +44,9 @@ export function WaterTipsBox({ catches, label, on, within }: { catches: readonly
             <Link to={find(exactTerm("lure", t(row.lure)))}>{t(row.lure)}</Link> ({row.count})
           </Fragment>
         ))}
-        {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(t(tips.time.label))} /> : null}
-        {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} to={find(t(SKY_LABELS[tips.sky]))} /> : null}
-        {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(t(SEASON_LABELS[tips.season]))} /> : null}
+        {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
+        {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} to={find(exactTerm("sky", t(SKY_LABELS[tips.sky])))} /> : null}
+        {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {pastWeek.length > 0 ? (
           <>
             <br />

@@ -8,6 +8,7 @@ describe("exact search terms", () => {
   });
 
   it("leaves any other search alone", () => {
+    expect(parseExactTerm('time:"Dawn"')).toEqual({ field: "time", name: "Dawn" });
     expect(parseExactTerm("Bass")).toBeNull();
     expect(parseExactTerm('colour:"red"')).toBeNull();
     expect(parseExactTerm('species:""')).toBeNull();

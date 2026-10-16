@@ -1,7 +1,7 @@
 import { waterTempTally, windTally, type Logbook, type WaterTempTally } from "@stillwater/shared";
 import { t } from "../i18n";
 import { tempText } from "../i18n/content";
-import { findLink, findWithLink } from "./findLinks";
+import { exactTerm, findLink, findWithLink } from "./findLinks";
 import { TallyBars } from "./TallyBars";
 
 /** "Under 10°C", "10°C to 16°C", "21°C and up", in the player's units. */
@@ -33,7 +33,7 @@ export function WeatherBars({ book, within }: { book: Logbook; within?: string }
           <div className="section-head">
             <h2>{t("By the wind")}</h2>
           </div>
-          <TallyBars rows={winds.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? link(t(row.label)) : undefined }))} />
+          <TallyBars rows={winds.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? link(exactTerm("wind", t(row.label))) : undefined }))} />
         </section>
       ) : null}
       {worth(temps.map((row) => row.count)) ? (
