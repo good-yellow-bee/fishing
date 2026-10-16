@@ -1177,7 +1177,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT132~~ | ~~Hunter follows: a pike, largemouth or walleye can follow a landed small fish in without grabbing it, then stays about that bank for the next few casts; a hint, a bite call and a landed note~~ (#707) | fish | S |
 | ~~GT133~~ | ~~News card for the hunter that follows a small fish in~~ (#709) | ui | S |
 | ~~GT134~~ | ~~A big lure tempts a fish that got away (or a hunter that followed one in) back sooner: 50% a cast at its bank instead of 30%, and the still-about hint says so on a small lure~~ (#710) | fish | S |
-| GT135 | News card for the big lure tempting a waiting fish back | ui | S |
+| ~~GT135~~ | ~~News card for the big lure tempting a waiting fish back~~ (#712) | ui | S |
+| GT136 | While a fish that got away, or a hunter, is still about the bank, one big shadow circles wide and slow round the float as you wait there | scene | S |
 
 ## Risks / open questions for the owner
 

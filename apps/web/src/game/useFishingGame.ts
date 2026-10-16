@@ -269,6 +269,7 @@ export function useFishingGame(
   const [nibble, setNibble] = useState(false);
   /** This cast landed in a school; the scene shows it milling round the float while it waits. */
   const [schooled, setSchooled] = useState(false);
+  const [lurking, setLurking] = useState(false);
   const [hint, setHint] = useState(() => t("Walk to the water."));
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
@@ -432,7 +433,8 @@ export function useFishingGame(
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
-    // The fish that broke off here may come back, at the same weight.
+    // The fish that broke off here may come back, at the same weight; while it's about this bank its shadow circles the float.
+    setLurking(gotAwayRef.current?.spot === spotRef.current);
     const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random(), favorsLargeFish(lureRef?.current ?? ""));
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
@@ -1032,6 +1034,7 @@ export function useFishingGame(
     hint,
     nibble,
     schooled,
+    lurking,
     hotspot,
     sim: simRef,
     performance: performanceRef,
