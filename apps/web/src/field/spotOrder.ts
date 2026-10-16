@@ -26,3 +26,13 @@ export function spotsByLastFish(book: Logbook): SpotRow[] {
   });
   return rows.map(({ index: _index, ...row }) => row);
 }
+
+/**
+ * The water a new fish most likely came from: today's outing's water, or of several outings today the one fished
+ * most recently; with none today, the water fished most recently; else the book's first.
+ */
+export function likelyWater(book: Logbook, today: string): string {
+  const order = spotsByLastFish(book).map((row) => row.spot.id);
+  const todays = new Set(book.trips.filter((trip) => trip.date === today).map((trip) => trip.spotId));
+  return order.find((id) => todays.has(id)) ?? order[0] ?? "";
+}
