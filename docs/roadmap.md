@@ -1501,3 +1501,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR322~~ | ~~News 2026-10-16zm~~ (#684) | field | S |
 | ~~BR323~~ | ~~Kept outing/water edits; same-water temp; time-of-day tie~~ (#686) | field | S |
 | ~~BR324~~ | ~~Send a copy through the share sheet~~ (#687) | field | S |
+| ~~BR325~~ | ~~Photo GPS picks the water~~ (#688) | field | S |
