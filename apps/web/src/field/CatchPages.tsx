@@ -232,7 +232,8 @@ function CatchForm() {
   // The water a photo's location picked, while the water field still holds it.
   const [photoSpot, setPhotoSpot] = useState("");
   // Set once the player picks a water themselves; a photo's location doesn't overrule them.
-  const spotTouched = useRef(false);
+  // A water brought in by a link (Log a fish on a water's page) counts as picked: a photo's place won't move it.
+  const spotTouched = useRef(Boolean(linkedSpot));
   // Read when the photo's notes come in, so a time typed while they were read is kept.
   const timeTouchedNow = useRef(timeTouched);
   timeTouchedNow.current = timeTouched;

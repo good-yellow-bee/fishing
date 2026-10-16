@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, dayWeather, lastMeasureKind, ownFirst, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -112,6 +112,16 @@ describe("the outing a new catch files under", () => {
     expect(tripOnDay(book, trip.spotId, trip.date)?.id).toBe(trip.id);
     expect(tripOnDay(book, trip.spotId, "1999-01-01")).toBeUndefined();
     expect(tripOnDay(book, "no-such-water", trip.date)).toBeUndefined();
+  });
+
+  it("counts a loose fish from the small hours for the evening before, unless that day has its own outing", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const only = { ...book, trips: [{ id: "eve", date: "2026-10-03", spotId: "w", title: "Evening", note: "" }] };
+    expect(fishOnOutingDay(only, "w", "2026-10-03T21:00", "2026-10-03")).toBe(true);
+    expect(fishOnOutingDay(only, "w", "2026-10-04T01:30", "2026-10-03")).toBe(true);
+    expect(fishOnOutingDay(only, "w", "2026-10-04T05:00", "2026-10-03")).toBe(false);
+    const both = { ...only, trips: [...only.trips, { id: "dawn", date: "2026-10-04", spotId: "w", title: "Dawn", note: "" }] };
+    expect(fishOnOutingDay(both, "w", "2026-10-04T01:30", "2026-10-03")).toBe(false);
   });
 
   it("files a fish from the small hours under the evening before's outing", () => {

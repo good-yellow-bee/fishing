@@ -26,7 +26,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { thisWeekInPastYears } from "./yearsAgo";
 import { speciesCounts } from "./speciesLink";
@@ -53,6 +53,7 @@ import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
+import { fishOnOutingDay } from "./suggestions";
 import "./search.css";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
@@ -267,9 +268,9 @@ function TripView() {
   const fishByTrip = fishCountsByTrip(book);
   const best = bestOutingHere(tripsForSpot(book, trip.spotId), (id) => fishByTrip.get(id) ?? 0, trip.id, today);
 
-  // Fish from this water on the outing's day that were logged without it.
+  // Fish from this water on the outing's day (or its small hours) that were logged without it.
   const loose = book.catches.filter(
-    (entry) => entry.tripId === null && entry.spotId === trip.spotId && localDate(new Date(entry.caughtAt)) === trip.date,
+    (entry) => entry.tripId === null && entry.spotId === trip.spotId && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date(entry.caughtAt)), trip.date),
   );
   const tackle = (
     <TackleList
@@ -470,12 +471,14 @@ function TripForm() {
     if (existing || !y || !m || !d) return [];
     return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), 3, Infinity);
   }, [book, spotId, date, existing]);
-  // Made from a fish logged without an outing: that day's fish on this water with none go on the new one.
+  // Made from a fish logged without an outing: that day's fish (and its small hours') on this water with none go on the new one.
   const loose = useMemo(
     () =>
       existing || !params.has("loose")
         ? []
-        : book.catches.filter((entry) => !entry.tripId && entry.spotId === spotId && localDate(new Date(entry.caughtAt)) === date).map((entry) => entry.id),
+        : book.catches
+            .filter((entry) => !entry.tripId && entry.spotId === spotId && fishOnOutingDay(book, spotId, toLocalInput(new Date(entry.caughtAt)), date))
+            .map((entry) => entry.id),
     [book, existing, params, spotId, date],
   );
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");

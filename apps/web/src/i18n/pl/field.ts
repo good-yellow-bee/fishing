@@ -523,6 +523,7 @@ export const PL_FIELD: PlBook = {
   "Open it": "Otwórz ją",
   "Changes you made here were not saved.": "Zmiany wprowadzone tutaj nie zostały zapisane.",
   "Pick it up": "Wróć do niej",
+  "Pick them up": "Przywróć je",
   "Let it go": "Porzuć",
   "Same as the last fish on this outing: {weather}": "Jak przy ostatniej rybie z tej wyprawy: {weather}",
   "Same as the last fish that day: {weather}": "Jak przy ostatniej rybie tego dnia: {weather}",

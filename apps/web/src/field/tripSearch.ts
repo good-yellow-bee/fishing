@@ -2,7 +2,7 @@ import { WATER_LABELS, spotById, type Logbook, type Trip } from "@stillwater/sha
 import { dateWords } from "./dateWords";
 
 /** Words that ask for the outings already fished that landed nothing. */
-const NO_FISH = ["no fish", "blank", "bez ryb", "pusty", "puste"];
+const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
 
 /** Lower case with single spaces, so typed words compare however they were spaced. */
 function plain(text: string): string {
@@ -14,7 +14,11 @@ function tripText(book: Logbook, trip: Trip, t: (text: string) => string): strin
   const spot = spotById(book, trip.spotId);
   const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
   const day = new Date(y, m - 1, d, 12);
-  const written = ["en", "pl"].map((lang) => new Intl.DateTimeFormat(lang, { weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(day));
+  // The month on its own too: Polish writes it differently beside a day ("września") than alone ("wrzesień").
+  const written = ["en", "pl"].flatMap((lang) => [
+    new Intl.DateTimeFormat(lang, { weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(day),
+    new Intl.DateTimeFormat(lang, { month: "long" }).format(day),
+  ]);
   return plain([trip.title, trip.note, spot?.name ?? "", spot ? t(WATER_LABELS[spot.waterType]) : "", trip.date, ...written].join(" \n "));
 }
 

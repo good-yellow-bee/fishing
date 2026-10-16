@@ -86,6 +86,18 @@ export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | un
 export const LATE_NIGHT_UNTIL = 4;
 
 /**
+ * Whether a fish caught at this local time (YYYY-MM-DDTHH:MM) on this water belongs to an outing on `ymd`: caught that
+ * day, or in the small hours after it with no outing of its own day there.
+ */
+export function fishOnOutingDay(book: Logbook, spotId: string, local: string, ymd: string): boolean {
+  if (local.slice(0, 10) === ymd) return true;
+  const hour = Number(local.slice(11, 13));
+  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return false;
+  const [y, m, d] = local.slice(0, 10).split("-").map(Number) as [number, number, number];
+  return localDate(new Date(y, m - 1, d - 1, 12)) === ymd && !tripOnDay(book, spotId, local.slice(0, 10));
+}
+
+/**
  * The outing a fish caught at this local time (YYYY-MM-DDTHH:MM) on this water most likely belongs to: that day's, or,
  * in the small hours with none that day, the outing of the evening before.
  */
