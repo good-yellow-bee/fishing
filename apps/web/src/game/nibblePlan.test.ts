@@ -58,7 +58,9 @@ describe("nibble plan", () => {
 
   it("names every kind's style, with only known ids set apart", () => {
     const styles = new Set(FISH.map((fish) => biteStyle(fish.id)));
-    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "peck", "run", "gulp", "usual"]));
+    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "peck", "run", "gulp", "snatch", "usual"]));
+    expect(biteStyle("brook-trout")).toBe("snatch");
+    expect(biteStyle("rainbow-trout")).toBe("snatch");
     expect(biteStyle("golden-shiner")).toBe("usual");
     expect(biteStyle("perch")).toBe("gulp");
     expect(biteStyle("pike")).toBe("ambush");

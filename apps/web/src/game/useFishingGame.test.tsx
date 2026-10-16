@@ -929,6 +929,17 @@ describe("level unlock integration", () => {
     expect(held).toBeGreaterThan(1.5);
   });
 
+  it("calls a trout snatching the bait and gives it less time before it lets go", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "rainbow-trout")!);
+    cast(surface);
+    for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("It snatched it — strike fast!");
+    for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    const held = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
+    expect(held).toBeLessThan(1.2);
+  });
+
   it("calls a crappie's lift bite", () => {
     const surface = mount();
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);

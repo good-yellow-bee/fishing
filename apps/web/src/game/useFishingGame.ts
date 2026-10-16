@@ -37,7 +37,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, FOLLOWERS, GULP_HOLD, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
+import { biteStyle, FOLLOWERS, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -162,6 +162,7 @@ function strikeCall(style: BiteStyle) {
   if (style === "peck") return t("The pecking turns into a pull — strike!");
   if (style === "run") return t("It's running off with it — strike!");
   if (style === "gulp") return t("It's gulping it down — strike!");
+  if (style === "snatch") return t("It snatched it — strike fast!");
   return t("NOW — strike!");
 }
 
@@ -497,7 +498,7 @@ export function useFishingGame(
         const openWindow = () => {
           const heldMs = hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints));
           const style = biteStyle(species.id);
-          const windowMs = style === "light" ? Math.round(heldMs * LIGHT_HOLD) : style === "gulp" ? Math.round(heldMs * GULP_HOLD) : heldMs;
+          const windowMs = style === "light" ? Math.round(heldMs * LIGHT_HOLD) : style === "gulp" ? Math.round(heldMs * GULP_HOLD) : style === "snatch" ? Math.round(heldMs * SNATCH_HOLD) : heldMs;
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
           timers.current.hook = window.setTimeout(() => {
             if (phaseRef.current !== "hookset") return;

@@ -1188,7 +1188,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT143~~ | ~~The field guide says how each landed fish bites (ambush, mouth, light, lift, peck, run); news card~~ (#727) | ui | S |
 | ~~GT144~~ | ~~A lake whitefish takes the bait lightly, like a walleye; news card~~ (#729) | game | S |
 | ~~GT145~~ | ~~A bluegill turns broadside and circles: while fresh it reels in 0.7x as fast; fight card habit line; news card~~ (#731) | fish | S |
-| GT146 | A perch gulps the bait: holds it 1.5x longer, with its own strike call and field guide line; news card | game | S |
+| ~~GT146~~ | ~~A perch gulps the bait: holds it 1.5x longer, with its own strike call and field guide line; news card~~ (#732) | game | S |
+| GT147 | A brook or rainbow trout snatches the bait: lets go after 0.8x the time, with its own strike call and field guide line; news card | game | S |
 
 ## Risks / open questions for the owner
 

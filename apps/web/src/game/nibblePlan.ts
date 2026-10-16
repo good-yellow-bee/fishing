@@ -25,9 +25,9 @@ const PECK_GAP_SPREAD = 260;
  * bottom feeders mouth it over and over, a walleye or a whitefish takes it so lightly the float only slides under,
  * a crappie takes it rising so the float lifts and lies flat, a bluegill pecks at it in quick taps
  * before it pulls, a smallmouth bass runs off with it so the float slides away before it goes under,
- * a perch gulps it down and holds on, and the rest nibble a time or three.
+ * a perch gulps it down and holds on, a trout snatches it and lets go fast, and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "run" | "gulp" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "run" | "gulp" | "snatch" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -44,6 +44,8 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   bluegill: "peck",
   "smallmouth-bass": "run",
   perch: "gulp",
+  "brook-trout": "snatch",
+  "rainbow-trout": "snatch",
 };
 
 /** A light biter's take pulls the float only this share as deep as a usual bite. */
@@ -52,6 +54,8 @@ export const LIGHT_PLUNGE = 0.45;
 export const LIGHT_HOLD = 1.3;
 /** A perch gulps the bait down and holds on this much longer before it lets go. */
 export const GULP_HOLD = 1.5;
+/** A trout snatches the bait and spits it this much sooner, so the strike has to be quick. */
+export const SNATCH_HOLD = 0.8;
 /** A lift bite raises the float this share of a usual bite's pull, instead of pulling it under. */
 export const LIFT_RISE = 0.3;
 /** A running bite pulls the float under this share as deep as a usual bite, as it slides it away. */
