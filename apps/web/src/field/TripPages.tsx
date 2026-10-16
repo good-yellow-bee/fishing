@@ -15,6 +15,7 @@ import {
   upcomingTrips,
   recentTrips,
   itemsForTrip,
+  tripsForSpot,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
 import { tripNeighbors } from "./catchNeighbors";
@@ -36,6 +37,7 @@ import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./tripSummary";
 import { fishPace } from "./tripPace";
+import { bestOutingHere } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -150,6 +152,8 @@ function TripView() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
+  const fishByTrip = fishCountsByTrip(book);
+  const best = bestOutingHere(tripsForSpot(book, trip.spotId), (id) => fishByTrip.get(id) ?? 0, trip.id, today);
 
   // Fish from this water on the outing's day that were logged without it.
   const loose = book.catches.filter(
@@ -178,6 +182,8 @@ function TripView() {
           {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt, catches.length)}
         </p>
       ) : null}
+      {/* Against every other outing on the same water. */}
+      {best ? <p className="meta best-outing">{best}</p> : null}
       <SpeciesChips catches={catches} />
       <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />
       {loose.length > 0 ? (
