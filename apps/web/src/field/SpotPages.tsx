@@ -32,7 +32,7 @@ import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
-import { formatCoord } from "./map/places";
+import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
 
@@ -134,7 +134,8 @@ export function SpotPage() {
               {t("Open on a map")}
             </a>
           </p>
-        ) : (
+        ) : placeFor(spot.id) ? null : (
+          // A sample water already has its pin on the map; any other water with no place is offered one.
           <p className="meta spot-place">
             <Link to={`/spots/${spot.id}/edit#place`}>{t("Note where it is")}</Link>
           </p>
