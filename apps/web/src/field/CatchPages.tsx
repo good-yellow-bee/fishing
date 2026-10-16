@@ -349,6 +349,13 @@ function CatchForm() {
     setPhotoError("");
   };
 
+  // An untouched number keeps its stored value, so a metric round trip doesn't nudge it; that holds for a length and
+  // weight swapped between the two fields too.
+  const bookAmount = (text: string, kind: CatchDraft["measureKind"]) => {
+    const stored = existing ? measureOf(existing, kind) : null;
+    return stored && text === measureAmountText(stored, units) ? measureAmountText(stored, "imperial") : toBookAmount(text, kind, units);
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (reducing) {
@@ -359,15 +366,8 @@ function CatchForm() {
       // A name already in the book is kept as written there, so "rock bass" joins "Rock bass".
       species: bookName(species, [...(existing ? [existing.species] : []), ...SPECIES, ...book.catches.map((entry) => entry.species)]),
       measureKind,
-      // An untouched number keeps its stored value, so a metric round trip doesn't nudge it.
-      amount:
-        existing && amount === startAmount && measureKind === existing.measure.kind
-          ? amountText(existing, "imperial")
-          : toBookAmount(amount, measureKind, units),
-      alsoAmount:
-        existing?.alsoMeasure && alsoAmount === startAlso && existing.alsoMeasure.kind === otherKind
-          ? measureAmountText(existing.alsoMeasure, "imperial")
-          : toBookAmount(alsoAmount, otherKind, units),
+      amount: bookAmount(amount, measureKind),
+      alsoAmount: bookAmount(alsoAmount, otherKind),
       lure: bookName(lure, [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS]),
       spotId,
       tripId,
@@ -540,6 +540,9 @@ function CatchForm() {
               <input
                 name="alsoAmount"
                 inputMode="decimal"
+                aria-label={`${measureKind === "length" ? t("Also weighed (optional)") : t("Also measured (optional)")}, ${
+                  units === "metric" ? (otherKind === "length" ? t("Centimetres") : t("Kilograms")) : otherKind === "length" ? t("Inches") : t("Pounds")
+                }`}
                 value={alsoAmount}
                 onChange={(event) => setAlsoAmount(event.target.value)}
                 placeholder={
