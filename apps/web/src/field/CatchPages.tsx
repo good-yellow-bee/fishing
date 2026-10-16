@@ -93,7 +93,13 @@ const BAITS = [
   "Elk hair caddis",
   "Spinnerbait",
   "Senko",
+  "Minnow",
+  "Leech",
+  "Wax worm",
 ];
+
+/** Live baits a shore or bait angler can pick in one tap while the lure field is still empty. */
+const LIVE_BAITS = ["Nightcrawler", "Minnow", "Leech", "Wax worm"];
 
 /**
  * The book keeps fish and bait under their English names, so a list pick made
@@ -745,6 +751,16 @@ function CatchForm() {
                   onClick={() => setLure(name)}
                 >
                   {name}
+                </button>
+              ))}
+            </p>
+          ) : null}
+          {!lure.trim() ? (
+            <p className="wide form-note lure-tips live-baits">
+              {t("Live bait:")}{" "}
+              {LIVE_BAITS.map((name) => (
+                <button key={name} type="button" className="lure-tip" onClick={() => setLure(t(name))}>
+                  {t(name)}
                 </button>
               ))}
             </p>

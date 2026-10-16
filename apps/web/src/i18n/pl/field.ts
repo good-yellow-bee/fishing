@@ -203,6 +203,10 @@ export const PL_FIELD: PlBook = {
   // Placeholder bait names in the catch form (the form's own list).
   "Crayfish crank": "Wobler rak",
   Nightcrawler: "Rosówka",
+  Minnow: "Żywiec",
+  Leech: "Pijawka",
+  "Wax worm": "Larwa barciaka",
+  "Live bait:": "Żywa przynęta:",
   "Elk hair caddis": "Chruścik z sierści łosia",
   "Green pumpkin tube": "Zielona tuba",
 
