@@ -31,11 +31,10 @@ export function localizeSample(book: Logbook): Logbook {
 }
 
 /**
- * Text from a form, as the book keeps it: a sample line left as it was shown (in the reader's language) goes back
- * to its English original, so switching language still switches it; anything else is the player's own words.
+ * Text from a form, as the book keeps it: a sample line the form showed (in the reader's language) and saved unchanged
+ * goes back to the English it is stored in, so switching language still switches it. Anything else, including the
+ * angler's own words that happen to read like a sample line, is kept as typed.
  */
-export function bookLine(text: string): string {
-  if (SAMPLE_LINES.has(text)) return text;
-  for (const line of SAMPLE_LINES) if (t(line) === text) return line;
-  return text;
+export function bookLine(text: string, stored: string): string {
+  return SAMPLE_LINES.has(stored) && t(stored) === text ? stored : text;
 }

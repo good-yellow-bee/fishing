@@ -170,8 +170,9 @@ export function searchParts(book: Logbook, needle: string): string[] {
  */
 function findWords(book: Logbook, part: string, t: (text: string) => string): CatchEntry[] {
   const found = findOne(book, part, t);
-  const words = part.split(/\s+/).filter(Boolean);
-  if (found.length > 0 || words.length < 2 || /[\d<>=:"“”„]/.test(part)) return found;
+  // One- and two-letter words ("a", "na") match nearly every fish, so they are left out of the fallback.
+  const words = part.split(/\s+/).filter((word) => word.length > 2);
+  if (found.length > 0 || words.length === 0 || part.split(/\s+/).length < 2 || /[\d<>=:"“”„]/.test(part)) return found;
   let matched = findOne(book, words[0]!, t);
   for (const word of words.slice(1)) {
     if (matched.length === 0) break;

@@ -149,7 +149,8 @@ export function newFishIn(here: Logbook, file: Logbook): CatchEntry[] {
 
 /**
  * This book with the file's new fish added, and the waters, outings, tackle and photos they bring along.
- * Anything already here, matched by id, stays as it is here; a water or outing deleted here comes back only when a new fish needs it.
+ * Anything already here, matched by id, stays as it is here (but for an outing's lost and missed counts, which take the higher);
+ * a water or outing deleted here comes back only when a new fish needs it.
  * The file's photos join only while they fit the room kept for photos, so the book can still be downloaded and loaded again.
  */
 export function mergeFieldArchive(here: FieldArchive, file: FieldArchive): FieldArchive {
@@ -171,10 +172,21 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive): Field
     photos[entry.id] = photo;
     size += grows;
   }
+  // An outing both books have keeps the higher of each lost and missed count, so taps made on another device arrive.
+  const fileTrips = new Map(file.book.trips.map((trip) => [trip.id, trip]));
+  const hereTrips = here.book.trips.map((trip) => {
+    const other = fileTrips.get(trip.id);
+    if (!other) return trip;
+    const lost = Math.max(trip.lost ?? 0, other.lost ?? 0);
+    const missed = Math.max(trip.missed ?? 0, other.missed ?? 0);
+    if (lost === (trip.lost ?? 0) && missed === (trip.missed ?? 0)) return trip;
+    const { lost: _lost, missed: _missed, ...rest } = trip;
+    return { ...rest, ...(lost ? { lost } : {}), ...(missed ? { missed } : {}) };
+  });
   return {
     book: {
       spots: [...here.book.spots, ...file.book.spots.filter((spot) => !spotIds.has(spot.id) && wantedSpots.has(spot.id))],
-      trips: [...here.book.trips, ...trips],
+      trips: [...hereTrips, ...trips],
       catches: [...here.book.catches, ...added],
     },
     tackle: [...here.tackle, ...file.tackle.filter((item) => !tackleIds.has(item.id) && newTrips.has(item.tripId))],

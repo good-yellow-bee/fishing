@@ -118,7 +118,7 @@ export function HomePage() {
               <>
                 {" · "}
                 <a href={osmLink(nextSpot.place.lat, nextSpot.place.lng)} target="_blank" rel="noreferrer">
-                  {t("Map")}
+                  {t("Open on a map")}
                 </a>
               </>
             ) : null}

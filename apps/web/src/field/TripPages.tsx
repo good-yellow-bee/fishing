@@ -151,10 +151,20 @@ function TripCounts({ trip, landed }: { trip: Trip; landed: number }) {
     <div className="trip-counts">
       {TRIP_COUNTS.map(({ count, label, more, fewer }) => (
         <p key={count} className="trip-count">
-          <span>
+          {/* Read out as it changes, since the buttons are named for what they do. */}
+          <span role="status">
             {t(label)}: <strong>{trip[count] ?? 0}</strong>
           </span>
-          <button type="button" className="count-button" aria-label={t(fewer)} disabled={!trip[count]} onClick={() => countOnTrip(trip.id, count, -1)}>
+          {/* Not disabled outright: focus stays on the button when the count reaches none. */}
+          <button
+            type="button"
+            className="count-button"
+            aria-label={t(fewer)}
+            aria-disabled={trip[count] ? undefined : true}
+            onClick={() => {
+              if (trip[count]) countOnTrip(trip.id, count, -1);
+            }}
+          >
             −
           </button>
           <button type="button" className="count-button" aria-label={t(more)} onClick={() => countOnTrip(trip.id, count, 1)}>

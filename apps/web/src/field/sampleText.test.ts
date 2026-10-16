@@ -23,11 +23,12 @@ describe("the sample week in the reader's language", () => {
     expect(localizeSample(book)).toEqual(book);
   });
 
-  it("keeps a sample line saved unchanged from a Polish form in English", () => {
+  it("keeps a sample line saved unchanged from a Polish form in English, and the angler's own words as typed", () => {
     setLang("pl");
-    expect(bookLine("Młynówka")).toBe("Mill Race");
-    expect(bookLine("Pod młynem")).toBe(sampleLogbook(new Date(2026, 9, 1)).trips.find((trip) => trip.spotId === "spot-mill")!.title);
-    expect(bookLine("Młynówka nocą")).toBe("Młynówka nocą");
-    expect(bookLine("")).toBe("");
+    expect(bookLine("Młynówka", "Mill Race")).toBe("Mill Race");
+    // A water of their own that happens to share the name stays theirs.
+    expect(bookLine("Młynówka", "My stream")).toBe("Młynówka");
+    expect(bookLine("Młynówka nocą", "Mill Race")).toBe("Młynówka nocą");
+    expect(bookLine("", "")).toBe("");
   });
 });
