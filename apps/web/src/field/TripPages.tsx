@@ -51,6 +51,7 @@ import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
 import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
+import { useKeptForm } from "./keptForm";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -409,7 +410,7 @@ export function TripFormPage() {
 }
 
 function TripForm() {
-  const { book, addTrip, updateTrip } = useLogbook();
+  const { book, storedBook, addTrip, updateTrip } = useLogbook();
   useT();
   const navigate = useNavigate();
   const { tripId } = useParams();
@@ -444,6 +445,18 @@ function TripForm() {
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
+  // Unsaved changes to an outing in the book wait for the next visit to its form.
+  const kept = useKeptForm(
+    existing ? `trip:${existing.id}` : null,
+    existing ? JSON.stringify(storedBook.trips.find((trip) => trip.id === existing.id) ?? existing) : "",
+    { date, spotId, title, note },
+    (fields) => {
+      if (fields.date) setDate(fields.date);
+      if (book.spots.some((spot) => spot.id === fields.spotId)) setSpotId(fields.spotId!);
+      setTitle(fields.title ?? "");
+      setNote(fields.note ?? "");
+    },
+  );
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -455,6 +468,7 @@ function TripForm() {
       return;
     }
     for (const item of againTackle) add(result.id, item.label);
+    kept.drop();
     navigate(`/trips/${result.id}`);
   };
 
@@ -487,8 +501,11 @@ function TripForm() {
           <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: existing.title }) : undefined}>{existing ? existing.title : t("Add a trip")}</h1>
         </div>
-        <Link to={existing ? `/trips/${existing.id}` : "/trips"}>{t("Cancel")}</Link>
+        <Link to={existing ? `/trips/${existing.id}` : "/trips"} onClick={kept.drop}>
+          {t("Cancel")}
+        </Link>
       </header>
+      {kept.banner}
       <form
         className="entry-form"
         onSubmit={onSubmit}

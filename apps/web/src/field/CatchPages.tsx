@@ -247,6 +247,8 @@ function CatchForm() {
   const [editBase] = useState(() => (existing ? editFields() : ""));
   // The fish as stored, which kept changes are tied to: unlike the form, it reads the same in any language or units.
   // The stored record, not the one on screen, which a sample book shows translated.
+  // Set once the edit is saved or cancelled: the re-render a save causes must not keep the saved values as changes.
+  const editDone = useRef(false);
   const recordBase = existing ? JSON.stringify(storedBook.catches.find((entry) => entry.id === existing.id) ?? existing) : "";
   // A new fish typed but never saved, or changes to this one, waits here until it is picked up or let go.
   const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? readEditDraft(existing.id, recordBase) : readKeptDraft()));
@@ -265,7 +267,7 @@ function CatchForm() {
 
   useEffect(() => {
     // While an older draft waits, keep it rather than overwrite it with this one.
-    if (waiting) return;
+    if (waiting || editDone.current) return;
     if (existing) {
       // Changes to a fish in the book: kept until saved or cancelled, let go when the form reads as the fish again.
       const now = editFields();
@@ -392,8 +394,8 @@ function CatchForm() {
   const outingWeather = useMemo(() => tripWeather(book, tripId, existing?.id), [book, tripId, existing?.id]);
   // No outing weather to go by: the newest fish logged the same day may still say what the sky was doing.
   const sameDayWeather = useMemo(
-    () => (outingWeather ? null : dayWeather(book, caughtAt.slice(0, 10), existing?.id)),
-    [book, outingWeather, caughtAt, existing?.id],
+    () => (outingWeather ? null : dayWeather(book, caughtAt.slice(0, 10), existing?.id, spotId)),
+    [book, outingWeather, caughtAt, existing?.id, spotId],
   );
   const offeredWeather = outingWeather ?? sameDayWeather;
 
@@ -496,6 +498,7 @@ function CatchForm() {
       return;
     }
     if (existing) {
+      editDone.current = true;
       dropEditDraft(existing.id);
       navigate(`/catches/${existing.id}`, savedState("catchEdit"));
       return;
@@ -542,7 +545,14 @@ function CatchForm() {
         <Link
           to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}
           // Cancelling an edit means it: the changes are not kept for later.
-          onClick={existing ? () => dropEditDraft(existing.id) : undefined}
+          onClick={
+            existing
+              ? () => {
+                  editDone.current = true;
+                  dropEditDraft(existing.id);
+                }
+              : undefined
+          }
         >
           {t("Cancel")}
         </Link>

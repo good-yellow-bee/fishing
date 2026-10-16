@@ -31,6 +31,7 @@ import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
+import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
 import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
@@ -216,7 +217,7 @@ export function SpotFormPage() {
 }
 
 function SpotForm() {
-  const { book, addSpot, updateSpot } = useLogbook();
+  const { book, storedBook, addSpot, updateSpot } = useLogbook();
   useT();
   const navigate = useNavigate();
   const { spotId } = useParams();
@@ -238,6 +239,19 @@ function SpotForm() {
   const [locating, setLocating] = useState<"idle" | "busy" | "found" | "failed">("idle");
   const canLocate = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [error, setError] = useState("");
+  // Unsaved changes to a water in the book wait for the next visit to its form.
+  const kept = useKeptForm(
+    existing ? `spot:${existing.id}` : null,
+    existing ? JSON.stringify(storedBook.spots.find((spot) => spot.id === existing.id) ?? existing) : "",
+    { name, waterType, notes, bestConditions, place },
+    (fields) => {
+      setName(fields.name ?? "");
+      if (fields.waterType) setWaterType(fields.waterType);
+      setNotes(fields.notes ?? "");
+      setBestConditions(fields.bestConditions ?? "");
+      setPlace(fields.place ?? "");
+    },
+  );
   // Two waters with one name split their fish and outings; point at the one already in the book.
   const sameName = name.trim()
     ? book.spots.find((spot) => spot.id !== existing?.id && spot.name.trim().toLowerCase() === name.trim().toLowerCase())
@@ -252,6 +266,7 @@ function SpotForm() {
       markInvalid(event.currentTarget as HTMLFormElement, result.field);
       return;
     }
+    kept.drop();
     navigate(`/spots/${result.id}`);
   };
 
@@ -272,8 +287,11 @@ function SpotForm() {
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: existing.name }) : undefined}>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
-        <Link to={existing ? `/spots/${existing.id}` : "/spots"}>{t("Cancel")}</Link>
+        <Link to={existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
+          {t("Cancel")}
+        </Link>
       </header>
+      {kept.banner}
       <form
         className="entry-form"
         onSubmit={onSubmit}

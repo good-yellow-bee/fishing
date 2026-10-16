@@ -10,8 +10,9 @@ export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   if (catches.length < TIPS_FROM) return null;
   const book = { spots: [], trips: [], catches: [...catches] };
   const lures = lureTally(book, 3);
-  let time: BiteTime | null = null;
-  for (const band of biteTimes(book)) if (band.count > 0 && (!time || band.count > time.count)) time = band;
+  // The time of day most fish came at, when at least two did and no other time ties it.
+  const [top, next] = [...biteTimes(book)].sort((a, b) => b.count - a.count);
+  const time: BiteTime | null = top && top.count >= 2 && (!next || next.count < top.count) ? top : null;
   return { lures, time, sky: leadingSky(catches), season: leadingSeason(catches) };
 }
 
