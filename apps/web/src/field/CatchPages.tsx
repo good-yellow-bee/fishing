@@ -45,10 +45,11 @@ import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
-import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
+import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
+import { likelyDuplicate } from "./likelyDuplicate";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater } from "./spotOrder";
@@ -165,7 +166,7 @@ export function CatchFormPage() {
 const PHOTO_HEAD_BYTES = 256 * 1024;
 
 function CatchForm() {
-  const { book, addCatch, updateCatch, photoFor } = useLogbook();
+  const { book, storedBook, addCatch, updateCatch, photoFor } = useLogbook();
   useT();
   const lang = useLang();
   const navigate = useNavigate();
@@ -244,8 +245,20 @@ function CatchForm() {
   const editFields = () => JSON.stringify({ species, measureKind, amount, alsoAmount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, released });
   // The fish as the edit form opened on it.
   const [editBase] = useState(() => (existing ? editFields() : ""));
+  // The fish as stored, which kept changes are tied to: unlike the form, it reads the same in any language or units.
+  // The stored record, not the one on screen, which a sample book shows translated.
+  const recordBase = existing ? JSON.stringify(storedBook.catches.find((entry) => entry.id === existing.id) ?? existing) : "";
   // A new fish typed but never saved, or changes to this one, waits here until it is picked up or let go.
-  const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? readEditDraft(existing.id, editBase) : readKeptDraft()));
+  const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? readEditDraft(existing.id, recordBase) : readKeptDraft()));
+
+  // A new fish the same kind and size as one logged at this water minutes apart: likely the same fish twice.
+  const twin =
+    existing || !amount.trim()
+      ? null
+      : likelyDuplicate(book, { species, spotId, caughtAt }, t, (entry) => {
+          const size = measureOf(entry, measureKind);
+          return size !== null && measureAmountText(size, units) === amount.trim();
+        });
 
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
   const opened = useRef<string | null>(null);
@@ -264,7 +277,7 @@ function CatchForm() {
           units,
           savedAt: new Date().toISOString(),
           catchId: existing.id,
-          base: editBase,
+          base: recordBase,
         });
       return;
     }
@@ -855,6 +868,13 @@ function CatchForm() {
         {error ? (
           <p className="field-error" role="alert" id={FORM_ERROR_ID}>
             {messageText(error)}
+          </p>
+        ) : null}
+        {/* The same kind at the same water a few minutes apart is more likely one fish logged twice than two. */}
+        {twin ? (
+          <p className="form-note" role="status">
+            {t("A {species} was already logged here at {time}. Saving adds another.", { species: t(twin.species), time: formatTimeOfDay(twin.caughtAt) })}{" "}
+            <Link to={`/catches/${twin.id}`}>{t("Open it")}</Link>
           </p>
         ) : null}
         {/* Stays on screen while a long form scrolls, so the save is always a thumb away. */}

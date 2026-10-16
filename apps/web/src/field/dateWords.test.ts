@@ -28,6 +28,8 @@ describe("dateWords", () => {
     expect(dateWords("15 paź", now)).toEqual(day("2026-10-15"));
     expect(dateWords("Dec 24", now)).toEqual(day("2025-12-24"));
     expect(dateWords("Feb 30", now)).toBeNull();
+    expect(dateWords("Feb 29", new Date(2028, 0, 10))).toEqual(day("2024-02-29"));
+    expect(dateWords("Feb 29", new Date(2029, 5, 1))).toEqual(day("2028-02-29"));
   });
 
   it("leaves other words alone", () => {

@@ -93,11 +93,13 @@ export function dateWords(text: string, now = new Date()): DayRange | null {
     const [day, word] = /^\d/.test(found[1]!) ? [Number(found[1]), found[2]!] : [Number(found[2]), found[1]!];
     const month = monthOf(word);
     if (month < 0 || day < 1 || day > 31) return null;
-    let date = new Date(today.getFullYear(), month, day);
-    // "Feb 30" rolls into March: not a day at all.
-    if (date.getMonth() !== month) return null;
-    if (date.getTime() > today.getTime() + DAY_MS / 2) date = new Date(today.getFullYear() - 1, month, day);
-    return one(date);
+    // The latest such day that has come: this year's, else an earlier year's ("Feb 29" looks back to its leap year).
+    for (let back = 0; back <= 8; back++) {
+      const date = new Date(today.getFullYear() - back, month, day);
+      // "Feb 30" rolls into March: not that day at all.
+      if (date.getMonth() === month && date.getTime() <= today.getTime() + DAY_MS / 2) return one(date);
+    }
+    return null;
   }
   return null;
 }

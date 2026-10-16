@@ -45,7 +45,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                     </li>
                   );
                 }
-                if (mark?.outing && day <= today) {
+                if (mark?.outing && day < today) {
                   return <li key={day} className="day-blank" aria-label={`${formatDay(day)}: ${t("an outing with no fish")}`} title={`${formatDay(day)}: ${t("an outing with no fish")}`} />;
                 }
                 return <li key={day} aria-hidden="true" className={mark?.outing ? "day-planned" : undefined} />;

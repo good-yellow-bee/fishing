@@ -46,14 +46,16 @@ describe("kept catch draft", () => {
 });
 
 describe("kept changes to a fish", () => {
-  const kept = JSON.stringify({ ...draft, catchId: "catch-pike", base: "as opened" });
+  const kept = JSON.stringify({ "catch-pike": { ...draft, catchId: "catch-pike", base: "as opened" }, "catch-perch": { ...draft, species: "Perch", catchId: "catch-perch", base: "perch" } });
 
   it("come back for the same fish while it reads as it did", () => {
     expect(parseEditDraft(kept, "catch-pike", "as opened", now)).toMatchObject({ catchId: "catch-pike", amount: "28" });
   });
 
   it("are not offered for another fish, or once the fish was changed elsewhere", () => {
-    expect(parseEditDraft(kept, "catch-perch", "as opened", now)).toBeNull();
+    expect(parseEditDraft(kept, "catch-bass", "as opened", now)).toBeNull();
+    // Each fish keeps its own.
+    expect(parseEditDraft(kept, "catch-perch", "perch", now)?.species).toBe("Perch");
     expect(parseEditDraft(kept, "catch-pike", "changed since", now)).toBeNull();
   });
 });

@@ -1499,7 +1499,7 @@ button.field-primary:disabled {
 
 .day-grid {
   display: grid;
-  grid-template-columns: repeat(7, 16px);
+  grid-template-columns: repeat(7, 24px);
   gap: 3px;
   margin: 0;
   padding: 0;
@@ -1507,8 +1507,9 @@ button.field-primary:disabled {
 }
 
 .day-grid li {
-  width: 16px;
-  height: 16px;
+  /* 24px: a day is a tap target on a phone. */
+  width: 24px;
+  height: 24px;
   border-radius: 3px;
   background: color-mix(in srgb, var(--field-line) 45%, transparent);
 }
