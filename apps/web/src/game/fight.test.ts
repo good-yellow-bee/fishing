@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { BREACHERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -833,6 +833,29 @@ describe("a carp's first run", () => {
   it("is a carp's habit only", () => {
     const { flags } = runLengths("walleye");
     expect(flags.every((flag) => !flag)).toBe(true);
+  });
+});
+
+describe("a sturgeon's breach", () => {
+  /** Lets the line go through the first three runs and notes which were leaps. */
+  const leaps = (id: string) => {
+    const runtime = makeFight(fish(id), 40, 10, () => 0.5);
+    const flags: boolean[] = [];
+    for (let now = 0; flags.length < 3 && now < 240_000; now += 10) {
+      const was = runtime.sim.surge;
+      runtime.step(now, 0.01, false);
+      if (was !== 2 && runtime.sim.surge === 2) flags.push(runtime.sim.jump === true);
+    }
+    return flags;
+  };
+
+  it("makes only the first run a leap", () => {
+    expect(BREACHERS.has("sturgeon")).toBe(true);
+    expect(leaps("sturgeon")).toEqual([true, false, false]);
+  });
+
+  it("is a sturgeon's habit only", () => {
+    expect(leaps("catfish").every((flag) => !flag)).toBe(true);
   });
 });
 
