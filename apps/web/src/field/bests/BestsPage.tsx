@@ -9,7 +9,7 @@ import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
-import { monthName, monthTally, yearTally } from "../tripMonths";
+import { daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal } from "../YearGoal";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -63,6 +63,8 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
 export function BestsPage() {
   const { book } = useLogbook();
   useT();
+  const today = localDate(new Date());
+  const days = daysOut(book, today.slice(0, 4), today);
   const bests = personalBests(book);
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
@@ -196,6 +198,7 @@ export function BestsPage() {
               <h2>{t("This year's goal")}</h2>
             </div>
             <YearGoal catches={book.catches} />
+            {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
           </section>
 
           {yearTally(book.catches).length > 1 ? (
