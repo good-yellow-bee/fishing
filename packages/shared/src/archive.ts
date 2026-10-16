@@ -143,25 +143,35 @@ export function newFishIn(here: Logbook, file: Logbook): CatchEntry[] {
 
 /**
  * This book with the file's new fish added, and the waters, outings, tackle and photos they bring along.
- * Anything already here, matched by id, stays as it is here.
+ * Anything already here, matched by id, stays as it is here; a water or outing deleted here comes back only when a new fish needs it.
+ * The file's photos join only while they fit the room kept for photos, so the book can still be downloaded and loaded again.
  */
 export function mergeFieldArchive(here: FieldArchive, file: FieldArchive): FieldArchive {
   const added = newFishIn(here.book, file.book);
   const spotIds = new Set(here.book.spots.map((spot) => spot.id));
   const tripIds = new Set(here.book.trips.map((trip) => trip.id));
   const tackleIds = new Set(here.tackle.map((item) => item.id));
+  const wantedTrips = new Set(added.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
+  const trips = file.book.trips.filter((trip) => !tripIds.has(trip.id) && wantedTrips.has(trip.id));
+  const wantedSpots = new Set([...added.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
+  const newTrips = new Set(trips.map((trip) => trip.id));
   const photos = { ...here.photos };
+  let size = JSON.stringify(photos).length;
   for (const entry of added) {
     const photo = file.photos[entry.id];
-    if (photo !== undefined) photos[entry.id] = photo;
+    if (photo === undefined) continue;
+    const grows = JSON.stringify(entry.id).length + JSON.stringify(photo).length + 2;
+    if (size + grows > CATCH_PHOTO_STORE_MAX_CHARS) continue;
+    photos[entry.id] = photo;
+    size += grows;
   }
   return {
     book: {
-      spots: [...here.book.spots, ...file.book.spots.filter((spot) => !spotIds.has(spot.id))],
-      trips: [...here.book.trips, ...file.book.trips.filter((trip) => !tripIds.has(trip.id))],
+      spots: [...here.book.spots, ...file.book.spots.filter((spot) => !spotIds.has(spot.id) && wantedSpots.has(spot.id))],
+      trips: [...here.book.trips, ...trips],
       catches: [...here.book.catches, ...added],
     },
-    tackle: [...here.tackle, ...file.tackle.filter((item) => !tackleIds.has(item.id))],
+    tackle: [...here.tackle, ...file.tackle.filter((item) => !tackleIds.has(item.id) && newTrips.has(item.tripId))],
     photos,
   };
 }

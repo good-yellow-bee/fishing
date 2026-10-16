@@ -113,11 +113,33 @@ describe("field archive", () => {
     const merged = mergeFieldArchive(here, file);
     expect(merged.book.catches).toHaveLength(book.catches.length);
     expect(merged.book.catches[0]!.note).toBe(book.catches[0]!.note);
-    expect(merged.book.spots).toHaveLength(book.spots.length);
-    expect(merged.book.trips).toHaveLength(book.trips.length);
+    const added = book.catches.slice(2);
+    const neededTrips = new Set(added.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
+    expect(merged.book.trips.map((trip) => trip.id).sort()).toEqual([...neededTrips].sort());
+    expect(merged.book.spots.map((spot) => spot.id).sort()).toEqual(
+      [...new Set([...book.spots.slice(1).map((spot) => spot.id), ...added.map((entry) => entry.spotId), ...book.trips.filter((trip) => neededTrips.has(trip.id)).map((trip) => trip.spotId)])].sort(),
+    );
     expect(merged.photos[book.catches[3]!.id]).toBe(jpeg);
     expect(merged.tackle).toEqual(here.tackle);
     expect(isLogbook(merged.book)).toBe(true);
+  });
+
+  it("doesn't bring back a water or outing no new fish needs", () => {
+    const empty = { id: "spot-empty", name: "Gone Pond", waterType: "pond" as const, notes: "", bestConditions: "" };
+    const file = archiveFor({ ...book, spots: [...book.spots, empty], trips: [...book.trips, { id: "trip-empty", date: "2026-09-01", spotId: "spot-empty", title: "Empty", note: "" }] }, null);
+    const merged = mergeFieldArchive(archiveFor(book, null), file);
+    expect(merged.book.spots.some((spot) => spot.id === "spot-empty")).toBe(false);
+    expect(merged.book.trips.some((trip) => trip.id === "trip-empty")).toBe(false);
+  });
+
+  it("leaves out the file's photos once the room for photos is full", () => {
+    const big = `data:image/jpeg;base64,${"A".repeat(CATCH_PHOTO_STORE_MAX_CHARS - 60)}`;
+    const here = { ...archiveFor({ ...book, catches: book.catches.slice(0, 1) }, null), photos: { [book.catches[0]!.id]: big } };
+    const file = archiveFor(book, book.catches[3]!.id);
+    const merged = mergeFieldArchive(here, file);
+    expect(merged.book.catches).toHaveLength(book.catches.length);
+    expect(merged.photos[book.catches[3]!.id]).toBeUndefined();
+    expect(JSON.stringify(merged.photos).length).toBeLessThanOrEqual(CATCH_PHOTO_STORE_MAX_CHARS);
   });
 
   it("keeps a water's place through the file", () => {
