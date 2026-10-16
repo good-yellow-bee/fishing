@@ -83,7 +83,6 @@ export const PL_GAME: PlBook = {
   "Right on a rise.": "Prosto w spław ryby.",
   "Snagged in the weed. Tap {n} times to work it free.": "Zaczep w zielsku. Dotknij {n} razy, by go uwolnić.",
   "Snagged on the rocks. Tap {n} times to work it free.": "Zaczep o kamienie. Dotknij {n} razy, by go uwolnić.",
-  "Snagged on the rocks. Tap {n} times to work it free.": "Zaczep o kamienie. Dotknij {n} razy, by go uwolnić.",
   "Working it free… {n} of {total}": "Uwalniam… {n} z {total}",
   "Free of the weed. Let it settle.": "Wolne od zielska. Niech się ułoży.",
   "Off the rocks. Let it settle.": "Zeszło z kamieni. Niech się ułoży.",
