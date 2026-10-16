@@ -1116,7 +1116,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT71~~ | ~~News card (2026-10-16f) covers GT70: a pike rolls on the line at the net~~ (#527) | news | S |
 | ~~GT72~~ | ~~On the lake a rolling pike turns over twice about its own length at the surface, and the boat doesn't swing for a roll, so the scene shows the roll the fight card calls~~ (#530) | feel | S |
 | ~~GT73~~ | ~~On a leap or a roll the fight card's steering line says it can't be turned and to let go, instead of showing the turn-a-run hint~~ (#531) | fight | S |
-| GT74 | News card (2026-10-16h) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned | news | S |
+| ~~GT74~~ | ~~News card (2026-10-16h) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned~~ (#534) | news | S |
+| GT75 | A carp's first run after the hook lasts 1.6× as long as its other runs, and the fight card calls it ("a carp's first run is the long one") | fish | S |
 
 ## Risks / open questions for the owner
 

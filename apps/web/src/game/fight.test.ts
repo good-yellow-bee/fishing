@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -802,5 +802,36 @@ describe("a pike rolling at the net", () => {
     const { runtime } = atTheNet("walleye", 2);
     expect(runtime.sim.roll).toBeFalsy();
     expect(runtime.sim.lastRun).toBe(true);
+  });
+});
+
+describe("a carp's first run", () => {
+  /** Lets the line go through every run and returns how long each of the first three ran. */
+  const runLengths = (id: string) => {
+    const runtime = makeFight(fish(id), 6, 5, () => 0.5);
+    const lengths: number[] = [];
+    const flags: boolean[] = [];
+    let started = -1;
+    for (let now = 0; lengths.length < 3 && now < 120_000; now += 10) {
+      const was = runtime.sim.surge;
+      runtime.step(now, 0.01, false);
+      if (was !== 2 && runtime.sim.surge === 2) {
+        started = now;
+        flags.push(runtime.sim.firstRun === true);
+      }
+      if (was === 2 && runtime.sim.surge !== 2) lengths.push(now - started);
+    }
+    return { lengths, flags };
+  };
+
+  it("is the long one, and only the first run is", () => {
+    const { lengths, flags } = runLengths("carp");
+    expect(flags).toEqual([true, false, false]);
+    expect(lengths[0]! / lengths[1]!).toBeCloseTo(FIRST_RUN_LONGER, 1);
+  });
+
+  it("is a carp's habit only", () => {
+    const { flags } = runLengths("walleye");
+    expect(flags.every((flag) => !flag)).toBe(true);
   });
 });

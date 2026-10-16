@@ -258,6 +258,21 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("Let go now — it sees the net!");
   });
 
+  it("calls a carp's long first run", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.firstRun = true;
+    sim.current.surge = 1;
+    frame();
+    expect(status()).toBe("Let go now — a carp's first run is the long one!");
+    sim.current.surge = 2;
+    frame();
+    expect(status()).toBe("Let it run — the first run is the longest!");
+    sim.current.firstRun = false;
+    frame();
+    expect(status()).not.toBe("Let it run — the first run is the longest!");
+  });
+
   it("says which way to pull the rod against a run, cheers a turn, and says a leap or a roll can't be turned", () => {
     mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
     const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);

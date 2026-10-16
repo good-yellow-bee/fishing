@@ -22,6 +22,8 @@ export type FightSim = {
   lastRun?: boolean;
   /** A pike's last run is a roll on the line instead, coming and while it lasts. */
   roll?: boolean;
+  /** A carp's first run after the hook: the long one, coming and while it lasts. */
+  firstRun?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
@@ -55,6 +57,10 @@ export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-tro
 export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
 /** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
 export const ROLL_MS = 900;
+/** Carp make one long run straight after the hook. */
+export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp"]);
+/** How much longer that first run lasts than the carp's other runs. */
+export const FIRST_RUN_LONGER = 1.6;
 /** A leap is in the air this long. */
 export const JUMP_MS = 750;
 /** Seconds into a leap before a held line costs anything: a prompt bow is always in time. */
@@ -263,6 +269,7 @@ export function makeFight(
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
   const roller = ROLLERS.has(species.id);
+  const longRunner = LONG_RUNNERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
   let sulkUntil = -Infinity;
@@ -284,6 +291,8 @@ export function makeFight(
         sim.jump = leaper && completedSurges % 2 === 1;
         // A pike that sees the net rolls on the line rather than running.
         sim.roll = roller && sim.lastRun === true && !sim.jump;
+        // A carp's first run is the long one.
+        sim.firstRun = longRunner && completedSurges === 0 && !sim.jump && !sim.roll;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
         heldThroughLeap = false;
@@ -291,7 +300,7 @@ export function makeFight(
         nextAt = nowMs + (sim.jump || sim.roll ? Math.max(pattern.warnMs, 420) : pattern.warnMs);
       } else if (sim.surge === 1) {
         sim.surge = 2;
-        nextAt = nowMs + (sim.jump ? JUMP_MS : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax));
+        nextAt = nowMs + (sim.jump ? JUMP_MS : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
@@ -311,6 +320,7 @@ export function makeFight(
         sim.surge = 0;
         sim.jump = false;
         sim.roll = false;
+        sim.firstRun = false;
         sim.lastRun = false;
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
