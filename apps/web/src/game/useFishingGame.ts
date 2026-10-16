@@ -32,8 +32,8 @@ import { fx } from "./fx";
 import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
-import { GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
+import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
@@ -135,7 +135,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -204,6 +204,10 @@ export function useFishingGame(
   const gotAwayRef = useRef<GotAway | null>(null);
   /** This bite is that fish come back. */
   const againRef = useRef(false);
+  /** The fish on now is the hunter that followed a small fish in. */
+  const followedRef = useRef(false);
+  /** The hunter that will follow this small fish in if it isn't grabbed, with the weight it bites at. */
+  const followRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -361,10 +365,12 @@ export function useFishingGame(
         grabbedRef.current = undefined;
         const predator = grabberFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
         grabRef.current = predator ? { predator, profile: current } : null;
+        const follower = predator ? null : followerFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
+        followRef.current = follower ? makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)) : null;
       }
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
-      const again = strike && againRef.current ? `${t("It's the one that got away!")} ` : "";
+      const again = strike && againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : t("It's the one that got away!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ` : "";
       if (heavy) {
@@ -430,6 +436,7 @@ export function useFishingGame(
     const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random());
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
+    followedRef.current = !!lost.again?.follow;
     const species = lost.again ? lost.again.species : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : drawn;
     const bitten = lost.again ? { species, weight: lost.again.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
@@ -830,6 +837,7 @@ export function useFishingGame(
           const grab = grabRef.current;
           if (grab && result === "fighting" && sim.line <= GRAB_LINE) {
             grabRef.current = null;
+            followRef.current = null;
             grabbedRef.current = current.species.id;
             const taken = makeCatch(grab.predator, grab.profile.patience, anglerLevel(grab.profile.lifetimePoints));
             biteRef.current = taken;
@@ -906,7 +914,8 @@ export function useFishingGame(
                 hookedSolid: hookedSolidRef.current,
                 secondTake: secondTakeRef.current,
                 grabbed: grabbedRef.current,
-                gotAway: againRef.current,
+                gotAway: againRef.current && !followedRef.current,
+                followedIn: againRef.current && followedRef.current,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
                 cleanRun: cleanRunRef.current,
                 closeCall: isCloseCall(runtime.performance),
@@ -921,10 +930,15 @@ export function useFishingGame(
             clearFight();
             setPhaseBoth("result");
             schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current);
+            // A hunter that followed the small fish in stays about the bank for the next few casts.
+            const follow = followRef.current;
+            followRef.current = null;
+            if (follow && !gotAwayRef.current) gotAwayRef.current = { spot: spotRef.current, species: follow.species, weight: follow.weight, casts: AGAIN_CASTS, follow: true };
+            const followed = follow && gotAwayRef.current?.follow ? ` ${followCall(follow.species)} ${t("It's still about: cast here again.")}` : "";
             setHint(
-              schoolRef.current
+              (schoolRef.current
                 ? `${castHint("landed")} ${t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
-                : castHint("landed"),
+                : castHint("landed")) + followed,
             );
           } else if (result === "snapped") {
             fx.snap();

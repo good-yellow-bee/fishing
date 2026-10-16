@@ -35,7 +35,7 @@ vi.mock("./nibblePlan", async (importOriginal) => {
 // A pike grabs the shiner only when a test says so.
 vi.mock("./grab", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./grab")>();
-  return { ...actual, grabberFor: vi.fn(() => null) };
+  return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null) };
 });
 // The fish that got away comes back only when a test says so.
 vi.mock("./gotAway", async (importOriginal) => {
@@ -59,7 +59,7 @@ import { updateSettings } from "./settings";
 import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
-import { grabberFor } from "./grab";
+import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
 const profile: Profile = {
@@ -261,6 +261,28 @@ describe("useFishingGame lost fight", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=grabbed]")?.textContent).toBe("golden-shiner");
+  });
+
+  it("keeps a pike that followed a shiner in about the bank, and says so when it bites", () => {
+    const surface = mount();
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    vi.mocked(followerFor).mockReturnValueOnce(pike);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(hint()).toMatch(/A pike followed it in to the bank! It's still about: cast here again\.$/);
+    const waiting = vi.mocked(castForGotAway).mock.calls.length;
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castForGotAway).mockImplementationOnce((lost) => ({ again: lost, next: null }));
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    expect(vi.mocked(castForGotAway).mock.calls[waiting]?.[0]).toMatchObject({ spot: "dock", species: { id: "pike" }, follow: true });
+    expect(hint()).toContain("It's the one that followed your fish in!");
+    step.mockReturnValueOnce("landed");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("false");
   });
 
   it("brings a fish that broke off back at the same weight, and says so", () => {

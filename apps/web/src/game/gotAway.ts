@@ -5,7 +5,8 @@ export const AGAIN_ODDS = 0.3;
 /** Casts, anywhere, before the lost fish moves off for good. */
 export const AGAIN_CASTS = 5;
 
-export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number };
+/** follow marks a hunter that followed a landed small fish in, rather than a fish that broke off. */
+export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number; follow?: boolean };
 
 /** The fish that broke off, waiting to bite again at its bank; small common fish are never remembered. */
 export function gotAwayAfterLoss(species: FishSpecies, weight: number, spot: SpotId): GotAway | null {
