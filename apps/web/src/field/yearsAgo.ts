@@ -2,6 +2,11 @@ import type { CatchEntry } from "@stillwater/shared";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The local calendar day as a whole number of days, the same whatever the hour. */
+function dayNumber(date: Date): number {
+  return Math.round(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS);
+}
+
 /** How many years back from `now` the fish came within `days` of the same date, or null: a fish from 30 December is a year ago on 1 January, not two. */
 export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3): number | null {
   const at = new Date(entry.caughtAt);
@@ -12,7 +17,8 @@ export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3): 
     if (years < 1) continue;
     const then = new Date(now);
     then.setFullYear(now.getFullYear() - years);
-    if (Math.abs(at.getTime() - then.getTime()) <= days * DAY_MS) return years;
+    // By calendar day, so a fish stays in the week all day rather than dropping out at the hour it was caught.
+    if (Math.abs(dayNumber(at) - dayNumber(then)) <= days) return years;
   }
   return null;
 }

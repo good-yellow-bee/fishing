@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "./keepCatch";
 import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
-import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, sampleLogbook } from "@stillwater/shared";
+import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, CATCH_PHOTO_STORE_MAX_CHARS, sampleLogbook } from "@stillwater/shared";
 
 function memoryStorage() {
   const data = new Map<string, string>();
@@ -149,6 +149,19 @@ describe("save a landed fish", () => {
     const photos = readStoredPhotos();
     expect(Object.keys(photos).sort()).toEqual(["best", "new", "small-2"]);
     expect(photos["small-2"]).toBe(shot("D"));
+  });
+
+  it("makes room when the photo store reaches its own limit before the browser's", () => {
+    const shot = (n: number) => `data:image/jpeg;base64,${String(n % 10).repeat(120_000)}`;
+    const ids = Array.from({ length: 27 }, (_, n) => `fish-${n}`);
+    // The first is the heaviest of its kind, so its snapshot is never the one to go.
+    ids.forEach((id, n) => saveLandedCatch({ ...landed, id, pounds: n === 0 ? 3 : 0.2 }));
+    for (const [n, id] of ids.entries()) expect(saveLandedPhoto(id, shot(n))).toBe(true);
+    const kept = Object.keys(readStoredPhotos());
+    expect(kept).toContain("fish-0");
+    expect(kept).toContain("fish-26");
+    expect(kept).not.toContain("fish-1");
+    expect(JSON.stringify(readStoredPhotos()).length).toBeLessThanOrEqual(CATCH_PHOTO_STORE_MAX_CHARS);
   });
 
   it("still throws when nothing of the game's may go", () => {

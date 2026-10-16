@@ -178,6 +178,11 @@ describe("field log", () => {
     expect(isLogbook({ spots: [{ id: "s", ...base, place: { lat: 146, lng: 0 } }], trips: [], catches: [] })).toBe(false);
   });
 
+  it("refuses a day the calendar doesn't have", () => {
+    expect(parseTripDraft({ date: "2026-02-30", spotId: "spot-quarry", title: "", note: "" }, book)).toMatchObject({ ok: false, field: "date" });
+    expect(parseTripDraft({ date: "2028-02-29", spotId: "spot-quarry", title: "", note: "" }, book).ok).toBe(true);
+  });
+
   it("rejects a book that is not a book", () => {
     expect(isLogbook(null)).toBe(false);
     expect(isLogbook({ spots: [], trips: [], catches: [] })).toBe(true);

@@ -1,4 +1,4 @@
-import { keepLandedCatch, measureOf, putCatchPhoto, withoutCatchPhoto, type CatchPhotoMap, type LandedFish, type Logbook } from "@stillwater/shared";
+import { catchPhotoRejection, keepLandedCatch, measureOf, putCatchPhoto, withoutCatchPhoto, type CatchPhotoMap, type LandedFish, type Logbook } from "@stillwater/shared";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { readStoredLogbook, saveLogbook } from "./storage";
@@ -81,9 +81,17 @@ export function saveLandedPhoto(id: string, photo: string) {
   if (photos[id]) return false;
   const auto = readAutoPhotos().filter((shot) => photos[shot.id] !== undefined);
   const spare = spareSnapshots(book, photos, auto, id);
+  const problem = catchPhotoRejection(photo);
+  if (problem) throw new Error(problem);
   for (;;) {
     const put = putCatchPhoto(photos, id, photo);
-    if (!put.ok) throw new Error(put.message);
+    if (!put.ok) {
+      // The photo store is at its own limit before the browser's: the oldest snapshot makes room the same way.
+      const oldest = spare.shift();
+      if (oldest === undefined) throw new Error(put.message);
+      photos = withoutCatchPhoto(photos, oldest);
+      continue;
+    }
     try {
       savePhotos(put.photos);
       photos = put.photos;

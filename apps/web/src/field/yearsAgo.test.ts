@@ -15,6 +15,13 @@ describe("this week in past years", () => {
     expect(found.map((entry) => entry.id)).toEqual(["a", "b"]);
   });
 
+  it("keeps a fish in the week all day, by calendar day rather than by the hour", () => {
+    const fish = [at("a", "2025-10-13T08:00:00")];
+    expect(thisWeekInPastYears(fish, new Date(2026, 9, 16, 7))).toHaveLength(1);
+    expect(thisWeekInPastYears(fish, new Date(2026, 9, 16, 20))).toHaveLength(1);
+    expect(thisWeekInPastYears(fish, new Date(2026, 9, 17, 0, 5))).toHaveLength(0);
+  });
+
   it("reaches across a month's end and keeps to the limit", () => {
     const found = thisWeekInPastYears(
       [at("a", "2025-10-31T08:00:00"), at("b", "2025-11-01T08:00:00"), at("c", "2025-10-30T08:00:00")],

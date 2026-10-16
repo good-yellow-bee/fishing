@@ -14,6 +14,9 @@ function jpegDataUrl(source: CanvasImageSource, width: number, height: number, m
   canvas.height = Math.max(1, Math.round(height * scale));
   const context = canvas.getContext("2d");
   if (!context) return "";
+  // A JPEG has no see-through parts: a transparent picture goes on white, not black.
+  context.fillStyle = "#fff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(source, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL("image/jpeg", quality);
 }

@@ -579,7 +579,8 @@ export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {
 }
 
 export function parseTripDraft(draft: TripDraft, book: Logbook): Parsed<Omit<Trip, "id">> {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date) || Number.isNaN(new Date(`${draft.date}T12:00:00`).getTime())) {
+  // "2026-02-30" parses as 2 March: the day has to come back as typed.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date) || localDate(new Date(`${draft.date}T12:00:00`)) !== draft.date) {
     return fail("date", "Pick a date.");
   }
   const spot = spotById(book, draft.spotId);
