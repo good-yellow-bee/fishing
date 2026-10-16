@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zr";
+export const NEWS_ID = "2026-10-16zs";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A pike, a largemouth bass or a walleye may now follow a shiner, bluegill or perch in without taking it. The hint says so, and for a few casts it stays about that bank, so cast back there to hook it.",
   "Land a trophy that made its second run at the net and the card says you rode it out. Lose a trophy-sized fish and the result now says it looked like a trophy, so you know what got away.",
   "Send a copy of your book straight to the phone's share sheet. A photo taken near a pinned water picks that water, a fish after midnight joins last night's outing, and each fish now says how near sunrise or sunset it came. Waters show their best water temperature, and the outings page has its own search.",
   "A trophy-sized fish now feels heavy the moment it's hooked, with a thud on the rod. If it still has fight left, it won't give up at the first sight of the net: let go when it makes one more run.",
