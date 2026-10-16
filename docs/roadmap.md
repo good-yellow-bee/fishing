@@ -1409,3 +1409,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR254~~ | ~~Best outing on a spot page~~ (#589) | field | S |
 | ~~BR255~~ | ~~Catch time opens that day's fish~~ (#591) | field | S |
 | ~~BR256~~ | ~~Audit 14 fixes~~ (#593) | field | S |
+| ~~BR257~~ | ~~Average fish per outing on the trips page~~ (#594) | field | S |

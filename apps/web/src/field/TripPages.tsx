@@ -37,7 +37,7 @@ import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./tripSummary";
 import { fishPace } from "./tripPace";
-import { bestOutingHere } from "./outingAverage";
+import { bestOutingHere, outingAverage } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -68,6 +68,8 @@ export function TripsPage() {
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today);
   const fishByTrip = fishCountsByTrip(book);
+  // How the outings already fished have gone, across every water.
+  const average = outingAverage(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
 
   return (
     <div className="sheet">
@@ -102,6 +104,7 @@ export function TripsPage() {
         </div>
       )}
       <h2 className="subhead">{t("Recent")}</h2>
+      {average ? <p className="meta">{average}</p> : null}
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
