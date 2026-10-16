@@ -278,6 +278,11 @@ function TripView() {
           >
             {t("Add to calendar")}
           </button>
+          {" · "}
+          {/* The outing and its tackle list on paper, to tick off while packing. */}
+          <button type="button" className="text-button" onClick={() => window.print()}>
+            {t("Print the packing list")}
+          </button>
         </p>
       ) : (
         spot ? (
