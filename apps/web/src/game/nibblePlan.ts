@@ -22,7 +22,7 @@ const PECK_GAP_SPREAD = 260;
 
 /**
  * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
- * bottom feeders mouth it over and over, a walleye takes it so lightly the float only slides under,
+ * bottom feeders mouth it over and over, a walleye or a whitefish takes it so lightly the float only slides under,
  * a crappie takes it rising so the float lifts and lies flat, a bluegill pecks at it in quick taps
  * before it pulls, a smallmouth bass runs off with it so the float slides away before it goes under,
  * and the rest nibble a time or three.
@@ -39,6 +39,7 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   sturgeon: "mouth",
   burbot: "mouth",
   walleye: "light",
+  "lake-whitefish": "light",
   crappie: "lift",
   bluegill: "peck",
   "smallmouth-bass": "run",
