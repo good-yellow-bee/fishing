@@ -68,6 +68,7 @@ import {
 } from "./fightMotion";
 import { ArticulatedFish, type FishDrive } from "./ArticulatedFish";
 import { FishShadow } from "./FishShadow";
+import { SchoolShadows } from "./SchoolShadows";
 import { fishSize, landedScale } from "./fishSize";
 import {
   LAND_DRIPS,
@@ -144,6 +145,8 @@ type Props = {
   spot: SpotId;
   sim: SimRef;
   nibble: boolean;
+  /** The float sits in a school of panfish: small shadows mill round it. */
+  schooled?: boolean;
   hour: LakeHour;
   sky: Sky;
   /** Optional so older callers keep the summer look. */
@@ -2105,7 +2108,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -2156,6 +2159,7 @@ function Scene({ level, phase, spot, sim, nibble, hour, sky, season = "summer", 
         wind={wind}
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
+      <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} />
       <CaughtFish

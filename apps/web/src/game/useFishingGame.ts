@@ -242,6 +242,8 @@ export function useFishingGame(
   const [fight, setFight] = useState<Fight | null>(null);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [nibble, setNibble] = useState(false);
+  /** This cast landed in a school; the scene shows it milling round the float while it waits. */
+  const [schooled, setSchooled] = useState(false);
   const [hint, setHint] = useState(() => t("Walk to the water."));
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
@@ -377,6 +379,7 @@ export function useFishingGame(
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
+    setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
@@ -887,6 +890,7 @@ export function useFishingGame(
     outcome,
     hint,
     nibble,
+    schooled,
     hotspot,
     sim: simRef,
     performance: performanceRef,
