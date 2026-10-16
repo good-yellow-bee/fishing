@@ -158,6 +158,7 @@ function strikeCall(style: BiteStyle) {
   if (style === "ambush") return t("WHAM — it hit! Strike!");
   if (style === "mouth") return t("It's taking it — strike!");
   if (style === "light") return t("A light take, the float just slides under — strike!");
+  if (style === "lift") return t("The float lifts and lies flat — strike!");
   return t("NOW — strike!");
 }
 
@@ -531,7 +532,7 @@ export function useFishingGame(
             // How long it held on, so the angler learns the window they have.
             setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait after {time} s.", { time: seconds(windowMs) }), fish: bitten });
             // Hold result so the miss spring and the turn play out.
-            resetToIdle(t("Strike the moment the bobber goes under."), "result");
+            resetToIdle(biteStyle(species.id) === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under."), "result");
           }, windowMs);
         };
         openWindow();

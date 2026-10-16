@@ -18,9 +18,9 @@ const MS_SPREAD = 220;
 /**
  * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
  * bottom feeders mouth it over and over, a walleye takes it so lightly the float only slides under,
- * and the rest nibble a time or three.
+ * a crappie takes it rising so the float lifts and lies flat, and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "light" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -32,12 +32,19 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   sturgeon: "mouth",
   burbot: "mouth",
   walleye: "light",
+  crappie: "lift",
 };
 
 /** A light biter's take pulls the float only this share as deep as a usual bite. */
 export const LIGHT_PLUNGE = 0.45;
 /** A light biter holds on to the bait this much longer, so the faint take can still be struck. */
 export const LIGHT_HOLD = 1.3;
+/** A lift bite raises the float this share of a usual bite's pull, instead of pulling it under. */
+export const LIFT_RISE = 0.3;
+/** How far a lifted float has tipped over towards lying flat (0 upright, 1 flat) at this plunge. */
+export function liftTilt(plunge: number) {
+  return Math.min(1, Math.max(0, -plunge / (0.3 * LIFT_RISE)));
+}
 
 /** A tiger muskie that misses the strike follows the bait and hits it once more, with no nibble first. */
 export const FOLLOWERS: ReadonlySet<string> = new Set(["tiger-muskie"]);
