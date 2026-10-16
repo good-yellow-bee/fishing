@@ -41,6 +41,7 @@ import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
 import { osmLink } from "./osmLink";
+import { NearestWater, canFindNearest } from "./NearestWater";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -466,25 +467,28 @@ function TripForm() {
             {t("Date")}
             <input name="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           </label>
-          <label>
-            {t("Spot")}
-            <select name="spot" value={spotId} onChange={(event) => setSpotId(event.target.value)}>
-              {book.spots.map((spot) => (
-                <option key={spot.id} value={spot.id}>
-                  {spot.name}
-                </option>
-              ))}
-            </select>
-            {lastHere ? (
-              <small className="field-hint">
-                {t("Last here: {title}, {day} · {fish}", {
-                  title: lastHere.title,
-                  day: formatDay(lastHere.date),
-                  fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
-                })}
-              </small>
-            ) : null}
-          </label>
+          <div className="water-field">
+            <label>
+              {t("Spot")}
+              <select name="spot" value={spotId} onChange={(event) => setSpotId(event.target.value)}>
+                {book.spots.map((spot) => (
+                  <option key={spot.id} value={spot.id}>
+                    {spot.name}
+                  </option>
+                ))}
+              </select>
+              {lastHere ? (
+                <small className="field-hint">
+                  {t("Last here: {title}, {day} · {fish}", {
+                    title: lastHere.title,
+                    day: formatDay(lastHere.date),
+                    fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
+                  })}
+                </small>
+              ) : null}
+            </label>
+            {!existing && canFindNearest(book) ? <NearestWater book={book} onPick={setSpotId} /> : null}
+          </div>
           {pastWeek.length > 0 ? (
             <p className="wide form-note">
               {t("This week in earlier years here: {fish}, {species}.", {

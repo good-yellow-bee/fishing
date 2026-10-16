@@ -1459,3 +1459,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR291~~ | ~~Own pinned waters on a fitted map sheet~~ (#639) | field | S |
 | ~~BR292~~ | ~~Review 18 fixes: sample names, count buttons, merged counts~~ (#641) | field | S |
 | ~~BR293~~ | ~~Review 19 fixes: outing kept on water change-back, own-waters map labels~~ (#644) | field | S |
+| ~~BR294~~ | ~~Nearest water to me on the outing form~~ (#645) | field | S |
