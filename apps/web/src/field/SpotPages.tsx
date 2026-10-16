@@ -24,6 +24,8 @@ import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, topOuting } from "./outingAverage";
+import { CopySummary } from "./CopySummary";
+import { spotSummary } from "./tripSummary";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -135,6 +137,12 @@ export function SpotPage() {
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
       <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} />
+      {catches.length > 0 ? (
+        <CopySummary
+          text={() => spotSummary(spot, trips.length, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}
+          file="stillwater-water.txt"
+        />
+      ) : null}
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>

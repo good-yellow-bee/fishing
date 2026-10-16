@@ -1,5 +1,5 @@
-import type { CatchEntry, Trip } from "@stillwater/shared";
-import { t } from "../i18n";
+import { WATER_LABELS, lureTally, type CatchEntry, type Spot, type Trip } from "@stillwater/shared";
+import { t, tn } from "../i18n";
 import { measuresText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText } from "./format";
 
@@ -25,4 +25,29 @@ export function catchSummary(entry: CatchEntry, spotName: string | null): string
   const when = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)}`, ...(spotName ? [spotName] : [])].join(" · ");
   const note = noteText(entry.note).trim();
   return [what, when, ...(note ? ["", note] : [])].join("\n");
+}
+
+/**
+ * A water as plain text: its kind, how its outings have gone, its best outing, the lures that took the most, and its notes.
+ * `average` and `best` are the lines the spot page shows, so the two say the same thing.
+ */
+export function spotSummary(
+  spot: Spot,
+  outings: number,
+  catches: readonly CatchEntry[],
+  average: string | null,
+  best: { trip: Trip; fish: number } | null,
+): string {
+  const lures = lureTally({ spots: [], trips: [], catches: [...catches] }, 3)
+    .map((row) => `${t(row.lure)} (${row.count})`)
+    .join(", ");
+  return [
+    `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
+    `${tn(outings, "{n} outing", "{n} outings")} · ${fishCountLabel(catches.length)}`,
+    ...(average ? [average] : []),
+    ...(best ? [`${t("Best outing here:")} ${best.trip.title} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),
+    ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
+    ...(spot.bestConditions.trim() ? [t("Best conditions: {conditions}", { conditions: spot.bestConditions.trim() })] : []),
+    ...(spot.notes.trim() ? ["", spot.notes.trim()] : []),
+  ].join("\n");
 }
