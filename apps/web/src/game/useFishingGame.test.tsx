@@ -907,6 +907,9 @@ describe("level unlock integration", () => {
     for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(phase()).toBe("hookset:none");
     expect(hint()).toBe("The float lifts and lies flat — strike!");
+    for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).toBe("Strike the moment the float lifts.");
   });
 
   it("calls a walleye's light take and gives it longer before it drops the bait", () => {

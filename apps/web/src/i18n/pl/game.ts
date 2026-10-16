@@ -397,6 +397,7 @@ export const PL_GAME: PlBook = {
   "It's taking it — strike!": "Bierze — zatnij!",
   "A light take, the float just slides under — strike!": "Delikatne branie, spławik tylko się zsuwa pod wodę — zatnij!",
   "The float lifts and lies flat — strike!": "Spławik się unosi i kładzie na wodzie — zatnij!",
+  "Strike the moment the float lifts.": "Zatnij, gdy tylko spławik się uniesie.",
   "Too slow. The fish dropped the bait after {time} s.": "Za wolno. Ryba wypuściła przynętę po {time} s.",
   "It swirled away, but a muskie follows. Watch for it to hit again…": "Zawrócił z wirem wody, ale tygrysi szczupak idzie za przynętą. Czekaj, aż uderzy znowu…",
   "It dropped the bait but it's still there. Watch for a second take…": "Wypuściła przynętę, ale wciąż tam jest. Czekaj na drugie branie…",
