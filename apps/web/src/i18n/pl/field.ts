@@ -358,6 +358,7 @@ export const PL_FIELD: PlBook = {
   "newest": "najnowsza",
   "By season": "Według pory roku",
   "By month": "Według miesiąca",
+  "By year": "Według roku",
   "{n} this month": "{n} w tym miesiącu",
   "This week in years past": "Ten tydzień w minionych latach",
   "This week in earlier years here: {fish}, {species}.": "W tym tygodniu w poprzednich latach: {fish}, {species}.",

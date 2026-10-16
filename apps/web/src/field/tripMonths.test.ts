@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { recentTrips, sampleLogbook } from "@stillwater/shared";
-import { catchMonth, monthTally, tripsByMonth } from "./tripMonths";
+import { catchMonth, monthTally, tripsByMonth, yearTally } from "./tripMonths";
 
 describe("trips by month", () => {
   it("cuts a newest-first list into months and keeps every trip in order", () => {
@@ -31,5 +31,16 @@ describe("month tally", () => {
     expect(rows.map((row) => row.month)).toEqual(["2026-10", "2026-09"]);
     expect(rows.reduce((sum, row) => sum + row.count, 0)).toBe(book.catches.length);
     expect(monthTally(book.catches, 1)).toEqual([rows[0]]);
+  });
+});
+
+describe("year tally", () => {
+  it("counts fish per year, newest year first", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const old = { ...book.catches[0]!, id: "old", caughtAt: new Date(2024, 5, 1, 9).toISOString() };
+    expect(yearTally([...book.catches, old])).toEqual([
+      { year: "2026", count: book.catches.length },
+      { year: "2024", count: 1 },
+    ]);
   });
 });

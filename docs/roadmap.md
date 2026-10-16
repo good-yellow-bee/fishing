@@ -1380,3 +1380,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR233~~ | ~~Deleted fish stay out of merges~~ (#557) | field | S |
 | ~~BR234~~ | ~~Copy an outing as a text summary~~ (#564) | field | S |
 | ~~BR235~~ | ~~Copy a catch as a text summary~~ (#565) | field | S |
+| ~~BR236~~ | ~~By year bars and year search~~ (#566) | field | S |
