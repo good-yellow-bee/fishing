@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { sampleLogbook, type Logbook } from "@stillwater/shared";
 import { reloadLang, setLang, setUnits } from "../i18n";
-import { catchesCsv } from "./catchCsv";
+import { catchesCsv, cell } from "./catchCsv";
 
 function bookWith(note: string): Logbook {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -30,5 +30,16 @@ describe("the catches as a spreadsheet", () => {
     const lines = catchesCsv(bookWith("Ok")).trimEnd().split("\r\n");
     expect(lines[0]).toContain("Długość (cm);Waga (kg)");
     expect(lines[1]).toMatch(/^2026-09-30;06:40;[^;]+;25,4;;/);
+  });
+});
+
+describe("a spreadsheet cell", () => {
+  it("keeps text a spreadsheet would read as a formula as text, and leaves numbers alone", () => {
+    expect(cell("=1+1", ",")).toBe("'=1+1");
+    expect(cell("-fished the weed edge", ",")).toBe("'-fished the weed edge");
+    expect(cell("@here", ",")).toBe("'@here");
+    expect(cell("-3", ",")).toBe("-3");
+    expect(cell("-1,5", ";")).toBe("-1,5");
+    expect(cell("+1, nice", ",")).toBe(`"'+1, nice"`);
   });
 });

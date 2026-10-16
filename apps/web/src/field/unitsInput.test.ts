@@ -7,6 +7,12 @@ describe("metric entry in the field log", () => {
     expect(toBookTemp("61", "imperial")).toBe("61");
   });
 
+  it("reads a decimal comma or a leading point in imperial too", () => {
+    expect(toBookAmount("2,5", "weight", "imperial")).toBe("2.5");
+    expect(toBookAmount(".75", "weight", "imperial")).toBe("0.75");
+    expect(toBookTemp(" 58,5 ", "imperial")).toBe("58.5");
+  });
+
   it("turns centimetres, kilograms and °C into the book's units", () => {
     expect(toBookAmount("71,12", "length", "metric")).toBe("28");
     expect(toBookAmount("1", "weight", "metric")).toBe("2.205");
