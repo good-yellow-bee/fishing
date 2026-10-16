@@ -270,6 +270,7 @@ describe("useFishingGame lost fight", () => {
     step.mockReturnValueOnce("snapped");
     castAndFight(surface, 1);
     expect(phase()).toBe("idle:broke");
+    expect(hint()).toContain("It's still about: cast here again.");
     const lost = vi.mocked(castForGotAway).mock.calls.length;
     act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));

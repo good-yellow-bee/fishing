@@ -1166,7 +1166,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT121~~ | ~~Pike grab: a pike at the reeds can hit a golden shiner on the way in, and the fight starts again with the pike; news card for it and the landed-card counts~~ (#679) | fight | S |
 | ~~GT122~~ | ~~Grab feel: the pike starts where the shiner was, not back at the end of the line, and spray bursts at the fish when it hits~~ (#683) | fight | S |
 | ~~GT123~~ | ~~More grabs: a largemouth takes a bluegill off the point and a walleye a perch from the boat, each with its own call and landed note; news card~~ (#685) | fight | S |
-| GT124 | The one that got away: a bigger fish that breaks off can bite again at its bank, same weight, within the next five casts; a call and a landed note | fight | S |
+| ~~GT124~~ | ~~The one that got away: a bigger fish that breaks off can bite again at its bank, same weight, within the next five casts; a call and a landed note~~ (#689) | fight | S |
+| GT125 | After a loss the hint says a bigger fish is still about; news card for the one that got away | ui | S |
 
 ## Risks / open questions for the owner
 

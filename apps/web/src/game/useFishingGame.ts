@@ -774,6 +774,8 @@ export function useFishingGame(
     let wasShaking = false;
     let wasLifting = false;
     let prevSurge: SurgeState = 0;
+    /** After a loss, a fish that may bite again is said to be still about. */
+    const stillAbout = () => (gotAwayRef.current ? ` ${t("It's still about: cast here again.")}` : "");
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
       try {
@@ -923,7 +925,7 @@ export function useFishingGame(
             const reeledIn = Math.round((1 - sim.line) * 100);
             const snapped = t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
             setOutcome({ kind: "broke", message: reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped });
-            resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run."));
+            resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
           } else if (result === "escaped") {
             fx.snap();
             fx.haptic("snap");
@@ -934,10 +936,10 @@ export function useFishingGame(
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
             if (sim.tornOut) {
               setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) });
-              resetToIdle(t("Soft mouth — ease off as soon as the bar turns red."));
+              resetToIdle(t("Soft mouth — ease off as soon as the bar turns red.") + stillAbout());
             } else {
               setOutcome({ kind: "broke", message: t("{fish} took all the line and threw the hook.", { fish: t(current.species.name) }) });
-              resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm."));
+              resetToIdle(t("Ran out of line — hold to reel whenever the fish is calm.") + stillAbout());
             }
           }
         }
