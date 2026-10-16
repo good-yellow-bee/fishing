@@ -370,6 +370,8 @@ export const PL_GAME: PlBook = {
   "Landed in {s} s": "Wyholowana w {s} s",
   "Landed in {m} min {s} s": "Wyholowana w {m} min {s} s",
   "Close call": "O włos",
+  "A pike grabbed your shiner! {line}. Ease off when it runs.": "Szczupak chwycił twojego złotawca! {line}. Odpuść, gdy odjeżdża.",
+  "Took it off your shiner": "Wziął twojego złotawca",
   "Hooked solid in {time} s! {line}. Ease off when it runs.": "Hak siedzi pewnie po {time} s! {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.": "Zacięte po {time} s (przy tym wietrze pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.": "Zacięte po {time} s (pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
@@ -542,6 +544,7 @@ export const PL_GAME: PlBook = {
   "A walleye now shakes its head once between runs: ease off a moment when the fight card calls it. And a sulking catfish takes two pumps to lift, not one.":
     "Sandacz amerykański potrząsa teraz głową raz między odjazdami: odpuść na chwilę, gdy karta walki o tym mówi. A sumik kanałowy, który zalega na dnie, potrzebuje dwóch pompek, by go poderwać, nie jednej.",
   "Bests can show one season at a time, outings show sunrise and sunset at the water, and a fish logged without an outing can make one of its day. Search understands “full moon”, “dusk” and “>3 lb 2 oz”, and backups carry the date in their name.": "Rekordy można oglądać sezon po sezonie, wyprawy pokazują wschód i zachód słońca nad łowiskiem, a z ryby bez wyprawy można zrobić wyprawę tego dnia. Wyszukiwanie rozumie „około pełni”, „zmierzch” i „>3 lb 2 oz”, a kopie dziennika mają datę w nazwie.",
+  "A pike in the reeds may grab a golden shiner you are reeling in: hang on, because the fight starts again with the pike. And the landed card now counts a brook trout's darts you followed and a walleye's head shakes you eased off.": "Szczupak w trzcinach może chwycić holowanego złotawca: trzymaj, bo hol zaczyna się od nowa ze szczupakiem. A karta złowionej ryby liczy teraz zygzaki pstrąga i przetrwane potrząśnięcia sandacza.",
   "The gear page keeps a record of the lures that took fish, packing lists copy as a checklist, and the Home card shows sunrise and how much is packed for today’s or tomorrow’s outing. Species pages show their newest photos, and several pieces of tackle can be added at once, split by commas.": "Strona sprzętu prowadzi bilans przynęt, które dały ryby, listę do spakowania można skopiować jako listę kontrolną, a karta na stronie głównej pokazuje wschód słońca i ile spakowano na dzisiejszą lub jutrzejszą wyprawę. Strony gatunków pokazują najnowsze zdjęcia, a kilka elementów sprzętu można dodać naraz, po przecinku.",
   "Perch, bluegill and crappie travel in schools. Land one and cast again from the same bank: for two casts the bites come sooner, and often it's another of the same kind.":
     "Okonie, bassy niebieskoskrzele i wielkooczki pływają ławicami. Wyholuj jedną rybę i zarzuć znów z tego samego brzegu: przez dwa rzuty brania przychodzą szybciej, a często to kolejna ryba tego samego gatunku.",
