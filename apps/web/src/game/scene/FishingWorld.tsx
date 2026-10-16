@@ -752,7 +752,7 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
 
     // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
     const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true) : 0;
-    boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 1.6) * dt));
+    boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
       fightView.leapAge += dt;
