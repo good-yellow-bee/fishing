@@ -143,7 +143,8 @@ export function BookFile() {
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
-    if (pendingGoals) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
+    // A file with no goals, from a browser that never set one, leaves this browser's alone.
+    if (pendingGoals && Object.keys(pendingGoals).length > 0) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
     // A fish that is in the book again is no longer one deleted here.
     forgetDeletedFish(next.book.catches.map((entry) => entry.id));
     if (!merged) {

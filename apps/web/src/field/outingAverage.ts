@@ -6,7 +6,8 @@ import { num, t, tn } from "../i18n";
  * Null with fewer than two such outings, where an average says nothing.
  */
 export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): string | null {
-  const fished = trips.filter((trip) => trip.date <= today);
+  // Today's outing counts once it has a fish; until then it is still the day's plan.
+  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
   if (fished.length < 2) return null;
   const counts = fished.map((trip) => fishOn(trip.id));
   const average = t("{n} fish an outing on average", { n: num(counts.reduce((sum, count) => sum + count, 0) / fished.length) });
