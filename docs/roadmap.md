@@ -1189,7 +1189,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT144~~ | ~~A lake whitefish takes the bait lightly, like a walleye; news card~~ (#729) | game | S |
 | ~~GT145~~ | ~~A bluegill turns broadside and circles: while fresh it reels in 0.7x as fast; fight card habit line; news card~~ (#731) | fish | S |
 | ~~GT146~~ | ~~A perch gulps the bait: holds it 1.5x longer, with its own strike call and field guide line; news card~~ (#732) | game | S |
-| GT147 | A brook or rainbow trout snatches the bait: lets go after 0.8x the time, with its own strike call and field guide line; news card | game | S |
+| ~~GT147~~ | ~~A brook or rainbow trout snatches the bait: lets go after 0.8x the time, with its own strike call and field guide line; news card~~ (#733) | game | S |
+| GT148 | A salmon rolls on the bait: a 1.6x wider strike splash with higher spray, its own strike call and field guide line; news card | game | S |
 
 ## Risks / open questions for the owner
 
