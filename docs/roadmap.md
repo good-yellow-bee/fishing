@@ -1393,3 +1393,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR245~~ | ~~Bite pace on outings~~ (#577) | field | S |
 | ~~BR246~~ | ~~Days on the water this year~~ (#578) | field | S |
 | ~~BR247~~ | ~~Fish per outing on each water~~ (#579) | field | S |
+| ~~BR248~~ | ~~Size rank among its kind~~ (#580) | field | S |
