@@ -63,6 +63,7 @@ describe("nibble plan", () => {
     expect(biteStyle("pike")).toBe("ambush");
     expect(biteStyle("carp")).toBe("mouth");
     expect(biteStyle("walleye")).toBe("light");
+    expect(biteStyle("lake-whitefish")).toBe("light");
     expect(biteStyle("crappie")).toBe("lift");
     expect(biteStyle("bluegill")).toBe("peck");
     expect(biteStyle("smallmouth-bass")).toBe("run");

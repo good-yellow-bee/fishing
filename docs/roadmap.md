@@ -1185,7 +1185,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT140~~ | ~~A crappie's lift bite: the float rises and lies flat instead of diving, with its own strike call; news card~~ (#722) | game | S |
 | ~~GT141~~ | ~~A bluegill pecks: three to five quick taps before it pulls, with its own strike call; news card~~ (#725) | game | S |
 | ~~GT142~~ | ~~A smallmouth bass runs off with the bait: the float slides along the top as it goes under, with its own strike call; news card~~ (#726) | game | S |
-| GT143 | The field guide says how each landed fish bites (ambush, mouth, light, lift, peck, run); news card | ui | S |
+| ~~GT143~~ | ~~The field guide says how each landed fish bites (ambush, mouth, light, lift, peck, run); news card~~ (#727) | ui | S |
+| GT144 | A lake whitefish takes the bait lightly, like a walleye; news card | game | S |
 
 ## Risks / open questions for the owner
 
