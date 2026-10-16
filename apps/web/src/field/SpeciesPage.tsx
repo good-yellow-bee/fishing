@@ -229,10 +229,25 @@ function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
 }
 
 /** A gain in size, with a place more than a size shows, so a small step does not read "+0 cm" or "+0 lb". */
-function gainText(gain: Measure): string {
+/**
+ * How much a step added, worked out from the two sizes as the page shows them, so "57 cm → 71 cm" reads "+14 cm"
+ * rather than the exact inches' "+13,5 cm".
+ */
+function gainText(from: Measure, to: Measure): string {
   const metric = getUnits() === "metric";
-  if (gain.kind === "length") return metric ? `${num(gain.inches * CM_PER_IN, 1)} cm` : `${num(gain.inches, 2)} in`;
-  return metric ? `${num(gain.pounds * KG_PER_LB, 2)} kg` : `${num(gain.pounds, 2)} lb`;
+  // The digits measureText shows for a size: whole cm, a tenth of an inch, and an extra place under 1 lb or 1 kg.
+  const shown = (measure: Measure): [number, number] => {
+    if (measure.kind === "length") return metric ? [measure.inches * CM_PER_IN, 0] : [measure.inches, 1];
+    const value = metric ? measure.pounds * KG_PER_LB : measure.pounds;
+    return [value, value < 1 ? 2 : 1];
+  };
+  const [a, aDigits] = shown(from);
+  const [b, bDigits] = shown(to);
+  const digits = Math.max(aDigits, bDigits);
+  const round = (value: number, places: number) => Math.round(value * 10 ** places) / 10 ** places;
+  const diff = round(b, bDigits) - round(a, aDigits);
+  const unit = to.kind === "length" ? (metric ? "cm" : "in") : metric ? "kg" : "lb";
+  return `${num(diff, digits)} ${unit}`;
 }
 
 /** The fish of the kind that were both measured and weighed, shortest first: how weight goes with length. */
@@ -272,12 +287,12 @@ function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
             {/* Both measures have a story: each list says which it is. */}
             {lists.length > 1 ? <h3 className="subhead">{label}</h3> : null}
             <ol className="species-waters best-steps" aria-label={label}>
-              {steps.map(({ entry, measure, gain }) => (
+              {steps.map(({ entry, measure, gain }, index) => (
                 <li key={entry.id}>
                   <Link to={`/catches/${entry.id}`}>{measureText(measure)}</Link>
                   <span className="meta">
                     {formatCatchDay(entry.caughtAt)}
-                    {gain ? ` · +${gainText(gain)}` : ` · ${t("the first")}`}
+                    {gain && index > 0 ? ` · +${gainText(steps[index - 1]!.measure, measure)}` : ` · ${t("the first")}`}
                   </span>
                 </li>
               ))}

@@ -18,10 +18,12 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
   useT();
   const recap = seasonRecap(book, year, today);
   if (recap.fish === 0 && recap.days === 0) return null;
+  // A season still going is set against the one before up to the same day.
+  const before = recap.beforeUntil ? t("{year} by this date", { year: recap.before }) : recap.before;
   const lines = [
-    t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, recap.before) }),
-    t("Days out: {count}", { count: against(recap.days, recap.daysBefore, recap.before) }),
-    t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, recap.before) }),
+    t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) }),
+    t("Days out: {count}", { count: against(recap.days, recap.daysBefore, before) }),
+    t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, before) }),
     ...(recap.newKinds.length > 0 ? [t("New to the book: {kinds}", { kinds: recap.newKinds.map((name) => t(name)).join(", ") })] : []),
   ];
   return (

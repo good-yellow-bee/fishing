@@ -1,4 +1,4 @@
-import type { Logbook } from "@stillwater/shared";
+import { localDate, type Logbook } from "@stillwater/shared";
 import { catchMonth, daysOut } from "../tripMonths";
 
 /** One season's totals beside the season before, and the kinds it brought into the book for the first time. */
@@ -11,13 +11,24 @@ export type SeasonRecap = {
   daysBefore: number;
   kinds: number;
   kindsBefore: number;
+  /** The season is still going, so the one before counts only up to the same day ("2025-10-16"); else null. */
+  beforeUntil: string | null;
   /** Kinds whose first fish in the book came this season, as stored, in the order they first came. */
   newKinds: string[];
 };
 
 export function seasonRecap(book: Logbook, year: string, today: string): SeasonRecap {
   const before = String(Number(year) - 1);
-  const of = (season: string) => book.catches.filter((entry) => catchMonth(entry).startsWith(`${season}-`));
+  // This season so far is set against the one before up to the same day, not the whole of it.
+  const beforeUntil = year === today.slice(0, 4) ? `${before}-${today.slice(5)}` : null;
+  const cut = beforeUntil
+    ? {
+        ...book,
+        catches: book.catches.filter((entry) => !catchMonth(entry).startsWith(`${before}-`) || localDate(new Date(entry.caughtAt)) <= beforeUntil),
+        trips: book.trips.filter((trip) => !trip.date.startsWith(`${before}-`) || trip.date <= beforeUntil),
+      }
+    : book;
+  const of = (season: string) => (season === before ? cut : book).catches.filter((entry) => catchMonth(entry).startsWith(`${season}-`));
   const kinds = (season: string) => new Set(of(season).map((entry) => entry.species.trim().toLowerCase())).size;
   // The first fish of each kind in the whole book, oldest first: those from this season are new to the book.
   const first = new Map<string, { name: string; at: string }>();
@@ -31,9 +42,10 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
     fish: of(year).length,
     fishBefore: of(before).length,
     days: daysOut(book, year, today),
-    daysBefore: daysOut(book, before, today),
+    daysBefore: daysOut(cut, before, today),
     kinds: kinds(year),
     kindsBefore: kinds(before),
+    beforeUntil,
     newKinds: [...first.values()].filter((row) => row.at.startsWith(`${year}-`)).map((row) => row.name),
   };
 }

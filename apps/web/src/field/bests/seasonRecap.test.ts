@@ -27,8 +27,17 @@ describe("a season against the one before", () => {
       daysBefore: 2,
       kinds: 3,
       kindsBefore: 2,
+      beforeUntil: "2025-10-16",
       newKinds: ["Walleye", "Burbot"],
     });
+  });
+
+  it("sets a season still going against the one before only up to the same day", () => {
+    const late = { ...book, catches: [...book.catches, fish("f", "Zander", "2025-11-20T09:00:00")], trips: [{ id: "t", date: "2025-12-01", spotId: "s", title: "Late", note: "" }] };
+    const recap = seasonRecap(late, "2026", "2026-10-16");
+    expect([recap.fishBefore, recap.daysBefore, recap.kindsBefore]).toEqual([2, 2, 2]);
+    const whole = seasonRecap(late, "2025", "2026-10-16");
+    expect([whole.fish, whole.beforeUntil]).toEqual([3, null]);
   });
 
   it("calls every kind new in the book's first season", () => {

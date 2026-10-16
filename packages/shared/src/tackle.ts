@@ -1,4 +1,5 @@
 import type { LakeHour } from "./hour.ts";
+import { foldText } from "./search.ts";
 
 export type TackleItem = {
   id: string;
@@ -100,13 +101,20 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?)\b/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?)\b/i;
 /** Line names end with the line word ("Steel leader"); "In-line spinner" does not. */
 const LINE = /\b(lines?|leaders?|tippets?)\s*$/i;
 
+/**
+ * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Żyłka 0,25", "Zapasowy przypon"),
+ * read without accents. Polish names a line by its word wherever it sits, so lines are here too.
+ */
+const TACKLE_TOOL_PL =
+  /(^|[^a-z])(podbierak|szczypc|wedk|wedzisk|kolowrot|zylk|plecionk|przypon|fluorocarbon|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang)/;
+
 /** Anything not recognised as a tool or line counts as a lure, so lures the angler typed stay on the list. */
 export function isLureLabel(label: string): boolean {
-  return !TACKLE_TOOL.test(label) && !LINE.test(label);
+  return !TACKLE_TOOL.test(label) && !LINE.test(label) && !TACKLE_TOOL_PL.test(foldText(label));
 }
 
 /** Packed lures, or the sample's lures when none are packed. */

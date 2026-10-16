@@ -1553,3 +1553,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR346~~ | ~~Catch steps stay in the list~~ (#730) | field | S |
 | ~~BR347~~ | ~~Review 27 fixes~~ (#734) | field | S |
 | ~~BR348~~ | ~~News card 16zzm (#723-#734)~~ (#736) | field | S |
+| ~~BR349~~ | ~~Fair season recap, Polish tools, phone lines~~ (#739) | field | S |
