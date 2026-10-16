@@ -1124,7 +1124,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT79~~ | ~~Perch, bluegill and crappie school: after landing one, the next two casts at that bank bite 30% sooner and half the bites are the same kind; the hint says so~~ (#544) | fish | S |
 | ~~GT80~~ | ~~News card (2026-10-16k) covers GT79: panfish schools~~ (#545) | news | S |
 | ~~GT81~~ | ~~School shadows: small fish shadows mill round the float on a schooled cast~~ (#548) | scene | S |
-| GT82 | News card (2026-10-16l) covers GT81: school shadows | news | S |
+| ~~GT82~~ | ~~News card (2026-10-16l) covers GT81: school shadows~~ (#551) | news | S |
+| GT83 | Walleye bite light: the float only slides under, the strike call says so, and it holds the bait 1.3x longer | bite | S |
 
 ## Risks / open questions for the owner
 

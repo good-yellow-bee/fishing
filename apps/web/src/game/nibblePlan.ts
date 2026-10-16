@@ -17,9 +17,10 @@ const MS_SPREAD = 220;
 
 /**
  * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
- * bottom feeders mouth it over and over, and the rest nibble a time or three.
+ * bottom feeders mouth it over and over, a walleye takes it so lightly the float only slides under,
+ * and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -30,7 +31,13 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   catfish: "mouth",
   sturgeon: "mouth",
   burbot: "mouth",
+  walleye: "light",
 };
+
+/** A light biter's take pulls the float only this share as deep as a usual bite. */
+export const LIGHT_PLUNGE = 0.45;
+/** A light biter holds on to the bait this much longer, so the faint take can still be struck. */
+export const LIGHT_HOLD = 1.3;
 
 export function biteStyle(speciesId: string): BiteStyle {
   return BITE_STYLES[speciesId] ?? "usual";

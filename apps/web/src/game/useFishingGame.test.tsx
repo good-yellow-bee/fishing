@@ -6,6 +6,7 @@ import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Prof
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { pickBite, waitMs } from "./logic";
+import { LIGHT_HOLD } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
@@ -733,6 +734,30 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(SECOND_TAKE_NIBBLE_MS));
     act(() => surface.dispatchEvent(pointer("pointerdown", 8)));
     expect(hint()).toBe("Too early. Wait for the bobber to go under, then strike.");
+  });
+
+  it("calls a walleye's light take and gives it longer before it drops the bait", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    act(() => vi.advanceTimersByTime(1400));
+    act(() => vi.advanceTimersByTime(SECOND_TAKE_MS));
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("result:miss");
+    const usual = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "walleye")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2201));
+    expect(phase()).toBe("hookset:none");
+    expect(hint()).toBe("A light take, the float just slides under — strike!");
+    act(() => vi.advanceTimersByTime(1400));
+    expect(phase()).toBe("hookset:none");
+    act(() => vi.advanceTimersByTime(1000));
+    expect(phase()).toBe("result:miss");
+    const light = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
+    expect(light).toBeCloseTo(usual * LIGHT_HOLD, 1);
   });
 
   it("calls a predator's bite as a hit and a usual fish's as NOW", () => {

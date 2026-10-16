@@ -130,7 +130,7 @@ import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
-import { biteStyle } from "../nibblePlan";
+import { biteStyle, LIGHT_PLUNGE } from "../nibblePlan";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -667,7 +667,7 @@ function WaterAim({ phase, aim, level, powerRef, accuracy }: WaterAimProps) {
   );
 }
 
-function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; ambush: boolean }) {
+function FightMotion({ phase, sim, ambush, light }: { phase: ScenePhase; sim: SimRef; ambush: boolean; light: boolean }) {
   const prevPhase = useRef(phase);
   const prevSurge = useRef(0);
   const biteAt = useRef(-1);
@@ -751,7 +751,8 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
       fightView.tug = 0;
       fightView.pump = 0;
       if (phase !== "fight") fightView.leapAge = -1;
-      fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) : 0;
+      // A light biter only slides the float under.
+      fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) * (light ? LIGHT_PLUNGE : 1) : 0;
     }
 
     // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
@@ -2128,7 +2129,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, hour, sky, s
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} />
+      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} light={species !== null && biteStyle(species.id) === "light"} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
