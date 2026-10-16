@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16k";
+export const NEWS_ID = "2026-10-16l";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "When you cast back into a school, you can now see small fish shadows milling round the float while you wait.",
   "Perch, bluegill and crappie travel in schools. Land one and cast again from the same bank: for two casts the bites come sooner, and often it's another of the same kind.",
   "A lake whitefish has a soft mouth: keep reeling while the tension is in the red and the hook tears out. The fight card warns you while it tears, so ease off at once.",
   "A hooked carp tears off on one long first run, half again as long as its later ones. The fight card calls it, so let it go and wait it out.",
