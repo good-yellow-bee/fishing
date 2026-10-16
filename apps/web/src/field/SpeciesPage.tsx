@@ -11,6 +11,8 @@ import { catchesOfSpecies, speciesWaters } from "./speciesLink";
 import { TallyBars } from "./TallyBars";
 import { findWithLink } from "./CatchSearch";
 import { WaterTipsBox } from "./WaterTipsBox";
+import { bestSteps, type BestStep } from "./bestSteps";
+import { measureText } from "../i18n/content";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 export function SpeciesPage() {
@@ -55,6 +57,7 @@ export function SpeciesPage() {
       <FishSum catches={catches} oneKind />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={t(name)} />
+      <BestGrowth catches={catches} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>
@@ -127,5 +130,31 @@ function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
     <p className="meta species-span">
       {t("First in the book")} {firstDay} · {t("newest")} {lastDay}
     </p>
+  );
+}
+
+/** Each fish that beat the best of the kind before it, oldest first, with what it added; shown once the first was ever beaten. */
+function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
+  const lists = [bestSteps(catches, "length"), bestSteps(catches, "weight")].filter((steps): steps is BestStep[] => steps !== null);
+  if (lists.length === 0) return null;
+  return (
+    <>
+      <div className="section-head">
+        <h2>{t("How the best grew")}</h2>
+      </div>
+      {lists.map((steps) => (
+        <ol key={steps[0]!.entry.measure.kind} className="species-waters best-steps">
+          {steps.map(({ entry, gain }) => (
+            <li key={entry.id}>
+              <Link to={`/catches/${entry.id}`}>{measureText(entry.measure)}</Link>
+              <span className="meta">
+                {formatCatchDay(entry.caughtAt)}
+                {gain ? ` · +${measureText(gain)}` : ` · ${t("the first")}`}
+              </span>
+            </li>
+          ))}
+        </ol>
+      ))}
+    </>
   );
 }
