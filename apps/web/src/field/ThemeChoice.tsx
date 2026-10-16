@@ -12,11 +12,11 @@ export function ThemeChoice() {
     { id: "dark", label: t("Dark") },
   ];
   return (
-    <section className="theme-choice" aria-labelledby="theme-choice-head">
-      <h2 className="subhead" id="theme-choice-head">
+    <div className="theme-choice">
+      <h2 className="subhead">
         {t("Page colours")}
       </h2>
       <ChoiceRow label={t("Page colours")} value={theme} options={options} onChange={writeFieldTheme} wrap />
-    </section>
+    </div>
   );
 }

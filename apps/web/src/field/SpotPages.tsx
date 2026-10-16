@@ -102,6 +102,8 @@ export function SpotPage() {
   const fishByTrip = fishCountsByTrip({ ...book, catches });
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
+  const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (
     <div className="sheet">
@@ -139,7 +141,7 @@ export function SpotPage() {
       <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} />
       {catches.length > 0 ? (
         <CopySummary
-          text={() => spotSummary(spot, trips.length, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}
+          text={() => spotSummary(spot, fishedOutings, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}
           file="stillwater-water.txt"
         />
       ) : null}
