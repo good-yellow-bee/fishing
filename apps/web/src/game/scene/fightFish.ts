@@ -197,3 +197,12 @@ export function leapLift(u: number) {
   const k = Math.min(1, Math.max(0, u));
   return { y: Math.sin(Math.PI * k) * LEAP_HEIGHT, pitch: Math.cos(Math.PI * k) * 0.7 };
 }
+
+/** Full turns a pike makes about its own length when it rolls on the line at the net. */
+export const ROLL_TURNS = 2;
+
+/** A roll `u` (0..1) of the way through: how far the fish has turned over, easing in and out of the spin. */
+export function rollTwist(u: number) {
+  const k = Math.min(1, Math.max(0, u));
+  return k * k * (3 - 2 * k) * ROLL_TURNS * Math.PI * 2;
+}
