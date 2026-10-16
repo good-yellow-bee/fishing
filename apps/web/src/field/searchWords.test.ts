@@ -32,4 +32,11 @@ describe("search words without +", () => {
     expect(findCatches(bare, "moon", t)).toEqual([]);
     expect(findCatches(bare, "full moon", t).length + findCatches(bare, "new moon", t).length).toBeGreaterThan(0);
   });
+
+  it("finds the fish with a photo by “photo”", () => {
+    const withPhoto = new Set([book.catches[0]!.id, book.catches[2]!.id]);
+    const found = findCatches(book, "photo", t, (id) => withPhoto.has(id)).map((entry) => entry.id);
+    expect(new Set(found)).toEqual(withPhoto);
+    expect(findCatches(book, "photo", t)).toEqual([]);
+  });
 });

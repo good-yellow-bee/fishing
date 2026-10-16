@@ -108,7 +108,7 @@ function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string 
 }
 
 /** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, words from a note (the fish's, its outing's or its water's), and released or kept fish. */
-function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+function findOne(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
   const exact = parseExactTerm(needle);
   if (exact) {
@@ -135,6 +135,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
   if (want === normalize(t("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
   if (want === normalize(t("Kept"))) return catchesNewestFirst(book).filter((entry) => !entry.released);
+  // "photo" whole: the fish with a picture kept, in either language.
+  if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
   const hit = new Set(found.map((entry) => entry.id));
   // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
   // An outing's title ("Opening day") finds the fish filed on it, from three letters up.
@@ -188,28 +190,29 @@ export function searchParts(book: Logbook, needle: string): string[] {
  * One part of a search; words that find nothing together ("cedar pike") are then each taken as a part, so the fish
  * every word finds come back, as "cedar + pike" would. Sizes, temperatures and exact terms are left whole.
  */
-function findWords(book: Logbook, part: string, t: (text: string) => string): CatchEntry[] {
-  const found = findOne(book, part, t);
+function findWords(book: Logbook, part: string, t: (text: string) => string, pictured: (id: string) => boolean): CatchEntry[] {
+  const found = findOne(book, part, t, pictured);
   // One- and two-letter words ("a", "na") match nearly every fish, so they are left out of the fallback.
   const words = part.split(/\s+/).filter((word) => word.length > 2);
   if (found.length > 0 || words.length === 0 || part.split(/\s+/).length < 2 || /[\d<>=:"“”„]/.test(part)) return found;
-  let matched = findOne(book, words[0]!, t);
+  let matched = findOne(book, words[0]!, t, pictured);
   for (const word of words.slice(1)) {
     if (matched.length === 0) break;
-    const hit = new Set(findOne(book, word, t).map((entry) => entry.id));
+    const hit = new Set(findOne(book, word, t, pictured).map((entry) => entry.id));
     matched = matched.filter((entry) => hit.has(entry.id));
   }
   return matched;
 }
 
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
-export function findCatches(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
+/** `pictured` says which fish have a photo kept, for "photo"; left out, none do. */
+export function findCatches(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean = () => false): CatchEntry[] {
   const parts = searchParts(book, needle);
   // "pike +" while the second part is still being typed: just the first.
-  if (parts.length < 2) return parts[0] ? findWords(book, parts[0], t) : [];
-  let found = findWords(book, parts[0]!, t);
+  if (parts.length < 2) return parts[0] ? findWords(book, parts[0], t, pictured) : [];
+  let found = findWords(book, parts[0]!, t, pictured);
   for (const part of parts.slice(1)) {
-    const hit = new Set(findWords(book, part, t).map((entry) => entry.id));
+    const hit = new Set(findWords(book, part, t, pictured).map((entry) => entry.id));
     found = found.filter((entry) => hit.has(entry.id));
   }
   return found;
@@ -218,7 +221,7 @@ export function findCatches(book: Logbook, needle: string, t: (text: string) => 
 export { FIND_PARAM, exactTerm, findLink, findWithLink } from "./findLinks";
 
 export function CatchSearch() {
-  const { book } = useLogbook();
+  const { book, photoFor } = useLogbook();
   const t = useT();
   const lang = useLang();
   const [params, setParams] = useSearchParams();
@@ -263,7 +266,7 @@ export function CatchSearch() {
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
-  const found = useMemo(() => (settled ? findCatches(book, settled, t) : []), [book, settled, t, lang]);
+  const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
   const largest = params.get(ORDER_PARAM) === "largest";
   const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
   const setLargest = (next: boolean) =>
@@ -325,7 +328,7 @@ export function CatchSearch() {
       {settled ? (
         <>
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, or “released” or “kept”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
