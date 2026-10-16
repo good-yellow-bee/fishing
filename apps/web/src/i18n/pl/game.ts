@@ -407,6 +407,8 @@ export const PL_GAME: PlBook = {
   "Jumper: every second run is a leap, so let go when it comes up": "Skoczek: co drugi odjazd to skok, więc puść, gdy idzie do góry",
   "Breacher: its first run is a leap, so let go when it comes up": "Wyskakuje: jego pierwszy odjazd to skok, więc puść, gdy idzie do góry",
   "Roller: at the net it rolls on the line instead of running": "Kręci się: przy podbieraku obraca się na żyłce zamiast odjeżdżać",
+  "Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there":
+    "Nurek: przy trzcinach i przy pomoście zaszywa się w kryjówce i nie wychodzi, więc zawracaj tam każdy odjazd",
   "Scrapper: pound for pound it fights hardest, so it tires slowly": "Zadziora: jak na swoją wagę walczy najmocniej, więc męczy się powoli",
   "Long runner: the first run is the long one, so let it go": "Długi odjazd: pierwszy odjazd jest najdłuższy, więc daj mu iść",
   "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",

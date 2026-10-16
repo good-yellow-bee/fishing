@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -774,6 +774,40 @@ describe("the dock's pilings", () => {
     const { runtime, now } = afterRun("pilings", false, false);
     runtime.step(now + WRAP_MS, 0.05, false);
     expect(runtime.sim.wrapped).toBe(false);
+  });
+});
+
+describe("a largemouth bass in cover", () => {
+  /** Lets the first run go unturned and returns when it ends. */
+  function firstRunEnd(runtime: FightRuntime) {
+    let was = runtime.sim.surge;
+    for (let now = 0; now < 60_000; now += 50) {
+      runtime.step(now, 0.05, false);
+      if (was === 2 && runtime.sim.surge === 0) return now;
+      was = runtime.sim.surge;
+    }
+    throw new Error("never ran");
+  }
+
+  it.each([
+    ["weeds", "weeded", WEED_MS],
+    ["pilings", "wrapped", WRAP_MS],
+  ] as const)("stays buried in the %s longer than another fish, and doesn't run till it comes out", (water, flag, ms) => {
+    const bass = makeFight(fish("largemouth-bass"), 4, 3, () => 0, 1, water);
+    const at = firstRunEnd(bass);
+    expect(bass.sim[flag]).toBe(true);
+    for (let now = at + 50; now < at + ms * COVER_HOLD - 50; now += 50) {
+      bass.step(now, 0.05, false);
+      expect(bass.sim.surge).toBe(0);
+    }
+    expect(bass.sim[flag]).toBe(true);
+    bass.step(at + ms * COVER_HOLD + 50, 0.05, false);
+    expect(bass.sim[flag]).toBe(false);
+
+    const smallmouth = makeFight(fish("smallmouth-bass"), 4, 3, () => 0, 1, water);
+    const end = firstRunEnd(smallmouth);
+    smallmouth.step(end + ms + 50, 0.05, false);
+    expect(smallmouth.sim[flag]).toBe(false);
   });
 });
 
