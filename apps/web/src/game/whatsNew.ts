@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zzf";
+export const NEWS_ID = "2026-10-16zzg";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Hook a perch and it fights hard for a moment, then gives up fast. The fight card says so.",
   "A landlocked salmon now rolls on the bait at the top, with a bigger splash than other fish. The field guide says so once you've landed one.",
   "A brook or rainbow trout now snatches the bait and lets go fast, so strike quick. The field guide says so once you've landed one.",
   "A perch now gulps the bait down and holds on, so you get a moment longer to strike. The field guide says so once you've landed one.",
