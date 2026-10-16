@@ -131,7 +131,7 @@ import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
-import { biteStyle, LIFT_RISE, LIGHT_PLUNGE, liftTilt, RUN_PLUNGE, runSlide } from "../nibblePlan";
+import { biteStyle, LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide } from "../nibblePlan";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -1943,7 +1943,8 @@ function CaughtFish({
   );
 }
 
-function StrikeSplash({ phase }: { phase: ScenePhase }) {
+/** A rolling bite (a salmon) throws a wider ring and higher spray than a usual take. */
+function StrikeSplash({ phase, roll }: { phase: ScenePhase; roll: boolean }) {
   const ring = useRef<THREE.Mesh>(null);
   const ringMat = useRef<THREE.MeshBasicMaterial>(null);
   const rim = useRef<THREE.Mesh>(null);
@@ -1989,8 +1990,9 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       if (ripple) {
         ring.current.position.set(ripple.x, ripple.y, ripple.z);
         rim.current.position.set(ripple.x, ripple.y + 0.004, ripple.z);
-        ring.current.scale.setScalar(ripple.radius);
-        rim.current.scale.setScalar(ripple.radius);
+        const radius = ripple.radius * (roll ? ROLL_SPLASH : 1);
+        ring.current.scale.setScalar(radius);
+        rim.current.scale.setScalar(radius);
         ringMat.current.opacity = ripple.opacity * 0.55;
         rimMat.current.opacity = ripple.opacity;
       }
@@ -2000,7 +2002,7 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
       flash.current.visible = spray != null;
       if (spray) {
         flash.current.position.set(spray.x, spray.y + 0.01, spray.z);
-        flash.current.scale.setScalar(0.22 + spray.strength * 0.3);
+        flash.current.scale.setScalar((0.22 + spray.strength * 0.3) * (roll ? ROLL_SPLASH : 1));
         flashMat.current.opacity = 0.2 + spray.strength * 0.3;
       }
     }
@@ -2015,7 +2017,8 @@ function StrikeSplash({ phase }: { phase: ScenePhase }) {
         continue;
       }
       mesh.visible = true;
-      mesh.position.set(drop.x, drop.y, drop.z);
+      const big = roll ? ROLL_SPLASH : 1;
+      mesh.position.set(drop.x * big, drop.y * big, drop.z * big);
       (mesh.material as THREE.MeshBasicMaterial).opacity = drop.opacity;
     }
   });
@@ -2190,7 +2193,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
-      <StrikeSplash phase={phase} />
+      <StrikeSplash phase={phase} roll={species !== null && biteStyle(species.id) === "roll"} />
       <CaughtFish
         phase={phase}
         color={golden ? GOLDEN_COLOR : (species?.color ?? FALLBACK_COLOR)}

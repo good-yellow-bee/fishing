@@ -25,9 +25,9 @@ const PECK_GAP_SPREAD = 260;
  * bottom feeders mouth it over and over, a walleye or a whitefish takes it so lightly the float only slides under,
  * a crappie takes it rising so the float lifts and lies flat, a bluegill pecks at it in quick taps
  * before it pulls, a smallmouth bass runs off with it so the float slides away before it goes under,
- * a perch gulps it down and holds on, a trout snatches it and lets go fast, and the rest nibble a time or three.
+ * a perch gulps it down and holds on, a trout snatches it and lets go fast, a salmon rolls on it in a big splash, and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "run" | "gulp" | "snatch" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "run" | "gulp" | "snatch" | "roll" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -46,6 +46,7 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   perch: "gulp",
   "brook-trout": "snatch",
   "rainbow-trout": "snatch",
+  salmon: "roll",
 };
 
 /** A light biter's take pulls the float only this share as deep as a usual bite. */
@@ -56,6 +57,8 @@ export const LIGHT_HOLD = 1.3;
 export const GULP_HOLD = 1.5;
 /** A trout snatches the bait and spits it this much sooner, so the strike has to be quick. */
 export const SNATCH_HOLD = 0.8;
+/** A salmon rolls on the bait, so its strike splash opens this much wider and throws its spray this much higher. */
+export const ROLL_SPLASH = 1.6;
 /** A lift bite raises the float this share of a usual bite's pull, instead of pulling it under. */
 export const LIFT_RISE = 0.3;
 /** A running bite pulls the float under this share as deep as a usual bite, as it slides it away. */

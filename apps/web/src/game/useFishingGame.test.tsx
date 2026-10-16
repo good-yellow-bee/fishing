@@ -940,6 +940,14 @@ describe("level unlock integration", () => {
     expect(held).toBeLessThan(1.2);
   });
 
+  it("calls a salmon rolling on the bait", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "salmon")!);
+    cast(surface);
+    for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("It rolled on the bait — strike!");
+  });
+
   it("calls a crappie's lift bite", () => {
     const surface = mount();
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);

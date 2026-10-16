@@ -163,6 +163,7 @@ function strikeCall(style: BiteStyle) {
   if (style === "run") return t("It's running off with it — strike!");
   if (style === "gulp") return t("It's gulping it down — strike!");
   if (style === "snatch") return t("It snatched it — strike fast!");
+  if (style === "roll") return t("It rolled on the bait — strike!");
   return t("NOW — strike!");
 }
 
