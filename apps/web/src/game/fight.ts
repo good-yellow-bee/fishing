@@ -93,6 +93,9 @@ export const SCRAPPER_TIRE = 0.8;
 /** A bluegill turns its flat side to the pull and circles: while it's fresh, reeling brings it in this much slower. */
 export const BROADSIDERS: ReadonlySet<string> = new Set(["bluegill"]);
 export const BROADSIDE_REEL = 0.7;
+/** A perch fights hard for a moment, then gives up: it tires this much faster than its size says. */
+export const QUITTERS: ReadonlySet<string> = new Set(["perch"]);
+export const QUIT_TIRE = 1.3;
 /** Carp and salmon make one long run straight after the hook. */
 /** Brook trout dart: halfway through each run they cut back the other way, so a turn has to switch sides. */
 export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
@@ -353,8 +356,8 @@ export function makeFight(
   const coverHold = coverDiver ? COVER_HOLD : 1;
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
-  const scrapper = SCRAPPERS.has(species.id);
   const broadsider = BROADSIDERS.has(species.id);
+  const tireHabit = SCRAPPERS.has(species.id) ? SCRAPPER_TIRE : QUITTERS.has(species.id) ? QUIT_TIRE : 1;
   let sulkUntil = -Infinity;
   let slackSec = 0;
   const softMouth = SOFT_MOUTHS.has(species.id);
@@ -522,7 +525,7 @@ export function makeFight(
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
     const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
-    sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * (scrapper ? SCRAPPER_TIRE : 1) : tire) * dtSec));
+    sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * tireHabit : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
