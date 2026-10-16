@@ -1329,3 +1329,51 @@ button.field-primary:disabled {
     color: inherit;
   }
 }
+
+/* Renaming a kind of fish: tucked away under the list until asked for. */
+.rename-kind {
+  margin-top: 28px;
+  border-top: 1px solid var(--field-input-line);
+  padding-top: 12px;
+}
+
+.rename-kind summary {
+  cursor: pointer;
+  color: var(--field-muted);
+}
+
+.rename-kind-form {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  margin-top: 12px;
+}
+
+.rename-kind-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.rename-kind-form input {
+  min-width: 0;
+  border: 1px solid var(--field-input-line);
+  background: var(--field-input);
+  color: var(--field-ink);
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.rename-kind-form p {
+  margin: 0;
+}
+
+.rename-kind-form button {
+  justify-self: start;
+}
+
+@media print {
+  .rename-kind {
+    display: none;
+  }
+}

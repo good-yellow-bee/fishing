@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Fragment, useState, type FormEvent } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { FISH, biteTimes, lureTally, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, useT } from "../i18n";
 import { CatchCard } from "./cards";
@@ -18,6 +18,7 @@ import { CM_PER_IN, KG_PER_LB, lengthText, measureText, weightText } from "../i1
 import { WeatherBars } from "./WeatherBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
+import { renameSpecies } from "./renameSpecies";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 export function SpeciesPage() {
@@ -136,7 +137,56 @@ export function SpeciesPage() {
           />
         )}
       </PagedCatches>
+      <RenameKind name={name} />
     </div>
+  );
+}
+
+/** A name fixed once for every fish of the kind; a name already in the book merges the two. */
+function RenameKind({ name }: { name: string }) {
+  const { book, changeBook } = useLogbook();
+  const navigate = useNavigate();
+  const [typed, setTyped] = useState(() => t(name));
+  const [error, setError] = useState("");
+  const onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    if (typed.trim() === t(name)) return;
+    const result = renameSpecies(book, name, typed);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+    if (changeBook("rename", result.book)) navigate(`/species/${encodeURIComponent(result.name)}`, { replace: true });
+  };
+  return (
+    <details className="rename-kind">
+      <summary>{t("Rename or merge")}</summary>
+      <form onSubmit={onSubmit} className="rename-kind-form">
+        <label>
+          {t("New name for every {name}", { name: t(name) })}
+          <input
+            value={typed}
+            onChange={(event) => {
+              setTyped(event.target.value);
+              setError("");
+            }}
+            aria-invalid={error ? true : undefined}
+            aria-describedby="rename-kind-hint"
+          />
+        </label>
+        <p className="field-hint" id="rename-kind-hint">
+          {t("A name already in the book merges the two.")}
+        </p>
+        {error ? (
+          <p className="field-error" role="alert">
+            {t(error)}
+          </p>
+        ) : null}
+        <button type="submit" className="field-primary inline">
+          {t("Rename")}
+        </button>
+      </form>
+    </details>
   );
 }
 
