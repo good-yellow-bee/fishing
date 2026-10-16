@@ -324,7 +324,7 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Bottom-sticker|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
@@ -348,7 +348,20 @@ describe("FightBar for screen readers", () => {
       "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it",
     ]);
     expect(habit("walleye")).toEqual(["Head-shaker: between runs it shakes its head, so ease off a moment when it does"]);
+    expect(habit("catfish")).toEqual(["Bottom-sticker: when it sulks it takes two pumps to lift, not one"]);
     expect(habit("perch")).toEqual([]);
+  });
+
+  it("calls a catfish lifting after its first pump", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "catfish")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 0;
+    sim.current.sulk = true;
+    frame();
+    expect(status()).toBe("It's sulking on the bottom — ease off, then pump!");
+    sim.current.lifting = true;
+    frame();
+    expect(status()).toBe("It's lifting — ease off and pump once more!");
   });
 
   it("calls a walleye's head shake between runs", () => {
