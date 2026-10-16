@@ -1480,3 +1480,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR308~~ | ~~News 2026-10-16zh for field log round 4~~ (#663) | field | S |
 | ~~BR309~~ | ~~Tackle: several at once, today's fish on gear, plural duplicates~~ (#664) | field | S |
 | ~~BR310~~ | ~~Photo as a search word~~ (#665) | field | S |
+| ~~BR311~~ | ~~Species page photos~~ (#667) | field | S |
