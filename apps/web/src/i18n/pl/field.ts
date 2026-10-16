@@ -78,6 +78,7 @@ export const PL_FIELD: PlBook = {
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Rename or merge": "Zmień nazwę lub połącz",
   "New name for every {name}": "Nowa nazwa dla wszystkich ryb: {name}",
+  "New name for {name} on every fish": "Nowa nazwa przynęty {name} we wszystkich połowach",
   "A name already in the book merges the two.": "Nazwa, która jest już w dzienniku, połączy oba gatunki.",
   "Rename": "Zmień nazwę",
   "Fish renamed.": "Zmieniono nazwę ryb.",

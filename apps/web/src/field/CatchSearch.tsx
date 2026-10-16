@@ -4,6 +4,7 @@ import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABEL
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
+import { RenameKind } from "./RenameKind";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { downloadFile } from "./download";
@@ -299,6 +300,10 @@ export function CatchSearch() {
               )}
             </PagedCatches>
           )}
+          {/* Every fish on one lure: the place to fix that lure's name across the book. */}
+          {matches.length > 0 && parseExactTerm(settled)?.field === "lure" ? (
+            <RenameKind key={matches[0]!.lure} field="lure" name={matches[0]!.lure} />
+          ) : null}
         </>
       ) : null}
     </section>
