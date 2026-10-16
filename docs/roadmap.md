@@ -1102,7 +1102,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT57~~ | ~~A fish going into the weeds at the reeds swishes once, with a soft buzz or controller thump~~ (#492) | feel | S |
 | ~~GT58~~ | ~~News card (2026-10-15zt) covers GT56 and GT57: the rock scrape and the weeds swish~~ (#494) | news | S |
 | ~~GT59~~ | ~~On the lake, a run at the drop-off dives to 0.6 m (below a calm fish, above a sulk) instead of thrashing at the surface, so the scene shows the dive the fight card names~~ (#496) | fish | S |
-| GT60 | On the lake, the inlet's current carries a resting fish 0.5 m off to the side while the angler isn't reeling, and it swings back in once reeled, so the scene shows the current the fight card names | fish | S |
+| ~~GT60~~ | ~~On the lake, the inlet's current carries a resting fish 0.5 m off to the side while the angler isn't reeling, and it swings back in once reeled, so the scene shows the current the fight card names~~ (#499) | fish | S |
+| GT61 | News card (2026-10-16a) covers GT59 and GT60: the drop-off dive and the inlet drift on the lake | news | S |
 
 ## Risks / open questions for the owner
 
