@@ -67,10 +67,12 @@ export function lastReleased(book: Logbook): boolean {
 
 /**
  * When a new catch starts: now, unless it is logged for an outing on an earlier day.
- * Then it starts on that day at this clock time, so it lands on the outing's date.
+ * Then it starts on that day at this clock time, so it lands on the outing's date. Last night's outing in the small
+ * hours keeps now: the fish came after midnight.
  */
 export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = new Date()): Date {
   if (!trip || trip.date >= localDate(now)) return now;
+  if (now.getHours() < LATE_NIGHT_UNTIL && trip.date === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12))) return now;
   const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
 }
@@ -78,6 +80,23 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
 /** The outing planned on this water for this day, which a fish caught there that day most likely belongs to. */
 export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | undefined {
   return book.trips.find((trip) => trip.spotId === spotId && trip.date === ymd);
+}
+
+/** Before this hour a fish with no outing on its own day still belongs to the night before's. */
+export const LATE_NIGHT_UNTIL = 4;
+
+/**
+ * The outing a fish caught at this local time (YYYY-MM-DDTHH:MM) on this water most likely belongs to: that day's, or,
+ * in the small hours with none that day, the outing of the evening before.
+ */
+export function tripForFish(book: Logbook, spotId: string, local: string): Trip | undefined {
+  const ymd = local.slice(0, 10);
+  const sameDay = tripOnDay(book, spotId, ymd);
+  if (sameDay) return sameDay;
+  const hour = Number(local.slice(11, 13));
+  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return undefined;
+  const [y, m, d] = ymd.split("-").map(Number) as [number, number, number];
+  return tripOnDay(book, spotId, localDate(new Date(y, m - 1, d - 1, 12)));
 }
 
 /**
