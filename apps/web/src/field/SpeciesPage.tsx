@@ -79,7 +79,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), t(row.label)) : undefined }))} />
+          <TallyBars rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("time", t(row.label))) : undefined }))} />
         </>
       ) : null}
       {seasons.filter((row) => row.count > 0).length > 1 ? (
@@ -87,7 +87,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By season")}</h2>
           </div>
-          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), t(row.label)) : undefined }))} />
+          <TallyBars rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("season", t(row.label))) : undefined }))} />
         </>
       ) : null}
       {catches.filter((entry) => entry.weather).length > 1 ? (
@@ -95,7 +95,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By the weather")}</h2>
           </div>
-          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), t(row.label)) : undefined }))} />
+          <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("sky", t(row.label))) : undefined }))} />
         </>
       ) : null}
       <WeatherBars book={{ ...book, catches }} within={exactTerm("species", t(name))} />
@@ -104,7 +104,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By the moon")}</h2>
           </div>
-          <TallyBars rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), t(row.label)) : undefined }))} />
+          <TallyBars rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("moon", t(row.label))) : undefined }))} />
         </>
       ) : null}
       <div className="section-head">

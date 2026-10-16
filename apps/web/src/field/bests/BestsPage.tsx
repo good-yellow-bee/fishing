@@ -179,7 +179,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("When they bite")}</h2>
             </div>
-            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
+            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("time", t(row.label))) : undefined }))} />
           </section>
 
           {monthTally(book.catches).length > 1 ? (
@@ -203,14 +203,14 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("By season")}</h2>
             </div>
-            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
+            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("season", t(row.label))) : undefined }))} />
           </section>
 
           <section>
             <div className="section-head">
               <h2>{t("By the moon")}</h2>
             </div>
-            <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
+            <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("moon", t(row.label))) : undefined }))} />
           </section>
 
           {skyTally(book).some((row) => row.count > 0) ? (
@@ -218,7 +218,7 @@ export function BestsPage() {
               <div className="section-head">
                 <h2>{t("By the weather")}</h2>
               </div>
-              <TallyBars rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
+              <TallyBars rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("sky", t(row.label))) : undefined }))} />
             </section>
           ) : null}
           <WeatherBars book={book} />

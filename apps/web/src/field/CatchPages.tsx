@@ -803,7 +803,7 @@ export function CatchPage() {
             <span className="eyebrow">{t("Weather")}</span>
             <p>
               {/* The sky opens every fish caught under it, through the catch search. */}
-              <Link to={findLink(t(SKY_LABELS[entry.weather.sky]))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
+              <Link to={findLink(exactTerm("sky", t(SKY_LABELS[entry.weather.sky])))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
               {` · ${t(WIND_LABELS[entry.weather.wind])} · ${tempText(entry.weather.waterTempF)}`}
             </p>
           </>
@@ -811,7 +811,7 @@ export function CatchPage() {
         <span className="eyebrow">{t("Moon")}</span>
         <p>
           {/* The phase opens every fish from the same week of the moon. */}
-          <Link to={findLink(t(MOON_QUARTER_LABELS[moonQuarterOf(new Date(entry.caughtAt))]))}>
+          <Link to={findLink(exactTerm("moon", t(MOON_QUARTER_LABELS[moonQuarterOf(new Date(entry.caughtAt))])))}>
             {t(MOON_LABELS[moonName(moonPhase(new Date(entry.caughtAt)))])}
           </Link>
         </p>
