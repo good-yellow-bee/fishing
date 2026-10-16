@@ -1141,7 +1141,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT96~~ | ~~Salmon long run: a salmon's first run after the hook is the long one, like a carp's~~ (#590) | fight | S |
 | ~~GT97~~ | ~~News card (2026-10-16v) covers GT96: salmon long run~~ (#592) | news | S |
 | ~~GT98~~ | ~~Smallmouth scrapper: a smallmouth bass tires 20% slower than its size says~~ (#595) | fight | S |
-| GT99 | News card (2026-10-16w) covers GT98: smallmouth scrapper | news | S |
+| ~~GT99~~ | ~~News card (2026-10-16w) covers GT98: smallmouth scrapper~~ (#596) | news | S |
+| GT100 | Point rocks snag: a cast into the point's rocky shallows can snag, like the reeds' weed | cast | S |
 
 ## Risks / open questions for the owner
 

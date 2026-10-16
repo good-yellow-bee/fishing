@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REEDS_STAND } from "./scene/bankWalk";
-import { castSnags, inWeeds, SNAG_ODDS } from "./snag";
+import { POINT_PAD } from "@stillwater/shared";
+import { castSnags, inWeeds, onRocks, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
 import { waterDepth } from "./scene/water";
 
 describe("snags", () => {
@@ -14,8 +15,27 @@ describe("snags", () => {
 
   it("catch some casts in the weed, never a new angler's mercy cast", () => {
     const { x, z } = REEDS_STAND;
-    expect(castSnags("reeds", x, z, false, SNAG_ODDS - 0.01)).toBe(true);
-    expect(castSnags("reeds", x, z, false, SNAG_ODDS + 0.01)).toBe(false);
-    expect(castSnags("reeds", x, z, true, 0)).toBe(false);
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS - 0.01)).toBe("weed");
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS + 0.01)).toBeNull();
+    expect(castSnags("reeds", x, z, true, 0)).toBeNull();
+  });
+
+  it("lie on the point's rocks in its shallows, less often than the weed, never on a mercy cast", () => {
+    // Walk out from the point's pad until the water is shallow but no longer dry land.
+    let shallow: { x: number; z: number } | null = null;
+    for (let step = 0; step < 200 && !shallow; step += 1)
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const x = POINT_PAD.x + dx * step * 0.1;
+        const z = POINT_PAD.z + dz * step * 0.1;
+        const depth = waterDepth(x, z);
+        if (depth > 0.05 && depth <= ROCK_DEPTH && onRocks("point", x, z)) shallow = { x, z };
+      }
+    expect(shallow).not.toBeNull();
+    const { x, z } = shallow!;
+    expect(onRocks("reeds", x, z)).toBe(false);
+    expect(ROCK_SNAG_ODDS).toBeLessThan(SNAG_ODDS);
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS - 0.01)).toBe("rocks");
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS + 0.01)).toBeNull();
+    expect(castSnags("point", x, z, true, 0)).toBeNull();
   });
 });
