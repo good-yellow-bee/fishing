@@ -32,7 +32,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, sweetBand, waitMs, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { biteStyle, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -188,6 +188,8 @@ export function useFishingGame(
   const castRiseRef = useRef(false);
   /** The school a landed panfish left at its bank, for the next casts there. */
   const schoolRef = useRef<School | null>(null);
+  /** The bank where a fish was just lost; its next cast waits longer. */
+  const spookRef = useRef<SpotId | null>(null);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -379,9 +381,13 @@ export function useFishingGame(
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
+    // A beginner still on their first catches is spared the spooked wait.
+    const spooked = castIntoSpooked(spookRef.current, spotRef.current) && !mercyRef.current;
+    spookRef.current = null;
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
+    if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -392,7 +398,7 @@ export function useFishingGame(
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
-    const wait = schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait;
+    const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1);
     const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
     const stolen = stealsBait(species.id, nibbles.length);
     const arm = () => {
@@ -824,6 +830,9 @@ export function useFishingGame(
             fx.snap();
             fx.haptic("snap");
             cleanRunRef.current = 0;
+            // A lost fish spooks the bank and scatters any school there.
+            spookRef.current = spotRef.current;
+            schoolRef.current = null;
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             const snapped = t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
@@ -833,6 +842,9 @@ export function useFishingGame(
             fx.snap();
             fx.haptic("snap");
             cleanRunRef.current = 0;
+            // A lost fish spooks the bank and scatters any school there.
+            spookRef.current = spotRef.current;
+            schoolRef.current = null;
             if (sim.tornOut) {
               setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) });
               resetToIdle(t("Soft mouth — ease off as soon as the bar turns red."));

@@ -224,6 +224,14 @@ export function castIntoSchool(school: School | null, spot: SpotId): { schoolId:
   return { schoolId: school.id, next: school.casts > 1 ? { ...school, casts: school.casts - 1 } : null };
 }
 
+/** A fish lost in a fight spooks its bank: the next cast there waits this much longer for a bite. */
+export const SPOOK_WAIT = 1.4;
+
+/** Whether this cast lands on water a lost fish just spooked. */
+export function castIntoSpooked(spooked: SpotId | null, spot: SpotId) {
+  return spooked === spot;
+}
+
 export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false, perfect = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(
