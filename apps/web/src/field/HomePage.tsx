@@ -6,6 +6,7 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { formatLongDay, formatTimeOfDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
+import { isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
@@ -67,7 +68,9 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 }
 
 export function HomePage() {
-  const { book, photos } = useLogbook();
+  const { book, storedBook, photos, startBlank } = useLogbook();
+  // A first visit: the invented sample and nothing of the player's own yet.
+  const sampleOnly = isSampleOnly(storedBook);
   const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
   useT();
   const now = new Date();
@@ -104,6 +107,16 @@ export function HomePage() {
           <p className="lede">{deskLine(now)}</p>
         </div>
       </header>
+
+      {sampleOnly ? (
+        <aside className="conditions sample-start" aria-label={t("Sample book")}>
+          <span className="eyebrow">{t("Sample book")}</span>
+          <p>{t("These waters, outings and fish are invented, so you can look around. Start your own book when you're ready.")}</p>
+          <button type="button" className="field-primary inline" onClick={() => startBlank()}>
+            {t("Start my own book")}
+          </button>
+        </aside>
+      ) : null}
 
       {kept ? (
         <div className="kept-draft" role="status">

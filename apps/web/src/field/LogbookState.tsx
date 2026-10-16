@@ -56,6 +56,8 @@ type LogbookApi = {
   /** One more or one fewer lost fish or missed strike on an outing. */
   countOnTrip: (tripId: string, count: TripCount, delta: number) => boolean;
   restoreSample: () => boolean;
+  /** Clears the book for a player's own waters and fish, with the same undo as a delete. */
+  startBlank: () => boolean;
   /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
   changeBook: (kind: "rename", next: Logbook) => boolean;
   /** Takes these photos off their catches, leaving the fish. */
@@ -72,7 +74,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "rename";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
@@ -160,8 +162,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       // Deletes are made from the entry's own page, before it navigates away.
       const before = { kind, book, photos, from: window.location.pathname };
       if (!commit(next)) return false;
-      // The sample takes the book's place on purpose; a deleted fish or water is kept out of later merges.
-      if (kind !== "sample") {
+      // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
+      if (kind !== "sample" && kind !== "blank") {
         const kept = new Set(next.catches.map((entry) => entry.id));
         noteDeletedFish(book.catches.filter((entry) => !kept.has(entry.id)).map((entry) => entry.id));
       }
@@ -284,6 +286,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       // The sample takes the whole book's place, so it can be undone like a delete.
       restoreSample: () => remove("sample", sampleLogbook(new Date())),
+      startBlank: () => remove("blank", { spots: [], trips: [], catches: [] }),
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);

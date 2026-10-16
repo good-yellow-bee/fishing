@@ -1561,7 +1561,8 @@ button.field-primary:disabled {
 }
 
 /* A season against the one before: several short lines, so smaller than a single conditions line. */
-.season-recap p {
+.season-recap p,
+.sample-start p {
   font-size: 15px;
   line-height: 1.45;
 }
