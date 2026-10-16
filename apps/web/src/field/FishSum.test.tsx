@@ -17,7 +17,7 @@ describe("fish sum", () => {
   it("counts released fish only when there are some", () => {
     expect(render(catches)).not.toContain("released");
     const marked = catches.map((entry, index) => (index < 2 ? { ...entry, released: true } : entry));
-    expect(render(marked)).toContain(" · 2 released · ");
+    expect(render(marked)).toContain("\u00a0· 2 released\u00a0· ");
   });
 
   it("leaves the species out on a page about one kind", () => {

@@ -199,14 +199,40 @@ export function searchParts(book: Logbook, needle: string): string[] {
 }
 
 /**
+ * The terms of one part for the word-by-word fallback: a size or temperature bound kept whole (">5 lb", "< 3 lb 2 oz",
+ * ">60°F"), every other word on its own. One- and two-letter words ("a", "na") match nearly every fish, so they are left out.
+ */
+export function searchTerms(part: string): string[] {
+  const tokens = part.trim().split(/\s+/);
+  const terms: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (/^[<>]/.test(tokens[i]!)) {
+      // The longest run from here that reads as one bound.
+      let end = 0;
+      for (let j = Math.min(tokens.length, i + 5); j > i && end === 0; j--) {
+        const bound = tokens.slice(i, j).join(" ");
+        if (parseSizeQuery(bound) || parseTempQuery(bound)) end = j;
+      }
+      if (end > 0) {
+        terms.push(tokens.slice(i, end).join(" "));
+        i = end - 1;
+        continue;
+      }
+    }
+    if (tokens[i]!.length > 2) terms.push(tokens[i]!);
+  }
+  return terms;
+}
+
+/**
  * One part of a search; words that find nothing together ("cedar pike") are then each taken as a part, so the fish
- * every word finds come back, as "cedar + pike" would. Sizes, temperatures and exact terms are left whole.
+ * every word finds come back, as "cedar + pike" would ("pike >5 lb" as "pike + >5 lb"). Exact terms are left whole.
  */
 function findWords(book: Logbook, part: string, t: (text: string) => string, pictured: (id: string) => boolean): CatchEntry[] {
   const found = findOne(book, part, t, pictured);
-  // One- and two-letter words ("a", "na") match nearly every fish, so they are left out of the fallback.
-  const words = part.split(/\s+/).filter((word) => word.length > 2);
-  if (found.length > 0 || words.length === 0 || part.split(/\s+/).length < 2 || /[\d<>=:"“”„]/.test(part)) return found;
+  if (found.length > 0 || part.trim().split(/\s+/).length < 2 || /[:"“”„]/.test(part)) return found;
+  const words = searchTerms(part);
+  if (words.length < 2) return found;
   let matched = findOne(book, words[0]!, t, pictured);
   for (const word of words.slice(1)) {
     if (matched.length === 0) break;
