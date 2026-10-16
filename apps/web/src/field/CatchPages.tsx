@@ -19,6 +19,7 @@ import {
   catchesNewestFirst,
   localDate,
   measureOf,
+  parseCatchDraft,
   personalBests,
   spotById,
   tripById,
@@ -47,6 +48,7 @@ import { lengthText, measureText, measuresText, tempText, weatherText, weightTex
 import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
+import { catchNews } from "./catchNews";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater } from "./spotOrder";
@@ -471,6 +473,9 @@ function CatchForm() {
         existing?.weather?.waterTempF !== undefined && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
       released,
     };
+    // Worked out against the book before this fish joins it.
+    const parsed = existing ? null : parseCatchDraft(draft, book);
+    const news = parsed?.ok ? catchNews(book, parsed.value) : null;
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
     if (!result.ok) {
       setError(unitsMessage(result.message, units));
@@ -486,10 +491,10 @@ function CatchForm() {
     if (!waiting) dropKeptDraft();
     // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now.
     if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
-      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }), savedState("catch"));
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }), savedState("catch", news));
       return;
     }
-    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch"));
+    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch", news));
   };
 
   if (catchId && !existing) {
