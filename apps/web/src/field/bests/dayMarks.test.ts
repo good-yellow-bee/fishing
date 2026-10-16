@@ -8,7 +8,7 @@ describe("dayMarks", () => {
     const marks = dayMarks(book, "2026");
     const fish = [...marks.values()].reduce((sum, row) => sum + row.fish, 0);
     expect(fish).toBe(book.catches.filter((entry) => entry.caughtAt.startsWith("2026")).length);
-    for (const trip of book.trips) if (trip.date.startsWith("2026")) expect(marks.get(trip.date)?.outing).toBe(true);
+    for (const trip of book.trips) if (trip.date.startsWith("2026")) expect(marks.get(trip.date)?.trips).toContain(trip.id);
     expect(dayMarks(book, "1999").size).toBe(0);
     expect(markedMonths(marks)).toEqual([...markedMonths(marks)].sort());
   });

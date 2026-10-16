@@ -1,17 +1,17 @@
 import { localDate, type Logbook } from "@stillwater/shared";
 
-/** One day of a season: its fish, and whether an outing was planned for it. */
-export type DayMark = { fish: number; outing: boolean };
+/** One day of a season: its fish, and the outings planned for it. */
+export type DayMark = { fish: number; trips: string[] };
 
 /** The days of `year` that had a fish or an outing, by local "YYYY-MM-DD". */
 export function dayMarks(book: Logbook, year: string): Map<string, DayMark> {
   const marks = new Map<string, DayMark>();
   const mark = (day: string) => {
-    const row = marks.get(day) ?? { fish: 0, outing: false };
+    const row = marks.get(day) ?? { fish: 0, trips: [] as string[] };
     marks.set(day, row);
     return row;
   };
-  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`)) mark(trip.date).outing = true;
+  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`)) mark(trip.date).trips.push(trip.id);
   for (const entry of book.catches) {
     const day = localDate(new Date(entry.caughtAt));
     if (day.startsWith(`${year}-`)) mark(day).fish += 1;

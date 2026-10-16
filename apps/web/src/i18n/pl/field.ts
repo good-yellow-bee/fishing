@@ -53,6 +53,10 @@ export const PL_FIELD: PlBook = {
   "Your biggest so far: {measures}": "Twoja największa do tej pory: {measures}",
   "Nothing in the book matches that.": "Nic w dzienniku do tego nie pasuje.",
   "Matches: {count}": "Pasujące: {count}",
+  "Find an outing": "Znajdź wyprawę",
+  "Title, water, note, month, or “no fish”": "Nazwa, łowisko, notatka, miesiąc lub „bez ryb”",
+  "No outing matches that.": "Żadna wyprawa do tego nie pasuje.",
+  "Outings: {count}": "Wyprawy: {count}",
 
   // Edit and delete
   "Also weighed (optional)": "Także zważona (opcjonalnie)",
