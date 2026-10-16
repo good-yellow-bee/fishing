@@ -1214,3 +1214,49 @@ button.field-primary:disabled {
     color-scheme: dark;
   }
 }
+
+/* On paper: just the sheet, ink on white, without the shell, the bars or the buttons. */
+@media print {
+  /* Keep the filled badges filled, or their light figures vanish into the paper. */
+  .field * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .field {
+    display: block;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .field-rail,
+  .field-mobile-bar,
+  .field-tab,
+  .undo-bar,
+  .sheet-actions,
+  .book-file,
+  .tackle-add,
+  .field .field-primary,
+  .field button,
+  .field input:placeholder-shown,
+  .catch-search:has(> input:placeholder-shown) {
+    display: none !important;
+  }
+
+  .field-main {
+    padding: 0;
+  }
+
+  .sheet {
+    max-width: none;
+    min-height: 0;
+    border-left: 0;
+    box-shadow: none;
+    padding: 0;
+    background: #fff;
+  }
+
+  .field a {
+    color: inherit;
+  }
+}
