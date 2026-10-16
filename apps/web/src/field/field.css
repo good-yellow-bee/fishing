@@ -1219,6 +1219,15 @@ button.field-primary:disabled {
   margin: 8px 0 -2px;
 }
 
+/* A month jumped to lands clear of the phone's top bar. */
+.month-head[id] {
+  scroll-margin-top: 88px;
+}
+
+.month-jump {
+  margin: 0;
+}
+
 .fish-span {
   display: block;
   margin: -6px 0 12px;

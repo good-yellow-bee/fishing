@@ -15,6 +15,10 @@ export const PL_FIELD: PlBook = {
   "Log a catch": "Zapisz połów",
   "{shown} of {total} fish": "{shown} z {total} ryb",
   "Show {count} more": "Pokaż jeszcze {count}",
+  "Jump to a month": "Skocz do miesiąca",
+  "Jump to a month:": "Skocz do miesiąca:",
+  "Jump to a year": "Skocz do roku",
+  "Jump to a year:": "Skocz do roku:",
 
   // Home
   "Write it down before the coffee gets cold.": "Zapisz, zanim kawa wystygnie.",

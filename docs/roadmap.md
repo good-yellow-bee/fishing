@@ -1531,3 +1531,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR337~~ | ~~Focus clear of tab bar, skip link, sample note~~ (#711) | field | S |
 | ~~BR338~~ | ~~Start my own book on Home~~ (#713) | field | S |
 | ~~BR339~~ | ~~First water back to the form; empty pages~~ (#715) | field | S |
+| ~~BR340~~ | ~~Month/year jump row on long catch lists~~ (#717) | field | S |
+| ~~BR341~~ | ~~News card 16zv (#702-#717)~~ (#718) | field | S |

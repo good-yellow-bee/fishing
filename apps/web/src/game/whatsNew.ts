@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zu";
+export const NEWS_ID = "2026-10-16zv";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Species pages split your fish by size. Bests has a season recap you can copy, the lure field offers live bait in one tap, and a long catch list can jump straight to a month. Trying the game on the sample book? Start your own book from Home and the samples go, with an undo.",
   "Cast back at a bank where a big fish is still about and you'll see its shadow circling wide and slow round your float.",
   "A big fish that got away, or a hunter that followed your fish in, now comes back sooner to a big lure cast at its bank. The hint reminds you when you're on a small one.",
   "A pike, a largemouth bass or a walleye may now follow a shiner, bluegill or perch in without taking it. The hint says so, and for a few casts it stays about that bank, so cast back there to hook it.",
