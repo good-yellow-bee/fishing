@@ -32,6 +32,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
@@ -128,7 +129,7 @@ export type Fight = {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; secondTake?: boolean; grabbed?: string; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; secondTake?: boolean; grabbed?: string; gotAway?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -193,6 +194,10 @@ export function useFishingGame(
   const schoolRef = useRef<School | null>(null);
   /** The bank where a fish was just lost; its next cast waits longer. */
   const spookRef = useRef<SpotId | null>(null);
+  /** A big fish that broke off, waiting to bite again at its bank. */
+  const gotAwayRef = useRef<GotAway | null>(null);
+  /** This bite is that fish come back. */
+  const againRef = useRef(false);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -353,9 +358,11 @@ export function useFishingGame(
       }
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
+      const again = strike && againRef.current ? `${t("It's the one that got away!")} ` : "";
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
       setHint(
-        !strike
+        again +
+        (!strike
           ? t("{line}. Ease off when it runs.", { line })
           : solid
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
@@ -369,7 +376,7 @@ export function useFishingGame(
                   time: seconds(strike.elapsedMs),
                   limit: seconds(strike.solidMs),
                   line,
-                }),
+                })),
       );
     }
   }, [resetToIdle]);
@@ -407,8 +414,12 @@ export function useFishingGame(
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
-    const species = schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : drawn;
-    const bitten = makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
+    // The fish that broke off here may come back, at the same weight.
+    const lost = castForGotAway(gotAwayRef.current, spotRef.current, Math.random());
+    gotAwayRef.current = lost.next;
+    againRef.current = lost.again !== null;
+    const species = lost.again ? lost.again.species : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : drawn;
+    const bitten = lost.again ? { species, weight: lost.again.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
@@ -881,6 +892,7 @@ export function useFishingGame(
                 hookedSolid: hookedSolidRef.current,
                 secondTake: secondTakeRef.current,
                 grabbed: grabbedRef.current,
+                gotAway: againRef.current,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
                 cleanRun: cleanRunRef.current,
                 closeCall: isCloseCall(runtime.performance),
@@ -906,6 +918,7 @@ export function useFishingGame(
             // A lost fish spooks the bank and scatters any school there.
             spookRef.current = spotRef.current;
             schoolRef.current = null;
+            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             const snapped = t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
@@ -918,6 +931,7 @@ export function useFishingGame(
             // A lost fish spooks the bank and scatters any school there.
             spookRef.current = spotRef.current;
             schoolRef.current = null;
+            gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
             if (sim.tornOut) {
               setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) });
               resetToIdle(t("Soft mouth — ease off as soon as the bar turns red."));
