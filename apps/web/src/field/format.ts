@@ -2,9 +2,9 @@ import { SPOT_LABELS } from "@stillwater/shared";
 import { getLang, locale, t, tn } from "../i18n";
 
 /** Formatters per language, built on first use so a language change takes effect. */
-const formats = new Map<string, Intl.DateTimeFormat>();
+const formats = new Map<string, { format(date: Date): string }>();
 
-function format(name: "day" | "long" | "clock" | "time", withYear = false): Intl.DateTimeFormat {
+function format(name: "day" | "long" | "clock" | "time", withYear = false): { format(date: Date): string } {
   const tag = locale();
   const key = `${tag}:${name}:${withYear}`;
   let found = formats.get(key);
@@ -17,7 +17,9 @@ function format(name: "day" | "long" | "clock" | "time", withYear = false): Intl
           : name === "time"
             ? { hour: "numeric", minute: "2-digit" }
             : { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
-    found = new Intl.DateTimeFormat(tag, withYear ? { ...options, year: "numeric" } : options);
+    const intl = new Intl.DateTimeFormat(tag, withYear ? { ...options, year: "numeric" } : options);
+    // May has no short form in Polish, and the browser gives it as "1 maj"; a date says "1 maja".
+    found = tag.startsWith("pl") ? { format: (date) => intl.format(date).replace(/(\d) maj\b/, "$1 maja") } : intl;
     formats.set(key, found);
   }
   return found;
