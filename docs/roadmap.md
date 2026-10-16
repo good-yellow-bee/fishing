@@ -1523,3 +1523,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR333~~ | ~~Size spread on species pages~~ (#702) | field | S |
 | ~~BR334~~ | ~~Live bait one-tap picks~~ (#704) | field | S |
 | ~~BR335~~ | ~~Season recap on Bests~~ (#706) | field | S |
+| ~~BR336~~ | ~~Review 25 fixes~~ (#708) | field | S |

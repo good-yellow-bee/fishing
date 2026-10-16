@@ -52,6 +52,10 @@ describe("days out", () => {
     const days = new Set([...book.catches.map((entry) => localDate(new Date(entry.caughtAt))), ...book.trips.filter((trip) => trip.date < today).map((trip) => trip.date)]);
     expect(daysOut(book, "2026", today)).toBe([...days].filter((day) => day.startsWith("2026-")).length);
     expect(daysOut({ ...book, trips: [...book.trips, { ...book.trips[0]!, id: "later", date: "2026-12-01" }] }, "2026", today)).toBe(daysOut(book, "2026", today));
+    // A fish just after midnight on an evening outing is the same day out.
+    const evening = { id: "eve", date: "2026-07-03", spotId: book.spots[0]!.id, title: "Evening", note: "" };
+    const late = { ...book.catches[0]!, id: "late", tripId: "eve", caughtAt: new Date(2026, 6, 4, 0, 30).toISOString() };
+    expect(daysOut({ ...book, trips: [evening], catches: [late] }, "2026", today)).toBe(1);
     expect(daysOut(book, "2020", today)).toBe(0);
   });
 });

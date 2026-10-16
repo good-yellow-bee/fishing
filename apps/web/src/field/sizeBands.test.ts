@@ -24,6 +24,14 @@ describe("size bands on a species page", () => {
     expect(bands.reduce((sum, band) => sum + band.count, 0)).toBe(4);
   });
 
+  it("keeps a metric fish stored in inches in the band its search finds", () => {
+    const cm = (id: string, value: number) => long(id, Math.round((value / 2.54) * 1000) / 1000);
+    const bands = sizeBands([cm("a", 40), cm("b", 44), cm("c", 52), cm("d", 60)], "length", true);
+    expect(bands.reduce((sum, band) => sum + band.count, 0)).toBe(4);
+    expect(bands[bands.length - 1]).toMatchObject({ from: 60, count: 1 });
+    expect(bands[0]!.count).toBeGreaterThan(0);
+  });
+
   it("says nothing for a few fish, or when they all share a band", () => {
     expect(sizeBands([long("a", 18), long("b", 20), long("c", 21)], "length", false)).toEqual([]);
     expect(sizeBands([long("a", 20), long("b", 20.2), long("c", 20.5), long("d", 20.9)], "length", false)).toEqual([]);

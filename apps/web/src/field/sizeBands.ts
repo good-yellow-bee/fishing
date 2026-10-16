@@ -32,8 +32,10 @@ export function sizeBands(catches: readonly CatchEntry[], kind: Measure["kind"],
   const measures = catches.map((entry) => measureOf(entry, kind)).filter((measure): measure is Measure => measure !== null);
   if (measures.length < BANDS_FROM) return [];
   const unit = kind === "length" ? (metric ? "cm" : "in") : metric ? "kg" : "lb";
-  const shown = measures.map((measure) =>
-    measure.kind === "length" ? measure.inches * (metric ? CM_PER_IN : 1) : measure.pounds * (metric ? KG_PER_LB : 1),
+  // Rounded to what the reader sees: a 60 cm fish is kept as 23.622 in, which reads back as 59.9999 cm, and must still
+  // get the 60 to 65 band its search finds it in.
+  const shown = measures.map(
+    (measure) => Math.round((measure.kind === "length" ? measure.inches * (metric ? CM_PER_IN : 1) : measure.pounds * (metric ? KG_PER_LB : 1)) * 100) / 100,
   );
   const low = Math.min(...shown);
   const high = Math.max(...shown);
