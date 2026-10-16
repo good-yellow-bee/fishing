@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16v";
+export const NEWS_ID = "2026-10-16w";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Pound for pound a smallmouth bass now fights hardest: it tires slower than its size says, and its fight card calls it a scrapper.",
   "A landlocked salmon now makes a long first run straight after the hook, like a carp, before its leaps begin. Let it run when the fight card calls it.",
   "A black crappie has a paper mouth: keep reeling while the tension is in the red and the hook tears out even faster than from a whitefish. Ease off at the red and it lands fine.",
   "In the field log, a trip with three or more fish says how often one came, each water shows its fish per outing, and a catch says how many of its kind it beats. The Bests page counts your days on the water this year, the year's goal rides in the book file, and the log turns dark when your device does.",
