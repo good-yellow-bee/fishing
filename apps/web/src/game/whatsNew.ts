@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16r";
+export const NEWS_ID = "2026-10-16s";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In the field log, a trip with three or more fish says how often one came, each water shows its fish per outing, and a catch says how many of its kind it beats. The Bests page counts your days on the water this year, the year's goal rides in the book file, and the log turns dark when your device does.",
   "In the field log, an outing or a single fish can be copied as a short text to paste into a message. Species pages show the lures that took each kind, the Bests page counts fish by year, and you can set a goal of fish for the year and watch it fill.",
   "A hooked lake sturgeon breaches: its first run is a leap clear of the water. Let go when the fight card calls it, then fight the rest of it on the bottom.",
   "Lose a fish in a fight and it spooks that bank: the next cast there waits longer for a bite, and any school there scatters. Try another bank, or give it a cast.",
