@@ -1163,7 +1163,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT118~~ | ~~Catfish lift feel: after the first pump a stuck catfish comes partway up on the lake, with one deep thud and a buzz~~ (#671) | fight | S |
 | ~~GT119~~ | ~~News card for the head-shake and catfish lift feel~~ (#673) | ui | S |
 | ~~GT120~~ | ~~The landed card counts darts followed (brook trout) and head shakes eased off (walleye)~~ (#675) | fight | S |
-| GT121 | Pike grab: a pike at the reeds can hit a golden shiner on the way in, and the fight starts again with the pike; news card for it and the landed-card counts | fight | S |
+| ~~GT121~~ | ~~Pike grab: a pike at the reeds can hit a golden shiner on the way in, and the fight starts again with the pike; news card for it and the landed-card counts~~ (#679) | fight | S |
+| GT122 | Grab feel: the pike starts where the shiner was, not back at the end of the line, and spray bursts at the fish when it hits | fight | S |
 
 ## Risks / open questions for the owner
 

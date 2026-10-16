@@ -813,6 +813,8 @@ export function useFishingGame(
             fx.haptic("strike");
             prevSurge = 0;
             beginFight(taken.species, taken.weight, grab.profile);
+            // The pike is where the shiner was, not back at the far end of the line.
+            if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
             setHint(t("A pike grabbed your shiner! {line}. Ease off when it runs.", { line: fightLines(taken.species.challenge)[0] }));
             return;
           }
