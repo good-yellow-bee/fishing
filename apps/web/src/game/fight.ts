@@ -59,8 +59,8 @@ export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "smallmouth-bass", "largemouth-bass", "salmon"]);
 /** A sturgeon breaches once: its first run after the hook is a leap clear of the water. */
 export const BREACHERS: ReadonlySet<string> = new Set(["sturgeon"]);
-/** Pike roll on the line at the net instead of making a last run. */
-export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
+/** Pike roll on the line at the net instead of making a last run, and a burbot coils on it the same way. */
+export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike", "burbot"]);
 /** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
 export const ROLL_MS = 900;
 /** Whitefish have soft mouths: reeled hard in the red, the hook tears out. */

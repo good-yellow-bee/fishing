@@ -798,6 +798,11 @@ describe("a pike rolling at the net", () => {
     expect(runtime.sim.turning).toBe(false);
   });
 
+  it("is a burbot's habit too: it coils on the line at the net", () => {
+    const { runtime } = atTheNet("burbot", 3);
+    expect(runtime.sim.roll).toBe(true);
+  });
+
   it("is a pike's habit only: other fish still make a last run", () => {
     const { runtime } = atTheNet("walleye", 2);
     expect(runtime.sim.roll).toBeFalsy();
