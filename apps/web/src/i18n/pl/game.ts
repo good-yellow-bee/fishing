@@ -493,6 +493,8 @@ export const PL_GAME: PlBook = {
   "A walleye takes the bait lightly: the float only slides under, with no jolt. The call says so, and a walleye holds on a little longer, so watch closely and strike.":
     "Sandacz amerykański bierze delikatnie: spławik tylko zsuwa się pod wodę, bez szarpnięcia. Mówi o tym komunikat, a sandacz trzyma przynętę nieco dłużej, więc patrz uważnie i zatnij.",
   "In the field log, a water can keep its place on the map, and a book file can add only the fish this browser doesn't have. The Photos page shows how full the photo room is, and last year's fish on the home page open every fish from that day.": "W dzienniku łowisko może zapamiętać swoje miejsce na mapie, a plik dziennika może dodać tylko ryby, których ta przeglądarka jeszcze nie ma. Strona zdjęć pokazuje, ile miejsca na zdjęcia jest zajęte, a zeszłoroczne ryby na stronie głównej otwierają wszystkie ryby z tamtego dnia.",
+  "Pound for pound a smallmouth bass now fights hardest: it tires slower than its size says, and its fight card calls it a scrapper.":
+    "Bass małogębowy walczy teraz najmocniej jak na swoją wagę: męczy się wolniej, niż wskazuje jego rozmiar, a karta holu nazywa go zadziorą.",
   "A landlocked salmon now makes a long first run straight after the hook, like a carp, before its leaps begin. Let it run when the fight card calls it.":
     "Łosoś jeziorowy robi teraz długi pierwszy odjazd zaraz po zacięciu, jak karp, zanim zacznie skakać. Daj mu płynąć, gdy karta holu to zapowie.",
   "A black crappie has a paper mouth: keep reeling while the tension is in the red and the hook tears out even faster than from a whitefish. Ease off at the red and it lands fine.":
