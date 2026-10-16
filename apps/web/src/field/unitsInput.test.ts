@@ -19,6 +19,21 @@ describe("metric entry in the field log", () => {
     expect(toBookTemp("16", "metric")).toBe("60.8");
   });
 
+  it("reads pounds and ounces, fractions of an inch, and a unit written after the number", () => {
+    expect(toBookAmount("3 lb 4 oz", "weight", "imperial")).toBe("3.25");
+    expect(toBookAmount("3lb 4", "weight", "imperial")).toBe("3.25");
+    expect(toBookAmount("12 oz", "weight", "imperial")).toBe("0.75");
+    expect(toBookAmount("2 lbs", "weight", "imperial")).toBe("2");
+    expect(toBookAmount("18 1/4", "length", "imperial")).toBe("18.25");
+    expect(toBookAmount("3/4 in", "length", "imperial")).toBe("0.75");
+    expect(toBookAmount("28 in", "length", "imperial")).toBe("28");
+    expect(toBookAmount("71 cm", "length", "metric")).toBe("27.953");
+    expect(toBookAmount("1,4 kg", "weight", "metric")).toBe("3.086");
+    // A fraction with nothing under it, or words, is still refused by the form.
+    expect(toBookAmount("18 1/0", "length", "imperial")).toBe("18 1/0");
+    expect(toBookAmount("4 oz 3 lb", "weight", "imperial")).toBe("4 oz 3 lb");
+  });
+
   it("passes text that isn't a number through for the form to refuse", () => {
     expect(toBookAmount("big", "length", "metric")).toBe("big");
     expect(toBookTemp("", "metric")).toBe("");
