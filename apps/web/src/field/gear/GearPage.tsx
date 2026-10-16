@@ -39,6 +39,8 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         name={t("Tackle for {trip}", { trip: trip.title })}
         suggest={packingTips(book, trip, today)}
         trips={book.trips}
+        // Today's outing may already have fish, counted against the pieces as on the outing's page.
+        caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
       />
     </section>
   );

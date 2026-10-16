@@ -1477,3 +1477,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR306~~ | ~~Make an outing of a loose fish's day~~ (#661) | field | S |
 | ~~BR307~~ | ~~Review 21 fixes: whole-book goal, season card links, moon filler~~ (#662) | field | S |
 | ~~BR308~~ | ~~News 2026-10-16zh for field log round 4~~ (#663) | field | S |
+| ~~BR309~~ | ~~Tackle: several at once, today's fish on gear, plural duplicates~~ (#664) | field | S |

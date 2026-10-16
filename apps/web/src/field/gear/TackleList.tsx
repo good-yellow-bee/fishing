@@ -3,12 +3,8 @@ import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, typ
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText } from "../format";
 import { useTackle } from "./TackleState";
+import { pieceKey } from "./pieceKey";
 import "./gear.css";
-
-/** "Woolly buggers" on the list and "Woolly bugger" on the catch are the same piece. */
-function pieceKey(label: string): string {
-  return label.trim().toLowerCase().replace(/s$/, "");
-}
 
 /** The outing whose bag this one most likely repeats: the latest with a list, on or before this one's day when there is one. */
 function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
@@ -42,8 +38,8 @@ export function TackleList({
   const rows = itemsForTrip(items, tripId);
   const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
   const packed = packedCount(rows);
-  const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
-  const missing = suggest.filter((lure) => !onList.has(lure.trim().toLowerCase()));
+  const onList = new Set(rows.map((item) => pieceKey(item.label)));
+  const missing = suggest.filter((lure) => !onList.has(pieceKey(lure)));
   const took = new Map<string, number>();
   for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
@@ -62,13 +58,21 @@ export function TackleList({
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const message = add(tripId, label);
-    if (message) {
-      setError(message);
-      return;
+    // "net, pliers, hooks": a piece for each, once each; any refused stay in the box with the reason.
+    const seen = new Set<string>();
+    const parts = label.split(",").filter((part) => {
+      const key = pieceKey(part);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const refused: { part: string; message: string }[] = [];
+    for (const part of parts.length > 0 ? parts : [label]) {
+      const message = add(tripId, part);
+      if (message) refused.push({ part: part.trim(), message });
     }
-    setLabel("");
-    setError("");
+    setLabel(refused.map((row) => row.part).join(", "));
+    setError(refused[0]?.message ?? "");
   };
 
   const count =

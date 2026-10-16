@@ -11,6 +11,7 @@ import {
 } from "@stillwater/shared";
 import { localId } from "../../game/localId";
 import { TACKLE_STORAGE_KEY, readTackle, saveTackle } from "./storage";
+import { pieceKey } from "./pieceKey";
 
 type TackleApi = {
   items: TackleItem[];
@@ -62,8 +63,9 @@ export function TackleProvider({ children }: { children: ReactNode }) {
       add: (tripId, label) => {
         const parsed = parseTackleLabel(label);
         if (!parsed.ok) return parsed.message;
-        const name = parsed.value.toLowerCase();
-        if (items.some((item) => item.tripId === tripId && item.label.toLowerCase() === name)) {
+        // "Spinnerbaits" on a list with "Spinnerbait" is the same piece, as the fish counts take it.
+        const name = pieceKey(parsed.value);
+        if (items.some((item) => item.tripId === tripId && pieceKey(item.label) === name)) {
           return "That piece is already on this list.";
         }
         const item: TackleItem = {
