@@ -197,6 +197,8 @@ export const PL_GAME: PlBook = {
   "HOLD the screen to reel": "PRZYTRZYMAJ ekran, by zwijać",
   "LET GO when the fish is about to run or tension goes red": "PUŚĆ, gdy ryba szykuje się do odjazdu albo napięcie robi się czerwone",
   "Reel in quick pumps": "Zwijaj szybkimi pompkami",
+  "Let go now — it's going to roll!": "Puść teraz — zaraz się obróci!",
+  "EASE OFF — it's rolling on the line!": "ODPUŚĆ — kręci się na żyłce!",
   "Let go now — it sees the net!": "Puść teraz — widzi podbierak!",
   "Let go now — it's shaking": "Puść teraz — rzuca łbem",
   "LET GO — head shake!": "PUŚĆ — rzut łbem!",
