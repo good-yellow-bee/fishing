@@ -1134,7 +1134,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT89~~ | ~~Sturgeon breach: a sturgeon's first run after the hook is a leap clear of the water~~ (#562) | fight | S |
 | ~~GT90~~ | ~~News card (2026-10-16q) covers GT89: sturgeon breach~~ (#563) | news | S |
 | ~~GT91~~ | ~~Habit lines on the fight card: jumper, breacher, roller, long runner~~ (#567) | ui | S |
-| GT92 | Burbot coil: a burbot coils on the line at the net, like a pike's roll | fight | S |
+| ~~GT92~~ | ~~Burbot coil: a burbot coils on the line at the net, like a pike's roll~~ (#570) | fight | S |
+| GT93 | News card (2026-10-16s) covers GT91 and GT92: habit lines, burbot coil | news | S |
 
 ## Risks / open questions for the owner
 
