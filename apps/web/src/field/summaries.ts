@@ -19,7 +19,11 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
       const parts = [`${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
-  return [head, fishCountLabel(catches.length), ...fish, ...(trip.note.trim() ? ["", trip.note.trim()] : [])].join("\n");
+  const counts = [
+    ...(trip.lost ? [`${t("Lost fish")}: ${trip.lost}`] : []),
+    ...(trip.missed ? [`${t("Missed strikes")}: ${trip.missed}`] : []),
+  ];
+  return [head, fishCountLabel(catches.length), ...(counts.length ? [counts.join(" · ")] : []), ...fish, ...(trip.note.trim() ? ["", trip.note.trim()] : [])].join("\n");
 }
 
 /** One fish as plain text: what it was, its size and lure, then when and where, and its note. */

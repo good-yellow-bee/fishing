@@ -55,6 +55,8 @@ function cleanTrip(trip: Trip): Trip {
     spotId: trip.spotId,
     title: trip.title,
     note: trip.note,
+    ...(trip.lost ? { lost: trip.lost } : {}),
+    ...(trip.missed ? { missed: trip.missed } : {}),
   };
 }
 

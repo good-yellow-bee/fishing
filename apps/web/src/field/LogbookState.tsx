@@ -18,10 +18,12 @@ import {
   withoutCatchPhoto,
   withoutSpot,
   withoutTrip,
+  withTripCount,
   type CatchDraft,
   type CatchPhotoMap,
   type Logbook,
   type SpotDraft,
+  type TripCount,
   type TripDraft,
 } from "@stillwater/shared";
 import { t, useLang } from "../i18n";
@@ -50,6 +52,8 @@ type LogbookApi = {
   fileCatches: (catchIds: readonly string[], tripId: string) => boolean;
   deleteSpot: (id: string) => boolean;
   deleteTrip: (id: string) => boolean;
+  /** One more or one fewer lost fish or missed strike on an outing. */
+  countOnTrip: (tripId: string, count: TripCount, delta: number) => boolean;
   restoreSample: () => boolean;
   /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
   changeBook: (kind: "rename", next: Logbook) => boolean;
@@ -241,13 +245,17 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
-        const saved = persist(replaceTrip(book, { ...parsed.value, id }), photos);
+        // The lost and missed tallies are kept on the water, not on the form: an edit leaves them be.
+        const before = book.trips.find((trip) => trip.id === id)!;
+        const counts = { ...(before.lost ? { lost: before.lost } : {}), ...(before.missed ? { missed: before.missed } : {}) };
+        const saved = persist(replaceTrip(book, { ...parsed.value, id, ...counts }), photos);
         return saved.ok ? { ok: true, id } : saved;
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
       fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
+      countOnTrip: (tripId, count, delta) => commit(withTripCount(book, tripId, count, delta)),
       changeBook: (kind, next) => remove(kind, next),
       undoable: undo?.kind ?? null,
       undoDelete: () => {
