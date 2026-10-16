@@ -26,3 +26,20 @@ export function bestOutingHere(trips: readonly Trip[], fishOn: (tripId: string) 
   if (mine === 0 || fished.some((trip) => trip.id !== tripId && fishOn(trip.id) >= mine)) return null;
   return t("The most fish of any outing on this water");
 }
+
+/**
+ * The longest run of outings in a row, by date, that each gave at least one fish, and whether the latest outings are still on it.
+ * Planned outings don't count, and today's only once it has a fish.
+ */
+export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { best: number; going: boolean } {
+  const fished = trips
+    .filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  let best = 0;
+  let run = 0;
+  for (const trip of fished) {
+    run = fishOn(trip.id) > 0 ? run + 1 : 0;
+    best = Math.max(best, run);
+  }
+  return { best, going: best > 0 && run === best };
+}

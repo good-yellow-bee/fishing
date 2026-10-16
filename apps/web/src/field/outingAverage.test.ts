@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestOutingHere, outingAverage } from "./outingAverage";
+import { bestOutingHere, outingAverage, outingStreak } from "./outingAverage";
 
 const trip = (id: string, date: string) => ({ id, date, spotId: "spot-cedar", title: id, note: "" });
 
@@ -32,5 +32,20 @@ describe("best outing here", () => {
     expect(bestOutingHere(trips, (id) => fish[id] ?? 0, "c", "2026-10-15")).toBeNull();
     expect(bestOutingHere(trips, (id) => fish[id] ?? 0, "later", "2026-10-15")).toBeNull();
     expect(bestOutingHere(trips.slice(1), (id) => (id === "c" ? 6 : (fish[id] ?? 0)), "c", "2026-10-15")).toBeNull();
+  });
+});
+
+describe("outing streak", () => {
+  const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("c", "2026-10-09"), trip("d", "2026-10-12"), trip("later", "2026-11-01")];
+
+  it("finds the longest run of outings with a fish, in date order", () => {
+    const fish: Record<string, number> = { a: 1, b: 2, c: 0, d: 4, later: 0 };
+    expect(outingStreak([...trips].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 2, going: false });
+  });
+
+  it("says when the latest outings are still on the run, and leaves planned ones out", () => {
+    const fish: Record<string, number> = { a: 0, b: 2, c: 1, d: 4 };
+    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
+    expect(outingStreak(trips, () => 0, "2026-10-15")).toEqual({ best: 0, going: false });
   });
 });
