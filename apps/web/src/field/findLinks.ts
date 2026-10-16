@@ -11,7 +11,7 @@ export const FIND_PARAM = "find";
  * Search terms that match one name whole ("species:\"Bass\"" finds bass, not smallmouth bass; "time:\"Dawn\"" finds
  * fish at dawn, not an outing called Dawn patrol), so a link opens exactly the fish its count counted.
  */
-export const EXACT_FIELDS = ["species", "lure", "water", "sky", "wind", "time", "season", "moon"] as const;
+export const EXACT_FIELDS = ["species", "lure", "water", "sky", "wind", "time", "season", "moon", "month"] as const;
 export type ExactField = (typeof EXACT_FIELDS)[number];
 
 export function exactTerm(field: ExactField, name: string): string {
@@ -20,7 +20,7 @@ export function exactTerm(field: ExactField, name: string): string {
 
 /** The field and name of an exact term, or null for any other search. */
 export function parseExactTerm(text: string): { field: ExactField; name: string } | null {
-  const match = /^\s*(species|lure|water|sky|wind|time|season|moon):"(.+)"\s*$/i.exec(text);
+  const match = /^\s*(species|lure|water|sky|wind|time|season|moon|month):"(.+)"\s*$/i.exec(text);
   return match ? { field: match[1]!.toLowerCase() as ExactField, name: match[2]! } : null;
 }
 

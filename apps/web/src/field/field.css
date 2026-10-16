@@ -1608,3 +1608,8 @@ button.field-primary:disabled {
 .skip-link:focus {
   top: 8px;
 }
+
+/* The wrong-measure hint stays in place, empty, until it has something to say. */
+.wrong-measure:empty {
+  margin: 0;
+}

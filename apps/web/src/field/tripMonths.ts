@@ -38,7 +38,7 @@ export function catchMonth(entry: CatchEntry): string {
 
 /**
  * Fish per calendar month, newest month first, from the latest month with a fish back over `limit` months (13, so
- * this month sits beside the same month a year ago) or to the first fish. A month between with none is there at 0,
+ * that month sits beside the same month a year before it) or to the first fish. A month between with none is there at 0,
  * not left out.
  */
 export function monthTally(catches: readonly CatchEntry[], limit = 13): { month: string; count: number }[] {

@@ -17,7 +17,10 @@ describe("monthOfYearTally", () => {
   it("counts the same fish the month's search finds", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const rows = monthOfYearTally(book.catches);
-    expect(findCatches(book, "October", t).length).toBe(rows[9]!.count);
-    expect(findCatches(book, "September", t).length).toBe(rows[8]!.count);
+    expect(findCatches(book, 'month:"October"', t).length).toBe(rows[9]!.count);
+    expect(findCatches(book, 'month:"Wrzesień"', t).length).toBe(rows[8]!.count);
+    // A note that "may" have said something is not a fish from May.
+    const noted = { ...book, catches: book.catches.map((entry) => ({ ...entry, note: "It may have been a big one" })) };
+    expect(findCatches(noted, 'month:"May"', t)).toEqual([]);
   });
 });

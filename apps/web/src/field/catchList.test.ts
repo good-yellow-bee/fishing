@@ -14,7 +14,8 @@ describe("catchList", () => {
     expect(list.rows.every((row) => row.species === "Northern pike")).toBe(true);
     expect(list.back).toBe("/species/Northern%20pike");
     const search = catchList(book, "find:pike", pike.id, t, none)!;
-    expect(search.back).toBe("/catches?find=pike");
+    expect(search.back).toBe("/?find=pike");
+    expect(catchList(book, "catches:pike", pike.id, t, none)?.back).toBe("/catches?find=pike");
     expect(neighborsIn(search.rows, pike.id).older?.species ?? "Northern pike").toBe("Northern pike");
   });
 
