@@ -296,6 +296,16 @@ describe("useFishingGame lost fight", () => {
     expect(fx.lift).toHaveBeenCalled();
   });
 
+  it("says a lost trophy-sized fish looked like a trophy", () => {
+    const surface = mount();
+    const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    vi.mocked(castForGotAway).mockReturnValueOnce({ again: { spot: "dock", species: pike, weight: pike.maxWeight, casts: 1 }, next: null });
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 1);
+    expect(message()).toMatch(/threw the hook\. It looked like a trophy\.$/);
+  });
+
   it("says why the line broke and what to do next time", () => {
     const surface = mount();
 
