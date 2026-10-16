@@ -50,6 +50,8 @@ import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catch
 import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
+import { CopySummary } from "./CopySummary";
+import { catchSummary } from "./tripSummary";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -883,6 +885,7 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
+      <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" />
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{trip.title}</Link>

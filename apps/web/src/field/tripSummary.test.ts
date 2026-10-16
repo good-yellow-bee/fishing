@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { tripSummary } from "./tripSummary";
+import { catchSummary, tripSummary } from "./tripSummary";
 
 const trip = { id: "trip-dawn", date: "2026-10-10", spotId: "spot-cedar", title: "Dawn patrol", note: "Fog until eight." };
 const fish = (id: string, at: string, released = false): CatchEntry => ({
@@ -31,5 +31,12 @@ describe("trip summary", () => {
   it("leaves out a missing water and an empty note", () => {
     const text = tripSummary({ ...trip, note: " " }, null, []);
     expect(text.split("\n")).toHaveLength(2);
+  });
+
+  it("sums up one fish with its day, water and note", () => {
+    const lines = catchSummary({ ...fish("a", "2026-10-10T12:00:00.000Z", true), note: "Off the weed edge." }, "Cedar Bend").split("\n");
+    expect(lines[0]).toBe("Largemouth bass, 3.2 lb, Texas-rig worm, Released");
+    expect(lines[1]).toMatch(/ · Cedar Bend$/);
+    expect(lines.at(-1)).toBe("Off the weed edge.");
   });
 });
