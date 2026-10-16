@@ -86,6 +86,15 @@ function datesReadable(book: Logbook): boolean {
   );
 }
 
+/** A size the catch form or the lake could have written: more than nothing, and no bigger than the form allows. */
+function sizeReadable(measure: Measure): boolean {
+  return measure.kind === "length" ? measure.inches > 0 && measure.inches <= 120 : measure.pounds > 0 && measure.pounds <= 80;
+}
+
+function sizesReadable(book: Logbook): boolean {
+  return book.catches.every((entry) => sizeReadable(entry.measure) && (entry.alsoMeasure === undefined || sizeReadable(entry.alsoMeasure)));
+}
+
 function cleanBook(book: Logbook): Logbook {
   return {
     spots: book.spots.map(cleanSpot),
@@ -129,7 +138,7 @@ export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isRecord(value)) return refuse();
   if (value.kind !== FIELD_ARCHIVE_KIND || value.version !== FIELD_ARCHIVE_VERSION) return refuse();
   const prepared = prepareStoredLogbook(value.book);
-  if (!isLogbook(prepared) || !datesReadable(prepared)) return refuse();
+  if (!isLogbook(prepared) || !datesReadable(prepared) || !sizesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();
   const book = cleanBook(prepared);
   const photos = readPhotos(value.photos, book);

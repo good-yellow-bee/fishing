@@ -131,7 +131,8 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
         left: `${(point.x / MAP_WIDTH) * 100}%`,
         top: `${(point.y / MAP_HEIGHT) * 100}%`,
       }}
-      aria-label={t("{name}, {place}. Open spot.", { name: spot.name, place: formatCoord(place.lat, place.lng) })}
+      // The list under the map names the same spots, so keyboards and screen readers go through each one once there.
+      tabIndex={-1}
     >
       <span className="map-pin-dot" />
       <span className="map-pin-label">
@@ -176,7 +177,7 @@ export function SpotMapPage() {
       ) : (
         <div className="spot-map">
           <MapPlate />
-          <div className="spot-map-pins">
+          <div className="spot-map-pins" aria-hidden="true">
             {plotted.map(({ spot, place }) => (
               <SpotPin key={spot.id} spot={spot} place={place} />
             ))}
