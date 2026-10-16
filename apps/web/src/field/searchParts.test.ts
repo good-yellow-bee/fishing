@@ -20,5 +20,7 @@ describe("split a search on +", () => {
     expect(searchParts(book, "2 kg+ + Overcast")).toEqual([">2 kg", "Overcast"]);
     expect(searchParts(book, "60F+")).toEqual([">60F"]);
     expect(searchParts(book, "30in + pike")).toEqual(["30in", "pike"]);
+    expect(searchParts(book, "pike+5lb+")).toEqual(["pike", ">5lb"]);
+    expect(searchParts(book, "3 lb 2 oz+")).toEqual([">3 lb 2 oz"]);
   });
 });

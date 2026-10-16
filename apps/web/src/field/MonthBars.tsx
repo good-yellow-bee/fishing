@@ -1,6 +1,6 @@
 import type { CatchEntry } from "@stillwater/shared";
 import { t } from "../i18n";
-import { findLink, findWithLink } from "./findLinks";
+import { exactTerm, findLink, findWithLink } from "./findLinks";
 import { TallyBars } from "./TallyBars";
 import { catchMonth, monthName } from "./tripMonths";
 
@@ -14,7 +14,7 @@ export function monthOfYearTally(catches: readonly CatchEntry[]): { month: numbe
   return counts.map((count, index) => ({ month: index + 1, count }));
 }
 
-/** The month's own name ("October", "Październik"), which the search reads as every October in the book. */
+/** The month's own name ("October", "Październik"); as an exact term the search reads it as every October in the book. */
 function monthWord(month: number): string {
   return monthName(`2026-${String(month).padStart(2, "0")}`).split(" ")[0]!;
 }
@@ -29,7 +29,7 @@ export function MonthBars({ catches, within }: { catches: readonly CatchEntry[];
       <div className="section-head">
         <h2>{t("Through the year")}</h2>
       </div>
-      <TallyBars rows={rows.map((row) => ({ key: String(row.month), label: monthWord(row.month), count: row.count, to: row.count > 0 ? link(monthWord(row.month)) : undefined }))} />
+      <TallyBars rows={rows.map((row) => ({ key: String(row.month), label: monthWord(row.month), count: row.count, to: row.count > 0 ? link(exactTerm("month", monthWord(row.month))) : undefined }))} />
     </section>
   );
 }

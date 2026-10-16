@@ -1,13 +1,16 @@
 import { catchesForSpot, catchesForTrip, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { findCatches } from "./CatchSearch";
-import { FIND_PARAM } from "./findLinks";
+import { FIND_PARAM, findLink } from "./findLinks";
 import { catchesOfSpecies, speciesLink } from "./speciesLink";
 
 /** The address parameter that says which list a catch was opened from, so its steps keep to that list. */
 export const LIST_PARAM = "in";
 
-/** "find:pike", "species:Northern pike", "trip:<id>" or "water:<id>": a list a catch card can be opened from. */
-export type ListKey = `${"find" | "species" | "trip" | "water"}:${string}`;
+/**
+ * "find:pike" (the search on Home), "catches:pike" (the same search on the Catches page), "species:Northern pike",
+ * "trip:<id>" or "water:<id>": a list a catch card can be opened from.
+ */
+export type ListKey = `${"find" | "catches" | "species" | "trip" | "water"}:${string}`;
 
 /** A catch page address that remembers the list it was opened from. */
 export function catchLink(id: string, list?: ListKey): string {
@@ -31,8 +34,11 @@ export function catchList(
   const value = list.slice(at + 1);
   if (!value) return null;
   const found =
-    kind === "find"
-      ? { rows: findCatches(book, value, t, pictured), back: `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}` }
+    kind === "find" || kind === "catches"
+      ? {
+          rows: findCatches(book, value, t, pictured),
+          back: kind === "find" ? findLink(value) : `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}`,
+        }
       : kind === "species"
         ? { rows: catchesOfSpecies(book, value), back: speciesLink(value) }
         : kind === "trip"

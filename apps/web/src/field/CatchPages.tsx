@@ -30,7 +30,7 @@ import {
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
-import { LIST_PARAM, catchLink, catchList } from "./catchList";
+import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { anotherCatchLink } from "./anotherCatch";
@@ -209,7 +209,9 @@ function CatchForm() {
   const typedAmount = Number(toBookAmount(amount, measureKind, units));
   const pairs = sizePairs(speciesCatches(book, species, t, existing?.id));
   // A number far past this kind's best that fits the other measure: likely typed in the wrong one, as the form keeps the last.
-  const otherMeasure = looksLikeOtherMeasure(bestSoFar, measureKind, typedAmount, Number(toBookAmount(amount, otherKind, units)));
+  // Only with the other measure left empty: with both typed, switching swaps them, which would keep the odd number.
+  const otherMeasure = !alsoAmount.trim() && looksLikeOtherMeasure(bestSoFar, measureKind, typedAmount, Number(toBookAmount(amount, otherKind, units)));
+  const amountInput = useRef<HTMLInputElement>(null);
   const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
     // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
@@ -532,7 +534,8 @@ function CatchForm() {
     if (existing) {
       editDone.current = true;
       dropEditDraft(existing.id);
-      navigate(`/catches/${existing.id}`, savedState("catchEdit"));
+      // Back to the fish, still within the list it was opened from.
+      navigate(catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined), savedState("catchEdit"));
       return;
     }
     // The waiting draft, if any, stays for later; this one is saved.
@@ -679,6 +682,7 @@ function CatchForm() {
             />
             <input
               name="amount"
+              ref={amountInput}
               inputMode="decimal"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
@@ -718,16 +722,27 @@ function CatchForm() {
                 }
               />
             </label>
-            {otherMeasure ? (
-              <p className="field-hint wrong-measure" role="status">
+            {/* Kept in place so a screen reader hears the hint when it comes. */}
+            <p className="field-hint wrong-measure" role="status">
+              {otherMeasure ? (
+                <>
                 {measureKind === "weight"
                   ? t("Far past your heaviest of this kind ({size}). Was it a length?", { size: measureOfBest(bestSoFar!.heaviest, "weight") })
                   : t("Far past your longest of this kind ({size}). Was it a weight?", { size: measureOfBest(bestSoFar!.longest, "length") })}{" "}
-                <button type="button" className="text-button" onClick={() => pickMeasureKind(otherKind)}>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    pickMeasureKind(otherKind);
+                    // The button goes with the hint: the number it moved is where to carry on.
+                    amountInput.current?.focus();
+                  }}
+                >
                   {otherKind === "length" ? t("Make it a length") : t("Make it a weight")}
                 </button>
-              </p>
-            ) : null}
+                </>
+              ) : null}
+            </p>
             {likely !== null && !alsoAmount.trim() ? (
               <small className="field-hint">
                 {t("Your other fish of this kind suggest about {size}.", { size: otherKind === "weight" ? weightText(likely) : lengthText(likely) })}
@@ -1033,10 +1048,10 @@ function CatchView() {
   return (
     <div className="sheet">
       <EditDelete
-        editTo={`/catches/${entry.id}/edit`}
+        editTo={list ? `/catches/${entry.id}/edit?${LIST_PARAM}=${encodeURIComponent(list.key)}` : `/catches/${entry.id}/edit`}
         ask={t("Delete this fish from the book?")}
         onDelete={() => {
-          if (deleteCatch(entry.id)) navigate("/catches");
+          if (deleteCatch(entry.id)) navigate(list?.back ?? "/catches");
         }}
       >
         <p className="eyebrow">
@@ -1182,7 +1197,7 @@ function CatchView() {
       ) : null}
       {list ? (
         <p className="catch-list-at">
-          <Link to={list.back}>{t("{at} of {count} in this list", { at: listAt, count: list.rows.length })}</Link>
+          <Link to={list.back}>{t("Back to this list, {at} of {count}", { at: listAt, count: list.rows.length })}</Link>
         </p>
       ) : null}
     </div>

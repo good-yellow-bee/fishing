@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
@@ -100,6 +100,16 @@ const MOON_WORDS: Partial<Record<MoonQuarter, string[]>> = {
   new: ["new moon", "nów"],
 };
 
+/** The month (1 to 12) a whole month name means, in English or Polish ("May", "maj", "Październik"), or null. */
+function monthOfYear(name: string): number | null {
+  const want = normalize(name);
+  for (let month = 1; month <= 12; month++) {
+    const at = new Date(2026, month - 1, 15);
+    for (const lang of ["en", "pl"]) if (normalize(new Intl.DateTimeFormat(lang, { month: "long" }).format(at)) === want) return month;
+  }
+  return null;
+}
+
 /** What an exact term compares for one fish, in the book's English: its kind, lure, water, sky, wind, time of day, season or moon. */
 function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string | null {
   if (field === "species") return entry.species;
@@ -111,6 +121,7 @@ function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string 
   if (Number.isNaN(at.getTime())) return null;
   if (field === "season") return SEASON_LABELS[lakeSeason(at)];
   if (field === "moon") return MOON_QUARTER_LABELS[moonQuarterOf(at)];
+  if (field === "month") return null;
   const id = biteTimeOf(at.getHours());
   return BITE_TIMES.find((row) => row.id === id)!.label;
 }
@@ -119,6 +130,11 @@ function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string 
 function findOne(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
   const exact = parseExactTerm(needle);
+  if (exact?.field === "month") {
+    // A month of any year ("May", "Maj"), by the month itself, so a note that "may" have said something doesn't count.
+    const month = monthOfYear(exact.name);
+    return month === null ? [] : catchesNewestFirst(book).filter((entry) => Number(catchMonth(entry).slice(5)) === month);
+  }
   if (exact) {
     // One name whole, as stored or as it reads in the player's language.
     const want = normalize(exact.name);
@@ -188,7 +204,7 @@ export function searchParts(book: Logbook, needle: string): string[] {
     .sort((a, b) => b.length - a.length);
   const kept: string[] = [];
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
-  let text = needle.replace(/(^|\s)(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=\s|$)/gi, "$1>$2");
+  let text = needle.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   for (const name of names) {
     const at = text.toLowerCase().indexOf(name.toLowerCase());
     if (at < 0) continue;
@@ -317,6 +333,8 @@ export function CatchSearch() {
   const settled = useDeferredValue(needle);
   const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
   const largest = params.get(ORDER_PARAM) === "largest";
+  // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
+  const onCatches = useLocation().pathname.startsWith("/catches");
   const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
   const setLargest = (next: boolean) =>
     setParams(
@@ -413,7 +431,7 @@ export function CatchSearch() {
                   entry={entry}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                   tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
-                  list={largest ? undefined : `find:${settled}`}
+                  list={largest ? undefined : `${onCatches ? "catches" : "find"}:${settled}`}
                 />
               )}
             </PagedCatches>
