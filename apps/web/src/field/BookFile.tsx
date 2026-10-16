@@ -9,6 +9,7 @@ import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
+import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
@@ -68,6 +69,8 @@ export function BookFile() {
   const keepButton = useRef<HTMLButtonElement>(null);
   const askId = useId();
   const [pending, setPending] = useState<FieldArchive | null>(null);
+  // The file's goals for the year, or null for a file from before they were kept.
+  const [pendingGoals, setPendingGoals] = useState<YearGoals | null>(null);
   // A picked file waits on a question: it takes focus on the safe answer, as the delete question does.
   useEffect(() => {
     if (pending) keepButton.current?.focus();
@@ -86,12 +89,13 @@ export function BookFile() {
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
   // What a loaded file replaced, while nothing has changed since: the load can be taken back.
-  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null } | null>(null);
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; goals: YearGoals } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   const onDownload = () => {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
-    downloadFile(JSON.stringify(fieldArchiveDocument({ book: storedBook, tackle: items, photos })), "application/json", "stillwater-field-log.json");
+    // The year's goals ride along, so a new browser keeps them too.
+    downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", "stillwater-field-log.json");
     saveCopiedAt(own);
     setCopiedAt(own);
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
@@ -117,6 +121,12 @@ export function BookFile() {
     }
     setNotice(null);
     setPending(parsed.value);
+    try {
+      const raw = (JSON.parse(text) as { goals?: unknown }).goals;
+      setPendingGoals(raw === undefined ? null : cleanYearGoals(raw));
+    } catch {
+      setPendingGoals(null);
+    }
   };
 
   /** Puts `next` in this browser, where it can be undone; `merged` is for a book that is this one plus the file's new fish, `leftOut` the file's photos that didn't fit. */
@@ -128,9 +138,12 @@ export function BookFile() {
       return;
     }
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
-    setBeforeLoad({ archive: here, loaded: next, copiedAt });
+    const goalsHere = readYearGoals();
+    setBeforeLoad({ archive: here, loaded: next, copiedAt, goals: goalsHere });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
+    // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
+    if (pendingGoals) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
     // A fish that is in the book again is no longer one deleted here.
     forgetDeletedFish(next.book.catches.map((entry) => entry.id));
     if (!merged) {
@@ -173,6 +186,7 @@ export function BookFile() {
     }
     replaceBook(beforeLoad.archive.book, beforeLoad.archive.photos);
     replaceTackle(beforeLoad.archive.tackle);
+    writeYearGoals(beforeLoad.goals);
     if (beforeLoad.copiedAt === null) clearCopiedAt();
     else saveCopiedAt(beforeLoad.copiedAt);
     setCopiedAt(beforeLoad.copiedAt);

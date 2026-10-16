@@ -6,26 +6,43 @@ import { catchMonth } from "./tripMonths";
 /** The angler's own target of fish for a year, kept in this browser by year. */
 export const YEAR_GOAL_KEY = "stillwater.field-log.year-goal.v1";
 
-export function readYearGoal(year: string): number | null {
+export type YearGoals = Record<string, number>;
+
+/** The goals in `value` that make sense, by year: anything else is dropped, so a hand-edited file can't break the page. */
+export function cleanYearGoals(value: unknown): YearGoals {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+  const goals: YearGoals = {};
+  for (const [year, goal] of Object.entries(value)) {
+    if (/^\d{4}$/.test(year) && typeof goal === "number" && Number.isInteger(goal) && goal > 0 && goal <= 10000) goals[year] = goal;
+  }
+  return goals;
+}
+
+export function readYearGoals(): YearGoals {
   try {
-    const goals = JSON.parse(localStorage.getItem(YEAR_GOAL_KEY) ?? "{}") as Record<string, unknown>;
-    const goal = goals?.[year];
-    return typeof goal === "number" && Number.isInteger(goal) && goal > 0 && goal <= 10000 ? goal : null;
+    return cleanYearGoals(JSON.parse(localStorage.getItem(YEAR_GOAL_KEY) ?? "{}"));
   } catch {
-    return null;
+    return {};
   }
 }
 
-function saveYearGoal(year: string, goal: number | null) {
+export function writeYearGoals(goals: YearGoals) {
   try {
-    const goals = JSON.parse(localStorage.getItem(YEAR_GOAL_KEY) ?? "{}") as Record<string, number>;
-    const next = typeof goals === "object" && goals !== null && !Array.isArray(goals) ? { ...goals } : {};
-    if (goal === null) delete next[year];
-    else next[year] = goal;
-    localStorage.setItem(YEAR_GOAL_KEY, JSON.stringify(next));
+    localStorage.setItem(YEAR_GOAL_KEY, JSON.stringify(goals));
   } catch {
     // A goal is only a nudge; the book itself is untouched.
   }
+}
+
+export function readYearGoal(year: string): number | null {
+  return readYearGoals()[year] ?? null;
+}
+
+function saveYearGoal(year: string, goal: number | null) {
+  const next = { ...readYearGoals() };
+  if (goal === null) delete next[year];
+  else next[year] = goal;
+  writeYearGoals(next);
 }
 
 /** This year's fish against a goal the angler sets, or an offer to set one. */
