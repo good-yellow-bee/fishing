@@ -1106,7 +1106,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT61~~ | ~~News card (2026-10-16a) covers GT59 and GT60: the drop-off dive and the inlet drift on the lake~~ (#502) | news | S |
 | ~~GT62~~ | ~~Out on the boat it swings to follow a run, so a run takes out 35% less line than from the bank; the fight card says so~~ (#504) | fight | S |
 | ~~GT63~~ | ~~At anchor the rowboat swings round about 13° toward a run and settles back square between runs, so the scene shows the boat following the fish~~ (#506) | fish | S |
-| GT64 | News card (2026-10-16b) covers GT62 and GT63: the boat follows a run and takes less line | news | S |
+| ~~GT64~~ | ~~News card (2026-10-16b) covers GT62 and GT63: the boat follows a run and takes less line~~ (#508) | news | S |
+| GT65 | On a breezy day the wind bellies a slack line, so between runs it drifts out 25% faster (50% on a strong day); runs pull as before, and the fight card says so | fight | S |
 
 ## Risks / open questions for the owner
 

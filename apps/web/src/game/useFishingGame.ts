@@ -19,9 +19,10 @@ import {
   type Sky,
   type SpotId,
   type StanceId,
+  type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, fightWater, isCleanFight, isCloseCall, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type Steer, type SurgeState } from "./fight";
+import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, makeFight, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -119,6 +120,8 @@ export type Fight = {
   underpowered: boolean;
   /** What the spot's water does to the fight; open water when left out. */
   water?: FightWater;
+  /** A breezy or strong day, when the wind bellies a slack line. */
+  windy?: FightWind;
 };
 
 /** How the angler played this fish, for a line on the landed card. */
@@ -173,9 +176,13 @@ export function useFishingGame(
   moon?: number,
   /** An evening rise is on: a cast onto a fresh ring bites sooner. */
   rising = false,
+  /** The day's wind; a breezy or strong one bellies a slack line in a fight. */
+  wind?: Wind,
 ) {
   const risingRef = useRef(rising);
   risingRef.current = rising;
+  const windRef = useRef(wind);
+  windRef.current = wind;
   const castRiseRef = useRef(false);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
@@ -301,7 +308,8 @@ export function useFishingGame(
     const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
     const underpowered = !canLand(current, species);
     const water = fightWater(spotRef.current);
-    const next = { species, weight, underpowered, water };
+    const windy = fightWind(windRef.current);
+    const next = { species, weight, underpowered, water, windy };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");
@@ -314,7 +322,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), water);
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), water, windy);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;

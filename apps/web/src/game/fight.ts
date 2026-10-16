@@ -124,6 +124,14 @@ export const DEEP_TIRE = 1.3;
 export const ROCK_PULL = 1.2;
 /** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
 export const BOAT_RUN = 0.65;
+/** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
+export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
+export type FightWind = keyof typeof WIND_SLACK;
+
+/** Breezy and strong days push on the line; calm and light ones don't. */
+export function fightWind(wind: string | undefined): FightWind | undefined {
+  return wind === "breezy" || wind === "strong" ? wind : undefined;
+}
 export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat";
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
@@ -215,13 +223,17 @@ export function makeFight(
   tireMul = 1,
   /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; out on the boat runs take less line. */
   water: FightWater = "open",
+  /** A breezy or strong day: slack line drifts out faster between runs. */
+  wind?: FightWind,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
-  const driftCalm = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT : 1);
-  const driftSurge = driftCalm * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
+  const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT : 1);
+  const driftCalm = driftWater * (wind ? WIND_SLACK[wind] : 1);
+  // A run takes line by its own pull; the wind only shows on a resting line.
+  const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
   const tensionUpCalm = Math.max(
     0.12,
     0.2 + t * 0.12 - (strength - 1) * 0.015 + (species.challenge === "tension" ? 0.08 : 0),
