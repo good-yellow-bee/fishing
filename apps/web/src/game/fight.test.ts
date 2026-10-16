@@ -777,6 +777,41 @@ describe("the dock's pilings", () => {
   });
 });
 
+describe("a brook trout's dart", () => {
+  /** Plays the first run, steering against the side it started on or against wherever it is heading now; returns each tick's side. */
+  function firstRun(id: string, steerBy: "start" | "now") {
+    const runtime = makeFight(fish(id), 1.5, 3, () => 0);
+    const sides: number[] = [];
+    let start: -1 | 1 | null = null;
+    let turnedLate = false;
+    for (let now = 0; now < 30_000; now += 20) {
+      if (runtime.sim.surge === 2 && start === null) start = runtime.sim.runSide;
+      const side = steerBy === "start" ? start : runtime.sim.runSide;
+      const steer = runtime.sim.surge === 2 && side !== null ? (-side as Steer) : 0;
+      runtime.step(now, 0.02, false, steer);
+      if (runtime.sim.surge === 2) {
+        sides.push(runtime.sim.runSide);
+        if (runtime.sim.darted && runtime.sim.turning) turnedLate = true;
+      } else if (sides.length > 0) return { sides, turnedLate };
+    }
+    throw new Error("never ran");
+  }
+
+  it("cuts back the other way halfway through a run, and other fish run straight", () => {
+    const { sides } = firstRun("brook-trout", "now");
+    const flip = sides.findIndex((side) => side !== sides[0]);
+    expect(flip).toBeGreaterThan(sides.length * 0.3);
+    expect(flip).toBeLessThan(sides.length * 0.7);
+    expect(sides.slice(flip).every((side) => side === sides[flip])).toBe(true);
+    expect(new Set(firstRun("smallmouth-bass", "now").sides).size).toBe(1);
+  });
+
+  it("is only turned after the dart by an angler who switches sides", () => {
+    expect(firstRun("brook-trout", "now").turnedLate).toBe(true);
+    expect(firstRun("brook-trout", "start").turnedLate).toBe(false);
+  });
+});
+
 describe("a largemouth bass in cover", () => {
   /** Lets the first run go unturned and returns when it ends. */
   function firstRunEnd(runtime: FightRuntime) {
