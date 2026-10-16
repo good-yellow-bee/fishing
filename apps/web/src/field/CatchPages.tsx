@@ -557,7 +557,7 @@ function CatchForm() {
       <div className="sheet">
         <h1>{t("Log a catch")}</h1>
         <p className="lede">{t("Add a spot first, then the fish has a water to belong to.")}</p>
-        <Link to="/spots/new" className="field-primary inline">
+        <Link to="/spots/new?then=catch" className="field-primary inline">
           {t("Add a spot")}
         </Link>
       </div>

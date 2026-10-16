@@ -296,6 +296,7 @@ export const PL_FIELD: PlBook = {
   "Sample waters are invented. This book stays in this browser.": "Przykładowe łowiska są zmyślone. Ten dziennik zostaje w tej przeglądarce.",
   "This book stays in this browser.": "Ten dziennik zostaje w tej przeglądarce.",
   "Skip to the page": "Przejdź do strony",
+  "Waters you note a place for are drawn here. The ink is local, with no tile service and no key.": "Łowiska z zapisanym miejscem są rysowane tutaj. Tusz jest lokalny, bez serwera map i bez klucza.",
   "This browser: {here}. The file: {there}.": "W tej przeglądarce: {here}. W pliku: {there}.",
   "Fish here that aren't in the file, and would be lost: {count}.": "Ryby zapisane tu, których nie ma w pliku i które przepadłyby: {count}.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",

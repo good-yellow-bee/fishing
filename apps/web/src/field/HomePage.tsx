@@ -189,7 +189,8 @@ export function HomePage() {
         </div>
       </section>
 
-      <CatchSearch />
+      {/* Nothing to find in a book with no fish yet. */}
+      {book.catches.length > 0 ? <CatchSearch /> : null}
 
       <div className="home-grid">
         <section>

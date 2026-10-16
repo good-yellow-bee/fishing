@@ -237,7 +237,9 @@ export function SpotMapPage() {
           <p className="eyebrow">{t("Waters")}</p>
           <h1>{t("Map")}</h1>
           <p className="lede">
-            {t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")}
+            {plotted.length > 0
+              ? t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")
+              : t("Waters you note a place for are drawn here. The ink is local, with no tile service and no key.")}
           </p>
         </div>
       </header>

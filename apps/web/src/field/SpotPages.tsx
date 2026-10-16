@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   WATER_LABELS,
   WATER_TYPES,
@@ -224,6 +224,9 @@ function SpotForm() {
   const existing = spotId ? spotById(book, spotId) : undefined;
   // Sent here to note where the water is (from the map, or its page): straight to the place field.
   const toPlace = useLocation().hash === "#place";
+  // Sent from the catch or outing form of a book with no water yet: back there with the new water once it is saved.
+  const [params] = useSearchParams();
+  const then = existing ? null : params.get("then");
   const placeInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // After the page's own scroll to the top has run.
@@ -267,7 +270,9 @@ function SpotForm() {
       return;
     }
     kept.drop();
-    navigate(`/spots/${result.id}`);
+    if (then === "catch") navigate(`/catches/new?spot=${result.id}`);
+    else if (then === "trip") navigate(`/trips/new?spot=${result.id}`);
+    else navigate(`/spots/${result.id}`);
   };
 
   if (spotId && !existing) {
