@@ -72,6 +72,9 @@ export function BookFile() {
   const [tip] = useState(() => homeScreenTip());
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
+  // What a loaded file replaced, while nothing has changed since: the load can be taken back.
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null } | null>(null);
+  const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   const onDownload = () => {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
@@ -111,6 +114,7 @@ export function BookFile() {
       setNotice({ tone: "bad", text: saved.message });
       return;
     }
+    setBeforeLoad({ archive: { book: storedBook, tackle: items, photos }, loaded: pending, copiedAt });
     replaceBook(pending.book, pending.photos);
     replaceTackle(pending.tackle);
     // The file is itself a copy of the book now in this browser, so the reminder counts from it.
@@ -119,6 +123,23 @@ export function BookFile() {
     setCopiedAt(loaded);
     setPending(null);
     setNotice({ tone: "ok", text: t("This browser now has the book from that file.") });
+    loadButton.current?.focus();
+  };
+
+  const onUndoLoad = () => {
+    if (!beforeLoad) return;
+    const saved = commitFieldArchive(beforeLoad.archive);
+    if (!saved.ok) {
+      setNotice({ tone: "bad", text: saved.message });
+      return;
+    }
+    replaceBook(beforeLoad.archive.book, beforeLoad.archive.photos);
+    replaceTackle(beforeLoad.archive.tackle);
+    if (beforeLoad.copiedAt === null) clearCopiedAt();
+    else saveCopiedAt(beforeLoad.copiedAt);
+    setCopiedAt(beforeLoad.copiedAt);
+    setBeforeLoad(null);
+    setNotice({ tone: "ok", text: t("The book from before the file is back.") });
     loadButton.current?.focus();
   };
 
@@ -239,6 +260,14 @@ export function BookFile() {
       {notice ? (
         <p className={notice.tone === "ok" ? "book-note" : "field-error"} role="status">
           {messageText(notice.text)}
+          {notice.tone === "ok" && canUndoLoad ? (
+            <>
+              {" "}
+              <button type="button" className="text-button" onClick={onUndoLoad}>
+                {t("Undo")}
+              </button>
+            </>
+          ) : null}
         </p>
       ) : null}
     </footer>

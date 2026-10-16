@@ -229,6 +229,7 @@ export const PL_FIELD: PlBook = {
   "This browser: {here}. The file: {there}.": "W tej przeglądarce: {here}. W pliku: {there}.",
   "Fish logged here after the file's newest would be lost.": "Ryby zapisane tu po najnowszej z pliku przepadłyby.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",
+  "The book from before the file is back.": "Dziennik sprzed wczytania pliku wrócił.",
   "no fish": "brak ryb",
   "Earlier tackle lists in this browser could not be read, so they were set aside instead of being lost.":
     "Wcześniejszych list sprzętu w tej przeglądarce nie dało się odczytać, więc odłożono je, zamiast je stracić.",
@@ -322,6 +323,7 @@ export const PL_FIELD: PlBook = {
     "Ten plik ma więcej zdjęć, niż ta przeglądarka powinna przechować. Dziennik został bez zmian.",
   "Name the piece in a few words.": "Nazwij sprzęt w kilku słowach.",
   "That piece is already on this list.": "Ten sprzęt już jest na liście.",
+  "Copy the list from {trip}": "Skopiuj listę z wyprawy „{trip}”",
 
   // Bests
   "Large · {label}": "Okaz · {label}",

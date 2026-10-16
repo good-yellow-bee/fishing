@@ -38,6 +38,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         tripId={trip.id}
         name={t("Tackle for {trip}", { trip: trip.title })}
         suggest={packingTips(book, trip, today)}
+        trips={book.trips}
       />
     </section>
   );
@@ -110,7 +111,7 @@ export function GearPage() {
           </div>
           <Link to={`/trips/${trip.id}`}>{t("Outing")}</Link>
         </header>
-        <TackleList tripId={trip.id} heading={t("In the bag")} suggest={packingTips(book, trip, today)} />
+        <TackleList tripId={trip.id} heading={t("In the bag")} suggest={packingTips(book, trip, today)} trips={book.trips} />
       </div>
     );
   }
