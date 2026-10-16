@@ -106,8 +106,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             `${lineIn}% · ${t(STAMINA_WORD[tired])}${short ? ` · ${t("Running out of line!")}` : ""}`,
           );
         }
-        // Which way to pull the rod: said once a run is coming, and cheered while it is being turned.
-        const steerCall = state.surge === 0 || state.jump || state.roll ? "calm" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
+        // Which way to pull the rod: said once a run is coming, and cheered while it is being turned. A leap or a roll can't be turned.
+        const steerCall = state.surge === 0 ? "calm" : state.roll ? "roll" : state.jump ? "leap" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
         if (steerLine.current && steerLine.current.dataset.call !== steerCall) {
           steerLine.current.dataset.call = steerCall;
           for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
@@ -206,6 +206,12 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             </span>
             <span data-for="turning" hidden>
               {t("Turning it!")}
+            </span>
+            <span data-for="leap" hidden>
+              {t("A leap can't be turned — just let go")}
+            </span>
+            <span data-for="roll" hidden>
+              {t("A roll can't be turned — just let go")}
             </span>
           </p>
           )}

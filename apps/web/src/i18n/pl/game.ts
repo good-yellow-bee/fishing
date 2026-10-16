@@ -433,6 +433,8 @@ export const PL_GAME: PlBook = {
   "TAP A or RT to start reeling": "DOTKNIJ: A albo RT, by zacząć zwijać",
   "HOLD A or RT to reel": "PRZYTRZYMAJ A albo RT, by zwijać",
   "(→ or D)": "(→ albo D)",
+  "A leap can't be turned — just let go": "Skoku nie da się zawrócić — po prostu odpuść",
+  "A roll can't be turned — just let go": "Obrotu nie da się zawrócić — po prostu odpuść",
   "Turning it!": "Zawracasz ją!",
   "Save picture": "Zapisz obrazek",
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
