@@ -91,6 +91,8 @@ export const PL_FIELD: PlBook = {
   "One more missed strike": "Jeszcze jedno puste branie",
   "One fewer missed strike": "O jedno puste branie mniej",
   "Landed {landed} of {hooked} hooked.": "Wyholowane: {landed} z {hooked} zaciętych.",
+  "On outings you counted ({outings}): landed {landed} of {hooked} hooked, missed strikes: {missed}.":
+    "Na policzonych wyprawach ({outings}): wyholowane {landed} z {hooked} zaciętych, puste brania: {missed}.",
   "{water}, {distance} away.": "{water}, {distance} stąd.",
   "Rename or merge": "Zmień nazwę lub połącz",
   "New name for every {name}": "Nowa nazwa dla wszystkich ryb: {name}",
