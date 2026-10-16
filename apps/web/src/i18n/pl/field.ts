@@ -77,6 +77,7 @@ export const PL_FIELD: PlBook = {
   "Save and log another": "Zapisz i dodaj kolejną",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
+  "No longer on {outing}: that outing was on another water.": "Już nie w wyprawie {outing}: ta wyprawa była na innym łowisku.",
   "Lost fish": "Spięte ryby",
   "Missed strikes": "Puste brania",
   "One more lost fish": "Jeszcze jedna spięta ryba",

@@ -216,6 +216,8 @@ function CatchForm() {
   );
   // Until the player picks an outing themselves, the outing follows the water and the day.
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
+  // The outing a change of water took the fish off, until the outing is picked again.
+  const [leftTrip, setLeftTrip] = useState("");
   const [caughtAt, setCaughtAt] = useState(() =>
     existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
@@ -337,7 +339,10 @@ function CatchForm() {
   const onSpot = (nextSpot: string) => {
     setSpotId(nextSpot);
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
-    setTripId(existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? ""));
+    const nextTrip = existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? "");
+    // Said under the water, so an outing doesn't quietly go from the fish.
+    setLeftTrip(tripId && nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "");
+    setTripId(nextTrip);
     setTripPicked(Boolean(existing));
   };
 
@@ -373,6 +378,7 @@ function CatchForm() {
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
+    setLeftTrip("");
     setTripPicked(true);
     if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
   };
@@ -687,6 +693,7 @@ function CatchForm() {
                 ))}
               </select>
             </label>
+            {leftTrip ? <span className="field-hint">{t("No longer on {outing}: that outing was on another water.", { outing: leftTrip })}</span> : null}
             {canLocate ? (
               <span className="field-hint nearest-water">
                 <button type="button" className="text-button" aria-disabled={locating === "busy" ? true : undefined} onClick={findNearest}>
