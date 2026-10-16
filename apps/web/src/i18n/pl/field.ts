@@ -481,7 +481,8 @@ export const PL_FIELD: PlBook = {
   "{n} this year": "{n} w tym roku",
   "{n} of {goal} this year": "{n} z {goal} w tym roku",
   "This week in years past": "Ten tydzień w minionych latach",
-  "This week in earlier years here: {fish}, {species}.": "W tym tygodniu w poprzednich latach: {fish}, {species}.",
+  "Around this date in earlier years here: {fish}, {species}.": "Około tej daty w poprzednich latach: {fish}, {species}.",
+  "Most on {lure}.": "Najwięcej na {lure}.",
   "{n} years ago": ["{n} rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Weather is optional: note the sky and wind, and the water temperature if you took it.":

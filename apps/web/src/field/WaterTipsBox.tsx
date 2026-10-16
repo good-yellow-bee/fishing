@@ -1,15 +1,30 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { SEASON_LABELS, SKY_LABELS, type CatchEntry } from "@stillwater/shared";
+import { SEASON_LABELS, SKY_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { waterTips } from "./waterTips";
-import { thisWeekInPastYears } from "./yearsAgo";
+import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { fishCountLabel, formatCatchDay } from "./format";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
 import { speciesCounts } from "./speciesLink";
+
+/**
+ * "Around this date in earlier years here: 9 fish, Northern pike, Perch; most on Spinnerbait.": what a water gave within
+ * a fortnight of a planned day in years before, for a box or form about one outing.
+ */
+export function sameTimeText(fish: readonly CatchEntry[]): string {
+  const text = t("Around this date in earlier years here: {fish}, {species}.", {
+    fish: fishCountLabel(fish.length),
+    species: speciesCounts(fish)
+      .map((row) => t(row.species))
+      .join(", "),
+  });
+  const lure = lureTally({ spots: [], trips: [], catches: [...fish] }, 1)[0];
+  return lure && lure.count >= 2 ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
+}
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
 function TipLine({ text, name, value, to }: { text: string; name: string; value: string; to: string }) {
@@ -51,7 +66,7 @@ export function WaterTipsBox({
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const sun = place ? nearSunCount(catches, place) : null;
-  const pastWeek = y && m && d ? thisWeekInPastYears(catches, new Date(y, m - 1, d, 12), 3, Infinity) : [];
+  const pastWeek = y && m && d ? thisWeekInPastYears(catches, new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity) : [];
   return (
     <aside className="conditions water-tips" aria-label={heading}>
       <span className="eyebrow">{heading}</span>
@@ -81,12 +96,7 @@ export function WaterTipsBox({
         {pastWeek.length > 0 ? (
           <>
             <br />
-            {t("This week in earlier years here: {fish}, {species}.", {
-              fish: fishCountLabel(pastWeek.length),
-              species: speciesCounts(pastWeek)
-                .map((row) => t(row.species))
-                .join(", "),
-            })}
+            {sameTimeText(pastWeek)}
           </>
         ) : null}
       </p>

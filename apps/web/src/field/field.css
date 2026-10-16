@@ -1502,6 +1502,11 @@ button.field-primary:disabled {
   font-size: 14px;
 }
 
+/* A tap target on a phone. */
+.tally-more button {
+  min-height: 24px;
+}
+
 /* The season Bests is worked out for: the one in use reads as plain text, the others are links to switch. */
 .bests-scope {
   display: flex;
@@ -1509,6 +1514,12 @@ button.field-primary:disabled {
   gap: 4px 14px;
   margin: 0 0 14px;
   font-size: 14px;
+}
+
+.bests-scope button,
+.bests-scope a {
+  /* A tap target on a phone. */
+  min-height: 24px;
 }
 
 .bests-scope [aria-pressed="true"] {
@@ -1549,6 +1560,18 @@ button.field-primary:disabled {
 
 .day-grid .day-lead {
   background: transparent;
+}
+
+.day-weekdays {
+  margin-bottom: 3px;
+}
+
+.day-weekdays span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1;
+  text-align: center;
+  color: var(--field-muted);
 }
 
 .day-grid li.day-fish a,

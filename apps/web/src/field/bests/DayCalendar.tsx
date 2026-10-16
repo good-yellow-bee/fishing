@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import type { Logbook } from "@stillwater/shared";
-import { t, tn, useT } from "../../i18n";
+import { locale, t, tn, useT } from "../../i18n";
 import { formatDay } from "../format";
 import { findLink } from "../findLinks";
 import { monthName } from "../tripMonths";
 import { dayMarks, markedMonths } from "./dayMarks";
+
+/** The weekdays' first letters in the reader's language, Monday first: "M T W T F S S", "P W Ś C P S N". */
+function weekdayLetters(): string[] {
+  // 2026-10-12 was a Monday.
+  return Array.from({ length: 7 }, (_, index) => new Intl.DateTimeFormat(locale(), { weekday: "narrow" }).format(new Date(2026, 9, 12 + index, 12)));
+}
 
 /** How dark a fished day is: one fish, a few, or a good day. */
 function level(fish: number): string {
@@ -31,6 +37,12 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
         return (
           <section key={month} className="day-month" aria-label={monthName(month)}>
             <h3>{monthName(month)}</h3>
+            {/* Which column is which day, for the eye; each day's link already says its whole date. */}
+            <div className="day-grid day-weekdays" aria-hidden="true">
+              {weekdayLetters().map((letter, index) => (
+                <span key={index}>{letter}</span>
+              ))}
+            </div>
             <ol className="day-grid">
               {Array.from({ length: lead }, (_, index) => (
                 <li key={`lead-${index}`} className="day-lead" aria-hidden="true" />
