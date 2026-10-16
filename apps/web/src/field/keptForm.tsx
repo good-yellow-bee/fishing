@@ -92,7 +92,7 @@ export function useKeptForm(key: string | null, base: string, fields: Record<str
           setWaiting(null);
         }}
       >
-        {t("Pick it up")}
+        {t("Pick them up")}
       </button>
       <button
         type="button"

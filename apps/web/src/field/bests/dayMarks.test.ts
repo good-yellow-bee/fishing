@@ -12,4 +12,11 @@ describe("dayMarks", () => {
     expect(dayMarks(book, "1999").size).toBe(0);
     expect(markedMonths(marks)).toEqual([...markedMonths(marks)].sort());
   });
+
+  it("knows an outing landed fish even when they came after midnight", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const late = { ...book.catches[0]!, id: "late", tripId: "eve", caughtAt: new Date(2026, 9, 4, 1, 30).toISOString() };
+    const marks = dayMarks({ ...book, trips: [{ id: "eve", date: "2026-10-03", spotId: late.spotId, title: "Evening", note: "" }], catches: [late] }, "2026");
+    expect(marks.get("2026-10-03")).toEqual({ fish: 0, trips: ["eve"], landed: true });
+  });
 });

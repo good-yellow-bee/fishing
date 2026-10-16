@@ -31,11 +31,13 @@ describe("find an outing", () => {
     expect(find("this week")).toEqual(["a"]);
     expect(find("last week")).toEqual([]);
     expect(find("2026-09")).toEqual(["b"]);
+    expect(find("wrzesień")).toEqual(["b"]);
   });
 
   it("finds past outings with no fish, and joins parts with +", () => {
     expect(find("no fish")).toEqual(["b"]);
     expect(find("bez ryb")).toEqual(["b"]);
+    expect(find("bez ryby")).toEqual(["b"]);
     expect(find("october + run")).toEqual([]);
     expect(find("october + next")).toEqual(["c"]);
   });

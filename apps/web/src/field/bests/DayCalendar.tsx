@@ -45,7 +45,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                     </li>
                   );
                 }
-                if (mark && mark.trips.length > 0 && day < today) {
+                if (mark && mark.trips.length > 0 && !mark.landed && day < today) {
                   // The blank opens its outing, or the day's outings when there were several.
                   const label = `${formatDay(day)}: ${t("an outing with no fish")}`;
                   return (
