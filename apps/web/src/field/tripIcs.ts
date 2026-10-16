@@ -1,4 +1,4 @@
-import type { Trip } from "@stillwater/shared";
+import type { SpotPlace, Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
@@ -34,7 +34,8 @@ function nextDay(ymd: string): string {
 }
 
 /** One all-day calendar event for an outing, for any calendar app to import. */
-export function tripIcs(trip: Trip, place: string | null, now: Date = new Date()): string {
+/** `at` is the water's own place, when the angler noted it: calendar apps can open it on a map. */
+export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace): string {
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
@@ -47,6 +48,7 @@ export function tripIcs(trip: Trip, place: string | null, now: Date = new Date()
     `DTEND;VALUE=DATE:${nextDay(trip.date).replace(/-/g, "")}`,
     `SUMMARY:${icsText(trip.title)}`,
     ...(place ? [`LOCATION:${icsText(place)}`] : []),
+    ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
     ...(trip.note ? [`DESCRIPTION:${icsText(trip.note)}`] : []),
     "END:VEVENT",
     "END:VCALENDAR",

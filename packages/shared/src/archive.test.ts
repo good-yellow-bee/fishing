@@ -4,10 +4,12 @@ import {
   FIELD_ARCHIVE_TOO_LARGE,
   fieldArchiveDocument,
   parseFieldArchive,
+  mergeFieldArchive,
+  newFishIn,
   parseFieldArchiveText,
 } from "./archive.ts";
 import { CATCH_PHOTO_STORE_MAX_CHARS } from "./photo.ts";
-import { sampleLogbook, type CatchEntry, type Logbook } from "./logbook.ts";
+import { isLogbook, sampleLogbook, type CatchEntry, type Logbook } from "./logbook.ts";
 import { sampleTackle, withPacked } from "./tackle.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -101,6 +103,21 @@ describe("field archive", () => {
     const badTrip = { ...document.book, trips: document.book.trips.map((trip, i) => (i === 0 ? { ...trip, date: "soon" } : trip)) };
     expect(parseFieldArchive({ ...document, book: badCatch })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
     expect(parseFieldArchive({ ...document, book: badTrip })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
+  });
+
+  it("adds only the file's new fish, with the waters, outings and photos they need", () => {
+    const here = archiveFor({ ...book, spots: book.spots.slice(1), trips: [], catches: book.catches.slice(0, 2) }, null);
+    const changed = { ...book.catches[0]!, note: "Edited in the file" };
+    const file = archiveFor({ ...book, catches: [changed, ...book.catches.slice(1)] }, book.catches[3]!.id);
+    expect(newFishIn(here.book, file.book)).toHaveLength(book.catches.length - 2);
+    const merged = mergeFieldArchive(here, file);
+    expect(merged.book.catches).toHaveLength(book.catches.length);
+    expect(merged.book.catches[0]!.note).toBe(book.catches[0]!.note);
+    expect(merged.book.spots).toHaveLength(book.spots.length);
+    expect(merged.book.trips).toHaveLength(book.trips.length);
+    expect(merged.photos[book.catches[3]!.id]).toBe(jpeg);
+    expect(merged.tackle).toEqual(here.tackle);
+    expect(isLogbook(merged.book)).toBe(true);
   });
 
   it("keeps a water's place through the file", () => {
