@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry, Logbook } from "@stillwater/shared";
-import { renameSpecies } from "./renameSpecies";
+import { renameInBook } from "./bookRename";
+
+const renameSpecies = (book: Logbook, from: string, typed: string) => renameInBook(book, "species", from, typed);
 
 const fish = (id: string, species: string): CatchEntry => ({
   id,
@@ -15,7 +17,7 @@ const fish = (id: string, species: string): CatchEntry => ({
 });
 const book: Logbook = { spots: [], trips: [], catches: [fish("a", "Pike"), fish("b", "pike "), fish("c", "Northern pike"), fish("d", "Perch")] };
 
-describe("renameSpecies", () => {
+describe("renameInBook", () => {
   it("renames every fish of the kind, whatever its case", () => {
     const result = renameSpecies(book, "Pike", "  Jack   pike ");
     expect(result).toMatchObject({ ok: true, name: "Jack pike", count: 2 });
@@ -36,5 +38,13 @@ describe("renameSpecies", () => {
   it("refuses a name too short or too long", () => {
     expect(renameSpecies(book, "Pike", " p ")).toMatchObject({ ok: false });
     expect(renameSpecies(book, "Pike", "x".repeat(41))).toMatchObject({ ok: false });
+  });
+
+  it("renames a lure on every fish caught on it, merging into one already in the book", () => {
+    const lures: Logbook = { ...book, catches: [{ ...fish("a", "Pike"), lure: "Spiner" }, { ...fish("b", "Perch"), lure: "Spinner" }] };
+    const result = renameInBook(lures, "lure", "spiner", "SPINNER");
+    expect(result).toMatchObject({ ok: true, name: "Spinner", count: 1 });
+    if (result.ok) expect(result.book.catches.map((entry) => [entry.species, entry.lure])).toEqual([["Pike", "Spinner"], ["Perch", "Spinner"]]);
+    expect(renameInBook(lures, "lure", "Spiner", "")).toMatchObject({ ok: false, message: "What was on the line?" });
   });
 });
