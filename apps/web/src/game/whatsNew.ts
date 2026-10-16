@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zt";
+export const NEWS_ID = "2026-10-16zu";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Cast back at a bank where a big fish is still about and you'll see its shadow circling wide and slow round your float.",
   "A big fish that got away, or a hunter that followed your fish in, now comes back sooner to a big lure cast at its bank. The hint reminds you when you're on a small one.",
   "A pike, a largemouth bass or a walleye may now follow a shiner, bluegill or perch in without taking it. The hint says so, and for a few casts it stays about that bank, so cast back there to hook it.",
   "Land a trophy that made its second run at the net and the card says you rode it out. Lose a trophy-sized fish and the result now says it looked like a trophy, so you know what got away.",
