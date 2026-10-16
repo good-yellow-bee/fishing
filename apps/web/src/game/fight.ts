@@ -34,6 +34,8 @@ export type FightSim = {
   weeded?: boolean;
   /** At the dock, a run nobody turned has wrapped the line round a piling: reeling only rubs it until the fish swings free. */
   wrapped?: boolean;
+  /** At the inlet, a run heading downstream that the angler isn't turning: the current helps it take more line. */
+  downstream?: boolean;
   /** Off the point, a run the angler isn't turning, dragging the line over the rocks. */
   rocky?: boolean;
   /** At the drop-off, a run heading down the ledge. */
@@ -147,6 +149,9 @@ export const WEED_MS = 1600;
 export const WEED_REEL = 0.3;
 /** How much faster slack line drifts out in the inlet's current. */
 export const CURRENT_DRIFT = 1.6;
+/** The inlet's current flows this way across the view; a run heading with it, left unturned, takes this much more line. */
+export const DOWNSTREAM_SIDE = 1;
+export const DOWNSTREAM_RUN = 1.3;
 /** At the drop-off a run dives down the ledge: it pulls this much harder, and tires the fish this much more. */
 export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
@@ -254,7 +259,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line. */
   water: FightWater = "open",
   /** A breezy or strong day: slack line drifts out faster between runs. */
   wind?: FightWind,
@@ -385,6 +390,7 @@ export function makeFight(
     const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
     sim.diving = water === "deep" && sim.surge === 2 && !sim.jump && !sim.roll;
+    sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
     sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
@@ -395,7 +401,7 @@ export function makeFight(
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
     }
     // A line held tight through a leap or a roll loads the rod into the red: the clean bonus goes, but never the fish.
     if ((sim.jump || sim.roll) && sim.surge === 2) {

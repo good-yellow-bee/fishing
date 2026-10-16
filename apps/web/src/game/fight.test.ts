@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -751,6 +751,39 @@ describe("the dock's pilings", () => {
     const { runtime, now } = afterRun("pilings", false, false);
     runtime.step(now + WRAP_MS, 0.05, false);
     expect(runtime.sim.wrapped).toBe(false);
+  });
+});
+
+describe("a run downstream at the inlet", () => {
+  /** Lets the first run go, steering it or not, and returns how fast it took line and whether it ran with the current. */
+  function firstRun(water: "current" | "open", firstSide: -1 | 1, turn: boolean) {
+    // The first run's side comes from the weight: 2 lb heads right, 2.1 lb left.
+    const runtime = makeFight(fish("lake-whitefish"), firstSide === 1 ? 2 : 2.1, 3, () => 0, 1, water);
+    let start: number | null = null;
+    let ticks = 0;
+    let downstream = false;
+    for (let now = 0; now < 60_000 && ticks < 10; now += 50) {
+      // A turning angler leans against the run from its warning on.
+      const steer = turn && runtime.sim.surge >= 1 ? (-runtime.sim.runSide as Steer) : 0;
+      runtime.step(now, 0.05, false, steer);
+      if (runtime.sim.downstream) downstream = true;
+      if (runtime.sim.surge === 2) {
+        start ??= runtime.sim.line;
+        ticks += 1;
+      }
+    }
+    // The line the run took in its first half second, before the spool's end can cut it short.
+    return { taken: runtime.sim.line - start!, downstream, side: runtime.sim.runSide };
+  }
+
+  it("helps a run with the current take more line, and not one upstream, one turned or one on still water", () => {
+    const down = firstRun("current", DOWNSTREAM_SIDE, false);
+    expect(down.side).toBe(DOWNSTREAM_SIDE);
+    expect(down.downstream).toBe(true);
+    expect(firstRun("current", -DOWNSTREAM_SIDE as -1 | 1, false).downstream).toBe(false);
+    expect(firstRun("current", DOWNSTREAM_SIDE, true).downstream).toBe(false);
+    expect(firstRun("open", DOWNSTREAM_SIDE, false).downstream).toBe(false);
+    expect(down.taken).toBeCloseTo(firstRun("current", -DOWNSTREAM_SIDE as -1 | 1, false).taken * DOWNSTREAM_RUN, 2);
   });
 });
 
