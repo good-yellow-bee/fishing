@@ -245,6 +245,15 @@ describe("fx haptics", () => {
     expect(() => fx.headShake()).not.toThrow();
   });
 
+  it("thuds once as a stuck catfish starts to lift", () => {
+    const vibrate = vi.fn(() => true);
+    vi.stubGlobal("navigator", { ...navigator, vibrate });
+    fx.haptic("lift");
+    expect(vibrate).toHaveBeenCalledWith([35]);
+    vi.stubGlobal("AudioContext", FakeAudioContext);
+    expect(() => fx.lift()).not.toThrow();
+  });
+
   it("stays quiet without vibrate, or when switched off", () => {
     vi.stubGlobal("navigator", { ...navigator, vibrate: undefined });
     expect(() => fx.haptic("bite")).not.toThrow();
