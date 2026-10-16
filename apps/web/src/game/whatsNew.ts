@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16d";
+export const NEWS_ID = "2026-10-16e";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "You can see the wind on a fight now: a slack line bows downwind between runs. On a windy day the bow soaks up the strike too, so a solid hook needs a quicker one.",
   "On a windy day the wind bellies a slack line, so line drifts out faster while you rest between runs. The fight card says when it's breezy or strong.",
   "In the field log, species pages show how your best of each kind grew and count fish by wind and water temperature. The catch search finds words from notes, a water temperature (“>60°F”) and a day (“2026-10-12”), and every count opens exactly the fish it counted.",
   "Out on the rowboat, the boat swings round to follow a run, so a run takes out less line than it would from the bank.",
