@@ -17,6 +17,7 @@ import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
 import { exactTerm, findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
+import { catchLink, type ListKey } from "./catchList";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -26,12 +27,15 @@ export function CatchCard({
   spotName,
   tripTitle,
   level = 3,
+  list,
 }: {
   entry: CatchEntry;
   /** Null on the water's own page, where naming the water again says nothing. */
   spotName: string | null;
   tripTitle: string | null;
   level?: CardLevel;
+  /** The list this card sits in, so the catch page steps through it rather than the whole book. */
+  list?: ListKey;
 }) {
   const Head = `h${level}` as const;
   const t = useT();
@@ -44,7 +48,7 @@ export function CatchCard({
       <p className={`measure measure-${entry.measure.kind}`}>{measuresText(entry)}</p>
       <div>
         <Head>
-          <Link to={`/catches/${entry.id}`}>{t(entry.species)}</Link>
+          <Link to={catchLink(entry.id, list)}>{t(entry.species)}</Link>
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </Head>
         <p className="meta">

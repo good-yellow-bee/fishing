@@ -210,6 +210,7 @@ export function SpotPage() {
               entry={entry}
               spotName={null}
               tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+              list={`water:${spot.id}`}
             />
           )}
         </PagedCatches>

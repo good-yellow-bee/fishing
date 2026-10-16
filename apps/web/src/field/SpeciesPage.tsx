@@ -173,6 +173,7 @@ export function SpeciesPage() {
             entry={entry}
             spotName={book.spots.find((spot) => spot.id === entry.spotId)?.name ?? t("Unknown water")}
             tripTitle={titleOf(entry.tripId)}
+            list={`species:${species}`}
           />
         )}
       </PagedCatches>
