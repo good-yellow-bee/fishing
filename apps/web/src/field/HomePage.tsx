@@ -86,6 +86,10 @@ export function HomePage() {
   const thisYear = today.slice(0, 4);
   const yearFish = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`)).length;
   const goal = readYearGoal(thisYear);
+  // Last year up to this same date, once last year has any fish: is this year on pace?
+  const lastYear = String(Number(thisYear) - 1);
+  const lastYearDays = book.catches.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
+  const lastYearByNow = lastYearDays.filter((day) => day.slice(5) <= today.slice(5)).length;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -137,6 +141,7 @@ export function HomePage() {
                   <Link to={findLink(thisYear)}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
+              {lastYearDays.length > 0 ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
             </small>
           ) : null}
         </div>
