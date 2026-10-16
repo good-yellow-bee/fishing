@@ -1153,6 +1153,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT108~~ | ~~The landed card notes Turned it upstream every time when every run downstream at the inlet was turned~~ (#638) | fight | S |
 | ~~GT109~~ | ~~Rainbow tail-walk: a rainbow trout's first leap is a long tail-walk across the top (1.8x a usual leap), with its own call and habit line~~ (#640) | fight | S |
 | GT110 | News card for the tail-walk and the inlet landed note | ui | S |
+| GT111 | Largemouth cover-diver: in the weeds or round a piling a largemouth bass stays buried 1.6x longer and doesn't run again till it comes out, with a habit line | fight | S |
 
 ## Risks / open questions for the owner
 

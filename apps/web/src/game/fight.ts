@@ -83,6 +83,10 @@ export const PAPER_TEAR_SEC = 0.45;
 export const SCRAPPERS: ReadonlySet<string> = new Set(["smallmouth-bass"]);
 export const SCRAPPER_TIRE = 0.8;
 /** Carp and salmon make one long run straight after the hook. */
+/** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
+export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);
+export const COVER_HOLD = 1.6;
+
 export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp", "salmon"]);
 /** How much longer that first run lasts than the carp's other runs. */
 export const FIRST_RUN_LONGER = 1.6;
@@ -304,6 +308,8 @@ export function makeFight(
   let walked = false;
   const roller = ROLLERS.has(species.id);
   const longRunner = LONG_RUNNERS.has(species.id);
+  const coverDiver = COVER_DIVERS.has(species.id);
+  const coverHold = coverDiver ? COVER_HOLD : 1;
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
   const scrapper = SCRAPPERS.has(species.id);
@@ -350,12 +356,12 @@ export function makeFight(
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
         if (weedy && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
-          weedUntil = nowMs + WEED_MS;
+          weedUntil = nowMs + WEED_MS * coverHold;
         }
         // At the dock it wraps the line round a piling instead.
         if (water === "pilings" && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
           sim.wrapped = true;
-          wrapUntil = nowMs + WRAP_MS;
+          wrapUntil = nowMs + WRAP_MS * coverHold;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
         if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll) {
@@ -385,6 +391,9 @@ export function makeFight(
         }
         const double = species.challenge === "sequence" && completedSurges % 2 === 1;
         nextAt = nowMs + (double ? range(160, 280) : range(pattern.calmMin, pattern.calmMax) * (1 + worn() * (SPENT_CALM - 1)));
+        // A bass buried in cover doesn't run again till it comes out.
+        if (coverDiver && sim.weeded) nextAt = Math.max(nextAt, weedUntil);
+        if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
       }
     }
 

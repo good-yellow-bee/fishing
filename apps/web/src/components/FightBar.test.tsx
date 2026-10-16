@@ -324,7 +324,7 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
@@ -338,6 +338,10 @@ describe("FightBar for screen readers", () => {
     expect(habit("smallmouth-bass")).toEqual([
       "Jumper: every second run is a leap, so let go when it comes up",
       "Scrapper: pound for pound it fights hardest, so it tires slowly",
+    ]);
+    expect(habit("largemouth-bass")).toEqual([
+      "Jumper: every second run is a leap, so let go when it comes up",
+      "Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there",
     ]);
     expect(habit("perch")).toEqual([]);
   });
