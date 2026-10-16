@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hookWindowMs, isPerfectCast, isSolidStrike, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
+import { hookWindowMs, isPerfectCast, isSolidStrike, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -52,5 +52,19 @@ describe("level 11 and 12 strike and cast help", () => {
     expect(wide.max - wide.min).toBeGreaterThan(narrow.max - narrow.min);
     expect(isPerfectCast(wide.max - 0.001, 1, 12)).toBe(true);
     expect(isPerfectCast(wide.max - 0.001, 1)).toBe(false);
+  });
+});
+
+describe("a solid strike in the wind", () => {
+  it("needs a quicker strike on a breezy day, and quicker still on a strong one", () => {
+    const ms = hookWindowMs(1);
+    expect(solidStrikeMs(ms, "breezy")).toBeCloseTo(solidStrikeMs(ms) * WIND_STRIKE.breezy);
+    expect(solidStrikeMs(ms, "strong")).toBeCloseTo(solidStrikeMs(ms) * WIND_STRIKE.strong);
+    expect(solidStrikeMs(ms, "strong")).toBeLessThan(solidStrikeMs(ms, "breezy"));
+  });
+
+  it("leaves a calm day's solid strike as it was", () => {
+    const ms = hookWindowMs(2);
+    expect(solidStrikeMs(ms)).toBeCloseTo(ms * 0.4);
   });
 });

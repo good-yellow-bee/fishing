@@ -189,9 +189,12 @@ export function hookWindowMs(accuracy: number, mercy = false, level = 1) {
 /** A strike in this first share of the hook window sets the hook solid. */
 export const SOLID_STRIKE_SHARE = 0.4;
 
-/** How quick a strike must be, in ms, to set the hook solid in a window this long. */
-export function solidStrikeMs(windowMs: number) {
-  return windowMs * SOLID_STRIKE_SHARE;
+/** On a breezy or strong day the wind's bow in the line soaks up the strike, so a solid hook needs a quicker one. */
+export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
+
+/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind. */
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE) {
+  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1);
 }
 
 /** True when the strike came quick enough on the bite to set the hook solid. */

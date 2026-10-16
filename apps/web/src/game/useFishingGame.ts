@@ -336,11 +336,17 @@ export function useFishingGame(
           ? t("{line}. Ease off when it runs.", { line })
           : solid
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
-            : t("Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.", {
-                time: seconds(strike.elapsedMs),
-                limit: seconds(strike.solidMs),
-                line,
-              }),
+            : fightWind(windRef.current)
+              ? t("Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.", {
+                  time: seconds(strike.elapsedMs),
+                  limit: seconds(strike.solidMs),
+                  line,
+                })
+              : t("Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.", {
+                  time: seconds(strike.elapsedMs),
+                  limit: seconds(strike.solidMs),
+                  line,
+                }),
       );
     }
   }, [resetToIdle]);
@@ -351,7 +357,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms) };
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current)) };
     fx.splash();
     fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile, strike);
