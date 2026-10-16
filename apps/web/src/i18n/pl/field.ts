@@ -77,6 +77,7 @@ export const PL_FIELD: PlBook = {
   "Save and log another": "Zapisz i dodaj kolejną",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
+  "{water}, right here.": "{water}, właśnie tutaj.",
   "Your own waters": "Twoje łowiska",
   "Your own waters, north up": "Twoje łowiska, północ u góry",
   "Not on a map yet, with no place noted:": "Jeszcze nie na mapie, bez zapisanego miejsca:",
