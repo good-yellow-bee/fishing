@@ -8,6 +8,7 @@ import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
+import { readDeletedFish } from "./deletedFish";
 import { downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
@@ -21,6 +22,12 @@ function newestAt(book: Logbook): string {
 function lostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set(file.catches.map((entry) => entry.id));
   return here.catches.filter((entry) => !kept.has(entry.id)).length;
+}
+
+/** The file without the fish deleted in this browser, so adding its new fish doesn't bring them back. */
+function withoutDeleted(file: FieldArchive): FieldArchive {
+  const deleted = readDeletedFish();
+  return { ...file, book: { ...file.book, catches: file.book.catches.filter((entry) => !deleted.has(entry.id)) } };
 }
 
 /** "12 fish, newest Oct 13", or "no fish". */
@@ -147,9 +154,10 @@ export function BookFile() {
   };
   const onAddNew = () => {
     if (!pending) return;
-    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, pending);
+    const file = withoutDeleted(pending);
+    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file);
     // The file's photos that didn't fit beside this book's own.
-    const leftOut = newFishIn(storedBook, pending.book).filter((entry) => pending.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
+    const leftOut = newFishIn(storedBook, file.book).filter((entry) => file.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
     load(next, true, leftOut);
   };
 
@@ -169,6 +177,10 @@ export function BookFile() {
     setNotice({ tone: "ok", text: t("The book from before the file is back.") });
     loadButton.current?.focus();
   };
+
+  const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
+  const addable = pending ? newFishIn(storedBook, withoutDeleted(pending).book).length : 0;
+  const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
 
   return (
     <footer className="sheet-foot">
@@ -274,17 +286,16 @@ export function BookFile() {
             )}{" "}
             {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
-            {lostOnLoad(storedBook, pending.book) > 0
-              ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lostOnLoad(storedBook, pending.book) })}`
-              : ""}
+            {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
+            {addable > 0 && kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>
-          {newFishIn(storedBook, pending.book).length > 0 && storedBook.catches.length > 0 ? (
+          {addable > 0 && storedBook.catches.length > 0 ? (
             // Two copies that each gained fish: keep this one and take the file's new ones.
             <button type="button" className="text-button" onClick={onAddNew}>
-              {t("Add only the new fish ({count})", { count: newFishIn(storedBook, pending.book).length })}
+              {t("Add only the new fish ({count})", { count: addable })}
             </button>
           ) : null}
           <button ref={keepButton} type="button" className="text-button" onClick={keepBook}>

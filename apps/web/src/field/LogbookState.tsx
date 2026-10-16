@@ -29,6 +29,7 @@ import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
+import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -152,6 +153,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       // Deletes are made from the entry's own page, before it navigates away.
       const before = { kind, book, photos, from: window.location.pathname };
       if (!commit(next)) return false;
+      // The sample takes the book's place on purpose; a deleted fish or water is kept out of later merges.
+      if (kind !== "sample") {
+        const kept = new Set(next.catches.map((entry) => entry.id));
+        noteDeletedFish(book.catches.filter((entry) => !kept.has(entry.id)).map((entry) => entry.id));
+      }
       setUndo(before);
       return true;
     };
@@ -245,6 +251,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!undo) return null;
         const result = persist(undo.book, undo.photos);
         setSaveError(result.ok ? null : result.message);
+        if (result.ok) forgetDeletedFish(undo.book.catches.map((entry) => entry.id));
         return result.ok ? undo.from : null;
       },
       saveError,
