@@ -1437,3 +1437,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR279~~ | ~~Rename or merge a lure from its catch search~~ (#619) | field | S |
 | ~~BR280~~ | ~~Audit 17 fixes: written units, repeat save-and-another, Polish rename~~ (#621) | field | S |
 | ~~BR281~~ | ~~Nearest water from the phone's location on the catch form~~ (#622) | field | S |
+| ~~BR282~~ | ~~News card for the catch form changes~~ (#624) | field | S |
