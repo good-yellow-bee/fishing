@@ -10,6 +10,8 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (notes.closeCall) parts.push(t("Close call"));
   if (notes.perfectCast) parts.push(t("Perfect cast"));
   if (notes.hookedSolid) parts.push(t("Hooked solid"));
+  // Kept on a hook that only just caught: worth telling, since the red would have pulled it out.
+  if (notes.lightHook) parts.push(t("Kept it on a light hook"));
   if (notes.secondTake) parts.push(t("On the second take"));
   if (notes.gotAway) parts.push(t("The one that got away"));
   if (notes.followedIn) parts.push(t("Followed your fish in"));

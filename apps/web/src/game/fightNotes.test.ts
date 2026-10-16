@@ -20,6 +20,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, easedShakes: 3 })).toBe("Eased off 3 head shakes");
     expect(fightNotesText({ perfectCast: false, hookedSolid: true, turnedRuns: 1, grabbed: "golden-shiner" })).toBe("Hooked solid · Took it off your shiner · Turned 1 run");
     expect(fightNotesText({ perfectCast: true, hookedSolid: true, turnedRuns: 0, secondTake: true })).toBe("Perfect cast · Hooked solid · On the second take");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, lightHook: true, turnedRuns: 1 })).toBe("Kept it on a light hook · Turned 1 run");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, followedIn: true })).toBe("Followed your fish in · Turned 1 run");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 65.2 })).toBe("Landed in 1 min 5 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "weeds" })).toBe("Turned 2 runs · Kept it out of the weeds");
@@ -36,6 +37,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 75 })).toBe("Wyholowana w 1 min 15 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, bowedLeaps: 5 })).toBe("5 przetrwanych skoków");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, secondTake: true })).toBe("Przy drugim braniu");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, lightHook: true, turnedRuns: 0 })).toBe("Utrzymana na płytko wbitym haczyku");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, grabbed: "golden-shiner" })).toBe("Wziął twojego złotawca");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, closeCall: true })).toBe("O włos");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, followedIn: true })).toBe("Odprowadziła twoją rybę");
