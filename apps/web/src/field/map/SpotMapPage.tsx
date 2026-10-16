@@ -303,10 +303,10 @@ export function SpotMapPage() {
           {unpinned.map((spot, index) => (
             <span key={spot.id}>
               {index > 0 ? ", " : null}
-              <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              <Link to={`/spots/${spot.id}/edit#place`}>{spot.name}</Link>
             </span>
           ))}
-          .
+          . {t("Open one to note where it is.")}
         </p>
       ) : null}
     </div>
