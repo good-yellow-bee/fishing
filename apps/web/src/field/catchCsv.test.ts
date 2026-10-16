@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { sampleLogbook, type Logbook } from "@stillwater/shared";
 import { reloadLang, setLang, setUnits } from "../i18n";
-import { catchesCsv, cell } from "./catchCsv";
+import { catchesCsv, cell, tripsCsv } from "./catchCsv";
 
 function bookWith(note: string): Logbook {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -41,5 +41,26 @@ describe("a spreadsheet cell", () => {
     expect(cell("-3", ",")).toBe("-3");
     expect(cell("-1,5", ";")).toBe("-1,5");
     expect(cell("+1, nice", ",")).toBe(`"'+1, nice"`);
+  });
+});
+
+describe("the outings as a spreadsheet", () => {
+  afterEach(() => {
+    setLang("en");
+    reloadLang();
+  });
+
+  it("writes one row per outing, newest first, with its fish and its lost and missed counts", () => {
+    const book = sampleLogbook(new Date(2026, 9, 1));
+    const [first] = book.trips;
+    const counted = { ...book, trips: book.trips.map((trip) => (trip.id === first!.id ? { ...trip, lost: 2, missed: 3 } : trip)) };
+    const lines = tripsCsv(counted).replace(/^\ufeff/, "").trimEnd().split("\r\n");
+    expect(lines[0]).toBe("Date,Trip,Water,Fish,Lost fish,Missed strikes,Note");
+    expect(lines).toHaveLength(book.trips.length + 1);
+    const dates = lines.slice(1).map((line) => line.slice(0, 10));
+    expect(dates).toEqual([...dates].sort().reverse());
+    const row = lines.find((line) => line.startsWith(`${first!.date},`))!;
+    const fish = book.catches.filter((entry) => entry.tripId === first!.id).length;
+    expect(row).toContain(`,${fish},2,3,`);
   });
 });

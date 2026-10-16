@@ -59,6 +59,22 @@ export function catchesCsv(book: Logbook): string {
       noteText(entry.note),
     ];
   });
-  // A byte-order mark tells spreadsheet programs the file is UTF-8, so Polish letters survive.
-  return "﻿" + [header, ...rows].map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
+  return sheet([header, ...rows], separator);
+}
+
+/** The rows as a file: a byte-order mark tells spreadsheet programs it is UTF-8, so Polish letters survive. */
+function sheet(rows: string[][], separator: string): string {
+  return "﻿" + rows.map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
+}
+
+/** The outings as a spreadsheet file, newest first: the day, the water, the fish landed, and the fish lost and strikes missed. */
+export function tripsCsv(book: Logbook): string {
+  const separator = getLang() === "pl" ? ";" : ",";
+  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Lost fish"), t("Missed strikes"), t("Note")];
+  const fish = new Map<string, number>();
+  for (const entry of book.catches) if (entry.tripId) fish.set(entry.tripId, (fish.get(entry.tripId) ?? 0) + 1);
+  const rows = [...book.trips]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map((trip) => [trip.date, trip.title, spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
+  return sheet([header, ...rows], separator);
 }
