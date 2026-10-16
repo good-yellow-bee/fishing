@@ -1356,3 +1356,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR222~~ | ~~Audit 9 fixes: map pins, load warning and undo, tackle focus~~ (#537) | field | S |
 | ~~BR223~~ | ~~Heaviest and longest in summaries; exact month links; steady search count~~ (#539) | field | S |
 | ~~BR224~~ | ~~Add just a file's new fish; GEO in calendar files~~ (#540) | field | S |
+| ~~BR225~~ | ~~Length and weight on species pages; suggested other measure~~ (#542) | field | S |
