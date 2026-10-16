@@ -1116,7 +1116,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT71~~ | ~~News card (2026-10-16f) covers GT70: a pike rolls on the line at the net~~ (#527) | news | S |
 | ~~GT72~~ | ~~On the lake a rolling pike turns over twice about its own length at the surface, and the boat doesn't swing for a roll, so the scene shows the roll the fight card calls~~ (#530) | feel | S |
 | ~~GT73~~ | ~~On a leap or a roll the fight card's steering line says it can't be turned and to let go, instead of showing the turn-a-run hint~~ (#531) | fight | S |
-| GT74 | News card (2026-10-16g) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned | news | S |
+| GT74 | News card (2026-10-16h) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned | news | S |
 
 ## Risks / open questions for the owner
 
@@ -1349,3 +1349,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR217~~ | ~~Keep unreadable tackle lists; refuse duplicate pieces and ids~~ (#528) | field | S |
 | ~~BR218~~ | ~~Refuse impossible sizes in a book file; map spots read once~~ (#529) | field | S |
 | ~~BR219~~ | ~~Copy the last outing's bag; undo loading a book file~~ (#532) | field | S |
+| ~~BR220~~ | ~~News card: both measures, copying a bag, undoing a load~~ (#533) | field | S |

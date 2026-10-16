@@ -467,6 +467,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
   "On the lake you can now watch a pike turn over on the line when it rolls at the net. When a fish leaps or rolls, the fight card says it can't be turned, so just let go.":
     "Na jeziorze widać teraz, jak szczupak przewraca się na żyłce, gdy kręci się przy podbieraku. Kiedy ryba skacze albo się kręci, karta walki mówi, że nie da się jej zawrócić, więc po prostu odpuść.",
+  "In the field log a fish can carry both a length and a weight, and both count for the bests. An empty tackle list can copy the last outing's bag, and loading a book file says how many fish each copy holds and can be undone.":
+    "W dzienniku ryba może mieć jednocześnie długość i wagę, a obie liczą się do rekordów. Pusta lista sprzętu może skopiować torbę z ostatniej wyprawy, a wczytanie pliku z dziennikiem mówi, ile ryb ma każda kopia, i da się je cofnąć.",
   "A pike, tiger muskie or ghost pike doesn't make a last run at the net: it rolls on the line. You can't turn a roll, so let go when the fight card calls it, or a tight line goes into the red.":
     "Szczupak, tygrysi muskie czy szczupak widmo nie robi przy podbieraku ostatniego odjazdu: kręci się na żyłce. Obrotu nie da się zawrócić, więc odpuść, gdy karta walki o nim mówi, bo napięta żyłka wejdzie w czerwień.",
   "You can see the wind on a fight now: a slack line bows downwind between runs. On a windy day the bow soaks up the strike too, so a solid hook needs a quicker one.":
