@@ -1105,7 +1105,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT60~~ | ~~On the lake, the inlet's current carries a resting fish 0.5 m off to the side while the angler isn't reeling, and it swings back in once reeled, so the scene shows the current the fight card names~~ (#499) | fish | S |
 | ~~GT61~~ | ~~News card (2026-10-16a) covers GT59 and GT60: the drop-off dive and the inlet drift on the lake~~ (#502) | news | S |
 | ~~GT62~~ | ~~Out on the boat it swings to follow a run, so a run takes out 35% less line than from the bank; the fight card says so~~ (#504) | fight | S |
-| GT63 | At anchor the rowboat swings round about 13° toward a run and settles back square between runs, so the scene shows the boat following the fish | fish | S |
+| ~~GT63~~ | ~~At anchor the rowboat swings round about 13° toward a run and settles back square between runs, so the scene shows the boat following the fish~~ (#506) | fish | S |
+| GT64 | News card (2026-10-16b) covers GT62 and GT63: the boat follows a run and takes less line | news | S |
 
 ## Risks / open questions for the owner
 
