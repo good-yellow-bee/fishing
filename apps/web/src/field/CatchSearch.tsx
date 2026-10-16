@@ -59,21 +59,31 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
   return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
 }
 
-/** True when the part of the day the fish came at ("Dawn", "Wieczór") starts with what was typed, from three letters up. */
+/** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
+const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> = {
+  dawn: ["sunrise", "first light", "daybreak", "świt", "wschód", "brzask"],
+  midday: ["noon", "południe"],
+  evening: ["dusk", "sunset", "zmierzch", "zmrok", "zachód"],
+  night: ["dark", "noc"],
+};
+
+/** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */
 function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
   const at = new Date(entry.caughtAt);
   if (Number.isNaN(at.getTime())) return false;
   const id = biteTimeOf(at.getHours());
   const band = BITE_TIMES.find((row) => row.id === id)!;
-  return normalize(t(band.label)).startsWith(want);
+  return [t(band.label), ...(TIME_WORDS[id] ?? [])].some((word) => normalize(word).startsWith(want));
 }
 
-/** True when the week of the moon the fish came in ("Waxing moon", "Near the full moon") starts with what was typed, from three letters up. */
+/** True when the week of the moon the fish came in ("Waxing moon", "Near the full moon") has a word starting what was typed ("full moon"), from three letters up. */
 function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
   const at = new Date(entry.caughtAt);
-  return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
+  if (Number.isNaN(at.getTime())) return false;
+  const label = normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)]));
+  return label.startsWith(want) || label.includes(` ${want}`);
 }
 
 /** What an exact term compares for one fish, in the book's English: its kind, lure, water, sky, wind, time of day, season or moon. */
