@@ -23,6 +23,7 @@ import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
+import { outingAverage } from "./outingAverage";
 import { EditDelete } from "./EditDelete";
 import { messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -97,6 +98,7 @@ export function SpotPage() {
   const trips = tripsForSpot(book, spot.id);
   const catches = catchesForSpot(book, spot.id);
   const fishByTrip = fishCountsByTrip({ ...book, catches });
+  const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
 
   return (
     <div className="sheet">
@@ -137,6 +139,7 @@ export function SpotPage() {
         <h2>{t("Outings")}</h2>
         <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>
       </div>
+      {average ? <p className="meta">{average}</p> : null}
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
