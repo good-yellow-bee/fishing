@@ -27,3 +27,22 @@ export function sizeMatches(measure: Measure, query: SizeQuery): boolean {
   const amount = measure.kind === "length" ? measure.inches : measure.pounds;
   return query.over ? amount >= query.amount : amount <= query.amount;
 }
+
+export type TempQuery = { over: boolean; fahrenheit: number };
+
+/** ">60°F", "<15 °C", ">= 58 f": a water-temperature bound in °F, or null when the text isn't one. */
+export function parseTempQuery(text: string): TempQuery | null {
+  const found = /^([<>])=?\s*(-?\d+(?:[.,]\d+)?)\s*°?\s*([cf])$/i.exec(text.trim());
+  if (!found) return null;
+  const value = Number(found[2]!.replace(",", "."));
+  return { over: found[1] === ">", fahrenheit: found[3]!.toLowerCase() === "c" ? (value * 9) / 5 + 32 : value };
+}
+
+/**
+ * True when the fish's water lands on the asked side of the bound: from it up for ">", below it for "<", so the
+ * temperature bands on Bests (50 up to 60, and so on) open the same fish they count.
+ */
+export function tempMatches(waterTempF: number | undefined, query: TempQuery): boolean {
+  if (waterTempF === undefined || !Number.isFinite(waterTempF)) return false;
+  return query.over ? waterTempF >= query.fahrenheit - 1e-9 : waterTempF < query.fahrenheit - 1e-9;
+}
