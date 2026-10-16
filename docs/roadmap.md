@@ -1538,3 +1538,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR341~~ | ~~News card 16zv (#702-#717)~~ (#718) | field | S |
 | ~~BR342~~ | ~~Review 26 fixes~~ (#719) | field | S |
 | ~~BR343~~ | ~~Accent-blind search~~ (#723) | field | S |
+| ~~BR344~~ | ~~Empty months, size+ search, wrong-measure hint~~ (#724) | field | S |
