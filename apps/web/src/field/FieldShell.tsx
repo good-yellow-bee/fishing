@@ -95,6 +95,21 @@ export function FieldShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="field" data-theme={theme === "device" ? undefined : theme}>
+      {/* The first stop for the keyboard: past the logo and the seven links, straight to the page. */}
+      <a
+        className="skip-link"
+        href="#field-main"
+        onClick={(event) => {
+          event.preventDefault();
+          const main = document.getElementById("field-main");
+          const heading = main?.querySelector<HTMLElement>("[data-focus-target]") ?? main?.querySelector<HTMLElement>("h1") ?? main;
+          if (!heading) return;
+          if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+          heading.focus();
+        }}
+      >
+        {t("Skip to the page")}
+      </a>
       <aside className="field-rail">
         <NavLink to="/" className="field-brand" end>
           <FishMark />
@@ -123,7 +138,9 @@ export function FieldShell({ children }: { children: ReactNode }) {
             {t("Log a catch")}
           </NavLink>
         </header>
-        <main className="field-main">{children}</main>
+        <main className="field-main" id="field-main">
+          {children}
+        </main>
         <SavedNote />
         <UndoBar />
       </div>

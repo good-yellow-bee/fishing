@@ -14,6 +14,13 @@ export function isSampleCatch(id: string) {
   return SAMPLE_IDS.has(id);
 }
 
+const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
+
+/** Whether any of the sample's invented waters is still in the book. */
+export function hasSampleWaters(book: Logbook) {
+  return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));
+}
+
 /** The player's own catches; the sample week's fish don't need a copy. */
 export function ownCatches(book: Logbook) {
   return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id)).length;

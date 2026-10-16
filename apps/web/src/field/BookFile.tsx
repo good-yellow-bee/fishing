@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "r
 import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, ownCatches, readCopiedAt, readCopyMark, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
@@ -237,7 +237,8 @@ export function BookFile() {
 
   return (
     <footer className="sheet-foot">
-      <p>{t("Sample waters are invented. This book stays in this browser.")}</p>
+      {/* Said only while the sample's invented waters are still in the book. */}
+      <p>{hasSampleWaters(storedBook) ? t("Sample waters are invented. This book stays in this browser.") : t("This book stays in this browser.")}</p>
       {nudge ? (
         <p className="copy-nudge">
           {nudge.kind === "never"
