@@ -16,6 +16,8 @@ import {
   fightFishPose,
   LEAP_HEIGHT,
   leapLift,
+  rollTwist,
+  ROLL_TURNS,
   fightLineEnd,
   type FightFishPose,
 } from "./fightFish.ts";
@@ -243,5 +245,16 @@ describe("leapLift", () => {
     expect(leapLift(0.1).pitch).toBeGreaterThan(0);
     expect(leapLift(0.9).pitch).toBeLessThan(0);
     expect(leapLift(2)).toEqual(leapLift(1));
+  });
+});
+
+describe("rollTwist", () => {
+  it("turns the fish over ROLL_TURNS times, easing in and out", () => {
+    expect(rollTwist(0)).toBe(0);
+    expect(rollTwist(1)).toBeCloseTo(ROLL_TURNS * Math.PI * 2);
+    expect(rollTwist(0.5)).toBeCloseTo(ROLL_TURNS * Math.PI);
+    expect(rollTwist(0.1)).toBeLessThan(0.1 * ROLL_TURNS * Math.PI * 2);
+    expect(rollTwist(-1)).toBe(0);
+    expect(rollTwist(2)).toEqual(rollTwist(1));
   });
 });

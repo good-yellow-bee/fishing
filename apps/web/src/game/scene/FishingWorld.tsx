@@ -22,7 +22,7 @@ import {
   type SpotId,
   type StanceId,
 } from "@stillwater/shared";
-import { JUMP_MS, type FightSim } from "../fight";
+import { JUMP_MS, ROLL_MS, type FightSim } from "../fight";
 import { fx } from "../fx";
 import { snowing } from "./capSnow";
 import type { Hotspot } from "../hotspot";
@@ -95,7 +95,7 @@ import { PHOTO_LIMITS, lookedOffset, lookIdle, takeLook } from "./photoLook";
 import { CAST_RELEASE_SEC, castAlong, castFlightSeconds, castLoft, castTrailSag } from "./castMotion";
 import { MISS_DRIPS, missBobberLift, missDrip, missLineSag, missView, resetMissView } from "./missMotion";
 import { RISE_SCALE, riseMode, risePose, takePose, turnPose } from "./riseMotion";
-import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd, leapLift } from "./fightFish";
+import { FIGHT_FISH_SCALE, FIGHT_WAG, fightFishMode, fightFishPose, fightLineEnd, leapLift, rollTwist } from "./fightFish";
 import { WAIT_REST_SAG, applyWaitShift, lureIsWaiting, nibbleBob, nibbleRingGap, waitLineSag, waitNod, waitView, resetWaitView } from "./waitMotion";
 import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld";
 import { clearDistance, easePull } from "./cameraClear";
@@ -752,7 +752,7 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
     }
 
     // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
-    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true) : 0;
+    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true || sim.current?.roll === true) : 0;
     boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
@@ -1280,6 +1280,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
   const bobber = useRef<THREE.Group>(null);
   const hooked = useRef<THREE.Group>(null);
   const leapStart = useRef<number | null>(null);
+  const rollStart = useRef<number | null>(null);
   const sitRing = useRef<THREE.Mesh>(null);
   const lure = useRef<THREE.Group>(null);
   const splash = useRef<THREE.Group>(null);
@@ -1613,6 +1614,13 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
       leapY = leap.y;
       hooked.current.position.y += leap.y;
       hooked.current.rotation.x -= leap.pitch;
+    }
+    // A roll at the net: the pike turns over twice about its own length, wrapping the line.
+    const rolling = phase === "fight" && sim.current?.roll === true && sim.current.surge === 2;
+    if (!rolling) rollStart.current = null;
+    else if (rollStart.current === null) rollStart.current = t;
+    if (rolling && hooked.current?.visible && rollStart.current !== null) {
+      hooked.current.rotation.z = rollTwist((t - rollStart.current) / (ROLL_MS / 1000));
     }
     const meet = hookedPose?.show ? fightLineEnd(phase, { ...hookedPose, mouthY: hookedPose.mouthY + leapY }, target) : null;
     // Cast trail keeps its own sag. A fight run or pump only lifts the belly.
