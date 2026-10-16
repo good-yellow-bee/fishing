@@ -460,6 +460,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "On a windy day the wind bellies a slack line, so line drifts out faster while you rest between runs. The fight card says when it's breezy or strong.":
+    "W wietrzny dzień wiatr wydyma luźną linkę, więc między odjazdami szybciej odpływa. Karta holu mówi, kiedy jest wietrznie albo wieje mocno.",
   "In the field log, species pages show how your best of each kind grew and count fish by wind and water temperature. The catch search finds words from notes, a water temperature (“>60°F”) and a day (“2026-10-12”), and every count opens exactly the fish it counted.":
     "W dzienniku połowów strony gatunków pokazują, jak rósł rekord, i liczą ryby według wiatru i temperatury wody. Wyszukiwarka znajduje słowa z notatek, temperaturę wody („>15°C”) i dzień („2026-10-12”), a każda liczba otwiera dokładnie te ryby, które policzyła.",
   "Out on the rowboat, the boat swings round to follow a run, so a run takes out less line than it would from the bank.":
