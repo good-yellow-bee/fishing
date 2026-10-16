@@ -102,6 +102,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       <i data-testid="second-take">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.secondTake) : ""}</i>
       <i data-testid="grabbed">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.grabbed) : ""}</i>
       <i data-testid="got-away">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.gotAway) : ""}</i>
+      <i data-testid="lurking">{String(game.lurking)}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
@@ -294,11 +295,13 @@ describe("useFishingGame lost fight", () => {
     expect(phase()).toBe("idle:broke");
     expect(hint()).toContain("It's still about: cast here again.");
     const lost = vi.mocked(castForGotAway).mock.calls.length;
+    expect(container!.querySelector("[data-testid=lurking]")?.textContent).toBe("false");
     act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));
     step.mockReturnValueOnce("fighting");
     castAndFight(surface, 2);
     const waiting = vi.mocked(castForGotAway).mock.calls[lost]?.[0];
+    expect(container!.querySelector("[data-testid=lurking]")?.textContent).toBe("true");
     expect(waiting).toMatchObject({ spot: "dock", species: { id: "pike" } });
     expect(container!.querySelector("[data-testid=fight]")?.textContent).toBe(`pike|${waiting!.weight}`);
     expect(hint()).toContain("It's the one that got away!");
