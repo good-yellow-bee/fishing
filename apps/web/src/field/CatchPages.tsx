@@ -213,6 +213,8 @@ function CatchForm() {
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
   // The outing a change of water took the fish off, until the outing is picked again.
   const [leftTrip, setLeftTrip] = useState("");
+  // Set while a change of water is what took the fish off its own outing, so going back to that water can put it back.
+  const [waterTookTrip, setWaterTookTrip] = useState(false);
   const [caughtAt, setCaughtAt] = useState(() =>
     existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
   );
@@ -335,8 +337,9 @@ function CatchForm() {
     setSpotId(nextSpot);
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
     // Back on the fish's own water: the outing it was on comes back with it.
-    if (existing?.tripId && nextSpot === existing.spotId && tripById(book, existing.tripId)) {
+    if (existing?.tripId && nextSpot === existing.spotId && waterTookTrip && tripById(book, existing.tripId)) {
       setLeftTrip("");
+      setWaterTookTrip(false);
       setTripId(existing.tripId);
       setTripPicked(true);
       return;
@@ -344,6 +347,7 @@ function CatchForm() {
     const nextTrip = existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? "");
     // Said under the water, so an outing doesn't quietly go from the fish; kept while no outing takes its place.
     setLeftTrip(tripId ? (nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "") : nextTrip ? "" : leftTrip);
+    if (existing && tripId === existing.tripId) setWaterTookTrip(true);
     setTripId(nextTrip);
     setTripPicked(Boolean(existing));
   };
@@ -362,6 +366,7 @@ function CatchForm() {
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
     setLeftTrip("");
+    setWaterTookTrip(false);
     setTripPicked(true);
     if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
   };
