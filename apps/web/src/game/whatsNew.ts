@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16o";
+export const NEWS_ID = "2026-10-16p";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Lose a fish in a fight and it spooks that bank: the next cast there waits longer for a bite, and any school there scatters. Try another bank, or give it a cast.",
   "A golden shiner is a bait thief: now and then it nibbles the bait clean off the hook instead of biting. When that happens, just cast again.",
   "A walleye takes the bait lightly: the float only slides under, with no jolt. The call says so, and a walleye holds on a little longer, so watch closely and strike.",
   "In the field log, a water can keep its place on the map, and a book file can add only the fish this browser doesn't have. The Photos page shows how full the photo room is, and last year's fish on the home page open every fish from that day.",
