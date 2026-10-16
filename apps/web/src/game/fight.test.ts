@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -607,6 +607,31 @@ describe("the inlet's current", () => {
     expect(fightWater("dropoff")).toBe("deep");
     expect(fightWater("point")).toBe("rocks");
     expect(fightWater("dock")).toBe("open");
+    expect(fightWater("open")).toBe("boat");
+  });
+});
+
+describe("a run from the boat", () => {
+  const runLine = (water: "open" | "boat") => {
+    const f = makeFight(fish("pike"), 6, 3, () => 0, 1, water);
+    let now = 0;
+    while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
+    const before = f.sim.line;
+    f.step((now += 50), 0.2, false);
+    return { run: f.sim.line - before };
+  };
+
+  it("takes out less line, since the boat swings to follow it", () => {
+    expect(runLine("boat").run).toBeGreaterThan(0);
+    expect(runLine("boat").run).toBeCloseTo(runLine("open").run * BOAT_RUN);
+  });
+
+  it("leaves line drifting between runs as it is from the bank", () => {
+    const open = makeFight(fish("pike"), 6, 3, () => 0, 1, "open");
+    const boat = makeFight(fish("pike"), 6, 3, () => 0, 1, "boat");
+    open.step(0, 0.5, false);
+    boat.step(0, 0.5, false);
+    expect(boat.sim.line).toBeCloseTo(open.sim.line);
   });
 });
 

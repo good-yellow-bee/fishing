@@ -122,10 +122,12 @@ export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
 /** Off the point a run left unturned drags the line over the rocks: reeling against it loads the line this much harder. */
 export const ROCK_PULL = 1.2;
-export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks";
+/** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
+export const BOAT_RUN = 0.65;
+export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat";
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
-  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : "open";
+  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : spot === "open" ? "boat" : "open";
 }
 
 export function staminaState(stamina: number): StaminaState {
@@ -211,7 +213,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; out on the boat runs take less line. */
   water: FightWater = "open",
 ): FightRuntime {
   const weedy = water === "weeds";
@@ -219,7 +221,7 @@ export function makeFight(
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
   const driftCalm = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT : 1);
-  const driftSurge = driftCalm * (species.challenge === "tension" ? 1.35 : 2);
+  const driftSurge = driftCalm * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
   const tensionUpCalm = Math.max(
     0.12,
     0.2 + t * 0.12 - (strength - 1) * 0.015 + (species.challenge === "tension" ? 0.08 : 0),
