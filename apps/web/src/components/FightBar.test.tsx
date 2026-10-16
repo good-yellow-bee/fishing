@@ -328,13 +328,14 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Bottom-sticker|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Circler|Bottom-sticker|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running"]);
     expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
     expect(habit("crappie")).toEqual(["Soft mouth: reel in the red and the hook tears out"]);
+    expect(habit("bluegill")).toEqual(["Circler: it turns its flat side and circles, so it comes in slowly till it tires"]);
     expect(habit("salmon")).toEqual([
       "Jumper: every second run is a leap, so let go when it comes up",
       "Long runner: the first run is the long one, so let it go",

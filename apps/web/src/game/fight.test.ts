@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { BREACHERS, BROADSIDE_REEL, BROADSIDERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -1134,6 +1134,25 @@ describe("a smallmouth bass, pound for pound", () => {
     const large = 1 - staminaAfter("largemouth-bass");
     expect(small).toBeLessThan(large);
     expect(small / large).toBeGreaterThanOrEqual(SCRAPPER_TIRE - 0.15);
+  });
+});
+
+describe("a bluegill turning broadside", () => {
+  /** Reels the first calm for a second from the start and returns the line taken in. */
+  const lineIn = (id: string) => {
+    const runtime = makeFight(fish(id), 0.5, 3, () => 0.5);
+    const start = runtime.sim.line;
+    for (let now = 0; now <= 1000; now += 50) runtime.step(now, 0.05, true);
+    return { gained: start - runtime.sim.line, fresh: runtime.sim.stamina >= 0.6 };
+  };
+
+  it("comes in slower than a perch while it's fresh", () => {
+    expect(BROADSIDERS.has("bluegill")).toBe(true);
+    const bluegill = lineIn("bluegill");
+    const perch = lineIn("perch");
+    expect(bluegill.fresh).toBe(true);
+    expect(bluegill.gained).toBeLessThan(perch.gained);
+    expect(bluegill.gained / perch.gained).toBeLessThan(BROADSIDE_REEL + 0.05);
   });
 });
 

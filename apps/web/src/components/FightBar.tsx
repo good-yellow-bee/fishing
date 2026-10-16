@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { BREACHERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, STICKERS, TAIL_WALKERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { BREACHERS, BROADSIDERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, STICKERS, TAIL_WALKERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -247,6 +247,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {ROLLERS.has(fight.species.id) && <p className="fight-water">{t("Roller: at the net it rolls on the line instead of running")}</p>}
           {TAIL_WALKERS.has(fight.species.id) && <p className="fight-water">{t("Tail-walker: its first leap dances across the top, so keep bowing till it's down")}</p>}
           {SCRAPPERS.has(fight.species.id) && <p className="fight-water">{t("Scrapper: pound for pound it fights hardest, so it tires slowly")}</p>}
+          {BROADSIDERS.has(fight.species.id) && <p className="fight-water">{t("Circler: it turns its flat side and circles, so it comes in slowly till it tires")}</p>}
           {HEAD_SHAKERS.has(fight.species.id) && <p className="fight-water">{t("Head-shaker: between runs it shakes its head, so ease off a moment when it does")}</p>}
           {STICKERS.has(fight.species.id) && <p className="fight-water">{t("Bottom-sticker: when it sulks it takes two pumps to lift, not one")}</p>}
           {DARTERS.has(fight.species.id) && <p className="fight-water">{t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it")}</p>}
