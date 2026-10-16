@@ -1512,3 +1512,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR328~~ | ~~Find an outing; calendar blanks open outings~~ (#693) | field | S |
 | ~~BR329~~ | ~~Fish time against sunrise and sunset~~ (#695) | field | S |
 | ~~BR330~~ | ~~Review 24 fixes~~ (#697) | field | S |
+| ~~BR331~~ | ~~News card 16zp~~ (#699) | field | S |
