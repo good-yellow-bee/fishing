@@ -14,6 +14,7 @@ import { findWithLink } from "../findLinks";
 import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
+import { SeasonRecapBox } from "./SeasonRecap";
 import { dayMarks } from "./dayMarks";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
@@ -139,6 +140,7 @@ export function BestsPage() {
           ))}
         </p>
       ) : null}
+      {year ? <SeasonRecapBox book={whole} year={year} today={today} /> : null}
 
       <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>
