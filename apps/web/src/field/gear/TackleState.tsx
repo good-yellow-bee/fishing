@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  itemsForTrip,
   parseTackleLabel,
   sampleTackle,
   withPacked,
@@ -17,6 +18,8 @@ type TackleApi = {
   add: (tripId: string, label: string) => string | null;
   remove: (id: string) => void;
   unpackTrip: (tripId: string) => void;
+  /** Puts another outing's list on this one, everything still to pack. */
+  copyTrip: (fromTripId: string, toTripId: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
 };
 
@@ -77,6 +80,12 @@ export function TackleProvider({ children }: { children: ReactNode }) {
       },
       unpackTrip: (tripId) => {
         setItems((current) => withTripUnpacked(current, tripId));
+      },
+      copyTrip: (fromTripId, toTripId) => {
+        setItems((current) => [
+          ...current,
+          ...itemsForTrip(current, fromTripId).map((item) => ({ id: localId(), tripId: toTripId, label: item.label, packed: false })),
+        ]);
       },
       replaceTackle: (next) => setItems(next),
     };

@@ -1,5 +1,5 @@
 import { useId, useState, type FormEvent } from "react";
-import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry } from "@stillwater/shared";
+import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, messageText } from "../format";
 import { useTackle } from "./TackleState";
@@ -10,25 +10,37 @@ function pieceKey(label: string): string {
   return label.trim().toLowerCase().replace(/s$/, "");
 }
 
+/** The outing whose bag this one most likely repeats: the latest with a list, on or before this one's day when there is one. */
+function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
+  const listed = new Set(items.map((item) => item.tripId));
+  const day = trips.find((trip) => trip.id === tripId)?.date ?? "9999-12-31";
+  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id)).sort((a, b) => b.date.localeCompare(a.date));
+  return others.find((trip) => trip.date <= day) ?? others[0] ?? null;
+}
+
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
 /** `suggest` offers lures to add in one tap (those already on the list are left out). */
 /** `caught` is the outing's fish: a piece named like the lure that took some says how many. */
+/** `trips` is the book's outings: an empty list offers the bag of the last one that had a list. */
 export function TackleList({
   tripId,
   heading,
   name,
   suggest = [],
   caught = [],
+  trips = [],
 }: {
   tripId: string;
   heading?: string;
   name?: string;
   suggest?: readonly string[];
   caught?: readonly CatchEntry[];
+  trips?: readonly Trip[];
 }) {
   const t = useT();
-  const { items, toggle, add, remove, unpackTrip } = useTackle();
+  const { items, toggle, add, remove, unpackTrip, copyTrip } = useTackle();
   const rows = itemsForTrip(items, tripId);
+  const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
   const packed = packedCount(rows);
   const onList = new Set(rows.map((item) => item.label.trim().toLowerCase()));
   const missing = suggest.filter((lure) => !onList.has(lure.trim().toLowerCase()));
@@ -80,7 +92,17 @@ export function TackleList({
         </p>
       )}
       {rows.length === 0 ? (
-        <p className="empty">{t("Nothing on this list yet.")}</p>
+        <p className="empty">
+          {t("Nothing on this list yet.")}
+          {lastBag ? (
+            <>
+              {" "}
+              <button type="button" className="text-button" onClick={() => copyTrip(lastBag.id, tripId)}>
+                {t("Copy the list from {trip}", { trip: lastBag.title })}
+              </button>
+            </>
+          ) : null}
+        </p>
       ) : (
         <ul className="tackle-list">
           {rows.map((item) => (
