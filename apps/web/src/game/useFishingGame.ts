@@ -748,6 +748,7 @@ export function useFishingGame(
     let wasWeeded = false;
     let wasWrapped = false;
     let wasShaking = false;
+    let wasLifting = false;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
@@ -817,6 +818,12 @@ export function useFishingGame(
             fx.haptic("headShake");
           }
           wasShaking = !!sim.shake;
+          // A stuck catfish gives a little on the first pump: one deep thud.
+          if (sim.lifting && !wasLifting) {
+            fx.lift();
+            fx.haptic("lift");
+          }
+          wasLifting = !!sim.lifting;
           // Reeling against a run off the point grates the line over the rocks.
           if (reeling && sim.rocky && now - lastScrapeFx > 220) {
             fx.scrape();

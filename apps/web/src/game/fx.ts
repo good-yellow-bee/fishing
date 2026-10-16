@@ -563,6 +563,7 @@ export const HAPTICS = {
   scrape: [12, 30, 12],
   weeds: [25, 20, 25],
   headShake: [15, 25, 15, 25, 15],
+  lift: [35],
 } as const;
 
 export type HapticBeat = keyof typeof HAPTICS;
@@ -578,6 +579,7 @@ export const RUMBLES: Record<HapticBeat, { ms: number; strong: number; weak: num
   scrape: { ms: 70, strong: 0.15, weak: 0.55 },
   weeds: { ms: 120, strong: 0.25, weak: 0.3 },
   headShake: { ms: 150, strong: 0.2, weak: 0.6 },
+  lift: { ms: 120, strong: 0.45, weak: 0.15 },
 };
 
 type RumblePad = { connected?: boolean; vibrationActuator?: { playEffect?: (type: string, params: object) => Promise<unknown> } | null };
@@ -766,6 +768,11 @@ export const fx = {
   headShake() {
     if (!this.enabled) return;
     for (const when of [0, 0.1, 0.2]) tone("sine", 150, 110, 0.06, 0.025, when);
+  },
+  /** A stuck catfish giving a little on the first pump: one deep, rising thud. */
+  lift() {
+    if (!this.enabled) return;
+    tone("sine", 90, 140, 0.18, 0.04);
   },
   surge() {
     if (!this.enabled) return;

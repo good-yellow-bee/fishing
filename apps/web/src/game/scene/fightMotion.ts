@@ -300,6 +300,8 @@ export function fishSideMeters(surge: FightSurge, runSide: number, worn = 0) {
 
 /** How deep a sulking bottom feeder digs in, well under its calm depth. */
 export const SULK_DEPTH = 0.68;
+/** A catfish pumped once comes this far up off the bottom, still under its calm depth, until the second pump lifts it. */
+export const LIFT_DEPTH = 0.55;
 /** How far the inlet's current carries a resting fish sideways, downstream, while the angler isn't reeling. */
 export const CURRENT_SIDE = 0.5;
 /** How far a slack fight line bows downwind, per meter a second of the day's drift, and at most. */
@@ -318,12 +320,12 @@ export const DIVE_DEPTH = 0.6;
  * Meters under the surface. The calm depth covers the body (about 0.31m
  * at fight scale). A run lifts the back out of the water.
  */
-export function fishDepthMeters(surge: FightSurge, worn = 0, sulk = false, diving = false) {
+export function fishDepthMeters(surge: FightSurge, worn = 0, sulk = false, diving = false, lifting = false) {
   // At the drop-off a run heads down the ledge instead of thrashing at the top.
   if (surge === 2) return diving ? DIVE_DEPTH : 0.04;
   if (surge === 1) return 0.22;
   // A sulking fish goes down to the bottom and stays there until it is pumped up.
-  if (sulk) return SULK_DEPTH;
+  if (sulk) return lifting ? LIFT_DEPTH : SULK_DEPTH;
   // A tiring fish comes up: played out, it rolls just under the surface.
   return 0.42 - clamp01(worn) * (0.42 - WORN_CALM_DEPTH);
 }
