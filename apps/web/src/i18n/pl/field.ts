@@ -125,6 +125,7 @@ export const PL_FIELD: PlBook = {
   "Outing:": "Wyprawa:",
   "Open the outing": "Otwórz wyprawę",
   "Fish came between {from} and {to}": "Ryby brały między {from} a {to}",
+  "Fish came at {time}": "Ryby brały o {time}",
   "By the weather": "Według pogody",
   "By the wind": "Według wiatru",
   "By water temperature": "Według temperatury wody",
