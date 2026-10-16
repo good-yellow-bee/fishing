@@ -35,6 +35,7 @@ import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./tripSummary";
+import { fishPace } from "./tripPace";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -48,11 +49,13 @@ function tripNight(date: string) {
 }
 
 
-/** "Fish came between 06:40 and 09:15", with the day too when the first and last fish fell on different days. */
-function fishSpan(first: string, last: string): string {
+/** "Fish came between 06:40 and 09:15", with the day too when the first and last fish fell on different days, and the pace when it says something. */
+function fishSpan(first: string, last: string, count: number): string {
   const sameDay = localDate(new Date(first)) === localDate(new Date(last));
   const show = sameDay ? formatTimeOfDay : formatClock;
-  return t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
+  const span = t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
+  const pace = fishPace(first, last, count);
+  return pace ? `${span}, ${pace}` : span;
 }
 
 export function TripsPage() {
@@ -172,7 +175,7 @@ function TripView() {
       {catches.length > 1 ? (
         <p className="meta fish-span">
           {/* Newest first: the last in the list came first. */}
-          {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt)}
+          {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt, catches.length)}
         </p>
       ) : null}
       <SpeciesChips catches={catches} />
