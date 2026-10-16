@@ -61,17 +61,24 @@ export function yearTally(catches: readonly CatchEntry[]): { year: string; count
   return [...counts.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([year, count]) => ({ year, count }));
 }
 
+/**
+ * The day a fish counts for: its own local day, or its outing's day when it came in the small hours after that day
+ * (`late`), so a night session doesn't make a second day out. `tripDays` maps outing ids to their "YYYY-MM-DD".
+ */
+export function fishDay(entry: Pick<CatchEntry, "caughtAt" | "tripId">, tripDays: ReadonlyMap<string, string>): { day: string; late: boolean } {
+  const at = new Date(entry.caughtAt);
+  const outing = entry.tripId ? tripDays.get(entry.tripId) : undefined;
+  const evening = new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, 12);
+  if (outing && at.getHours() < LATE_NIGHT_UNTIL && localDate(evening) === outing) return { day: outing, late: true };
+  return { day: localDate(at), late: false };
+}
+
 /** The days of `year` the book shows on the water: a fish logged, or an outing from before today. */
 export function daysOut(book: Logbook, year: string, today: string): number {
   const days = new Set<string>();
   const tripDays = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   for (const entry of book.catches) {
-    // A fish from the small hours after its outing's day counts for that day, so it doesn't make a second day out.
-    const at = new Date(entry.caughtAt);
-    const own = localDate(at);
-    const outing = entry.tripId ? tripDays.get(entry.tripId) : undefined;
-    const evening = new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, 12);
-    const day = outing && at.getHours() < LATE_NIGHT_UNTIL && localDate(evening) === outing ? outing : own;
+    const day = fishDay(entry, tripDays).day;
     if (day.startsWith(`${year}-`)) days.add(day);
   }
   // An outing planned for today counts once it has a fish, through the catches above.

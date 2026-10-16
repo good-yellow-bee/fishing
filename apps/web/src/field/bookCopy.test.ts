@@ -60,6 +60,7 @@ describe("a book that is still only the sample", () => {
     const sample = sampleLogbook(new Date(2026, 9, 15));
     expect(isSampleOnly(sample)).toBe(true);
     expect(isSampleOnly({ ...sample, catches: [...sample.catches, { ...sample.catches[0]!, id: "mine" }] })).toBe(false);
+    expect(isSampleOnly({ ...sample, trips: [...sample.trips, { ...sample.trips[0]!, id: "mine" }] })).toBe(false);
     expect(isSampleOnly({ ...sample, spots: [...sample.spots, { ...sample.spots[0]!, id: "my-pond" }] })).toBe(false);
     expect(isSampleOnly({ spots: [], trips: [], catches: [] })).toBe(false);
   });

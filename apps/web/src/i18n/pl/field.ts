@@ -61,7 +61,6 @@ export const PL_FIELD: PlBook = {
   "This outing already has fish, so it can't be moved to a day still to come.": "Ta wyprawa ma już ryby, więc nie można jej przenieść na dzień, który dopiero nadejdzie.",
   "Its {n} fish move to this water too.": ["Jej ryba też przeniesie się na to łowisko.", "Jej {n} ryby też przeniosą się na to łowisko.", "Jej {n} ryb też przeniesie się na to łowisko."],
   "Its fish were caught on {day} and keep that day.": ["Jej rybę złowiono dnia {day} i zostanie przy tym dniu.", "Jej {n} ryby złowiono dnia {day} i zostaną przy tym dniu.", "Jej {n} ryb złowiono dnia {day} i zostaną przy tym dniu."],
-  "an outing whose fish came after midnight": "wyprawa, której ryby wzięły po północy",
   "Title, water, note, month, or “no fish”": "Nazwa, łowisko, notatka, miesiąc lub „bez ryb”",
   "No outing matches that.": "Żadna wyprawa do tego nie pasuje.",
   "Outings: {count}": "Wyprawy: {count}",

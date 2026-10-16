@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
@@ -69,6 +69,7 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 
 export function HomePage() {
   const { book, storedBook, photos, startBlank } = useLogbook();
+  const heading = useRef<HTMLHeadingElement>(null);
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
   const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
@@ -103,7 +104,9 @@ export function HomePage() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{formatLongDay(now)}</p>
-          <h1>{t("The book")}</h1>
+          <h1 ref={heading} tabIndex={-1}>
+            {t("The book")}
+          </h1>
           <p className="lede">{deskLine(now)}</p>
         </div>
       </header>
@@ -112,7 +115,10 @@ export function HomePage() {
         <aside className="conditions sample-start" aria-label={t("Sample book")}>
           <span className="eyebrow">{t("Sample book")}</span>
           <p>{t("These waters, outings and fish are invented, so you can look around. Start your own book when you're ready.")}</p>
-          <button type="button" className="field-primary inline" onClick={() => startBlank()}>
+          <button type="button" className="field-primary inline" onClick={() => {
+              // The button goes with the sample, so focus moves to the top of the page.
+              if (startBlank()) heading.current?.focus();
+            }}>
             {t("Start my own book")}
           </button>
         </aside>

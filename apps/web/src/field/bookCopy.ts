@@ -15,12 +15,14 @@ export function isSampleCatch(id: string) {
 }
 
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
+const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
 
-/** Whether the book is still only the sample: its waters and nothing of the player's own. */
+/** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. */
 export function isSampleOnly(book: Logbook) {
   return (
     book.spots.length > 0 &&
     book.spots.every((spot) => SAMPLE_SPOT_IDS.has(spot.id)) &&
+    book.trips.every((trip) => SAMPLE_TRIP_IDS.has(trip.id)) &&
     book.catches.every((entry) => SAMPLE_IDS.has(entry.id))
   );
 }

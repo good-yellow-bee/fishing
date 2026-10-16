@@ -1,29 +1,35 @@
-import { fishCountsByTrip, localDate, type Logbook } from "@stillwater/shared";
+import type { Logbook } from "@stillwater/shared";
+import { fishDay } from "../tripMonths";
 
 /**
- * One day of a season: its fish, the outings planned for it, and whether any of those outings landed a fish (one
- * caught after midnight counts for its outing's day, not the day it was caught).
+ * One day of a season: its fish, the outings planned for it, and `lateTrip`, the outing whose small-hours fish were
+ * filed under this day when all of the day's fish came on it (else null). A fish caught after midnight counts for its
+ * outing's day, not the day it was caught, as the days on the water do.
  */
-export type DayMark = { fish: number; trips: string[]; landed: boolean };
+export type DayMark = { fish: number; trips: string[]; lateTrip: string | null };
 
 /** The days of `year` that had a fish or an outing, by local "YYYY-MM-DD". */
 export function dayMarks(book: Logbook, year: string): Map<string, DayMark> {
   const marks = new Map<string, DayMark>();
   const mark = (day: string) => {
-    const row = marks.get(day) ?? { fish: 0, trips: [] as string[], landed: false };
+    const row = marks.get(day) ?? { fish: 0, trips: [] as string[], lateTrip: null };
     marks.set(day, row);
     return row;
   };
-  const fishByTrip = fishCountsByTrip(book);
-  for (const trip of book.trips) {
-    if (!trip.date.startsWith(`${year}-`)) continue;
-    const row = mark(trip.date);
-    row.trips.push(trip.id);
-    if ((fishByTrip.get(trip.id) ?? 0) > 0) row.landed = true;
-  }
+  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`)) mark(trip.date).trips.push(trip.id);
+  const tripDays = new Map(book.trips.map((trip) => [trip.id, trip.date]));
+  const late = new Set<string>();
+  const fishTrips = new Map<string, Set<string | null>>();
   for (const entry of book.catches) {
-    const day = localDate(new Date(entry.caughtAt));
-    if (day.startsWith(`${year}-`)) mark(day).fish += 1;
+    const { day, late: small } = fishDay(entry, tripDays);
+    if (!day.startsWith(`${year}-`)) continue;
+    mark(day).fish += 1;
+    if (small) late.add(day);
+    fishTrips.set(day, (fishTrips.get(day) ?? new Set()).add(entry.tripId));
+  }
+  for (const day of late) {
+    const only = [...fishTrips.get(day)!];
+    if (only.length === 1 && only[0]) mark(day).lateTrip = only[0];
   }
   return marks;
 }

@@ -1224,6 +1224,13 @@ button.field-primary:disabled {
   scroll-margin-top: 88px;
 }
 
+/* The narrowest phones wrap the top bar onto a second line. */
+@media (max-width: 360px) {
+  .month-head[id] {
+    scroll-margin-top: 132px;
+  }
+}
+
 .month-jump {
   margin: 0;
 }
