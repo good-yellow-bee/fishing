@@ -8,9 +8,10 @@ import { downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
+import { noteText } from "./format";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
-import { FIND_PARAM } from "./findLinks";
+import { FIND_PARAM, parseExactTerm } from "./findLinks";
 import { parseSizeQuery, sizeMatches } from "./sizeQuery";
 
 function normalize(value: string): string {
@@ -68,9 +69,18 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, and released fish. */
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, words from a note, and released fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
+  const exact = parseExactTerm(needle);
+  if (exact) {
+    // One name whole, as stored or as it reads in the player's language.
+    const want = normalize(exact.name);
+    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want;
+    return catchesNewestFirst(book).filter((entry) =>
+      exact.field === "species" ? named(entry.species) : exact.field === "lure" ? named(entry.lure) : named(spotById(book, entry.spotId)?.name ?? ""),
+    );
+  }
   const size = parseSizeQuery(needle);
   if (size) return catchesNewestFirst(book).filter((entry) => sizeMatches(entry.measure, size));
   const found = searchCatches(book, needle);
@@ -80,6 +90,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
   // An outing's title ("Opening day") finds the fish filed on it, from three letters up.
   const tripsNamed = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.title).includes(want)).map((trip) => trip.id));
+  // Words from a fish's own note, or from its outing's note, find it too, from three letters up.
+  const tripsNoted = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.note).includes(want)).map((trip) => trip.id));
   const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
@@ -93,7 +105,9 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       seasonHas(entry, want, t) ||
       timeHas(entry, want, t) ||
       moonHas(entry, want, t) ||
-      (entry.tripId !== null && tripsNamed.has(entry.tripId))
+      (entry.tripId !== null && tripsNamed.has(entry.tripId)) ||
+      (entry.tripId !== null && tripsNoted.has(entry.tripId)) ||
+      (want.length >= 3 && normalize(noteText(entry.note)).includes(want))
     )
       hit.add(entry.id);
   }
@@ -131,7 +145,7 @@ function findCatches(book: Logbook, needle: string, t: (text: string) => string)
   return found;
 }
 
-export { FIND_PARAM, findLink, findWithLink } from "./findLinks";
+export { FIND_PARAM, exactTerm, findLink, findWithLink } from "./findLinks";
 
 export function CatchSearch() {
   const { book } = useLogbook();
@@ -219,7 +233,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, or “released”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a word from a note, or “released”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">

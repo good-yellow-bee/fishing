@@ -17,6 +17,7 @@ import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
 import { WaterTipsBox } from "./WaterTipsBox";
+import { exactTerm } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
@@ -121,7 +122,7 @@ export function SpotPage() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      <WaterTipsBox catches={catches} on={today} within={spot.name} />
+      <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} />
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>

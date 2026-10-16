@@ -15,7 +15,7 @@ import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./fo
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
-import { findLink } from "./findLinks";
+import { exactTerm, findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
 
 /** A card's heading sits one below the section it is listed under. */
@@ -49,7 +49,7 @@ export function CatchCard({
         </Head>
         <p className="meta">
           {/* Every fish taken on this lure, as on the catch page. */}
-          <Link to={findLink(t(entry.lure))}>{t(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", t(entry.lure)))}>{t(entry.lure)}</Link>
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
