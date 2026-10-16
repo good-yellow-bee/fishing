@@ -21,6 +21,7 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if ((notes.bowedLeaps ?? 0) > 0) parts.push(tn(notes.bowedLeaps!, "Bowed to {n} leap", "Bowed to {n} leaps"));
   if ((notes.followedDarts ?? 0) > 0) parts.push(tn(notes.followedDarts!, "Followed {n} dart", "Followed {n} darts"));
   if ((notes.easedShakes ?? 0) > 0) parts.push(tn(notes.easedShakes!, "Eased off {n} head shake", "Eased off {n} head shakes"));
+  if (notes.encore) parts.push(t("Rode out a second run at the net"));
   if ((notes.cleanRun ?? 0) >= 2) parts.push(t("{n} clean fights in a row", { n: notes.cleanRun! }));
   if (notes.fightSec !== undefined) parts.push(landedIn(notes.fightSec));
   return parts.length ? parts.join(" · ") : null;

@@ -202,6 +202,7 @@ describe("makeFight", () => {
       runtime.step((now += 100), 0, true);
       expect(runtime.sim.lastRun).toBe(true);
       expect(runtime.sim.encore).toBe(encore);
+      expect(runtime.performance.encore).toBe(encore || undefined);
       while (runtime.sim.surge !== 0) runtime.step((now += 50), 0.05, false);
       expect(runtime.sim.encore).toBe(false);
     }

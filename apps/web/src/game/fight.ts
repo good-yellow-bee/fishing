@@ -131,6 +131,8 @@ export type FightPerformance = {
   easedShakes?: number;
   /** A brook trout's darts the angler switched sides for and kept turning. */
   followedDarts?: number;
+  /** A trophy that made a second run at the net. */
+  encore?: boolean;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
@@ -363,6 +365,7 @@ export function makeFight(
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
     if (lastRunsLeft > 0 && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
       sim.encore = lastRunDone;
+      if (lastRunDone) performance.encore = true;
       lastRunDone = true;
       lastRunsLeft -= 1;
       sim.lastRun = true;
