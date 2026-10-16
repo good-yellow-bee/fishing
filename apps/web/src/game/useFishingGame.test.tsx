@@ -6,7 +6,7 @@ import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Prof
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { pickBite, waitMs } from "./logic";
-import { LIGHT_HOLD } from "./nibblePlan";
+import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
@@ -26,6 +26,11 @@ vi.mock("./eveningRise", () => ({ isRiseCast: () => true }));
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
   return { ...actual, castSnags: vi.fn(() => false) };
+});
+// Bait thieves are random; each test that wants one says so.
+vi.mock("./nibblePlan", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./nibblePlan")>();
+  return { ...actual, stealsBait: vi.fn(() => false) };
 });
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
@@ -734,6 +739,17 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(SECOND_TAKE_NIBBLE_MS));
     act(() => surface.dispatchEvent(pointer("pointerdown", 8)));
     expect(hint()).toBe("Too early. Wait for the bobber to go under, then strike.");
+  });
+
+  it("lets a golden shiner nibble the bait off the hook now and then", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    vi.mocked(stealsBait).mockReturnValueOnce(true);
+    cast(surface);
+    for (let waited = 0; phase() !== "result:miss" && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toBe("Golden shiner nibbled the bait clean off the hook.");
+    expect(hint()).toBe("Little fish steal bait. Cast again.");
   });
 
   it("calls a walleye's light take and gives it longer before it drops the bait", () => {

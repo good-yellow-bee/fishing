@@ -39,6 +39,16 @@ export const LIGHT_PLUNGE = 0.45;
 /** A light biter holds on to the bait this much longer, so the faint take can still be struck. */
 export const LIGHT_HOLD = 1.3;
 
+/** Little fish that nibble the bait away now and then instead of taking the hook. */
+export const BAIT_THIEVES: ReadonlySet<string> = new Set(["golden-shiner"]);
+/** How often a bait thief strips the hook rather than biting. */
+export const STEAL_CHANCE = 0.25;
+
+/** Whether this wait ends with the bait stolen; only a thief that nibbles first can steal it. */
+export function stealsBait(speciesId: string, nibbles: number, rand: () => number = Math.random) {
+  return BAIT_THIEVES.has(speciesId) && nibbles > 0 && rand() < STEAL_CHANCE;
+}
+
 export function biteStyle(speciesId: string): BiteStyle {
   return BITE_STYLES[speciesId] ?? "usual";
 }

@@ -34,7 +34,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, LIGHT_HOLD, nibblePlan, type BiteStyle } from "./nibblePlan";
+import { biteStyle, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -394,6 +394,7 @@ export function useFishingGame(
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     const wait = schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait;
     const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
+    const stolen = stealsBait(species.id, nibbles.length);
     const arm = () => {
       let secondTake = false;
       const nibbleTimers: number[] = [];
@@ -422,6 +423,12 @@ export function useFishingGame(
       const takeBait = () => {
         if (phaseRef.current !== "waiting") return;
         setNibble(false);
+        // A bait thief nibbled the hook clean: there is nothing left to bite.
+        if (stolen) {
+          setOutcome({ kind: "miss", message: t("{fish} nibbled the bait clean off the hook.", { fish: t(species.name) }), fish: bitten });
+          resetToIdle(t("Little fish steal bait. Cast again."), "result");
+          return;
+        }
         fx.bite();
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
