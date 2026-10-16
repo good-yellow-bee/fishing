@@ -48,6 +48,13 @@ describe("outing streak", () => {
     expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
     expect(outingStreak(trips, () => 0, "2026-10-15")).toEqual({ best: 0, going: false });
   });
+
+  it("counts two outings on one day as one step, whichever order they were saved in", () => {
+    const fish: Record<string, number> = { a: 1, b: 2, morning: 0, evening: 3 };
+    const sameDay = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("morning", "2026-10-09"), trip("evening", "2026-10-09")];
+    expect(outingStreak(sameDay, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
+    expect(outingStreak([...sameDay].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
+  });
 });
 
 describe("top outing", () => {

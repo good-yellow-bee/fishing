@@ -375,7 +375,7 @@ export const PL_FIELD: PlBook = {
   "Best outing here:": "Najlepsza wyprawa tutaj:",
   "Outings in a row with a fish: {count}, and still going": "Wyprawy z rybą pod rząd: {count} i seria trwa",
   "Most outings in a row with a fish: {count}": "Najwięcej wypraw z rybą pod rząd: {count}",
-  "The most fish of any outing on this water": "Najwięcej ryb ze wszystkich wypraw na tym łowisku",
+  "The most fish of any outing on this water": "Najwięcej ryb spośród wszystkich wypraw na tym łowisku",
   "Longer than {count} of the {total} others of its kind": "Dłuższa niż {count} z {total} pozostałych tego gatunku",
   "Heavier than {count} of the {total} others of its kind": "Cięższa niż {count} z {total} pozostałych tego gatunku",
   "{n} without a fish": ["{n} wyprawa bez ryby", "{n} wyprawy bez ryby", "{n} wypraw bez ryby"],

@@ -37,13 +37,16 @@ export function bestOutingHere(trips: readonly Trip[], fishOn: (tripId: string) 
  * Planned outings don't count, and today's only once it has a fish.
  */
 export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { best: number; going: boolean } {
-  const fished = trips
-    .filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  // Two outings on one day are one step, fished if either gave a fish: their order within the day isn't known.
+  const days = new Map<string, boolean>();
+  for (const trip of trips) {
+    if (trip.date > today || (trip.date === today && fishOn(trip.id) === 0)) continue;
+    days.set(trip.date, (days.get(trip.date) ?? false) || fishOn(trip.id) > 0);
+  }
   let best = 0;
   let run = 0;
-  for (const trip of fished) {
-    run = fishOn(trip.id) > 0 ? run + 1 : 0;
+  for (const day of [...days.keys()].sort()) {
+    run = days.get(day) ? run + 1 : 0;
     best = Math.max(best, run);
   }
   return { best, going: best > 0 && run === best };
