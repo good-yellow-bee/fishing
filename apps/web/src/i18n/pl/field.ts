@@ -405,6 +405,8 @@ export const PL_FIELD: PlBook = {
   "What it takes": "Na co bierze",
   "Where it comes from": "Skąd pochodzi",
   "How the best grew": "Jak rósł rekord",
+  "By length": "Według długości",
+  "By weight": "Według wagi",
   "the first": "pierwsza",
   "Every one in the book": "Wszystkie w dzienniku",
   "All {species}": "Gatunek: {species}",
