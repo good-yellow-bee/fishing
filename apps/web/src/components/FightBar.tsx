@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { BREACHERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { BREACHERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -230,6 +230,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Jumper: every second run is a leap, so let go when it comes up")}</p>}
           {BREACHERS.has(fight.species.id) && <p className="fight-water">{t("Breacher: its first run is a leap, so let go when it comes up")}</p>}
           {ROLLERS.has(fight.species.id) && <p className="fight-water">{t("Roller: at the net it rolls on the line instead of running")}</p>}
+          {SCRAPPERS.has(fight.species.id) && <p className="fight-water">{t("Scrapper: pound for pound it fights hardest, so it tires slowly")}</p>}
           {LONG_RUNNERS.has(fight.species.id) && <p className="fight-water">{t("Long runner: the first run is the long one, so let it go")}</p>}
           {fight.windy && (
             <p className="fight-water fight-wind">
