@@ -32,6 +32,8 @@ export type FightSim = {
   sulk?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
   weeded?: boolean;
+  /** At the dock, a run nobody turned has wrapped the line round a piling: reeling only rubs it until the fish swings free. */
+  wrapped?: boolean;
   /** Off the point, a run the angler isn't turning, dragging the line over the rocks. */
   rocky?: boolean;
   /** At the drop-off, a run heading down the ledge. */
@@ -97,7 +99,7 @@ export type FightPerformance = {
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds or the point, every run so far kept out of the weeds or off the rocks; unset once one wasn't. */
-  clearOf?: "weeds" | "rocks";
+  clearOf?: "weeds" | "rocks" | "pilings";
 };
 
 /** Where FightBar turns the tension bar red. */
@@ -150,6 +152,9 @@ export const DEEP_PULL = 1.25;
 export const DEEP_TIRE = 1.3;
 /** Off the point a run left unturned drags the line over the rocks: reeling against it loads the line this much harder. */
 export const ROCK_PULL = 1.2;
+/** At the dock a run left unturned wraps the line round a piling for this long: reeling wins no line meanwhile and loads it this much harder each second. */
+export const WRAP_MS = 1200;
+export const WRAP_PULL = 0.5;
 /** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
 export const BOAT_RUN = 0.65;
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
@@ -160,10 +165,10 @@ export type FightWind = keyof typeof WIND_SLACK;
 export function fightWind(wind: string | undefined): FightWind | undefined {
   return wind === "breezy" || wind === "strong" ? wind : undefined;
 }
-export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat";
+export type FightWater = "open" | "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings";
 /** The water a spot gives the fight. */
 export function fightWater(spot: string): FightWater {
-  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : spot === "open" ? "boat" : "open";
+  return spot === "reeds" ? "weeds" : spot === "inlet" ? "current" : spot === "dropoff" ? "deep" : spot === "point" ? "rocks" : spot === "open" ? "boat" : spot === "dock" ? "pilings" : "open";
 }
 
 export function staminaState(stamina: number): StaminaState {
@@ -249,7 +254,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; out on the boat runs take less line. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line. */
   water: FightWater = "open",
   /** A breezy or strong day: slack line drifts out faster between runs. */
   wind?: FightWind,
@@ -296,6 +301,7 @@ export function makeFight(
   const tearAt = PAPER_MOUTHS.has(species.id) ? PAPER_TEAR_SEC : TEAR_SEC;
   let tearSec = 0;
   let weedUntil = -Infinity;
+  let wrapUntil = -Infinity;
   let rockedThisRun = false;
   let fouled = false;
 
@@ -332,10 +338,15 @@ export function makeFight(
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS;
         }
+        // At the dock it wraps the line round a piling instead.
+        if (water === "pilings" && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
+          sim.wrapped = true;
+          wrapUntil = nowMs + WRAP_MS;
+        }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks") && turnable && !sim.jump && !sim.roll) {
-          if (sim.weeded || rockedThisRun) fouled = true;
-          performance.clearOf = fouled ? undefined : weedy ? "weeds" : "rocks";
+        if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll) {
+          if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
+          performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" ? "pilings" : "rocks";
         }
         rockedThisRun = false;
         sim.surge = 0;
@@ -358,6 +369,7 @@ export function makeFight(
     }
 
     if (sim.weeded && (sim.surge !== 0 || nowMs >= weedUntil)) sim.weeded = false;
+    if (sim.wrapped && (sim.surge !== 0 || nowMs >= wrapUntil)) sim.wrapped = false;
     if (sim.sulk) {
       if (sim.surge !== 0 || nowMs >= sulkUntil) sim.sulk = false;
       else if (!reeling) slackSec += dtSec;
@@ -376,14 +388,14 @@ export function makeFight(
     sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge : driftCalm) * dtSec;
     }
     // A line held tight through a leap or a roll loads the rod into the red: the clean bonus goes, but never the fish.
     if ((sim.jump || sim.roll) && sim.surge === 2) {
