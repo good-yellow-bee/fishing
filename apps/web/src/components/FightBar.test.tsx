@@ -8,6 +8,7 @@ import { FightBar } from "./FightBar";
 
 const perch = FISH.find((fish) => fish.id === "perch")!;
 const trout = FISH.find((fish) => fish.id === "rainbow-trout")!;
+const whitefish = FISH.find((fish) => fish.id === "lake-whitefish")!;
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
 let frames: FrameRequestCallback[] = [];
@@ -256,6 +257,24 @@ describe("FightBar for screen readers", () => {
     sim.current.lastRun = false;
     frame();
     expect(status()).not.toBe("Let go now — it sees the net!");
+  });
+
+  it("warns that the hook is tearing out of a soft mouth", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.tearing = true;
+    frame();
+    expect(status()).toBe("EASE OFF — the hook is tearing out!");
+    sim.current.tearing = false;
+    frame();
+    expect(status()).not.toBe("EASE OFF — the hook is tearing out!");
+  });
+
+  it("says a whitefish has a soft mouth, and no other fish", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, whitefish);
+    expect(container!.textContent).toContain("Soft mouth: reel in the red and the hook tears out");
+    mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
+    expect(container!.textContent).not.toContain("Soft mouth");
   });
 
   it("calls a carp's long first run", () => {

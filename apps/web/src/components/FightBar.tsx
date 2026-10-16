@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -75,7 +75,9 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
         }
         // Written only on a change, so the live region speaks each new call once.
         const call =
-          state.roll && state.surge === 1
+          state.tearing
+            ? t("EASE OFF — the hook is tearing out!")
+            : state.roll && state.surge === 1
             ? t("Let go now — it's going to roll!")
             : state.roll && state.surge === 2
             ? t("EASE OFF — it's rolling on the line!")
@@ -224,6 +226,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
+          {SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Soft mouth: reel in the red and the hook tears out")}</p>}
           {fight.windy && (
             <p className="fight-water fight-wind">
               {fight.windy === "strong" ? t("Strong wind: a slack line drifts out much faster") : t("Breezy: a slack line drifts out faster")}

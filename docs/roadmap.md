@@ -1118,7 +1118,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT73~~ | ~~On a leap or a roll the fight card's steering line says it can't be turned and to let go, instead of showing the turn-a-run hint~~ (#531) | fight | S |
 | ~~GT74~~ | ~~News card (2026-10-16h) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned~~ (#534) | news | S |
 | ~~GT75~~ | ~~A carp's first run after the hook lasts 1.6× as long as its other runs, and the fight card calls it ("a carp's first run is the long one")~~ (#536) | fish | S |
-| GT76 | News card (2026-10-16i) covers GT75: a carp's long first run | news | S |
+| ~~GT76~~ | ~~News card (2026-10-16i) covers GT75: a carp's long first run~~ (#538) | news | S |
+| GT77 | A lake whitefish has a soft mouth: reeled in the red for 0.8 s the hook tears out and it gets away; the fight card says so, warns while it tears, and the result names the torn hook | fish | S |
 
 ## Risks / open questions for the owner
 
