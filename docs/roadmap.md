@@ -1317,3 +1317,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR199~~ | ~~Catch form offers the water's fish as picks and narrows lure picks to the kind~~ (#498) | field | S |
 | ~~BR200~~ | ~~Catch form offers the same day's weather for a fish with no outing weather~~ (#500) | field | S |
 | ~~BR201~~ | ~~Species pages show how the best of the kind grew~~ (#501) | field | S |
+| ~~BR202~~ | ~~Outing pages lead with their fish from the outing's own day on~~ (#503) | field | S |
