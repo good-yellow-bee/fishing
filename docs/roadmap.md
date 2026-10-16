@@ -1122,7 +1122,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT77~~ | ~~A lake whitefish has a soft mouth: reeled in the red for 0.8 s the hook tears out and it gets away; the fight card says so, warns while it tears, and the result names the torn hook~~ (#541) | fish | S |
 | ~~GT78~~ | ~~News card (2026-10-16j) covers GT77: a whitefish's soft mouth~~ (#543) | news | S |
 | ~~GT79~~ | ~~Perch, bluegill and crappie school: after landing one, the next two casts at that bank bite 30% sooner and half the bites are the same kind; the hint says so~~ (#544) | fish | S |
-| GT80 | News card (2026-10-16k) covers GT79: panfish schools | news | S |
+| ~~GT80~~ | ~~News card (2026-10-16k) covers GT79: panfish schools~~ (#545) | news | S |
+| GT81 | School shadows: small fish shadows mill round the float on a schooled cast | scene | S |
 
 ## Risks / open questions for the owner
 
