@@ -34,7 +34,19 @@ export type Trip = {
   spotId: string;
   title: string;
   note: string;
+  /** Fish hooked but lost before landing, and strikes missed, counted on the water; left out while none. */
+  lost?: number;
+  missed?: number;
 };
+
+/** The two tallies an outing keeps besides its fish. */
+export type TripCount = "lost" | "missed";
+
+const TRIP_COUNT_MAX = 999;
+
+function isTripCount(value: unknown) {
+  return value === undefined || (typeof value === "number" && Number.isInteger(value) && value > 0 && value <= TRIP_COUNT_MAX);
+}
 
 export type CatchEntry = {
   id: string;
@@ -386,7 +398,9 @@ function isTrip(value: unknown): value is Trip {
     typeof value.date === "string" &&
     typeof value.spotId === "string" &&
     typeof value.title === "string" &&
-    typeof value.note === "string"
+    typeof value.note === "string" &&
+    isTripCount(value.lost) &&
+    isTripCount(value.missed)
   );
 }
 
@@ -612,6 +626,16 @@ export function replaceCatch(book: Logbook, entry: CatchEntry): Logbook {
 export function replaceSpot(book: Logbook, spot: Spot): Logbook {
   if (!book.spots.some((row) => row.id === spot.id)) return book;
   return { ...book, spots: book.spots.map((row) => (row.id === spot.id ? spot : row)) };
+}
+
+/** One more (or one fewer) lost fish or missed strike on an outing; never below none, and none is left out. */
+export function withTripCount(book: Logbook, tripId: string, count: TripCount, delta: number): Logbook {
+  const trip = book.trips.find((row) => row.id === tripId);
+  if (!trip) return book;
+  const next = Math.max(0, Math.min(TRIP_COUNT_MAX, (trip[count] ?? 0) + delta));
+  if (next === (trip[count] ?? 0)) return book;
+  const { [count]: _old, ...rest } = trip;
+  return replaceTrip(book, next > 0 ? { ...rest, [count]: next } : rest);
 }
 
 export function replaceTrip(book: Logbook, trip: Trip): Logbook {

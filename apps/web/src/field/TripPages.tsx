@@ -16,6 +16,8 @@ import {
   recentTrips,
   itemsForTrip,
   tripsForSpot,
+  type Trip,
+  type TripCount,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
 import { tripNeighbors } from "./catchNeighbors";
@@ -133,6 +135,36 @@ export function TripPage() {
   return <TripView key={tripId} />;
 }
 
+const TRIP_COUNTS: { count: TripCount; label: string; more: string; fewer: string }[] = [
+  { count: "lost", label: "Lost fish", more: "One more lost fish", fewer: "One fewer lost fish" },
+  { count: "missed", label: "Missed strikes", more: "One more missed strike", fewer: "One fewer missed strike" },
+];
+
+/** Tap-to-count tallies of fish lost and strikes missed on an outing, and how many of the hooked fish were landed. */
+function TripCounts({ trip, landed }: { trip: Trip; landed: number }) {
+  const { countOnTrip } = useLogbook();
+  useT();
+  const lost = trip.lost ?? 0;
+  return (
+    <div className="trip-counts">
+      {TRIP_COUNTS.map(({ count, label, more, fewer }) => (
+        <p key={count} className="trip-count">
+          <span>
+            {t(label)}: <strong>{trip[count] ?? 0}</strong>
+          </span>
+          <button type="button" className="count-button" aria-label={t(fewer)} disabled={!trip[count]} onClick={() => countOnTrip(trip.id, count, -1)}>
+            −
+          </button>
+          <button type="button" className="count-button" aria-label={t(more)} onClick={() => countOnTrip(trip.id, count, 1)}>
+            +
+          </button>
+        </p>
+      ))}
+      {lost > 0 && landed > 0 ? <p className="meta">{t("Landed {landed} of {hooked} hooked.", { landed, hooked: landed + lost })}</p> : null}
+    </div>
+  );
+}
+
 function TripView() {
   const { book, deleteTrip, fileCatches } = useLogbook();
   useT();
@@ -179,6 +211,8 @@ function TripView() {
         </h2>
       </div>
       <FishSum catches={catches} />
+      {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
+      {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {catches.length > 1 ? (
         <p className="meta fish-span">
           {/* Newest first: the last in the list came first. */}

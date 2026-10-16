@@ -23,6 +23,7 @@ import {
   withoutCatch,
   withoutSpot,
   withoutTrip,
+  withTripCount,
   type CatchDraft,
   type Logbook,
 } from "./logbook.ts";
@@ -436,5 +437,23 @@ describe("a fish both measured and weighed", () => {
     expect(measureOf({ ...entry, alsoMeasure: undefined }, "weight")).toBeNull();
     expect(isLogbook({ ...book, catches: [entry] })).toBe(true);
     expect(isLogbook({ ...book, catches: [{ ...entry, alsoMeasure: { kind: "length", inches: 21 } }] })).toBe(false);
+  });
+});
+
+describe("lost and missed on an outing", () => {
+  const book = sampleLogbook(new Date(2026, 9, 16, 9));
+  const id = book.trips[0]!.id;
+  it("counts up and down, never below none, and leaves out none", () => {
+    const once = withTripCount(withTripCount(book, id, "lost", 1), id, "lost", 1);
+    expect(once.trips[0]!.lost).toBe(2);
+    expect(isLogbook(once)).toBe(true);
+    const back = withTripCount(withTripCount(withTripCount(once, id, "lost", -1), id, "lost", -1), id, "lost", -1);
+    expect("lost" in back.trips[0]!).toBe(false);
+    expect(withTripCount(book, "no-such-trip", "missed", 1)).toBe(book);
+  });
+
+  it("refuses a count that isn't a whole number above none", () => {
+    const trip = book.trips[0]!;
+    for (const bad of [0, -1, 1.5, "2"]) expect(isLogbook({ ...book, trips: [{ ...trip, missed: bad }] })).toBe(false);
   });
 });
