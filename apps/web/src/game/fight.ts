@@ -70,6 +70,9 @@ export const TEAR_SEC = 0.8;
 /** A crappie's "paper mouth" is softer still: it tears out of it sooner, before the line would snap. */
 export const PAPER_MOUTHS: ReadonlySet<string> = new Set(["crappie"]);
 export const PAPER_TEAR_SEC = 0.45;
+/** Pound for pound a smallmouth bass fights hardest: it tires this much slower than its size says. */
+export const SCRAPPERS: ReadonlySet<string> = new Set(["smallmouth-bass"]);
+export const SCRAPPER_TIRE = 0.8;
 /** Carp and salmon make one long run straight after the hook. */
 export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp", "salmon"]);
 /** How much longer that first run lasts than the carp's other runs. */
@@ -286,6 +289,7 @@ export function makeFight(
   const longRunner = LONG_RUNNERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
+  const scrapper = SCRAPPERS.has(species.id);
   let sulkUntil = -Infinity;
   let slackSec = 0;
   const softMouth = SOFT_MOUTHS.has(species.id);
@@ -392,7 +396,7 @@ export function makeFight(
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
     const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
-    sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul : tire) * dtSec));
+    sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * (scrapper ? SCRAPPER_TIRE : 1) : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);

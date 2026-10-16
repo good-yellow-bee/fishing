@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -842,6 +842,23 @@ describe("a carp's first run", () => {
   it("is a carp's and a salmon's habit only", () => {
     const { flags } = runLengths("walleye");
     expect(flags.every((flag) => !flag)).toBe(true);
+  });
+});
+
+describe("a smallmouth bass, pound for pound", () => {
+  /** Reels steadily between runs and lets every run go; returns the stamina left after ten seconds. */
+  const staminaAfter = (id: string) => {
+    const runtime = makeFight(fish(id), 2, 3, () => 0.5);
+    for (let now = 0; now <= 10_000; now += 50) runtime.step(now, 0.05, runtime.sim.surge === 0 && runtime.sim.tension < 0.6);
+    return runtime.sim.stamina;
+  };
+
+  it("tires slower than a largemouth of the same weight", () => {
+    expect(SCRAPPERS.has("smallmouth-bass")).toBe(true);
+    const small = 1 - staminaAfter("smallmouth-bass");
+    const large = 1 - staminaAfter("largemouth-bass");
+    expect(small).toBeLessThan(large);
+    expect(small / large).toBeGreaterThanOrEqual(SCRAPPER_TIRE - 0.15);
   });
 });
 
