@@ -747,6 +747,7 @@ export function useFishingGame(
     let lastScrapeFx = 0;
     let wasWeeded = false;
     let wasWrapped = false;
+    let wasShaking = false;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
@@ -810,6 +811,12 @@ export function useFishingGame(
             fx.haptic("scrape");
           }
           wasWrapped = !!sim.wrapped;
+          // A walleye shaking its head knocks up the rod.
+          if (sim.shake && !wasShaking) {
+            fx.headShake();
+            fx.haptic("headShake");
+          }
+          wasShaking = !!sim.shake;
           // Reeling against a run off the point grates the line over the rocks.
           if (reeling && sim.rocky && now - lastScrapeFx > 220) {
             fx.scrape();
