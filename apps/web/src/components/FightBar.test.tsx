@@ -200,7 +200,7 @@ describe("FightBar for screen readers", () => {
   });
 
   it("says what the reeds and the inlet do to a fight, and nothing on open water", () => {
-    const water = (w?: "weeds" | "current" | "deep" | "rocks" | "boat") => {
+    const water = (w?: "weeds" | "current" | "deep" | "rocks" | "boat" | "pilings") => {
       act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, water: w }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
       return container!.querySelector(".fight-water")?.textContent ?? null;
     };
@@ -211,6 +211,25 @@ describe("FightBar for screen readers", () => {
     expect(water("deep")).toMatch(/dive/);
     expect(water("rocks")).toMatch(/rocks/);
     expect(water("boat")).toMatch(/swings to follow a run/);
+    // A dock perch can't be turned, so the pilings go unmentioned for it.
+    expect(water("pilings")).toBeNull();
+  });
+
+  it("warns of the dock's pilings for a fish whose runs can be turned", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    act(() => root!.render(<FightBar fight={{ species: FISH.find((f) => f.id === "lake-whitefish")!, weight: 2, underpowered: false, water: "pilings" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect(container!.querySelector(".fight-water")?.textContent).toBe("Dock: turn every run, or it wraps the line round a piling");
+  });
+
+  it("tells the angler the line is wrapped round a piling", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.wrapped = true;
+    frame();
+    expect(status()).toBe("It wrapped the line round a piling — ease off till it swings free!");
+    sim.current.wrapped = false;
+    frame();
+    expect(status()).not.toMatch(/piling/);
   });
 
   it("says when the wind bellies a slack line, and nothing on a calm day", () => {

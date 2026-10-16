@@ -724,7 +724,8 @@ function FightMotion({ phase, sim, ambush, light }: { phase: ScenePhase; sim: Si
     if (live) {
       const worn = 1 - (sim.current?.stamina ?? 1);
       // A fish in the weeds stays out where its run ended, rather than swinging back in.
-      const weeded = sim.current?.weeded === true;
+      // A fish in the weeds or wrapped round a piling holds where it is.
+      const weeded = sim.current?.weeded === true || sim.current?.wrapped === true;
       const leadTarget = fishLeadMeters(weeded ? 2 : surge, fightView.reeling || weeded, worn);
       // A turned run swings back in toward the line.
       // At the inlet the current carries a resting fish off downstream until the angler reels it back.

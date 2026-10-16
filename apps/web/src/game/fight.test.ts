@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -606,7 +606,8 @@ describe("the inlet's current", () => {
     expect(fightWater("inlet")).toBe("current");
     expect(fightWater("dropoff")).toBe("deep");
     expect(fightWater("point")).toBe("rocks");
-    expect(fightWater("dock")).toBe("open");
+    expect(fightWater("dock")).toBe("pilings");
+    expect(fightWater("shore")).toBe("open");
     expect(fightWater("open")).toBe("boat");
   });
 });
@@ -690,7 +691,7 @@ describe("runs off the point", () => {
 
 describe("keeping a fish clear of the reeds' weeds and the point's rocks", () => {
   /** Plays two runs, turning them or not, reeling between and through them, and returns what the landed card would note. */
-  function twoRuns(water: "weeds" | "rocks" | "open", turn: boolean) {
+  function twoRuns(water: "weeds" | "rocks" | "pilings" | "open", turn: boolean) {
     const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
     let runs = 0;
     let was = runtime.sim.surge;
@@ -709,7 +710,47 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
     expect(twoRuns("weeds", false)).toBeUndefined();
     expect(twoRuns("rocks", true)).toBe("rocks");
     expect(twoRuns("rocks", false)).toBeUndefined();
+    expect(twoRuns("pilings", true)).toBe("pilings");
+    expect(twoRuns("pilings", false)).toBeUndefined();
     expect(twoRuns("open", true)).toBeUndefined();
+  });
+});
+
+describe("the dock's pilings", () => {
+  /** Lets one run go unturned, then reels or rests through the calm after it. */
+  function afterRun(water: "pilings" | "open", turn: boolean, reel: boolean) {
+    const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
+    let was = runtime.sim.surge;
+    let now = 0;
+    for (; now < 60_000; now += 50) {
+      const steer = turn && runtime.sim.surge === 2 ? (-runtime.sim.runSide as Steer) : 0;
+      runtime.step(now, 0.05, false, steer);
+      if (was === 2 && runtime.sim.surge === 0) break;
+      was = runtime.sim.surge;
+    }
+    const start = { line: runtime.sim.line, tension: runtime.sim.tension, wrapped: runtime.sim.wrapped === true };
+    for (let t = 0; t < 10; t += 1) runtime.step((now += 50), 0.05, reel);
+    return { start, line: runtime.sim.line, tension: runtime.sim.tension, runtime, now };
+  }
+
+  it("wraps the line round a piling after a run nobody turned, and not after a turned one", () => {
+    expect(afterRun("pilings", false, false).start.wrapped).toBe(true);
+    expect(afterRun("pilings", true, false).start.wrapped).toBe(false);
+    expect(afterRun("open", false, false).start.wrapped).toBe(false);
+  });
+
+  it("wins no line while wrapped, and reeling against it loads the line", () => {
+    const wrapped = afterRun("pilings", false, true);
+    const open = afterRun("open", false, true);
+    expect(wrapped.line).toBeCloseTo(wrapped.start.line);
+    expect(open.line).toBeLessThan(open.start.line);
+    expect(wrapped.tension - wrapped.start.tension).toBeCloseTo(open.tension - open.start.tension + WRAP_PULL * 0.5);
+  });
+
+  it("swings free once the wrap's time is up", () => {
+    const { runtime, now } = afterRun("pilings", false, false);
+    runtime.step(now + WRAP_MS, 0.05, false);
+    expect(runtime.sim.wrapped).toBe(false);
   });
 });
 

@@ -127,7 +127,7 @@ export type Fight = {
 
 /** How the angler played this fish, for a line on the landed card. */
 /** cleanRun counts this clean fight and the clean ones landed right before it this session; 0 when this one was not clean. */
-export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; secondTake?: boolean; clearOf?: "weeds" | "rocks" };
+export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; secondTake?: boolean; clearOf?: "weeds" | "rocks" | "pilings" };
 
 export type Outcome =
   | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
@@ -732,6 +732,7 @@ export function useFishingGame(
     let lastReelFx = 0;
     let lastScrapeFx = 0;
     let wasWeeded = false;
+    let wasWrapped = false;
     let prevSurge: SurgeState = 0;
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop);
@@ -789,6 +790,12 @@ export function useFishingGame(
             fx.haptic("weeds");
           }
           wasWeeded = !!sim.weeded;
+          // A line wrapping round a piling at the dock grates once.
+          if (sim.wrapped && !wasWrapped) {
+            fx.scrape();
+            fx.haptic("scrape");
+          }
+          wasWrapped = !!sim.wrapped;
           // Reeling against a run off the point grates the line over the rocks.
           if (reeling && sim.rocky && now - lastScrapeFx > 220) {
             fx.scrape();
