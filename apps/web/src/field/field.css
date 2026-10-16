@@ -620,6 +620,11 @@ button.field-primary:disabled {
   resize: vertical;
 }
 
+/* A field scrolled to (a refused save) stops above the sticky save buttons, not under them. */
+.entry-form :is(input, select, textarea) {
+  scroll-margin-bottom: 120px;
+}
+
 /* The save buttons ride along the bottom of the window while the form scrolls. */
 .form-save {
   position: sticky;

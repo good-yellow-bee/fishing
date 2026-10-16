@@ -29,6 +29,17 @@ describe("metric entry in the field log", () => {
     expect(toBookAmount("28 in", "length", "imperial")).toBe("28");
     expect(toBookAmount("71 cm", "length", "metric")).toBe("27.953");
     expect(toBookAmount("1,4 kg", "weight", "metric")).toBe("3.086");
+    expect(toBookAmount("71 cm", "length", "imperial")).toBe("27.953");
+    expect(toBookAmount("1.4 kg", "weight", "imperial")).toBe("3.086");
+    expect(toBookAmount("3 lb", "weight", "metric")).toBe("3");
+    expect(toBookAmount("28 in", "length", "metric")).toBe("28");
+    expect(toBookAmount("2 lb 8 oz", "weight", "metric")).toBe("2.5");
+    expect(toBookAmount("18 1/4 in", "length", "metric")).toBe("18.25");
+    // A weight's unit on a length, ounces past a pound, or ounces after part of a pound are refused.
+    expect(toBookAmount("3 lb", "length", "imperial")).toBe("3 lb");
+    expect(toBookAmount("71 cm", "weight", "metric")).toBe("71 cm");
+    expect(toBookAmount("3 lb 20 oz", "weight", "imperial")).toBe("3 lb 20 oz");
+    expect(toBookAmount("3.5 lb 2", "weight", "imperial")).toBe("3.5 lb 2");
     // A fraction with nothing under it, or words, is still refused by the form.
     expect(toBookAmount("18 1/0", "length", "imperial")).toBe("18 1/0");
     expect(toBookAmount("4 oz 3 lb", "weight", "imperial")).toBe("4 oz 3 lb");
