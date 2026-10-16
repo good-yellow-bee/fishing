@@ -4,6 +4,7 @@ import { FISH, biteTimes, moonTally, seasonTally, sizePairs, skyTally, type Catc
 import { getUnits, num, t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
+import { FishCsv } from "./FishCsv";
 import { fishCountLabel, formatCatchDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
@@ -57,6 +58,7 @@ export function SpeciesPage() {
         </div>
       </header>
       <FishSum catches={catches} oneKind />
+      <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <BestGrowth catches={catches} />

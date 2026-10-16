@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesForSpot, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, catchesNewestFirst, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -63,6 +63,13 @@ export function BestsPage() {
   const { book } = useLogbook();
   useT();
   const bests = personalBests(book);
+  // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
+  const bySpot = new Map<string, CatchEntry[]>();
+  for (const entry of catchesNewestFirst(book)) {
+    const list = bySpot.get(entry.spotId);
+    if (list) list.push(entry);
+    else bySpot.set(entry.spotId, [entry]);
+  }
   const topDay = bestDay(book);
   // When every fish of the best day came on one outing, the tile opens that outing.
   const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
@@ -241,7 +248,7 @@ export function BestsPage() {
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
-                  <p className="meta">{waterFishLine(catchesForSpot(book, water.spotId))}</p>
+                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
                 </Link>
               ))}
             </div>
