@@ -15,16 +15,21 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
   return blank > 0 ? `${average}, ${tn(blank, "{n} without a fish", "{n} without a fish")}` : average;
 }
 
+/** The outing on a water that caught strictly more fish than every other one fished there, once three have been fished. */
+export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): Trip | null {
+  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
+  if (fished.length < 3) return null;
+  const top = fished.reduce((best, trip) => (fishOn(trip.id) > fishOn(best.id) ? trip : best));
+  if (fishOn(top.id) === 0 || fished.some((trip) => trip.id !== top.id && fishOn(trip.id) === fishOn(top.id))) return null;
+  return top;
+}
+
 /**
  * "The most fish of any outing on this water" when this outing beats every other one fished here.
  * Null until the water has three outings fished, or when another outing caught as many.
  */
 export function bestOutingHere(trips: readonly Trip[], fishOn: (tripId: string) => number, tripId: string, today: string): string | null {
-  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
-  if (fished.length < 3 || !fished.some((trip) => trip.id === tripId)) return null;
-  const mine = fishOn(tripId);
-  if (mine === 0 || fished.some((trip) => trip.id !== tripId && fishOn(trip.id) >= mine)) return null;
-  return t("The most fish of any outing on this water");
+  return topOuting(trips, fishOn, today)?.id === tripId ? t("The most fish of any outing on this water") : null;
 }
 
 /**

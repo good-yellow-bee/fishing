@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestOutingHere, outingAverage, outingStreak } from "./outingAverage";
+import { bestOutingHere, outingAverage, outingStreak, topOuting } from "./outingAverage";
 
 const trip = (id: string, date: string) => ({ id, date, spotId: "spot-cedar", title: id, note: "" });
 
@@ -47,5 +47,13 @@ describe("outing streak", () => {
     const fish: Record<string, number> = { a: 0, b: 2, c: 1, d: 4 };
     expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
     expect(outingStreak(trips, () => 0, "2026-10-15")).toEqual({ best: 0, going: false });
+  });
+});
+
+describe("top outing", () => {
+  it("picks the one outing with the most fish, and none on a tie", () => {
+    const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("c", "2026-10-09"), trip("later", "2026-11-01")];
+    expect(topOuting(trips, (id) => ({ a: 1, b: 4, c: 2, later: 9 })[id] ?? 0, "2026-10-15")?.id).toBe("b");
+    expect(topOuting(trips, (id) => ({ a: 4, b: 4, c: 2 })[id] ?? 0, "2026-10-15")).toBeNull();
   });
 });
