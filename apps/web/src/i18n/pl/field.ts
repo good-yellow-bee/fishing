@@ -243,6 +243,7 @@ export const PL_FIELD: PlBook = {
     "Usunąć {count} najstarszych zdjęć z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
   "Photos fill {percent}% of the room this browser keeps for them.": "Zdjęcia zajmują {percent}% miejsca, które ta przeglądarka dla nich trzyma.",
   "Make room": "Zrób miejsce",
+  "Every fish that day": "Wszystkie ryby z tego dnia",
   "Snapshots removed: {count}.": "Usunięte zdjęcia: {count}.",
   "Your other fish of this kind suggest about {size}.": "Twoje inne ryby tego gatunku podpowiadają około {size}.",
   "Add only the new fish ({count})": "Dodaj tylko nowe ryby ({count})",

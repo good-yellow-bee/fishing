@@ -137,7 +137,12 @@ export function HomePage() {
                 {yearsAgo.map((entry) => (
                   <div key={entry.id} className="years-ago">
                     {/* Say plainly how long ago, beside the date on the card. */}
-                    <p className="meta">{tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}</p>
+                    <p className="meta">
+                      {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
+                      {" · "}
+                      {/* The whole day it came from, in the catch search. */}
+                      <Link to={findLink(localDate(new Date(entry.caughtAt)))}>{t("Every fish that day")}</Link>
+                    </p>
                     <CatchCard
                       level={4}
                       entry={entry}
