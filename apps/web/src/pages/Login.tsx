@@ -28,7 +28,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="auth-shell">
+    <main className="auth-shell">
       <form className="auth-card" onSubmit={onSubmit}>
         <h1>Stillwater</h1>
         <p className="lede">{t("First light on a northern lake. Cast, wait, fight whatever takes the hook.")}</p>
@@ -50,6 +50,6 @@ export function LoginPage() {
           {t("New here?")} <Link to="/register">{t("Make a profile")}</Link>
         </p>
       </form>
-    </div>
+    </main>
   );
 }

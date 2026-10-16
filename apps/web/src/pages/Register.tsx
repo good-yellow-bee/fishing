@@ -29,7 +29,7 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="auth-shell">
+    <main className="auth-shell">
       <form className="auth-card" onSubmit={onSubmit}>
         <h1>{t("Join Stillwater")}</h1>
         <p className="lede">{t("A name, an email, a password. Points and fish stay on this profile.")}</p>
@@ -53,6 +53,6 @@ export function RegisterPage() {
           {t("Already an angler?")} <Link to="/login">{t("Sign in")}</Link>
         </p>
       </form>
-    </div>
+    </main>
   );
 }

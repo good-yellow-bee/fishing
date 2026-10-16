@@ -29,19 +29,19 @@ const SpotMapPage = lazy(() => import("./field/map/SpotMapPage").then((module) =
 function FogLifting() {
   const t = useT();
   return (
-    <div className="auth-shell">
+    <main className="auth-shell">
       <div className="auth-card">
         <h1>Stillwater</h1>
         <p className="lede">{t("Fog lifting…")}</p>
       </div>
-    </div>
+    </main>
   );
 }
 
 function Offline() {
   const t = useT();
   return (
-    <div className="auth-shell">
+    <main className="auth-shell">
       <div className="auth-card">
         <h1>Stillwater</h1>
         <p className="lede">{t("You're offline. The lake needs a connection, but your field log works without one.")}</p>
@@ -49,7 +49,7 @@ function Offline() {
           <Link to="/">{t("Open the field log")}</Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
 
