@@ -1455,3 +1455,18 @@ button.field-primary:disabled {
   margin: 4px 0 12px;
   font-size: 14px;
 }
+
+/* The season Bests is worked out for: the one in use reads as plain text, the others are links to switch. */
+.bests-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 14px;
+  font-size: 14px;
+}
+
+.bests-scope [aria-pressed="true"] {
+  color: var(--field-ink);
+  font-weight: 600;
+  text-decoration: none;
+}

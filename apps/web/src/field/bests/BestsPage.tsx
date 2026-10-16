@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
 import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
@@ -10,6 +10,7 @@ import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
+import { findWithLink } from "../findLinks";
 import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { CopySummary } from "../CopySummary";
@@ -64,13 +65,37 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
 }
 
+/** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
+const YEAR_PARAM = "year";
+
 export function BestsPage() {
-  const { book } = useLogbook();
+  const { book: whole } = useLogbook();
   useT();
+  const [params, setParams] = useSearchParams();
   const today = localDate(new Date());
-  const days = daysOut(book, today.slice(0, 4), today);
-  const fishByTrip = fishCountsByTrip(book);
-  const streak = outingStreak(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
+  const days = daysOut(whole, today.slice(0, 4), today);
+  const wholeFishByTrip = fishCountsByTrip(whole);
+  const streak = outingStreak(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const years = yearTally(whole.catches).map((row) => row.year);
+  const asked = params.get(YEAR_PARAM);
+  const year = asked && years.includes(asked) ? asked : null;
+  // Everything else is worked out from the season picked, fish and outings alike.
+  const book = year
+    ? { ...whole, catches: whole.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
+    : whole;
+  // A row's link opens the same fish it counted: within the season picked, when there is one.
+  const linkFor = (term: string) => (year ? findWithLink(term, year) : findLink(term));
+  const pickYear = (next: string | null) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next) out.set(YEAR_PARAM, next);
+        else out.delete(YEAR_PARAM);
+        return out;
+      },
+      { replace: true },
+    );
   const bests = personalBests(book);
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
@@ -98,6 +123,20 @@ export function BestsPage() {
           </p>
         </div>
       </header>
+
+      {/* One season at a time, once the book spans more than one. */}
+      {years.length > 1 ? (
+        <p className="bests-scope" role="group" aria-label={t("Which seasons")}>
+          <button type="button" className="text-button" aria-pressed={!year} onClick={() => pickYear(null)}>
+            {t("All time")}
+          </button>
+          {years.map((each) => (
+            <button key={each} type="button" className="text-button" aria-pressed={year === each} onClick={() => pickYear(each)}>
+              {each}
+            </button>
+          ))}
+        </p>
+      ) : null}
 
       <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>
@@ -132,7 +171,7 @@ export function BestsPage() {
       {released > 0 ? (
         <p className="meta released-share">
           {/* Opens the released fish in the catch search. */}
-          <Link to={findLink(t("Released"))}>{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</Link>
+          <Link to={linkFor(t("Released"))}>{t("Released: {count} of {total}", { count: released, total: book.catches.length })}</Link>
         </p>
       ) : null}
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
@@ -198,7 +237,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("When they bite")}</h2>
             </div>
-            <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("time", t(row.label))) : undefined }))} />
+            <TallyBars key={year ?? ""} rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("time", t(row.label))) : undefined }))} />
           </section>
 
           <section>
@@ -219,13 +258,13 @@ export function BestsPage() {
             ) : null}
           </section>
 
-          {yearTally(book.catches).length > 1 ? (
+          {!year && years.length > 1 ? (
             <section>
               <div className="section-head">
                 <h2>{t("By year")}</h2>
               </div>
               {/* Each year opens the catch search for its fish. */}
-              <TallyBars rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(row.year) }))} />
+              <TallyBars key={year ?? ""} rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(row.year) }))} />
             </section>
           ) : null}
 
@@ -250,14 +289,14 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("By season")}</h2>
             </div>
-            <TallyBars rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("season", t(row.label))) : undefined }))} />
+            <TallyBars key={year ?? ""} rows={seasonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("season", t(row.label))) : undefined }))} />
           </section>
 
           <section>
             <div className="section-head">
               <h2>{t("By the moon")}</h2>
             </div>
-            <TallyBars rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("moon", t(row.label))) : undefined }))} />
+            <TallyBars key={year ?? ""} rows={moonTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("moon", t(row.label))) : undefined }))} />
           </section>
 
           {skyTally(book).some((row) => row.count > 0) ? (
@@ -265,16 +304,16 @@ export function BestsPage() {
               <div className="section-head">
                 <h2>{t("By the weather")}</h2>
               </div>
-              <TallyBars rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("sky", t(row.label))) : undefined }))} />
+              <TallyBars key={year ?? ""} rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("sky", t(row.label))) : undefined }))} />
             </section>
           ) : null}
-          <WeatherBars book={book} />
+          <WeatherBars key={year ?? ""} book={book} within={year ?? undefined} />
 
           <section>
             <div className="section-head">
               <h2>{t("Lures that worked")}</h2>
             </div>
-            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findLink(exactTerm("lure", t(row.lure))) }))} />
+            <TallyBars key={year ?? ""} rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>

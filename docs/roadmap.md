@@ -1473,3 +1473,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR302~~ | ~~Search: moon words, dusk/sunrise, lb-oz sizes~~ (#657) | field | S |
 | ~~BR303~~ | ~~Dated backup and spreadsheet names~~ (#658) | field | S |
 | ~~BR304~~ | ~~Sunrise and sunset on outings~~ (#659) | field | S |
+| ~~BR305~~ | ~~Season picker on Bests~~ (#660) | field | S |
