@@ -32,6 +32,17 @@ describe("month tally", () => {
     expect(rows.reduce((sum, row) => sum + row.count, 0)).toBe(book.catches.length);
     expect(monthTally(book.catches, 1)).toEqual([rows[0]]);
   });
+
+  it("keeps a month with no fish between, and reaches back to the same month a year ago", () => {
+    const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
+    const at = (y: number, m: number) => ({ ...base, id: `${y}-${m}`, caughtAt: new Date(y, m, 10, 9).toISOString() });
+    const rows = monthTally([at(2026, 9), at(2026, 7), at(2025, 9), at(2024, 1)]);
+    expect(rows.length).toBe(13);
+    expect(rows[0]).toEqual({ month: "2026-10", count: 1 });
+    expect(rows[1]).toEqual({ month: "2026-09", count: 0 });
+    expect(rows[12]).toEqual({ month: "2025-10", count: 1 });
+    expect(monthTally([at(2026, 9), at(2026, 7)]).map((row) => row.month)).toEqual(["2026-10", "2026-09", "2026-08"]);
+  });
 });
 
 describe("year tally", () => {

@@ -323,6 +323,10 @@ export const PL_FIELD: PlBook = {
   "Every fish that day": "Wszystkie ryby z tego dnia",
   "Snapshots removed: {count}.": "Usunięte zdjęcia: {count}.",
   "Your other fish of this kind suggest about {size}.": "Twoje inne ryby tego gatunku podpowiadają około {size}.",
+  "Far past your heaviest of this kind ({size}). Was it a length?": "Daleko ponad Twoją najcięższą rybę tego gatunku ({size}). Może to była długość?",
+  "Far past your longest of this kind ({size}). Was it a weight?": "Daleko ponad Twoją najdłuższą rybę tego gatunku ({size}). Może to była waga?",
+  "Make it a length": "Zmień na długość",
+  "Make it a weight": "Zmień na wagę",
   "Add only the new fish ({count})": "Dodaj tylko nowe ryby ({count})",
   "no fish": "brak ryb",
   "Earlier tackle lists in this browser could not be read, so they were set aside instead of being lost.":

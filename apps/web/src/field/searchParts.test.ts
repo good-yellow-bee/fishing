@@ -14,4 +14,11 @@ describe("split a search on +", () => {
     expect(searchParts(book, "pond + creek + Brook trout")).toEqual(["pond + creek", "Brook trout"]);
     expect(searchParts(book, "Pond + creek")).toEqual(["Pond + creek"]);
   });
+
+  it("reads a size with a + after it as that size and up", () => {
+    expect(searchParts(book, "pike 30in+")).toEqual(["pike >30in"]);
+    expect(searchParts(book, "2 kg+ + Overcast")).toEqual([">2 kg", "Overcast"]);
+    expect(searchParts(book, "60F+")).toEqual([">60F"]);
+    expect(searchParts(book, "30in + pike")).toEqual(["30in", "pike"]);
+  });
 });
