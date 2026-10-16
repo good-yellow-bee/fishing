@@ -27,6 +27,7 @@ import { PagedTrips } from "./PagedTrips";
 import { thisWeekInPastYears } from "./yearsAgo";
 import { speciesCounts } from "./speciesLink";
 import { FishSum } from "./FishSum";
+import { FishCsv } from "./FishCsv";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
@@ -173,6 +174,7 @@ function TripView() {
         </p>
       ) : null}
       <SpeciesChips catches={catches} />
+      <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
           {tn(loose.length, "{n} fish from this water that day is not on this outing.", "{n} fish from this water that day are not on this outing.")}{" "}

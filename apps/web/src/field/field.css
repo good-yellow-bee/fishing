@@ -108,6 +108,11 @@
 }
 
 /* Holds a paged list for Show more's focus without laying anything out. */
+.fish-csv {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
 .paged-list {
   display: contents;
 }

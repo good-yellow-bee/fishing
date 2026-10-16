@@ -16,6 +16,7 @@ import {
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
+import { FishCsv } from "./FishCsv";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
@@ -160,6 +161,7 @@ export function SpotPage() {
       </div>
       <FishSum catches={catches} />
       <SpeciesChips catches={catches} within={spot.name} />
+      <FishCsv catches={catches} name={spot.name} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (

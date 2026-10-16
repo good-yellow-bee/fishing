@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, catchesForTrip } from "@stillwater/shared";
+import { fishCountsByTrip, localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
@@ -29,6 +29,8 @@ export function HomePage() {
   const catches = recentCatches(book, 4);
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today, 3);
+  // Counted once for every card, not by sorting the whole book once per outing.
+  const fishByTrip = fishCountsByTrip(book);
   const kinds = speciesCounts(book.catches).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(book.catches, now);
@@ -168,7 +170,7 @@ export function HomePage() {
                   trip={trip}
                   spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
                   waterType={spotById(book, trip.spotId)?.waterType ?? null}
-                  fishCount={catchesForTrip(book, trip.id).length}
+                  fishCount={fishByTrip.get(trip.id) ?? 0}
                   today={today}
                   tomorrow={tomorrow}
                 />
@@ -187,7 +189,7 @@ export function HomePage() {
                   trip={trip}
                   spotName={spotById(book, trip.spotId)?.name ?? t("Unknown water")}
                   waterType={spotById(book, trip.spotId)?.waterType ?? null}
-                  fishCount={catchesForTrip(book, trip.id).length}
+                  fishCount={fishByTrip.get(trip.id) ?? 0}
                   today={today}
                   tomorrow={tomorrow}
                 />
