@@ -381,7 +381,6 @@ export const PL_FIELD: PlBook = {
   N: "N",
   "about 2 miles": "około 2 mil",
   "about 3 km": "około 3 km",
-  "{name}, {place}. Open spot.": "{name}, {place}. Otwórz łowisko.",
   "Sample spots on a north-woods sheet. The ink is local — no tile service and no key.":
     "Przykładowe łowiska na arkuszu z północnych lasów. Rysunek jest lokalny — bez serwera map i bez klucza.",
   "None of the waters in this book are drawn on the sheet.": "Żadne z łowisk w tym dzienniku nie jest narysowane na arkuszu.",

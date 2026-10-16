@@ -103,6 +103,18 @@ describe("field archive", () => {
     expect(parseFieldArchive({ ...document, book: badTrip })).toMatchObject({ ok: false, message: FIELD_ARCHIVE_REFUSAL });
   });
 
+  it("refuses a file with a size no fish could have", () => {
+    const document = fieldArchiveDocument(archiveFor(book, null));
+    const sized = (patch: Partial<CatchEntry>) => ({
+      ...document,
+      book: { ...document.book, catches: document.book.catches.map((entry, i) => (i === 0 ? { ...entry, ...patch } : entry)) },
+    });
+    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: -2 } }))).toMatchObject({ ok: false });
+    expect(parseFieldArchive(sized({ measure: { kind: "length", inches: 5000 } }))).toMatchObject({ ok: false });
+    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 2 }, alsoMeasure: { kind: "length", inches: 0 } }))).toMatchObject({ ok: false });
+    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 80 }, alsoMeasure: { kind: "length", inches: 120 } }))).toMatchObject({ ok: true });
+  });
+
   it("writes a file's catch times the way the book does, so newest first holds", () => {
     const document = fieldArchiveDocument(archiveFor(book, null));
     const stamps = ["October 1, 2020", "2026-10-14T23:30:00-05:00", "2026-10-15T01:00:00.000Z"];
