@@ -10,7 +10,7 @@ import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
-import { downloadFile } from "./download";
+import { datedName, downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
@@ -95,7 +95,7 @@ export function BookFile() {
   const onDownload = () => {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
     // The year's goals ride along, so a new browser keeps them too.
-    downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", "stillwater-field-log.json");
+    downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", datedName("stillwater-field-log.json"));
     saveCopiedAt(own);
     setCopiedAt(own);
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
@@ -248,7 +248,7 @@ export function BookFile() {
             type="button"
             className="text-button"
             onClick={() => {
-              downloadFile(catchesCsv(book), "text/csv;charset=utf-8", "stillwater-catches.csv");
+              downloadFile(catchesCsv(book), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"));
               setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
             }}
           >
