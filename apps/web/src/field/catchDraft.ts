@@ -60,3 +60,40 @@ export function dropKeptDraft() {
     // Nothing to drop.
   }
 }
+
+/** Changes to a fish already in the book, typed but not saved: kept for that fish while it still reads as it did. */
+export type EditDraft = KeptDraft & { catchId: string; base: string };
+
+export const CATCH_EDIT_KEY = "stillwater.catch-edit.v1";
+
+/** The kept changes to this fish, unless it was changed since (another tab, an undo), which would make them stale. */
+export function parseEditDraft(raw: string | null, catchId: string, base: string, now: Date): EditDraft | null {
+  const draft = parseKeptDraft(raw, now) as EditDraft | null;
+  return draft && draft.catchId === catchId && draft.base === base ? draft : null;
+}
+
+export function readEditDraft(catchId: string, base: string, now = new Date()): EditDraft | null {
+  try {
+    return parseEditDraft(localStorage.getItem(CATCH_EDIT_KEY), catchId, base, now);
+  } catch {
+    return null;
+  }
+}
+
+export function keepEditDraft(draft: EditDraft) {
+  try {
+    localStorage.setItem(CATCH_EDIT_KEY, JSON.stringify(draft));
+  } catch {
+    // A full or blocked store only costs the safety net.
+  }
+}
+
+/** Lets go of the kept changes to this fish; another fish's stay. */
+export function dropEditDraft(catchId: string) {
+  try {
+    const raw = localStorage.getItem(CATCH_EDIT_KEY);
+    if (raw && (JSON.parse(raw) as { catchId?: unknown }).catchId === catchId) localStorage.removeItem(CATCH_EDIT_KEY);
+  } catch {
+    // Nothing to drop.
+  }
+}
