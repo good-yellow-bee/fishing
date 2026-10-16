@@ -34,7 +34,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, nibblePlan, type BiteStyle } from "./nibblePlan";
+import { biteStyle, LIGHT_HOLD, nibblePlan, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -149,6 +149,7 @@ type Timers = {
 function strikeCall(style: BiteStyle) {
   if (style === "ambush") return t("WHAM — it hit! Strike!");
   if (style === "mouth") return t("It's taking it — strike!");
+  if (style === "light") return t("A light take, the float just slides under — strike!");
   return t("NOW — strike!");
 }
 
@@ -427,7 +428,8 @@ export function useFishingGame(
         setPhaseBoth("hookset");
         setHint(strikeCall(biteStyle(species.id)));
         const openWindow = () => {
-          const windowMs = hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints));
+          const heldMs = hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints));
+          const windowMs = biteStyle(species.id) === "light" ? Math.round(heldMs * LIGHT_HOLD) : heldMs;
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
           timers.current.hook = window.setTimeout(() => {
             if (phaseRef.current !== "hookset") return;
