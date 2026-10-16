@@ -1483,3 +1483,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR310~~ | ~~Photo as a search word~~ (#665) | field | S |
 | ~~BR311~~ | ~~Species page photos~~ (#667) | field | S |
 | ~~BR312~~ | ~~Lure record on the gear page~~ (#668) | field | S |
+| ~~BR313~~ | ~~Packing list copy and Home Next sun/packing line~~ (#670) | field | S |
