@@ -39,6 +39,11 @@ export function formatCatchDay(iso: string): string {
   return format("day", otherYear(date)).format(date);
 }
 
+/** A day that always carries its year, for text read later elsewhere. */
+export function formatDatedDay(date: Date): string {
+  return format("day", true).format(date);
+}
+
 export function formatLongDay(date: Date): string {
   return format("long").format(date);
 }

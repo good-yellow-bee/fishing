@@ -28,6 +28,15 @@ describe("trip summary", () => {
     expect(lines.at(-1)).toBe("Fog until eight.");
   });
 
+  it("names the water of a fish from somewhere else, and gives the year", () => {
+    const away = { ...fish("c", "2026-10-10T13:00:00.000Z"), spotId: "spot-quarry" };
+    const text = tripSummary(trip, "Cedar Bend", [away, fish("a", "2026-10-10T12:00:00.000Z")], (id) => (id === "spot-quarry" ? "Quarry Pond" : null));
+    const lines = text.split("\n");
+    expect(lines[0]).toContain("2026");
+    expect(lines[2]).not.toContain("Quarry Pond");
+    expect(lines[3]).toMatch(/Texas-rig worm, Quarry Pond$/);
+  });
+
   it("leaves out a missing water and an empty note", () => {
     const text = tripSummary({ ...trip, note: " " }, null, []);
     expect(text.split("\n")).toHaveLength(2);

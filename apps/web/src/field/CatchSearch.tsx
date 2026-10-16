@@ -101,8 +101,6 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
   // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
   if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
-  // "2025": the fish of that year, which the year bars open.
-  if (/^(19|20)\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry).startsWith(`${needle.trim()}-`));
   // ">60°F", "<15°C": the fish from water on that side of a temperature.
   const temp = parseTempQuery(needle);
   if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));

@@ -8,7 +8,7 @@ import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
-import { readDeletedFish } from "./deletedFish";
+import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
 import { downloadFile } from "./download";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
@@ -131,6 +131,8 @@ export function BookFile() {
     setBeforeLoad({ archive: here, loaded: next, copiedAt });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
+    // A fish that is in the book again is no longer one deleted here.
+    forgetDeletedFish(next.book.catches.map((entry) => entry.id));
     if (!merged) {
       // The file is itself a copy of the book now in this browser, so the reminder counts from it.
       const loaded = ownCatches(next.book);
@@ -152,9 +154,10 @@ export function BookFile() {
   const onReplace = () => {
     if (pending) load(pending, false);
   };
-  const onAddNew = () => {
+  /** `withDeleted` takes back the fish deleted here too, when the file still has them. */
+  const onAddNew = (withDeleted = false) => {
     if (!pending) return;
-    const file = withoutDeleted(pending);
+    const file = withDeleted ? pending : withoutDeleted(pending);
     const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file);
     // The file's photos that didn't fit beside this book's own.
     const leftOut = newFishIn(storedBook, file.book).filter((entry) => file.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
@@ -287,15 +290,21 @@ export function BookFile() {
             {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
             {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
-            {addable > 0 && kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
+            {kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>
           {addable > 0 && storedBook.catches.length > 0 ? (
             // Two copies that each gained fish: keep this one and take the file's new ones.
-            <button type="button" className="text-button" onClick={onAddNew}>
+            <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add only the new fish ({count})", { count: addable })}
+            </button>
+          ) : null}
+          {kept > 0 && storedBook.catches.length > 0 ? (
+            // A fish deleted by mistake, still in an older copy, can come back without replacing the book.
+            <button type="button" className="text-button" onClick={() => onAddNew(true)}>
+              {t("Add with the deleted fish too ({count})", { count: addable + kept })}
             </button>
           ) : null}
           <button ref={keepButton} type="button" className="text-button" onClick={keepBook}>
