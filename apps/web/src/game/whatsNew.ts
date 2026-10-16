@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16za";
+export const NEWS_ID = "2026-10-16zb";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "At the dock, a run you don't turn now wraps the line round a piling: ease off until it swings free. Turn every run there and the landed card says you kept it clear of the pilings.",
   "The catch form now reads “3 lb 4 oz” and “18 1/4”, takes the time from a photo, can find the nearest water, and has Save and log another. Weather needs no water temperature, and a species or lure can be renamed or merged across the whole book.",
   "A cast into the rocky shallows off the point can now snag on the rocks, as one in the reeds can in the weed. Tap a few times to work it free.",
   "In the field log, the Bests page can copy a summary of your year so far, a catch search can copy the list of fish it found, and the catch log now opens with a line summing up the whole book.",
