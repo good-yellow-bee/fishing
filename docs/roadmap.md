@@ -1515,3 +1515,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR329~~ | ~~Fish time against sunrise and sunset~~ (#695) | field | S |
 | ~~BR330~~ | ~~Review 24 fixes~~ (#697) | field | S |
 | ~~BR331~~ | ~~News card 16zq~~ (#699) | field | S |
+| ~~BR332~~ | ~~Outing edits keep fish right; same-water tackle list~~ (#701) | field | S |

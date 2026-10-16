@@ -8,12 +8,17 @@ import { CopySummary } from "../CopySummary";
 import { pieceKey } from "./pieceKey";
 import "./gear.css";
 
-/** The outing whose bag this one most likely repeats: the latest with a list, on or before this one's day when there is one. */
-function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
+/**
+ * The outing whose bag this one most likely repeats: the latest with a list, on or before this one's day when there is
+ * one, and on the same water ahead of any other.
+ */
+export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
   const listed = new Set(items.map((item) => item.tripId));
-  const day = trips.find((trip) => trip.id === tripId)?.date ?? "9999-12-31";
+  const self = trips.find((trip) => trip.id === tripId);
+  const day = self?.date ?? "9999-12-31";
   const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id)).sort((a, b) => b.date.localeCompare(a.date));
-  return others.find((trip) => trip.date <= day) ?? others[0] ?? null;
+  const pick = (from: readonly Trip[]) => from.find((trip) => trip.date <= day) ?? from[0] ?? null;
+  return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
 }
 
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
