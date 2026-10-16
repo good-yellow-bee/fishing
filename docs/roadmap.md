@@ -1330,3 +1330,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR207~~ | ~~Each field-log page names its browser tab after its heading~~ (#512) | field | S |
 | ~~BR208~~ | ~~Search finds a day; the Best day tile always links~~ (#513) | field | S |
 | ~~BR209~~ | ~~News card 2026-10-16c for the field log's new counts and searches~~ (#514) | field | S |
+| ~~BR210~~ | ~~Search bounds keep fish on the edge; trailing plus; best gains to a decimal; photo alt text~~ (#516) | field | S |
