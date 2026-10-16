@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16h";
+export const NEWS_ID = "2026-10-16i";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A hooked carp tears off on one long first run, half again as long as its later ones. The fight card calls it, so let it go and wait it out.",
   "On the lake you can now watch a pike turn over on the line when it rolls at the net. When a fish leaps or rolls, the fight card says it can't be turned, so just let go.",
   "In the field log a fish can carry both a length and a weight, and both count for the bests. An empty tackle list can copy the last outing's bag, and loading a book file says how many fish each copy holds and can be undone.",
   "A pike, tiger muskie or ghost pike doesn't make a last run at the net: it rolls on the line. You can't turn a roll, so let go when the fight card calls it, or a tight line goes into the red.",
