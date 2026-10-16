@@ -434,6 +434,7 @@ export const PL_GAME: PlBook = {
   "It wrapped the line round a piling — ease off till it swings free!": "Owinęła żyłkę wokół pala — odpuść, aż się odwinie!",
   "Dock: turn every run, or it wraps the line round a piling": "Pomost: zawracaj każdy odjazd, bo owinie żyłkę wokół pala",
   "Kept it clear of the pilings": "Z dala od pali",
+  "Turned it upstream every time": "Za każdym razem zawrócona pod prąd",
   "It ran into the weeds — reel slow and steady!": "Wpłynęła w zielsko — zwijaj powoli i równo!",
   "It's dragging the line over the rocks — turn it!": "Ciągnie linkę po kamieniach — zawróć ją!",
   "Reeds: turn every run, or it goes into the weeds": "Trzciny: zawracaj każdy odjazd, bo wpłynie w zielsko",

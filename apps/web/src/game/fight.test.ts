@@ -776,6 +776,27 @@ describe("a run downstream at the inlet", () => {
     return { taken: runtime.sim.line - start!, downstream, side: runtime.sim.runSide };
   }
 
+  /** Plays three runs at the inlet, turning them or not, and returns what the landed card would note. */
+  function threeRuns(firstSide: -1 | 1, turn: boolean) {
+    const runtime = makeFight(fish("lake-whitefish"), firstSide === 1 ? 2 : 2.1, 3, () => 0, 1, "current");
+    let runs = 0;
+    let was = runtime.sim.surge;
+    for (let now = 0; now < 60_000 && runs < 3; now += 50) {
+      const steer = turn && runtime.sim.surge >= 1 ? (-runtime.sim.runSide as Steer) : 0;
+      if (runtime.step(now, 0.05, runtime.sim.surge !== 1 && runtime.sim.tension < 0.6, steer) !== "fighting") break;
+      if (was === 2 && runtime.sim.surge === 0) runs += 1;
+      was = runtime.sim.surge;
+    }
+    expect(runs).toBe(3);
+    return runtime.performance.clearOf;
+  }
+
+  it("notes a fish whose every run downstream was turned upstream, and not one let run with the current", () => {
+    expect(threeRuns(DOWNSTREAM_SIDE, true)).toBe("current");
+    expect(threeRuns(DOWNSTREAM_SIDE, false)).toBeUndefined();
+    expect(threeRuns(-DOWNSTREAM_SIDE as -1 | 1, false)).toBeUndefined();
+  });
+
   it("helps a run with the current take more line, and not one upstream, one turned or one on still water", () => {
     const down = firstRun("current", DOWNSTREAM_SIDE, false);
     expect(down.side).toBe(DOWNSTREAM_SIDE);
