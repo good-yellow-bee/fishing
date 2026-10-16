@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { draftWorthKeeping, parseKeptDraft, type KeptDraft } from "./catchDraft";
+import { draftWorthKeeping, parseEditDraft, parseKeptDraft, type KeptDraft } from "./catchDraft";
 
 const now = new Date("2026-10-15T09:00:00Z");
 
@@ -42,5 +42,18 @@ describe("kept catch draft", () => {
     expect(parseKeptDraft(JSON.stringify({ ...draft, measureKind: "girth" }), now)).toBeNull();
     expect(parseKeptDraft(JSON.stringify({ ...draft, amount: 28 }), now)).toBeNull();
     expect(parseKeptDraft(JSON.stringify([draft]), now)).toBeNull();
+  });
+});
+
+describe("kept changes to a fish", () => {
+  const kept = JSON.stringify({ ...draft, catchId: "catch-pike", base: "as opened" });
+
+  it("come back for the same fish while it reads as it did", () => {
+    expect(parseEditDraft(kept, "catch-pike", "as opened", now)).toMatchObject({ catchId: "catch-pike", amount: "28" });
+  });
+
+  it("are not offered for another fish, or once the fish was changed elsewhere", () => {
+    expect(parseEditDraft(kept, "catch-perch", "as opened", now)).toBeNull();
+    expect(parseEditDraft(kept, "catch-pike", "changed since", now)).toBeNull();
   });
 });

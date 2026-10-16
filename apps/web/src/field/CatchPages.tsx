@@ -47,7 +47,7 @@ import { lengthText, measureText, measuresText, tempText, weatherText, weightTex
 import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
-import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
+import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater } from "./spotOrder";
 import { NearestWater, canFindNearest } from "./NearestWater";
@@ -238,15 +238,34 @@ function CatchForm() {
   const [reducing, setReducing] = useState(false);
   const [error, setError] = useState("");
   const photoPick = useRef(0);
-  // A new fish typed but never saved waits here until it is picked up or let go.
-  const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? null : readKeptDraft()));
+  // A fish's fields as the edit form holds them, to tell kept changes from the fish as it reads now.
+  const editFields = () => JSON.stringify({ species, measureKind, amount, alsoAmount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, released });
+  // The fish as the edit form opened on it.
+  const [editBase] = useState(() => (existing ? editFields() : ""));
+  // A new fish typed but never saved, or changes to this one, waits here until it is picked up or let go.
+  const [waiting, setWaiting] = useState<KeptDraft | null>(() => (existing ? readEditDraft(existing.id, editBase) : readKeptDraft()));
 
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
   const opened = useRef<string | null>(null);
 
   useEffect(() => {
     // While an older draft waits, keep it rather than overwrite it with this one.
-    if (existing || waiting) return;
+    if (waiting) return;
+    if (existing) {
+      // Changes to a fish in the book: kept until saved or cancelled, let go when the form reads as the fish again.
+      const now = editFields();
+      if (now === editBase) dropEditDraft(existing.id);
+      else
+        keepEditDraft({
+          ...(JSON.parse(now) as Omit<KeptDraft, "timeTouched" | "units" | "savedAt">),
+          timeTouched,
+          units,
+          savedAt: new Date().toISOString(),
+          catchId: existing.id,
+          base: editBase,
+        });
+      return;
+    }
     const fields = { species, measureKind, amount, alsoAmount, lure, spotId, tripId, note, sky, wind, waterTemp, released };
     const now = JSON.stringify(fields);
     if (opened.current === null) opened.current = now;
@@ -459,6 +478,7 @@ function CatchForm() {
       return;
     }
     if (existing) {
+      dropEditDraft(existing.id);
       navigate(`/catches/${existing.id}`, savedState("catchEdit"));
       return;
     }
@@ -501,12 +521,20 @@ function CatchForm() {
           <p className="eyebrow">{existing ? t("Edit entry") : t("New entry")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: t(existing.species) }) : t("Log a catch")}>{heading}</h1>
         </div>
-        <Link to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}>{t("Cancel")}</Link>
+        <Link
+          to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}
+          // Cancelling an edit means it: the changes are not kept for later.
+          onClick={existing ? () => dropEditDraft(existing.id) : undefined}
+        >
+          {t("Cancel")}
+        </Link>
       </header>
       {waiting ? (
         <div className="kept-draft" role="status">
           <p>
-            {waiting.species.trim()
+            {existing
+              ? t("Changes you made to this fish were not saved.")
+              : waiting.species.trim()
               ? t("A fish you started logging was not saved: {species}.", { species: waiting.species.trim() })
               : t("A fish you started logging was not saved.")}
           </p>
@@ -517,7 +545,8 @@ function CatchForm() {
             type="button"
             className="text-button"
             onClick={() => {
-              dropKeptDraft();
+              if (existing) dropEditDraft(existing.id);
+              else dropKeptDraft();
               setWaiting(null);
             }}
           >

@@ -1,8 +1,8 @@
-import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, ownCatches, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
@@ -83,7 +83,9 @@ export function BookFile() {
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
-  const nudge = copyNudge(own, copiedAt);
+  const [copyMark, setCopyMark] = useState(readCopyMark);
+  const signature = useMemo(() => bookSignature(storedBook), [storedBook]);
+  const nudge = copyNudge(own, copiedAt, changedDaysSince(copyMark, signature));
   const canInstall = useInstallOffer();
   const [tip] = useState(() => homeScreenTip());
   const [setAside, setSetAside] = useState(readUnreadableBook);
@@ -96,8 +98,9 @@ export function BookFile() {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
     // The year's goals ride along, so a new browser keeps them too.
     downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", datedName("stillwater-field-log.json"));
-    saveCopiedAt(own);
+    saveCopiedAt(own, signature);
     setCopiedAt(own);
+    setCopyMark(readCopyMark());
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
   };
 
@@ -150,8 +153,9 @@ export function BookFile() {
     if (!merged) {
       // The file is itself a copy of the book now in this browser, so the reminder counts from it.
       const loaded = ownCatches(next.book);
-      saveCopiedAt(loaded);
+      saveCopiedAt(loaded, bookSignature(next.book));
       setCopiedAt(loaded);
+      setCopyMark(readCopyMark());
     }
     setPending(null);
     setNotice({
@@ -191,6 +195,7 @@ export function BookFile() {
     if (beforeLoad.copiedAt === null) clearCopiedAt();
     else saveCopiedAt(beforeLoad.copiedAt);
     setCopiedAt(beforeLoad.copiedAt);
+    setCopyMark(readCopyMark());
     setBeforeLoad(null);
     setNotice({ tone: "ok", text: t("The book from before the file is back.") });
     loadButton.current?.focus();
@@ -207,7 +212,9 @@ export function BookFile() {
         <p className="copy-nudge">
           {nudge.kind === "never"
             ? t("This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.")
-            : t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })}
+            : nudge.kind === "since"
+              ? t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })
+              : t("The last download was {days} days ago, and the book has changed since. A fresh copy keeps it safe.", { days: nudge.days })}
         </p>
       ) : null}
       {setAside ? (
@@ -273,6 +280,7 @@ export function BookFile() {
             if (!restoreSample()) return;
             clearCopiedAt();
             setCopiedAt(null);
+            setCopyMark(null);
           }}
         >
           {t("Restore sample book")}

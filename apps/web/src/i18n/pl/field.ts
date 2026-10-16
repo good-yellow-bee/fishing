@@ -320,6 +320,7 @@ export const PL_FIELD: PlBook = {
     "Aby zachować aplikację i dziennik na tym urządzeniu, stuknij Udostępnij, a potem Do ekranu początkowego.",
   "This book hasn't been downloaded yet. A copy keeps your catches if the browser clears its storage.":
     "Ten dziennik nie był jeszcze pobrany. Kopia zachowa połowy, gdyby przeglądarka wyczyściła swoje dane.",
+  "The last download was {days} days ago, and the book has changed since. A fresh copy keeps it safe.": "Ostatnia kopia została pobrana {days} dni temu, a dziennik od tego czasu się zmienił. Świeża kopia go zabezpieczy.",
   "Catches since the last download: {count}. A fresh copy keeps them safe.":
     "Połowy od ostatniego pobrania: {count}. Nowa kopia je zabezpieczy.",
   "Load a book": "Wczytaj dziennik",
@@ -501,6 +502,7 @@ export const PL_FIELD: PlBook = {
   "Take {piece} off the list": "Usuń z listy: {piece}",
   "A fish you started logging was not saved: {species}.": "Ryba, którą zacząłeś zapisywać, nie została zapisana: {species}.",
   "A fish you started logging was not saved.": "Ryba, którą zacząłeś zapisywać, nie została zapisana.",
+  "Changes you made to this fish were not saved.": "Zmiany w tej rybie nie zostały zapisane.",
   "Pick it up": "Wróć do niej",
   "Let it go": "Porzuć",
   "Same as the last fish on this outing: {weather}": "Jak przy ostatniej rybie z tej wyprawy: {weather}",
