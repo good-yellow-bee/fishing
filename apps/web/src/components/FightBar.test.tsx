@@ -287,6 +287,10 @@ describe("FightBar for screen readers", () => {
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running"]);
     expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
     expect(habit("crappie")).toEqual(["Soft mouth: reel in the red and the hook tears out"]);
+    expect(habit("salmon")).toEqual([
+      "Jumper: every second run is a leap, so let go when it comes up",
+      "Long runner: the first run is the long one, so let it go",
+    ]);
     expect(habit("perch")).toEqual([]);
   });
 
@@ -296,7 +300,7 @@ describe("FightBar for screen readers", () => {
     sim.current.firstRun = true;
     sim.current.surge = 1;
     frame();
-    expect(status()).toBe("Let go now — a carp's first run is the long one!");
+    expect(status()).toBe("Let go now — its first run is the long one!");
     sim.current.surge = 2;
     frame();
     expect(status()).toBe("Let it run — the first run is the longest!");

@@ -835,7 +835,11 @@ describe("a carp's first run", () => {
     expect(lengths[0]! / lengths[1]!).toBeCloseTo(FIRST_RUN_LONGER, 1);
   });
 
-  it("is a carp's habit only", () => {
+  it("is a salmon's too, before its leaps", () => {
+    expect(runLengths("salmon").flags).toEqual([true, false, false]);
+  });
+
+  it("is a carp's and a salmon's habit only", () => {
     const { flags } = runLengths("walleye");
     expect(flags.every((flag) => !flag)).toBe(true);
   });
