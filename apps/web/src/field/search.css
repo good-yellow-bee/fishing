@@ -14,8 +14,8 @@
 .catch-search input {
   width: 100%;
   max-width: 28rem;
-  border: 1px solid #6b5233;
-  background: #fffaf2;
+  border: 1px solid var(--field-input-line);
+  background: var(--field-input);
   color: var(--field-ink);
   padding: 12px;
   font: inherit;

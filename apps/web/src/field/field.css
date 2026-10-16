@@ -8,6 +8,17 @@
   --field-rail-ink: #f3e6cc;
   --field-rust: #9a3f2c;
   --field-water: #314650;
+  /* Fills that carry light text keep their depth in either theme. */
+  --field-fill-water: #314650;
+  --field-fill-rust: #9a3f2c;
+  --field-input: #fffaf2;
+  --field-input-line: #6b5233;
+  --field-stamp-lake: #314650;
+  --field-stamp-river: #1f5c68;
+  --field-stamp-pond: #3d6b4f;
+  --field-stamp-creek: #6a5430;
+  --field-stamp-reservoir: #6a432c;
+  color-scheme: light;
   min-height: 100dvh;
   display: grid;
   grid-template-columns: 232px 1fr;
@@ -109,7 +120,7 @@
 
 /* Holds a paged list for Show more's focus without laying anything out. */
 .fish-csv {
-  margin: 4px 0 0;
+  margin: 4px 0 10px;
   font-size: 13px;
 }
 
@@ -191,7 +202,7 @@ button.field-primary {
 .sheet {
   max-width: 980px;
   background: var(--field-paper);
-  border-left: 16px solid var(--field-rust);
+  border-left: 16px solid var(--field-fill-rust);
   box-shadow: 0 22px 50px rgba(8, 10, 9, 0.35);
   padding: 28px 32px 36px 26px;
   min-height: calc(100dvh - 56px);
@@ -207,7 +218,7 @@ button.field-primary {
   margin-bottom: 22px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--field-ink);
-  box-shadow: 0 3px 0 #f4e7cc, 0 4px 0 var(--field-ink);
+  box-shadow: 0 3px 0 var(--field-paper), 0 4px 0 var(--field-ink);
 }
 
 .sheet h1 {
@@ -386,7 +397,7 @@ button.field-primary {
 .catch-photo {
   margin: 18px 0 0;
   padding: 8px;
-  background: #fffaf2;
+  background: var(--field-input);
   border: 1px solid var(--field-line);
 }
 
@@ -402,7 +413,7 @@ button.field-primary {
 .catch-photo-preview {
   width: min(100%, 360px);
   max-height: 240px;
-  border: 1px solid #6b5233;
+  border: 1px solid var(--field-input-line);
 }
 
 .photo-field {
@@ -449,11 +460,11 @@ button.field-primary:disabled {
   font-size: 22px;
   line-height: 1;
   color: #f6edd9;
-  background: var(--field-water);
+  background: var(--field-fill-water);
 }
 
 .measure-weight {
-  background: var(--field-rust);
+  background: var(--field-fill-rust);
 }
 
 .weather-line,
@@ -530,11 +541,11 @@ button.field-primary:disabled {
   transform: rotate(-2deg);
 }
 
-.stamp-lake { color: #314650; }
-.stamp-river { color: #1f5c68; }
-.stamp-pond { color: #3d6b4f; }
-.stamp-creek { color: #6a5430; }
-.stamp-reservoir { color: #6a432c; }
+.stamp-lake { color: var(--field-stamp-lake); }
+.stamp-river { color: var(--field-stamp-river); }
+.stamp-pond { color: var(--field-stamp-pond); }
+.stamp-creek { color: var(--field-stamp-creek); }
+.stamp-reservoir { color: var(--field-stamp-reservoir); }
 
 .conditions {
   margin-top: 16px;
@@ -583,8 +594,8 @@ button.field-primary:disabled {
 .entry-form textarea {
   width: 100%;
   min-width: 0;
-  border: 1px solid #6b5233;
-  background: #fffaf2;
+  border: 1px solid var(--field-input-line);
+  background: var(--field-input);
   color: var(--field-ink);
   padding: 12px;
   font-size: 16px;
@@ -607,7 +618,7 @@ button.field-primary:disabled {
 
 .choice-row button {
   background: transparent;
-  border: 1px solid #6b5233;
+  border: 1px solid var(--field-input-line);
   color: var(--field-ink);
   padding: 8px 12px;
   cursor: pointer;
@@ -1159,8 +1170,8 @@ button.field-primary:disabled {
 
 .year-goal-form input {
   width: 100%;
-  border: 1px solid #6b5233;
-  background: #fffaf2;
+  border: 1px solid var(--field-input-line);
+  background: var(--field-input);
   color: var(--field-ink);
   padding: 10px 12px;
   font-size: 16px;
@@ -1170,7 +1181,7 @@ button.field-primary:disabled {
 
 .year-goal-form button[type="submit"] {
   background: transparent;
-  border: 1px solid #6b5233;
+  border: 1px solid var(--field-input-line);
   color: var(--field-ink);
   padding: 10px 14px;
   cursor: pointer;
@@ -1181,4 +1192,25 @@ button.field-primary:disabled {
 
 .year-goal-form .field-error {
   grid-column: 1 / -1;
+}
+
+/* After dark on the water: the same book, read from a dim screen. */
+@media (prefers-color-scheme: dark) {
+  .field {
+    --field-ink: #ece1cc;
+    --field-muted: #b8a78c;
+    --field-paper: #1f1b17;
+    --field-card: #29241e;
+    --field-line: #4b4033;
+    --field-rust: #e6957a;
+    --field-water: #93b8c7;
+    --field-input: #171411;
+    --field-input-line: #8a7356;
+    --field-stamp-lake: #93b8c7;
+    --field-stamp-river: #7fc3cf;
+    --field-stamp-pond: #8fc4a2;
+    --field-stamp-creek: #d2b47e;
+    --field-stamp-reservoir: #d9a07e;
+    color-scheme: dark;
+  }
 }
