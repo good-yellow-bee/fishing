@@ -100,7 +100,7 @@ import { CAMERA_HILLS, CAMERA_TREES, LakeWorld, weatherLook } from "./LakeWorld"
 import { clearDistance, easePull } from "./cameraClear";
 import { PlayerMove } from "./Player";
 import { beatDistance, dollyStep, fightDistance, landingDistance, landingFramed, landingWeight } from "./cameraBeats";
-import { aboard, ANCHOR, boat, resetBoat, subscribeBoat } from "./boat";
+import { aboard, ANCHOR, boat, boatSwingTarget, resetBoat, subscribeBoat } from "./boat";
 import { anglerPose, resetAnglerPose, shortestYaw, walkAnglerTo } from "./pose";
 import {
   STRIKE_DROPS,
@@ -749,6 +749,10 @@ function FightMotion({ phase, sim, ambush }: { phase: ScenePhase; sim: SimRef; a
       if (phase !== "fight") fightView.leapAge = -1;
       fightView.plunge = phase === "hookset" ? bobberPlunge(fightView.biteAge, -1, 0) : 0;
     }
+
+    // At anchor the boat swings to follow a run (that is why a run takes less line out here), then settles back.
+    const swingTarget = live && boat.mode === "anchored" ? boatSwingTarget(surge, runSide.current, sim.current?.jump === true) : 0;
+    boat.swing += (swingTarget - boat.swing) * (1 - Math.exp(-(swingTarget === 0 ? 0.9 : 2.5) * dt));
 
     if (phase === "fight" && fightView.leapAge >= 0) {
       fightView.leapAge += dt;

@@ -1787,7 +1787,7 @@ function PlayerBoat() {
     const sample = 0.75;
     hull.position.set(at.x, y + BOAT_DECK - 0.14, at.z);
     hull.rotation.order = "YXZ";
-    hull.rotation.y = boat.yaw;
+    hull.rotation.y = boat.yaw + boat.swing;
     hull.rotation.x = THREE.MathUtils.clamp((waterHeight(at.x, at.z + sample, t) - y) * 1.15, -0.2, 0.2);
     hull.rotation.z = THREE.MathUtils.clamp((y - waterHeight(at.x + sample, at.z, t)) * 1.15, -0.2, 0.2);
   });

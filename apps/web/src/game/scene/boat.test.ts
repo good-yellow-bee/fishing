@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, inLake, stanceAt } from "@stillwater/shared";
-import { aboard, ANCHOR, boat, boatPathPoint, MOORING, resetBoat, ROW_SECONDS, rowBack, rowOut, stepBoat, subscribeBoat } from "./boat";
+import { aboard, ANCHOR, boat, boatPathPoint, BOAT_SWING, boatSwingTarget, MOORING, resetBoat, ROW_SECONDS, rowBack, rowOut, stepBoat, subscribeBoat } from "./boat";
 
 afterEach(() => resetBoat());
 
@@ -62,5 +62,24 @@ describe("rowboat", () => {
     // Partway out there is no bank underfoot, so no casting from a moving boat.
     const mid = boatPathPoint(0.5);
     expect(stanceAt(mid.x, mid.z)).toBe("trail");
+  });
+});
+
+describe("the boat swinging to a run", () => {
+  it("turns toward a run's side and squares up between runs", () => {
+    expect(boatSwingTarget(2, 1)).toBeCloseTo(-BOAT_SWING);
+    expect(boatSwingTarget(2, -0.5)).toBeCloseTo(BOAT_SWING * 0.5);
+    expect(boatSwingTarget(1, 1)).toBe(0);
+    expect(boatSwingTarget(0, -1)).toBe(0);
+  });
+
+  it("stays square for a leap, which goes up rather than sideways", () => {
+    expect(boatSwingTarget(2, 1, true)).toBe(0);
+  });
+
+  it("is square again after the boat goes home", () => {
+    boat.swing = 0.2;
+    resetBoat();
+    expect(boat.swing).toBe(0);
   });
 });
