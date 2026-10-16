@@ -1387,3 +1387,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR239~~ | ~~Lures that took it on species pages~~ (#571) | field | S |
 | ~~BR240~~ | ~~Audit 12 fixes~~ (#572) | field | S |
 | ~~BR241~~ | ~~Year goal on Bests~~ (#573) | field | S |
+| ~~BR242~~ | ~~Year goal on the home tile~~ (#574) | field | S |
