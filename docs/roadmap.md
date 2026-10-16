@@ -1173,7 +1173,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT128~~ | ~~News card for the trophy feel and the trophy's second run at the net~~ (#698) | ui | S |
 | ~~GT129~~ | ~~The landed card notes Rode out a second run at the net when a trophy made its encore~~ (#700) | fight | S |
 | ~~GT130~~ | ~~A lost trophy-sized fish: the snapped or thrown-hook message adds It looked like a trophy~~ (#703) | fight | S |
-| GT131 | News card for the second-run landed note and the lost-trophy line | ui | S |
+| ~~GT131~~ | ~~News card for the second-run landed note and the lost-trophy line~~ (#705) | ui | S |
+| GT132 | Hunter follows: a pike, largemouth or walleye can follow a landed small fish in without grabbing it, then stays about that bank for the next few casts; a hint, a bite call and a landed note | fish | S |
 
 ## Risks / open questions for the owner
 

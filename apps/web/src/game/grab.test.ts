@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { setLang } from "../i18n";
-import { GRAB_ODDS, grabberFor, grabCall, grabNote } from "./grab";
+import { FISH } from "@stillwater/shared";
+import { FOLLOW_ODDS, followCall, followerFor, GRAB_ODDS, grabberFor, grabCall, grabNote } from "./grab";
 
 const strong = { strength: 10, accuracy: 10 };
 
@@ -33,6 +34,28 @@ describe("grabberFor", () => {
     expect(grabberFor("golden-shiner", "reeds", { strength: 1, accuracy: 1 }, false, 0)).toBeNull();
     expect(grabberFor("perch", "open", { strength: 2, accuracy: 1 }, false, 0)).toBeNull();
     expect(grabberFor("bluegill", "point", { strength: 2, accuracy: 1 }, false, 0)?.id).toBe("largemouth-bass");
+  });
+});
+
+describe("followerFor", () => {
+  it("follows a share of the small fish in, at the same banks as the grabs", () => {
+    expect(followerFor("golden-shiner", "reeds", strong, false, FOLLOW_ODDS - 0.01)?.id).toBe("pike");
+    expect(followerFor("perch", "open", strong, false, 0)?.id).toBe("walleye");
+    expect(followerFor("golden-shiner", "reeds", strong, false, FOLLOW_ODDS)).toBeNull();
+    expect(followerFor("golden-shiner", "dock", strong, false, 0)).toBeNull();
+  });
+
+  it("spares a new angler and one too weak for the hunter", () => {
+    expect(followerFor("golden-shiner", "reeds", strong, true, 0)).toBeNull();
+    expect(followerFor("golden-shiner", "reeds", { strength: 1, accuracy: 1 }, false, 0)).toBeNull();
+  });
+
+  it("says who followed it, in Polish too", () => {
+    const fish = (id: string) => FISH.find((f) => f.id === id)!;
+    expect(followCall(fish("pike"))).toBe("A pike followed it in to the bank!");
+    expect(followCall(fish("walleye"))).toBe("A walleye followed it up to the boat!");
+    setLang("pl");
+    expect(followCall(fish("largemouth-bass"))).toBe("Bass wielkogębowy odprowadził ją aż do brzegu!");
   });
 });
 
