@@ -29,13 +29,14 @@ import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { t, useT } from "../i18n";
+import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
 import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
+import { MonthBars } from "./MonthBars";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -113,7 +114,12 @@ export function SpotPage() {
     <div className="sheet">
       <EditDelete
         editTo={`/spots/${spot.id}/edit`}
-        ask={t("Delete this water? Its outings and fish leave the book too.")}
+        ask={
+          // How much goes with it, since a water with a season on it takes a lot.
+          trips.length + catches.length === 0
+            ? t("Delete this water?")
+            : t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(trips.length, "{n} outing", "{n} outings"), fish: fishCountLabel(catches.length) })
+        }
         onDelete={() => {
           if (deleteSpot(spot.id)) navigate("/spots");
         }}
@@ -192,6 +198,7 @@ export function SpotPage() {
       <FishSum catches={catches} />
       <SpeciesChips catches={catches} within={spot.name} />
       <FishCsv catches={catches} name={spot.name} />
+      <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
