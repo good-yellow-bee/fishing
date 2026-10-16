@@ -125,6 +125,10 @@ export type FightPerformance = {
   turnedRuns?: number;
   /** Leaps the angler bowed to, letting go before the line loaded the rod. */
   bowedLeaps?: number;
+  /** A walleye's head shakes the angler eased off for, not reeling through into the red. */
+  easedShakes?: number;
+  /** A brook trout's darts the angler switched sides for and kept turning. */
+  followedDarts?: number;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
@@ -335,6 +339,8 @@ export function makeFight(
   let shakeAt = Infinity;
   /** How much of a darter's run is left when it cuts back: half of it, so turning it, which shortens the run, brings the dart sooner. */
   let dartLeft: number | null = null;
+  let followedDart = false;
+  let heldThroughShake = false;
   const coverHold = coverDiver ? COVER_HOLD : 1;
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
@@ -380,6 +386,8 @@ export function makeFight(
         dartLeft = darter && !sim.jump && !sim.roll ? (nextAt - nowMs) / 2 : null;
       } else {
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
+        if (followedDart) performance.followedDarts = (performance.followedDarts ?? 0) + 1;
+        followedDart = false;
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
         if (weedy && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
@@ -449,7 +457,12 @@ export function makeFight(
     }
     if (!sim.sulk) sim.lifting = false;
 
+    const wasShaking = sim.shake === true;
     sim.shake = sim.surge === 0 && nowMs >= shakeAt && nowMs < shakeAt + SHAKE_MS;
+    if (wasShaking && !sim.shake) {
+      if (!heldThroughShake) performance.easedShakes = (performance.easedShakes ?? 0) + 1;
+      heldThroughShake = false;
+    }
     // A brook trout cuts back the other way halfway through its run.
     if (dartLeft !== null && sim.surge === 2 && nextAt !== null && nextAt - nowMs <= dartLeft) {
       dartLeft = null;
@@ -460,6 +473,7 @@ export function makeFight(
     sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
+    if (sim.turning && sim.darted) followedDart = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll;
@@ -479,7 +493,10 @@ export function makeFight(
       if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
-    if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) sim.tension = Math.max(sim.tension, RED_TENSION);
+    if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {
+      sim.tension = Math.max(sim.tension, RED_TENSION);
+      heldThroughShake = true;
+    }
     // A line held tight through a leap or a roll loads the rod into the red: the clean bonus goes, but never the fish.
     if ((sim.jump || sim.roll) && sim.surge === 2) {
       jumpAge += dtSec;

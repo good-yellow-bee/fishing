@@ -363,6 +363,8 @@ export const PL_GAME: PlBook = {
   "Kept it out of the weeds": "Z dala od zielska",
   "Kept it off the rocks": "Z dala od kamieni",
   "Turned {n} runs": ["{n} zawrócony odjazd", "{n} zawrócone odjazdy", "{n} zawróconych odjazdów"],
+  "Followed {n} darts": ["{n} złapany zygzak", "{n} złapane zygzaki", "{n} złapanych zygzaków"],
+  "Eased off {n} head shakes": ["{n} przetrwane potrząśnięcie", "{n} przetrwane potrząśnięcia", "{n} przetrwanych potrząśnięć"],
   "Bowed to {n} leaps": ["{n} przetrwany skok", "{n} przetrwane skoki", "{n} przetrwanych skoków"],
   "{n} clean fights in a row": "Czyste hole z rzędu: {n}",
   "Landed in {s} s": "Wyholowana w {s} s",

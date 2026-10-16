@@ -816,7 +816,7 @@ describe("a walleye's head shake", () => {
       const calm = ran && runtime.sim.surge === 0;
       runtime.step(now, 0.02, calm && reel);
       if (runtime.sim.surge === 2) ran = true;
-      else if (ran && runtime.sim.surge === 1) return { shakeTicks, peak };
+      else if (ran && runtime.sim.surge === 1) return { shakeTicks, peak, eased: runtime.performance.easedShakes ?? 0 };
       if (calm) {
         if (runtime.sim.shake) shakeTicks += 1;
         peak = Math.max(peak, runtime.sim.tension);
@@ -837,6 +837,11 @@ describe("a walleye's head shake", () => {
     expect(calmAfterRun("pike", true).peak).toBeLessThan(RED_TENSION);
     expect(SHAKE_GRACE_SEC).toBeGreaterThan(JUMP_GRACE_SEC);
   });
+
+  it("counts a shake the angler eased off for, and not one reeled through", () => {
+    expect(calmAfterRun("walleye", false).eased).toBe(1);
+    expect(calmAfterRun("walleye", true).eased).toBe(0);
+  });
 });
 
 describe("a brook trout's dart", () => {
@@ -854,7 +859,7 @@ describe("a brook trout's dart", () => {
       if (runtime.sim.surge === 2) {
         sides.push(runtime.sim.runSide);
         if (runtime.sim.darted && runtime.sim.turning) turnedLate = true;
-      } else if (sides.length > 0) return { sides, turnedLate };
+      } else if (sides.length > 0) return { sides, turnedLate, followed: runtime.performance.followedDarts ?? 0 };
     }
     throw new Error("never ran");
   }
@@ -871,6 +876,8 @@ describe("a brook trout's dart", () => {
   it("is only turned after the dart by an angler who switches sides", () => {
     expect(firstRun("brook-trout", "now").turnedLate).toBe(true);
     expect(firstRun("brook-trout", "start").turnedLate).toBe(false);
+    expect(firstRun("brook-trout", "now").followed).toBe(1);
+    expect(firstRun("brook-trout", "start").followed).toBe(0);
   });
 });
 

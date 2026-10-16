@@ -16,6 +16,8 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, fightSec: 23.6 })).toBe("Turned 2 runs · Landed in 24 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 0.2 })).toBe("Landed in 1 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, bowedLeaps: 2 })).toBe("Turned 1 run · Bowed to 2 leaps");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, followedDarts: 1 })).toBe("Turned 2 runs · Followed 1 dart");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, easedShakes: 3 })).toBe("Eased off 3 head shakes");
     expect(fightNotesText({ perfectCast: true, hookedSolid: true, turnedRuns: 0, secondTake: true })).toBe("Perfect cast · Hooked solid · On the second take");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 65.2 })).toBe("Landed in 1 min 5 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "weeds" })).toBe("Turned 2 runs · Kept it out of the weeds");
