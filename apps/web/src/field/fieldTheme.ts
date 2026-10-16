@@ -22,6 +22,8 @@ export function writeFieldTheme(theme: FieldTheme): void {
   try {
     if (theme === "device") localStorage.removeItem(FIELD_THEME_KEY);
     else localStorage.setItem(FIELD_THEME_KEY, theme);
+    // Stored: an earlier choice held only in memory gives way to it.
+    remembered = null;
   } catch {
     // Storage refused: the choice still holds until the page reloads.
     remembered = theme;
@@ -39,6 +41,11 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
+/** The choice in force: one held in memory after storage refused it, else the stored one. */
+export function themeNow(): FieldTheme {
+  return remembered ?? readFieldTheme();
+}
+
 export function useFieldTheme(): FieldTheme {
-  return useSyncExternalStore(subscribe, () => remembered ?? readFieldTheme(), () => "device");
+  return useSyncExternalStore(subscribe, themeNow, () => "device");
 }

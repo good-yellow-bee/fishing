@@ -1261,10 +1261,10 @@ button.field-primary:disabled {
   .sheet-actions,
   .book-file,
   .tackle-add,
+  .tackle-suggest,
   .trip-calendar,
   .field .field-primary,
   .field button,
-  .field input:placeholder-shown,
   .catch-search:has(> input:placeholder-shown) {
     display: none !important;
   }
