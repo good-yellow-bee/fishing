@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { BAIT_THIEVES, biteStyle, LIFT_RISE, liftTilt, nibblePlan, STEAL_CHANCE, stealsBait } from "./nibblePlan";
+import { BAIT_THIEVES, biteStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -58,13 +58,23 @@ describe("nibble plan", () => {
 
   it("names every kind's style, with only known ids set apart", () => {
     const styles = new Set(FISH.map((fish) => biteStyle(fish.id)));
-    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "peck", "usual"]));
+    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "peck", "run", "usual"]));
     expect(biteStyle("perch")).toBe("usual");
     expect(biteStyle("pike")).toBe("ambush");
     expect(biteStyle("carp")).toBe("mouth");
     expect(biteStyle("walleye")).toBe("light");
     expect(biteStyle("crappie")).toBe("lift");
     expect(biteStyle("bluegill")).toBe("peck");
+    expect(biteStyle("smallmouth-bass")).toBe("run");
+  });
+
+  it("slides a running bite's float away as it goes down, never past the full slide", () => {
+    expect(runSlide(0)).toBe(0);
+    expect(runSlide(-0.1)).toBe(0);
+    expect(runSlide(0.36 * RUN_PLUNGE)).toBeCloseTo(RUN_SLIDE);
+    expect(runSlide(1)).toBeCloseTo(RUN_SLIDE);
+    expect(runSlide(0.1)).toBeGreaterThan(0);
+    expect(runSlide(0.1)).toBeLessThan(RUN_SLIDE);
   });
 
   it("gives a pecker more, quicker taps that still end before the bite", () => {

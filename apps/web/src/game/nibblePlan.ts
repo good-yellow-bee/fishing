@@ -24,9 +24,10 @@ const PECK_GAP_SPREAD = 260;
  * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
  * bottom feeders mouth it over and over, a walleye takes it so lightly the float only slides under,
  * a crappie takes it rising so the float lifts and lies flat, a bluegill pecks at it in quick taps
- * before it pulls, and the rest nibble a time or three.
+ * before it pulls, a smallmouth bass runs off with it so the float slides away before it goes under,
+ * and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "run" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -40,6 +41,7 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   walleye: "light",
   crappie: "lift",
   bluegill: "peck",
+  "smallmouth-bass": "run",
 };
 
 /** A light biter's take pulls the float only this share as deep as a usual bite. */
@@ -48,6 +50,14 @@ export const LIGHT_PLUNGE = 0.45;
 export const LIGHT_HOLD = 1.3;
 /** A lift bite raises the float this share of a usual bite's pull, instead of pulling it under. */
 export const LIFT_RISE = 0.3;
+/** A running bite pulls the float under this share as deep as a usual bite, as it slides it away. */
+export const RUN_PLUNGE = 0.6;
+/** How far, in meters, a running bite slides the float along the top. */
+export const RUN_SLIDE = 0.55;
+/** How far a running bite has slid the float at this (already scaled) plunge. */
+export function runSlide(plunge: number) {
+  return Math.min(1, Math.max(0, plunge / (0.36 * RUN_PLUNGE))) * RUN_SLIDE;
+}
 /** How far a lifted float has tipped over towards lying flat (0 upright, 1 flat) at this plunge. */
 export function liftTilt(plunge: number) {
   return Math.min(1, Math.max(0, -plunge / (0.3 * LIFT_RISE)));
