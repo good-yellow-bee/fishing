@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FISH, biteTimes, lureTally, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
-import { getUnits, num, t, useT } from "../i18n";
+import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
@@ -14,13 +14,47 @@ import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
-import { CM_PER_IN, KG_PER_LB, lengthText, measureText, weightText } from "../i18n/content";
+import { CM_PER_IN, KG_PER_LB, lengthText, measureText, measuresText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
+/** How many of the kind's newest photos show here; the rest are a search away. */
+const PHOTOS_SHOWN = 4;
+
+/** The kind's own pictures, newest first, each opening its fish; more than a few open in the catch search. */
+function SpeciesPhotos({ catches, name }: { catches: readonly CatchEntry[]; name: string }) {
+  const { photoFor } = useLogbook();
+  const pictured = catches.filter((entry) => photoFor(entry.id));
+  if (pictured.length === 0) return null;
+  return (
+    <section>
+      <div className="section-head">
+        <h2>{t("Photos")}</h2>
+        {pictured.length > PHOTOS_SHOWN ? (
+          <Link to={findWithLink(exactTerm("species", t(name)), t("Photo").toLowerCase())}>{tn(pictured.length, "{n} photo", "{n} photos")}</Link>
+        ) : null}
+      </div>
+      <ul className="photo-wall species-photos">
+        {pictured.slice(0, PHOTOS_SHOWN).map((entry) => (
+          <li key={entry.id}>
+            <Link to={`/catches/${entry.id}`}>
+              <img src={photoFor(entry.id)!} alt="" loading="lazy" />
+              <span className="photo-caption">
+                <small>
+                  {measuresText(entry)} · {formatCatchDay(entry.caughtAt)}
+                </small>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function SpeciesPage() {
   const { book } = useLogbook();
   useT();
@@ -67,6 +101,7 @@ export function SpeciesPage() {
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
+      <SpeciesPhotos key={species} catches={catches} name={name} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>

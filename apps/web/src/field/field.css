@@ -983,6 +983,11 @@ button.field-primary:disabled {
   background: #14211f;
 }
 
+/* A species page's few pictures: smaller tiles than the photos page. */
+.species-photos {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr));
+}
+
 .photo-caption {
   display: grid;
   gap: 2px;
