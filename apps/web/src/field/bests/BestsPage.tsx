@@ -7,6 +7,7 @@ import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
+import { WeatherBars } from "../WeatherBars";
 import { findLink } from "../CatchSearch";
 import { monthName, monthTally } from "../tripMonths";
 
@@ -219,6 +220,7 @@ export function BestsPage() {
               <TallyBars rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(t(row.label)) : undefined }))} />
             </section>
           ) : null}
+          <WeatherBars book={book} />
 
           <section>
             <div className="section-head">

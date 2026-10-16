@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -37,6 +37,13 @@ function skyHas(entry: CatchEntry, want: string, t: (text: string) => string): b
   return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
 }
 
+/** True when a word of the wind the fish came in ("Light north", "Słaby z północy") starts with what was typed, from three letters up. */
+function windHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  if (want.length < 3 || !entry.weather) return false;
+  const name = normalize(t(WIND_LABELS[entry.weather.wind]));
+  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
+}
+
 /** True when the season the fish came in ("Fall", "Jesień") starts with what was typed, from three letters up. */
 function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
@@ -61,7 +68,7 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
   return !Number.isNaN(at.getTime()) && normalize(t(MOON_QUARTER_LABELS[moonQuarterOf(at)])).startsWith(want);
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the season, the time of day, the moon, the outing's title, and released fish. */
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, and released fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
   const size = parseSizeQuery(needle);
@@ -82,6 +89,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
       waterTypeHas(book, entry, want, t) ||
       skyHas(entry, want, t) ||
+      windHas(entry, want, t) ||
       seasonHas(entry, want, t) ||
       timeHas(entry, want, t) ||
       moonHas(entry, want, t) ||
@@ -211,7 +219,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a kind of water such as “river”, a size such as “>2 lb”, or “released”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, or “released”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">

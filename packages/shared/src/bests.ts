@@ -1,6 +1,6 @@
 import { LAKE_SEASONS, SEASON_LABELS, lakeSeason, type LakeSeason } from "./season.ts";
 import { moonPhase } from "./moon.ts";
-import { SKIES, SKY_LABELS, type Sky } from "./weather.ts";
+import { SKIES, SKY_LABELS, WINDS, WIND_LABELS, type Sky, type Wind } from "./weather.ts";
 import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
@@ -224,6 +224,31 @@ export function skyTally(book: Logbook): SkyTally[] {
   const counts = new Map<Sky, number>();
   for (const entry of book.catches) if (entry.weather) counts.set(entry.weather.sky, (counts.get(entry.weather.sky) ?? 0) + 1);
   return SKIES.map((id) => ({ id, label: SKY_LABELS[id], count: counts.get(id) ?? 0 }));
+}
+
+export type WindTally = { id: Wind; label: string; count: number };
+
+/** How many fish came in each wind, from calm to strong; fish without weather are left out. */
+export function windTally(book: Logbook): WindTally[] {
+  const counts = new Map<Wind, number>();
+  for (const entry of book.catches) if (entry.weather) counts.set(entry.weather.wind, (counts.get(entry.weather.wind) ?? 0) + 1);
+  return WINDS.map((id) => ({ id, label: WIND_LABELS[id], count: counts.get(id) ?? 0 }));
+}
+
+/** The water-temperature bands the field log counts fish in, by their lower edge in °F; the first has none. */
+export const WATER_TEMP_BANDS = [null, 50, 60, 70] as const;
+
+export type WaterTempTally = { from: number | null; to: number | null; count: number };
+
+/** How many fish came in each band of water temperature, coldest first; fish without weather are left out. */
+export function waterTempTally(book: Logbook): WaterTempTally[] {
+  const rows = WATER_TEMP_BANDS.map((from, index) => ({ from, to: WATER_TEMP_BANDS[index + 1] ?? null, count: 0 }));
+  for (const entry of book.catches) {
+    const temp = entry.weather?.waterTempF;
+    if (temp === undefined || !Number.isFinite(temp)) continue;
+    rows.find((row) => (row.from === null || temp >= row.from) && (row.to === null || temp < row.to))!.count += 1;
+  }
+  return rows;
 }
 
 export type BestDay = { date: string; count: number };
