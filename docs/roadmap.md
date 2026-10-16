@@ -1341,3 +1341,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR213~~ | ~~Search finds kept fish and water notes; "released" finds just released fish~~ (#521) | field | S |
 | ~~BR214~~ | ~~Edit pages and single catches get their own tab titles~~ (#523) | field | S |
 | ~~BR215~~ | ~~A fish can carry both a length and a weight~~ (#525) | field | S |
+| ~~BR216~~ | ~~Download the stored book; load-a-book counts and newest dates~~ (#526) | field | S |

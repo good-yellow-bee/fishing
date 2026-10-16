@@ -34,6 +34,8 @@ type SaveResult = { ok: true; id: string } | { ok: false; message: string; field
 
 type LogbookApi = {
   book: Logbook;
+  /** The book as stored, before the sample week is put into the player's language: what a backup file should hold. */
+  storedBook: Logbook;
   photoFor: (id: string) => string | null;
   addCatch: (draft: CatchDraft, photo: string | null) => SaveResult;
   addSpot: (draft: SpotDraft) => SaveResult;
@@ -153,6 +155,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
 
     return {
       book: localizeSample(book),
+      storedBook: book,
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
         const parsed = parseCatchDraft(draft, book);
