@@ -20,7 +20,7 @@ export function LurkerShadow({ phase, lurking, bobber }: Props) {
     const { dx, dz, heading } = lurkerPose(time);
     const x = bobber.x + dx;
     const z = bobber.z + dz;
-    fish.position.set(x, waterHeight(x, z, time) - 0.02, z);
+    fish.position.set(x, waterHeight(x, z, time) + 0.01, z);
     fish.rotation.y = heading;
   });
   return (

@@ -1179,7 +1179,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT134~~ | ~~A big lure tempts a fish that got away (or a hunter that followed one in) back sooner: 50% a cast at its bank instead of 30%, and the still-about hint says so on a small lure~~ (#710) | fish | S |
 | ~~GT135~~ | ~~News card for the big lure tempting a waiting fish back~~ (#712) | ui | S |
 | ~~GT136~~ | ~~While a fish that got away, or a hunter, is still about the bank, one big shadow circles wide and slow round the float as you wait there~~ (#714) | scene | S |
-| GT137 | News card for the big shadow round the float | ui | S |
+| ~~GT137~~ | ~~News card for the big shadow round the float~~ (#716) | ui | S |
+| GT138 | Lift the circling shadow above the water so it shows | ui | S |
 
 ## Risks / open questions for the owner
 
