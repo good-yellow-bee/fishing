@@ -1,13 +1,11 @@
-import { WATER_LABELS, spotById, type Logbook, type Trip } from "@stillwater/shared";
+import { WATER_LABELS, foldText, spotById, type Logbook, type Trip } from "@stillwater/shared";
 import { dateWords } from "./dateWords";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
 
 /** Lower case with single spaces, so typed words compare however they were spaced. */
-function plain(text: string): string {
-  return text.trim().toLowerCase().replace(/\s+/g, " ");
-}
+const plain = foldText;
 
 /** Everything an outing can be found by: its title, note, water and kind of water, and its day written out. */
 function tripText(book: Logbook, trip: Trip, t: (text: string) => string): string {
