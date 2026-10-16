@@ -244,7 +244,7 @@ export function TripPage() {
           <button
             type="button"
             className="text-button"
-            onClick={() => downloadFile(tripIcs(trip, spot?.name ?? null), "text/calendar;charset=utf-8", tripIcsName(trip))}
+            onClick={() => downloadFile(tripIcs(trip, spot?.name ?? null, new Date(), spot?.place), "text/calendar;charset=utf-8", tripIcsName(trip))}
           >
             {t("Add to calendar")}
           </button>

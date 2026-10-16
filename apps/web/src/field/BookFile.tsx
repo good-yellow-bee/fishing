@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent } from "react";
-import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
@@ -112,24 +112,38 @@ export function BookFile() {
     setPending(parsed.value);
   };
 
-  const onReplace = () => {
-    if (!pending) return;
-    const saved = commitFieldArchive(pending);
+  /** Puts `next` in this browser, where it can be undone; `merged` is for a book that is this one plus the file's new fish. */
+  const load = (next: FieldArchive, merged: boolean) => {
+    const saved = commitFieldArchive(next);
     if (!saved.ok) {
       setPending(null);
       setNotice({ tone: "bad", text: saved.message });
       return;
     }
-    setBeforeLoad({ archive: { book: storedBook, tackle: items, photos }, loaded: pending, copiedAt });
-    replaceBook(pending.book, pending.photos);
-    replaceTackle(pending.tackle);
-    // The file is itself a copy of the book now in this browser, so the reminder counts from it.
-    const loaded = ownCatches(pending.book);
-    saveCopiedAt(loaded);
-    setCopiedAt(loaded);
+    const here: FieldArchive = { book: storedBook, tackle: items, photos };
+    setBeforeLoad({ archive: here, loaded: next, copiedAt });
+    replaceBook(next.book, next.photos);
+    replaceTackle(next.tackle);
+    if (!merged) {
+      // The file is itself a copy of the book now in this browser, so the reminder counts from it.
+      const loaded = ownCatches(next.book);
+      saveCopiedAt(loaded);
+      setCopiedAt(loaded);
+    }
     setPending(null);
-    setNotice({ tone: "loaded", text: t("This browser now has the book from that file.") });
+    setNotice({
+      tone: "loaded",
+      text: merged
+        ? t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })
+        : t("This browser now has the book from that file."),
+    });
     loadButton.current?.focus();
+  };
+  const onReplace = () => {
+    if (pending) load(pending, false);
+  };
+  const onAddNew = () => {
+    if (pending) load(mergeFieldArchive({ book: storedBook, tackle: items, photos }, pending), true);
   };
 
   const onUndoLoad = () => {
@@ -260,6 +274,12 @@ export function BookFile() {
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>
+          {newFishIn(storedBook, pending.book).length > 0 && storedBook.catches.length > 0 ? (
+            // Two copies that each gained fish: keep this one and take the file's new ones.
+            <button type="button" className="text-button" onClick={onAddNew}>
+              {t("Add only the new fish ({count})", { count: newFishIn(storedBook, pending.book).length })}
+            </button>
+          ) : null}
           <button ref={keepButton} type="button" className="text-button" onClick={keepBook}>
             {t("Keep")}
           </button>

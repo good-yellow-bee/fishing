@@ -237,6 +237,8 @@ export const PL_FIELD: PlBook = {
   "Fish here that aren't in the file, and would be lost: {count}.": "Ryby zapisane tu, których nie ma w pliku i które przepadłyby: {count}.",
   "{fish}, newest {day}": "{fish}, najnowsza {day}",
   "The book from before the file is back.": "Dziennik sprzed wczytania pliku wrócił.",
+  "Fish added from the file: {count}.": "Dodane ryby z pliku: {count}.",
+  "Add only the new fish ({count})": "Dodaj tylko nowe ryby ({count})",
   "no fish": "brak ryb",
   "Earlier tackle lists in this browser could not be read, so they were set aside instead of being lost.":
     "Wcześniejszych list sprzętu w tej przeglądarce nie dało się odczytać, więc odłożono je, zamiast je stracić.",

@@ -21,8 +21,14 @@ describe("trip calendar file", () => {
     expect(text).toContain("LOCATION:Cedar Bend\r\n");
   });
 
+  it("gives the water's own place as coordinates", () => {
+    const text = tripIcs(trip, "Cedar Bend", new Date("2026-10-15T04:00:00.000Z"), { lat: 46.848, lng: -94.14 });
+    expect(text).toContain("GEO:46.848;-94.14\r\n");
+  });
+
   it("leaves out an unknown place and an empty note", () => {
     const text = tripIcs({ ...trip, note: "" }, null);
+    expect(text).not.toContain("GEO:");
     expect(text).not.toContain("LOCATION:");
     expect(text).not.toContain("DESCRIPTION:");
   });
