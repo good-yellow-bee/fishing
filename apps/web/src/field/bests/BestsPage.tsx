@@ -44,8 +44,9 @@ function soleTripOn(book: Logbook, ymd: string): string | null {
   return trips.size === 1 && only ? only : null;
 }
 
-function DayTally({ count, tripId }: { count: number; tripId: string | null }) {
-  return tripId ? <Link to={`/trips/${tripId}`}>{fishCountLabel(count)}</Link> : <>{fishCountLabel(count)}</>;
+/** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
+function DayTally({ count, date, tripId }: { count: number; date: string; tripId: string | null }) {
+  return <Link to={tripId ? `/trips/${tripId}` : findLink(date)}>{fishCountLabel(count)}</Link>;
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
@@ -106,7 +107,7 @@ export function BestsPage() {
         </div>
         <div>
           <span className="eyebrow">{t("Best day")}</span>
-          <strong>{topDay ? <DayTally count={topDay.count} tripId={topDayTrip} /> : t("None")}</strong>
+          <strong>{topDay ? <DayTally count={topDay.count} date={topDay.date} tripId={topDayTrip} /> : t("None")}</strong>
           <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>

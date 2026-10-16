@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -81,6 +81,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       exact.field === "species" ? named(entry.species) : exact.field === "lure" ? named(entry.lure) : named(spotById(book, entry.spotId)?.name ?? ""),
     );
   }
+  // "2026-10-12": the fish of that local day.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
   // ">60°F", "<15°C": the fish from water on that side of a temperature.
   const temp = parseTempQuery(needle);
   if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));
@@ -236,7 +238,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, or “released”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, or “released”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
