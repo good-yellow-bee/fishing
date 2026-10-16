@@ -471,6 +471,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "A lake whitefish has a soft mouth: keep reeling while the tension is in the red and the hook tears out. The fight card warns you while it tears, so ease off at once.":
+    "Sieja jeziorowa ma miękki pysk: zwijaj dalej, gdy napięcie jest w czerwieni, a haczyk się wyrwie. Karta walki ostrzega, gdy się wyrywa, więc od razu odpuść.",
   "A hooked carp tears off on one long first run, half again as long as its later ones. The fight card calls it, so let it go and wait it out.":
     "Zacięty karp rusza w jeden długi pierwszy odjazd, o połowę dłuższy od kolejnych. Karta walki o nim mówi, więc odpuść i przeczekaj.",
   "On the lake you can now watch a pike turn over on the line when it rolls at the net. When a fish leaps or rolls, the fight card says it can't be turned, so just let go.":
