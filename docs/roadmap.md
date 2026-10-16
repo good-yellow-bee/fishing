@@ -1399,3 +1399,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR249~~ | ~~Audit 13 fixes~~ (#581) | field | S |
 | ~~BR250~~ | ~~Dark theme for the field log~~ (#583) | field | S |
 | ~~BR251~~ | ~~News line for recent field-log features~~ (#584) | field | S |
+| ~~BR252~~ | ~~Best outing on a water, on the trip page~~ (#586) | field | S |
