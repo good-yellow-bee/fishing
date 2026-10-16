@@ -33,6 +33,7 @@ import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { formatCoord } from "./map/places";
+import { osmLink } from "./osmLink";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -199,11 +200,6 @@ export function SpotPage() {
       )}
     </div>
   );
-}
-
-/** The water on OpenStreetMap, pinned. */
-function osmLink(lat: number, lng: number): string {
-  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
 }
 
 export function SpotFormPage() {

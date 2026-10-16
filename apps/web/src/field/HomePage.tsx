@@ -13,6 +13,7 @@ import { catchMonth } from "./tripMonths";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
+import { osmLink } from "./osmLink";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -113,6 +114,14 @@ export function HomePage() {
             {next
               ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
               : t("Add an outing when you know the day")}
+            {next && nextSpot?.place ? (
+              <>
+                {" · "}
+                <a href={osmLink(nextSpot.place.lat, nextSpot.place.lng)} target="_blank" rel="noreferrer">
+                  {t("Map")}
+                </a>
+              </>
+            ) : null}
           </small>
         </div>
       </section>
