@@ -94,6 +94,9 @@ export function HomePage() {
   const lastYear = String(Number(thisYear) - 1);
   const lastYearDays = book.catches.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
   const lastYearByNow = lastYearDays.filter((day) => day.slice(5) <= today.slice(5)).length;
+  // "0 by this date last year" says nothing when the book only starts after that date.
+  const firstDay = book.catches.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
+  const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -160,7 +163,7 @@ export function HomePage() {
                   <Link to={findLink(thisYear)}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
-              {lastYearDays.length > 0 ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
+              {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
             </small>
           ) : null}
         </div>

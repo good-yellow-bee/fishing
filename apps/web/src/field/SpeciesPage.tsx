@@ -16,6 +16,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
 import { CM_PER_IN, KG_PER_LB, lengthText, measureText, measuresText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
+import { MonthBars } from "./MonthBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
@@ -134,6 +135,7 @@ export function SpeciesPage() {
           <TallyBars key={species} rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("season", t(row.label))) : undefined }))} />
         </>
       ) : null}
+      <MonthBars key={`months-${species}`} catches={catches} within={exactTerm("species", t(name))} />
       {catches.filter((entry) => entry.weather).length > 1 ? (
         <>
           <div className="section-head">
