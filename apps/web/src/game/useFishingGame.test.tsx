@@ -918,6 +918,17 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("It's running off with it — strike!");
   });
 
+  it("calls a perch gulping the bait and gives it longer before it lets go", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    cast(surface);
+    for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("It's gulping it down — strike!");
+    for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    const held = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
+    expect(held).toBeGreaterThan(1.5);
+  });
+
   it("calls a crappie's lift bite", () => {
     const surface = mount();
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);
@@ -962,7 +973,7 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("WHAM — it hit! Strike!");
     act(() => vi.advanceTimersByTime(1400));
     act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
-    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
     cast(surface);
     act(() => vi.advanceTimersByTime(2201));
     expect(hint()).toBe("NOW — strike!");

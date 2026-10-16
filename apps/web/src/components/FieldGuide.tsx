@@ -68,6 +68,8 @@ function biteLabel(style: BiteStyle): string | null {
       return t("Bites: pecks in quick taps before it pulls");
     case "run":
       return t("Bites: runs off with it, sliding the float away");
+    case "gulp":
+      return t("Bites: gulps it down and holds on, so there's a moment longer to strike");
     case "usual":
       return null;
   }

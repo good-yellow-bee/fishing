@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zzc";
+export const NEWS_ID = "2026-10-16zzd";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A perch now gulps the bait down and holds on, so you get a moment longer to strike. The field guide says so once you've landed one.",
   "Hook a bluegill and it turns its flat side to you and circles, so it comes in slowly until it tires. The fight card says so.",
   "A lake whitefish now takes the bait as lightly as a walleye: the float only slides under, and it holds on a little longer, so strike on the slide.",
   "The field guide now says how each fish you've landed takes the bait, from a pike's hit out of nowhere to a bluegill's quick pecks.",
