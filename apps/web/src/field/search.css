@@ -46,6 +46,21 @@
   font-size: 13px;
 }
 
+.catch-search .search-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 13px;
+}
+
+/* The order in use reads as plain text; the other is the link to switch. */
+.catch-search .search-order [aria-pressed="true"] {
+  color: var(--field-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 .catch-search .search-tip {
   margin: 0;
   color: var(--field-muted);

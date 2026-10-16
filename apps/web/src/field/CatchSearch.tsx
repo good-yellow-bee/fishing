@@ -16,6 +16,10 @@ import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
+import { largestFirst } from "./largestFirst";
+
+/** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
+const ORDER_PARAM = "order";
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -243,7 +247,19 @@ export function CatchSearch() {
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
-  const matches = useMemo(() => (settled ? findCatches(book, settled, t) : []), [book, settled, t, lang]);
+  const found = useMemo(() => (settled ? findCatches(book, settled, t) : []), [book, settled, t, lang]);
+  const largest = params.get(ORDER_PARAM) === "largest";
+  const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
+  const setLargest = (next: boolean) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next) out.set(ORDER_PARAM, "largest");
+        else out.delete(ORDER_PARAM);
+        return out;
+      },
+      { replace: true },
+    );
 
   return (
     <section
@@ -271,7 +287,10 @@ export function CatchSearch() {
             (current) => {
               const out = new URLSearchParams(current);
               if (next.trim()) out.set(FIND_PARAM, next);
-              else out.delete(FIND_PARAM);
+              else {
+                out.delete(FIND_PARAM);
+                out.delete(ORDER_PARAM);
+              }
               return out;
             },
             { replace: true },
@@ -306,8 +325,20 @@ export function CatchSearch() {
           {matches.length > 0 ? (
             <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-search.txt" />
           ) : null}
+          {matches.length > 1 ? (
+            // "Which was my biggest pike at Cedar": the same matches, largest first.
+            <p className="search-order" role="group" aria-label={t("Order of the matches")}>
+              <button type="button" className="text-button" aria-pressed={!largest} onClick={() => setLargest(false)}>
+                {t("Newest first")}
+              </button>
+              <button type="button" className="text-button" aria-pressed={largest} onClick={() => setLargest(true)}>
+                {t("Largest first")}
+              </button>
+            </p>
+          ) : null}
           {matches.length > 0 && (
-            <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>
+            // Month headings only make sense newest first.
+            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : catchMonth} headLevel={2}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}
