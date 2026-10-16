@@ -107,6 +107,11 @@
   background: #d9a94e;
 }
 
+/* Holds a paged list for Show more's focus without laying anything out. */
+.paged-list {
+  display: contents;
+}
+
 .show-more {
   display: flex;
   flex-wrap: wrap;
@@ -159,6 +164,11 @@ button.field-primary {
   color: #f3e6cc;
   border: 1px solid rgba(243, 230, 204, 0.25);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* A change the browser wouldn't keep: the same bar, marked so it isn't read as a done deed. */
+.undo-bar-error {
+  background: #5a1f17;
 }
 
 .undo-bar .text-button {

@@ -12,7 +12,7 @@ const DELETED = {
 
 /** After a delete, a quiet bar with one way back, until the book changes again. */
 export function UndoBar() {
-  const { undoable, undoDelete, dismissUndo } = useLogbook();
+  const { undoable, undoDelete, dismissUndo, saveError, dismissSaveError } = useLogbook();
   const navigate = useNavigate();
   useT();
 
@@ -30,6 +30,18 @@ export function UndoBar() {
   }, [undoable, dismissUndo]);
 
   // The live region stays in the page so the line is read out when it appears.
+  if (saveError) {
+    return (
+      <div role="status">
+        <div className="undo-bar undo-bar-error">
+          <span>{saveError}</span>
+          <button type="button" className="text-button undo-close" onClick={dismissSaveError} aria-label={t("Dismiss")}>
+            ×
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (!undoable) return <div role="status" />;
   const onUndo = () => {
     // Back to the page the entry was deleted from, now that it is there again.

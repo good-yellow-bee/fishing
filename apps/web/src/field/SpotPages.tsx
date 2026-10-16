@@ -103,8 +103,7 @@ export function SpotPage() {
         editTo={`/spots/${spot.id}/edit`}
         ask={t("Delete this water? Its outings and fish leave the book too.")}
         onDelete={() => {
-          deleteSpot(spot.id);
-          navigate("/spots");
+          if (deleteSpot(spot.id)) navigate("/spots");
         }}
         aside={
           <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">

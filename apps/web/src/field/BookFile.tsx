@@ -233,7 +233,7 @@ export function BookFile() {
             if (!window.confirm(t("Replace this book with the sample week?"))) return;
             setPending(null);
             setNotice(null);
-            restoreSample();
+            if (!restoreSample()) return;
             clearCopiedAt();
             setCopiedAt(null);
           }}

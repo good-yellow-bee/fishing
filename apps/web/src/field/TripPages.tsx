@@ -161,7 +161,9 @@ function TripView() {
   const fish = (
     <>
       <div className="section-head">
-        <h2>{t("Fish on this outing")}</h2>
+        <h2 id="outing-fish" tabIndex={-1}>
+          {t("Fish on this outing")}
+        </h2>
       </div>
       <FishSum catches={catches} />
       {catches.length > 1 ? (
@@ -174,7 +176,14 @@ function TripView() {
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
           {tn(loose.length, "{n} fish from this water that day is not on this outing.", "{n} fish from this water that day are not on this outing.")}{" "}
-          <button type="button" className="text-button" onClick={() => fileCatches(loose.map((entry) => entry.id), trip.id)}>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              // The line and its button go once the fish are filed: the fish list's heading takes focus.
+              if (fileCatches(loose.map((entry) => entry.id), trip.id)) document.getElementById("outing-fish")?.focus();
+            }}
+          >
             {t("Add them")}
           </button>
         </p>
@@ -213,8 +222,7 @@ function TripView() {
         editTo={`/trips/${trip.id}/edit`}
         ask={t("Delete this outing? Its fish stay in the book.")}
         onDelete={() => {
-          deleteTrip(trip.id);
-          navigate("/trips");
+          if (deleteTrip(trip.id)) navigate("/trips");
         }}
         aside={
           // An outing still ahead has no fish to log yet; a catch can't be dated in the future.

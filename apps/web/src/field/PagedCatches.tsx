@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { t } from "../i18n";
 import { fishCountLabel } from "./format";
 import { monthName } from "./tripMonths";
@@ -10,6 +10,27 @@ export const CATCH_PAGE = 50;
 export function catchPage<T>(all: readonly T[], shown: number) {
   const visible = all.slice(0, shown);
   return { visible, more: Math.min(CATCH_PAGE, all.length - visible.length) };
+}
+
+/**
+ * How many of a paged list to draw, and Show more. The press hands focus to the first link it brought in, since the
+ * button itself goes once the last page is out; `box` wraps the list and its button.
+ */
+export function useShowMore() {
+  const [shown, setShown] = useState(CATCH_PAGE);
+  const box = useRef<HTMLDivElement>(null);
+  const firstNew = useRef<number | null>(null);
+  useEffect(() => {
+    if (firstNew.current === null) return;
+    box.current?.querySelectorAll<HTMLElement>("a[href]")[firstNew.current]?.focus();
+    firstNew.current = null;
+  }, [shown]);
+  const showMore = () => {
+    // The new cards come after every link already drawn, so the first of them is the next link along.
+    firstNew.current = box.current?.querySelectorAll("a[href]").length ?? 0;
+    setShown((count) => count + CATCH_PAGE);
+  };
+  return { shown, showMore, box };
 }
 
 /**
@@ -29,12 +50,12 @@ export function PagedCatches<T>({
   headLevel?: 2 | 3;
 }) {
   const Head = headLevel === 2 ? "h2" : "h3";
-  const [shown, setShown] = useState(CATCH_PAGE);
+  const { shown, showMore, box } = useShowMore();
   const { visible, more } = catchPage(items, shown);
   const monthCounts = new Map<string, number>();
   if (monthOf) for (const item of items) monthCounts.set(monthOf(item), (monthCounts.get(monthOf(item)) ?? 0) + 1);
   return (
-    <div className="stack">
+    <div className="stack" ref={box}>
       {monthOf
         ? visible.map((item, index) => {
             const month = monthOf(item);
@@ -54,7 +75,7 @@ export function PagedCatches<T>({
       {more > 0 && (
         <div className="show-more">
           <p role="status">{t("{shown} of {total} fish", { shown: visible.length, total: items.length })}</p>
-          <button type="button" className="field-primary inline" onClick={() => setShown((count) => count + CATCH_PAGE)}>
+          <button type="button" className="field-primary inline" onClick={showMore}>
             {t("Show {count} more", { count: more })}
           </button>
         </div>

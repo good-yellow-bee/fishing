@@ -43,12 +43,16 @@ type LogbookApi = {
   updateCatch: (id: string, draft: CatchDraft, photo: string | null) => SaveResult;
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
-  deleteCatch: (id: string) => void;
+  /** Each of these says whether the change was saved; one that wasn't leaves `saveError` for the bar to show. */
+  deleteCatch: (id: string) => boolean;
   /** Files fish logged without an outing under one on their water. */
-  fileCatches: (catchIds: readonly string[], tripId: string) => void;
-  deleteSpot: (id: string) => void;
-  deleteTrip: (id: string) => void;
-  restoreSample: () => void;
+  fileCatches: (catchIds: readonly string[], tripId: string) => boolean;
+  deleteSpot: (id: string) => boolean;
+  deleteTrip: (id: string) => boolean;
+  restoreSample: () => boolean;
+  /** Why the last delete, filing, sample or undo didn't save, until the next one or a dismiss. */
+  saveError: string | null;
+  dismissSaveError: () => void;
   /** What the last delete took out, until the next change to the book. */
   undoable: DeletedKind | null;
   /** Puts the book back and gives the page the delete was made from, to return to. */
@@ -95,6 +99,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
   });
 
   const [undo, setUndo] = useState<Undo | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     // Another tab (the game, or the field log open twice) changed the book: carry on from its copy,
@@ -144,13 +149,16 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     const remove = (kind: DeletedKind, next: Logbook) => {
       // Deletes are made from the entry's own page, before it navigates away.
       const before = { kind, book, photos, from: window.location.pathname };
-      commit(next);
+      if (!commit(next)) return false;
       setUndo(before);
+      return true;
     };
 
+    // A full or blocked browser leaves the book as it was and says so in the bar, rather than the button doing nothing.
     const commit = (next: Logbook) => {
       const result = persist(next, photosForBook(next, photos));
-      if (!result.ok) throw new Error(result.message);
+      setSaveError(result.ok ? null : result.message);
+      return result.ok;
     };
 
     return {
@@ -234,9 +242,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       undoDelete: () => {
         if (!undo) return null;
         const result = persist(undo.book, undo.photos);
-        if (!result.ok) throw new Error(result.message);
-        return undo.from;
+        setSaveError(result.ok ? null : result.message);
+        return result.ok ? undo.from : null;
       },
+      saveError,
+      dismissSaveError: () => setSaveError(null),
       dismissUndo: () => setUndo(null),
       // The sample takes the whole book's place, so it can be undone like a delete.
       restoreSample: () => remove("sample", sampleLogbook(new Date())),
@@ -248,7 +258,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
     };
     // The language is a dependency: the sample week's lines are shown in it.
-  }, [book, photos, lang, undo]);
+  }, [book, photos, lang, undo, saveError]);
 
   return <LogbookContext.Provider value={api}>{children}</LogbookContext.Provider>;
 }
