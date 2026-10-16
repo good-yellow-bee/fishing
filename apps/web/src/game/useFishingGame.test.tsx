@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { pickBite, waitMs } from "./logic";
+import { castIntoSpooked, pickBite, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -34,7 +34,8 @@ vi.mock("./nibblePlan", async (importOriginal) => {
 });
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
-  return { ...actual, pickBite: vi.fn(actual.pickBite) };
+  // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
+  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -243,6 +244,19 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 2);
     expect(container!.querySelector("output")?.textContent).toBe("idle:broke");
     expect(hint()).toMatch(/ran out of line.*reel whenever the fish is calm/i);
+  });
+
+  it("spooks the bank after a lost fish, so the next cast there says the bite is slower", () => {
+    const surface = mount();
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    expect(vi.mocked(castIntoSpooked)).toHaveBeenLastCalledWith(null, "dock");
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castIntoSpooked).mockReturnValueOnce(true);
+    cast(surface);
+    expect(vi.mocked(castIntoSpooked)).toHaveBeenLastCalledWith("dock", "dock");
+    act(() => vi.advanceTimersByTime(1400));
+    expect(hint()).toMatch(/^The lost fish spooked this water, so the next bite is slower\. /);
   });
 
   it("says how close a snapped fish came to the net", () => {
