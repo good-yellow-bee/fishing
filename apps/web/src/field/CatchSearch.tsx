@@ -12,7 +12,7 @@ import { noteText } from "./format";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm } from "./findLinks";
-import { parseSizeQuery, sizeMatches } from "./sizeQuery";
+import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 
 function normalize(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
@@ -81,6 +81,9 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       exact.field === "species" ? named(entry.species) : exact.field === "lure" ? named(entry.lure) : named(spotById(book, entry.spotId)?.name ?? ""),
     );
   }
+  // ">60°F", "<15°C": the fish from water on that side of a temperature.
+  const temp = parseTempQuery(needle);
+  if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));
   const size = parseSizeQuery(needle);
   if (size) return catchesNewestFirst(book).filter((entry) => sizeMatches(entry.measure, size));
   const found = searchCatches(book, needle);
@@ -233,7 +236,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a word from a note, or “released”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, or “released”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
