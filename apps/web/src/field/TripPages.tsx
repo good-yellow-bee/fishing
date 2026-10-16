@@ -274,7 +274,7 @@ function TripView() {
           </p>
         ) : null
       )}
-      {catches.length > 0 ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches)} file="stillwater-outing.txt" /> : null}
+      {catches.length > 0 ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />

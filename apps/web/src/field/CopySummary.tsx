@@ -7,13 +7,17 @@ export function CopySummary({ text, file }: { text: () => string; file: string }
   const [said, setSaid] = useState("");
   const copy = async () => {
     const summary = text();
+    let message: string;
     try {
       await navigator.clipboard.writeText(summary);
-      setSaid(t("Summary copied."));
+      message = t("Summary copied.");
     } catch {
       downloadFile(summary, "text/plain;charset=utf-8", file);
-      setSaid(t("The summary was downloaded instead."));
+      message = t("The summary was downloaded instead.");
     }
+    // Emptied first, so a second copy is announced again rather than left as the same words.
+    setSaid("");
+    setTimeout(() => setSaid(message), 100);
   };
   return (
     <p className="trip-again">
