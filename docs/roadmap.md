@@ -1428,3 +1428,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR272~~ | ~~Rename tripSummary.ts to summaries.ts~~ (#612) | field | S |
 | ~~BR273~~ | ~~Log a catch opens on today's water~~ (#613) | field | S |
 | ~~BR274~~ | ~~Pounds and ounces and inch fractions in the size fields~~ (#614) | field | S |
+| ~~BR275~~ | ~~Save and log another, sticky save bar on the catch form~~ (#615) | field | S |
