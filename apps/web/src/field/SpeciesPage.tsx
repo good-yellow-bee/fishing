@@ -13,6 +13,7 @@ import { findWithLink } from "./CatchSearch";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
 import { measureText } from "../i18n/content";
+import { WeatherBars } from "./WeatherBars";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 export function SpeciesPage() {
@@ -96,6 +97,7 @@ export function SpeciesPage() {
           <TallyBars rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(t(name), t(row.label)) : undefined }))} />
         </>
       ) : null}
+      <WeatherBars book={{ ...book, catches }} within={t(name)} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">

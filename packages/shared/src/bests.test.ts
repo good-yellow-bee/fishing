@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally, skyTally } from "./bests.ts";
+import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally, skyTally, waterTempTally, windTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -216,5 +216,29 @@ describe("fish by sky", () => {
     expect(rows.map((row) => row.id)).toEqual(["clear", "partly-cloudy", "overcast", "rain", "fog"]);
     expect(rows.reduce((sum, row) => sum + row.count, 0)).toBe(book.catches.filter((entry) => entry.weather).length);
     expect(rows.find((row) => row.id === "overcast")!.count).toBeGreaterThan(0);
+  });
+});
+
+describe("fish by wind and water temperature", () => {
+  const book = sampleLogbook(new Date(2026, 9, 15));
+  const weighed = book.catches.filter((entry) => entry.weather).length;
+
+  it("counts the fish in each wind, calm first", () => {
+    const rows = windTally(book);
+    expect(rows[0]!.id).toBe("calm");
+    expect(rows.reduce((sum, row) => sum + row.count, 0)).toBe(weighed);
+  });
+
+  it("puts each fish in one band of water temperature, edges going to the warmer band", () => {
+    const base = book.catches[0]!;
+    const at = (id: string, waterTempF: number) => ({ ...base, id, weather: { sky: "clear" as const, wind: "calm" as const, waterTempF } });
+    const rows = waterTempTally({ ...book, catches: [at("a", 42), at("b", 50), at("c", 59.9), at("d", 70), at("e", 85), { ...base, id: "f", weather: null }] });
+    expect(rows).toEqual([
+      { from: null, to: 50, count: 1 },
+      { from: 50, to: 60, count: 2 },
+      { from: 60, to: 70, count: 0 },
+      { from: 70, to: null, count: 2 },
+    ]);
+    expect(waterTempTally(book).reduce((sum, row) => sum + row.count, 0)).toBe(weighed);
   });
 });
