@@ -1148,7 +1148,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT103~~ | ~~News card (2026-10-16zb) covers GT102: dock pilings~~ (#626) | news | S |
 | ~~GT104~~ | ~~Inlet downstream runs: a run heading with the current, left unturned, takes 30% more line~~ (#628) | fight | S |
 | ~~GT105~~ | ~~News card (2026-10-16zc) covers GT104: inlet downstream runs~~ (#631) | news | S |
-| GT106 | Muskie follow: a tiger muskie that misses the strike follows the bait and hits once more, with no nibble | bite | S |
+| ~~GT106~~ | ~~Muskie follow: a tiger muskie that misses the strike follows the bait and hits once more, with no nibble~~ (#633) | bite | S |
+| GT107 | News card (2026-10-16zd) covers GT106: muskie follow | news | S |
 
 ## Risks / open questions for the owner
 

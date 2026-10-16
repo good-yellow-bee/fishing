@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zc";
+export const NEWS_ID = "2026-10-16zd";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Miss the strike on a tiger muskie and it follows the bait: watch the float, because it hits once more with no warning nibble.",
   "At the inlet, the current now helps a run heading downstream take more line. Turn it upstream when the fight card calls it.",
   "At the dock, a run you don't turn now wraps the line round a piling: ease off until it swings free. Turn every run there and the landed card says you kept it clear of the pilings.",
   "The catch form now reads “3 lb 4 oz” and “18 1/4”, takes the time from a photo, can find the nearest water, and has Save and log another. Weather needs no water temperature, and a species or lure can be renamed or merged across the whole book.",
