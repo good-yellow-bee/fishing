@@ -52,7 +52,7 @@ import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
-import { catchSummary } from "./tripSummary";
+import { catchSummary } from "./summaries";
 import { sizeRank } from "./sizeRank";
 
 function amountText(entry: CatchEntry, units: Units): string {

@@ -12,7 +12,7 @@ import { exactTerm, findLink } from "../CatchSearch";
 import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { CopySummary } from "../CopySummary";
-import { yearSummary } from "../tripSummary";
+import { yearSummary } from "../summaries";
 import { outingStreak } from "../outingAverage";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {

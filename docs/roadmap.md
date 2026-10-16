@@ -1425,3 +1425,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR269~~ | ~~Copy a summary of search results~~ (#609) | field | S |
 | ~~BR270~~ | ~~Audit 16 fixes~~ (#610) | field | S |
 | ~~BR271~~ | ~~News line for year/search summaries and book total~~ (#611) | field | S |
+| ~~BR272~~ | ~~Rename tripSummary.ts to summaries.ts~~ (#612) | field | S |

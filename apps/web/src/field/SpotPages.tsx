@@ -25,7 +25,7 @@ import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, topOuting } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
-import { spotSummary } from "./tripSummary";
+import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
