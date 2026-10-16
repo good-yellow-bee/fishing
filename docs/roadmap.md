@@ -1138,7 +1138,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT93~~ | ~~News card (2026-10-16s) covers GT91 and GT92: habit lines, burbot coil~~ (#582) | news | S |
 | ~~GT94~~ | ~~Crappie paper mouth: a crappie's hook tears out when reeled in the red, like a whitefish's~~ (#585) | fight | S |
 | ~~GT95~~ | ~~News card (2026-10-16u) covers GT94: crappie paper mouth~~ (#587) | news | S |
-| GT96 | Salmon long run: a salmon's first run after the hook is the long one, like a carp's | fight | S |
+| ~~GT96~~ | ~~Salmon long run: a salmon's first run after the hook is the long one, like a carp's~~ (#590) | fight | S |
+| GT97 | News card (2026-10-16v) covers GT96: salmon long run | news | S |
 
 ## Risks / open questions for the owner
 
