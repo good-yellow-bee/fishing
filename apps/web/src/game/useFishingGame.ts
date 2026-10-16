@@ -10,6 +10,7 @@ import {
   parseAim,
   parseStance,
   FISH,
+  isTrophyWeight,
   resolveCast,
   SPOT_LABELS,
   type CastFail,
@@ -359,9 +360,15 @@ export function useFishingGame(
       if (solid) runtime.sim.stamina = Math.min(runtime.sim.stamina, SOLID_HOOK_STAMINA);
       const line = fightLines(species.challenge)[0];
       const again = strike && againRef.current ? `${t("It's the one that got away!")} ` : "";
+      // A trophy-sized fish is felt on the rod the moment it's hooked.
+      const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ` : "";
+      if (heavy) {
+        fx.lift();
+        fx.haptic("lift");
+      }
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
       setHint(
-        again +
+        again + heavy +
         (!strike
           ? t("{line}. Ease off when it runs.", { line })
           : solid

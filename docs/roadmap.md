@@ -1167,7 +1167,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT122~~ | ~~Grab feel: the pike starts where the shiner was, not back at the end of the line, and spray bursts at the fish when it hits~~ (#683) | fight | S |
 | ~~GT123~~ | ~~More grabs: a largemouth takes a bluegill off the point and a walleye a perch from the boat, each with its own call and landed note; news card~~ (#685) | fight | S |
 | ~~GT124~~ | ~~The one that got away: a bigger fish that breaks off can bite again at its bank, same weight, within the next five casts; a call and a landed note~~ (#689) | fight | S |
-| GT125 | After a loss the hint says a bigger fish is still about; news card for the one that got away | ui | S |
+| ~~GT125~~ | ~~After a loss the hint says a bigger fish is still about; news card for the one that got away~~ (#691) | ui | S |
+| GT126 | Trophy feel: a trophy-sized fish is called heavy on the hook, with a thud on the rod and a buzz | fight | S |
 
 ## Risks / open questions for the owner
 
