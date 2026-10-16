@@ -1125,7 +1125,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT80~~ | ~~News card (2026-10-16k) covers GT79: panfish schools~~ (#545) | news | S |
 | ~~GT81~~ | ~~School shadows: small fish shadows mill round the float on a schooled cast~~ (#548) | scene | S |
 | ~~GT82~~ | ~~News card (2026-10-16l) covers GT81: school shadows~~ (#551) | news | S |
-| GT83 | Walleye bite light: the float only slides under, the strike call says so, and it holds the bait 1.3x longer | bite | S |
+| ~~GT83~~ | ~~Walleye bite light: the float only slides under, the strike call says so, and it holds the bait 1.3x longer~~ (#555) | bite | S |
+| GT84 | News card (2026-10-16n) covers GT83: walleye light bite | news | S |
 
 ## Risks / open questions for the owner
 
