@@ -17,6 +17,7 @@ import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
+import { dateWords } from "./dateWords";
 import { pieceKey } from "./gear/pieceKey";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
@@ -133,6 +134,12 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     });
   }
   // "2026-10-12": the fish of that local day.
+  // "yesterday", "last week", "Oct 15", "sobota": the fish of those local days.
+  const days = dateWords(needle);
+  if (days) return catchesNewestFirst(book).filter((entry) => {
+    const day = localDate(new Date(entry.caughtAt));
+    return day >= days.from && day <= days.to;
+  });
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
   // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
   if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());

@@ -492,6 +492,8 @@ export const PL_FIELD: PlBook = {
   "Not on this sheet:": "Poza arkuszem:",
   "Fish deleted.": "Ryba usunięta.",
   "Fish saved.": "Ryba zapisana.",
+  "First {species} in the book.": "Pierwsza ryba tego gatunku w dzienniku: {species}.",
+  "New best {species}: {size} (was {was}).": "Nowy rekord: {species}, {size} (wcześniej {was}).",
   "Changes saved.": "Zmiany zapisane.",
   "Sample book restored.": "Przywrócono przykładowy dziennik.",
   "Water deleted, with its outings and fish.": "Łowisko usunięte razem z wyprawami i rybami.",
