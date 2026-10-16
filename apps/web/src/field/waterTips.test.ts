@@ -18,9 +18,10 @@ describe("water tips", () => {
     expect(tips.time).toMatchObject({ id: "dawn", count: 3 });
   });
 
-  it("breaks a tie in time of day toward the earlier band", () => {
+  it("names a time of day only when at least two fish came then and no other time ties it", () => {
     const at = (iso: string, id: string) => ({ ...book.catches[0]!, id, caughtAt: iso });
-    const tips = waterTips([at("2026-10-01T06:00:00", "a"), at("2026-10-01T19:00:00", "b"), at("2026-10-01T12:00:00", "c")])!;
+    expect(waterTips([at("2026-10-01T06:00:00", "a"), at("2026-10-01T19:00:00", "b"), at("2026-10-01T12:00:00", "c")])!.time).toBeNull();
+    const tips = waterTips([at("2026-10-01T06:00:00", "a"), at("2026-10-02T06:30:00", "b"), at("2026-10-01T12:00:00", "c")])!;
     expect(tips.time?.id).toBe("dawn");
   });
 

@@ -511,6 +511,7 @@ export const PL_FIELD: PlBook = {
   "Changes you made to this fish were not saved.": "Zmiany w tej rybie nie zostały zapisane.",
   "A {species} was already logged here at {time}. Saving adds another.": "Ryba {species} została już tu zapisana o {time}. Zapis doda kolejną.",
   "Open it": "Otwórz ją",
+  "Changes you made here were not saved.": "Zmiany wprowadzone tutaj nie zostały zapisane.",
   "Pick it up": "Wróć do niej",
   "Let it go": "Porzuć",
   "Same as the last fish on this outing: {weather}": "Jak przy ostatniej rybie z tej wyprawy: {weather}",

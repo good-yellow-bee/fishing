@@ -121,6 +121,11 @@ describe("weather from the same day", () => {
     expect(dayWeather(day, "2026-10-10", "n")).toEqual(morning.weather);
   });
 
+  it("brings the water temperature only from a fish on the same water", () => {
+    expect(dayWeather(day, "2026-10-10", undefined, base.spotId)).toEqual(noon.weather);
+    expect(dayWeather(day, "2026-10-10", undefined, "another-water")).toEqual({ sky: "clear", wind: "calm" });
+  });
+
   it("offers nothing for a day with no fish or a half-typed day", () => {
     expect(dayWeather(day, "2026-10-11")).toBeNull();
     expect(dayWeather(day, "2026-10")).toBeNull();

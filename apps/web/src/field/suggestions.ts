@@ -1,4 +1,4 @@
-import { catchesNewestFirst, localDate, lureTally, personalBests, type CatchEntry, type Logbook, type Measure, type Trip } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, lureTally, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
 
 /** The game files its fish here, always by weight, so they say nothing about how the player measures. */
@@ -39,10 +39,18 @@ export function tripWeather(book: Logbook, tripId: string | undefined, skipId?: 
   return catchesNewestFirst(book).find((entry) => entry.tripId === tripId && entry.id !== skipId && entry.weather)?.weather ?? null;
 }
 
-/** The weather on the newest fish of a day (YYYY-MM-DD, local) that noted it, for a fish with no outing weather to go by. */
-export function dayWeather(book: Logbook, ymd: string, skipId?: string) {
+/**
+ * The weather on the newest fish of a day (YYYY-MM-DD, local) that noted it, for a fish with no outing weather to go by.
+ * The sky and wind hold across waters that day; the water temperature only comes along from a fish on `spotId` itself.
+ */
+export function dayWeather(book: Logbook, ymd: string, skipId?: string, spotId?: string): CatchWeather | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
-  return catchesNewestFirst(book).find((entry) => entry.id !== skipId && entry.weather && localDate(new Date(entry.caughtAt)) === ymd)?.weather ?? null;
+  const day = catchesNewestFirst(book).filter((entry) => entry.id !== skipId && entry.weather && localDate(new Date(entry.caughtAt)) === ymd);
+  if (spotId === undefined) return day[0]?.weather ?? null;
+  const here = day.find((entry) => entry.spotId === spotId);
+  if (here || !day[0]) return here?.weather ?? null;
+  const { waterTempF: _elsewhere, ...rest } = day[0].weather!;
+  return rest;
 }
 
 /** Length or weight, as the player measured their newest fish by hand; length for a book with none yet. */
