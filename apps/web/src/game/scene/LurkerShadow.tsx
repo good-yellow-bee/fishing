@@ -20,13 +20,13 @@ export function LurkerShadow({ phase, lurking, bobber }: Props) {
     const { dx, dz, heading } = lurkerPose(time);
     const x = bobber.x + dx;
     const z = bobber.z + dz;
-    fish.position.set(x, waterHeight(x, z, time) - 0.05, z);
+    fish.position.set(x, waterHeight(x, z, time) + 0.01, z);
     fish.rotation.y = heading;
   });
   return (
-    <mesh ref={mesh} visible={false} scale={[0.26, 0.02, 0.75]} renderOrder={2}>
+    <mesh ref={mesh} visible={false} scale={[0.38, 0.02, 1.05]} renderOrder={2}>
       <sphereGeometry args={[1, 12, 6]} />
-      <meshBasicMaterial color="#04101a" transparent opacity={0.5} depthWrite={false} toneMapped={false} />
+      <meshBasicMaterial color="#04101a" transparent opacity={0.62} depthWrite={false} toneMapped={false} />
     </mesh>
   );
 }
