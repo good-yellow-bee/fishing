@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { YEAR_GOAL_KEY, readYearGoal } from "./YearGoal";
+import { YEAR_GOAL_KEY, cleanYearGoals, readYearGoal } from "./YearGoal";
 
 function memoryStorage() {
   const items = new Map<string, string>();
@@ -25,5 +25,10 @@ describe("year goal", () => {
   it("reads a broken store as no goal", () => {
     localStorage.setItem(YEAR_GOAL_KEY, "[");
     expect(readYearGoal("2026")).toBeNull();
+  });
+
+  it("keeps only whole goals for four-digit years from a file", () => {
+    expect(cleanYearGoals({ "2026": 40, "26": 5, "2025": -1, "2024": "9" })).toEqual({ "2026": 40 });
+    expect(cleanYearGoals([1, 2])).toEqual({});
   });
 });
