@@ -168,7 +168,13 @@ export function TripPage() {
       ) : null}
       {catches.length === 0 ? (
         <p className="empty">
-          {trip.date > today ? t("Fish you log on the day show up here.") : t("Nothing logged for this trip yet.")}
+          {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
+          {trip.date === today ? (
+            <>
+              {" "}
+              <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`}>{t("Log the first one")}</Link>
+            </>
+          ) : null}
         </p>
       ) : (
         <PagedCatches items={catches}>
@@ -185,7 +191,8 @@ export function TripPage() {
       )}
     </>
   );
-  const fishFirst = catches.length > 0 || trip.date < today;
+  // From the outing's own day on, the fish lead: on the water, the bag is already packed.
+  const fishFirst = catches.length > 0 || trip.date <= today;
 
   return (
     <div className="sheet">
@@ -245,7 +252,7 @@ export function TripPage() {
       {/* Planning ahead: what has worked on this water before. */}
       {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={spot.name} /> : null}
       <TripWeather catches={catches} />
-      {/* Once fish are in, they lead; before that, the bag does. */}
+      {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
       {fishFirst ? tackle : fish}
       {newer || older ? (
