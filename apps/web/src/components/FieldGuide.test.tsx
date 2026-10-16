@@ -63,6 +63,7 @@ describe("field guide card", () => {
   it("says how a logged fish bites, only for the ones with their own bite", () => {
     expect(cards([stat("bluegill", 0.5)])("bluegill").lines).toContain("Bites: pecks in quick taps before it pulls");
     expect(cards([stat("pike", 6)])("pike").lines).toContain("Bites: hits from nowhere, with no nibble first");
+    expect(cards([stat("brook-trout", 0.4)])("brook-trout").lines).toContain("Bites: snatches it and lets go fast, so strike quick");
     expect(cards([])("bluegill").text).not.toContain("Bites:");
     expect(cards([stat("golden-shiner", 0.2)])("golden-shiner").text).not.toContain("Bites:");
   });
