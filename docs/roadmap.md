@@ -1362,3 +1362,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR224~~ | ~~Add just a file's new fish; GEO in calendar files~~ (#540) | field | S |
 | ~~BR225~~ | ~~Length and weight on species pages; suggested other measure~~ (#542) | field | S |
 | ~~BR226~~ | ~~Audit 10 fixes: snapshot room, fresh pages, real dates~~ (#546) | field | S |
+| ~~BR227~~ | ~~Failed saves say so; focus after Show more and filing~~ (#547) | field | S |
