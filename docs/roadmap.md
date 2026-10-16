@@ -1404,3 +1404,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR252~~ | ~~Best outing on a water, on the trip page~~ (#586) | field | S |
 | ~~BR253~~ | ~~Outings in a row with a fish, on Bests~~ (#588) | field | S |
 | ~~BR254~~ | ~~Best outing on a spot page~~ (#589) | field | S |
+| ~~BR255~~ | ~~Catch time opens that day's fish~~ (#591) | field | S |
