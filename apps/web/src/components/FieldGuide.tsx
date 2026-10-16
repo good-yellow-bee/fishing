@@ -17,6 +17,7 @@ import {
 } from "@stillwater/shared";
 import { Link } from "react-router-dom";
 import { bestHourFor, lureSizeFor, rarityLabel, type LureSize } from "../game/logic";
+import { biteStyle, type BiteStyle } from "../game/nibblePlan";
 import { t, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 import { FishMark } from "./FishMark";
@@ -49,6 +50,26 @@ function lureLabel(size: LureSize): string {
       return t("big lure");
     case "either":
       return t("any lure");
+  }
+}
+
+/** How a kind of fish takes the bait, for the ones that don't simply nibble and dip. */
+function biteLabel(style: BiteStyle): string | null {
+  switch (style) {
+    case "ambush":
+      return t("Bites: hits from nowhere, with no nibble first");
+    case "mouth":
+      return t("Bites: mouths it a few times, and may come back for a second take");
+    case "light":
+      return t("Bites: so lightly the float only slides under");
+    case "lift":
+      return t("Bites: lifts the float and lays it flat");
+    case "peck":
+      return t("Bites: pecks in quick taps before it pulls");
+    case "run":
+      return t("Bites: runs off with it, sliding the float away");
+    case "usual":
+      return null;
   }
 }
 
@@ -92,6 +113,7 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
         <p>{species.spots.map((spot) => t("{spot} at {hour}", { spot: t(SPOT_LABELS[spot]), hour: hourAt(spot) })).join(" · ")}</p>
       )}
       {known && drawsOn(species.id) && <p className="guide-draws">{t("Draws on: {lures}", { lures: drawsOn(species.id) })}</p>}
+      {known && biteLabel(biteStyle(species.id)) && <p className="guide-bite">{biteLabel(biteStyle(species.id))}</p>}
       {known && peakSeason(species.id) && <p className="guide-season">{t("Runs in {season}", { season: t(SEASON_LABELS[peakSeason(species.id)!]).toLowerCase() })}</p>}
       {known && inBook > 0 && (
         <p className="guide-book">

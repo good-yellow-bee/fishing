@@ -41,6 +41,7 @@ describe("field guide card", () => {
       "Dock: big lure at dusk",
       "Drop-off: small lure at dusk",
       "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
+      "Bites: runs off with it, sliding the float away",
       "Runs in summer",
     ]);
     expect(bass.trophy).toBeNull();
@@ -57,6 +58,13 @@ describe("field guide card", () => {
     expect(cards([stat("catfish", 4)])("catfish").lines).toContain("Draws on: Live bait (night)");
     expect(cards([])("catfish").text).not.toContain("Draws on");
     expect(cards([stat("sturgeon", 40)])("sturgeon").text).not.toContain("Draws on");
+  });
+
+  it("says how a logged fish bites, only for the ones with their own bite", () => {
+    expect(cards([stat("bluegill", 0.5)])("bluegill").lines).toContain("Bites: pecks in quick taps before it pulls");
+    expect(cards([stat("pike", 6)])("pike").lines).toContain("Bites: hits from nowhere, with no nibble first");
+    expect(cards([])("bluegill").text).not.toContain("Bites:");
+    expect(cards([stat("perch", 0.6)])("perch").text).not.toContain("Bites:");
   });
 
   it("names the season a logged fish runs in, and says nothing for a fish with no season", () => {
