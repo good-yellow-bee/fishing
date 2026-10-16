@@ -30,6 +30,7 @@ import {
 import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
+import { photoTakenAt } from "./photoTime";
 import { anotherCatchLink } from "./anotherCatch";
 import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
@@ -147,6 +148,9 @@ export function CatchFormPage() {
   return <CatchForm key={`${catchId ?? ""}:${params.toString()}`} />;
 }
 
+/** Camera notes sit at the start of a JPEG; this much is plenty to find the time a photo was taken. */
+const PHOTO_HEAD_BYTES = 256 * 1024;
+
 function CatchForm() {
   const { book, addCatch, updateCatch, photoFor } = useLogbook();
   useT();
@@ -201,6 +205,8 @@ function CatchForm() {
   );
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
+  // The time read from a photo's camera notes, while the time field still holds it.
+  const [photoTime, setPhotoTime] = useState("");
   const [note, setNote] = useState(existing?.note ?? "");
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
@@ -339,6 +345,24 @@ function CatchForm() {
     photoPick.current = ticket;
     setReducing(true);
     setPhotoError("");
+    // A new fish whose time hasn't been set takes the time the photo was taken, if the camera noted one.
+    if (!existing && !timeTouched) {
+      void file
+        .slice(0, PHOTO_HEAD_BYTES)
+        .arrayBuffer()
+        .then((head) => {
+          const taken = photoTakenAt(new Uint8Array(head));
+          if (photoPick.current !== ticket || !taken || taken > toLocalInput(new Date())) return;
+          setCaughtAt(taken);
+          setPhotoTime(taken);
+          // Read off the camera, so picking an outing afterwards keeps it.
+          setTimeTouched(true);
+          if (!tripPicked) setTripId(tripOnDay(book, spotId, taken.slice(0, 10))?.id ?? "");
+        })
+        .catch(() => {
+          // No camera notes to read: the time stays as it was.
+        });
+    }
     void compressCatchPhoto(file).then(
       (result) => {
         if (photoPick.current !== ticket) return;
@@ -637,6 +661,7 @@ function CatchForm() {
               }}
               required
             />
+            {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
           </label>
 
           <label>
