@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zx";
+export const NEWS_ID = "2026-10-16zy";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A bluegill now pecks at the bait in quick little taps before it takes it. Wait for the pecking to turn into a pull, then strike.",
   "A crappie takes the bait rising, so its bite lifts the float and lays it flat instead of pulling it under. Strike on the lift.",
   "When the big shadow round your float starts closing in, get ready: that's the fish coming back for the bait.",
   "Species pages split your fish by size. Bests has a season recap you can copy, the lure field offers live bait in one tap, and a long catch list can jump straight to a month. Trying the game on the sample book? Start your own book from Home and the samples go, with an undo.",

@@ -14,13 +14,19 @@ const GAP_MIN = 420;
 const GAP_SPREAD = 700;
 const MS_MIN = 220;
 const MS_SPREAD = 220;
+/** A pecker's nibbles are quicker taps, closer together. */
+const PECK_MS_MIN = 110;
+const PECK_MS_SPREAD = 90;
+const PECK_GAP_MIN = 160;
+const PECK_GAP_SPREAD = 260;
 
 /**
  * How a kind of fish takes the bait: predators hit from nowhere with no nibble first,
  * bottom feeders mouth it over and over, a walleye takes it so lightly the float only slides under,
- * a crappie takes it rising so the float lifts and lies flat, and the rest nibble a time or three.
+ * a crappie takes it rising so the float lifts and lies flat, a bluegill pecks at it in quick taps
+ * before it pulls, and the rest nibble a time or three.
  */
-export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "usual";
+export type BiteStyle = "ambush" | "mouth" | "light" | "lift" | "peck" | "usual";
 
 const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   pike: "ambush",
@@ -33,6 +39,7 @@ const BITE_STYLES: Readonly<Record<string, BiteStyle>> = {
   burbot: "mouth",
   walleye: "light",
   crappie: "lift",
+  bluegill: "peck",
 };
 
 /** A light biter's take pulls the float only this share as deep as a usual bite. */
@@ -65,17 +72,18 @@ export function biteStyle(speciesId: string): BiteStyle {
 
 export function nibblePlan(wait: number, rand: () => number = Math.random, style: BiteStyle = "usual"): Nibble[] {
   if (wait < MIN_WAIT || style === "ambush") return [];
-  // A mouther tries the bait two to four times; the rest one to three.
-  const count = (style === "mouth" ? 2 : 1) + Math.floor(rand() * 3);
+  // A pecker taps three to five times, a mouther tries the bait two to four times; the rest one to three.
+  const peck = style === "peck";
+  const count = (peck ? 3 : style === "mouth" ? 2 : 1) + Math.floor(rand() * 3);
   const plan: Nibble[] = [];
-  const ms = () => Math.round(MS_MIN + rand() * MS_SPREAD);
+  const ms = () => Math.round(peck ? PECK_MS_MIN + rand() * PECK_MS_SPREAD : MS_MIN + rand() * MS_SPREAD);
   const firstMs = ms();
   // The first lands anywhere from a quarter to about two thirds of the way in, with room left for it.
   let at = Math.round(Math.min(wait * (0.25 + rand() * 0.4), wait - BEFORE_BITE - firstMs));
   plan.push({ at, ms: firstMs });
   for (let k = 1; k < count; k += 1) {
     const next = ms();
-    at = Math.round(at + plan[k - 1]!.ms + GAP_MIN + rand() * GAP_SPREAD);
+    at = Math.round(at + plan[k - 1]!.ms + (peck ? PECK_GAP_MIN + rand() * PECK_GAP_SPREAD : GAP_MIN + rand() * GAP_SPREAD));
     if (at + next > wait - BEFORE_BITE) break;
     plan.push({ at, ms: next });
   }

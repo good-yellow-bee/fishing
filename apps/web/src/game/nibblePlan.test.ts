@@ -58,12 +58,32 @@ describe("nibble plan", () => {
 
   it("names every kind's style, with only known ids set apart", () => {
     const styles = new Set(FISH.map((fish) => biteStyle(fish.id)));
-    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "usual"]));
+    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "peck", "usual"]));
     expect(biteStyle("perch")).toBe("usual");
     expect(biteStyle("pike")).toBe("ambush");
     expect(biteStyle("carp")).toBe("mouth");
     expect(biteStyle("walleye")).toBe("light");
     expect(biteStyle("crappie")).toBe("lift");
+    expect(biteStyle("bluegill")).toBe("peck");
+  });
+
+  it("gives a pecker more, quicker taps that still end before the bite", () => {
+    let pecks = 0;
+    let usual = 0;
+    for (let seed = 1; seed < 200; seed += 1) {
+      const wait = 2000 + (seed * 137) % 7000;
+      const plan = nibblePlan(wait, seeded(seed), "peck");
+      expect(plan.length).toBeGreaterThanOrEqual(1);
+      expect(plan.length).toBeLessThanOrEqual(5);
+      plan.forEach((n, k) => {
+        expect(n.ms).toBeLessThanOrEqual(200);
+        expect(n.at + n.ms).toBeLessThanOrEqual(wait - 350);
+        if (k > 0) expect(n.at).toBeGreaterThan(plan[k - 1]!.at + plan[k - 1]!.ms);
+      });
+      pecks += plan.length;
+      usual += nibblePlan(wait, seeded(seed)).length;
+    }
+    expect(pecks).toBeGreaterThan(usual * 1.5);
   });
 
   it("tips a lifted float flat as it rises, and never past flat", () => {

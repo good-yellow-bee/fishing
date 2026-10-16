@@ -900,6 +900,15 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("Little fish steal bait. Cast again.");
   });
 
+  it("calls a bluegill's pull after its pecks", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "bluegill")!);
+    cast(surface);
+    for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("hookset:none");
+    expect(hint()).toBe("The pecking turns into a pull — strike!");
+  });
+
   it("calls a crappie's lift bite", () => {
     const surface = mount();
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "crappie")!);
