@@ -1041,6 +1041,17 @@ button.field-primary:disabled {
   align-items: center;
 }
 
+.catch-list-at {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+.catch-list-at a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .best-badge {
   display: inline-block;
   margin: 8px 0 0;

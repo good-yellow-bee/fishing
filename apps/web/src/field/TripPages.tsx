@@ -335,6 +335,7 @@ function TripView() {
               // The outing's own water is in its header; only a fish from elsewhere names its water.
               spotName={entry.spotId === trip.spotId ? null : (spotById(book, entry.spotId)?.name ?? t("Unknown water"))}
               tripTitle={null}
+              list={`trip:${trip.id}`}
             />
           )}
         </PagedCatches>

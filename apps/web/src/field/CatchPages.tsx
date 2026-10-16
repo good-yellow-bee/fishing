@@ -29,7 +29,8 @@ import {
   type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
-import { catchNeighbors } from "./catchNeighbors";
+import { catchNeighbors, neighborsIn } from "./catchNeighbors";
+import { LIST_PARAM, catchLink, catchList } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { anotherCatchLink } from "./anotherCatch";
@@ -978,6 +979,7 @@ function CatchView() {
   useT();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
+  const [params] = useSearchParams();
   const [pictureError, setPictureError] = useState(false);
   const entry = book.catches.find((row) => row.id === catchId);
 
@@ -997,7 +999,10 @@ function CatchView() {
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
   const looseTrip = trip ? undefined : tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
   const photo = photoFor(entry.id);
-  const { newer, older } = catchNeighbors(book, entry.id);
+  // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
+  const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
+  const { newer, older } = list ? neighborsIn(list.rows, entry.id) : catchNeighbors(book, entry.id);
+  const listAt = list ? list.rows.findIndex((row) => row.id === entry.id) + 1 : 0;
   const badge = catchBadge(book, entry);
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
@@ -1162,18 +1167,23 @@ function CatchView() {
       {newer || older ? (
         <nav className="catch-steps" aria-label={t("More catches")}>
           {newer ? (
-            <Link to={`/catches/${newer.id}`} rel="prev">
+            <Link to={catchLink(newer.id, list?.key)} rel="prev">
               {t("← Newer: {species}", { species: t(newer.species) })}
             </Link>
           ) : (
             <span />
           )}
           {older ? (
-            <Link to={`/catches/${older.id}`} rel="next">
+            <Link to={catchLink(older.id, list?.key)} rel="next">
               {t("Older: {species} →", { species: t(older.species) })}
             </Link>
           ) : null}
         </nav>
+      ) : null}
+      {list ? (
+        <p className="catch-list-at">
+          <Link to={list.back}>{t("{at} of {count} in this list", { at: listAt, count: list.rows.length })}</Link>
+        </p>
       ) : null}
     </div>
   );

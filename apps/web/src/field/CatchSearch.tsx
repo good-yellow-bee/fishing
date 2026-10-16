@@ -413,6 +413,7 @@ export function CatchSearch() {
                   entry={entry}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                   tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                  list={largest ? undefined : `find:${settled}`}
                 />
               )}
             </PagedCatches>
