@@ -1551,3 +1551,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR345~~ | ~~Through the year, dated outing steps, delete counts, phone map labels~~ (#728) | field | S |
 | ~~BR346~~ | ~~Catch steps stay in the list~~ (#730) | field | S |
 | ~~BR347~~ | ~~Review 27 fixes~~ (#734) | field | S |
+| ~~BR348~~ | ~~News card 16zzm (#723-#734)~~ (#736) | field | S |
