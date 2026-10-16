@@ -298,6 +298,10 @@ describe("FightBar for screen readers", () => {
     sim.current.lastRun = true;
     frame();
     expect(status()).toBe("Let go now — it sees the net!");
+    sim.current.encore = true;
+    frame();
+    expect(status()).toBe("Not done yet — let go, one more run!");
+    sim.current.encore = false;
     sim.current.lastRun = false;
     frame();
     expect(status()).not.toBe("Let go now — it sees the net!");

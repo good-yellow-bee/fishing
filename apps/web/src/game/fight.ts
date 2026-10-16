@@ -1,4 +1,4 @@
-import type { ChallengeId, FishSpecies } from "@stillwater/shared";
+import { isTrophyWeight, type ChallengeId, type FishSpecies } from "@stillwater/shared";
 import { t } from "../i18n";
 import { difficulty01 } from "./logic";
 import { biteStyle } from "./nibblePlan";
@@ -20,6 +20,8 @@ export type FightSim = {
   turning?: boolean;
   /** The run it makes on seeing the net, while that run lasts. */
   lastRun?: boolean;
+  /** A trophy's second run at the net, after the first last run. */
+  encore?: boolean;
   /** A pike's last run is a roll on the line instead, coming and while it lasts. */
   roll?: boolean;
   /** A long runner's first run after the hook: the long one, coming and while it lasts. */
@@ -322,6 +324,8 @@ export function makeFight(
   let graceUntil = -Infinity;
   let jumpAge = 0;
   let lastRunDone = false;
+  /** A trophy-sized fish sees the net twice. */
+  let lastRunsLeft = isTrophyWeight(species, weight) ? 2 : 1;
   let turnedThisRun = false;
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
@@ -357,8 +361,10 @@ export function makeFight(
 
   const step = (nowMs: number, dtSec: number, reeling: boolean, steer: Steer = 0): FightOutcome => {
     if (nextAt === null) nextAt = nowMs + range(1200, 1800);
-    if (!lastRunDone && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+    if (lastRunsLeft > 0 && sim.surge === 0 && sim.line > 0 && sim.line < LAST_RUN_LINE && sim.stamina > SPENT_STAMINA) {
+      sim.encore = lastRunDone;
       lastRunDone = true;
+      lastRunsLeft -= 1;
       sim.lastRun = true;
       nextAt = nowMs;
     }
@@ -417,6 +423,7 @@ export function makeFight(
         sim.darted = false;
         dartLeft = null;
         sim.lastRun = false;
+        sim.encore = false;
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
         turnedThisRun = false;

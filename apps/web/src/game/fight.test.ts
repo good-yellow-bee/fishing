@@ -193,6 +193,24 @@ describe("makeFight", () => {
     expect(runtime.sim.surge).toBe(0);
   });
 
+  it("makes a second run at the net when it's trophy-sized", () => {
+    const runtime = makeFight(fish("perch"), 1.2, 2, () => 0);
+    runtime.step(0, 0, false);
+    let now = 0;
+    for (const encore of [false, true]) {
+      runtime.sim.line = LAST_RUN_LINE - 0.01;
+      runtime.step((now += 100), 0, true);
+      expect(runtime.sim.lastRun).toBe(true);
+      expect(runtime.sim.encore).toBe(encore);
+      while (runtime.sim.surge !== 0) runtime.step((now += 50), 0.05, false);
+      expect(runtime.sim.encore).toBe(false);
+    }
+    // Twice is all: the third time near the net it comes in.
+    runtime.sim.line = LAST_RUN_LINE - 0.01;
+    runtime.step((now += 16), 0.016, true);
+    expect(runtime.sim.surge).toBe(0);
+  });
+
   it("reels line in faster with the tension in the tight zone, and not in the red", () => {
     const reeled = (tension: number) => {
       const runtime = makeFight(fish("perch"), 0.8, 2, () => 0);
