@@ -54,6 +54,15 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                     </li>
                   );
                 }
+                if (mark && mark.landed && day < today) {
+                  // Its fish all came after midnight, so the day itself holds none: it opens the outing that had them.
+                  const label = `${formatDay(day)}: ${t("an outing whose fish came after midnight")}`;
+                  return (
+                    <li key={day} className="day-fish day-level-1">
+                      <Link to={`/trips/${mark.trips[0]}`} aria-label={label} title={label} />
+                    </li>
+                  );
+                }
                 return <li key={day} aria-hidden="true" className={mark && mark.trips.length > 0 ? "day-planned" : undefined} />;
               })}
             </ol>

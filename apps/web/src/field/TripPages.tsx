@@ -616,7 +616,7 @@ function TripForm() {
           ) : null}
           {existing && firstFishDay && date !== existing.date && fishDays === 0 ? (
             <p className="wide form-note" role="status">
-              {t("Its fish were caught on {day} and keep that day.", { day: formatDay(firstFishDay) })}
+              {tn(ownFish.length, "Its fish was caught on {day} and keeps that day.", "Its fish were caught on {day} and keep that day.", { day: formatDay(firstFishDay) })}
             </p>
           ) : null}
           {loose.length > 0 ? (

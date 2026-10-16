@@ -1,3 +1,4 @@
+import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { localDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { locale } from "../i18n";
 
@@ -63,8 +64,14 @@ export function yearTally(catches: readonly CatchEntry[]): { year: string; count
 /** The days of `year` the book shows on the water: a fish logged, or an outing from before today. */
 export function daysOut(book: Logbook, year: string, today: string): number {
   const days = new Set<string>();
+  const tripDays = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   for (const entry of book.catches) {
-    const day = localDate(new Date(entry.caughtAt));
+    // A fish from the small hours after its outing's day counts for that day, so it doesn't make a second day out.
+    const at = new Date(entry.caughtAt);
+    const own = localDate(at);
+    const outing = entry.tripId ? tripDays.get(entry.tripId) : undefined;
+    const evening = new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, 12);
+    const day = outing && at.getHours() < LATE_NIGHT_UNTIL && localDate(evening) === outing ? outing : own;
     if (day.startsWith(`${year}-`)) days.add(day);
   }
   // An outing planned for today counts once it has a fish, through the catches above.
