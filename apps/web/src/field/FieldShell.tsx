@@ -39,12 +39,32 @@ function FieldLinks() {
 export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
+  const { pathname } = useLocation();
   useEffect(() => {
-    document.title = t("Stillwater · Field log");
-  }, [t, lang]);
+    // Each page's tab and history entry carries its own heading ("Northern pike · Stillwater"); home keeps the
+    // app's name. The heading can change after the page has drawn (a book loading, the language switching).
+    const main = document.querySelector<HTMLElement>(".field-main");
+    const name = t("Stillwater · Field log");
+    const update = () => {
+      const heading = pathname === "/" ? "" : (main?.querySelector("h1")?.textContent ?? "").trim();
+      const next = heading ? `${heading} · Stillwater` : name;
+      if (document.title !== next) document.title = next;
+    };
+    update();
+    if (!main) return;
+    const watch = new MutationObserver(update);
+    watch.observe(main, { childList: true, subtree: true, characterData: true });
+    return () => watch.disconnect();
+  }, [t, lang, pathname]);
+  // Leaving the field log for the game, the tab goes back to the app's own name.
+  useEffect(
+    () => () => {
+      document.title = "Stillwater";
+    },
+    [],
+  );
 
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
-  const { pathname } = useLocation();
   const how = useNavigationType();
   const lastPath = useRef(pathname);
   useLayoutEffect(() => {

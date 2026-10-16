@@ -8,10 +8,16 @@ function parse(text: string) {
 
 const round = (value: number, digits: number) => String(Math.round(value * 10 ** digits) / 10 ** digits);
 
+/** "2,5" and ".5" as the book reads them ("2.5", "0.5"), so a phone with only a comma key is understood in any units. */
+function decimal(text: string) {
+  return text.trim().replace(",", ".").replace(/^\./, "0.");
+}
+
 /** What the player typed, in the book's inches or pounds; text that isn't a number passes through for the form to refuse. */
 export function toBookAmount(text: string, kind: "length" | "weight", units: Units) {
   const value = parse(text);
-  if (units === "imperial" || value === null) return text;
+  if (value === null) return text;
+  if (units === "imperial") return decimal(text);
   return round(kind === "length" ? value / CM_PER_IN : value / KG_PER_LB, 3);
 }
 
@@ -24,7 +30,8 @@ export function fromBookAmount(value: number, kind: "length" | "weight", units: 
 /** A typed water temperature in the book's °F. */
 export function toBookTemp(text: string, units: Units) {
   const value = parse(text);
-  if (units === "imperial" || value === null) return text;
+  if (value === null) return text;
+  if (units === "imperial") return decimal(text);
   return round((value * 9) / 5 + 32, 1);
 }
 

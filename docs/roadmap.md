@@ -1324,3 +1324,8 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR201~~ | ~~Species pages show how the best of the kind grew~~ (#501) | field | S |
 | ~~BR202~~ | ~~Outing pages lead with their fish from the outing's own day on~~ (#503) | field | S |
 | ~~BR203~~ | ~~Bests and species pages count fish by wind and water temperature; search finds a wind~~ (#505) | field | S |
+| ~~BR204~~ | ~~Notes keep line breaks; imperial reads a decimal comma; CSV formula guard; localised map coordinates~~ (#507) | field | S |
+| ~~BR205~~ | ~~Search finds words from notes; count links use exact name terms so results match counts~~ (#509) | field | S |
+| ~~BR206~~ | ~~Search takes a water temperature; temperature bars link to their fish~~ (#510) | field | S |
+| ~~BR207~~ | ~~Each field-log page names its browser tab after its heading~~ (#512) | field | S |
+| ~~BR208~~ | ~~Search finds a day; the Best day tile always links~~ (#513) | field | S |

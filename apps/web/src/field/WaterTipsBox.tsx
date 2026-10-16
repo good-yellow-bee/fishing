@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { SEASON_LABELS, SKY_LABELS, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
-import { findLink, findWithLink } from "./CatchSearch";
+import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { waterTips } from "./waterTips";
 import { thisWeekInPastYears } from "./yearsAgo";
 import { fishCountLabel } from "./format";
@@ -41,7 +41,7 @@ export function WaterTipsBox({ catches, label, on, within }: { catches: readonly
         {tips.lures.map((row, index) => (
           <Fragment key={row.lure}>
             {index > 0 ? " · " : null}
-            <Link to={find(t(row.lure))}>{t(row.lure)}</Link> ({row.count})
+            <Link to={find(exactTerm("lure", t(row.lure)))}>{t(row.lure)}</Link> ({row.count})
           </Fragment>
         ))}
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(t(tips.time.label))} /> : null}

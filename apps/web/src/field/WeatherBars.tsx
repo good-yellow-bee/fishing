@@ -11,7 +11,16 @@ export function tempBandLabel(row: WaterTempTally): string {
   return t("{from} to {to}", { from: tempText(row.from), to: tempText(row.to) });
 }
 
-/** The fish by wind and by water temperature, each once more than one row has fish; wind rows open those fish in the search, within a kind when given. */
+/**
+ * The search for one band's fish. It is written in °F whatever the reader's units, because the bands' edges are whole
+ * °F and a rounded °C edge (60°F is 15.6°C) would put a fish on the edge in the wrong band.
+ */
+export function tempBandSearch(row: WaterTempTally): string {
+  const parts = [row.from === null ? null : `>${row.from}°F`, row.to === null ? null : `<${row.to}°F`].filter(Boolean);
+  return parts.join(" + ");
+}
+
+/** The fish by wind and by water temperature, each once more than one row has fish; each row opens its fish in the search, within a kind when given. */
 export function WeatherBars({ book, within }: { book: Logbook; within?: string }) {
   const winds = windTally(book);
   const temps = waterTempTally(book);
@@ -32,7 +41,7 @@ export function WeatherBars({ book, within }: { book: Logbook; within?: string }
           <div className="section-head">
             <h2>{t("By water temperature")}</h2>
           </div>
-          <TallyBars rows={temps.map((row) => ({ key: String(row.from), label: tempBandLabel(row), count: row.count }))} />
+          <TallyBars rows={temps.map((row) => ({ key: String(row.from), label: tempBandLabel(row), count: row.count, to: row.count > 0 ? link(tempBandSearch(row)) : undefined }))} />
         </section>
       ) : null}
     </>
