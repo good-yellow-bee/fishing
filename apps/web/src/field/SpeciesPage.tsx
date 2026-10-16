@@ -19,6 +19,7 @@ import { WeatherBars } from "./WeatherBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
+import { sizeBands } from "./sizeBands";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -116,6 +117,7 @@ export function SpeciesPage() {
           </li>
         ))}
       </ul>
+      <SizeSpread catches={catches} name={name} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">
@@ -174,6 +176,41 @@ export function SpeciesPage() {
       </PagedCatches>
       <RenameKind field="species" name={name} />
     </div>
+  );
+}
+
+/** How the kind's fish spread by length and by weight, each band opening its fish, and how many went back. */
+function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: string }) {
+  const metric = getUnits() === "metric";
+  const within = exactTerm("species", t(name));
+  const released = catches.filter((entry) => entry.released).length;
+  const charts = (["length", "weight"] as const)
+    .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric) }))
+    .filter((chart) => chart.bands.length > 0);
+  if (charts.length === 0) return null;
+  const size = (value: number, unit: string) => `${num(value, 2)} ${unit}`;
+  return (
+    <>
+      <div className="section-head">
+        <h2>{t("By size")}</h2>
+      </div>
+      {released > 0 ? (
+        <p className="meta released-share">
+          <Link to={findWithLink(within, t("Released"))}>{t("Released: {count} of {total}", { count: released, total: catches.length })}</Link>
+        </p>
+      ) : null}
+      {charts.map((chart) => (
+        <TallyBars
+          key={chart.kind}
+          rows={chart.bands.map((band) => ({
+            key: `${chart.kind}-${band.from}`,
+            label: t("{from} to {to}", { from: size(band.from, band.unit), to: size(band.to, band.unit) }),
+            count: band.count,
+            to: band.count > 0 ? findWithLink(within, band.search) : undefined,
+          }))}
+        />
+      ))}
+    </>
   );
 }
 
