@@ -144,7 +144,7 @@ export function SpotPage() {
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}
-          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{top.title}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
+          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${top.title} · ${tripWhen(top.date, today, tomorrow)}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
         </p>
       ) : null}
       {trips.length === 0 ? (

@@ -1194,13 +1194,13 @@ button.field-primary:disabled {
   grid-column: 1 / -1;
 }
 
-/* After dark on the water: the same book, read from a dim screen. */
-@media (prefers-color-scheme: dark) {
+/* After dark on the water: the same book, read from a dim screen. On screen only, so a printed page keeps dark ink on white paper. */
+@media screen and (prefers-color-scheme: dark) {
   .field {
     --field-ink: #ece1cc;
     --field-muted: #b8a78c;
-    --field-paper: #1f1b17;
-    --field-card: #29241e;
+    --field-paper: #25201b;
+    --field-card: #2d2721;
     --field-line: #4b4033;
     --field-rust: #e6957a;
     --field-water: #93b8c7;
