@@ -100,8 +100,8 @@ export type FightPerformance = {
   bowedLeaps?: number;
   /** Seconds of fight played so far, by game time, so a paused tab doesn't count. */
   fightSec?: number;
-  /** At the reeds or the point, every run so far kept out of the weeds or off the rocks; unset once one wasn't. */
-  clearOf?: "weeds" | "rocks" | "pilings";
+  /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
+  clearOf?: "weeds" | "rocks" | "pilings" | "current";
 };
 
 /** Where FightBar turns the tension bar red. */
@@ -352,6 +352,11 @@ export function makeFight(
         if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" ? "pilings" : "rocks";
+        }
+        // At the inlet only a run downstream counts: turned upstream it keeps the note, left to run with the current it spoils it.
+        if (water === "current" && turnable && !sim.jump && !sim.roll && sim.runSide === DOWNSTREAM_SIDE) {
+          if (!turnedThisRun) fouled = true;
+          performance.clearOf = fouled ? undefined : "current";
         }
         rockedThisRun = false;
         sim.surge = 0;

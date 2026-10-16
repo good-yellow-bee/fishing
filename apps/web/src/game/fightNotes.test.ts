@@ -21,6 +21,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "weeds" })).toBe("Turned 2 runs · Kept it out of the weeds");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "rocks" })).toBe("Turned 2 runs · Kept it off the rocks");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "pilings" })).toBe("Turned 2 runs · Kept it clear of the pilings");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "current" })).toBe("Turned 2 runs · Turned it upstream every time");
   });
 
   it("says it in Polish too", () => {
@@ -34,5 +35,6 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "weeds" })).toBe("Z dala od zielska");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "rocks" })).toBe("Z dala od kamieni");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "pilings" })).toBe("Z dala od pali");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "current" })).toBe("Za każdym razem zawrócona pod prąd");
   });
 });
