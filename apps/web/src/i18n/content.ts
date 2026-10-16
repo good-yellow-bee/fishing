@@ -27,9 +27,9 @@ import { getUnits, num, t } from ".";
 export const KG_PER_LB = 0.45359237;
 export const CM_PER_IN = 2.54;
 
-/** "2.4 lb", or "1,1 kg" for a metric reader. The book keeps pounds. */
+/** "2.4 lb", or "1,1 kg" for a metric reader; under a pound or a kilo, to the hundredth. The book keeps pounds. */
 export function weightText(pounds: number): string {
-  return getUnits() === "metric" ? `${num(pounds * KG_PER_LB, pounds * KG_PER_LB < 1 ? 2 : 1)} kg` : `${num(pounds)} lb`;
+  return getUnits() === "metric" ? `${num(pounds * KG_PER_LB, pounds * KG_PER_LB < 1 ? 2 : 1)} kg` : `${num(pounds, pounds < 1 ? 2 : 1)} lb`;
 }
 
 /** "28 in", or "71 cm" for a metric reader. The book keeps inches. */

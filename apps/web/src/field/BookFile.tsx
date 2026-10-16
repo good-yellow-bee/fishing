@@ -112,8 +112,8 @@ export function BookFile() {
     setPending(parsed.value);
   };
 
-  /** Puts `next` in this browser, where it can be undone; `merged` is for a book that is this one plus the file's new fish. */
-  const load = (next: FieldArchive, merged: boolean) => {
+  /** Puts `next` in this browser, where it can be undone; `merged` is for a book that is this one plus the file's new fish, `leftOut` the file's photos that didn't fit. */
+  const load = (next: FieldArchive, merged: boolean, leftOut = 0) => {
     const saved = commitFieldArchive(next);
     if (!saved.ok) {
       setPending(null);
@@ -134,7 +134,10 @@ export function BookFile() {
     setNotice({
       tone: "loaded",
       text: merged
-        ? t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })
+        ? [
+            t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length }),
+            ...(leftOut > 0 ? [t("Photos left out, so the book still fits this browser: {count}.", { count: leftOut })] : []),
+          ].join(" ")
         : t("This browser now has the book from that file."),
     });
     loadButton.current?.focus();
@@ -143,7 +146,11 @@ export function BookFile() {
     if (pending) load(pending, false);
   };
   const onAddNew = () => {
-    if (pending) load(mergeFieldArchive({ book: storedBook, tackle: items, photos }, pending), true);
+    if (!pending) return;
+    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, pending);
+    // The file's photos that didn't fit beside this book's own.
+    const leftOut = newFishIn(storedBook, pending.book).filter((entry) => pending.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
+    load(next, true, leftOut);
   };
 
   const onUndoLoad = () => {

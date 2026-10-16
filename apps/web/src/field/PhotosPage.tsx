@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { CATCH_PHOTO_STORE_MAX_CHARS, catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
 import { spareGameSnapshots } from "./keepCatch";
@@ -32,13 +32,17 @@ export function PhotosPage() {
   useT();
   const { shown, showMore, box } = useShowMore();
   const [made, setMade] = useState<number | null>(null);
+  const roomNote = useRef<HTMLParagraphElement>(null);
   // How full the room kept for photos is, and what of the game's could go to free some.
   const fill = Math.min(100, Math.round((JSON.stringify(photos).length / CATCH_PHOTO_STORE_MAX_CHARS) * 100));
   const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
   const clear = spare.slice(0, 10);
   const makeRoom = () => {
     if (!window.confirm(t("Remove the lake's {count} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.", { count: clear.length }))) return;
-    if (removePhotos(clear)) setMade(clear.length);
+    if (!removePhotos(clear)) return;
+    setMade(clear.length);
+    // The button goes once there is room, so focus waits on the word of what was removed.
+    roomNote.current?.focus();
   };
   const all = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const { visible, more } = catchPage(all, shown);
@@ -56,7 +60,7 @@ export function PhotosPage() {
         </div>
       </header>
       {all.length > 0 ? (
-        <p className="meta photo-room">
+        <p ref={roomNote} className="meta photo-room" tabIndex={-1}>
           {t("Photos fill {percent}% of the room this browser keeps for them.", { percent: fill })}
           {clear.length > 0 ? (
             <>
