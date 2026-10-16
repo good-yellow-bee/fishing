@@ -57,7 +57,8 @@ function tripNight(date: string) {
 function fishSpan(first: string, last: string, count: number): string {
   const sameDay = localDate(new Date(first)) === localDate(new Date(last));
   const show = sameDay ? formatTimeOfDay : formatClock;
-  const span = t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
+  // Two fish in the same minute: one time, not "between 4:05 PM and 4:05 PM".
+  const span = show(first) === show(last) ? t("Fish came at {time}", { time: show(first) }) : t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
   const pace = fishPace(first, last, count);
   return pace ? `${span}, ${pace}` : span;
 }
