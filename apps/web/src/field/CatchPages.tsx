@@ -48,6 +48,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
+import { likelyWater } from "./spotOrder";
 import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
@@ -157,7 +158,8 @@ function CatchForm() {
   const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
   const linkedSpot = book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
-  const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? book.spots[0]?.id ?? "";
+  // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
+  const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date())));
 
   const asked = params.get("kind");
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
