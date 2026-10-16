@@ -9,6 +9,9 @@ describe("dateWords", () => {
   it("reads today, yesterday and weekdays, in English and Polish", () => {
     expect(dateWords("today", now)).toEqual(day("2026-10-16"));
     expect(dateWords("Wczoraj", now)).toEqual(day("2026-10-15"));
+    expect(dateWords("dzis", now)).toEqual(day("2026-10-16"));
+    expect(dateWords("sroda", now)).toEqual(dateWords("środa", now));
+    expect(dateWords("15 pazdziernika", now)).toEqual(day("2026-10-15"));
     expect(dateWords("friday", now)).toEqual(day("2026-10-16"));
     expect(dateWords("saturday", now)).toEqual(day("2026-10-10"));
     expect(dateWords("sun", now)).toBeNull();
