@@ -1440,3 +1440,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR281~~ | ~~Nearest water from the phone's location on the catch form~~ (#622) | field | S |
 | ~~BR282~~ | ~~News card for the catch form changes~~ (#624) | field | S |
 | ~~BR283~~ | ~~Lost fish and missed strikes on an outing~~ (#625) | field | S |
+| ~~BR284~~ | ~~Sample lines saved unchanged from a Polish form stay English~~ (#627) | field | S |
