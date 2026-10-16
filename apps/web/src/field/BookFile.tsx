@@ -95,14 +95,43 @@ export function BookFile() {
   const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
-  const onDownload = () => {
-    // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
-    // The year's goals ride along, so a new browser keeps them too.
-    downloadFile(JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() }), "application/json", datedName("stillwater-field-log.json"));
+  // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
+  // The year's goals ride along, so a new browser keeps them too.
+  const archiveText = () => JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() });
+  /** A copy went out: the reminder counts from it. */
+  const markCopied = () => {
     saveCopiedAt(own, bookSignature(storedBook, items, Object.keys(photos), readYearGoals()));
     setCopiedAt(own);
     setCopyMark(readCopyMark());
+  };
+
+  const onDownload = () => {
+    downloadFile(archiveText(), "application/json", datedName("stillwater-field-log.json"));
+    markCopied();
     setNotice({ tone: "ok", text: t("A copy of this book was downloaded.") });
+  };
+
+  // On a phone that can hand files to the share sheet: the same copy, to Files, a drive or a message.
+  const [shareFile] = useState(() => {
+    try {
+      const file = new File(["{}"], "stillwater-field-log.json", { type: "application/json" });
+      return typeof navigator !== "undefined" && typeof navigator.share === "function" && navigator.canShare?.({ files: [file] }) === true;
+    } catch {
+      return false;
+    }
+  });
+  const onSend = async () => {
+    const file = new File([archiveText()], datedName("stillwater-field-log.json"), { type: "application/json" });
+    try {
+      await navigator.share({ files: [file] });
+    } catch (error) {
+      // Closing the share sheet sends nothing, so it is not a copy.
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      setNotice({ tone: "bad", text: t("The copy could not be sent. Download it instead.") });
+      return;
+    }
+    markCopied();
+    setNotice({ tone: "ok", text: t("A copy of this book was sent.") });
   };
 
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -251,6 +280,11 @@ export function BookFile() {
         <button type="button" className="text-button" onClick={onDownload}>
           {t("Download this book")}
         </button>
+        {shareFile ? (
+          <button type="button" className="text-button" onClick={() => void onSend()}>
+            {t("Send a copy…")}
+          </button>
+        ) : null}
         {book.catches.length > 0 ? (
           <button
             type="button"
