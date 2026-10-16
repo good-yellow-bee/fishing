@@ -324,7 +324,7 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
@@ -343,7 +343,23 @@ describe("FightBar for screen readers", () => {
       "Jumper: every second run is a leap, so let go when it comes up",
       "Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there",
     ]);
+    expect(habit("brook-trout")).toEqual([
+      "Jumper: every second run is a leap, so let go when it comes up",
+      "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it",
+    ]);
     expect(habit("perch")).toEqual([]);
+  });
+
+  it("calls a brook trout's dart until the angler switches sides", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "brook-trout")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 2;
+    sim.current.darted = true;
+    frame();
+    expect(status()).toBe("It darted the other way — switch sides!");
+    sim.current.turning = true;
+    frame();
+    expect(status()).not.toBe("It darted the other way — switch sides!");
   });
 
   it("calls a carp's long first run", () => {

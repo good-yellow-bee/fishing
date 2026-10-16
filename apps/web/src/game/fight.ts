@@ -26,6 +26,8 @@ export type FightSim = {
   firstRun?: boolean;
   /** A rainbow trout's first leap: a long tail-walk across the top, coming and while it lasts. */
   tailWalk?: boolean;
+  /** A brook trout's run that darted the other way halfway: the turn has to switch sides. */
+  darted?: boolean;
   /** A soft-mouthed fish reeled in the red: the hook is tearing and pulls free if it goes on. */
   tearing?: boolean;
   /** The hook tore out of a soft mouth: why the fish got away. */
@@ -83,6 +85,9 @@ export const PAPER_TEAR_SEC = 0.45;
 export const SCRAPPERS: ReadonlySet<string> = new Set(["smallmouth-bass"]);
 export const SCRAPPER_TIRE = 0.8;
 /** Carp and salmon make one long run straight after the hook. */
+/** Brook trout dart: halfway through each run they cut back the other way, so a turn has to switch sides. */
+export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
+
 /** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
 export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);
 export const COVER_HOLD = 1.6;
@@ -309,6 +314,9 @@ export function makeFight(
   const roller = ROLLERS.has(species.id);
   const longRunner = LONG_RUNNERS.has(species.id);
   const coverDiver = COVER_DIVERS.has(species.id);
+  const darter = DARTERS.has(species.id);
+  /** How much of a darter's run is left when it cuts back: half of it, so turning it, which shortens the run, brings the dart sooner. */
+  let dartLeft: number | null = null;
   const coverHold = coverDiver ? COVER_HOLD : 1;
   const turnable = canTurnRuns(species.challenge);
   const sulker = biteStyle(species.id) === "mouth";
@@ -351,6 +359,7 @@ export function makeFight(
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
         if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
+        dartLeft = darter && !sim.jump && !sim.roll ? (nextAt - nowMs) / 2 : null;
       } else {
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
@@ -379,6 +388,8 @@ export function makeFight(
         sim.roll = false;
         sim.firstRun = false;
         sim.tailWalk = false;
+        sim.darted = false;
+        dartLeft = null;
         sim.lastRun = false;
         completedSurges += 1;
         if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
@@ -405,6 +416,12 @@ export function makeFight(
       else if (slackSec >= SULK_PUMP_SEC) sim.sulk = false;
     }
 
+    // A brook trout cuts back the other way halfway through its run.
+    if (dartLeft !== null && sim.surge === 2 && nextAt !== null && nextAt - nowMs <= dartLeft) {
+      dartLeft = null;
+      sim.darted = true;
+      sim.runSide = -sim.runSide as -1 | 1;
+    }
     // A leap goes up, not sideways, so only a run can be turned.
     sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
