@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesNewestFirst, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -11,6 +11,7 @@ import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal } from "../YearGoal";
+import { outingStreak } from "../outingAverage";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -65,6 +66,8 @@ export function BestsPage() {
   useT();
   const today = localDate(new Date());
   const days = daysOut(book, today.slice(0, 4), today);
+  const fishByTrip = fishCountsByTrip(book);
+  const streak = outingStreak(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
   const bests = personalBests(book);
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
@@ -199,6 +202,12 @@ export function BestsPage() {
             </div>
             <YearGoal catches={book.catches} />
             {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
+            {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
+            {streak.best > 1 ? (
+              <p className="meta">
+                {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
+              </p>
+            ) : null}
           </section>
 
           {yearTally(book.catches).length > 1 ? (

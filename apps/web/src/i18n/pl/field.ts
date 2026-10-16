@@ -371,6 +371,8 @@ export const PL_FIELD: PlBook = {
   "This year's goal": "Cel na ten rok",
   "Days on the water in {year}: {count}": "Dni nad wodą w {year}: {count}",
   "{n} fish an outing on average": "Średnio {n} na wyprawę",
+  "Outings in a row with a fish: {count}, and still going": "Wyprawy z rybą pod rząd: {count} i seria trwa",
+  "Most outings in a row with a fish: {count}": "Najwięcej wypraw z rybą pod rząd: {count}",
   "The most fish of any outing on this water": "Najwięcej ryb ze wszystkich wypraw na tym łowisku",
   "Longer than {count} of the {total} others of its kind": "Dłuższa niż {count} z {total} pozostałych tego gatunku",
   "Heavier than {count} of the {total} others of its kind": "Cięższa niż {count} z {total} pozostałych tego gatunku",
