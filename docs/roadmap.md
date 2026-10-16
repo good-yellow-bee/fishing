@@ -1129,7 +1129,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT84~~ | ~~News card (2026-10-16n) covers GT83: walleye light bite~~ (#556) | news | S |
 | ~~GT85~~ | ~~Bait thieves: a golden shiner sometimes nibbles the bait off the hook instead of biting~~ (#558) | bite | S |
 | ~~GT86~~ | ~~News card (2026-10-16o) covers GT85: bait thieves~~ (#559) | news | S |
-| GT87 | Spooked water: a fish lost in a fight scatters the school and slows the next bite at that bank (1.4x, not on a mercy streak) | bite | S |
+| GT87 | Spooked water: a fish lost in a fight scatters the school and slows the next bite at that bank (1.4x, not for a beginner on their first catches) | bite | S |
 
 ## Risks / open questions for the owner
 

@@ -381,7 +381,7 @@ export function useFishingGame(
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
-    // A struggling angler on a mercy streak is spared the spooked wait.
+    // A beginner still on their first catches is spared the spooked wait.
     const spooked = castIntoSpooked(spookRef.current, spotRef.current) && !mercyRef.current;
     spookRef.current = null;
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
