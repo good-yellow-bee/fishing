@@ -29,7 +29,7 @@ import {
 import { t, useLang } from "../i18n";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
-import { localizeSample } from "./sampleText";
+import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 
@@ -180,7 +180,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       storedBook: book,
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
-        const parsed = parseCatchDraft(draft, book);
+        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         let nextPhotos = photos;
@@ -195,7 +195,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return { ok: true, id };
       },
       addSpot: (draft) => {
-        const parsed = parseSpotDraft(draft);
+        const parsed = parseSpotDraft({ ...draft, name: bookLine(draft.name), notes: bookLine(draft.notes), bestConditions: bookLine(draft.bestConditions) });
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         // A full browser says so on the form instead of the save silently not happening.
@@ -203,7 +203,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return saved.ok ? { ok: true, id } : saved;
       },
       addTrip: (draft) => {
-        const parsed = parseTripDraft(draft, book);
+        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title), note: bookLine(draft.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         const saved = persist(withTrip(book, { ...parsed.value, id }), photos);
@@ -213,7 +213,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!book.catches.some((entry) => entry.id === id)) {
           return { ok: false, message: t("That catch is not in this book.") };
         }
-        const parsed = parseCatchDraft(draft, book);
+        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const current = photos[id] ?? null;
         let nextPhotos = photos;
@@ -234,7 +234,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!book.spots.some((spot) => spot.id === id)) {
           return { ok: false, message: t("That spot is not in this book.") };
         }
-        const parsed = parseSpotDraft(draft);
+        const parsed = parseSpotDraft({ ...draft, name: bookLine(draft.name), notes: bookLine(draft.notes), bestConditions: bookLine(draft.bestConditions) });
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const saved = persist(replaceSpot(book, { ...parsed.value, id }), photos);
         return saved.ok ? { ok: true, id } : saved;
@@ -243,7 +243,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!book.trips.some((trip) => trip.id === id)) {
           return { ok: false, message: t("That outing is not in this book.") };
         }
-        const parsed = parseTripDraft(draft, book);
+        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title), note: bookLine(draft.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         // The lost and missed tallies are kept on the water, not on the form: an edit leaves them be.
         const before = book.trips.find((trip) => trip.id === id)!;
