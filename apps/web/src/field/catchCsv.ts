@@ -54,7 +54,7 @@ export function catchesCsv(book: Logbook): string {
       entry.tripId ? (tripById(book, entry.tripId)?.title ?? "") : "",
       weather ? t(SKY_LABELS[weather.sky]) : "",
       weather ? t(WIND_LABELS[weather.wind]) : "",
-      weather ? num(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF) : "",
+      weather?.waterTempF === undefined ? "" : num(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF),
       entry.released ? t("Yes") : "",
       noteText(entry.note),
     ];

@@ -205,7 +205,7 @@ function CatchForm() {
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
-  const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
+  const [startTemp] = useState(() => (existing?.weather?.waterTempF === undefined ? "" : fromBookTemp(existing.weather.waterTempF, units)));
   const [waterTemp, setWaterTemp] = useState(startTemp);
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
@@ -390,7 +390,8 @@ function CatchForm() {
       note,
       sky,
       wind,
-      waterTemp: existing?.weather && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
+      waterTemp:
+        existing?.weather?.waterTempF !== undefined && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
       released,
     };
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
@@ -651,7 +652,7 @@ function CatchForm() {
             </p>
           ) : null}
 
-          <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
+          <p className="wide form-note">{t("Weather is optional: note the sky and wind, and the water temperature if you took it.")}</p>
           {offeredWeather && !weatherStarted ? (
             <p className="wide form-note lure-tips">
               <button
@@ -660,7 +661,7 @@ function CatchForm() {
                 onClick={() => {
                   setSky(offeredWeather.sky);
                   setWind(offeredWeather.wind);
-                  setWaterTemp(fromBookTemp(offeredWeather.waterTempF, units));
+                  setWaterTemp(offeredWeather.waterTempF === undefined ? "" : fromBookTemp(offeredWeather.waterTempF, units));
                 }}
               >
                 {outingWeather
@@ -703,7 +704,6 @@ function CatchForm() {
               onChange={(event) => setWaterTemp(event.target.value)}
               placeholder={units === "metric" ? "14" : "58"}
               aria-label={units === "metric" ? t("Water temperature in Celsius") : t("Water temperature in Fahrenheit")}
-              required={weatherStarted}
             />
           </label>
 
@@ -904,7 +904,8 @@ function CatchView() {
             <p>
               {/* The sky opens every fish caught under it, through the catch search. */}
               <Link to={findLink(exactTerm("sky", t(SKY_LABELS[entry.weather.sky])))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
-              {` · ${t(WIND_LABELS[entry.weather.wind])} · ${tempText(entry.weather.waterTempF)}`}
+              {` · ${t(WIND_LABELS[entry.weather.wind])}`}
+              {entry.weather.waterTempF === undefined ? null : ` · ${tempText(entry.weather.waterTempF)}`}
             </p>
           </>
         ) : null}

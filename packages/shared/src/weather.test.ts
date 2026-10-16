@@ -87,6 +87,11 @@ describe("catch weather", () => {
     expect(parseWeatherDraft({ sky: "", wind: "", waterTemp: "54" })).toMatchObject({ ok: false, field: "sky" });
     expect(parseWeatherDraft({ sky: "rain", wind: "nope", waterTemp: "54" })).toMatchObject({ ok: false, field: "wind" });
     expect(parseCatchDraft(draft({ waterTemp: "hot" }), book)).toMatchObject({ ok: false, field: "waterTemp" });
+    // The water temperature is the one part that may be left out.
+    expect(parseWeatherDraft({ sky: "rain", wind: "calm", waterTemp: " " })).toEqual({ ok: true, value: { sky: "rain", wind: "calm" } });
+    expect(isWeather({ sky: "rain", wind: "calm" })).toBe(true);
+    expect(isWeather({ sky: "rain", wind: "calm", waterTempF: "54" })).toBe(false);
+    expect(formatWeather({ sky: "rain", wind: "calm" })).toBe("Rain · Calm");
     expect(parseCatchDraft(draft({ waterTemp: "31" }), book)).toMatchObject({ ok: false, field: "waterTemp" });
     expect(parseCatchDraft(draft({ waterTemp: "90.5" }), book)).toMatchObject({ ok: false, field: "waterTemp" });
   });

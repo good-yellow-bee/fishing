@@ -47,7 +47,8 @@ export const WIND_LABELS: Record<Wind, string> = {
 export type CatchWeather = {
   sky: Sky;
   wind: Wind;
-  waterTempF: number;
+  /** Left out when the water temperature wasn't taken. */
+  waterTempF?: number;
 };
 
 export type WeatherDraft = {
@@ -199,7 +200,7 @@ export function dailyWind(date: Date, sky: Sky): { wind: Wind; x: number; z: num
 }
 
 /** Field-log conditions for a catch on this lake: wind and water temperature hold for the whole local day. */
-export function dailyConditions(date: Date, sky: Sky): CatchWeather {
+export function dailyConditions(date: Date, sky: Sky): Required<CatchWeather> {
   const { seed, wind } = windOfDay(date, sky);
   const dayOfYear = Math.round(
     (new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(date.getFullYear(), 0, 1).getTime()) / 86_400_000,
@@ -238,8 +239,7 @@ export function isWeather(value: unknown): value is CatchWeather {
   return (
     isSky(weather.sky) &&
     isWind(weather.wind) &&
-    typeof weather.waterTempF === "number" &&
-    Number.isFinite(weather.waterTempF)
+    (weather.waterTempF === undefined || (typeof weather.waterTempF === "number" && Number.isFinite(weather.waterTempF)))
   );
 }
 
@@ -260,11 +260,12 @@ function parseTemp(raw: string): number | null {
   return Number.isFinite(amount) ? amount : null;
 }
 
-/** Conditions are optional: all three left blank keep no weather; once one is noted, all three are needed. */
+/** Conditions are optional: all left blank keep no weather; once one is noted, the sky and wind are needed, the water temperature only if taken. */
 export function parseWeatherDraft(draft: WeatherDraft): WeatherParsed {
   if (!draft.sky && !draft.wind && !draft.waterTemp.trim()) return { ok: true, value: null };
   if (!isSky(draft.sky)) return fail("sky", "Note the sky.");
   if (!isWind(draft.wind)) return fail("wind", "Note the wind.");
+  if (!draft.waterTemp.trim()) return { ok: true, value: { sky: draft.sky, wind: draft.wind } };
   const waterTempF = parseTemp(draft.waterTemp);
   if (waterTempF === null) return fail("waterTemp", "Use a number for the water temperature.");
   if (waterTempF < 32 || waterTempF > 90) {
@@ -274,8 +275,9 @@ export function parseWeatherDraft(draft: WeatherDraft): WeatherParsed {
 }
 
 export function formatWeather(weather: CatchWeather): string {
-  const temp = (Math.round(weather.waterTempF * 10) / 10).toString();
-  return `${SKY_LABELS[weather.sky]} · ${WIND_LABELS[weather.wind]} · ${temp}°F`;
+  const sky = `${SKY_LABELS[weather.sky]} · ${WIND_LABELS[weather.wind]}`;
+  if (weather.waterTempF === undefined) return sky;
+  return `${sky} · ${(Math.round(weather.waterTempF * 10) / 10).toString()}°F`;
 }
 
 export function prepareStoredLogbook(value: unknown): unknown {

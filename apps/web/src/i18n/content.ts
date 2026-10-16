@@ -54,7 +54,8 @@ export function measuresText(entry: CatchEntry): string {
 
 /** "Clear · Calm · 61°F" in the player's words and units. */
 export function weatherText(weather: CatchWeather): string {
-  return `${t(SKY_LABELS[weather.sky])} · ${t(WIND_LABELS[weather.wind])} · ${tempText(weather.waterTempF)}`;
+  const sky = `${t(SKY_LABELS[weather.sky])} · ${t(WIND_LABELS[weather.wind])}`;
+  return weather.waterTempF === undefined ? sky : `${sky} · ${tempText(weather.waterTempF)}`;
 }
 
 /** "A yellow perch over 1 lb at the Dock" / "3 × bluegill". */
