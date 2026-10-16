@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
 import { t, tn, useT } from "../i18n";
-import { measureText } from "../i18n/content";
+import { measuresText } from "../i18n/content";
 import { formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { CATCH_PAGE, catchPage } from "./PagedCatches";
@@ -58,7 +58,7 @@ export function PhotosPage() {
               </h2>
               <ul className="photo-wall">
                 {group.entries.map((entry) => {
-                  const size = measureText(entry.measure);
+                  const size = measuresText(entry);
                   return (
                     <li key={entry.id}>
                       <Link to={`/catches/${entry.id}`}>

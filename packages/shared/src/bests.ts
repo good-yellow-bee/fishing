@@ -1,7 +1,7 @@
 import { LAKE_SEASONS, SEASON_LABELS, lakeSeason, type LakeSeason } from "./season.ts";
 import { moonPhase } from "./moon.ts";
 import { SKIES, SKY_LABELS, WINDS, WIND_LABELS, type Sky, type Wind } from "./weather.ts";
-import { formatMeasure, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
+import { formatMeasure, measureOf, spotById, type CatchEntry, type Logbook, type Measure } from "./logbook.ts";
 
 export type SpeciesTally = {
   species: string;
@@ -29,11 +29,15 @@ function amount(measure: Measure): number {
   return measure.kind === "length" ? measure.inches : measure.pounds;
 }
 
+/** The fish with the largest measure of this kind, counting a fish's other measure when it was both measured and weighed. */
 function bestOf(catches: CatchEntry[], kind: Measure["kind"]): CatchEntry | null {
   let best: CatchEntry | null = null;
+  let most = -Infinity;
   for (const entry of catches) {
-    if (entry.measure.kind !== kind) continue;
-    if (!best || amount(entry.measure) > amount(best.measure)) best = entry;
+    const measure = measureOf(entry, kind);
+    if (!measure || amount(measure) <= most) continue;
+    best = entry;
+    most = amount(measure);
   }
   return best;
 }
@@ -88,8 +92,9 @@ export type FieldLogBestBeat = {
 };
 
 function weightBest(entry: CatchEntry | null): { pounds: number; species: string } | null {
-  if (!entry || entry.measure.kind !== "weight") return null;
-  return { pounds: entry.measure.pounds, species: entry.species };
+  const weight = entry ? measureOf(entry, "weight") : null;
+  if (!entry || !weight || weight.kind !== "weight") return null;
+  return { pounds: weight.pounds, species: entry.species };
 }
 
 function beatLine(scope: FieldLogBestBeat["scope"], pounds: number, species: string): string {

@@ -1,4 +1,4 @@
-import { isLogbook, type CatchEntry, type Logbook, type Spot, type Trip } from "./logbook.ts";
+import { isLogbook, type CatchEntry, type Logbook, type Measure, type Spot, type Trip } from "./logbook.ts";
 import { CATCH_PHOTO_STORE_MAX_CHARS, isCatchPhoto, photosForBook, type CatchPhotoMap } from "./photo.ts";
 import { isTackleBox, type TackleItem } from "./tackle.ts";
 import { prepareStoredLogbook } from "./weather.ts";
@@ -58,10 +58,8 @@ function cleanTrip(trip: Trip): Trip {
 }
 
 function cleanCatch(entry: CatchEntry): CatchEntry {
-  const measure =
-    entry.measure.kind === "length"
-      ? { kind: "length" as const, inches: entry.measure.inches }
-      : { kind: "weight" as const, pounds: entry.measure.pounds };
+  const copy = (one: Measure) => (one.kind === "length" ? { kind: "length" as const, inches: one.inches } : { kind: "weight" as const, pounds: one.pounds });
+  const measure = copy(entry.measure);
   return {
     id: entry.id,
     species: entry.species,
@@ -76,6 +74,7 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
       ? { sky: entry.weather.sky, wind: entry.weather.wind, waterTempF: entry.weather.waterTempF }
       : null,
     ...(entry.released ? { released: true } : {}),
+    ...(entry.alsoMeasure ? { alsoMeasure: copy(entry.alsoMeasure) } : {}),
   };
 }
 

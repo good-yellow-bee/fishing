@@ -10,7 +10,7 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
-import { measureText } from "../i18n/content";
+import { measuresText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
@@ -41,7 +41,7 @@ export function CatchCard({
   return (
     <article className={photo ? "catch-card has-photo" : "catch-card"}>
       {photo ? <img className="catch-thumb" src={photo} alt="" /> : null}
-      <p className={`measure measure-${entry.measure.kind}`}>{measureText(entry.measure)}</p>
+      <p className={`measure measure-${entry.measure.kind}`}>{measuresText(entry)}</p>
       <div>
         <Head>
           <Link to={`/catches/${entry.id}`}>{t(entry.species)}</Link>

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesForSpot, localDate, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, catchesForSpot, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -13,8 +13,9 @@ import { monthName, monthTally } from "../tripMonths";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
-  if (longest) parts.push(measureText(longest.measure));
-  if (heaviest) parts.push(measureText(heaviest.measure));
+  // A fish both measured and weighed may be the longest by its other measure: show the one it is best by.
+  if (longest) parts.push(measureText(measureOf(longest, "length")!));
+  if (heaviest) parts.push(measureText(measureOf(heaviest, "weight")!));
   return parts.join(" · ");
 }
 
@@ -85,14 +86,14 @@ export function BestsPage() {
         <div>
           <span className="eyebrow">{t("Longest")}</span>
           <strong>
-            {bests.longest ? <Link to={`/catches/${bests.longest.id}`}>{measureText(bests.longest.measure)}</Link> : t("None")}
+            {bests.longest ? <Link to={`/catches/${bests.longest.id}`}>{measureText(measureOf(bests.longest, "length")!)}</Link> : t("None")}
           </strong>
           <small>{bests.longest ? t(bests.longest.species) : t("No length in the book")}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
           <strong>
-            {bests.heaviest ? <Link to={`/catches/${bests.heaviest.id}`}>{measureText(bests.heaviest.measure)}</Link> : t("None")}
+            {bests.heaviest ? <Link to={`/catches/${bests.heaviest.id}`}>{measureText(measureOf(bests.heaviest, "weight")!)}</Link> : t("None")}
           </strong>
           <small>{bests.heaviest ? t(bests.heaviest.species) : t("No weight in the book")}</small>
         </div>

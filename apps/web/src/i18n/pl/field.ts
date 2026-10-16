@@ -55,6 +55,8 @@ export const PL_FIELD: PlBook = {
   "Matches: {count}": "Pasujące: {count}",
 
   // Edit and delete
+  "Also weighed (optional)": "Także zważona (opcjonalnie)",
+  "Also measured (optional)": "Także zmierzona (opcjonalnie)",
   Edit: "Edytuj",
   "Editing {name}": "Edycja: {name}",
   Delete: "Usuń",

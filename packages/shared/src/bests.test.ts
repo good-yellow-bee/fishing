@@ -242,3 +242,14 @@ describe("fish by wind and water temperature", () => {
     expect(waterTempTally(book).reduce((sum, row) => sum + row.count, 0)).toBe(weighed);
   });
 });
+
+describe("bests with a fish both measured and weighed", () => {
+  it("counts the fish's second measure for the other best", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const heaviest = personalBests(book).heaviest!;
+    const measuredOne = book.catches.find((entry) => entry.measure.kind === "length")!;
+    const both = { ...measuredOne, alsoMeasure: { kind: "weight" as const, pounds: (heaviest.measure as { pounds: number }).pounds + 1 } };
+    const bests = personalBests({ ...book, catches: book.catches.map((entry) => (entry.id === both.id ? both : entry)) });
+    expect(bests.heaviest!.id).toBe(both.id);
+  });
+});

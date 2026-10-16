@@ -1,4 +1,4 @@
-import { catchesNewestFirst, spotById, tripById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
+import { catchesNewestFirst, measuresOf, spotById, tripById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { noteText } from "./format";
@@ -39,13 +39,16 @@ export function catchesCsv(book: Logbook): string {
   ];
   const rows = catchesNewestFirst(book).map((entry) => {
     const at = new Date(entry.caughtAt);
-    const { measure, weather } = entry;
+    const { weather } = entry;
+    // A fish both measured and weighed fills both columns.
+    const length = measuresOf(entry).find((one) => one.kind === "length");
+    const weight = measuresOf(entry).find((one) => one.kind === "weight");
     return [
       `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`,
       `${pad(at.getHours())}:${pad(at.getMinutes())}`,
       t(entry.species),
-      measure.kind === "length" ? num(metric ? measure.inches * CM_PER_IN : measure.inches) : "",
-      measure.kind === "weight" ? num(metric ? measure.pounds * KG_PER_LB : measure.pounds, 2) : "",
+      length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
+      weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
       t(entry.lure),
       spotById(book, entry.spotId)?.name ?? "",
       entry.tripId ? (tripById(book, entry.tripId)?.title ?? "") : "",

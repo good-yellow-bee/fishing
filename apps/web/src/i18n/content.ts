@@ -7,6 +7,8 @@ import {
   SKY_LABELS,
   SPOT_LABELS,
   WIND_LABELS,
+  measuresOf,
+  type CatchEntry,
   type CatchWeather,
   type DailyRequest,
   type FieldLogBestBeat,
@@ -43,6 +45,11 @@ export function tempText(fahrenheit: number): string {
 /** "2.4 lb" / "2,4 lb" / "1,1 kg". */
 export function measureText(measure: Measure): string {
   return measure.kind === "length" ? lengthText(measure.inches) : weightText(measure.pounds);
+}
+
+/** "28 in · 6.4 lb" for a fish both measured and weighed, else its one measure. */
+export function measuresText(entry: CatchEntry): string {
+  return measuresOf(entry).map(measureText).join(" · ");
 }
 
 /** "Clear · Calm · 61°F" in the player's words and units. */
