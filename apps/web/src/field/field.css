@@ -1450,3 +1450,8 @@ button.field-primary:disabled {
     display: none;
   }
 }
+
+.tally-more {
+  margin: 4px 0 12px;
+  font-size: 14px;
+}
