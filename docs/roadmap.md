@@ -1430,3 +1430,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR274~~ | ~~Pounds and ounces and inch fractions in the size fields~~ (#614) | field | S |
 | ~~BR275~~ | ~~Save and log another, sticky save bar on the catch form~~ (#615) | field | S |
 | ~~BR276~~ | ~~Water temperature optional in a fish's weather~~ (#616) | field | S |
+| ~~BR277~~ | ~~Catch time from the photo's EXIF~~ (#617) | field | S |
