@@ -36,3 +36,25 @@ export function likelyWater(book: Logbook, today: string): string {
   const todays = new Set(book.trips.filter((trip) => trip.date === today).map((trip) => trip.spotId));
   return order.find((id) => todays.has(id)) ?? order[0] ?? "";
 }
+
+const EARTH_KM = 6371;
+
+/** Kilometres between two points on the map, along the ground. */
+export function kmBetween(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const rad = (degrees: number) => (degrees * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * EARTH_KM * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/** The water with a pin nearest to where the player stands, and how far it is; null when no water has a pin. */
+export function nearestWater(book: Logbook, here: { lat: number; lng: number }): { spot: Spot; km: number } | null {
+  let best: { spot: Spot; km: number } | null = null;
+  for (const spot of book.spots) {
+    if (!spot.place) continue;
+    const km = kmBetween(here, spot.place);
+    if (!best || km < best.km) best = { spot, km };
+  }
+  return best;
+}

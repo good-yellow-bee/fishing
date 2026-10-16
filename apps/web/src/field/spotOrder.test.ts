@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { likelyWater, spotsByLastFish } from "./spotOrder";
+import { kmBetween, likelyWater, nearestWater, spotsByLastFish } from "./spotOrder";
 
 describe("spot order", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -32,5 +32,21 @@ describe("likely water", () => {
     expect(likelyWater(book, "2026-10-17")).toBe("lake");
     expect(likelyWater({ ...book, catches: [] }, "2026-10-17")).toBe("first");
     expect(likelyWater({ spots: [], trips: [], catches: [] }, "2026-10-17")).toBe("");
+  });
+});
+
+describe("nearestWater", () => {
+  const water = (id: string, place?: { lat: number; lng: number }) => ({ id, name: id, waterType: "lake" as const, notes: "", ...(place ? { place } : {}) });
+  it("picks the pinned water nearest to where the player stands", () => {
+    const book = { spots: [water("far", { lat: 47, lng: -94 }), water("none"), water("near", { lat: 46.85, lng: -94.25 })], trips: [], catches: [] };
+    const found = nearestWater(book as never, { lat: 46.86, lng: -94.24 });
+    expect(found?.spot.id).toBe("near");
+    expect(found!.km).toBeGreaterThan(1);
+    expect(found!.km).toBeLessThan(2);
+    expect(nearestWater({ spots: [water("none")], trips: [], catches: [] } as never, { lat: 0, lng: 0 })).toBeNull();
+  });
+
+  it("measures along the ground", () => {
+    expect(kmBetween({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })).toBeCloseTo(111.19, 1);
   });
 });

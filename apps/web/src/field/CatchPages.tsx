@@ -40,7 +40,7 @@ import { catchMonth } from "./tripMonths";
 import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
-import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
+import { getUnits, locale, num, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -49,7 +49,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
-import { likelyWater } from "./spotOrder";
+import { likelyWater, nearestWater } from "./spotOrder";
 import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
@@ -148,6 +148,12 @@ export function CatchFormPage() {
   // Each arrival starts afresh, even at the same address: a second "Save and log another" lands on the same link.
   const { key } = useLocation();
   return <CatchForm key={`${catchId ?? ""}:${params.toString()}:${key}`} />;
+}
+
+/** "1.2 km" or "0.7 mi", in the player's units. */
+function distanceText(km: number, units: Units): string {
+  const value = units === "metric" ? km : km / 1.609344;
+  return `${num(value, value < 10 ? 1 : 0)} ${units === "metric" ? "km" : "mi"}`;
 }
 
 /** Camera notes sit at the start of a JPEG; this much is plenty to find the time a photo was taken. */
@@ -325,6 +331,27 @@ function CatchForm() {
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
     setTripId(existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? ""));
     setTripPicked(Boolean(existing));
+  };
+
+  // At the water with the phone: the pinned water nearest to where the player stands.
+  const canLocate = !existing && typeof navigator !== "undefined" && "geolocation" in navigator && book.spots.some((spot) => spot.place);
+  const [locating, setLocating] = useState<"idle" | "busy" | "failed" | { name: string; km: number }>("idle");
+  const findNearest = () => {
+    if (locating === "busy") return;
+    setLocating("busy");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const found = nearestWater(book, { lat: position.coords.latitude, lng: position.coords.longitude });
+        if (!found) {
+          setLocating("failed");
+          return;
+        }
+        onSpot(found.spot.id);
+        setLocating({ name: found.spot.name, km: found.km });
+      },
+      () => setLocating("failed"),
+      { enableHighAccuracy: true, timeout: 15000 },
+    );
   };
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
@@ -641,16 +668,32 @@ function CatchForm() {
             </p>
           ) : null}
 
-          <label>
-            {t("Water")}
-            <select name="spot" value={spotId} onChange={(event) => onSpot(event.target.value)}>
-              {book.spots.map((spot) => (
-                <option key={spot.id} value={spot.id}>
-                  {spot.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="water-field">
+            <label>
+              {t("Water")}
+              <select name="spot" value={spotId} onChange={(event) => onSpot(event.target.value)}>
+                {book.spots.map((spot) => (
+                  <option key={spot.id} value={spot.id}>
+                    {spot.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {canLocate ? (
+              <span className="field-hint nearest-water">
+                <button type="button" className="text-button" aria-disabled={locating === "busy" ? true : undefined} onClick={findNearest}>
+                  {locating === "busy" ? t("Finding you…") : t("Nearest water to me")}
+                </button>
+                <span role="status">
+                  {locating === "failed"
+                    ? ` ${t("The browser didn't give a place.")}`
+                    : typeof locating === "object"
+                      ? ` ${t("{water}, {distance} away.", { water: locating.name, distance: distanceText(locating.km, units) })}`
+                      : ""}
+                </span>
+              </span>
+            ) : null}
+          </div>
 
           <label>
             {t("Time")}
