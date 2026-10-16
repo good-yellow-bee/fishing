@@ -25,6 +25,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "rocks" })).toBe("Turned 2 runs · Kept it off the rocks");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "pilings" })).toBe("Turned 2 runs · Kept it clear of the pilings");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, clearOf: "current" })).toBe("Turned 2 runs · Turned it upstream every time");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, encore: true, fightSec: 40 })).toBe("Turned 1 run · Rode out a second run at the net · Landed in 40 s");
   });
 
   it("says it in Polish too", () => {
@@ -36,6 +37,7 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, secondTake: true })).toBe("Przy drugim braniu");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, grabbed: "golden-shiner" })).toBe("Wziął twojego złotawca");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, closeCall: true })).toBe("O włos");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, encore: true })).toBe("Przetrwany drugi odjazd przy podbieraku");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "weeds" })).toBe("Z dala od zielska");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "rocks" })).toBe("Z dala od kamieni");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, clearOf: "pilings" })).toBe("Z dala od pali");
