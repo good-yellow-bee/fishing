@@ -34,7 +34,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
+import { biteStyle, FOLLOWERS, LIGHT_HOLD, nibblePlan, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -157,6 +157,8 @@ function strikeCall(style: BiteStyle) {
 export const SECOND_TAKE_MS = 1800;
 /** The twitch of the float halfway through that wait. */
 export const SECOND_TAKE_NIBBLE_MS = 300;
+/** How long a tiger muskie that missed follows the bait before it hits again. */
+export const FOLLOW_MS = 1200;
 
 const waitHint = () => t("Watch the bobber. Strike on the real dip, not a nibble.");
 const hotspotWaitHint = () => t("Your lure is in the bubbles. Watch the bobber — strike on the real dip.");
@@ -463,6 +465,18 @@ export function useFishingGame(
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
               }, SECOND_TAKE_MS);
+              return;
+            }
+            // A tiger muskie follows the bait it missed and hits once more, with no warning tap.
+            if (!secondTake && FOLLOWERS.has(species.id)) {
+              secondTake = true;
+              secondTakeRef.current = true;
+              setPhaseBoth("waiting");
+              setHint(t("It swirled away, but a muskie follows. Watch for it to hit again…"));
+              timers.current.wait = window.setTimeout(() => {
+                if (phaseRef.current !== "waiting") return;
+                timers.current.shown = whenShown(takeBait);
+              }, FOLLOW_MS);
               return;
             }
             // The missed fish stays in the outcome so the turn-away shows the same fish.

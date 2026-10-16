@@ -46,7 +46,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useFishingGame } from "./useFishingGame";
+import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 
@@ -729,6 +729,24 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^carp\|/);
     expect(container!.querySelector("[data-testid=miss-message]")?.textContent).toMatch(/^Too slow\. The fish dropped the bait after \d\.\d\d s\.$/);
+  });
+
+  it("lets a tiger muskie that missed follow the bait and hit once more, with no nibble", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "tiger-muskie")!);
+    cast(surface);
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("hookset:none");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toBe("It swirled away, but a muskie follows. Watch for it to hit again…");
+    const nibbles = vi.mocked(fx.nibble).mock.calls.length;
+    act(() => vi.advanceTimersByTime(FOLLOW_MS));
+    expect(vi.mocked(fx.nibble).mock.calls.length).toBe(nibbles);
+    expect(phase()).toBe("hookset:none");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("result:miss");
+    expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^tiger-muskie\|/);
   });
 
   it("notes a bottom feeder hooked on its second take, and not the next fish hooked at once", () => {

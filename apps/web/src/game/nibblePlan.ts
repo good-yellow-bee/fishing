@@ -39,6 +39,9 @@ export const LIGHT_PLUNGE = 0.45;
 /** A light biter holds on to the bait this much longer, so the faint take can still be struck. */
 export const LIGHT_HOLD = 1.3;
 
+/** A tiger muskie that misses the strike follows the bait and hits it once more, with no nibble first. */
+export const FOLLOWERS: ReadonlySet<string> = new Set(["tiger-muskie"]);
+
 /** Little fish that nibble the bait away now and then instead of taking the hook. */
 export const BAIT_THIEVES: ReadonlySet<string> = new Set(["golden-shiner"]);
 /** How often a bait thief strips the hook rather than biting. */
