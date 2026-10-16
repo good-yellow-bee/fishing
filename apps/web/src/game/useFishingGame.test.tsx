@@ -25,7 +25,7 @@ vi.mock("@stillwater/shared", async (importOriginal) => {
 vi.mock("./eveningRise", () => ({ isRiseCast: () => true }));
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
-  return { ...actual, castSnags: vi.fn(() => false) };
+  return { ...actual, castSnags: vi.fn(() => null) };
 });
 // Bait thieves are random; each test that wants one says so.
 vi.mock("./nibblePlan", async (importOriginal) => {
@@ -312,7 +312,7 @@ describe("useFishingGame strike timing", () => {
   });
 
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
-    vi.mocked(castSnags).mockReturnValueOnce(true);
+    vi.mocked(castSnags).mockReturnValueOnce("weed");
     const surface = mount();
     cast(surface);
     act(() => vi.advanceTimersByTime(SNAG_AT_MS + 1));
@@ -329,6 +329,19 @@ describe("useFishingGame strike timing", () => {
     expect(hint()).toBe("Free of the weed. Let it settle.");
     act(() => vi.advanceTimersByTime(2_201));
     expect(phase()).toBe("hookset:none");
+  });
+
+  it("names the rocks when the lure snags on the point", () => {
+    vi.mocked(castSnags).mockReturnValueOnce("rocks");
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(SNAG_AT_MS + 1));
+    expect(hint()).toBe(`Snagged on the rocks. Tap ${SNAG_TAPS} times to work it free.`);
+    for (let tap = 1; tap <= SNAG_TAPS; tap += 1) {
+      act(() => surface.dispatchEvent(pointer("pointerdown", 30 + tap)));
+      act(() => window.dispatchEvent(pointer("pointerup", 30 + tap)));
+    }
+    expect(hint()).toBe("Off the rocks. Let it settle.");
   });
 
   it("holds the bite and the strike window while the game is in another tab", () => {

@@ -30,7 +30,7 @@ import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
-import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
+import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
@@ -198,9 +198,9 @@ export function useFishingGame(
   const secondTakeRef = useRef(false);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
-  const castSnagRef = useRef(false);
+  const castSnagRef = useRef<SnagCover | null>(null);
   /** Taps so far on a snagged lure, and the bite timers it is holding back; null while the lure is free. */
-  const snagRef = useRef<{ taps: number; arm: () => void } | null>(null);
+  const snagRef = useRef<{ taps: number; arm: () => void; cover: SnagCover } | null>(null);
   const mercyRef = useRef(mercy);
   mercyRef.current = mercy;
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -483,13 +483,18 @@ export function useFishingGame(
       arm();
       return;
     }
-    // Fouled in the weed: no bite until it is worked free.
+    // Fouled in the weed or on a rock: no bite until it is worked free.
+    const cover = castSnagRef.current;
     timers.current.snag = window.setTimeout(() => {
       if (phaseRef.current !== "waiting") return;
-      snagRef.current = { taps: 0, arm };
+      snagRef.current = { taps: 0, arm, cover: cover ?? "weed" };
       fx.plop();
       fx.haptic("nibble");
-      setHint(t("Snagged in the weed. Tap {n} times to work it free.", { n: SNAG_TAPS }));
+      setHint(
+        cover === "rocks"
+          ? t("Snagged on the rocks. Tap {n} times to work it free.", { n: SNAG_TAPS })
+          : t("Snagged in the weed. Tap {n} times to work it free.", { n: SNAG_TAPS }),
+      );
     }, SNAG_AT_MS);
   }, [hour, lureRef, moon, resetToIdle, season, sky]);
 
@@ -534,7 +539,7 @@ export function useFishingGame(
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
-    castSnagRef.current = aimed !== null && castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random());
+    castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random()) : null;
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
@@ -596,7 +601,7 @@ export function useFishingGame(
           break;
         }
         snagRef.current = null;
-        waitHintRef.current = t("Free of the weed. Let it settle.");
+        waitHintRef.current = snag.cover === "rocks" ? t("Off the rocks. Let it settle.") : t("Free of the weed. Let it settle.");
         setHint(waitHintRef.current);
         snag.arm();
         break;
