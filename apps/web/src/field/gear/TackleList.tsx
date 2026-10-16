@@ -1,7 +1,7 @@
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
-import { fishCountLabel, messageText } from "../format";
+import { fishCountLabel, formatDay, messageText } from "../format";
 import { useTackle } from "./TackleState";
 import "./gear.css";
 
@@ -49,6 +49,16 @@ export function TackleList({
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   const errorId = useId();
+  const box = useRef<HTMLElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  // A control that takes itself away (a copied list, an added tip, the last unpack, a removed row) hands focus on.
+  const focusAfter = (removedIndex?: number) => {
+    setTimeout(() => {
+      const removers = box.current?.querySelectorAll<HTMLButtonElement>(".tackle-remove") ?? [];
+      const next = removedIndex === undefined ? undefined : (removers[removedIndex] ?? removers[removedIndex - 1]);
+      (next ?? input.current)?.focus();
+    }, 0);
+  };
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -70,13 +80,20 @@ export function TackleList({
   // After an outing, the same list can go back in the bag for the next one.
   const unpack =
     packed > 0 ? (
-      <button type="button" className="text-button tackle-unpack" onClick={() => unpackTrip(tripId)}>
+      <button
+        type="button"
+        className="text-button tackle-unpack"
+        onClick={() => {
+          unpackTrip(tripId);
+          focusAfter();
+        }}
+      >
         {t("Unpack all")}
       </button>
     ) : null;
 
   return (
-    <section className="tackle-block" aria-label={name ?? heading ?? t("Tackle")}>
+    <section ref={box} className="tackle-block" aria-label={name ?? heading ?? t("Tackle")}>
       {heading ? (
         <div className="section-head">
           <h2>{heading}</h2>
@@ -97,15 +114,22 @@ export function TackleList({
           {lastBag ? (
             <>
               {" "}
-              <button type="button" className="text-button" onClick={() => copyTrip(lastBag.id, tripId)}>
-                {t("Copy the list from {trip}", { trip: lastBag.title })}
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  copyTrip(lastBag.id, tripId);
+                  focusAfter();
+                }}
+              >
+                {t("Copy the list from {trip}, {day}", { trip: lastBag.title, day: formatDay(lastBag.date) })}
               </button>
             </>
           ) : null}
         </p>
       ) : (
         <ul className="tackle-list">
-          {rows.map((item) => (
+          {rows.map((item, index) => (
             <li key={item.id}>
               <label className="tackle-row">
                 <input
@@ -120,7 +144,10 @@ export function TackleList({
               <button
                 type="button"
                 className="tackle-remove"
-                onClick={() => remove(item.id)}
+                onClick={() => {
+                  remove(item.id);
+                  focusAfter(index);
+                }}
                 aria-label={t("Take {piece} off the list", { piece: t(item.label) })}
               >
                 ×
@@ -133,7 +160,11 @@ export function TackleList({
         <p className="form-note lure-tips tackle-suggest">
           {t("Works on this water:")}{" "}
           {missing.map((lure) => (
-            <button key={lure} type="button" className="lure-tip" onClick={() => setError(add(tripId, lure) ?? "")}>
+            <button key={lure} type="button" className="lure-tip" onClick={() => {
+                const message = add(tripId, lure);
+                setError(message ?? "");
+                if (!message) focusAfter();
+              }}>
               {t("+ {lure}", { lure: t(lure) })}
             </button>
           ))}
@@ -145,7 +176,11 @@ export function TackleList({
           <input
             name="piece"
             value={label}
-            onChange={(event) => setLabel(event.target.value)}
+            ref={input}
+            onChange={(event) => {
+              setLabel(event.target.value);
+              setError("");
+            }}
             placeholder={t("Spare leader")}
             maxLength={60}
             aria-invalid={error ? true : undefined}

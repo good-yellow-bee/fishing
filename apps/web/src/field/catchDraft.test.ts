@@ -33,6 +33,7 @@ describe("kept catch draft", () => {
     expect(draftWorthKeeping({ species: " ", amount: "", note: "" })).toBe(false);
     expect(parseKeptDraft(JSON.stringify({ ...draft, species: "", amount: "" }), now)).toBeNull();
     expect(draftWorthKeeping({ species: "", amount: "", note: "Lost it at the net" })).toBe(true);
+    expect(draftWorthKeeping({ species: "", amount: "", alsoAmount: "3.2", note: "" })).toBe(true);
   });
 
   it("ignores broken or foreign data", () => {

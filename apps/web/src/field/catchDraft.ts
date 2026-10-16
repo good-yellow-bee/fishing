@@ -11,8 +11,8 @@ const KEEP_MS = 24 * 60 * 60 * 1000;
 const TEXT_FIELDS = ["species", "amount", "lure", "spotId", "tripId", "caughtAt", "note", "sky", "wind", "waterTemp"] as const;
 
 /** Whether the player has typed anything worth coming back for (the presets alone are not). */
-export function draftWorthKeeping(draft: Pick<CatchDraft, "species" | "amount" | "note">): boolean {
-  return Boolean(draft.species.trim() || draft.amount.trim() || draft.note.trim());
+export function draftWorthKeeping(draft: Pick<CatchDraft, "species" | "amount" | "note" | "alsoAmount">): boolean {
+  return Boolean(draft.species.trim() || draft.amount.trim() || draft.alsoAmount?.trim() || draft.note.trim());
 }
 
 export function parseKeptDraft(raw: string | null, now: Date): KeptDraft | null {

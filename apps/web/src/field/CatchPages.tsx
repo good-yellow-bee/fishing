@@ -420,7 +420,7 @@ function CatchForm() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{existing ? t("Edit entry") : t("New entry")}</p>
-          <h1>{heading}</h1>
+          <h1 data-title={existing ? t("Editing {name}", { name: t(existing.species) }) : t("Log a catch")}>{heading}</h1>
         </div>
         <Link to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}>{t("Cancel")}</Link>
       </header>
