@@ -57,6 +57,8 @@ export type FightOutcome = "fighting" | "landed" | "snapped" | "escaped";
 
 /** Trout, bass and salmon jump: every second run of theirs is a leap. */
 export const LEAPERS: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "smallmouth-bass", "largemouth-bass", "salmon"]);
+/** A sturgeon breaches once: its first run after the hook is a leap clear of the water. */
+export const BREACHERS: ReadonlySet<string> = new Set(["sturgeon"]);
 /** Pike roll on the line at the net instead of making a last run. */
 export const ROLLERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
 /** A roll on the line lasts this long; held tight past the leap's grace, it loads the line into the red. */
@@ -276,6 +278,7 @@ export function makeFight(
   let turnedThisRun = false;
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id);
+  const breacher = BREACHERS.has(species.id);
   const roller = ROLLERS.has(species.id);
   const longRunner = LONG_RUNNERS.has(species.id);
   const turnable = canTurnRuns(species.challenge);
@@ -298,7 +301,7 @@ export function makeFight(
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;
-        sim.jump = leaper && completedSurges % 2 === 1;
+        sim.jump = (leaper && completedSurges % 2 === 1) || (breacher && completedSurges === 0);
         // A pike that sees the net rolls on the line rather than running.
         sim.roll = roller && sim.lastRun === true && !sim.jump;
         // A carp's first run is the long one.

@@ -1130,7 +1130,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT85~~ | ~~Bait thieves: a golden shiner sometimes nibbles the bait off the hook instead of biting~~ (#558) | bite | S |
 | ~~GT86~~ | ~~News card (2026-10-16o) covers GT85: bait thieves~~ (#559) | news | S |
 | ~~GT87~~ | ~~Spooked water: a fish lost in a fight scatters the school and slows the next bite at that bank (1.4x, not for a beginner on their first catches)~~ (#560) | bite | S |
-| GT88 | News card (2026-10-16p) covers GT87: spooked water | news | S |
+| ~~GT88~~ | ~~News card (2026-10-16p) covers GT87: spooked water~~ (#561) | news | S |
+| GT89 | Sturgeon breach: a sturgeon's first run after the hook is a leap clear of the water | fight | S |
 
 ## Risks / open questions for the owner
 
