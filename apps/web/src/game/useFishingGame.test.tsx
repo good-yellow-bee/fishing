@@ -414,6 +414,16 @@ describe("useFishingGame strike timing", () => {
     expect(hint()).toMatch(/^Hooked in 0\.90 s \(solid under 0\.\d\d s\)\. /);
   });
 
+  it("says the hook went in light on a strike late in the window", () => {
+    const surface = mount();
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("fight:none");
+    expect(hint()).toMatch(/^Hooked light in 1\.10 s, it only just caught\. Keep it out of the red\. /);
+  });
+
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
     vi.mocked(castSnags).mockReturnValueOnce("weed");
     const surface = mount();

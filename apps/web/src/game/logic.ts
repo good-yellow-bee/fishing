@@ -197,6 +197,14 @@ export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE
   return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1);
 }
 
+/** A strike after this share of the hook window only sets the hook light. */
+export const LIGHT_HOOK_SHARE = 0.75;
+
+/** True when the strike came so late in the window that the hook only just caught. */
+export function isLightHook(elapsedMs: number, windowMs: number) {
+  return elapsedMs > windowMs * LIGHT_HOOK_SHARE;
+}
+
 /** True when the strike came quick enough on the bite to set the hook solid. */
 export function isSolidStrike(elapsedMs: number, windowMs: number) {
   return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;

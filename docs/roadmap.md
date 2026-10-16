@@ -1191,7 +1191,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT146~~ | ~~A perch gulps the bait: holds it 1.5x longer, with its own strike call and field guide line; news card~~ (#732) | game | S |
 | ~~GT147~~ | ~~A brook or rainbow trout snatches the bait: lets go after 0.8x the time, with its own strike call and field guide line; news card~~ (#733) | game | S |
 | ~~GT148~~ | ~~A salmon rolls on the bait: a 1.6x wider strike splash with higher spray, its own strike call and field guide line; news card~~ (#735) | game | S |
-| GT149 | A perch fights hard for a moment, then gives up: it tires 1.3x faster; fight card habit line; news card | fish | S |
+| ~~GT149~~ | ~~A perch fights hard for a moment, then gives up: it tires 1.3x faster; fight card habit line; news card~~ (#737) | fish | S |
+| GT150 | A late strike (past 75% of the hook window) hooks light: reeled in the red, the hook pulls out like a soft mouth's; hint, fight card line, own loss message; news card | game | S |
 
 ## Risks / open questions for the owner
 

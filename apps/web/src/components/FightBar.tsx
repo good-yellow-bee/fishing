@@ -242,6 +242,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
           {SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Soft mouth: reel in the red and the hook tears out")}</p>}
+          {fight.lightHook && !SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Hooked light: reel in the red and the hook pulls out")}</p>}
           {LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Jumper: every second run is a leap, so let go when it comes up")}</p>}
           {BREACHERS.has(fight.species.id) && <p className="fight-water">{t("Breacher: its first run is a leap, so let go when it comes up")}</p>}
           {ROLLERS.has(fight.species.id) && <p className="fight-water">{t("Roller: at the net it rolls on the line instead of running")}</p>}

@@ -326,6 +326,15 @@ describe("FightBar for screen readers", () => {
     expect(container!.textContent).not.toContain("Soft mouth");
   });
 
+  it("warns that a fish hooked light can pull free, unless its soft mouth already says so", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
+    expect(container!.textContent).not.toContain("Hooked light");
+    act(() => root!.render(<FightBar fight={{ species: trout, weight: 0.8, underpowered: false, lightHook: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect(container!.textContent).toContain("Hooked light: reel in the red and the hook pulls out");
+    act(() => root!.render(<FightBar fight={{ species: whitefish, weight: 0.8, underpowered: false, lightHook: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect(container!.textContent).not.toContain("Hooked light");
+  });
+
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
