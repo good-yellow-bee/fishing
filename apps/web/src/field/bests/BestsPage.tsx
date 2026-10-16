@@ -10,6 +10,7 @@ import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { monthName, monthTally, yearTally } from "../tripMonths";
+import { YearGoal } from "../YearGoal";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -188,6 +189,13 @@ export function BestsPage() {
               <h2>{t("When they bite")}</h2>
             </div>
             <TallyBars rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findLink(exactTerm("time", t(row.label))) : undefined }))} />
+          </section>
+
+          <section>
+            <div className="section-head">
+              <h2>{t("This year's goal")}</h2>
+            </div>
+            <YearGoal catches={book.catches} />
           </section>
 
           {yearTally(book.catches).length > 1 ? (
