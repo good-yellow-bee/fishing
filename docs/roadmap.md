@@ -1162,7 +1162,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT117~~ | ~~Head-shake feel: the hooked walleye wags its head on the lake, the rod knocks three times and the pad or phone buzzes~~ (#669) | fight | S |
 | ~~GT118~~ | ~~Catfish lift feel: after the first pump a stuck catfish comes partway up on the lake, with one deep thud and a buzz~~ (#671) | fight | S |
 | ~~GT119~~ | ~~News card for the head-shake and catfish lift feel~~ (#673) | ui | S |
-| GT120 | The landed card counts darts followed (brook trout) and head shakes eased off (walleye) | fight | S |
+| ~~GT120~~ | ~~The landed card counts darts followed (brook trout) and head shakes eased off (walleye)~~ (#675) | fight | S |
+| GT121 | Pike grab: a pike at the reeds can hit a golden shiner on the way in, and the fight starts again with the pike; news card for it and the landed-card counts | fight | S |
 
 ## Risks / open questions for the owner
 
