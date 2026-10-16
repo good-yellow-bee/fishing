@@ -1136,7 +1136,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT91~~ | ~~Habit lines on the fight card: jumper, breacher, roller, long runner~~ (#567) | ui | S |
 | ~~GT92~~ | ~~Burbot coil: a burbot coils on the line at the net, like a pike's roll~~ (#570) | fight | S |
 | ~~GT93~~ | ~~News card (2026-10-16s) covers GT91 and GT92: habit lines, burbot coil~~ (#582) | news | S |
-| GT94 | Crappie paper mouth: a crappie's hook tears out when reeled in the red, like a whitefish's | fight | S |
+| ~~GT94~~ | ~~Crappie paper mouth: a crappie's hook tears out when reeled in the red, like a whitefish's~~ (#585) | fight | S |
+| GT95 | News card (2026-10-16u) covers GT94: crappie paper mouth | news | S |
 
 ## Risks / open questions for the owner
 
