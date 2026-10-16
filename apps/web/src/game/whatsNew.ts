@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zq";
+export const NEWS_ID = "2026-10-16zr";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Land a trophy that made its second run at the net and the card says you rode it out. Lose a trophy-sized fish and the result now says it looked like a trophy, so you know what got away.",
   "Send a copy of your book straight to the phone's share sheet. A photo taken near a pinned water picks that water, a fish after midnight joins last night's outing, and each fish now says how near sunrise or sunset it came. Waters show their best water temperature, and the outings page has its own search.",
   "A trophy-sized fish now feels heavy the moment it's hooked, with a thud on the rod. If it still has fight left, it won't give up at the first sight of the net: let go when it makes one more run.",
   "Lose a bigger fish and it may still be about: cast at that bank again within a few casts and it can bite again, at the same weight. Land it and the card calls it the one that got away.",

@@ -1172,7 +1172,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT127~~ | ~~Trophy encore: a trophy-sized fish with fight left makes a second run at the net, with its own call~~ (#696) | fight | S |
 | ~~GT128~~ | ~~News card for the trophy feel and the trophy's second run at the net~~ (#698) | ui | S |
 | ~~GT129~~ | ~~The landed card notes Rode out a second run at the net when a trophy made its encore~~ (#700) | fight | S |
-| GT130 | A lost trophy-sized fish: the snapped or thrown-hook message adds It looked like a trophy | fight | S |
+| ~~GT130~~ | ~~A lost trophy-sized fish: the snapped or thrown-hook message adds It looked like a trophy~~ (#703) | fight | S |
+| GT131 | News card for the second-run landed note and the lost-trophy line | ui | S |
 
 ## Risks / open questions for the owner
 
