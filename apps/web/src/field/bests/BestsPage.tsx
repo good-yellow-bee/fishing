@@ -115,6 +115,23 @@ export function BestsPage() {
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
+  // A book with no fish yet: one line and the way to the first, not a page of empty tiles.
+  if (whole.catches.length === 0) {
+    return (
+      <div className="sheet">
+        <header className="sheet-head">
+          <div>
+            <p className="eyebrow">{t("Personal bests")}</p>
+            <h1>{t("Bests")}</h1>
+          </div>
+        </header>
+        <p className="empty">
+          {t("Nothing landed in the book yet.")} <Link to="/catches/new">{t("Log a catch")}</Link>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="sheet">
       <header className="sheet-head">

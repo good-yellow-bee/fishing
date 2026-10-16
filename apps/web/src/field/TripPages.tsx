@@ -538,7 +538,7 @@ function TripForm() {
       <div className="sheet">
         <h1>{t("Add a trip")}</h1>
         <p className="lede">{t("Add a spot first so the outing has a water.")}</p>
-        <Link to="/spots/new" className="field-primary inline">
+        <Link to="/spots/new?then=trip" className="field-primary inline">
           {t("Add a spot")}
         </Link>
       </div>
