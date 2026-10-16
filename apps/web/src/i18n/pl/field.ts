@@ -433,6 +433,7 @@ export const PL_FIELD: PlBook = {
   "Heavier than {count} of the {total} others of its kind": "Cięższa niż {count} z {total} pozostałych tego gatunku",
   "{n} without a fish": ["{n} wyprawa bez ryby", "{n} wyprawy bez ryby", "{n} wypraw bez ryby"],
   "{n} this month": "{n} w tym miesiącu",
+  "{n} by this date last year": "rok temu do tego dnia: {n}",
   "{n} this year": "{n} w tym roku",
   "{n} of {goal} this year": "{n} z {goal} w tym roku",
   "This week in years past": "Ten tydzień w minionych latach",
