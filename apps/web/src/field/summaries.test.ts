@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { catchSummary, searchSummary, speciesSummary, spotSummary, tripSummary, yearSummary } from "./tripSummary";
+import { catchSummary, searchSummary, speciesSummary, spotSummary, tripSummary, yearSummary } from "./summaries";
 
 const trip = { id: "trip-dawn", date: "2026-10-10", spotId: "spot-cedar", title: "Dawn patrol", note: "Fog until eight." };
 const fish = (id: string, at: string, released = false): CatchEntry => ({

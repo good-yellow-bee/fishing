@@ -17,7 +17,7 @@ import { bestSteps, type BestStep } from "./bestSteps";
 import { CM_PER_IN, KG_PER_LB, lengthText, measureText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
 import { CopySummary } from "./CopySummary";
-import { speciesSummary } from "./tripSummary";
+import { speciesSummary } from "./summaries";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 export function SpeciesPage() {

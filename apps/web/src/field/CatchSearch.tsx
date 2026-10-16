@@ -4,7 +4,7 @@ import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABEL
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
-import { searchSummary } from "./tripSummary";
+import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { downloadFile } from "./download";
 import { FishSum } from "./FishSum";

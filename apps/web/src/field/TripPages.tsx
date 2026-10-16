@@ -35,7 +35,7 @@ import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
-import { tripSummary } from "./tripSummary";
+import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
