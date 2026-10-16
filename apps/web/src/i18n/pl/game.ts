@@ -412,6 +412,9 @@ export const PL_GAME: PlBook = {
   "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it":
     "Zygzak: w połowie odjazdu skręca w drugą stronę, więc zmień stronę, by dalej ją zawracać",
   "It darted the other way — switch sides!": "Skręciła w drugą stronę — zmień stronę!",
+  "Head-shaker: between runs it shakes its head, so ease off a moment when it does":
+    "Szarpak: między odjazdami potrząsa głową, więc wtedy na chwilę odpuść",
+  "It's shaking its head — ease off a moment!": "Potrząsa głową — odpuść na chwilę!",
   "Scrapper: pound for pound it fights hardest, so it tires slowly": "Zadziora: jak na swoją wagę walczy najmocniej, więc męczy się powoli",
   "Long runner: the first run is the long one, so let it go": "Długi odjazd: pierwszy odjazd jest najdłuższy, więc daj mu iść",
   "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",

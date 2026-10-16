@@ -1155,7 +1155,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT110~~ | ~~News card for the tail-walk and the inlet landed note~~ (#642) | ui | S |
 | ~~GT111~~ | ~~Largemouth cover-diver: in the weeds or round a piling a largemouth bass stays buried 1.6x longer and doesn't run again till it comes out, with a habit line~~ (#643) | fight | S |
 | ~~GT112~~ | ~~Brook trout darter: halfway through each run a brook trout cuts back the other way, so a turn has to switch sides; its own call and habit line~~ (#646) | fight | S |
-| GT113 | News card for the largemouth cover-diver and the brook trout dart | ui | S |
+| ~~GT113~~ | ~~News card for the largemouth cover-diver and the brook trout dart~~ (#648) | ui | S |
+| GT114 | Walleye head-shaker: once in the calm after each run a walleye shakes its head; reel through it and the line goes into the red (clean bonus lost, never the fish); call and habit line | fight | S |
 
 ## Risks / open questions for the owner
 

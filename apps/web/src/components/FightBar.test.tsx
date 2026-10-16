@@ -324,7 +324,7 @@ describe("FightBar for screen readers", () => {
   it("names each fish's habit on the card, and only its own", () => {
     const habit = (id: string) => {
       mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === id)!);
-      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
+      return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
     expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
@@ -347,7 +347,20 @@ describe("FightBar for screen readers", () => {
       "Jumper: every second run is a leap, so let go when it comes up",
       "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it",
     ]);
+    expect(habit("walleye")).toEqual(["Head-shaker: between runs it shakes its head, so ease off a moment when it does"]);
     expect(habit("perch")).toEqual([]);
+  });
+
+  it("calls a walleye's head shake between runs", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "walleye")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    sim.current.surge = 0;
+    sim.current.shake = true;
+    frame();
+    expect(status()).toBe("It's shaking its head — ease off a moment!");
+    sim.current.shake = false;
+    frame();
+    expect(status()).not.toBe("It's shaking its head — ease off a moment!");
   });
 
   it("calls a brook trout's dart until the angler switches sides", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD } from "./fight";
+import { BREACHERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -30,7 +30,7 @@ function seeded(seed: number) {
 
 type Policy = (sim: FightSim, reeling: boolean) => boolean;
 
-const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && sim.tension < 0.7;
+const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && !sim.shake && sim.tension < 0.7;
 /** Ignores surges; 0.6 leaves room for the reaction delay, so calm water alone never turns the bar red. */
 const barOnly: Policy = (sim, reeling) => sim.tension < (reeling ? 0.6 : 0.45);
 /** Misses the warning and lets go only on LET GO or red, resuming once calm and back in the green. */
@@ -774,6 +774,40 @@ describe("the dock's pilings", () => {
     const { runtime, now } = afterRun("pilings", false, false);
     runtime.step(now + WRAP_MS, 0.05, false);
     expect(runtime.sim.wrapped).toBe(false);
+  });
+});
+
+describe("a walleye's head shake", () => {
+  /** Rests through the first run, then reels or rests through the calm after it; returns the shake's ticks and the calm's peak tension. */
+  function calmAfterRun(id: string, reel: boolean) {
+    const runtime = makeFight(fish(id), 3, 3, () => 0);
+    let ran = false;
+    let shakeTicks = 0;
+    let peak = 0;
+    for (let now = 0; now < 30_000; now += 20) {
+      const calm = ran && runtime.sim.surge === 0;
+      runtime.step(now, 0.02, calm && reel);
+      if (runtime.sim.surge === 2) ran = true;
+      else if (ran && runtime.sim.surge === 1) return { shakeTicks, peak };
+      if (calm) {
+        if (runtime.sim.shake) shakeTicks += 1;
+        peak = Math.max(peak, runtime.sim.tension);
+      }
+    }
+    throw new Error("never ran twice");
+  }
+
+  it("shakes its head once in the calm after a run, and other fish don't", () => {
+    const { shakeTicks } = calmAfterRun("walleye", false);
+    expect(shakeTicks * 20).toBeGreaterThanOrEqual(SHAKE_MS - 40);
+    expect(shakeTicks * 20).toBeLessThanOrEqual(SHAKE_MS + 40);
+    expect(calmAfterRun("pike", false).shakeTicks).toBe(0);
+  });
+
+  it("sends a line reeled through the shake into the red, after a moment's grace", () => {
+    expect(calmAfterRun("walleye", true).peak).toBeGreaterThanOrEqual(RED_TENSION);
+    expect(calmAfterRun("pike", true).peak).toBeLessThan(RED_TENSION);
+    expect(SHAKE_GRACE_SEC).toBeGreaterThan(JUMP_GRACE_SEC);
   });
 });
 
