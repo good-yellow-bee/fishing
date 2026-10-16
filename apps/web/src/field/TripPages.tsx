@@ -40,6 +40,7 @@ import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
+import { osmLink } from "./osmLink";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -298,6 +299,15 @@ function TripView() {
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               {" · "}
               {t(WATER_LABELS[spot.waterType])}
+              {/* On the way there: the water's pin, one tap from the outing. */}
+              {spot.place ? (
+                <>
+                  {" · "}
+                  <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
+                    {t("Open on a map")}
+                  </a>
+                </>
+              ) : null}
             </>
           ) : null}
         </p>
