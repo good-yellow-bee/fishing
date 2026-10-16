@@ -1126,7 +1126,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT81~~ | ~~School shadows: small fish shadows mill round the float on a schooled cast~~ (#548) | scene | S |
 | ~~GT82~~ | ~~News card (2026-10-16l) covers GT81: school shadows~~ (#551) | news | S |
 | ~~GT83~~ | ~~Walleye bite light: the float only slides under, the strike call says so, and it holds the bait 1.3x longer~~ (#555) | bite | S |
-| GT84 | News card (2026-10-16n) covers GT83: walleye light bite | news | S |
+| ~~GT84~~ | ~~News card (2026-10-16n) covers GT83: walleye light bite~~ (#556) | news | S |
+| GT85 | Bait thieves: a golden shiner sometimes nibbles the bait off the hook instead of biting | bite | S |
 
 ## Risks / open questions for the owner
 

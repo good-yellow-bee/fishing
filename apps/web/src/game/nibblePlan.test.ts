@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { biteStyle, nibblePlan } from "./nibblePlan";
+import { BAIT_THIEVES, biteStyle, nibblePlan, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -63,5 +63,15 @@ describe("nibble plan", () => {
     expect(biteStyle("pike")).toBe("ambush");
     expect(biteStyle("carp")).toBe("mouth");
     expect(biteStyle("walleye")).toBe("light");
+  });
+});
+
+describe("stealsBait", () => {
+  it("lets only a thief that nibbled steal, at its chance", () => {
+    expect(BAIT_THIEVES.has("golden-shiner")).toBe(true);
+    expect(stealsBait("golden-shiner", 2, () => STEAL_CHANCE - 0.01)).toBe(true);
+    expect(stealsBait("golden-shiner", 2, () => STEAL_CHANCE + 0.01)).toBe(false);
+    expect(stealsBait("golden-shiner", 0, () => 0)).toBe(false);
+    expect(stealsBait("perch", 2, () => 0)).toBe(false);
   });
 });
