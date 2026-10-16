@@ -369,6 +369,7 @@ export const PL_FIELD: PlBook = {
   "Change goal": "Zmień cel",
   "Remove goal": "Usuń cel",
   "This year's goal": "Cel na ten rok",
+  "Days on the water in {year}: {count}": "Dni nad wodą w {year}: {count}",
   "{n} this month": "{n} w tym miesiącu",
   "{n} this year": "{n} w tym roku",
   "{n} of {goal} this year": "{n} z {goal} w tym roku",

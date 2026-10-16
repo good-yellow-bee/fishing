@@ -1,4 +1,4 @@
-import { localDate, type CatchEntry, type Trip } from "@stillwater/shared";
+import { localDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { locale } from "../i18n";
 
 export type TripMonth = { month: string; trips: Trip[] };
@@ -58,4 +58,15 @@ export function yearTally(catches: readonly CatchEntry[]): { year: string; count
     counts.set(year, (counts.get(year) ?? 0) + 1);
   }
   return [...counts.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([year, count]) => ({ year, count }));
+}
+
+/** The days of `year` the book shows on the water: a fish logged, or an outing already fished. */
+export function daysOut(book: Logbook, year: string, today: string): number {
+  const days = new Set<string>();
+  for (const entry of book.catches) {
+    const day = localDate(new Date(entry.caughtAt));
+    if (day.startsWith(`${year}-`)) days.add(day);
+  }
+  for (const trip of book.trips) if (trip.date.startsWith(`${year}-`) && trip.date <= today) days.add(trip.date);
+  return days.size;
 }
