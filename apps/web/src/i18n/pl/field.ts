@@ -79,6 +79,8 @@ export const PL_FIELD: PlBook = {
   "Nearest water to me": "Najbliższe łowisko",
   "Share": "Udostępnij",
   "Which seasons": "Które sezony",
+  "Make an outing of this day": "Zrób z tego dnia wyprawę",
+  "The {n} fish you logged here that day go on this outing.": ["Ryba złowiona tu tego dnia trafi do tej wyprawy.", "{n} ryby złowione tu tego dnia trafią do tej wyprawy.", "{n} ryb złowionych tu tego dnia trafi do tej wyprawy."],
   "Note where it is": "Zapisz, gdzie to jest",
   "Open one to note where it is.": "Otwórz jedno, by zapisać, gdzie jest.",
   "Download the outings as a spreadsheet": "Pobierz wyprawy jako arkusz",
