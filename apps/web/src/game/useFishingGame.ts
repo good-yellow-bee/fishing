@@ -9,6 +9,7 @@ import {
   lakeHour,
   parseAim,
   parseStance,
+  FISH,
   resolveCast,
   SPOT_LABELS,
   type CastFail,
@@ -31,7 +32,7 @@ import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, hookWindowMs, isPerfectCast, makeCatch, pickBite, SLAP_POWER, solidStrikeMs, sweetBand, waitMs } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, hookWindowMs, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { biteStyle, nibblePlan, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -184,6 +185,8 @@ export function useFishingGame(
   const windRef = useRef(wind);
   windRef.current = wind;
   const castRiseRef = useRef(false);
+  /** The school a landed panfish left at its bank, for the next casts there. */
+  const schoolRef = useRef<School | null>(null);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -371,15 +374,21 @@ export function useFishingGame(
     if (castHotspotRef.current) waitHintRef.current = short ? `${shortCastHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
     else if (castRiseRef.current) waitHintRef.current = `${t("Right on a rise.")} ${waitHintRef.current}`;
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
+    const school = castIntoSchool(schoolRef.current, spotRef.current);
+    schoolRef.current = school.next;
+    const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
+    if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
-    const species = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
+    const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
+    const species = schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : drawn;
     const bitten = makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
-    const wait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
+    const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
+    const wait = schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait;
     const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
     const arm = () => {
       let secondTake = false;
@@ -793,7 +802,12 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            setHint(castHint("landed"));
+            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current);
+            setHint(
+              schoolRef.current
+                ? `${castHint("landed")} ${t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
+                : castHint("landed"),
+            );
           } else if (result === "snapped") {
             fx.snap();
             fx.haptic("snap");
