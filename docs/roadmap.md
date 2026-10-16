@@ -1115,7 +1115,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT70~~ | ~~A pike, tiger muskie or ghost pike rolls on the line at the net instead of making a last run: a short roll that can't be turned, and a line held tight through it loads into the red like a leap; the fight card calls it~~ (#524) | fish | S |
 | ~~GT71~~ | ~~News card (2026-10-16f) covers GT70: a pike rolls on the line at the net~~ (#527) | news | S |
 | ~~GT72~~ | ~~On the lake a rolling pike turns over twice about its own length at the surface, and the boat doesn't swing for a roll, so the scene shows the roll the fight card calls~~ (#530) | feel | S |
-| GT73 | On a leap or a roll the fight card's steering line says it can't be turned and to let go, instead of showing the turn-a-run hint | fight | S |
+| ~~GT73~~ | ~~On a leap or a roll the fight card's steering line says it can't be turned and to let go, instead of showing the turn-a-run hint~~ (#531) | fight | S |
+| GT74 | News card (2026-10-16h) covers GT72 and GT73: the pike turning over in the scene, and the fight card saying a leap or a roll can't be turned | news | S |
 
 ## Risks / open questions for the owner
 
