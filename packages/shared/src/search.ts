@@ -1,8 +1,21 @@
 import { catchesNewestFirst, spotById, type CatchEntry, type Logbook } from "./logbook.ts";
 
-function normalize(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
+/**
+ * Text as a search compares it: lower case, single spaces, and without accents ("Okoń" reads "okon", "Biały" reads
+ * "bialy"), since phones often type the plain letters. Each letter stays one letter, so positions still line up.
+ */
+export function foldText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ł/g, "l")
+    .replace(/Ł/g, "L")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
 }
+
+const normalize = foldText;
 
 function fieldHas(field: string, needle: string): boolean {
   return normalize(field).includes(needle);

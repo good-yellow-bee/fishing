@@ -1,4 +1,4 @@
-import { localDate } from "@stillwater/shared";
+import { foldText, localDate } from "@stillwater/shared";
 
 /** A run of local days, both ends included, as "YYYY-MM-DD". */
 export type DayRange = { from: string; to: string };
@@ -13,9 +13,14 @@ function ymd(date: Date): string {
   return localDate(date);
 }
 
-/** Lower case, no dots or doubled spaces: "Oct. 15" reads as "oct 15". */
+/** Lower case, no dots, accents or doubled spaces: "Oct. 15" reads as "oct 15", "Środa" as "sroda". */
 function plain(text: string): string {
-  return text.trim().toLowerCase().replace(/\./g, "").replace(/\s+/g, " ");
+  return foldText(text.replace(/\./g, ""));
+}
+
+/** Whether the typed words are one of these phrases, however they carry their accents. */
+function says(want: string, phrases: readonly string[]): boolean {
+  return phrases.some((phrase) => plain(phrase) === want);
 }
 
 const LANGS = ["en", "pl"] as const;
@@ -74,15 +79,15 @@ export function dateWords(text: string, now = new Date()): DayRange | null {
   if (!want) return null;
   const today = dayOf(now, 0);
   const one = (date: Date): DayRange => ({ from: ymd(date), to: ymd(date) });
-  if (["today", "dziś", "dzisiaj"].includes(want)) return one(today);
-  if (["yesterday", "wczoraj"].includes(want)) return one(dayOf(today, -1));
-  if (["this week", "ten tydzień", "w tym tygodniu"].includes(want)) return { from: ymd(mondayOf(today)), to: ymd(today) };
-  if (["last week", "zeszły tydzień", "w zeszłym tygodniu", "ostatni tydzień"].includes(want)) {
+  if (says(want, ["today", "dziś", "dzisiaj"])) return one(today);
+  if (says(want, ["yesterday", "wczoraj"])) return one(dayOf(today, -1));
+  if (says(want, ["this week", "ten tydzień", "w tym tygodniu"])) return { from: ymd(mondayOf(today)), to: ymd(today) };
+  if (says(want, ["last week", "zeszły tydzień", "w zeszłym tygodniu", "ostatni tydzień"])) {
     const monday = mondayOf(today);
     return { from: ymd(dayOf(monday, -7)), to: ymd(dayOf(monday, -1)) };
   }
-  if (["this month", "ten miesiąc", "w tym miesiącu"].includes(want)) return { from: ymd(new Date(today.getFullYear(), today.getMonth(), 1)), to: ymd(today) };
-  if (["last month", "zeszły miesiąc", "w zeszłym miesiącu"].includes(want)) {
+  if (says(want, ["this month", "ten miesiąc", "w tym miesiącu"])) return { from: ymd(new Date(today.getFullYear(), today.getMonth(), 1)), to: ymd(today) };
+  if (says(want, ["last month", "zeszły miesiąc", "w zeszłym miesiącu"])) {
     return { from: ymd(new Date(today.getFullYear(), today.getMonth() - 1, 1)), to: ymd(new Date(today.getFullYear(), today.getMonth(), 0)) };
   }
   weekdays ??= weekdayNames();

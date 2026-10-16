@@ -63,4 +63,11 @@ describe("search words without +", () => {
     expect(new Set(found)).toEqual(withPhoto);
     expect(findCatches(book, "photo", t)).toEqual([]);
   });
+
+  it("finds Polish names typed without their accents", () => {
+    const named = { ...book, spots: book.spots.map((spot) => ({ ...spot, name: `Jezioro Białe ${spot.name}` })) };
+    const found = (needle: string) => findCatches(named, needle, t).map((entry) => entry.id).sort();
+    expect(found("jezioro biale")).toEqual(found("Jezioro Białe"));
+    expect(found("biale").length).toBe(book.catches.length);
+  });
 });

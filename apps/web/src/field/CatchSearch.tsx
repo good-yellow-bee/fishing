@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
@@ -22,9 +22,7 @@ import { dateWords } from "./dateWords";
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 const ORDER_PARAM = "order";
 
-function normalize(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
-}
+const normalize = foldText;
 
 /** True when a word of the fish's month ("October 2026", "Październik 2026") starts with what was typed. */
 function monthHas(entry: CatchEntry, want: string): boolean {
@@ -94,7 +92,7 @@ function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 }
 
 /** Words the moon weeks share, in English and Polish, which say nothing about the phase. */
-const MOON_FILLER = new Set(["near", "the", "moon", "około", "księżyc"]);
+const MOON_FILLER = new Set(["near", "the", "moon", "około", "księżyc"].map(normalize));
 
 /** Other words for a moon week than its label: the phase itself, as "full moon" and "pełnia" read elsewhere in the app. */
 const MOON_WORDS: Partial<Record<MoonQuarter, string[]>> = {
