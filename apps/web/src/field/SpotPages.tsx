@@ -28,6 +28,7 @@ import { useLogbook } from "./LogbookState";
 import { t, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
+import { formatCoord } from "./map/places";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -116,6 +117,14 @@ export function SpotPage() {
         </p>
         <h1>{spot.name}</h1>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
+        {spot.place ? (
+          <p className="meta spot-place">
+            {formatCoord(spot.place.lat, spot.place.lng)}{" "}
+            <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
+              {t("Open on a map")}
+            </a>
+          </p>
+        ) : null}
       </EditDelete>
       {spot.notes ? <p className="prose">{spot.notes}</p> : null}
       <aside className="conditions" aria-label={t("Best conditions")}>
@@ -171,6 +180,11 @@ export function SpotPage() {
   );
 }
 
+/** The water on OpenStreetMap, pinned. */
+function osmLink(lat: number, lng: number): string {
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=15/${lat}/${lng}`;
+}
+
 export function SpotFormPage() {
   const { spotId } = useParams();
   return <SpotForm key={spotId ?? ""} />;
@@ -186,6 +200,9 @@ function SpotForm() {
   const [waterType, setWaterType] = useState<string>(existing?.waterType ?? "lake");
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [bestConditions, setBestConditions] = useState(existing?.bestConditions ?? "");
+  const [place, setPlace] = useState(existing?.place ? `${existing.place.lat}, ${existing.place.lng}` : "");
+  const [locating, setLocating] = useState<"idle" | "busy" | "failed">("idle");
+  const canLocate = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [error, setError] = useState("");
   // Two waters with one name split their fish and outings; point at the one already in the book.
   const sameName = name.trim()
@@ -194,7 +211,7 @@ function SpotForm() {
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const draft = { name, waterType, notes, bestConditions };
+    const draft = { name, waterType, notes, bestConditions, place };
     const result = existing ? updateSpot(existing.id, draft) : addSpot(draft);
     if (!result.ok) {
       setError(result.message);
@@ -274,6 +291,39 @@ function SpotForm() {
               placeholder={t("Overcast, light west wind")}
             />
           </label>
+          <label className="wide">
+            {t("Place, latitude then longitude (optional)")}
+            <input
+              name="place"
+              autoComplete="off"
+              value={place}
+              onChange={(event) => setPlace(event.target.value)}
+              placeholder="46.85, -94.24"
+            />
+          </label>
+          {canLocate ? (
+            <p className="wide form-note">
+              <button
+                type="button"
+                className="text-button"
+                disabled={locating === "busy"}
+                onClick={() => {
+                  setLocating("busy");
+                  navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                      setPlace(`${position.coords.latitude.toFixed(5)}, ${position.coords.longitude.toFixed(5)}`);
+                      setLocating("idle");
+                    },
+                    () => setLocating("failed"),
+                    { enableHighAccuracy: true, timeout: 15000 },
+                  );
+                }}
+              >
+                {locating === "busy" ? t("Finding you…") : t("Use where I am")}
+              </button>
+              {locating === "failed" ? <span role="status"> {t("The browser didn't give a place.")}</span> : null}
+            </p>
+          ) : null}
         </div>
         {error ? (
           <p className="field-error" role="alert" id={FORM_ERROR_ID}>

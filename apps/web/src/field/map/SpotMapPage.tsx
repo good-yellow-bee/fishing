@@ -143,14 +143,24 @@ function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
   );
 }
 
+/** Where a spot sits on the sheet: a sample water's own place, or the angler's place for a water inside the frame. */
+function sheetPlace(spot: Spot): SamplePlace | undefined {
+  const sample = placeFor(spot.id);
+  if (sample) return sample;
+  const place = spot.place;
+  if (!place) return undefined;
+  const inside = place.lat <= MAP_FRAME.north && place.lat >= MAP_FRAME.south && place.lng >= MAP_FRAME.west && place.lng <= MAP_FRAME.east;
+  return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
+}
+
 export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
   const plotted = book.spots.flatMap((spot) => {
-    const place = placeFor(spot.id);
+    const place = sheetPlace(spot);
     return place ? [{ spot, place }] : [];
   });
-  const unplotted = book.spots.filter((spot) => !placeFor(spot.id));
+  const unplotted = book.spots.filter((spot) => !sheetPlace(spot));
 
   return (
     <div className="sheet">
@@ -205,6 +215,7 @@ export function SpotMapPage() {
             <span key={spot.id}>
               {index > 0 ? ", " : null}
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+              {spot.place ? ` (${formatCoord(spot.place.lat, spot.place.lng)})` : null}
             </span>
           ))}
           .

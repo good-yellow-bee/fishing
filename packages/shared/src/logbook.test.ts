@@ -10,6 +10,7 @@ import {
   measureOf,
   parseCatchDraft,
   parseSpotDraft,
+  parseSpotPlace,
   parseTripDraft,
   recentCatches,
   recentTrips,
@@ -151,6 +152,30 @@ describe("field log", () => {
     const trip = parseTripDraft({ date: "2026-10-04", spotId: "spot-quarry", title: "", note: "" }, book);
     expect(trip.ok).toBe(true);
     if (trip.ok) expect(trip.value.title).toBe("Quarry Cut");
+  });
+
+  it("reads a spot's place however it was typed", () => {
+    expect(parseSpotPlace("46.85, -94.24")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("46,85; -94,24")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("46,85 -94,24")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("46.8551° N, 94.2438° W")).toEqual({ lat: 46.8551, lng: -94.2438 });
+    expect(parseSpotPlace("94.2438 W 46.8551 N")).toEqual({ lat: 46.8551, lng: -94.2438 });
+    expect(parseSpotPlace("46.123456789,-94.1")).toEqual({ lat: 46.12346, lng: -94.1 });
+    expect(parseSpotPlace("46,85")).toBeNull();
+    expect(parseSpotPlace("north cove")).toBeNull();
+    expect(parseSpotPlace("95, 10")).toBeNull();
+    expect(parseSpotPlace("46.85, -94.24, 3")).toBeNull();
+  });
+
+  it("keeps a spot's place, and leaves a blank one out", () => {
+    const base = { name: "North cove", waterType: "lake", notes: "", bestConditions: "" };
+    const placed = parseSpotDraft({ ...base, place: " 46.85, -94.24 " });
+    expect(placed.ok && placed.value.place).toEqual({ lat: 46.85, lng: -94.24 });
+    const blank = parseSpotDraft({ ...base, place: "  " });
+    expect(blank.ok && "place" in blank.value).toBe(false);
+    expect(parseSpotDraft({ ...base, place: "by the dam" })).toMatchObject({ ok: false, field: "place" });
+    expect(isLogbook({ spots: [{ id: "s", ...base, place: { lat: 46.85, lng: -94.24 } }], trips: [], catches: [] })).toBe(true);
+    expect(isLogbook({ spots: [{ id: "s", ...base, place: { lat: 146, lng: 0 } }], trips: [], catches: [] })).toBe(false);
   });
 
   it("rejects a book that is not a book", () => {

@@ -22,7 +22,11 @@ export type Spot = {
   waterType: WaterType;
   notes: string;
   bestConditions: string;
+  /** Where the water is, when the angler noted it: degrees, north and east positive. */
+  place?: SpotPlace;
 };
+
+export type SpotPlace = { lat: number; lng: number };
 
 export type Trip = {
   id: string;
@@ -89,6 +93,8 @@ export type SpotDraft = {
   waterType: string;
   notes: string;
   bestConditions: string;
+  /** "46.85, -94.24" as typed; blank leaves the water without a place. */
+  place?: string;
 };
 
 export type TripDraft = {
@@ -337,8 +343,39 @@ function isSpot(value: unknown): value is Spot {
     typeof value.name === "string" &&
     isWaterType(value.waterType) &&
     typeof value.notes === "string" &&
-    typeof value.bestConditions === "string"
+    typeof value.bestConditions === "string" &&
+    (value.place === undefined || isSpotPlace(value.place))
   );
+}
+
+function isSpotPlace(value: unknown): value is SpotPlace {
+  return (
+    isRecord(value) &&
+    typeof value.lat === "number" &&
+    typeof value.lng === "number" &&
+    Math.abs(value.lat) <= 90 &&
+    Math.abs(value.lng) <= 180
+  );
+}
+
+const PLACE_NUMBER = /(-?\d+(?:[.,]\d+)?)\s*°?\s*([NSEW])?/gi;
+
+/**
+ * "46.85, -94.24", "46,85; -94,24" or "46.85° N 94.24° W": latitude then longitude, or the other way round when
+ * the letters say so. Null when it isn't two coordinates.
+ */
+export function parseSpotPlace(raw: string): SpotPlace | null {
+  const found = [...raw.matchAll(PLACE_NUMBER)];
+  if (found.length !== 2 || raw.replace(PLACE_NUMBER, "").replace(/[\s,;]/g, "") !== "") return null;
+  const parts = found.map((match) => {
+    const value = Number(match[1]!.replace(",", "."));
+    const letter = match[2]?.toUpperCase();
+    return { value: letter === "S" || letter === "W" ? -Math.abs(value) : value, letter };
+  });
+  const lngFirst = (parts[0]!.letter === "E" || parts[0]!.letter === "W") && (parts[1]!.letter === "N" || parts[1]!.letter === "S" || !parts[1]!.letter);
+  const [lat, lng] = lngFirst ? [parts[1]!.value, parts[0]!.value] : [parts[0]!.value, parts[1]!.value];
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
 }
 
 function isTrip(value: unknown): value is Trip {
@@ -534,7 +571,11 @@ export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {
   const bestConditions = cleanLine(draft.bestConditions);
   if (notes.length > 400) return fail("notes", "Shorten the notes a little.");
   if (bestConditions.length > 160) return fail("bestConditions", "Keep the best conditions to one line.");
-  return { ok: true, value: { name, waterType: draft.waterType, notes, bestConditions } };
+  const placeText = (draft.place ?? "").trim();
+  if (!placeText) return { ok: true, value: { name, waterType: draft.waterType, notes, bestConditions } };
+  const place = parseSpotPlace(placeText);
+  if (!place) return fail("place", "Give the place as latitude, then longitude, like 46.85, -94.24.");
+  return { ok: true, value: { name, waterType: draft.waterType, notes, bestConditions, place } };
 }
 
 export function parseTripDraft(draft: TripDraft, book: Logbook): Parsed<Omit<Trip, "id">> {
