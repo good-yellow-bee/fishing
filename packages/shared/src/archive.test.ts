@@ -132,6 +132,15 @@ describe("field archive", () => {
     expect(merged.book.trips.some((trip) => trip.id === "trip-empty")).toBe(false);
   });
 
+  it("keeps the higher lost and missed count on an outing both books have", () => {
+    const tripId = book.trips[0]!.id;
+    const withCounts = (lost: number, missed: number) => ({ ...book, trips: book.trips.map((trip) => (trip.id === tripId ? { ...trip, ...(lost ? { lost } : {}), ...(missed ? { missed } : {}) } : trip)) });
+    const merged = mergeFieldArchive(archiveFor(withCounts(1, 3), null), archiveFor(withCounts(2, 0), null));
+    const trip = merged.book.trips.find((each) => each.id === tripId)!;
+    expect([trip.lost, trip.missed]).toEqual([2, 3]);
+    expect(isLogbook(merged.book)).toBe(true);
+  });
+
   it("leaves out the file's photos once the room for photos is full", () => {
     const big = `data:image/jpeg;base64,${"A".repeat(CATCH_PHOTO_STORE_MAX_CHARS - 60)}`;
     const here = { ...archiveFor({ ...book, catches: book.catches.slice(0, 1) }, null), photos: { [book.catches[0]!.id]: big } };

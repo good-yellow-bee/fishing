@@ -180,7 +180,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       storedBook: book,
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
-        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note) }, book);
+        const parsed = parseCatchDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         let nextPhotos = photos;
@@ -195,7 +195,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return { ok: true, id };
       },
       addSpot: (draft) => {
-        const parsed = parseSpotDraft({ ...draft, name: bookLine(draft.name), notes: bookLine(draft.notes), bestConditions: bookLine(draft.bestConditions) });
+        const parsed = parseSpotDraft(draft);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         // A full browser says so on the form instead of the save silently not happening.
@@ -203,17 +203,18 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return saved.ok ? { ok: true, id } : saved;
       },
       addTrip: (draft) => {
-        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title), note: bookLine(draft.note) }, book);
+        const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
         const saved = persist(withTrip(book, { ...parsed.value, id }), photos);
         return saved.ok ? { ok: true, id } : saved;
       },
       updateCatch: (id, draft, photo) => {
-        if (!book.catches.some((entry) => entry.id === id)) {
+        const was = book.catches.find((entry) => entry.id === id);
+        if (!was) {
           return { ok: false, message: t("That catch is not in this book.") };
         }
-        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note) }, book);
+        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note, was.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const current = photos[id] ?? null;
         let nextPhotos = photos;
@@ -231,22 +232,28 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return { ok: true, id };
       },
       updateSpot: (id, draft) => {
-        if (!book.spots.some((spot) => spot.id === id)) {
+        const was = book.spots.find((spot) => spot.id === id);
+        if (!was) {
           return { ok: false, message: t("That spot is not in this book.") };
         }
-        const parsed = parseSpotDraft({ ...draft, name: bookLine(draft.name), notes: bookLine(draft.notes), bestConditions: bookLine(draft.bestConditions) });
+        const parsed = parseSpotDraft({
+          ...draft,
+          name: bookLine(draft.name, was.name),
+          notes: bookLine(draft.notes, was.notes),
+          bestConditions: bookLine(draft.bestConditions, was.bestConditions),
+        });
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const saved = persist(replaceSpot(book, { ...parsed.value, id }), photos);
         return saved.ok ? { ok: true, id } : saved;
       },
       updateTrip: (id, draft) => {
-        if (!book.trips.some((trip) => trip.id === id)) {
+        const before = book.trips.find((trip) => trip.id === id);
+        if (!before) {
           return { ok: false, message: t("That outing is not in this book.") };
         }
-        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title), note: bookLine(draft.note) }, book);
+        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title, before.title), note: bookLine(draft.note, before.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         // The lost and missed tallies are kept on the water, not on the form: an edit leaves them be.
-        const before = book.trips.find((trip) => trip.id === id)!;
         const counts = { ...(before.lost ? { lost: before.lost } : {}), ...(before.missed ? { missed: before.missed } : {}) };
         const saved = persist(replaceTrip(book, { ...parsed.value, id, ...counts }), photos);
         return saved.ok ? { ok: true, id } : saved;
