@@ -194,7 +194,7 @@ export function BestsPage() {
                   key: row.month,
                   label: monthName(row.month),
                   count: row.count,
-                  to: findLink(monthName(row.month)),
+                  to: findLink(row.month),
                 }))}
               />
             </section>

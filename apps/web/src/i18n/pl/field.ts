@@ -433,4 +433,8 @@ export const PL_FIELD: PlBook = {
   "All {species}": "Gatunek: {species}",
   "{species}: {n} of {total}": "{species}: {n} z {total}",
   "Largest: {size}": "Największa: {size}",
+  "Heaviest: {size}": "Najcięższa: {size}",
+  "Heaviest: {species}, {size}": "Najcięższa: {species}, {size}",
+  "Longest: {size}": "Najdłuższa: {size}",
+  "Longest: {species}, {size}": "Najdłuższa: {species}, {size}",
 };

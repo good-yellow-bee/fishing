@@ -99,6 +99,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   }
   // "2026-10-12": the fish of that local day.
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
+  // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
+  if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
   // ">60°F", "<15°C": the fish from water on that side of a temperature.
   const temp = parseTempQuery(needle);
   if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));
@@ -255,19 +257,17 @@ export function CatchSearch() {
           );
         }}
       />
+      {/* Only the count is read out; the cards themselves are not a live region. It stays mounted, so each new count is heard. */}
+      <div role="status" className={settled ? (matches.length === 0 ? "empty" : "search-count") : undefined}>
+        {!settled ? null : matches.length > 1 ? (
+          // Several matches: what they add up to, from the count to the largest among them.
+          <FishSum catches={matches} />
+        ) : (
+          <p>{matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}</p>
+        )}
+      </div>
       {settled ? (
         <>
-          {/* Only the count is read out; the cards themselves are not a live region. */}
-          {matches.length > 1 ? (
-            // Several matches: what they add up to, from the count to the largest among them.
-            <div role="status" className="search-count">
-              <FishSum catches={matches} />
-            </div>
-          ) : (
-            <p role="status" className={matches.length === 0 ? "empty" : "search-count"}>
-              {matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}
-            </p>
-          )}
           {matches.length === 0 ? (
             <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, or “released” or “kept”. Join two with “+”.")}</p>
           ) : null}
