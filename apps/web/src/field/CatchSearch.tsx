@@ -84,7 +84,7 @@ function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string 
   return BITE_TIMES.find((row) => row.id === id)!.label;
 }
 
-/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, words from a note, and released fish. */
+/** The shared search, plus species and lure names as they read in the player's language, the month a fish came in, the kind of water, the sky, the wind, the season, the time of day, the moon, the outing's title, words from a note (the fish's, its outing's or its water's), and released or kept fish. */
 function findOne(book: Logbook, needle: string, t: (text: string) => string): CatchEntry[] {
   // ">2 lb", "<30 cm": the fish on that side of a size.
   const exact = parseExactTerm(needle);
@@ -107,12 +107,16 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
   const want = normalize(needle);
+  // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
+  if (want === normalize(t("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
+  if (want === normalize(t("Kept"))) return catchesNewestFirst(book).filter((entry) => !entry.released);
   const hit = new Set(found.map((entry) => entry.id));
   // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
   // An outing's title ("Opening day") finds the fish filed on it, from three letters up.
   const tripsNamed = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.title).includes(want)).map((trip) => trip.id));
-  // Words from a fish's own note, or from its outing's note, find it too, from three letters up.
+  // Words from a fish's own note, its outing's note or its water's notes find it too, from three letters up.
   const tripsNoted = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.note).includes(want)).map((trip) => trip.id));
+  const spotsNoted = new Set(want.length < 3 ? [] : book.spots.filter((spot) => normalize(spot.notes).includes(want)).map((spot) => spot.id));
   const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
@@ -128,6 +132,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
       moonHas(entry, want, t) ||
       (entry.tripId !== null && tripsNamed.has(entry.tripId)) ||
       (entry.tripId !== null && tripsNoted.has(entry.tripId)) ||
+      spotsNoted.has(entry.spotId) ||
       (want.length >= 3 && normalize(noteText(entry.note)).includes(want))
     )
       hit.add(entry.id);
@@ -264,7 +269,7 @@ export function CatchSearch() {
             </p>
           )}
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, or “released”. Join two with “+”.")}</p>
+            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, or “released” or “kept”. Join two with “+”.")}</p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
