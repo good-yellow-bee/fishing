@@ -1517,3 +1517,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR331~~ | ~~News card 16zq~~ (#699) | field | S |
 | ~~BR332~~ | ~~Outing edits keep fish right; same-water tackle list~~ (#701) | field | S |
 | ~~BR333~~ | ~~Size spread on species pages~~ (#702) | field | S |
+| ~~BR334~~ | ~~Live bait one-tap picks~~ (#704) | field | S |
