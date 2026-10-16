@@ -350,7 +350,7 @@ function TripForm() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
-          <h1>{existing ? existing.title : t("Add a trip")}</h1>
+          <h1 data-title={existing ? t("Editing {name}", { name: existing.title }) : undefined}>{existing ? existing.title : t("Add a trip")}</h1>
         </div>
         <Link to={existing ? `/trips/${existing.id}` : "/trips"}>{t("Cancel")}</Link>
       </header>

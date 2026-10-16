@@ -46,7 +46,9 @@ export function FieldShell({ children }: { children: ReactNode }) {
     const main = document.querySelector<HTMLElement>(".field-main");
     const name = t("Stillwater · Field log");
     const update = () => {
-      const heading = pathname === "/" ? "" : (main?.querySelector("h1")?.textContent ?? "").trim();
+      // A page can name its tab apart from its heading (data-title), so an edit form or one fish of many is told apart.
+      const named = main?.querySelector("[data-title]")?.getAttribute("data-title") ?? main?.querySelector("h1")?.textContent ?? "";
+      const heading = pathname === "/" ? "" : named.trim();
       const next = heading ? `${heading} · Stillwater` : name;
       if (document.title !== next) document.title = next;
     };

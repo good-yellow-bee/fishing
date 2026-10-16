@@ -37,7 +37,7 @@ import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { measureText, tempText, weatherText } from "../i18n/content";
-import { fishCountLabel, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
+import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
@@ -759,7 +759,8 @@ export function CatchPage() {
               : t("All {species}", { species: t(entry.species) })}
           </Link>
         </p>
-        <h1>{t(entry.species)}</h1>
+        {/* The tab says which fish of the kind this is: its size and day. */}
+        <h1 data-title={`${t(entry.species)}, ${measureText(entry.measure)} · ${formatCatchDay(entry.caughtAt)}`}>{t(entry.species)}</h1>
         <p className="meta stand">
           <span>{measureText(entry.measure)}</span>
           {" · "}

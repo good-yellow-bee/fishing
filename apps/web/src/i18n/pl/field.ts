@@ -56,6 +56,7 @@ export const PL_FIELD: PlBook = {
 
   // Edit and delete
   Edit: "Edytuj",
+  "Editing {name}": "Edycja: {name}",
   Delete: "Usuń",
   Keep: "Zostaw",
   Cancel: "Anuluj",

@@ -219,7 +219,7 @@ function SpotForm() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
-          <h1>{existing ? existing.name : t("Add a spot")}</h1>
+          <h1 data-title={existing ? t("Editing {name}", { name: existing.name }) : undefined}>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
         <Link to={existing ? `/spots/${existing.id}` : "/spots"}>{t("Cancel")}</Link>
       </header>
