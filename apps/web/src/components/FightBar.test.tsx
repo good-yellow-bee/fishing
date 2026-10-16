@@ -258,7 +258,7 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("Let go now — it sees the net!");
   });
 
-  it("says which way to pull the rod against a run, cheers a turn, and stays quiet on a leap", () => {
+  it("says which way to pull the rod against a run, cheers a turn, and says a leap or a roll can't be turned", () => {
     mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
     const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);
     frame();
@@ -277,6 +277,16 @@ describe("FightBar for screen readers", () => {
     expect(shown()).toEqual(["turning"]);
     sim.current.turning = false;
     sim.current.jump = true;
+    frame();
+    expect(shown()).toEqual(["leap"]);
+    expect(container!.querySelector(".fight-steer")!.textContent).toContain("A leap can't be turned — just let go");
+    sim.current.jump = false;
+    sim.current.roll = true;
+    sim.current.surge = 1;
+    frame();
+    expect(shown()).toEqual(["roll"]);
+    sim.current.surge = 0;
+    sim.current.roll = false;
     frame();
     expect(shown()).toEqual(["calm"]);
   });

@@ -1137,6 +1137,12 @@ kbd {
   font-weight: 600;
 }
 
+.fight-bar .fight-steer[data-call="leap"],
+.fight-bar .fight-steer[data-call="roll"] {
+  color: #9a3b26;
+  font-weight: 600;
+}
+
 .fight-bar .fight-steer[data-call="turning"] {
   color: #4d6b3f;
   font-weight: 600;
