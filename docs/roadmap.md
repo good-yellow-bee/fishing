@@ -1421,3 +1421,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR265~~ | ~~News line for colours, printing, summaries~~ (#605) | field | S |
 | ~~BR266~~ | ~~Copy a summary of the year~~ (#606) | field | S |
 | ~~BR267~~ | ~~Narrow phone fixes with larger text~~ (#607) | field | S |
+| ~~BR268~~ | ~~Whole-book sum on the catch log~~ (#608) | field | S |
