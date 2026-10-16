@@ -620,6 +620,14 @@ button.field-primary:disabled {
   resize: vertical;
 }
 
+/* The water and, on a phone, a way to pick the one nearest. */
+.water-field {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-width: 0;
+}
+
 /* A field scrolled to (a refused save) stops above the sticky save buttons, not under them. */
 .entry-form :is(input, select, textarea) {
   scroll-margin-bottom: 120px;
