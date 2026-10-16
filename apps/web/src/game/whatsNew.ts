@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zo";
+export const NEWS_ID = "2026-10-16zp";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Send a copy of your book straight to the phone's share sheet. A photo taken near a pinned water picks that water, a fish after midnight joins last night's outing, and each fish now says how near sunrise or sunset it came. Waters show their best water temperature, and the outings page has its own search.",
   "Lose a bigger fish and it may still be about: cast at that bank again within a few casts and it can bite again, at the same weight. Land it and the card calls it the one that got away.",
   "It isn't only pike now: a largemouth bass off the point may grab a bluegill you are reeling in, and from the boat a walleye may take a perch. Hang on, because the fight starts again with the bigger fish, right where the small one was.",
   "Saving a fish now says when it is the first of its kind or a new best, and warns when the same fish looks logged twice. Unsaved edits to a fish wait for you, search understands “yesterday”, “last week” and “Oct 15”, and Bests shows a calendar of your days out.",
