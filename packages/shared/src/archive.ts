@@ -72,7 +72,11 @@ function cleanCatch(entry: CatchEntry): CatchEntry {
     caughtAt: new Date(entry.caughtAt).toISOString(),
     note: entry.note,
     weather: entry.weather
-      ? { sky: entry.weather.sky, wind: entry.weather.wind, waterTempF: entry.weather.waterTempF }
+      ? {
+          sky: entry.weather.sky,
+          wind: entry.weather.wind,
+          ...(entry.weather.waterTempF === undefined ? {} : { waterTempF: entry.weather.waterTempF }),
+        }
       : null,
     ...(entry.released ? { released: true } : {}),
     ...(entry.alsoMeasure ? { alsoMeasure: copy(entry.alsoMeasure) } : {}),

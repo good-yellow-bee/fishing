@@ -397,7 +397,8 @@ export const PL_FIELD: PlBook = {
   "This week in earlier years here: {fish}, {species}.": "W tym tygodniu w poprzednich latach: {fish}, {species}.",
   "{n} years ago": ["{n} rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
-  "Weather is optional: note all three, or leave them blank.": "Pogoda jest opcjonalna: wpisz wszystkie trzy albo zostaw puste.",
+  "Weather is optional: note the sky and wind, and the water temperature if you took it.":
+    "Pogoda jest opcjonalna: zapisz niebo i wiatr, a temperaturę wody, jeśli ją znasz.",
   "Lures that worked": "Przynęty, które łowiły",
   "Lures that took it": "Przynęty, na które brała",
   "one every {gap} on average": "średnio jedna co {gap}",
