@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
+import { CopySummary } from "./CopySummary";
+import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { downloadFile } from "./download";
 import { FishSum } from "./FishSum";
@@ -281,6 +283,9 @@ export function CatchSearch() {
                 {t("Download these as a spreadsheet")}
               </button>
             </p>
+          ) : null}
+          {matches.length > 0 ? (
+            <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 0 && (
             <PagedCatches key={settled} items={matches} monthOf={catchMonth} headLevel={2}>

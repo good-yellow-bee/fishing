@@ -1411,3 +1411,23 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR254~~ | ~~Best outing on a spot page~~ (#589) | field | S |
 | ~~BR255~~ | ~~Catch time opens that day's fish~~ (#591) | field | S |
 | ~~BR256~~ | ~~Audit 14 fixes~~ (#593) | field | S |
+| ~~BR257~~ | ~~Average fish per outing on the trips page~~ (#594) | field | S |
+| ~~BR258~~ | ~~Print layout for the field log~~ (#597) | field | S |
+| ~~BR259~~ | ~~Print the packing list button~~ (#598) | field | S |
+| ~~BR260~~ | ~~Light / dark / device choice for the field log~~ (#600) | field | S |
+| ~~BR261~~ | ~~Copy a summary of a water~~ (#601) | field | S |
+| ~~BR262~~ | ~~Audit 15 fixes~~ (#602) | field | S |
+| ~~BR263~~ | ~~Copy a summary of a species~~ (#603) | field | S |
+| ~~BR264~~ | ~~Polish May dates in the genitive~~ (#604) | field | S |
+| ~~BR265~~ | ~~News line for colours, printing, summaries~~ (#605) | field | S |
+| ~~BR266~~ | ~~Copy a summary of the year~~ (#606) | field | S |
+| ~~BR267~~ | ~~Narrow phone fixes with larger text~~ (#607) | field | S |
+| ~~BR268~~ | ~~Whole-book sum on the catch log~~ (#608) | field | S |
+| ~~BR269~~ | ~~Copy a summary of search results~~ (#609) | field | S |
+| ~~BR270~~ | ~~Audit 16 fixes~~ (#610) | field | S |
+| ~~BR271~~ | ~~News line for year/search summaries and book total~~ (#611) | field | S |
+| ~~BR272~~ | ~~Rename tripSummary.ts to summaries.ts~~ (#612) | field | S |
+| ~~BR273~~ | ~~Log a catch opens on today's water~~ (#613) | field | S |
+| ~~BR274~~ | ~~Pounds and ounces and inch fractions in the size fields~~ (#614) | field | S |
+| ~~BR275~~ | ~~Save and log another, sticky save bar on the catch form~~ (#615) | field | S |
+| ~~BR276~~ | ~~Water temperature optional in a fish's weather~~ (#616) | field | S |

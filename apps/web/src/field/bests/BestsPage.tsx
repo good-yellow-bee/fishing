@@ -9,8 +9,10 @@ import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
-import { daysOut, monthName, monthTally, yearTally } from "../tripMonths";
-import { YearGoal } from "../YearGoal";
+import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
+import { YearGoal, readYearGoal } from "../YearGoal";
+import { CopySummary } from "../CopySummary";
+import { yearSummary } from "../summaries";
 import { outingStreak } from "../outingAverage";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -207,6 +209,10 @@ export function BestsPage() {
               <p className="meta">
                 {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
               </p>
+            ) : null}
+            {/* The year so far as text for a message, once it has a fish. */}
+            {book.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+              <CopySummary text={() => yearSummary(book, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
             ) : null}
           </section>
 

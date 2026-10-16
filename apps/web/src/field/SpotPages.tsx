@@ -24,6 +24,8 @@ import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, topOuting } from "./outingAverage";
+import { CopySummary } from "./CopySummary";
+import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -100,6 +102,8 @@ export function SpotPage() {
   const fishByTrip = fishCountsByTrip({ ...book, catches });
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
+  const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (
     <div className="sheet">
@@ -135,6 +139,12 @@ export function SpotPage() {
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
       <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} />
+      {catches.length > 0 ? (
+        <CopySummary
+          text={() => spotSummary(spot, fishedOutings, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}
+          file="stillwater-water.txt"
+        />
+      ) : null}
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>

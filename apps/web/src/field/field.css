@@ -331,6 +331,8 @@ button.field-primary {
 
 .section-head {
   display: flex;
+  /* On a narrow phone with larger text, the side link drops below the heading instead of past the edge. */
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
@@ -530,8 +532,19 @@ button.field-primary:disabled {
   gap: 10px;
 }
 
+/* The name gives way, so the stamp keeps its place at the right even on a narrow phone with larger text. */
+.spot-card-top > :first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.spot-card-top > .stamp {
+  flex-shrink: 0;
+}
+
 .stamp {
   display: inline-block;
+  max-width: 100%;
   margin-top: 8px;
   padding: 3px 7px 2px;
   border: 1.5px dashed currentColor;
@@ -605,6 +618,26 @@ button.field-primary:disabled {
 
 .entry-form textarea {
   resize: vertical;
+}
+
+/* The save buttons ride along the bottom of the window while the form scrolls. */
+.form-save {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin: 0 -8px;
+  padding: 8px;
+  background: var(--field-paper);
+  border-top: 1px solid var(--field-input-line);
+}
+
+/* A "Fish saved." line after Save and log another sits above the save buttons, not over them. */
+.field:has(.form-save) .undo-bar {
+  bottom: 92px;
 }
 
 .choice-row {
@@ -759,6 +792,15 @@ button.field-primary:disabled {
 
   .undo-bar {
     bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  /* Above the tab bar, which is fixed to the bottom of a phone screen. */
+  .form-save {
+    bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+
+  .field:has(.form-save) .undo-bar {
+    bottom: calc(150px + env(safe-area-inset-bottom));
   }
 
   .field-tab {
@@ -970,7 +1012,8 @@ button.field-primary:disabled {
   font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  white-space: nowrap;
+  /* One line where it fits; on a narrow phone with larger text it wraps inside its box. */
+  max-width: 100%;
 }
 
 .water-tips p {
@@ -1195,8 +1238,9 @@ button.field-primary:disabled {
 }
 
 /* After dark on the water: the same book, read from a dim screen. On screen only, so a printed page keeps dark ink on white paper. */
+/* Dark when the device is, unless the page is held light; and dark whenever it is held dark. */
 @media screen and (prefers-color-scheme: dark) {
-  .field {
+  .field:not([data-theme="light"]) {
     --field-ink: #ece1cc;
     --field-muted: #b8a78c;
     --field-paper: #25201b;
@@ -1212,5 +1256,76 @@ button.field-primary:disabled {
     --field-stamp-creek: #d2b47e;
     --field-stamp-reservoir: #d9a07e;
     color-scheme: dark;
+  }
+}
+
+@media screen {
+  .field[data-theme="dark"] {
+    --field-ink: #ece1cc;
+    --field-muted: #b8a78c;
+    --field-paper: #25201b;
+    --field-card: #2d2721;
+    --field-line: #4b4033;
+    --field-rust: #e6957a;
+    --field-water: #93b8c7;
+    --field-input: #171411;
+    --field-input-line: #8a7356;
+    --field-stamp-lake: #93b8c7;
+    --field-stamp-river: #7fc3cf;
+    --field-stamp-pond: #8fc4a2;
+    --field-stamp-creek: #d2b47e;
+    --field-stamp-reservoir: #d9a07e;
+    color-scheme: dark;
+  }
+}
+
+/* On paper: just the sheet, ink on white, without the shell, the bars or the buttons. */
+@media print {
+  .theme-choice {
+    display: none;
+  }
+
+  /* Keep the filled badges filled, or their light figures vanish into the paper. */
+  .field * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .field {
+    display: block;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .field-rail,
+  .field-mobile-bar,
+  .field-tab,
+  .undo-bar,
+  .sheet-actions,
+  .book-file,
+  .tackle-add,
+  .tackle-suggest,
+  .trip-calendar,
+  .field .field-primary,
+  .field button,
+  .catch-search:has(> input:placeholder-shown) {
+    display: none !important;
+  }
+
+  .field-main {
+    padding: 0;
+  }
+
+  .sheet {
+    max-width: none;
+    min-height: 0;
+    border-left: 0;
+    box-shadow: none;
+    padding: 0;
+    background: #fff;
+  }
+
+  .field a {
+    color: inherit;
   }
 }

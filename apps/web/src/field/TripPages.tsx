@@ -35,9 +35,9 @@ import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
-import { tripSummary } from "./tripSummary";
+import { tripSummary } from "./summaries";
 import { fishPace } from "./tripPace";
-import { bestOutingHere } from "./outingAverage";
+import { bestOutingHere, outingAverage } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripWeather } from "./Weather";
@@ -68,6 +68,8 @@ export function TripsPage() {
   const upcoming = upcomingTrips(book, today);
   const recent = recentTrips(book, today);
   const fishByTrip = fishCountsByTrip(book);
+  // How the outings already fished have gone, across every water.
+  const average = outingAverage(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
 
   return (
     <div className="sheet">
@@ -102,6 +104,7 @@ export function TripsPage() {
         </div>
       )}
       <h2 className="subhead">{t("Recent")}</h2>
+      {average ? <p className="meta">{average}</p> : null}
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
@@ -274,6 +277,11 @@ function TripView() {
             onClick={() => downloadFile(tripIcs(trip, spot?.name ?? null, new Date(), spot?.place), "text/calendar;charset=utf-8", tripIcsName(trip))}
           >
             {t("Add to calendar")}
+          </button>
+          {" · "}
+          {/* The outing and its tackle list on paper, to tick off while packing. */}
+          <button type="button" className="text-button" onClick={() => window.print()}>
+            {t("Print the packing list")}
           </button>
         </p>
       ) : (

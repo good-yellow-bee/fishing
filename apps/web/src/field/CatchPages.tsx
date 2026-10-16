@@ -47,11 +47,13 @@ import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, no
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
+import { FishSum } from "./FishSum";
+import { likelyWater } from "./spotOrder";
 import { SpeciesChips } from "./SpeciesChips";
 import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
-import { catchSummary } from "./tripSummary";
+import { catchSummary } from "./summaries";
 import { sizeRank } from "./sizeRank";
 
 function amountText(entry: CatchEntry, units: Units): string {
@@ -120,6 +122,8 @@ export function CatchesPage() {
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
         <>
+          {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
+          <FishSum catches={catches} />
           <SpeciesChips catches={catches} />
           <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
             {(entry) => (
@@ -154,7 +158,8 @@ function CatchForm() {
   const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
   const linkedSpot = book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
-  const presetSpot = existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? book.spots[0]?.id ?? "";
+  // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
+  const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date())));
 
   const asked = params.get("kind");
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
@@ -200,7 +205,7 @@ function CatchForm() {
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
-  const [startTemp] = useState(() => (existing?.weather ? fromBookTemp(existing.weather.waterTempF, units) : ""));
+  const [startTemp] = useState(() => (existing?.weather?.waterTempF === undefined ? "" : fromBookTemp(existing.weather.waterTempF, units)));
   const [waterTemp, setWaterTemp] = useState(startTemp);
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
@@ -385,7 +390,8 @@ function CatchForm() {
       note,
       sky,
       wind,
-      waterTemp: existing?.weather && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
+      waterTemp:
+        existing?.weather?.waterTempF !== undefined && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
       released,
     };
     const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
@@ -400,6 +406,11 @@ function CatchForm() {
     }
     // The waiting draft, if any, stays for later; this one is saved.
     if (!waiting) dropKeptDraft();
+    // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now.
+    if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }), savedState("catch"));
+      return;
+    }
     navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch"));
   };
 
@@ -641,7 +652,7 @@ function CatchForm() {
             </p>
           ) : null}
 
-          <p className="wide form-note">{t("Weather is optional: note all three, or leave them blank.")}</p>
+          <p className="wide form-note">{t("Weather is optional: note the sky and wind, and the water temperature if you took it.")}</p>
           {offeredWeather && !weatherStarted ? (
             <p className="wide form-note lure-tips">
               <button
@@ -650,7 +661,7 @@ function CatchForm() {
                 onClick={() => {
                   setSky(offeredWeather.sky);
                   setWind(offeredWeather.wind);
-                  setWaterTemp(fromBookTemp(offeredWeather.waterTempF, units));
+                  setWaterTemp(offeredWeather.waterTempF === undefined ? "" : fromBookTemp(offeredWeather.waterTempF, units));
                 }}
               >
                 {outingWeather
@@ -693,7 +704,6 @@ function CatchForm() {
               onChange={(event) => setWaterTemp(event.target.value)}
               placeholder={units === "metric" ? "14" : "58"}
               aria-label={units === "metric" ? t("Water temperature in Celsius") : t("Water temperature in Fahrenheit")}
-              required={weatherStarted}
             />
           </label>
 
@@ -750,9 +760,17 @@ function CatchForm() {
             {messageText(error)}
           </p>
         ) : null}
-        <button type="submit" className="field-primary inline" disabled={reducing}>
-          {existing ? t("Save changes") : t("Save to the book")}
-        </button>
+        {/* Stays on screen while a long form scrolls, so the save is always a thumb away. */}
+        <div className="form-save">
+          <button type="submit" className="field-primary inline" disabled={reducing}>
+            {existing ? t("Save changes") : t("Save to the book")}
+          </button>
+          {existing ? null : (
+            <button type="submit" name="another" className="text-button" disabled={reducing}>
+              {t("Save and log another")}
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
@@ -886,7 +904,8 @@ function CatchView() {
             <p>
               {/* The sky opens every fish caught under it, through the catch search. */}
               <Link to={findLink(exactTerm("sky", t(SKY_LABELS[entry.weather.sky])))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
-              {` · ${t(WIND_LABELS[entry.weather.wind])} · ${tempText(entry.weather.waterTempF)}`}
+              {` · ${t(WIND_LABELS[entry.weather.wind])}`}
+              {entry.weather.waterTempF === undefined ? null : ` · ${tempText(entry.weather.waterTempF)}`}
             </p>
           </>
         ) : null}
