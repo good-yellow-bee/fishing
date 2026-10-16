@@ -68,6 +68,8 @@ describe("tackle", () => {
     expect(isTackleBox({ items: [{ id: "x", tripId: "trip-dawn", label: "Net", packed: "yes" }] })).toBe(false);
     expect(isTackleBox({ items: "rod" })).toBe(false);
     expect(isTackleBox(null)).toBe(false);
+    const piece = { id: "x", tripId: "trip-dawn", label: "Net", packed: false };
+    expect(isTackleBox({ items: [piece, { ...piece, label: "Rod" }] })).toBe(false);
   });
 
   it("adds a piece onto one outing", () => {

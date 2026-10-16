@@ -59,6 +59,10 @@ export function TackleProvider({ children }: { children: ReactNode }) {
       add: (tripId, label) => {
         const parsed = parseTackleLabel(label);
         if (!parsed.ok) return parsed.message;
+        const name = parsed.value.toLowerCase();
+        if (items.some((item) => item.tripId === tripId && item.label.toLowerCase() === name)) {
+          return "That piece is already on this list.";
+        }
         const item: TackleItem = {
           id: localId(),
           tripId,

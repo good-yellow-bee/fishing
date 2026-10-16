@@ -4,6 +4,7 @@ import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { clearCopiedAt, copyNudge, ownCatches, readCopiedAt, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
+import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
@@ -20,6 +21,29 @@ function newestAt(book: Logbook): string {
 function bookSummary(book: Logbook): string {
   const newest = newestAt(book);
   return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
+}
+
+/** A stored copy that could not be read: offered as a file, or forgotten on the angler's word. */
+function SetAside(props: { text: string; download: string; ask: string; forget: string; raw: string; file: string; onForget: () => void }) {
+  return (
+    <div className="copy-nudge">
+      <p>{props.text}</p>
+      <div className="book-file">
+        <button type="button" className="text-button" onClick={() => downloadFile(props.raw, "application/json", props.file)}>
+          {props.download}
+        </button>
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => {
+            if (window.confirm(props.ask)) props.onForget();
+          }}
+        >
+          {props.forget}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function BookFile() {
@@ -47,6 +71,7 @@ export function BookFile() {
   const canInstall = useInstallOffer();
   const [tip] = useState(() => homeScreenTip());
   const [setAside, setSetAside] = useState(readUnreadableBook);
+  const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
 
   const onDownload = () => {
     // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
@@ -108,25 +133,32 @@ export function BookFile() {
         </p>
       ) : null}
       {setAside ? (
-        <div className="copy-nudge">
-          <p>{t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")}</p>
-          <div className="book-file">
-            <button type="button" className="text-button" onClick={() => downloadFile(setAside, "application/json", "stillwater-field-log-set-aside.json")}>
-              {t("Download the set-aside book")}
-            </button>
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => {
-                if (!window.confirm(t("Forget the set-aside book for good?"))) return;
-                forgetUnreadableBook();
-                setSetAside(null);
-              }}
-            >
-              {t("Forget it")}
-            </button>
-          </div>
-        </div>
+        <SetAside
+          text={t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")}
+          download={t("Download the set-aside book")}
+          ask={t("Forget the set-aside book for good?")}
+          forget={t("Forget it")}
+          raw={setAside}
+          file="stillwater-field-log-set-aside.json"
+          onForget={() => {
+            forgetUnreadableBook();
+            setSetAside(null);
+          }}
+        />
+      ) : null}
+      {tackleAside ? (
+        <SetAside
+          text={t("Earlier tackle lists in this browser could not be read, so they were set aside instead of being lost.")}
+          download={t("Download the set-aside lists")}
+          ask={t("Forget the set-aside lists for good?")}
+          forget={t("Forget them")}
+          raw={tackleAside}
+          file="stillwater-tackle-set-aside.json"
+          onForget={() => {
+            forgetUnreadableTackle();
+            setTackleAside(null);
+          }}
+        />
       ) : null}
       {tip && own > 0 ? <p className="copy-nudge">{t("To keep the app and its book on this device, tap Share, then Add to Home Screen.")}</p> : null}
       <div className="book-file">

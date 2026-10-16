@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, messageText } from "../format";
@@ -36,6 +36,7 @@ export function TackleList({
   for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
+  const errorId = useId();
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -125,11 +126,13 @@ export function TackleList({
             onChange={(event) => setLabel(event.target.value)}
             placeholder={t("Spare leader")}
             maxLength={60}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
           />
         </label>
         <button type="submit">{t("Add")}</button>
         {error ? (
-          <p className="field-error" role="alert">
+          <p className="field-error" role="alert" id={errorId}>
             {messageText(error)}
           </p>
         ) : null}
