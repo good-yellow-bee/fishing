@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, moonTally, seasonTally, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -13,7 +13,7 @@ import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
-import { CM_PER_IN, KG_PER_LB, measureText } from "../i18n/content";
+import { CM_PER_IN, KG_PER_LB, lengthText, measureText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -60,6 +60,7 @@ export function SpeciesPage() {
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <BestGrowth catches={catches} />
+      <LengthAndWeight catches={catches} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>
@@ -141,6 +142,27 @@ function gainText(gain: Measure): string {
   const metric = getUnits() === "metric";
   if (gain.kind === "length") return metric ? `${num(gain.inches * CM_PER_IN, 1)} cm` : `${num(gain.inches, 2)} in`;
   return metric ? `${num(gain.pounds * KG_PER_LB, 2)} kg` : `${num(gain.pounds, 2)} lb`;
+}
+
+/** The fish of the kind that were both measured and weighed, shortest first: how weight goes with length. */
+function LengthAndWeight({ catches }: { catches: readonly CatchEntry[] }) {
+  const pairs = sizePairs(catches);
+  if (pairs.length === 0) return null;
+  return (
+    <>
+      <div className="section-head">
+        <h2>{t("Length and weight")}</h2>
+      </div>
+      <ol className="species-waters best-steps" aria-label={t("Length and weight")}>
+        {pairs.map(({ entry, inches, pounds }) => (
+          <li key={entry.id}>
+            <Link to={`/catches/${entry.id}`}>{`${lengthText(inches)} · ${weightText(pounds)}`}</Link>
+            <span className="meta">{formatCatchDay(entry.caughtAt)}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
 }
 
 /** Each fish that beat the best of the kind before it, oldest first, with what it added; shown once the first was ever beaten. */

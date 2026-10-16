@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
+  likelyLength,
+  likelyWeight,
+  sizePairs,
   MOON_LABELS,
   MOON_QUARTER_LABELS,
   moonName,
@@ -33,13 +36,13 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
-import { measureText, measuresText, tempText, weatherText } from "../i18n/content";
+import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
 import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
@@ -165,6 +168,10 @@ function CatchForm() {
   const [startAlso] = useState(() => (existing?.alsoMeasure ? measureAmountText(existing.alsoMeasure, units) : ""));
   const [alsoAmount, setAlsoAmount] = useState(startAlso);
   const otherKind = measureKind === "length" ? "weight" : "length";
+  // From this kind's fish that were both measured and weighed: about what the other measure of this one would be.
+  const typedAmount = Number(toBookAmount(amount, measureKind, units));
+  const pairs = sizePairs(speciesCatches(book, species, t, existing?.id));
+  const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
     // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
     if (kind !== measureKind && alsoAmount.trim()) {
@@ -550,6 +557,11 @@ function CatchForm() {
                 }
               />
             </label>
+            {likely !== null && !alsoAmount.trim() ? (
+              <small className="field-hint">
+                {t("Your other fish of this kind suggest about {size}.", { size: otherKind === "weight" ? weightText(likely) : lengthText(likely) })}
+              </small>
+            ) : null}
           </fieldset>
 
           <label>

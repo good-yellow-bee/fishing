@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestDay, biteTimeOf, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally, skyTally, waterTempTally, windTally } from "./bests.ts";
+import { bestDay, biteTimeOf, likelyLength, likelyWeight, sizePairs, biteTimes, fieldLogBestBeat, lureTally, moonQuarterOf, moonTally, personalBests, seasonTally, skyTally, waterTempTally, windTally } from "./bests.ts";
 import { keepLandedCatch, sampleLogbook } from "./logbook.ts";
 
 const now = new Date(2026, 9, 1, 8, 30, 0);
@@ -251,5 +251,30 @@ describe("bests with a fish both measured and weighed", () => {
     const both = { ...measuredOne, alsoMeasure: { kind: "weight" as const, pounds: (heaviest.measure as { pounds: number }).pounds + 1 } };
     const bests = personalBests({ ...book, catches: book.catches.map((entry) => (entry.id === both.id ? both : entry)) });
     expect(bests.heaviest!.id).toBe(both.id);
+  });
+});
+
+describe("length and weight", () => {
+  const fish = sampleLogbook(now).catches[0]!;
+  const pike = (id: string, inches: number, pounds: number) => ({
+    ...fish,
+    id,
+    measure: { kind: "length" as const, inches },
+    alsoMeasure: { kind: "weight" as const, pounds },
+  });
+
+  it("pairs only fish with both measures, shortest first", () => {
+    const pairs = sizePairs([pike("b", 30, 8), fish, pike("a", 20, 2.4)]);
+    expect(pairs.map((pair) => pair.entry.id)).toEqual(["a", "b"]);
+    expect(pairs[0]).toMatchObject({ inches: 20, pounds: 2.4 });
+  });
+
+  it("estimates a weight from the cube of the length once two fish are paired", () => {
+    expect(likelyWeight(sizePairs([pike("a", 20, 2.4)]), 25)).toBeNull();
+    const pairs = sizePairs([pike("a", 20, 2.4), pike("b", 30, 8.1)]);
+    expect(likelyWeight(pairs, 20)).toBeCloseTo(2.4, 1);
+    expect(likelyWeight(pairs, 30)).toBeCloseTo(8.1, 1);
+    expect(likelyLength(pairs, likelyWeight(pairs, 26)!)).toBeCloseTo(26, 6);
+    expect(likelyWeight(pairs, 0)).toBeNull();
   });
 });

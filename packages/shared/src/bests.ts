@@ -278,3 +278,36 @@ export function bestDay(book: Logbook): BestDay | null {
   }
   return best;
 }
+
+export type SizePair = { entry: CatchEntry; inches: number; pounds: number };
+
+/** The fish that were both measured and weighed, shortest first. */
+export function sizePairs(catches: readonly CatchEntry[]): SizePair[] {
+  const pairs: SizePair[] = [];
+  for (const entry of catches) {
+    const length = measureOf(entry, "length");
+    const weight = measureOf(entry, "weight");
+    if (length?.kind === "length" && weight?.kind === "weight" && length.inches > 0) pairs.push({ entry, inches: length.inches, pounds: weight.pounds });
+  }
+  return pairs.sort((a, b) => a.inches - b.inches);
+}
+
+/**
+ * A fish's weight grows about with the cube of its length. From two or more measured and weighed fish of a kind,
+ * the weight one of `inches` would likely have, or null with too few to go on.
+ */
+export function likelyWeight(pairs: readonly SizePair[], inches: number): number | null {
+  const factor = condition(pairs);
+  return factor === null || !(inches > 0) ? null : factor * inches ** 3;
+}
+
+/** The other way round: about how long a fish of `pounds` would be. */
+export function likelyLength(pairs: readonly SizePair[], pounds: number): number | null {
+  const factor = condition(pairs);
+  return factor === null || !(pounds > 0) ? null : Math.cbrt(pounds / factor);
+}
+
+function condition(pairs: readonly SizePair[]): number | null {
+  if (pairs.length < 2) return null;
+  return pairs.reduce((sum, pair) => sum + pair.pounds / pair.inches ** 3, 0) / pairs.length;
+}
