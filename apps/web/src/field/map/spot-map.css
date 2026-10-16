@@ -218,6 +218,14 @@
   right: 26px;
 }
 
+.map-pin-own.map-pin-down .map-pin-label {
+  top: 58px;
+}
+
+.map-pin-own.map-pin-up .map-pin-label {
+  top: -30px;
+}
+
 .map-pin-label small {
   display: block;
   margin-top: 3px;
@@ -272,6 +280,12 @@
   font-size: 18px;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+
+/* The coordinates in the own-waters index read like the sample sheet's: small, beside the name. */
+.map-index a.map-coord-link {
+  color: var(--field-muted);
+  font: inherit;
 }
 
 .map-note {

@@ -339,9 +339,16 @@ function CatchForm() {
   const onSpot = (nextSpot: string) => {
     setSpotId(nextSpot);
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
+    // Back on the fish's own water: the outing it was on comes back with it.
+    if (existing?.tripId && nextSpot === existing.spotId && tripById(book, existing.tripId)) {
+      setLeftTrip("");
+      setTripId(existing.tripId);
+      setTripPicked(true);
+      return;
+    }
     const nextTrip = existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? "");
-    // Said under the water, so an outing doesn't quietly go from the fish.
-    setLeftTrip(tripId && nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "");
+    // Said under the water, so an outing doesn't quietly go from the fish; kept while no outing takes its place.
+    setLeftTrip(tripId ? (nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "") : nextTrip ? "" : leftTrip);
     setTripId(nextTrip);
     setTripPicked(Boolean(existing));
   };
