@@ -13,6 +13,8 @@ import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
 import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
+import { DayCalendar } from "./DayCalendar";
+import { dayMarks } from "./dayMarks";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak } from "../outingAverage";
@@ -258,6 +260,16 @@ export function BestsPage() {
               <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
             ) : null}
           </section>
+
+          {dayMarks(whole, year ?? today.slice(0, 4)).size > 0 ? (
+            <section>
+              <div className="section-head">
+                <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
+              </div>
+              <p className="meta">{t("A stronger shade means more fish; an outlined day was an outing with none.")}</p>
+              <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} />
+            </section>
+          ) : null}
 
           {!year && years.length > 1 ? (
             <section>
