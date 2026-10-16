@@ -1112,7 +1112,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT67~~ | ~~In a fight the wind bows a slack line downwind (about 0.2 m on a light day, 0.4 m breezy, 0.65 m strong at mid-span), and it pulls straight once reeled or run on, so the scene shows the wind the fight card names~~ (#517) | feel | S |
 | ~~GT68~~ | ~~On a breezy day a solid hook needs a strike 15% quicker (30% on a strong day), since the wind's bow in the line soaks up the strike; the strike hint says "solid under N s in this wind"~~ (#519) | strike | S |
 | ~~GT69~~ | ~~News card (2026-10-16e) covers GT67 and GT68: the wind's bow on a slack fight line and the quicker solid strike it asks for~~ (#522) | news | S |
-| GT70 | A pike, tiger muskie or ghost pike rolls on the line at the net instead of making a last run: a short roll that can't be turned, and a line held tight through it loads into the red like a leap; the fight card calls it | fish | S |
+| ~~GT70~~ | ~~A pike, tiger muskie or ghost pike rolls on the line at the net instead of making a last run: a short roll that can't be turned, and a line held tight through it loads into the red like a leap; the fight card calls it~~ (#524) | fish | S |
+| GT71 | News card (2026-10-16f) covers GT70: a pike rolls on the line at the net | news | S |
 
 ## Risks / open questions for the owner
 
