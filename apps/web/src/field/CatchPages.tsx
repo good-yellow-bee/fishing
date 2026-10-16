@@ -52,6 +52,7 @@ import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./tripSummary";
+import { sizeRank } from "./sizeRank";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -792,6 +793,8 @@ function CatchView() {
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
+  // Short of a best, where it sits among the others of its kind.
+  const rank = sizeRank(kind, entry);
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -858,6 +861,8 @@ function CatchView() {
                 ? t("Your heaviest of this kind")
                 : t("Your longest of this kind")}
           </p>
+        ) : rank ? (
+          <p className="meta">{rank}</p>
         ) : null}
       </EditDelete>
       {photo ? (
