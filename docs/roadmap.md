@@ -1383,3 +1383,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR235~~ | ~~Copy a catch as a text summary~~ (#565) | field | S |
 | ~~BR236~~ | ~~By year bars and year search~~ (#566) | field | S |
 | ~~BR237~~ | ~~Main landmark on auth screens~~ (#568) | field | S |
+| ~~BR238~~ | ~~This year on the home fish tile~~ (#569) | field | S |
