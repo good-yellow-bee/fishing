@@ -1493,3 +1493,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR316~~ | ~~Search size beside words, 320px tab bar, fish sum dots~~ (#676) | field | S |
 | ~~BR317~~ | ~~Keep unsaved fish edits; month-old backup reminder~~ (#677) | field | S |
 | ~~BR318~~ | ~~Save note for first/new best; date words in search~~ (#678) | field | S |
+| ~~BR319~~ | ~~Last year by this date on the Home fish tile~~ (#680) | field | S |
