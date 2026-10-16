@@ -214,6 +214,12 @@ button.field-primary {
   line-height: 1.45;
 }
 
+/* A note keeps the lines it was written in. */
+.sheet .prose,
+.note {
+  white-space: pre-line;
+}
+
 .sheet .eyebrow {
   color: var(--field-rust);
 }

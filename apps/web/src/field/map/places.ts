@@ -1,3 +1,5 @@
+import { getLang } from "../../i18n";
+
 export type LngLat = { lat: number; lng: number };
 
 export const MAP_WIDTH = 1000;
@@ -158,16 +160,22 @@ export function oval(center: LngLat, dLat: number, dLng: number, steps = 16): Ln
   });
 }
 
+/** A coordinate with a fixed number of places, with the reader's decimal mark ("45,1234" in Polish). */
+function degrees(value: number, digits: number): string {
+  const text = Math.abs(value).toFixed(digits);
+  return getLang() === "pl" ? text.replace(".", ",") : text;
+}
+
 export function formatCoord(lat: number, lng: number): string {
   const ns = lat >= 0 ? "N" : "S";
   const ew = lng >= 0 ? "E" : "W";
-  return `${Math.abs(lat).toFixed(4)}° ${ns}, ${Math.abs(lng).toFixed(4)}° ${ew}`;
+  return `${degrees(lat, 4)}° ${ns}, ${degrees(lng, 4)}° ${ew}`;
 }
 
 export function formatLat(lat: number): string {
-  return `${lat.toFixed(2)}°N`;
+  return `${degrees(lat, 2)}°${lat >= 0 ? "N" : "S"}`;
 }
 
 export function formatLng(lng: number): string {
-  return `${Math.abs(lng).toFixed(2)}°W`;
+  return `${degrees(lng, 2)}°${lng >= 0 ? "E" : "W"}`;
 }

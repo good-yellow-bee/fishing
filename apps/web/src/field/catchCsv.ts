@@ -3,9 +3,13 @@ import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { noteText } from "./format";
 
-/** One cell, quoted when it holds the separator, a quote or a line break. */
-function cell(value: string, separator: string) {
-  return value.includes(separator) || /["\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+/**
+ * One cell, quoted when it holds the separator, a quote or a line break. Text a spreadsheet would read as a formula
+ * ("=…", "-weed edge") gets a leading apostrophe so it stays text; a plain number such as "-3" is left alone.
+ */
+export function cell(value: string, separator: string) {
+  const safe = /^[=+\-@\t\r]/.test(value) && !/^-\d+([.,]\d+)?$/.test(value) ? `'${value}` : value;
+  return safe.includes(separator) || /["\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
 
 const pad = (value: number) => String(value).padStart(2, "0");
