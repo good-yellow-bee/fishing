@@ -1175,7 +1175,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT130~~ | ~~A lost trophy-sized fish: the snapped or thrown-hook message adds It looked like a trophy~~ (#703) | fight | S |
 | ~~GT131~~ | ~~News card for the second-run landed note and the lost-trophy line~~ (#705) | ui | S |
 | ~~GT132~~ | ~~Hunter follows: a pike, largemouth or walleye can follow a landed small fish in without grabbing it, then stays about that bank for the next few casts; a hint, a bite call and a landed note~~ (#707) | fish | S |
-| GT133 | News card for the hunter that follows a small fish in | ui | S |
+| ~~GT133~~ | ~~News card for the hunter that follows a small fish in~~ (#709) | ui | S |
+| GT134 | A big lure tempts a fish that got away (or a hunter that followed one in) back sooner: 50% a cast at its bank instead of 30%, and the still-about hint says so on a small lure | fish | S |
 
 ## Risks / open questions for the owner
 
