@@ -15,7 +15,21 @@ function photoFile(dataUrl: string, name: string): File | null {
  * An outing or a fish as text for a message: copied when the browser allows it, else saved as a file. On a phone that
  * can share, a Share button beside it opens the share sheet, with the fish's photo when there is one.
  */
-export function CopySummary({ text, file, photo }: { text: () => string; file: string; photo?: string | null }) {
+export function CopySummary({
+  text,
+  file,
+  photo,
+  label,
+  copied,
+}: {
+  text: () => string;
+  file: string;
+  photo?: string | null;
+  /** The copy button's words, when the text is not a summary (a packing list). */
+  label?: string;
+  /** What is said once copied, with `label`. */
+  copied?: string;
+}) {
   const [said, setSaid] = useState("");
   const say = (message: string) => {
     // Emptied first, so a second copy is announced again rather than left as the same words.
@@ -26,7 +40,7 @@ export function CopySummary({ text, file, photo }: { text: () => string; file: s
     const summary = text();
     try {
       await navigator.clipboard.writeText(summary);
-      say(t("Summary copied."));
+      say(copied ?? t("Summary copied."));
     } catch {
       downloadFile(summary, "text/plain;charset=utf-8", file);
       say(t("The summary was downloaded instead."));
@@ -48,7 +62,7 @@ export function CopySummary({ text, file, photo }: { text: () => string; file: s
   return (
     <p className="trip-again">
       <button type="button" className="text-button" onClick={() => void copy()}>
-        {t("Copy a summary")}
+        {label ?? t("Copy a summary")}
       </button>{" "}
       {canShare ? (
         <>

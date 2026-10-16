@@ -1,9 +1,10 @@
+import { Fragment, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { fishCountsByTrip, localDate, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips } from "@stillwater/shared";
+import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay, tripWhen } from "./format";
+import { formatLongDay, formatTimeOfDay, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
@@ -14,12 +15,55 @@ import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
 import { osmLink } from "./osmLink";
+import { sunTimes } from "./sunTimes";
+import { placeFor } from "./map/places";
+import { useTackleItems } from "./gear/TackleState";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
   if (hour < 11) return t("Write it down before the coffee gets cold.");
   if (hour < 17) return t("If it bent the rod, it belongs in the book.");
   return t("Get the lure and the hour on paper before both slip.");
+}
+
+/** For an outing today or tomorrow: when the sun next rises (or, once it is up today, sets) at the water, and how much of the bag is packed. */
+function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | undefined; today: string; now: Date }) {
+  const items = useTackleItems();
+  const parts: ReactNode[] = [];
+  const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
+  if (place) {
+    const sun = sunTimes(trip.date, place.lat, place.lng);
+    if ("rise" in sun) {
+      parts.push(
+        trip.date === today && sun.rise <= now
+          ? sun.set > now
+            ? t("Sunset {time}", { time: formatTimeOfDay(sun.set.toISOString()) })
+            : null
+          : t("Sunrise {time}", { time: formatTimeOfDay(sun.rise.toISOString()) }),
+      );
+    }
+  }
+  const rows = items ? itemsForTrip(items, trip.id) : [];
+  if (rows.length > 0) {
+    const packed = packedCount(rows);
+    parts.push(
+      <Link key="packed" to="/gear">
+        {packed === rows.length ? t("All packed") : t("{packed} of {total} packed", { packed, total: rows.length })}
+      </Link>,
+    );
+  }
+  const shown = parts.filter(Boolean);
+  if (shown.length === 0) return null;
+  return (
+    <small className="next-day">
+      {shown.map((part, index) => (
+        <Fragment key={index}>
+          {index > 0 ? " · " : null}
+          {part}
+        </Fragment>
+      ))}
+    </small>
+  );
 }
 
 export function HomePage() {
@@ -123,6 +167,7 @@ export function HomePage() {
               </>
             ) : null}
           </small>
+          {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
         </div>
       </section>
 

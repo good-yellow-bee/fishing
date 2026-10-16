@@ -3,6 +3,8 @@ import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, typ
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText } from "../format";
 import { useTackle } from "./TackleState";
+import { packingText } from "./packingText";
+import { CopySummary } from "../CopySummary";
 import { pieceKey } from "./pieceKey";
 import "./gear.css";
 
@@ -160,6 +162,17 @@ export function TackleList({
           ))}
         </ul>
       )}
+      {rows.length > 0 ? (
+        <CopySummary
+          text={() => {
+            const trip = trips.find((row) => row.id === tripId);
+            return packingText(trip ? `${t("Tackle for {trip}", { trip: trip.title })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
+          }}
+          file="stillwater-tackle.txt"
+          label={t("Copy the list")}
+          copied={t("List copied.")}
+        />
+      ) : null}
       {missing.length > 0 ? (
         <p className="form-note lure-tips tackle-suggest">
           {t("Works on this water:")}{" "}
