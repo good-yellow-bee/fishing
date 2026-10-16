@@ -183,12 +183,21 @@ export function CatchSearch() {
   useEffect(() => {
     // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
     const at = box.current;
-    if (!linked || linked === typed.current || !at) return;
+    if (!linked) {
+      // The search left the address (Home in the menu, say), not by clearing the box: clear the box too.
+      if (typed.current !== "") setQuery("");
+      typed.current = null;
+      return;
+    }
+    if (linked === typed.current || !at) return;
     setQuery(linked);
     // The phone's sticky bar would cover the search box, so stop below it.
     const bar = document.querySelector<HTMLElement>(".field-mobile-bar");
     const below = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
     window.scrollTo({ top: at.getBoundingClientRect().top + window.scrollY - below - 12 });
+    // A link followed from home itself stays on the same page, so the shell does not move focus: move it here, so
+    // the keyboard carries on from the matches and a screen reader says where it landed.
+    at.focus({ preventScroll: true });
   }, [linked]);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
