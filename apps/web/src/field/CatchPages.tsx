@@ -795,6 +795,8 @@ function CatchView() {
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
+  const caughtDay = localDate(new Date(entry.caughtAt));
+  const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -843,7 +845,14 @@ function CatchView() {
             </>
           ) : null}
           {" · "}
-          <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+          {/* With other fish that day, the day opens all of them in the catch search. */}
+          {sameDay > 1 ? (
+            <Link to={findLink(caughtDay)} aria-label={t("{when}, every fish that day ({count})", { when: formatClock(entry.caughtAt), count: sameDay })}>
+              <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+            </Link>
+          ) : (
+            <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
+          )}
           {entry.released ? (
             <>
               {" · "}
