@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16a";
+export const NEWS_ID = "2026-10-16b";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Out on the rowboat, the boat swings round to follow a run, so a run takes out less line than it would from the bank.",
   "On the lake you can now see the water at work: a run at the drop-off dives under the surface, and at the inlet the current carries a resting fish off to the side until you reel it back.",
   "You can hear the water now: the line grates while you reel against a run on the rocks off the point, and a fish going into the weeds at the reeds swishes, with a buzz on phones and controllers.",
   "Off the point the fight card calls a run that is dragging the line over the rocks, and the landed card notes a fish kept out of the weeds or off the rocks.",

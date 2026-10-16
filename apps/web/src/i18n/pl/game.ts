@@ -458,6 +458,8 @@ export const PL_GAME: PlBook = {
     "Wyszukiwarka połowów znajduje też wypuszczone ryby i rodzaje wód („rzeka”, „staw”), podsumowuje znalezione ryby i może zapisać je jako arkusz.",
   "The catch search now finds fish by sky (“overcast”), season (“fall”), time of day (“dawn”) and week of the moon, and every bar on the Bests page opens the fish behind it. A planned outing and a water’s page say what that water gave the same week in earlier years.":
     "Wyszukiwarka połowów znajduje teraz ryby po niebie („pochmurno”), porze roku („jesień”), porze dnia („świt”) i tygodniu księżyca, a każdy pasek na stronie rekordów otwiera ryby, które za nim stoją. Planowana wyprawa i strona łowiska mówią, co ta woda dała w tym samym tygodniu w poprzednich latach.",
+  "Out on the rowboat, the boat swings round to follow a run, so a run takes out less line than it would from the bank.":
+    "Na łódce łódź obraca się za odjeżdżającą rybą, więc odjazd zabiera mniej linki niż z brzegu.",
   "On the lake you can now see the water at work: a run at the drop-off dives under the surface, and at the inlet the current carries a resting fish off to the side until you reel it back.":
     "Na jeziorze widać teraz, co robi woda: odjazd przy uskoku schodzi pod powierzchnię, a przy ujściu strumienia nurt znosi odpoczywającą rybę w bok, dopóki jej nie przyciągniesz.",
   "You can hear the water now: the line grates while you reel against a run on the rocks off the point, and a fish going into the weeds at the reeds swishes, with a buzz on phones and controllers.":
