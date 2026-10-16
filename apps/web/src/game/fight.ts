@@ -330,6 +330,8 @@ export function makeFight(
   const darter = DARTERS.has(species.id);
   const headShaker = HEAD_SHAKERS.has(species.id);
   const sticker = STICKERS.has(species.id);
+  /** When the calm would have ended had a catfish not stuck to the bottom. */
+  let calmEnd = 0;
   let shakeAt = Infinity;
   /** How much of a darter's run is left when it cuts back: half of it, so turning it, which shortens the run, brings the dart sooner. */
   let dartLeft: number | null = null;
@@ -423,6 +425,9 @@ export function makeFight(
         // A bass buried in cover doesn't run again till it comes out.
         if (coverDiver && sim.weeded) nextAt = Math.max(nextAt, weedUntil);
         if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
+        // A catfish stuck on the bottom doesn't run again till it is lifted or comes up on its own.
+        calmEnd = nextAt;
+        if (sticker && sim.sulk) nextAt = Math.max(nextAt, sulkUntil);
       }
     }
 
@@ -436,7 +441,10 @@ export function makeFight(
         if (sticker && !sim.lifting) {
           sim.lifting = true;
           slackSec = 0;
-        } else sim.sulk = false;
+        } else {
+          sim.sulk = false;
+          if (sticker && nextAt !== null) nextAt = Math.min(nextAt, Math.max(calmEnd, nowMs));
+        }
       }
     }
     if (!sim.sulk) sim.lifting = false;

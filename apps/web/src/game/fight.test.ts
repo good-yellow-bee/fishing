@@ -583,6 +583,18 @@ describe("sulking on the bottom", () => {
     expect(catfish.sim.lifting).toBe(false);
   });
 
+  it("keeps a stuck catfish on the bottom, with no run, till it comes up on its own", () => {
+    const catfish = makeFight(fish("catfish"), 10, 3, () => 0);
+    const at = untilSulk(catfish);
+    for (let now = at + 50; now < at + SULK_MS; now += 50) {
+      catfish.step(now, 0.05, false);
+      expect(catfish.sim.sulk).toBe(true);
+      expect(catfish.sim.surge).toBe(0);
+    }
+    catfish.step(at + SULK_MS + 50, 0.05, false);
+    expect(catfish.sim.sulk).toBe(false);
+  });
+
   it("leaves every other fish to fight as before", () => {
     const runtime = makeFight(fish("largemouth-bass"), 3, 3, () => 0);
     for (let now = 0; now < 20_000; now += 50) {
