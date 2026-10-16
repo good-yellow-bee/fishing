@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zl";
+export const NEWS_ID = "2026-10-16zm";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Saving a fish now says when it is the first of its kind or a new best, and warns when the same fish looks logged twice. Unsaved edits to a fish wait for you, search understands “yesterday”, “last week” and “Oct 15”, and Bests shows a calendar of your days out.",
   "A pike in the reeds may grab a golden shiner you are reeling in: hang on, because the fight starts again with the pike. And the landed card now counts a brook trout's darts you followed and a walleye's head shakes you eased off.",
   "The gear page keeps a record of the lures that took fish, packing lists copy as a checklist, and the Home card shows sunrise and how much is packed for today’s or tomorrow’s outing. Species pages show their newest photos, and several pieces of tackle can be added at once, split by commas.",
   "On the lake you can now see a walleye wag its head as it shakes, and a stuck catfish come partway up on the first pump. Both knock on the rod, and a phone or controller buzzes.",
