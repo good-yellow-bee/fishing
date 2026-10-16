@@ -33,6 +33,22 @@ describe("search words without +", () => {
     expect(findCatches(bare, "full moon", t).length + findCatches(bare, "new moon", t).length).toBeGreaterThan(0);
   });
 
+  it("finds a Polish moon week by the phase's own name, and nothing by the shared word", () => {
+    const bare = { spots: book.spots.map((spot) => ({ ...spot, name: "X", notes: "", bestConditions: "" })), trips: [], catches: book.catches.map((entry) => ({ ...entry, note: "", tripId: null })) };
+    const pl: Record<string, string> = { "Near the new moon": "Około nowiu", "Waxing moon": "Księżyc przybywa", "Near the full moon": "Około pełni", "Waning moon": "Księżyc ubywa" };
+    const tPl = (text: string) => pl[text] ?? text;
+    const ids = (needle: string) => findCatches(bare, needle, tPl).map((entry) => entry.id).sort();
+    expect(ids("pełnia")).toEqual(ids("pełni"));
+    expect(ids("nów")).toEqual(ids("nowiu"));
+    expect(ids("pełnia").length + ids("nów").length).toBeGreaterThan(0);
+    expect(ids("księżyc")).toEqual([]);
+  });
+
+  it("finds a lure by its plural too", () => {
+    const lure = book.catches[0]!.lure;
+    expect(ids(`lure:"${lure}s"`)).toEqual(ids(`lure:"${lure}"`));
+  });
+
   it("finds the fish with a photo by “photo”", () => {
     const withPhoto = new Set([book.catches[0]!.id, book.catches[2]!.id]);
     const found = findCatches(book, "photo", t, (id) => withPhoto.has(id)).map((entry) => entry.id);

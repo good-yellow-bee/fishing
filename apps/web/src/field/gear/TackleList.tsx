@@ -69,7 +69,9 @@ export function TackleList({
       return true;
     });
     const refused: { part: string; message: string }[] = [];
-    for (const part of parts.length > 0 ? parts : [label]) {
+    // Only commas (",,,") name nothing: refused as an empty name rather than added as a piece called ",,,".
+    const pieces = parts.length > 0 ? parts : [label.includes(",") ? "" : label];
+    for (const part of pieces) {
       const message = add(tripId, part);
       if (message) refused.push({ part: part.trim(), message });
     }
@@ -171,6 +173,7 @@ export function TackleList({
           file="stillwater-tackle.txt"
           label={t("Copy the list")}
           copied={t("List copied.")}
+          saved={t("The list was downloaded instead.")}
         />
       ) : null}
       {missing.length > 0 ? (
@@ -199,7 +202,6 @@ export function TackleList({
               setError("");
             }}
             placeholder={t("Spare leader")}
-            maxLength={60}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
           />

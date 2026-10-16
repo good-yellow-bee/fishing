@@ -21,6 +21,7 @@ export function CopySummary({
   photo,
   label,
   copied,
+  saved,
 }: {
   text: () => string;
   file: string;
@@ -29,6 +30,8 @@ export function CopySummary({
   label?: string;
   /** What is said once copied, with `label`. */
   copied?: string;
+  /** What is said when it was saved as a file instead, with `label`. */
+  saved?: string;
 }) {
   const [said, setSaid] = useState("");
   const say = (message: string) => {
@@ -43,7 +46,7 @@ export function CopySummary({
       say(copied ?? t("Summary copied."));
     } catch {
       downloadFile(summary, "text/plain;charset=utf-8", file);
-      say(t("The summary was downloaded instead."));
+      say(saved ?? t("The summary was downloaded instead."));
     }
   };
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";

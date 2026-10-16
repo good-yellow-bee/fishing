@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -57,12 +58,14 @@ function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
   const { items } = useTackle();
   const records = pieceRecords(book, items, today);
+  const [all, setAll] = useState(false);
   if (records.length === 0) return null;
+  const fold = records.length > RECORD_ROWS;
   return (
     <>
       <h2 className="subhead">{t("Lure record")}</h2>
       <ul className="species-waters lure-record">
-        {records.slice(0, RECORD_ROWS).map((row) => (
+        {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
@@ -72,6 +75,13 @@ function LureRecord({ today }: { today: string }) {
           </li>
         ))}
       </ul>
+      {fold ? (
+        <p className="tally-more">
+          <button type="button" className="text-button" aria-expanded={all} onClick={() => setAll((open) => !open)}>
+            {all ? t("Show fewer") : t("Show all {count}", { count: records.length })}
+          </button>
+        </p>
+      ) : null}
     </>
   );
 }
@@ -95,7 +105,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} caught={catchesForTrip(book, trip.id)} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} caught={catchesForTrip(book, trip.id)} trips={book.trips} />
     </details>
   );
 }
@@ -143,7 +153,13 @@ export function GearPage() {
           </div>
           <Link to={`/trips/${trip.id}`}>{t("Outing")}</Link>
         </header>
-        <TackleList tripId={trip.id} heading={t("In the bag")} suggest={packingTips(book, trip, today)} trips={book.trips} />
+        <TackleList
+          tripId={trip.id}
+          heading={t("In the bag")}
+          suggest={packingTips(book, trip, today)}
+          trips={book.trips}
+          caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
+        />
       </div>
     );
   }

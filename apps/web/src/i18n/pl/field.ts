@@ -282,6 +282,8 @@ export const PL_FIELD: PlBook = {
   "Copy a summary": "Skopiuj podsumowanie",
   "Copy the list": "Skopiuj listę",
   "List copied.": "Lista skopiowana.",
+  "The list was downloaded instead.": "Lista została pobrana jako plik.",
+  "Show fewer": "Pokaż mniej",
   "Summary copied.": "Podsumowanie skopiowane.",
   "The summary was downloaded instead.": "Podsumowanie zostało pobrane jako plik.",
   "Length and weight": "Długość i waga",
