@@ -55,8 +55,15 @@ describe("bounds on the edge", () => {
   it("keeps a fish logged in metric right on a size bound", () => {
     expect(sizeMatches({ kind: "length", inches: 19.685 }, parseSizeQuery(">50 cm")!)).toBe(true);
     expect(sizeMatches({ kind: "weight", pounds: 4.409 }, parseSizeQuery(">2 kg")!)).toBe(true);
-    expect(sizeMatches({ kind: "weight", pounds: 2.205 }, parseSizeQuery("<1 kg")!)).toBe(true);
-    expect(sizeMatches({ kind: "weight", pounds: 2.3 }, parseSizeQuery("<1 kg")!)).toBe(false);
+    expect(sizeMatches({ kind: "weight", pounds: 2.205 }, parseSizeQuery("<=1 kg")!)).toBe(true);
+    expect(sizeMatches({ kind: "weight", pounds: 2.3 }, parseSizeQuery("<=1 kg")!)).toBe(false);
+  });
+
+  it("stops short of the bound for a plain <, and takes it for <=", () => {
+    expect(sizeMatches({ kind: "length", inches: 20 }, parseSizeQuery("<20 in")!)).toBe(false);
+    expect(sizeMatches({ kind: "length", inches: 19.9 }, parseSizeQuery("<20 in")!)).toBe(true);
+    expect(sizeMatches({ kind: "length", inches: 20 }, parseSizeQuery("<=20 in")!)).toBe(true);
+    expect(sizeMatches({ kind: "length", inches: 20 }, parseSizeQuery(">20 in")!)).toBe(true);
   });
 
   it("keeps a water temperature logged in °C right on its bound, and reads <= as up to it", () => {
