@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { catchesCsv } from "./catchCsv";
@@ -103,7 +103,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string): Ca
   const temp = parseTempQuery(needle);
   if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));
   const size = parseSizeQuery(needle);
-  if (size) return catchesNewestFirst(book).filter((entry) => sizeMatches(entry.measure, size));
+  if (size) return catchesNewestFirst(book).filter((entry) => measuresOf(entry).some((measure) => sizeMatches(measure, size)));
   const found = searchCatches(book, needle);
   const translated = getLang() !== "en";
   const want = normalize(needle);

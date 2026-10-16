@@ -7,6 +7,7 @@ import {
   keepLandedCatch,
   keepPlayTrip,
   localDate,
+  measureOf,
   parseCatchDraft,
   parseSpotDraft,
   parseTripDraft,
@@ -384,5 +385,26 @@ describe("field log", () => {
     expect(again.spots).toHaveLength(next.spots.length);
     expect(next.catches.filter((entry) => entry.id !== "catch-play-point")).toEqual(book.catches);
     expect(isLogbook(next)).toBe(true);
+  });
+});
+
+describe("a fish both measured and weighed", () => {
+  const book = sampleLogbook(now);
+
+  it("keeps the other measure when one is typed, and checks it like the first", () => {
+    const both = parseCatchDraft(draft("spot-cedar", { amount: "18.5", alsoAmount: "2.4" }), book);
+    expect(both).toMatchObject({ ok: true, value: { measure: { kind: "length", inches: 18.5 }, alsoMeasure: { kind: "weight", pounds: 2.4 } } });
+    const one = parseCatchDraft(draft("spot-cedar", { alsoAmount: "  " }), book);
+    expect(one.ok && "alsoMeasure" in one.value).toBe(false);
+    expect(parseCatchDraft(draft("spot-cedar", { alsoAmount: "200" }), book)).toMatchObject({ ok: false, field: "alsoAmount" });
+    expect(parseCatchDraft(draft("spot-cedar", { measureKind: "weight", amount: "3", alsoAmount: "big" }), book)).toMatchObject({ ok: false, field: "alsoAmount" });
+  });
+
+  it("reads either measure, and a stored book only holds the other kind as the second", () => {
+    const entry = { ...book.catches[0]!, measure: { kind: "length" as const, inches: 20 }, alsoMeasure: { kind: "weight" as const, pounds: 3 } };
+    expect(measureOf(entry, "weight")).toEqual({ kind: "weight", pounds: 3 });
+    expect(measureOf({ ...entry, alsoMeasure: undefined }, "weight")).toBeNull();
+    expect(isLogbook({ ...book, catches: [entry] })).toBe(true);
+    expect(isLogbook({ ...book, catches: [{ ...entry, alsoMeasure: { kind: "length", inches: 21 } }] })).toBe(false);
   });
 });

@@ -1339,3 +1339,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR212~~ | ~~Search links on home move focus; Home clears the search; undo bar ignores Escape in fields and prompts~~ (#520) | field | S |
 | ~~BR213~~ | ~~Search finds kept fish and water notes; "released" finds just released fish~~ (#521) | field | S |
 | ~~BR214~~ | ~~Edit pages and single catches get their own tab titles~~ (#523) | field | S |
+| ~~BR215~~ | ~~A fish can carry both a length and a weight~~ (#525) | field | S |

@@ -1,4 +1,4 @@
-import { keepLandedCatch, putCatchPhoto, withoutCatchPhoto, type CatchPhotoMap, type LandedFish, type Logbook } from "@stillwater/shared";
+import { keepLandedCatch, measureOf, putCatchPhoto, withoutCatchPhoto, type CatchPhotoMap, type LandedFish, type Logbook } from "@stillwater/shared";
 import { readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { readStoredLogbook, saveLogbook } from "./storage";
@@ -57,9 +57,10 @@ function writeAutoPhotos(list: AutoPhoto[]) {
 export function spareSnapshots(book: Logbook, photos: CatchPhotoMap, auto: readonly AutoPhoto[], keep: string): string[] {
   const heaviest = new Map<string, { id: string; pounds: number }>();
   for (const entry of book.catches) {
-    if (entry.measure.kind !== "weight") continue;
+    const weight = measureOf(entry, "weight");
+    if (weight?.kind !== "weight") continue;
     const best = heaviest.get(entry.species);
-    if (!best || entry.measure.pounds > best.pounds) heaviest.set(entry.species, { id: entry.id, pounds: entry.measure.pounds });
+    if (!best || weight.pounds > best.pounds) heaviest.set(entry.species, { id: entry.id, pounds: weight.pounds });
   }
   const bests = new Set([...heaviest.values()].map((best) => best.id));
   return auto

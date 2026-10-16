@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { personalBests, type CatchEntry } from "@stillwater/shared";
+import { measureOf, personalBests, type CatchEntry } from "@stillwater/shared";
 import { t, tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
 import { fishCountLabel } from "./format";
@@ -12,6 +12,8 @@ export function FishSum({ catches, oneKind = false }: { catches: readonly CatchE
   const species = new Set(catches.map((entry) => entry.species.trim().toLowerCase())).size;
   const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
   const largest = bests.heaviest ?? bests.longest;
+  // The size it is largest by: its weight when any fish here was weighed, else its length.
+  const size = largest ? measureText(measureOf(largest, bests.heaviest ? "weight" : "length")!) : "";
   const released = catches.filter((entry) => entry.released).length;
   return (
     <p className="meta fish-sum">
@@ -24,8 +26,8 @@ export function FishSum({ catches, oneKind = false }: { catches: readonly CatchE
           {/* The largest opens its own catch page. */}
           <Link to={`/catches/${largest.id}`}>
             {oneKind
-              ? t("Largest: {size}", { size: measureText(largest.measure) })
-              : t("Largest: {species}, {size}", { species: t(largest.species), size: measureText(largest.measure) })}
+              ? t("Largest: {size}", { size })
+              : t("Largest: {species}, {size}", { species: t(largest.species), size })}
           </Link>
         </>
       ) : null}

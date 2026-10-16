@@ -30,6 +30,8 @@ export function parseKeptDraft(raw: string | null, now: Date): KeptDraft | null 
   if (typeof row.timeTouched !== "boolean" || typeof row.units !== "string" || typeof row.savedAt !== "string") return null;
   const savedAt = Date.parse(row.savedAt);
   if (!Number.isFinite(savedAt) || now.getTime() - savedAt > KEEP_MS) return null;
+  // The second measure came later: an older kept draft has none, and a stray value is let go.
+  if (row.alsoAmount !== undefined && typeof row.alsoAmount !== "string") delete row.alsoAmount;
   const draft = row as unknown as KeptDraft;
   return draftWorthKeeping(draft) ? draft : null;
 }

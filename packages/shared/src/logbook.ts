@@ -44,7 +44,19 @@ export type CatchEntry = {
   weather: CatchWeather | null;
   /** Put back alive. Left out on kept fish and on books from before it existed. */
   released?: boolean;
+  /** The other measure, when the fish was both measured and weighed; always the other kind than `measure`. */
+  alsoMeasure?: Measure;
 };
+
+/** Every measure a fish has: its main one, and the other when it was both measured and weighed. */
+export function measuresOf(entry: CatchEntry): Measure[] {
+  return entry.alsoMeasure ? [entry.measure, entry.alsoMeasure] : [entry.measure];
+}
+
+/** The fish's length or weight, whichever is asked, or null when it was not taken. */
+export function measureOf(entry: CatchEntry, kind: Measure["kind"]): Measure | null {
+  return measuresOf(entry).find((measure) => measure.kind === kind) ?? null;
+}
 
 export type Logbook = {
   spots: Spot[];
@@ -68,6 +80,8 @@ export type CatchDraft = {
   wind: string;
   waterTemp: string;
   released?: boolean;
+  /** The other measure (a weight for a fish measured by length, or the other way), left blank when not taken. */
+  alsoAmount?: string;
 };
 
 export type SpotDraft = {
@@ -352,7 +366,8 @@ function isCatch(value: unknown): value is CatchEntry {
     typeof value.caughtAt === "string" &&
     typeof value.note === "string" &&
     (value.weather === null || isWeather(value.weather)) &&
-    (value.released === undefined || typeof value.released === "boolean")
+    (value.released === undefined || typeof value.released === "boolean") &&
+    (value.alsoMeasure === undefined || (isMeasure(value.alsoMeasure) && value.alsoMeasure.kind !== value.measure.kind))
   );
 }
 
@@ -442,15 +457,18 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
   const amount = parseAmount(draft.amount);
   if (amount === null) return fail("amount", "Use a number for length or weight.");
 
-  let measure: Measure;
-  if (draft.measureKind === "length") {
-    if (amount < 1 || amount > 120) return fail("amount", "Length should sit between 1 and 120 inches.");
-    measure = { kind: "length", inches: amount };
-  } else if (draft.measureKind === "weight") {
-    if (amount < 0.1 || amount > 80) return fail("amount", "Weight should sit between 0.1 and 80 pounds.");
-    measure = { kind: "weight", pounds: amount };
-  } else {
-    return fail("measureKind", "Choose length or weight.");
+  if (draft.measureKind !== "length" && draft.measureKind !== "weight") return fail("measureKind", "Choose length or weight.");
+  const measure = measureFrom(draft.measureKind, amount, "amount");
+  if (!measure.ok) return measure;
+
+  // The other measure is optional: a fish measured and weighed keeps both.
+  let alsoMeasure: Measure | null = null;
+  if (draft.alsoAmount !== undefined && draft.alsoAmount.trim() !== "") {
+    const also = parseAmount(draft.alsoAmount);
+    if (also === null) return fail("alsoAmount", "Use a number for length or weight.");
+    const parsed = measureFrom(draft.measureKind === "length" ? "weight" : "length", also, "alsoAmount");
+    if (!parsed.ok) return parsed;
+    alsoMeasure = parsed.value;
   }
 
   const lure = cleanLine(draft.lure);
@@ -486,7 +504,7 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
     ok: true,
     value: {
       species,
-      measure,
+      measure: measure.value,
       lure,
       spotId: spot.id,
       tripId,
@@ -494,8 +512,18 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
       note,
       weather: weather.value,
       ...(draft.released ? { released: true } : {}),
+      ...(alsoMeasure ? { alsoMeasure } : {}),
     },
   };
+}
+
+function measureFrom(kind: Measure["kind"], amount: number, field: string): Parsed<Measure> {
+  if (kind === "length") {
+    if (amount < 1 || amount > 120) return fail(field, "Length should sit between 1 and 120 inches.");
+    return { ok: true, value: { kind: "length", inches: amount } };
+  }
+  if (amount < 0.1 || amount > 80) return fail(field, "Weight should sit between 0.1 and 80 pounds.");
+  return { ok: true, value: { kind: "weight", pounds: amount } };
 }
 
 export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {

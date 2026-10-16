@@ -153,15 +153,15 @@ function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
         <h2>{t("How the best grew")}</h2>
       </div>
       {lists.map((steps) => {
-        const label = steps[0]!.entry.measure.kind === "length" ? t("By length") : t("By weight");
+        const label = steps[0]!.measure.kind === "length" ? t("By length") : t("By weight");
         return (
-          <Fragment key={steps[0]!.entry.measure.kind}>
+          <Fragment key={steps[0]!.measure.kind}>
             {/* Both measures have a story: each list says which it is. */}
             {lists.length > 1 ? <h3 className="subhead">{label}</h3> : null}
             <ol className="species-waters best-steps" aria-label={label}>
-              {steps.map(({ entry, gain }) => (
+              {steps.map(({ entry, measure, gain }) => (
                 <li key={entry.id}>
-                  <Link to={`/catches/${entry.id}`}>{measureText(entry.measure)}</Link>
+                  <Link to={`/catches/${entry.id}`}>{measureText(measure)}</Link>
                   <span className="meta">
                     {formatCatchDay(entry.caughtAt)}
                     {gain ? ` · +${gainText(gain)}` : ` · ${t("the first")}`}

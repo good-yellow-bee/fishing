@@ -15,11 +15,14 @@ import {
   catchesForSpot,
   catchesNewestFirst,
   localDate,
+  measureOf,
+  personalBests,
   spotById,
   tripById,
   tripsForSpot,
   type CatchDraft,
   type CatchEntry,
+  type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
@@ -36,7 +39,7 @@ import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } 
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
-import { measureText, tempText, weatherText } from "../i18n/content";
+import { measureText, measuresText, tempText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatCatchDay, formatClock, formatDay, messageText, noteText, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
@@ -46,9 +49,17 @@ import { exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
 
 function amountText(entry: CatchEntry, units: Units): string {
-  return entry.measure.kind === "length"
-    ? fromBookAmount(entry.measure.inches, "length", units)
-    : fromBookAmount(entry.measure.pounds, "weight", units);
+  return measureAmountText(entry.measure, units);
+}
+
+function measureAmountText(measure: Measure, units: Units): string {
+  return measure.kind === "length" ? fromBookAmount(measure.inches, "length", units) : fromBookAmount(measure.pounds, "weight", units);
+}
+
+/** A best's size by the measure it is best by, or nothing when there is no such best. */
+function measureOfBest(entry: CatchEntry | null, kind: "length" | "weight"): string {
+  const measure = entry ? measureOf(entry, kind) : null;
+  return measure ? measureText(measure) : "";
 }
 
 const SPECIES = [...FISH].map((fish) => fish.name);
@@ -150,6 +161,18 @@ function CatchForm() {
   const units = getUnits();
   const [startAmount] = useState(() => (existing ? amountText(existing, units) : ""));
   const [amount, setAmount] = useState(startAmount);
+  // The other measure, for a fish both measured and weighed.
+  const [startAlso] = useState(() => (existing?.alsoMeasure ? measureAmountText(existing.alsoMeasure, units) : ""));
+  const [alsoAmount, setAlsoAmount] = useState(startAlso);
+  const otherKind = measureKind === "length" ? "weight" : "length";
+  const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
+    // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
+    if (kind !== measureKind && alsoAmount.trim()) {
+      setAmount(alsoAmount);
+      setAlsoAmount(amount);
+    }
+    setMeasureKind(kind);
+  };
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
   // A new fish on a water with an outing planned today files under that outing.
@@ -185,7 +208,7 @@ function CatchForm() {
   useEffect(() => {
     // While an older draft waits, keep it rather than overwrite it with this one.
     if (existing || waiting) return;
-    const fields = { species, measureKind, amount, lure, spotId, tripId, note, sky, wind, waterTemp, released };
+    const fields = { species, measureKind, amount, alsoAmount, lure, spotId, tripId, note, sky, wind, waterTemp, released };
     const now = JSON.stringify(fields);
     if (opened.current === null) opened.current = now;
     if (now === opened.current) {
@@ -196,6 +219,7 @@ function CatchForm() {
       species,
       measureKind,
       amount,
+      alsoAmount,
       lure,
       spotId,
       tripId,
@@ -209,7 +233,7 @@ function CatchForm() {
       units,
       savedAt: new Date().toISOString(),
     });
-  }, [existing, waiting, species, measureKind, amount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, released, timeTouched, units]);
+  }, [existing, waiting, species, measureKind, amount, alsoAmount, lure, spotId, tripId, caughtAt, note, sky, wind, waterTemp, released, timeTouched, units]);
 
   const pickUp = (kept: KeptDraft) => {
     const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
@@ -229,6 +253,7 @@ function CatchForm() {
     // Numbers typed in other units would mean something else now.
     if (kept.units === units) {
       setAmount(kept.amount);
+      setAlsoAmount(kept.alsoAmount ?? "");
       setWaterTemp(kept.waterTemp);
     }
     // Picked up counts as typed: it stays kept even before the next keystroke.
@@ -324,6 +349,13 @@ function CatchForm() {
     setPhotoError("");
   };
 
+  // An untouched number keeps its stored value, so a metric round trip doesn't nudge it; that holds for a length and
+  // weight swapped between the two fields too.
+  const bookAmount = (text: string, kind: CatchDraft["measureKind"]) => {
+    const stored = existing ? measureOf(existing, kind) : null;
+    return stored && text === measureAmountText(stored, units) ? measureAmountText(stored, "imperial") : toBookAmount(text, kind, units);
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (reducing) {
@@ -334,11 +366,8 @@ function CatchForm() {
       // A name already in the book is kept as written there, so "rock bass" joins "Rock bass".
       species: bookName(species, [...(existing ? [existing.species] : []), ...SPECIES, ...book.catches.map((entry) => entry.species)]),
       measureKind,
-      // An untouched number keeps its stored value, so a metric round trip doesn't nudge it.
-      amount:
-        existing && amount === startAmount && measureKind === existing.measure.kind
-          ? amountText(existing, "imperial")
-          : toBookAmount(amount, measureKind, units),
+      amount: bookAmount(amount, measureKind),
+      alsoAmount: bookAmount(alsoAmount, otherKind),
       lure: bookName(lure, [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS]),
       spotId,
       tripId,
@@ -447,7 +476,7 @@ function CatchForm() {
             {bestSoFar ? (
               <small className="field-hint">
                 {t("Your biggest so far: {measures}", {
-                  measures: [bestSoFar.longest, bestSoFar.heaviest].flatMap((entry) => (entry ? [measureText(entry.measure)] : [])).join(" · "),
+                  measures: [measureOfBest(bestSoFar.longest, "length"), measureOfBest(bestSoFar.heaviest, "weight")].filter(Boolean).join(" · "),
                 })}
               </small>
             ) : null}
@@ -478,7 +507,7 @@ function CatchForm() {
                 { id: "length", label: t("Length") },
                 { id: "weight", label: t("Weight") },
               ]}
-              onChange={setMeasureKind}
+              onChange={pickMeasureKind}
             />
             <input
               name="amount"
@@ -505,6 +534,22 @@ function CatchForm() {
               }
               required
             />
+            {/* Optional: a fish both measured and weighed keeps both, and counts for both bests. */}
+            <label className="also-measure">
+              {measureKind === "length" ? t("Also weighed (optional)") : t("Also measured (optional)")}
+              <input
+                name="alsoAmount"
+                inputMode="decimal"
+                aria-label={`${measureKind === "length" ? t("Also weighed (optional)") : t("Also measured (optional)")}, ${
+                  units === "metric" ? (otherKind === "length" ? t("Centimetres") : t("Kilograms")) : otherKind === "length" ? t("Inches") : t("Pounds")
+                }`}
+                value={alsoAmount}
+                onChange={(event) => setAlsoAmount(event.target.value)}
+                placeholder={
+                  units === "metric" ? (otherKind === "length" ? t("Centimetres") : t("Kilograms")) : otherKind === "length" ? t("Inches") : t("Pounds")
+                }
+              />
+            </label>
           </fieldset>
 
           <label>
@@ -731,14 +776,17 @@ export function CatchPage() {
     const caught = new Date(entry.caughtAt);
     const text = {
       title: t(entry.species),
-      detail: [measureText(entry.measure), spot?.name].filter(Boolean).join(" · "),
+      detail: [measuresText(entry), spot?.name].filter(Boolean).join(" · "),
       conditions: entry.weather ? weatherText(entry.weather) : t(entry.lure),
       date: caught.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
     };
     setPictureError(false);
     saveShareCard(text, photo ?? null, shareCardFileName(entry.species, caught)).catch(() => setPictureError(true));
   };
-  const heavy = entry.measure.kind === "weight";
+  // Which best the badge is for: a fish both measured and weighed may hold either.
+  const bests = badge ? personalBests(book) : null;
+  const kindBests = bests?.species.find((row) => row.species.trim().toLowerCase() === entry.species.trim().toLowerCase());
+  const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
 
   return (
     <div className="sheet">
@@ -760,9 +808,9 @@ export function CatchPage() {
           </Link>
         </p>
         {/* The tab says which fish of the kind this is: its size and day. */}
-        <h1 data-title={`${t(entry.species)}, ${measureText(entry.measure)} · ${formatCatchDay(entry.caughtAt)}`}>{t(entry.species)}</h1>
+        <h1 data-title={`${t(entry.species)}, ${measuresText(entry)} · ${formatCatchDay(entry.caughtAt)}`}>{t(entry.species)}</h1>
         <p className="meta stand">
-          <span>{measureText(entry.measure)}</span>
+          <span>{measuresText(entry)}</span>
           {" · "}
           {/* Every fish taken on this lure, through the catch search. */}
           <Link to={findLink(exactTerm("lure", t(entry.lure)))}>{t(entry.lure)}</Link>
