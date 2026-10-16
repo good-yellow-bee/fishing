@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, lureTally, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -108,6 +108,15 @@ export function SpeciesPage() {
             <h2>{t("By the moon")}</h2>
           </div>
           <TallyBars rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("moon", t(row.label))) : undefined }))} />
+        </>
+      ) : null}
+      {lureTally({ ...book, catches }).length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("Lures that took it")}</h2>
+          </div>
+          {/* Each lure opens just this kind's fish on it. */}
+          <TallyBars rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(exactTerm("species", t(name)), exactTerm("lure", t(row.lure))) }))} />
         </>
       ) : null}
       <div className="section-head">
