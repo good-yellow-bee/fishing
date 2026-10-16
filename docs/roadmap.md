@@ -1453,3 +1453,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR288~~ | ~~Map link on outings and Home's next outing~~ (#634) | field | S |
 | ~~BR289~~ | ~~Note when a new water drops the fish's outing~~ (#635) | field | S |
 | ~~BR290~~ | ~~Fold empty tally rows~~ (#637) | field | S |
+| ~~BR291~~ | ~~Own pinned waters on a fitted map sheet~~ (#639) | field | S |

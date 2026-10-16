@@ -172,10 +172,10 @@ export function formatCoord(lat: number, lng: number): string {
   return `${degrees(lat, 4)}° ${ns}, ${degrees(lng, 4)}° ${ew}`;
 }
 
-export function formatLat(lat: number): string {
-  return `${degrees(lat, 2)}°${lat >= 0 ? "N" : "S"}`;
+export function formatLat(lat: number, digits = 2): string {
+  return `${degrees(lat, digits)}°${lat >= 0 ? "N" : "S"}`;
 }
 
-export function formatLng(lng: number): string {
-  return `${degrees(lng, 2)}°${lng >= 0 ? "E" : "W"}`;
+export function formatLng(lng: number, digits = 2): string {
+  return `${degrees(lng, digits)}°${lng >= 0 ? "E" : "W"}`;
 }

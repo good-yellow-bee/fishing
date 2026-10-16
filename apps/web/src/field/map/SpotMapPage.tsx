@@ -30,6 +30,8 @@ import {
   ringPath,
   type SamplePlace,
 } from "./places";
+import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
+import { osmLink } from "../osmLink";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -121,17 +123,16 @@ function MapPlate() {
   );
 }
 
-function SpotPin({ spot, place }: { spot: Spot; place: SamplePlace }) {
-  const point = project(place);
+function SpotPin({ spot, place, point = project(place), width = MAP_WIDTH, height = MAP_HEIGHT }: { spot: Spot; place: SamplePlace; point?: { x: number; y: number }; width?: number; height?: number }) {
   // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
-  const own = spot.place ? ` map-pin-own${point.x > MAP_WIDTH * 0.6 ? " map-pin-east" : ""}` : "";
+  const own = spot.place ? ` map-pin-own${point.x > width * 0.6 ? " map-pin-east" : ""}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
       className={own ? `map-pin${own}` : `map-pin map-pin-${spot.id}`}
       style={{
-        left: `${(point.x / MAP_WIDTH) * 100}%`,
-        top: `${(point.y / MAP_HEIGHT) * 100}%`,
+        left: `${(point.x / width) * 100}%`,
+        top: `${(point.y / height) * 100}%`,
       }}
       // The list under the map names the same spots, so keyboards and screen readers go through each one once there.
       tabIndex={-1}
@@ -154,6 +155,49 @@ function sheetPlace(spot: Spot): SamplePlace | undefined {
   return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
 }
 
+/** The angler's own pins away from the sample sheet, on a plain sheet of their own: a grid fitted to them, north up. */
+function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) {
+  const frame = fitFrame(pinned.map(({ place }) => place));
+  const lats = gridLines(frame.south, frame.north);
+  const lngs = gridLines(frame.west, frame.east);
+  const corner = 16;
+  return (
+    <div className="spot-map own-sheet">
+      <svg className="spot-map-plate" viewBox={`0 0 ${OWN_WIDTH} ${OWN_HEIGHT}`} role="img" aria-label={t("Your own waters, north up")}>
+        <rect width={OWN_WIDTH} height={OWN_HEIGHT} className="map-land" />
+        {lats.values.map((lat) => {
+          const y = projectIn(frame, { lat, lng: frame.west }).y;
+          return (
+            <g key={lat}>
+              <line x1={corner} x2={OWN_WIDTH - corner} y1={y} y2={y} className="map-grid" />
+              <text x={22} y={y - 4} className="map-tick">
+                {formatLat(lat, lats.digits)}
+              </text>
+            </g>
+          );
+        })}
+        {lngs.values.map((lng) => {
+          const x = projectIn(frame, { lat: frame.north, lng }).x;
+          return (
+            <g key={lng}>
+              <line x1={x} x2={x} y1={corner} y2={OWN_HEIGHT - corner} className="map-grid" />
+              <text x={x + 4} y={OWN_HEIGHT - 22} className="map-tick">
+                {formatLng(lng, lngs.digits)}
+              </text>
+            </g>
+          );
+        })}
+        <rect x="14" y="14" width={OWN_WIDTH - 28} height={OWN_HEIGHT - 28} className="map-frame" />
+      </svg>
+      <div className="spot-map-pins" aria-hidden="true">
+        {pinned.map(({ spot, place }) => (
+          <SpotPin key={spot.id} spot={spot} place={place} point={projectIn(frame, place)} width={OWN_WIDTH} height={OWN_HEIGHT} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
@@ -162,6 +206,9 @@ export function SpotMapPage() {
     return place ? [{ spot, place }] : [];
   });
   const unplotted = book.spots.filter((spot) => !sheetPlace(spot));
+  // Pinned off the sample sheet: drawn on a sheet of their own.
+  const ownPinned = unplotted.flatMap((spot) => (spot.place ? [{ spot, place: { spotId: spot.id, lat: spot.place.lat, lng: spot.place.lng } }] : []));
+  const unpinned = unplotted.filter((spot) => !spot.place);
 
   return (
     <div className="sheet">
@@ -175,7 +222,7 @@ export function SpotMapPage() {
         </div>
       </header>
 
-      {plotted.length === 0 ? (
+      {plotted.length === 0 && ownPinned.length === 0 ? (
         <p className="empty">
           {t("None of the waters in this book are drawn on the sheet.")}
           {book.spots.length === 0 ? (
@@ -185,7 +232,7 @@ export function SpotMapPage() {
             </>
           ) : null}
         </p>
-      ) : (
+      ) : plotted.length === 0 ? null : (
         <div className="spot-map">
           <MapPlate />
           <div className="spot-map-pins" aria-hidden="true">
@@ -209,14 +256,34 @@ export function SpotMapPage() {
         </ul>
       ) : null}
 
-      {unplotted.length > 0 ? (
+      {ownPinned.length > 0 ? (
+        <>
+          <h2 className="subhead">{t("Your own waters")}</h2>
+          <OwnSheet pinned={ownPinned} />
+          <ul className="map-index">
+            {ownPinned.map(({ spot, place }) => (
+              <li key={spot.id}>
+                <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                <span>{t(WATER_LABELS[spot.waterType])}</span>
+                <span>{fishCountLabel(book.catches.filter((entry) => entry.spotId === spot.id).length)}</span>
+                <span>
+                  <a href={osmLink(place.lat, place.lng)} target="_blank" rel="noreferrer">
+                    {formatCoord(place.lat, place.lng)}
+                  </a>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {unpinned.length > 0 ? (
         <p className="map-note">
-          {t("Not on this sheet:")}{" "}
-          {unplotted.map((spot, index) => (
+          {t("Not on a map yet, with no place noted:")}{" "}
+          {unpinned.map((spot, index) => (
             <span key={spot.id}>
               {index > 0 ? ", " : null}
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-              {spot.place ? ` (${formatCoord(spot.place.lat, spot.place.lng)})` : null}
             </span>
           ))}
           .
