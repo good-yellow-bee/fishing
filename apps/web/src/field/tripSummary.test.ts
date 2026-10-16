@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { catchSummary, speciesSummary, spotSummary, tripSummary, yearSummary } from "./tripSummary";
+import { catchSummary, searchSummary, speciesSummary, spotSummary, tripSummary, yearSummary } from "./tripSummary";
 
 const trip = { id: "trip-dawn", date: "2026-10-10", spotId: "spot-cedar", title: "Dawn patrol", note: "Fog until eight." };
 const fish = (id: string, at: string, released = false): CatchEntry => ({
@@ -112,5 +112,15 @@ describe("year summary", () => {
       "Waters: Cedar Bend (2)",
       "Lures that took the most: Texas-rig worm (2)",
     ]);
+  });
+});
+
+describe("search summary", () => {
+  it("names the search and lists its fish oldest first with their water", () => {
+    const lines = searchSummary(" bass ", [fish("b", "2026-10-11T14:00:00.000Z", true), fish("a", "2026-09-10T12:00:00.000Z")], () => "Cedar Bend").split("\n");
+    expect(lines[0]).toBe("“bass”");
+    expect(lines[1]).toBe("2 fish");
+    expect(lines[2]).toMatch(/^- .*Sep 10, 2026 Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend$/);
+    expect(lines[3]).toMatch(/^- .*Oct 11, 2026 Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend, Released$/);
   });
 });

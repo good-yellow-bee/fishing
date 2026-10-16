@@ -114,3 +114,18 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
   ].join("\n");
 }
+
+/**
+ * The fish a search found, as plain text: what was searched, how many, then each fish oldest first
+ * with its day, kind, size, lure and water.
+ */
+export function searchSummary(query: string, matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null): string {
+  const fish = [...matches]
+    .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
+    .map((entry) => {
+      const water = waterOf(entry.spotId);
+      const parts = [`${formatDatedDay(new Date(entry.caughtAt))} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
+      return `- ${parts.join(", ")}`;
+    });
+  return [t("“{query}”", { query: query.trim() }), fishCountLabel(matches.length), ...fish].join("\n");
+}

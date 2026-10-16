@@ -375,6 +375,7 @@ export const PL_FIELD: PlBook = {
   "Best conditions: {conditions}": "Najlepsze warunki: {conditions}",
   "Waters: {waters}": "Łowiska: {waters}",
   "{year} in the book": "{year} w dzienniku",
+  "“{query}”": "„{query}”",
   "Page colours": "Kolory stron",
   "As the device": "Jak w urządzeniu",
   "Light": "Jasne",
