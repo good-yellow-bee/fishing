@@ -39,27 +39,21 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                 const day = `${month}-${String(index + 1).padStart(2, "0")}`;
                 const mark = marks.get(day);
                 if (mark && mark.fish > 0) {
+                  // A day whose fish include some from after midnight opens their outing, since a search by day
+                  // would miss those; several outings' fish fall back to the day's search.
+                  const label = `${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}`}>
-                      <Link to={findLink(day)} aria-label={`${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`} title={`${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`} />
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(day)} aria-label={label} title={label} />
                     </li>
                   );
                 }
-                if (mark && mark.trips.length > 0 && !mark.landed && day < today) {
+                if (mark && mark.trips.length > 0 && day < today) {
                   // The blank opens its outing, or the day's outings when there were several.
                   const label = `${formatDay(day)}: ${t("an outing with no fish")}`;
                   return (
                     <li key={day} className="day-blank">
                       <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} />
-                    </li>
-                  );
-                }
-                if (mark && mark.landed && day < today) {
-                  // Its fish all came after midnight, so the day itself holds none: it opens the outing that had them.
-                  const label = `${formatDay(day)}: ${t("an outing whose fish came after midnight")}`;
-                  return (
-                    <li key={day} className="day-fish day-level-1">
-                      <Link to={`/trips/${mark.trips[0]}`} aria-label={label} title={label} />
                     </li>
                   );
                 }

@@ -13,10 +13,19 @@ describe("dayMarks", () => {
     expect(markedMonths(marks)).toEqual([...markedMonths(marks)].sort());
   });
 
-  it("knows an outing landed fish even when they came after midnight", () => {
+  it("files a fish from after midnight under its outing's day, and names that outing", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const late = { ...book.catches[0]!, id: "late", tripId: "eve", caughtAt: new Date(2026, 9, 4, 1, 30).toISOString() };
     const marks = dayMarks({ ...book, trips: [{ id: "eve", date: "2026-10-03", spotId: late.spotId, title: "Evening", note: "" }], catches: [late] }, "2026");
-    expect(marks.get("2026-10-03")).toEqual({ fish: 0, trips: ["eve"], landed: true });
+    expect(marks.get("2026-10-03")).toEqual({ fish: 1, trips: ["eve"], lateTrip: "eve" });
+    expect(marks.has("2026-10-04")).toBe(false);
+  });
+
+  it("leaves an outing whose fish were caught on another day as a day without fish", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const moved = { ...book.catches[0]!, id: "moved", tripId: "t1", caughtAt: new Date(2026, 8, 5, 12).toISOString() };
+    const marks = dayMarks({ ...book, trips: [{ id: "t1", date: "2026-09-10", spotId: moved.spotId, title: "Moved", note: "" }], catches: [moved] }, "2026");
+    expect(marks.get("2026-09-10")).toEqual({ fish: 0, trips: ["t1"], lateTrip: null });
+    expect(marks.get("2026-09-05")?.fish).toBe(1);
   });
 });

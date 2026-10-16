@@ -32,6 +32,7 @@ import {
 } from "./places";
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
 import { osmLink } from "../osmLink";
+import { hasSampleWaters } from "../bookCopy";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -237,7 +238,7 @@ export function SpotMapPage() {
           <p className="eyebrow">{t("Waters")}</p>
           <h1>{t("Map")}</h1>
           <p className="lede">
-            {plotted.length > 0
+            {hasSampleWaters(book)
               ? t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")
               : t("Waters you note a place for are drawn here. The ink is local, with no tile service and no key.")}
           </p>

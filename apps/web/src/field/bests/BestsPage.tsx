@@ -115,8 +115,9 @@ export function BestsPage() {
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
 
-  // A book with no fish yet: one line and the way to the first, not a page of empty tiles.
-  if (whole.catches.length === 0) {
+  // A book with no fish and no outings yet: one line and the way to the first, not a page of empty tiles. Outings
+  // alone still have their days on the water and calendar to show.
+  if (whole.catches.length === 0 && whole.trips.length === 0) {
     return (
       <div className="sheet">
         <header className="sheet-head">
