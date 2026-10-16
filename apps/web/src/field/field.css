@@ -1130,3 +1130,55 @@ button.field-primary:disabled {
 .field-main [data-focus-target]:focus {
   outline: none;
 }
+
+/* A year's goal: the count against it, and a bar like the tallies'. */
+.year-goal {
+  display: grid;
+  gap: 8px;
+}
+
+.year-goal p {
+  margin: 0;
+}
+
+.year-goal-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px 10px;
+  align-items: end;
+}
+
+.year-goal-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--field-muted);
+}
+
+.year-goal-form input {
+  width: 100%;
+  border: 1px solid #6b5233;
+  background: #fffaf2;
+  color: var(--field-ink);
+  padding: 10px 12px;
+  font-size: 16px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.year-goal-form button[type="submit"] {
+  background: transparent;
+  border: 1px solid #6b5233;
+  color: var(--field-ink);
+  padding: 10px 14px;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.year-goal-form .field-error {
+  grid-column: 1 / -1;
+}
