@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { BAIT_THIEVES, biteStyle, nibblePlan, STEAL_CHANCE, stealsBait } from "./nibblePlan";
+import { BAIT_THIEVES, biteStyle, LIFT_RISE, liftTilt, nibblePlan, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -58,11 +58,20 @@ describe("nibble plan", () => {
 
   it("names every kind's style, with only known ids set apart", () => {
     const styles = new Set(FISH.map((fish) => biteStyle(fish.id)));
-    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "usual"]));
+    expect(styles).toEqual(new Set(["ambush", "mouth", "light", "lift", "usual"]));
     expect(biteStyle("perch")).toBe("usual");
     expect(biteStyle("pike")).toBe("ambush");
     expect(biteStyle("carp")).toBe("mouth");
     expect(biteStyle("walleye")).toBe("light");
+    expect(biteStyle("crappie")).toBe("lift");
+  });
+
+  it("tips a lifted float flat as it rises, and never past flat", () => {
+    expect(liftTilt(0)).toBe(0);
+    expect(liftTilt(0.2)).toBe(0);
+    expect(liftTilt(-0.36 * LIFT_RISE)).toBe(1);
+    expect(liftTilt(-0.05)).toBeGreaterThan(0);
+    expect(liftTilt(-0.05)).toBeLessThan(1);
   });
 });
 
