@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16f";
+export const NEWS_ID = "2026-10-16g";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In the field log a fish can carry both a length and a weight, and both count for the bests. An empty tackle list can copy the last outing's bag, and loading a book file says how many fish each copy holds and can be undone.",
   "A pike, tiger muskie or ghost pike doesn't make a last run at the net: it rolls on the line. You can't turn a roll, so let go when the fight card calls it, or a tight line goes into the red.",
   "You can see the wind on a fight now: a slack line bows downwind between runs. On a windy day the bow soaks up the strike too, so a solid hook needs a quicker one.",
   "On a windy day the wind bellies a slack line, so line drifts out faster while you rest between runs. The fight card says when it's breezy or strong.",

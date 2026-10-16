@@ -1348,3 +1348,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR217~~ | ~~Keep unreadable tackle lists; refuse duplicate pieces and ids~~ (#528) | field | S |
 | ~~BR218~~ | ~~Refuse impossible sizes in a book file; map spots read once~~ (#529) | field | S |
 | ~~BR219~~ | ~~Copy the last outing's bag; undo loading a book file~~ (#532) | field | S |
+| ~~BR220~~ | ~~News card: both measures, copying a bag, undoing a load~~ (#533) | field | S |
