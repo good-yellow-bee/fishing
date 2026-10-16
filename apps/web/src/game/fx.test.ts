@@ -236,6 +236,15 @@ describe("fx haptics", () => {
     expect(() => fx.weeds()).not.toThrow();
   });
 
+  it("knocks up the rod as a walleye shakes its head", () => {
+    const vibrate = vi.fn(() => true);
+    vi.stubGlobal("navigator", { ...navigator, vibrate });
+    fx.haptic("headShake");
+    expect(vibrate).toHaveBeenCalledWith([15, 25, 15, 25, 15]);
+    vi.stubGlobal("AudioContext", FakeAudioContext);
+    expect(() => fx.headShake()).not.toThrow();
+  });
+
   it("stays quiet without vibrate, or when switched off", () => {
     vi.stubGlobal("navigator", { ...navigator, vibrate: undefined });
     expect(() => fx.haptic("bite")).not.toThrow();

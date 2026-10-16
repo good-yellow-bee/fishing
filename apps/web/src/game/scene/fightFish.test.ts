@@ -17,6 +17,8 @@ import {
   LEAP_HEIGHT,
   leapLift,
   rollTwist,
+  headShakeYaw,
+  SHAKE_YAW,
   ROLL_TURNS,
   fightLineEnd,
   type FightFishPose,
@@ -245,6 +247,18 @@ describe("leapLift", () => {
     expect(leapLift(0.1).pitch).toBeGreaterThan(0);
     expect(leapLift(0.9).pitch).toBeLessThan(0);
     expect(leapLift(2)).toEqual(leapLift(1));
+  });
+});
+
+describe("headShakeYaw", () => {
+  it("wags the head both ways and dies away by the end", () => {
+    const samples = Array.from({ length: 41 }, (_, i) => headShakeYaw(i / 40));
+    expect(headShakeYaw(0)).toBe(0);
+    expect(headShakeYaw(1)).toBeCloseTo(0);
+    expect(Math.max(...samples)).toBeGreaterThan(SHAKE_YAW * 0.5);
+    expect(Math.min(...samples)).toBeLessThan(-SHAKE_YAW * 0.5);
+    expect(Math.abs(headShakeYaw(0.9))).toBeLessThan(SHAKE_YAW * 0.15);
+    expect(headShakeYaw(2)).toBeCloseTo(0);
   });
 });
 

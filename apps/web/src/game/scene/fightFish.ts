@@ -198,6 +198,16 @@ export function leapLift(u: number) {
   return { y: Math.sin(Math.PI * k) * LEAP_HEIGHT, pitch: Math.cos(Math.PI * k) * 0.7 };
 }
 
+/** Times a walleye wags its head side to side in one shake, and how far each wag turns it (radians). */
+export const SHAKE_WAGS = 3;
+export const SHAKE_YAW = 0.45;
+
+/** A head shake `u` (0..1) of the way through: how far the fish's head is turned, dying away as the shake ends. */
+export function headShakeYaw(u: number) {
+  const k = Math.min(1, Math.max(0, u));
+  return Math.sin(k * SHAKE_WAGS * Math.PI * 2) * SHAKE_YAW * (1 - k);
+}
+
 /** Full turns a pike makes about its own length when it rolls on the line at the net. */
 export const ROLL_TURNS = 2;
 

@@ -1158,7 +1158,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT113~~ | ~~News card for the largemouth cover-diver and the brook trout dart~~ (#648) | ui | S |
 | ~~GT114~~ | ~~Walleye head-shaker: once in the calm after each run a walleye shakes its head; reel through it and the line goes into the red (clean bonus lost, never the fish); call and habit line~~ (#651) | fight | S |
 | ~~GT115~~ | ~~Catfish bottom-sticker: a sulking catfish takes two pumps to lift, with a call after the first and a habit line~~ (#655) | fight | S |
-| GT116 | News card for the walleye head shake and the catfish bottom-sticker | ui | S |
+| ~~GT116~~ | ~~News card for the walleye head shake and the catfish bottom-sticker~~ (#666) | ui | S |
+| GT117 | Head-shake feel: the hooked walleye wags its head on the lake, the rod knocks three times and the pad or phone buzzes | fight | S |
 
 ## Risks / open questions for the owner
 

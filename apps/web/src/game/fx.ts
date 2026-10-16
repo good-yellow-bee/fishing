@@ -562,6 +562,7 @@ export const HAPTICS = {
   land: [20, 30, 60],
   scrape: [12, 30, 12],
   weeds: [25, 20, 25],
+  headShake: [15, 25, 15, 25, 15],
 } as const;
 
 export type HapticBeat = keyof typeof HAPTICS;
@@ -576,6 +577,7 @@ export const RUMBLES: Record<HapticBeat, { ms: number; strong: number; weak: num
   land: { ms: 220, strong: 0.35, weak: 0.7 },
   scrape: { ms: 70, strong: 0.15, weak: 0.55 },
   weeds: { ms: 120, strong: 0.25, weak: 0.3 },
+  headShake: { ms: 150, strong: 0.2, weak: 0.6 },
 };
 
 type RumblePad = { connected?: boolean; vibrationActuator?: { playEffect?: (type: string, params: object) => Promise<unknown> } | null };
@@ -759,6 +761,11 @@ export const fx = {
     if (!this.enabled) return;
     noiseBurst("bandpass", 900, 450, 0.07, 0.035);
     noiseBurst("bandpass", 750, 400, 0.06, 0.025, 0.05);
+  },
+  /** A walleye shaking its head on the line: three quick, low knocks up the rod. */
+  headShake() {
+    if (!this.enabled) return;
+    for (const when of [0, 0.1, 0.2]) tone("sine", 150, 110, 0.06, 0.025, when);
   },
   surge() {
     if (!this.enabled) return;
