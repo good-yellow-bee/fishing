@@ -844,14 +844,17 @@ button.field-primary:disabled {
     z-index: 6;
     background: #14211f;
     border-top: 1px solid rgba(243, 230, 204, 0.2);
-    padding: 6px 4px calc(8px + env(safe-area-inset-bottom));
+    /* 46px tall with its tabs, as the save bar and undo bar above it expect. */
+    padding: 0 4px calc(2px + env(safe-area-inset-bottom));
   }
 
   .field-tab a {
     border-left: 0;
     border-top: 3px solid transparent;
     text-align: center;
-    padding: 8px 4px;
+    /* 44px tall, the tap target the rest of the log keeps. */
+    min-height: 44px;
+    padding: 12px 2px 8px;
     font-size: 11px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -874,6 +877,11 @@ button.field-primary:disabled {
 
 /* Seven tabs on a narrow phone: long labels such as WYPRAWY and REKORDY must still fit their column. */
 @media (max-width: 420px) {
+  /* The bar's own side padding goes to the tabs, so seven letters of CATCHES fit at 320px. */
+  .field-tab {
+    padding-inline: 0;
+  }
+
   .field-tab a {
     padding-inline: 0;
     font-size: 10px;

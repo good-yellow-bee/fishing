@@ -4,6 +4,9 @@ import { t, tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
 import { fishCountLabel } from "./format";
 
+/** The dot held to the words before it, so a wrap never leaves it alone at the start of a line. */
+const SEP = "\u00a0· ";
+
 /** "6 fish · 3 species · 2 released · Largest: Northern pike, 28 in" for the fish of one outing or one water. */
 /** `oneKind` is for a page about one species, where naming it again says nothing. */
 export function FishSum({ catches, oneKind = false }: { catches: readonly CatchEntry[]; oneKind?: boolean }) {
@@ -20,18 +23,18 @@ export function FishSum({ catches, oneKind = false }: { catches: readonly CatchE
   return (
     <p className="meta fish-sum">
       {fishCountLabel(catches.length)}
-      {oneKind ? "" : ` · ${tn(species, "{n} species", "{n} species")}`}
-      {released > 0 ? ` · ${tn(released, "{n} released", "{n} released")}` : ""}
+      {oneKind ? "" : `${SEP}${tn(species, "{n} species", "{n} species")}`}
+      {released > 0 ? `${SEP}${tn(released, "{n} released", "{n} released")}` : ""}
       {both ? (
         <>
-          {" · "}
+          {SEP}
           <BestLink entry={bests.heaviest!} kind="weight" oneKind={oneKind} />
-          {" · "}
+          {SEP}
           <BestLink entry={bests.longest!} kind="length" oneKind={oneKind} />
         </>
       ) : largest ? (
         <>
-          {" · "}
+          {SEP}
           {/* The largest opens its own catch page. */}
           <Link to={`/catches/${largest.id}`}>
             {oneKind

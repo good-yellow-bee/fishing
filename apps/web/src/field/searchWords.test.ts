@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
 import { t } from "../i18n";
-import { findCatches } from "./CatchSearch";
+import { findCatches, searchTerms } from "./CatchSearch";
 
 describe("search words without +", () => {
   const book = sampleLogbook(new Date(2026, 9, 15));
@@ -42,6 +42,14 @@ describe("search words without +", () => {
     expect(ids("nów")).toEqual(ids("nowiu"));
     expect(ids("pełnia").length + ids("nów").length).toBeGreaterThan(0);
     expect(ids("księżyc")).toEqual([]);
+  });
+
+  it("takes a size bound beside words as its own part", () => {
+    expect(searchTerms("pike >5lb")).toEqual(["pike", ">5lb"]);
+    expect(searchTerms("brook trout < 3 lb 2 oz at dawn")).toEqual(["brook", "trout", "< 3 lb 2 oz", "dawn"]);
+    expect(searchTerms("perch >60°F")).toEqual(["perch", ">60°F"]);
+    expect(ids("pike > 1 lb")).toEqual(ids("pike + > 1 lb"));
+    expect(ids("pike > 1 lb").length).toBeGreaterThan(0);
   });
 
   it("finds a lure by its plural too", () => {
