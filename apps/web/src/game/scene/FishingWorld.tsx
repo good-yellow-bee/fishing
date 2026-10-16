@@ -940,17 +940,23 @@ function HookedFish({
   color,
   accent,
   build,
+  speciesId,
 }: {
   fishRef: RefObject<THREE.Group | null>;
   burstRef: BurstRef;
   color: string;
   accent: string;
   build: FishBuild;
+  speciesId?: string;
 }) {
   const prevLeap = useRef(-1);
+  const prevSpecies = useRef(speciesId);
   useFrame(() => {
     if (prevLeap.current >= 0 && fightView.leapAge < 0) burstRef.current();
     prevLeap.current = fightView.leapAge;
+    // A pike taking the shiner on the line hits it in a burst of spray.
+    if (prevSpecies.current && speciesId && prevSpecies.current !== speciesId) burstRef.current();
+    prevSpecies.current = speciesId;
   });
   return (
     <group ref={fishRef} scale={FIGHT_FISH_SCALE} visible={false}>
@@ -1787,6 +1793,7 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
             color={species?.color ?? FALLBACK_COLOR}
             accent={species?.accent ?? FALLBACK_ACCENT}
             build={fishBuild(species?.id)}
+            speciesId={species?.id}
           />
         )}
       </group>
