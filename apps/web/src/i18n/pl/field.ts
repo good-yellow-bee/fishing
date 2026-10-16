@@ -75,6 +75,7 @@ export const PL_FIELD: PlBook = {
   "More catches": "Więcej połowów",
   "Log another like this": "Zapisz kolejną taką rybę",
   "Save and log another": "Zapisz i dodaj kolejną",
+  "Water from the photo's location.": "Łowisko z miejsca zrobienia zdjęcia.",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
   "Share": "Udostępnij",

@@ -31,7 +31,7 @@ import {
 import { CatchCard } from "./cards";
 import { catchNeighbors } from "./catchNeighbors";
 import { catchBadge } from "./catchBadge";
-import { photoTakenAt } from "./photoTime";
+import { photoPlace, photoTakenAt } from "./photoTime";
 import { anotherCatchLink } from "./anotherCatch";
 import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
@@ -52,7 +52,7 @@ import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
-import { likelyWater } from "./spotOrder";
+import { likelyWater, nearestWater } from "./spotOrder";
 import { NearestWater, canFindNearest } from "./NearestWater";
 import { SpeciesChips } from "./SpeciesChips";
 import { CatchSearch, FIND_PARAM, exactTerm, findLink } from "./CatchSearch";
@@ -164,6 +164,8 @@ export function CatchFormPage() {
 
 /** Camera notes sit at the start of a JPEG; this much is plenty to find the time a photo was taken. */
 const PHOTO_HEAD_BYTES = 256 * 1024;
+/** How near a pinned water a photo must be taken to name it: a lake shore walked round, not the next town. */
+const PHOTO_WATER_KM = 2;
 
 function CatchForm() {
   const { book, storedBook, addCatch, updateCatch, photoFor } = useLogbook();
@@ -225,6 +227,10 @@ function CatchForm() {
   const [timeTouched, setTimeTouched] = useState(Boolean(existing));
   // The time read from a photo's camera notes, while the time field still holds it.
   const [photoTime, setPhotoTime] = useState("");
+  // The water a photo's location picked, while the water field still holds it.
+  const [photoSpot, setPhotoSpot] = useState("");
+  // Set once the player picks a water themselves; a photo's location doesn't overrule them.
+  const spotTouched = useRef(false);
   // Read when the photo's notes come in, so a time typed while they were read is kept.
   const timeTouchedNow = useRef(timeTouched);
   timeTouchedNow.current = timeTouched;
@@ -370,6 +376,7 @@ function CatchForm() {
   const heading = existing ? t(existing.species) : presetTrip ? presetTrip.title : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
+    spotTouched.current = true;
     setSpotId(nextSpot);
     if (tripId && tripsForSpot(book, nextSpot).some((trip) => trip.id === tripId)) return;
     // Back on the fish's own water: the outing it was on comes back with it.
@@ -415,19 +422,32 @@ function CatchForm() {
     photoPick.current = ticket;
     setReducing(true);
     setPhotoError("");
-    // A new fish whose time hasn't been set takes the time the photo was taken, if the camera noted one.
-    if (!existing && !timeTouched) {
+    // A new fish takes the time the photo was taken, if the camera noted one and the time hasn't been set, and the
+    // pinned water within a couple of km of where it was taken, if the water and outing haven't been picked.
+    const canMoveWater = !tripPicked && !spotTouched.current;
+    if (!existing && (!timeTouched || canMoveWater)) {
       void file
         .slice(0, PHOTO_HEAD_BYTES)
         .arrayBuffer()
         .then((head) => {
-          const taken = photoTakenAt(new Uint8Array(head));
-          if (photoPick.current !== ticket || timeTouchedNow.current || !taken || taken > toLocalInput(new Date())) return;
-          setCaughtAt(taken);
-          setPhotoTime(taken);
-          // Read off the camera, so picking an outing afterwards keeps it.
-          setTimeTouched(true);
-          if (!tripPicked) setTripId(tripOnDay(book, spotId, taken.slice(0, 10))?.id ?? "");
+          if (photoPick.current !== ticket) return;
+          const bytes = new Uint8Array(head);
+          const place = canMoveWater ? photoPlace(bytes) : null;
+          const near = place ? nearestWater(book, place) : null;
+          const water = near && near.km <= PHOTO_WATER_KM && !spotTouched.current ? near.spot.id : spotId;
+          if (water !== spotId) {
+            setSpotId(water);
+            setPhotoSpot(water);
+          }
+          const taken = photoTakenAt(bytes);
+          const timed = !timeTouchedNow.current && taken && taken <= toLocalInput(new Date()) ? taken : null;
+          if (timed) {
+            setCaughtAt(timed);
+            setPhotoTime(timed);
+            // Read off the camera, so picking an outing afterwards keeps it.
+            setTimeTouched(true);
+          }
+          if (!tripPicked && (timed || water !== spotId)) setTripId(tripOnDay(book, water, (timed ?? caughtAt).slice(0, 10))?.id ?? "");
         })
         .catch(() => {
           // No camera notes to read: the time stays as it was.
@@ -738,6 +758,7 @@ function CatchForm() {
                 ))}
               </select>
             </label>
+            {photoSpot && photoSpot === spotId ? <span className="field-hint">{t("Water from the photo's location.")}</span> : null}
             {leftTrip ? <span className="field-hint">{t("No longer on {outing}: that outing was on another water.", { outing: leftTrip })}</span> : null}
             {canLocate ? <NearestWater book={book} onPick={onSpot} /> : null}
           </div>
