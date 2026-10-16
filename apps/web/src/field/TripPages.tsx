@@ -31,6 +31,7 @@ import { thisWeekInPastYears } from "./yearsAgo";
 import { speciesCounts } from "./speciesLink";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
+import { tripsCsv } from "./catchCsv";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
@@ -110,6 +111,13 @@ export function TripsPage() {
       )}
       <h2 className="subhead">{t("Recent")}</h2>
       {average ? <p className="meta">{average}</p> : null}
+      {book.trips.length > 0 ? (
+        <p className="fish-csv">
+          <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", "stillwater-outings.csv")}>
+            {t("Download the outings as a spreadsheet")}
+          </button>
+        </p>
+      ) : null}
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (

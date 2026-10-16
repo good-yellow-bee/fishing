@@ -78,6 +78,7 @@ export const PL_FIELD: PlBook = {
   "Taken from the photo.": "Odczytany ze zdjęcia.",
   "Nearest water to me": "Najbliższe łowisko",
   "Share": "Udostępnij",
+  "Download the outings as a spreadsheet": "Pobierz wyprawy jako arkusz",
   "Order of the matches": "Kolejność wyników",
   "Newest first": "Najnowsze najpierw",
   "Largest first": "Największe najpierw",
