@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { hookWindowMs, isPerfectCast, isSolidStrike, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
+import { FISH } from "@stillwater/shared";
+import { castIntoSchool, hookWindowMs, isPerfectCast, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -66,5 +67,31 @@ describe("a solid strike in the wind", () => {
   it("leaves a calm day's solid strike as it was", () => {
     const ms = hookWindowMs(2);
     expect(solidStrikeMs(ms)).toBeCloseTo(ms * 0.4);
+  });
+});
+
+describe("a school of panfish", () => {
+  it("stays at the bank for a couple of casts after a schooler is landed", () => {
+    const school = schoolAfterLanding("perch", "dock");
+    expect(school).toEqual({ spot: "dock", id: "perch", casts: SCHOOL_CASTS });
+    const first = castIntoSchool(school, "dock");
+    expect(first.schoolId).toBe("perch");
+    const second = castIntoSchool(first.next, "dock");
+    expect(second.schoolId).toBe("perch");
+    expect(second.next).toBeNull();
+    expect(castIntoSchool(second.next, "dock").schoolId).toBeNull();
+  });
+
+  it("is left behind at another bank", () => {
+    const moved = castIntoSchool(schoolAfterLanding("bluegill", "dock"), "reeds");
+    expect(moved.schoolId).toBeNull();
+    expect(moved.next).toBeNull();
+  });
+
+  it("only forms for schooling fish", () => {
+    expect(schoolAfterLanding("pike", "reeds")).toBeNull();
+    for (const id of SCHOOLERS) expect(FISH.some((fish) => fish.id === id && fish.rarity === "common")).toBe(true);
+    expect(SCHOOL_SAME).toBeGreaterThan(0);
+    expect(SCHOOL_WAIT).toBeLessThan(1);
   });
 });

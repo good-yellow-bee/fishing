@@ -202,6 +202,28 @@ export function isSolidStrike(elapsedMs: number, windowMs: number) {
   return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;
 }
 
+/** Panfish travel in schools: land one and more of its kind are still under the bobber. */
+export const SCHOOLERS: ReadonlySet<string> = new Set(["perch", "bluegill", "crappie"]);
+/** Casts after landing a schooler that the school stays at that bank. */
+export const SCHOOL_CASTS = 2;
+/** Chance a bite in the school is one of the school's own kind. */
+export const SCHOOL_SAME = 0.5;
+/** Bites come this much sooner while the school is in. */
+export const SCHOOL_WAIT = 0.7;
+
+export type School = { spot: SpotId; id: string; casts: number };
+
+/** The school left by a landed fish, or none when it doesn't school. */
+export function schoolAfterLanding(id: string, spot: SpotId): School | null {
+  return SCHOOLERS.has(id) ? { spot, id, casts: SCHOOL_CASTS } : null;
+}
+
+/** Whether a cast at this bank lands in the school, and what the school is after the cast. */
+export function castIntoSchool(school: School | null, spot: SpotId): { schoolId: string | null; next: School | null } {
+  if (!school || school.spot !== spot || school.casts <= 0) return { schoolId: null, next: null };
+  return { schoolId: school.id, next: school.casts > 1 ? { ...school, casts: school.casts - 1 } : null };
+}
+
 export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false, perfect = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(

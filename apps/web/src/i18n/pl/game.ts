@@ -349,6 +349,8 @@ export const PL_GAME: PlBook = {
   "Line parted. Spend points on Strength.": "Żyłka pękła. Wydaj punkty na Siłę.",
   "Line parted. Spend points on Accuracy.": "Żyłka pękła. Wydaj punkty na Celność.",
   "{line}. Ease off when it runs.": "{line}. Odpuść, gdy odjeżdża.",
+  "Into the school.": "Prosto w ławicę.",
+  "{fish}: there's a school here, cast again quickly!": "{fish}: tu jest ławica, zarzuć szybko jeszcze raz!",
   "Perfect cast.": "Idealny rzut.",
   "Perfect cast": "Idealny rzut",
   "Hooked solid": "Hak siedzi pewnie",
