@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { BREACHERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, TAIL_WALKERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { BREACHERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, STICKERS, TAIL_WALKERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -91,6 +91,8 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
             ? t("Let go now — it sees the net!")
             : state.surge === 0 && state.shake
               ? t("It's shaking its head — ease off a moment!")
+            : state.surge === 0 && state.sulk && state.lifting
+              ? t("It's lifting — ease off and pump once more!")
             : state.surge === 0 && state.sulk
               ? t("It's sulking on the bottom — ease off, then pump!")
               : state.surge === 0 && state.weeded
@@ -244,6 +246,7 @@ export function FightBar({ fight, sim, performance, best = null }: Props) {
           {TAIL_WALKERS.has(fight.species.id) && <p className="fight-water">{t("Tail-walker: its first leap dances across the top, so keep bowing till it's down")}</p>}
           {SCRAPPERS.has(fight.species.id) && <p className="fight-water">{t("Scrapper: pound for pound it fights hardest, so it tires slowly")}</p>}
           {HEAD_SHAKERS.has(fight.species.id) && <p className="fight-water">{t("Head-shaker: between runs it shakes its head, so ease off a moment when it does")}</p>}
+          {STICKERS.has(fight.species.id) && <p className="fight-water">{t("Bottom-sticker: when it sulks it takes two pumps to lift, not one")}</p>}
           {DARTERS.has(fight.species.id) && <p className="fight-water">{t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it")}</p>}
           {COVER_DIVERS.has(fight.species.id) && <p className="fight-water">{t("Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there")}</p>}
           {LONG_RUNNERS.has(fight.species.id) && <p className="fight-water">{t("Long runner: the first run is the long one, so let it go")}</p>}

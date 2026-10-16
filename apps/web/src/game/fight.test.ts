@@ -554,7 +554,7 @@ describe("sulking on the bottom", () => {
   });
 
   it("comes up when the angler eases off and pumps, or on its own after a while", () => {
-    const pumped = makeFight(fish("catfish"), 10, 3, () => 0);
+    const pumped = makeFight(fish("carp"), 10, 3, () => 0);
     let now = untilSulk(pumped);
     for (const end = now + SULK_PUMP_SEC * 1000 + 50; now < end; now += 50) pumped.step(now, 0.05, false);
     expect(pumped.sim.sulk).toBe(true);
@@ -565,6 +565,34 @@ describe("sulking on the bottom", () => {
     now = untilSulk(waited);
     waited.step(now + SULK_MS, 0.05, false);
     expect(waited.sim.sulk).toBe(false);
+  });
+
+  it("takes two pumps to lift a catfish off the bottom", () => {
+    const catfish = makeFight(fish("catfish"), 10, 3, () => 0);
+    let now = untilSulk(catfish);
+    const pump = () => {
+      for (const end = now + SULK_PUMP_SEC * 1000 + 50; now < end; now += 50) catfish.step(now, 0.05, false);
+      catfish.step(now, 0.05, true);
+      now += 50;
+    };
+    pump();
+    expect(catfish.sim.sulk).toBe(true);
+    expect(catfish.sim.lifting).toBe(true);
+    pump();
+    expect(catfish.sim.sulk).toBe(false);
+    expect(catfish.sim.lifting).toBe(false);
+  });
+
+  it("keeps a stuck catfish on the bottom, with no run, till it comes up on its own", () => {
+    const catfish = makeFight(fish("catfish"), 10, 3, () => 0);
+    const at = untilSulk(catfish);
+    for (let now = at + 50; now < at + SULK_MS; now += 50) {
+      catfish.step(now, 0.05, false);
+      expect(catfish.sim.sulk).toBe(true);
+      expect(catfish.sim.surge).toBe(0);
+    }
+    catfish.step(at + SULK_MS + 50, 0.05, false);
+    expect(catfish.sim.sulk).toBe(false);
   });
 
   it("leaves every other fish to fight as before", () => {

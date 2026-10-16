@@ -36,6 +36,8 @@ export type FightSim = {
   tornOut?: boolean;
   /** A bottom feeder sitting tight on the bottom between runs: reeling barely moves it until the angler eases off and pumps. */
   sulk?: boolean;
+  /** A catfish pumped once off the bottom: it has started to lift, and one more pump brings it up. */
+  lifting?: boolean;
   /** A run left unturned at a weedy spot ends with the fish in the weeds: line comes in slowly and it rests there a while. */
   weeded?: boolean;
   /** At the dock, a run nobody turned has wrapped the line round a piling: reeling only rubs it until the fish swings free. */
@@ -95,6 +97,9 @@ export const HEAD_SHAKERS: ReadonlySet<string> = new Set(["walleye"]);
 export const SHAKE_MS = 600;
 /** A shake gives about a reaction time to let go before a tight line goes into the red. */
 export const SHAKE_GRACE_SEC = 0.3;
+
+/** Catfish stick to the bottom: a sulking catfish takes two pumps to lift, not one. */
+export const STICKERS: ReadonlySet<string> = new Set(["catfish"]);
 
 /** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
 export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);
@@ -324,6 +329,9 @@ export function makeFight(
   const coverDiver = COVER_DIVERS.has(species.id);
   const darter = DARTERS.has(species.id);
   const headShaker = HEAD_SHAKERS.has(species.id);
+  const sticker = STICKERS.has(species.id);
+  /** When the calm would have ended had a catfish not stuck to the bottom. */
+  let calmEnd = 0;
   let shakeAt = Infinity;
   /** How much of a darter's run is left when it cuts back: half of it, so turning it, which shortens the run, brings the dart sooner. */
   let dartLeft: number | null = null;
@@ -417,6 +425,9 @@ export function makeFight(
         // A bass buried in cover doesn't run again till it comes out.
         if (coverDiver && sim.weeded) nextAt = Math.max(nextAt, weedUntil);
         if (coverDiver && sim.wrapped) nextAt = Math.max(nextAt, wrapUntil);
+        // A catfish stuck on the bottom doesn't run again till it is lifted or comes up on its own.
+        calmEnd = nextAt;
+        if (sticker && sim.sulk) nextAt = Math.max(nextAt, sulkUntil);
       }
     }
 
@@ -425,8 +436,18 @@ export function makeFight(
     if (sim.sulk) {
       if (sim.surge !== 0 || nowMs >= sulkUntil) sim.sulk = false;
       else if (!reeling) slackSec += dtSec;
-      else if (slackSec >= SULK_PUMP_SEC) sim.sulk = false;
+      else if (slackSec >= SULK_PUMP_SEC) {
+        // A catfish only starts to lift on the first pump; the next one brings it up.
+        if (sticker && !sim.lifting) {
+          sim.lifting = true;
+          slackSec = 0;
+        } else {
+          sim.sulk = false;
+          if (sticker && nextAt !== null) nextAt = Math.min(nextAt, Math.max(calmEnd, nowMs));
+        }
+      }
     }
+    if (!sim.sulk) sim.lifting = false;
 
     sim.shake = sim.surge === 0 && nowMs >= shakeAt && nowMs < shakeAt + SHAKE_MS;
     // A brook trout cuts back the other way halfway through its run.
