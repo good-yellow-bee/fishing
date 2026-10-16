@@ -1497,3 +1497,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR319~~ | ~~Last year by this date on the Home fish tile~~ (#680) | field | S |
 | ~~BR320~~ | ~~Day calendar on Bests~~ (#681) | field | S |
 | ~~BR321~~ | ~~Review round 23 fixes and same-fish-twice note~~ (#682) | field | S |
+| ~~BR322~~ | ~~News 2026-10-16zm~~ (#684) | field | S |
