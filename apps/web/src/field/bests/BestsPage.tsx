@@ -8,7 +8,7 @@ import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
-import { findLink } from "../CatchSearch";
+import { exactTerm, findLink } from "../CatchSearch";
 import { monthName, monthTally } from "../tripMonths";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -226,7 +226,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("Lures that worked")}</h2>
             </div>
-            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findLink(t(row.lure)) }))} />
+            <TallyBars rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findLink(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>

@@ -29,6 +29,7 @@ import { speciesCounts } from "./speciesLink";
 import { FishSum } from "./FishSum";
 import { SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox } from "./WaterTipsBox";
+import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
@@ -250,7 +251,7 @@ export function TripPage() {
         ) : null
       )}
       {/* Planning ahead: what has worked on this water before. */}
-      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={spot.name} /> : null}
+      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
