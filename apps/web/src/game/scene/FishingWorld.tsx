@@ -150,6 +150,8 @@ type Props = {
   schooled?: boolean;
   /** A fish that got away, or a hunter, is still about this bank: one big shadow circles wide of the float. */
   lurking?: boolean;
+  /** That fish is the one coming to bite: its shadow closes in on the float over this many ms. */
+  lurkerCloseInMs?: number;
   hour: LakeHour;
   sky: Sky;
   /** Optional so older callers keep the summer look. */
@@ -2128,7 +2130,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -2180,7 +2182,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
-      <LurkerShadow phase={phase} lurking={lurking} bobber={bobberWorld} />
+      <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
       <StrikeSplash phase={phase} />
       <CaughtFish

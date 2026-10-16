@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LURKER_RADIUS, lurkerPose, SCHOOL_SIZE, schoolPose } from "./schoolPose";
+import { LURKER_CLOSE, LURKER_RADIUS, lurkerPose, SCHOOL_SIZE, schoolPose } from "./schoolPose";
 
 describe("schoolPose", () => {
   it("keeps every fish within a meter of the float", () => {
@@ -36,5 +36,13 @@ describe("lurkerPose", () => {
     const a = lurkerPose(0);
     const b = lurkerPose(1);
     expect(Math.hypot(a.dx - b.dx, a.dz - b.dz)).toBeLessThan(0.5);
+  });
+
+  it("closes in on the float as the fish comes for the bait", () => {
+    const far = lurkerPose(5, 0);
+    const near = lurkerPose(5, 1);
+    expect(Math.hypot(near.dx, near.dz)).toBeLessThan(Math.hypot(far.dx, far.dz) * (1 - LURKER_CLOSE) + 1e-9);
+    expect(lurkerPose(5, 3)).toEqual(near);
+    expect(Math.hypot(lurkerPose(5, 0.5).dx, lurkerPose(5, 0.5).dz)).toBeLessThan(Math.hypot(far.dx, far.dz));
   });
 });
