@@ -420,7 +420,8 @@ function TripForm() {
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
   const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : (book.spots[0]?.id ?? "");
-  const [date, setDate] = useState(existing?.date ?? localDate(new Date()));
+  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
+  const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
@@ -432,6 +433,14 @@ function TripForm() {
     if (existing || !y || !m || !d) return [];
     return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), 3, Infinity);
   }, [book, spotId, date, existing]);
+  // Made from a fish logged without an outing: that day's fish on this water with none go on the new one.
+  const loose = useMemo(
+    () =>
+      existing || !params.has("loose")
+        ? []
+        : book.catches.filter((entry) => !entry.tripId && entry.spotId === spotId && localDate(new Date(entry.caughtAt)) === date).map((entry) => entry.id),
+    [book, existing, params, spotId, date],
+  );
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
@@ -439,7 +448,7 @@ function TripForm() {
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     const draft = { date, spotId, title, note };
-    const result = existing ? updateTrip(existing.id, draft) : addTrip(draft);
+    const result = existing ? updateTrip(existing.id, draft) : addTrip(draft, loose);
     if (!result.ok) {
       setError(result.message);
       markInvalid(event.currentTarget as HTMLFormElement, result.field);
@@ -530,6 +539,11 @@ function TripForm() {
           {sameDay ? (
             <p className="wide form-note" role="status">
               {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
+            </p>
+          ) : null}
+          {loose.length > 0 ? (
+            <p className="wide form-note" role="status">
+              {tn(loose.length, "The fish you logged here that day goes on this outing.", "The {n} fish you logged here that day go on this outing.")}
             </p>
           ) : null}
           <label className="wide">

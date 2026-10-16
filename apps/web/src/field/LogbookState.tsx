@@ -42,7 +42,8 @@ type LogbookApi = {
   photoFor: (id: string) => string | null;
   addCatch: (draft: CatchDraft, photo: string | null) => SaveResult;
   addSpot: (draft: SpotDraft) => SaveResult;
-  addTrip: (draft: TripDraft) => SaveResult;
+  /** `fileIds`: fish already logged on that water, filed on the new outing in the same save. */
+  addTrip: (draft: TripDraft, fileIds?: readonly string[]) => SaveResult;
   updateCatch: (id: string, draft: CatchDraft, photo: string | null) => SaveResult;
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
@@ -202,11 +203,12 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         const saved = persist(withSpot(book, { ...parsed.value, id }), photos);
         return saved.ok ? { ok: true, id } : saved;
       },
-      addTrip: (draft) => {
+      addTrip: (draft, fileIds = []) => {
         const parsed = parseTripDraft(draft, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const id = newId();
-        const saved = persist(withTrip(book, { ...parsed.value, id }), photos);
+        const next = fileIds.reduce((filed, catchId) => withCatchOnTrip(filed, catchId, id), withTrip(book, { ...parsed.value, id }));
+        const saved = persist(next, photos);
         return saved.ok ? { ok: true, id } : saved;
       },
       updateCatch: (id, draft, photo) => {

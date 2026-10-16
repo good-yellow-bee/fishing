@@ -1001,7 +1001,14 @@ function CatchView() {
             {t("Add this fish to it")}
           </button>
         </p>
-      ) : null}
+      ) : (
+        // No outing that day on this water: one can be made around the fish, so its day gets the outing's counts and pace.
+        <p className="trip-link">
+          <Link to={`/trips/new?${new URLSearchParams({ spot: entry.spotId, date: localDate(new Date(entry.caughtAt)), loose: "1" }).toString()}`}>
+            {t("Make an outing of this day")}
+          </Link>
+        </p>
+      )}
       <p className="another-catch">
         <Link to={anotherCatchLink(entry)} className="field-primary inline">
           {t("Log another like this")}
