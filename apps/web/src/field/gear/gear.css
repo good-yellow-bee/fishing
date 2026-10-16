@@ -75,7 +75,7 @@
   width: 18px;
   height: 18px;
   margin: 0;
-  accent-color: #9a3f2c;
+  accent-color: var(--field-rust);
   cursor: pointer;
 }
 
@@ -103,8 +103,8 @@
 
 .tackle-add input {
   width: 100%;
-  border: 1px solid #6b5233;
-  background: #fffaf2;
+  border: 1px solid var(--field-input-line);
+  background: var(--field-input);
   color: var(--field-ink);
   padding: 10px 12px;
   font-size: 16px;
@@ -114,7 +114,7 @@
 
 .tackle-add button {
   background: transparent;
-  border: 1px solid #6b5233;
+  border: 1px solid var(--field-input-line);
   color: var(--field-ink);
   padding: 10px 14px;
   cursor: pointer;
@@ -134,7 +134,7 @@
 
 .tackle-row .tackle-caught {
   margin-left: auto;
-  color: #9a3f2c;
+  color: var(--field-rust);
   font-size: 12px;
   white-space: nowrap;
 }
