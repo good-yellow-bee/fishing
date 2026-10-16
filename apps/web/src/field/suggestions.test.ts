@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, dayWeather, lastMeasureKind, ownFirst, startTimeFor, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, ownFirst, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -97,6 +97,12 @@ describe("when a new catch starts", () => {
   it("starts on an earlier outing's day at this clock time", () => {
     expect(startTimeFor({ date: "2026-10-12" }, now)).toEqual(new Date(2026, 9, 12, 7, 42));
   });
+
+  it("keeps now in the small hours for last night's outing", () => {
+    const late = new Date(2026, 9, 16, 1, 20);
+    expect(startTimeFor({ date: "2026-10-15" }, late)).toBe(late);
+    expect(startTimeFor({ date: "2026-10-14" }, late)).toEqual(new Date(2026, 9, 14, 1, 20));
+  });
 });
 
 describe("the outing a new catch files under", () => {
@@ -106,6 +112,21 @@ describe("the outing a new catch files under", () => {
     expect(tripOnDay(book, trip.spotId, trip.date)?.id).toBe(trip.id);
     expect(tripOnDay(book, trip.spotId, "1999-01-01")).toBeUndefined();
     expect(tripOnDay(book, "no-such-water", trip.date)).toBeUndefined();
+  });
+
+  it("files a fish from the small hours under the evening before's outing", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const trip = book.trips[0]!;
+    const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
+    const next = new Date(y, m - 1, d + 1, 12);
+    const nextDay = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-${String(next.getDate()).padStart(2, "0")}`;
+    const only = { ...book, trips: [trip] };
+    expect(tripForFish(only, trip.spotId, `${trip.date}T18:00`)?.id).toBe(trip.id);
+    expect(tripForFish(only, trip.spotId, `${nextDay}T01:30`)?.id).toBe(trip.id);
+    expect(tripForFish(only, trip.spotId, `${nextDay}T04:00`)).toBeUndefined();
+    expect(tripForFish(only, trip.spotId, nextDay)).toBeUndefined();
+    const morning = { ...trip, id: "next-morning", date: nextDay };
+    expect(tripForFish({ ...book, trips: [trip, morning] }, trip.spotId, `${nextDay}T01:30`)?.id).toBe("next-morning");
   });
 });
 

@@ -38,7 +38,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripLure, tripOnDay, tripWeather } from "./suggestions";
+import { bookLures, dayWeather, lastMeasureKind, lastReleased, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
@@ -210,9 +210,9 @@ function CatchForm() {
   };
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
-  // A new fish on a water with an outing planned today files under that outing.
+  // A new fish on a water with an outing planned today (or last night, in the small hours) files under that outing.
   const [tripId, setTripId] = useState(() =>
-    existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripOnDay(book, presetSpot, localDate(new Date()))?.id ?? ""),
+    existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, toLocalInput(new Date()))?.id ?? ""),
   );
   // Until the player picks an outing themselves, the outing follows the water and the day.
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
@@ -387,7 +387,7 @@ function CatchForm() {
       setTripPicked(true);
       return;
     }
-    const nextTrip = existing ? "" : (tripOnDay(book, nextSpot, caughtAt.slice(0, 10))?.id ?? "");
+    const nextTrip = existing ? "" : (tripForFish(book, nextSpot, caughtAt)?.id ?? "");
     // Said under the water, so an outing doesn't quietly go from the fish; kept while no outing takes its place.
     setLeftTrip(tripId ? (nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "") : nextTrip ? "" : leftTrip);
     if (existing && tripId === existing.tripId) setWaterTookTrip(true);
@@ -447,7 +447,7 @@ function CatchForm() {
             // Read off the camera, so picking an outing afterwards keeps it.
             setTimeTouched(true);
           }
-          if (!tripPicked && (timed || water !== spotId)) setTripId(tripOnDay(book, water, (timed ?? caughtAt).slice(0, 10))?.id ?? "");
+          if (!tripPicked && (timed || water !== spotId)) setTripId(tripForFish(book, water, timed ?? caughtAt)?.id ?? "");
         })
         .catch(() => {
           // No camera notes to read: the time stays as it was.
@@ -772,7 +772,7 @@ function CatchForm() {
               max={toLocalInput(new Date())}
               onChange={(event) => {
                 setCaughtAt(event.target.value);
-                if (!tripPicked) setTripId(tripOnDay(book, spotId, event.target.value.slice(0, 10))?.id ?? "");
+                if (!tripPicked) setTripId(tripForFish(book, spotId, event.target.value)?.id ?? "");
                 setTimeTouched(true);
               }}
               required
@@ -952,7 +952,7 @@ function CatchView() {
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
-  const looseTrip = trip ? undefined : tripOnDay(book, entry.spotId, localDate(new Date(entry.caughtAt)));
+  const looseTrip = trip ? undefined : tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
   const photo = photoFor(entry.id);
   const { newer, older } = catchNeighbors(book, entry.id);
   const badge = catchBadge(book, entry);
