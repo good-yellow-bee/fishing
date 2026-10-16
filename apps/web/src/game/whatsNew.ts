@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zg";
+export const NEWS_ID = "2026-10-16zh";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Bests can show one season at a time, outings show sunrise and sunset at the water, and a fish logged without an outing can make one of its day. Search understands “full moon”, “dusk” and “>3 lb 2 oz”, and backups carry the date in their name.",
   "Search results can be sorted largest first, and Share sends a catch with its photo. Bests and each water count how many hooked fish you landed, outings download as a spreadsheet, and the outing form can find the nearest water.",
   "A brook trout now darts: halfway through a run it cuts back the other way, so switch sides to keep turning it. And a largemouth bass that reaches the weeds or a dock piling stays buried longer, so turn its runs there.",
   "A rainbow trout's first leap is now a long tail-walk across the top: keep bowing until it's down. And at the inlet, turn every run upstream and the landed card says so.",
