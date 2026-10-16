@@ -1469,3 +1469,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR298~~ | ~~Outings spreadsheet with lost and missed~~ (#652) | field | S |
 | ~~BR299~~ | ~~Note where it is: place links from map and water page~~ (#653) | field | S |
 | ~~BR300~~ | ~~Review 20 fixes: outing restore only after a water change, no place link on sample waters~~ (#654) | field | S |
+| ~~BR301~~ | ~~News 2026-10-16zg for field log round 3~~ (#656) | field | S |

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-16zf";
+export const NEWS_ID = "2026-10-16zg";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Search results can be sorted largest first, and Share sends a catch with its photo. Bests and each water count how many hooked fish you landed, outings download as a spreadsheet, and the outing form can find the nearest water.",
   "A brook trout now darts: halfway through a run it cuts back the other way, so switch sides to keep turning it. And a largemouth bass that reaches the weeds or a dock piling stays buried longer, so turn its runs there.",
   "A rainbow trout's first leap is now a long tail-walk across the top: keep bowing until it's down. And at the inlet, turn every run upstream and the landed card says so.",
   "Miss the strike on a tiger muskie and it follows the bait: watch the float, because it hits once more with no warning nibble.",
