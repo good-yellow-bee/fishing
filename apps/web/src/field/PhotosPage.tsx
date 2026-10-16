@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
 import { t, tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
 import { formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
-import { CATCH_PAGE, catchPage } from "./PagedCatches";
+import { catchPage, useShowMore } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
 
 /** The catches that carry a photo, newest first: the game's snapshots and the player's own pictures. */
@@ -29,7 +28,7 @@ function photoMonths(entries: readonly CatchEntry[]) {
 export function PhotosPage() {
   const { book, photoFor } = useLogbook();
   useT();
-  const [shown, setShown] = useState(CATCH_PAGE);
+  const { shown, showMore, box } = useShowMore();
   const all = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const { visible, more } = catchPage(all, shown);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
@@ -48,7 +47,7 @@ export function PhotosPage() {
       {all.length === 0 ? (
         <p className="empty">{t("No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.")}</p>
       ) : (
-        <>
+        <div ref={box} className="paged-list">
           {photoMonths(visible).map((group) => (
             <section key={group.month} aria-label={monthName(group.month)}>
               <h2 className="month-head">
@@ -80,12 +79,12 @@ export function PhotosPage() {
           {more > 0 && (
             <div className="show-more">
               <p role="status">{t("{shown} of {total} photos", { shown: visible.length, total: all.length })}</p>
-              <button type="button" className="field-primary inline" onClick={() => setShown((count) => count + CATCH_PAGE)}>
+              <button type="button" className="field-primary inline" onClick={showMore}>
                 {t("Show {count} more", { count: more })}
               </button>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

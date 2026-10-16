@@ -1,7 +1,7 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { Trip } from "@stillwater/shared";
 import { t } from "../i18n";
-import { CATCH_PAGE, catchPage } from "./PagedCatches";
+import { catchPage, useShowMore } from "./PagedCatches";
 import { monthName, tripsByMonth } from "./tripMonths";
 import { TripMonthHead } from "./TripMonthHead";
 
@@ -21,11 +21,12 @@ export function PagedTrips({
   children: (trip: Trip) => ReactNode;
   stack?: boolean;
 }) {
-  const [shown, setShown] = useState(CATCH_PAGE);
+  const { shown, showMore, box } = useShowMore();
   const { visible, more } = catchPage(trips, shown);
   const wholeMonths = new Map(tripsByMonth(trips).map((group) => [group.month, group.trips]));
   return (
-    <>
+    // Only there to hold the list for Show more's focus: it lays nothing out.
+    <div ref={box} className="paged-list">
       {tripsByMonth(visible).map((group) => (
         <section key={group.month} aria-label={monthName(group.month)}>
           <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} />
@@ -35,11 +36,11 @@ export function PagedTrips({
       {more > 0 && (
         <div className="show-more">
           <p role="status">{t("{shown} of {total} outings", { shown: visible.length, total: trips.length })}</p>
-          <button type="button" className="field-primary inline" onClick={() => setShown((count) => count + CATCH_PAGE)}>
+          <button type="button" className="field-primary inline" onClick={showMore}>
             {t("Show {count} more", { count: more })}
           </button>
         </div>
       )}
-    </>
+    </div>
   );
 }

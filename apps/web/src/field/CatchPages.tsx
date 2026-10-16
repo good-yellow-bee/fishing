@@ -812,8 +812,7 @@ function CatchView() {
         editTo={`/catches/${entry.id}/edit`}
         ask={t("Delete this fish from the book?")}
         onDelete={() => {
-          deleteCatch(entry.id);
-          navigate("/catches");
+          if (deleteCatch(entry.id)) navigate("/catches");
         }}
       >
         <p className="eyebrow">
@@ -886,13 +885,20 @@ function CatchView() {
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
       {trip ? (
         <p className="trip-link">
-          {t("Outing:")} <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{trip.title}</Link>
           {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
           {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{looseTrip.title}</Link>{" "}
-          <button type="button" className="text-button" onClick={() => fileCatches([entry.id], looseTrip.id)}>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              // The button goes once the fish is filed; the outing's link takes its place, and focus.
+              if (fileCatches([entry.id], looseTrip.id)) setTimeout(() => document.getElementById("catch-outing")?.focus(), 0);
+            }}
+          >
             {t("Add this fish to it")}
           </button>
         </p>
