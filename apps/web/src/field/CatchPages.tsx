@@ -51,7 +51,7 @@ import { dropKeptDraft, keepDraft, readKeptDraft, type KeptDraft } from "./catch
 import { FishSum } from "./FishSum";
 import { likelyWater, nearestWater } from "./spotOrder";
 import { SpeciesChips } from "./SpeciesChips";
-import { exactTerm, findLink } from "./CatchSearch";
+import { CatchSearch, FIND_PARAM, exactTerm, findLink } from "./CatchSearch";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
@@ -103,6 +103,9 @@ export function CatchesPage() {
   useT();
   const catches = catchesNewestFirst(book);
   const photoCount = catches.filter((entry) => photos[entry.id]).length;
+  // While a search is typed, its matches take the list's place.
+  const [params] = useSearchParams();
+  const searching = Boolean(params.get(FIND_PARAM)?.trim());
 
   return (
     <div className="sheet">
@@ -123,19 +126,24 @@ export function CatchesPage() {
         <p className="empty">{t("Nothing landed in the book yet.")}</p>
       ) : (
         <>
-          {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
-          <FishSum catches={catches} />
-          <SpeciesChips catches={catches} />
-          <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
-            {(entry) => (
-              <CatchCard
-                key={entry.id}
-                entry={entry}
-                spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
-              />
-            )}
-          </PagedCatches>
+          <CatchSearch />
+          {searching ? null : (
+            <>
+              {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
+              <FishSum catches={catches} />
+              <SpeciesChips catches={catches} />
+              <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
+                {(entry) => (
+                  <CatchCard
+                    key={entry.id}
+                    entry={entry}
+                    spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
+                    tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                  />
+                )}
+              </PagedCatches>
+            </>
+          )}
         </>
       )}
     </div>
