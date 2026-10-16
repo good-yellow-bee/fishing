@@ -76,17 +76,27 @@ export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | un
  * The longest and heaviest fish of the kind being typed, so the form can say what a new one has to beat.
  * `shown` turns a stored name into the words on screen; `skipId` leaves out the fish being edited.
  */
+/** The book's fish of the kind typed, as stored or as it reads in the player's language, leaving out the one being edited. */
+export function speciesCatches(
+  book: Logbook,
+  typed: string,
+  shown: (name: string) => string = (name) => name,
+  skipId?: string,
+): CatchEntry[] {
+  const want = typed.trim().toLowerCase();
+  if (!want) return [];
+  return book.catches.filter(
+    (entry) => entry.id !== skipId && (entry.species.toLowerCase() === want || shown(entry.species).toLowerCase() === want),
+  );
+}
+
 export function speciesBestSoFar(
   book: Logbook,
   typed: string,
   shown: (name: string) => string = (name) => name,
   skipId?: string,
 ): { longest: CatchEntry | null; heaviest: CatchEntry | null } | null {
-  const want = typed.trim().toLowerCase();
-  if (!want) return null;
-  const catches = book.catches.filter(
-    (entry) => entry.id !== skipId && (entry.species.toLowerCase() === want || shown(entry.species).toLowerCase() === want),
-  );
+  const catches = speciesCatches(book, typed, shown, skipId);
   if (catches.length === 0) return null;
   const { longest, heaviest } = personalBests({ ...book, catches });
   return { longest, heaviest };
