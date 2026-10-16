@@ -1144,7 +1144,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT99~~ | ~~News card (2026-10-16w) covers GT98: smallmouth scrapper~~ (#596) | news | S |
 | ~~GT100~~ | ~~Point rocks snag: a cast into the point's rocky shallows can snag, like the reeds' weed~~ (#599) | cast | S |
 | ~~GT101~~ | ~~News card (2026-10-16z) covers GT100: point rocks snag~~ (#620) | news | S |
-| GT102 | Dock pilings: a run left unturned at the dock wraps the line round a piling; ease off till it swings free | fight | S |
+| ~~GT102~~ | ~~Dock pilings: a run left unturned at the dock wraps the line round a piling; ease off till it swings free~~ (#623) | fight | S |
+| GT103 | News card (2026-10-16zb) covers GT102: dock pilings | news | S |
 
 ## Risks / open questions for the owner
 
