@@ -15,7 +15,7 @@ let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 let fightLine = 1;
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), lift: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 // The tests time bites to the usual wait; the day's hot bank is kept off the dock.
 vi.mock("@stillwater/shared", async (importOriginal) => {
@@ -284,6 +284,16 @@ describe("useFishingGame lost fight", () => {
     now += 16;
     act(() => frames.at(-1)!(now));
     expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("true");
+  });
+
+  it("calls a trophy-sized fish heavy on the hook, with a thud on the rod", () => {
+    const surface = mount();
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    vi.mocked(castForGotAway).mockReturnValueOnce({ again: { spot: "dock", species: pike, weight: pike.maxWeight, casts: 1 }, next: null });
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(hint()).toMatch(/^It's the one that got away! It feels heavy — could be a trophy! /);
+    expect(fx.lift).toHaveBeenCalled();
   });
 
   it("says why the line broke and what to do next time", () => {
