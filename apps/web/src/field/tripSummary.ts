@@ -1,6 +1,6 @@
-import { WATER_LABELS, lureTally, type CatchEntry, type Spot, type Trip } from "@stillwater/shared";
+import { WATER_LABELS, lureTally, measureOf, personalBests, type CatchEntry, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
-import { measuresText } from "../i18n/content";
+import { measureText, measuresText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText } from "./format";
 
 /**
@@ -49,5 +49,35 @@ export function spotSummary(
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
     ...(spot.bestConditions.trim() ? [t("Best conditions: {conditions}", { conditions: spot.bestConditions.trim() })] : []),
     ...(spot.notes.trim() ? ["", spot.notes.trim()] : []),
+  ].join("\n");
+}
+
+/**
+ * One kind of fish as plain text: how many and how many went back, its longest and heaviest,
+ * its first and newest day, the waters that gave it, and the lures that took it.
+ * `catches` are newest first, as the species page has them.
+ */
+export function speciesSummary(species: string, catches: readonly CatchEntry[], waters: ReadonlyArray<{ name: string | null; count: number }>): string {
+  const released = catches.filter((entry) => entry.released).length;
+  const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
+  const sizes = [
+    ...(bests.longest ? [t("Longest: {size}", { size: measureText(measureOf(bests.longest, "length")!) })] : []),
+    ...(bests.heaviest ? [t("Heaviest: {size}", { size: measureText(measureOf(bests.heaviest, "weight")!) })] : []),
+  ];
+  const first = catches[catches.length - 1];
+  const newest = catches[0];
+  const named = waters.filter((row) => row.name).map((row) => `${row.name} (${row.count})`);
+  const lures = lureTally({ spots: [], trips: [], catches: [...catches] }, 3)
+    .map((row) => `${t(row.lure)} (${row.count})`)
+    .join(", ");
+  return [
+    t(species),
+    [fishCountLabel(catches.length), ...(released > 0 ? [tn(released, "{n} released", "{n} released")] : [])].join(" · "),
+    ...(sizes.length > 0 ? [sizes.join(" · ")] : []),
+    ...(first && newest && catches.length > 1
+      ? [`${t("First in the book")} ${formatDatedDay(new Date(first.caughtAt))} · ${t("newest")} ${formatDatedDay(new Date(newest.caughtAt))}`]
+      : []),
+    ...(named.length > 0 ? [t("Waters: {waters}", { waters: named.join(", ") })] : []),
+    ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
   ].join("\n");
 }

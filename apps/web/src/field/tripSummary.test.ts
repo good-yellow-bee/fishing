@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CatchEntry } from "@stillwater/shared";
-import { catchSummary, spotSummary, tripSummary } from "./tripSummary";
+import { catchSummary, speciesSummary, spotSummary, tripSummary } from "./tripSummary";
 
 const trip = { id: "trip-dawn", date: "2026-10-10", spotId: "spot-cedar", title: "Dawn patrol", note: "Fog until eight." };
 const fish = (id: string, at: string, released = false): CatchEntry => ({
@@ -68,5 +68,25 @@ describe("spot summary", () => {
   it("leaves out the lines it has nothing for", () => {
     const text = spotSummary({ ...spot, notes: "", bestConditions: " " }, 1, [fish("a", "2026-10-10T12:00:00.000Z")], null, null);
     expect(text).toBe("Cedar Bend · Lake\n1 outing · 1 fish\nLures that took the most: Texas-rig worm (1)");
+  });
+});
+
+describe("species summary", () => {
+  it("counts the kind, names its sizes, days, waters and lures", () => {
+    const catches = [
+      { ...fish("b", "2026-10-11T14:00:00.000Z", true), measure: { kind: "length" as const, inches: 18 } },
+      fish("a", "2026-09-10T12:00:00.000Z"),
+    ];
+    const lines = speciesSummary("Largemouth bass", catches, [{ name: "Cedar Bend", count: 2 }, { name: null, count: 1 }]).split("\n");
+    expect(lines[0]).toBe("Largemouth bass");
+    expect(lines[1]).toBe("2 fish · 1 released");
+    expect(lines[2]).toBe("Longest: 18 in · Heaviest: 3.2 lb");
+    expect(lines[3]).toMatch(/^First in the book .*2026 · newest .*2026$/);
+    expect(lines[4]).toBe("Waters: Cedar Bend (2)");
+    expect(lines[5]).toBe("Lures that took the most: Texas-rig worm (2)");
+  });
+
+  it("leaves out the day span for a single fish", () => {
+    expect(speciesSummary("Largemouth bass", [fish("a", "2026-09-10T12:00:00.000Z")], [])).toBe("Largemouth bass\n1 fish\nHeaviest: 3.2 lb\nLures that took the most: Texas-rig worm (1)");
   });
 });

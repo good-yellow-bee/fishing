@@ -16,6 +16,8 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
 import { CM_PER_IN, KG_PER_LB, lengthText, measureText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
+import { CopySummary } from "./CopySummary";
+import { speciesSummary } from "./tripSummary";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 export function SpeciesPage() {
@@ -61,6 +63,7 @@ export function SpeciesPage() {
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
+      <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
       <div className="section-head">
