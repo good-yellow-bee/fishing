@@ -1357,6 +1357,7 @@ describe("a fight in winter", () => {
 
   it("tires an early spawner faster only in spring", () => {
     expect(SPAWN_SPENT_TIRE).toBeGreaterThan(1);
+    expect(EARLY_SPAWNERS.has("perch")).toBe(true);
     for (const id of EARLY_SPAWNERS) expect(spentTireMul("spring", id)).toBe(SPAWN_SPENT_TIRE);
     expect(spentTireMul("summer", "pike")).toBe(1);
     expect(spentTireMul("spring", "largemouth-bass")).toBe(1);
