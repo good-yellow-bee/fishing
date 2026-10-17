@@ -1247,7 +1247,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT202~~ | ~~Swollen inlet: with spring's melt or in rain the Inlet's current takes slack line 1.25x faster still, and the hookset says so~~ (#833) | fight | S |
 | ~~GT203~~ | ~~Spent from spawning: in spring a pike or walleye, worn from spawning, tires 1.15x faster, and the hookset says so; news 2026-10-17-game06~~ (#834) | fight | S |
 | ~~GT204~~ | ~~Twilight hunter: a walleye hooked at dawn or dusk hunts hardest in the low light, so it tires only 0.85x as fast, and the hookset says so~~ (#845) | fight | S |
-| GT205 | Winter perch schools: in winter a landed perch leaves a big school that stays one cast longer, and the landing says so | game | S |
+| ~~GT205~~ | ~~Winter perch schools: in winter a landed perch leaves a big school that stays one cast longer, and the landing says so~~ (#847) | game | S |
+| GT206 | Sturgeon spring run: a sturgeon hooked at the Inlet in spring is on its spawning run, so it tires only 0.8x as fast, and the hookset says so; news 2026-10-17-game07 | fight | S |
 
 ## Risks / open questions for the owner
 
