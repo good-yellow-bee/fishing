@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zw";
+export const NEWS_ID = "2026-10-17zzw";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Two names for one water can be merged on the water’s page, outings and fish included. A fish’s page can step through its own kind only, and the catch form names the water its species chips come from. A past outing lists its fish first to last, search reads size ranges like “25-30 in”, and the field-log home switches language and units. Adding from a book file now brings new waters and planned outings too.",
   "Tap with a streamer in the water to strip it: it darts off like a fleeing fish, and the first two strips draw a bite sooner.",
   "Strike only on the real dip with bait: a strike at a nibble yanks the bait away, and the fish backs off before it bites.",
   "Tap with a spoon in the water to lift it: it flashes and flutters back down, and the first two lifts draw a bite sooner.",
