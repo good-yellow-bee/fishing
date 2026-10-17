@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -55,6 +55,7 @@ import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { ownFish } from "./milestones";
+import { speciesLink } from "./speciesLink";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
@@ -284,6 +285,12 @@ function TripView() {
     catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
       ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
       : undefined;
+  // Kinds this water gave for the first time on this outing, once earlier fish from it say what it usually gives.
+  const ownHere = catches.filter(ownFish);
+  const firstAt = ownHere.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
+  const before = catchesForSpot(book, trip.spotId).filter((entry) => ownFish(entry) && entry.tripId !== trip.id && entry.caughtAt < firstAt);
+  const known = new Set(before.map((entry) => entry.species.trim().toLowerCase()));
+  const newKinds = before.length > 0 ? [...new Set(ownHere.map((entry) => entry.species.trim()))].filter((name) => !known.has(name.toLowerCase())) : [];
   const rush = busiestHour(catches.map((entry) => entry.caughtAt));
   const weighed = totalWeight(
     catches.map((entry) => {
@@ -352,6 +359,17 @@ function TripView() {
       {/* Before going back: what was learned there last time, in the angler's own words. */}
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       <SpeciesChips catches={catches} />
+      {newKinds.length > 0 ? (
+        <p className="meta new-kinds">
+          {t("First time at this water:")}{" "}
+          {newKinds.map((name, index) => (
+            <Fragment key={name}>
+              {index > 0 ? ", " : null}
+              <Link to={speciesLink(name)}>{t(name)}</Link>
+            </Fragment>
+          ))}
+        </p>
+      ) : null}
       <LureChips catches={catches} outing={trip} water={spot?.name} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (

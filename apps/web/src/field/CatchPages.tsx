@@ -265,6 +265,9 @@ function CatchForm() {
   }, [species]);
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
+  // The kind's biggest at the water picked, once it differs from the biggest anywhere.
+  const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => entry.spotId === spotId) }, species, t, existing?.id) : null;
+  const hereDiffers = hereBest && (hereBest.longest?.id !== bestSoFar?.longest?.id || hereBest.heaviest?.id !== bestSoFar?.heaviest?.id);
   // A new fish on a water with an outing planned today (or last night, in the small hours) files under that outing.
   const [tripId, setTripId] = useState(() =>
     existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, toLocalInput(new Date()))?.id ?? ""),
@@ -749,6 +752,13 @@ function CatchForm() {
               <small className="field-hint">
                 {t("Your biggest so far: {measures}", {
                   measures: [measureOfBest(bestSoFar.longest, "length"), measureOfBest(bestSoFar.heaviest, "weight")].filter(Boolean).join(" · "),
+                })}
+              </small>
+            ) : null}
+            {hereBest && hereDiffers ? (
+              <small className="field-hint here-best">
+                {t("At this water: {measures}", {
+                  measures: [measureOfBest(hereBest.longest, "length"), measureOfBest(hereBest.heaviest, "weight")].filter(Boolean).join(" · "),
                 })}
               </small>
             ) : null}
