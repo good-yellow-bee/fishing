@@ -220,6 +220,10 @@ export const TOPWATER_POP_LEFT = 0.6;
 export const TOPWATER_COMEBACK_ODDS = 0.5;
 /** How long a fish that missed a topwater lure takes to come back up for it. */
 export const TOPWATER_COMEBACK_MS = 1400;
+/** Striking at a nibble on bait yanks it from the fish, which backs off: the rest of the wait stretches this much, once a cast. */
+export const BAIT_YANK_WAIT = 1.5;
+/** A second finger this soon after a yank makes it a camera pinch, and the yank is taken back. */
+const PINCH_UNDO_MS = 600;
 
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
 export const SECOND_TAKE_MS = 1800;
@@ -279,6 +283,10 @@ export function useFishingGame(
   /** This fish came back for a second take after dropping the bait. */
   const secondTakeRef = useRef(false);
   /** A topwater lure sitting before the bite: when the bite is due, how to bring it on, and the pops so far. */
+  // When the bait's bite is due, so a strike at a nibble can yank it away and put the bite off.
+  const yankRef = useRef<{ dueAt: number; take: () => void } | null>(null);
+  // The yank just made, so a camera pinch whose first finger looked like a strike can take it back.
+  const yankedRef = useRef<{ dueAt: number; take: () => void; at: number } | null>(null);
   const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
@@ -350,6 +358,8 @@ export function useFishingGame(
   const clearTimers = () => {
     window.clearTimeout(timers.current.wait);
     popRef.current = null;
+    yankRef.current = null;
+    yankedRef.current = null;
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
@@ -586,6 +596,8 @@ export function useFishingGame(
       const takeBait = () => {
         if (phaseRef.current !== "waiting") return;
         popRef.current = null;
+        yankRef.current = null;
+        yankedRef.current = null;
         setNibble(false);
         // A bait thief nibbled the hook clean: there is nothing left to bite.
         if (stolen) {
@@ -666,6 +678,8 @@ export function useFishingGame(
       // A sitting topwater can be popped, a jig on the bottom hopped and a spoon lifted, to draw the fish sooner.
       const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : null;
       popRef.current = work ? { dueAt: performance.now() + wait, take: bringOn, pops: 0, work } : null;
+      // A beginner's easy fish never backs off.
+      yankRef.current = carriesBait(lureRef?.current) && !mercyNow ? { dueAt: performance.now() + wait, take: bringOn } : null;
     };
     if (!castSnagRef.current) {
       arm();
@@ -803,6 +817,17 @@ export function useFishingGame(
         if (!snag) {
           // Striking at a nibble is the usual early strike, so say what it was.
           const atNibble = surfaceRef.current?.dataset.nibble === "1";
+          const yank = yankRef.current;
+          if (atNibble && yank) {
+            // Yanking the bait from a nibbling fish makes it back off, so the real bite comes later; once a cast.
+            yankRef.current = null;
+            yankedRef.current = { ...yank, at: performance.now() };
+            const later = Math.max(0, yank.dueAt - performance.now()) * BAIT_YANK_WAIT;
+            window.clearTimeout(timers.current.wait);
+            timers.current.wait = window.setTimeout(yank.take, later);
+            setHint(t("You yanked the bait away from it, so the fish backed off. Let it settle and wait for the real dip."));
+            break;
+          }
           setHint(atNibble ? t("That was only a nibble. Wait for the bobber to go under, then strike.") : t("Too early. Wait for the bobber to go under, then strike."));
           break;
         }
@@ -887,7 +912,17 @@ export function useFishingGame(
       if (event.pointerType === "touch" && !event.isPrimary) {
         if (phaseRef.current === "casting") resetToIdle(t("Camera moved. Hold one finger or Space to cast."));
         // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
-        if (phaseRef.current === "waiting") setHint(waitHintRef.current);
+        if (phaseRef.current === "waiting") {
+          setHint(waitHintRef.current);
+          const yanked = yankedRef.current;
+          if (yanked && performance.now() - yanked.at < PINCH_UNDO_MS) {
+            // Nor did it yank the bait, so the bite comes when it was due.
+            yankedRef.current = null;
+            yankRef.current = { dueAt: yanked.dueAt, take: yanked.take };
+            window.clearTimeout(timers.current.wait);
+            timers.current.wait = window.setTimeout(yanked.take, Math.max(0, yanked.dueAt - performance.now()));
+          }
+        }
         return;
       }
       const target = event.target as HTMLElement;

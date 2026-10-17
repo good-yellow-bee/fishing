@@ -386,13 +386,38 @@ describe("useFishingGame strike timing", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early|only a nibble/i);
+    expect(hint()).toMatch(/too early|only a nibble|yanked/i);
     expect(phase()).toBe("waiting:none");
     act(() => window.dispatchEvent(pointer("pointerup", 2)));
-    act(() => vi.advanceTimersByTime(1_601));
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(phase()).toBe("hookset:none");
     act(() => surface.dispatchEvent(pointer("pointerdown", 3)));
     expect(phase()).toBe("fight:none");
+  });
+
+  it("puts the bite off once when a strike at a nibble yanks the bait away", () => {
+    const untilBite = (yanks: number) => {
+      const surface = mount();
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+      cast(surface);
+      let waited = 0;
+      for (let yank = 0; yank < yanks; yank++) {
+        for (; surface.dataset.nibble !== "1" && phase() === "waiting:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+        if (phase() !== "waiting:none") break;
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + yank)));
+        if (yank === 0) expect(hint()).toBe("You yanked the bait away from it, so the fish backed off. Let it settle and wait for the real dip.");
+        else expect(hint()).toBe("That was only a nibble. Wait for the bobber to go under, then strike.");
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + yank)));
+        for (; surface.dataset.nibble === "1" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      }
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    expect(untilBite(1)).toBeGreaterThan(sat);
   });
 
   it("says the hook is solid on a quick strike, and not on a slow one", () => {
@@ -650,7 +675,7 @@ describe("useFishingGame strike timing", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early|only a nibble/i);
+    expect(hint()).toMatch(/too early|only a nibble|yanked/i);
     const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(second));
@@ -674,7 +699,7 @@ describe("useFishingGame bubbling hotspot", () => {
     expect(hint()).toMatch(/your lure is in the bubbles/i);
     // A camera pinch takes back the early strike's hint, not the bubbles line.
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early|only a nibble/i);
+    expect(hint()).toMatch(/too early|only a nibble|yanked/i);
     const pinch = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(pinch, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(pinch));
@@ -823,7 +848,7 @@ describe("useFishingGame cast feedback", () => {
     castFor(surface, 300);
     act(() => vi.advanceTimersByTime(600));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early|only a nibble/i);
+    expect(hint()).toMatch(/too early|only a nibble|yanked/i);
     const second = new MouseEvent("pointerdown", { bubbles: true, button: 0 });
     Object.defineProperties(second, { pointerId: { value: 3 }, isPrimary: { value: false }, pointerType: { value: "touch" } });
     act(() => surface.dispatchEvent(second));
@@ -1000,7 +1025,7 @@ describe("level unlock integration", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(300));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
-    expect(hint()).toMatch(/too early|only a nibble/i);
+    expect(hint()).toMatch(/too early|only a nibble|yanked/i);
   });
 
   it("lets a fish that missed a topwater lure come back up for it once", () => {
