@@ -130,12 +130,15 @@ export function SpotCard({
   fishCount,
   tripCount,
   lastFishAt = null,
+  restDays = null,
   nextOuting = null,
 }: {
   spot: Spot;
   fishCount: number;
   tripCount: number;
   lastFishAt?: string | null;
+  /** Days since the water was last fished, when the list is ordered by that. */
+  restDays?: number | null;
   /** The soonest planned outing here, already in words. */
   nextOuting?: string | null;
 }) {
@@ -153,6 +156,7 @@ export function SpotCard({
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishAt ? ` · ${t("Last fish: {day}", { day: formatDay(localDate(new Date(lastFishAt))) })}` : ""}
       </p>
+      {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
     </Link>
   );

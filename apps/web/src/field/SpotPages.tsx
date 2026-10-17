@@ -21,7 +21,7 @@ import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
-import { spotsByLastFish } from "./spotOrder";
+import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
@@ -54,13 +54,13 @@ function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string)
 }
 
 /** How the water list is ordered, kept for the next visit. */
-type SpotOrder = "fish" | "name" | "most";
+type SpotOrder = "fish" | "name" | "most" | "rested";
 const SPOT_ORDER_KEY = "stillwater.field-log.spot-order.v1";
 
 function readSpotOrder(): SpotOrder {
   try {
     const stored = localStorage.getItem(SPOT_ORDER_KEY);
-    return stored === "name" || stored === "most" ? stored : "fish";
+    return stored === "name" || stored === "most" || stored === "rested" ? stored : "fish";
   } catch {
     return "fish";
   }
@@ -85,6 +85,9 @@ export function SpotsPage() {
   const rows = spotsByLastFish(book);
   if (order === "name") rows.sort((a, b) => a.spot.name.localeCompare(b.spot.name, locale()));
   if (order === "most") rows.sort((a, b) => b.fishCount - a.fishCount);
+  // The water left alone longest first, to give a rested one a go; waters never fished after them.
+  const lastOut = lastOutByWater(book, today);
+  if (order === "rested") rows.sort((a, b) => (lastOut.get(a.spot.id) ?? "~").localeCompare(lastOut.get(b.spot.id) ?? "~"));
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
 
   return (
@@ -112,6 +115,7 @@ export function SpotsPage() {
                 { id: "fish", label: t("Last fish") },
                 { id: "name", label: t("Name") },
                 { id: "most", label: t("Most fish") },
+                { id: "rested", label: t("Longest rested") },
               ]}
               onChange={pickOrder}
             />
@@ -125,6 +129,7 @@ export function SpotsPage() {
               fishCount={row.fishCount}
               tripCount={tripsForSpot(book, row.spot.id).length}
               lastFishAt={row.lastFishAt}
+              restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
             />
           ))}
