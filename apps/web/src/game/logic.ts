@@ -293,6 +293,14 @@ export function springShallowsWaitMul(spot: string, season: LakeSeason | undefin
   return season === "spring" && spot === "reeds" ? SPRING_SHALLOWS_WAIT : 1;
 }
 
+/** In fall the fish fatten up for winter and go after a big meal, so a big lure draws the bite sooner. */
+export const FALL_BIG_LURE_WAIT = 0.85;
+
+/** How the season stretches the wait on a big lure: sooner in fall, else 1. */
+export function fallBigLureWaitMul(lure: string | undefined, season: LakeSeason | undefined) {
+  return season === "fall" && !!lure?.trim() && favorsLargeFish(lure) ? FALL_BIG_LURE_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
