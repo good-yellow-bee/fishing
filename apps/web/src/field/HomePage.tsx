@@ -1,8 +1,9 @@
-import { Fragment, useRef, type ReactNode } from "react";
+import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
 import { catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
-import { BookFile } from "./BookFile";
+import { BookFile, SET_ASIDE_ID } from "./BookFile";
+import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
@@ -95,6 +96,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
 export function HomePage() {
   const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
   const heading = useRef<HTMLHeadingElement>(null);
+  const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
   const photoCount = book.catches.filter((entry) => photos[entry.id] && offPlayLake(entry)).length;
@@ -199,6 +201,23 @@ export function HomePage() {
             {t("Pick it up")}
           </Link>
         </div>
+      ) : null}
+
+      {/* The set-aside notice sits low on the page, with the book's file: a line up here says it is there. */}
+      {setAside ? (
+        <p className="copy-nudge">
+          <a
+            href={`#${SET_ASIDE_ID}`}
+            onClick={(event) => {
+              event.preventDefault();
+              const notice = document.getElementById(SET_ASIDE_ID);
+              notice?.scrollIntoView({ block: "center" });
+              notice?.focus({ preventScroll: true });
+            }}
+          >
+            {t("A book that could not be read was set aside. See what to do with it")}
+          </a>
+        </p>
       ) : null}
 
       <section className="stat-row" aria-label={t("This book")}>
@@ -367,7 +386,7 @@ export function HomePage() {
         </section>
       </div>
 
-      <BookFile />
+      <BookFile onSetAsideGone={() => setSetAside(false)} />
       <ThemeChoice />
     </div>
   );

@@ -760,4 +760,7 @@ export const PL_FIELD: PlBook = {
   "The tackle list could not be saved in this browser. It stays as it is until this page is closed.": "Nie udało się zapisać listy sprzętu w tej przeglądarce. Zostaje taka, jak jest, do zamknięcia tej strony.",
   "The goal could not be saved in this browser.": "Nie udało się zapisać celu w tej przeglądarce.",
   "The goal could not be removed in this browser, so it comes back next time.": "Nie udało się usunąć celu w tej przeglądarce, więc wróci przy następnej wizycie.",
+  "The book could not be saved: this browser's storage is full.": "Nie udało się zapisać dziennika: pamięć tej przeglądarki jest pełna.",
+  "Make room on the photos page": "Zrób miejsce na stronie zdjęć",
+  "A book that could not be read was set aside. See what to do with it": "Dziennik, którego nie dało się odczytać, został odłożony. Zobacz, co można z nim zrobić",
 };

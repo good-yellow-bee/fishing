@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLogbook } from "./LogbookState";
+import { STORAGE_FULL } from "./storage";
 import { t, useT } from "../i18n";
 
 const DELETED = {
@@ -17,7 +18,7 @@ const DELETED = {
 
 /** After a delete, a quiet bar with one way back, until the book changes again. */
 export function UndoBar() {
-  const { undoable, undoDelete, dismissUndo, saveError, dismissSaveError } = useLogbook();
+  const { undoable, undoDelete, dismissUndo, saveError, dismissSaveError, photos } = useLogbook();
   const navigate = useNavigate();
   useT();
 
@@ -39,7 +40,16 @@ export function UndoBar() {
     return (
       <div role="status">
         <div className="undo-bar undo-bar-error">
-          <span>{saveError}</span>
+          <span>
+            {saveError}
+            {/* Photos take most of the room: their page is where some can be let go. */}
+            {saveError === t(STORAGE_FULL) && Object.keys(photos).length > 0 ? (
+              <>
+                {" "}
+                <Link to="/photos">{t("Make room on the photos page")}</Link>
+              </>
+            ) : null}
+          </span>
           <button type="button" className="text-button undo-close" onClick={dismissSaveError} aria-label={t("Dismiss")}>
             ×
           </button>

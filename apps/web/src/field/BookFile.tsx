@@ -40,6 +40,9 @@ function bookSummary(book: Logbook): string {
   return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
 }
 
+/** Where the set-aside book's notice sits, for a note at the top of Home to lead to. */
+export const SET_ASIDE_ID = "set-aside-book";
+
 /** The set-aside book in the shape of a downloaded copy, with its photos still kept here: it loads once mended by hand. */
 function setAsideFile(raw: string, photos: CatchPhotoMap): string {
   try {
@@ -54,9 +57,9 @@ function setAsideFile(raw: string, photos: CatchPhotoMap): string {
 }
 
 /** A stored copy that could not be read: offered as a file, or forgotten on the angler's word. */
-function SetAside(props: { text: string; download: string; ask: string; forget: string; raw: string | (() => string); file: string; onForget: () => void }) {
+function SetAside(props: { id?: string; text: string; download: string; ask: string; forget: string; raw: string | (() => string); file: string; onForget: () => void }) {
   return (
-    <div className="copy-nudge">
+    <div className="copy-nudge" id={props.id} tabIndex={props.id ? -1 : undefined}>
       <p>{props.text}</p>
       <div className="book-file">
         <button type="button" className="text-button" onClick={() => downloadFile(typeof props.raw === "string" ? props.raw : props.raw(), "application/json", props.file)}>
@@ -76,7 +79,8 @@ function SetAside(props: { text: string; download: string; ask: string; forget: 
   );
 }
 
-export function BookFile() {
+/** `onSetAsideGone` tells the page the set-aside book was forgotten, so a note pointing at it can go too. */
+export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {}) {
   const { book, storedBook, photos, replaceBook, restoreSample } = useLogbook();
   useT();
   const { items, replaceTackle } = useTackle();
@@ -301,6 +305,7 @@ export function BookFile() {
       ) : null}
       {setAside ? (
         <SetAside
+          id={SET_ASIDE_ID}
           text={
             salvageStored(setAside)
               ? t("Part of this browser's book could not be read. What could be read was kept, and the whole book was set aside as it was, so nothing is lost.")
@@ -314,6 +319,7 @@ export function BookFile() {
           onForget={() => {
             forgetUnreadableBook();
             setSetAside(null);
+            onSetAsideGone?.();
           }}
         />
       ) : null}
