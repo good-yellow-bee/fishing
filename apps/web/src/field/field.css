@@ -413,6 +413,52 @@ button.field-primary {
   background: #14211f;
 }
 
+.photo-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.photo-full {
+  max-width: 100vw;
+  max-height: 100vh;
+  padding: 8px;
+  border: 0;
+  background: #14211f;
+}
+
+.photo-full::backdrop {
+  background: rgb(0 0 0 / 0.85);
+}
+
+.photo-full img {
+  display: block;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 96px);
+  object-fit: contain;
+}
+
+.photo-full form {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.time-now {
+  justify-self: start;
+  font-size: 13px;
+}
+
+@media print {
+  .photo-full,
+  .time-now {
+    display: none;
+  }
+}
+
 .catch-photo-preview {
   width: min(100%, 360px);
   max-height: 240px;
