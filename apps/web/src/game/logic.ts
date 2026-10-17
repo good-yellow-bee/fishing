@@ -197,6 +197,14 @@ export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE
   return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1);
 }
 
+/** A topwater lure's splash carries on glassy water and drowns in a strong wind's chop, so the wait for a bite shifts. */
+export const TOPWATER_WAIT = { calm: 0.8, strong: 1.4 } as const;
+
+/** How the day's wind stretches the wait on a topwater lure: 1 for any other lure or wind. */
+export function topwaterWaitMul(topwater: boolean, wind: string | undefined) {
+  return topwater && (wind === "calm" || wind === "strong") ? TOPWATER_WAIT[wind] : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

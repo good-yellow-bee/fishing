@@ -1196,7 +1196,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT151~~ | ~~The landed card says "Kept it on a light hook" for a fish landed after a late strike~~ (#740) | ui | S |
 | ~~GT152~~ | ~~The Strike card's timer bar runs for the fish's real hold (a perch's longer, a trout's shorter) and fades for the light-hook last quarter~~ (#742) | ui | S |
 | ~~GT153~~ | ~~Level 2 unlock (it had none): the Strike card's bar carries a mark where a strike stops hooking solid, wind-adjusted~~ (#745) | levels | S |
-| GT154 | A topwater lure is hit at the top: every fish takes it like an ambush (no nibbles), with its own call and the big strike splash | game | S |
+| ~~GT154~~ | ~~A topwater lure is hit at the top: every fish takes it like an ambush (no nibbles), with its own call and the big strike splash~~ (#746) | game | S |
+| GT155 | A topwater lure bites sooner on a calm day (0.8x wait) and slower in a strong wind's chop (1.4x; a beginner is spared), and the cast hint says which | game | S |
 
 ## Risks / open questions for the owner
 

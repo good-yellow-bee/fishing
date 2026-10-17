@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -101,6 +101,23 @@ describe("a school of panfish", () => {
     for (const id of SCHOOLERS) expect(FISH.some((fish) => fish.id === id && fish.rarity === "common")).toBe(true);
     expect(SCHOOL_SAME).toBeGreaterThan(0);
     expect(SCHOOL_WAIT).toBeLessThan(1);
+  });
+});
+
+describe("a topwater lure in the wind", () => {
+  it("bites sooner on glassy water and slower in a strong chop", () => {
+    expect(topwaterWaitMul(true, "calm")).toBe(TOPWATER_WAIT.calm);
+    expect(topwaterWaitMul(true, "strong")).toBe(TOPWATER_WAIT.strong);
+    expect(TOPWATER_WAIT.calm).toBeLessThan(1);
+    expect(TOPWATER_WAIT.strong).toBeGreaterThan(1);
+  });
+
+  it("leaves a light breeze, and any lure that sinks, alone", () => {
+    expect(topwaterWaitMul(true, "breezy")).toBe(1);
+    expect(topwaterWaitMul(true, "light-west")).toBe(1);
+    expect(topwaterWaitMul(true, undefined)).toBe(1);
+    expect(topwaterWaitMul(false, "strong")).toBe(1);
+    expect(topwaterWaitMul(false, "calm")).toBe(1);
   });
 });
 

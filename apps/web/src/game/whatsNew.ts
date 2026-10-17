@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17c";
+export const NEWS_ID = "2026-10-17d";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A topwater lure draws bites sooner on a calm, glassy day and slower when a strong wind chops the water. The cast says which.",
   "Tie on a topwater lure and fish hit it at the top: no nibble first, just a big splash, so strike the moment it blows up.",
   "Level 2 now opens something: from there the Strike card's bar carries a mark, and a strike before the bar shrinks past it hooks the fish solid.",
   "The bar on the Strike card now runs out when this fish lets go, longer for a perch and shorter for a trout, and it fades for the last quarter, where a strike only hooks the fish light.",
