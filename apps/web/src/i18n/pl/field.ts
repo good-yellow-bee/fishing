@@ -696,4 +696,7 @@ export const PL_FIELD: PlBook = {
   "Heaviest: {species}, {size}": "Najcięższa: {species}, {size}",
   "Longest: {size}": "Najdłuższa: {size}",
   "Longest: {species}, {size}": "Najdłuższa: {species}, {size}",
+  Saturday: "W sobotę",
+  "Hide packed": "Ukryj spakowane",
+  "Show packed ({n})": "Pokaż spakowane ({n})",
 };

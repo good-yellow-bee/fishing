@@ -9,7 +9,8 @@
   text-transform: uppercase;
 }
 
-.tackle-unpack {
+.tackle-unpack,
+.tackle-hide {
   margin-left: 12px;
   font-size: 12px;
   letter-spacing: 0.08em;

@@ -57,6 +57,10 @@ export function TackleList({
   for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
+  // While packing, the pieces already in the bag can step aside.
+  const [hidePacked, setHidePacked] = useState(false);
+  const hiding = hidePacked && packed > 0 && packed < rows.length;
+  const shown = hiding ? rows.filter((item) => !item.packed) : rows;
   const errorId = useId();
   const box = useRef<HTMLElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -97,6 +101,12 @@ export function TackleList({
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: rows.length });
   // After an outing, the same list can go back in the bag for the next one.
+  const hideToggle =
+    packed > 0 && packed < rows.length ? (
+      <button type="button" className="text-button tackle-hide" aria-pressed={hiding} onClick={() => setHidePacked(!hiding)}>
+        {hiding ? t("Show packed ({n})", { n: packed }) : t("Hide packed")}
+      </button>
+    ) : null;
   const unpack =
     packed > 0 ? (
       <button
@@ -118,12 +128,14 @@ export function TackleList({
           <h2>{heading}</h2>
           <span className="tackle-count">
             {count}
+            {hideToggle}
             {unpack}
           </span>
         </div>
       ) : (
         <p className="tackle-count">
           {count}
+          {hideToggle}
           {unpack}
         </p>
       )}
@@ -148,13 +160,22 @@ export function TackleList({
         </p>
       ) : (
         <ul className="tackle-list">
-          {rows.map((item, index) => (
+          {shown.map((item, index) => (
             <li key={item.id}>
               <label className="tackle-row">
                 <input
                   type="checkbox"
                   checked={item.packed}
-                  onChange={(event) => toggle(item.id, event.target.checked)}
+                  onChange={(event) => {
+                    toggle(item.id, event.target.checked);
+                    // A packed piece leaves a hiding list: the next one takes the focus.
+                    if (hiding && event.target.checked) {
+                      setTimeout(() => {
+                        const boxes = box.current?.querySelectorAll<HTMLInputElement>(".tackle-row input") ?? [];
+                        (boxes[index] ?? boxes[index - 1])?.focus();
+                      }, 0);
+                    }
+                  }}
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
