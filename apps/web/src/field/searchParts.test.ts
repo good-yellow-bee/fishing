@@ -11,6 +11,10 @@ describe("split a search on +", () => {
     expect(searchParts(book, "under 2 lb")).toEqual(["<2 lb"]);
     expect(searchParts(book, "szczupak ponad 60 cm")).toEqual(["szczupak >60 cm"]);
     expect(searchParts(book, "poniżej 1,5 kg")).toEqual(["<1,5 kg"]);
+    expect(searchParts(book, "szczupak większy niż 60 cm")).toEqual(["szczupak >60 cm"]);
+    expect(searchParts(book, "okoń dluzsze niz 25 cm")).toEqual(["okoń >25 cm"]);
+    expect(searchParts(book, "lżejsze niż 2 kg")).toEqual(["<2 kg"]);
+    expect(searchParts(book, "over 10 inches")).toEqual([">10 in"]);
     // Not before a word: "over the weeds" stays text.
     expect(searchParts(book, "over the weeds")).toEqual(["over the weeds"]);
   });

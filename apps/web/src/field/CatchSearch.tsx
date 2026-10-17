@@ -284,9 +284,11 @@ export function searchParts(book: Logbook, needle: string): string[] {
   const kept: string[] = [];
   // "over 10 in", "under 2 lb", "ponad 60 cm": the words for a bound, read as ">" and "<" before a size or temperature.
   const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$))`;
+  // "10 inches" or "10 inch": the unit as the search reads it.
   let text = needle
-    .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz)\s+` + sized, "gi"), "$1>")
-    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz)\s+` + sized, "gi"), "$1<");
+    .replace(/(\d)\s?inch(?:es)?(?=[\s+]|$)/gi, "$1 in")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niż|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niz|od)\s+` + sized, "gi"), "$1>")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz|do)\s+` + sized, "gi"), "$1<");
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
   text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   // "20+ in", the plus before the unit: the same.

@@ -24,6 +24,7 @@ import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
+import { countedFish } from "../milestones";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -114,7 +115,8 @@ export function BestsPage() {
       },
       { replace: true },
     );
-  const bests = personalBests(book);
+  // The angler's own fish once there are any, as the Catches page sums them.
+  const bests = personalBests({ ...book, catches: countedFish(book.catches) });
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
   for (const entry of catchesNewestFirst(book)) {

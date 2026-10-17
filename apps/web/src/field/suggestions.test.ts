@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, dayWeather, kindMeasure, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { fullSpecies, bookLures, dayWeather, kindMeasure, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -133,7 +133,7 @@ describe("the outing a new catch files under", () => {
 
   it("files a fish from the small hours under the evening before's outing", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
-    const trip = book.trips[0]!;
+    const trip = { ...book.trips[0]!, id: "own-evening" };
     const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
     const next = new Date(y, m - 1, d + 1, 12);
     const nextDay = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}-${String(next.getDate()).padStart(2, "0")}`;
@@ -144,6 +144,12 @@ describe("the outing a new catch files under", () => {
     expect(tripForFish(only, trip.spotId, nextDay)).toBeUndefined();
     const morning = { ...trip, id: "next-morning", date: nextDay };
     expect(tripForFish({ ...book, trips: [trip, morning] }, trip.spotId, `${nextDay}T01:30`)?.id).toBe("next-morning");
+  });
+
+  it("never files a new fish on one of the sample week's outings", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const trip = book.trips[0]!;
+    expect(tripForFish(book, trip.spotId, `${trip.date}T10:00`)).toBeUndefined();
   });
 });
 
@@ -172,5 +178,14 @@ describe("weather from the same day", () => {
   it("offers nothing for a day with no fish or a half-typed day", () => {
     expect(dayWeather(day, "2026-10-11")).toBeNull();
     expect(dayWeather(day, "2026-10")).toBeNull();
+  });
+});
+
+describe("a short species name", () => {
+  it("offers the full name it ends, the book's own first", () => {
+    expect(fullSpecies("perch", ["European perch", "Yellow perch"])).toBe("European perch");
+    expect(fullSpecies(" Pike ", ["Northern pike"])).toBe("Northern pike");
+    expect(fullSpecies("perch", ["Perch", "Yellow perch"])).toBeNull();
+    expect(fullSpecies("ch", ["Yellow perch"])).toBeNull();
   });
 });

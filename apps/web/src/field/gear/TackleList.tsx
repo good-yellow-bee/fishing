@@ -79,8 +79,8 @@ export function TackleList({
     event.preventDefault();
     // "net, pliers, hooks": a piece for each, once each; any refused stay in the box with the reason.
     const seen = new Set<string>();
-    // Not a decimal comma: "Żyłka 0,25" or "Wędka 2,7 m" stays one piece.
-    const parts = label.split(/(?<!\d),|,(?!\d)/).filter((part) => {
+    // Not a decimal comma ("Żyłka 0,25", "Wędka 2,7 m"), nor a list of sizes ("Haczyki nr 8, 10"): one piece each.
+    const parts = label.split(/(?<!\d),|,(?!\s*\d)/).filter((part) => {
       const key = pieceKey(part);
       if (!key || seen.has(key)) return false;
       seen.add(key);
