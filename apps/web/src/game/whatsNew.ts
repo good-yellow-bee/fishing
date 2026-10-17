@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzq";
+export const NEWS_ID = "2026-10-17zzzr";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In rain the patter on the water covers a lost fish's splash, so the bank doesn't spook and the next bite isn't slower.",
   "A fish that swallowed live bait is hooked deep, so the hook holds longer in the red before it tears out of a soft mouth.",
   "The catch form now asks “Did you mean Northern pike?” for a slip of a name, warns at a size more than twice your best, and has a “Now” link for the time. Search finds one size, like “17 in”, and ranges include their top. An outing shows how the last one on that water went, water tips name the best wind, each lure on a species page shows its best fish, and a fish’s photo opens full size.",
   "In winter's cold water trout, bass and salmon stay down: they never leap in the fight.",

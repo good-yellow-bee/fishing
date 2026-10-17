@@ -513,13 +513,16 @@ export function useFishingGame(
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
-    // A beginner still on their first catches is spared the spooked wait.
-    const spooked = castIntoSpooked(spookRef.current, spotRef.current) && !mercyRef.current;
+    // A beginner still on their first catches is spared the spooked wait, and rain on the water covers the lost fish's splash.
+    const spookedBank = castIntoSpooked(spookRef.current, spotRef.current) && !mercyRef.current;
+    const rainCover = spookedBank && sky === "rain";
+    const spooked = spookedBank && !rainCover;
     spookRef.current = null;
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
+    else if (rainCover) waitHintRef.current = `${t("The rain on the water covered the lost fish's splash, so this water isn't spooked.")} ${waitHintRef.current}`;
     // Why the lure and the conditions draw a bite sooner (or slower); only the two latest are told, so the hint stays short.
     const reasons: string[] = [];
     // A topwater lure shows best on glassy water and gets lost in a strong wind's chop; a beginner is spared the slow side.
