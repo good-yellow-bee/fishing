@@ -7,8 +7,10 @@ describe("split a search on +", () => {
   const book = { ...sample, spots: sample.spots.map((spot, i) => (i === 0 ? { ...spot, name: "Pond + creek" } : spot)) };
 
   it("reads a size range as both bounds, and leaves dates alone", () => {
-    expect(searchParts(book, "pike 25-30 in")).toEqual(["pike >25 in", "<30 in"]);
-    expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<2 kg"]);
+    expect(searchParts(book, "pike 25-30 in")).toEqual(["pike >25 in", "<=30 in"]);
+    expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<=2 kg"]);
+    expect(searchParts(book, "30-25 in")).toEqual([">25 in", "<=30 in"]);
+    expect(searchParts(book, "pike 20+ in")).toEqual(["pike >20 in"]);
     expect(searchParts(book, "2026-10-12")).toEqual(["2026-10-12"]);
   });
 

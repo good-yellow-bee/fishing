@@ -210,8 +210,13 @@ export function searchParts(book: Logbook, needle: string): string[] {
   const kept: string[] = [];
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
   let text = needle.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
-  // "25-30 in" or "1–2 kg": a size between the two, as ">25 in + <30 in".
-  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $4 + <$3 $4");
+  // "20+ in", the plus before the unit: the same.
+  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
+  // "25-30 in" or "1–2 kg": a size between the two, both ends included, as ">25 in + <=30 in"; "30-25 in" reads the same.
+  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, (_all, lead: string, a: string, b: string, unit: string) => {
+    const [low, high] = Number(a.replace(",", ".")) <= Number(b.replace(",", ".")) ? [a, b] : [b, a];
+    return `${lead}>${low} ${unit} + <=${high} ${unit}`;
+  });
   for (const name of names) {
     const at = text.toLowerCase().indexOf(name.toLowerCase());
     if (at < 0) continue;
@@ -431,7 +436,7 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
-          {matches.length === 0 && /(^|[\s+])[<>]\s?\d+(?:[.,]\d+)?(?=[\s+]|$)/.test(settled) ? (
+          {matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled) ? (
             // ">30" finds nothing without saying what it measures.
             <p className="search-tip">{t("Add a unit to a size, as in “>30 in”.")}</p>
           ) : null}
