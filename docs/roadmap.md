@@ -1581,3 +1581,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR361~~ | ~~Wind/temp links on fish page; shorter search hints~~ (#762) | field | S |
 | ~~BR362~~ | ~~Outing weather in time order~~ (#764) | field | S |
 | ~~BR363~~ | ~~Planned days on year calendar link to outing~~ (#766) | field | S |
+| ~~BR364~~ | ~~Leave fish out of a search with -word~~ (#768) | field | S |
