@@ -1696,3 +1696,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR421~~ | ~~Round 29 fixes~~ (#880) | field | S |
 | ~~BR422~~ | ~~Round 29 ideas: water list order, this year vs last~~ (#881) | field | S |
 | ~~BR423~~ | ~~Round 30 fixes~~ (#882) | field | S |
+| ~~BR424~~ | ~~Round 30 ideas: water photos, weighed/measured search~~ (#883) | field | S |
