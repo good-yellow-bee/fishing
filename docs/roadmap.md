@@ -1647,3 +1647,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR391~~ | ~~Record search word, best moon, water trend~~ (#826) | field | S |
 | ~~BR392~~ | ~~Season first and lure by water temperature~~ (#828) | field | S |
 | ~~BR393~~ | ~~Lure last-fish dates, weekend vs weekday~~ (#830) | field | S |
+| ~~BR394~~ | ~~News card for round 17~~ (#832) | field | S |
