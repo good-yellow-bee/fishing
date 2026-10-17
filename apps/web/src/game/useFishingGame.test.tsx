@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile, type Wind } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, waitMs } from "./logic";
@@ -88,8 +88,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile, hour = "day", rising = false, lure }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, undefined, false, undefined, undefined, rising);
+function Harness({ current = profile, hour = "day", rising = false, lure, wind }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind }) {
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, undefined, false, undefined, undefined, rising, wind);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -134,7 +134,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -148,7 +148,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} />));
   return container.querySelector("div")!;
 }
 
@@ -1007,6 +1007,23 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("It blew up on the topwater — strike!");
     // A carp mouths a bait two to four times, but on a topwater lure it just hits.
     expect(vi.mocked(fx.nibble).mock.calls.length).toBe(nibbles);
+  });
+
+  it.each([
+    ["calm", /^Glassy water, made for a topwater\. /],
+    ["strong", /^The chop hides the topwater, so the bites come slow\. /],
+  ] as const)("says how a %s day suits a topwater lure as it lands", (wind, said) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog", wind);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1400));
+    expect(hint()).toMatch(said);
+  });
+
+  it("says nothing of the wind for a lure that sinks", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler", "strong");
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1400));
+    expect(hint()).not.toMatch(/topwater/);
   });
 
   it("calls a predator's bite as a hit and a usual fish's as NOW", () => {

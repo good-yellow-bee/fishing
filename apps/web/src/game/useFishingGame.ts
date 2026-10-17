@@ -36,7 +36,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isLightHook, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isLightHook, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, topwaterWaitMul, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -451,6 +451,10 @@ export function useFishingGame(
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
+    // A topwater lure shows best on glassy water and gets lost in a strong wind's chop; a beginner is spared the slow side.
+    const topwaterWait = Math.min(topwaterWaitMul(isTopwater(lureRef?.current), windRef.current), mercyRef.current ? 1 : Infinity);
+    if (topwaterWait < 1) waitHintRef.current = `${t("Glassy water, made for a topwater.")} ${waitHintRef.current}`;
+    else if (topwaterWait > 1) waitHintRef.current = `${t("The chop hides the topwater, so the bites come slow.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -467,7 +471,7 @@ export function useFishingGame(
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
-    const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1);
+    const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1) * topwaterWait;
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
