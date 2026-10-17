@@ -13,7 +13,7 @@ import {
   upcomingTrips,
   type Trip,
 } from "@stillwater/shared";
-import { fishCountLabel, formatCatchDay, formatDay, tripWhen } from "../format";
+import { fishCountLabel, formatCatchDay, formatDay, outingName, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
@@ -34,7 +34,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
     <section className="tackle-trip">
       <div className="section-head">
         <h2>
-          <Link to={`/trips/${trip.id}`}>{trip.title}</Link>
+          <Link to={`/trips/${trip.id}`}>{outingName(trip)}</Link>
         </h2>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
@@ -74,7 +74,8 @@ function LureRecord({ today }: { today: string }) {
             {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
-              {row.lastAt ? ` · ${t("last fish {day}", { day: formatCatchDay(row.lastAt) })}` : null}
+              {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
+              {row.lastAt ? <span className="lure-last">{t("last fish {day}", { day: formatCatchDay(row.lastAt) })}</span> : null}
             </span>
           </li>
         ))}
@@ -106,10 +107,15 @@ function readKeptApart(): string[] {
 function LureTwins() {
   const { storedBook, changeBook } = useLogbook();
   const [kept, setKept] = useState(readKeptApart);
-  const keyOf = (pair: { from: string; into: string }) => `${pair.from.toLowerCase()}|${pair.into.toLowerCase()}`;
-  // Close as stored but not as shown (a sample lure in Polish) would read as two unrelated names.
-  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER)).filter(
-    (pair) => !kept.includes(keyOf(pair)) && (t(pair.from) === pair.from) === (t(pair.into) === pair.into),
+  // Either way round: the pair stays apart when the other spelling later takes more fish.
+  const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
+  // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
+  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER), (from, into) =>
+    // The plain "from|into" key is how the first build kept a pair apart.
+    [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`].some((key) => kept.includes(key)),
+  ).filter(
+    // Close as stored but not as shown (a sample lure in Polish) would read as two unrelated names.
+    (pair) => (t(pair.from) === pair.from) === (t(pair.into) === pair.into),
   );
   if (twins.length === 0) return null;
   const keepApart = (pair: { from: string; into: string }) => {
@@ -154,7 +160,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
   return (
     <details className="tackle-trip tackle-past">
       <summary>
-        <span className="tackle-past-title">{trip.title}</span>
+        <span className="tackle-past-title">{outingName(trip)}</span>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
           {spot ? ` · ${spot.name}` : ""}
@@ -197,7 +203,7 @@ export function GearPage() {
               {" · "}
               {tripWhen(trip.date, today, tomorrow)}
             </p>
-            <h1>{trip.title}</h1>
+            <h1>{outingName(trip)}</h1>
             <p className="meta stand">
               <time dateTime={trip.date}>{formatDay(trip.date)}</time>
               {spot ? (

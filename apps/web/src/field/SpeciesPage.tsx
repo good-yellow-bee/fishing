@@ -263,7 +263,6 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
   );
 }
 
-/** The first and the newest fish of the kind, each a link to its catch. */
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
 function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
   const found = seasonFirst(catches);
@@ -289,6 +288,7 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
   );
 }
 
+/** The first and the newest fish of the kind, each a link to its catch. */
 function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
   const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;

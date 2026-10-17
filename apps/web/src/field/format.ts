@@ -30,6 +30,11 @@ function otherYear(date: Date): boolean {
   return date.getFullYear() !== new Date().getFullYear();
 }
 
+/** An outing's name as shown: its title, or "Outing" when it was saved without one, so a line never opens on a comma. */
+export function outingName(trip: { title: string }): string {
+  return trip.title.trim() || t("Outing");
+}
+
 export function formatDay(ymd: string): string {
   const date = new Date(`${ymd}T12:00:00`);
   return format("day", otherYear(date)).format(date);

@@ -6,10 +6,10 @@ function calendarDay(at: Date): number {
 }
 
 /**
- * The first fish of the newest year against the year before's first: how many days earlier (positive) or later
- * (negative) the kind showed up. Null unless both years have a fish.
+ * This year's first fish against last year's first: how many days earlier (positive) or later (negative) the kind
+ * showed up. Null unless both years have a fish; a kind not seen this year has no first to compare.
  */
-export function seasonFirst(catches: readonly CatchEntry[]): { entry: CatchEntry; year: number; earlier: number } | null {
+export function seasonFirst(catches: readonly CatchEntry[], today: Date = new Date()): { entry: CatchEntry; year: number; earlier: number } | null {
   const firsts = new Map<number, { entry: CatchEntry; at: Date }>();
   for (const entry of catches) {
     const at = new Date(entry.caughtAt);
@@ -17,7 +17,7 @@ export function seasonFirst(catches: readonly CatchEntry[]): { entry: CatchEntry
     const held = firsts.get(at.getFullYear());
     if (!held || at < held.at) firsts.set(at.getFullYear(), { entry, at });
   }
-  const year = Math.max(...firsts.keys());
+  const year = today.getFullYear();
   const now = firsts.get(year);
   const before = firsts.get(year - 1);
   if (!now || !before) return null;

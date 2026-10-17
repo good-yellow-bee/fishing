@@ -4,7 +4,7 @@ import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, 
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay, formatTimeOfDay, tripWhen } from "./format";
+import { formatLongDay, formatTimeOfDay, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
@@ -180,7 +180,7 @@ export function HomePage() {
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>
-          <strong>{next ? <Link to={`/trips/${next.id}`}>{next.title}</Link> : t("None planned")}</strong>
+          <strong>{next ? <Link to={`/trips/${next.id}`}>{outingName(next)}</Link> : t("None planned")}</strong>
           <small>
             {next
               ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
