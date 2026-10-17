@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzz";
+export const NEWS_ID = "2026-10-17zzzz";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In fall the fish fatten up for winter, so a big lure (streamer, spinner, spoon, crankbait or jig) draws a bite sooner.",
   "Two names for one water can be merged on the water’s page, outings and fish included. A fish’s page can step through its own kind only, and the catch form names the water its species chips come from. A past outing lists its fish first to last, search reads size ranges like “25-30 in”, and the field-log home switches language and units. Adding from a book file now brings new waters and planned outings too.",
   "In spring the shallows by the reeds warm first and the fish crowd in, so a cast to the Reeds draws a bite sooner.",
   "Fish a jig in winter: the cold slows the fish, but a slow jig still draws a bite sooner.",

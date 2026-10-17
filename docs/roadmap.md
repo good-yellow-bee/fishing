@@ -1221,7 +1221,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT176~~ | ~~Yank the bait: a strike at a nibble on bait pulls it from the fish, which backs off, so the rest of the wait stretches 1.5x once a cast (not on a beginner's easy fish)~~ (#785) | game | S |
 | ~~GT177~~ | ~~Strip a streamer: a tap with a streamer in the water strips it like a fleeing fish, and the first two strips bring the bite sooner~~ (#787) | game | S |
 | ~~GT178~~ | ~~A jig in winter: the cold slows the fish, but a slow jig still draws them, so a jig waits 0.85x in winter, and the cast says so~~ (#789) | game | S |
-| GT179 | Spring shallows: the reeds' shallows warm first and the fish crowd in, so any cast to the reeds waits 0.85x in spring, and the cast says so | game | S |
+| ~~GT179~~ | ~~Spring shallows: the reeds' shallows warm first and the fish crowd in, so any cast to the reeds waits 0.85x in spring, and the cast says so~~ (#790) | game | S |
+| GT180 | Fall feed: the fish fatten up for winter, so a big lure waits 0.85x in fall, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 
