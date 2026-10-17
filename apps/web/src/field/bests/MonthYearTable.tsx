@@ -21,7 +21,8 @@ export function monthYearCounts(catches: readonly CatchEntry[]): { years: string
 }
 
 /** The same month set against itself across the years, as a table a screen reader can walk; each count opens its fish. */
-export function MonthYearTable({ catches, today = new Date() }: { catches: readonly CatchEntry[]; today?: Date }) {
+/** `tail` adds to each month's search what the counts left out. */
+export function MonthYearTable({ catches, today = new Date(), tail = (term) => term }: { catches: readonly CatchEntry[]; today?: Date; tail?: (term: string) => string }) {
   const { years, counts } = monthYearCounts(catches);
   // Months still to come are left blank, not counted as none.
   const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
@@ -58,7 +59,7 @@ export function MonthYearTable({ catches, today = new Date() }: { catches: reado
                     return (
                       <td key={year}>
                         {count > 0 ? (
-                          <Link to={findLink(month)} aria-label={`${monthName(month)}: ${fishCountLabel(count)}`}>
+                          <Link to={findLink(tail(month))} aria-label={`${monthName(month)}: ${fishCountLabel(count)}`}>
                             {count}
                           </Link>
                         ) : (

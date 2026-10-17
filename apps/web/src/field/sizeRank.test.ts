@@ -73,6 +73,12 @@ describe("heavy or light for its length", () => {
     expect(forItsLength(kind, fish("y", 25, 5))?.heavy).toBe(false);
   });
 
+  it("goes by the middle build of fish near its length, so one mistyped weight or a far smaller fish doesn't tip it", () => {
+    const typo = [...kind, fish("e", 26, 70)];
+    expect(forItsLength(typo, fish("z", 25, 6.5))).toBeNull();
+    expect(forItsLength([fish("s1", 8, 0.5), fish("s2", 9, 0.7), fish("s3", 10, 0.9)], fish("big", 30, 10.8))).toBeNull();
+  });
+
   it("says nothing for a usual fish, one not weighed, or too few to go by", () => {
     expect(forItsLength(kind, fish("z", 25, 6.5))).toBeNull();
     expect(forItsLength(kind, { ...base, id: "w", measure: { kind: "length", inches: 25 }, alsoMeasure: undefined })).toBeNull();

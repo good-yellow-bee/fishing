@@ -688,8 +688,8 @@ function CatchForm() {
           // phone's "next" key says; a complete form still saves on Enter (and logs another, in a run of them).
           const field = event.target;
           if (event.key !== "Enter" || event.nativeEvent.isComposing || !(field instanceof HTMLInputElement)) return;
-          if (!["species", "amount", "lure"].includes(field.name)) return;
           if (event.currentTarget.checkValidity()) {
+            // From any box on the form, so Enter in the second size or the water temperature doesn't end the run.
             const another = inRun ? event.currentTarget.querySelector<HTMLButtonElement>("button[name=another]") : null;
             if (another && !another.disabled) {
               event.preventDefault();
@@ -697,6 +697,7 @@ function CatchForm() {
             }
             return;
           }
+          if (!["species", "amount", "lure"].includes(field.name)) return;
           // A field still missing comes first, even one above; else the one after.
           const missing = [...event.currentTarget.querySelectorAll<HTMLElement>("input:invalid, select:invalid, textarea:invalid")].find((each) => each !== field);
           const fields = [...event.currentTarget.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea")].filter((each) => !each.hasAttribute("disabled"));
@@ -1213,10 +1214,9 @@ function CatchView() {
   const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
-  // Said only on the angler's own fish, and counting only those; the link leaves the game's lake out to match.
-  const yearFish = isCounted ? counted.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear) : [];
-  const yearCount = yearFish.length;
+  // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
   const yearSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))] as const;
+  const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
