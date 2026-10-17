@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-game04";
+export const NEWS_ID = "2026-10-17-game05";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Summer's warm water no longer always wears out a trout, salmon or whitefish: in a summer rain, or hooked off the Drop-off where the water runs cool, it keeps its strength.",
   "A trophy-sized fish makes a long first run, so let it go. A catfish or burbot hooked at night fights at full strength, and in rain the swollen Inlet washes food in, so a cast there draws a bite sooner.",
   "A catch page marks your 100th fish and the first of each kind, and a species page says whether the typical size went up or down. Search names the time and water most fish share and understands “weekend”. Planning an outing shows the water temperature around that date in past years, the Tackle page offers to merge lure names a letter apart, and the catch form warns when the time is still to come.",
   "Seasons change the fight: in summer's warm water a trout, salmon or whitefish tires sooner, a salmon on its fall run fights longer, and in spring a bass guarding its nest by the Reeds or the Dock fights harder.",

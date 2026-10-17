@@ -1241,7 +1241,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT196~~ | ~~Rain at the inlet: in rain the swollen inlet washes food in, so a cast to the Inlet waits 0.85x, and the cast says so~~ (#821) | game | S |
 | ~~GT197~~ | ~~Night hunters: a catfish or burbot hooked at night is out hunting at full strength, so it tires only 0.85x as fast, and the hookset says so~~ (#823) | fight | S |
 | ~~GT198~~ | ~~Trophy run: a trophy-sized fish of any kind makes a long first run, like a carp, and the hookset says so; news 2026-10-17-game04~~ (#825) | fight | S |
-| GT199 | Rain cools summer water: in a summer rain a cold-water fish keeps its strength instead of tiring 1.2x faster, and the hookset says so | fight | S |
+| ~~GT199~~ | ~~Rain cools summer water: in a summer rain a cold-water fish keeps its strength instead of tiring 1.2x faster, and the hookset says so~~ (#827) | fight | S |
+| GT200 | Cool water down deep: in summer a cold-water fish hooked off the Drop-off keeps its strength instead of tiring 1.2x faster, and the hookset says so; news 2026-10-17-game05 | fight | S |
 
 ## Risks / open questions for the owner
 

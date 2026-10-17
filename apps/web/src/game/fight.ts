@@ -224,9 +224,14 @@ export function rainCooled(season: string | undefined, speciesId: string, sky: s
   return season === "summer" && COLDWATER.has(speciesId) && sky === "rain";
 }
 
-/** How summer's warm water speeds a cold-water fish's tiring: faster in summer unless rain has cooled it, else 1. */
-export function warmTireMul(season: string | undefined, speciesId: string, sky?: string) {
-  return season === "summer" && COLDWATER.has(speciesId) && !rainCooled(season, speciesId, sky) ? SUMMER_TIRE : 1;
+/** Whether a cold-water fish hooked off the dropoff in summer has found cool water down deep, sparing it summer's short air. */
+export function deepCooled(season: string | undefined, speciesId: string, spot: string | undefined) {
+  return season === "summer" && COLDWATER.has(speciesId) && spot === "dropoff";
+}
+
+/** How summer's warm water speeds a cold-water fish's tiring: faster in summer unless rain or the deep has cooled it, else 1. */
+export function warmTireMul(season: string | undefined, speciesId: string, sky?: string, spot?: string) {
+  return season === "summer" && COLDWATER.has(speciesId) && !rainCooled(season, speciesId, sky) && !deepCooled(season, speciesId, spot) ? SUMMER_TIRE : 1;
 }
 /** Fall run fish: in fall they run up to spawn, full of fight. */
 export const FALL_RUNNERS: ReadonlySet<string> = new Set(["salmon"]);

@@ -372,6 +372,25 @@ describe("useFishingGame lost fight", () => {
   });
 
   it.each([
+    ["dropoff", true],
+    ["dock", false],
+  ] as const)("says a cold-water fish hooked in summer at the %s has found cool water down deep: %s", (stance, cooled) => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, undefined, undefined, "summer");
+    if (stance === "dropoff") {
+      surface.dataset.stance = "dropoff";
+      surface.dataset.angler = "15.4,7.8";
+      surface.dataset.aim = "15.4,-5.4";
+    }
+    vi.mocked(waitMs).mockReturnValueOnce(2_000);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "salmon")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It has found cool water down deep, so it keeps its strength.")).toBe(cooled);
+    expect(hint()?.includes("The warm water leaves it short of air, so it tires sooner.")).toBe(!cooled);
+  });
+
+  it.each([
     ["fall", "salmon", true],
     ["summer", "salmon", false],
     ["fall", "pike", false],
