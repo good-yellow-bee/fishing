@@ -55,6 +55,7 @@ import { fishOnOutingDay } from "./suggestions";
 import "./search.css";
 import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
+import { useStepKeys } from "./stepKeys";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -246,6 +247,7 @@ function SunLine({ date, spot }: { date: string; spot: Spot }) {
 function TripView() {
   const { book, deleteTrip, fileCatches } = useLogbook();
   useT();
+  useStepKeys();
   const navigate = useNavigate();
   const { tripId = "" } = useParams();
   const trip = tripById(book, tripId);

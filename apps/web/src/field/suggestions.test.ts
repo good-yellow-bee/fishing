@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { bookLures, dayWeather, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
+import { bookLures, dayWeather, kindMeasure, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
   it("puts own names first and drops repeats whatever their case", () => {
@@ -52,6 +52,13 @@ describe("the measure a new catch starts with", () => {
   it("follows the player's newest fish logged by hand", () => {
     const own = { ...book, catches: [...book.catches, fish("old", "length", "2026-10-18T08:00:00"), fish("new", "weight", "2026-10-19T08:00:00")] };
     expect(lastMeasureKind(own)).toBe("weight");
+  });
+
+  it("follows how the player last measured the kind typed", () => {
+    const panfish = (id: string, kind: "length" | "weight", caughtAt: string, spotId?: string) => ({ ...fish(id, kind, caughtAt, spotId), species: "Bluegill" });
+    const own = { ...book, catches: [...book.catches, panfish("a", "length", "2026-10-10T08:00:00"), panfish("b", "weight", "2026-10-12T08:00:00"), panfish("g", "length", "2026-10-13T08:00:00", "spot-stillwater")] };
+    expect(kindMeasure(own, "bluegill")).toBe("weight");
+    expect(kindMeasure(own, "Walleye")).toBeNull();
   });
 
   it("starts ticked as released only when the player's newest own fish went back", () => {

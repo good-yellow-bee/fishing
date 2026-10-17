@@ -33,6 +33,7 @@ import {
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
 import { osmLink } from "../osmLink";
 import { hasSampleWaters } from "../bookCopy";
+import { spotsByLastFish } from "../spotOrder";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -229,11 +230,13 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
 export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
-  const plotted = book.spots.flatMap((spot) => {
+  // The lists under each sheet go by the water fished most recently, as the Waters page does.
+  const spots = spotsByLastFish(book).map((row) => row.spot);
+  const plotted = spots.flatMap((spot) => {
     const place = sheetPlace(spot);
     return place ? [{ spot, place }] : [];
   });
-  const unplotted = book.spots.filter((spot) => !sheetPlace(spot));
+  const unplotted = spots.filter((spot) => !sheetPlace(spot));
   // Pinned off the sample sheet: drawn on a sheet of their own.
   const ownPinned = unplotted.flatMap((spot) => (spot.place ? [{ spot, place: { spotId: spot.id, lat: spot.place.lat, lng: spot.place.lng } }] : []));
   const unpinned = unplotted.filter((spot) => !spot.place);

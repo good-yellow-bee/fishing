@@ -196,6 +196,12 @@ export function HomePage() {
             ) : null}
           </small>
           {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
+          {/* On the day, a fish goes straight onto this outing. */}
+          {next && next.date === today ? (
+            <small className="next-log">
+              <Link to={`/catches/new?trip=${next.id}&spot=${next.spotId}`}>{t("Log a catch")}</Link>
+            </small>
+          ) : null}
         </div>
       </section>
 
