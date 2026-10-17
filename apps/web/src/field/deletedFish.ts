@@ -1,4 +1,4 @@
-/** The fish deleted in this browser, so adding the new fish from an older copy of the book doesn't bring them back. */
+/** The fish, waters and outings deleted in this browser, so adding from an older copy of the book doesn't bring them back. */
 export const DELETED_FISH_KEY = "stillwater.field-log.deleted.v1";
 
 /** Enough for years of deletes; the oldest go first. */

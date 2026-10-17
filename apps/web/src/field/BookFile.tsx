@@ -178,8 +178,8 @@ export function BookFile() {
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
     // A file with no goals, from a browser that never set one, leaves this browser's alone.
     if (pendingGoals && Object.keys(pendingGoals).length > 0) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
-    // A fish that is in the book again is no longer one deleted here.
-    forgetDeletedFish(next.book.catches.map((entry) => entry.id));
+    // A fish, water or outing that is in the book again is no longer one deleted here.
+    forgetDeletedFish([...next.book.catches, ...next.book.spots, ...next.book.trips].map((each) => each.id));
     if (!merged) {
       // The file is itself a copy of the book now in this browser, so the reminder counts from it.
       const loaded = ownCatches(next.book);
@@ -192,7 +192,12 @@ export function BookFile() {
       tone: "loaded",
       text: merged
         ? [
-            t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length }),
+            // Just the waters and outings, when the file brought no fish.
+            ...(next.book.catches.length > here.book.catches.length || next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length
+              ? [t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })]
+              : []),
+            ...(next.book.spots.length > here.book.spots.length ? [t("Waters added: {count}.", { count: next.book.spots.length - here.book.spots.length })] : []),
+            ...(next.book.trips.length > here.book.trips.length ? [t("Outings added: {count}.", { count: next.book.trips.length - here.book.trips.length })] : []),
             ...(leftOut > 0 ? [t("Photos left out, so the book still fits this browser: {count}.", { count: leftOut })] : []),
           ].join(" ")
         : t("This browser now has the book from that file."),
@@ -206,7 +211,7 @@ export function BookFile() {
   const onAddNew = (withDeleted = false) => {
     if (!pending) return;
     const file = withDeleted ? pending : withoutDeleted(pending);
-    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file);
+    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file, readDeletedFish());
     // The file's photos that didn't fit beside this book's own.
     const leftOut = newFishIn(storedBook, file.book).filter((entry) => file.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
     load(next, true, leftOut);
@@ -234,6 +239,9 @@ export function BookFile() {
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
   const addable = pending ? newFishIn(storedBook, withoutDeleted(pending).book).length : 0;
   const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
+  // The file's waters and outings with no new fish of their own: one added or planned on another device.
+  const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), photos: {} }, readDeletedFish()) : null;
+  const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
 
   return (
     <footer className="sheet-foot">
@@ -358,6 +366,10 @@ export function BookFile() {
             // Two copies that each gained fish: keep this one and take the file's new ones.
             <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add only the new fish ({count})", { count: addable })}
+            </button>
+          ) : placesOnly > 0 ? (
+            <button type="button" className="text-button" onClick={() => onAddNew()}>
+              {t("Add the new waters and outings ({count})", { count: placesOnly })}
             </button>
           ) : null}
           {kept > 0 && storedBook.catches.length > 0 ? (

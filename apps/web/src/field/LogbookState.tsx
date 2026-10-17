@@ -164,8 +164,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
       if (kind !== "sample" && kind !== "blank") {
-        const kept = new Set(next.catches.map((entry) => entry.id));
-        noteDeletedFish(book.catches.filter((entry) => !kept.has(entry.id)).map((entry) => entry.id));
+        // Waters and outings too, so adding from an older file doesn't bring them back either.
+        const kept = new Set([...next.catches, ...next.spots, ...next.trips].map((each) => each.id));
+        noteDeletedFish([...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id));
       }
       setUndo(before);
       return true;
@@ -273,7 +274,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!undo) return null;
         const result = persist(undo.book, undo.photos);
         setSaveError(result.ok ? null : result.message);
-        if (result.ok) forgetDeletedFish(undo.book.catches.map((entry) => entry.id));
+        if (result.ok) forgetDeletedFish([...undo.book.catches, ...undo.book.spots, ...undo.book.trips].map((each) => each.id));
         return result.ok ? undo.from : null;
       },
       saveError,

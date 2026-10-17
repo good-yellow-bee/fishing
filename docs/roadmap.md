@@ -1600,3 +1600,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR370~~ | ~~Language/units on field-log home; keep last fish's time for earlier days~~ (#780) | field | S |
 | ~~BR371~~ | ~~Water on catch-form chips; past outings first-to-last; size ranges in search~~ (#782) | field | S |
 | ~~BR372~~ | ~~Merge a water into another; step through one kind~~ (#784) | field | S |
+| ~~BR373~~ | ~~File adds bring new waters and planned outings~~ (#786) | field | S |
