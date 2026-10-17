@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
-import { WATER_LABELS, localDate, type Spot } from "@stillwater/shared";
+import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
 import { getUnits, t, useT } from "../../i18n";
-import { fishCountLabel, formatDay } from "../format";
+import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -33,7 +33,7 @@ import {
 } from "./places";
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
 import { hasSampleWaters } from "../bookCopy";
-import { PLAY_LAKE_ID } from "../playLake";
+import { PLAY_LAKE_ID, upcomingOwnTrips } from "../playLake";
 import { spotsByLastFish } from "../spotOrder";
 import "./spot-map.css";
 
@@ -236,10 +236,16 @@ export function SpotMapPage() {
   const rows = spotsByLastFish(book).filter((row) => row.spot.id !== PLAY_LAKE_ID);
   const spots = rows.map((row) => row.spot);
   // Each water's fish and the day of its last one: where to go next, at a glance.
+  // And the next outing planned there, as the Waters page says it.
+  const today = localDate(new Date());
+  const tomorrow = shiftDate(new Date(), 1);
+  const upcoming = upcomingOwnTrips(book, today);
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
-    return row?.lastFishAt ? t("{fish}, last {day}", { fish, day: formatDay(localDate(new Date(row.lastFishAt))) }) : fish;
+    const line = row?.lastFishAt ? t("{fish}, last {day}", { fish, day: formatDay(localDate(new Date(row.lastFishAt))) }) : fish;
+    const next = upcoming.find((trip) => trip.spotId === spotId);
+    return next ? `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}` : line;
   };
   const plotted = spots.flatMap((spot) => {
     const place = sheetPlace(spot);
