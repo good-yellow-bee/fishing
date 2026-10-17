@@ -718,7 +718,7 @@ export function DockPage() {
         />
         {padCursor && <i className="pad-cursor" aria-hidden style={{ left: padCursor.x, top: padCursor.y }} />}
         {game.phase === "hookset" && (
-          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${hookWindowMs(me.profile.accuracy, mercy, me.level)}ms` } as CSSProperties}>
+          <div className="strike-cue" role="alert" style={{ "--strike-ms": `${game.strikeWindowMs || hookWindowMs(me.profile.accuracy, mercy, me.level)}ms` } as CSSProperties}>
             <strong>{t("Strike!")}</strong>
             <span className="cue-keys">{t("Click or Space")}</span>
             <span className="cue-touch">{t("Tap anywhere")}</span>

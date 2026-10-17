@@ -2216,9 +2216,17 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* The bar fades for the last quarter, where a strike only hooks the fish light. */
 @keyframes strike-time {
+  75% {
+    background: var(--rust);
+  }
+  76% {
+    background: #c9ad84;
+  }
   to {
     transform: scaleX(0);
+    background: #c9ad84;
   }
 }
 

@@ -104,6 +104,7 @@ function Harness({ current = profile, hour = "day", rising = false }: { current?
       <i data-testid="got-away">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.gotAway) : ""}</i>
       <i data-testid="lurking">{String(game.lurking)}</i>
       <i data-testid="closing">{String(game.lurkerCloseInMs > 0)}</i>
+      <i data-testid="strike-window">{game.strikeWindowMs}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <p data-testid="hint">{game.hint}</p>
@@ -934,9 +935,12 @@ describe("level unlock integration", () => {
     cast(surface);
     for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(hint()).toBe("It's gulping it down — strike!");
+    const strikeWindow = Number(container!.querySelector("[data-testid=strike-window]")?.textContent);
     for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     const held = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
     expect(held).toBeGreaterThan(1.5);
+    // The strike cue runs for the perch's own, longer hold.
+    expect(strikeWindow / 1000).toBeCloseTo(held, 2);
   });
 
   it("calls a trout snatching the bait and gives it less time before it lets go", () => {
