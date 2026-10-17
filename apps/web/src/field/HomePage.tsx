@@ -6,7 +6,7 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { hasSampleFish, isSampleOnly } from "./bookCopy";
+import { hasSampleLeft, isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
@@ -71,7 +71,8 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 /** How the last outing on the next outing's water went: its fish and the lure that took the most, to plan by. */
 function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
   const last = tripsForSpot(book, trip.spotId)
-    .filter((other) => other.id !== trip.id && other.date < trip.date && other.date <= today)
+    // Today's outing only once it has given a fish: one still to happen says nothing yet.
+    .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   if (!last) return null;
   const fish = catchesForTrip(book, last.id);
@@ -81,7 +82,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     <small className="next-last">
       <Link to={`/trips/${last.id}`}>
         {lure
-          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: `${t(lure.lure)} (${lure.count})` })
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: `${t(lure.lure)} ×${lure.count}` })
           : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
       </Link>
     </small>
@@ -128,7 +129,7 @@ export function HomePage() {
   const ownWaters = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   const ownOutings = book.trips.filter(offPlayLake).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
-  const sampleLeft = !sampleOnly && hasSampleFish(storedBook);
+  const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -162,7 +163,7 @@ export function HomePage() {
       {sampleLeft ? (
         <aside className="conditions sample-start" aria-label={t("Sample book")}>
           <span className="eyebrow">{t("Sample book")}</span>
-          <p>{t("The sample week's invented fish are still in this book, beside your own.")}</p>
+          <p>{t("The sample week's invented entries are still in this book, beside your own.")}</p>
           <button type="button" className="field-primary inline" onClick={() => {
               if (dropSample()) heading.current?.focus();
             }}>

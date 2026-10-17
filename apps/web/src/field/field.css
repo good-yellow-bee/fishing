@@ -677,7 +677,8 @@ button.field-primary:disabled {
 }
 
 /* The water and, on a phone, a way to pick the one nearest. */
-.water-field {
+.water-field,
+.date-field {
   display: grid;
   gap: 6px;
   align-content: start;
@@ -1815,8 +1816,4 @@ button.field-primary:disabled {
 /* Spots: how the water list is ordered. */
 .spot-order {
   margin: 0 0 14px;
-}
-
-.date-picks {
-  margin-top: 6px;
 }

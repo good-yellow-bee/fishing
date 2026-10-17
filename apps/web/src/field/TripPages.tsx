@@ -662,11 +662,14 @@ function TripForm() {
         }}
       >
         <div className="form-grid">
+          <div className="date-field">
           <label>
             {t("Date")}
             <input name="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
+          </label>
+            {/* Outside the label, so the date box keeps its one-word name. */}
             {!existing ? (
-              <small className="field-hint lure-tips date-picks">
+              <small className="field-hint lure-tips date-picks" role="group" aria-label={t("Pick a day")}>
                 {datePicks(new Date()).map((pick) => (
                   <button key={pick.label} type="button" className="lure-tip" aria-pressed={date === pick.date} onClick={() => setDate(pick.date)}>
                     {t(pick.label)}
@@ -674,7 +677,7 @@ function TripForm() {
                 ))}
               </small>
             ) : null}
-          </label>
+          </div>
           <div className="water-field">
             <label>
               {t("Spot")}

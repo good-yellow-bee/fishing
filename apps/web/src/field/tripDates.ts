@@ -1,5 +1,6 @@
 import { shiftDate, type Logbook } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
+import { isSampleTrip } from "./bookCopy";
 
 export type DatePick = { label: "Today" | "Tomorrow" | "Saturday"; date: string };
 
@@ -17,7 +18,7 @@ export function datePicks(now: Date): DatePick[] {
 /** Names given to earlier outings, this water's first, newest first, each once. */
 export function pastTitles(book: Logbook, spotId: string, limit = 8): string[] {
   const named = book.trips
-    .filter((trip) => trip.spotId !== PLAY_LAKE_ID && trip.title.trim())
+    .filter((trip) => trip.spotId !== PLAY_LAKE_ID && !isSampleTrip(trip.id) && trip.title.trim())
     .sort((a, b) => Number(b.spotId === spotId) - Number(a.spotId === spotId) || b.date.localeCompare(a.date));
   const seen = new Set<string>();
   const titles: string[] = [];
