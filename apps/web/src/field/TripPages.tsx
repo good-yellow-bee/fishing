@@ -327,7 +327,8 @@ function TripView() {
           ) : null}
         </p>
       ) : (
-        <PagedCatches items={catches}>
+        // A past outing reads as the day went, first fish first, like its weather; on the day, the newest leads.
+        <PagedCatches items={trip.date < today ? [...catches].reverse() : catches}>
           {(entry) => (
             <CatchCard
               key={entry.id}

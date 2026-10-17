@@ -6,6 +6,12 @@ describe("split a search on +", () => {
   const sample = sampleLogbook(new Date(2026, 9, 15));
   const book = { ...sample, spots: sample.spots.map((spot, i) => (i === 0 ? { ...spot, name: "Pond + creek" } : spot)) };
 
+  it("reads a size range as both bounds, and leaves dates alone", () => {
+    expect(searchParts(book, "pike 25-30 in")).toEqual(["pike >25 in", "<30 in"]);
+    expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<2 kg"]);
+    expect(searchParts(book, "2026-10-12")).toEqual(["2026-10-12"]);
+  });
+
   it("joins parts on +", () => {
     expect(searchParts(book, "Northern pike + >2 lb")).toEqual(["Northern pike", ">2 lb"]);
   });

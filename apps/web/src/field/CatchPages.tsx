@@ -669,7 +669,11 @@ function CatchForm() {
           </label>
           {hereSpecies.length > 0 ? (
             <p className="wide form-note lure-tips">
-              {t("Comes from this water:")}{" "}
+              {/* Which water these come from, with a way to it: on a phone the water's own field is further down. */}
+              {t("From {water}:", { water: spotById(book, spotId)?.name ?? "" })}{" "}
+              <button type="button" className="text-button" onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
+                {t("change")}
+              </button>{" "}
               {hereSpecies.map((name) => (
                 <button
                   key={name}
