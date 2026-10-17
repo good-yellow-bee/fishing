@@ -35,7 +35,7 @@ import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
-import { anotherCatchLink } from "./anotherCatch";
+import { AT_PARAM, anotherCatchLink } from "./anotherCatch";
 import { catchesOfSpecies, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
@@ -240,11 +240,14 @@ function CatchForm() {
   const [leftTrip, setLeftTrip] = useState("");
   // Set while a change of water is what took the fish off its own outing, so going back to that water can put it back.
   const [waterTookTrip, setWaterTookTrip] = useState(false);
+  // The last fish's time, when "Save and log another" came from a fish of an earlier day.
+  const startAt = existing ? null : params.get(AT_PARAM);
+  const carriedTime = startAt && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(startAt) ? startAt : null;
   const [caughtAt, setCaughtAt] = useState(() =>
-    existing ? toLocalInput(new Date(existing.caughtAt)) : toLocalInput(startTimeFor(presetTrip)),
+    existing ? toLocalInput(new Date(existing.caughtAt)) : (carriedTime ?? toLocalInput(startTimeFor(presetTrip))),
   );
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
-  const [timeTouched, setTimeTouched] = useState(Boolean(existing));
+  const [timeTouched, setTimeTouched] = useState(Boolean(existing || carriedTime));
   // The time read from a photo's camera notes, while the time field still holds it.
   const [photoTime, setPhotoTime] = useState("");
   // The water a photo's location picked, while the water field still holds it.
@@ -550,9 +553,11 @@ function CatchForm() {
     }
     // The waiting draft, if any, stays for later; this one is saved.
     if (!waiting) dropKeptDraft();
-    // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now.
+    // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now; for a fish
+    // of an earlier day, that fish's time, as the next one came after it that day.
     if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
-      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }), savedState("catch", news));
+      const earlier = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) ? caughtAt : undefined;
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news));
       return;
     }
     navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch", news));
