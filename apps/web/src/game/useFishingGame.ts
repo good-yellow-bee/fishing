@@ -36,7 +36,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, chopWaitMul, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -535,6 +535,9 @@ export function useFishingGame(
     if (topwaterWait < 1) reasons.unshift(t("Glassy water, made for a topwater."));
     else if (topwaterWait > 1) reasons.unshift(t("The chop hides the topwater, so the bites come slow."));
     // A spinner or spoon flashes in the sun, so a fish sees it from farther off.
+    // A breeze chops the surface, and the fish under it feed bolder.
+    const chopWait = chopWaitMul(isTopwater(lureRef?.current), windRef.current);
+    if (chopWait < 1) reasons.unshift(t("The breeze chops the surface, and the fish feed bolder under it."));
     const flashWait = flashWaitMul(lureRef?.current, sky, hour, moon);
     if (flashWait < 1) reasons.unshift(hour === "night" ? t("The full moon catches the lure's flash.") : t("The sun catches the lure's flash."));
     // After dark the fish hunt by sound, and a topwater's gurgle carries.
@@ -588,7 +591,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, fallWait, heatWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, chopWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, fallWait, heatWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
