@@ -52,3 +52,19 @@ export function sizeBands(catches: readonly CatchEntry[], kind: Measure["kind"],
   }
   return bands.filter((band) => band.count > 0).length > 1 ? bands : [];
 }
+
+/**
+ * The middle fish's size of one measure, half of the rest above it and half below; null with fewer than BANDS_FROM
+ * fish measured that way, where a middle says little.
+ */
+export function typicalSize(catches: readonly CatchEntry[], kind: Measure["kind"]): Measure | null {
+  const values = catches
+    .map((entry) => measureOf(entry, kind))
+    .filter((measure): measure is Measure => measure !== null)
+    .map((measure) => (measure.kind === "length" ? measure.inches : measure.pounds))
+    .sort((a, b) => a - b);
+  if (values.length < BANDS_FROM) return null;
+  const middle = values.length / 2;
+  const value = values.length % 2 === 1 ? values[Math.floor(middle)]! : (values[middle - 1]! + values[middle]!) / 2;
+  return kind === "length" ? { kind, inches: value } : { kind, pounds: value };
+}

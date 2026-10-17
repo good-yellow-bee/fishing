@@ -457,6 +457,7 @@ export const PL_FIELD: PlBook = {
   "A stronger shade means more fish; an outlined day was an outing with none.": "Mocniejszy kolor to więcej ryb; obwiedziony dzień to wyprawa bez ryby.",
   "Biggest here": "Największe tutaj",
   "Took:": "Brały na:",
+  "Typical size: {size} (as many bigger as smaller)": "Typowy rozmiar: {size} (tyle samo większych, co mniejszych)",
   "Arrow keys move between the days.": "Strzałki przechodzą między dniami.",
   "an outing with no fish": "wyprawa bez ryby",
   "Days on the water in {year}: {count}": "Dni nad wodą w {year}: {count}",
