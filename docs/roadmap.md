@@ -1204,7 +1204,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT159~~ | ~~A bait thief (golden shiner) can only strip real bait: live bait, a float rig or an unnamed lure; a spinner, spoon, crank, jig, fly or topwater has none to steal~~ (#756) | fish | S |
 | ~~GT160~~ | ~~A spinner or spoon flashes in the sun: under a clear sky from dawn to dusk its wait is 0.85x, and the cast says the sun catches its flash~~ (#757) | game | S |
 | ~~GT161~~ | ~~A jig cast at the drop-off hops down the ledge where the fish hold: its wait is 0.8x, and the cast says so~~ (#759) | game | S |
-| GT162 | Live bait is swallowed: a late strike on a worm, leech or minnow hooks deep (a plain hook, own hint) instead of light | fight | S |
+| ~~GT162~~ | ~~Live bait is swallowed: a late strike on a worm, leech or minnow hooks deep (a plain hook, own hint) instead of light~~ (#761) | fight | S |
+| GT163 | A fly or streamer cast at the inlet drifts on the current down to the trout: its wait is 0.8x, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

@@ -223,6 +223,16 @@ export function jigWaitMul(lure: string | undefined, spot: string) {
   return spot === "dropoff" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_LEDGE_WAIT : 1;
 }
 
+/** A fly or streamer swung on the inlet's current drifts down to the trout holding there, so the bite comes sooner. */
+export const FLY_DRIFT_WAIT = 0.8;
+
+/** How the bank stretches the wait on a fly or streamer: sooner at the inlet, else 1. */
+export function flyDriftWaitMul(lure: string | undefined, spot: string) {
+  if (spot !== "inlet" || !lure?.trim()) return 1;
+  const kind = lureClass(lure).id;
+  return kind === "fly" || kind === "streamer" ? FLY_DRIFT_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
