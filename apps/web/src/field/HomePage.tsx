@@ -81,7 +81,6 @@ export function HomePage() {
   const catches = recentCatches(book, 4);
   const upcoming = upcomingOwnTrips(book, today);
   // Just back from the water, not from a round of the game.
-  const realTrips = book.trips.filter(offPlayLake).length;
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
@@ -89,7 +88,7 @@ export function HomePage() {
   const real = book.catches.filter(offPlayLake);
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
-  const yearsAgo = thisWeekInPastYears(book.catches, now);
+  const yearsAgo = thisWeekInPastYears(real, now);
   const thisMonth = today.slice(0, 7);
   const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
   const monthFish = monthRows.filter(offPlayLake).length;
@@ -179,9 +178,9 @@ export function HomePage() {
           <strong>
             <Link to="/spots">{book.spots.length}</Link>
           </strong>
-          {realTrips > 0 ? (
+          {book.trips.length > 0 ? (
             <small>
-              <Link to="/trips">{tn(realTrips, "{n} outing", "{n} outings")}</Link>
+              <Link to="/trips">{tn(book.trips.length, "{n} outing", "{n} outings")}</Link>
             </small>
           ) : null}
         </div>

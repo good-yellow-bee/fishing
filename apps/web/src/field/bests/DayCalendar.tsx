@@ -56,7 +56,8 @@ export function stepDay(days: readonly string[], from: string, key: string): str
  * A season at a glance: each month with a day out, Monday first, each fished day shaded by its fish and opening them,
  * and an outing that landed nothing marked as a blank that opens it.
  */
-export function DayCalendar({ book, year, today }: { book: Logbook; year: string; today: string }) {
+/** `tail` adds to each day's search what the marks left out. */
+export function DayCalendar({ book, year, today, tail = (term) => term }: { book: Logbook; year: string; today: string; tail?: (term: string) => string }) {
   useT();
   const marks = dayMarks(book, year);
   const months = markedMonths(marks);
@@ -112,7 +113,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                   const label = `${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}`}>
-                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(day)} aria-label={label} title={label} {...dayLink(day)} />
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} aria-label={label} title={label} {...dayLink(day)} />
                     </li>
                   );
                 }

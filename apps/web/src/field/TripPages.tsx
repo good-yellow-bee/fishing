@@ -312,7 +312,8 @@ function TripView() {
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
       {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
-      {trip.date === today && catches[0] && localDate(new Date(catches[0].caughtAt)) === today ? (
+      {/* An evening outing still going past midnight counts too; a fish over 12 hours old says nothing. */}
+      {catches[0] && (trip.date === today || trip.date === shiftDate(new Date(), -1)) ? (
         <SinceLast caughtAt={catches[0].caughtAt} />
       ) : null}
       {catches.length > 1 ? (

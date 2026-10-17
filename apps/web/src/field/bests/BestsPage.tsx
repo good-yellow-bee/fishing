@@ -23,7 +23,7 @@ import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
-import { offPlayLake } from "../playLake";
+import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -60,8 +60,8 @@ function soleTripOn(book: Logbook, ymd: string): string | null {
 }
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
-function DayTally({ count, date, tripId }: { count: number; date: string; tripId: string | null }) {
-  return <Link to={tripId ? `/trips/${tripId}` : findLink(date)}>{fishCountLabel(count)}</Link>;
+function DayTally({ count, date, tripId, tail }: { count: number; date: string; tripId: string | null; tail: (term: string) => string }) {
+  return <Link to={tripId ? `/trips/${tripId}` : findLink(tail(date))}>{fishCountLabel(count)}</Link>;
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
@@ -77,13 +77,17 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
 const YEAR_PARAM = "year";
 
 export function BestsPage() {
-  const { book: whole } = useLogbook();
+  const { book: all } = useLogbook();
   useT();
   const [params, setParams] = useSearchParams();
   const today = localDate(new Date());
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
   // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
-  const real = { ...whole, trips: whole.trips.filter(offPlayLake), catches: whole.catches.filter(offPlayLake) };
+  // Records are the angler's own: the game's lake, its rounds and its fish stay out of every tile, tally and calendar here,
+  // and each search link leaves them out too, so a count and the list it opens agree.
+  const whole = { ...all, spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID), trips: all.trips.filter(offPlayLake), catches: all.catches.filter(offPlayLake) };
+  const real = whole;
+  const tail = (term: string) => withoutPlayLake(all, term, all.catches);
   const days = daysOut(real, today.slice(0, 4), today);
   const notYet = notYetThisYear(real.catches);
   const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
@@ -98,7 +102,7 @@ export function BestsPage() {
     ? { ...whole, catches: whole.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
     : whole;
   // A row's link opens the same fish it counted: within the season picked, when there is one.
-  const linkFor = (term: string) => (year ? findWithLink(term, year) : findLink(term));
+  const linkFor = (term: string) => (year ? findWithLink(term, tail(year)) : findLink(tail(term)));
   const pickYear = (next: string | null) =>
     setParams(
       (current) => {
@@ -109,8 +113,7 @@ export function BestsPage() {
       },
       { replace: true },
     );
-  // The angler's own bests: a game fish takes none of them, as the catch pages say.
-  const bests = personalBests({ ...book, catches: book.catches.filter(offPlayLake) });
+  const bests = personalBests(book);
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
   for (const entry of catchesNewestFirst(book)) {
@@ -198,7 +201,7 @@ export function BestsPage() {
         </div>
         <div>
           <span className="eyebrow">{t("Best day")}</span>
-          <strong>{topDay ? <DayTally count={topDay.count} date={topDay.date} tripId={topDayTrip} /> : t("None")}</strong>
+          <strong>{topDay ? <DayTally count={topDay.count} date={topDay.date} tripId={topDayTrip} tail={tail} /> : t("None")}</strong>
           <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>
@@ -341,7 +344,7 @@ export function BestsPage() {
                 <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
               </div>
               <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
-              <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} />
+              <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} />
             </section>
           ) : null}
 
@@ -351,7 +354,7 @@ export function BestsPage() {
                 <h2>{t("By year")}</h2>
               </div>
               {/* Each year opens the catch search for its fish. */}
-              <TallyBars key={year ?? ""} rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(row.year) }))} />
+              <TallyBars key={year ?? ""} rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(tail(row.year)) }))} />
             </section>
           ) : null}
 
@@ -366,13 +369,13 @@ export function BestsPage() {
                   key: row.month,
                   label: monthName(row.month),
                   count: row.count,
-                  to: row.count > 0 ? findLink(row.month) : undefined,
+                  to: row.count > 0 ? findLink(tail(row.month)) : undefined,
                 }))}
               />
             </section>
           ) : null}
 
-          {!year ? <MonthYearTable catches={book.catches} /> : null}
+          {!year ? <MonthYearTable catches={book.catches} tail={tail} /> : null}
 
           <section>
             <div className="section-head">
@@ -396,7 +399,7 @@ export function BestsPage() {
               <TallyBars key={year ?? ""} rows={skyTally(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("sky", t(row.label))) : undefined }))} />
             </section>
           ) : null}
-          <WeatherBars key={year ?? ""} book={book} within={year ?? undefined} />
+          <WeatherBars key={year ?? ""} book={book} within={year ? tail(year) : tail("").trim() || undefined} />
 
           <section>
             <div className="section-head">

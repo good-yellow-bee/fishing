@@ -1,4 +1,4 @@
-import { likelyWeight, measureOf, sizePairs, type CatchEntry, type Measure } from "@stillwater/shared";
+import { measureOf, sizePairs, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 
@@ -60,10 +60,14 @@ export function forItsLength(kind: readonly CatchEntry[], entry: CatchEntry): { 
   const length = measureOf(entry, "length");
   const weight = measureOf(entry, "weight");
   if (length?.kind !== "length" || weight?.kind !== "weight" || !(weight.pounds > 0)) return null;
-  const pairs = sizePairs(kind.filter((other) => other.id !== entry.id));
-  if (pairs.length < 3) return null;
-  const usual = likelyWeight(pairs, length.inches);
-  if (usual === null || !(usual > 0)) return null;
+  // Only fish near its length, so a kind's build that changes with size doesn't mark small or big fish; and the middle
+  // build of those, so one mistyped weight doesn't tip every other fish.
+  const near = sizePairs(kind.filter((other) => other.id !== entry.id)).filter((pair) => Math.abs(pair.inches - length.inches) <= length.inches * 0.3);
+  if (near.length < 3) return null;
+  const builds = near.map((pair) => pair.pounds / pair.inches ** 3).sort((a, b) => a - b);
+  const middle = builds.length % 2 ? builds[(builds.length - 1) / 2]! : (builds[builds.length / 2 - 1]! + builds[builds.length / 2]!) / 2;
+  const usual = middle * length.inches ** 3;
+  if (!(usual > 0)) return null;
   const ratio = weight.pounds / usual;
   return ratio > 1.15 ? { heavy: true, usual } : ratio < 0.85 ? { heavy: false, usual } : null;
 }
