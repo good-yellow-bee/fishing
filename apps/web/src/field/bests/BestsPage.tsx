@@ -2,7 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
 import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
-import { t, useT } from "../../i18n";
+import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay } from "../format";
 import { hookTally, hookText } from "../hookTally";
@@ -18,7 +18,7 @@ import { SeasonRecapBox } from "./SeasonRecap";
 import { dayMarks } from "./dayMarks";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
-import { outingStreak } from "../outingAverage";
+import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -81,6 +81,7 @@ export function BestsPage() {
   const days = daysOut(whole, today.slice(0, 4), today);
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const split = weekendSplit(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const years = yearTally(whole.catches).map((row) => row.year);
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;
@@ -274,6 +275,11 @@ export function BestsPage() {
             {streak.best > 1 ? (
               <p className="meta">
                 {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
+              </p>
+            ) : null}
+            {split ? (
+              <p className="meta weekend-split">
+                {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
               </p>
             ) : null}
             {/* The year so far as text for a message, once it has a fish. */}

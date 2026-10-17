@@ -1,8 +1,8 @@
 import { isLureLabel, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { pieceKey } from "./pieceKey";
 
-/** `lure`: the name the fish were logged under, for opening them; set when the piece took any. */
-export type PieceRecord = { label: string; outings: number; fish: number; lure?: string };
+/** `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught. Both set when the piece took any. */
+export type PieceRecord = { label: string; outings: number; fish: number; lure?: string; lastAt?: string };
 
 /**
  * Each lure packed for outings up to `today`: how many lists it was on, and the fish in the book logged under its
@@ -28,7 +28,8 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
         spellings.set(name, [...(spellings.get(name) ?? []), entry]);
       }
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
-      return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] ? { lure: took[0].lure } : {}) };
+      const lastAt = took.reduce<string | undefined>((newest, entry) => (!newest || Date.parse(entry.caughtAt) > Date.parse(newest) ? entry.caughtAt : newest), undefined);
+      return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));
 }

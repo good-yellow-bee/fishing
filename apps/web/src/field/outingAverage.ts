@@ -51,3 +51,20 @@ export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) =>
   }
   return { best, going: best > 0 && run === best };
 }
+
+/**
+ * Fish an outing on Saturdays and Sundays against the rest of the week, once each side has two outings fished:
+ * whether a day off midweek pays.
+ */
+export function weekendSplit(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { weekend: number; weekday: number } | null {
+  const fished = trips.filter((trip) => trip.date < today || (trip.date === today && fishOn(trip.id) > 0));
+  const [weekend, weekday] = [true, false].map((wanted) =>
+    fished.filter((trip) => {
+      const [y, m, d] = trip.date.split("-").map(Number);
+      return [0, 6].includes(new Date(y!, m! - 1, d!).getDay()) === wanted;
+    }),
+  );
+  if (weekend!.length < 2 || weekday!.length < 2) return null;
+  const average = (list: readonly Trip[]) => list.reduce((sum, trip) => sum + fishOn(trip.id), 0) / list.length;
+  return { weekend: average(weekend!), weekday: average(weekday!) };
+}
