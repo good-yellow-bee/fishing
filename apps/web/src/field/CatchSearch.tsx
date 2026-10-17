@@ -529,7 +529,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
