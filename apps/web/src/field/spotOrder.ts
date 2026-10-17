@@ -67,14 +67,15 @@ export function nearestWater(book: Logbook, here: { lat: number; lng: number }):
   return best;
 }
 
-/** The last day each water was fished, by an outing up to today or a fish logged there, whichever is later. */
+/** The last day each water was fished, by an outing before today or a fish logged there, whichever is later; not the game's lake. */
 export function lastOutByWater(book: Logbook, today: string): Map<string, string> {
   const last = new Map<string, string>();
   const note = (spotId: string, day: string) => {
     if (day <= today && day > (last.get(spotId) ?? "")) last.set(spotId, day);
   };
-  for (const trip of book.trips) note(trip.spotId, trip.date);
-  for (const entry of book.catches) note(entry.spotId, localDate(new Date(entry.caughtAt)));
+  // Today's outing counts once it has a fish, which the fish below already says.
+  for (const trip of book.trips) if (trip.date < today && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date);
+  for (const entry of book.catches) if (entry.spotId !== PLAY_LAKE_ID) note(entry.spotId, localDate(new Date(entry.caughtAt)));
   return last;
 }
 

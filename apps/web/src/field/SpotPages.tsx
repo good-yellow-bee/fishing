@@ -87,7 +87,13 @@ export function SpotsPage() {
   if (order === "most") rows.sort((a, b) => b.fishCount - a.fishCount);
   // The water left alone longest first, to give a rested one a go; waters never fished after them.
   const lastOut = lastOutByWater(book, today);
-  if (order === "rested") rows.sort((a, b) => (lastOut.get(a.spot.id) ?? "~").localeCompare(lastOut.get(b.spot.id) ?? "~"));
+  if (order === "rested") {
+    rows.sort((a, b) => {
+      const x = lastOut.get(a.spot.id);
+      const y = lastOut.get(b.spot.id);
+      return !x ? (y ? 1 : 0) : !y ? -1 : x < y ? -1 : x > y ? 1 : 0;
+    });
+  }
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
 
   return (

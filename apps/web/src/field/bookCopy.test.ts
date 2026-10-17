@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleFish, isSampleOnly, isSampleTrip, ownCatches, withoutSample, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
+import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleFish, hasSampleLeft, isSampleOnly, isSampleTrip, ownCatches, withoutSample, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
 
 describe("remind to download a copy of the book", () => {
   it("stays quiet until the book has some of the player's own catches", () => {
@@ -65,6 +65,8 @@ describe("a book that is still only the sample", () => {
     expect(left.trips.map((each) => each.id)).toEqual([trip.id]);
     expect(left.spots.map((spot) => spot.id)).toEqual([trip.spotId]);
     expect(hasSampleFish(left)).toBe(false);
+    expect(hasSampleLeft(left)).toBe(false);
+    expect(hasSampleLeft({ ...book, catches: [own] })).toBe(true);
     expect(hasSampleFish(book)).toBe(true);
   });
 

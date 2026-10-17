@@ -73,6 +73,8 @@ describe("when each water was last fished", () => {
           { id: "zq-a", date: "2026-10-05", spotId: spot, title: "", note: "" },
           { id: "zq-b", date: "2026-10-20", spotId: spot, title: "", note: "" },
           { id: "zq-c", date: "2026-10-01", spotId: other, title: "", note: "" },
+          { id: "zq-d", date: "2026-10-15", spotId: "zq-today", title: "", note: "" },
+          { id: "zq-e", date: "2026-10-14", spotId: "spot-stillwater", title: "", note: "" },
         ],
         catches: [fish],
       },
@@ -80,6 +82,9 @@ describe("when each water was last fished", () => {
     );
     expect(last.get(spot)).toBe("2026-10-05");
     expect(last.get(other)).toBe("2026-10-12");
+    // Today's outing with no fish yet, and the game's lake, say nothing.
+    expect(last.has("zq-today")).toBe(false);
+    expect(last.has("spot-stillwater")).toBe(false);
     expect(daysBetween("2026-10-05", "2026-10-15")).toBe(10);
     expect(daysBetween("2026-03-28", "2026-03-30")).toBe(2);
   });

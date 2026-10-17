@@ -61,6 +61,8 @@ export function TackleList({
   const [hidePacked, setHidePacked] = useState(false);
   const hiding = hidePacked && packed > 0 && packed < rows.length;
   const shown = hiding ? rows.filter((item) => !item.packed) : rows;
+  // Once the toggle is gone (all packed, or all unpacked), the next packing starts with every piece in view.
+  if (hidePacked && !hiding) setHidePacked(false);
   const errorId = useId();
   const box = useRef<HTMLElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -169,10 +171,12 @@ export function TackleList({
                   onChange={(event) => {
                     toggle(item.id, event.target.checked);
                     // A packed piece leaves a hiding list: the next one takes the focus.
+                    // The last one packed brings the whole list back: focus goes on to adding a piece.
                     if (hiding && event.target.checked) {
+                      const last = packed + 1 === rows.length;
                       setTimeout(() => {
                         const boxes = box.current?.querySelectorAll<HTMLInputElement>(".tackle-row input") ?? [];
-                        (boxes[index] ?? boxes[index - 1])?.focus();
+                        (last ? input.current : (boxes[index] ?? boxes[index - 1]))?.focus();
                       }, 0);
                     }
                   }}

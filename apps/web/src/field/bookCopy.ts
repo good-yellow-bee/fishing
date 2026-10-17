@@ -54,6 +54,12 @@ export function withoutSample(book: Logbook): Logbook {
   return { ...book, catches, trips, spots: book.spots.filter((spot) => !SAMPLE_SPOT_IDS.has(spot.id) || usedSpots.has(spot.id)) };
 }
 
+/** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */
+export function hasSampleLeft(book: Logbook) {
+  const left = withoutSample(book);
+  return left.catches.length < book.catches.length || left.trips.length < book.trips.length || left.spots.length < book.spots.length;
+}
+
 /** The player's own catches; the sample week's fish and the game's don't need a copy. */
 export function ownCatches(book: Logbook) {
   return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id) && offPlayLake(entry)).length;
