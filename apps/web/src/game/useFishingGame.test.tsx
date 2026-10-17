@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, pickBite, waitMs } from "./logic";
+import { castIntoSpooked, pickBite, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -45,7 +45,7 @@ vi.mock("./gotAway", async (importOriginal) => {
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
-  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false) };
+  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
+import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -1313,6 +1313,19 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("waiting:none");
     if (said) expect(hint()).toContain(said);
     else expect(hint()).not.toContain("jig");
+  });
+
+  it("tells only the two latest reasons a bite comes sooner, so the hint stays short", () => {
+    vi.mocked(springShallowsWaitMul).mockReturnValueOnce(SPRING_SHALLOWS_WAIT);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Green pumpkin tube", undefined, undefined, "winter");
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(WAIT_REASONS).toBe(2);
+    expect(hint()).toMatch(/^The cold water slows the fish, but they still chase a slow jig\. The shallows by the reeds warm first in spring, and the fish crowd in\. /);
+    expect(hint()).not.toContain("The jig hops down the ledge.");
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {

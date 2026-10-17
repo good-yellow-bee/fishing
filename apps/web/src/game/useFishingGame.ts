@@ -212,6 +212,9 @@ export function isStreamer(lure: string | undefined) {
 /** Pike that, missing a streamer stripped away from them, chase it down for one more hit. */
 export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pike"]);
 
+/** At most this many reasons for a sooner or slower bite are told on a cast, so the hint stays readable. */
+export const WAIT_REASONS = 2;
+
 /** How many pops of a sitting topwater lure draw the fish up sooner. */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
@@ -517,46 +520,49 @@ export function useFishingGame(
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
+    // Why the lure and the conditions draw a bite sooner (or slower); only the two latest are told, so the hint stays short.
+    const reasons: string[] = [];
     // A topwater lure shows best on glassy water and gets lost in a strong wind's chop; a beginner is spared the slow side.
     const topwaterWait = Math.min(topwaterWaitMul(isTopwater(lureRef?.current), windRef.current), mercyRef.current ? 1 : Infinity);
-    if (topwaterWait < 1) waitHintRef.current = `${t("Glassy water, made for a topwater.")} ${waitHintRef.current}`;
-    else if (topwaterWait > 1) waitHintRef.current = `${t("The chop hides the topwater, so the bites come slow.")} ${waitHintRef.current}`;
+    if (topwaterWait < 1) reasons.unshift(t("Glassy water, made for a topwater."));
+    else if (topwaterWait > 1) reasons.unshift(t("The chop hides the topwater, so the bites come slow."));
     // A spinner or spoon flashes in the sun, so a fish sees it from farther off.
     const flashWait = flashWaitMul(lureRef?.current, sky, hour);
-    if (flashWait < 1) waitHintRef.current = `${t("The sun catches the lure's flash.")} ${waitHintRef.current}`;
+    if (flashWait < 1) reasons.unshift(t("The sun catches the lure's flash."));
     // After dark the fish hunt by sound, and a topwater's gurgle carries.
     const nightTopwaterWait = topwaterNightWaitMul(isTopwater(lureRef?.current), hour);
-    if (nightTopwaterWait < 1) waitHintRef.current = `${t("In the dark the fish hunt by sound, and they hear the topwater.")} ${waitHintRef.current}`;
+    if (nightTopwaterWait < 1) reasons.unshift(t("In the dark the fish hunt by sound, and they hear the topwater."));
     // Worms crawl out after dark, so live bait draws a bite sooner at night.
     const nightWait = wormNightWaitMul(lureRef?.current, hour);
-    if (nightWait < 1) waitHintRef.current = `${t("Worms crawl out after dark, and the fish are looking for one.")} ${waitHintRef.current}`;
+    if (nightWait < 1) reasons.unshift(t("Worms crawl out after dark, and the fish are looking for one."));
     // Fish on a rise are taking insects off the top, and a fly matches the hatch.
     const hatchWait = flyHatchWaitMul(lureRef?.current, castRiseRef.current);
-    if (hatchWait < 1) waitHintRef.current = `${t("The fly matches what they're rising to.")} ${waitHintRef.current}`;
+    if (hatchWait < 1) reasons.unshift(t("The fly matches what they're rising to."));
     // In rain or fog the fish can barely see, but they feel a spinner's blade thump.
     const thumpWait = spinnerThumpWaitMul(lureRef?.current, sky);
-    if (thumpWait < 1) waitHintRef.current = `${t("The fish can't see far, but they feel the spinner's blade thump.")} ${waitHintRef.current}`;
+    if (thumpWait < 1) reasons.unshift(t("The fish can't see far, but they feel the spinner's blade thump."));
     // A jig hops down the drop-off's ledge, where the fish hold.
     const jigWait = jigWaitMul(lureRef?.current, spotRef.current);
-    if (jigWait < 1) waitHintRef.current = `${t("The jig hops down the ledge.")} ${waitHintRef.current}`;
+    if (jigWait < 1) reasons.unshift(t("The jig hops down the ledge."));
     // In fall the fish fatten up for winter and go after a big meal.
     const fallWait = fallBigLureWaitMul(lureRef?.current, season);
-    if (fallWait < 1) waitHintRef.current = `${t("The fish are fattening up for winter and want a big meal.")} ${waitHintRef.current}`;
+    if (fallWait < 1) reasons.unshift(t("The fish are fattening up for winter and want a big meal."));
     // On a summer day the fish drop down to the cool water off the ledge.
     const heatWait = summerDeepWaitMul(spotRef.current, season, hour);
-    if (heatWait < 1) waitHintRef.current = `${t("The summer heat sends the fish down to the cool water off the ledge.")} ${waitHintRef.current}`;
+    if (heatWait < 1) reasons.unshift(t("The summer heat sends the fish down to the cool water off the ledge."));
     // In spring the reeds' shallows warm first, and the fish crowd in.
     const shallowsWait = springShallowsWaitMul(spotRef.current, season);
-    if (shallowsWait < 1) waitHintRef.current = `${t("The shallows by the reeds warm first in spring, and the fish crowd in.")} ${waitHintRef.current}`;
+    if (shallowsWait < 1) reasons.unshift(t("The shallows by the reeds warm first in spring, and the fish crowd in."));
     // In winter the cold slows the fish, and a slow jig is what they still chase.
     const winterWait = jigWinterWaitMul(lureRef?.current, season);
-    if (winterWait < 1) waitHintRef.current = `${t("The cold water slows the fish, but they still chase a slow jig.")} ${waitHintRef.current}`;
+    if (winterWait < 1) reasons.unshift(t("The cold water slows the fish, but they still chase a slow jig."));
     // A fly or streamer swings down the inlet's current to the trout holding there.
     const driftWait = flyDriftWaitMul(lureRef?.current, spotRef.current);
-    if (driftWait < 1) waitHintRef.current = `${t("The current swings the fly down to the fish.")} ${waitHintRef.current}`;
+    if (driftWait < 1) reasons.unshift(t("The current swings the fly down to the fish."));
     // A crankbait bangs off the point's rocks, and the erratic bump draws a reaction bite.
     const rockWait = crankRockWaitMul(lureRef?.current, spotRef.current);
-    if (rockWait < 1) waitHintRef.current = `${t("The crankbait bangs off the rocks.")} ${waitHintRef.current}`;
+    if (rockWait < 1) reasons.unshift(t("The crankbait bangs off the rocks."));
+    waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
