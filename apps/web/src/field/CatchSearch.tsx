@@ -14,7 +14,8 @@ import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
-import { noteText, outingNameById } from "./format";
+import { noteText, outingNameById, toLocalInput } from "./format";
+import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
@@ -67,6 +68,8 @@ const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekor
 const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwszy"].map((word) => normalize(word)));
 /** "big": the fish bigger than their kind's typical size, by the measure each was logged with. */
 const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "duza", "duzy"].map((word) => normalize(word)));
+/** "loose": fish left off an outing that water had that day, the ones "Add this fish to it" would file. */
+const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -189,6 +192,9 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     }
     const ids = new Set([...first.values()].map((entry) => entry.id));
     return catchesNewestFirst(book).filter((entry) => ids.has(entry.id));
+  }
+  if (LOOSE_WORDS.has(normalize(needle))) {
+    return catchesNewestFirst(book).filter((entry) => !(entry.tripId && tripById(book, entry.tripId)) && !Number.isNaN(Date.parse(entry.caughtAt)) && tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt))));
   }
   if (RECORD_WORDS.has(normalize(needle))) {
     const badges = bookBadges(book);
@@ -494,7 +500,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}

@@ -1,11 +1,12 @@
-import { isLureLabel, localDate, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
+import { isLureLabel, localDate, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { pieceKey } from "./pieceKey";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught;
- * `since`: the outings it went on after that day. All three set when the piece took any.
+ * `since`: the outings it went on after that day. All three set when the piece took any. `largest`: its biggest fish, by
+ * weight when any was weighed, else by length, once it took two or more.
  */
-export type PieceRecord = { label: string; outings: number; fish: number; lure?: string; lastAt?: string; since?: number };
+export type PieceRecord = { label: string; outings: number; fish: number; lure?: string; lastAt?: string; since?: number; largest?: { entry: CatchEntry; by: "weight" | "length" } };
 
 /**
  * Each lure packed for outings up to `today`: how many lists it was on, and the fish in the book logged under its
@@ -33,14 +34,18 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       }
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
       // The newest fish under any spelling of the piece: "Spinnerbaits" last week still counts for "Spinnerbait".
-      const lastAt = [...spellings.values()].flat().reduce<string | undefined>((newest, entry) => (!newest || Date.parse(entry.caughtAt) > Date.parse(newest) ? entry.caughtAt : newest), undefined);
+      const all = [...spellings.values()].flat();
+      const lastAt = all.reduce<string | undefined>((newest, entry) => (!newest || Date.parse(entry.caughtAt) > Date.parse(newest) ? entry.caughtAt : newest), undefined);
       const lastDay = lastAt ? localDate(new Date(lastAt)) : "";
       // Today's outing counts once it is over; until then it may still bring a fish.
       const since = [...row.trips].filter((id) => {
         const date = dateOf.get(id) ?? "";
         return date > lastDay && date < today;
       }).length;
-      return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, since } : {}) };
+      // Across every spelling, as "last fish" is: one fish is its own biggest and says nothing.
+      const bests = all.length >= 2 ? personalBests({ spots: [], trips: [], catches: all }) : null;
+      const largest = bests?.heaviest ? { entry: bests.heaviest, by: "weight" as const } : bests?.longest ? { entry: bests.longest, by: "length" as const } : undefined;
+      return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, since } : {}), ...(largest ? { largest } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));
 }
