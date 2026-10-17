@@ -26,7 +26,7 @@ import {
   type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -441,7 +441,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky));
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky));
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -470,6 +470,7 @@ export function useFishingGame(
       const stream = currentTireMul(species.id, spotRef.current) >= 1 ? "" : `${t("It turns its side to the current and fights it, so it tires slower.")} `;
       const fed = fallFeedTireMul(season, species.id) >= 1 ? "" : `${t("It has fed hard for winter and is at full strength, so it tires slower.")} `;
       const murky = rainHunterTireMul(sky, species.id) >= 1 ? "" : `${t("It hunts by smell in the murky rain water and fights at full strength, so it tires slower.")} `;
+      const basking = summerStrengthTireMul(season, species.id) >= 1 ? "" : `${t("It thrives in the warm summer water and is at its strongest, so it tires slower.")} `;
       const spent = spentTireMul(season, species.id) <= 1 ? "" : `${t("It's worn from spawning, so it tires sooner.")} `;
       const flood = floodedInlet(spotRef.current, season, sky) ? `${t("The swollen inlet pulls harder on a slack line.")} ` : "";
       const warm = rainCooled(season, species.id, sky) ? `${t("The rain has cooled the water, so it keeps its strength.")} ` : deepCooled(season, species.id, spotRef.current) ? `${t("It has found cool water down deep, so it keeps its strength.")} ` : warmTireMul(season, species.id, sky, spotRef.current) <= 1 ? "" : `${t("The warm water leaves it short of air, so it tires sooner.")} `;
@@ -485,7 +486,7 @@ export function useFishingGame(
       }
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
       setHint(
-        again + heavy + cold + warm + run + nest + hunter + dim + upriver + stream + fed + murky + spent + flood +
+        again + heavy + cold + warm + run + nest + hunter + dim + upriver + stream + fed + murky + basking + spent + flood +
         (!strike
           ? t("{line}. Ease off when it runs.", { line })
           : solid
