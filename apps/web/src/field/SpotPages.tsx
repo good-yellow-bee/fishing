@@ -44,7 +44,7 @@ import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MergeWater } from "./MergeWater";
-import { upcomingOwnTrips } from "./playLake";
+import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -57,6 +57,8 @@ export function SpotsPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingOwnTrips(book, today);
+  // The game's lake last: it is played, not fished.
+  const rows = spotsByLastFish(book).sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
 
   return (
     <div className="sheet">
@@ -74,7 +76,7 @@ export function SpotsPage() {
         <p className="empty">{t("No waters yet.")}</p>
       ) : (
         <div className="card-grid">
-          {spotsByLastFish(book).map((row) => (
+          {rows.map((row) => (
             <SpotCard
               key={row.spot.id}
               spot={row.spot}
@@ -139,9 +141,12 @@ export function SpotPage() {
           if (deleteSpot(spot.id)) navigate("/spots");
         }}
         aside={
-          <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">
-            {t("Log a catch here")}
-          </Link>
+          // The game's lake fills itself as it is played; nothing to log or plan by hand.
+          spot.id === PLAY_LAKE_ID ? undefined : (
+            <Link to={`/catches/new?spot=${spot.id}`} className="field-primary inline">
+              {t("Log a catch here")}
+            </Link>
+          )
         }
       >
         <p className="eyebrow">
@@ -156,7 +161,7 @@ export function SpotPage() {
               {t("Open on a map")}
             </a>
           </p>
-        ) : placeFor(spot.id) ? null : (
+        ) : placeFor(spot.id) || spot.id === PLAY_LAKE_ID ? null : (
           // A sample water already has its pin on the map; any other water with no place is offered one.
           <p className="meta spot-place">
             <Link to={`/spots/${spot.id}/edit#place`}>{t("Note where it is")}</Link>
@@ -179,14 +184,14 @@ export function SpotPage() {
 
       <div className="section-head">
         <h2>{t("Outings")}</h2>
-        <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>
+        {spot.id === PLAY_LAKE_ID ? null : <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>}
       </div>
       {average ? <p className="meta">{average}</p> : null}
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
       {split ? (
         <p className="meta weekend-split">{t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}</p>
       ) : null}
-      {streak.dryNow > 1 && streak.best > 0 ? <p className="meta dry-here">{t("Outings here since the last fish: {count}", { count: streak.dryNow })}</p> : null}
+      {streak.dryNow > 1 && streak.best > 0 ? <p className="meta dry-here">{t("Days out here since the last fish: {count}", { count: streak.dryNow })}</p> : null}
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}

@@ -533,7 +533,7 @@ export const PL_FIELD: PlBook = {
   "Most kinds in one day: {count}, on {day}": "Najwięcej gatunków jednego dnia: {count} ({day})",
   "Most outings in a row without a fish: {count}": "Najwięcej wypraw bez ryby pod rząd: {count}",
   "Outings since your last fish: {count}": "Wyprawy od ostatniej ryby: {count}",
-  "Outings here since the last fish: {count}": "Wyprawy tutaj od ostatniej ryby: {count}",
+  "Days out here since the last fish: {count}": "Dni nad wodą tutaj od ostatniej ryby: {count}",
   "Not yet this year:": "W tym roku jeszcze nie:",
   "Which kinds": "Które gatunki",
   "All kinds": "Wszystkie gatunki",

@@ -58,6 +58,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
+import { isSampleCatch } from "./bookCopy";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater, nearestWater } from "./spotOrder";
@@ -266,7 +267,9 @@ function CatchForm() {
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
   // The kind's biggest at the water picked, once it differs from the biggest anywhere.
-  const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => entry.spotId === spotId) }, species, t, existing?.id) : null;
+  // Sample fish only when the best anywhere is one too (a book still all samples for this kind).
+  const sampleBest = [bestSoFar?.longest, bestSoFar?.heaviest].some((best) => best && isSampleCatch(best.id));
+  const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => entry.spotId === spotId && (sampleBest || !isSampleCatch(entry.id))) }, species, t, existing?.id) : null;
   const hereDiffers = hereBest && (hereBest.longest?.id !== bestSoFar?.longest?.id || hereBest.heaviest?.id !== bestSoFar?.heaviest?.id);
   // A new fish on a water with an outing planned today (or last night, in the small hours) files under that outing.
   const [tripId, setTripId] = useState(() =>
@@ -1265,7 +1268,8 @@ function CatchView() {
         <p className="eyebrow">
           <Link to="/catches">{t("Catches")}</Link>
           {" · "}
-          <Link to={speciesLink(entry.species)}>
+          {/* A game fish's kind opens the game's fish of that kind, as it is counted here. */}
+          <Link to={onPage.some((other) => other.id === entry.id) || !spot ? speciesLink(entry.species) : findWithLink(exactTerm("water", spot.name), exactTerm("species", t(entry.species)))}>
             {eyebrowKind.length > 1
               ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: eyebrowKind.length })
               : t("All {species}", { species: t(entry.species) })}

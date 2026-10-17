@@ -358,7 +358,8 @@ function TripView() {
       ) : null}
       {/* Before going back: what was learned there last time, in the angler's own words. */}
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
-      <SpeciesChips catches={catches} />
+      {/* A game day's kinds open its own fish there, not the kind's page of the angler's own. */}
+      <SpeciesChips catches={catches} within={play ? spot?.name : undefined} />
       {newKinds.length > 0 ? (
         <p className="meta new-kinds">
           {t("First time at this water:")}{" "}
