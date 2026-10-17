@@ -1410,7 +1410,8 @@ button.field-primary:disabled {
   .catch-steps,
   .catch-list-at,
   .trip-again,
-  .field a[href^="https://www.openstreetmap.org/"],
+  .field a[href^="https://www.openstreetmap.org/"]:not(.map-coord-link),
+  .map-link,
   .tackle-block:has(> .empty) {
     display: none !important;
   }

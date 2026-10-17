@@ -228,10 +228,10 @@ function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   );
 }
 
-/** A gain in size, with a place more than a size shows, so a small step does not read "+0 cm" or "+0 lb". */
 /**
  * How much a step added, worked out from the two sizes as the page shows them, so "57 cm → 71 cm" reads "+14 cm"
- * rather than the exact inches' "+13,5 cm".
+ * rather than the exact inches' "+13,5 cm". Two sizes that show the same give the exact gain with a place more,
+ * so a small step does not read "+0 cm".
  */
 function gainText(from: Measure, to: Measure): string {
   const metric = getUnits() === "metric";
@@ -247,7 +247,10 @@ function gainText(from: Measure, to: Measure): string {
   const round = (value: number, places: number) => Math.round(value * 10 ** places) / 10 ** places;
   const diff = round(b, bDigits) - round(a, aDigits);
   const unit = to.kind === "length" ? (metric ? "cm" : "in") : metric ? "kg" : "lb";
-  return `${num(diff, digits)} ${unit}`;
+  if (round(diff, digits) > 0) return `${num(diff, digits)} ${unit}`;
+  let places = digits + 1;
+  while (places < 4 && round(b - a, places) <= 0) places += 1;
+  return `${num(b - a, places)} ${unit}`;
 }
 
 /** The fish of the kind that were both measured and weighed, shortest first: how weight goes with length. */

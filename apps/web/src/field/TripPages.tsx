@@ -377,12 +377,12 @@ function TripView() {
               {t(WATER_LABELS[spot.waterType])}
               {/* On the way there: the water's pin, one tap from the outing. */}
               {spot.place ? (
-                <>
+                <span className="map-link">
                   {" · "}
                   <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
                     {t("Open on a map")}
                   </a>
-                </>
+                </span>
               ) : null}
             </>
           ) : null}

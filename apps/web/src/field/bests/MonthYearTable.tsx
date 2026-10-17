@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { CatchEntry } from "@stillwater/shared";
 import { t } from "../../i18n";
+import { fishCountLabel } from "../format";
 import { findLink } from "../findLinks";
 import { catchMonth, monthName } from "../tripMonths";
 
@@ -20,8 +21,10 @@ export function monthYearCounts(catches: readonly CatchEntry[]): { years: string
 }
 
 /** The same month set against itself across the years, as a table a screen reader can walk; each count opens its fish. */
-export function MonthYearTable({ catches }: { catches: readonly CatchEntry[] }) {
+export function MonthYearTable({ catches, today = new Date() }: { catches: readonly CatchEntry[]; today?: Date }) {
   const { years, counts } = monthYearCounts(catches);
+  // Months still to come are left blank, not counted as none.
+  const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   if (years.length < 2) return null;
   return (
     <section>
@@ -49,8 +52,23 @@ export function MonthYearTable({ catches }: { catches: readonly CatchEntry[] }) 
                 <tr key={mm}>
                   <th scope="row">{monthName(`2026-${mm}`).split(" ")[0]}</th>
                   {years.map((year) => {
-                    const count = counts.get(`${year}-${mm}`) ?? 0;
-                    return <td key={year}>{count > 0 ? <Link to={findLink(`${year}-${mm}`)}>{count}</Link> : <><span aria-hidden="true">–</span><span className="sr-only">{t("None")}</span></>}</td>;
+                    const month = `${year}-${mm}`;
+                    const count = counts.get(month) ?? 0;
+                    if (count === 0 && month > thisMonth) return <td key={year} />;
+                    return (
+                      <td key={year}>
+                        {count > 0 ? (
+                          <Link to={findLink(month)} aria-label={`${monthName(month)}: ${fishCountLabel(count)}`}>
+                            {count}
+                          </Link>
+                        ) : (
+                          <>
+                            <span aria-hidden="true">–</span>
+                            <span className="sr-only">{t("None")}</span>
+                          </>
+                        )}
+                      </td>
+                    );
                   })}
                 </tr>
               );

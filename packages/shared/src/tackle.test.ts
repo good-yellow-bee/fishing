@@ -127,7 +127,7 @@ describe("tackle", () => {
     for (const lure of ["Obrotówka", "Wahadłówka", "Woblery", "Gumka 7 cm", "Kogut", "Mucha sucha", "Twister", "Rosówka"]) {
       expect(isLureLabel(lure), lure).toBe(true);
     }
-    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz"]) {
+    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz", "Obcinaczki", "Nożyczki"]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }
   });

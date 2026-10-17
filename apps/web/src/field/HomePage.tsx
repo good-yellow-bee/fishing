@@ -186,12 +186,12 @@ export function HomePage() {
               ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
               : t("Add an outing when you know the day")}
             {next && nextSpot?.place ? (
-              <>
+              <span className="map-link">
                 {" · "}
                 <a href={osmLink(nextSpot.place.lat, nextSpot.place.lng)} target="_blank" rel="noreferrer">
                   {t("Open on a map")}
                 </a>
-              </>
+              </span>
             ) : null}
           </small>
           {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
