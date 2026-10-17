@@ -115,6 +115,7 @@ export function SpotsPage() {
         {rows.length > 2 ? (
           <div className="spot-order">
             <ChoiceRow<SpotOrder>
+              wrap
               label={t("Order")}
               value={order}
               options={[

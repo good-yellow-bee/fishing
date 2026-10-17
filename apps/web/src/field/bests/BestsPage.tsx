@@ -257,7 +257,7 @@ export function BestsPage() {
 
           <section>
             <div className="section-head">
-              <h2>{t("By species")}</h2>
+              <h2 id="by-species" tabIndex={-1}>{t("By species")}</h2>
             </div>
             <SameKinds />
             <div className="card-grid">

@@ -350,6 +350,7 @@ export function BookFile() {
           type="file"
           accept="application/json,.json"
           tabIndex={-1}
+          aria-hidden="true"
           aria-label={t("Field log file")}
           onChange={(event) => {
             void onFile(event);

@@ -36,12 +36,13 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   return (
     <section className="tackle-trip">
       <div className="section-head">
-        <h2>
+        {/* Under "Coming up". */}
+        <h3 className="tackle-trip-title">
           <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
-        </h2>
+        </h3>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
-          {spot ? ` · ${spot.name}` : ""}
+          {spot && spot.name !== outingName(trip, book.spots) ? ` · ${spot.name}` : ""}
         </span>
       </div>
       <TackleList
@@ -199,7 +200,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
-          {spot ? ` · ${spot.name}` : ""}
+          {spot && spot.name !== outingName(trip, book.spots) ? ` · ${spot.name}` : ""}
           {` · ${fishCountLabel(fish.length)}`}
         </span>
       </summary>

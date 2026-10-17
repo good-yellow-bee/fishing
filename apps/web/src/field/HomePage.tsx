@@ -206,7 +206,7 @@ export function HomePage() {
           <span className="eyebrow">{t("Fish")}</span>
           <strong>
             {/* The angler's own: game fish are left out of the count and of the list it opens. */}
-            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: withoutPlayLake(book, "", book.catches).trim() }).toString()}` : "/catches"}>{real.length}</Link>
+            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: withoutPlayLake(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
           </strong>
           {book.catches.length > 0 ? (
             <small>
@@ -232,7 +232,7 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Waters")}</span>
           <strong>
-            <Link to="/spots">{ownWaters}</Link>
+            <Link to="/spots" aria-label={tn(ownWaters, "{n} water", "{n} waters")}>{ownWaters}</Link>
           </strong>
           {ownOutings > 0 ? (
             <small>
