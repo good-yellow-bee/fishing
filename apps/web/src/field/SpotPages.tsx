@@ -38,6 +38,7 @@ import { tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
+import { countedFish } from "./milestones";
 import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
@@ -51,14 +52,39 @@ function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string)
   return trip ? t("Next outing: {when}", { when: tripWhen(trip.date, today, tomorrow) }) : null;
 }
 
+/** How the water list is ordered, kept for the next visit. */
+type SpotOrder = "fish" | "name" | "most";
+const SPOT_ORDER_KEY = "stillwater.field-log.spot-order.v1";
+
+function readSpotOrder(): SpotOrder {
+  try {
+    const stored = localStorage.getItem(SPOT_ORDER_KEY);
+    return stored === "name" || stored === "most" ? stored : "fish";
+  } catch {
+    return "fish";
+  }
+}
+
 export function SpotsPage() {
   const { book } = useLogbook();
   useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingOwnTrips(book, today);
-  // The game's lake last: it is played, not fished.
-  const rows = spotsByLastFish(book).sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
+  const [order, setOrder] = useState(readSpotOrder);
+  const pickOrder = (next: SpotOrder) => {
+    setOrder(next);
+    try {
+      localStorage.setItem(SPOT_ORDER_KEY, next);
+    } catch {
+      // Storage blocked: the order holds for this visit.
+    }
+  };
+  // Last fish first by default, else by name or by the most fish; the game's lake last, as it is played, not fished.
+  const rows = spotsByLastFish(book);
+  if (order === "name") rows.sort((a, b) => a.spot.name.localeCompare(b.spot.name, locale()));
+  if (order === "most") rows.sort((a, b) => b.fishCount - a.fishCount);
+  rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
 
   return (
     <div className="sheet">
@@ -75,6 +101,21 @@ export function SpotsPage() {
       {book.spots.length === 0 ? (
         <p className="empty">{t("No waters yet.")}</p>
       ) : (
+        <>
+        {rows.length > 2 ? (
+          <div className="spot-order">
+            <ChoiceRow<SpotOrder>
+              label={t("Order")}
+              value={order}
+              options={[
+                { id: "fish", label: t("Last fish") },
+                { id: "name", label: t("Name") },
+                { id: "most", label: t("Most fish") },
+              ]}
+              onChange={pickOrder}
+            />
+          </div>
+        ) : null}
         <div className="card-grid">
           {rows.map((row) => (
             <SpotCard
@@ -87,6 +128,7 @@ export function SpotsPage() {
             />
           ))}
         </div>
+        </>
       )}
     </div>
   );
@@ -125,6 +167,17 @@ export function SpotPage() {
   const kindsDay = mostKindsDay({ ...book, catches });
   const here = exactTerm("water", spot.name);
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
+  // This season here against last season up to the same date, once last season had begun by now.
+  const ownHere = countedFish(catches);
+  const seasonSoFar = (year: string) => ({
+    outings: trips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && trip.date <= today).length,
+    fish: ownHere.filter((entry) => {
+      const day = localDate(new Date(entry.caughtAt));
+      return day.startsWith(`${year}-`) && day.slice(5) <= today.slice(5);
+    }).length,
+  });
+  const thisSeason = seasonSoFar(today.slice(0, 4));
+  const lastSeason = seasonSoFar(String(Number(today.slice(0, 4)) - 1));
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (
@@ -190,6 +243,16 @@ export function SpotPage() {
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
       {split ? (
         <p className="meta weekend-split">{t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}</p>
+      ) : null}
+      {spot.id !== PLAY_LAKE_ID && lastSeason.outings + lastSeason.fish > 0 ? (
+        <p className="meta season-pace">
+          {t("This year here: {outings}, {fish} · last year by now: {lastOutings}, {lastFish}", {
+            outings: tn(thisSeason.outings, "{n} outing", "{n} outings"),
+            fish: fishCountLabel(thisSeason.fish),
+            lastOutings: tn(lastSeason.outings, "{n} outing", "{n} outings"),
+            lastFish: fishCountLabel(lastSeason.fish),
+          })}
+        </p>
       ) : null}
       {streak.dryNow > 1 && streak.best > 0 ? <p className="meta dry-here">{t("Days out here since the last fish: {count}", { count: streak.dryNow })}</p> : null}
       {top ? (

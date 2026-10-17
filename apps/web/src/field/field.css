@@ -1811,3 +1811,8 @@ button.field-primary:disabled {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.85em;
 }
+
+/* Spots: how the water list is ordered. */
+.spot-order {
+  margin: 0 0 14px;
+}
