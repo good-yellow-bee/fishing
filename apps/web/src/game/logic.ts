@@ -301,6 +301,14 @@ export function fallBigLureWaitMul(lure: string | undefined, season: LakeSeason 
   return season === "fall" && !!lure?.trim() && favorsLargeFish(lure) ? FALL_BIG_LURE_WAIT : 1;
 }
 
+/** On a summer day the shallows run warm and the fish drop down to the cool water off the ledge, so a cast to the drop-off draws the bite sooner. */
+export const SUMMER_DEEP_WAIT = 0.85;
+
+/** How the season and hour stretch the wait at the drop-off: sooner in the heat of a summer day, else 1. */
+export function summerDeepWaitMul(spot: string, season: LakeSeason | undefined, hour: LakeHour) {
+  return season === "summer" && hour === "day" && spot === "dropoff" ? SUMMER_DEEP_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
