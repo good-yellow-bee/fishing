@@ -10,6 +10,7 @@ const DELETED = {
   sample: "Sample book restored.",
   blank: "The sample waters and fish are gone. Add your first water to begin.",
   rename: "Fish renamed.",
+  merge: "Waters merged.",
 } as const;
 
 /** After a delete, a quiet bar with one way back, until the book changes again. */

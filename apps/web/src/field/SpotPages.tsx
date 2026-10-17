@@ -38,6 +38,7 @@ import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
+import { MergeWater } from "./MergeWater";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -217,6 +218,7 @@ export function SpotPage() {
           )}
         </PagedCatches>
       )}
+      <MergeWater spotId={spot.id} />
     </div>
   );
 }
