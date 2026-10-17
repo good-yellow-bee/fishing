@@ -1242,7 +1242,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT197~~ | ~~Night hunters: a catfish or burbot hooked at night is out hunting at full strength, so it tires only 0.85x as fast, and the hookset says so~~ (#823) | fight | S |
 | ~~GT198~~ | ~~Trophy run: a trophy-sized fish of any kind makes a long first run, like a carp, and the hookset says so; news 2026-10-17-game04~~ (#825) | fight | S |
 | ~~GT199~~ | ~~Rain cools summer water: in a summer rain a cold-water fish keeps its strength instead of tiring 1.2x faster, and the hookset says so~~ (#827) | fight | S |
-| GT200 | Cool water down deep: in summer a cold-water fish hooked off the Drop-off keeps its strength instead of tiring 1.2x faster, and the hookset says so; news 2026-10-17-game05 | fight | S |
+| ~~GT200~~ | ~~Cool water down deep: in summer a cold-water fish hooked off the Drop-off keeps its strength instead of tiring 1.2x faster, and the hookset says so; news 2026-10-17-game05~~ (#829) | fight | S |
+| GT201 | Burbot in winter: a burbot spawns under the ice and thrives in the cold, so in winter it keeps its strength instead of tiring 1.25x faster, and the hookset says so | fight | S |
 
 ## Risks / open questions for the owner
 

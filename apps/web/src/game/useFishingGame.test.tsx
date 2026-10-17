@@ -336,6 +336,16 @@ describe("useFishingGame lost fight", () => {
     expect(hint()?.includes("The cold water has it sluggish, so it tires sooner.")).toBe(cold);
   });
 
+  it("says a burbot hooked in winter thrives in the cold", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "burbot")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()).toContain("It thrives in the cold, so it keeps its strength.");
+    expect(hint()).not.toContain("sluggish");
+  });
+
   it("says a jumper hooked in winter won't jump", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
