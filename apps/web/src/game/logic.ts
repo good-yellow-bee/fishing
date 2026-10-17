@@ -419,6 +419,14 @@ export function streamerLedgeWaitMul(lure: string | undefined, spot: string) {
   return spot === "dropoff" && !!lure?.trim() && lureClass(lure).id === "streamer" ? STREAMER_LEDGE_WAIT : 1;
 }
 
+/** The inlet's current tumbles a worm downstream like food washed in from the stream, and the fish waiting there take it sooner. */
+export const WORM_INLET_WAIT = 0.85;
+
+/** How the bank stretches the wait on a worm: sooner at the inlet, else 1. */
+export function wormInletWaitMul(lure: string | undefined, spot: string) {
+  return spot === "inlet" && !!lure?.trim() && lureClass(lure).id === "worm" ? WORM_INLET_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
