@@ -1272,7 +1272,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT227~~ | ~~Bluegill on the nest: a bluegill hooked at the Trzciny or Pomost in spring is fanning its nest and tires slower, like the bass, and the hookset hint says so~~ (#917) | fight | S |
 | ~~GT228~~ | ~~Brook trout in the current: a brook trout hooked at the Ujście turns its side to the current like the rainbow and tires slower, and the hookset hint says so~~ (#918) | fight | S |
 | ~~GT229~~ | ~~Crappie at twilight: a black crappie hooked at dawn or dusk hunts hardest in the low light like the walleye and tires slower, and the hookset hint says so; news card game13~~ (#919) | fight | S |
-| GT230 | Perch spent in spring: a perch hooked in spring is worn from spawning like the pike and walleye and tires sooner, and the hookset hint says so | fight | S |
+| ~~GT230~~ | ~~Perch spent in spring: a perch hooked in spring is worn from spawning like the pike and walleye and tires sooner, and the hookset hint says so~~ (#920) | fight | S |
+| GT231 | Burbot by scent in rain: a burbot hooked in rain hunts by smell in the murky water like the catfish and tires slower, and the hookset hint says so | fight | S |
 
 ## Risks / open questions for the owner
 
