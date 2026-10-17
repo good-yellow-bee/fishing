@@ -92,10 +92,13 @@ function measureOfBest(entry: CatchEntry | null, kind: "length" | "weight"): str
   return measure ? measureText(measure) : "";
 }
 
-const SPECIES = [...FISH].map((fish) => fish.name);
+/** Common European fish the game's lake doesn't hold, so a Polish angler's okoń or sandacz is a known kind with its records. */
+export const FIELD_SPECIES = ["European perch", "Zander", "Common bream", "Roach", "Chub", "Tench", "Asp", "Wels catfish", "Crucian carp", "Rudd", "Ide", "Brown trout", "Grayling", "Barbel", "European eel"];
 
-/** A fish name from the shared list; its Polish line lives with the other fish names. */
-const SPECIES_HINT = "Yellow perch";
+const SPECIES = [...[...FISH].map((fish) => fish.name), ...FIELD_SPECIES];
+
+/** A fish name from the list above; its Polish line lives with the field log's. */
+const SPECIES_HINT = "European perch";
 
 const BAITS = [
   "#5 Mepps",
