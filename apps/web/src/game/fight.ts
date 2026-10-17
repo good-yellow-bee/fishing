@@ -210,9 +210,17 @@ export const BOAT_RUN = 0.65;
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
-/** How the season speeds a fish's tiring: faster in winter, else 1. */
-export function seasonTireMul(season: string | undefined) {
-  return season === "winter" ? WINTER_TIRE : 1;
+/** Cold lovers: a burbot spawns under winter's ice and stays lively in the cold. */
+export const COLD_LOVERS: ReadonlySet<string> = new Set(["burbot"]);
+
+/** Whether a fish thrives in winter's cold rather than going sluggish. */
+export function thrivesInCold(season: string | undefined, speciesId?: string) {
+  return season === "winter" && speciesId !== undefined && COLD_LOVERS.has(speciesId);
+}
+
+/** How the season speeds a fish's tiring: faster in winter unless it's a cold lover, else 1. */
+export function seasonTireMul(season: string | undefined, speciesId?: string) {
+  return season === "winter" && !thrivesInCold(season, speciesId) ? WINTER_TIRE : 1;
 }
 /** Cold-water fish: summer's warm water holds little air for them, so they tire sooner. */
 export const COLDWATER: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "salmon", "lake-whitefish"]);
