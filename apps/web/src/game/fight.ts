@@ -277,6 +277,15 @@ export const NIGHT_HUNTER_TIRE = 0.85;
 export function nightTireMul(hour: string | undefined, speciesId: string) {
   return hour === "night" && NIGHT_HUNTERS.has(speciesId) ? NIGHT_HUNTER_TIRE : 1;
 }
+/** Twilight hunters: their eyes are made for low light, so they hunt hardest at dawn and dusk. */
+export const TWILIGHT_HUNTERS: ReadonlySet<string> = new Set(["walleye"]);
+/** At dawn or dusk a twilight hunter tires only this fast on a run or against the reel. */
+export const TWILIGHT_HUNTER_TIRE = 0.85;
+
+/** How the low light slows a twilight hunter's tiring: slower at dawn and dusk, else 1. */
+export function twilightTireMul(hour: string | undefined, speciesId: string) {
+  return (hour === "dawn" || hour === "dusk") && TWILIGHT_HUNTERS.has(speciesId) ? TWILIGHT_HUNTER_TIRE : 1;
+}
 /** Early spawners: they spawn as the ice goes out and are worn from it through spring. */
 export const EARLY_SPAWNERS: ReadonlySet<string> = new Set(["pike", "walleye"]);
 /** In spring an early spawner, worn from spawning, tires this much faster on a run or against the reel. */

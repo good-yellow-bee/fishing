@@ -360,6 +360,20 @@ describe("useFishingGame lost fight", () => {
     expect(hint()?.includes("It's worn from spawning, so it tires sooner.")).toBe(spent);
   });
 
+  it.each([
+    ["dusk", "walleye", true],
+    ["day", "walleye", false],
+    ["dusk", "pike", false],
+  ] as const)("says a fish hooked at %s (%s) hunts hardest in the low light: %s", (hour, id, dim) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, hour);
+    vi.mocked(waitMs).mockReturnValueOnce(2_000);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It hunts hardest in the low light, so it tires slower.")).toBe(dim);
+  });
+
   it("says a burbot hooked in winter thrives in the cold", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "burbot")!);
