@@ -900,6 +900,28 @@ describe("level unlock integration", () => {
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^tiger-muskie\|/);
   });
 
+  it.each([
+    ["Woolly bugger", true],
+    ["Nightcrawler", false],
+  ] as const)("lets a pike that missed a %s chase it for one more hit: %s", (lure, chases) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, lure);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("hookset:none");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    if (!chases) {
+      expect(phase()).toBe("result:miss");
+      return;
+    }
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toBe("It missed, but the streamer keeps it chasing. Watch for it to hit again…");
+    act(() => vi.advanceTimersByTime(FOLLOW_MS));
+    expect(phase()).toBe("hookset:none");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("result:miss");
+  });
+
   it("brings a fish up sooner when a sitting topwater lure is popped, for the first two pops", () => {
     const untilBite = (pops: number) => {
       const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
