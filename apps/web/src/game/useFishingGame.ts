@@ -11,6 +11,7 @@ import {
   parseStance,
   FISH,
   isTrophyWeight,
+  lureClass,
   resolveCast,
   SPOT_LABELS,
   type CastFail,
@@ -37,7 +38,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
 import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, hookWindowMs, isLightHook, isPerfectCast, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, waitMs, type School } from "./logic";
 import { localId } from "./localId";
-import { biteStyle, FOLLOWERS, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
+import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
 
 /** Milliseconds as seconds with two decimals, in the angler's own number format. */
@@ -167,6 +168,11 @@ function strikeCall(style: BiteStyle) {
   if (style === "snatch") return t("It snatched it — strike fast!");
   if (style === "roll") return t("It rolled on the bait — strike!");
   return t("NOW — strike!");
+}
+
+/** Whether the lure tied on is a topwater one, which fish hit at the top. */
+export function isTopwater(lure: string | undefined) {
+  return lure !== undefined && lureClass(lure).id === "popper";
 }
 
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
@@ -464,7 +470,10 @@ export function useFishingGame(
     const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
-    const nibbles = nibblePlan(wait, Math.random, biteStyle(species.id));
+    // A topwater lure is hit at the top, so every fish takes it without a nibble.
+    const topwater = isTopwater(lureRef?.current);
+    const style = takeStyle(species.id, topwater);
+    const nibbles = nibblePlan(wait, Math.random, style);
     const stolen = stealsBait(species.id, nibbles.length);
     const arm = () => {
       let secondTake = false;
@@ -504,10 +513,9 @@ export function useFishingGame(
         if (hour === "night") fx.rodBell("ring");
         fx.haptic("bite");
         setPhaseBoth("hookset");
-        setHint(strikeCall(biteStyle(species.id)));
+        setHint(topwater ? t("It blew up on the topwater — strike!") : strikeCall(style));
         const openWindow = () => {
           const heldMs = hookWindowMs(current.accuracy, mercyNow, anglerLevel(current.lifetimePoints));
-          const style = biteStyle(species.id);
           const windowMs = style === "light" ? Math.round(heldMs * LIGHT_HOLD) : style === "gulp" ? Math.round(heldMs * GULP_HOLD) : style === "snatch" ? Math.round(heldMs * SNATCH_HOLD) : heldMs;
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
           setStrikeWindowMs(windowMs);
@@ -519,7 +527,7 @@ export function useFishingGame(
               return;
             }
             // A bottom feeder that dropped the bait noses back for one more go before it leaves.
-            if (!secondTake && biteStyle(species.id) === "mouth") {
+            if (!secondTake && style === "mouth") {
               secondTake = true;
               secondTakeRef.current = true;
               setPhaseBoth("waiting");
@@ -548,7 +556,7 @@ export function useFishingGame(
             // How long it held on, so the angler learns the window they have.
             setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait after {time} s.", { time: seconds(windowMs) }), fish: bitten });
             // Hold result so the miss spring and the turn play out.
-            resetToIdle(biteStyle(species.id) === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under."), "result");
+            resetToIdle(style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under."), "result");
           }, windowMs);
         };
         openWindow();

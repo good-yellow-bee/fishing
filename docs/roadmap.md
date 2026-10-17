@@ -1195,7 +1195,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT150~~ | ~~A late strike (past 75% of the hook window) hooks light: reeled in the red, the hook pulls out like a soft mouth's; hint, fight card line, own loss message; news card~~ (#738) | game | S |
 | ~~GT151~~ | ~~The landed card says "Kept it on a light hook" for a fish landed after a late strike~~ (#740) | ui | S |
 | ~~GT152~~ | ~~The Strike card's timer bar runs for the fish's real hold (a perch's longer, a trout's shorter) and fades for the light-hook last quarter~~ (#742) | ui | S |
-| GT153 | Level 2 unlock (it had none): the Strike card's bar carries a mark where a strike stops hooking solid, wind-adjusted | levels | S |
+| ~~GT153~~ | ~~Level 2 unlock (it had none): the Strike card's bar carries a mark where a strike stops hooking solid, wind-adjusted~~ (#745) | levels | S |
+| GT154 | A topwater lure is hit at the top: every fish takes it like an ambush (no nibbles), with its own call and the big strike splash | game | S |
 
 ## Risks / open questions for the owner
 

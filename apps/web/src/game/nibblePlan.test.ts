@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { BAIT_THIEVES, biteStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealsBait } from "./nibblePlan";
+import { BAIT_THIEVES, biteStyle, takeStyle, LIFT_RISE, liftTilt, nibblePlan, RUN_PLUNGE, RUN_SLIDE, runSlide, STEAL_CHANCE, stealsBait } from "./nibblePlan";
 
 function seeded(seed: number) {
   let s = (seed * 48271 + 12345) % 2147483647;
@@ -117,5 +117,14 @@ describe("stealsBait", () => {
     expect(stealsBait("golden-shiner", 2, () => STEAL_CHANCE + 0.01)).toBe(false);
     expect(stealsBait("golden-shiner", 0, () => 0)).toBe(false);
     expect(stealsBait("perch", 2, () => 0)).toBe(false);
+  });
+});
+
+describe("a topwater lure", () => {
+  it("makes every fish's take an ambush, and leaves other lures to the fish", () => {
+    expect(takeStyle("carp", true)).toBe("ambush");
+    expect(takeStyle("crappie", true)).toBe("ambush");
+    expect(takeStyle("carp", false)).toBe("mouth");
+    expect(nibblePlan(5000, () => 0.5, takeStyle("carp", true))).toEqual([]);
   });
 });

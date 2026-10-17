@@ -87,6 +87,11 @@ export function stealsBait(speciesId: string, nibbles: number, rand: () => numbe
   return BAIT_THIEVES.has(speciesId) && nibbles > 0 && rand() < STEAL_CHANCE;
 }
 
+/** A topwater lure is hit at the top: any fish takes it like an ambush, with no nibble first. */
+export function takeStyle(speciesId: string, topwater: boolean): BiteStyle {
+  return topwater ? "ambush" : biteStyle(speciesId);
+}
+
 export function biteStyle(speciesId: string): BiteStyle {
   return BITE_STYLES[speciesId] ?? "usual";
 }

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17b";
+export const NEWS_ID = "2026-10-17c";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Tie on a topwater lure and fish hit it at the top: no nibble first, just a big splash, so strike the moment it blows up.",
   "Level 2 now opens something: from there the Strike card's bar carries a mark, and a strike before the bar shrinks past it hooks the fish solid.",
   "The bar on the Strike card now runs out when this fish lets go, longer for a perch and shorter for a trout, and it fades for the last quarter, where a strike only hooks the fish light.",
   "Strike late in the bite and the hook only just catches: keep that fish out of the red, or the hook pulls out like a soft mouth's. The fight card says so.",
