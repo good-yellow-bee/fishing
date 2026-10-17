@@ -59,7 +59,7 @@ type LogbookApi = {
   /** Clears the book for a player's own waters and fish, with the same undo as a delete. */
   startBlank: () => boolean;
   /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
-  changeBook: (kind: "rename", next: Logbook) => boolean;
+  changeBook: (kind: "rename" | "merge", next: Logbook) => boolean;
   /** Takes these photos off their catches, leaving the fish. */
   removePhotos: (ids: readonly string[]) => boolean;
   /** Why the last delete, filing, sample or undo didn't save, until the next one or a dismiss. */
@@ -74,7 +74,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename" | "merge";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 

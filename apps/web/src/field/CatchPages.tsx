@@ -1222,6 +1222,12 @@ function CatchView() {
           ) : null}
         </nav>
       ) : null}
+      {/* Outside a list of its kind, the steps can keep to this kind alone. */}
+      {kind.length > 1 && !list?.key.startsWith("species:") ? (
+        <p className="catch-list-at">
+          <Link to={catchLink(entry.id, `species:${entry.species}`)}>{t("Step through {species} only", { species: t(entry.species) })}</Link>
+        </p>
+      ) : null}
       {list ? (
         <p className="catch-list-at">
           <Link to={list.back}>{t("Back to this list, {at} of {count}", { at: listAt, count: list.rows.length })}</Link>
