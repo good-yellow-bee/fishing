@@ -319,6 +319,8 @@ export function makeFight(
   topwater = false,
   /** Hooked on a lure with treble hooks (a spinner, spoon or crankbait): a tearing hook holds longer. */
   trebles = false,
+  /** Winter's cold water: a jumper stays down and never leaps. */
+  cold = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -351,7 +353,7 @@ export function makeFight(
   let lastRunsLeft = isTrophyWeight(species, weight) ? 2 : 1;
   let turnedThisRun = false;
   let heldThroughLeap = false;
-  const leaper = LEAPERS.has(species.id);
+  const leaper = LEAPERS.has(species.id) && !cold;
   const breacher = BREACHERS.has(species.id);
   const tailWalker = TAIL_WALKERS.has(species.id);
   let walked = false;
