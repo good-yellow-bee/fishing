@@ -435,6 +435,14 @@ export function spinnerInletWaitMul(lure: string | undefined, spot: string) {
   return spot === "inlet" && !!lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_INLET_WAIT : 1;
 }
 
+/** A crankbait run past the dock's pilings knocks off the wood and darts aside, and the fish hiding underneath strike at it sooner. */
+export const CRANK_PILING_WAIT = 0.85;
+
+/** How the bank stretches the wait on a crankbait: sooner at the dock, else 1. */
+export function crankPilingWaitMul(lure: string | undefined, spot: string) {
+  return spot === "dock" && !!lure?.trim() && lureClass(lure).id === "crank" ? CRANK_PILING_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

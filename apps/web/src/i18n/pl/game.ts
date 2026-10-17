@@ -376,6 +376,7 @@ export const PL_GAME: PlBook = {
   "The jig hops down the ledge.": "Jig skacze w dół po krawędzi uskoku.",
   "The worm sinks down beside the pilings, where the fish hide.": "Robak opada tuż przy palach, gdzie kryją się ryby.",
   "The spoon flutters down through the open water, where the hunters roam.": "Wahadłówka trzepocze w dół przez otwartą wodę, gdzie krążą drapieżniki.",
+  "The crankbait knocks off the pilings and darts aside, and the fish underneath strike at it.": "Wobler odbija się od pali i ucieka w bok, a ryby spod Pomostu atakują go.",
   "The current spins the blade hard even on a slow retrieve, and the fish in the flow come to it.": "Nurt mocno kręci skrzydełkiem nawet przy wolnym prowadzeniu i ryby stojące w prądzie podpływają do niego.",
   "A float rig at the Reeds holds the bait still over the panfish in the stems, a streamer stripped up the Drop-off darts past the trout holding deep, and at the Inlet the current tumbles a worm downstream like washed-in food and spins a spinner's blade hard. Each draws a bite sooner.": "Zestaw spławikowy przy Trzcinach trzyma przynętę nieruchomo nad rybkami wśród łodyg, streamer prowadzony w górę Uskoku śmiga obok pstrągów stojących w głębinie, a w Ujściu nurt toczy robaka jak spłukany pokarm i mocno kręci skrzydełkiem obrotówki. Każde z nich szybciej przynosi branie.",
   "The current tumbles the worm downstream like food washed in from the stream.": "Nurt toczy robaka z prądem jak pokarm spłukany ze strumienia.",
