@@ -10,8 +10,10 @@ export function neighborsIn<T extends { id: string }>(rows: readonly T[], id: st
   return { newer: rows[at - 1] ?? null, older: rows[at + 1] ?? null };
 }
 
+/** The fish either side, newest first: a game fish steps among game fish, a real one among real ones. */
 export function catchNeighbors(book: Logbook, id: string): Neighbors<CatchEntry> {
-  return neighborsIn(catchesNewestFirst(book), id);
+  const play = book.catches.find((entry) => entry.id === id)?.spotId === PLAY_LAKE_ID;
+  return neighborsIn(catchesNewestFirst(book).filter((entry) => (entry.spotId === PLAY_LAKE_ID) === play), id);
 }
 
 /** The outings either side, by day: game days step only among themselves, real ones among real ones. */

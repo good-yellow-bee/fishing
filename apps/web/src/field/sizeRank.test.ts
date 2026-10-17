@@ -52,4 +52,10 @@ describe("biggestSince", () => {
     setUnits("imperial");
     expect(biggestSince(kind, kind[5]!)?.id).toBe("big");
   });
+
+  it("compares weights under and over one pound as sizes", () => {
+    const gill = (id: string, day: number, pounds: number): CatchEntry => ({ ...base, id, species: "Bluegill", measure: { kind: "weight", pounds }, alsoMeasure: undefined, caughtAt: new Date(2026, 5, day).toISOString() });
+    const kind = [gill("small", 1, 0.9), gill("a", 2, 1.2), gill("b", 3, 1.1), gill("c", 4, 1.3), gill("new", 5, 2)];
+    expect(biggestSince(kind, kind[4]!)).toBeNull();
+  });
 });

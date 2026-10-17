@@ -48,3 +48,14 @@ describe("outing neighbours and game days", () => {
     expect(tripNeighbors(book, "play")).toEqual({ newer: null, older: null });
   });
 });
+
+describe("catch neighbours and game fish", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const fish = (id: string, day: number, spotId = "spot-cedar") => ({ ...base, id, spotId, caughtAt: new Date(2026, 9, day, 9).toISOString() });
+  const book = { spots: [], trips: [], catches: [fish("a", 1), fish("g", 2, "spot-stillwater"), fish("b", 3)] };
+
+  it("steps over game fish from a real one", () => {
+    expect(catchNeighbors(book, "a").newer?.id).toBe("b");
+    expect(catchNeighbors(book, "g")).toEqual({ newer: null, older: null });
+  });
+});

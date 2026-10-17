@@ -232,7 +232,7 @@ export const PL_FIELD: PlBook = {
   "An outing on this water that day:": "Tego dnia na tym łowisku była wyprawa:",
   "Add this fish to it": "Dodaj do niej tę rybę",
   "File these on their outings": "Dodaj te ryby do ich wypraw",
-  "Fish added to their outings.": "Ryby dodane do ich wypraw.",
+  "Fish added to their outings.": "Ryby dodano do ich wypraw.",
   "This book already has a water by that name:": "W dzienniku jest już łowisko o tej nazwie:",
   "Fish you log on the day show up here.": "Ryby zapisane tego dnia pojawią się tutaj.",
   "You already have an outing on this water that day:": "Tego dnia na tym łowisku jest już wyprawa:",

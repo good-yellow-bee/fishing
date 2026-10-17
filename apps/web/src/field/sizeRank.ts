@@ -2,7 +2,16 @@ import { measureOf, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 
-const size = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+/**
+ * A size as it reads, in real units: 23.9 in and 24.0 in are both 61 cm to a metric reader, so neither is bigger.
+ * Weights under one read to the hundredth, the rest to the tenth.
+ */
+function shownSize(measure: Measure): number {
+  const metric = getUnits() === "metric";
+  const value = measure.kind === "length" ? (metric ? measure.inches * CM_PER_IN : measure.inches) : metric ? measure.pounds * KG_PER_LB : measure.pounds;
+  const places = measure.kind === "length" ? (metric ? 0 : 1) : value < 1 ? 2 : 1;
+  return Math.round(value * 10 ** places) / 10 ** places;
+}
 
 /**
  * Where a fish sits among the others of its kind measured the same way: "Longer than 7 of the 9 others of its kind".
@@ -13,10 +22,11 @@ export function sizeRank(kind: readonly CatchEntry[], entry: CatchEntry): string
   const others = kind.flatMap((other) => {
     if (other.id === entry.id) return [];
     const theirs = measureOf(other, own.kind);
-    return theirs ? [size(theirs)] : [];
+    return theirs ? [shownSize(theirs)] : [];
   });
   if (others.length < 3) return null;
-  const beaten = others.filter((value) => value < size(own)).length;
+  // As the sizes read: two that show the same are neither longer nor heavier.
+  const beaten = others.filter((value) => value < shownSize(own)).length;
   if (beaten === 0) return null;
   const vars = { count: beaten, total: others.length };
   return own.kind === "length" ? t("Longer than {count} of the {total} others of its kind", vars) : t("Heavier than {count} of the {total} others of its kind", vars);
@@ -27,14 +37,8 @@ export function sizeRank(kind: readonly CatchEntry[], entry: CatchEntry): string
  * of the kind came in between, all smaller. Null when nothing earlier was as big (a best at the time) or the gap is short.
  */
 export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): CatchEntry | null {
-  // As the sizes read: 23.9 in and 24.0 in are both 61 cm to a metric reader, so neither is bigger.
-  const metric = getUnits() === "metric";
-  const shown = (measure: Measure) => {
-    const value = measure.kind === "length" ? (metric ? measure.inches * CM_PER_IN : measure.inches) : metric ? measure.pounds * KG_PER_LB : measure.pounds;
-    const places = measure.kind === "length" ? (metric ? 0 : 1) : value < 1 ? 2 : 1;
-    return Math.round(value * 10 ** places);
-  };
-  const own = shown(entry.measure);
+
+  const own = shownSize(entry.measure);
   const at = Date.parse(entry.caughtAt);
   const earlier = kind
     .filter((other) => other.id !== entry.id && Date.parse(other.caughtAt) < at)
@@ -42,7 +46,7 @@ export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): Ca
   let between = 0;
   for (const other of earlier) {
     const theirs = measureOf(other, entry.measure.kind);
-    if (theirs && shown(theirs) >= own) return between >= 3 ? other : null;
+    if (theirs && shownSize(theirs) >= own) return between >= 3 ? other : null;
     if (theirs) between += 1;
   }
   return null;
