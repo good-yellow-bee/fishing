@@ -1626,3 +1626,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR382~~ | ~~Lure did-you-mean, same size, typical by year~~ (#806) | field | S |
 | ~~BR383~~ | ~~Water temperature through the year~~ (#808) | field | S |
 | ~~BR384~~ | ~~News 2026-10-17-field15c~~ (#810) | field | S |
+| ~~BR385~~ | ~~Same-size matches, lure size slips, labels~~ (#813) | field | S |
