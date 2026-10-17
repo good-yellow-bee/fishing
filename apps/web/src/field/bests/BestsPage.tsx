@@ -19,6 +19,7 @@ import { dayMarks } from "./dayMarks";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak } from "../outingAverage";
+import { MonthYearTable } from "./MonthYearTable";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -317,6 +318,8 @@ export function BestsPage() {
               />
             </section>
           ) : null}
+
+          {!year ? <MonthYearTable catches={book.catches} /> : null}
 
           <section>
             <div className="section-head">

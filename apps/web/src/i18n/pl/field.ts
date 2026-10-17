@@ -17,6 +17,8 @@ export const PL_FIELD: PlBook = {
   "Show {count} more": "Pokaż jeszcze {count}",
   "Jump to a month": "Skocz do miesiąca",
   "Through the year": "W ciągu roku",
+  "Month by month, year by year": "Miesiąc po miesiącu, rok po roku",
+  Month: "Miesiąc",
   "Back to this list, {at} of {count}": "Wróć do tej listy, {at} z {count}",
   "Jump to a month:": "Skocz do miesiąca:",
   "Jump to a year": "Skocz do roku",
