@@ -1,3 +1,4 @@
+import { useRef, useState, type KeyboardEvent } from "react";
 import { Link } from "react-router-dom";
 import type { Logbook } from "@stillwater/shared";
 import { locale, t, tn, useT } from "../../i18n";
@@ -18,6 +19,40 @@ function level(fish: number): string {
 }
 
 /**
+ * Where an arrow key moves among the days that open something, oldest first: left and right a day that opens
+ * something, up and down the nearest such day a week or more away, Home and End the ends. Null for any other key.
+ */
+export function stepDay(days: readonly string[], from: string, key: string): string | null {
+  const at = days.indexOf(from);
+  if (at < 0 || days.length === 0) return null;
+  const shift = (day: string, by: number) => {
+    const [y, m, d] = day.split("-").map(Number) as [number, number, number];
+    const date = new Date(y, m - 1, d + by, 12);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  };
+  switch (key) {
+    case "ArrowLeft":
+      return days[Math.max(0, at - 1)]!;
+    case "ArrowRight":
+      return days[Math.min(days.length - 1, at + 1)]!;
+    case "ArrowUp": {
+      const back = shift(from, -7);
+      return [...days].reverse().find((day) => day <= back) ?? days[0]!;
+    }
+    case "ArrowDown": {
+      const ahead = shift(from, 7);
+      return days.find((day) => day >= ahead) ?? days[days.length - 1]!;
+    }
+    case "Home":
+      return days[0]!;
+    case "End":
+      return days[days.length - 1]!;
+    default:
+      return null;
+  }
+}
+
+/**
  * A season at a glance: each month with a day out, Monday first, each fished day shaded by its fish and opening them,
  * and an outing that landed nothing marked as a blank that opens it.
  */
@@ -25,9 +60,30 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
   useT();
   const marks = dayMarks(book, year);
   const months = markedMonths(marks);
+  const box = useRef<HTMLDivElement>(null);
+  const [current, setCurrent] = useState<string | null>(null);
   if (months.length === 0) return null;
+  // The days that open something, oldest first. The calendar is one tab stop: the arrow keys walk these days.
+  const linked = [...marks.entries()]
+    .filter(([day, mark]) => mark.fish > 0 || (mark.trips.length > 0 && day < today))
+    .map(([day]) => day)
+    .sort();
+  const active = current && linked.includes(current) ? current : linked[0];
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const from = (event.target as HTMLElement).dataset.day;
+    if (!from) return;
+    const to = stepDay(linked, from, event.key);
+    if (!to) return;
+    event.preventDefault();
+    setCurrent(to);
+    box.current?.querySelector<HTMLElement>(`[data-day="${to}"]`)?.focus();
+  };
+  const dayLink = (day: string) => ({ "data-day": day, "aria-describedby": "day-calendar-keys", tabIndex: day === active ? 0 : -1, onFocus: () => setCurrent(day) });
   return (
-    <div className="day-calendar">
+    <div className="day-calendar" ref={box} onKeyDown={onKeyDown}>
+      <p id="day-calendar-keys" className="sr-only">
+        {t("Arrow keys move between the days.")}
+      </p>
       {months.map((month) => {
         const [y, m] = month.split("-").map(Number) as [number, number];
         const first = new Date(y, m - 1, 1);
@@ -56,7 +112,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                   const label = `${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}`}>
-                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(day)} aria-label={label} title={label} />
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(day)} aria-label={label} title={label} {...dayLink(day)} />
                     </li>
                   );
                 }
@@ -65,7 +121,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                   const label = `${formatDay(day)}: ${t("an outing with no fish")}`;
                   return (
                     <li key={day} className="day-blank">
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} />
                     </li>
                   );
                 }
