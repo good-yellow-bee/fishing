@@ -1238,7 +1238,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT193~~ | ~~Summer warm water: a cold-water fish (brook trout, rainbow trout, salmon, whitefish) tires 1.2x faster in summer, short of air, and the hookset says so~~ (#816) | fight | S |
 | ~~GT194~~ | ~~Fall run: a salmon on its fall spawning run is full of fight, so in fall it tires only 0.8x as fast, and the hookset says so~~ (#817) | fight | S |
 | ~~GT195~~ | ~~Nest guard: in spring a bass hooked at the Reeds or the Dock guards its nest and tires only 0.85x as fast, and the hookset says so; news 2026-10-17-game03~~ (#819) | fight | S |
-| GT196 | Rain at the inlet: in rain the swollen inlet washes food in, so a cast to the Inlet waits 0.85x, and the cast says so | game | S |
+| ~~GT196~~ | ~~Rain at the inlet: in rain the swollen inlet washes food in, so a cast to the Inlet waits 0.85x, and the cast says so~~ (#821) | game | S |
+| GT197 | Night hunters: a catfish or burbot hooked at night is out hunting at full strength, so it tires only 0.85x as fast, and the hookset says so | fight | S |
 
 ## Risks / open questions for the owner
 

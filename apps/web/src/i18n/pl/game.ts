@@ -415,6 +415,7 @@ export const PL_GAME: PlBook = {
   "The cold water has it sluggish, so it tires sooner.": "Zimna woda ją spowalnia, więc szybciej się męczy.",
   "The warm water leaves it short of air, so it tires sooner.": "W ciepłej wodzie brakuje jej tlenu, więc szybciej się męczy.",
   "It's guarding its nest, so it fights harder and tires slower.": "Broni gniazda, więc walczy zacieklej i wolniej się męczy.",
+  "It's out hunting after dark and fights at full strength, so it tires slower.": "Po zmroku poluje i walczy z pełną siłą, więc wolniej się męczy.",
   "It's on its fall run and full of fight, so it tires slower.": "Jesienny ciąg na tarło dodaje sił, więc wolniej się męczy.",
   "It feels heavy — could be a trophy!": "Ciężka — może być trofeum!",
   "Not done yet — let go, one more run!": "To jeszcze nie koniec — puść, jeszcze jeden odjazd!",
