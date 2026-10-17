@@ -6,7 +6,7 @@ export const INLET_LEVEL = 6;
 export const OPEN_LEVEL = 7;
 export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet", "open"];
 
-export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000];
+export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000];
 
 export function anglerLevel(lifetimePoints: number): number {
   let level = 1;
@@ -50,6 +50,7 @@ export const ANGLER_TITLES = [
   "Stillwater sage",
   "Lake elder",
   "Spirit of the lake",
+  "Heart of the lake",
 ] as const;
 
 export function anglerTitle(level: number): string {
@@ -80,6 +81,7 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   10: "Rare and legendary fish bite more often.",
   11: "Fish hold the bait 20% longer before they let go.",
   12: "The gold perfect-cast mark is wider.",
+  13: "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.",
 };
 
 export function levelUnlock(level: number): string | null {
@@ -117,6 +119,11 @@ export function hookWindowMulForLevel(level: number): number {
 /** Half the width of the perfect-cast mark at this level, in cast power. */
 export function perfectCastHalfForLevel(level: number): number {
   return level >= 12 ? 0.05 : 0.035;
+}
+
+/** How many taps working a lure (popping a topwater, hopping a jig, lifting a spoon, stripping a streamer) bring the bite sooner at this level. */
+export function lureWorkTapsForLevel(level: number): number {
+  return level >= 13 ? 3 : 2;
 }
 
 export function biteWaitMulForLevel(level: number): number {

@@ -1064,6 +1064,29 @@ describe("level unlock integration", () => {
     expect(untilBite(TOPWATER_POPS + 1)).toBe(stripped);
   });
 
+  it("lets a level 13 angler lift a spoon a third time to bring the fish sooner", () => {
+    const untilBite = (lifts: number, lifetimePoints: number) => {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints }, "day", false, "Kastmaster spoon");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(300));
+      for (let lift = 0; lift < lifts; lift++) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + lift)));
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + lift)));
+      }
+      const said = hint();
+      let waited = 300;
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return { waited, said };
+    };
+    expect(untilBite(3, 17000).said).toBe("Let it fall between lifts.");
+    expect(untilBite(3, 23000).said).toBe("Lift! The spoon flashes and flutters back down. Let it fall…");
+    expect(untilBite(3, 23000).waited).toBeLessThan(untilBite(2, 23000).waited);
+  });
+
   it("brings a fish up sooner when a spoon is lifted, for the first two lifts", () => {
     const untilBite = (hops: number) => {
       const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Kastmaster spoon");

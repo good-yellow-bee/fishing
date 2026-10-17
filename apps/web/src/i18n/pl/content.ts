@@ -147,6 +147,7 @@ export const PL_CONTENT: PlBook = {
   "Rare and legendary fish bite more often.": "Rzadkie i legendarne ryby biorą częściej.",
   "Fish hold the bait 20% longer before they let go.": "Ryby trzymają przynętę o 20% dłużej, zanim ją puszczą.",
   "The gold perfect-cast mark is wider.": "Złoty znacznik idealnego rzutu jest szerszy.",
+  "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia i ściągnięcia) przyspiesza branie trzy razy, a nie dwa.",
 
   // Badges (badges.ts)
   "Four banks": "Cztery brzegi",

@@ -570,6 +570,7 @@ export const PL_GAME: PlBook = {
   "Stillwater sage": "Mędrzec Stillwater",
   "Lake elder": "Nestor jeziora",
   "Spirit of the lake": "Duch jeziora",
+  "Heart of the lake": "Serce jeziora",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
@@ -630,6 +631,7 @@ export const PL_GAME: PlBook = {
   "A pike, a largemouth bass or a walleye may now follow a shiner, bluegill or perch in without taking it. The hint says so, and for a few casts it stays about that bank, so cast back there to hook it.": "Szczupak, bass wielkogębowy albo sandacz może teraz odprowadzić złotawca, bassa niebieskoskrzelego albo okonia, nie biorąc go. Podpowiedź to powie, a przez kilka rzutów drapieżnik krąży przy tym brzegu, więc zarzuć tam znowu, żeby go zaciąć.",
   "Land a trophy that made its second run at the net and the card says you rode it out. Lose a trophy-sized fish and the result now says it looked like a trophy, so you know what got away.": "Wyholuj trofeum, które zrobiło drugi odjazd przy podbieraku, a karta powie, że udało ci się go przetrwać. Strać rybę wielkości trofeum, a wynik powie, że wyglądało to na trofeum, więc wiesz, co się zerwało.",
   "Send a copy of your book straight to the phone's share sheet. A photo taken near a pinned water picks that water, a fish after midnight joins last night's outing, and each fish now says how near sunrise or sunset it came. Waters show their best water temperature, and the outings page has its own search.": "Wyślij kopię dziennika prosto przez menu udostępniania telefonu. Zdjęcie zrobione przy przypiętym łowisku wybiera to łowisko, ryba po północy trafia do wczorajszej wyprawy, a każda ryba mówi, jak blisko wschodu lub zachodu słońca wzięła. Łowiska pokazują najlepszą temperaturę wody, a strona wypraw ma własne wyszukiwanie.",
+  "Level 13 is open at 23000 points (title: Heart of the lake): a third pop, hop, lift or strip still brings the bite sooner.": "Poziom 13 otwiera się przy 23000 punktów (tytuł: Serce jeziora): trzecie pyknięcie, podbicie, podniesienie lub ściągnięcie wciąż przyspiesza branie.",
   "In a summer thunderstorm the fish go down and sulk, so every bite comes slower until it passes.": "W letnią burzę ryby schodzą w głąb i się dąsają, więc każde branie przychodzi wolniej, dopóki burza nie minie.",
   "On a breezy day the chop on the water makes the fish bolder, so any lure but a topwater draws a bite sooner.": "W wietrzny dzień fale na wodzie ośmielają ryby, więc każda przynęta poza powierzchniową szybciej przynosi branie.",
   "In fog the shy fish can't see you and come in close, so even a short cast can draw more than the small fish.": "We mgle płochliwe ryby cię nie widzą i podpływają blisko, więc nawet krótki rzut może skusić coś więcej niż małe ryby.",
