@@ -1223,7 +1223,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT178~~ | ~~A jig in winter: the cold slows the fish, but a slow jig still draws them, so a jig waits 0.85x in winter, and the cast says so~~ (#789) | game | S |
 | ~~GT179~~ | ~~Spring shallows: the reeds' shallows warm first and the fish crowd in, so any cast to the reeds waits 0.85x in spring, and the cast says so~~ (#790) | game | S |
 | ~~GT180~~ | ~~Fall feed: the fish fatten up for winter, so a big lure waits 0.85x in fall, and the cast says so~~ (#791) | game | S |
-| GT181 | Summer heat: on a summer day the fish drop to the cool water off the ledge, so a cast to the drop-off waits 0.85x, and the cast says so | game | S |
+| ~~GT181~~ | ~~Summer heat: on a summer day the fish drop to the cool water off the ledge, so a cast to the drop-off waits 0.85x, and the cast says so~~ (#793) | game | S |
+| GT182 | Winter sluggish: in winter's cold water a hooked fish tires 1.25x faster, and the hookset says so | game | S |
 
 ## Risks / open questions for the owner
 

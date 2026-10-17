@@ -207,6 +207,13 @@ export const WRAP_MS = 1200;
 export const WRAP_PULL = 0.5;
 /** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
 export const BOAT_RUN = 0.65;
+/** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
+export const WINTER_TIRE = 1.25;
+
+/** How the season speeds a fish's tiring: faster in winter, else 1. */
+export function seasonTireMul(season: string | undefined) {
+  return season === "winter" ? WINTER_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;

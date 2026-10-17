@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile, type Sky, type Wind } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, waitMs } from "./logic";
@@ -88,8 +88,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, undefined, undefined, rising, wind);
+function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky, season }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky; season?: LakeSeason }) {
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, season, undefined, rising, wind);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -134,7 +134,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky, season?: LakeSeason) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -148,7 +148,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} season={season} />));
   return container.querySelector("div")!;
 }
 
@@ -323,6 +323,17 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(hint()).toMatch(/^It's the one that got away! It feels heavy — could be a trophy! /);
     expect(fx.lift).toHaveBeenCalled();
+  });
+
+  it.each([
+    ["winter", true],
+    ["summer", false],
+  ] as const)("says a fish hooked in %s is sluggish in the cold: %s", (season, cold) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("The cold water has it sluggish, so it tires sooner.")).toBe(cold);
   });
 
   it("says a lost trophy-sized fish looked like a trophy", () => {
