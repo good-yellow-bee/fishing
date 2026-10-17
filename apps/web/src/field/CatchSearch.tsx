@@ -210,6 +210,8 @@ export function searchParts(book: Logbook, needle: string): string[] {
   const kept: string[] = [];
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
   let text = needle.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
+  // "25-30 in" or "1–2 kg": a size between the two, as ">25 in + <30 in".
+  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $4 + <$3 $4");
   for (const name of names) {
     const at = text.toLowerCase().indexOf(name.toLowerCase());
     if (at < 0) continue;
@@ -429,6 +431,10 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
+          {matches.length === 0 && /(^|[\s+])[<>]\s?\d+(?:[.,]\d+)?(?=[\s+]|$)/.test(settled) ? (
+            // ">30" finds nothing without saying what it measures.
+            <p className="search-tip">{t("Add a unit to a size, as in “>30 in”.")}</p>
+          ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
               {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}{" "}

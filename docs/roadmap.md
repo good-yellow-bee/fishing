@@ -1597,3 +1597,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR368~~ | ~~News 2026-10-17zq (re-ship again)~~ (#774) | field | S |
 | ~~BR369~~ | ~~Round 13 bugs: twin check by value, Polish decimals in edit form, Wypuszczona, blank title comma~~ (#778) | field | S |
 | ~~BR370~~ | ~~Language/units on field-log home; keep last fish's time for earlier days~~ (#780) | field | S |
+| ~~BR371~~ | ~~Water on catch-form chips; past outings first-to-last; size ranges in search~~ (#782) | field | S |
