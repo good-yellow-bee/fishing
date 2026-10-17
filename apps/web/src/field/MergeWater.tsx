@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { t, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
 import { mergeWaters, noteMergedWater } from "./waterMerge";
-
-/** The game's own lake: its fish come from play, so it neither merges into a real water nor takes one in. */
-const PLAY_LAKE_ID = "spot-stillwater";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /** A water logged twice under two names, folded into the other one with its outings and fish. */
 export function MergeWater({ spotId }: { spotId: string }) {

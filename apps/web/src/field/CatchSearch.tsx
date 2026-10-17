@@ -404,7 +404,14 @@ function FileLoose() {
   if (loose.size === 0) return null;
   return (
     <p className="file-loose">
-      <button type="button" className="text-button" onClick={() => fileEach(loose)}>
+      <button
+        type="button"
+        className="text-button"
+        onClick={() => {
+          // The button and the list go once they are filed: focus goes back to the search, not the top of the page.
+          if (fileEach(loose)) setTimeout(() => document.getElementById("catch-search")?.focus(), 0);
+        }}
+      >
         {t("File these on their outings")}
       </button>
     </p>

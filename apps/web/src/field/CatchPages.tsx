@@ -69,6 +69,7 @@ import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestSince, sizeRank } from "./sizeRank";
+import { PLAY_LAKE_ID } from "./playLake";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -588,7 +589,8 @@ function CatchForm() {
     );
   }
 
-  if (!existing && book.spots.length === 0) {
+  // The game's lake alone is no water to log a real day on.
+  if (!existing && !book.spots.some((spot) => spot.id !== PLAY_LAKE_ID)) {
     return (
       <div className="sheet">
         <h1>{t("Log a catch")}</h1>
@@ -856,7 +858,8 @@ function CatchForm() {
             <label>
               {t("Water")}
               <select name="spot" value={spotId} onChange={(event) => onSpot(event.target.value)}>
-                {book.spots.map((spot) => (
+                {/* The game's lake only for what is already there. */}
+                {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>
@@ -1126,8 +1129,8 @@ function CatchView() {
   // The fish of its kind that year, through the catch search.
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
   const yearSearch = [exactTerm("species", t(entry.species)), caughtYear] as const;
-  // The angler's own fish of that year: game fish don't count toward it.
-  const yearCount = isCounted ? counted.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear).length : 0;
+  // Counted as the link opens them, so the line and the list agree; said only on the angler's own fish.
+  const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {

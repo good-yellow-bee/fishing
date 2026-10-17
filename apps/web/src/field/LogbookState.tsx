@@ -32,6 +32,7 @@ import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -290,7 +291,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       // The sample takes the whole book's place, so it can be undone like a delete.
       restoreSample: () => remove("sample", sampleLogbook(new Date())),
-      startBlank: () => remove("blank", { spots: [], trips: [], catches: [] }),
+      // The game's lake and what was landed there stay: they come from play, not the sample.
+      startBlank: () => remove("blank", { spots: book.spots.filter((spot) => spot.id === PLAY_LAKE_ID), trips: book.trips.filter((trip) => !offPlayLake(trip)), catches: book.catches.filter((entry) => !offPlayLake(entry)) }),
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);
