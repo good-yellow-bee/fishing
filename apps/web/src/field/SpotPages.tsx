@@ -39,6 +39,7 @@ import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
 import { countedFish } from "./milestones";
+import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
@@ -309,6 +310,7 @@ export function SpotPage() {
         </p>
       ) : null}
       <BiggestHere catches={catches} spotId={spot.id} />
+      <PhotoStrip catches={catches} within={here} named />
       <FishCsv catches={catches} name={spot.name} />
       {catches.length > 1 ? (
         <>

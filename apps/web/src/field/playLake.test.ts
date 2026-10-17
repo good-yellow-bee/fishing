@@ -60,4 +60,9 @@ describe("search words added in round 30", () => {
   it("knows autumn as the fall", () => {
     expect(findCatches(book, "autumn", same(""), () => false).length).toBe(findCatches(book, "fall", same(""), () => false).length);
   });
+  it("finds the weighed and the measured fish", () => {
+    const weighed = book.catches.filter((entry) => [entry.measure, entry.alsoMeasure].some((measure) => measure?.kind === "weight"));
+    expect(ids(findCatches(book, "weighed", same(""), () => false)).sort()).toEqual(ids(weighed).sort());
+    expect(findCatches(book, "zmierzone", same(""), () => false).every((entry) => [entry.measure, entry.alsoMeasure].some((measure) => measure?.kind === "length"))).toBe(true);
+  });
 });
