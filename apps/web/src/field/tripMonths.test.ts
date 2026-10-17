@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { localDate, recentTrips, sampleLogbook } from "@stillwater/shared";
-import { catchMonth, daysOut, monthTally, tripsByMonth, yearTally } from "./tripMonths";
+import { bestFishDay, catchMonth, daysOut, monthTally, tripsByMonth, yearTally } from "./tripMonths";
 
 describe("trips by month", () => {
   it("cuts a newest-first list into months and keeps every trip in order", () => {
@@ -68,5 +68,21 @@ describe("days out", () => {
     const late = { ...book.catches[0]!, id: "late", tripId: "eve", caughtAt: new Date(2026, 6, 4, 0, 30).toISOString() };
     expect(daysOut({ ...book, trips: [evening], catches: [late] }, "2026", today)).toBe(1);
     expect(daysOut(book, "2020", today)).toBe(0);
+  });
+});
+
+describe("the best fish day", () => {
+  it("counts a night session's small hours on its outing's day and opens that outing", () => {
+    const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
+    const trip = { id: "zq-night", date: "2026-10-17", spotId: "lake", title: "", note: "" };
+    const at = (day: number, hour: number) => new Date(2026, 9, day, hour).toISOString();
+    const catches = [
+      { ...base, id: "a", tripId: trip.id, caughtAt: at(17, 18) },
+      { ...base, id: "b", tripId: trip.id, caughtAt: at(17, 21) },
+      { ...base, id: "c", tripId: trip.id, caughtAt: at(18, 0) },
+      { ...base, id: "d", tripId: null, caughtAt: at(12, 9) },
+      { ...base, id: "e", tripId: null, caughtAt: at(12, 10) },
+    ];
+    expect(bestFishDay({ spots: [], trips: [trip], catches })).toEqual({ date: "2026-10-17", count: 3, tripId: trip.id });
   });
 });

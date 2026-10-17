@@ -20,6 +20,7 @@ import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
+import { LATE_NIGHT_UNTIL } from "./suggestions";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -102,7 +103,9 @@ export function HomePage() {
   const tomorrow = shiftDate(now, 1);
   // The angler's own: a round of the game fills none of these cards.
   const catches = recentCatches({ ...book, catches: book.catches.filter(offPlayLake) }, 4);
-  const upcoming = upcomingOwnTrips(book, today);
+  // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
+  const lateOuting = now.getHours() < LATE_NIGHT_UNTIL ? book.trips.find((trip) => offPlayLake(trip) && trip.date === shiftDate(now, -1)) : undefined;
+  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingOwnTrips(book, today)];
   // Just back from the water, not from a round of the game.
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
@@ -241,10 +244,10 @@ export function HomePage() {
               </span>
             ) : null}
           </small>
-          {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
+          {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* On the day, a fish goes straight onto this outing. */}
-          {next && next.date === today ? (
+          {next && (next.date === today || next === lateOuting) ? (
             <small className="next-log">
               <Link to={`/catches/new?trip=${next.id}&spot=${next.spotId}`}>{t("Log a catch")}</Link>
             </small>

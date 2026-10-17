@@ -1168,6 +1168,22 @@ function CatchForm() {
               {t("Save and log another")}
             </button>
           )}
+          {/* Ticked like the last fish, far down the form: said beside the save, with a way to keep this one. */}
+          {!existing && released ? (
+            <small className="field-hint form-released">
+              {t("Goes in as released.")}{" "}
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  setReleased(false);
+                  focusSoon('.form-save button[type="submit"]');
+                }}
+              >
+                {t("Kept it")}
+              </button>
+            </small>
+          ) : null}
         </div>
       </form>
     </div>

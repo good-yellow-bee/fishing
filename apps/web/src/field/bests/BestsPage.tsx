@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
+import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -12,7 +12,7 @@ import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
-import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
+import { bestFishDay, catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
@@ -53,12 +53,6 @@ function LargeFish({
   );
 }
 
-function soleTripOn(book: Logbook, ymd: string): string | null {
-  const trips = new Set(book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === ymd).map((entry) => entry.tripId ?? ""));
-  const [only] = [...trips];
-  // Only when the outing holds no fish of another day (one past midnight), so it opens the fish the tile counts.
-  return trips.size === 1 && only && book.catches.every((entry) => entry.tripId !== only || localDate(new Date(entry.caughtAt)) === ymd) ? only : null;
-}
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
 function DayTally({ count, date, tripId, tail }: { count: number; date: string; tripId: string | null; tail: (term: string) => string }) {
@@ -128,10 +122,11 @@ export function BestsPage() {
     if (list) list.push(entry);
     else bySpot.set(entry.spotId, [entry]);
   }
-  const topDay = bestDay(book);
+  // Counted as the calendar below counts its days, so the tile and the calendar agree.
+  const topDay = bestFishDay(book);
   const kindsDay = mostKindsDay(book);
   // When every fish of the best day came on one outing, the tile opens that outing.
-  const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
+  const topDayTrip = topDay?.tripId ?? null;
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");

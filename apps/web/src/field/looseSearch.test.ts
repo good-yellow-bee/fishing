@@ -13,6 +13,8 @@ describe("loose in a search", () => {
     const catches = [fish("filed", "2026-10-10", "trip"), fish("loose", "2026-10-10"), fish("no-outing", "2026-10-11"), fish("gone", "2026-10-10", "deleted-trip")];
     const book = { spots: [], trips: [trip], catches };
     expect(findCatches(book, "loose", t).map((entry) => entry.id).sort()).toEqual(["gone", "loose"]);
-    expect(findCatches(book, "bez wyprawy", t)).toHaveLength(2);
+    expect(findCatches(book, "luźne", t)).toHaveLength(2);
+    // On no outing at all, filable or not.
+    expect(findCatches(book, "bez wyprawy", t).map((entry) => entry.id).sort()).toEqual(["gone", "loose", "no-outing"]);
   });
 });

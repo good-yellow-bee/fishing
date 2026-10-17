@@ -236,14 +236,14 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "crank",
     label: "Crankbait",
-    match: /crank|jerkbait|rapala/i,
+    match: /crank|jerkbait|rapala|wobler/i,
     size: "large",
     species: { "smallmouth-bass": 1.7, pike: 1.3, "rainbow-trout": 1.3 },
   },
   {
     id: "jig",
     label: "Jig",
-    match: /tube|\bjigs?\b|\bgrubs?\b/i,
+    match: /tube|\bjigs?\b|\bgrubs?\b|kopyt|ripper|twister/i,
     size: "large",
     species: { "smallmouth-bass": 1.8, burbot: 1.5, walleye: 1.6 },
   },
