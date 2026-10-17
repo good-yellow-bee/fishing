@@ -13,4 +13,9 @@ describe("a year in a search", () => {
     const catches = [fish("old", "2025-06-01T09:00"), fish("new", "2026-05-01T09:00", "t"), { ...fish("noted", "2024-06-01T09:00"), note: "like 2025" }];
     expect(findCatches({ spots: sample.spots, trips: [trip], catches }, "2025", t).map((entry) => entry.id)).toEqual(["old"]);
   });
+
+  it("searches a number as text when no fish came that year", () => {
+    const catches = [{ ...fish("lure", "2025-06-01T09:00"), lure: "Rapala 1100" }];
+    expect(findCatches({ spots: sample.spots, trips: [], catches }, "1100", t).map((entry) => entry.id)).toEqual(["lure"]);
+  });
 });

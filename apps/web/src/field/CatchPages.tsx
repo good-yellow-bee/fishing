@@ -211,7 +211,7 @@ function CatchForm() {
   const bestSoFar = speciesBestSoFar(book, species, t, existing?.id);
   // Starting values that look through the whole book are worked out once, not on every keystroke.
   const [measureKind, setMeasureKind] = useState<CatchDraft["measureKind"]>(
-    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : lastMeasureKind(book)),
+    () => existing?.measure.kind ?? (asked === "weight" || asked === "length" ? asked : (kindMeasure(book, t(params.get("species") ?? ""), t) ?? lastMeasureKind(book))),
   );
   // The form reads and writes in the units the player picked; the book keeps imperial.
   const units = getUnits();
@@ -246,9 +246,14 @@ function CatchForm() {
     setMeasurePicked(true);
   };
   // Until the player picks a measure or types a size, it follows how they last measured this kind: pike by length, panfish by weight.
+  // The starting kind is set with the form; only a kind typed after that moves it. A measure the link asked for holds
+  // while the fish is still the one the link named ("Save and log another" carries the last fish's measure).
   const [measurePicked, setMeasurePicked] = useState(false);
+  const firstSpecies = useRef(species);
   useEffect(() => {
-    if (existing || measurePicked || asked === "weight" || asked === "length" || amount.trim() || alsoAmount.trim()) return;
+    if (species === firstSpecies.current) return;
+    const askedHolds = (asked === "weight" || asked === "length") && species.trim().toLowerCase() === t(params.get("species") ?? "").trim().toLowerCase();
+    if (existing || measurePicked || askedHolds || amount.trim() || alsoAmount.trim()) return;
     const kind = kindMeasure(book, species, t);
     if (kind) setMeasureKind(kind);
     // Only a change of kind moves it, not a change of the size or the book.
@@ -373,6 +378,8 @@ function CatchForm() {
     const keptTrip = tripsForSpot(book, keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
     setSpecies(kept.species);
     setMeasureKind(kept.measureKind);
+    // The draft's measure was the player's: the kind it names doesn't move it.
+    setMeasurePicked(true);
     setLure(kept.lure);
     setSpotId(keptSpot);
     setTripId(keptTrip);
@@ -672,13 +679,15 @@ function CatchForm() {
         className="entry-form"
         onSubmit={onSubmit}
         onKeyDown={(event) => {
-          // Enter in the fish, size or lure with the form not yet complete goes on to the next field, as a phone's
-          // "next" key says; a complete form still saves on Enter.
+          // Enter in the fish, size or lure with the form not yet complete goes on to the field still missing, as a
+          // phone's "next" key says; a complete form still saves on Enter.
           const field = event.target;
           if (event.key !== "Enter" || event.nativeEvent.isComposing || !(field instanceof HTMLInputElement)) return;
           if (!["species", "amount", "lure"].includes(field.name) || event.currentTarget.checkValidity()) return;
+          // A field still missing comes first, even one above; else the one after.
+          const missing = [...event.currentTarget.querySelectorAll<HTMLElement>("input:invalid, select:invalid, textarea:invalid")].find((each) => each !== field);
           const fields = [...event.currentTarget.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea")].filter((each) => !each.hasAttribute("disabled"));
-          const next = fields[fields.indexOf(field) + 1];
+          const next = missing ?? fields[fields.indexOf(field) + 1];
           if (!next) return;
           event.preventDefault();
           next.focus();
