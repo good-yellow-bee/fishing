@@ -13,7 +13,7 @@ import {
   upcomingTrips,
   type Trip,
 } from "@stillwater/shared";
-import { fishCountLabel, formatDay, tripWhen } from "../format";
+import { fishCountLabel, formatCatchDay, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
@@ -74,6 +74,7 @@ function LureRecord({ today }: { today: string }) {
             {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
+              {row.lastAt ? ` · ${t("last fish {day}", { day: formatCatchDay(row.lastAt) })}` : null}
             </span>
           </li>
         ))}
