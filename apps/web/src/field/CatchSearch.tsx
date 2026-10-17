@@ -217,6 +217,14 @@ export function searchParts(book: Logbook, needle: string): string[] {
     const [low, high] = Number(a.replace(",", ".")) <= Number(b.replace(",", ".")) ? [a, b] : [b, a];
     return `${lead}>${low} ${unit} + <=${high} ${unit}`;
   });
+  // "17 in" or "2.5 lb" alone: the fish of that size as it rounds, from half a step under it to half a step over.
+  // Not part of "3 lb 2 oz", which reads as one weight, nor a bound with a space in it ("> 1 lb").
+  text = text.replace(/(?<![<>]=?\s*)(^|[\s+])(?<!lbs?\s+)(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?![\s]+\d+(?:[.,]\d+)?\s?oz)(?=[\s+]|$)/gi, (_all, lead: string, typed: string, unit: string) => {
+    const value = Number(typed.replace(",", "."));
+    const half = 0.5 / 10 ** (typed.split(/[.,]/)[1]?.length ?? 0);
+    const edge = (n: number) => String(Math.round(n * 1000) / 1000);
+    return `${lead}>${edge(value - half)} ${unit} + <${edge(value + half)} ${unit}`;
+  });
   for (const name of names) {
     const at = text.toLowerCase().indexOf(name.toLowerCase());
     if (at < 0) continue;

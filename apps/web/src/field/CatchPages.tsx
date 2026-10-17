@@ -41,7 +41,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { bookLures, dayWeather, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, farPastBest, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -218,6 +218,8 @@ function CatchForm() {
   // A number far past this kind's best that fits the other measure: likely typed in the wrong one, as the form keeps the last.
   // Only with the other measure left empty: with both typed, switching swaps them, which would keep the odd number.
   const otherMeasure = !alsoAmount.trim() && looksLikeOtherMeasure(bestSoFar, measureKind, typedAmount, Number(toBookAmount(amount, otherKind, units)));
+  // Not the other measure, but still far past this kind's best: most likely the wrong unit, or a slip of a digit.
+  const pastBest = otherMeasure ? null : farPastBest(bestSoFar, measureKind, typedAmount);
   const amountInput = useRef<HTMLInputElement>(null);
   const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
@@ -389,6 +391,8 @@ function CatchForm() {
       ).sort((a, b) => a.localeCompare(b)),
     [book, lang],
   );
+  // A name one or two letters off one already known, offered before it starts a kind of its own.
+  const misspelt = closeSpecies(species, speciesOptions);
   const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
@@ -659,6 +663,15 @@ function CatchForm() {
                 <option key={name} value={name} />
               ))}
             </datalist>
+            {misspelt ? (
+              <small className="field-hint">
+                {t("Did you mean")}{" "}
+                <button type="button" className="text-button" onClick={() => setSpecies(misspelt)}>
+                  {misspelt}
+                </button>
+                ?
+              </small>
+            ) : null}
             {bestSoFar ? (
               <small className="field-hint">
                 {t("Your biggest so far: {measures}", {
@@ -760,6 +773,8 @@ function CatchForm() {
                   {otherKind === "length" ? t("Make it a length") : t("Make it a weight")}
                 </button>
                 </>
+              ) : pastBest ? (
+                t("That's more than twice your best {species} ({size}). Is the unit right?", { species: species.trim(), size: measureText(pastBest) })
               ) : null}
             </p>
             {likely !== null && !alsoAmount.trim() ? (

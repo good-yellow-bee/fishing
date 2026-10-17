@@ -142,6 +142,8 @@ export const PL_FIELD: PlBook = {
   "← Newer: {species}": "← Nowszy: {species}",
   "Older: {species} →": "Starszy: {species} →",
   "Step through {species} only": "Przeglądaj tylko: {species}",
+  "Did you mean": "Czy chodziło o",
+  "That's more than twice your best {species} ({size}). Is the unit right?": "To ponad dwa razy więcej niż Twój rekord – {species} ({size}). Czy jednostka się zgadza?",
   "Add a spot first, then the fish has a water to belong to.": "Najpierw dodaj łowisko, żeby ryba miała skąd pochodzić.",
   "Add a spot": "Dodaj łowisko",
   "Edit entry": "Edycja wpisu",

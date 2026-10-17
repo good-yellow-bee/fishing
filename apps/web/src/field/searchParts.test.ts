@@ -11,6 +11,13 @@ describe("split a search on +", () => {
     expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<=2 kg"]);
     expect(searchParts(book, "30-25 in")).toEqual([">25 in", "<=30 in"]);
     expect(searchParts(book, "pike 20+ in")).toEqual(["pike >20 in"]);
+  });
+
+  it("reads one size as the fish that round to it", () => {
+    expect(searchParts(book, "pike 17 in")).toEqual(["pike >16.5 in", "<17.5 in"]);
+    expect(searchParts(book, "2,5 kg")).toEqual([">2.45 kg", "<2.55 kg"]);
+    expect(searchParts(book, "3 lb 2 oz")).toEqual(["3 lb 2 oz"]);
+    expect(searchParts(book, ">3 lb")).toEqual([">3 lb"]);
     expect(searchParts(book, "2026-10-12")).toEqual(["2026-10-12"]);
   });
 
@@ -27,7 +34,7 @@ describe("split a search on +", () => {
     expect(searchParts(book, "pike 30in+")).toEqual(["pike >30in"]);
     expect(searchParts(book, "2 kg+ + Overcast")).toEqual([">2 kg", "Overcast"]);
     expect(searchParts(book, "60F+")).toEqual([">60F"]);
-    expect(searchParts(book, "30in + pike")).toEqual(["30in", "pike"]);
+    expect(searchParts(book, "30in + pike")).toEqual([">29.5 in", "<30.5 in", "pike"]);
     expect(searchParts(book, "pike+5lb+")).toEqual(["pike", ">5lb"]);
     expect(searchParts(book, "3 lb 2 oz+")).toEqual([">3 lb 2 oz"]);
   });
