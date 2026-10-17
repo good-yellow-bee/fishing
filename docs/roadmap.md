@@ -1663,3 +1663,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR403~~ | ~~Round 19 news card~~ (#843) | field | S |
 | ~~BR404~~ | ~~Round 20 fixes~~ (#844) | field | S |
 | ~~BR405~~ | ~~First kind here, kind per year, dry per water, new waters, file loose~~ (#846) | field | S |
+| ~~BR406~~ | ~~Photos by kind, round 20 news~~ (#848) | field | S |

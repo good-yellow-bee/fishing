@@ -534,6 +534,8 @@ export const PL_FIELD: PlBook = {
   "Outings since your last fish: {count}": "Wyprawy od ostatniej ryby: {count}",
   "Outings here since the last fish: {count}": "Wyprawy tutaj od ostatniej ryby: {count}",
   "Not yet this year:": "W tym roku jeszcze nie:",
+  "Which kinds": "Które gatunki",
+  "All kinds": "Wszystkie gatunki",
   "New waters this year:": "Nowe łowiska w tym roku:",
   "Caught in water of {temp}.": "Temperatura wody przy połowach: {temp}.",
   "The most fish of any outing on this water": "Najwięcej ryb spośród wszystkich wypraw na tym łowisku",
