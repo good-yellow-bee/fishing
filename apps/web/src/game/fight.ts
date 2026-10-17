@@ -243,6 +243,15 @@ export const NEST_TIRE = 0.85;
 export function nestTireMul(season: string | undefined, speciesId: string, spot: string) {
   return season === "spring" && NEST_GUARDERS.has(speciesId) && NEST_SPOTS.has(spot) ? NEST_TIRE : 1;
 }
+/** Night hunters: after dark they're out feeding at full strength. */
+export const NIGHT_HUNTERS: ReadonlySet<string> = new Set(["catfish", "burbot"]);
+/** At night a night hunter tires only this fast on a run or against the reel. */
+export const NIGHT_HUNTER_TIRE = 0.85;
+
+/** How the night slows a night hunter's tiring: slower at night, else 1. */
+export function nightTireMul(hour: string | undefined, speciesId: string) {
+  return hour === "night" && NIGHT_HUNTERS.has(speciesId) ? NIGHT_HUNTER_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;

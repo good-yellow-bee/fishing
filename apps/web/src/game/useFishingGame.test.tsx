@@ -45,7 +45,7 @@ vi.mock("./gotAway", async (importOriginal) => {
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
-  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul) };
+  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), waitMs: vi.fn(actual.waitMs) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -382,6 +382,20 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("fight:none");
     expect(hint()?.includes("It's guarding its nest, so it fights harder and tires slower.")).toBe(nest);
+  });
+
+  it.each([
+    ["night", "catfish", true],
+    ["day", "catfish", false],
+    ["night", "pike", false],
+  ] as const)("says a fish hooked at %s (%s) is out hunting: %s", (hour, id, hunter) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, hour);
+    vi.mocked(waitMs).mockReturnValueOnce(2_000);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It's out hunting after dark and fights at full strength, so it tires slower.")).toBe(hunter);
   });
 
   it("says a lost trophy-sized fish looked like a trophy", () => {
