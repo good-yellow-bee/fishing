@@ -279,6 +279,8 @@ export function useFishingGame(
   const [schooled, setSchooled] = useState(false);
   const [lurking, setLurking] = useState(false);
   const [lurkerCloseInMs, setLurkerCloseInMs] = useState(0);
+  /** How long this bite's fish holds the bait, so the strike cue runs out when it lets go. */
+  const [strikeWindowMs, setStrikeWindowMs] = useState(0);
   const [hint, setHint] = useState(() => t("Walk to the water."));
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
@@ -508,6 +510,7 @@ export function useFishingGame(
           const style = biteStyle(species.id);
           const windowMs = style === "light" ? Math.round(heldMs * LIGHT_HOLD) : style === "gulp" ? Math.round(heldMs * GULP_HOLD) : style === "snatch" ? Math.round(heldMs * SNATCH_HOLD) : heldMs;
           biteWindowRef.current = { at: performance.now(), ms: windowMs };
+          setStrikeWindowMs(windowMs);
           timers.current.hook = window.setTimeout(() => {
             if (phaseRef.current !== "hookset") return;
             // Gone to another tab mid-bite: the fish keeps the bait, and a fresh window opens on the way back.
@@ -1057,6 +1060,7 @@ export function useFishingGame(
     schooled,
     lurking,
     lurkerCloseInMs,
+    strikeWindowMs,
     hotspot,
     sim: simRef,
     performance: performanceRef,

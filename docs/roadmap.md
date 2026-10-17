@@ -1193,7 +1193,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT148~~ | ~~A salmon rolls on the bait: a 1.6x wider strike splash with higher spray, its own strike call and field guide line; news card~~ (#735) | game | S |
 | ~~GT149~~ | ~~A perch fights hard for a moment, then gives up: it tires 1.3x faster; fight card habit line; news card~~ (#737) | fish | S |
 | ~~GT150~~ | ~~A late strike (past 75% of the hook window) hooks light: reeled in the red, the hook pulls out like a soft mouth's; hint, fight card line, own loss message; news card~~ (#738) | game | S |
-| GT151 | The landed card says "Kept it on a light hook" for a fish landed after a late strike | ui | S |
+| ~~GT151~~ | ~~The landed card says "Kept it on a light hook" for a fish landed after a late strike~~ (#740) | ui | S |
+| GT152 | The Strike card's timer bar runs for the fish's real hold (a perch's longer, a trout's shorter) and fades for the light-hook last quarter | ui | S |
 
 ## Risks / open questions for the owner
 
