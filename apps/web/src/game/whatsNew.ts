@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzu";
+export const NEWS_ID = "2026-10-17-field15c";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A planned outing quotes what you wrote last time on that water, and a water page shows how its temperature ran through the year. Search names the lure that led, reads “this year” and “last year”, and “pike -<20 in” leaves the small ones out. The catch form also checks lure names for slips, a fish links to others of its kind and size, and a species page gives its typical size by year.",
   "On a breezy day the chop on the water makes the fish bolder, so any lure but a topwater draws a bite sooner.",
   "In fog the shy fish can't see you and come in close, so even a short cast can draw more than the small fish.",
   "At dawn and dusk a school feeds hard in the low light, so it stays for three casts instead of two.",
