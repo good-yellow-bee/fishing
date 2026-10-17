@@ -381,6 +381,7 @@ export const PL_GAME: PlBook = {
   "The crankbait bangs off the rocks.": "Wobler obija się o kamienie.",
   "The full moon catches the lure's flash.": "Pełnia księżyca odbija się w przynęcie i błyska.",
   "Thunder puts the fish down, so the bites come slow.": "Grzmoty spychają ryby w głąb, więc brania przychodzą wolno.",
+  "The midday glare drives the fish from the open water, so the bites come slow.": "Południowy blask przegania ryby z otwartej wody, więc brania przychodzą powoli.",
   "The breeze chops the surface, and the fish feed bolder under it.": "Wiatr marszczy powierzchnię, a ryby pod nią żerują śmielej.",
   "The sun catches the lure's flash.": "Słońce odbija się w przynęcie i błyska.",
   "Glassy water, made for a topwater.": "Gładka woda, jak stworzona do przynęty powierzchniowej.",
