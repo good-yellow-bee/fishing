@@ -266,6 +266,10 @@ function TripView() {
   const { newer, older } = tripNeighbors(book, trip.id);
   const fishByTrip = fishCountsByTrip(book);
   const best = bestOutingHere(tripsForSpot(book, trip.spotId), (id) => fishByTrip.get(id) ?? 0, trip.id, today);
+  // The outing on this water before this one, to set the two side by side.
+  const lastHere = tripsForSpot(book, trip.spotId)
+    .filter((other) => other.date < trip.date && other.date <= today)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   const loose = book.catches.filter(
@@ -298,6 +302,13 @@ function TripView() {
       ) : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
+      {lastHere ? (
+        <p className="meta last-here">
+          <Link to={`/trips/${lastHere.id}`}>
+            {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(fishByTrip.get(lastHere.id) ?? 0) })}
+          </Link>
+        </p>
+      ) : null}
       <SpeciesChips catches={catches} />
       <LureChips catches={catches} outing={trip} />
       <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />

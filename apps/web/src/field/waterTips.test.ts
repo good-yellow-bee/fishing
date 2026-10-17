@@ -36,6 +36,12 @@ describe("water tips", () => {
     expect(waterTips([under("a", "overcast"), under("b", null), under("c", null)])!.sky).toBeNull();
   });
 
+  it("names the wind most fish came in, only when one clearly leads", () => {
+    const inWind = (id: string, wind: "calm" | "breezy" | null) => ({ ...book.catches[0]!, id, weather: wind ? { sky: "clear" as const, wind, waterTempF: 60 } : null });
+    expect(waterTips([inWind("a", "breezy"), inWind("b", "breezy"), inWind("c", "calm")])!.wind).toBe("breezy");
+    expect(waterTips([inWind("a", "breezy"), inWind("b", "calm"), inWind("c", null)])!.wind).toBeNull();
+  });
+
   it("names the water temperature band most fish came in, and the newest reading", () => {
     const at = (id: string, temp: number | null, iso: string) => ({
       ...book.catches[0]!,

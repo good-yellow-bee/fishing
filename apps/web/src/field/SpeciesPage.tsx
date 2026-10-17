@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, lureTally, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -56,6 +56,22 @@ function SpeciesPhotos({ catches, name }: { catches: readonly CatchEntry[]; name
       </ul>
     </section>
   );
+}
+
+/** The biggest fish of the kind on one lure, by the measure most of the kind were taken in: "best 32 in". */
+function lureBest(catches: readonly CatchEntry[], lure: string): string | undefined {
+  const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
+  const kind: Measure["kind"] = lengths * 2 >= catches.length ? "length" : "weight";
+  const want = lure.trim().replace(/\s+/g, " ").toLowerCase();
+  let best: Measure | null = null;
+  for (const entry of catches) {
+    if (entry.lure.trim().replace(/\s+/g, " ").toLowerCase() !== want) continue;
+    const measure = measureOf(entry, kind);
+    if (!measure) continue;
+    const size = (m: Measure) => (m.kind === "length" ? m.inches : m.pounds);
+    if (!best || size(measure) > size(best)) best = measure;
+  }
+  return best ? t("best {size}", { size: measureText(best) }) : undefined;
 }
 
 export function SpeciesPage() {
@@ -167,7 +183,7 @@ export function SpeciesPage() {
             <h2>{t("Lures that took it")}</h2>
           </div>
           {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(exactTerm("species", t(name)), exactTerm("lure", t(row.lure))) }))} />
+          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(exactTerm("species", t(name)), exactTerm("lure", t(row.lure))), note: lureBest(catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">
