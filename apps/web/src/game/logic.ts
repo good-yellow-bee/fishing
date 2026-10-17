@@ -360,6 +360,14 @@ export function windPointWaitMul(spot: string, wind: string | undefined) {
   return wind === "strong" && spot === "point" ? WIND_POINT_WAIT : 1;
 }
 
+/** Under a clear summer midday sun the open water glares bright and the fish shun it, so out on the boat the bite comes slower. */
+export const OPEN_GLARE_WAIT = 1.15;
+
+/** How the glare stretches the wait out on the boat: slower under a clear summer sky by day, else 1. */
+export function openGlareWaitMul(spot: string, season: LakeSeason | undefined, hour: LakeHour, sky: string | undefined) {
+  return season === "summer" && hour === "day" && sky === "clear" && spot === "open" ? OPEN_GLARE_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
