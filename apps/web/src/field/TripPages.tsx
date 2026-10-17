@@ -32,7 +32,7 @@ import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { tripsCsv } from "./catchCsv";
-import { SpeciesChips } from "./SpeciesChips";
+import { LureChips, SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox, sameTimeText } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
@@ -299,6 +299,7 @@ function TripView() {
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
       <SpeciesChips catches={catches} />
+      {spot ? <LureChips catches={catches} water={spot.name} day={trip.date} /> : null}
       <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
