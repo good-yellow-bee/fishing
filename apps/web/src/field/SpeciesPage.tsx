@@ -173,7 +173,7 @@ export function SpeciesPage() {
         ))}
       </ul>
       <TypicalByWater catches={countedFish(catches)} waters={waters} />
-      <SizeSpread catches={countedFish(catches)} name={name} />
+      <SizeSpread catches={countedFish(catches)} within={kindTerm} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">
@@ -238,9 +238,9 @@ export function SpeciesPage() {
 }
 
 /** How the kind's fish spread by length and by weight, each band opening its fish, and how many went back. */
-function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: string }) {
+/** `within` is the page's own search for the kind, so a band opens the fish it counted (the game's lake left out). */
+function SizeSpread({ catches, within }: { catches: readonly CatchEntry[]; within: string }) {
   const metric = getUnits() === "metric";
-  const within = exactTerm("species", t(name));
   const released = catches.filter((entry) => entry.released).length;
   const charts = (["length", "weight"] as const)
     .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric), years: typicalByYear(catches, kind) }))

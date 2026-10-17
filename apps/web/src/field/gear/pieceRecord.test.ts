@@ -31,6 +31,18 @@ describe("pieceRecords", () => {
     expect(pieceRecords({ ...book, catches: [game, ...book.catches] }, items, "2026-12-31")[0]).toEqual({ label: "Game spinner", outings: 1, fish: 0 });
   });
 
+  it("leaves the sample week's bags out once the book has an outing of its own", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const sample = book.trips[0]!;
+    const own = { ...sample, id: "zq-own", date: "2026-10-01" };
+    const items: TackleItem[] = [
+      { id: "a", tripId: sample.id, label: "Spinnerbait", packed: true },
+      { id: "b", tripId: own.id, label: "Jig", packed: true },
+    ];
+    const rows = pieceRecords({ ...book, trips: [...book.trips, own] }, items, "2026-10-15");
+    expect(rows.map((row) => row.label)).toEqual(["Jig"]);
+  });
+
   it("leaves out outings still to come", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const items: TackleItem[] = [{ id: "a", tripId: book.trips[0]!.id, label: "Spoon", packed: true }];

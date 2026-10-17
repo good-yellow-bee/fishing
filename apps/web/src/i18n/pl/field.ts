@@ -216,7 +216,7 @@ export const PL_FIELD: PlBook = {
   "Last time here, {day}: {fish}": "Ostatnio tutaj, {day}: {fish}",
   "Water temperature in {year}: {readings}": "Temperatura wody w roku {year}: {readings}",
   "Last time you wrote: “{note}”": "Ostatnio zapisano: „{note}”",
-  "best {size}": "najlepsza {size}",
+  "best {size}": "największa {size}",
   "Best water temperature: {temp}": "Najlepsza temperatura wody: {temp}",
   "Last water temperature noted: {temp} on {day}.": "Ostatnia zapisana temperatura wody: {temp}, {day}.",
   "Warming from {temp} on {day}.": "Woda się ociepla (było {temp}, {day}).",

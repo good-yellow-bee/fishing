@@ -56,7 +56,8 @@ function LargeFish({
 function soleTripOn(book: Logbook, ymd: string): string | null {
   const trips = new Set(book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === ymd).map((entry) => entry.tripId ?? ""));
   const [only] = [...trips];
-  return trips.size === 1 && only ? only : null;
+  // Only when the outing holds no fish of another day (one past midnight), so it opens the fish the tile counts.
+  return trips.size === 1 && only && book.catches.every((entry) => entry.tripId !== only || localDate(new Date(entry.caughtAt)) === ymd) ? only : null;
 }
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */

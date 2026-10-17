@@ -190,6 +190,8 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
   const { book } = useLogbook();
   useT();
   const spot = spotById(book, trip.spotId);
+  // Once for the line and the list: each look-up sorts the whole book.
+  const fish = catchesForTrip(book, trip.id);
 
   return (
     <details className="tackle-trip tackle-past">
@@ -198,13 +200,13 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
           {spot ? ` · ${spot.name}` : ""}
-          {` · ${fishCountLabel(catchesForTrip(book, trip.id).length)}`}
+          {` · ${fishCountLabel(fish.length)}`}
         </span>
       </summary>
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={catchesForTrip(book, trip.id)} trips={book.trips} spots={book.spots} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} spots={book.spots} />
     </details>
   );
 }
