@@ -376,6 +376,7 @@ export const PL_GAME: PlBook = {
   "The jig hops down the ledge.": "Jig skacze w dół po krawędzi uskoku.",
   "The worm sinks down beside the pilings, where the fish hide.": "Robak opada tuż przy palach, gdzie kryją się ryby.",
   "The spoon flutters down through the open water, where the hunters roam.": "Wahadłówka trzepocze w dół przez otwartą wodę, gdzie krążą drapieżniki.",
+  "The current tumbles the worm downstream like food washed in from the stream.": "Nurt toczy robaka z prądem jak pokarm spłukany ze strumienia.",
   "The streamer darts up the ledge like a fleeing baitfish, right past the trout holding deep.": "Streamer śmiga w górę Uskoku jak uciekająca rybka, tuż obok pstrągów stojących w głębinie.",
   "The float holds the bait still at the reed edge, right over the panfish hiding in the stems.": "Spławik trzyma przynętę nieruchomo przy ścianie Trzcin, tuż nad rybkami ukrytymi wśród łodyg.",
   "The spinner's blade flickers along the reed edge, past the hunters lying in ambush.": "Skrzydełko obrotówki migocze wzdłuż ściany Trzcin, tuż obok drapieżników czających się w zasadzce.",
