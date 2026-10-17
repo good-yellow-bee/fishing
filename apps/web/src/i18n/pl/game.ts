@@ -385,6 +385,7 @@ export const PL_GAME: PlBook = {
   "The lost fish spooked this water, so the next bite is slower.": "Zgubiona ryba spłoszyła tę wodę, więc następne branie przyjdzie później.",
   "Into the school.": "Prosto w ławicę.",
   "{fish}: there's a school here, feeding hard in the low light. Cast again quickly!": "{fish}: tu jest ławica, żeruje ostro w półmroku. Zarzuć szybko jeszcze raz!",
+  "{fish}: there's a big winter school here, and it stays a while. Cast again quickly!": "{fish}: tu jest duża zimowa ławica i chwilę zostanie. Zarzuć szybko jeszcze raz!",
   "{fish}: there's a school here, cast again quickly!": "{fish}: tu jest ławica, zarzuć szybko jeszcze raz!",
   "Perfect cast.": "Idealny rzut.",
   "Perfect cast": "Idealny rzut",
