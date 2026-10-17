@@ -1202,7 +1202,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT157~~ | ~~Pop a sitting topwater lure: a strike press before the bite pops it instead of striking too early, and each of the first two pops leaves 0.6 of the wait; a third says to let it sit~~ (#752) | game | S |
 | ~~GT158~~ | ~~A jumper (trout, bass, salmon) hooked on a topwater lure leaps on its first run and every second one after, instead of on its second~~ (#753) | fight | S |
 | ~~GT159~~ | ~~A bait thief (golden shiner) can only strip real bait: live bait, a float rig or an unnamed lure; a spinner, spoon, crank, jig, fly or topwater has none to steal~~ (#756) | fish | S |
-| GT160 | A spinner or spoon flashes in the sun: under a clear sky from dawn to dusk its wait is 0.85x, and the cast says the sun catches its flash | game | S |
+| ~~GT160~~ | ~~A spinner or spoon flashes in the sun: under a clear sky from dawn to dusk its wait is 0.85x, and the cast says the sun catches its flash~~ (#757) | game | S |
+| GT161 | A jig cast at the drop-off hops down the ledge where the fish hold: its wait is 0.8x, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

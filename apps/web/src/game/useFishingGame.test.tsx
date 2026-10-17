@@ -1134,6 +1134,20 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("NOW — strike!");
   });
 
+  it.each([
+    ["Green pumpkin tube", "The jig hops down the ledge. "],
+    ["Nightcrawler", null],
+  ] as const)("says a %s hops down the drop-off's ledge: %s", (lure, said) => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    if (said) expect(hint()).toContain(said);
+    else expect(hint()).not.toContain("jig");
+  });
+
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: points });
     surface.dataset.stance = "dropoff";
