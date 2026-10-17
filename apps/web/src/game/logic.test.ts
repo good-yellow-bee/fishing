@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -144,6 +144,17 @@ describe("a jig at the drop-off", () => {
     expect(jigWaitMul("Green pumpkin tube", "dock")).toBe(1);
     expect(jigWaitMul("Nightcrawler", "dropoff")).toBe(1);
     expect(jigWaitMul(undefined, "dropoff")).toBe(1);
+  });
+});
+
+describe("a fly on the inlet's current", () => {
+  it("bites sooner for a fly or streamer at the inlet, and nowhere else or on any other lure", () => {
+    expect(FLY_DRIFT_WAIT).toBeLessThan(1);
+    expect(flyDriftWaitMul("Pheasant tail nymph", "inlet")).toBe(FLY_DRIFT_WAIT);
+    expect(flyDriftWaitMul("Woolly bugger", "inlet")).toBe(FLY_DRIFT_WAIT);
+    expect(flyDriftWaitMul("Pheasant tail nymph", "dock")).toBe(1);
+    expect(flyDriftWaitMul("Inline spinner", "inlet")).toBe(1);
+    expect(flyDriftWaitMul(undefined, "inlet")).toBe(1);
   });
 });
 
