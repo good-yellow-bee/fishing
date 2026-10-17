@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
 import { setUnits } from "../i18n";
-import { biggestSince, forItsLength, sizeRank } from "./sizeRank";
+import { biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 
 const fish = (id: string, inches: number, pounds?: number): CatchEntry => ({
   id,
@@ -83,5 +83,20 @@ describe("heavy or light for its length", () => {
     expect(forItsLength(kind, fish("z", 25, 6.5))).toBeNull();
     expect(forItsLength(kind, { ...base, id: "w", measure: { kind: "length", inches: 25 }, alsoMeasure: undefined })).toBeNull();
     expect(forItsLength(kind.slice(0, 2), fish("x", 25, 8))).toBeNull();
+  });
+});
+
+describe("a long gap since the last of the kind", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const at = (id: string, month: number, day: number): CatchEntry => ({ ...base, id, caughtAt: new Date(2026, month, day, 9).toISOString() });
+  it("names the one before once 30 days or more went by", () => {
+    const kind = [at("a", 4, 1), at("b", 5, 1), at("c", 6, 16)];
+    expect(longGap(kind, kind[2]!)).toEqual({ before: kind[1], days: 45 });
+    expect(longGap(kind, kind[1]!)).toEqual({ before: kind[0], days: 31 });
+  });
+  it("says nothing for the first of the kind or a short gap", () => {
+    const kind = [at("a", 4, 1), at("b", 4, 20)];
+    expect(longGap(kind, kind[0]!)).toBeNull();
+    expect(longGap(kind, kind[1]!)).toBeNull();
   });
 });

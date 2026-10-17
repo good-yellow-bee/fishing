@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field25";
+export const NEWS_ID = "2026-10-17-field26";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A fish that ends a long spell without its kind now says so: “The first perch in 45 days”, opening the one before. An outing shows its busiest hour and, once two fish were weighed, their total weight. Bests now leaves game fish out of every tile, chart and calendar, not just the biggest fish.",
   "A fish both measured and weighed now says when it is heavy or light for its length. A water's page shows when it bites there, a trip out today shows how long since the last fish, and in a run of “Save and log another”, Enter logs the next one. Game fish no longer win your best badges or Bests, or count toward the year goal and the Home numbers, and the game's weather is no longer offered on a real catch.",
   "A golden shiner travels in a school like the panfish, so land one and cast again. A carp hooked in summer is at its strongest, a brook trout in fall is on its spawning run, and a pike hunts on through the winter, so each tires slower. On a clear summer midday the fish shun the open water, and on a moonless night they can barely see to feed, so the bites come slower.",
   "On the catch form, Enter moves on to the next field until the fish is complete, and “Save and log another” puts the cursor straight in the size. Game days no longer show up in outing steps, “Just back”, the outing average or the backup reminder, and a game fish no longer takes away your real first or best. Game-day pages drop the planning tools, and undoing a delete returns you to the list you were in.",

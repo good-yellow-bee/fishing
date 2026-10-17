@@ -9,6 +9,7 @@ import {
   catchesForTrip,
   fishCountsByTrip,
   localDate,
+  measureOf,
   shiftDate,
   spotById,
   tripById,
@@ -25,6 +26,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
+import { measureText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
@@ -38,7 +40,7 @@ import { packingTips } from "./waterTips";
 import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
-import { fishPace, sinceLastFish } from "./tripPace";
+import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
 import { osmLink } from "./osmLink";
 import { placeFor } from "./map/places";
@@ -275,6 +277,13 @@ function TripView() {
 
   const spot = spotById(book, trip.spotId);
   const catches = catchesForTrip(book, trip.id);
+  const rush = busiestHour(catches.map((entry) => entry.caughtAt));
+  const weighed = totalWeight(
+    catches.map((entry) => {
+      const weight = measureOf(entry, "weight");
+      return weight?.kind === "weight" ? weight.pounds : null;
+    }),
+  );
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
@@ -322,6 +331,8 @@ function TripView() {
           {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt, catches.length)}
         </p>
       ) : null}
+      {rush ? <p className="meta busiest-hour">{t("Most in one hour: {count}, from {time}", { count: rush.count, time: formatTimeOfDay(rush.from) })}</p> : null}
+      {weighed ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
       {lastHere ? (
