@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, BOAT_RUN, WIND_SLACK, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -1258,6 +1258,21 @@ describe("a whitefish's soft mouth", () => {
     expect(outcome).toBe("escaped");
     expect(runtime.sim.tornOut).toBe(true);
     expect(now).toBeLessThanOrEqual(TEAR_SEC * 1000 + 100);
+  });
+
+  it("holds longer on a lure's treble hooks", () => {
+    const runtime = makeFight(fish("lake-whitefish"), 1.5, 5, () => 0.5, 1, "open", undefined, false, true);
+    let outcome: FightOutcome = "fighting";
+    let now = 0;
+    for (; outcome === "fighting" && now < 3000; now += 50) {
+      runtime.sim.surge = 0;
+      runtime.sim.tension = RED_TENSION + 0.05;
+      outcome = runtime.step(now, 0.05, true);
+    }
+    expect(TREBLE_HOLD).toBeGreaterThan(1);
+    expect(outcome).toBe("escaped");
+    expect(now).toBeGreaterThan(TEAR_SEC * 1000 + 100);
+    expect(now).toBeLessThanOrEqual(TEAR_SEC * TREBLE_HOLD * 1000 + 100);
   });
 
   it("is a whitefish's trait only", () => {

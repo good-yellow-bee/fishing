@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17z";
+export const NEWS_ID = "2026-10-17za";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A spinner, spoon or crankbait's treble hooks hold a soft mouth or a light hook half again as long before it tears free.",
   "Bang a crankbait off the point's rocks and the erratic bump draws a bite sooner.",
   "A topwater lure rides over the reeds' weed and a crankbait's lip bumps it off the point's rocks, so neither snags there.",
   "Swing a fly or streamer on the inlet's current and it drifts down to the trout holding there, so the bite comes sooner.",
