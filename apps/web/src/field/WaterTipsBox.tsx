@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
-import { readingBefore, waterTips } from "./waterTips";
+import { lureByTemp, readingBefore, waterTips } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { fishCountLabel, formatCatchDay } from "./format";
 import { tempText } from "../i18n/content";
@@ -80,6 +80,7 @@ export function WaterTipsBox({
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const sun = place ? nearSunCount(catches, place) : null;
+  const byTemp = lureByTemp(catches);
   // Against the reading before it: a change too small to show as a whole degree says nothing.
   const before = on ? readingBefore(catches, tips.lastTemp) : null;
   const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
@@ -103,6 +104,12 @@ export function WaterTipsBox({
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
         {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} to={find(exactTerm("sky", t(SKY_LABELS[tips.sky])))} /> : null}
         {tips.wind ? <TipLine text="Best wind: {wind}" name="wind" value={t(WIND_LABELS[tips.wind])} to={find(exactTerm("wind", t(WIND_LABELS[tips.wind])))} /> : null}
+        {byTemp.length > 0 ? (
+          <>
+            <br />
+            {t("Lure by water temperature: {bands}", { bands: byTemp.map((row) => `${tempBandLabel(row.band)}: ${t(row.lure)}`).join(" · ") })}
+          </>
+        ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}

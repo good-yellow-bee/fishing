@@ -20,6 +20,7 @@ import { MonthBars } from "./MonthBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
+import { seasonFirst } from "./seasonFirst";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
@@ -125,6 +126,7 @@ export function SpeciesPage() {
       <FishSum catches={catches} oneKind />
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
+      <SeasonFirst catches={catches} />
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
@@ -262,6 +264,31 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
 }
 
 /** The first and the newest fish of the kind, each a link to its catch. */
+/** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
+function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
+  const found = seasonFirst(catches);
+  if (!found) return null;
+  const vars = { year: found.year, last: found.year - 1 };
+  const gap = Math.abs(found.earlier);
+  const [before, after] = (
+    found.earlier > 0
+      ? tn(gap, "First of {year}: {day}, {n} day earlier than in {last}.", "First of {year}: {day}, {n} days earlier than in {last}.", { ...vars, day: "\u0000" })
+      : found.earlier < 0
+        ? tn(gap, "First of {year}: {day}, {n} day later than in {last}.", "First of {year}: {day}, {n} days later than in {last}.", { ...vars, day: "\u0000" })
+        : t("First of {year}: {day}, the same day as in {last}.", { ...vars, day: "\u0000" })
+  ).split("\u0000");
+  return (
+    <p className="meta season-first">
+      {/* One run of text: the paragraph lays its children out as separate items. */}
+      <span>
+        {before}
+        <Link to={`/catches/${found.entry.id}`}>{formatCatchDay(found.entry.caughtAt)}</Link>
+        {after}
+      </span>
+    </p>
+  );
+}
+
 function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
   const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;
