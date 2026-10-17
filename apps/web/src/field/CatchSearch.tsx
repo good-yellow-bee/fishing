@@ -5,6 +5,7 @@ import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
+import { bookBadges } from "./catchBadge";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
@@ -59,6 +60,8 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
 }
 
 /** Words for Saturdays and Sundays, in English and Polish. */
+/** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
+const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekordy"].map((word) => normalize(word)));
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
@@ -159,6 +162,10 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const day = localDate(new Date(entry.caughtAt));
     return day >= days.from && day <= days.to;
   });
+  if (RECORD_WORDS.has(normalize(needle))) {
+    const badges = bookBadges(book);
+    return catchesNewestFirst(book).filter((entry) => badges.has(entry.id));
+  }
   // "weekend": every fish caught on a Saturday or a Sunday.
   if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(entry.caughtAt).getDay()));
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
