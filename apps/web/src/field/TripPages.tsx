@@ -54,7 +54,7 @@ import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
-import { countedFish } from "./milestones";
+import { ownFish } from "./milestones";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
@@ -279,9 +279,10 @@ function TripView() {
   const spot = spotById(book, trip.spotId);
   const catches = catchesForTrip(book, trip.id);
   // A blank day past: the water's last fish before it, and what took it, to try next time.
+  // Not when that day's fish were only logged without the outing: those are offered just above.
   const lastFishHere =
     catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
-      ? countedFish(catchesForSpot(book, trip.spotId)).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
+      ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
       : undefined;
   const rush = busiestHour(catches.map((entry) => entry.caughtAt));
   const weighed = totalWeight(
@@ -351,7 +352,7 @@ function TripView() {
       {/* Before going back: what was learned there last time, in the angler's own words. */}
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       <SpeciesChips catches={catches} />
-      <LureChips catches={catches} outing={trip} />
+      <LureChips catches={catches} outing={trip} water={spot?.name} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
@@ -371,7 +372,7 @@ function TripView() {
       {catches.length === 0 ? (
         <p className="empty">
           {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
-          {lastFishHere ? (
+          {lastFishHere && loose.length === 0 ? (
             <>
               {" "}
               <Link to={`/catches/${lastFishHere.id}`} className="last-fish-here">

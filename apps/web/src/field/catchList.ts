@@ -1,7 +1,7 @@
 import { catchesForSpot, catchesForTrip, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { findCatches } from "./CatchSearch";
 import { FIND_PARAM, findLink } from "./findLinks";
-import { catchesOfSpecies, speciesLink } from "./speciesLink";
+import { kindOnPage, speciesLink } from "./speciesLink";
 
 /** The address parameter that says which list a catch was opened from, so its steps keep to that list. */
 export const LIST_PARAM = "in";
@@ -40,7 +40,7 @@ export function catchList(
           back: kind === "find" ? findLink(value) : `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}`,
         }
       : kind === "species"
-        ? { rows: catchesOfSpecies(book, value), back: speciesLink(value) }
+        ? { rows: kindOnPage(book, value), back: speciesLink(value) }
         : kind === "trip"
           ? { rows: catchesForTrip(book, value), back: `/trips/${value}` }
           : kind === "water"

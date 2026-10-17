@@ -1,4 +1,5 @@
 import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { offPlayLake } from "./playLake";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -9,6 +10,24 @@ export function speciesLink(species: string) {
 export function catchesOfSpecies(book: Logbook, species: string): CatchEntry[] {
   const key = species.trim().toLowerCase();
   return catchesNewestFirst(book).filter((entry) => entry.species.trim().toLowerCase() === key);
+}
+
+/**
+ * The fish a kind's page lists, newest first: the angler's own, leaving the game's out; a kind only ever caught in the
+ * game shows its game fish. Every count that opens the kind's page goes by this.
+ */
+export function kindOnPage(book: Logbook, species: string): CatchEntry[] {
+  const every = catchesOfSpecies(book, species);
+  const own = every.filter(offPlayLake);
+  return own.length > 0 ? own : every;
+}
+
+/** Each kind among `catches` counted as its page counts it: the angler's own fish, or its game fish when that is all. */
+export function pageCounts(catches: readonly CatchEntry[]) {
+  const own = speciesCounts(catches.filter(offPlayLake));
+  const known = new Set(own.map((row) => row.species.trim().toLowerCase()));
+  const gameOnly = speciesCounts(catches.filter((entry) => !offPlayLake(entry))).filter((row) => !known.has(row.species.trim().toLowerCase()));
+  return [...own, ...gameOnly].sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
 }
 
 /** The waters this kind came from, most fish first, then by name. */

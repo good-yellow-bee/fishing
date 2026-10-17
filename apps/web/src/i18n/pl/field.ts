@@ -281,7 +281,7 @@ export const PL_FIELD: PlBook = {
   "That trip is not in this book.": "Tej wyprawy nie ma w dzienniku.",
   "Back to trips": "Wróć do wypraw",
   "Add to calendar": "Dodaj do kalendarza",
-  "This outing was on {day}; the fish is dated another day.": "Ta wyprawa była {day}, a ryba ma inną datę.",
+  "This outing was on {day}; the fish is dated another day.": "Ta wyprawa była w dniu {day}, a ryba ma inną datę.",
   "What works here": "Co tu działa",
   "Last fish: {day}": "Ostatnia ryba: {day}",
   "Works on this water:": "Działa na tym łowisku:",

@@ -110,11 +110,16 @@ describe("a long gap since the last of the kind", () => {
 describe("biggest of the outing", () => {
   const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
   const fish = (id: string, inches: number): CatchEntry => ({ ...base, id, measure: { kind: "length", inches }, alsoMeasure: undefined });
-  it("marks the biggest once it beat two others measured the same way", () => {
+  it("marks the one the outing's summary names, on an outing of three or more", () => {
     const outing = [fish("a", 12), fish("b", 14), fish("c", 18)];
     expect(biggestOnOuting(outing, outing[2]!)).toBe(true);
     expect(biggestOnOuting(outing, outing[1]!)).toBe(false);
     expect(biggestOnOuting(outing.slice(1), outing[2]!)).toBe(false);
-    expect(biggestOnOuting([...outing, fish("d", 18)], outing[2]!)).toBe(false);
+  });
+
+  it("marks only one fish when some were weighed and some measured", () => {
+    const weighed = { ...fish("w", 0), measure: { kind: "weight" as const, pounds: 3 } };
+    const outing = [fish("a", 12), fish("b", 30), weighed, { ...weighed, id: "w2", measure: { kind: "weight" as const, pounds: 1 } }];
+    expect(outing.filter((entry) => biggestOnOuting(outing, entry)).map((entry) => entry.id)).toEqual(["w"]);
   });
 });

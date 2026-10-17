@@ -9,8 +9,8 @@ import { fishCountLabel, formatCatchDay, outingNameById } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { catchesOfSpecies, speciesWaters } from "./speciesLink";
-import { offPlayLake, withoutPlayLake } from "./playLake";
+import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
+import { withoutPlayLake } from "./playLake";
 import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
 import { WaterTipsBox, waterRange } from "./WaterTipsBox";
@@ -93,11 +93,10 @@ export function SpeciesPage() {
   const { species = "" } = useParams();
   // The angler's own fish of the kind, as Bests counts them; a kind only ever caught in the game shows its game fish.
   const every = catchesOfSpecies(book, species);
-  const own = every.filter(offPlayLake);
-  const catches = own.length > 0 ? own : every;
+  const catches = kindOnPage(book, species);
   const name = catches[0]?.species ?? species;
   // Its searches leave the game's lake out when the page does, so each count opens the fish it counted.
-  const kindTerm = catches === own ? withoutPlayLake(book, exactTerm("species", t(name)), every) : exactTerm("species", t(name));
+  const kindTerm = catches.length < every.length ? withoutPlayLake(book, exactTerm("species", t(name)), every) : exactTerm("species", t(name));
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   if (catches.length === 0) {
