@@ -1405,6 +1405,39 @@ button.field-primary:disabled {
   .field a {
     color: inherit;
   }
+
+  /* Links that only go somewhere on a screen, and an empty tackle list, say nothing on paper. */
+  .catch-steps,
+  .catch-list-at,
+  .trip-again,
+  .field a[href^="https://www.openstreetmap.org/"],
+  .tackle-block:has(> .empty) {
+    display: none !important;
+  }
+
+  /* Cards print as rows, not boxes, so a long list takes fewer pages. */
+  .catch-card,
+  .trip-card,
+  .spot-card {
+    border: 0;
+    border-bottom: 1px solid #bbb;
+    background: #fff;
+    padding: 6px 0;
+    break-inside: avoid;
+  }
+
+  .catch-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .catch-card.has-photo {
+    grid-template-columns: 48px 92px 1fr;
+  }
+
+  .stack {
+    gap: 0;
+  }
 }
 
 /* Renaming a kind of fish: tucked away under the list until asked for. */
