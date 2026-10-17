@@ -192,9 +192,13 @@ export const SOLID_STRIKE_SHARE = 0.4;
 /** On a breezy or strong day the wind's bow in the line soaks up the strike, so a solid hook needs a quicker one. */
 export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 
-/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE) {
-  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1);
+/** A jig's single stout hook drives home on a strike, so it sets solid over a longer share of the window. */
+export const JIG_SOLID = 1.25;
+
+/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure. */
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string) {
+  const jig = !!lure?.trim() && lureClass(lure).id === "jig";
+  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1);
 }
 
 /** A topwater lure's splash carries on glassy water and drowns in a strong wind's chop, so the wait for a bite shifts. */

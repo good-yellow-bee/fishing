@@ -727,7 +727,7 @@ export function DockPage() {
             <div className="cue-bar">
               <i />
               {/* From level 2, a mark where the shrinking bar passes the last moment for a solid hook. */}
-              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind))) * 100}%` }} />}
+              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind), tiedLure.current)) * 100}%` }} />}
             </div>
           </div>
         )}

@@ -1208,7 +1208,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT163~~ | ~~A fly or streamer cast at the inlet drifts on the current down to the trout: its wait is 0.8x, and the cast says so~~ (#763) | game | S |
 | ~~GT164~~ | ~~Lures slip their cover: a topwater never snags in the reeds' weed, and a crankbait never snags on the point's rocks~~ (#765) | casting | S |
 | ~~GT165~~ | ~~A crankbait cast off the point bangs off the rocks and draws a reaction bite: its wait is 0.8x, and the cast says so~~ (#767) | game | S |
-| GT166 | Treble hooks hold: on a spinner, spoon or crankbait a soft mouth or a light hook takes 1.5x as long in the red to tear free | fight | S |
+| ~~GT166~~ | ~~Treble hooks hold: on a spinner, spoon or crankbait a soft mouth or a light hook takes 1.5x as long in the red to tear free~~ (#769) | fight | S |
+| GT167 | A jig's stout single hook sets solid over 1.25x the usual share of the strike window, and the Strike bar's solid mark moves to match | fight | S |
 
 ## Risks / open questions for the owner
 
