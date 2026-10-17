@@ -323,7 +323,7 @@ export function nightTireMul(hour: string | undefined, speciesId: string) {
   return hour === "night" && NIGHT_HUNTERS.has(speciesId) ? NIGHT_HUNTER_TIRE : 1;
 }
 /** Twilight hunters: their eyes are made for low light, so they hunt hardest at dawn and dusk. */
-export const TWILIGHT_HUNTERS: ReadonlySet<string> = new Set(["walleye"]);
+export const TWILIGHT_HUNTERS: ReadonlySet<string> = new Set(["walleye", "crappie"]);
 /** At dawn or dusk a twilight hunter tires only this fast on a run or against the reel. */
 export const TWILIGHT_HUNTER_TIRE = 0.85;
 

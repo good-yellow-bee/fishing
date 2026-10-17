@@ -1270,7 +1270,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT225~~ | ~~Spinner in the inlet current: the Ujście current spins a spinner's blade hard even on a slow retrieve, so the bite comes 0.85x sooner, and the wait hint says so; news card game12~~ (#913) | bite | S |
 | ~~GT226~~ | ~~Crankbait off the pilings: a crankbait run past the Pomost knocks off the pilings and darts aside, so the bite comes 0.85x sooner, and the wait hint says so~~ (#915) | bite | S |
 | ~~GT227~~ | ~~Bluegill on the nest: a bluegill hooked at the Trzciny or Pomost in spring is fanning its nest and tires slower, like the bass, and the hookset hint says so~~ (#917) | fight | S |
-| GT228 | Brook trout in the current: a brook trout hooked at the Ujście turns its side to the current like the rainbow and tires slower, and the hookset hint says so | fight | S |
+| ~~GT228~~ | ~~Brook trout in the current: a brook trout hooked at the Ujście turns its side to the current like the rainbow and tires slower, and the hookset hint says so~~ (#918) | fight | S |
+| GT229 | Crappie at twilight: a black crappie hooked at dawn or dusk hunts hardest in the low light like the walleye and tires slower, and the hookset hint says so; news card game13 | fight | S |
 
 ## Risks / open questions for the owner
 
