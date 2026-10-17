@@ -118,7 +118,8 @@ export function TripCard({
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">
-          {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
+          {/* The fish that got away too, so a hard day stands out in the list. */}
+          {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>

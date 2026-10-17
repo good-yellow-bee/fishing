@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field33";
+export const NEWS_ID = "2026-10-17-field34";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A catch page now names the biggest of its kind you took on the same lure, opening that fish. Outing cards in Trips count the fish that got away, so a hard day stands out.",
   "The map's list of waters now gives each one's last fish day beside its count. On the day of an outing, Home says how many pieces are left to pack and takes you to the list. Spots ordered by longest rested now put never-fished waters last.",
   "Home's Next tile now says how your last outing on that water went, with the lure that took the most. Spots can be ordered by the water left alone longest, each saying how many days it has rested. Once you log your own fish, Home offers to take the sample week out.",
   "A new outing picks its day in one tap: today, tomorrow or the coming Saturday. Its title offers the names you gave earlier outings, this water's first. A tackle list can hide what is already packed, so only what is left shows while you pack.",
