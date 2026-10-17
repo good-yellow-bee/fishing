@@ -299,7 +299,7 @@ function TripView() {
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
       <SpeciesChips catches={catches} />
-      {spot ? <LureChips catches={catches} water={spot.name} day={trip.date} /> : null}
+      <LureChips catches={catches} outing={trip} />
       <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">

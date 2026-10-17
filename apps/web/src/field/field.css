@@ -783,6 +783,18 @@ button.field-primary:disabled {
     }
   }
 
+  /* Narrower still, the bar's own padding and the button give a little too. */
+  @media (max-width: 359px) {
+    .field-mobile-bar {
+      gap: 8px;
+      padding: 14px 12px;
+    }
+
+    .field-mobile-bar .field-primary {
+      padding: 10px 8px;
+    }
+  }
+
   .field-main {
     padding: 0 0 92px;
   }

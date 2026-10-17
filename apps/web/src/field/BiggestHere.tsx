@@ -12,7 +12,8 @@ export function biggestOf(catches: readonly CatchEntry[]): { longest: CatchEntry
 }
 
 /** The sizes of a group's biggest fish, each opening its fish: "28.5 in · 9.2 lb", or one of them. */
-export function BiggestLinks({ catches, list }: { catches: readonly CatchEntry[]; list?: ListKey }) {
+/** `about` names the group for a link read on its own ("Northern pike", "Cedar Lake"). */
+export function BiggestLinks({ catches, list, about }: { catches: readonly CatchEntry[]; list?: ListKey; about: string }) {
   const { longest, heaviest } = biggestOf(catches);
   const rows = [
     longest ? { entry: longest, kind: "length" as const } : null,
@@ -26,7 +27,7 @@ export function BiggestLinks({ catches, list }: { catches: readonly CatchEntry[]
           <span key={kind}>
             {/* The dot holds to the size before it, so a wrapped line does not start with one. */}
             {index > 0 ? "\u00a0· " : null}
-            <Link to={catchLink(entry.id, list)}>{measureText(measure)}</Link>
+            <Link to={catchLink(entry.id, list)} aria-label={`${about}: ${measureText(measure)}`}>{measureText(measure)}</Link>
           </span>
         );
       })}
@@ -50,7 +51,7 @@ export function BiggestHere({ catches, spotId }: { catches: readonly CatchEntry[
             <li key={key}>
               <Link to={speciesLink(species)}>{t(species)}</Link>
               <span className="meta sizes">
-                <BiggestLinks catches={catches.filter((entry) => entry.species.trim().toLowerCase() === key)} list={`water:${spotId}`} />
+                <BiggestLinks catches={catches.filter((entry) => entry.species.trim().toLowerCase() === key)} list={`water:${spotId}`} about={t(species)} />
               </span>
             </li>
           );

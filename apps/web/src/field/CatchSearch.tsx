@@ -117,6 +117,11 @@ function exactName(book: Logbook, entry: CatchEntry, field: ExactField): string 
   if (field === "water") return spotById(book, entry.spotId)?.name ?? null;
   if (field === "sky") return entry.weather ? SKY_LABELS[entry.weather.sky] : null;
   if (field === "wind") return entry.weather ? WIND_LABELS[entry.weather.wind] : null;
+  if (field === "outing") {
+    // "2026-10-10 Dawn patrol": one outing's fish, after midnight too, which a water and a day would miss.
+    const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
+    return trip ? `${trip.date} ${trip.title}` : null;
+  }
   const at = new Date(entry.caughtAt);
   if (Number.isNaN(at.getTime())) return null;
   if (field === "season") return SEASON_LABELS[lakeSeason(at)];
@@ -270,22 +275,20 @@ function findWords(book: Logbook, part: string, t: (text: string) => string, pic
 }
 
 /**
- * What to leave out of a search: a part that starts with "-" ("pike + -released"), and a word in a part that does
- * ("pike -released"). A "-" before a number ("-5°C") is kept as it is. Returns the parts to find and the ones to drop.
+ * What to leave out of a search: a part that starts with "-" ("pike + -released"), and what follows a "-" in a part
+ * ("pike -released", "pike -soft plastic", "pike -water:"Cedar Lake"", "pike -released -jig"): to the next "-" or the
+ * part's end. A "-" before a number ("-5°C") is kept as it is. Returns the parts to find and the ones to drop.
  */
 export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: string[] } {
   const keep: string[] = [];
   const drop: string[] = [];
-  const out = (text: string) => /^-\s*[^\s\d.,<>-]/.test(text);
+  // A "-" at the start, or after a space, that comes before a word rather than a number or a bound.
+  const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-])/;
   for (const part of parts) {
-    if (out(part)) {
-      drop.push(part.replace(/^-\s*/, ""));
-      continue;
-    }
-    const words = part.split(/\s+/);
-    for (const word of words.filter(out)) drop.push(word.slice(1));
-    const rest = words.filter((word) => !out(word)).join(" ");
-    if (rest) keep.push(rest);
+    const pieces = part.split(dash);
+    const first = pieces[0]!.trim();
+    if (first) keep.push(first);
+    for (const piece of pieces.slice(1)) if (piece.trim()) drop.push(piece.trim());
   }
   return { keep, drop };
 }

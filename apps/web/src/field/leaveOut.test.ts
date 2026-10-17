@@ -26,4 +26,15 @@ describe("leaving fish out of a search", () => {
     expect(splitLeftOut(["pike -"])).toEqual({ keep: ["pike -"], drop: [] });
     expect(splitLeftOut(['-species:"Perch"', "cedar"])).toEqual({ keep: ["cedar"], drop: ['species:"Perch"'] });
   });
+
+  it("drops everything after a dash, quoted names and several words whole", () => {
+    expect(splitLeftOut(['pike -water:"Cedar Lake"'])).toEqual({ keep: ["pike"], drop: ['water:"Cedar Lake"'] });
+    expect(splitLeftOut(["walleye -soft plastic"])).toEqual({ keep: ["walleye"], drop: ["soft plastic"] });
+    expect(splitLeftOut(["pike -released -jig"])).toEqual({ keep: ["pike"], drop: ["released", "jig"] });
+    expect(splitLeftOut(["cedar-lake pike"])).toEqual({ keep: ["cedar-lake pike"], drop: [] });
+    const water = book.spots[0]!.name;
+    const there = new Set(ids(`water:"${water}"`));
+    expect(there.size).toBeGreaterThan(0);
+    expect(ids(`pike -water:"${water}"`)).toEqual(ids("pike").filter((id) => !there.has(id)));
+  });
 });
