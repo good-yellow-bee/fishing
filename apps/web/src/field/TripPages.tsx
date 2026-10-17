@@ -53,7 +53,7 @@ import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
 import { fishOnOutingDay } from "./suggestions";
 import "./search.css";
-import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
 import { useStepKeys } from "./stepKeys";
 
@@ -88,7 +88,7 @@ export function TripsPage() {
   const recent = recentTrips(book, today);
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
-  const average = outingAverage(book.trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const average = outingAverage(book.trips.filter(offPlayLake), (id) => fishByTrip.get(id) ?? 0, today);
   const needle = query.trim();
   const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t) : [];
   const card = (trip: Trip, level?: 4) => (
@@ -278,7 +278,9 @@ function TripView() {
   const loose = book.catches.filter(
     (entry) => entry.tripId === null && entry.spotId === trip.spotId && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date(entry.caughtAt)), trip.date),
   );
-  const tackle = (
+  // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
+  const play = trip.spotId === PLAY_LAKE_ID;
+  const tackle = play ? null : (
     <TackleList
       tripId={trip.id}
       heading={t("Tackle")}
@@ -336,7 +338,7 @@ function TripView() {
       {catches.length === 0 ? (
         <p className="empty">
           {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
-          {trip.date === today ? (
+          {trip.date === today && !play ? (
             <>
               {" "}
               <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`}>{t("Log the first one")}</Link>
@@ -373,7 +375,7 @@ function TripView() {
         }}
         aside={
           // An outing still ahead has no fish to log yet; a catch can't be dated in the future.
-          trip.date <= today ? (
+          trip.date <= today && !play ? (
             <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
               {t("Add a catch")}
             </Link>
@@ -410,7 +412,7 @@ function TripView() {
         {spot ? <SunLine date={trip.date} spot={spot} /> : null}
       </EditDelete>
       {trip.note ? <p className="prose">{trip.note}</p> : null}
-      {trip.date >= today ? (
+      {play ? null : trip.date >= today ? (
         <p className="trip-calendar">
           <button
             type="button"
@@ -438,7 +440,7 @@ function TripView() {
       )}
       {catches.length > 0 ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {trip.date >= today && spot ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
+      {trip.date >= today && spot && !play ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}

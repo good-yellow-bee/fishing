@@ -38,3 +38,13 @@ describe("trip neighbours", () => {
     expect(tripNeighbors(book, "gone")).toEqual({ newer: null, older: null });
   });
 });
+
+describe("outing neighbours and game days", () => {
+  const trip = (id: string, date: string, spotId = "spot-cedar") => ({ id, date, spotId, title: id, note: "" });
+  const book = { spots: [], catches: [], trips: [trip("a", "2026-10-01"), trip("play", "2026-10-02", "spot-stillwater"), trip("b", "2026-10-03")] };
+
+  it("steps over game days from a real outing, and among game days from one", () => {
+    expect(tripNeighbors(book, "a").newer?.id).toBe("b");
+    expect(tripNeighbors(book, "play")).toEqual({ newer: null, older: null });
+  });
+});

@@ -163,7 +163,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
 
     const remove = (kind: DeletedKind, next: Logbook) => {
       // Deletes are made from the entry's own page, before it navigates away.
-      const before = { kind, book, photos, from: window.location.pathname };
+      const before = { kind, book, photos, from: window.location.pathname + window.location.search };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
       if (kind !== "sample" && kind !== "blank" && kind !== "file") {

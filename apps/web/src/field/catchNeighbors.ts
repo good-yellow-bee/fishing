@@ -1,4 +1,5 @@
 import { catchesNewestFirst, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
+import { PLAY_LAKE_ID } from "./playLake";
 
 export type Neighbors<T> = { newer: T | null; older: T | null };
 
@@ -13,7 +14,9 @@ export function catchNeighbors(book: Logbook, id: string): Neighbors<CatchEntry>
   return neighborsIn(catchesNewestFirst(book), id);
 }
 
+/** The outings either side, by day: game days step only among themselves, real ones among real ones. */
 export function tripNeighbors(book: Logbook, id: string): Neighbors<Trip> {
-  const rows = [...book.trips].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+  const play = book.trips.find((trip) => trip.id === id)?.spotId === PLAY_LAKE_ID;
+  const rows = book.trips.filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play).sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
   return neighborsIn(rows, id);
 }
