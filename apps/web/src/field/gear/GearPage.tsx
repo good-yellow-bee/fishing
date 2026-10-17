@@ -89,25 +89,54 @@ function LureRecord({ today }: { today: string }) {
   );
 }
 
-/** Lure names that look like one lure typed two ways, each with a button to fold one into the other. */
+/** Pairs the angler said are two lures, kept in this browser so the line doesn't come back. */
+const KEPT_APART_KEY = "stillwater.field-log.lure-twins-kept.v1";
+
+function readKeptApart(): string[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEPT_APART_KEY) ?? "[]") as unknown;
+    return Array.isArray(raw) ? raw.filter((key): key is string => typeof key === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Lure names that look like one lure typed two ways, each with a button to fold one into the other or keep both. */
 function LureTwins() {
   const { storedBook, changeBook } = useLogbook();
-  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER));
+  const [kept, setKept] = useState(readKeptApart);
+  const keyOf = (pair: { from: string; into: string }) => `${pair.from.toLowerCase()}|${pair.into.toLowerCase()}`;
+  // Close as stored but not as shown (a sample lure in Polish) would read as two unrelated names.
+  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER)).filter(
+    (pair) => !kept.includes(keyOf(pair)) && (t(pair.from) === pair.from) === (t(pair.into) === pair.into),
+  );
   if (twins.length === 0) return null;
+  const keepApart = (pair: { from: string; into: string }) => {
+    const next = [...kept, keyOf(pair)];
+    setKept(next);
+    try {
+      localStorage.setItem(KEPT_APART_KEY, JSON.stringify(next));
+    } catch {
+      // Storage full or blocked: hidden for this visit only.
+    }
+  };
   return (
     <ul className="lure-twins">
-      {twins.map(({ from, into }) => (
-        <li key={from} className="meta">
-          {t("“{from}” looks like “{into}”.", { from: t(from), into: t(into) })}{" "}
+      {twins.map((pair) => (
+        <li key={pair.from} className="meta">
+          {t("“{from}” looks like “{into}”.", { from: t(pair.from), into: t(pair.into) })}{" "}
           <button
             type="button"
             className="text-button"
             onClick={() => {
-              const result = renameInBook(storedBook, "lure", from, into);
+              const result = renameInBook(storedBook, "lure", pair.from, pair.into);
               if (result.ok) changeBook("rename", result.book);
             }}
           >
-            {t("Merge into {into}", { into: t(into) })}
+            {t("Merge into {into}", { into: t(pair.into) })}
+          </button>{" "}
+          <button type="button" className="text-button" onClick={() => keepApart(pair)}>
+            {t("They're different")}
           </button>
         </li>
       ))}

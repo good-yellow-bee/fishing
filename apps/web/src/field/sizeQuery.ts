@@ -76,14 +76,14 @@ export function tempMatches(waterTempF: number | undefined, query: TempQuery): b
 }
 
 /**
- * The size search for fish the same size as this one, in the reader's units: lengths to the whole inch or centimetre,
+ * The size search for fish the same size as this one, in the reader's units: lengths to the whole centimetre or the tenth of an inch,
  * weights to the tenth as the cards show them (a hundredth under 1). Written as a range, so "1.0 lb" can't widen to
  * the half pound a bare "1 lb" would search.
  */
 export function sameSizeSearch(measure: Measure, metric: boolean): string {
   const [value, unit, places] =
     measure.kind === "length"
-      ? [metric ? measure.inches * CM_PER_IN : measure.inches, metric ? "cm" : "in", 0]
+      ? [metric ? measure.inches * CM_PER_IN : measure.inches, metric ? "cm" : "in", metric ? 0 : 1]
       : ((weight: number) => [weight, metric ? "kg" : "lb", weight < 1 ? 2 : 1] as const)(metric ? measure.pounds * KG_PER_LB : measure.pounds);
   const step = 10 ** -places;
   const shown = Math.round(value / step) * step;

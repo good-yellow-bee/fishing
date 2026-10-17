@@ -435,7 +435,7 @@ function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
     <p className="meta temp-year">
       {t("Water temperature in {year}: {readings}", {
         year: new Date(readings[0]!.at).getFullYear(),
-        readings: readings.map((reading) => `${day(reading.at)} ${tempText(reading.fahrenheit)}`).join(" → "),
+        readings: readings.map((reading) => `${day(reading.at)}: ${tempText(reading.fahrenheit)}`).join(" → "),
       })}
     </p>
   );
