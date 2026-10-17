@@ -23,6 +23,9 @@ export function yearsBack(entry: CatchEntry, now: Date = new Date(), days = 3): 
   return null;
 }
 
+/** How far either side of a planned day "this time of year" reaches in earlier years: a fortnight, as fish keep to a season, not a week. */
+export const SAME_TIME_DAYS = 14;
+
 /** Fish from earlier years caught within `days` of today's date in their own year, newest first: this week, years ago. */
 export function thisWeekInPastYears(catches: readonly CatchEntry[], now: Date = new Date(), days = 3, limit = 3): CatchEntry[] {
   const found = catches.filter((entry) => yearsBack(entry, now, days) !== null);

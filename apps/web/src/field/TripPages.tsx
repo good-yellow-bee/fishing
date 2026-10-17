@@ -28,13 +28,12 @@ import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
-import { thisWeekInPastYears } from "./yearsAgo";
-import { speciesCounts } from "./speciesLink";
+import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { tripsCsv } from "./catchCsv";
 import { SpeciesChips } from "./SpeciesChips";
-import { WaterTipsBox } from "./WaterTipsBox";
+import { WaterTipsBox, sameTimeText } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { datedName, downloadFile } from "./download";
@@ -466,11 +465,11 @@ function TripForm() {
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
-  // What this water gave in the same week of earlier years, for an outing being planned.
+  // What this water gave around the same date in earlier years, for an outing being planned.
   const pastWeek = useMemo(() => {
     const [y, m, d] = date.split("-").map(Number);
     if (existing || !y || !m || !d) return [];
-    return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), 3, Infinity);
+    return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity);
   }, [book, spotId, date, existing]);
   // Made from a fish logged without an outing: that day's fish (and its small hours') on this water with none go on the new one.
   const loose = useMemo(
@@ -597,12 +596,7 @@ function TripForm() {
           </div>
           {pastWeek.length > 0 ? (
             <p className="wide form-note">
-              {t("This week in earlier years here: {fish}, {species}.", {
-                fish: fishCountLabel(pastWeek.length),
-                species: speciesCounts(pastWeek)
-                  .map((row) => t(row.species))
-                  .join(", "),
-              })}
+              {sameTimeText(pastWeek)}
             </p>
           ) : null}
           {sameDay ? (
