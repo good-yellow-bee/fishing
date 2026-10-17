@@ -192,6 +192,7 @@ export const PL_FIELD: PlBook = {
   "Best weather: {sky}": "Najlepsza pogoda: {sky}",
   "Best wind: {wind}": "Najlepszy wiatr: {wind}",
   "Last time here, {day}: {fish}": "Ostatnio tutaj, {day}: {fish}",
+  "Last time you wrote: “{note}”": "Ostatnio zapisano: „{note}”",
   "best {size}": "najlepsza {size}",
   "Best water temperature: {temp}": "Najlepsza temperatura wody: {temp}",
   "Last water temperature noted: {temp} on {day}.": "Ostatnia zapisana temperatura wody: {temp}, {day}.",

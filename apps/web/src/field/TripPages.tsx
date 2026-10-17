@@ -309,6 +309,8 @@ function TripView() {
           </Link>
         </p>
       ) : null}
+      {/* Before going back: what was learned there last time, in the angler's own words. */}
+      {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       <SpeciesChips catches={catches} />
       <LureChips catches={catches} outing={trip} />
       <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />

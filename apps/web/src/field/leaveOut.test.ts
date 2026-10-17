@@ -16,6 +16,12 @@ describe("leaving fish out of a search", () => {
     expect(ids("pike -overcast")).toEqual(expected);
   });
 
+  it("leaves out the fish a size bound finds", () => {
+    const small = new Set(ids("<20 in"));
+    expect(small.size).toBeGreaterThan(0);
+    expect(ids("pike -<20 in")).toEqual(ids("pike").filter((id) => !small.has(id)));
+  });
+
   it("leaves out of the whole book when there is nothing else to find", () => {
     expect(ids("-pike").length).toBe(book.catches.length - ids("pike").length);
   });
@@ -24,6 +30,7 @@ describe("leaving fish out of a search", () => {
     expect(splitLeftOut(["<-5°C"])).toEqual({ keep: ["<-5°C"], drop: [] });
     expect(splitLeftOut(["-5"])).toEqual({ keep: ["-5"], drop: [] });
     expect(splitLeftOut(["pike -"])).toEqual({ keep: ["pike -"], drop: [] });
+    expect(splitLeftOut(["pike -<10 in"])).toEqual({ keep: ["pike"], drop: ["<10 in"] });
     expect(splitLeftOut(['-species:"Perch"', "cedar"])).toEqual({ keep: ["cedar"], drop: ['species:"Perch"'] });
   });
 
