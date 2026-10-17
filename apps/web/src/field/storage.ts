@@ -98,6 +98,15 @@ export function forgetUnreadableBook() {
   }
 }
 
+/** The book's line when storage is full: the bar under it offers the photos page, where most of the room goes. */
+export const STORAGE_FULL = "The book could not be saved: this browser's storage is full.";
+
+/** True for the error a browser throws when its storage for this site is full, by any of its names. */
+export function isStorageFull(error: unknown): boolean {
+  if (!(error instanceof DOMException)) return false;
+  return error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED" || error.code === 22 || error.code === 1014;
+}
+
 export function saveLogbook(book: Logbook) {
   const json = JSON.stringify(book);
   const previous = localStorage.getItem(LOGBOOK_STORAGE_KEY);

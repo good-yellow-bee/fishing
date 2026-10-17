@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { localId as newId } from "../game/localId";
 import {
   parseCatchDraft,
@@ -30,7 +30,7 @@ import { t, useLang } from "../i18n";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
-import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bringBackClearedCopy, withoutSample } from "./bookCopy";
@@ -147,12 +147,37 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  // A phone that froze this page (in the background, or kept for the back button) can miss another tab's change:
+  // coming back reads the stored book again, and carries on from it when it differs.
+  const shown = useRef({ book, photos });
+  useEffect(() => {
+    shown.current = { book, photos };
+  }, [book, photos]);
+  useEffect(() => {
+    const onBack = () => {
+      if (document.visibilityState !== "visible") return;
+      const stored = readStoredLogbook();
+      const storedPhotos = readStoredPhotos();
+      const bookChanged = stored !== null && JSON.stringify(stored) !== JSON.stringify(shown.current.book);
+      const photosChanged = JSON.stringify(storedPhotos) !== JSON.stringify(shown.current.photos);
+      if (bookChanged) setBook(stored);
+      if (photosChanged) setPhotos(storedPhotos);
+      if (bookChanged || photosChanged) setUndo(null);
+    };
+    document.addEventListener("visibilitychange", onBack);
+    window.addEventListener("pageshow", onBack);
+    return () => {
+      document.removeEventListener("visibilitychange", onBack);
+      window.removeEventListener("pageshow", onBack);
+    };
+  }, []);
+
   const api = useMemo<LogbookApi>(() => {
     const persist = (nextBook: Logbook, nextPhotos: CatchPhotoMap): { ok: true } | { ok: false; message: string } => {
       try {
         saveLogbook(nextBook);
-      } catch {
-        return { ok: false, message: t("The book could not be saved in this browser.") };
+      } catch (error) {
+        return { ok: false, message: t(isStorageFull(error) ? STORAGE_FULL : "The book could not be saved in this browser.") };
       }
       if (nextPhotos !== photos) {
         try {
