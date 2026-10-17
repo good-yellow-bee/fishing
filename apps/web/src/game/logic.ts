@@ -387,6 +387,14 @@ export function wormPilingWaitMul(lure: string | undefined, spot: string) {
   return spot === "dock" && !!lure?.trim() && lureClass(lure).id === "worm" ? WORM_PILING_WAIT : 1;
 }
 
+/** Out on the boat a spoon flutters down through the open water, where the hunters roam after the baitfish, so the bite there comes sooner. */
+export const SPOON_OPEN_WAIT = 0.85;
+
+/** How the bank stretches the wait on a spoon: sooner out on the boat, else 1. */
+export function spoonOpenWaitMul(lure: string | undefined, spot: string) {
+  return spot === "open" && !!lure?.trim() && lureClass(lure).id === "spoon" ? SPOON_OPEN_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
