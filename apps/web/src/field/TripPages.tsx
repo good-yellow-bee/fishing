@@ -100,7 +100,8 @@ export function TripsPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingOwnTrips(book, today);
-  const recent = recentTrips(book, today);
+  // Today's round of the game too: "Coming up" leaves it out, and "Recent" starts from yesterday.
+  const recent = [...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)), ...recentTrips(book, today)];
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
   const average = outingAverage(book.trips.filter(offPlayLake), (id) => fishByTrip.get(id) ?? 0, today);
@@ -545,7 +546,8 @@ function TripForm() {
   const again = existing ? undefined : tripById(book, params.get("again") ?? "");
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
-  const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : likelyWater(book, localDate(new Date()));
+  // Never the game's lake: its days are made by playing.
+  const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID) ? (params.get("spot") as string) : likelyWater(book, localDate(new Date()));
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);

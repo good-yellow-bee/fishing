@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { forgetDeletedFish, noteDeletedFish, readDeletedFish } from "./deletedFish";
+import { forgetDeletedFish, noteDeletedFish, readDeletedFish, restoreDeletedFish } from "./deletedFish";
 
 function memoryStorage() {
   const items = new Map<string, string>();
@@ -21,6 +21,14 @@ describe("deleted fish", () => {
     expect([...readDeletedFish()].sort()).toEqual(["a", "b", "c"]);
     forgetDeletedFish(["b"]);
     expect([...readDeletedFish()].sort()).toEqual(["a", "c"]);
+  });
+
+  it("puts the list back as it was when a file load is undone", () => {
+    noteDeletedFish(["a"]);
+    const before = [...readDeletedFish()];
+    noteDeletedFish(["b", "c"]);
+    restoreDeletedFish(before);
+    expect([...readDeletedFish()]).toEqual(["a"]);
   });
 
   it("reads a broken list as empty", () => {

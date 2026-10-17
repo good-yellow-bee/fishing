@@ -17,6 +17,9 @@ export function isSampleCatch(id: string) {
 
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
 
+/** Whether an outing is one of the sample week's. */
+export const isSampleTrip = (id: string) => SAMPLE_TRIP_IDS.has(id);
+
 /** Whether a water is one of the sample week's. */
 export const isSampleSpot = (id: string) => SAMPLE_SPOT_IDS.has(id);
 const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
@@ -139,8 +142,18 @@ export function restoreCopyRecord(raw: string | null) {
   }
 }
 
+/** The copy record the sample week cleared, until that is undone or another clear. */
+let clearedRecord: string | null = null;
+
+/** Puts back the copy record the sample week cleared, when its restore is undone. */
+export function bringBackClearedCopy() {
+  if (clearedRecord !== null) restoreCopyRecord(clearedRecord);
+  clearedRecord = null;
+}
+
 /** A fresh start, as after restoring the sample: the next reminder is the first-copy one. */
 export function clearCopiedAt() {
+  clearedRecord = readCopyRecord();
   try {
     localStorage.removeItem(BOOK_COPY_STORAGE_KEY);
   } catch {

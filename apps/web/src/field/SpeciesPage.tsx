@@ -26,6 +26,7 @@ import { countedFish } from "./milestones";
 import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
+import { catchLink, type ListKey } from "./catchList";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -35,7 +36,8 @@ const PHOTOS_SHOWN = 4;
  * Pictures of some fish, newest first, each opening its fish; more than a few open in the catch search within `within`
  * (a kind or a water). `named` puts each fish's kind in its caption, for a strip of mixed kinds.
  */
-export function PhotoStrip({ catches, within, named = false }: { catches: readonly CatchEntry[]; within: string; named?: boolean }) {
+/** `list` is the list each photo's fish steps through. */
+export function PhotoStrip({ catches, within, named = false, list }: { catches: readonly CatchEntry[]; within: string; named?: boolean; list?: ListKey }) {
   const { photoFor } = useLogbook();
   const pictured = catches.filter((entry) => photoFor(entry.id));
   if (pictured.length === 0) return null;
@@ -50,7 +52,7 @@ export function PhotoStrip({ catches, within, named = false }: { catches: readon
       <ul className="photo-wall species-photos">
         {pictured.slice(0, PHOTOS_SHOWN).map((entry) => (
           <li key={entry.id}>
-            <Link to={`/catches/${entry.id}`}>
+            <Link to={catchLink(entry.id, list)}>
               <img src={photoFor(entry.id)!} alt="" loading="lazy" />
               <span className="photo-caption">
                 {named ? <strong>{t(entry.species)}</strong> : null}
@@ -148,7 +150,7 @@ export function SpeciesPage() {
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
-      <PhotoStrip catches={catches} within={kindTerm} />
+      <PhotoStrip catches={catches} within={kindTerm} list={`species:${species}`} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>

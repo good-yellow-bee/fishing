@@ -114,7 +114,7 @@ function LureRecord({ today }: { today: string }) {
             {quiet.map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
-                <Link to={findLink(exactTerm("lure", t(lure)))}>{t(lure)}</Link>
+                <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(lure)), book.catches))}>{t(lure)}</Link>
               </Fragment>
             ))}
           </span>

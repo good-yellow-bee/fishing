@@ -33,6 +33,7 @@ import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { bringBackClearedCopy } from "./bookCopy";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -279,6 +280,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         const result = persist(undo.book, undo.photos);
         setSaveError(result.ok ? null : result.message);
         if (result.ok) forgetDeletedFish([...undo.book.catches, ...undo.book.spots, ...undo.book.trips].map((each) => each.id));
+        // The book back from under the sample was downloaded when it was: its backup reminder comes back with it.
+        if (result.ok && undo.kind === "sample") bringBackClearedCopy();
         return result.ok ? undo.from : null;
       },
       saveError,
