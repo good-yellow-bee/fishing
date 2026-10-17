@@ -363,7 +363,7 @@ export function CatchSearch() {
         type="search"
         aria-keyshortcuts="/"
         value={query}
-        placeholder={t("Species, water, lure, or month")}
+        placeholder={t("Species, water, lure, month")}
         autoComplete="off"
         onChange={(event) => {
           const next = event.target.value;

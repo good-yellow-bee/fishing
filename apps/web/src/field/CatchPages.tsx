@@ -24,12 +24,14 @@ import {
   spotById,
   tripById,
   tripsForSpot,
+  waterTempTally,
   type CatchDraft,
   type CatchEntry,
   type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
+import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
@@ -1116,10 +1118,18 @@ function CatchView() {
           <>
             <span className="eyebrow">{t("Weather")}</span>
             <p>
-              {/* The sky opens every fish caught under it, through the catch search. */}
+              {/* The sky and the wind open every fish caught under them, and the temperature its 10° band, through the catch search. */}
               <Link to={findLink(exactTerm("sky", t(SKY_LABELS[entry.weather.sky])))}>{t(SKY_LABELS[entry.weather.sky])}</Link>
-              {` · ${t(WIND_LABELS[entry.weather.wind])}`}
-              {entry.weather.waterTempF === undefined ? null : ` · ${tempText(entry.weather.waterTempF)}`}
+              {" · "}
+              <Link to={findLink(exactTerm("wind", t(WIND_LABELS[entry.weather.wind])))}>{t(WIND_LABELS[entry.weather.wind])}</Link>
+              {entry.weather.waterTempF === undefined ? null : (
+                <>
+                  {" · "}
+                  <Link to={findLink(tempBandSearch(waterTempTally({ spots: [], trips: [], catches: [entry] }).find((row) => row.count > 0)!))}>
+                    {tempText(entry.weather.waterTempF)}
+                  </Link>
+                </>
+              )}
             </p>
           </>
         ) : null}

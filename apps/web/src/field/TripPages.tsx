@@ -121,7 +121,7 @@ export function TripsPage() {
             id="trip-search"
             type="search"
             value={query}
-            placeholder={t("Title, water, note, month, or “no fish”")}
+            placeholder={t("Water, month, “no fish”…")}
             autoComplete="off"
             onChange={(event) => {
               const next = event.target.value;
