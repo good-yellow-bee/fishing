@@ -257,6 +257,15 @@ export const FALL_RUN_TIRE = 0.8;
 export function runTireMul(season: string | undefined, speciesId: string) {
   return season === "fall" && FALL_RUNNERS.has(speciesId) ? FALL_RUN_TIRE : 1;
 }
+/** Spring run fish: in spring they run up the inlet to spawn, full of fight. */
+export const SPRING_RUNNERS: ReadonlySet<string> = new Set(["sturgeon"]);
+/** In spring a spring runner hooked at the inlet tires only this fast on a run or against the reel. */
+export const SPRING_RUN_TIRE = 0.8;
+
+/** How a spring spawning run slows a fish's tiring: slower for a spring runner hooked at the inlet in spring, else 1. */
+export function springRunTireMul(season: string | undefined, speciesId: string, spot: string) {
+  return season === "spring" && spot === "inlet" && SPRING_RUNNERS.has(speciesId) ? SPRING_RUN_TIRE : 1;
+}
 /** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
 export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
 /** The shallow spots where a nest guarder makes its nest. */

@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
-import { floodedInlet, makeFight, type FightOutcome, type FightPerformance } from "./fight";
+import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
@@ -53,6 +53,7 @@ vi.mock("./fight", async (importOriginal) => {
     ...actual,
     makeFight: vi.fn(() => ({ sim: { line: fightLine, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step })),
     floodedInlet: vi.fn(actual.floodedInlet),
+    springRunTireMul: vi.fn(actual.springRunTireMul),
   };
 });
 
@@ -385,6 +386,15 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("fight:none");
     expect(hint()?.includes("It hunts hardest in the low light, so it tires slower.")).toBe(dim);
+  });
+
+  it.each([true, false])("says a fish on its spring run up the inlet tires slower: %s", (running) => {
+    if (running) vi.mocked(springRunTireMul).mockReturnValueOnce(SPRING_RUN_TIRE).mockReturnValueOnce(SPRING_RUN_TIRE);
+    const surface = mount();
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It's on its spring run up the inlet, so it tires slower.")).toBe(running);
   });
 
   it("says a burbot hooked in winter thrives in the cold", () => {
