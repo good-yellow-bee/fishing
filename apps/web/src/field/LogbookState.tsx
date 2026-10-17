@@ -51,7 +51,7 @@ type LogbookApi = {
   deleteCatch: (id: string) => boolean;
   /** Files fish logged without an outing under one on their water. */
   fileCatches: (catchIds: readonly string[], tripId: string) => boolean;
-  /** Files each fish under its own outing (catch id to outing id), in one save. */
+  /** Files each fish under its own outing (catch id to outing id), in one save, with the same undo as a delete. */
   fileEach: (tripFor: ReadonlyMap<string, string>) => boolean;
   deleteSpot: (id: string) => boolean;
   deleteTrip: (id: string) => boolean;
@@ -76,7 +76,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename" | "merge";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename" | "merge" | "file";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
@@ -165,7 +165,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       const before = { kind, book, photos, from: window.location.pathname };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
-      if (kind !== "sample" && kind !== "blank") {
+      if (kind !== "sample" && kind !== "blank" && kind !== "file") {
         // Waters and outings too, so adding from an older file doesn't bring them back either.
         const kept = new Set([...next.catches, ...next.spots, ...next.trips].map((each) => each.id));
         noteDeletedFish([...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id));
@@ -267,7 +267,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
       fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
-      fileEach: (tripFor) => commit([...tripFor].reduce((next, [id, tripId]) => withCatchOnTrip(next, id, tripId), book)),
+      fileEach: (tripFor) => remove("file", [...tripFor].reduce((next, [id, tripId]) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       countOnTrip: (tripId, count, delta) => commit(withTripCount(book, tripId, count, delta)),

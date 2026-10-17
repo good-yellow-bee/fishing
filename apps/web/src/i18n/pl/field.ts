@@ -232,6 +232,7 @@ export const PL_FIELD: PlBook = {
   "An outing on this water that day:": "Tego dnia na tym łowisku była wyprawa:",
   "Add this fish to it": "Dodaj do niej tę rybę",
   "File these on their outings": "Dodaj te ryby do ich wypraw",
+  "Fish added to their outings.": "Ryby dodane do ich wypraw.",
   "This book already has a water by that name:": "W dzienniku jest już łowisko o tej nazwie:",
   "Fish you log on the day show up here.": "Ryby zapisane tego dnia pojawią się tutaj.",
   "You already have an outing on this water that day:": "Tego dnia na tym łowisku jest już wyprawa:",
@@ -394,8 +395,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
@@ -537,6 +538,7 @@ export const PL_FIELD: PlBook = {
   "Which kinds": "Które gatunki",
   "All kinds": "Wszystkie gatunki",
   "New waters this year:": "Nowe łowiska w tym roku:",
+  "New waters: {waters}": "Nowe łowiska: {waters}",
   "Caught in water of {temp}.": "Temperatura wody przy połowach: {temp}.",
   "The most fish of any outing on this water": "Najwięcej ryb spośród wszystkich wypraw na tym łowisku",
   "Longer than {count} of the {total} others of its kind": "Dłuższa niż {count} z {total} pozostałych tego gatunku",

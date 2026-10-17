@@ -11,6 +11,7 @@ const DELETED = {
   blank: "The sample waters and fish are gone. Add your first water to begin.",
   rename: "Fish renamed.",
   merge: "Waters merged.",
+  file: "Fish added to their outings.",
 } as const;
 
 /** After a delete, a quiet bar with one way back, until the book changes again. */

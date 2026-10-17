@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-game07";
+export const NEWS_ID = "2026-10-17-field21";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water page names last year's kinds that haven't come back, its day with the most kinds and how weekends compare there. A species page lists the waters it turned up in for the first time this year, and the season recap names new waters too. The lure record lists lures that haven't had a fish yet this year. Filing loose fish can be undone, and a year such as “2025” in search finds just that year's fish.",
   "A walleye hooked at dawn or dusk hunts hardest in the low light and tires slower, and a sturgeon hooked at the Inlet in spring is on its spawning run and fights longer. In winter a landed perch leaves a big school that stays a cast longer.",
   "A catch page says when a fish was the first of its kind at that water and how many of its kind came that year. A water page shows a blank spell running there, Bests names the waters new this year, and Photos can show one kind at a time. After a “loose” search, one tap files those fish on their outings, and untitled outings go by their water's name everywhere.",
   "A burbot hooked in winter thrives in the cold and keeps its strength, and a pike or walleye in spring is worn from spawning and tires sooner. With spring's melt or in rain the swollen Inlet pulls harder on a slack line.",
