@@ -104,3 +104,22 @@ export function speciesLures(catches: readonly CatchEntry[], species: string, li
   const kind = catches.filter((entry) => entry.species.trim().toLowerCase() === want);
   return lureTally({ spots: [], trips: [], catches: kind }, limit).map((row) => row.lure);
 }
+
+/**
+ * How the water warmed and cooled through the year of the newest reading: the last reading of each month, in order.
+ * Empty with readings in only one month of that year, which shows no change.
+ */
+export function tempThroughYear(catches: readonly CatchEntry[]): WaterReading[] {
+  const last = lastReading(catches);
+  if (!last) return [];
+  const year = new Date(last.at).getFullYear();
+  const byMonth = new Map<number, WaterReading>();
+  for (const entry of catches) {
+    const fahrenheit = entry.weather?.waterTempF;
+    const at = new Date(entry.caughtAt);
+    if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(at.getTime()) || at.getFullYear() !== year) continue;
+    const held = byMonth.get(at.getMonth());
+    if (!held || at.getTime() > Date.parse(held.at)) byMonth.set(at.getMonth(), { fahrenheit, at: entry.caughtAt });
+  }
+  return byMonth.size < 2 ? [] : [...byMonth.entries()].sort((a, b) => a[0] - b[0]).map(([, reading]) => reading);
+}

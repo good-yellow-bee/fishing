@@ -11,6 +11,7 @@ import {
   tripById,
   tripsForSpot,
   upcomingTrips,
+  type CatchEntry,
   type Trip,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
@@ -29,7 +30,9 @@ import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, messageText, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { t, tn, useT } from "../i18n";
+import { locale, t, tn, useT } from "../i18n";
+import { tempText } from "../i18n/content";
+import { tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
@@ -156,6 +159,7 @@ export function SpotPage() {
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
       <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
+      <TempThroughYear catches={catches} />
       {catches.length > 0 ? (
         <CopySummary
           text={() => spotSummary(spot, fishedOutings, catches, average, top ? { trip: top, fish: fishByTrip.get(top.id) ?? 0 } : null)}
@@ -417,5 +421,21 @@ function SpotForm() {
         </button>
       </form>
     </div>
+  );
+}
+
+/** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
+function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
+  useT();
+  const readings = tempThroughYear(catches);
+  if (readings.length === 0) return null;
+  const day = (iso: string) => new Date(iso).toLocaleDateString(locale(), { month: "short", day: "numeric" });
+  return (
+    <p className="meta temp-year">
+      {t("Water temperature in {year}: {readings}", {
+        year: new Date(readings[0]!.at).getFullYear(),
+        readings: readings.map((reading) => `${day(reading.at)} ${tempText(reading.fahrenheit)}`).join(" → "),
+      })}
+    </p>
   );
 }
