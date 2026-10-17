@@ -24,6 +24,11 @@ describe("dateWords", () => {
     expect(dateWords("last month", now)).toEqual({ from: "2026-09-01", to: "2026-09-30" });
   });
 
+  it("reads this year and last year", () => {
+    expect(dateWords("this year", now)).toEqual({ from: "2026-01-01", to: "2026-10-16" });
+    expect(dateWords("w zeszłym roku", now)).toEqual({ from: "2025-01-01", to: "2025-12-31" });
+  });
+
   it("reads a day of a month as the cards write it, last year's when this year's is still to come", () => {
     expect(dateWords("Oct 15", now)).toEqual(day("2026-10-15"));
     expect(dateWords("october 15", now)).toEqual(day("2026-10-15"));

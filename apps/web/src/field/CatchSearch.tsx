@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lureTally, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
@@ -297,8 +297,8 @@ function findWords(book: Logbook, part: string, t: (text: string) => string, pic
 export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: string[] } {
   const keep: string[] = [];
   const drop: string[] = [];
-  // A "-" at the start, or after a space, that comes before a word rather than a number or a bound.
-  const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-])/;
+  // A "-" at the start, or after a space, that comes before a word or a size bound ("-<10 in"), not a number ("-5°C").
+  const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-]|[<>]=?\s?\d)/;
   for (const part of parts) {
     const pieces = part.split(dash);
     const first = pieces[0]!.trim();
@@ -437,7 +437,10 @@ export function CatchSearch() {
       <div role="status" className={settled ? (matches.length === 0 ? "empty" : "search-count") : undefined}>
         {!settled ? null : matches.length > 1 ? (
           // Several matches: what they add up to, from the count to the largest among them.
-          <FishSum catches={matches} />
+          <>
+            <FishSum catches={matches} />
+            <TopLure catches={matches} />
+          </>
         ) : (
           <p>{matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}</p>
         )}
@@ -501,4 +504,12 @@ export function CatchSearch() {
       ) : null}
     </section>
   );
+}
+
+/** The lure most of the found fish took, when it took at least two and clearly leads: "Most on Jig (5)." */
+function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
+  const t = useT();
+  const [top, next] = lureTally({ spots: [], trips: [], catches: [...catches] }, 2);
+  if (!top || top.count < 2 || (next && next.count >= top.count) || top.count === catches.length) return null;
+  return <p className="meta top-lure">{t("Most on {lure}.", { lure: `${t(top.lure)} (${top.count})` })}</p>;
 }

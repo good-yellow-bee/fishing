@@ -90,6 +90,10 @@ export function dateWords(text: string, now = new Date()): DayRange | null {
   if (says(want, ["last month", "zeszły miesiąc", "w zeszłym miesiącu"])) {
     return { from: ymd(new Date(today.getFullYear(), today.getMonth() - 1, 1)), to: ymd(new Date(today.getFullYear(), today.getMonth(), 0)) };
   }
+  if (says(want, ["this year", "ten rok", "w tym roku"])) return { from: ymd(new Date(today.getFullYear(), 0, 1)), to: ymd(today) };
+  if (says(want, ["last year", "zeszły rok", "w zeszłym roku", "ubiegły rok", "w ubiegłym roku"])) {
+    return { from: `${today.getFullYear() - 1}-01-01`, to: `${today.getFullYear() - 1}-12-31` };
+  }
   weekdays ??= weekdayNames();
   const weekday = want.length >= 3 ? weekdays.findIndex((names) => names.includes(want)) : -1;
   if (weekday >= 0) return one(dayOf(today, -((today.getDay() - weekday + 7) % 7)));
