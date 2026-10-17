@@ -1251,7 +1251,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT206~~ | ~~Sturgeon spring run: a sturgeon hooked at the Inlet in spring is on its spawning run, so it tires only 0.8x as fast, and the hookset says so; news 2026-10-17-game07~~ (#849) | fight | S |
 | ~~GT207~~ | ~~Current fighters: a smallmouth bass or rainbow trout hooked at the Inlet turns its side to the current, so it tires only 0.85x as fast, and the hookset says so~~ (#851) | fight | S |
 | ~~GT208~~ | ~~Fall feeders: a tiger muskie hooked in fall has fed hard for winter, so it tires only 0.85x as fast, and the hookset says so~~ (#853) | fight | S |
-| GT209 | Rain scent hunter: a catfish hooked in rain hunts by smell in the murky water, so it tires only 0.85x as fast, and the hookset says so; news 2026-10-17-game08 | fight | S |
+| ~~GT209~~ | ~~Rain scent hunter: a catfish hooked in rain hunts by smell in the murky water, so it tires only 0.85x as fast, and the hookset says so; news 2026-10-17-game08~~ (#854) | fight | S |
+| GT210 | Dock shade: on a clear summer day the fish tuck into the shade under the Pomost, so a cast to the dock draws the bite 0.85x sooner, and the wait hint says so | bite | S |
 
 ## Risks / open questions for the owner
 

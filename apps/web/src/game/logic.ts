@@ -336,6 +336,14 @@ export function summerDeepWaitMul(spot: string, season: LakeSeason | undefined, 
   return season === "summer" && hour === "day" && spot === "dropoff" ? SUMMER_DEEP_WAIT : 1;
 }
 
+/** On a bright summer day the fish tuck into the shade under the dock's planks, so a cast to the dock draws the bite sooner. */
+export const DOCK_SHADE_WAIT = 0.85;
+
+/** How the sun stretches the wait at the dock: sooner under a clear summer sky by day, else 1. */
+export function dockShadeWaitMul(spot: string, season: LakeSeason | undefined, hour: LakeHour, sky: string | undefined) {
+  return season === "summer" && hour === "day" && sky === "clear" && spot === "dock" ? DOCK_SHADE_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
