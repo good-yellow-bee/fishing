@@ -70,8 +70,13 @@ function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
 }
 
+/** A number for a form box, with the decimal sign the reader writes: "0,64" in Polish. */
+function inputNumber(text: string): string {
+  return locale().startsWith("pl") ? text.replace(".", ",") : text;
+}
+
 function measureAmountText(measure: Measure, units: Units): string {
-  return measure.kind === "length" ? fromBookAmount(measure.inches, "length", units) : fromBookAmount(measure.pounds, "weight", units);
+  return inputNumber(measure.kind === "length" ? fromBookAmount(measure.inches, "length", units) : fromBookAmount(measure.pounds, "weight", units));
 }
 
 /** A best's size by the measure it is best by, or nothing when there is no such best. */
@@ -254,7 +259,7 @@ function CatchForm() {
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
-  const [startTemp] = useState(() => (existing?.weather?.waterTempF === undefined ? "" : fromBookTemp(existing.weather.waterTempF, units)));
+  const [startTemp] = useState(() => (existing?.weather?.waterTempF === undefined ? "" : inputNumber(fromBookTemp(existing.weather.waterTempF, units))));
   const [waterTemp, setWaterTemp] = useState(startTemp);
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
@@ -280,8 +285,11 @@ function CatchForm() {
     existing || !amount.trim()
       ? null
       : likelyDuplicate(book, { species, spotId, caughtAt }, t, (entry) => {
+          // By value, as the form shows it, so "1,5", "1.5" and "1.50" are one size.
           const size = measureOf(entry, measureKind);
-          return size !== null && measureAmountText(size, units) === amount.trim();
+          const typed = Number(toBookAmount(amount, measureKind, units));
+          if (size === null || !Number.isFinite(typed)) return false;
+          return fromBookAmount(size.kind === "length" ? size.inches : size.pounds, measureKind, units) === fromBookAmount(typed, measureKind, units);
         });
 
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
@@ -498,7 +506,7 @@ function CatchForm() {
   // weight swapped between the two fields too.
   const bookAmount = (text: string, kind: CatchDraft["measureKind"]) => {
     const stored = existing ? measureOf(existing, kind) : null;
-    return stored && text === measureAmountText(stored, units) ? measureAmountText(stored, "imperial") : toBookAmount(text, kind, units);
+    return stored && text === measureAmountText(stored, units) ? String(stored.kind === "length" ? stored.inches : stored.pounds) : toBookAmount(text, kind, units);
   };
 
   const onSubmit = (event: FormEvent) => {
@@ -851,7 +859,7 @@ function CatchForm() {
                 onClick={() => {
                   setSky(offeredWeather.sky);
                   setWind(offeredWeather.wind);
-                  setWaterTemp(offeredWeather.waterTempF === undefined ? "" : fromBookTemp(offeredWeather.waterTempF, units));
+                  setWaterTemp(offeredWeather.waterTempF === undefined ? "" : inputNumber(fromBookTemp(offeredWeather.waterTempF, units)));
                 }}
               >
                 {outingWeather
