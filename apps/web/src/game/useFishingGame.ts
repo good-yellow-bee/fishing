@@ -175,6 +175,11 @@ export function isTopwater(lure: string | undefined) {
   return lure !== undefined && lureClass(lure).id === "popper";
 }
 
+/** The share of fish that, after a missed topwater blow-up, come back up for it once more. */
+export const TOPWATER_COMEBACK_ODDS = 0.5;
+/** How long a fish that missed a topwater lure takes to come back up for it. */
+export const TOPWATER_COMEBACK_MS = 1400;
+
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
 export const SECOND_TAKE_MS = 1800;
 /** The twitch of the float halfway through that wait. */
@@ -542,6 +547,18 @@ export function useFishingGame(
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
               }, SECOND_TAKE_MS);
+              return;
+            }
+            // A fish that blew up on a topwater lure often misses it, and left to sit the lure can draw it back up.
+            if (!secondTake && topwater && Math.random() < TOPWATER_COMEBACK_ODDS) {
+              secondTake = true;
+              secondTakeRef.current = true;
+              setPhaseBoth("waiting");
+              setHint(t("It missed the topwater. Let it sit, it may come back…"));
+              timers.current.wait = window.setTimeout(() => {
+                if (phaseRef.current !== "waiting") return;
+                timers.current.shown = whenShown(takeBait);
+              }, TOPWATER_COMEBACK_MS);
               return;
             }
             // A tiger muskie follows the bait it missed and hits once more, with no warning tap.
