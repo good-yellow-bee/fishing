@@ -505,12 +505,15 @@ export function useFishingGame(
     beginFight(bitten.species, bitten.weight, profile, strike);
   }, [beginFight, profile]);
 
-  const startWait = useCallback((current: Profile, short: boolean) => {
+  const startWait = useCallback((current: Profile, shortCast: boolean) => {
     setPhaseBoth("waiting");
     setNibble(false);
-    // A short cast only draws commons, even in the bubbles.
-    waitHintRef.current = short ? shortCastHint() : waitHint();
-    if (castHotspotRef.current) waitHintRef.current = short ? `${shortCastHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
+    // A short cast only draws commons, even in the bubbles; in fog the shy fish can't see the angler and come in close.
+    const fogClose = shortCast && sky === "fog";
+    const short = shortCast && !fogClose;
+    const shortHint = () => (fogClose ? t("Short cast, but in the fog the shy fish come in close.") : shortCastHint());
+    waitHintRef.current = shortCast ? shortHint() : waitHint();
+    if (castHotspotRef.current) waitHintRef.current = shortCast ? `${shortHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
     else if (castRiseRef.current) waitHintRef.current = `${t("Right on a rise.")} ${waitHintRef.current}`;
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);

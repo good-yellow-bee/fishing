@@ -859,6 +859,17 @@ describe("useFishingGame cast feedback", () => {
     expect(rarity()).toBe("common");
   });
 
+  it("lets a short cast in fog draw past the commons, since the shy fish come in close", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "fog");
+    lateRoll();
+    castFor(surface, 300);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toBe("Short cast, but in the fog the shy fish come in close.");
+    hookOnLateRoll(surface);
+    expect(phase()).toBe("fight:none");
+    expect(rarity()).toBe("uncommon");
+  });
+
   it("keeps the plain wait hint for a cast in the band, which draws past the commons", () => {
     const surface = mount();
     lateRoll();
