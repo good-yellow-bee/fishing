@@ -45,6 +45,22 @@ export function lastReading(catches: readonly CatchEntry[]): WaterReading | null
   return last;
 }
 
+/**
+ * The lure that clearly led in each band of water temperature: at least two fish on it and no tie. Only worth a line
+ * when two bands or more name one, so it says which lure for which water.
+ */
+export function lureByTemp(catches: readonly CatchEntry[]): { band: WaterTempTally; lure: string }[] {
+  const rows = waterTempTally({ spots: [], trips: [], catches: [...catches] }).flatMap((band) => {
+    const inBand = catches.filter((entry) => {
+      const temp = entry.weather?.waterTempF;
+      return temp !== undefined && Number.isFinite(temp) && (band.from === null || temp >= band.from) && (band.to === null || temp < band.to);
+    });
+    const [top, next] = lureTally({ spots: [], trips: [], catches: inBand }, 2);
+    return top && top.count >= 2 && (!next || next.count < top.count) ? [{ band, lure: top.lure }] : [];
+  });
+  return rows.length >= 2 ? rows : [];
+}
+
 /** How far back an earlier reading still says which way the water is going. */
 const TREND_DAYS = 21;
 
