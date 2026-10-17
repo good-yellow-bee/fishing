@@ -1562,3 +1562,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR351~~ | ~~Cleaner printing~~ (#743) | field | S |
 | ~~BR352~~ | ~~Month × year table on Bests~~ (#744) | field | S |
 | ~~BR353~~ | ~~Review round 28 fixes: print map links, small record steps, Cancel keeps list, table labels, lure tie, Polish tackle~~ (#747) | field | S |
+| ~~BR354~~ | ~~News 2026-10-17h for #734-#747~~ (#749) | field | S |
