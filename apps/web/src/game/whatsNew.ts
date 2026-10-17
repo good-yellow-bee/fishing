@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzs";
+export const NEWS_ID = "2026-10-17-field15";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A planned outing quotes what you wrote last time on that water, and a water page shows how its temperature ran through the year. Search names the lure that led, reads “this year” and “last year”, and “pike -<20 in” leaves the small ones out. The catch form also checks lure names for slips, a fish links to others of its kind and size, and a species page gives its typical size by year.",
   "At dawn and dusk a school feeds hard in the low light, so it stays for three casts instead of two.",
   "In rain the patter on the water covers a lost fish's splash, so the bank doesn't spook and the next bite isn't slower.",
   "A fish that swallowed live bait is hooked deep, so the hook holds longer in the red before it tears out of a soft mouth.",
