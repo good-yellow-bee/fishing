@@ -25,3 +25,16 @@ describe("milestoneOf", () => {
     expect(milestoneOf({ ...book, catches: [...catches, lone] }, lone)).toBeNull();
   });
 });
+
+describe("milestoneOf leaves out play and the sample week", () => {
+  const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
+  const fish = (i: number, spotId: string): CatchEntry => ({ ...base, id: `p${i}`, species: "Bluegill", spotId, caughtAt: new Date(2026, 0, 1, 0, i).toISOString() });
+
+  it("doesn't call a game fish the first, and counts the angler's own from the next", () => {
+    const catches = [fish(0, "spot-stillwater"), fish(1, "s1"), fish(2, "s1")];
+    const book = { spots: [], trips: [], catches };
+    expect(milestoneOf(book, catches[0]!)).toBeNull();
+    expect(milestoneOf(book, catches[1]!)).toEqual({ of: "kind", n: 1 });
+    expect(milestoneOf(book, base)).toBeNull();
+  });
+});

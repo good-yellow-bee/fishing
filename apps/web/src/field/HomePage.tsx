@@ -1,10 +1,10 @@
 import { Fragment, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripById, upcomingTrips, type Spot, type Trip } from "@stillwater/shared";
+import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, upcomingTrips, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay, formatTimeOfDay, tripWhen } from "./format";
+import { formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
@@ -180,7 +180,7 @@ export function HomePage() {
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>
-          <strong>{next ? <Link to={`/trips/${next.id}`}>{next.title}</Link> : t("None planned")}</strong>
+          <strong>{next ? <Link to={`/trips/${next.id}`}>{outingName(next, book.spots)}</Link> : t("None planned")}</strong>
           <small>
             {next
               ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
@@ -219,7 +219,7 @@ export function HomePage() {
                   key={entry.id}
                   entry={entry}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                  tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                  tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                 />
               ))}
             </div>
@@ -241,7 +241,7 @@ export function HomePage() {
                       level={4}
                       entry={entry}
                       spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                      tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                      tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                     />
                   </div>
                 ))}

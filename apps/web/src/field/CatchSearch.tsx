@@ -1,18 +1,21 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
 import { bookBadges } from "./catchBadge";
+import { countedFish } from "./milestones";
+import { typicalSize } from "./sizeBands";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
-import { noteText } from "./format";
+import { noteText, outingNameById, toLocalInput } from "./format";
+import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
@@ -59,9 +62,15 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
   return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
 }
 
-/** Words for Saturdays and Sundays, in English and Polish. */
 /** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
 const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekordy"].map((word) => normalize(word)));
+/** "first": the first fish of each kind in the book. */
+const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwszy"].map((word) => normalize(word)));
+/** "big": the fish bigger than their kind's typical size, by the measure each was logged with. */
+const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "duza", "duzy"].map((word) => normalize(word)));
+/** "loose": fish left off an outing that water had that day, the ones "Add this fish to it" would file. */
+const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
+/** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
@@ -162,6 +171,31 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const day = localDate(new Date(entry.caughtAt));
     return day >= days.from && day <= days.to;
   });
+  if (BIG_WORDS.has(normalize(needle))) {
+    const byKind = new Map<string, CatchEntry[]>();
+    for (const entry of book.catches) {
+      const kind = entry.species.trim().toLowerCase();
+      byKind.set(kind, [...(byKind.get(kind) ?? []), entry]);
+    }
+    const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+    return catchesNewestFirst(book).filter((entry) => {
+      const typical = typicalSize(byKind.get(entry.species.trim().toLowerCase()) ?? [], entry.measure.kind);
+      return typical !== null && amount(entry.measure) > amount(typical);
+    });
+  }
+  if (FIRST_WORDS.has(normalize(needle))) {
+    const first = new Map<string, CatchEntry>();
+    for (const entry of countedFish(book.catches)) {
+      const kind = entry.species.trim().toLowerCase();
+      const held = first.get(kind);
+      if (!held || entry.caughtAt < held.caughtAt) first.set(kind, entry);
+    }
+    const ids = new Set([...first.values()].map((entry) => entry.id));
+    return catchesNewestFirst(book).filter((entry) => ids.has(entry.id));
+  }
+  if (LOOSE_WORDS.has(normalize(needle))) {
+    return catchesNewestFirst(book).filter((entry) => !(entry.tripId && tripById(book, entry.tripId)) && !Number.isNaN(Date.parse(entry.caughtAt)) && tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt))));
+  }
   if (RECORD_WORDS.has(normalize(needle))) {
     const badges = bookBadges(book);
     return catchesNewestFirst(book).filter((entry) => badges.has(entry.id));
@@ -278,7 +312,8 @@ export function searchTerms(part: string): string[] {
         continue;
       }
     }
-    if (tokens[i]!.length > 2) terms.push(tokens[i]!);
+    // Short words are noise ("of", "na"), but "pb" is a word of its own.
+    if (tokens[i]!.length > 2 || RECORD_WORDS.has(normalize(tokens[i]!))) terms.push(tokens[i]!);
   }
   return terms;
 }
@@ -465,7 +500,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
@@ -502,7 +537,7 @@ export function CatchSearch() {
                   key={entry.id}
                   entry={entry}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                  tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                  tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                   list={largest ? undefined : `${onCatches ? "catches" : "find"}:${settled}`}
                 />
               )}

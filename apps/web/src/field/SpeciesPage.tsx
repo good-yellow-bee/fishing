@@ -12,7 +12,7 @@ import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
 import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
-import { WaterTipsBox } from "./WaterTipsBox";
+import { WaterTipsBox, waterRange } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
 import { CM_PER_IN, KG_PER_LB, lengthText, measureText, measuresText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
@@ -21,6 +21,7 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst } from "./seasonFirst";
+import { countedFish } from "./milestones";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
@@ -127,6 +128,10 @@ export function SpeciesPage() {
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
+      {/* The water the kind came in, once two fish noted it: where to look for it. */}
+      {catches.filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(catches) ? (
+        <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(catches)! })}</p>
+      ) : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
@@ -153,6 +158,7 @@ export function SpeciesPage() {
           </li>
         ))}
       </ul>
+      <TypicalByWater catches={catches} waters={waters} />
       <SizeSpread catches={catches} name={name} />
       {catches.length > 1 ? (
         <>
@@ -263,10 +269,23 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
   );
 }
 
-/** The first and the newest fish of the kind, each a link to its catch. */
+/** "Typical size by water: Cedar Lake: 29 in · Mill Pond: 24 in", biggest first, once two waters have enough fish measured. */
+function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; waters: readonly { spotId: string; name?: string | null }[] }) {
+  const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
+  const kind = lengths * 2 >= catches.length ? "length" : "weight";
+  const rows = waters.flatMap((water) => {
+    const size = water.name ? typicalSize(catches.filter((entry) => entry.spotId === water.spotId), kind) : null;
+    return size && water.name ? [{ name: water.name, size }] : [];
+  });
+  if (rows.length < 2) return null;
+  const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+  rows.sort((a, b) => amount(b.size) - amount(a.size));
+  return <p className="meta typical-waters">{t("Typical size by water: {waters}", { waters: rows.map((row) => `${row.name}: ${measureText(row.size)}`).join(" · ") })}</p>;
+}
+
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
 function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
-  const found = seasonFirst(catches);
+  const found = seasonFirst(countedFish(catches));
   if (!found) return null;
   const vars = { year: found.year, last: found.year - 1 };
   const gap = Math.abs(found.earlier);
@@ -289,6 +308,7 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
   );
 }
 
+/** The first and the newest fish of the kind, each a link to its catch. */
 function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
   const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;

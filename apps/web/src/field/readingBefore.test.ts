@@ -23,3 +23,13 @@ describe("readingBefore", () => {
     expect(readingBefore(catches, lastReading(catches))).toBeNull();
   });
 });
+
+describe("readingBefore past a run of one temperature", () => {
+  const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
+  const at = (id: string, day: number, waterTempF: number): CatchEntry => ({ ...base, id, caughtAt: new Date(2026, 9, day, 9).toISOString(), weather: { sky: "clear", wind: "calm", waterTempF } });
+
+  it("looks back to the reading that shows another temperature", () => {
+    const catches = [at("a", 10, 54), at("b", 14, 52), at("c", 15, 52)];
+    expect(readingBefore(catches, lastReading(catches), (f) => Math.round(f) !== 52)?.fahrenheit).toBe(54);
+  });
+});

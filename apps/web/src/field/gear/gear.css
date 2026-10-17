@@ -217,3 +217,7 @@
   margin: 0 0 1rem;
   padding: 0;
 }
+
+.lure-record .lure-last {
+  display: block;
+}

@@ -1648,3 +1648,13 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR391~~ | ~~Record search word, best moon, water trend~~ (#826) | field | S |
 | ~~BR392~~ | ~~Season first and lure by water temperature~~ (#828) | field | S |
 | ~~BR393~~ | ~~Lure last-fish dates, weekend vs weekday~~ (#830) | field | S |
+| ~~BR394~~ | ~~News card for round 17~~ (#832) | field | S |
+| ~~BR395~~ | ~~Round 18 field log fixes~~ (#835) | field | S |
+| ~~BR396~~ | ~~Biggest since, lure for last water temperature~~ (#836) | field | S |
+| ~~BR397~~ | ~~Blank spell, quiet lures, first search word~~ (#837) | field | S |
+| ~~BR398~~ | ~~Moon on the day, typical size by water, most kinds~~ (#838) | field | S |
+| ~~BR399~~ | ~~News card for round 18~~ (#839) | field | S |
+| ~~BR400~~ | ~~Round 19 field log fixes~~ (#840) | field | S |
+| ~~BR401~~ | ~~Blank spell now, not yet back, water range, lure at a water, big search~~ (#841) | field | S |
+| ~~BR402~~ | ~~Lure's biggest fish, loose search word~~ (#842) | field | S |
+| ~~BR403~~ | ~~Round 19 news card~~ (#843) | field | S |

@@ -1,4 +1,21 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
+import { isSampleCatch } from "./bookCopy";
+
+/** The game's own lake: fish landed in play don't count toward the book's real milestones. */
+const PLAY_LAKE_ID = "spot-stillwater";
+
+/** A fish the angler caught: not the sample week, not the game. */
+export const ownFish = (entry: CatchEntry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID;
+
+/**
+ * The fish a "first" or "most" should be drawn from: never the game's, and the angler's own once there are any, so
+ * a new book's sample week still shows how a line reads.
+ */
+export function countedFish(catches: readonly CatchEntry[]): CatchEntry[] {
+  const real = catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID);
+  const own = real.filter((entry) => !isSampleCatch(entry.id));
+  return own.length > 0 ? own : real;
+}
 
 /** Round counts worth a line: the 50th fish, the 100th, and so on. */
 const BOOK_MARKS = [50, 100, 250, 500, 1000, 2500, 5000, 10000];
@@ -13,11 +30,13 @@ const byTime = (a: CatchEntry, b: CatchEntry) => a.caughtAt.localeCompare(b.caug
  * or the first of a kind the book now holds more of. The book's mark wins when both land on one fish.
  */
 export function milestoneOf(book: Logbook, entry: CatchEntry): Milestone | null {
+  if (!ownFish(entry)) return null;
+  const own = book.catches.filter(ownFish);
   const before = (other: CatchEntry) => byTime(other, entry) < 0;
-  const inBook = book.catches.filter(before).length + 1;
+  const inBook = own.filter(before).length + 1;
   if (BOOK_MARKS.includes(inBook)) return { of: "book", n: inBook };
   const kind = entry.species.trim().toLowerCase();
-  const same = book.catches.filter((other) => other.species.trim().toLowerCase() === kind);
+  const same = own.filter((other) => other.species.trim().toLowerCase() === kind);
   const inKind = same.filter(before).length + 1;
   // A lone fish of its kind is first by default: worth saying only once another has followed it.
   if (inKind === 1 && same.length > 1) return { of: "kind", n: 1 };

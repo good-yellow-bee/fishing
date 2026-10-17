@@ -30,6 +30,20 @@ function otherYear(date: Date): boolean {
   return date.getFullYear() !== new Date().getFullYear();
 }
 
+/**
+ * An outing's name as shown: its title, or for one saved without a title its water's name (as a new outing from a
+ * draft is named), else "Outing", so a line never opens on a comma.
+ */
+export function outingName(trip: { title: string; spotId: string }, spots: readonly { id: string; name: string }[] = []): string {
+  return trip.title.trim() || spots.find((spot) => spot.id === trip.spotId)?.name.trim() || t("Outing");
+}
+
+/** The shown name of the outing with this id, or null when the book has none such. */
+export function outingNameById(book: { trips: readonly { id: string; title: string; spotId: string }[]; spots: readonly { id: string; name: string }[] }, id: string): string | null {
+  const trip = book.trips.find((each) => each.id === id);
+  return trip ? outingName(trip, book.spots) : null;
+}
+
 export function formatDay(ymd: string): string {
   const date = new Date(`${ymd}T12:00:00`);
   return format("day", otherYear(date)).format(date);

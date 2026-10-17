@@ -36,7 +36,7 @@ export function bestOutingHere(trips: readonly Trip[], fishOn: (tripId: string) 
  * The longest run of outings in a row, by date, that each gave at least one fish, and whether the latest outings are still on it.
  * Planned outings don't count, and today's only once it has a fish.
  */
-export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { best: number; going: boolean } {
+export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string): { best: number; going: boolean; dry: number; dryNow: number } {
   // Two outings on one day are one step, fished if either gave a fish: their order within the day isn't known.
   const days = new Map<string, boolean>();
   for (const trip of trips) {
@@ -45,11 +45,16 @@ export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) =>
   }
   let best = 0;
   let run = 0;
+  // The longest run the other way: outings in a row that came home without a fish.
+  let dry = 0;
+  let dryRun = 0;
   for (const day of [...days.keys()].sort()) {
     run = days.get(day) ? run + 1 : 0;
+    dryRun = days.get(day) ? 0 : dryRun + 1;
     best = Math.max(best, run);
+    dry = Math.max(dry, dryRun);
   }
-  return { best, going: best > 0 && run === best };
+  return { best, going: best > 0 && run === best, dry, dryNow: dryRun };
 }
 
 /**

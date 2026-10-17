@@ -26,7 +26,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, toLocalInput, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
@@ -381,7 +381,7 @@ function TripView() {
           {" · "}
           {tripWhen(trip.date, today, tomorrow)}
         </p>
-        <h1>{trip.title}</h1>
+        <h1>{outingName(trip, book.spots)}</h1>
         <p className="meta stand">
           <time dateTime={trip.date}>{formatDay(trip.date)}</time>
           {spot ? (
@@ -565,7 +565,7 @@ function TripForm() {
       <header className="sheet-head">
         <div>
           <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
-          <h1 data-title={existing ? t("Editing {name}", { name: existing.title }) : undefined}>{existing ? existing.title : t("Add a trip")}</h1>
+          <h1 data-title={existing ? t("Editing {name}", { name: outingName(existing, book.spots) }) : undefined}>{existing ? outingName(existing, book.spots) : t("Add a trip")}</h1>
         </div>
         <Link to={existing ? `/trips/${existing.id}` : "/trips"} onClick={kept.drop}>
           {t("Cancel")}
@@ -616,7 +616,7 @@ function TripForm() {
           ) : null}
           {sameDay ? (
             <p className="wide form-note" role="status">
-              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
+              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{outingName(sameDay, book.spots)}</Link>
             </p>
           ) : null}
           {existing && ownFish.length > 0 && spotId !== existing.spotId ? (
@@ -658,7 +658,7 @@ function TripForm() {
         </div>
         {again && againTackle.length > 0 ? (
           <p className="again-note">
-            {t("The tackle list from “{title}” comes along, unpacked.", { title: again.title })}
+            {t("The tackle list from “{title}” comes along, unpacked.", { title: outingName(again, book.spots) })}
           </p>
         ) : null}
         {error ? (

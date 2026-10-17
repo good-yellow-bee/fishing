@@ -1,7 +1,7 @@
 import { useId, useRef, useState, type FormEvent } from "react";
 import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
-import { fishCountLabel, formatDay, messageText } from "../format";
+import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
@@ -135,7 +135,7 @@ export function TackleList({
                   focusAfter();
                 }}
               >
-                {t("Copy the list from {trip}, {day}", { trip: lastBag.title, day: formatDay(lastBag.date) })}
+                {t("Copy the list from {trip}, {day}", { trip: outingName(lastBag), day: formatDay(lastBag.date) })}
               </button>
             </>
           ) : null}
@@ -173,7 +173,7 @@ export function TackleList({
         <CopySummary
           text={() => {
             const trip = trips.find((row) => row.id === tripId);
-            return packingText(trip ? `${t("Tackle for {trip}", { trip: trip.title })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
+            return packingText(trip ? `${t("Tackle for {trip}", { trip: outingName(trip) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
           }}
           file="stillwater-tackle.txt"
           label={t("Copy the list")}

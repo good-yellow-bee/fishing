@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
-import { t, useT } from "../i18n";
+import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
+import { getUnits, t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { lureByTemp, readingBefore, waterTips } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
-import { fishCountLabel, formatCatchDay } from "./format";
+import { fishCountLabel, formatCatchDay, tripWhen } from "./format";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
@@ -31,13 +31,19 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
 
 /** "Water then: 54–61°F.": the water temperatures noted with those fish, so a planned day knows what to expect. */
 export function waterThen(fish: readonly CatchEntry[]): string | null {
+  const range = waterRange(fish);
+  return range ? t("Water then: {temp}.", { temp: range }) : null;
+}
+
+/** "54–61°F": the water temperatures noted with these fish, rounded as shown, or one value when they read the same. */
+export function waterRange(fish: readonly CatchEntry[]): string | null {
   const temps = fish.map((entry) => entry.weather?.waterTempF).map((f) => (f === undefined ? f : Math.round(f))).filter((f): f is number => f !== undefined && Number.isFinite(f));
   if (temps.length === 0) return null;
   const low = Math.min(...temps);
   const high = Math.max(...temps);
   // Rounded as shown: two readings a fraction apart read as one temperature, not a range of the same number twice.
   const [lowText, highText] = [tempText(low), tempText(high)];
-  return t("Water then: {temp}.", { temp: lowText === highText ? lowText : `${lowText.replace(/\s*°.*$/, "")}–${highText}` });
+  return lowText === highText ? lowText : `${lowText.replace(/\s*°.*$/, "")}–${highText}`;
 }
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
@@ -79,10 +85,19 @@ export function WaterTipsBox({
   // Links narrow to the same water or kind of fish (`within`) when the box is about one.
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
+  const dayMoon = on ? moonQuarterOf(new Date(y!, m! - 1, d!, 12)) : null;
+  // "today" or "tomorrow" when it is, as outing cards say it.
+  const onDay = on ? tripWhen(on, localDate(new Date()), shiftDate(new Date(), 1)) : "";
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
+  // As the reading is shown: 59.7°F reads "60°F", so it takes the 60s band's lure, not the 50s'.
+  const lastF = tips.lastTemp ? (getUnits() === "metric" ? tips.lastTemp.fahrenheit : Math.round(tips.lastTemp.fahrenheit)) : undefined;
+  const lureNow =
+    on && lastF !== undefined
+      ? byTemp.find(({ band }) => (band.from === null || lastF >= band.from) && (band.to === null || lastF < band.to))?.lure
+      : undefined;
   // Against the reading before it: a change too small to show as a whole degree says nothing.
-  const before = on ? readingBefore(catches, tips.lastTemp) : null;
+  const before = on && tips.lastTemp ? readingBefore(catches, tips.lastTemp, (fahrenheit) => tempText(fahrenheit) !== tempText(tips.lastTemp!.fahrenheit)) : null;
   const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
   const trend =
     before && tips.lastTemp && beforeText !== lastText
@@ -111,6 +126,8 @@ export function WaterTipsBox({
           </>
         ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
+        {/* The moon on the day in question, against the best one here. */}
+        {tips.moon && dayMoon ? (dayMoon === tips.moon ? ` ${t("({day} too)", { day: onDay })}` : ` ${t("({day}: {moon})", { day: onDay, moon: t(MOON_QUARTER_LABELS[dayMoon]).toLowerCase() })}`) : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}
         {sun && sun.near >= 2 ? (
@@ -124,6 +141,8 @@ export function WaterTipsBox({
             <br />
             {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: formatCatchDay(tips.lastTemp.at) })}
             {trend ? ` ${trend}` : null}
+            {/* The lure that led in the band the water was last in: what to tie on first. */}
+            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: t(lureNow) })}` : null}
           </>
         ) : null}
         {pastWeek.length > 0 ? (

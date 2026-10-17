@@ -58,7 +58,8 @@ export function lureByTemp(catches: readonly CatchEntry[]): { band: WaterTempTal
     const [top, next] = lureTally({ spots: [], trips: [], catches: inBand }, 2);
     return top && top.count >= 2 && (!next || next.count < top.count) ? [{ band, lure: top.lure }] : [];
   });
-  return rows.length >= 2 ? rows : [];
+  // The same lure leading every band says nothing about temperature.
+  return rows.length >= 2 && new Set(rows.map((row) => row.lure.trim().toLowerCase())).size >= 2 ? rows : [];
 }
 
 /** How far back an earlier reading still says which way the water is going. */
@@ -66,9 +67,10 @@ const TREND_DAYS = 21;
 
 /**
  * The reading before the last one, from an earlier day within three weeks of it: with the last, whether the water
- * is warming or cooling. Null without one.
+ * is warming or cooling. `differs` skips readings that show the same as the last, so a run of one degree looks back
+ * to where it changed. Null without one.
  */
-export function readingBefore(catches: readonly CatchEntry[], last: WaterReading | null): WaterReading | null {
+export function readingBefore(catches: readonly CatchEntry[], last: WaterReading | null, differs: (fahrenheit: number) => boolean = () => true): WaterReading | null {
   if (!last) return null;
   const lastAt = new Date(last.at);
   const lastDay = new Date(lastAt.getFullYear(), lastAt.getMonth(), lastAt.getDate()).getTime();
@@ -77,7 +79,7 @@ export function readingBefore(catches: readonly CatchEntry[], last: WaterReading
     const fahrenheit = entry.weather?.waterTempF;
     const at = Date.parse(entry.caughtAt);
     if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(at)) continue;
-    if (at >= lastDay || lastDay - at > TREND_DAYS * 86_400_000) continue;
+    if (at >= lastDay || lastDay - at > TREND_DAYS * 86_400_000 || !differs(fahrenheit)) continue;
     if (!before || at > Date.parse(before.at)) before = { fahrenheit, at: entry.caughtAt };
   }
   return before;
