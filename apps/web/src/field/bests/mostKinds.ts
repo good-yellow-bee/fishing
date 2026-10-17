@@ -1,9 +1,10 @@
 import { localDate, type Logbook } from "@stillwater/shared";
+import { countedFish } from "../milestones";
 
 /** The local day the book's fish came in the most kinds, once a day has two or more; a tie goes to the latest day. */
 export function mostKindsDay(book: Logbook): { date: string; kinds: number } | null {
   const days = new Map<string, Set<string>>();
-  for (const entry of book.catches) {
+  for (const entry of countedFish(book.catches)) {
     const at = new Date(entry.caughtAt);
     if (Number.isNaN(at.getTime())) continue;
     const day = localDate(at);

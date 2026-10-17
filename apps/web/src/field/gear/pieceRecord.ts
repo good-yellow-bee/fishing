@@ -32,9 +32,14 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
         spellings.set(name, [...(spellings.get(name) ?? []), entry]);
       }
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
-      const lastAt = took.reduce<string | undefined>((newest, entry) => (!newest || Date.parse(entry.caughtAt) > Date.parse(newest) ? entry.caughtAt : newest), undefined);
+      // The newest fish under any spelling of the piece: "Spinnerbaits" last week still counts for "Spinnerbait".
+      const lastAt = [...spellings.values()].flat().reduce<string | undefined>((newest, entry) => (!newest || Date.parse(entry.caughtAt) > Date.parse(newest) ? entry.caughtAt : newest), undefined);
       const lastDay = lastAt ? localDate(new Date(lastAt)) : "";
-      const since = [...row.trips].filter((id) => (dateOf.get(id) ?? "") > lastDay).length;
+      // Today's outing counts once it is over; until then it may still bring a fish.
+      const since = [...row.trips].filter((id) => {
+        const date = dateOf.get(id) ?? "";
+        return date > lastDay && date < today;
+      }).length;
       return { label: row.label, outings: row.trips.size, fish: took.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, since } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));

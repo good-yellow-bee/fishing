@@ -8,7 +8,6 @@ import {
   localDate,
   shiftDate,
   spotById,
-  tripById,
   tripsForSpot,
   upcomingTrips,
   type CatchEntry,
@@ -28,7 +27,7 @@ import { outingAverage, topOuting } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
-import { fishCountLabel, messageText, outingName, tripWhen } from "./format";
+import { fishCountLabel, messageText, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { locale, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
@@ -176,7 +175,7 @@ export function SpotPage() {
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}
-          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${outingName(top)} · ${tripWhen(top.date, today, tomorrow)}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
+          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${outingName(top, book.spots)} · ${tripWhen(top.date, today, tomorrow)}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
         </p>
       ) : null}
       {trips.length === 0 ? (
@@ -216,7 +215,7 @@ export function SpotPage() {
               key={entry.id}
               entry={entry}
               spotName={null}
-              tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+              tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
               list={`water:${spot.id}`}
             />
           )}

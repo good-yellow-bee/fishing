@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, SEASON_LABELS, moonQuarterOf, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
-import { t, useT } from "../i18n";
+import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
+import { getUnits, t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { lureByTemp, readingBefore, waterTips } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
-import { fishCountLabel, formatCatchDay, formatDay } from "./format";
+import { fishCountLabel, formatCatchDay, tripWhen } from "./format";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
@@ -80,9 +80,12 @@ export function WaterTipsBox({
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const dayMoon = on ? moonQuarterOf(new Date(y!, m! - 1, d!, 12)) : null;
+  // "today" or "tomorrow" when it is, as outing cards say it.
+  const onDay = on ? tripWhen(on, localDate(new Date()), shiftDate(new Date(), 1)) : "";
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
-  const lastF = tips.lastTemp?.fahrenheit;
+  // As the reading is shown: 59.7°F reads "60°F", so it takes the 60s band's lure, not the 50s'.
+  const lastF = tips.lastTemp ? (getUnits() === "metric" ? tips.lastTemp.fahrenheit : Math.round(tips.lastTemp.fahrenheit)) : undefined;
   const lureNow =
     on && lastF !== undefined
       ? byTemp.find(({ band }) => (band.from === null || lastF >= band.from) && (band.to === null || lastF < band.to))?.lure
@@ -118,7 +121,7 @@ export function WaterTipsBox({
         ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
         {/* The moon on the day in question, against the best one here. */}
-        {tips.moon && dayMoon ? (dayMoon === tips.moon ? ` ${t("({day} too)", { day: formatDay(on!) })}` : ` ${t("({day}: {moon})", { day: formatDay(on!), moon: t(MOON_QUARTER_LABELS[dayMoon]).toLowerCase() })}`) : null}
+        {tips.moon && dayMoon ? (dayMoon === tips.moon ? ` ${t("({day} too)", { day: onDay })}` : ` ${t("({day}: {moon})", { day: onDay, moon: t(MOON_QUARTER_LABELS[dayMoon]).toLowerCase() })}`) : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}
         {sun && sun.near >= 2 ? (

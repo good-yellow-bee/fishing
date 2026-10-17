@@ -34,7 +34,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
     <section className="tackle-trip">
       <div className="section-head">
         <h2>
-          <Link to={`/trips/${trip.id}`}>{outingName(trip)}</Link>
+          <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
         </h2>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
@@ -43,7 +43,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
       </div>
       <TackleList
         tripId={trip.id}
-        name={t("Tackle for {trip}", { trip: trip.title })}
+        name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })}
         suggest={packingTips(book, trip, today)}
         trips={book.trips}
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
@@ -117,8 +117,8 @@ function LureTwins() {
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
   const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER), (from, into) =>
-    // The plain "from|into" key is how the first build kept a pair apart.
-    [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`].some((key) => kept.includes(key)),
+    // The plain "from|into" key, either way round as the counts may have flipped, is how the first build kept a pair apart.
+    [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`, `${into.toLowerCase()}|${from.toLowerCase()}`].some((key) => kept.includes(key)),
   ).filter(
     // Close as stored but not as shown (a sample lure in Polish) would read as two unrelated names.
     (pair) => (t(pair.from) === pair.from) === (t(pair.into) === pair.into),
@@ -166,7 +166,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
   return (
     <details className="tackle-trip tackle-past">
       <summary>
-        <span className="tackle-past-title">{outingName(trip)}</span>
+        <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
           {spot ? ` · ${spot.name}` : ""}
@@ -176,7 +176,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: trip.title })} caught={catchesForTrip(book, trip.id)} trips={book.trips} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={catchesForTrip(book, trip.id)} trips={book.trips} />
     </details>
   );
 }
@@ -209,7 +209,7 @@ export function GearPage() {
               {" · "}
               {tripWhen(trip.date, today, tomorrow)}
             </p>
-            <h1>{outingName(trip)}</h1>
+            <h1>{outingName(trip, book.spots)}</h1>
             <p className="meta stand">
               <time dateTime={trip.date}>{formatDay(trip.date)}</time>
               {spot ? (
