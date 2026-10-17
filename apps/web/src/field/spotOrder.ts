@@ -1,7 +1,7 @@
 import { localDate, type Logbook, type Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { countedFish, ownFish } from "./milestones";
-import { isSampleSpot } from "./bookCopy";
+import { isSampleSpot, isSampleTrip } from "./bookCopy";
 
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null };
 
@@ -38,7 +38,7 @@ export function likelyWater(book: Logbook, today: string): string {
   // Never the game's lake: a fish logged by hand came from a real water. Ranked by the angler's own fish, so a sample
   // week dated after their first real fish doesn't pull a new fish onto a made-up water.
   const order = spotsByLastFish({ ...book, catches: countedFish(book.catches) }).map((row) => row.spot.id).filter((id) => id !== PLAY_LAKE_ID);
-  const todays = new Set(book.trips.filter((trip) => trip.date === today).map((trip) => trip.spotId));
+  const todays = new Set(book.trips.filter((trip) => trip.date === today && !isSampleTrip(trip.id)).map((trip) => trip.spotId));
   // No fish of the angler's own yet: their first water of their own, not one from the sample week.
   const noOwn = !book.catches.some(ownFish);
   const own = noOwn ? book.spots.find((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id))?.id : undefined;

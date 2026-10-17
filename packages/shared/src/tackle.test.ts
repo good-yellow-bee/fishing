@@ -118,7 +118,7 @@ describe("tackle", () => {
       "Steel leader", "Steel leaders", "6x tippet", "6x tippets", "Braided line", "Euro nymph leader", "Streamer leader",
       "Landing net", "Landing nets", "Jaw spreaders", "Headlamp", "Headlamps", "5-weight fly rod", "Fly rods",
       "Spinning reel", "Spinning reels", "Hemostats", "Polarized sunglasses", "Nipper", "8 lb fluoro", "20 lb braid",
-      "Fishing license", "Rain jacket", "Cooler", "Sunscreen", "Bait bucket", "Stringer",
+      "Fishing license", "Rain jacket", "Cooler", "Sunscreen", "Bait bucket", "Stringer", "Bullet sinkers", "Swivels", "Split shot",
     ]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }
@@ -128,7 +128,7 @@ describe("tackle", () => {
     for (const lure of ["Obrotówka", "Wahadłówka", "Woblery", "Gumka 7 cm", "Kogut", "Mucha sucha", "Twister", "Rosówka"]) {
       expect(isLureLabel(lure), lure).toBe(true);
     }
-    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz", "Obcinaczki", "Nożyczki"]) {
+    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz", "Obcinaczki", "Nożyczki", "Ciężarki", "Krętliki", "Zanęta"]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }
   });

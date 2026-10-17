@@ -12,6 +12,7 @@ import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { catchMonth } from "./tripMonths";
+import { countedFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
@@ -121,16 +122,17 @@ export function HomePage() {
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
   // The counts are the angler's own: a round of the game moves none of them.
-  const real = book.catches.filter(offPlayLake);
+  const real = countedFish(book.catches);
+  const counted = new Set(real.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(real, now);
   const thisMonth = today.slice(0, 7);
   const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
-  const monthFish = monthRows.filter(offPlayLake).length;
+  const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
   const thisYear = today.slice(0, 4);
   const yearRows = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`));
-  const yearFish = yearRows.filter(offPlayLake).length;
+  const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
   const goal = readYearGoal(thisYear);
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);

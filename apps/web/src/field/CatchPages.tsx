@@ -44,7 +44,7 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
-import { bookLures, closeSpecies, dayWeather, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, fullSpecies, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -442,7 +442,8 @@ function CatchForm() {
   // A name one or two letters off one already known, offered before it starts a kind of its own.
   // Said once the name is typed and the field left, not while "Walley" is on its way to "Walleye".
   const [typingSpecies, setTypingSpecies] = useState(false);
-  const misspelt = typingSpecies ? null : closeSpecies(species, speciesOptions);
+  // "perch" alone is most likely the perch already in the book, not a kind of its own.
+  const misspelt = typingSpecies ? null : (closeSpecies(species, speciesOptions) ?? fullSpecies(species, [...ownFirst(book.catches.map((entry) => entry.species), [], t), ...speciesOptions]));
   const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
   // The same for a lure, so a typo doesn't split its tally in two.
   const [typingLure, setTypingLure] = useState(false);

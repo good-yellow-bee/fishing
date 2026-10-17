@@ -1,5 +1,5 @@
 import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
-import { isSampleCatch } from "./bookCopy";
+import { isSampleCatch, isSampleTrip } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 import { countedFish } from "./milestones";
 
@@ -109,6 +109,8 @@ export function fishOnOutingDay(book: Logbook, spotId: string, local: string, ym
  * in the small hours with none that day, the outing of the evening before.
  */
 export function tripForFish(book: Logbook, spotId: string, local: string): Trip | undefined {
+  // A fish the angler logs is their own: never filed on one of the sample week's invented outings.
+  book = { ...book, trips: book.trips.filter((trip) => !isSampleTrip(trip.id)) };
   const ymd = local.slice(0, 10);
   const sameDay = tripOnDay(book, spotId, ymd);
   if (sameDay) return sameDay;
@@ -215,6 +217,13 @@ export function closeSpecies(typed: string, names: readonly string[]): string | 
     if (distance <= most && (!found || distance < found.distance)) found = { name, distance };
   }
   return found?.name ?? null;
+}
+
+/** The full name a short one most likely means ("perch" for "Yellow perch"): the first name it ends, the book's own first. */
+export function fullSpecies(typed: string, names: readonly string[]): string | null {
+  const want = typed.trim().toLowerCase();
+  if (want.length < 3 || names.some((name) => name.toLowerCase() === want)) return null;
+  return names.find((name) => name.toLowerCase().endsWith(` ${want}`)) ?? null;
 }
 
 /**
