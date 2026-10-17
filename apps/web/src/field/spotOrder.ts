@@ -1,4 +1,4 @@
-import type { Logbook, Spot } from "@stillwater/shared";
+import { localDate, type Logbook, type Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { countedFish, ownFish } from "./milestones";
 import { isSampleSpot } from "./bookCopy";
@@ -65,4 +65,20 @@ export function nearestWater(book: Logbook, here: { lat: number; lng: number }):
     if (!best || km < best.km) best = { spot, km };
   }
   return best;
+}
+
+/** The last day each water was fished, by an outing up to today or a fish logged there, whichever is later. */
+export function lastOutByWater(book: Logbook, today: string): Map<string, string> {
+  const last = new Map<string, string>();
+  const note = (spotId: string, day: string) => {
+    if (day <= today && day > (last.get(spotId) ?? "")) last.set(spotId, day);
+  };
+  for (const trip of book.trips) note(trip.spotId, trip.date);
+  for (const entry of book.catches) note(entry.spotId, localDate(new Date(entry.caughtAt)));
+  return last;
+}
+
+/** Whole days from one day to a later one. */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
 }

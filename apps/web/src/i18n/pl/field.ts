@@ -702,4 +702,10 @@ export const PL_FIELD: PlBook = {
   "The sample week's invented fish are still in this book, beside your own.": "Wymyślone ryby z przykładowego tygodnia wciąż są w dzienniku, obok twoich.",
   "Remove the sample week": "Usuń przykładowy tydzień",
   "The sample week is gone. Your own fish stay.": "Przykładowy tydzień usunięty. Twoje ryby zostały.",
+  "Longest rested": "Najdawniej łowione",
+  "Fished here today": "Łowione tu dziś",
+  "Last fished here yesterday": "Ostatnio łowione tu wczoraj",
+  "Last fished here {n} days ago": ["Ostatnio łowione tu {n} dzień temu", "Ostatnio łowione tu {n} dni temu", "Ostatnio łowione tu {n} dni temu"],
+  "Last time: {day} · {fish}": "Ostatnio: {day} · {fish}",
+  "Last time: {day} · {fish} · {lure}": "Ostatnio: {day} · {fish} · {lure}",
 };

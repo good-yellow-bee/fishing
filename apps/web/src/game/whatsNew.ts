@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field31";
+export const NEWS_ID = "2026-10-17-field32";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Home's Next tile now says how your last outing on that water went, with the lure that took the most. Spots can be ordered by the water left alone longest, each saying how many days it has rested. Once you log your own fish, Home offers to take the sample week out.",
   "A new outing picks its day in one tap: today, tomorrow or the coming Saturday. Its title offers the names you gave earlier outings, this water's first. A tackle list can hide what is already packed, so only what is left shows while you pack.",
   "A water's page now shows its newest photos. The catch search knows “weighed” and “measured”, to find the fish still missing a weight or a length, and “autumn” too. Opening a photo keeps your place in Photos, and Home counts only your own fish.",
   "The waters list can now be ordered by last fish, by name or by most fish, and it remembers your choice. A water's page sets this year's outings and fish there against last year by the same date. A new fish now opens on the water you really fish, and lure records leave game fish out.",

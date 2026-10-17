@@ -1,10 +1,10 @@
 import { Fragment, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Spot, type Trip } from "@stillwater/shared";
+import { catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { hasSampleFish, isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
@@ -64,6 +64,26 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
           {part}
         </Fragment>
       ))}
+    </small>
+  );
+}
+
+/** How the last outing on the next outing's water went: its fish and the lure that took the most, to plan by. */
+function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
+  const last = tripsForSpot(book, trip.spotId)
+    .filter((other) => other.id !== trip.id && other.date < trip.date && other.date <= today)
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (!last) return null;
+  const fish = catchesForTrip(book, last.id);
+  const lure = lureTally({ ...book, catches: fish }, 1)[0];
+  const day = formatDay(last.date);
+  return (
+    <small className="next-last">
+      <Link to={`/trips/${last.id}`}>
+        {lure
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: `${t(lure.lure)} (${lure.count})` })
+          : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
+      </Link>
     </small>
   );
 }
@@ -220,6 +240,7 @@ export function HomePage() {
             ) : null}
           </small>
           {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
+          {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* On the day, a fish goes straight onto this outing. */}
           {next && next.date === today ? (
             <small className="next-log">
