@@ -287,7 +287,7 @@ export function BestsPage() {
               <div className="section-head">
                 <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
               </div>
-              <p className="meta">{t("A stronger shade means more fish; an outlined day was an outing with none.")}</p>
+              <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
               <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} />
             </section>
           ) : null}

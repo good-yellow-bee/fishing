@@ -65,7 +65,7 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
   if (months.length === 0) return null;
   // The days that open something, oldest first. The calendar is one tab stop: the arrow keys walk these days.
   const linked = [...marks.entries()]
-    .filter(([day, mark]) => mark.fish > 0 || (mark.trips.length > 0 && day < today))
+    .filter(([, mark]) => mark.fish > 0 || mark.trips.length > 0)
     .map(([day]) => day)
     .sort();
   const active = current && linked.includes(current) ? current : linked[0];
@@ -125,7 +125,16 @@ export function DayCalendar({ book, year, today }: { book: Logbook; year: string
                     </li>
                   );
                 }
-                return <li key={day} aria-hidden="true" className={mark && mark.trips.length > 0 ? "day-planned" : undefined} />;
+                if (mark && mark.trips.length > 0) {
+                  // An outing still ahead (or today's, before its first fish) opens its plan.
+                  const label = `${formatDay(day)}: ${t("an outing ahead")}`;
+                  return (
+                    <li key={day} className="day-planned">
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} />
+                    </li>
+                  );
+                }
+                return <li key={day} aria-hidden="true" />;
               })}
             </ol>
           </section>
