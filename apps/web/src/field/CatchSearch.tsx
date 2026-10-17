@@ -610,7 +610,8 @@ export function CatchSearch() {
               )}
             </PagedCatches>
           )}
-          {matches.length > 0 && LOOSE_WORDS.has(normalize(settled)) ? <FileLoose /> : null}
+          {/* "bez wyprawy" takes in the loose fish too: those can still be filed in one tap. */}
+          {matches.length > 0 && (LOOSE_WORDS.has(normalize(settled)) || NO_OUTING_WORDS.has(normalize(settled))) ? <FileLoose /> : null}
           {/* Every fish on one lure: the place to fix that lure's name across the book. */}
           {matches.length > 0 && parseExactTerm(settled)?.field === "lure" ? (
             <RenameKind key={matches[0]!.lure} field="lure" name={matches[0]!.lure} />
