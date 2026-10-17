@@ -48,12 +48,13 @@ function cleanSpot(spot: Spot): Spot {
   };
 }
 
-function cleanTrip(trip: Trip): Trip {
+/** An outing with no title in the file takes its water's name, as one saved with no title does. */
+function cleanTrip(trip: Trip, spots: readonly Spot[]): Trip {
   return {
     id: trip.id,
     date: trip.date,
     spotId: trip.spotId,
-    title: trip.title,
+    title: trip.title.trim() || spots.find((spot) => spot.id === trip.spotId)?.name || "Outing",
     note: trip.note,
     ...(trip.lost ? { lost: trip.lost } : {}),
     ...(trip.missed ? { missed: trip.missed } : {}),
@@ -105,7 +106,7 @@ function sizesReadable(book: Logbook): boolean {
 function cleanBook(book: Logbook): Logbook {
   return {
     spots: book.spots.map(cleanSpot),
-    trips: book.trips.map(cleanTrip),
+    trips: book.trips.map((trip) => cleanTrip(trip, book.spots)),
     catches: book.catches.map(cleanCatch),
   };
 }

@@ -38,6 +38,13 @@ describe("field archive", () => {
     expect(parsed.value.photos["catch-gill"]).toBe(jpeg);
   });
 
+  it("names an outing with no title after its water", () => {
+    const untitled = { ...book, trips: book.trips.map((trip, index) => (index === 0 ? { ...trip, title: " " } : trip)) };
+    const parsed = parseFieldArchive(fieldArchiveDocument(archiveFor(untitled)));
+    const first = book.trips[0]!;
+    expect(parsed.ok && parsed.value.book.trips[0]!.title).toBe(book.spots.find((spot) => spot.id === first.spotId)!.name);
+  });
+
   it("keeps a released mark through the file", () => {
     const marked = { ...book, catches: book.catches.map((entry) => (entry.id === "catch-gill" ? { ...entry, released: true } : entry)) };
     const parsed = parseFieldArchive(fieldArchiveDocument(archiveFor(marked)));
