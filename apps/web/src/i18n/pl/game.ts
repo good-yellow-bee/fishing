@@ -382,6 +382,8 @@ export const PL_GAME: PlBook = {
   "The full moon catches the lure's flash.": "Pełnia księżyca odbija się w przynęcie i błyska.",
   "Thunder puts the fish down, so the bites come slow.": "Grzmoty spychają ryby w głąb, więc brania przychodzą wolno.",
   "The midday glare drives the fish from the open water, so the bites come slow.": "Południowy blask przegania ryby z otwartej wody, więc brania przychodzą powoli.",
+  "There's no moon tonight and the fish can barely see to feed, so the bites come slow.": "Dziś nie ma księżyca i ryby ledwo widzą żer, więc brania przychodzą powoli.",
+  "A golden shiner travels in a school like the panfish, so land one and cast again. A carp hooked in summer is at its strongest, a brook trout in fall is on its spawning run, and a pike hunts on through the winter, so each tires slower. On a clear summer midday the fish shun the open water, and on a moonless night they can barely see to feed, so the bites come slower.": "Złotawiec pływa w ławicy jak drobne ryby, więc po wyholowaniu zarzuć jeszcze raz. Karp złowiony latem jest w pełni sił, pstrąg źródlany jesienią ciągnie na tarło, a szczupak poluje przez całą zimę, więc każdy z nich wolniej się męczy. W pogodne letnie południe ryby unikają otwartej wody, a w bezksiężycową noc ledwo widzą żer, więc brania przychodzą wolniej.",
   "The breeze chops the surface, and the fish feed bolder under it.": "Wiatr marszczy powierzchnię, a ryby pod nią żerują śmielej.",
   "The sun catches the lure's flash.": "Słońce odbija się w przynęcie i błyska.",
   "Glassy water, made for a topwater.": "Gładka woda, jak stworzona do przynęty powierzchniowej.",

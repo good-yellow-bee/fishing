@@ -368,6 +368,17 @@ export function openGlareWaitMul(spot: string, season: LakeSeason | undefined, h
   return season === "summer" && hour === "day" && sky === "clear" && spot === "open" ? OPEN_GLARE_WAIT : 1;
 }
 
+/** On a night with the moon this thin (its lit share) or less, it is too dark for the fish to see to feed. */
+export const NEW_MOON = 0.1;
+
+/** On a moonless night the fish can barely see to feed, so the bite comes slower. */
+export const DARK_NIGHT_WAIT = 1.1;
+
+/** How a moonless night stretches the wait: slower at night under a new moon, else 1 (and 1 when the moon is unknown). */
+export function darkNightWaitMul(hour: LakeHour, moon: number | undefined) {
+  return hour === "night" && moon !== undefined && moon <= NEW_MOON ? DARK_NIGHT_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
