@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -183,5 +183,17 @@ describe("a jig's stout hook", () => {
     expect(solidStrikeMs(1000, undefined, "Green pumpkin tube")).toBeCloseTo(solidStrikeMs(1000) * JIG_SOLID);
     expect(solidStrikeMs(1000, "strong", "Green pumpkin tube")).toBeCloseTo(solidStrikeMs(1000, "strong") * JIG_SOLID);
     expect(solidStrikeMs(1000, undefined, "Nightcrawler")).toBe(solidStrikeMs(1000));
+  });
+});
+
+describe("a worm after dark", () => {
+  it("bites sooner at night, and only on a worm", () => {
+    expect(WORM_NIGHT_WAIT).toBeLessThan(1);
+    expect(wormNightWaitMul("Nightcrawler", "night")).toBe(WORM_NIGHT_WAIT);
+    expect(wormNightWaitMul("Leech", "night")).toBe(WORM_NIGHT_WAIT);
+    expect(wormNightWaitMul("Nightcrawler", "day")).toBe(1);
+    expect(wormNightWaitMul("Nightcrawler", "dusk")).toBe(1);
+    expect(wormNightWaitMul("Inline spinner", "night")).toBe(1);
+    expect(wormNightWaitMul(undefined, "night")).toBe(1);
   });
 });

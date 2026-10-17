@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zb";
+export const NEWS_ID = "2026-10-17zc";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Fish a worm at night: worms crawl out after dark, so the fish look for one and bite sooner.",
   "A jig's single stout hook drives home: on a jig a strike sets solid over a longer stretch of the Strike card's bar.",
   "A spinner, spoon or crankbait's treble hooks hold a soft mouth or a light hook half again as long before it tears free.",
   "Bang a crankbait off the point's rocks and the erratic bump draws a bite sooner.",
