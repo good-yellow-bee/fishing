@@ -219,9 +219,14 @@ export const COLDWATER: ReadonlySet<string> = new Set(["brook-trout", "rainbow-t
 /** In summer a cold-water fish tires this much faster on a run or against the reel. */
 export const SUMMER_TIRE = 1.2;
 
-/** How summer's warm water speeds a cold-water fish's tiring: faster in summer, else 1. */
-export function warmTireMul(season: string | undefined, speciesId: string) {
-  return season === "summer" && COLDWATER.has(speciesId) ? SUMMER_TIRE : 1;
+/** Whether a summer rain has cooled the water for a cold-water fish, sparing it summer's short air. */
+export function rainCooled(season: string | undefined, speciesId: string, sky: string | undefined) {
+  return season === "summer" && COLDWATER.has(speciesId) && sky === "rain";
+}
+
+/** How summer's warm water speeds a cold-water fish's tiring: faster in summer unless rain has cooled it, else 1. */
+export function warmTireMul(season: string | undefined, speciesId: string, sky?: string) {
+  return season === "summer" && COLDWATER.has(speciesId) && !rainCooled(season, speciesId, sky) ? SUMMER_TIRE : 1;
 }
 /** Fall run fish: in fall they run up to spawn, full of fight. */
 export const FALL_RUNNERS: ReadonlySet<string> = new Set(["salmon"]);
