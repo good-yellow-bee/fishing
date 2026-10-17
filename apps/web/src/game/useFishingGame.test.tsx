@@ -88,8 +88,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile, hour = "day", rising = false }: { current?: Profile; hour?: LakeHour; rising?: boolean }) {
-  const game = useFishingGame(current, hour, undefined, undefined, false, undefined, undefined, rising);
+function Harness({ current = profile, hour = "day", rising = false, lure }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string }) {
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, undefined, false, undefined, undefined, rising);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -134,7 +134,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -148,7 +148,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} />));
   return container.querySelector("div")!;
 }
 
@@ -996,6 +996,17 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("result:miss");
     const light = Number(container!.querySelector("[data-testid=miss-message]")?.textContent?.match(/(\d\.\d\d) s/)?.[1]);
     expect(light).toBeCloseTo(usual * LIGHT_HOLD, 1);
+  });
+
+  it("has every fish hit a topwater lure at the top, with no nibble first", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
+    cast(surface);
+    const nibbles = vi.mocked(fx.nibble).mock.calls.length;
+    for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(hint()).toBe("It blew up on the topwater — strike!");
+    // A carp mouths a bait two to four times, but on a topwater lure it just hits.
+    expect(vi.mocked(fx.nibble).mock.calls.length).toBe(nibbles);
   });
 
   it("calls a predator's bite as a hit and a usual fish's as NOW", () => {

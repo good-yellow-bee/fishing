@@ -84,7 +84,7 @@ import { latestCatchShot, subscribeCatchShot } from "../game/scene/catchPhoto";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
-import { touchScreen, useFishingGame } from "../game/useFishingGame";
+import { isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
@@ -701,6 +701,7 @@ export function DockPage() {
           schooled={game.schooled}
           lurking={game.lurking}
           lurkerCloseInMs={game.lurkerCloseInMs}
+          topwater={isTopwater(lure)}
           hour={hour}
           sky={sky}
           season={season}

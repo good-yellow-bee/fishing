@@ -131,7 +131,7 @@ import { recolourFloatUvs } from "./floatColour";
 import { createFrameWatch, noteEffectsSteppedDown } from "../frameWatch";
 import { frameDue, frameThrottle, idleNow } from "./frameCap";
 import { GOLDEN_ACCENT, GOLDEN_COLOR } from "../../components/FishMark";
-import { biteStyle, LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide } from "../nibblePlan";
+import { LIFT_RISE, LIGHT_PLUNGE, liftTilt, ROLL_SPLASH, RUN_PLUNGE, runSlide, takeStyle } from "../nibblePlan";
 
 const BUOY_URL = "/models/buoy.glb";
 /** Top of the buoy model at its 0.32 scale, where the night tip sits. */
@@ -152,6 +152,8 @@ type Props = {
   lurking?: boolean;
   /** That fish is the one coming to bite: its shadow closes in on the float over this many ms. */
   lurkerCloseInMs?: number;
+  /** A topwater lure is tied on: every fish hits it at the top, like an ambush, in a big splash. */
+  topwater?: boolean;
   hour: LakeHour;
   sky: Sky;
   /** Optional so older callers keep the summer look. */
@@ -1289,7 +1291,7 @@ function FloatModel() {
   );
 }
 
-function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND }: LineAndBobberProps) {
+function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, species, weight, level, hour, wind = NO_WIND, topwater = false }: LineAndBobberProps) {
   const look = lineLook(hour);
   const restOpacity = useRef(look.opacity);
   restOpacity.current = look.opacity;
@@ -1342,8 +1344,8 @@ function LineAndBobber({ phase, powerRef, sim, rodTip, aim, lookAt, nibble, spec
     return mesh;
   }, []);
   const dipped = isFighting(phase);
-  const lifting = species !== null && biteStyle(species.id) === "lift";
-  const running = species !== null && biteStyle(species.id) === "run";
+  const lifting = species !== null && takeStyle(species.id, topwater) === "lift";
+  const running = species !== null && takeStyle(species.id, topwater) === "run";
 
   useEffect(() => {
     return () => {
@@ -2139,7 +2141,9 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+  // How this fish takes the bait: a topwater lure makes every take a hit at the top.
+  const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
@@ -2159,7 +2163,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   return (
     <>
       <PlayerMove phase={phase} />
-      <FightMotion phase={phase} sim={sim} ambush={species !== null && biteStyle(species.id) === "ambush"} light={species !== null && biteStyle(species.id) === "light"} lift={species !== null && biteStyle(species.id) === "lift"} run={species !== null && biteStyle(species.id) === "run"} />
+      <FightMotion phase={phase} sim={sim} ambush={take === "ambush"} light={take === "light"} lift={take === "lift"} run={take === "run"} />
       <CameraRig phase={phase} sim={sim} />
       <Tone hour={hour} />
       <FrameWatch />
@@ -2188,12 +2192,13 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
         lookAt={lookAt}
         hour={hour}
         wind={wind}
+        topwater={topwater}
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
-      <StrikeSplash phase={phase} roll={species !== null && biteStyle(species.id) === "roll"} />
+      <StrikeSplash phase={phase} roll={take === "roll" || (species !== null && topwater)} />
       <CaughtFish
         phase={phase}
         color={golden ? GOLDEN_COLOR : (species?.color ?? FALLBACK_COLOR)}
