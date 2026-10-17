@@ -383,6 +383,17 @@ describe("useFishingGame lost fight", () => {
     expect(hint()).toMatch(/^The lost fish spooked this water, so the next bite is slower\. /);
   });
 
+  it("lets the rain cover a lost fish's splash, so the bank isn't spooked", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, "rain");
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 1);
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castIntoSpooked).mockReturnValueOnce(true);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1400));
+    expect(hint()).toMatch(/^The rain on the water covered the lost fish's splash, so this water isn't spooked\. /);
+  });
+
   it("says how close a snapped fish came to the net", () => {
     const surface = mount();
     const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
