@@ -37,7 +37,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, chopWaitMul, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, stormWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, chopWaitMul, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, rainInletWaitMul, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, stormWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -574,6 +574,9 @@ export function useFishingGame(
     // In spring the reeds' shallows warm first, and the fish crowd in.
     const shallowsWait = springShallowsWaitMul(spotRef.current, season);
     if (shallowsWait < 1) reasons.unshift(t("The shallows by the reeds warm first in spring, and the fish crowd in."));
+    // In rain the inlet's swollen current washes food in, and the fish gather to feed.
+    const inletWait = rainInletWaitMul(spotRef.current, sky);
+    if (inletWait < 1) reasons.unshift(t("The rain swells the inlet and washes food in, and the fish gather to feed."));
     // In winter the cold slows the fish, and a slow jig is what they still chase.
     const winterWait = jigWinterWaitMul(lureRef?.current, season);
     if (winterWait < 1) reasons.unshift(t("The cold water slows the fish, but they still chase a slow jig."));
@@ -601,7 +604,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, chopWait, stormWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, fallWait, heatWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, chopWait, stormWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.

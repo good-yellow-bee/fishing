@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { makeFight, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, pickBite, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
+import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -45,7 +45,7 @@ vi.mock("./gotAway", async (importOriginal) => {
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
-  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul) };
+  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -1408,6 +1408,17 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("waiting:none");
     if (said) expect(hint()).toContain(said);
     else expect(hint()).not.toContain("jig");
+  });
+
+  it("says the rain washes food into the inlet when the cast's wait comes sooner for it", () => {
+    vi.mocked(rainInletWaitMul).mockReturnValueOnce(RAIN_INLET_WAIT);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("The rain swells the inlet and washes food in, and the fish gather to feed.");
   });
 
   it("tells only the two latest reasons a bite comes sooner, so the hint stays short", () => {

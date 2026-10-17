@@ -367,6 +367,7 @@ export const PL_GAME: PlBook = {
   "The fish are fattening up for winter and want a big meal.": "Ryby tuczą się przed zimą i szukają dużego kąska.",
   "The summer heat sends the fish down to the cool water off the ledge.": "Letni upał spycha ryby w chłodną wodę pod krawędzią uskoku.",
   "The shallows by the reeds warm first in spring, and the fish crowd in.": "Wiosną płycizna przy trzcinach nagrzewa się pierwsza i ryby się tam tłoczą.",
+  "The rain swells the inlet and washes food in, and the fish gather to feed.": "Deszcz podnosi wodę w Ujściu i spłukuje pokarm, a ryby zbierają się na żer.",
   "The cold water slows the fish, but they still chase a slow jig.": "Zimna woda spowalnia ryby, ale wolno prowadzony jig wciąż je kusi.",
   "The jig hops down the ledge.": "Jig skacze w dół po krawędzi uskoku.",
   "In the dark the fish hunt by sound, and they hear the topwater.": "Po ciemku ryby polują na słuch i słyszą przynętę powierzchniową.",

@@ -312,6 +312,14 @@ export function springShallowsWaitMul(spot: string, season: LakeSeason | undefin
   return season === "spring" && spot === "reeds" ? SPRING_SHALLOWS_WAIT : 1;
 }
 
+/** In rain the inlet's swollen current washes food into the lake, and the fish gather to feed. */
+export const RAIN_INLET_WAIT = 0.85;
+
+/** How rain stretches the wait at the inlet: sooner in rain, else 1. */
+export function rainInletWaitMul(spot: string, sky: string | undefined) {
+  return sky === "rain" && spot === "inlet" ? RAIN_INLET_WAIT : 1;
+}
+
 /** In fall the fish fatten up for winter and go after a big meal, so a big lure draws the bite sooner. */
 export const FALL_BIG_LURE_WAIT = 0.85;
 
