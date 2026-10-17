@@ -216,6 +216,19 @@ describe("useFishingGame landed outcome", () => {
     expect(container!.querySelector("span")?.textContent).toBe("false");
   });
 
+  it.each([
+    ["winter", true],
+    ["summer", false],
+  ] as const)("says a perch landed in %s leaves a big winter school: %s", (season, big) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(hint()?.includes("there's a big winter school here")).toBe(big);
+    expect(hint()?.includes("there's a school here")).toBe(!big);
+  });
+
   it("counts clean fights in a row, and starts again after a dirty landing or a lost fish", () => {
     const surface = mount();
     const run = () => container!.querySelector("[data-testid=clean-run]")?.textContent;

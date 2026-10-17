@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, TWILIGHT_SCHOOL_CASTS, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -281,6 +281,13 @@ describe("a school at dawn and dusk", () => {
     expect(schoolAfterLanding("perch", "dock", "dawn")?.casts).toBe(SCHOOL_CASTS + TWILIGHT_SCHOOL_CASTS);
     expect(schoolAfterLanding("perch", "dock", "dusk")?.casts).toBe(SCHOOL_CASTS + TWILIGHT_SCHOOL_CASTS);
     expect(schoolAfterLanding("pike", "dock", "dusk")).toBeNull();
+  });
+
+  it("keeps a perch's big winter school in a cast longer", () => {
+    for (const id of WINTER_SCHOOLERS) expect(isWinterSchool(id, "winter")).toBe(true);
+    expect(schoolAfterLanding("perch", "dock", "day", "winter")?.casts).toBe(SCHOOL_CASTS + WINTER_SCHOOL_CASTS);
+    expect(schoolAfterLanding("perch", "dock", "day", "summer")?.casts).toBe(SCHOOL_CASTS);
+    expect(schoolAfterLanding("bluegill", "dock", "day", "winter")?.casts).toBe(SCHOOL_CASTS);
   });
 });
 
