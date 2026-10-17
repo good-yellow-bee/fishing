@@ -214,6 +214,15 @@ export const WINTER_TIRE = 1.25;
 export function seasonTireMul(season: string | undefined) {
   return season === "winter" ? WINTER_TIRE : 1;
 }
+/** Cold-water fish: summer's warm water holds little air for them, so they tire sooner. */
+export const COLDWATER: ReadonlySet<string> = new Set(["brook-trout", "rainbow-trout", "salmon", "lake-whitefish"]);
+/** In summer a cold-water fish tires this much faster on a run or against the reel. */
+export const SUMMER_TIRE = 1.2;
+
+/** How summer's warm water speeds a cold-water fish's tiring: faster in summer, else 1. */
+export function warmTireMul(season: string | undefined, speciesId: string) {
+  return season === "summer" && COLDWATER.has(speciesId) ? SUMMER_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;

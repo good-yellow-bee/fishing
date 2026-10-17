@@ -345,6 +345,19 @@ describe("useFishingGame lost fight", () => {
     expect(hint()).toContain("The cold water has it sluggish: it tires sooner and won't jump.");
   });
 
+  it.each([
+    ["summer", "brook-trout", true],
+    ["winter", "brook-trout", false],
+    ["summer", "largemouth-bass", false],
+  ] as const)("says a fish hooked in %s (%s) is short of air in the warm water: %s", (season, id, warm) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("The warm water leaves it short of air, so it tires sooner.")).toBe(warm);
+  });
+
   it("says a lost trophy-sized fish looked like a trophy", () => {
     const surface = mount();
     const message = () => container!.querySelector("[data-testid=broke]")?.textContent;

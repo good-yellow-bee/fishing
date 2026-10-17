@@ -26,7 +26,7 @@ import {
   type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, warmTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -441,7 +441,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season) > 1);
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season) * warmTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season) > 1);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -464,13 +464,15 @@ export function useFishingGame(
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
       const cold = seasonTireMul(season) <= 1 ? "" : LEAPERS.has(species.id) ? `${t("The cold water has it sluggish: it tires sooner and won't jump.")} ` : `${t("The cold water has it sluggish, so it tires sooner.")} `;
+      // Summer's warm water leaves a trout or whitefish short of air, so it tires sooner.
+      const warm = warmTireMul(season, species.id) <= 1 ? "" : `${t("The warm water leaves it short of air, so it tires sooner.")} `;
       if (heavy) {
         fx.lift();
         fx.haptic("lift");
       }
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
       setHint(
-        again + heavy + cold +
+        again + heavy + cold + warm +
         (!strike
           ? t("{line}. Ease off when it runs.", { line })
           : solid
