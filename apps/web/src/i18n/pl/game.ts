@@ -413,6 +413,7 @@ export const PL_GAME: PlBook = {
   "The cold water has it sluggish: it tires sooner and won't jump.": "Zimna woda ją spowalnia: szybciej się męczy i nie wyskakuje.",
   "The cold water has it sluggish, so it tires sooner.": "Zimna woda ją spowalnia, więc szybciej się męczy.",
   "The warm water leaves it short of air, so it tires sooner.": "W ciepłej wodzie brakuje jej tlenu, więc szybciej się męczy.",
+  "It's on its fall run and full of fight, so it tires slower.": "Jesienny ciąg na tarło dodaje sił, więc wolniej się męczy.",
   "It feels heavy — could be a trophy!": "Ciężka — może być trofeum!",
   "Not done yet — let go, one more run!": "To jeszcze nie koniec — puść, jeszcze jeden odjazd!",
   "It looked like a trophy.": "Wyglądało to na trofeum.",
