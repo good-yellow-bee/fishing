@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -195,5 +195,16 @@ describe("a worm after dark", () => {
     expect(wormNightWaitMul("Nightcrawler", "dusk")).toBe(1);
     expect(wormNightWaitMul("Inline spinner", "night")).toBe(1);
     expect(wormNightWaitMul(undefined, "night")).toBe(1);
+  });
+});
+
+describe("a fly on a rise", () => {
+  it("matches the hatch and bites sooner on a rise, on a fly only", () => {
+    expect(FLY_HATCH_WAIT).toBeLessThan(1);
+    expect(flyHatchWaitMul("Pheasant tail nymph", true)).toBe(FLY_HATCH_WAIT);
+    expect(flyHatchWaitMul("Pheasant tail nymph", false)).toBe(1);
+    expect(flyHatchWaitMul("Woolly bugger", true)).toBe(1);
+    expect(flyHatchWaitMul("Nightcrawler", true)).toBe(1);
+    expect(flyHatchWaitMul(undefined, true)).toBe(1);
   });
 });

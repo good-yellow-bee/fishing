@@ -227,6 +227,14 @@ export function wormNightWaitMul(lure: string | undefined, hour: LakeHour) {
   return hour === "night" && lure?.trim() && lureClass(lure).id === "worm" ? WORM_NIGHT_WAIT : 1;
 }
 
+/** Fish on a rise are sipping insects off the top, so a fly matches the hatch and draws the bite sooner still. */
+export const FLY_HATCH_WAIT = 0.75;
+
+/** How a rise stretches the wait on a fly: sooner on a fresh ring of the rise, else 1. */
+export function flyHatchWaitMul(lure: string | undefined, rise: boolean) {
+  return rise && lure?.trim() && lureClass(lure).id === "fly" ? FLY_HATCH_WAIT : 1;
+}
+
 /** A jig hops down the drop-off's ledge, right where the fish hold, so the bite comes sooner there. */
 export const JIG_LEDGE_WAIT = 0.8;
 
