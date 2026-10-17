@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { t, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
-import { mergeWaters } from "./waterMerge";
+import { mergeWaters, noteMergedWater } from "./waterMerge";
 
 /** A water logged twice under two names, folded into the other one with its outings and fish. */
 export function MergeWater({ spotId }: { spotId: string }) {
@@ -18,7 +18,9 @@ export function MergeWater({ spotId }: { spotId: string }) {
     if (!into) return;
     const next = mergeWaters(storedBook, spotId, into);
     if (next === storedBook) return;
-    if (changeBook("merge", next)) navigate(`/spots/${into}`, { replace: true });
+    if (!changeBook("merge", next)) return;
+    noteMergedWater(spotId, into);
+    navigate(`/spots/${into}`, { replace: true });
   };
   return (
     <details className="rename-kind">

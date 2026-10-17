@@ -21,3 +21,45 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
     catches: book.catches.map((entry) => (entry.spotId === from.id ? { ...entry, spotId: into.id } : entry)),
   };
 }
+
+/** Where each water merged away in this browser went, so a water from an older file lands in the one it joined. */
+export const MERGED_WATERS_KEY = "stillwater.field-log.merged-waters.v1";
+
+export function readMergedWaters(): Record<string, string> {
+  try {
+    const raw = JSON.parse(localStorage.getItem(MERGED_WATERS_KEY) ?? "{}") as unknown;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+    return Object.fromEntries(Object.entries(raw).filter((pair): pair is [string, string] => typeof pair[1] === "string"));
+  } catch {
+    return {};
+  }
+}
+
+export function noteMergedWater(fromId: string, intoId: string) {
+  try {
+    localStorage.setItem(MERGED_WATERS_KEY, JSON.stringify({ ...readMergedWaters(), [fromId]: intoId }));
+  } catch {
+    // Only a guard for later file adds; the merge itself is already saved.
+  }
+}
+
+/**
+ * A file's book with every water merged away here moved into the one it joined: its fish and outings follow, and the
+ * old water drops out. A merge that was undone (the water is back in `here`) is left alone.
+ */
+export function intoMergedWaters(file: Logbook, here: Logbook, merged: Record<string, string>): Logbook {
+  const hereIds = new Set(here.spots.map((spot) => spot.id));
+  const target = (id: string): string => {
+    let at = id;
+    // Follow a water merged more than once, as far as one still here.
+    for (let step = 0; step < 10 && !hereIds.has(at) && merged[at]; step++) at = merged[at]!;
+    return hereIds.has(at) ? at : id;
+  };
+  const moved = file.spots.some((spot) => target(spot.id) !== spot.id) || file.catches.some((entry) => target(entry.spotId) !== entry.spotId);
+  if (!moved) return file;
+  return {
+    spots: file.spots.filter((spot) => target(spot.id) === spot.id),
+    trips: file.trips.map((trip) => (target(trip.spotId) === trip.spotId ? trip : { ...trip, spotId: target(trip.spotId) })),
+    catches: file.catches.map((entry) => (target(entry.spotId) === entry.spotId ? entry : { ...entry, spotId: target(entry.spotId) })),
+  };
+}

@@ -8,6 +8,7 @@ import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
+import { intoMergedWaters, readMergedWaters } from "./waterMerge";
 import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
@@ -210,7 +211,9 @@ export function BookFile() {
   /** `withDeleted` takes back the fish deleted here too, when the file still has them. */
   const onAddNew = (withDeleted = false) => {
     if (!pending) return;
-    const file = withDeleted ? pending : withoutDeleted(pending);
+    const trimmed = withDeleted ? pending : withoutDeleted(pending);
+    // A water merged away here since the file was made: its fish and outings go to the water it joined.
+    const file = { ...trimmed, book: intoMergedWaters(trimmed.book, storedBook, readMergedWaters()) };
     const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file, readDeletedFish());
     // The file's photos that didn't fit beside this book's own.
     const leftOut = newFishIn(storedBook, file.book).filter((entry) => file.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
@@ -240,7 +243,7 @@ export function BookFile() {
   const addable = pending ? newFishIn(storedBook, withoutDeleted(pending).book).length : 0;
   const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
-  const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), photos: {} }, readDeletedFish()) : null;
+  const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
 
   return (

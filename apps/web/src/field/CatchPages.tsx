@@ -393,7 +393,9 @@ function CatchForm() {
     [book, lang],
   );
   // A name one or two letters off one already known, offered before it starts a kind of its own.
-  const misspelt = closeSpecies(species, speciesOptions);
+  // Said once the name is typed and the field left, not while "Walley" is on its way to "Walleye".
+  const [typingSpecies, setTypingSpecies] = useState(false);
+  const misspelt = typingSpecies ? null : closeSpecies(species, speciesOptions);
   const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
@@ -655,6 +657,8 @@ function CatchForm() {
               list="species-list"
               value={species}
               onChange={(event) => setSpecies(event.target.value)}
+              onFocus={() => setTypingSpecies(true)}
+              onBlur={() => setTypingSpecies(false)}
               placeholder={t(SPECIES_HINT)}
               autoComplete="off"
               required
@@ -775,7 +779,7 @@ function CatchForm() {
                 </button>
                 </>
               ) : pastBest ? (
-                t("That's more than twice your best {species} ({size}). Is the unit right?", { species: species.trim(), size: measureText(pastBest) })
+                t("That's far past your best {species} ({size}). Is the unit right?", { species: species.trim(), size: measureText(pastBest) })
               ) : null}
             </p>
             {likely !== null && !alsoAmount.trim() ? (
@@ -864,7 +868,7 @@ function CatchForm() {
               <button
                 type="button"
                 className="text-button time-now"
-                aria-label={t("Set the time to now")}
+                title={t("Set the time to now")}
                 onClick={() => {
                   const now = toLocalInput(new Date());
                   setCaughtAt(now);

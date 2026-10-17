@@ -141,8 +141,11 @@ export function speciesBestSoFar(
   return { longest, heaviest };
 }
 
-/** A size this many times the kind's best so far is more likely typed in the other measure than a new record. */
-export const FAR_PAST_BEST = 2;
+/**
+ * A size this many times the kind's best so far is more likely a slip than a new record. Weight grows with about the
+ * cube of length, so a fish a third longer than the best is more than twice as heavy: weights get room for that.
+ */
+export const FAR_PAST_BEST: Record<Measure["kind"], number> = { length: 2, weight: 4 };
 
 /**
  * True when `amount` (inches or pounds, by `kind`) is more than FAR_PAST_BEST times this kind's best of that measure,
@@ -161,9 +164,10 @@ export function looksLikeOtherMeasure(
     return measure ? (measure.kind === "length" ? measure.inches : measure.pounds) : null;
   };
   const same = size(kind === "length" ? best.longest : best.heaviest, kind);
-  if (same === null || amount <= same * FAR_PAST_BEST) return false;
-  const other = size(kind === "length" ? best.heaviest : best.longest, kind === "length" ? "weight" : "length");
-  return other === null || asOther <= other * FAR_PAST_BEST;
+  if (same === null || amount <= same * FAR_PAST_BEST[kind]) return false;
+  const otherKind = kind === "length" ? "weight" : "length";
+  const other = size(kind === "length" ? best.heaviest : best.longest, otherKind);
+  return other === null || asOther <= other * FAR_PAST_BEST[otherKind];
 }
 
 
@@ -173,7 +177,7 @@ export function farPastBest(best: { longest: CatchEntry | null; heaviest: CatchE
   const measure = entry ? measureOf(entry, kind) : null;
   if (!measure || !(amount > 0)) return null;
   const size = measure.kind === "length" ? measure.inches : measure.pounds;
-  return amount > size * FAR_PAST_BEST ? measure : null;
+  return amount > size * FAR_PAST_BEST[kind] ? measure : null;
 }
 
 /** How many letters to add, drop or change to turn one name into the other. */
