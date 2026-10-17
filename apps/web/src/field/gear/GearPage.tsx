@@ -5,6 +5,7 @@ import {
   catchesForTrip,
   fishCountsByTrip,
   localDate,
+  lureTally,
   recentTrips,
   shiftDate,
   spotById,
@@ -19,6 +20,8 @@ import { useTackle } from "./TackleState";
 import { pieceRecords } from "./pieceRecord";
 import { exactTerm, findLink } from "../findLinks";
 import { packingTips } from "../waterTips";
+import { nearTwinLures } from "../suggestions";
+import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { t, tn, useT } from "../../i18n";
 
@@ -83,6 +86,32 @@ function LureRecord({ today }: { today: string }) {
         </p>
       ) : null}
     </>
+  );
+}
+
+/** Lure names that look like one lure typed two ways, each with a button to fold one into the other. */
+function LureTwins() {
+  const { storedBook, changeBook } = useLogbook();
+  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER));
+  if (twins.length === 0) return null;
+  return (
+    <ul className="lure-twins">
+      {twins.map(({ from, into }) => (
+        <li key={from} className="meta">
+          {t("“{from}” looks like “{into}”.", { from: t(from), into: t(into) })}{" "}
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              const result = renameInBook(storedBook, "lure", from, into);
+              if (result.ok) changeBook("rename", result.book);
+            }}
+          >
+            {t("Merge into {into}", { into: t(into) })}
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -186,6 +215,7 @@ export function GearPage() {
         upcoming.map((trip) => <TripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />)
       )}
       <LureRecord today={today} />
+      <LureTwins />
       <h2 className="subhead">{t("Recent")}</h2>
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>

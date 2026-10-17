@@ -5,7 +5,7 @@ import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 
 describe("this time of year at a water", () => {
   const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
-  const fish = (id: string, at: Date, lure: string) => ({ ...base, id, lure, species: "Northern pike", caughtAt: at.toISOString() });
+  const fish = (id: string, at: Date, lure: string) => ({ ...base, id, lure, species: "Northern pike", caughtAt: at.toISOString(), weather: { sky: "clear" as const, wind: "calm" as const } });
   const catches = [
     fish("a", new Date(2025, 9, 5, 9), "Spinnerbait"),
     fish("b", new Date(2024, 9, 28, 9), "Spinnerbait"),
