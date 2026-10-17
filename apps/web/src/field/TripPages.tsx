@@ -54,6 +54,7 @@ import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
+import { countedFish } from "./milestones";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
@@ -277,6 +278,11 @@ function TripView() {
 
   const spot = spotById(book, trip.spotId);
   const catches = catchesForTrip(book, trip.id);
+  // A blank day past: the water's last fish before it, and what took it, to try next time.
+  const lastFishHere =
+    catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
+      ? countedFish(catchesForSpot(book, trip.spotId)).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
+      : undefined;
   const rush = busiestHour(catches.map((entry) => entry.caughtAt));
   const weighed = totalWeight(
     catches.map((entry) => {
@@ -365,6 +371,16 @@ function TripView() {
       {catches.length === 0 ? (
         <p className="empty">
           {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
+          {lastFishHere ? (
+            <>
+              {" "}
+              <Link to={`/catches/${lastFishHere.id}`} className="last-fish-here">
+                {lastFishHere.lure.trim()
+                  ? t("Last fish here: {species} on {lure}, {day}", { species: t(lastFishHere.species), lure: t(lastFishHere.lure), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })
+                  : t("Last fish here: {species}, {day}", { species: t(lastFishHere.species), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })}
+              </Link>
+            </>
+          ) : null}
           {trip.date === today && !play ? (
             <>
               {" "}

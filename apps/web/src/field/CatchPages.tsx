@@ -68,7 +68,7 @@ import { findWithLink } from "./findLinks";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
-import { biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
+import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
 
@@ -1200,6 +1200,8 @@ function CatchView() {
   const build = isCounted ? forItsLength(counted, entry) : null;
   // Back after a long spell without one, opening the one before.
   const gap = isCounted ? longGap(counted, entry) : null;
+  // Short of a best of its kind, the day's best: the biggest of its outing.
+  const outingBest = !badge && trip && trip.spotId !== PLAY_LAKE_ID && biggestOnOuting(book.catches.filter((other) => other.tripId === trip.id), entry);
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1296,6 +1298,11 @@ function CatchView() {
           </p>
         ) : rank ? (
           <p className="meta">{rank}</p>
+        ) : null}
+        {outingBest && trip ? (
+          <p className="meta outing-best">
+            <Link to={`/trips/${trip.id}`}>{t("Biggest fish of the outing")}</Link>
+          </p>
         ) : null}
         {gap ? (
           <p className="meta long-gap">

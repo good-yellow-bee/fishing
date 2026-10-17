@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
 import { setUnits } from "../i18n";
-import { biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
+import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 
 const fish = (id: string, inches: number, pounds?: number): CatchEntry => ({
   id,
@@ -104,5 +104,17 @@ describe("a long gap since the last of the kind", () => {
     const kind = [at("a", 4, 1), at("b", 4, 20)];
     expect(longGap(kind, kind[0]!)).toBeNull();
     expect(longGap(kind, kind[1]!)).toBeNull();
+  });
+});
+
+describe("biggest of the outing", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const fish = (id: string, inches: number): CatchEntry => ({ ...base, id, measure: { kind: "length", inches }, alsoMeasure: undefined });
+  it("marks the biggest once it beat two others measured the same way", () => {
+    const outing = [fish("a", 12), fish("b", 14), fish("c", 18)];
+    expect(biggestOnOuting(outing, outing[2]!)).toBe(true);
+    expect(biggestOnOuting(outing, outing[1]!)).toBe(false);
+    expect(biggestOnOuting(outing.slice(1), outing[2]!)).toBe(false);
+    expect(biggestOnOuting([...outing, fish("d", 18)], outing[2]!)).toBe(false);
   });
 });
