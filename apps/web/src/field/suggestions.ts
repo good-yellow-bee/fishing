@@ -166,3 +166,39 @@ export function looksLikeOtherMeasure(
   return other === null || asOther <= other * FAR_PAST_BEST;
 }
 
+
+/** This kind's best of the measure typed, when `amount` is more than FAR_PAST_BEST times it: likely a slip of the unit. */
+export function farPastBest(best: { longest: CatchEntry | null; heaviest: CatchEntry | null } | null, kind: Measure["kind"], amount: number): Measure | null {
+  const entry = kind === "length" ? best?.longest : best?.heaviest;
+  const measure = entry ? measureOf(entry, kind) : null;
+  if (!measure || !(amount > 0)) return null;
+  const size = measure.kind === "length" ? measure.inches : measure.pounds;
+  return amount > size * FAR_PAST_BEST ? measure : null;
+}
+
+/** How many letters to add, drop or change to turn one name into the other. */
+function editDistance(a: string, b: string): number {
+  let row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const next = [i];
+    for (let j = 1; j <= b.length; j++) next[j] = Math.min(row[j]! + 1, next[j - 1]! + 1, row[j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1));
+    row = next;
+  }
+  return row[b.length]!;
+}
+
+/**
+ * The name a typed species is most likely a slip of ("Nothern pike" for "Northern pike"): one or two letters off,
+ * by its length. Null for a name already known, one too short to judge, or nothing close.
+ */
+export function closeSpecies(typed: string, names: readonly string[]): string | null {
+  const want = typed.trim().toLowerCase();
+  if (want.length < 4 || names.some((name) => name.toLowerCase() === want)) return null;
+  const most = want.length >= 8 ? 2 : 1;
+  let found: { name: string; distance: number } | null = null;
+  for (const name of names) {
+    const distance = editDistance(want, name.toLowerCase());
+    if (distance <= most && (!found || distance < found.distance)) found = { name, distance };
+  }
+  return found?.name ?? null;
+}
