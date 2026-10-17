@@ -408,6 +408,19 @@ describe("useFishingGame lost fight", () => {
   });
 
   it.each([
+    ["summer", "carp", true],
+    ["spring", "carp", false],
+    ["summer", "pike", false],
+  ] as const)("says a fish hooked in %s (%s) thrives in the warm water: %s", (season, id, said) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It thrives in the warm summer water and is at its strongest, so it tires slower.")).toBe(said);
+  });
+
+  it.each([
     ["fall", "tiger-muskie", true],
     ["summer", "tiger-muskie", false],
     ["fall", "pike", false],

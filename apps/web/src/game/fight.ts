@@ -293,6 +293,15 @@ export const RAIN_HUNTER_TIRE = 0.85;
 export function rainHunterTireMul(sky: string | undefined, speciesId: string) {
   return sky === "rain" && SCENT_HUNTERS.has(speciesId) ? RAIN_HUNTER_TIRE : 1;
 }
+/** Warm lovers: a carp thrives in summer's warm water, when it feeds most and is at its strongest. */
+export const WARM_LOVERS: ReadonlySet<string> = new Set(["carp"]);
+/** In summer a warm lover tires only this fast on a run or against the reel. */
+export const SUMMER_STRENGTH_TIRE = 0.85;
+
+/** How summer's warm water slows a warm lover's tiring: slower in summer, else 1. */
+export function summerStrengthTireMul(season: string | undefined, speciesId: string) {
+  return season === "summer" && WARM_LOVERS.has(speciesId) ? SUMMER_STRENGTH_TIRE : 1;
+}
 /** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
 export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
 /** The shallow spots where a nest guarder makes its nest. */

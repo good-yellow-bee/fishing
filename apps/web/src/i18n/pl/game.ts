@@ -425,6 +425,7 @@ export const PL_GAME: PlBook = {
   "It's worn from spawning, so it tires sooner.": "Po tarle szybciej się męczy.",
   "It hunts by smell in the murky rain water and fights at full strength, so it tires slower.": "W mętnej deszczowej wodzie poluje węchem i walczy z pełną siłą, więc wolniej się męczy.",
   "It has fed hard for winter and is at full strength, so it tires slower.": "Przed zimą żeruje ostro i jest w pełni sił, więc wolniej się męczy.",
+  "It thrives in the warm summer water and is at its strongest, so it tires slower.": "W ciepłej letniej wodzie czuje się najlepiej i jest w pełni sił, więc wolniej się męczy.",
   "It turns its side to the current and fights it, so it tires slower.": "Ustawia się bokiem do nurtu i walczy z nim, więc wolniej się męczy.",
   "It's on its spring run up the inlet, so it tires slower.": "Wiosną ciągnie Ujściem na tarło, więc wolniej się męczy.",
   "It hunts hardest in the low light, so it tires slower.": "W półmroku poluje najzacieklej, więc wolniej się męczy.",

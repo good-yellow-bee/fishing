@@ -1254,7 +1254,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT209~~ | ~~Rain scent hunter: a catfish hooked in rain hunts by smell in the murky water, so it tires only 0.85x as fast, and the hookset says so; news 2026-10-17-game08~~ (#854) | fight | S |
 | ~~GT210~~ | ~~Dock shade: on a clear summer day the fish tuck into the shade under the Pomost, so a cast to the dock draws the bite 0.85x sooner, and the wait hint says so~~ (#856) | bite | S |
 | ~~GT211~~ | ~~Winter sun: on a clear winter day the sun warms the shallows by the reeds a little and the cold fish drift in, so a cast to the reeds draws the bite 0.85x sooner, and the wait hint says so~~ (#858) | bite | S |
-| GT212 | Wind-blown point: a strong wind drives the baitfish onto the Point and the hunters follow, so a cast off the point draws the bite 0.85x sooner, and the wait hint says so; news 2026-10-17-game09 | bite | S |
+| ~~GT212~~ | ~~Wind-blown point: a strong wind drives the baitfish onto the Point and the hunters follow, so a cast off the point draws the bite 0.85x sooner, and the wait hint says so; news 2026-10-17-game09~~ (#859) | bite | S |
+| GT213 | Summer carp: a carp hooked in summer thrives in the warm water and is at its strongest, so it tires only 0.85x as fast, and the hookset says so | fight | S |
 
 ## Risks / open questions for the owner
 
