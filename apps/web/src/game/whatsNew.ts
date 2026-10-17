@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zf";
+export const NEWS_ID = "2026-10-17zr";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
   "Strip a streamer past a pike: if it misses, it chases the streamer down and hits once more.",
+  "A water’s page lists the biggest of each kind caught there, and a species page shows each water’s biggest and a typical size. An outing shows what the fish took and its weather hour by hour. On a fish, the wind and water temperature open the fish caught like it, and a dash leaves fish out of a search, as in “Cedar -released”.",
   "In rain or fog the fish can barely see, but they feel a spinner's blade thump, so it draws a bite sooner.",
   "Cast a fly onto a rise: the fish are sipping insects off the top, so the fly matches the hatch and draws a bite sooner.",
   "Fish a worm at night: worms crawl out after dark, so the fish look for one and bite sooner.",
