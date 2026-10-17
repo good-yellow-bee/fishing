@@ -395,8 +395,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „{size}”), temperatury wody (np. „{temp}”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
@@ -506,7 +506,7 @@ export const PL_FIELD: PlBook = {
   "A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.": "Mocniejszy kolor to więcej ryb; gruba obwódka to wyprawa bez ryby, cienka to wyprawa, która dopiero będzie.",
   "an outing ahead": "wyprawa przed nami",
   "Put “-” before a word to leave those fish out.": "Wpisz „-” przed słowem, by pominąć te ryby.",
-  "Add a unit to a size, as in “>30 in”.": "Dodaj jednostkę do rozmiaru, np. „>30 cm”.",
+  "Add a unit to a size, as in “{size}”.": "Dodaj jednostkę do rozmiaru, np. „{size}”.",
   "Biggest here": "Największe tutaj",
   "Took:": "Brały na:",
   "Typical size: {size} (as many bigger as smaller)": "Typowy rozmiar: {size} (tyle samo większych, co mniejszych)",
@@ -572,7 +572,7 @@ export const PL_FIELD: PlBook = {
   "Order": "Kolejność",
   "Last fish": "Ostatnia ryba",
   "Most fish": "Najwięcej ryb",
-  "This year here: {outings}, {fish} · last year by now: {lastOutings}, {lastFish}": "W tym roku tutaj: {outings}, {fish} · rok temu do dziś: {lastOutings}, {lastFish}",
+  "This year here: {outings}, {fish} · last year by now: {lastOutings}, {lastFish}": "W tym roku tutaj: {outings}, {fish} · w zeszłym roku do tego dnia: {lastOutings}, {lastFish}",
   "At this water: {measures}": "Na tym łowisku: {measures}",
   "First time at this water:": "Pierwszy raz na tym łowisku:",
   "Last fish here: {species} on {lure}, {day}": "Ostatnia ryba tutaj: {species} ({lure}), {day}",

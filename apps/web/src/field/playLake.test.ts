@@ -47,3 +47,17 @@ describe("a kind's page and the chips that open it", () => {
     expect(counts.get("Game-only fish")).toBe(1);
   });
 });
+
+describe("search words added in round 30", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const ids = (rows: readonly { id: string }[]) => rows.map((row) => row.id);
+  const same = (_text: string) => (word: string) => word;
+  it("finds a kind's pictured fish through the photo list link", () => {
+    const fish = book.catches[0]!;
+    const term = `species:"${fish.species}" + photo`;
+    expect(ids(findCatches(book, term, same(""), (id) => id === fish.id))).toEqual([fish.id]);
+  });
+  it("knows autumn as the fall", () => {
+    expect(findCatches(book, "autumn", same(""), () => false).length).toBe(findCatches(book, "fall", same(""), () => false).length);
+  });
+});

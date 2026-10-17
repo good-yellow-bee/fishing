@@ -1,6 +1,7 @@
 import type { Logbook, Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
-import { countedFish } from "./milestones";
+import { countedFish, ownFish } from "./milestones";
+import { isSampleSpot } from "./bookCopy";
 
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null };
 
@@ -38,7 +39,10 @@ export function likelyWater(book: Logbook, today: string): string {
   // week dated after their first real fish doesn't pull a new fish onto a made-up water.
   const order = spotsByLastFish({ ...book, catches: countedFish(book.catches) }).map((row) => row.spot.id).filter((id) => id !== PLAY_LAKE_ID);
   const todays = new Set(book.trips.filter((trip) => trip.date === today).map((trip) => trip.spotId));
-  return order.find((id) => todays.has(id)) ?? order[0] ?? "";
+  // No fish of the angler's own yet: their first water of their own, not one from the sample week.
+  const noOwn = !book.catches.some(ownFish);
+  const own = noOwn ? book.spots.find((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id))?.id : undefined;
+  return order.find((id) => todays.has(id)) ?? own ?? order[0] ?? "";
 }
 
 const EARTH_KM = 6371;
