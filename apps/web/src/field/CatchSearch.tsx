@@ -1,6 +1,6 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lureTally, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
@@ -57,6 +57,9 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
   const at = new Date(entry.caughtAt);
   return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
 }
+
+/** Words for Saturdays and Sundays, in English and Polish. */
+const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
 const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> = {
@@ -156,6 +159,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const day = localDate(new Date(entry.caughtAt));
     return day >= days.from && day <= days.to;
   });
+  // "weekend": every fish caught on a Saturday or a Sunday.
+  if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(entry.caughtAt).getDay()));
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
   // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
   if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
@@ -506,10 +511,34 @@ export function CatchSearch() {
   );
 }
 
-/** The lure most of the found fish took, when it took at least two and clearly leads: "Most on Jig (5)." */
+/** The one value most of the found fish share, when at least two do and none ties it; null otherwise. */
+function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T | null): { value: T; count: number } | null {
+  const counts = new Map<T, number>();
+  for (const entry of catches) {
+    const value = of(entry);
+    if (value !== null) counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  const [top, next] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  if (!top || top[1] < 2 || (next && next[1] === top[1]) || counts.size < 2) return null;
+  return { value: top[0], count: top[1] };
+}
+
+/** What the found fish have in common, where one clearly leads: "Most on Jig (5). Most at Dawn (4). Most from Cedar Lake (6)." */
 function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const t = useT();
-  const [top, next] = lureTally({ spots: [], trips: [], catches: [...catches] }, 2);
-  if (!top || top.count < 2 || (next && next.count >= top.count) || top.count === catches.length) return null;
-  return <p className="meta top-lure">{t("Most on {lure}.", { lure: `${t(top.lure)} (${top.count})` })}</p>;
+  const { book } = useLogbook();
+  const lure = leader(catches, (entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() || null);
+  const time = leader(catches, (entry) => {
+    const at = new Date(entry.caughtAt);
+    return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
+  });
+  const water = leader(catches, (entry) => entry.spotId);
+  const lureName = lure ? catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === lure.value)!.lure.trim() : "";
+  const lines = [
+    lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
+    time ? t("Most at {time}.", { time: `${t(BITE_TIMES.find((row) => row.id === time.value)!.label)} (${time.count})` }) : null,
+    water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
+  ].filter(Boolean);
+  return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;
 }
+
