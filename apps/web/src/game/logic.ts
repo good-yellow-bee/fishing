@@ -312,10 +312,18 @@ export function castIntoSpooked(spooked: SpotId | null, spot: SpotId) {
   return spooked === spot;
 }
 
+/** The shortest wait for a bite, so there is always room for a nibble before it. */
+export const WAIT_FLOOR_MS = 1100;
+
+/** The wait after the cast's own multipliers (lure, school, spooked water), never under the floor however many bonuses stack. */
+export function stackWaitMs(wait: number, ...muls: number[]) {
+  return Math.max(WAIT_FLOOR_MS, muls.reduce((ms, mul) => ms * mul, wait));
+}
+
 export function waitMs(patience: number, hour: LakeHour = lakeHour(), hotspot = false, level = 1, mercy = false, hotBank = false, rise = false, perfect = false) {
   const base = 2200 + Math.random() * 3800;
   const wait = Math.max(
-    1100,
+    WAIT_FLOOR_MS,
     base * (1 - patience * 0.07) * lakeHourWaitMul(hour) * (hotspot ? HOTSPOT_WAIT : 1) * biteWaitMulForLevel(level) * (hotBank ? HOT_BANK_WAIT : 1) * (rise ? RISE_WAIT : 1) * (perfect ? PERFECT_CAST_WAIT : 1),
   );
   return mercy ? Math.min(wait, MERCY_WAIT_MAX_MS) : wait;
