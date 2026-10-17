@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -134,6 +134,16 @@ describe("a flashing lure in the sun", () => {
     expect(flashWaitMul("Inline spinner", undefined, "day")).toBe(1);
     expect(flashWaitMul("Nightcrawler", "clear", "day")).toBe(1);
     expect(flashWaitMul(undefined, "clear", "day")).toBe(1);
+  });
+});
+
+describe("a jig at the drop-off", () => {
+  it("bites sooner hopped down the ledge, and nowhere else or on any other lure", () => {
+    expect(JIG_LEDGE_WAIT).toBeLessThan(1);
+    expect(jigWaitMul("Green pumpkin tube", "dropoff")).toBe(JIG_LEDGE_WAIT);
+    expect(jigWaitMul("Green pumpkin tube", "dock")).toBe(1);
+    expect(jigWaitMul("Nightcrawler", "dropoff")).toBe(1);
+    expect(jigWaitMul(undefined, "dropoff")).toBe(1);
   });
 });
 

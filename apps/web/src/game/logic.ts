@@ -215,6 +215,14 @@ export function flashWaitMul(lure: string | undefined, sky: string | undefined, 
   return kind === "spinner" || kind === "spoon" ? FLASH_SUN_WAIT : 1;
 }
 
+/** A jig hops down the drop-off's ledge, right where the fish hold, so the bite comes sooner there. */
+export const JIG_LEDGE_WAIT = 0.8;
+
+/** How the bank stretches the wait on a jig: sooner at the drop-off, else 1. */
+export function jigWaitMul(lure: string | undefined, spot: string) {
+  return spot === "dropoff" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_LEDGE_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
