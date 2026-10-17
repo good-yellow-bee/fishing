@@ -95,6 +95,21 @@ export function readCopiedAt(): number | null {
   }
 }
 
+/**
+ * Brings the count kept at the last download down to `own` when the book now counts fewer (fish deleted, or game fish
+ * no longer counted as the angler's own), so the next fish logged count toward the reminder again. Leaves the rest be.
+ */
+export function lowerCopiedAt(own: number) {
+  try {
+    const raw = localStorage.getItem(BOOK_COPY_STORAGE_KEY);
+    if (raw === null) return;
+    const record = JSON.parse(raw);
+    if (record && typeof record === "object" && Number(record.catches) > own) localStorage.setItem(BOOK_COPY_STORAGE_KEY, JSON.stringify({ ...record, catches: own }));
+  } catch {
+    // Only the reminder is late.
+  }
+}
+
 export function saveCopiedAt(own: number, sig?: string) {
   try {
     localStorage.setItem(BOOK_COPY_STORAGE_KEY, JSON.stringify({ catches: own, at: new Date().toISOString(), ...(sig ? { sig } : {}) }));

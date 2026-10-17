@@ -1,0 +1,25 @@
+import { describe, expect, it } from "vitest";
+import { sampleLogbook } from "@stillwater/shared";
+import { withoutPlayLake } from "./playLake";
+import { findCatches } from "./CatchSearch";
+
+describe("leaving the game's lake out of a search", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const played = { ...book, spots: [...book.spots, { ...book.spots[0]!, id: "spot-stillwater", name: "Stillwater" }] };
+
+  it("adds the left-out water only when a game fish is among the rows", () => {
+    expect(withoutPlayLake(played, "2026", [{ spotId: "spot-stillwater" }])).toBe('2026 -water:"Stillwater"');
+    expect(withoutPlayLake(played, "2026", [{ spotId: book.spots[0]!.id }])).toBe("2026");
+    expect(withoutPlayLake(book, "2026", [{ spotId: "spot-stillwater" }])).toBe("2026");
+  });
+
+  it("opens just the angler's own fish of that year", () => {
+    const fish = played.catches[0]!;
+    const year = String(new Date(fish.caughtAt).getFullYear());
+    const game = { ...fish, id: "game-fish", spotId: "spot-stillwater" };
+    const both = { ...played, catches: [game, ...played.catches] };
+    const same = (rows: readonly { id: string }[]) => rows.map((row) => row.id);
+    const term = withoutPlayLake(both, year, [game]);
+    expect(same(findCatches(both, term, (text) => text, () => false))).toEqual(same(findCatches(played, year, (text) => text, () => false)));
+  });
+});

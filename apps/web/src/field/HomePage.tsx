@@ -19,7 +19,7 @@ import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { offPlayLake, upcomingOwnTrips } from "./playLake";
+import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -81,23 +81,28 @@ export function HomePage() {
   const catches = recentCatches(book, 4);
   const upcoming = upcomingOwnTrips(book, today);
   // Just back from the water, not from a round of the game.
+  const realTrips = book.trips.filter(offPlayLake).length;
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
-  const kinds = speciesCounts(book.catches).length;
+  // The counts are the angler's own: a round of the game moves none of them.
+  const real = book.catches.filter(offPlayLake);
+  const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(book.catches, now);
   const thisMonth = today.slice(0, 7);
-  const monthFish = book.catches.filter((entry) => catchMonth(entry) === thisMonth).length;
+  const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
+  const monthFish = monthRows.filter(offPlayLake).length;
   const thisYear = today.slice(0, 4);
-  const yearFish = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`)).length;
+  const yearRows = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`));
+  const yearFish = yearRows.filter(offPlayLake).length;
   const goal = readYearGoal(thisYear);
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
-  const lastYearDays = book.catches.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
+  const lastYearDays = real.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
   const lastYearByNow = lastYearDays.filter((day) => day.slice(5) <= today.slice(5)).length;
   // "0 by this date last year" says nothing when the book only starts after that date.
-  const firstDay = book.catches.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
+  const firstDay = real.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
   const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
@@ -155,14 +160,14 @@ export function HomePage() {
                 <>
                   {" · "}
                   {/* This month's fish, through the catch search. */}
-                  <Link to={findLink(thisMonth)}>{t("{n} this month", { n: monthFish })}</Link>
+                  <Link to={findLink(withoutPlayLake(book, thisMonth, monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
               {yearFish > monthFish || goal !== null ? (
                 <>
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
-                  <Link to={findLink(thisYear)}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
+                  <Link to={findLink(withoutPlayLake(book, thisYear, yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
@@ -174,9 +179,9 @@ export function HomePage() {
           <strong>
             <Link to="/spots">{book.spots.length}</Link>
           </strong>
-          {book.trips.length > 0 ? (
+          {realTrips > 0 ? (
             <small>
-              <Link to="/trips">{tn(book.trips.length, "{n} outing", "{n} outings")}</Link>
+              <Link to="/trips">{tn(realTrips, "{n} outing", "{n} outings")}</Link>
             </small>
           ) : null}
         </div>

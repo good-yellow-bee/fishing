@@ -69,7 +69,7 @@ import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestSince, sizeRank } from "./sizeRank";
-import { PLAY_LAKE_ID } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
 
 function amountText(entry: CatchEntry, units: Units): string {
@@ -249,9 +249,12 @@ function CatchForm() {
   // The starting kind is set with the form; only a kind typed after that moves it. A measure the link asked for holds
   // while the fish is still the one the link named ("Save and log another" carries the last fish's measure).
   const [measurePicked, setMeasurePicked] = useState(false);
-  const firstSpecies = useRef(species);
+  const kindMounted = useRef(false);
   useEffect(() => {
-    if (species === firstSpecies.current) return;
+    if (!kindMounted.current) {
+      kindMounted.current = true;
+      return;
+    }
     const askedHolds = (asked === "weight" || asked === "length") && species.trim().toLowerCase() === t(params.get("species") ?? "").trim().toLowerCase();
     if (existing || measurePicked || askedHolds || amount.trim() || alsoAmount.trim()) return;
     const kind = kindMeasure(book, species, t);
@@ -950,7 +953,7 @@ function CatchForm() {
               <span className="time-back">
                 {[
                   [15, `−${t("{n} min", { n: 15 })}`],
-                  [60, `−${t("{h} h", { h: 1 })}`],
+                  [60, `−${t("{n} h", { n: 1 })}`],
                 ].map(([minutes, label]) => (
                   <button
                     key={minutes}
@@ -1129,7 +1132,7 @@ function sunMarkText(mark: SunMark): string {
   if (away < 3) return mark.edge === "rise" ? t("At sunrise") : t("At sunset");
   const hours = Math.floor(away / 60);
   const minutes = away % 60;
-  const time = hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{h} h", { h: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+  const time = hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{n} h", { n: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
   if (mark.edge === "rise") return mark.minutes < 0 ? t("{time} before sunrise", { time }) : t("{time} after sunrise", { time });
   return mark.minutes < 0 ? t("{time} before sunset", { time }) : t("{time} after sunset", { time });
 }
@@ -1174,11 +1177,12 @@ function CatchView() {
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
-  // Short of a best, where it sits among the others of its kind.
-  const rank = sizeRank(kind, entry);
   const counted = countedFish(kind);
+  const isCounted = counted.some((other) => other.id === entry.id);
+  // Short of a best, where it sits among the angler's own others of its kind.
+  const rank = isCounted ? sizeRank(counted, entry) : null;
   // A game or sample fish among the angler's own has no place in their run of sizes.
-  const since = badge || !counted.some((other) => other.id === entry.id) ? null : biggestSince(counted, entry);
+  const since = badge || !isCounted ? null : biggestSince(counted, entry);
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1192,15 +1196,15 @@ function CatchView() {
   const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
   const milestone = milestoneOf(book, entry);
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
-  const isCounted = counted.some((other) => other.id === entry.id);
   const atWater = spot && isCounted ? counted.filter((other) => other.spotId === entry.spotId) : [];
   // Two fish logged in the same minute go by id, as the milestones order them.
   const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
-  const yearSearch = [exactTerm("species", t(entry.species)), caughtYear] as const;
-  // Counted as the link opens them, so the line and the list agree; said only on the angler's own fish.
-  const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  // Said only on the angler's own fish, and counting only those; the link leaves the game's lake out to match.
+  const yearFish = isCounted ? counted.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear) : [];
+  const yearCount = yearFish.length;
+  const yearSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))] as const;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -1213,7 +1217,7 @@ function CatchView() {
     saveShareCard(text, photo ?? null, shareCardFileName(entry.species, caught)).catch(() => setPictureError(true));
   };
   // Which best the badge is for: a fish both measured and weighed may hold either.
-  const bests = badge ? personalBests(book) : null;
+  const bests = badge ? personalBests({ ...book, catches: book.catches.filter(offPlayLake) }) : null;
   const kindBests = bests?.species.find((row) => row.species.trim().toLowerCase() === entry.species.trim().toLowerCase());
   const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
 

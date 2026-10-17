@@ -85,8 +85,8 @@ export function BestsPage() {
   // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
   const real = { ...whole, trips: whole.trips.filter(offPlayLake), catches: whole.catches.filter(offPlayLake) };
   const days = daysOut(real, today.slice(0, 4), today);
-  const notYet = notYetThisYear(whole.catches);
-  const newWaters = newWatersThisYear(whole.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  const notYet = notYetThisYear(real.catches);
+  const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
@@ -109,7 +109,8 @@ export function BestsPage() {
       },
       { replace: true },
     );
-  const bests = personalBests(book);
+  // The angler's own bests: a game fish takes none of them, as the catch pages say.
+  const bests = personalBests({ ...book, catches: book.catches.filter(offPlayLake) });
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
   for (const entry of catchesNewestFirst(book)) {
@@ -283,7 +284,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("This year's goal")}</h2>
             </div>
-            <YearGoal catches={whole.catches} />
+            <YearGoal catches={real.catches} />
             {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
             {/* Last year's kinds still to show up this year, each opening its page. */}
             {notYet.length > 0 ? (

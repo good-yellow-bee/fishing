@@ -1,16 +1,18 @@
 import { measuresOf, personalBests, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { offPlayLake } from "./playLake";
 
 export type CatchBadge = "book" | "species" | null;
 
 const cache = new WeakMap<Logbook, Map<string, Exclude<CatchBadge, null>>>();
 
-/** Every badged fish in the book, worked out once per book. */
+/** Every badged fish in the book, worked out once per book. A game fish wins no badge and takes none away. */
 export function bookBadges(book: Logbook): Map<string, Exclude<CatchBadge, null>> {
   const known = cache.get(book);
   if (known) return known;
-  const bests = personalBests(book);
+  const real = { ...book, catches: book.catches.filter(offPlayLake) };
+  const bests = personalBests(real);
   const rivals = new Map<string, number>();
-  for (const entry of book.catches) {
+  for (const entry of real.catches) {
     for (const measure of measuresOf(entry)) {
       const key = `${entry.species.trim().toLowerCase()}\u0000${measure.kind}`;
       rivals.set(key, (rivals.get(key) ?? 0) + 1);
