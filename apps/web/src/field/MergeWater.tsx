@@ -4,15 +4,18 @@ import { t, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
 import { mergeWaters, noteMergedWater } from "./waterMerge";
 
+/** The game's own lake: its fish come from play, so it neither merges into a real water nor takes one in. */
+const PLAY_LAKE_ID = "spot-stillwater";
+
 /** A water logged twice under two names, folded into the other one with its outings and fish. */
 export function MergeWater({ spotId }: { spotId: string }) {
   // The book as stored: the shown one has the sample week in the player's language, which must not be saved.
   const { storedBook, book, changeBook } = useLogbook();
   useT();
   const navigate = useNavigate();
-  const others = book.spots.filter((spot) => spot.id !== spotId).sort((a, b) => a.name.localeCompare(b.name));
+  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID).sort((a, b) => a.name.localeCompare(b.name));
   const [into, setInto] = useState("");
-  if (others.length === 0) return null;
+  if (others.length === 0 || spotId === PLAY_LAKE_ID) return null;
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!into) return;

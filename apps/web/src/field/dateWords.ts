@@ -86,6 +86,16 @@ export function dateWords(text: string, now = new Date()): DayRange | null {
     const monday = mondayOf(today);
     return { from: ymd(dayOf(monday, -7)), to: ymd(dayOf(monday, -1)) };
   }
+  // A weekend by its Saturday and Sunday: on a weekday, "this weekend" and "last weekend" both mean the one just gone.
+  const weekendNow = [0, 6].includes(today.getDay());
+  if (says(want, ["this weekend", "ten weekend", "w ten weekend", "w tym weekendzie"])) {
+    const monday = mondayOf(today);
+    return weekendNow ? { from: ymd(dayOf(monday, 5)), to: ymd(today) } : { from: ymd(dayOf(monday, -2)), to: ymd(dayOf(monday, -1)) };
+  }
+  if (says(want, ["last weekend", "zeszły weekend", "w zeszły weekend", "ostatni weekend", "w ostatni weekend"])) {
+    const monday = mondayOf(today);
+    return { from: ymd(dayOf(monday, -2)), to: ymd(dayOf(monday, -1)) };
+  }
   if (says(want, ["this month", "ten miesiąc", "w tym miesiącu"])) return { from: ymd(new Date(today.getFullYear(), today.getMonth(), 1)), to: ymd(today) };
   if (says(want, ["last month", "zeszły miesiąc", "w zeszłym miesiącu"])) {
     return { from: ymd(new Date(today.getFullYear(), today.getMonth() - 1, 1)), to: ymd(new Date(today.getFullYear(), today.getMonth(), 0)) };

@@ -46,3 +46,14 @@ describe("dateWords", () => {
     expect(dateWords("mar", now)).toBeNull();
   });
 });
+
+describe("weekend date words", () => {
+  it("reads this and last weekend from a weekday and from a Sunday", () => {
+    const wednesday = new Date(2026, 9, 14, 12);
+    expect(dateWords("this weekend", wednesday)).toEqual({ from: "2026-10-10", to: "2026-10-11" });
+    expect(dateWords("zeszły weekend", wednesday)).toEqual({ from: "2026-10-10", to: "2026-10-11" });
+    const sunday = new Date(2026, 9, 18, 12);
+    expect(dateWords("this weekend", sunday)).toEqual({ from: "2026-10-17", to: "2026-10-18" });
+    expect(dateWords("last weekend", sunday)).toEqual({ from: "2026-10-10", to: "2026-10-11" });
+  });
+});

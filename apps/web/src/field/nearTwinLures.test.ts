@@ -8,5 +8,6 @@ describe("nearTwinLures", () => {
 
   it("leaves sizes of one lure, and names far apart", () => {
     expect(nearTwinLures([{ lure: "Jig 5g", count: 2 }, { lure: "Jig 9g", count: 1 }, { lure: "Spoon", count: 1 }, { lure: "Popper", count: 1 }])).toEqual([]);
+    expect(nearTwinLures([{ lure: "Hair jig", count: 2 }, { lure: "Hair rig", count: 1 }])).toEqual([]);
   });
 });

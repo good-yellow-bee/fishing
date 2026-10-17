@@ -221,11 +221,17 @@ export function nearTwinLures(tally: readonly { lure: string; count: number }[])
   for (const [i, into] of rows.entries()) {
     if (taken.has(into.lure)) continue;
     for (const from of rows.slice(i + 1)) {
-      if (taken.has(from.lure) || closeSpecies(from.lure, [into.lure]) !== into.lure) continue;
+      if (taken.has(from.lure) || closeSpecies(from.lure, [into.lure]) !== into.lure || jigOrRig(from.lure, into.lure)) continue;
       pairs.push({ from: from.lure, into: into.lure });
       taken.add(from.lure).add(into.lure);
       break;
     }
   }
   return pairs;
+}
+
+/** "Hair jig" and "Hair rig": a word apart that names two kinds of tackle, not a slip. */
+function jigOrRig(a: string, b: string): boolean {
+  const swap = (name: string) => name.toLowerCase().replace(/\b(jig|rig)\b/g, "#");
+  return swap(a) === swap(b) && a.toLowerCase() !== b.toLowerCase();
 }
