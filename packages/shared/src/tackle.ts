@@ -106,15 +106,19 @@ const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemost
 const LINE = /\b(lines?|leaders?|tippets?)\s*$/i;
 
 /**
- * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Żyłka 0,25", "Zapasowy przypon"),
- * read without accents. Polish names a line by its word wherever it sits, so lines are here too.
+ * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.
  */
 const TACKLE_TOOL_PL =
-  /(^|[^a-z])(podbierak|szczypc|wedk|wedzisk|kolowrot|zylk|plecionk|przypon|fluorocarbon|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang)/;
+  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang)/;
+/**
+ * Polish names a line by its word wherever it sits ("Żyłka 0,25", "Zapasowy przypon"), but a lure rigged on one
+ * ("Guma na przyponie") is still a lure.
+ */
+const LINE_PL = /(^|[^a-z])(?<!(^|\s)(na|z|ze|do) )(zylk|plecionk|przypon|fluorocarbon)/;
 
 /** Anything not recognised as a tool or line counts as a lure, so lures the angler typed stay on the list. */
 export function isLureLabel(label: string): boolean {
-  return !TACKLE_TOOL.test(label) && !LINE.test(label) && !TACKLE_TOOL_PL.test(foldText(label));
+  return !TACKLE_TOOL.test(label) && !LINE.test(label) && !TACKLE_TOOL_PL.test(foldText(label)) && !LINE_PL.test(foldText(label));
 }
 
 /** Packed lures, or the sample's lures when none are packed. */

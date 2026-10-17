@@ -21,4 +21,9 @@ describe("this time of year at a water", () => {
     expect(sameTimeText(catches.slice(0, 2))).toBe("Around this date in earlier years here: 2 fish, Northern pike. Most on Spinnerbait.");
     expect(sameTimeText(catches.slice(0, 1))).toBe("Around this date in earlier years here: 1 fish, Northern pike.");
   });
+
+  it("names no lure when two tie", () => {
+    const tied = [...catches.slice(0, 2), fish("d", new Date(2025, 9, 6, 9), "Jig"), fish("e", new Date(2024, 9, 20, 9), "Jig")];
+    expect(sameTimeText(tied)).toBe("Around this date in earlier years here: 4 fish, Northern pike.");
+  });
 });

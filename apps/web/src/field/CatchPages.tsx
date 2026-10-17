@@ -578,7 +578,7 @@ function CatchForm() {
           <h1 data-title={existing ? t("Editing {name}", { name: t(existing.species) }) : t("Log a catch")}>{heading}</h1>
         </div>
         <Link
-          to={existing ? `/catches/${existing.id}` : tripId ? `/trips/${tripId}` : "/catches"}
+          to={existing ? catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined) : tripId ? `/trips/${tripId}` : "/catches"}
           // Cancelling an edit means it: the changes are not kept for later.
           onClick={
             existing

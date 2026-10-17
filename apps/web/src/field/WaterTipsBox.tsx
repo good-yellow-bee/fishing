@@ -22,8 +22,9 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
       .map((row) => t(row.species))
       .join(", "),
   });
-  const lure = lureTally({ spots: [], trips: [], catches: [...fish] }, 1)[0];
-  return lure && lure.count >= 2 ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
+  // A tie names no lure: "most on" would be a coin toss.
+  const [lure, second] = lureTally({ spots: [], trips: [], catches: [...fish] }, 2);
+  return lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
 }
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
