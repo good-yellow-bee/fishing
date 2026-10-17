@@ -347,6 +347,19 @@ describe("useFishingGame lost fight", () => {
     expect(vi.mocked(makeFight).mock.calls.at(-1)?.[11]).toBe(flood);
   });
 
+  it.each([
+    ["spring", "pike", true],
+    ["summer", "pike", false],
+    ["spring", "largemouth-bass", false],
+  ] as const)("says a fish hooked in %s (%s) is worn from spawning: %s", (season, id, spent) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It's worn from spawning, so it tires sooner.")).toBe(spent);
+  });
+
   it("says a burbot hooked in winter thrives in the cold", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "burbot")!);

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field19";
+export const NEWS_ID = "2026-10-17-game06";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A burbot hooked in winter thrives in the cold and keeps its strength, and a pike or walleye in spring is worn from spawning and tires sooner. With spring's melt or in rain the swollen Inlet pulls harder on a slack line.",
   "Bests shows your current run of outings without a fish and the kinds you caught last year but not yet this one. A species page gives the water temperatures it came in, a catch page counts its lure's fish at that water, and the lure record names each lure's biggest fish. In search, “big” finds fish above their usual size and “loose” finds fish left off that day's outing.",
   "A catch page names the earlier fish it's the biggest since, and “first” in search lists each kind's first fish. A water's tips say which lure led at its last water temperature and where the moon stands on the day. A species page compares typical size by water, the Tackle page flags lures that have gone quiet, and Bests adds your longest blank spell and the day with the most kinds.",
   "Search finds your best fish with “record” or “pb”, and reads “this weekend” and “last weekend”. A water's tips add its best moon, the lure that leads at each water temperature, and whether the water is warming or cooling. A species page says how early the kind turned up this year, the Tackle page shows when each lure last took a fish, and Bests compares weekend and weekday outings.",
