@@ -1425,6 +1425,8 @@ describe("a fight in winter", () => {
     expect(FALL_RUN_TIRE).toBeLessThan(1);
     for (const id of FALL_RUNNERS) expect(runTireMul("fall", id)).toBe(FALL_RUN_TIRE);
     expect(runTireMul("summer", "salmon")).toBe(1);
+    expect(runTireMul("fall", "brook-trout")).toBe(FALL_RUN_TIRE);
+    expect(runTireMul("spring", "brook-trout")).toBe(1);
     expect(runTireMul("fall", "pike")).toBe(1);
     expect(runTireMul(undefined, "salmon")).toBe(1);
   });
