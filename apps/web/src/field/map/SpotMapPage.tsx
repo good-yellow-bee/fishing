@@ -181,6 +181,9 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
   const lats = gridLines(frame.south, frame.north);
   const lngs = gridLines(frame.west, frame.east);
   const corner = 16;
+  // Room a grid label needs at the phone's larger tick size: its height, and the width of "179.5°W".
+  const TICK_ROOM = 26;
+  const TICK_WIDTH = 110;
   const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
   return (
     <div className="spot-map own-sheet">
@@ -191,7 +194,8 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
           return (
             <g key={lat}>
               <line x1={corner} x2={OWN_WIDTH - corner} y1={y} y2={y} className="map-grid" />
-              <text x={22} y={y - 4} className="map-tick">
+              {/* A label by the top edge sits under its line, so the frame does not cut it. */}
+              <text x={22} y={y - 4 < corner + TICK_ROOM ? y + 8 : y - 4} dominantBaseline={y - 4 < corner + TICK_ROOM ? "hanging" : undefined} className="map-tick">
                 {formatLat(lat, lats.digits)}
               </text>
             </g>
@@ -202,9 +206,12 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
           return (
             <g key={lng}>
               <line x1={x} x2={x} y1={corner} y2={OWN_HEIGHT - corner} className="map-grid" />
-              <text x={x + 4} y={OWN_HEIGHT - 22} className="map-tick">
-                {formatLng(lng, lngs.digits)}
-              </text>
+              {/* A line by the right edge goes unlabelled rather than have its label run off the plate. */}
+              {x <= OWN_WIDTH - corner - TICK_WIDTH ? (
+                <text x={x + 4} y={OWN_HEIGHT - 22} className="map-tick">
+                  {formatLng(lng, lngs.digits)}
+                </text>
+              ) : null}
             </g>
           );
         })}

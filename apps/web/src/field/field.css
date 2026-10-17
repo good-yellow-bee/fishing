@@ -772,6 +772,17 @@ button.field-primary:disabled {
     white-space: nowrap;
   }
 
+  /* On a small phone the brand packs tighter, so a longer subtitle ("Dziennik połowów") keeps the bar to one row. */
+  @media (max-width: 400px) {
+    .field-mobile-bar .field-brand {
+      gap: 8px;
+    }
+
+    .field-mobile-bar .field-brand small {
+      letter-spacing: 0.06em;
+    }
+  }
+
   .field-main {
     padding: 0 0 92px;
   }
