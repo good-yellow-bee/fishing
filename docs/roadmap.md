@@ -1214,7 +1214,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT169~~ | ~~A fly matches the hatch: a fly cast onto a fresh ring of the evening rise waits a further 0.75x, and the cast says so~~ (#773) | game | S |
 | ~~GT170~~ | ~~A spinner's blade thumps: in rain or fog, when the fish can barely see, a spinner waits 0.85x, and the cast says so~~ (#775) | game | S |
 | ~~GT171~~ | ~~Stacked wait bonuses (lure, school, rise) never cut the wait under the 1.1 s floor, so a nibble always fits before the bite~~ (#776) | game | S |
-| GT172 | A pike chases a streamer: a pike or ghost pike that misses a streamer follows it and hits once more, like a tiger muskie | fish | S |
+| ~~GT172~~ | ~~A pike chases a streamer: a pike or ghost pike that misses a streamer follows it and hits once more, like a tiger muskie~~ (#777) | fish | S |
+| GT173 | A topwater after dark: the fish hunt by sound, so a topwater waits 0.85x at night, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

@@ -36,7 +36,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -502,6 +502,9 @@ export function useFishingGame(
     // A spinner or spoon flashes in the sun, so a fish sees it from farther off.
     const flashWait = flashWaitMul(lureRef?.current, sky, hour);
     if (flashWait < 1) waitHintRef.current = `${t("The sun catches the lure's flash.")} ${waitHintRef.current}`;
+    // After dark the fish hunt by sound, and a topwater's gurgle carries.
+    const nightTopwaterWait = topwaterNightWaitMul(isTopwater(lureRef?.current), hour);
+    if (nightTopwaterWait < 1) waitHintRef.current = `${t("In the dark the fish hunt by sound, and they hear the topwater.")} ${waitHintRef.current}`;
     // Worms crawl out after dark, so live bait draws a bite sooner at night.
     const nightWait = wormNightWaitMul(lureRef?.current, hour);
     if (nightWait < 1) waitHintRef.current = `${t("Worms crawl out after dark, and the fish are looking for one.")} ${waitHintRef.current}`;
@@ -537,7 +540,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, flashWait, jigWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, nightTopwaterWait, flashWait, jigWait, driftWait, rockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.

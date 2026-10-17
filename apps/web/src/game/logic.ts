@@ -243,6 +243,14 @@ export function spinnerThumpWaitMul(lure: string | undefined, sky: string | unde
   return (sky === "rain" || sky === "fog") && lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_THUMP_WAIT : 1;
 }
 
+/** After dark the fish hunt by sound and look up at the lit surface, so a topwater lure's gurgle draws the bite sooner. */
+export const TOPWATER_NIGHT_WAIT = 0.85;
+
+/** How the hour stretches the wait on a topwater lure: sooner at night, else 1. */
+export function topwaterNightWaitMul(topwater: boolean, hour: LakeHour) {
+  return topwater && hour === "night" ? TOPWATER_NIGHT_WAIT : 1;
+}
+
 /** A jig hops down the drop-off's ledge, right where the fish hold, so the bite comes sooner there. */
 export const JIG_LEDGE_WAIT = 0.8;
 
