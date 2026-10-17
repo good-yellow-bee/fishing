@@ -569,6 +569,8 @@ export const PL_FIELD: PlBook = {
   "{n} h": "{n} godz.",
   "Last fish {time} ago": "Ostatnia ryba {time} temu",
   "Biggest fish of the outing": "Największa ryba tej wyprawy",
+  "At this water: {measures}": "Na tym łowisku: {measures}",
+  "First time at this water:": "Pierwszy raz na tym łowisku:",
   "Last fish here: {species} on {lure}, {day}": "Ostatnia ryba tutaj: {species} ({lure}), {day}",
   "Last fish here: {species}, {day}": "Ostatnia ryba tutaj: {species}, {day}",
   "The first {species} in {n} days": "Pierwszy okaz ({species}) od {n} dni",

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field27";
+export const NEWS_ID = "2026-10-17-field28";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The catch form now shows your biggest of the kind at the water you picked, next to your biggest anywhere. An outing names the kinds that water gave you for the first time. A kind is now counted the same way on its chips, its page and each fish's page, and a fish caught after midnight on last evening's outing no longer gets a date warning.",
   "The biggest fish of an outing now says so on its page. A blank day out shows the water's last fish before it and what took it, for next time. A species page counts only your own fish, the way Bests does.",
   "A fish that ends a long spell without its kind now says so: “The first perch in 45 days”, opening the one before. An outing shows its busiest hour and, once two fish were weighed, their total weight. Bests now leaves game fish out of every tile, chart and calendar, not just the biggest fish.",
   "A fish both measured and weighed now says when it is heavy or light for its length. A water's page shows when it bites there, a trip out today shows how long since the last fish, and in a run of “Save and log another”, Enter logs the next one. Game fish no longer win your best badges or Bests, or count toward the year goal and the Home numbers, and the game's weather is no longer offered on a real catch.",
