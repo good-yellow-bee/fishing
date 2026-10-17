@@ -1591,3 +1591,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR364~~ | ~~Leave fish out of a search with -word~~ (#768) | field | S |
 | ~~BR365~~ | ~~Review round 29 fixes: dash phrases, outing term for lure chips, weather keys, temp band, header, link names~~ (#771) | field | S |
 | ~~BR368~~ | ~~News 2026-10-17zq (re-ship again)~~ (#774) | field | S |
+| ~~BR369~~ | ~~Round 13 bugs: twin check by value, Polish decimals in edit form, Wypuszczona, blank title comma~~ (#778) | field | S |
