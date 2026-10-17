@@ -285,6 +285,14 @@ export function jigWinterWaitMul(lure: string | undefined, season: LakeSeason | 
   return season === "winter" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_WINTER_WAIT : 1;
 }
 
+/** In spring the reeds' shallows warm first, and the fish crowd in there, so any cast to the reeds draws the bite sooner. */
+export const SPRING_SHALLOWS_WAIT = 0.85;
+
+/** How the season stretches the wait at the reeds: sooner in spring, else 1. */
+export function springShallowsWaitMul(spot: string, season: LakeSeason | undefined) {
+  return season === "spring" && spot === "reeds" ? SPRING_SHALLOWS_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
