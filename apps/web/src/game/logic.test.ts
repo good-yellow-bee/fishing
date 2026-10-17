@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -118,6 +118,22 @@ describe("a topwater lure in the wind", () => {
     expect(topwaterWaitMul(true, undefined)).toBe(1);
     expect(topwaterWaitMul(false, "strong")).toBe(1);
     expect(topwaterWaitMul(false, "calm")).toBe(1);
+  });
+});
+
+describe("a flashing lure in the sun", () => {
+  it("bites sooner on a spinner or spoon under a clear sky from dawn to dusk", () => {
+    expect(FLASH_SUN_WAIT).toBeLessThan(1);
+    expect(flashWaitMul("Inline spinner", "clear", "day")).toBe(FLASH_SUN_WAIT);
+    expect(flashWaitMul("Kastmaster spoon", "clear", "dawn")).toBe(FLASH_SUN_WAIT);
+  });
+
+  it("leaves the night, a cloudy sky and every other lure alone", () => {
+    expect(flashWaitMul("Inline spinner", "clear", "night")).toBe(1);
+    expect(flashWaitMul("Inline spinner", "overcast", "day")).toBe(1);
+    expect(flashWaitMul("Inline spinner", undefined, "day")).toBe(1);
+    expect(flashWaitMul("Nightcrawler", "clear", "day")).toBe(1);
+    expect(flashWaitMul(undefined, "clear", "day")).toBe(1);
   });
 });
 
