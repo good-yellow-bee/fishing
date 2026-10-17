@@ -37,6 +37,7 @@ import { formatCoord, placeFor } from "./map/places";
 import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
+import { BiggestHere } from "./BiggestHere";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -197,6 +198,7 @@ export function SpotPage() {
       </div>
       <FishSum catches={catches} />
       <SpeciesChips catches={catches} within={spot.name} />
+      <BiggestHere catches={catches} spotId={spot.id} />
       <FishCsv catches={catches} name={spot.name} />
       <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
       {catches.length === 0 ? (

@@ -1195,6 +1195,12 @@ button.field-primary:disabled {
   border-bottom: 1px solid var(--field-line);
 }
 
+/* Counts and sizes stay on one line; a long name wraps instead. */
+.species-waters li > .meta.sizes {
+  display: block;
+  white-space: nowrap;
+}
+
 .species-chips {
   display: flex;
   flex-wrap: wrap;

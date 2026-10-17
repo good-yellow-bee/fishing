@@ -21,6 +21,7 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { sizeBands } from "./sizeBands";
+import { BiggestLinks } from "./BiggestHere";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -111,9 +112,16 @@ export function SpeciesPage() {
         {waters.map((water) => (
           <li key={water.spotId}>
             {water.name ? <Link to={`/spots/${water.spotId}`}>{water.name}</Link> : t("Unknown water")}
-            <span className="meta">
+            <span className="meta sizes">
               {/* The count opens just those fish, through the catch search. */}
               {water.name ? <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
+              {/* Beside each water, its biggest of the kind, once there is more than one water to set side by side. */}
+              {waters.length > 1 ? (
+                <>
+                  {"\u00a0· "}
+                  <BiggestLinks catches={catches.filter((entry) => entry.spotId === water.spotId)} list={`species:${species}`} />
+                </>
+              ) : null}
             </span>
           </li>
         ))}
