@@ -15,7 +15,7 @@ describe("pieceRecords", () => {
     const records = pieceRecords(book, items, "2026-12-31");
     const fish = book.catches.filter((entry) => entry.lure.toLowerCase() === lure.toLowerCase()).length;
     const newest = book.catches.filter((entry) => entry.lure.toLowerCase() === lure.toLowerCase()).sort((a, b) => b.caughtAt.localeCompare(a.caughtAt))[0]!;
-    expect(records[0]).toEqual({ label: `${lure}s`, outings: 1, fish, lure, lastAt: newest.caughtAt });
+    expect(records[0]).toEqual({ label: `${lure}s`, outings: 1, fish, lure, lastAt: newest.caughtAt, since: 0 });
     expect(records.map((row) => row.label)).not.toContain("Pliers");
     expect(records.find((row) => row.label === "Never-used spoon")).toEqual({ label: "Never-used spoon", outings: 1, fish: 0 });
   });

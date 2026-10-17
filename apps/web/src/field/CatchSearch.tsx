@@ -61,6 +61,8 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
 
 /** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
 const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekordy"].map((word) => normalize(word)));
+/** "first": the first fish of each kind in the book. */
+const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwszy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -162,6 +164,16 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const day = localDate(new Date(entry.caughtAt));
     return day >= days.from && day <= days.to;
   });
+  if (FIRST_WORDS.has(normalize(needle))) {
+    const first = new Map<string, CatchEntry>();
+    for (const entry of book.catches) {
+      const kind = entry.species.trim().toLowerCase();
+      const held = first.get(kind);
+      if (!held || entry.caughtAt < held.caughtAt) first.set(kind, entry);
+    }
+    const ids = new Set([...first.values()].map((entry) => entry.id));
+    return catchesNewestFirst(book).filter((entry) => ids.has(entry.id));
+  }
   if (RECORD_WORDS.has(normalize(needle))) {
     const badges = bookBadges(book);
     return catchesNewestFirst(book).filter((entry) => badges.has(entry.id));
@@ -466,7 +478,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
