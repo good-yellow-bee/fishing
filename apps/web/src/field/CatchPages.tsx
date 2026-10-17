@@ -68,7 +68,7 @@ import { findWithLink } from "./findLinks";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
-import { sizeRank } from "./sizeRank";
+import { biggestSince, sizeRank } from "./sizeRank";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -1103,6 +1103,7 @@ function CatchView() {
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
+  const since = badge ? null : biggestSince(kind, entry);
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1187,6 +1188,11 @@ function CatchView() {
           </p>
         ) : rank ? (
           <p className="meta">{rank}</p>
+        ) : null}
+        {since ? (
+          <p className="meta biggest-since">
+            <Link to={`/catches/${since.id}`}>{t("The biggest {species} since {day}", { species: t(entry.species), day: formatCatchDay(since.caughtAt) })}</Link>
+          </p>
         ) : null}
         {sameSize > 1 ? (
           <p className="meta same-size">
