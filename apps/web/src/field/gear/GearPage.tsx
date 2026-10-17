@@ -48,6 +48,7 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })}
         suggest={packingTips(book, trip, today)}
         trips={book.trips}
+        spots={book.spots}
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
         caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
       />
@@ -186,7 +187,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={catchesForTrip(book, trip.id)} trips={book.trips} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={catchesForTrip(book, trip.id)} trips={book.trips} spots={book.spots} />
     </details>
   );
 }
@@ -239,6 +240,7 @@ export function GearPage() {
           heading={t("In the bag")}
           suggest={packingTips(book, trip, today)}
           trips={book.trips}
+          spots={book.spots}
           caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
         />
       </div>
