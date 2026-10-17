@@ -1669,3 +1669,33 @@ button.field-primary:disabled {
 .wrong-measure:empty {
   margin: 0;
 }
+
+/* Bests, all time: each month across the years, a column a year. */
+.month-year-wrap {
+  overflow-x: auto;
+}
+
+.month-year {
+  border-collapse: collapse;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 14px;
+}
+
+.month-year th,
+.month-year td {
+  padding: 4px 12px 4px 0;
+  text-align: right;
+  border-bottom: 1px solid var(--field-line);
+}
+
+.month-year th[scope="row"] {
+  text-align: left;
+  font-weight: 400;
+  color: var(--field-muted);
+}
+
+.month-year td a {
+  display: inline-block;
+  min-width: 24px;
+  min-height: 24px;
+}
