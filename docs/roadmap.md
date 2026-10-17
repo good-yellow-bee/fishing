@@ -1263,7 +1263,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT218~~ | ~~Moonless night: at night under a new moon (lit share 0.1 or less) the fish can barely see to feed, so the bite comes 1.1x slower (not while new anglers get mercy), and the wait hint says so; news 2026-10-17-game10~~ (#868) | bite | S |
 | ~~GT219~~ | ~~Worm by the pilings: a worm cast to the Pomost sinks down beside the pilings where the fish hide, so the bite comes 0.85x sooner, and the wait hint says so~~ (#870) | bite | S |
 | ~~GT220~~ | ~~Spoon in the open water: a spoon cast out on the boat flutters down through the open water where the hunters roam, so the bite comes 0.85x sooner, and the wait hint says so~~ (#871) | bite | S |
-| GT221 | Spinner along the reeds: a spinner cast to the Trzciny flickers along the reed edge past the hunters in ambush, so the bite comes 0.85x sooner, and the wait hint says so | bite | S |
+| ~~GT221~~ | ~~Spinner along the reeds: a spinner cast to the Trzciny flickers along the reed edge past the hunters in ambush, so the bite comes 0.85x sooner, and the wait hint says so~~ (#873) | bite | S |
+| GT222 | Float rig at the reeds: a float rig set at the Trzciny holds the bait still over the panfish in the stems, so the bite comes 0.85x sooner, and the wait hint says so; news card game11 | bite | S |
 
 ## Risks / open questions for the owner
 

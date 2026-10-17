@@ -403,6 +403,14 @@ export function spinnerReedWaitMul(lure: string | undefined, spot: string) {
   return spot === "reeds" && !!lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_REED_WAIT : 1;
 }
 
+/** A float rig set at the reeds' edge holds the bait still right over the panfish hiding in the stems, so the bite comes sooner. */
+export const FLOAT_REED_WAIT = 0.85;
+
+/** How the bank stretches the wait on a float rig: sooner at the reeds, else 1. */
+export function floatReedWaitMul(lure: string | undefined, spot: string) {
+  return spot === "reeds" && !!lure?.trim() && lureClass(lure).id === "bobber" ? FLOAT_REED_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
