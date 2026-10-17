@@ -98,6 +98,7 @@ describe("a school of panfish", () => {
 
   it("only forms for schooling fish", () => {
     expect(schoolAfterLanding("pike", "reeds")).toBeNull();
+    expect(schoolAfterLanding("golden-shiner", "reeds")?.casts).toBe(SCHOOL_CASTS);
     for (const id of SCHOOLERS) expect(FISH.some((fish) => fish.id === id && fish.rarity === "common")).toBe(true);
     expect(SCHOOL_SAME).toBeGreaterThan(0);
     expect(SCHOOL_WAIT).toBeLessThan(1);
