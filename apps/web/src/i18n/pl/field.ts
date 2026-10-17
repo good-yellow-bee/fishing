@@ -154,6 +154,7 @@ export const PL_FIELD: PlBook = {
   "Did you mean": "Czy chodziło o",
   "{species} of this size: {count}": "Ryby tej wielkości ({species}): {count}",
   "Fish no. {n} in the book.": "Ryba nr {n} w dzienniku.",
+  "The biggest {species} since {day}": "Największy okaz ({species}) od {day}",
   "Your first {species}.": "Pierwszy okaz: {species}.",
   "{species} no. {n}.": "{species}: okaz nr {n}.",
   "Typical size by year: {years}": "Typowy rozmiar w kolejnych latach: {years}",
@@ -213,6 +214,7 @@ export const PL_FIELD: PlBook = {
   "Last water temperature noted: {temp} on {day}.": "Ostatnia zapisana temperatura wody: {temp}, {day}.",
   "Warming from {temp} on {day}.": "Woda się ociepla (było {temp}, {day}).",
   "Cooling from {temp} on {day}.": "Woda się ochładza (było {temp}, {day}).",
+  "{lure} led at that temperature.": "Przy takiej temperaturze najlepiej brało na: {lure}.",
   "Best season: {season}": "Najlepsza pora roku: {season}",
   "{n} fish from this water that day are not on this outing.": [
     "{n} ryba z tego łowiska z tego dnia nie jest w tej wyprawie.",

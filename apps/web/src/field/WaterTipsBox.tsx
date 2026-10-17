@@ -81,6 +81,11 @@ export function WaterTipsBox({
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
+  const lastF = tips.lastTemp?.fahrenheit;
+  const lureNow =
+    on && lastF !== undefined
+      ? byTemp.find(({ band }) => (band.from === null || lastF >= band.from) && (band.to === null || lastF < band.to))?.lure
+      : undefined;
   // Against the reading before it: a change too small to show as a whole degree says nothing.
   const before = on && tips.lastTemp ? readingBefore(catches, tips.lastTemp, (fahrenheit) => tempText(fahrenheit) !== tempText(tips.lastTemp!.fahrenheit)) : null;
   const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
@@ -124,6 +129,8 @@ export function WaterTipsBox({
             <br />
             {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: formatCatchDay(tips.lastTemp.at) })}
             {trend ? ` ${trend}` : null}
+            {/* The lure that led in the band the water was last in: what to tie on first. */}
+            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: t(lureNow) })}` : null}
           </>
         ) : null}
         {pastWeek.length > 0 ? (

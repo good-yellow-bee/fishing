@@ -20,3 +20,22 @@ export function sizeRank(kind: readonly CatchEntry[], entry: CatchEntry): string
   const vars = { count: beaten, total: others.length };
   return own.kind === "length" ? t("Longer than {count} of the {total} others of its kind", vars) : t("Heavier than {count} of the {total} others of its kind", vars);
 }
+
+/**
+ * The fish this one is the biggest since: the newest earlier fish of its kind at least as big, once three or more
+ * of the kind came in between, all smaller. Null when nothing earlier was as big (a best at the time) or the gap is short.
+ */
+export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): CatchEntry | null {
+  const own = size(entry.measure);
+  const at = Date.parse(entry.caughtAt);
+  const earlier = kind
+    .filter((other) => other.id !== entry.id && Date.parse(other.caughtAt) < at)
+    .sort((a, b) => Date.parse(b.caughtAt) - Date.parse(a.caughtAt));
+  let between = 0;
+  for (const other of earlier) {
+    const theirs = measureOf(other, entry.measure.kind);
+    if (theirs && size(theirs) >= own) return between >= 3 ? other : null;
+    if (theirs) between += 1;
+  }
+  return null;
+}
