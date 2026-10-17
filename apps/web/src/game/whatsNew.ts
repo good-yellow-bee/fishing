@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17a";
+export const NEWS_ID = "2026-10-17b";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Level 2 now opens something: from there the Strike card's bar carries a mark, and a strike before the bar shrinks past it hooks the fish solid.",
   "The bar on the Strike card now runs out when this fish lets go, longer for a perch and shorter for a trout, and it fades for the last quarter, where a strike only hooks the fish light.",
   "Strike late in the bite and the hook only just catches: keep that fish out of the red, or the hook pulls out like a soft mouth's. The fight card says so.",
   "Search now finds Polish names typed without accents, and “30in+” works as a size. Species and water pages show which months your fish came in, and a fish opened from a search, a species, an outing or a water steps through that list. The catch form asks before a size far past your best becomes a record in the wrong unit.",

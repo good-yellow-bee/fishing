@@ -225,7 +225,7 @@ describe("level-up toast", () => {
     expect(page.querySelector(".landed-card")).toBeNull();
     expect(page.querySelector(".level-status")).toBe(status);
     expect(status?.querySelector(".level-toast h2")?.textContent).toBe("Level 3");
-    expect(status?.querySelector(".level-toast p")?.textContent).toBe("The drop-off is open — walk east along the shore.");
+    expect(status?.querySelector(".level-toast p")?.textContent).toBe("The Strike card marks how long a solid hook lasts. The drop-off is open — walk east along the shore.");
     expect(fx.land).toHaveBeenCalledTimes(1);
 
     // A quick recast hides it; coming back resumes the remaining time without a second chime.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -81,6 +81,15 @@ describe("levelProgress", () => {
     const top = LEVEL_THRESHOLDS.length;
     expect(levelProgress(LEVEL_THRESHOLDS[top - 1]!)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
     expect(levelProgress(1_000_000)).toEqual({ level: top, next: null, toNext: 0, share: 1 });
+  });
+});
+
+describe("level 2", () => {
+  it("marks the solid strike on the Strike card from level 2", () => {
+    expect(anglerLevel(50)).toBe(2);
+    expect(levelUnlock(2)).toBe("The Strike card marks how long a solid hook lasts.");
+    expect(showsSolidMark(1)).toBe(false);
+    expect(showsSolidMark(2)).toBe(true);
   });
 });
 

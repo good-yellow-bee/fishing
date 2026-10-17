@@ -135,6 +135,7 @@ export const PL_CONTENT: PlBook = {
 
   // Level unlocks (progression.ts)
   "The drop-off is open — walk east along the shore.": "Uskok jest otwarty — idź brzegiem na wschód.",
+  "The Strike card marks how long a solid hook lasts.": "Karta „Zatnij!” pokazuje, jak długo zacięcie jest pewne.",
   "See a fish shadow before you strike.": "Widzisz cień ryby, zanim zatniesz.",
   "Cast 25% farther.": "Rzucasz o 25% dalej.",
   "The inlet is open — follow the west shore north. Legendary fish bite more often at night or in rain.":

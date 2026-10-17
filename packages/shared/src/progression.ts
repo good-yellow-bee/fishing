@@ -69,6 +69,7 @@ export function canUseSpot(spot: SpotId, level: number): boolean {
 }
 
 const LEVEL_UNLOCKS: Record<number, string> = {
+  2: "The Strike card marks how long a solid hook lasts.",
   3: "The drop-off is open — walk east along the shore.",
   4: "See a fish shadow before you strike.",
   5: "Cast 25% farther.",
@@ -83,6 +84,11 @@ const LEVEL_UNLOCKS: Record<number, string> = {
 
 export function levelUnlock(level: number): string | null {
   return LEVEL_UNLOCKS[level] ?? null;
+}
+
+/** From level 2 the Strike card's bar carries a mark where a strike stops hooking solid. */
+export function showsSolidMark(level: number): boolean {
+  return level >= 2;
 }
 
 export function canPreviewFish(level: number): boolean {
