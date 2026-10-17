@@ -1262,7 +1262,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT217~~ | ~~Winter pike: a pike hunts on through the winter, so like a burbot it keeps its strength in the cold instead of going sluggish, and the hookset says so~~ (#866) | fight | S |
 | ~~GT218~~ | ~~Moonless night: at night under a new moon (lit share 0.1 or less) the fish can barely see to feed, so the bite comes 1.1x slower (not while new anglers get mercy), and the wait hint says so; news 2026-10-17-game10~~ (#868) | bite | S |
 | ~~GT219~~ | ~~Worm by the pilings: a worm cast to the Pomost sinks down beside the pilings where the fish hide, so the bite comes 0.85x sooner, and the wait hint says so~~ (#870) | bite | S |
-| GT220 | Spoon in the open water: a spoon cast out on the boat flutters down through the open water where the hunters roam, so the bite comes 0.85x sooner, and the wait hint says so | bite | S |
+| ~~GT220~~ | ~~Spoon in the open water: a spoon cast out on the boat flutters down through the open water where the hunters roam, so the bite comes 0.85x sooner, and the wait hint says so~~ (#871) | bite | S |
+| GT221 | Spinner along the reeds: a spinner cast to the Trzciny flickers along the reed edge past the hunters in ambush, so the bite comes 0.85x sooner, and the wait hint says so | bite | S |
 
 ## Risks / open questions for the owner
 
