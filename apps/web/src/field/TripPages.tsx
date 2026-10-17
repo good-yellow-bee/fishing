@@ -53,7 +53,7 @@ import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
-import { fishOnOutingDay } from "./suggestions";
+import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
@@ -321,8 +321,8 @@ function TripView() {
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
       {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
-      {/* An evening outing still going past midnight counts too; a fish over 12 hours old says nothing. */}
-      {catches[0] && (trip.date === today || trip.date === shiftDate(new Date(), -1)) ? (
+      {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
+      {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
         <SinceLast caughtAt={catches[0].caughtAt} />
       ) : null}
       {catches.length > 1 ? (
@@ -331,8 +331,8 @@ function TripView() {
           {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt, catches.length)}
         </p>
       ) : null}
-      {rush ? <p className="meta busiest-hour">{t("Most in one hour: {count}, from {time}", { count: rush.count, time: formatTimeOfDay(rush.from) })}</p> : null}
-      {weighed ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
+      {rush && !play ? <p className="meta busiest-hour">{t("Most in one hour: {count}, from {time}", { count: rush.count, time: formatTimeOfDay(rush.from) })}</p> : null}
+      {weighed && !play ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
       {lastHere ? (

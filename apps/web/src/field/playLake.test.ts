@@ -13,6 +13,11 @@ describe("leaving the game's lake out of a search", () => {
     expect(withoutPlayLake(book, "2026", [{ spotId: "spot-stillwater" }])).toBe("2026");
   });
 
+  it("leaves nothing out by name when a real water shares the game lake's name", () => {
+    const twin = { ...played, spots: [...played.spots, { ...book.spots[0]!, id: "real-stillwater", name: "stillwater " }] };
+    expect(withoutPlayLake(twin, "2026", [{ spotId: "spot-stillwater" }])).toBe("2026");
+  });
+
   it("opens just the angler's own fish of that year", () => {
     const fish = played.catches[0]!;
     const year = String(new Date(fish.caughtAt).getFullYear());

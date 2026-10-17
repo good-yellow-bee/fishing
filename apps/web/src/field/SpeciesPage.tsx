@@ -10,6 +10,7 @@ import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
+import { offPlayLake, withoutPlayLake } from "./playLake";
 import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
 import { WaterTipsBox, waterRange } from "./WaterTipsBox";
@@ -90,8 +91,13 @@ export function SpeciesPage() {
   const { book } = useLogbook();
   useT();
   const { species = "" } = useParams();
-  const catches = catchesOfSpecies(book, species);
+  // The angler's own fish of the kind, as Bests counts them; a kind only ever caught in the game shows its game fish.
+  const every = catchesOfSpecies(book, species);
+  const own = every.filter(offPlayLake);
+  const catches = own.length > 0 ? own : every;
   const name = catches[0]?.species ?? species;
+  // Its searches leave the game's lake out when the page does, so each count opens the fish it counted.
+  const kindTerm = catches === own ? withoutPlayLake(book, exactTerm("species", t(name)), every) : exactTerm("species", t(name));
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   if (catches.length === 0) {
@@ -135,7 +141,7 @@ export function SpeciesPage() {
       {countedFish(catches).filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(countedFish(catches)) ? (
         <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(countedFish(catches))! })}</p>
       ) : null}
-      <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
+      <WaterTipsBox catches={catches} label={t("What it takes")} within={kindTerm} />
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
@@ -149,7 +155,7 @@ export function SpeciesPage() {
             {water.name ? <Link to={`/spots/${water.spotId}`}>{water.name}</Link> : t("Unknown water")}
             <span className="meta sizes">
               {/* The count opens just those fish, through the catch search. */}
-              {water.name ? <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
+              {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", water.name))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
               {/* Beside each water, its biggest of the kind, once there is more than one water to set side by side. */}
               {waters.length > 1 ? (
                 <>
@@ -168,7 +174,7 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars key={species} rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("time", t(row.label))) : undefined }))} />
+          <TallyBars key={species} rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("time", t(row.label))) : undefined }))} />
         </>
       ) : null}
       {seasons.filter((row) => row.count > 0).length > 1 ? (
@@ -176,25 +182,25 @@ export function SpeciesPage() {
           <div className="section-head">
             <h2>{t("By season")}</h2>
           </div>
-          <TallyBars key={species} rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("season", t(row.label))) : undefined }))} />
+          <TallyBars key={species} rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("season", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <MonthBars key={`months-${species}`} catches={catches} within={exactTerm("species", t(name))} />
+      <MonthBars key={`months-${species}`} catches={catches} within={kindTerm} />
       {catches.filter((entry) => entry.weather).length > 1 ? (
         <>
           <div className="section-head">
             <h2>{t("By the weather")}</h2>
           </div>
-          <TallyBars key={species} rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("sky", t(row.label))) : undefined }))} />
+          <TallyBars key={species} rows={skyTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("sky", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <WeatherBars key={species} book={{ ...book, catches }} within={exactTerm("species", t(name))} />
+      <WeatherBars key={species} book={{ ...book, catches }} within={kindTerm} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">
             <h2>{t("By the moon")}</h2>
           </div>
-          <TallyBars key={species} rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(exactTerm("species", t(name)), exactTerm("moon", t(row.label))) : undefined }))} />
+          <TallyBars key={species} rows={moonTally({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("moon", t(row.label))) : undefined }))} />
         </>
       ) : null}
       {lureTally({ ...book, catches }).length > 1 ? (
@@ -203,7 +209,7 @@ export function SpeciesPage() {
             <h2>{t("Lures that took it")}</h2>
           </div>
           {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(exactTerm("species", t(name)), exactTerm("lure", t(row.lure))), note: lureBest(catches, row.lure) }))} />
+          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">

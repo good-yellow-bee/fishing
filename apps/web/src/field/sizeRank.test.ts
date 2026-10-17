@@ -94,6 +94,12 @@ describe("a long gap since the last of the kind", () => {
     expect(longGap(kind, kind[2]!)).toEqual({ before: kind[1], days: 45 });
     expect(longGap(kind, kind[1]!)).toEqual({ before: kind[0], days: 31 });
   });
+  it("counts calendar days, whatever the hours", () => {
+    const evening = { ...at("e", 5, 1), caughtAt: new Date(2026, 5, 1, 18).toISOString() };
+    const morning = { ...at("m", 6, 1), caughtAt: new Date(2026, 6, 1, 8).toISOString() };
+    expect(longGap([evening, morning], morning)?.days).toBe(30);
+  });
+
   it("says nothing for the first of the kind or a short gap", () => {
     const kind = [at("a", 4, 1), at("b", 4, 20)];
     expect(longGap(kind, kind[0]!)).toBeNull();

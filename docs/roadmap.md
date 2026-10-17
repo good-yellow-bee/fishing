@@ -1689,3 +1689,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR414~~ | ~~Round 25 ideas: heavy/light, bites per water, since last fish, Enter run~~ (#869) | field | S |
 | ~~BR415~~ | ~~Round 26 fixes: game fish out of all of Bests~~ (#872) | field | S |
 | ~~BR416~~ | ~~Round 26 ideas: long gap, busiest hour, outing weight~~ (#874) | field | S |
+| ~~BR417~~ | ~~Round 27 fixes~~ (#876) | field | S |
