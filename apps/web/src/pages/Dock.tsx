@@ -36,6 +36,7 @@ import {
   moonLight,
   moonName,
   moonPhase,
+  showsSolidMark,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
@@ -68,7 +69,7 @@ import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { hookWindowMs, isMercy } from "../game/logic";
+import { hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
@@ -88,7 +89,7 @@ import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
 import { locale, t, tn, useT } from "../i18n";
-import { canTurnRuns } from "../game/fight";
+import { canTurnRuns, fightWind } from "../game/fight";
 import { fightNotesText } from "../game/fightNotes";
 import { savePng, saveShareCard, shareCardFileName } from "../game/shareCard";
 import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
@@ -722,7 +723,11 @@ export function DockPage() {
             <strong>{t("Strike!")}</strong>
             <span className="cue-keys">{t("Click or Space")}</span>
             <span className="cue-touch">{t("Tap anywhere")}</span>
-            <i />
+            <div className="cue-bar">
+              <i />
+              {/* From level 2, a mark where the shrinking bar passes the last moment for a solid hook. */}
+              {showsSolidMark(me.level) && <b aria-hidden style={{ left: `${(1 - solidStrikeMs(1, fightWind(wind.wind))) * 100}%` }} />}
+            </div>
           </div>
         )}
         {(scenePhase === "waiting" || scenePhase === "hookset" || scenePhase === "fight") && (

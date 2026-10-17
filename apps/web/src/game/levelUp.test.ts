@@ -12,9 +12,9 @@ describe("level up", () => {
   });
 
   it("announces a rise and the drop-off only when it is crossed", () => {
-    expect(levelUp(1, 2)).toEqual({ level: 2, opened: null });
+    expect(levelUp(1, 2)).toEqual({ level: 2, opened: "The Strike card marks how long a solid hook lasts." });
     expect(levelUp(2, 3)).toEqual({ level: 3, opened: dropoff });
-    expect(levelUp(1, 4)).toEqual({ level: 4, opened: `${dropoff} See a fish shadow before you strike.` });
+    expect(levelUp(1, 4)).toEqual({ level: 4, opened: `The Strike card marks how long a solid hook lasts. ${dropoff} See a fish shadow before you strike.` });
     expect(levelUp(3, 4)).toEqual({ level: 4, opened: "See a fish shadow before you strike." });
   });
 });

@@ -2199,11 +2199,24 @@ html[data-input="pad"] .fight-bar .on-pad {
   color: #4a3b2a;
 }
 
+.strike-cue .cue-bar {
+  position: relative;
+  width: 140px;
+  margin-top: 4px;
+}
+
+.strike-cue .cue-bar b {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 10px;
+  background: #4a3b2a;
+}
+
 .strike-cue i {
   display: block;
   width: 140px;
   height: 4px;
-  margin-top: 4px;
   background: var(--rust);
   transform-origin: left;
   animation: strike-time var(--strike-ms, 1s) linear forwards;
