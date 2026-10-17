@@ -68,3 +68,20 @@ export function typicalSize(catches: readonly CatchEntry[], kind: Measure["kind"
   const value = values.length % 2 === 1 ? values[Math.floor(middle)]! : (values[middle - 1]! + values[middle]!) / 2;
   return kind === "length" ? { kind, inches: value } : { kind, pounds: value };
 }
+
+/** The typical size in each year with enough fish measured that way, oldest year first: whether they run bigger. */
+export function typicalByYear(catches: readonly CatchEntry[], kind: Measure["kind"]): { year: string; size: Measure }[] {
+  const years = new Map<string, CatchEntry[]>();
+  for (const entry of catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime())) continue;
+    const year = String(at.getFullYear());
+    years.set(year, [...(years.get(year) ?? []), entry]);
+  }
+  return [...years.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .flatMap(([year, fish]) => {
+      const size = typicalSize(fish, kind);
+      return size ? [{ year, size }] : [];
+    });
+}
