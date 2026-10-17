@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17c";
+export const NEWS_ID = "2026-10-17h";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A search can ask for a month, as in “month:May”, and a fish opened from a list steps back to that list. Home sets this season against last year’s by the same date, a water’s page says what it gave around this date in earlier years, and the all-time Bests page sets each month against itself across the years. A printout drops on-screen links and fits more on a page.",
   "Tie on a topwater lure and fish hit it at the top: no nibble first, just a big splash, so strike the moment it blows up.",
   "Level 2 now opens something: from there the Strike card's bar carries a mark, and a strike before the bar shrinks past it hooks the fish solid.",
   "The bar on the Strike card now runs out when this fish lets go, longer for a perch and shorter for a trout, and it fades for the last quarter, where a strike only hooks the fish light.",
