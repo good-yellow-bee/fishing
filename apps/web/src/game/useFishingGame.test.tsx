@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, useFishingGame } from "./useFishingGame";
+import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -861,6 +861,32 @@ describe("level unlock integration", () => {
     for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^tiger-muskie\|/);
+  });
+
+  it("lets a fish that missed a topwater lure come back up for it once", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+    cast(surface);
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("hookset:none");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toBe("It missed the topwater. Let it sit, it may come back…");
+    act(() => vi.advanceTimersByTime(TOPWATER_COMEBACK_MS));
+    expect(phase()).toBe("hookset:none");
+    expect(hint()).toBe("It blew up on the topwater — strike!");
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("result:miss");
+  });
+
+  it("has a fish that missed a topwater lure leave when the odds say so", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+    cast(surface);
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    vi.mocked(Math.random).mockReturnValue(TOPWATER_COMEBACK_ODDS);
+    for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+    expect(phase()).toBe("result:miss");
   });
 
   it("notes a bottom feeder hooked on its second take, and not the next fish hooked at once", () => {
