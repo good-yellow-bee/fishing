@@ -427,6 +427,14 @@ export function wormInletWaitMul(lure: string | undefined, spot: string) {
   return spot === "inlet" && !!lure?.trim() && lureClass(lure).id === "worm" ? WORM_INLET_WAIT : 1;
 }
 
+/** The inlet's current spins a spinner's blade hard even on a slow retrieve, and its flash and thump draw the fish waiting in the flow sooner. */
+export const SPINNER_INLET_WAIT = 0.85;
+
+/** How the bank stretches the wait on a spinner: sooner at the inlet, else 1. */
+export function spinnerInletWaitMul(lure: string | undefined, spot: string) {
+  return spot === "inlet" && !!lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_INLET_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-game11";
+export const NEWS_ID = "2026-10-17-game12";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A float rig at the Reeds holds the bait still over the panfish in the stems, a streamer stripped up the Drop-off darts past the trout holding deep, and at the Inlet the current tumbles a worm downstream like washed-in food and spins a spinner's blade hard. Each draws a bite sooner.",
   "A worm fished at the Dock sinks down beside the pilings where the fish hide, a spoon cast from the boat flutters through the open water, a spinner flickers along the Reeds' edge past the hunters in ambush, and a float rig at the Reeds holds the bait still over the panfish in the stems. Each draws a bite sooner.",
   "For planning the season: outing counts on Spots and Home leave out the ones still planned, which read “Planned” instead of “Nothing logged”, and the map list says when the next outing on each water is. A past outing with no note offers “Write up the day”, and a water added twice from a file opens straight on its merge box.",
   "Swapping book files between two phones works better: a photo added on the other phone to a fish you both have now comes across, a water added twice under one name gets a “Merge them” link, and loading the same file again says nothing in it is new. Files with repeated or broken entries are tidied or refused instead of loaded as they are.",
