@@ -735,4 +735,9 @@ export const PL_FIELD: PlBook = {
   "These waters are invented.": "Te łowiska są zmyślone.",
   "Add the one you fished": "Dodaj to, na którym łowisz",
   "That day's outing": "Wyprawa z tego dnia",
+  "On pace for {pace} by the year's end": "W tym tempie {pace} do końca roku",
+  "{left} to go, about {week} a week": "brakuje {left}, około {week} na tydzień",
+  "Same kind, two names": "Jeden gatunek, dwie nazwy",
+  "{shown} is in the book under two names: {from} ({fromCount}) and {into} ({intoCount}).": "{shown} jest w dzienniku pod dwiema nazwami: {from} ({fromCount}) i {into} ({intoCount}).",
+  "Join them": "Połącz je",
 };
