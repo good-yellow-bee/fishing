@@ -57,6 +57,13 @@ export function lastMeasureKind(book: Logbook): Measure["kind"] {
   return own?.measure.kind ?? "length";
 }
 
+/** Length or weight, as the player measured their newest own fish of the kind typed; null when they have none of it yet. */
+export function kindMeasure(book: Logbook, typed: string, shown: (name: string) => string = (name) => name): Measure["kind"] | null {
+  const own = speciesCatches(book, typed, shown).filter((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
+  const newest = own.reduce<CatchEntry | null>((best, entry) => (!best || entry.caughtAt > best.caughtAt ? entry : best), null);
+  return newest?.measure.kind ?? null;
+}
+
 /** Whether the player's newest own fish went back, so a catch-and-release angler starts each new one ticked. */
 export function lastReleased(book: Logbook): boolean {
   const own = catchesNewestFirst(book).find((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);

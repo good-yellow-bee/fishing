@@ -452,9 +452,18 @@ button.field-primary {
   font-size: 13px;
 }
 
+/* "−15 min · −1 h": side by side under the time. */
+.time-back {
+  justify-self: start;
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+}
+
 @media print {
   .photo-full,
-  .time-now {
+  .time-now,
+  .time-back {
     display: none;
   }
 }

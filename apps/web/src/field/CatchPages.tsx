@@ -44,7 +44,7 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
-import { bookLures, closeSpecies, dayWeather, farPastBest, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -70,6 +70,7 @@ import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestSince, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID } from "./playLake";
+import { useStepKeys } from "./stepKeys";
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -234,7 +235,16 @@ function CatchForm() {
       setAlsoAmount(amount);
     }
     setMeasureKind(kind);
+    setMeasurePicked(true);
   };
+  // Until the player picks a measure or types a size, it follows how they last measured this kind: pike by length, panfish by weight.
+  const [measurePicked, setMeasurePicked] = useState(false);
+  useEffect(() => {
+    if (existing || measurePicked || asked === "weight" || asked === "length" || amount.trim() || alsoAmount.trim()) return;
+    const kind = kindMeasure(book, species, t);
+    if (kind) setMeasureKind(kind);
+    // Only a change of kind moves it, not a change of the size or the book.
+  }, [species]);
   const [lure, setLure] = useState(() => t(existing ? existing.lure : (params.get("lure") ?? tripLure(book, presetTrip?.id))));
   const [spotId, setSpotId] = useState(presetSpot);
   // A new fish on a water with an outing planned today (or last night, in the small hours) files under that outing.
@@ -901,6 +911,31 @@ function CatchForm() {
                 {t("Now")}
               </button>
             ) : null}
+            {/* Logged a little after it was landed: a step back from the time shown, a tap each. */}
+            {!existing ? (
+              <span className="time-back">
+                {[
+                  [15, `−${t("{n} min", { n: 15 })}`],
+                  [60, `−${t("{h} h", { h: 1 })}`],
+                ].map(([minutes, label]) => (
+                  <button
+                    key={minutes}
+                    type="button"
+                    className="text-button"
+                    onClick={() => {
+                      const at = new Date(caughtAt);
+                      if (Number.isNaN(at.getTime())) return;
+                      const earlier = toLocalInput(new Date(at.getTime() - Number(minutes) * 60_000));
+                      setCaughtAt(earlier);
+                      if (!tripPicked) setTripId(tripForFish(book, spotId, earlier)?.id ?? "");
+                      setTimeTouched(true);
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </span>
+            ) : null}
             {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
             {Date.parse(caughtAt) - Date.now() > 5 * 60_000 ? (
               <span className="field-hint" role="status">
@@ -1074,6 +1109,7 @@ export function CatchPage() {
 function CatchView() {
   const { book, deleteCatch, fileCatches, photoFor } = useLogbook();
   useT();
+  useStepKeys();
   const navigate = useNavigate();
   const { catchId = "" } = useParams();
   const [params] = useSearchParams();
