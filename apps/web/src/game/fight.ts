@@ -293,8 +293,8 @@ export const RAIN_HUNTER_TIRE = 0.85;
 export function rainHunterTireMul(sky: string | undefined, speciesId: string) {
   return sky === "rain" && SCENT_HUNTERS.has(speciesId) ? RAIN_HUNTER_TIRE : 1;
 }
-/** Warm lovers: a carp thrives in summer's warm water, when it feeds most and is at its strongest. */
-export const WARM_LOVERS: ReadonlySet<string> = new Set(["carp"]);
+/** Warm lovers: a carp thrives in summer's warm water, when it feeds most and is at its strongest. A largemouth bass is a warm-water fish too and is at its best in high summer. */
+export const WARM_LOVERS: ReadonlySet<string> = new Set(["carp", "largemouth-bass"]);
 /** In summer a warm lover tires only this fast on a run or against the reel. */
 export const SUMMER_STRENGTH_TIRE = 0.85;
 
