@@ -38,13 +38,13 @@ import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { AT_PARAM, anotherCatchLink } from "./anotherCatch";
-import { catchesOfSpecies, speciesLink } from "./speciesLink";
+import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
-import { bookLures, closeSpecies, dayWeather, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -1001,7 +1001,8 @@ function CatchForm() {
               {tripOptions}
             </select>
           </label>
-          {pickedTrip && caughtAt.slice(0, 10) !== pickedTrip.date ? (
+          {/* A small-hours fish on last evening's outing is on its day. */}
+          {pickedTrip && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date) ? (
             <p className="wide form-note" role="status">
               {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}
             </p>
@@ -1189,7 +1190,10 @@ function CatchView() {
   const badge = catchBadge(book, entry);
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
-  const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
+  // Its number among the fish its kind's page lists; a game fish among the game's.
+  const onPage = kindOnPage(book, entry.species);
+  const eyebrowKind = onPage.some((other) => other.id === entry.id) ? onPage : kind.filter((other) => other.spotId === PLAY_LAKE_ID);
+  const kindNumber = eyebrowKind.length - eyebrowKind.findIndex((other) => other.id === entry.id);
   const counted = countedFish(kind);
   const isCounted = counted.some((other) => other.id === entry.id);
   // Short of a best, where it sits among the angler's own others of its kind.
@@ -1252,8 +1256,8 @@ function CatchView() {
           <Link to="/catches">{t("Catches")}</Link>
           {" · "}
           <Link to={speciesLink(entry.species)}>
-            {kind.length > 1
-              ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: kind.length })
+            {eyebrowKind.length > 1
+              ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: eyebrowKind.length })
               : t("All {species}", { species: t(entry.species) })}
           </Link>
         </p>

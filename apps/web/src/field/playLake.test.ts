@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
 import { withoutPlayLake } from "./playLake";
 import { findCatches } from "./CatchSearch";
+import { kindOnPage, pageCounts } from "./speciesLink";
 
 describe("leaving the game's lake out of a search", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -26,5 +27,23 @@ describe("leaving the game's lake out of a search", () => {
     const same = (rows: readonly { id: string }[]) => rows.map((row) => row.id);
     const term = withoutPlayLake(both, year, [game]);
     expect(same(findCatches(both, term, (text) => text, () => false))).toEqual(same(findCatches(played, year, (text) => text, () => false)));
+  });
+});
+
+describe("a kind's page and the chips that open it", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const fish = book.catches[0]!;
+  const game = (id: string, species: string) => ({ ...fish, id, species, spotId: "spot-stillwater" });
+  const played = { ...book, catches: [game("g1", fish.species), game("g2", "Game-only fish"), ...book.catches] };
+
+  it("lists the angler's own fish of a kind, or its game fish when that is all", () => {
+    expect(kindOnPage(played, fish.species).some((entry) => entry.id === "g1")).toBe(false);
+    expect(kindOnPage(played, "Game-only fish").map((entry) => entry.id)).toEqual(["g2"]);
+  });
+
+  it("counts each chip as its page does", () => {
+    const counts = new Map(pageCounts(played.catches).map((row) => [row.species, row.count]));
+    expect(counts.get(fish.species)).toBe(kindOnPage(played, fish.species).length);
+    expect(counts.get("Game-only fish")).toBe(1);
   });
 });
