@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, CHOP_WAIT, chopWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, TWILIGHT_SCHOOL_CASTS, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, TWILIGHT_SCHOOL_CASTS, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -284,6 +284,17 @@ describe("a breezy day's chop", () => {
     expect(chopWaitMul(false, "calm")).toBe(1);
     expect(chopWaitMul(false, "strong")).toBe(1);
     expect(chopWaitMul(false, undefined)).toBe(1);
+  });
+});
+
+describe("a thunderstorm", () => {
+  it("slows every bite in a storm, but not in winter's snow", () => {
+    expect(STORM_WAIT).toBeGreaterThan(1);
+    expect(stormWaitMul("rain", "summer", "strong")).toBe(STORM_WAIT);
+    expect(stormWaitMul("rain", "winter", "strong")).toBe(1);
+    expect(stormWaitMul("rain", "summer", "breezy")).toBe(1);
+    expect(stormWaitMul("clear", "summer", "strong")).toBe(1);
+    expect(stormWaitMul(undefined, undefined, undefined)).toBe(1);
   });
 });
 

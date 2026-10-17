@@ -209,6 +209,14 @@ export function topwaterWaitMul(topwater: boolean, wind: string | undefined) {
   return topwater && (wind === "calm" || wind === "strong") ? TOPWATER_WAIT[wind] : 1;
 }
 
+/** In a summer thunderstorm the fish go down and sulk, so every bite comes slower. */
+export const STORM_WAIT = 1.25;
+
+/** How a thunderstorm stretches the wait: slower in a storm (rain, a strong wind, and not winter's snow), else 1. */
+export function stormWaitMul(sky: string | undefined, season: string | undefined, wind: string | undefined) {
+  return sky === "rain" && wind === "strong" && season !== "winter" ? STORM_WAIT : 1;
+}
+
 /** A breeze chops the surface, and under the broken light the fish feed bolder, so any lure but a topwater draws the bite sooner. */
 export const CHOP_WAIT = 0.9;
 
