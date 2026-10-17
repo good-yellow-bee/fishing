@@ -16,6 +16,9 @@ export function isSampleCatch(id: string) {
 }
 
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
+
+/** Whether a water is one of the sample week's. */
+export const isSampleSpot = (id: string) => SAMPLE_SPOT_IDS.has(id);
 const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
 
 /** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. The game's lake doesn't count either way. */

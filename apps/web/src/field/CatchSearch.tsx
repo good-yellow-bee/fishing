@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
-import { getLang, useLang, useT } from "../i18n";
+import { getLang, getUnits, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -56,10 +56,15 @@ function windHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 }
 
 /** True when the season the fish came in ("Fall", "Jesień") starts with what was typed, from three letters up. */
+/** Other words for the seasons: "autumn", and the Polish "in summer" forms ("latem"). */
+const SEASON_WORDS: Record<string, string[]> = { spring: ["wiosną"], summer: ["latem"], fall: ["autumn", "jesienią"], winter: ["zimą"] };
+
 function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
   const at = new Date(entry.caughtAt);
-  return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
+  if (Number.isNaN(at.getTime())) return false;
+  const season = lakeSeason(at);
+  return [t(SEASON_LABELS[season]), ...(SEASON_WORDS[season] ?? [])].some((word) => normalize(word).startsWith(want));
 }
 
 /** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
@@ -75,9 +80,10 @@ const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => 
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
 const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> = {
-  dawn: ["sunrise", "first light", "daybreak", "świt", "wschód", "brzask"],
+  // Not "wschód" or "zachód": they are the east and west of a wind as well ("ze wschodu").
+  dawn: ["sunrise", "first light", "daybreak", "świt", "brzask"],
   midday: ["noon", "południe"],
-  evening: ["dusk", "sunset", "zmierzch", "zmrok", "zachód"],
+  evening: ["dusk", "sunset", "zmierzch", "zmrok"],
   night: ["dark", "noc"],
 };
 
@@ -222,7 +228,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   const want = normalize(needle);
   // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
   if (want === normalize(t("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
-  if (want === normalize(t("Kept"))) return catchesNewestFirst(book).filter((entry) => !entry.released);
+  if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
   const hit = new Set(found.map((entry) => entry.id));
@@ -468,6 +474,7 @@ export function CatchSearch() {
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
+  const metric = getUnits() === "metric";
   const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
   const largest = params.get(ORDER_PARAM) === "largest";
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
@@ -534,13 +541,13 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
-          {matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled) ? (
-            // ">30" finds nothing without saying what it measures.
-            <p className="search-tip">{t("Add a unit to a size, as in “>30 in”.")}</p>
+          {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s|$)/.test(settled) ? (
+            // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
+            <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}

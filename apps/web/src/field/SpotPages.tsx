@@ -160,17 +160,21 @@ export function SpotPage() {
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
-  const streak = outingStreak(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // A fish here logged off its outing still ends a dry run: counted on the day it came.
+  const looseByDay = new Map<string, number>();
+  for (const entry of catches) if (!entry.tripId) looseByDay.set(localDate(new Date(entry.caughtAt)), (looseByDay.get(localDate(new Date(entry.caughtAt))) ?? 0) + 1);
+  const dayOf = new Map(trips.map((trip) => [trip.id, trip.date]));
+  const streak = outingStreak(trips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today);
   const split = weekendSplit(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
   const notYet = notYetThisYear(catches);
   const kindsDay = mostKindsDay({ ...book, catches });
   const here = exactTerm("water", spot.name);
-  // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
-  // This season here against last season up to the same date, once last season had begun by now.
+  // This season here against last season up to the same date, once last season had begun by now. Today's outing
+  // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
   const seasonSoFar = (year: string) => ({
-    outings: trips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && trip.date <= today).length,
+    outings: trips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && (trip.date < today || (fishByTrip.get(trip.id) ?? 0) > 0)).length,
     fish: ownHere.filter((entry) => {
       const day = localDate(new Date(entry.caughtAt));
       return day.startsWith(`${year}-`) && day.slice(5) <= today.slice(5);
@@ -178,6 +182,7 @@ export function SpotPage() {
   });
   const thisSeason = seasonSoFar(today.slice(0, 4));
   const lastSeason = seasonSoFar(String(Number(today.slice(0, 4)) - 1));
+  // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (

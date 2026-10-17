@@ -150,7 +150,8 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Fish")}</span>
           <strong>
-            <Link to="/catches">{book.catches.length}</Link>
+            {/* The angler's own: game fish are left out of the count and of the list it opens. */}
+            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: withoutPlayLake(book, "", book.catches).trim() }).toString()}` : "/catches"}>{real.length}</Link>
           </strong>
           {book.catches.length > 0 ? (
             <small>
@@ -247,7 +248,7 @@ export function HomePage() {
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
                       {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(localDate(new Date(entry.caughtAt)))}>{t("Every fish that day")}</Link>
+                      <Link to={findLink(withoutPlayLake(book, localDate(new Date(entry.caughtAt)), book.catches))}>{t("Every fish that day")}</Link>
                     </p>
                     <CatchCard
                       level={4}

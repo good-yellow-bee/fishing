@@ -5,14 +5,24 @@ import { pageCounts, speciesCounts, speciesLink } from "./speciesLink";
 import { exactTerm, findWithLink } from "./findLinks";
 
 /** The kinds among some fish, each a link to its own page, or with `within` (a water's name) to just those fish there. */
-export function SpeciesChips({ catches, within }: { catches: readonly CatchEntry[]; within?: string }) {
+/** With `outing`, each kind opens that outing's fish of it, as counted. */
+export function SpeciesChips({ catches, within, outing }: { catches: readonly CatchEntry[]; within?: string; outing?: { date: string; title: string } }) {
   useT();
   if (catches.length === 0) return null;
   return (
     <p className="species-chips">
       {/* A chip that opens the kind's page counts as that page does. */}
-      {(within ? speciesCounts(catches) : pageCounts(catches)).map((row) => (
-        <Link key={row.species} to={within ? findWithLink(exactTerm("water", within), exactTerm("species", t(row.species))) : speciesLink(row.species)}>
+      {(within || outing ? speciesCounts(catches) : pageCounts(catches)).map((row) => (
+        <Link
+          key={row.species}
+          to={
+            outing
+              ? findWithLink(exactTerm("outing", `${outing.date} ${outing.title}`), exactTerm("species", t(row.species)))
+              : within
+                ? findWithLink(exactTerm("water", within), exactTerm("species", t(row.species)))
+                : speciesLink(row.species)
+          }
+        >
           {t(row.species)} ({row.count})
         </Link>
       ))}
