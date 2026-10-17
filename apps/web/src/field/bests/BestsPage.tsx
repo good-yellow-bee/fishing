@@ -16,6 +16,7 @@ import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
 import { dayMarks } from "./dayMarks";
+import { mostKindsDay } from "./mostKinds";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
@@ -110,6 +111,7 @@ export function BestsPage() {
     else bySpot.set(entry.spotId, [entry]);
   }
   const topDay = bestDay(book);
+  const kindsDay = mostKindsDay(book);
   // When every fish of the best day came on one outing, the tile opens that outing.
   const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
   const released = book.catches.filter((entry) => entry.released).length;
@@ -192,6 +194,11 @@ export function BestsPage() {
           <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
         </div>
       </section>
+      {kindsDay ? (
+        <p className="meta most-kinds">
+          <Link to={linkFor(kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
+        </p>
+      ) : null}
       {released > 0 ? (
         <p className="meta released-share">
           {/* Opens the released fish in the catch search. */}

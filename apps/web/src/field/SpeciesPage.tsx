@@ -153,6 +153,7 @@ export function SpeciesPage() {
           </li>
         ))}
       </ul>
+      <TypicalByWater catches={catches} waters={waters} />
       <SizeSpread catches={catches} name={name} />
       {catches.length > 1 ? (
         <>
@@ -261,6 +262,20 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
       ))}
     </>
   );
+}
+
+/** "Typical size by water: Cedar Lake: 29 in · Mill Pond: 24 in", biggest first, once two waters have enough fish measured. */
+function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; waters: readonly { spotId: string; name?: string | null }[] }) {
+  const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
+  const kind = lengths * 2 >= catches.length ? "length" : "weight";
+  const rows = waters.flatMap((water) => {
+    const size = water.name ? typicalSize(catches.filter((entry) => entry.spotId === water.spotId), kind) : null;
+    return size && water.name ? [{ name: water.name, size }] : [];
+  });
+  if (rows.length < 2) return null;
+  const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+  rows.sort((a, b) => amount(b.size) - amount(a.size));
+  return <p className="meta typical-waters">{t("Typical size by water: {waters}", { waters: rows.map((row) => `${row.name}: ${measureText(row.size)}`).join(" · ") })}</p>;
 }
 
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
