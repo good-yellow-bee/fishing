@@ -119,7 +119,7 @@ export function SpeciesPage() {
               {waters.length > 1 ? (
                 <>
                   {"\u00a0· "}
-                  <BiggestLinks catches={catches.filter((entry) => entry.spotId === water.spotId)} list={`species:${species}`} />
+                  <BiggestLinks catches={catches.filter((entry) => entry.spotId === water.spotId)} list={`species:${species}`} about={`${t(name)}, ${water.name ?? t("Unknown water")}`} />
                 </>
               ) : null}
             </span>

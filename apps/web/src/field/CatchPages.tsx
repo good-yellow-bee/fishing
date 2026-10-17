@@ -1125,7 +1125,7 @@ function CatchView() {
               {entry.weather.waterTempF === undefined ? null : (
                 <>
                   {" · "}
-                  <Link to={findLink(tempBandSearch(waterTempTally({ spots: [], trips: [], catches: [entry] }).find((row) => row.count > 0)!))}>
+                  <Link to={findLink(tempBandSearch(waterTempTally({ spots: [], trips: [], catches: [{ ...entry, weather: { ...entry.weather, waterTempF: Math.round(entry.weather.waterTempF * 10) / 10 } }] }).find((row) => row.count > 0)!))}>
                     {tempText(entry.weather.waterTempF)}
                   </Link>
                 </>

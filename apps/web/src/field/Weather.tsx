@@ -47,8 +47,8 @@ export function TripWeather({ catches }: { catches: CatchEntry[] }) {
         <p>{weatherText(runs[0]!.weather)}</p>
       ) : (
         // When it changed, what it was, and the fish it brought.
-        runs.map((run) => (
-          <p key={run.from}>
+        runs.map((run, index) => (
+          <p key={index}>
             <time className="run-time" dateTime={run.from}>{formatTimeOfDay(run.from)}</time> {weatherText(run.weather)} · {fishCountLabel(run.fish)}
           </p>
         ))

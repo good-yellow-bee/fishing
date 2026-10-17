@@ -54,7 +54,7 @@ function cleanTrip(trip: Trip, spots: readonly Spot[]): Trip {
     id: trip.id,
     date: trip.date,
     spotId: trip.spotId,
-    title: trip.title.trim() || spots.find((spot) => spot.id === trip.spotId)?.name || "Outing",
+    title: trip.title.trim().replace(/\s+/g, " ") || spots.find((spot) => spot.id === trip.spotId)?.name || "Outing",
     note: trip.note,
     ...(trip.lost ? { lost: trip.lost } : {}),
     ...(trip.missed ? { missed: trip.missed } : {}),
