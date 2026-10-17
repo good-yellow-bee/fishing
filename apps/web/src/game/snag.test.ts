@@ -20,6 +20,13 @@ describe("snags", () => {
     expect(castSnags("reeds", x, z, true, 0)).toBeNull();
   });
 
+  it("let a topwater lure ride over the weed, while any other lure still fouls there", () => {
+    const { x, z } = REEDS_STAND;
+    expect(castSnags("reeds", x, z, false, 0, "Topwater frog")).toBeNull();
+    expect(castSnags("reeds", x, z, false, 0, "Shallow crankbait")).toBe("weed");
+    expect(castSnags("reeds", x, z, false, 0, "Nightcrawler")).toBe("weed");
+  });
+
   it("lie on the point's rocks in its shallows, less often than the weed, never on a mercy cast", () => {
     // Walk out from the point's pad until the water is shallow but no longer dry land.
     let shallow: { x: number; z: number } | null = null;
@@ -37,5 +44,8 @@ describe("snags", () => {
     expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS - 0.01)).toBe("rocks");
     expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS + 0.01)).toBeNull();
     expect(castSnags("point", x, z, true, 0)).toBeNull();
+    // A crankbait's lip bumps it off the rocks; a topwater lure still hangs up on them.
+    expect(castSnags("point", x, z, false, 0, "Shallow crankbait")).toBeNull();
+    expect(castSnags("point", x, z, false, 0, "Topwater frog")).toBe("rocks");
   });
 });

@@ -684,7 +684,7 @@ export function useFishingGame(
     }
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
-    castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random()) : null;
+    castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), lureRef?.current) : null;
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
