@@ -20,7 +20,7 @@ import { MonthBars } from "./MonthBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
-import { sizeBands, typicalSize } from "./sizeBands";
+import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -229,6 +229,16 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
       {charts.map((chart) => (
         <Fragment key={chart.kind}>
           <p className="meta typical-size">{t("Typical size: {size} (as many bigger as smaller)", { size: measureText(typicalSize(catches, chart.kind)!) })}</p>
+          {/* Two years or more with enough fish: whether they are getting bigger. */}
+          {typicalByYear(catches, chart.kind).length > 1 ? (
+            <p className="meta typical-years">
+              {t("Typical size by year: {years}", {
+                years: typicalByYear(catches, chart.kind)
+                  .map((row) => `${row.year} ${measureText(row.size)}`)
+                  .join(" · "),
+              })}
+            </p>
+          ) : null}
           <TallyBars
           rows={chart.bands.map((band) => ({
             key: `${chart.kind}-${band.from}`,

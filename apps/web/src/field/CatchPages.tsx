@@ -61,7 +61,8 @@ import { FishSum } from "./FishSum";
 import { likelyWater, nearestWater } from "./spotOrder";
 import { NearestWater, canFindNearest } from "./NearestWater";
 import { SpeciesChips } from "./SpeciesChips";
-import { CatchSearch, FIND_PARAM, exactTerm, findLink } from "./CatchSearch";
+import { CatchSearch, FIND_PARAM, exactTerm, findCatches, findLink } from "./CatchSearch";
+import { findWithLink } from "./findLinks";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
@@ -397,6 +398,9 @@ function CatchForm() {
   const [typingSpecies, setTypingSpecies] = useState(false);
   const misspelt = typingSpecies ? null : closeSpecies(species, speciesOptions);
   const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
+  // The same for a lure, so a typo doesn't split its tally in two.
+  const [typingLure, setTypingLure] = useState(false);
+  const misspeltLure = typingLure ? null : closeSpecies(lure, lureOptions);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
     () =>
@@ -796,6 +800,8 @@ function CatchForm() {
               list="bait-list"
               value={lure}
               onChange={(event) => setLure(event.target.value)}
+              onFocus={() => setTypingLure(true)}
+              onBlur={() => setTypingLure(false)}
               placeholder={t(BAITS[1])}
               autoComplete="off"
               required
@@ -805,6 +811,15 @@ function CatchForm() {
                 <option key={bait} value={bait} />
               ))}
             </datalist>
+            {misspeltLure ? (
+              <small className="field-hint">
+                {t("Did you mean")}{" "}
+                <button type="button" className="text-button" onClick={() => setLure(misspeltLure)}>
+                  {misspeltLure}
+                </button>
+                ?
+              </small>
+            ) : null}
           </label>
           {lurePicks.length > 0 ? (
             <p className="wide form-note lure-tips">
@@ -1079,6 +1094,9 @@ function CatchView() {
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
+  // The others of its kind that round to the same size, through the one-size search.
+  const sizeSearch = [exactTerm("species", t(entry.species)), measureText(entry.measure)] as const;
+  const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const caughtDay = localDate(new Date(entry.caughtAt));
   // Where the fish's time sat against the sun at its water, for a water with a place.
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
@@ -1159,6 +1177,11 @@ function CatchView() {
           </p>
         ) : rank ? (
           <p className="meta">{rank}</p>
+        ) : null}
+        {sameSize > 1 ? (
+          <p className="meta same-size">
+            <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species), count: sameSize })}</Link>
+          </p>
         ) : null}
       </EditDelete>
       {photo ? (

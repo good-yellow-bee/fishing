@@ -147,6 +147,8 @@ export const PL_FIELD: PlBook = {
   "Set the time to now": "Ustaw bieżącą godzinę",
   "Now": "Teraz",
   "Did you mean": "Czy chodziło o:",
+  "{species} of this size: {count}": "{species} tej wielkości: {count}",
+  "Typical size by year: {years}": "Typowy rozmiar w kolejnych latach: {years}",
   "That's far past your best {species} ({size}). Is the unit right?": "To dużo więcej niż Twój rekord – {species} ({size}). Czy jednostka się zgadza?",
   "Add a spot first, then the fish has a water to belong to.": "Najpierw dodaj łowisko, żeby ryba miała skąd pochodzić.",
   "Add a spot": "Dodaj łowisko",
