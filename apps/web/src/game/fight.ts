@@ -284,6 +284,15 @@ export const FALL_FEED_TIRE = 0.85;
 export function fallFeedTireMul(season: string | undefined, speciesId: string) {
   return season === "fall" && FALL_FEEDERS.has(speciesId) ? FALL_FEED_TIRE : 1;
 }
+/** Scent hunters: they hunt by smell, so murky rain water suits them. */
+export const SCENT_HUNTERS: ReadonlySet<string> = new Set(["catfish"]);
+/** In rain a scent hunter tires only this fast on a run or against the reel. */
+export const RAIN_HUNTER_TIRE = 0.85;
+
+/** How rain's murky water slows a scent hunter's tiring: slower in rain, else 1. */
+export function rainHunterTireMul(sky: string | undefined, speciesId: string) {
+  return sky === "rain" && SCENT_HUNTERS.has(speciesId) ? RAIN_HUNTER_TIRE : 1;
+}
 /** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
 export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
 /** The shallow spots where a nest guarder makes its nest. */
