@@ -1645,6 +1645,16 @@ describe("level unlock integration", () => {
     expect(hint()).toContain("There's no moon tonight and the fish can barely see to feed, so the bites come slow.");
   });
 
+  it.each([
+    ["Nightcrawler", true],
+    ["Green pumpkin tube", false],
+  ] as const)("says a %s sinks down beside the dock's pilings: %s", (lure, said) => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()?.includes("The worm sinks down beside the pilings, where the fish hide.")).toBe(said);
+  });
+
   it("tells only the two latest reasons a bite comes sooner, so the hint stays short", () => {
     vi.mocked(springShallowsWaitMul).mockReturnValueOnce(SPRING_SHALLOWS_WAIT);
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Green pumpkin tube", undefined, undefined, "winter");
