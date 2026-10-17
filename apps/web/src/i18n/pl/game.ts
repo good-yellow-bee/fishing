@@ -375,6 +375,7 @@ export const PL_GAME: PlBook = {
   "The cold water slows the fish, but they still chase a slow jig.": "Zimna woda spowalnia ryby, ale wolno prowadzony jig wciąż je kusi.",
   "The jig hops down the ledge.": "Jig skacze w dół po krawędzi uskoku.",
   "The worm sinks down beside the pilings, where the fish hide.": "Robak opada tuż przy palach, gdzie kryją się ryby.",
+  "The spoon flutters down through the open water, where the hunters roam.": "Wahadłówka trzepocze w dół przez otwartą wodę, gdzie krążą drapieżniki.",
   "In the dark the fish hunt by sound, and they hear the topwater.": "Po ciemku ryby polują na słuch i słyszą przynętę powierzchniową.",
   "The fish can't see far, but they feel the spinner's blade thump.": "Ryby słabo widzą, ale czują pulsowanie skrzydełka obrotówki.",
   "The fly matches what they're rising to.": "Mucha wygląda jak to, co zbierają z powierzchni.",

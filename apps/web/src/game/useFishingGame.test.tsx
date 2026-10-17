@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
+import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -45,7 +45,7 @@ vi.mock("./gotAway", async (importOriginal) => {
 vi.mock("./logic", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./logic")>();
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
-  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), waitMs: vi.fn(actual.waitMs) };
+  return { ...actual, pickBite: vi.fn(actual.pickBite), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), waitMs: vi.fn(actual.waitMs) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -1653,6 +1653,17 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()?.includes("The worm sinks down beside the pilings, where the fish hide.")).toBe(said);
+  });
+
+  it("says the spoon flutters through the open water when the cast's wait comes sooner for it", () => {
+    vi.mocked(spoonOpenWaitMul).mockReturnValueOnce(SPOON_OPEN_WAIT);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("The spoon flutters down through the open water, where the hunters roam.");
   });
 
   it("tells only the two latest reasons a bite comes sooner, so the hint stays short", () => {
