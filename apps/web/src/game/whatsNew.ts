@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field35";
+export const NEWS_ID = "2026-10-17-field36";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The catch form now knows common European fish: perch, zander, bream, roach, chub, tench and more, each with its own records. A tackle name like “Line 0,25” stays one piece, and the form says when a fish will go in as released.",
   "Bests now gives each month of the calendar its fish count, and each water with fish the day of its last one.",
   "A catch page now names the biggest of its kind you took on the same lure, opening that fish. Outing cards in Trips count the fish that got away, so a hard day stands out.",
   "The map's list of waters now gives each one's last fish day beside its count. On the day of an outing, Home says how many pieces are left to pack and takes you to the list. Spots ordered by longest rested now put never-fished waters last.",
