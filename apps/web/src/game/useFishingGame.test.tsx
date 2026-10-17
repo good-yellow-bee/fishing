@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile, type Wind } from "@stillwater/shared";
+import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import type { FightOutcome, FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, waitMs } from "./logic";
@@ -88,8 +88,8 @@ function pointer(type: string, pointerId = 1) {
   return event;
 }
 
-function Harness({ current = profile, hour = "day", rising = false, lure, wind }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind }) {
-  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, undefined, false, undefined, undefined, rising, wind);
+function Harness({ current = profile, hour = "day", rising = false, lure, wind, sky }: { current?: Profile; hour?: LakeHour; rising?: boolean; lure?: string; wind?: Wind; sky?: Sky }) {
+  const game = useFishingGame(current, hour, lure === undefined ? undefined : { current: lure }, sky, false, undefined, undefined, rising, wind);
   return (
     <>
       <div ref={game.surfaceRef} data-stance="dock" data-aim="0.5,3" data-angler="0.15,7.42">
@@ -134,7 +134,7 @@ afterEach(() => {
 });
 
 /** Pins the clock so a bubble move never lands inside a test by accident. */
-function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind) {
+function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", rising = false, lure?: string, wind?: Wind, sky?: Sky) {
   vi.useFakeTimers();
   vi.setSystemTime(at);
   vi.spyOn(performance, "now").mockImplementation(() => now);
@@ -148,7 +148,7 @@ function mount(at = DOCK_BUBBLES.at, current = profile, hour: LakeHour = "day", 
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} />));
+  act(() => root!.render(<Harness current={current} hour={hour} rising={rising} lure={lure} wind={wind} sky={sky} />));
   return container.querySelector("div")!;
 }
 
@@ -1098,6 +1098,19 @@ describe("level unlock integration", () => {
     cast(surface);
     act(() => vi.advanceTimersByTime(1400));
     expect(hint()).toMatch(said);
+  });
+
+  it.each([
+    ["Inline spinner", "clear", "day", true],
+    ["Silver spoon", "clear", "dusk", true],
+    ["Inline spinner", "overcast", "day", false],
+    ["Inline spinner", "clear", "night", false],
+    ["Nightcrawler", "clear", "day", false],
+  ] as const)("says the sun catches the flash of a %s under a %s sky by %s: %s", (lure, sky, hour, flash) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, hour, false, lure, undefined, sky);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(1400));
+    expect((hint() ?? "").startsWith("The sun catches the lure's flash. ")).toBe(flash);
   });
 
   it("says nothing of the wind for a lure that sinks", () => {

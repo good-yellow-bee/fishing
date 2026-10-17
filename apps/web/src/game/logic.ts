@@ -205,6 +205,16 @@ export function topwaterWaitMul(topwater: boolean, wind: string | undefined) {
   return topwater && (wind === "calm" || wind === "strong") ? TOPWATER_WAIT[wind] : 1;
 }
 
+/** A spinner or spoon flashes in sunlight, so on a clear day a fish sees it from farther and the bite comes sooner. */
+export const FLASH_SUN_WAIT = 0.85;
+
+/** How the light stretches the wait on a flashing lure: sooner under a clear sky from dawn to dusk, else 1. */
+export function flashWaitMul(lure: string | undefined, sky: string | undefined, hour: LakeHour) {
+  if (!lure?.trim() || sky !== "clear" || hour === "night") return 1;
+  const kind = lureClass(lure).id;
+  return kind === "spinner" || kind === "spoon" ? FLASH_SUN_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
