@@ -1,9 +1,9 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { SEASON_LABELS, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
-import { waterTips } from "./waterTips";
+import { readingBefore, waterTips } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { fishCountLabel, formatCatchDay } from "./format";
 import { tempText } from "../i18n/content";
@@ -80,6 +80,15 @@ export function WaterTipsBox({
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const sun = place ? nearSunCount(catches, place) : null;
+  // Against the reading before it: a change too small to show as a whole degree says nothing.
+  const before = on ? readingBefore(catches, tips.lastTemp) : null;
+  const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
+  const trend =
+    before && tips.lastTemp && beforeText !== lastText
+      ? tips.lastTemp.fahrenheit > before.fahrenheit
+        ? t("Warming from {temp} on {day}.", { temp: beforeText, day: formatCatchDay(before.at) })
+        : t("Cooling from {temp} on {day}.", { temp: beforeText, day: formatCatchDay(before.at) })
+      : null;
   const pastWeek = y && m && d ? thisWeekInPastYears(catches, new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity) : [];
   return (
     <aside className="conditions water-tips" aria-label={heading}>
@@ -94,6 +103,7 @@ export function WaterTipsBox({
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
         {tips.sky ? <TipLine text="Best weather: {sky}" name="sky" value={t(SKY_LABELS[tips.sky])} to={find(exactTerm("sky", t(SKY_LABELS[tips.sky])))} /> : null}
         {tips.wind ? <TipLine text="Best wind: {wind}" name="wind" value={t(WIND_LABELS[tips.wind])} to={find(exactTerm("wind", t(WIND_LABELS[tips.wind])))} /> : null}
+        {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}
         {sun && sun.near >= 2 ? (
@@ -106,6 +116,7 @@ export function WaterTipsBox({
           <>
             <br />
             {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: formatCatchDay(tips.lastTemp.at) })}
+            {trend ? ` ${trend}` : null}
           </>
         ) : null}
         {pastWeek.length > 0 ? (

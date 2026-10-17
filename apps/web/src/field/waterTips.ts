@@ -1,4 +1,4 @@
-import { biteTimes, catchesForSpot, lakeSeason, lureTally, waterTempTally, type BiteTime, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lakeSeason, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
@@ -10,6 +10,7 @@ export type WaterTips = {
   time: BiteTime | null;
   sky: Sky | null;
   wind: Wind | null;
+  moon: MoonQuarter | null;
   season: LakeSeason | null;
   temp: WaterTempTally | null;
   lastTemp: WaterReading | null;
@@ -23,7 +24,7 @@ export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   // The time of day most fish came at, when at least two did and no other time ties it.
   const [top, next] = [...biteTimes(book)].sort((a, b) => b.count - a.count);
   const time: BiteTime | null = top && top.count >= 2 && (!next || next.count < top.count) ? top : null;
-  return { lures, time, sky: leadingSky(catches), wind: leadingWind(catches), season: leadingSeason(catches), temp: leadingTemp(catches), lastTemp: lastReading(catches) };
+  return { lures, time, sky: leadingSky(catches), wind: leadingWind(catches), moon: leadingMoon(catches), season: leadingSeason(catches), temp: leadingTemp(catches), lastTemp: lastReading(catches) };
 }
 
 /** The band of water temperature most of the fish came in, when at least two noted it and one band clearly leads. */
@@ -44,6 +45,28 @@ export function lastReading(catches: readonly CatchEntry[]): WaterReading | null
   return last;
 }
 
+/** How far back an earlier reading still says which way the water is going. */
+const TREND_DAYS = 21;
+
+/**
+ * The reading before the last one, from an earlier day within three weeks of it: with the last, whether the water
+ * is warming or cooling. Null without one.
+ */
+export function readingBefore(catches: readonly CatchEntry[], last: WaterReading | null): WaterReading | null {
+  if (!last) return null;
+  const lastAt = new Date(last.at);
+  const lastDay = new Date(lastAt.getFullYear(), lastAt.getMonth(), lastAt.getDate()).getTime();
+  let before: WaterReading | null = null;
+  for (const entry of catches) {
+    const fahrenheit = entry.weather?.waterTempF;
+    const at = Date.parse(entry.caughtAt);
+    if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(at)) continue;
+    if (at >= lastDay || lastDay - at > TREND_DAYS * 86_400_000) continue;
+    if (!before || at > Date.parse(before.at)) before = { fahrenheit, at: entry.caughtAt };
+  }
+  return before;
+}
+
 /** The sky most of the fish came under, when at least two noted it and one sky clearly leads. */
 function leadingSky(catches: readonly CatchEntry[]): Sky | null {
   const counts = new Map<Sky, number>();
@@ -60,6 +83,13 @@ function leadingWind(catches: readonly CatchEntry[]): Wind | null {
   const [top, next] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   if (!top || top[1] < 2 || (next && next[1] === top[1])) return null;
   return top[0];
+}
+
+/** The quarter of the moon most of the fish came under, once they span more than one and one clearly leads. */
+function leadingMoon(catches: readonly CatchEntry[]): MoonQuarter | null {
+  const [top, next] = moonTally({ spots: [], trips: [], catches: [...catches] }).sort((a, b) => b.count - a.count);
+  if (!top || !next || next.count === 0 || top.count < 2 || next.count === top.count) return null;
+  return top.id;
 }
 
 /** The season most of the fish came in, once they span more than one season and one clearly leads. */
