@@ -25,6 +25,7 @@ import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
 import { countedFish } from "../milestones";
+import { SameKinds } from "./SameKinds";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -258,6 +259,7 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("By species")}</h2>
             </div>
+            <SameKinds />
             <div className="card-grid">
               {bests.species.map((row) => {
                 const measures = bestMeasures(row.longest, row.heaviest);
