@@ -1654,3 +1654,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR398~~ | ~~Moon on the day, typical size by water, most kinds~~ (#838) | field | S |
 | ~~BR399~~ | ~~News card for round 18~~ (#839) | field | S |
 | ~~BR400~~ | ~~Round 19 field log fixes~~ (#840) | field | S |
+| ~~BR401~~ | ~~Blank spell now, not yet back, water range, lure at a water, big search~~ (#841) | field | S |
