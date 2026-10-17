@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-game13";
+export const NEWS_ID = "2026-10-17-game14";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A perch hooked in spring is worn from spawning and tires sooner. A burbot hooked in rain hunts by smell in the murky water, and a pike hooked in fall has fed hard for winter, so both fight longer.",
   "A crankbait run past the Dock knocks off the pilings and draws a bite sooner. A bluegill guarding its spring nest in the shallows, a brook trout fighting the Inlet's current and a black crappie hunting at dawn or dusk all tire slower.",
   "For a safer book: if one saved fish is ever damaged, the field log keeps the rest of the book and its photos, and sets the whole book aside as a file you can load once mended; a line at the top of Home leads to it. When storage is full, the bar says so and offers the photos page to make room, and tackle lists and year goals now say when they could not be saved. Coming back to the app after a while picks up changes made in another tab.",
   "A float rig at the Reeds holds the bait still over the panfish in the stems, a streamer stripped up the Drop-off darts past the trout holding deep, and at the Inlet the current tumbles a worm downstream like washed-in food and spins a spinner's blade hard. Each draws a bite sooner.",

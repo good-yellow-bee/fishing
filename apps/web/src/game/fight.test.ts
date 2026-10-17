@@ -1405,6 +1405,7 @@ describe("a fight in winter", () => {
 
   it("slows a fall feeder's tiring only in fall", () => {
     expect(FALL_FEED_TIRE).toBeLessThan(1);
+    expect(FALL_FEEDERS.has("pike")).toBe(true);
     for (const id of FALL_FEEDERS) expect(fallFeedTireMul("fall", id)).toBe(FALL_FEED_TIRE);
     expect(fallFeedTireMul("summer", "tiger-muskie")).toBe(1);
     expect(fallFeedTireMul("fall", "pike")).toBe(1);

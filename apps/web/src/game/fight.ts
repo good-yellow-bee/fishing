@@ -275,8 +275,8 @@ export const CURRENT_FIGHTER_TIRE = 0.85;
 export function currentTireMul(speciesId: string, spot: string) {
   return spot === "inlet" && CURRENT_FIGHTERS.has(speciesId) ? CURRENT_FIGHTER_TIRE : 1;
 }
-/** Fall feeders: they feed hard before winter and are at full strength in fall. */
-export const FALL_FEEDERS: ReadonlySet<string> = new Set(["tiger-muskie"]);
+/** Fall feeders: they feed hard before winter and are at full strength in fall. A pike gorges on the fall baitfish the same way. */
+export const FALL_FEEDERS: ReadonlySet<string> = new Set(["tiger-muskie", "pike"]);
 /** In fall a fall feeder tires only this fast on a run or against the reel. */
 export const FALL_FEED_TIRE = 0.85;
 
