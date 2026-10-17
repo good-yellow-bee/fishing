@@ -8,6 +8,9 @@ describe("catchNews", () => {
 
   it("names the first of a kind", () => {
     expect(catchNews(book, { species: "Muskellunge", measure: { kind: "length", inches: 40 } })).toBe("First Muskellunge in the book.");
+    // A game fish of the kind doesn't take the first away.
+    const played = { ...book, catches: [...book.catches, { ...pike, id: "game-musky", species: "Muskellunge", spotId: "spot-stillwater" }] };
+    expect(catchNews(played, { species: "Muskellunge", measure: { kind: "length", inches: 40 } })).toBe("First Muskellunge in the book.");
   });
 
   it("names a new best and the size it beat, and stays quiet otherwise", () => {

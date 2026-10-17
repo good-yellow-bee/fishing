@@ -19,7 +19,7 @@ import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { upcomingOwnTrips } from "./playLake";
+import { offPlayLake, upcomingOwnTrips } from "./playLake";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -80,7 +80,8 @@ export function HomePage() {
   const tomorrow = shiftDate(now, 1);
   const catches = recentCatches(book, 4);
   const upcoming = upcomingOwnTrips(book, today);
-  const recent = recentTrips(book, today, 3);
+  // Just back from the water, not from a round of the game.
+  const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
   const kinds = speciesCounts(book.catches).length;

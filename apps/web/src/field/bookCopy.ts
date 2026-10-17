@@ -34,9 +34,9 @@ export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));
 }
 
-/** The player's own catches; the sample week's fish don't need a copy. */
+/** The player's own catches; the sample week's fish and the game's don't need a copy. */
 export function ownCatches(book: Logbook) {
-  return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id)).length;
+  return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id) && offPlayLake(entry)).length;
 }
 
 export type CopyNudge = { kind: "never" } | { kind: "since"; count: number } | { kind: "old"; days: number } | null;

@@ -184,6 +184,9 @@ export function CatchFormPage() {
   return <CatchForm key={`${catchId ?? ""}:${params.toString()}:${key}`} />;
 }
 
+/** When "Save and log another" was last pressed, so the fresh form it opens puts the cursor in the size. */
+let anotherAt = 0;
+
 /** Camera notes sit at the start of a JPEG; this much is plenty to find the time a photo was taken. */
 const PHOTO_HEAD_BYTES = 256 * 1024;
 /** How near a pinned water a photo must be taken to name it: a lake shore walked round, not the next town. */
@@ -227,6 +230,11 @@ function CatchForm() {
   // Not the other measure, but still far past this kind's best: most likely the wrong unit, or a slip of a digit.
   const pastBest = otherMeasure ? null : farPastBest(bestSoFar, measureKind, typedAmount);
   const amountInput = useRef<HTMLInputElement>(null);
+  // Arrived from "Save and log another": the address stays the same, so the shell moves no focus; the size is what to type
+  // next. Timed rather than read from the address's state, which the saved note clears (and the form opens again).
+  useEffect(() => {
+    if (!existing && Date.now() - anotherAt < 2000) amountInput.current?.focus({ preventScroll: true });
+  }, []);
   const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
     // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
@@ -582,6 +590,7 @@ function CatchForm() {
     // "Save and log another": a fresh form on the same water, outing, fish, lure and measure, the time now; for a fish
     // of an earlier day, that fish's time, as the next one came after it that day.
     if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
+      anotherAt = Date.now();
       const earlier = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) ? caughtAt : undefined;
       navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news));
       return;
@@ -662,6 +671,18 @@ function CatchForm() {
       <form
         className="entry-form"
         onSubmit={onSubmit}
+        onKeyDown={(event) => {
+          // Enter in the fish, size or lure with the form not yet complete goes on to the next field, as a phone's
+          // "next" key says; a complete form still saves on Enter.
+          const field = event.target;
+          if (event.key !== "Enter" || event.nativeEvent.isComposing || !(field instanceof HTMLInputElement)) return;
+          if (!["species", "amount", "lure"].includes(field.name) || event.currentTarget.checkValidity()) return;
+          const fields = [...event.currentTarget.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea")].filter((each) => !each.hasAttribute("disabled"));
+          const next = fields[fields.indexOf(field) + 1];
+          if (!next) return;
+          event.preventDefault();
+          next.focus();
+        }}
         onInput={(event) => {
           // A change after a refused save clears the complaint.
           if (!error) return;
@@ -675,6 +696,8 @@ function CatchForm() {
             <input
               name="species"
               list="species-list"
+              // A phone's Enter goes on to the next field rather than sending a half-filled form.
+              enterKeyHint="next"
               value={species}
               onChange={(event) => setSpecies(event.target.value)}
               onFocus={() => setTypingSpecies(true)}
@@ -741,6 +764,7 @@ function CatchForm() {
               name="amount"
               ref={amountInput}
               inputMode="decimal"
+              enterKeyHint="next"
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               placeholder={
@@ -814,6 +838,7 @@ function CatchForm() {
             <input
               name="lure"
               list="bait-list"
+              enterKeyHint="next"
               value={lure}
               onChange={(event) => setLure(event.target.value)}
               onFocus={() => setTypingLure(true)}

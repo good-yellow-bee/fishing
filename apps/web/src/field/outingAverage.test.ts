@@ -10,6 +10,11 @@ describe("outing average", () => {
     expect(text).toBe("1.7 fish an outing on average, 1 without a fish");
   });
 
+  it("shows a small average to the hundredth, not as 0", () => {
+    const trips = Array.from({ length: 30 }, (_, n) => trip(`t${n}`, `2026-09-${String(n + 1).padStart(2, "0")}`));
+    expect(outingAverage(trips, (id) => (id === "t0" ? 1 : 0), "2026-10-15")).toMatch(/^0\.03 fish an outing on average/);
+  });
+
   it("says nothing with fewer than two outings fished", () => {
     expect(outingAverage([trip("a", "2026-10-01"), trip("later", "2026-11-01")], () => 2, "2026-10-15")).toBeNull();
   });

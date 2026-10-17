@@ -1,6 +1,7 @@
 import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
+import { countedFish } from "./milestones";
 
 /**
  * Names for a form's suggestion list: the player's own first, most used on
@@ -140,7 +141,8 @@ export function speciesBestSoFar(
   shown: (name: string) => string = (name) => name,
   skipId?: string,
 ): { longest: CatchEntry | null; heaviest: CatchEntry | null } | null {
-  const catches = speciesCatches(book, typed, shown, skipId);
+  // The angler's own: a game fish is no size to beat.
+  const catches = countedFish(speciesCatches(book, typed, shown, skipId));
   if (catches.length === 0) return null;
   const { longest, heaviest } = personalBests({ ...book, catches });
   return { longest, heaviest };
