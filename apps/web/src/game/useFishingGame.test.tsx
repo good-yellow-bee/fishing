@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
-import type { FightOutcome, FightPerformance } from "./fight";
+import { makeFight, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
@@ -51,7 +51,7 @@ vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
   return {
     ...actual,
-    makeFight: () => ({ sim: { line: fightLine, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step }),
+    makeFight: vi.fn(() => ({ sim: { line: fightLine, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step })),
   };
 });
 
@@ -467,7 +467,7 @@ describe("useFishingGame strike timing", () => {
     now += 1_100;
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(phase()).toBe("fight:none");
-    expect(hint()).toMatch(/^Hooked light in 1\.10 s, it only just caught\. Keep it out of the red\. /);
+    expect(hint()).toMatch(/^Hooked light in 1\.10 s, it only just caught\. Keep it out of the red\. /);    expect(vi.mocked(makeFight).mock.calls.at(-1)![8]).toBe(false);
   });
 
   it("hooks deep, not light, on a late strike when live bait was swallowed", () => {
@@ -478,6 +478,8 @@ describe("useFishingGame strike timing", () => {
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(phase()).toBe("fight:none");
     expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s\. .*Ease off when it runs\.$/);
+    // A swallowed hook holds like a treble: it takes longer in the red to tear free.
+    expect(vi.mocked(makeFight).mock.calls.at(-1)![8]).toBe(true);
   });
 
   it.each([
