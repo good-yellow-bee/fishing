@@ -1116,8 +1116,8 @@ describe("a pike rolling at the net", () => {
 
 describe("a carp's first run", () => {
   /** Lets the line go through every run and returns how long each of the first three ran. */
-  const runLengths = (id: string) => {
-    const runtime = makeFight(fish(id), 6, 5, () => 0.5);
+  const runLengths = (id: string, trophy = false) => {
+    const runtime = makeFight(fish(id), 6, 5, () => 0.5, 1, "open", undefined, false, false, false, trophy);
     const lengths: number[] = [];
     const flags: boolean[] = [];
     let started = -1;
@@ -1146,6 +1146,12 @@ describe("a carp's first run", () => {
   it("is a carp's and a salmon's habit only", () => {
     const { flags } = runLengths("walleye");
     expect(flags.every((flag) => !flag)).toBe(true);
+  });
+
+  it("is any trophy-sized fish's too", () => {
+    const { lengths, flags } = runLengths("walleye", true);
+    expect(flags).toEqual([true, false, false]);
+    expect(lengths[0]! / lengths[1]!).toBeCloseTo(FIRST_RUN_LONGER, 1);
   });
 });
 
