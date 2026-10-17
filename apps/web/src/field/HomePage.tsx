@@ -49,8 +49,9 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
   if (rows.length > 0) {
     const packed = packedCount(rows);
     parts.push(
-      <Link key="packed" to="/gear">
-        {packed === rows.length ? t("All packed") : t("{packed} of {total} packed", { packed, total: rows.length })}
+      // To the outing, where its list is: what is still to go in the bag.
+      <Link key="packed" to={`/trips/${trip.id}`}>
+        {packed === rows.length ? t("All packed") : t("{n} left to pack", { n: rows.length - packed })}
       </Link>,
     );
   }

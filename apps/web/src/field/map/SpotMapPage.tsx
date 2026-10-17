@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import { WATER_LABELS, type Spot } from "@stillwater/shared";
+import { WATER_LABELS, localDate, type Spot } from "@stillwater/shared";
 import { getUnits, t, useT } from "../../i18n";
-import { fishCountLabel } from "../format";
+import { fishCountLabel, formatDay } from "../format";
 import { useLogbook } from "../LogbookState";
 import {
   ALDERS,
@@ -233,7 +233,14 @@ export function SpotMapPage() {
   useT();
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
   // Not the game's lake: it has no place on a real map.
-  const spots = spotsByLastFish(book).map((row) => row.spot).filter((spot) => spot.id !== PLAY_LAKE_ID);
+  const rows = spotsByLastFish(book).filter((row) => row.spot.id !== PLAY_LAKE_ID);
+  const spots = rows.map((row) => row.spot);
+  // Each water's fish and the day of its last one: where to go next, at a glance.
+  const fishLine = (spotId: string) => {
+    const row = rows.find((each) => each.spot.id === spotId);
+    const fish = fishCountLabel(row?.fishCount ?? 0);
+    return row?.lastFishAt ? t("{fish}, last {day}", { fish, day: formatDay(localDate(new Date(row.lastFishAt))) }) : fish;
+  };
   const plotted = spots.flatMap((spot) => {
     const place = sheetPlace(spot);
     return place ? [{ spot, place }] : [];
@@ -284,7 +291,7 @@ export function SpotMapPage() {
             <li key={spot.id}>
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               <span>{t(WATER_LABELS[spot.waterType])}</span>
-              <span>{fishCountLabel(book.catches.filter((entry) => entry.spotId === spot.id).length)}</span>
+              <span>{fishLine(spot.id)}</span>
               <span>{formatCoord(place.lat, place.lng)}</span>
             </li>
           ))}
@@ -300,7 +307,7 @@ export function SpotMapPage() {
               <li key={spot.id}>
                 <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
                 <span>{t(WATER_LABELS[spot.waterType])}</span>
-                <span>{fishCountLabel(book.catches.filter((entry) => entry.spotId === spot.id).length)}</span>
+                <span>{fishLine(spot.id)}</span>
                 <span>
                   <a className="map-coord-link" href={osmLink(place.lat, place.lng)} target="_blank" rel="noreferrer">
                     {formatCoord(place.lat, place.lng)}
