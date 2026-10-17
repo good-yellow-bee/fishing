@@ -352,6 +352,14 @@ export function winterSunWaitMul(spot: string, season: LakeSeason | undefined, h
   return season === "winter" && hour === "day" && sky === "clear" && spot === "reeds" ? WINTER_SUN_WAIT : 1;
 }
 
+/** A strong wind drives the waves and the baitfish onto the point's rocks, and the hunters follow them in, so a cast off the point draws the bite sooner. */
+export const WIND_POINT_WAIT = 0.85;
+
+/** How the wind stretches the wait off the point: sooner on a strong wind, else 1. */
+export function windPointWaitMul(spot: string, wind: string | undefined) {
+  return wind === "strong" && spot === "point" ? WIND_POINT_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

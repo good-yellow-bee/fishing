@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field22";
+export const NEWS_ID = "2026-10-17-game09";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a clear summer day the fish hide in the shade under the Dock, on a clear winter day they drift into the sun-warmed shallows by the Reeds, and a strong wind drives the baitfish onto the Point. A cast to each draws a bite sooner.",
   "The game's lake stays out of your real log: forms, upcoming outings, Bests streaks and Start my own book all leave it alone. On the day of an outing, Home has a “Log a catch” link for it. The catch form has −15 min and −1 h buttons, and starts each kind on the measure you last used for it. ← and → step between catches and outings, and the map lists waters by the last fish.",
   "A smallmouth bass or rainbow trout hooked at the Inlet turns its side to the current and tires slower, a tiger muskie hooked in fall has fed hard for winter and fights at full strength, and in rain a catfish hunts by smell in the murky water and fights longer.",
   "A water page names last year's kinds that haven't come back, its day with the most kinds and how weekends compare there. A species page lists the waters it turned up in for the first time this year, and the season recap names new waters too. The lure record lists lures that haven't had a fish yet this year. Filing loose fish can be undone, and a year such as “2025” in search finds just that year's fish.",
