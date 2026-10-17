@@ -81,6 +81,11 @@ export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { befor
     if (other.id !== entry.id && when < at && (!before || when > Date.parse(before.caughtAt))) before = other;
   }
   if (!before) return null;
-  const days = Math.floor((at - Date.parse(before.caughtAt)) / (24 * 60 * 60 * 1000));
+  // Calendar days between the two, whatever the hours or a clock change.
+  const day = (time: string) => {
+    const when = new Date(time);
+    return Date.UTC(when.getFullYear(), when.getMonth(), when.getDate());
+  };
+  const days = Math.round((day(entry.caughtAt) - day(before.caughtAt)) / (24 * 60 * 60 * 1000));
   return days >= 30 ? { before, days } : null;
 }

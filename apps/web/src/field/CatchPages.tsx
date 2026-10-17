@@ -688,6 +688,8 @@ function CatchForm() {
           // phone's "next" key says; a complete form still saves on Enter (and logs another, in a run of them).
           const field = event.target;
           if (event.key !== "Enter" || event.nativeEvent.isComposing || !(field instanceof HTMLInputElement)) return;
+          // Enter on the photo picker or a tick box does what it does there, not a save.
+          if (["file", "checkbox", "radio", "button", "submit"].includes(field.type)) return;
           if (event.currentTarget.checkValidity()) {
             // From any box on the form, so Enter in the second size or the water temperature doesn't end the run.
             const another = inRun ? event.currentTarget.querySelector<HTMLButtonElement>("button[name=another]") : null;
