@@ -1605,3 +1605,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR372~~ | ~~Merge a water into another; step through one kind~~ (#784) | field | S |
 | ~~BR373~~ | ~~File adds bring new waters and planned outings~~ (#786) | field | S |
 | ~~BR374~~ | ~~News 2026-10-17zzz~~ (#788) | field | S |
+| ~~BR375~~ | ~~Section labels, size range ends, photos 0%~~ (#792) | field | S |
