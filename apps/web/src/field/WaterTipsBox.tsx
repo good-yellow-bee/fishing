@@ -37,7 +37,9 @@ export function waterThen(fish: readonly CatchEntry[]): string | null {
 
 /** "54–61°F": the water temperatures noted with these fish, rounded as shown, or one value when they read the same. */
 export function waterRange(fish: readonly CatchEntry[]): string | null {
-  const temps = fish.map((entry) => entry.weather?.waterTempF).map((f) => (f === undefined ? f : Math.round(f))).filter((f): f is number => f !== undefined && Number.isFinite(f));
+  // Whole °F as shown; a metric reader's °C rounds from the raw reading, or 59.54°F would read 16°C, not 15°C.
+  const metric = getUnits() === "metric";
+  const temps = fish.map((entry) => entry.weather?.waterTempF).filter((f): f is number => f !== undefined && Number.isFinite(f)).map((f) => (metric ? f : Math.round(f)));
   if (temps.length === 0) return null;
   const low = Math.min(...temps);
   const high = Math.max(...temps);

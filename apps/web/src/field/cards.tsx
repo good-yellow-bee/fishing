@@ -102,6 +102,7 @@ export function TripCard({
   const Head = `h${level}` as const;
   const t = useT();
   const tackle = useTackleItems();
+  const { book } = useLogbook();
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
   const bag = tackle && fishCount === 0 && trip.date >= today ? itemsForTrip(tackle, trip.id) : [];
   const packed = packedCount(bag);
@@ -115,7 +116,7 @@ export function TripCard({
     <Link to={`/trips/${trip.id}`} className="trip-card">
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
       <div>
-        <Head>{outingName(trip)}</Head>
+        <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">
           {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
         </p>

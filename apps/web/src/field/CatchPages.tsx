@@ -1103,7 +1103,9 @@ function CatchView() {
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
-  const since = badge ? null : biggestSince(countedFish(kind), entry);
+  const counted = countedFish(kind);
+  // A game or sample fish among the angler's own has no place in their run of sizes.
+  const since = badge || !counted.some((other) => other.id === entry.id) ? null : biggestSince(counted, entry);
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;

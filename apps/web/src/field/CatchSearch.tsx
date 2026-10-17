@@ -173,7 +173,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   });
   if (BIG_WORDS.has(normalize(needle))) {
     const byKind = new Map<string, CatchEntry[]>();
-    for (const entry of book.catches) {
+    // The usual size from the angler's own fish: game pike would move it.
+    for (const entry of countedFish(book.catches)) {
       const kind = entry.species.trim().toLowerCase();
       byKind.set(kind, [...(byKind.get(kind) ?? []), entry]);
     }

@@ -282,6 +282,7 @@ function TripView() {
       suggest={packingTips(book, trip, today)}
       caught={catchesForTrip(book, trip.id)}
       trips={book.trips}
+      spots={book.spots}
     />
   );
   const fish = (
@@ -313,7 +314,7 @@ function TripView() {
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
       <SpeciesChips catches={catches} />
       <LureChips catches={catches} outing={trip} />
-      <FishCsv catches={catches} name={`${trip.date} ${trip.title}`} />
+      <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
           {tn(loose.length, "{n} fish from this water that day is not on this outing.", "{n} fish from this water that day are not on this outing.")}{" "}
@@ -411,7 +412,11 @@ function TripView() {
           <button
             type="button"
             className="text-button"
-            onClick={() => downloadFile(tripIcs(trip, spot?.name ?? null, new Date(), spot?.place), "text/calendar;charset=utf-8", tripIcsName(trip))}
+            onClick={() => {
+              // An untitled outing goes by its water's name, as its heading does.
+              const named = { ...trip, title: outingName(trip, book.spots) };
+              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place), "text/calendar;charset=utf-8", tripIcsName(named));
+            }}
           >
             {t("Add to calendar")}
           </button>

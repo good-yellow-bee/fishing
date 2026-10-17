@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from "react";
-import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type TackleItem, type Trip } from "@stillwater/shared";
+import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
@@ -32,6 +32,7 @@ export function TackleList({
   suggest = [],
   caught = [],
   trips = [],
+  spots = [],
 }: {
   tripId: string;
   heading?: string;
@@ -39,6 +40,8 @@ export function TackleList({
   suggest?: readonly string[];
   caught?: readonly CatchEntry[];
   trips?: readonly Trip[];
+  /** The book's waters, so an untitled outing goes by its water's name. */
+  spots?: readonly Spot[];
 }) {
   const t = useT();
   const { items, toggle, add, remove, unpackTrip, copyTrip } = useTackle();
@@ -135,7 +138,7 @@ export function TackleList({
                   focusAfter();
                 }}
               >
-                {t("Copy the list from {trip}, {day}", { trip: outingName(lastBag), day: formatDay(lastBag.date) })}
+                {t("Copy the list from {trip}, {day}", { trip: outingName(lastBag, spots), day: formatDay(lastBag.date) })}
               </button>
             </>
           ) : null}
@@ -173,7 +176,7 @@ export function TackleList({
         <CopySummary
           text={() => {
             const trip = trips.find((row) => row.id === tripId);
-            return packingText(trip ? `${t("Tackle for {trip}", { trip: outingName(trip) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
+            return packingText(trip ? `${t("Tackle for {trip}", { trip: outingName(trip, spots) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
           }}
           file="stillwater-tackle.txt"
           label={t("Copy the list")}

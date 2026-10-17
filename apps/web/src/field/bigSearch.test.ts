@@ -13,4 +13,10 @@ describe("big in a search", () => {
     expect(findCatches(book, "big", t).map((entry) => entry.id).sort()).toEqual(["d", "e"]);
     expect(findCatches(book, "duże", t)).toHaveLength(2);
   });
+
+  it("leaves game fish out of the usual size", () => {
+    const catches = [pike("a", 20), pike("b", 22), pike("c", 24), pike("d", 26), pike("e", 30), ...[1, 2, 3, 4, 5, 6].map((n) => ({ ...pike(`g${n}`, 10), spotId: "spot-stillwater" }))];
+    const book = { spots: [], trips: [], catches };
+    expect(findCatches(book, "big", t).map((entry) => entry.id).filter((id) => !id.startsWith("g")).sort()).toEqual(["d", "e"]);
+  });
 });

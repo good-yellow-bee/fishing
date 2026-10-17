@@ -304,7 +304,7 @@ export function BestsPage() {
             {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
             {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
             {/* A blank spell still running: how long since an outing gave a fish. */}
-            {streak.dryNow > 1 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+            {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
             {split ? (
               <p className="meta weekend-split">
                 {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
