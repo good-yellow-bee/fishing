@@ -177,6 +177,11 @@ export function carriesBait(lure: string | undefined) {
   return kind === "worm" || kind === "bobber" || kind === "plain";
 }
 
+/** Whether the hook carries live bait, which a fish given time swallows. */
+export function isLiveBait(lure: string | undefined) {
+  return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "worm";
+}
+
 /** Whether the lure tied on is a topwater one, which fish hit at the top. */
 export function isTopwater(lure: string | undefined) {
   return lure !== undefined && lureClass(lure).id === "popper";
@@ -375,7 +380,10 @@ export function useFishingGame(
 
   const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number; windowMs: number }) => {
     const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
-    const lightHook = strike !== undefined && !solid && isLightHook(strike.elapsedMs, strike.windowMs);
+    const late = strike !== undefined && !solid && isLightHook(strike.elapsedMs, strike.windowMs);
+    // Live bait held that long is swallowed, so a late strike still hooks deep rather than light.
+    const deep = late && isLiveBait(lureRef?.current);
+    const lightHook = late && !deep;
     const underpowered = !canLand(current, species);
     const water = fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
@@ -426,6 +434,8 @@ export function useFishingGame(
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : lightHook
               ? t("Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.", { time: seconds(strike.elapsedMs), line })
+            : deep
+              ? t("It swallowed the bait: hooked deep in {time} s. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : fightWind(windRef.current)
               ? t("Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.", {
                   time: seconds(strike.elapsedMs),

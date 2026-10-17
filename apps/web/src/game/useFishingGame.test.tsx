@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
+import { carriesBait, FOLLOW_MS, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -423,6 +423,26 @@ describe("useFishingGame strike timing", () => {
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(phase()).toBe("fight:none");
     expect(hint()).toMatch(/^Hooked light in 1\.10 s, it only just caught\. Keep it out of the red\. /);
+  });
+
+  it("hooks deep, not light, on a late strike when live bait was swallowed", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(phase()).toBe("fight:none");
+    expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s\. .*Ease off when it runs\.$/);
+  });
+
+  it.each([
+    ["Nightcrawler", true],
+    ["Leech", true],
+    ["Bobber rig", false],
+    ["Inline spinner", false],
+    [undefined, false],
+  ] as const)("says whether %s is live bait", (lure, live) => {
+    expect(isLiveBait(lure)).toBe(live);
   });
 
   it("holds the bite while the lure is snagged, and lets it come once tapped free", () => {
