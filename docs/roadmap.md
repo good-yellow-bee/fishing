@@ -1682,3 +1682,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR410~~ | ~~Round 22 ideas and news~~ (#857) | field | S |
 | ~~BR411~~ | ~~Round 23 fixes and news~~ (#860) | field | S |
 | ~~BR412~~ | ~~Round 24 regression fixes~~ (#864) | field | S |
+| ~~BR413~~ | ~~Round 25 fixes: game fish out of badges, Bests, goal and Home~~ (#867) | field | S |

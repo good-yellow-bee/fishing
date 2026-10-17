@@ -35,3 +35,14 @@ describe("book badges", () => {
     expect([...bookBadges(book).values()].filter((badge) => badge === "book")).toHaveLength(2);
   });
 });
+
+describe("game fish and badges", () => {
+  it("gives a game fish no badge and lets it take none", () => {
+    const book = sampleLogbook(new Date(2026, 9, 1));
+    const bests = personalBests(book);
+    const huge = { ...bests.heaviest!, id: "game-giant", spotId: "spot-stillwater", measure: { kind: "weight" as const, pounds: 999 } };
+    const played = { ...book, catches: [huge, ...book.catches] };
+    expect(catchBadge(played, huge)).toBeNull();
+    expect(catchBadge(played, bests.heaviest!)).toBe("book");
+  });
+});

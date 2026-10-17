@@ -164,6 +164,11 @@ describe("weather from the same day", () => {
     expect(dayWeather(day, "2026-10-10", undefined, "another-water")).toEqual({ sky: "clear", wind: "calm" });
   });
 
+  it("never offers the game's made-up sky", () => {
+    const played = { ...noon, id: "g", spotId: "spot-stillwater", caughtAt: new Date(2026, 9, 10, 15, 0).toISOString(), weather: { sky: "rain" as const, wind: "strong" as const } };
+    expect(dayWeather({ ...book, catches: [morning, noon, played] }, "2026-10-10", undefined, "another-water")).toEqual({ sky: "clear", wind: "calm" });
+  });
+
   it("offers nothing for a day with no fish or a half-typed day", () => {
     expect(dayWeather(day, "2026-10-11")).toBeNull();
     expect(dayWeather(day, "2026-10")).toBeNull();

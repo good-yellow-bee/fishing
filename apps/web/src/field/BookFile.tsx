@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "r
 import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
 import { forgetUnreadableBook, readUnreadableBook } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
@@ -84,6 +84,11 @@ export function BookFile() {
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
+  useEffect(() => {
+    if (copiedAt === null || copiedAt <= own) return;
+    lowerCopiedAt(own);
+    setCopiedAt(own);
+  }, [copiedAt, own]);
   const [copyMark, setCopyMark] = useState(readCopyMark);
   // What a download would hold; the goals are read fresh whenever the page shows.
   const signature = useMemo(() => bookSignature(storedBook, items, Object.keys(photos), readYearGoals()), [storedBook, items, photos]);

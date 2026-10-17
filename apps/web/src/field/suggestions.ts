@@ -44,7 +44,8 @@ export function tripWeather(book: Logbook, tripId: string | undefined, skipId?: 
  */
 export function dayWeather(book: Logbook, ymd: string, skipId?: string, spotId?: string): CatchWeather | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
-  const day = catchesNewestFirst(book).filter((entry) => entry.id !== skipId && entry.weather && localDate(new Date(entry.caughtAt)) === ymd);
+  // The game's sky is made up: it says nothing about the day at a real water.
+  const day = catchesNewestFirst(book).filter((entry) => entry.id !== skipId && entry.weather && entry.spotId !== PLAY_LAKE_ID && localDate(new Date(entry.caughtAt)) === ymd);
   if (spotId === undefined) return day[0]?.weather ?? null;
   const here = day.find((entry) => entry.spotId === spotId);
   if (here || !day[0]) return here?.weather ?? null;
