@@ -336,6 +336,15 @@ describe("useFishingGame lost fight", () => {
     expect(hint()?.includes("The cold water has it sluggish, so it tires sooner.")).toBe(cold);
   });
 
+  it("says a jumper hooked in winter won't jump", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "winter");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()).toContain("The cold water has it sluggish: it tires sooner and won't jump.");
+  });
+
   it("says a lost trophy-sized fish looked like a trophy", () => {
     const surface = mount();
     const message = () => container!.querySelector("[data-testid=broke]")?.textContent;

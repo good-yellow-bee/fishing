@@ -541,6 +541,27 @@ describe("leaps", () => {
     expect(runs("pike", () => false, 30_000, true).kinds.some(Boolean)).toBe(false);
   });
 
+  it("keeps a jumper down in winter's cold water, even on a topwater", () => {
+    const leaps = (cold: boolean, topwater: boolean) => {
+      const runtime = makeFight(fish("largemouth-bass"), fish("largemouth-bass").minWeight, 20, seeded(7), 1, "open", undefined, topwater, false, cold);
+      const kinds: boolean[] = [];
+      let before = 0;
+      for (let now = 0; now < 30_000; now += 20) {
+        const outcome = runtime.step(now, 0.02, false);
+        if (runtime.sim.surge === 2 && before !== 2) kinds.push(runtime.sim.jump === true);
+        before = runtime.sim.surge;
+        if (outcome !== "fighting") break;
+      }
+      return kinds;
+    };
+    for (const topwater of [false, true]) {
+      expect(leaps(false, topwater).some(Boolean)).toBe(true);
+      const cold = leaps(true, topwater);
+      expect(cold.length).toBeGreaterThan(1);
+      expect(cold.some(Boolean)).toBe(false);
+    }
+  });
+
   it("loads the rod into the red when the line is held through a leap, but bowing keeps it clean", () => {
     const held = runs("smallmouth-bass", (sim) => sim.jump === true && sim.surge === 2, 12_000).runtime;
     expect(held.performance.peakTension).toBeGreaterThanOrEqual(RED_TENSION);
