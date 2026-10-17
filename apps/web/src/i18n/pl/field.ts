@@ -740,4 +740,7 @@ export const PL_FIELD: PlBook = {
   "Same kind, two names": "Jeden gatunek, dwie nazwy",
   "{shown} is in the book under two names: {from} ({fromCount}) and {into} ({intoCount}).": "{shown} jest w dzienniku pod dwiema nazwami: {from} ({fromCount}) i {into} ({intoCount}).",
   "Join them": "Połącz je",
+  "{n} waters": ["{n} łowisko", "{n} łowiska", "{n} łowisk"],
+  "Change water": "Zmień łowisko",
+  "{left} to go, {n} days left": ["brakuje {left}, został {n} dzień", "brakuje {left}, zostały {n} dni", "brakuje {left}, zostało {n} dni"],
 };

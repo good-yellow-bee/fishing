@@ -120,7 +120,8 @@ export function TripCard({
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">
           {/* The fish that got away too, so a hard day stands out in the list. */}
-          {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
+          {/* An untitled outing is already named after its water. */}
+          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>

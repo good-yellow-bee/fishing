@@ -460,6 +460,7 @@ function CatchForm() {
       )),
     [spotTrips, lang],
   );
+  const onlySampleWaters = !existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id));
   const heading = existing ? t(existing.species) : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
@@ -781,7 +782,7 @@ function CatchForm() {
             <p className="wide form-note lure-tips">
               {/* Which water these come from, with a way to it: on a phone the water's own field is further down. */}
               {t("From {water}:", { water: spotById(book, spotId)?.name ?? "" })}{" "}
-              <button type="button" className="text-button" onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
+              <button type="button" className="text-button" aria-label={t("Change water")} onClick={() => document.querySelector<HTMLSelectElement>('select[name="spot"]')?.focus()}>
                 {t("change")}
               </button>{" "}
               {hereSpecies.map((name) => (
@@ -950,7 +951,7 @@ function CatchForm() {
           <div className="water-field">
             <label>
               {t("Water")}
-              <select name="spot" value={spotId} onChange={(event) => onSpot(event.target.value)}>
+              <select name="spot" aria-describedby={onlySampleWaters ? "own-water-hint" : undefined} value={spotId} onChange={(event) => onSpot(event.target.value)}>
                 {/* The game's lake only for what is already there. */}
                 {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
                   <option key={spot.id} value={spot.id}>
@@ -963,8 +964,8 @@ function CatchForm() {
             {leftTrip ? <span className="field-hint">{t("No longer on {outing}: that outing was on another water.", { outing: leftTrip })}</span> : null}
             {canLocate ? <NearestWater book={book} onPick={onSpot} /> : null}
             {/* Only the sample week's made-up waters to pick from: the real one is a tap away. */}
-            {!existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id)) ? (
-              <span className="field-hint own-water">
+            {onlySampleWaters ? (
+              <span className="field-hint own-water" id="own-water-hint">
                 {t("These waters are invented.")} <Link to="/spots/new?then=catch">{t("Add the one you fished")}</Link>
               </span>
             ) : null}

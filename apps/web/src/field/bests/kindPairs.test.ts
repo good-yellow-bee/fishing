@@ -16,6 +16,11 @@ describe("one kind under two names", () => {
     ]);
   });
 
+  it("pairs them in English too, matched as Polish writes them", () => {
+    const catches = [fish("a", "Okoń"), fish("b", "European perch")];
+    expect(kindPairs(catches, (name) => name, show)).toEqual([{ shown: "European perch", from: "Okoń", into: "European perch", fromCount: 1, intoCount: 1 }]);
+  });
+
   it("leaves one name in two cases alone", () => {
     expect(kindPairs([fish("a", "pike"), fish("b", "Pike ")], show)).toEqual([]);
   });

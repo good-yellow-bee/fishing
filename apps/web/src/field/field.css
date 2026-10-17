@@ -895,8 +895,9 @@ button.field-primary:disabled {
   /* Above the tab bar, which is fixed to the bottom of a phone screen. */
   .form-save {
     bottom: calc(48px + env(safe-area-inset-bottom));
-    /* One row on a phone: the save button keeps its size and the second one wraps its words beside it. */
-    flex-wrap: nowrap;
+    /* One row on a phone: the save button keeps its size and the second one wraps its words beside it. With large
+       text the second drops to a row of its own rather than one letter a line. */
+    flex-wrap: wrap;
     gap: 12px;
   }
 
@@ -905,7 +906,7 @@ button.field-primary:disabled {
   }
 
   .form-save .text-button {
-    flex: 1 1 0;
+    flex: 1 1 12ch;
     min-width: 0;
     text-align: start;
   }
@@ -1274,16 +1275,17 @@ button.field-primary:disabled {
 
 .species-waters li {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid var(--field-line);
 }
 
-/* Counts and sizes stay on one line; a long name wraps instead. */
+/* Counts and sizes stay on one line while they fit; with large text they wrap rather than widen the page. */
 .species-waters li > .meta.sizes {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .species-chips {
