@@ -162,7 +162,7 @@ export function SpeciesPage() {
         ))}
       </ul>
       <TypicalByWater catches={countedFish(catches)} waters={waters} />
-      <SizeSpread catches={catches} name={name} />
+      <SizeSpread catches={countedFish(catches)} name={name} />
       {catches.length > 1 ? (
         <>
           <div className="section-head">

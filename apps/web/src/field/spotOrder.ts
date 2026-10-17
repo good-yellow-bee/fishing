@@ -1,4 +1,5 @@
 import type { Logbook, Spot } from "@stillwater/shared";
+import { PLAY_LAKE_ID } from "./playLake";
 
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null };
 
@@ -29,10 +30,11 @@ export function spotsByLastFish(book: Logbook): SpotRow[] {
 
 /**
  * The water a new fish most likely came from: today's outing's water, or of several outings today the one fished
- * most recently; with none today, the water fished most recently; else the book's first.
+ * most recently; with none today, the water fished most recently; else the book's first. Never the game's lake.
  */
 export function likelyWater(book: Logbook, today: string): string {
-  const order = spotsByLastFish(book).map((row) => row.spot.id);
+  // Never the game's lake: a fish logged by hand came from a real water.
+  const order = spotsByLastFish(book).map((row) => row.spot.id).filter((id) => id !== PLAY_LAKE_ID);
   const todays = new Set(book.trips.filter((trip) => trip.date === today).map((trip) => trip.spotId));
   return order.find((id) => todays.has(id)) ?? order[0] ?? "";
 }

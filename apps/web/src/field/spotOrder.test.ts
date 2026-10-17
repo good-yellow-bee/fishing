@@ -33,6 +33,15 @@ describe("likely water", () => {
     expect(likelyWater({ ...book, catches: [] }, "2026-10-17")).toBe("first");
     expect(likelyWater({ spots: [], trips: [], catches: [] }, "2026-10-17")).toBe("");
   });
+
+  it("never picks the game's lake, even fished today", () => {
+    const played = {
+      spots: [...book.spots, spot("spot-stillwater")],
+      trips: [...book.trips, { id: "play", date: "2026-10-17", spotId: "spot-stillwater", title: "", note: "" }],
+      catches: [...book.catches, fishAt("g", "spot-stillwater", "2026-10-17T09:00:00.000Z")],
+    };
+    expect(likelyWater(played, "2026-10-17")).toBe("lake");
+  });
 });
 
 describe("nearestWater", () => {

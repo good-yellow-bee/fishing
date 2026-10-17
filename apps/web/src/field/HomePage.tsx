@@ -1,6 +1,6 @@
 import { Fragment, useRef, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, upcomingTrips, type Spot, type Trip } from "@stillwater/shared";
+import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
@@ -19,6 +19,7 @@ import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
+import { upcomingOwnTrips } from "./playLake";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -78,7 +79,7 @@ export function HomePage() {
   const today = localDate(now);
   const tomorrow = shiftDate(now, 1);
   const catches = recentCatches(book, 4);
-  const upcoming = upcomingTrips(book, today);
+  const upcoming = upcomingOwnTrips(book, today);
   const recent = recentTrips(book, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);

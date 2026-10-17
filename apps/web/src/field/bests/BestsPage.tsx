@@ -23,6 +23,7 @@ import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
+import { offPlayLake } from "../playLake";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -81,12 +82,14 @@ export function BestsPage() {
   const [params, setParams] = useSearchParams();
   const today = localDate(new Date());
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
-  const days = daysOut(whole, today.slice(0, 4), today);
+  // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
+  const real = { ...whole, trips: whole.trips.filter(offPlayLake), catches: whole.catches.filter(offPlayLake) };
+  const days = daysOut(real, today.slice(0, 4), today);
   const notYet = notYetThisYear(whole.catches);
   const newWaters = newWatersThisYear(whole.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
-  const streak = outingStreak(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
-  const split = weekendSplit(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const streak = outingStreak(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const years = yearTally(whole.catches).map((row) => row.year);
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;

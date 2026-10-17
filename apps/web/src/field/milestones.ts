@@ -1,8 +1,6 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
-
-/** The game's own lake: fish landed in play don't count toward the book's real milestones. */
-const PLAY_LAKE_ID = "spot-stillwater";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /** A fish the angler caught: not the sample week, not the game. */
 export const ownFish = (entry: CatchEntry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID;

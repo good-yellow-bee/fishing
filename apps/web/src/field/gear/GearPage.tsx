@@ -11,7 +11,6 @@ import {
   shiftDate,
   spotById,
   tripById,
-  upcomingTrips,
   type Trip,
 } from "@stillwater/shared";
 import { fishCountLabel, formatCatchDay, formatDay, outingName, tripWhen } from "../format";
@@ -27,6 +26,7 @@ import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
+import { upcomingOwnTrips } from "../playLake";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -263,7 +263,7 @@ export function GearPage() {
     );
   }
 
-  const upcoming = upcomingTrips(book, today);
+  const upcoming = upcomingOwnTrips(book, today);
   const recent = recentTrips(book, today);
   const fishByTrip = fishCountsByTrip(book);
 

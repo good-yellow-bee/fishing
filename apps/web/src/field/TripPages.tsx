@@ -12,7 +12,6 @@ import {
   shiftDate,
   spotById,
   tripById,
-  upcomingTrips,
   recentTrips,
   itemsForTrip,
   tripsForSpot,
@@ -54,6 +53,8 @@ import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
 import { fishOnOutingDay } from "./suggestions";
 import "./search.css";
+import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
+import { likelyWater } from "./spotOrder";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
 function tripNight(date: string) {
@@ -82,7 +83,7 @@ export function TripsPage() {
   const query = params.get(TRIP_FIND) ?? "";
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingTrips(book, today);
+  const upcoming = upcomingOwnTrips(book, today);
   const recent = recentTrips(book, today);
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
@@ -477,7 +478,7 @@ function TripForm() {
   const again = existing ? undefined : tripById(book, params.get("again") ?? "");
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
-  const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : (book.spots[0]?.id ?? "");
+  const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : likelyWater(book, localDate(new Date()));
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
@@ -553,7 +554,8 @@ function TripForm() {
     );
   }
 
-  if (!existing && book.spots.length === 0) {
+  // The game's lake alone is no water to log a real day on.
+  if (!existing && !book.spots.some((spot) => spot.id !== PLAY_LAKE_ID)) {
     return (
       <div className="sheet">
         <h1>{t("Add a trip")}</h1>
@@ -596,7 +598,8 @@ function TripForm() {
             <label>
               {t("Spot")}
               <select name="spot" value={spotId} onChange={(event) => setSpotId(event.target.value)}>
-                {book.spots.map((spot) => (
+                {/* The game's lake only for what is already there. */}
+                {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>

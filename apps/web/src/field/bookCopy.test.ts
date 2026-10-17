@@ -63,5 +63,9 @@ describe("a book that is still only the sample", () => {
     expect(isSampleOnly({ ...sample, trips: [...sample.trips, { ...sample.trips[0]!, id: "mine" }] })).toBe(false);
     expect(isSampleOnly({ ...sample, spots: [...sample.spots, { ...sample.spots[0]!, id: "my-pond" }] })).toBe(false);
     expect(isSampleOnly({ spots: [], trips: [], catches: [] })).toBe(false);
+    // A round on the game's lake leaves it the sample.
+    const lake = { id: "spot-stillwater", name: "Stillwater", waterType: "lake" as const, notes: "", bestConditions: "" };
+    const played = { spots: [...sample.spots, lake], trips: [...sample.trips, { ...sample.trips[0]!, id: "play", spotId: lake.id }], catches: [...sample.catches, { ...sample.catches[0]!, id: "landed", spotId: lake.id }] };
+    expect(isSampleOnly(played)).toBe(true);
   });
 });

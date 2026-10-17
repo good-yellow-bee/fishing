@@ -1,8 +1,6 @@
 import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch } from "./bookCopy";
-
-/** The game files its fish here, always by weight, so they say nothing about how the player measures. */
-const PLAY_LAKE_ID = "spot-stillwater";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /**
  * Names for a form's suggestion list: the player's own first, most used on

@@ -9,7 +9,6 @@ import {
   shiftDate,
   spotById,
   tripsForSpot,
-  upcomingTrips,
   type CatchEntry,
   type Trip,
 } from "@stillwater/shared";
@@ -43,6 +42,7 @@ import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MergeWater } from "./MergeWater";
+import { upcomingOwnTrips } from "./playLake";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -54,7 +54,7 @@ export function SpotsPage() {
   useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingTrips(book, today);
+  const upcoming = upcomingOwnTrips(book, today);
 
   return (
     <div className="sheet">

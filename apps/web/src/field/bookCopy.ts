@@ -1,4 +1,5 @@
 import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
 export const BOOK_COPY_STORAGE_KEY = "stillwater.field-log.copied.v1";
 
@@ -17,13 +18,14 @@ export function isSampleCatch(id: string) {
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
 const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
 
-/** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. */
+/** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. The game's lake doesn't count either way. */
 export function isSampleOnly(book: Logbook) {
+  const spots = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID);
   return (
-    book.spots.length > 0 &&
-    book.spots.every((spot) => SAMPLE_SPOT_IDS.has(spot.id)) &&
-    book.trips.every((trip) => SAMPLE_TRIP_IDS.has(trip.id)) &&
-    book.catches.every((entry) => SAMPLE_IDS.has(entry.id))
+    spots.length > 0 &&
+    spots.every((spot) => SAMPLE_SPOT_IDS.has(spot.id)) &&
+    book.trips.filter(offPlayLake).every((trip) => SAMPLE_TRIP_IDS.has(trip.id)) &&
+    book.catches.filter(offPlayLake).every((entry) => SAMPLE_IDS.has(entry.id))
   );
 }
 
