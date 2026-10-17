@@ -152,16 +152,19 @@ export function newFishIn(here: Logbook, file: Logbook): CatchEntry[] {
  * This book with the file's new fish added, and the waters, outings, tackle and photos they bring along.
  * Anything already here, matched by id, stays as it is here (but for an outing's lost and missed counts, which take the higher);
  * a water or outing deleted here comes back only when a new fish needs it.
+ * Given `deletedHere`, the ids deleted in this book, the file's other waters and outings come along too (a water added
+ * or an outing planned on another device), unless deleted here; without it, only what the new fish need.
  * The file's photos join only while they fit the room kept for photos, so the book can still be downloaded and loaded again.
  */
-export function mergeFieldArchive(here: FieldArchive, file: FieldArchive): FieldArchive {
+export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, deletedHere?: ReadonlySet<string>): FieldArchive {
   const added = newFishIn(here.book, file.book);
   const spotIds = new Set(here.book.spots.map((spot) => spot.id));
   const tripIds = new Set(here.book.trips.map((trip) => trip.id));
   const tackleIds = new Set(here.tackle.map((item) => item.id));
   const wantedTrips = new Set(added.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
-  const trips = file.book.trips.filter((trip) => !tripIds.has(trip.id) && wantedTrips.has(trip.id));
-  const wantedSpots = new Set([...added.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
+  const wanted = (id: string, needed: boolean) => needed || (deletedHere !== undefined && !deletedHere.has(id));
+  const trips = file.book.trips.filter((trip) => !tripIds.has(trip.id) && wanted(trip.id, wantedTrips.has(trip.id)));
+  const neededSpots = new Set([...added.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
   const newTrips = new Set(trips.map((trip) => trip.id));
   const photos = { ...here.photos };
   let size = JSON.stringify(photos).length;
@@ -186,7 +189,7 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive): Field
   });
   return {
     book: {
-      spots: [...here.book.spots, ...file.book.spots.filter((spot) => !spotIds.has(spot.id) && wantedSpots.has(spot.id))],
+      spots: [...here.book.spots, ...file.book.spots.filter((spot) => !spotIds.has(spot.id) && wanted(spot.id, neededSpots.has(spot.id)))],
       trips: [...hereTrips, ...trips],
       catches: [...here.book.catches, ...added],
     },

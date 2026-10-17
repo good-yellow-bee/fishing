@@ -139,6 +139,18 @@ describe("field archive", () => {
     expect(merged.book.trips.some((trip) => trip.id === "trip-empty")).toBe(false);
   });
 
+  it("given what was deleted here, brings the file's other waters and outings, but not those", () => {
+    const pond = { id: "spot-new", name: "New Pond", waterType: "pond" as const, notes: "", bestConditions: "" };
+    const gone = { id: "spot-gone", name: "Gone Pond", waterType: "pond" as const, notes: "", bestConditions: "" };
+    const planned = { id: "trip-planned", date: "2026-11-01", spotId: "spot-new", title: "Planned", note: "" };
+    const goneTrip = { id: "trip-gone", date: "2026-11-02", spotId: book.spots[0]!.id, title: "Gone", note: "" };
+    const file = archiveFor({ ...book, spots: [...book.spots, pond, gone], trips: [...book.trips, planned, goneTrip] }, null);
+    const merged = mergeFieldArchive(archiveFor(book, null), file, new Set(["spot-gone", "trip-gone"]));
+    expect(merged.book.spots.slice(book.spots.length).map((spot) => spot.id)).toEqual(["spot-new"]);
+    expect(merged.book.trips.slice(book.trips.length).map((trip) => trip.id)).toEqual(["trip-planned"]);
+    expect(isLogbook(merged.book)).toBe(true);
+  });
+
   it("keeps the higher lost and missed count on an outing both books have", () => {
     const tripId = book.trips[0]!.id;
     const withCounts = (lost: number, missed: number) => ({ ...book, trips: book.trips.map((trip) => (trip.id === tripId ? { ...trip, ...(lost ? { lost } : {}), ...(missed ? { missed } : {}) } : trip)) });
