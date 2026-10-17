@@ -109,7 +109,9 @@ export function bestFishDay(book: Logbook): { date: string; count: number; tripI
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
     const day = fishDay(entry, tripDays).day;
     dayOf.set(entry.id, day);
-    byDay.set(day, [...(byDay.get(day) ?? []), entry]);
+    const list = byDay.get(day);
+    if (list) list.push(entry);
+    else byDay.set(day, [entry]);
   }
   let best: { date: string; fish: CatchEntry[] } | null = null;
   for (const [date, fish] of byDay) {

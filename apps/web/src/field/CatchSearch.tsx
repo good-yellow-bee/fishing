@@ -287,8 +287,12 @@ export function searchParts(book: Logbook, needle: string): string[] {
   // "10 inches" or "10 inch": the unit as the search reads it.
   let text = needle
     .replace(/(\d)\s?inch(?:es)?(?=[\s+]|$)/gi, "$1 in")
+    // "od 20 do 25 cm", "between 20 and 25 in", "from 2 to 3 lb": the range "20-25 cm", read below.
+    .replace(/(^|[\s+])(?:od|from|between)\s+(\d+(?:[.,]\d+)?)\s+(?:do|to|and)\s+(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))(?=[\s+]|$)/gi, "$1$2-$3")
     .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niż|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niz|od)\s+` + sized, "gi"), "$1>")
-    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz|do)\s+` + sized, "gi"), "$1<");
+    // "do 25 cm", "up to 2 lb": the bound itself included.
+    .replace(new RegExp(String.raw`(^|[\s+])(?:do|up to)\s+` + sized, "gi"), "$1<=")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz)\s+` + sized, "gi"), "$1<");
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
   text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   // "20+ in", the plus before the unit: the same.
