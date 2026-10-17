@@ -15,15 +15,24 @@ function parseStored(raw: string): Logbook | null {
 }
 
 export function readStoredLogbook(): Logbook | null {
+  return openStoredLogbook().book;
+}
+
+/** The stored book, read once, and whether it was there but could not be read whole (its photos are then left alone). */
+export function openStoredLogbook(): { book: Logbook | null; unreadable: boolean } {
   let raw: string | null;
   try {
     raw = localStorage.getItem(LOGBOOK_STORAGE_KEY);
   } catch {
-    return null;
+    return { book: null, unreadable: false };
   }
-  if (!raw) return null;
+  if (!raw) return { book: null, unreadable: false };
   const book = parseStored(raw);
-  if (book) return book;
+  if (book) return { book, unreadable: false };
+  return { book: setAsideAndSalvage(raw), unreadable: true };
+}
+
+function setAsideAndSalvage(raw: string): Logbook | null {
   keepUnreadable(raw);
   // One bad fish doesn't cost the rest: what reads is kept, and stored in place so the game adds to it too.
   const kept = salvageStored(raw);

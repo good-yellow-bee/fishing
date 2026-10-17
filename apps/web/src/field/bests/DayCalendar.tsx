@@ -9,9 +9,15 @@ import { dayMarks, markedMonths } from "./dayMarks";
 
 /** The weekdays' first letters in the reader's language, Monday first: "M T W T F S S", "P W Ś C P S N". */
 function weekdayLetters(): string[] {
+  const held = letters.get(locale());
+  if (held) return held;
+  const format = new Intl.DateTimeFormat(locale(), { weekday: "narrow" });
   // 2026-10-12 was a Monday.
-  return Array.from({ length: 7 }, (_, index) => new Intl.DateTimeFormat(locale(), { weekday: "narrow" }).format(new Date(2026, 9, 12 + index, 12)));
+  const made = Array.from({ length: 7 }, (_, index) => format.format(new Date(2026, 9, 12 + index, 12)));
+  letters.set(locale(), made);
+  return made;
 }
+const letters = new Map<string, string[]>();
 
 /** How dark a fished day is: one fish, a few, or a good day. */
 function level(fish: number): string {

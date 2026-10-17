@@ -465,8 +465,17 @@ export function tripById(book: Logbook, id: string): Trip | undefined {
   return book.trips.find((trip) => trip.id === id);
 }
 
+/** Sorted once per list of fish: a search or a page asks many times for the same book. */
+const newestFirst = new WeakMap<readonly CatchEntry[], CatchEntry[]>();
+
 export function catchesNewestFirst(book: Logbook): CatchEntry[] {
-  return [...book.catches].sort((a, b) => b.caughtAt.localeCompare(a.caughtAt));
+  let sorted = newestFirst.get(book.catches);
+  if (!sorted) {
+    sorted = [...book.catches].sort((a, b) => b.caughtAt.localeCompare(a.caughtAt));
+    newestFirst.set(book.catches, sorted);
+  }
+  // A copy each time, so a caller that sorts or trims its list can't change another's.
+  return sorted.slice();
 }
 
 export function recentCatches(book: Logbook, limit = 4): CatchEntry[] {
