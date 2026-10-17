@@ -69,7 +69,7 @@ const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwsz
 /** "big": the fish bigger than their kind's typical size, by the measure each was logged with. */
 const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "duza", "duzy"].map((word) => normalize(word)));
 /** "loose": fish left off an outing that water had that day, the ones "Add this fish to it" would file. */
-const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
+export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -195,7 +195,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     return catchesNewestFirst(book).filter((entry) => ids.has(entry.id));
   }
   if (LOOSE_WORDS.has(normalize(needle))) {
-    return catchesNewestFirst(book).filter((entry) => !(entry.tripId && tripById(book, entry.tripId)) && !Number.isNaN(Date.parse(entry.caughtAt)) && tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt))));
+    return [...looseOutings(book).keys()].map((id) => book.catches.find((entry) => entry.id === id)!);
   }
   if (RECORD_WORDS.has(normalize(needle))) {
     const badges = bookBadges(book);
@@ -383,6 +383,32 @@ function findKept(book: Logbook, parts: readonly string[], t: (text: string) => 
 
 export { FIND_PARAM, exactTerm, findLink, findWithLink } from "./findLinks";
 
+/** The fish left off an outing their water had that day, newest first, each with that outing's id. */
+export function looseOutings(book: Logbook): Map<string, string> {
+  const found = new Map<string, string>();
+  for (const entry of catchesNewestFirst(book)) {
+    if ((entry.tripId && tripById(book, entry.tripId)) || Number.isNaN(Date.parse(entry.caughtAt))) continue;
+    const trip = tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
+    if (trip) found.set(entry.id, trip.id);
+  }
+  return found;
+}
+
+/** "File these on their outings": after a "loose" search, every fish goes onto its day's outing in one tap. */
+function FileLoose() {
+  const { book, fileEach } = useLogbook();
+  const t = useT();
+  const loose = looseOutings(book);
+  if (loose.size === 0) return null;
+  return (
+    <p className="file-loose">
+      <button type="button" className="text-button" onClick={() => fileEach(loose)}>
+        {t("File these on their outings")}
+      </button>
+    </p>
+  );
+}
+
 export function CatchSearch() {
   const { book, photoFor } = useLogbook();
   const t = useT();
@@ -544,6 +570,7 @@ export function CatchSearch() {
               )}
             </PagedCatches>
           )}
+          {matches.length > 0 && LOOSE_WORDS.has(normalize(settled)) ? <FileLoose /> : null}
           {/* Every fish on one lure: the place to fix that lure's name across the book. */}
           {matches.length > 0 && parseExactTerm(settled)?.field === "lure" ? (
             <RenameKind key={matches[0]!.lure} field="lure" name={matches[0]!.lure} />

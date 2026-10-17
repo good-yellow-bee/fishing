@@ -23,7 +23,7 @@ import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
-import { outingAverage, topOuting } from "./outingAverage";
+import { outingAverage, outingStreak, topOuting } from "./outingAverage";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
@@ -111,6 +111,8 @@ export function SpotPage() {
   const hooks = hookTally(book, spot.id);
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
+  const streak = outingStreak(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
@@ -172,6 +174,7 @@ export function SpotPage() {
       </div>
       {average ? <p className="meta">{average}</p> : null}
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
+      {streak.dryNow > 1 && streak.best > 0 ? <p className="meta dry-here">{t("Outings here since the last fish: {count}", { count: streak.dryNow })}</p> : null}
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}

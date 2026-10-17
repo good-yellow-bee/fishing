@@ -431,7 +431,7 @@ function CatchForm() {
     }
     const nextTrip = existing ? "" : (tripForFish(book, nextSpot, caughtAt)?.id ?? "");
     // Said under the water, so an outing doesn't quietly go from the fish; kept while no outing takes its place.
-    setLeftTrip(tripId ? (nextTrip !== tripId ? (tripById(book, tripId)?.title ?? "") : "") : nextTrip ? "" : leftTrip);
+    setLeftTrip(tripId ? (nextTrip !== tripId ? (outingNameById(book, tripId) ?? "") : "") : nextTrip ? "" : leftTrip);
     if (existing && tripId === existing.tripId) setWaterTookTrip(true);
     setTripId(nextTrip);
     setTripPicked(Boolean(existing));
@@ -1118,6 +1118,13 @@ function CatchView() {
   const sun = place ? sunMark(entry.caughtAt, place) : null;
   const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
   const milestone = milestoneOf(book, entry);
+  // The first of its kind at this water, once another has followed it there: the book's first says so already.
+  const atWater = spot && counted.some((other) => other.id === entry.id) ? counted.filter((other) => other.spotId === entry.spotId) : [];
+  const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || other.caughtAt > entry.caughtAt);
+  // The fish of its kind that year, through the catch search.
+  const caughtYear = String(new Date(entry.caughtAt).getFullYear());
+  const yearSearch = [exactTerm("species", t(entry.species)), caughtYear] as const;
+  const yearCount = kind.length > 1 ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -1207,6 +1214,16 @@ function CatchView() {
         {lureHere && lureHereCount > 1 ? (
           <p className="meta lure-here">
             <Link to={findWithLink(...lureHere)}>{t("On {lure} at {water}: {count}", { lure: t(entry.lure), water: spot!.name, count: fishCountLabel(lureHereCount) })}</Link>
+          </p>
+        ) : null}
+        {firstHere ? (
+          <p className="meta first-here">
+            <Link to={findWithLink(exactTerm("water", spot!.name), exactTerm("species", t(entry.species)))}>{t("First {species} here.", { species: t(entry.species) })}</Link>
+          </p>
+        ) : null}
+        {yearCount > 1 ? (
+          <p className="meta kind-year">
+            <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: t(entry.species), year: caughtYear, count: yearCount })}</Link>
           </p>
         ) : null}
         {milestone ? (
