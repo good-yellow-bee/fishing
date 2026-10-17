@@ -1729,3 +1729,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR450~~ | ~~Round 44 fixes~~ (#909) | field | S |
 | ~~BR451~~ | ~~Round 44 ideas~~ (#910) | field | S |
 | ~~BR452~~ | ~~Round 45 fixes: unreadable fish salvage, failed tackle and goal saves~~ (#914) | field | S |
+| ~~BR453~~ | ~~Round 45 ideas: full storage message, set-aside line on Home, re-read on return~~ (#916) | field | S |
