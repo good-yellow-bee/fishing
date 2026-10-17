@@ -1,4 +1,5 @@
 import { Fragment, useRef, type ReactNode } from "react";
+import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
 import { catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
@@ -16,7 +17,6 @@ import { countedFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
-import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
@@ -250,9 +250,9 @@ export function HomePage() {
             {next && nextSpot?.place ? (
               <span className="map-link">
                 {" · "}
-                <a href={osmLink(nextSpot.place.lat, nextSpot.place.lng)} target="_blank" rel="noreferrer">
+                <MapAnchor lat={nextSpot.place.lat} lng={nextSpot.place.lng}>
                   {t("Open on a map")}
-                </a>
+                </MapAnchor>
               </span>
             ) : null}
           </small>

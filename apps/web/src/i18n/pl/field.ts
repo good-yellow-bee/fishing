@@ -743,4 +743,5 @@ export const PL_FIELD: PlBook = {
   "{n} waters": ["{n} łowisko", "{n} łowiska", "{n} łowisk"],
   "Change water": "Zmień łowisko",
   "{left} to go, {n} days left": ["brakuje {left}, został {n} dzień", "brakuje {left}, zostały {n} dni", "brakuje {left}, zostało {n} dni"],
+  "(opens OpenStreetMap in a new tab)": "(otwiera OpenStreetMap w nowej karcie)",
 };

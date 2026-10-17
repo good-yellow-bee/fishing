@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
+import { MapAnchor } from "./MapAnchor";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -41,7 +42,6 @@ import { ChoiceRow } from "./ChoiceRow";
 import { countedFish } from "./milestones";
 import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
-import { osmLink } from "./osmLink";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
@@ -228,9 +228,9 @@ export function SpotPage() {
         {spot.place ? (
           <p className="meta spot-place">
             {formatCoord(spot.place.lat, spot.place.lng)}{" "}
-            <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
+            <MapAnchor lat={spot.place.lat} lng={spot.place.lng}>
               {t("Open on a map")}
-            </a>
+            </MapAnchor>
           </p>
         ) : placeFor(spot.id) || spot.id === PLAY_LAKE_ID ? null : (
           // A sample water already has its pin on the map; any other water with no place is offered one.
