@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { Link } from "react-router-dom";
+import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
@@ -9,7 +10,8 @@ import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { intoMergedWaters, readMergedWaters } from "./waterMerge";
-import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
+import { MERGE_PARAM } from "./MergeWater";
+import { forgetDeletedFish, readDeletedFish, restoreDeletedFish } from "./deletedFish";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
 import { t, useT } from "../i18n";
@@ -80,10 +82,16 @@ export function BookFile() {
     setPending(null);
     loadButton.current?.focus();
   };
-  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string } | null>(null);
+  // `twins`: waters the file added under a name the book already had, each a tap from merging.
+  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string; twins?: { id: string; name: string; into: string }[] } | null>(null);
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
+  // An undo elsewhere (the sample week taken back) can put the copy record back: read it again with the book.
+  useEffect(() => {
+    setCopiedAt(readCopiedAt());
+    setCopyMark(readCopyMark());
+  }, [storedBook]);
   useEffect(() => {
     if (copiedAt === null || copiedAt <= own) return;
     lowerCopiedAt(own);
@@ -98,7 +106,7 @@ export function BookFile() {
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
   // What a loaded file replaced, while nothing has changed since: the load can be taken back.
-  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals } | null>(null);
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals; deleted: string[] } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
@@ -178,7 +186,7 @@ export function BookFile() {
     }
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
     const goalsHere = readYearGoals();
-    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere });
+    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()] });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
@@ -194,16 +202,26 @@ export function BookFile() {
       setCopyMark(readCopyMark());
     }
     setPending(null);
+    const namesHere = new Set(here.book.spots.map((spot) => foldText(spot.name)));
+    const idsHere = new Set(here.book.spots.map((spot) => spot.id));
+    const twins = merged
+      ? next.book.spots
+          .filter((spot) => !idsHere.has(spot.id) && namesHere.has(foldText(spot.name)))
+          .map((spot) => ({ id: spot.id, name: spot.name, into: here.book.spots.find((other) => foldText(other.name) === foldText(spot.name))!.id }))
+      : [];
     setNotice({
       tone: "loaded",
+      ...(twins.length > 0 ? { twins } : {}),
       text: merged
         ? [
-            // Just the waters and outings, when the file brought no fish.
-            ...(next.book.catches.length > here.book.catches.length || next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length
+            // Just the waters and outings, or the photos, when the file brought no fish.
+            ...(next.book.catches.length > here.book.catches.length ||
+            (next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length && Object.keys(next.photos).length === Object.keys(here.photos).length)
               ? [t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })]
               : []),
             ...(next.book.spots.length > here.book.spots.length ? [t("Waters added: {count}.", { count: next.book.spots.length - here.book.spots.length })] : []),
             ...(next.book.trips.length > here.book.trips.length ? [t("Outings added: {count}.", { count: next.book.trips.length - here.book.trips.length })] : []),
+            ...(Object.keys(next.photos).length > Object.keys(here.photos).length ? [t("Photos added: {count}.", { count: Object.keys(next.photos).length - Object.keys(here.photos).length })] : []),
             ...(leftOut > 0 ? [t("Photos left out, so the book still fits this browser: {count}.", { count: leftOut })] : []),
           ].join(" ")
         : t("This browser now has the book from that file."),
@@ -237,6 +255,8 @@ export function BookFile() {
     writeYearGoals(beforeLoad.goals);
     // The copy record as it was, its time and fingerprint included.
     restoreCopyRecord(beforeLoad.copyRecord);
+    // The fish deleted before the load are kept out of later merges again.
+    restoreDeletedFish(beforeLoad.deleted);
     setCopiedAt(beforeLoad.copiedAt);
     setCopyMark(readCopyMark());
     setBeforeLoad(null);
@@ -250,6 +270,8 @@ export function BookFile() {
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
   const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
+  // Photos the file has for fish both books share and this one has none for: taken on the other phone after a swap.
+  const photosOnly = pending && storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined).length : 0;
 
   return (
     <footer className="sheet-foot">
@@ -343,6 +365,7 @@ export function BookFile() {
           type="file"
           accept="application/json,.json"
           tabIndex={-1}
+          aria-hidden="true"
           aria-label={t("Field log file")}
           onChange={(event) => {
             void onFile(event);
@@ -366,6 +389,8 @@ export function BookFile() {
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
             {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
             {kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
+            {/* The same file again: nothing to add, so Replace (which can lose fish) isn't the only way out that reads like one. */}
+            {storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 && photosOnly === 0 && kept === 0 ? ` ${t("Nothing in this file is new to this book.")}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
@@ -378,6 +403,10 @@ export function BookFile() {
           ) : placesOnly > 0 ? (
             <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add the new waters and outings ({count})", { count: placesOnly })}
+            </button>
+          ) : photosOnly > 0 ? (
+            <button type="button" className="text-button" onClick={() => onAddNew()}>
+              {t("Add the new photos ({count})", { count: photosOnly })}
             </button>
           ) : null}
           {kept > 0 && storedBook.catches.length > 0 ? (
@@ -396,6 +425,13 @@ export function BookFile() {
         {notice ? (
           <p className={notice.tone === "bad" ? "field-error" : "book-note"}>
             {messageText(notice.text)}
+            {/* Two phones that each added the same water: the file's copy opens on its merge box. */}
+            {notice.twins?.map((twin) => (
+              <span key={twin.id}>
+                {" "}
+                {t("{name} is now in the book twice.", { name: twin.name })} <Link to={`/spots/${twin.id}?${MERGE_PARAM}=${encodeURIComponent(twin.into)}`}>{t("Merge them")}</Link>
+              </span>
+            ))}
             {notice.tone === "loaded" && canUndoLoad ? (
               <>
                 {" "}

@@ -14,5 +14,8 @@ export function upcomingOwnTrips(book: Logbook, today: string): Trip[] {
 /** A catch search `term` that leaves out the game's lake when any of `rows` came from it, so its link opens the fish counted. */
 export function withoutPlayLake(book: Logbook, term: string, rows: readonly { spotId: string }[]): string {
   const lake = book.spots.find((spot) => spot.id === PLAY_LAKE_ID);
+  // Left out by name: when a real water shares it, leaving the name out would drop that water's fish as well.
+  const named = (name: string) => name.trim().toLowerCase();
+  if (lake && book.spots.some((spot) => spot.id !== PLAY_LAKE_ID && named(spot.name) === named(lake.name))) return term;
   return lake && rows.some((row) => !offPlayLake(row)) ? `${term} -${exactTerm("water", lake.name)}` : term;
 }

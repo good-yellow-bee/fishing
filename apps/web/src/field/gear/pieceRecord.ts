@@ -1,5 +1,8 @@
 import { isLureLabel, localDate, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { pieceKey } from "./pieceKey";
+import { countedFish } from "../milestones";
+import { isSampleCatch, isSampleTrip } from "../bookCopy";
+import { PLAY_LAKE_ID } from "../playLake";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught;
@@ -13,8 +16,15 @@ export type PieceRecord = { label: string; outings: number; fish: number; lure?:
  * commonest spelling, as its search link opens them. Tools and line are left out. Most fish first, then most outings.
  */
 export function pieceRecords(book: Logbook, items: readonly TackleItem[], today: string): PieceRecord[] {
-  const past = new Set(book.trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
+  // The sample week's made-up bags count only while the book has no outings of the angler's own, as its fish do.
+  // Own outings already fished: not the game's, and not one still only planned.
+  const ownTrips = book.trips.filter((trip) => !isSampleTrip(trip.id) && trip.spotId !== PLAY_LAKE_ID && trip.date <= today);
+  // The same switch the fish make (countedFish): once the angler has a fish or an outing of their own, the sample's go.
+  const ownFish = book.catches.some((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
+  const trips = ownTrips.length > 0 || ownFish ? ownTrips : book.trips;
+  const past = new Set(trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
+  const own = countedFish(book.catches);
   const byPiece = new Map<string, { label: string; trips: Set<string> }>();
   for (const item of items) {
     if (!past.has(item.tripId) || !isLureLabel(item.label)) continue;
@@ -27,10 +37,13 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
     .map(([key, row]) => {
       // The spelling most of its fish were logged under, and those fish: what the lure's search link opens.
       const spellings = new Map<string, CatchEntry[]>();
-      for (const entry of book.catches) {
+      // The angler's own fish: a round of the game with the same lure neither adds to its record nor ends a dry run.
+      for (const entry of own) {
         if (pieceKey(entry.lure) !== key) continue;
         const name = entry.lure.trim().toLowerCase();
-        spellings.set(name, [...(spellings.get(name) ?? []), entry]);
+        const list = spellings.get(name);
+        if (list) list.push(entry);
+        else spellings.set(name, [entry]);
       }
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
       // The newest fish under any spelling of the piece: "Spinnerbaits" last week still counts for "Spinnerbait".

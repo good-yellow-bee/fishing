@@ -101,15 +101,15 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?)\b/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?)\b/i;
 /** Line names end with the line word ("Steel leader"); "In-line spinner" does not. */
-const LINE = /\b(lines?|leaders?|tippets?)\s*$/i;
+const LINE = /\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$/i;
 
 /**
  * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.
  */
 const TACKLE_TOOL_PL =
-  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang)/;
+  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet)/;
 /**
  * Polish names a line by its word wherever it sits ("Żyłka 0,25", "Zapasowy przypon"), but a lure rigged on one
  * ("Guma na przyponie") is still a lure.
@@ -236,14 +236,14 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "crank",
     label: "Crankbait",
-    match: /crank|jerkbait|rapala/i,
+    match: /crank|jerkbait|rapala|wobler/i,
     size: "large",
     species: { "smallmouth-bass": 1.7, pike: 1.3, "rainbow-trout": 1.3 },
   },
   {
     id: "jig",
     label: "Jig",
-    match: /tube|\bjigs?\b|\bgrubs?\b/i,
+    match: /tube|\bjigs?\b|\bgrubs?\b|kopyt|ripper|twister/i,
     size: "large",
     species: { "smallmouth-bass": 1.8, burbot: 1.5, walleye: 1.6 },
   },

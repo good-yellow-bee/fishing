@@ -100,8 +100,24 @@ describe("field archive", () => {
       ok: false,
       message: FIELD_ARCHIVE_REFUSAL,
     });
-    expect(parseFieldArchive({ ...document, photos: { "missing-fish": jpeg } })).toMatchObject({ ok: false });
     expect(parseFieldArchive({ ...document, photos: [] })).toMatchObject({ ok: false });
+  });
+
+  it("drops a photo whose fish isn't in the file, and keeps the file", () => {
+    const document = fieldArchiveDocument(archiveFor(book));
+    const parsed = parseFieldArchive({ ...document, photos: { ...document.photos, "missing-fish": jpeg } });
+    expect(parsed.ok && Object.keys(parsed.value.photos)).toEqual(["catch-gill"]);
+  });
+
+  it("keeps the first of a repeated id, drops an outing that isn't there, and refuses a fish on a missing water", () => {
+    const document = fieldArchiveDocument(archiveFor(book, null));
+    const [first, ...rest] = document.book.catches;
+    const twice = parseFieldArchive({ ...document, book: { ...document.book, catches: [first, { ...first!, note: "copy" }, ...rest] } });
+    expect(twice.ok && twice.value.book.catches.filter((entry) => entry.id === first!.id).map((entry) => entry.note)).toEqual([first!.note]);
+    const ghostTrip = parseFieldArchive({ ...document, book: { ...document.book, catches: [{ ...first!, tripId: "nowhere" }, ...rest] } });
+    expect(ghostTrip.ok && ghostTrip.value.book.catches[0]!.tripId).toBeNull();
+    expect(parseFieldArchive({ ...document, book: { ...document.book, catches: [{ ...first!, spotId: "nowhere" }, ...rest] } })).toMatchObject({ ok: false });
+    expect(parseFieldArchive({ ...document, book: { ...document.book, trips: document.book.trips.map((trip, i) => (i === 0 ? { ...trip, spotId: "nowhere" } : trip)) } })).toMatchObject({ ok: false });
   });
 
   it("refuses a file whose catch time or outing day isn't a date", () => {
@@ -129,6 +145,14 @@ describe("field archive", () => {
     expect(merged.photos[book.catches[3]!.id]).toBe(jpeg);
     expect(merged.tackle).toEqual(here.tackle);
     expect(isLogbook(merged.book)).toBe(true);
+  });
+
+  it("brings a photo for a fish both books have when this one has none", () => {
+    const here = archiveFor(book, null);
+    const file = archiveFor(book, "catch-gill");
+    expect(mergeFieldArchive(here, file).photos["catch-gill"]).toBe(jpeg);
+    const other = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wA=";
+    expect(mergeFieldArchive({ ...here, photos: { "catch-gill": other } }, file).photos["catch-gill"]).toBe(other);
   });
 
   it("doesn't bring back a water or outing no new fish needs", () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
 import { setUnits } from "../i18n";
-import { biggestSince, forItsLength, sizeRank } from "./sizeRank";
+import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 
 const fish = (id: string, inches: number, pounds?: number): CatchEntry => ({
   id,
@@ -83,5 +83,43 @@ describe("heavy or light for its length", () => {
     expect(forItsLength(kind, fish("z", 25, 6.5))).toBeNull();
     expect(forItsLength(kind, { ...base, id: "w", measure: { kind: "length", inches: 25 }, alsoMeasure: undefined })).toBeNull();
     expect(forItsLength(kind.slice(0, 2), fish("x", 25, 8))).toBeNull();
+  });
+});
+
+describe("a long gap since the last of the kind", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const at = (id: string, month: number, day: number): CatchEntry => ({ ...base, id, caughtAt: new Date(2026, month, day, 9).toISOString() });
+  it("names the one before once 30 days or more went by", () => {
+    const kind = [at("a", 4, 1), at("b", 5, 1), at("c", 6, 16)];
+    expect(longGap(kind, kind[2]!)).toEqual({ before: kind[1], days: 45 });
+    expect(longGap(kind, kind[1]!)).toEqual({ before: kind[0], days: 31 });
+  });
+  it("counts calendar days, whatever the hours", () => {
+    const evening = { ...at("e", 5, 1), caughtAt: new Date(2026, 5, 1, 18).toISOString() };
+    const morning = { ...at("m", 6, 1), caughtAt: new Date(2026, 6, 1, 8).toISOString() };
+    expect(longGap([evening, morning], morning)?.days).toBe(30);
+  });
+
+  it("says nothing for the first of the kind or a short gap", () => {
+    const kind = [at("a", 4, 1), at("b", 4, 20)];
+    expect(longGap(kind, kind[0]!)).toBeNull();
+    expect(longGap(kind, kind[1]!)).toBeNull();
+  });
+});
+
+describe("biggest of the outing", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const fish = (id: string, inches: number): CatchEntry => ({ ...base, id, measure: { kind: "length", inches }, alsoMeasure: undefined });
+  it("marks the one the outing's summary names, on an outing of three or more", () => {
+    const outing = [fish("a", 12), fish("b", 14), fish("c", 18)];
+    expect(biggestOnOuting(outing, outing[2]!)).toBe(true);
+    expect(biggestOnOuting(outing, outing[1]!)).toBe(false);
+    expect(biggestOnOuting(outing.slice(1), outing[2]!)).toBe(false);
+  });
+
+  it("marks only one fish when some were weighed and some measured", () => {
+    const weighed = { ...fish("w", 0), measure: { kind: "weight" as const, pounds: 3 } };
+    const outing = [fish("a", 12), fish("b", 30), weighed, { ...weighed, id: "w2", measure: { kind: "weight" as const, pounds: 1 } }];
+    expect(outing.filter((entry) => biggestOnOuting(outing, entry)).map((entry) => entry.id)).toEqual(["w"]);
   });
 });

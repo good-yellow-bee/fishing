@@ -26,7 +26,7 @@ import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { upcomingOwnTrips } from "../playLake";
+import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "../playLake";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -36,12 +36,13 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   return (
     <section className="tackle-trip">
       <div className="section-head">
-        <h2>
+        {/* Under "Coming up". */}
+        <h3 className="tackle-trip-title">
           <Link to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
-        </h2>
+        </h3>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
-          {spot ? ` · ${spot.name}` : ""}
+          {spot && spot.name !== outingName(trip, book.spots) ? ` · ${spot.name}` : ""}
         </span>
       </div>
       <TackleList
@@ -76,7 +77,7 @@ function LureRecord({ today }: { today: string }) {
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
-            {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {row.lure ? <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(row.lure)), book.catches))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
@@ -114,7 +115,7 @@ function LureRecord({ today }: { today: string }) {
             {quiet.map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
-                <Link to={findLink(exactTerm("lure", t(lure)))}>{t(lure)}</Link>
+                <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(lure)), book.catches))}>{t(lure)}</Link>
               </Fragment>
             ))}
           </span>
@@ -143,7 +144,8 @@ function LureTwins() {
   // Either way round: the pair stays apart when the other spelling later takes more fish.
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
-  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER), (from, into) =>
+  // The angler's own spellings: the game's lure names are its own and not slips to merge.
+  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(offPlayLake) }, Number.MAX_SAFE_INTEGER), (from, into) =>
     // The plain "from|into" key, either way round as the counts may have flipped, is how the first build kept a pair apart.
     [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`, `${into.toLowerCase()}|${from.toLowerCase()}`].some((key) => kept.includes(key)),
   ).filter(
@@ -189,6 +191,8 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
   const { book } = useLogbook();
   useT();
   const spot = spotById(book, trip.spotId);
+  // Once for the line and the list: each look-up sorts the whole book.
+  const fish = catchesForTrip(book, trip.id);
 
   return (
     <details className="tackle-trip tackle-past">
@@ -196,14 +200,14 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
           {tripWhen(trip.date, today, tomorrow)}
-          {spot ? ` · ${spot.name}` : ""}
-          {` · ${fishCountLabel(catchesForTrip(book, trip.id).length)}`}
+          {spot && spot.name !== outingName(trip, book.spots) ? ` · ${spot.name}` : ""}
+          {` · ${fishCountLabel(fish.length)}`}
         </span>
       </summary>
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={catchesForTrip(book, trip.id)} trips={book.trips} spots={book.spots} />
+      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} spots={book.spots} />
     </details>
   );
 }
@@ -264,7 +268,8 @@ export function GearPage() {
   }
 
   const upcoming = upcomingOwnTrips(book, today);
-  const recent = recentTrips(book, today);
+  // Real days out: a game day has nothing in the bag.
+  const recent = recentTrips(book, today).filter(offPlayLake);
   const fishByTrip = fishCountsByTrip(book);
 
   return (

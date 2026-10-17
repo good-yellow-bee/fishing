@@ -9,6 +9,7 @@ const DELETED = {
   trip: "Outing deleted; its fish stay in the book.",
   sample: "Sample book restored.",
   blank: "The sample waters and fish are gone. Add your first water to begin.",
+  unsample: "The sample week is gone. Your own entries stay.",
   rename: "Fish renamed.",
   merge: "Waters merged.",
   file: "Fish added to their outings.",
@@ -51,6 +52,8 @@ export function UndoBar() {
     // Back to the page the entry was deleted from, now that it is there again.
     const from = undoDelete();
     if (from) navigate(from);
+    // The button goes with the bar: focus moves to the top of the page it lands on.
+    requestAnimationFrame(() => document.querySelector<HTMLElement>("main h1")?.focus());
   };
   return (
     <div role="status">

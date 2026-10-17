@@ -30,7 +30,7 @@ describe("WhatsNew", () => {
     const host = document.createElement("div");
     const root = createRoot(host);
     act(() => root.render(<WhatsNew caughtTotal={3} hidden={false} />));
-    expect(host.querySelectorAll("li")).toHaveLength(NEWS_ITEMS.length);
+    expect(host.querySelectorAll("li")).toHaveLength(Math.min(NEWS_ITEMS.length, 4));
     act(() => root.render(<WhatsNew caughtTotal={3} hidden />));
     expect(host.querySelector(".whats-new")).toBeNull();
     act(() => root.render(<WhatsNew caughtTotal={3} hidden={false} />));

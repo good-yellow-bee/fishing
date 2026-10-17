@@ -73,7 +73,8 @@ export function CatchCard({
         {entry.note ? <p className="note">{noteText(entry.note)}</p> : null}
         {entry.tripId && tripTitle ? (
           <p className="trip-link">
-            <Link to={`/trips/${entry.tripId}`}>{tripTitle}</Link>
+            {/* An untitled outing goes by its water's name, already on the line above: said once. */}
+            <Link to={`/trips/${entry.tripId}`}>{tripTitle === spotName ? t("That day's outing") : tripTitle}</Link>
           </p>
         ) : null}
       </div>
@@ -108,7 +109,10 @@ export function TripCard({
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
-      ? fishCountLabel(fishCount)
+      ? // Still ahead with nothing packed: planned, not a blank day.
+        fishCount === 0 && trip.date > today
+        ? t("Planned")
+        : fishCountLabel(fishCount)
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
@@ -118,7 +122,9 @@ export function TripCard({
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
         <p className="meta">
-          {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
+          {/* The fish that got away too, so a hard day stands out in the list. */}
+          {/* An untitled outing is already named after its water. */}
+          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>
@@ -130,12 +136,15 @@ export function SpotCard({
   fishCount,
   tripCount,
   lastFishAt = null,
+  restDays = null,
   nextOuting = null,
 }: {
   spot: Spot;
   fishCount: number;
   tripCount: number;
   lastFishAt?: string | null;
+  /** Days since the water was last fished, when the list is ordered by that. */
+  restDays?: number | null;
   /** The soonest planned outing here, already in words. */
   nextOuting?: string | null;
 }) {
@@ -153,6 +162,7 @@ export function SpotCard({
         {tn(tripCount, "{n} outing", "{n} outings")}
         {lastFishAt ? ` · ${t("Last fish: {day}", { day: formatDay(localDate(new Date(lastFishAt))) })}` : ""}
       </p>
+      {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
     </Link>
   );

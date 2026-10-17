@@ -1689,3 +1689,39 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR413~~ | ~~Round 25 fixes: game fish out of badges, Bests, goal and Home~~ (#867) | field | S |
 | ~~BR414~~ | ~~Round 25 ideas: heavy/light, bites per water, since last fish, Enter run~~ (#869) | field | S |
 | ~~BR415~~ | ~~Round 26 fixes: game fish out of all of Bests~~ (#872) | field | S |
+| ~~BR416~~ | ~~Round 26 ideas: long gap, busiest hour, outing weight~~ (#874) | field | S |
+| ~~BR417~~ | ~~Round 27 fixes~~ (#876) | field | S |
+| ~~BR418~~ | ~~Round 27 ideas: biggest of the outing, blank day's last fish~~ (#877) | field | S |
+| ~~BR419~~ | ~~Round 28 fixes~~ (#878) | field | S |
+| ~~BR420~~ | ~~Round 28 ideas: biggest at this water, first kinds at a water~~ (#879) | field | S |
+| ~~BR421~~ | ~~Round 29 fixes~~ (#880) | field | S |
+| ~~BR422~~ | ~~Round 29 ideas: water list order, this year vs last~~ (#881) | field | S |
+| ~~BR423~~ | ~~Round 30 fixes~~ (#882) | field | S |
+| ~~BR424~~ | ~~Round 30 ideas: water photos, weighed/measured search~~ (#883) | field | S |
+| ~~BR425~~ | ~~Round 31 fixes~~ (#884) | field | S |
+| ~~BR426~~ | ~~Round 31 ideas~~ (#885) | field | S |
+| ~~BR427~~ | ~~Round 32 fixes~~ (#886) | field | S |
+| ~~BR428~~ | ~~Round 32 ideas~~ (#887) | field | S |
+| ~~BR429~~ | ~~Round 33 fixes~~ (#888) | field | S |
+| ~~BR430~~ | ~~Round 33 ideas~~ (#889) | field | S |
+| ~~BR431~~ | ~~Round 34 fixes~~ (#890) | field | S |
+| ~~BR432~~ | ~~Round 34 ideas~~ (#891) | field | S |
+| ~~BR433~~ | ~~Round 35 fixes~~ (#892) | field | S |
+| ~~BR434~~ | ~~Round 35 ideas~~ (#893) | field | S |
+| ~~BR435~~ | ~~Round 36 fixes~~ (#894) | field | S |
+| ~~BR436~~ | ~~Round 36 ideas~~ (#895) | field | S |
+| ~~BR437~~ | ~~Round 37 fixes~~ (#896) | field | S |
+| ~~BR438~~ | ~~Round 37 ideas~~ (#897) | field | S |
+| ~~BR439~~ | ~~Round 38 fixes~~ (#898) | field | S |
+| ~~BR440~~ | ~~Round 39 fixes~~ (#899) | field | S |
+| ~~BR441~~ | ~~Round 39 ideas~~ (#900) | field | S |
+| ~~BR442~~ | ~~Round 40 fixes~~ (#901) | field | S |
+| ~~BR443~~ | ~~Round 40 ideas~~ (#902) | field | S |
+| ~~BR444~~ | ~~Round 41 fixes~~ (#903) | field | S |
+| ~~BR445~~ | ~~Round 41 ideas~~ (#904) | field | S |
+| ~~BR446~~ | ~~Round 42 fixes~~ (#905) | field | S |
+| ~~BR447~~ | ~~Round 42 ideas~~ (#906) | field | S |
+| ~~BR448~~ | ~~Round 43 fixes~~ (#907) | field | S |
+| ~~BR449~~ | ~~Round 43 ideas~~ (#908) | field | S |
+| ~~BR450~~ | ~~Round 44 fixes~~ (#909) | field | S |
+| ~~BR451~~ | ~~Round 44 ideas~~ (#910) | field | S |

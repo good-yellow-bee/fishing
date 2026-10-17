@@ -16,6 +16,12 @@ export function isSampleCatch(id: string) {
 }
 
 const SAMPLE_SPOT_IDS = new Set(sampleLogbook(new Date()).spots.map((spot) => spot.id));
+
+/** Whether an outing is one of the sample week's. */
+export const isSampleTrip = (id: string) => SAMPLE_TRIP_IDS.has(id);
+
+/** Whether a water is one of the sample week's. */
+export const isSampleSpot = (id: string) => SAMPLE_SPOT_IDS.has(id);
 const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
 
 /** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. The game's lake doesn't count either way. */
@@ -32,6 +38,26 @@ export function isSampleOnly(book: Logbook) {
 /** Whether any of the sample's invented waters is still in the book. */
 export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));
+}
+
+/** Whether any of the sample week's invented fish is still in the book. */
+export function hasSampleFish(book: Logbook) {
+  return book.catches.some((entry) => SAMPLE_IDS.has(entry.id));
+}
+
+/** The book without the sample week: its fish, and its outings and waters unless a fish of the player's own is on them. */
+export function withoutSample(book: Logbook): Logbook {
+  const catches = book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id));
+  const usedTrips = new Set(catches.map((entry) => entry.tripId));
+  const trips = book.trips.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id) || usedTrips.has(trip.id));
+  const usedSpots = new Set([...catches.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
+  return { ...book, catches, trips, spots: book.spots.filter((spot) => !SAMPLE_SPOT_IDS.has(spot.id) || usedSpots.has(spot.id)) };
+}
+
+/** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */
+export function hasSampleLeft(book: Logbook) {
+  const left = withoutSample(book);
+  return left.catches.length < book.catches.length || left.trips.length < book.trips.length || left.spots.length < book.spots.length;
 }
 
 /** The player's own catches; the sample week's fish and the game's don't need a copy. */
@@ -136,8 +162,18 @@ export function restoreCopyRecord(raw: string | null) {
   }
 }
 
+/** The copy record the sample week cleared, until that is undone or another clear. */
+let clearedRecord: string | null = null;
+
+/** Puts back the copy record the sample week cleared, when its restore is undone. */
+export function bringBackClearedCopy() {
+  if (clearedRecord !== null) restoreCopyRecord(clearedRecord);
+  clearedRecord = null;
+}
+
 /** A fresh start, as after restoring the sample: the next reminder is the first-copy one. */
 export function clearCopiedAt() {
+  clearedRecord = readCopyRecord();
   try {
     localStorage.removeItem(BOOK_COPY_STORAGE_KEY);
   } catch {

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import type { CatchEntry } from "@stillwater/shared";
-import { t } from "../i18n";
+import { t, tn } from "../i18n";
 import { catchMonth } from "./tripMonths";
 
 /** The angler's own target of fish for a year, kept in this browser by year. */
@@ -43,6 +43,23 @@ function saveYearGoal(year: string, goal: number | null) {
   if (goal === null) delete next[year];
   else next[year] = goal;
   writeYearGoals(next);
+}
+
+/**
+ * How the year is going against its goal: the fish the year ends with at this rate, and how many a week the rest
+ * needs. Null before a first fish, once the goal is reached, and in the year's first fortnight, when a rate says little.
+ */
+export function goalPace(count: number, goal: number, now: Date): { pace: number; left: number; perWeek: number; daysLeft: number } | null {
+  if (count === 0 || count >= goal) return null;
+  const year = now.getFullYear();
+  // Calendar days, counted in UTC so a clock change never makes a day of 23 or 25 hours.
+  const DAY = 24 * 60 * 60 * 1000;
+  const gone = Math.round((Date.UTC(year, now.getMonth(), now.getDate()) - Date.UTC(year, 0, 1)) / DAY) + 1;
+  if (gone < 14) return null;
+  const total = Math.round((Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / DAY);
+  const daysLeft = total - gone + 1;
+  const left = goal - count;
+  return { pace: Math.round((count / gone) * total), left, perWeek: Math.ceil(left / Math.max(1, daysLeft / 7)), daysLeft };
 }
 
 /** This year's fish against a goal the angler sets, or an offer to set one. */
@@ -125,6 +142,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
       </p>
     );
   }
+  const pace = goalPace(count, goal, now);
   return (
     <div className="year-goal">
       <p>
@@ -147,6 +165,13 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
       <span className="tally-bar" aria-hidden="true">
         <span style={{ width: `${Math.min(100, (count / goal) * 100)}%` }} />
       </span>
+      {pace ? (
+        <p className="meta goal-pace">
+          {t("On pace for {pace} by the year's end", { pace: pace.pace })} · {pace.daysLeft < 7
+            ? tn(pace.daysLeft, "{left} to go, {n} day left", "{left} to go, {n} days left", { left: pace.left })
+            : t("{left} to go, about {week} a week", { left: pace.left, week: pace.perWeek })}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
 import { pieceKey } from "./pieceKey";
+import { isSampleTrip } from "../bookCopy";
 import "./gear.css";
 
 /**
@@ -16,7 +17,9 @@ export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleIte
   const listed = new Set(items.map((item) => item.tripId));
   const self = trips.find((trip) => trip.id === tripId);
   const day = self?.date ?? "9999-12-31";
-  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id)).sort((a, b) => b.date.localeCompare(a.date));
+  // The sample week's made-up bags only for one of its own outings.
+  const sample = isSampleTrip(tripId);
+  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleTrip(trip.id))).sort((a, b) => b.date.localeCompare(a.date));
   const pick = (from: readonly Trip[]) => from.find((trip) => trip.date <= day) ?? from[0] ?? null;
   return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
 }
@@ -54,6 +57,12 @@ export function TackleList({
   for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
+  // While packing, the pieces already in the bag can step aside.
+  const [hidePacked, setHidePacked] = useState(false);
+  const hiding = hidePacked && packed > 0 && packed < rows.length;
+  const shown = hiding ? rows.filter((item) => !item.packed) : rows;
+  // Once the toggle is gone (all packed, or all unpacked), the next packing starts with every piece in view.
+  if (hidePacked && !hiding) setHidePacked(false);
   const errorId = useId();
   const box = useRef<HTMLElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -70,7 +79,8 @@ export function TackleList({
     event.preventDefault();
     // "net, pliers, hooks": a piece for each, once each; any refused stay in the box with the reason.
     const seen = new Set<string>();
-    const parts = label.split(",").filter((part) => {
+    // Not a decimal comma ("Żyłka 0,25", "Wędka 2,7 m"), nor a list of sizes ("Haczyki nr 8, 10"): one piece each.
+    const parts = label.split(/(?<!\d),|,(?!\s*\d)/).filter((part) => {
       const key = pieceKey(part);
       if (!key || seen.has(key)) return false;
       seen.add(key);
@@ -94,6 +104,12 @@ export function TackleList({
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: rows.length });
   // After an outing, the same list can go back in the bag for the next one.
+  const hideToggle =
+    packed > 0 && packed < rows.length ? (
+      <button type="button" className="text-button tackle-hide" aria-pressed={hiding} onClick={() => setHidePacked(!hiding)}>
+        {hiding ? t("Show packed ({n})", { n: packed }) : t("Hide packed")}
+      </button>
+    ) : null;
   const unpack =
     packed > 0 ? (
       <button
@@ -114,13 +130,16 @@ export function TackleList({
         <div className="section-head">
           <h2>{heading}</h2>
           <span className="tackle-count">
-            {count}
+            {/* Said as each piece is ticked, so the bag's progress is heard, not only seen. */}
+            <span role="status">{count}</span>
+            {hideToggle}
             {unpack}
           </span>
         </div>
       ) : (
         <p className="tackle-count">
-          {count}
+          <span role="status">{count}</span>
+          {hideToggle}
           {unpack}
         </p>
       )}
@@ -145,13 +164,24 @@ export function TackleList({
         </p>
       ) : (
         <ul className="tackle-list">
-          {rows.map((item, index) => (
+          {shown.map((item, index) => (
             <li key={item.id}>
               <label className="tackle-row">
                 <input
                   type="checkbox"
                   checked={item.packed}
-                  onChange={(event) => toggle(item.id, event.target.checked)}
+                  onChange={(event) => {
+                    toggle(item.id, event.target.checked);
+                    // A packed piece leaves a hiding list: the next one takes the focus.
+                    // The last one packed brings the whole list back: focus goes on to adding a piece.
+                    if (hiding && event.target.checked) {
+                      const last = packed + 1 === rows.length;
+                      setTimeout(() => {
+                        const boxes = box.current?.querySelectorAll<HTMLInputElement>(".tackle-row input") ?? [];
+                        (last ? input.current : (boxes[index] ?? boxes[index - 1]))?.focus();
+                      }, 0);
+                    }
+                  }}
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}

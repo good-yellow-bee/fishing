@@ -37,3 +37,8 @@ export function forgetDeletedFish(ids: readonly string[]) {
   const back = new Set(ids);
   write(read().filter((id) => !back.has(id)));
 }
+
+/** Puts the deleted list back as it was, when a file load is undone. */
+export function restoreDeletedFish(ids: readonly string[]) {
+  write([...ids]);
+}

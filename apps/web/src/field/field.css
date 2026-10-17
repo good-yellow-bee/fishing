@@ -322,6 +322,11 @@ button.field-primary {
   white-space: nowrap;
 }
 
+/* A long line of its own ("Last time: … · Jig and minnow ×1"): it wraps rather than widen the page. */
+.stat-row .next-last a {
+  white-space: normal;
+}
+
 .home-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -677,7 +682,8 @@ button.field-primary:disabled {
 }
 
 /* The water and, on a phone, a way to pick the one nearest. */
-.water-field {
+.water-field,
+.date-field {
   display: grid;
   gap: 6px;
   align-content: start;
@@ -889,8 +895,9 @@ button.field-primary:disabled {
   /* Above the tab bar, which is fixed to the bottom of a phone screen. */
   .form-save {
     bottom: calc(48px + env(safe-area-inset-bottom));
-    /* One row on a phone: the save button keeps its size and the second one wraps its words beside it. */
-    flex-wrap: nowrap;
+    /* One row on a phone: the save button keeps its size and the second one wraps its words beside it. With large
+       text the second drops to a row of its own rather than one letter a line. */
+    flex-wrap: wrap;
     gap: 12px;
   }
 
@@ -899,9 +906,14 @@ button.field-primary:disabled {
   }
 
   .form-save .text-button {
-    flex: 1 1 0;
+    flex: 1 1 12ch;
     min-width: 0;
     text-align: start;
+  }
+
+  /* The released note takes a row of its own above the buttons, which keep theirs. */
+  .form-save:has(.form-released) {
+    flex-wrap: wrap;
   }
 
   /* Keyboard focus scrolled into view stops above the fixed tab bar rather than under it. */
@@ -1263,16 +1275,17 @@ button.field-primary:disabled {
 
 .species-waters li {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid var(--field-line);
 }
 
-/* Counts and sizes stay on one line; a long name wraps instead. */
+/* Counts and sizes stay on one line while they fit; with large text they wrap rather than widen the page. */
 .species-waters li > .meta.sizes {
   display: block;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .species-chips {
@@ -1810,4 +1823,30 @@ button.field-primary:disabled {
   color: var(--field-muted);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.85em;
+}
+
+/* Spots: how the water list is ordered. */
+.spot-order {
+  margin: 0 0 14px;
+}
+
+.day-month-fish {
+  font-weight: 400;
+  color: var(--field-muted);
+}
+
+.form-save .form-released {
+  flex: 1 0 100%;
+  order: -1;
+}
+
+.form-save .form-released .text-button {
+  flex: none;
+}
+
+/* A phone on its side: the header scrolls away, so the form keeps more than a strip between it and the save bar. */
+@media (max-width: 860px) and (max-height: 500px) {
+  .field-mobile-bar {
+    position: static;
+  }
 }

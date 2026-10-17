@@ -96,3 +96,30 @@ export function daysOut(book: Logbook, year: string, today: string): number {
   for (const trip of book.trips) if (trip.date.startsWith(`${year}-`) && trip.date < today) days.add(trip.date);
   return days.size;
 }
+
+/**
+ * The day with the most fish, a night session's small hours counted on its outing's day as the calendar counts them;
+ * a tie goes to the latest day. `tripId`: the outing that holds exactly that day's fish, when one does.
+ */
+export function bestFishDay(book: Logbook): { date: string; count: number; tripId: string | null } | null {
+  const tripDays = new Map(book.trips.map((trip) => [trip.id, trip.date]));
+  const byDay = new Map<string, CatchEntry[]>();
+  const dayOf = new Map<string, string>();
+  for (const entry of book.catches) {
+    if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
+    const day = fishDay(entry, tripDays).day;
+    dayOf.set(entry.id, day);
+    const list = byDay.get(day);
+    if (list) list.push(entry);
+    else byDay.set(day, [entry]);
+  }
+  let best: { date: string; fish: CatchEntry[] } | null = null;
+  for (const [date, fish] of byDay) {
+    if (!best || fish.length > best.fish.length || (fish.length === best.fish.length && date > best.date)) best = { date, fish };
+  }
+  if (!best) return null;
+  const trips = new Set(best.fish.map((entry) => entry.tripId ?? ""));
+  const [only] = [...trips];
+  const sole = trips.size === 1 && only && book.catches.every((entry) => entry.tripId !== only || dayOf.get(entry.id) === best!.date) ? only : null;
+  return { date: best.date, count: best.fish.length, tripId: sole };
+}

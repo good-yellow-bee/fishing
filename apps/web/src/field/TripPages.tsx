@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
+import { MapAnchor } from "./MapAnchor";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -9,6 +10,7 @@ import {
   catchesForTrip,
   fishCountsByTrip,
   localDate,
+  measureOf,
   shiftDate,
   spotById,
   tripById,
@@ -25,6 +27,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
+import { measureText } from "../i18n/content";
 import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
@@ -38,9 +41,8 @@ import { packingTips } from "./waterTips";
 import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
-import { fishPace, sinceLastFish } from "./tripPace";
+import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
-import { osmLink } from "./osmLink";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
 import { NearestWater, canFindNearest } from "./NearestWater";
@@ -51,10 +53,13 @@ import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findTrips } from "./tripSearch";
-import { fishOnOutingDay } from "./suggestions";
+import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
+import { ownFish } from "./milestones";
+import { speciesLink } from "./speciesLink";
+import { datePicks, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
-import { likelyWater } from "./spotOrder";
+import { likelyWater, spotsByLastFish } from "./spotOrder";
 import { useStepKeys } from "./stepKeys";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
@@ -96,7 +101,8 @@ export function TripsPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingOwnTrips(book, today);
-  const recent = recentTrips(book, today);
+  // Today's round of the game too: "Coming up" leaves it out, and "Recent" starts from yesterday.
+  const recent = [...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)), ...recentTrips(book, today)];
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
   const average = outingAverage(book.trips.filter(offPlayLake), (id) => fishByTrip.get(id) ?? 0, today);
@@ -275,6 +281,25 @@ function TripView() {
 
   const spot = spotById(book, trip.spotId);
   const catches = catchesForTrip(book, trip.id);
+  // A blank day past: the water's last fish before it, and what took it, to try next time.
+  // Not when that day's fish were only logged without the outing: those are offered just above.
+  const lastFishHere =
+    catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
+      ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
+      : undefined;
+  // Kinds this water gave for the first time on this outing, once earlier fish from it say what it usually gives.
+  const ownHere = catches.filter(ownFish);
+  const firstAt = ownHere.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
+  const before = catchesForSpot(book, trip.spotId).filter((entry) => ownFish(entry) && entry.tripId !== trip.id && entry.caughtAt < firstAt);
+  const known = new Set(before.map((entry) => entry.species.trim().toLowerCase()));
+  const newKinds = before.length > 0 ? [...new Set(ownHere.map((entry) => entry.species.trim()))].filter((name) => !known.has(name.toLowerCase())) : [];
+  const rush = busiestHour(catches.map((entry) => entry.caughtAt));
+  const weighed = totalWeight(
+    catches.map((entry) => {
+      const weight = measureOf(entry, "weight");
+      return weight?.kind === "weight" ? weight.pounds : null;
+    }),
+  );
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
@@ -310,10 +335,10 @@ function TripView() {
       </div>
       <FishSum catches={catches} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
-      {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
+      {trip.date <= today && !play ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
-      {/* An evening outing still going past midnight counts too; a fish over 12 hours old says nothing. */}
-      {catches[0] && (trip.date === today || trip.date === shiftDate(new Date(), -1)) ? (
+      {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
+      {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
         <SinceLast caughtAt={catches[0].caughtAt} />
       ) : null}
       {catches.length > 1 ? (
@@ -322,6 +347,8 @@ function TripView() {
           {fishSpan(catches[catches.length - 1]!.caughtAt, catches[0]!.caughtAt, catches.length)}
         </p>
       ) : null}
+      {rush && !play ? <p className="meta busiest-hour">{t("Most in one hour: {count}, from {time}", { count: rush.count, time: formatTimeOfDay(rush.from) })}</p> : null}
+      {weighed && !play ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
       {lastHere ? (
@@ -333,8 +360,20 @@ function TripView() {
       ) : null}
       {/* Before going back: what was learned there last time, in the angler's own words. */}
       {lastHere?.note.trim() && trip.date >= today ? <p className="meta last-note">{t("Last time you wrote: “{note}”", { note: lastHere.note.trim() })}</p> : null}
-      <SpeciesChips catches={catches} />
-      <LureChips catches={catches} outing={trip} />
+      {/* A game day's kinds open its own fish there, not the kind's page of the angler's own. */}
+      <SpeciesChips catches={catches} outing={play ? trip : undefined} />
+      {newKinds.length > 0 ? (
+        <p className="meta new-kinds">
+          {t("First time at this water:")}{" "}
+          {newKinds.map((name, index) => (
+            <Fragment key={name}>
+              {index > 0 ? ", " : null}
+              <Link to={speciesLink(name)}>{t(name)}</Link>
+            </Fragment>
+          ))}
+        </p>
+      ) : null}
+      <LureChips catches={catches} outing={trip} water={spot?.name} />
       <FishCsv catches={catches} name={`${trip.date} ${outingName(trip, book.spots)}`} />
       {loose.length > 0 ? (
         <p className="meta loose-fish" role="status">
@@ -347,13 +386,23 @@ function TripView() {
               if (fileCatches(loose.map((entry) => entry.id), trip.id)) document.getElementById("outing-fish")?.focus();
             }}
           >
-            {t("Add them")}
+            {tn(loose.length, "Add it", "Add them")}
           </button>
         </p>
       ) : null}
       {catches.length === 0 ? (
         <p className="empty">
           {trip.date > today ? t("Fish you log on the day show up here.") : trip.date === today ? t("No fish logged yet today.") : t("Nothing logged for this trip yet.")}
+          {lastFishHere && loose.length === 0 ? (
+            <>
+              {" "}
+              <Link to={`/catches/${lastFishHere.id}`} className="last-fish-here">
+                {lastFishHere.lure.trim()
+                  ? t("Last fish here: {species} on {lure}, {day}", { species: t(lastFishHere.species), lure: t(lastFishHere.lure), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })
+                  : t("Last fish here: {species}, {day}", { species: t(lastFishHere.species), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })}
+              </Link>
+            </>
+          ) : null}
           {trip.date === today && !play ? (
             <>
               {" "}
@@ -416,9 +465,9 @@ function TripView() {
               {spot.place ? (
                 <span className="map-link">
                   {" · "}
-                  <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
+                  <MapAnchor lat={spot.place.lat} lng={spot.place.lng}>
                     {t("Open on a map")}
-                  </a>
+                  </MapAnchor>
                 </span>
               ) : null}
             </>
@@ -427,7 +476,14 @@ function TripView() {
         <p className="meta moon-line">{t("Moon: {phase}", { phase: t(MOON_LABELS[moonName(moonPhase(tripNight(trip.date)))]) })}</p>
         {spot ? <SunLine date={trip.date} spot={spot} /> : null}
       </EditDelete>
-      {trip.note ? <p className="prose">{trip.note}</p> : null}
+      {trip.note ? (
+        <p className="prose">{trip.note}</p>
+      ) : !play && trip.date <= today ? (
+        // A day fished with nothing written: the note is one tap away, not behind Edit.
+        <p className="trip-write-up">
+          <Link to={`/trips/${trip.id}/edit?${NOTE_PARAM}=1`}>{t("Write up the day")}</Link>
+        </p>
+      ) : null}
       {play ? null : trip.date >= today ? (
         <p className="trip-calendar">
           <button
@@ -481,6 +537,9 @@ function TripView() {
   );
 }
 
+/** In an outing's edit link: open with the note in focus, to write the day up. */
+const NOTE_PARAM = "note";
+
 export function TripFormPage() {
   const { tripId } = useParams();
   const [params] = useSearchParams();
@@ -498,8 +557,16 @@ function TripForm() {
   const again = existing ? undefined : tripById(book, params.get("again") ?? "");
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
-  const preset = book.spots.some((spot) => spot.id === params.get("spot")) ? (params.get("spot") as string) : likelyWater(book, localDate(new Date()));
+  // Never the game's lake: its days are made by playing.
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
+  // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
+  const busy = (spotId: string) => book.trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
+  const guess = likelyWater(book, localDate(new Date()));
+  const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
+    ? (params.get("spot") as string)
+    : busy(guess)
+      ? (spotsByLastFish(book).map((row) => row.spot.id).find((id) => id !== PLAY_LAKE_ID && !busy(id)) ?? guess)
+      : guess;
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
@@ -523,6 +590,8 @@ function TripForm() {
     [book, existing, params, spotId, date],
   );
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
+  // Names already given, offered as the title is typed.
+  const titles = useMemo(() => pastTitles(book, spotId), [book, spotId]);
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
   // Unsaved changes to an outing in the book wait for the next visit to its form.
@@ -610,10 +679,22 @@ function TripForm() {
         }}
       >
         <div className="form-grid">
+          <div className="date-field">
           <label>
             {t("Date")}
             <input name="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
           </label>
+            {/* Outside the label, so the date box keeps its one-word name. */}
+            {!existing ? (
+              <small className="field-hint lure-tips date-picks" role="group" aria-label={t("Pick a day")}>
+                {datePicks(new Date()).map((pick) => (
+                  <button key={pick.label} type="button" className="lure-tip" aria-pressed={date === pick.date} onClick={() => setDate(pick.date)}>
+                    {t(pick.label)}
+                  </button>
+                ))}
+              </small>
+            ) : null}
+          </div>
           <div className="water-field">
             <label>
               {t("Spot")}
@@ -670,12 +751,21 @@ function TripForm() {
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t("Dawn patrol")}
+              list={titles.length > 0 ? "trip-titles" : undefined}
             />
+            {titles.length > 0 ? (
+              <datalist id="trip-titles">
+                {titles.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+            ) : null}
           </label>
           <label className="wide">
             {t("Note")}
             <textarea
               name="note"
+              autoFocus={params.get(NOTE_PARAM) === "1"}
               maxLength={400}
               rows={3}
               value={note}

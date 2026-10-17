@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { kmBetween, likelyWater, nearestWater, spotsByLastFish } from "./spotOrder";
+import { daysBetween, kmBetween, lastOutByWater, likelyWater, nearestWater, spotsByLastFish } from "./spotOrder";
 
 describe("spot order", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -26,6 +26,11 @@ describe("likely water", () => {
 
   it("picks today's outing's water over the one fished last", () => {
     expect(likelyWater(book, "2026-10-16")).toBe("creek");
+  });
+
+  it("keeps last night's outing's water in the small hours", () => {
+    expect(likelyWater(book, "2026-10-17", true)).toBe("creek");
+    expect(likelyWater(book, "2026-10-17")).toBe("lake");
   });
 
   it("picks the water fished last when nothing is on today, and the first water in an empty book", () => {
@@ -57,5 +62,35 @@ describe("nearestWater", () => {
 
   it("measures along the ground", () => {
     expect(kmBetween({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })).toBeCloseTo(111.19, 1);
+  });
+});
+
+describe("when each water was last fished", () => {
+  it("takes the later of an outing up to today and a fish, never a planned day", () => {
+    const book = sampleLogbook(new Date(2026, 9, 10));
+    const spot = book.spots[0]!.id;
+    const other = book.spots[1]!.id;
+    const fish = { ...book.catches[0]!, id: "zq-last", spotId: other, tripId: null, caughtAt: new Date(2026, 9, 12, 9).toISOString() };
+    const last = lastOutByWater(
+      {
+        ...book,
+        trips: [
+          { id: "zq-a", date: "2026-10-05", spotId: spot, title: "", note: "" },
+          { id: "zq-b", date: "2026-10-20", spotId: spot, title: "", note: "" },
+          { id: "zq-c", date: "2026-10-01", spotId: other, title: "", note: "" },
+          { id: "zq-d", date: "2026-10-15", spotId: "zq-today", title: "", note: "" },
+          { id: "zq-e", date: "2026-10-14", spotId: "spot-stillwater", title: "", note: "" },
+        ],
+        catches: [fish],
+      },
+      "2026-10-15",
+    );
+    expect(last.get(spot)).toBe("2026-10-05");
+    expect(last.get(other)).toBe("2026-10-12");
+    // Today's outing with no fish yet, and the game's lake, say nothing.
+    expect(last.has("zq-today")).toBe(false);
+    expect(last.has("spot-stillwater")).toBe(false);
+    expect(daysBetween("2026-10-05", "2026-10-15")).toBe(10);
+    expect(daysBetween("2026-03-28", "2026-03-30")).toBe(2);
   });
 });

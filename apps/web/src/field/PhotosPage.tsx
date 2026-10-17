@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { CATCH_PHOTO_STORE_MAX_CHARS, catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
 import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
@@ -9,6 +9,8 @@ import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
 import { speciesCounts } from "./speciesLink";
+import { catchLink } from "./catchList";
+import { exactTerm } from "./findLinks";
 
 /** The catches that carry a photo, newest first: the game's snapshots and the player's own pictures. */
 export function catchesWithPhotos(catches: readonly CatchEntry[], hasPhoto: (id: string) => boolean) {
@@ -46,7 +48,19 @@ export function PhotosPage() {
     // The button goes once there is room, so focus waits on the word of what was removed.
     roomNote.current?.focus();
   };
-  const [kind, setKind] = useState<string | null>(null);
+  // The kind picked lives in the address, so Back from a photo's fish returns to it.
+  const [params, setParams] = useSearchParams();
+  const kind = params.get("kind");
+  const setKind = (next: string | null) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next) out.set("kind", next);
+        else out.delete("kind");
+        return out;
+      },
+      { replace: true },
+    );
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
   // A kind picked that has since lost its last photo shows them all again.
@@ -109,7 +123,8 @@ export function PhotosPage() {
                   const size = measuresText(entry);
                   return (
                     <li key={entry.id}>
-                      <Link to={`/catches/${entry.id}`}>
+                      {/* Stepping on from the fish goes through the photos shown here, not the whole book. */}
+                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}photo`)}>
                         <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>

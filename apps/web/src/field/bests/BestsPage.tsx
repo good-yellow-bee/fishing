@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
+import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -12,7 +12,7 @@ import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
-import { catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
+import { bestFishDay, catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
@@ -24,6 +24,8 @@ import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
+import { countedFish } from "../milestones";
+import { SameKinds } from "./SameKinds";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -53,11 +55,6 @@ function LargeFish({
   );
 }
 
-function soleTripOn(book: Logbook, ymd: string): string | null {
-  const trips = new Set(book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === ymd).map((entry) => entry.tripId ?? ""));
-  const [only] = [...trips];
-  return trips.size === 1 && only ? only : null;
-}
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
 function DayTally({ count, date, tripId, tail }: { count: number; date: string; tripId: string | null; tail: (term: string) => string }) {
@@ -71,6 +68,12 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
   if (!top || catches.length < 2) return fish;
   if (!next) return t("{fish}, all {species}", { fish, species: t(top.species) });
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
+}
+
+/** "Last fish: Sat, Oct 10" under a water, from its newest fish. */
+function lastFishLine(catches: readonly CatchEntry[]) {
+  const last = catches.reduce<string | null>((newest, entry) => (!newest || entry.caughtAt > newest ? entry.caughtAt : newest), null);
+  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(localDate(new Date(last))) })}</p> : null;
 }
 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
@@ -113,7 +116,8 @@ export function BestsPage() {
       },
       { replace: true },
     );
-  const bests = personalBests(book);
+  // The angler's own fish once there are any, as the Catches page sums them.
+  const bests = personalBests({ ...book, catches: countedFish(book.catches) });
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
   for (const entry of catchesNewestFirst(book)) {
@@ -121,10 +125,11 @@ export function BestsPage() {
     if (list) list.push(entry);
     else bySpot.set(entry.spotId, [entry]);
   }
-  const topDay = bestDay(book);
+  // Counted as the calendar below counts its days, so the tile and the calendar agree.
+  const topDay = bestFishDay(book);
   const kindsDay = mostKindsDay(book);
   // When every fish of the best day came on one outing, the tile opens that outing.
-  const topDayTrip = topDay ? soleTripOn(book, topDay.date) : null;
+  const topDayTrip = topDay?.tripId ?? null;
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
@@ -252,8 +257,9 @@ export function BestsPage() {
 
           <section>
             <div className="section-head">
-              <h2>{t("By species")}</h2>
+              <h2 id="by-species" tabIndex={-1}>{t("By species")}</h2>
             </div>
+            <SameKinds />
             <div className="card-grid">
               {bests.species.map((row) => {
                 const measures = bestMeasures(row.longest, row.heaviest);
@@ -283,60 +289,63 @@ export function BestsPage() {
             <TallyBars key={year ?? ""} rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("time", t(row.label))) : undefined }))} />
           </section>
 
-          <section>
-            <div className="section-head">
-              <h2>{t("This year's goal")}</h2>
-            </div>
-            <YearGoal catches={real.catches} />
-            {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
-            {/* Last year's kinds still to show up this year, each opening its page. */}
-            {notYet.length > 0 ? (
-              <p className="meta not-yet">
-                <span>
-                  {t("Not yet this year:")}{" "}
-                  {notYet.map((name, index) => (
-                    <Fragment key={name}>
-                      {index > 0 ? ", " : null}
-                      <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
-                    </Fragment>
-                  ))}
-                </span>
-              </p>
-            ) : null}
-            {/* Waters that gave their first fish this year: where the season went exploring. */}
-            {newWaters.length > 0 ? (
-              <p className="meta new-waters">
-                <span>
-                  {t("New waters this year:")}{" "}
-                  {newWaters.map((spot, index) => (
-                    <Fragment key={spot.id}>
-                      {index > 0 ? ", " : null}
-                      <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-                    </Fragment>
-                  ))}
-                </span>
-              </p>
-            ) : null}
-            {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
-            {streak.best > 1 ? (
-              <p className="meta">
-                {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
-              </p>
-            ) : null}
-            {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
-            {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
-            {/* A blank spell still running: how long since an outing gave a fish. */}
-            {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
-            {split ? (
-              <p className="meta weekend-split">
-                {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
-              </p>
-            ) : null}
-            {/* The year so far as text for a message, once it has a fish. */}
-            {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-              <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
-            ) : null}
-          </section>
+          {/* This year's own numbers: a past season picked above has its recap instead. */}
+          {!year || year === today.slice(0, 4) ? (
+            <section>
+              <div className="section-head">
+                <h2>{t("This year's goal")}</h2>
+              </div>
+              <YearGoal catches={real.catches} />
+              {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
+              {/* Last year's kinds still to show up this year, each opening its page. */}
+              {notYet.length > 0 ? (
+                <p className="meta not-yet">
+                  <span>
+                    {t("Not yet this year:")}{" "}
+                    {notYet.map((name, index) => (
+                      <Fragment key={name}>
+                        {index > 0 ? ", " : null}
+                        <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
+                      </Fragment>
+                    ))}
+                  </span>
+                </p>
+              ) : null}
+              {/* Waters that gave their first fish this year: where the season went exploring. */}
+              {newWaters.length > 0 ? (
+                <p className="meta new-waters">
+                  <span>
+                    {t("New waters this year:")}{" "}
+                    {newWaters.map((spot, index) => (
+                      <Fragment key={spot.id}>
+                        {index > 0 ? ", " : null}
+                        <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                      </Fragment>
+                    ))}
+                  </span>
+                </p>
+              ) : null}
+              {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
+              {streak.best > 1 ? (
+                <p className="meta">
+                  {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
+                </p>
+              ) : null}
+              {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
+              {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
+              {/* A blank spell still running: how long since an outing gave a fish. */}
+              {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+              {split ? (
+                <p className="meta weekend-split">
+                  {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
+                </p>
+              ) : null}
+              {/* The year so far as text for a message, once it has a fish. */}
+              {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+                <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+              ) : null}
+            </section>
+          ) : null}
 
           {dayMarks(whole, year ?? today.slice(0, 4)).size > 0 ? (
             <section>
@@ -405,7 +414,8 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("Lures that worked")}</h2>
             </div>
-            <TallyBars key={year ?? ""} rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
+            {/* Every lure that took a fish, the top five until asked for the rest. */}
+            <TallyBars key={year ?? ""} limit={5} rows={lureTally(book, Infinity).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>
@@ -419,6 +429,8 @@ export function BestsPage() {
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
+                  {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
+                  {lastFishLine(bySpot.get(water.spotId) ?? [])}
                 </Link>
               ))}
             </div>

@@ -1,4 +1,4 @@
-import { measureOf, sizePairs, type CatchEntry, type Measure } from "@stillwater/shared";
+import { measureOf, personalBests, sizePairs, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 
@@ -70,4 +70,32 @@ export function forItsLength(kind: readonly CatchEntry[], entry: CatchEntry): { 
   if (!(usual > 0)) return null;
   const ratio = weight.pounds / usual;
   return ratio > 1.15 ? { heavy: true, usual } : ratio < 0.85 ? { heavy: false, usual } : null;
+}
+
+/** The angler's last fish of the kind before this one, and the whole days between, once it is 30 days or more. */
+export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { before: CatchEntry; days: number } | null {
+  const at = Date.parse(entry.caughtAt);
+  let before: CatchEntry | null = null;
+  for (const other of kind) {
+    const when = Date.parse(other.caughtAt);
+    if (other.id !== entry.id && when < at && (!before || when > Date.parse(before.caughtAt))) before = other;
+  }
+  if (!before) return null;
+  // Calendar days between the two, whatever the hours or a clock change.
+  const day = (time: string) => {
+    const when = new Date(time);
+    return Date.UTC(when.getFullYear(), when.getMonth(), when.getDate());
+  };
+  const days = Math.round((day(entry.caughtAt) - day(before.caughtAt)) / (24 * 60 * 60 * 1000));
+  return days >= 30 ? { before, days } : null;
+}
+
+/**
+ * Whether this fish was the biggest of an outing of three or more: the one the outing's own summary names, its heaviest
+ * when any fish was weighed, else its longest.
+ */
+export function biggestOnOuting(outing: readonly CatchEntry[], entry: CatchEntry): boolean {
+  if (outing.length < 3) return false;
+  const bests = personalBests({ spots: [], trips: [], catches: [...outing] });
+  return (bests.heaviest ?? bests.longest)?.id === entry.id;
 }

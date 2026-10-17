@@ -9,7 +9,8 @@
   text-transform: uppercase;
 }
 
-.tackle-unpack {
+.tackle-unpack,
+.tackle-hide {
   margin-left: 12px;
   font-size: 12px;
   letter-spacing: 0.08em;
@@ -203,12 +204,13 @@
 
 /* The fold mark goes in front of the title, since a flex summary drops the browser's own. */
 .tackle-past-title::before {
-  content: "▸ ";
+  /* Not read out: the fold says open or closed by itself. */
+  content: "▸ " / "";
   color: var(--field-muted);
 }
 
 .tackle-past[open] .tackle-past-title::before {
-  content: "▾ ";
+  content: "▾ " / "";
 }
 
 /* Lure names that look like one lure typed two ways. */
@@ -220,4 +222,11 @@
 
 .lure-record .lure-last {
   display: block;
+}
+
+/* An outing under "Coming up" reads as big as the section heads it used to be. */
+.sheet .tackle-trip-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1;
 }

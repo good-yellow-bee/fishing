@@ -11,7 +11,8 @@ describe("catch badges", () => {
   });
 
   it("marks the biggest of a kind only when it beat another of its kind", () => {
-    const pike = book.catches.find((row) => row.id === bests.heaviest!.id)!;
+    // The angler's own fish: a sample one holds no badge over them.
+    const pike = { ...book.catches.find((row) => row.id === bests.heaviest!.id)!, id: "own-pike" };
     const second = { ...pike, id: "second-pike", measure: { kind: "weight" as const, pounds: 1 } };
     const twoPike = { ...book, catches: [second, pike] };
     expect(catchBadge(twoPike, pike)).toBe("book");
@@ -33,6 +34,15 @@ describe("book badges", () => {
     const book = sampleLogbook(new Date(2026, 9, 1));
     expect(bookBadges(book)).toBe(bookBadges(book));
     expect([...bookBadges(book).values()].filter((badge) => badge === "book")).toHaveLength(2);
+  });
+});
+
+describe("sample fish and badges", () => {
+  it("lets the sample week's fish hold no badge once the angler has a fish of their own", () => {
+    const book = sampleLogbook(new Date(2026, 9, 1));
+    const own = { ...book.catches[0]!, id: "own-small", measure: { kind: "length" as const, inches: 3 } };
+    const mixed = { ...book, catches: [...book.catches, own] };
+    expect([...bookBadges(mixed).keys()]).toEqual(["own-small"]);
   });
 });
 

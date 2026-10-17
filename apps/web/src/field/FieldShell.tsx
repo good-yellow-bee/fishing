@@ -138,11 +138,12 @@ export function FieldShell({ children }: { children: ReactNode }) {
             {t("Log a catch")}
           </NavLink>
         </header>
+        {/* Before the page in reading order: one Shift+Tab from the heading a delete leaves focus on. It sits fixed at the bottom all the same. */}
+        <UndoBar />
         <main className="field-main" id="field-main">
           {children}
         </main>
         <SavedNote />
-        <UndoBar />
       </div>
       <nav className="field-tab" aria-label={t("Log")}>
         <FieldLinks />

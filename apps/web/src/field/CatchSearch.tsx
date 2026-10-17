@@ -1,7 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
-import { getLang, useLang, useT } from "../i18n";
+import { getLang, getUnits, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -56,10 +56,15 @@ function windHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 }
 
 /** True when the season the fish came in ("Fall", "Jesień") starts with what was typed, from three letters up. */
+/** Other words for the seasons: "autumn", and the Polish "in summer" forms ("latem"). */
+const SEASON_WORDS: Record<string, string[]> = { spring: ["wiosną"], summer: ["latem"], fall: ["autumn", "jesienią"], winter: ["zimą"] };
+
 function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
   const at = new Date(entry.caughtAt);
-  return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
+  if (Number.isNaN(at.getTime())) return false;
+  const season = lakeSeason(at);
+  return [t(SEASON_LABELS[season]), ...(SEASON_WORDS[season] ?? [])].some((word) => normalize(word).startsWith(want));
 }
 
 /** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
@@ -68,17 +73,26 @@ const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekor
 const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwszy"].map((word) => normalize(word)));
 /** "big": the fish bigger than their kind's typical size, by the measure each was logged with. */
 const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "duza", "duzy"].map((word) => normalize(word)));
+/** "weighed" and "measured": the fish logged with a weight, or with a length, to see which still lack the other. */
+const WEIGHED_WORDS = new Set(["weighed", "zważone", "zważona", "zważony", "zwazone", "zwazona", "zwazony"].map((word) => normalize(word)));
+const MEASURED_WORDS = new Set(["measured", "zmierzone", "zmierzona", "zmierzony"].map((word) => normalize(word)));
 /** "loose": fish left off an outing that water had that day, the ones "Add this fish to it" would file. */
-export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
+export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne"].map((word) => normalize(word)));
+/** Fish on no outing at all, as the Polish help offers them. */
+const NO_OUTING_WORDS = new Set(["no outing", "bez wyprawy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
 const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> = {
-  dawn: ["sunrise", "first light", "daybreak", "świt", "wschód", "brzask"],
+  // Not "wschód" or "zachód": they are the east and west of a wind as well ("ze wschodu").
+  // The Polish "at dawn", "in the evening" and "at night" forms too ("o świcie", "wieczorem", "nocą", "w nocy").
+  dawn: ["sunrise", "first light", "daybreak", "świt", "świcie", "brzask"],
+  morning: ["rankiem"],
   midday: ["noon", "południe"],
-  evening: ["dusk", "sunset", "zmierzch", "zmrok", "zachód"],
-  night: ["dark", "noc"],
+  afternoon: ["popołudniu"],
+  evening: ["dusk", "sunset", "zmierzch", "zmrok", "wieczorem"],
+  night: ["dark", "noc", "nocą", "nocy"],
 };
 
 /** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */
@@ -194,6 +208,13 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const ids = new Set([...first.values()].map((entry) => entry.id));
     return catchesNewestFirst(book).filter((entry) => ids.has(entry.id));
   }
+  if (WEIGHED_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => measuresOf(entry).some((measure) => measure.kind === "weight"));
+  if (MEASURED_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => measuresOf(entry).some((measure) => measure.kind === "length"));
+  // "bez wyprawy": every fish on no outing in the book, filed or not filable.
+  if (NO_OUTING_WORDS.has(normalize(needle))) {
+    const trips = new Set(book.trips.map((trip) => trip.id));
+    return catchesNewestFirst(book).filter((entry) => !entry.tripId || !trips.has(entry.tripId));
+  }
   if (LOOSE_WORDS.has(normalize(needle))) {
     return [...looseOutings(book).keys()].map((id) => book.catches.find((entry) => entry.id === id)!);
   }
@@ -222,7 +243,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   const want = normalize(needle);
   // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
   if (want === normalize(t("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
-  if (want === normalize(t("Kept"))) return catchesNewestFirst(book).filter((entry) => !entry.released);
+  if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
   const hit = new Set(found.map((entry) => entry.id));
@@ -261,8 +282,19 @@ export function searchParts(book: Logbook, needle: string): string[] {
     .filter((name) => name.includes("+"))
     .sort((a, b) => b.length - a.length);
   const kept: string[] = [];
+  // "over 10 in", "under 2 lb", "ponad 60 cm": the words for a bound, read as ">" and "<" before a size or temperature.
+  const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$))`;
+  // "10 inches" or "10 inch": the unit as the search reads it.
+  let text = needle
+    .replace(/(\d)\s?inch(?:es)?(?=[\s+]|$)/gi, "$1 in")
+    // "od 20 do 25 cm", "between 20 and 25 in", "from 2 to 3 lb": the range "20-25 cm", read below.
+    .replace(/(^|[\s+])(?:od|from|between)\s+(\d+(?:[.,]\d+)?)\s+(?:do|to|and)\s+(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))(?=[\s+]|$)/gi, "$1$2-$3")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niż|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niz|od)\s+` + sized, "gi"), "$1>")
+    // "do 25 cm", "up to 2 lb": the bound itself included.
+    .replace(new RegExp(String.raw`(^|[\s+])(?:do|up to)\s+` + sized, "gi"), "$1<=")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz)\s+` + sized, "gi"), "$1<");
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
-  let text = needle.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
+  text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   // "20+ in", the plus before the unit: the same.
   text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
   // "25-30 in" or "1–2 kg": a size between the two, both ends included, as ">25 in + <=30 in"; "30-25 in" reads the same.
@@ -468,6 +500,7 @@ export function CatchSearch() {
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
+  const metric = getUnits() === "metric";
   const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
   const largest = params.get(ORDER_PARAM) === "largest";
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
@@ -534,13 +567,13 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
-          {matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled) ? (
-            // ">30" finds nothing without saying what it measures.
-            <p className="search-tip">{t("Add a unit to a size, as in “>30 in”.")}</p>
+          {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|g|in|cm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
+            // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
+            <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
@@ -583,7 +616,8 @@ export function CatchSearch() {
               )}
             </PagedCatches>
           )}
-          {matches.length > 0 && LOOSE_WORDS.has(normalize(settled)) ? <FileLoose /> : null}
+          {/* "bez wyprawy" takes in the loose fish too: those can still be filed in one tap. */}
+          {matches.length > 0 && (LOOSE_WORDS.has(normalize(settled)) || NO_OUTING_WORDS.has(normalize(settled))) ? <FileLoose /> : null}
           {/* Every fish on one lure: the place to fix that lure's name across the book. */}
           {matches.length > 0 && parseExactTerm(settled)?.field === "lure" ? (
             <RenameKind key={matches[0]!.lure} field="lure" name={matches[0]!.lure} />

@@ -33,6 +33,7 @@ import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { bringBackClearedCopy, withoutSample } from "./bookCopy";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -61,6 +62,8 @@ type LogbookApi = {
   restoreSample: () => boolean;
   /** Clears the book for a player's own waters and fish, with the same undo as a delete. */
   startBlank: () => boolean;
+  /** Takes the sample week out from beside the player's own fish, with the same undo as a delete. */
+  dropSample: () => boolean;
   /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
   changeBook: (kind: "rename" | "merge", next: Logbook) => boolean;
   /** Takes these photos off their catches, leaving the fish. */
@@ -77,7 +80,7 @@ type LogbookApi = {
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
 };
 
-export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "rename" | "merge" | "file";
+export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "unsample" | "rename" | "merge" | "file";
 
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
@@ -166,7 +169,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       const before = { kind, book, photos, from: window.location.pathname + window.location.search };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
-      if (kind !== "sample" && kind !== "blank" && kind !== "file") {
+      if (kind !== "sample" && kind !== "blank" && kind !== "unsample" && kind !== "file") {
         // Waters and outings too, so adding from an older file doesn't bring them back either.
         const kept = new Set([...next.catches, ...next.spots, ...next.trips].map((each) => each.id));
         noteDeletedFish([...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id));
@@ -267,7 +270,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return saved.ok ? { ok: true, id } : saved;
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
-      fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
+      fileCatches: (catchIds, tripId) => remove("file", catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
       fileEach: (tripFor) => remove("file", [...tripFor].reduce((next, [id, tripId]) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
@@ -279,6 +282,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         const result = persist(undo.book, undo.photos);
         setSaveError(result.ok ? null : result.message);
         if (result.ok) forgetDeletedFish([...undo.book.catches, ...undo.book.spots, ...undo.book.trips].map((each) => each.id));
+        // The book back from under the sample was downloaded when it was: its backup reminder comes back with it.
+        if (result.ok && undo.kind === "sample") bringBackClearedCopy();
         return result.ok ? undo.from : null;
       },
       saveError,
@@ -293,6 +298,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       restoreSample: () => remove("sample", sampleLogbook(new Date())),
       // The game's lake and what was landed there stay: they come from play, not the sample.
       startBlank: () => remove("blank", { spots: book.spots.filter((spot) => spot.id === PLAY_LAKE_ID), trips: book.trips.filter((trip) => !offPlayLake(trip)), catches: book.catches.filter((entry) => !offPlayLake(entry)) }),
+      dropSample: () => remove("unsample", withoutSample(book)),
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);

@@ -1,25 +1,27 @@
 import { Fragment, useRef, type ReactNode } from "react";
+import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { fishCountsByTrip, itemsForTrip, localDate, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Spot, type Trip } from "@stillwater/shared";
+import { catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile } from "./BookFile";
 import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
-import { formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { isSampleOnly } from "./bookCopy";
+import { hasSampleLeft, isSampleOnly, isSampleTrip } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { catchMonth } from "./tripMonths";
+import { countedFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
-import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
+import { LATE_NIGHT_UNTIL } from "./suggestions";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -49,8 +51,9 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
   if (rows.length > 0) {
     const packed = packedCount(rows);
     parts.push(
-      <Link key="packed" to="/gear">
-        {packed === rows.length ? t("All packed") : t("{packed} of {total} packed", { packed, total: rows.length })}
+      // To the outing, where its list is: what is still to go in the bag.
+      <Link key="packed" to={`/trips/${trip.id}`}>
+        {packed === rows.length ? t("All packed") : t("{n} left to pack", { n: rows.length - packed })}
       </Link>,
     );
   }
@@ -68,33 +71,68 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
   );
 }
 
+/** How the last outing on the next outing's water went: its fish and the lure that took the most, to plan by. */
+function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
+  const last = tripsForSpot(book, trip.spotId)
+    // Today's outing only once it has given a fish: one still to happen says nothing yet.
+    .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
+    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  if (!last) return null;
+  const fish = catchesForTrip(book, last.id);
+  const lure = lureTally({ ...book, catches: fish }, 1)[0];
+  const day = formatDay(last.date);
+  return (
+    <small className="next-last">
+      <Link to={`/trips/${last.id}`}>
+        {lure
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: `${t(lure.lure)} ×${lure.count}` })
+          : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
+      </Link>
+    </small>
+  );
+}
+
 export function HomePage() {
-  const { book, storedBook, photos, startBlank } = useLogbook();
+  const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
   const heading = useRef<HTMLHeadingElement>(null);
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
-  const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
+  const photoCount = book.catches.filter((entry) => photos[entry.id] && offPlayLake(entry)).length;
   useT();
   const now = new Date();
   const today = localDate(now);
   const tomorrow = shiftDate(now, 1);
-  const catches = recentCatches(book, 4);
-  const upcoming = upcomingOwnTrips(book, today);
+  // The angler's own: a round of the game fills none of these cards.
+  const catches = recentCatches({ ...book, catches: book.catches.filter(offPlayLake) }, 4);
+  // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
+  // Not when today has an outing of its own, nor yesterday's morning outing: only one still going, with no fish yet or
+  // one in the last twelve hours.
+  const todayOuting = book.trips.some((trip) => offPlayLake(trip) && trip.date === today);
+  const lateOuting =
+    now.getHours() < LATE_NIGHT_UNTIL && !todayOuting
+      ? book.trips.find((trip) => {
+          if (!offPlayLake(trip) || isSampleTrip(trip.id) || trip.date !== shiftDate(now, -1)) return false;
+          const fish = catchesForTrip(book, trip.id);
+          return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
+        })
+      : undefined;
+  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingOwnTrips(book, today)];
   // Just back from the water, not from a round of the game.
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
   // The counts are the angler's own: a round of the game moves none of them.
-  const real = book.catches.filter(offPlayLake);
+  const real = countedFish(book.catches);
+  const counted = new Set(real.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(real, now);
   const thisMonth = today.slice(0, 7);
   const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
-  const monthFish = monthRows.filter(offPlayLake).length;
+  const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
   const thisYear = today.slice(0, 4);
   const yearRows = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`));
-  const yearFish = yearRows.filter(offPlayLake).length;
+  const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
   const goal = readYearGoal(thisYear);
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
@@ -103,6 +141,11 @@ export function HomePage() {
   // "0 by this date last year" says nothing when the book only starts after that date.
   const firstDay = real.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
   const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
+  // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
+  const ownWaters = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
+  const ownOutings = book.trips.filter((trip) => offPlayLake(trip) && trip.date <= today).length;
+  // Fish of their own logged beside the sample week: the invented part can go on its own.
+  const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -133,6 +176,18 @@ export function HomePage() {
         </aside>
       ) : null}
 
+      {sampleLeft ? (
+        <aside className="conditions sample-start" aria-label={t("Sample book")}>
+          <span className="eyebrow">{t("Sample book")}</span>
+          <p>{t("The sample week's invented entries are still in this book, beside your own.")}</p>
+          <button type="button" className="field-primary inline" onClick={() => {
+              if (dropSample()) heading.current?.focus();
+            }}>
+            {t("Remove the sample week")}
+          </button>
+        </aside>
+      ) : null}
+
       {kept ? (
         <div className="kept-draft" role="status">
           <p>
@@ -150,7 +205,8 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Fish")}</span>
           <strong>
-            <Link to="/catches">{book.catches.length}</Link>
+            {/* The angler's own: game fish are left out of the count and of the list it opens. */}
+            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: withoutPlayLake(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
           </strong>
           {book.catches.length > 0 ? (
             <small>
@@ -176,11 +232,11 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Waters")}</span>
           <strong>
-            <Link to="/spots">{book.spots.length}</Link>
+            <Link to="/spots" aria-label={tn(ownWaters, "{n} water", "{n} waters")}>{ownWaters}</Link>
           </strong>
-          {book.trips.length > 0 ? (
+          {ownOutings > 0 ? (
             <small>
-              <Link to="/trips">{tn(book.trips.length, "{n} outing", "{n} outings")}</Link>
+              <Link to="/trips">{tn(ownOutings, "{n} outing", "{n} outings")}</Link>
             </small>
           ) : null}
         </div>
@@ -194,15 +250,16 @@ export function HomePage() {
             {next && nextSpot?.place ? (
               <span className="map-link">
                 {" · "}
-                <a href={osmLink(nextSpot.place.lat, nextSpot.place.lng)} target="_blank" rel="noreferrer">
+                <MapAnchor lat={nextSpot.place.lat} lng={nextSpot.place.lng}>
                   {t("Open on a map")}
-                </a>
+                </MapAnchor>
               </span>
             ) : null}
           </small>
-          {next && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
+          {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
+          {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
           {/* On the day, a fish goes straight onto this outing. */}
-          {next && next.date === today ? (
+          {next && (next.date === today || next === lateOuting) ? (
             <small className="next-log">
               <Link to={`/catches/new?trip=${next.id}&spot=${next.spotId}`}>{t("Log a catch")}</Link>
             </small>
@@ -247,7 +304,7 @@ export function HomePage() {
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
                       {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(localDate(new Date(entry.caughtAt)))}>{t("Every fish that day")}</Link>
+                      <Link to={findLink(withoutPlayLake(book, localDate(new Date(entry.caughtAt)), book.catches))}>{t("Every fish that day")}</Link>
                     </p>
                     <CatchCard
                       level={4}
