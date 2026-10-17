@@ -476,7 +476,14 @@ function TripView() {
         <p className="meta moon-line">{t("Moon: {phase}", { phase: t(MOON_LABELS[moonName(moonPhase(tripNight(trip.date)))]) })}</p>
         {spot ? <SunLine date={trip.date} spot={spot} /> : null}
       </EditDelete>
-      {trip.note ? <p className="prose">{trip.note}</p> : null}
+      {trip.note ? (
+        <p className="prose">{trip.note}</p>
+      ) : !play && trip.date <= today ? (
+        // A day fished with nothing written: the note is one tap away, not behind Edit.
+        <p className="trip-write-up">
+          <Link to={`/trips/${trip.id}/edit?${NOTE_PARAM}=1`}>{t("Write up the day")}</Link>
+        </p>
+      ) : null}
       {play ? null : trip.date >= today ? (
         <p className="trip-calendar">
           <button
@@ -529,6 +536,9 @@ function TripView() {
     </div>
   );
 }
+
+/** In an outing's edit link: open with the note in focus, to write the day up. */
+const NOTE_PARAM = "note";
 
 export function TripFormPage() {
   const { tripId } = useParams();
@@ -755,6 +765,7 @@ function TripForm() {
             {t("Note")}
             <textarea
               name="note"
+              autoFocus={params.get(NOTE_PARAM) === "1"}
               maxLength={400}
               rows={3}
               value={note}

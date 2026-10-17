@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field42";
+export const NEWS_ID = "2026-10-17-field43";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "For planning the season: outing counts on Spots and Home leave out the ones still planned, which read “Planned” instead of “Nothing logged”, and the map list says when the next outing on each water is. A past outing with no note offers “Write up the day”, and a water added twice from a file opens straight on its merge box.",
   "Swapping book files between two phones works better: a photo added on the other phone to a fish you both have now comes across, a water added twice under one name gets a “Merge them” link, and loading the same file again says nothing in it is new. Files with repeated or broken entries are tidied or refused instead of loaded as they are.",
   "Out on the water at night or offline: “Fish saved” now says the fish’s day and time, “Save and log another” keeps the clock going past midnight, last night’s outing stays the likely water until dawn, and the map shows a note instead of a blank screen when it has never loaded. A fish dated off its outing’s day offers to move it there in one tap.",
   "The field log works better with large text and a screen reader: the save bar wraps instead of squeezing, a packed tally is read out as you tick pieces, map links say they open a new tab, and Undo sits right before the page after a delete. “Join them” on Bests now finds the same fish under two names in English too.",

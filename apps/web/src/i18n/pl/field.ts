@@ -755,4 +755,5 @@ export const PL_FIELD: PlBook = {
   "Merge them": "Połącz je",
   "This outing is still to come.": "Ta wyprawa jeszcze przed tobą.",
   Planned: "Zaplanowana",
+  "Write up the day": "Opisz ten dzień",
 };
