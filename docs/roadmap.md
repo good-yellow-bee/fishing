@@ -1219,7 +1219,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT174~~ | ~~Hop a jig: a tap while a jig sits on the bottom hops it, and like a topwater's pops the first two hops bring the bite sooner~~ (#781) | game | S |
 | ~~GT175~~ | ~~Lift a spoon: a tap with a spoon in the water lifts it to flash and flutter down, and the first two lifts bring the bite sooner~~ (#783) | game | S |
 | ~~GT176~~ | ~~Yank the bait: a strike at a nibble on bait pulls it from the fish, which backs off, so the rest of the wait stretches 1.5x once a cast (not on a beginner's easy fish)~~ (#785) | game | S |
-| GT177 | Strip a streamer: a tap with a streamer in the water strips it like a fleeing fish, and the first two strips bring the bite sooner | game | S |
+| ~~GT177~~ | ~~Strip a streamer: a tap with a streamer in the water strips it like a fleeing fish, and the first two strips bring the bite sooner~~ (#787) | game | S |
+| GT178 | A jig in winter: the cold slows the fish, but a slow jig still draws them, so a jig waits 0.85x in winter, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

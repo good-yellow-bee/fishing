@@ -277,6 +277,14 @@ export function crankRockWaitMul(lure: string | undefined, spot: string) {
   return spot === "point" && lure?.trim() && lureClass(lure).id === "crank" ? CRANK_ROCK_WAIT : 1;
 }
 
+/** In winter the cold water slows the fish, and a jig worked slow on the bottom is the one thing they will still chase, so it draws the bite sooner. */
+export const JIG_WINTER_WAIT = 0.85;
+
+/** How the season stretches the wait on a jig: sooner in winter, else 1. */
+export function jigWinterWaitMul(lure: string | undefined, season: LakeSeason | undefined) {
+  return season === "winter" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_WINTER_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

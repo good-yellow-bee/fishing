@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -217,6 +217,17 @@ describe("a spinner in murky light", () => {
     expect(spinnerThumpWaitMul("Inline spinner", "clear")).toBe(1);
     expect(spinnerThumpWaitMul("Kastmaster spoon", "rain")).toBe(1);
     expect(spinnerThumpWaitMul(undefined, "rain")).toBe(1);
+  });
+});
+
+describe("a jig in winter", () => {
+  it("bites sooner in winter, on a jig only", () => {
+    expect(JIG_WINTER_WAIT).toBeLessThan(1);
+    expect(jigWinterWaitMul("Green pumpkin tube", "winter")).toBe(JIG_WINTER_WAIT);
+    expect(jigWinterWaitMul("Green pumpkin tube", "summer")).toBe(1);
+    expect(jigWinterWaitMul("Green pumpkin tube", undefined)).toBe(1);
+    expect(jigWinterWaitMul("Inline spinner", "winter")).toBe(1);
+    expect(jigWinterWaitMul(undefined, "winter")).toBe(1);
   });
 });
 
