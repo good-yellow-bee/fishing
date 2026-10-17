@@ -748,4 +748,7 @@ export const PL_FIELD: PlBook = {
   "Try again": "Spróbuj ponownie",
   "Fish saved: {when}.": "Ryba zapisana: {when}.",
   "Move it to {day}": "Przenieś na {day}",
+  "Photos added: {count}.": "Dodane zdjęcia: {count}.",
+  "Add the new photos ({count})": "Dodaj nowe zdjęcia ({count})",
+  "Nothing in this file is new to this book.": "Nic w tym pliku nie jest nowe dla tego dziennika.",
 };

@@ -1046,7 +1046,7 @@ function CatchForm() {
             </select>
           </label>
           {/* A small-hours fish on last evening's outing is on its day. */}
-          {pickedTrip && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date) ? (
+          {pickedTrip && caughtAt && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date) ? (
             <p className="wide form-note" role="status">
               {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}{" "}
               {/* The same clock time, on the outing's day: a fish moved to another outing keeps its old date otherwise. */}
