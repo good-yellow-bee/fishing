@@ -277,6 +277,8 @@ export function BestsPage() {
                 {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
               </p>
             ) : null}
+            {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
+            {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
             {split ? (
               <p className="meta weekend-split">
                 {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}

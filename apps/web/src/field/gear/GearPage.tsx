@@ -75,7 +75,13 @@ function LureRecord({ today }: { today: string }) {
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
-              {row.lastAt ? <span className="lure-last">{t("last fish {day}", { day: formatCatchDay(row.lastAt) })}</span> : null}
+              {row.lastAt ? (
+                <>
+                  <span className="lure-last">{t("last fish {day}", { day: formatCatchDay(row.lastAt) })}</span>
+                  {/* Packed since without a fish: a lure that has gone quiet. */}
+                  {row.since && row.since >= 2 ? <span className="lure-last">{tn(row.since, "none on {n} outing since", "none on {n} outings since")}</span> : null}
+                </>
+              ) : null}
             </span>
           </li>
         ))}

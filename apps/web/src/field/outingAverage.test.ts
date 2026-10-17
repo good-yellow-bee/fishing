@@ -40,20 +40,20 @@ describe("outing streak", () => {
 
   it("finds the longest run of outings with a fish, in date order", () => {
     const fish: Record<string, number> = { a: 1, b: 2, c: 0, d: 4, later: 0 };
-    expect(outingStreak([...trips].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 2, going: false });
+    expect(outingStreak([...trips].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 2, going: false, dry: 1 });
   });
 
   it("says when the latest outings are still on the run, and leaves planned ones out", () => {
     const fish: Record<string, number> = { a: 0, b: 2, c: 1, d: 4 };
-    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
-    expect(outingStreak(trips, () => 0, "2026-10-15")).toEqual({ best: 0, going: false });
+    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true, dry: 1 });
+    expect(outingStreak(trips, () => 0, "2026-10-15")).toEqual({ best: 0, going: false, dry: 4 });
   });
 
   it("counts two outings on one day as one step, whichever order they were saved in", () => {
     const fish: Record<string, number> = { a: 1, b: 2, morning: 0, evening: 3 };
     const sameDay = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("morning", "2026-10-09"), trip("evening", "2026-10-09")];
-    expect(outingStreak(sameDay, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
-    expect(outingStreak([...sameDay].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true });
+    expect(outingStreak(sameDay, (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true, dry: 0 });
+    expect(outingStreak([...sameDay].reverse(), (id) => fish[id] ?? 0, "2026-10-15")).toEqual({ best: 3, going: true, dry: 0 });
   });
 });
 
