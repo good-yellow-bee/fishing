@@ -1626,7 +1626,8 @@ button.field-primary:disabled {
 }
 
 .day-grid li.day-fish a,
-.day-grid li.day-blank a {
+.day-grid li.day-blank a,
+.day-grid li.day-planned a {
   display: block;
   width: 100%;
   height: 100%;
@@ -1656,7 +1657,8 @@ button.field-primary:disabled {
 }
 
 .day-grid li.day-fish a:focus-visible,
-.day-grid li.day-blank a:focus-visible {
+.day-grid li.day-blank a:focus-visible,
+.day-grid li.day-planned a:focus-visible {
   outline: 2px solid var(--field-rust);
   outline-offset: 2px;
 }
