@@ -1440,6 +1440,7 @@ describe("a fight in winter", () => {
       expect(nestTireMul("spring", id, "dropoff")).toBe(1);
       expect(nestTireMul("summer", id, "reeds")).toBe(1);
     }
+    expect(NEST_GUARDERS.has("bluegill")).toBe(true);
     expect(nestTireMul("spring", "pike", "reeds")).toBe(1);
   });
 

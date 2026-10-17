@@ -1268,7 +1268,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT223~~ | ~~Streamer off the drop-off: a streamer stripped up the Uskok darts like a fleeing baitfish past the trout holding deep, so the bite comes 0.85x sooner, and the wait hint says so~~ (#911) | bite | S |
 | ~~GT224~~ | ~~Worm in the inlet current: a worm cast to the Ujście tumbles downstream like food washed in from the stream, so the bite comes 0.85x sooner, and the wait hint says so~~ (#912) | bite | S |
 | ~~GT225~~ | ~~Spinner in the inlet current: the Ujście current spins a spinner's blade hard even on a slow retrieve, so the bite comes 0.85x sooner, and the wait hint says so; news card game12~~ (#913) | bite | S |
-| GT226 | Crankbait off the pilings: a crankbait run past the Pomost knocks off the pilings and darts aside, so the bite comes 0.85x sooner, and the wait hint says so | bite | S |
+| ~~GT226~~ | ~~Crankbait off the pilings: a crankbait run past the Pomost knocks off the pilings and darts aside, so the bite comes 0.85x sooner, and the wait hint says so~~ (#915) | bite | S |
+| GT227 | Bluegill on the nest: a bluegill hooked at the Trzciny or Pomost in spring is fanning its nest and tires slower, like the bass, and the hookset hint says so | fight | S |
 
 ## Risks / open questions for the owner
 

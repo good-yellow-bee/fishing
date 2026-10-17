@@ -302,8 +302,8 @@ export const SUMMER_STRENGTH_TIRE = 0.85;
 export function summerStrengthTireMul(season: string | undefined, speciesId: string) {
   return season === "summer" && WARM_LOVERS.has(speciesId) ? SUMMER_STRENGTH_TIRE : 1;
 }
-/** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
-export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
+/** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. A bluegill fans its nest in the same shallows and chases off anything that comes near. */
+export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass", "bluegill"]);
 /** The shallow spots where a nest guarder makes its nest. */
 export const NEST_SPOTS: ReadonlySet<string> = new Set(["reeds", "dock"]);
 /** In spring a nest guarder hooked by its nest tires only this fast on a run or against the reel. */
