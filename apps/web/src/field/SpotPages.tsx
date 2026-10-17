@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from "reac
 import {
   WATER_LABELS,
   WATER_TYPES,
+  biteTimes,
   catchesForSpot,
   fishCountsByTrip,
   localDate,
@@ -16,6 +17,7 @@ import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
+import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
@@ -235,6 +237,14 @@ export function SpotPage() {
       ) : null}
       <BiggestHere catches={catches} spotId={spot.id} />
       <FishCsv catches={catches} name={spot.name} />
+      {catches.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("When it bites")}</h2>
+          </div>
+          <TallyBars key={spot.id} rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
+        </>
+      ) : null}
       <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>

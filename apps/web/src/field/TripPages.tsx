@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -38,7 +38,7 @@ import { packingTips } from "./waterTips";
 import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
-import { fishPace } from "./tripPace";
+import { fishPace, sinceLastFish } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
 import { osmLink } from "./osmLink";
 import { placeFor } from "./map/places";
@@ -72,6 +72,17 @@ function fishSpan(first: string, last: string, count: number): string {
   const span = show(first) === show(last) ? t("Fish came at {time}", { time: show(first) }) : t("Fish came between {from} and {to}", { from: show(first), to: show(last) });
   const pace = fishPace(first, last, count);
   return pace ? `${span}, ${pace}` : span;
+}
+
+/** The quiet since the outing's last fish, kept current while the page stays open. */
+function SinceLast({ caughtAt }: { caughtAt: string }) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const text = sinceLastFish(caughtAt, now);
+  return text ? <p className="meta since-last">{text}</p> : null;
 }
 
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
@@ -300,6 +311,10 @@ function TripView() {
       <FishSum catches={catches} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
       {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
+      {/* Out there now: how long it has been quiet, to help decide when to move. */}
+      {trip.date === today && catches[0] && localDate(new Date(catches[0].caughtAt)) === today ? (
+        <SinceLast caughtAt={catches[0].caughtAt} />
+      ) : null}
       {catches.length > 1 ? (
         <p className="meta fish-span">
           {/* Newest first: the last in the list came first. */}

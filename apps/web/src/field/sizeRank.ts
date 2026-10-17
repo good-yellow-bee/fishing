@@ -1,4 +1,4 @@
-import { measureOf, type CatchEntry, type Measure } from "@stillwater/shared";
+import { likelyWeight, measureOf, sizePairs, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 
@@ -50,4 +50,20 @@ export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): Ca
     if (theirs) between += 1;
   }
   return null;
+}
+
+/**
+ * For a fish both measured and weighed: whether it was well heavier or lighter than its length would say, going by the
+ * other fish of its kind that were both measured and weighed (three at least), and the weight that would be usual.
+ */
+export function forItsLength(kind: readonly CatchEntry[], entry: CatchEntry): { heavy: boolean; usual: number } | null {
+  const length = measureOf(entry, "length");
+  const weight = measureOf(entry, "weight");
+  if (length?.kind !== "length" || weight?.kind !== "weight" || !(weight.pounds > 0)) return null;
+  const pairs = sizePairs(kind.filter((other) => other.id !== entry.id));
+  if (pairs.length < 3) return null;
+  const usual = likelyWeight(pairs, length.inches);
+  if (usual === null || !(usual > 0)) return null;
+  const ratio = weight.pounds / usual;
+  return ratio > 1.15 ? { heavy: true, usual } : ratio < 0.85 ? { heavy: false, usual } : null;
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
 import { setUnits } from "../i18n";
-import { biggestSince, sizeRank } from "./sizeRank";
+import { biggestSince, forItsLength, sizeRank } from "./sizeRank";
 
 const fish = (id: string, inches: number, pounds?: number): CatchEntry => ({
   id,
@@ -57,5 +57,25 @@ describe("biggestSince", () => {
     const gill = (id: string, day: number, pounds: number): CatchEntry => ({ ...base, id, species: "Bluegill", measure: { kind: "weight", pounds }, alsoMeasure: undefined, caughtAt: new Date(2026, 5, day).toISOString() });
     const kind = [gill("small", 1, 0.9), gill("a", 2, 1.2), gill("b", 3, 1.1), gill("c", 4, 1.3), gill("new", 5, 2)];
     expect(biggestSince(kind, kind[4]!)).toBeNull();
+  });
+});
+
+describe("heavy or light for its length", () => {
+  const base = sampleLogbook(new Date(2026, 9, 1)).catches[0]!;
+  const fish = (id: string, inches: number, pounds: number): CatchEntry => ({ ...base, id, measure: { kind: "length", inches }, alsoMeasure: { kind: "weight", pounds } });
+  // Four fish on one build: pounds = 0.0004 * inches^3.
+  const kind = [fish("a", 20, 3.2), fish("b", 25, 6.25), fish("c", 30, 10.8), fish("d", 15, 1.35)];
+
+  it("says a fat fish is heavy and a thin one light, with the usual weight", () => {
+    const fat = forItsLength(kind, fish("x", 25, 8));
+    expect(fat?.heavy).toBe(true);
+    expect(fat?.usual).toBeCloseTo(6.25, 2);
+    expect(forItsLength(kind, fish("y", 25, 5))?.heavy).toBe(false);
+  });
+
+  it("says nothing for a usual fish, one not weighed, or too few to go by", () => {
+    expect(forItsLength(kind, fish("z", 25, 6.5))).toBeNull();
+    expect(forItsLength(kind, { ...base, id: "w", measure: { kind: "length", inches: 25 }, alsoMeasure: undefined })).toBeNull();
+    expect(forItsLength(kind.slice(0, 2), fish("x", 25, 8))).toBeNull();
   });
 });
