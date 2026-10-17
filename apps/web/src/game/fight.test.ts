@@ -1408,7 +1408,7 @@ describe("a fight in winter", () => {
     expect(FALL_FEEDERS.has("pike")).toBe(true);
     for (const id of FALL_FEEDERS) expect(fallFeedTireMul("fall", id)).toBe(FALL_FEED_TIRE);
     expect(fallFeedTireMul("summer", "tiger-muskie")).toBe(1);
-    expect(fallFeedTireMul("fall", "pike")).toBe(1);
+    expect(fallFeedTireMul("fall", "walleye")).toBe(1);
   });
 
   it("slows a current fighter's tiring only at the inlet", () => {

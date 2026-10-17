@@ -424,7 +424,8 @@ describe("useFishingGame lost fight", () => {
   it.each([
     ["fall", "tiger-muskie", true],
     ["summer", "tiger-muskie", false],
-    ["fall", "pike", false],
+    ["fall", "pike", true],
+    ["fall", "walleye", false],
   ] as const)("says a fish hooked in %s (%s) has fed hard for winter: %s", (season, id, fed) => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
