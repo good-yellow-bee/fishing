@@ -9,6 +9,7 @@ const DELETED = {
   trip: "Outing deleted; its fish stay in the book.",
   sample: "Sample book restored.",
   blank: "The sample waters and fish are gone. Add your first water to begin.",
+  unsample: "The sample week is gone. Your own fish stay.",
   rename: "Fish renamed.",
   merge: "Waters merged.",
   file: "Fish added to their outings.",

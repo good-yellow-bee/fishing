@@ -558,7 +558,7 @@ export const PL_FIELD: PlBook = {
   "Most on {lure}.": "Najczęściej brało na: {lure}.",
   "Most at {time}.": "Najwięcej o porze: {time}.",
   "Most from {water}.": "Najwięcej z łowiska: {water}.",
-  "{n} years ago": ["{n} rok temu", "{n} lata temu", "{n} lat temu"],
+  "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Weather is optional: note the sky and wind, and the water temperature if you took it.":
     "Pogoda jest opcjonalna: zapisz niebo i wiatr, a temperaturę wody, jeśli ją znasz.",
@@ -699,4 +699,7 @@ export const PL_FIELD: PlBook = {
   Saturday: "W sobotę",
   "Hide packed": "Ukryj spakowane",
   "Show packed ({n})": "Pokaż spakowane ({n})",
+  "The sample week's invented fish are still in this book, beside your own.": "Wymyślone ryby z przykładowego tygodnia wciąż są w dzienniku, obok twoich.",
+  "Remove the sample week": "Usuń przykładowy tydzień",
+  "The sample week is gone. Your own fish stay.": "Przykładowy tydzień usunięty. Twoje ryby zostały.",
 };

@@ -84,10 +84,13 @@ const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
 const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> = {
   // Not "wschód" or "zachód": they are the east and west of a wind as well ("ze wschodu").
-  dawn: ["sunrise", "first light", "daybreak", "świt", "brzask"],
+  // The Polish "at dawn", "in the evening" and "at night" forms too ("o świcie", "wieczorem", "nocą", "w nocy").
+  dawn: ["sunrise", "first light", "daybreak", "świt", "świcie", "brzask"],
+  morning: ["rankiem"],
   midday: ["noon", "południe"],
-  evening: ["dusk", "sunset", "zmierzch", "zmrok"],
-  night: ["dark", "noc"],
+  afternoon: ["popołudniu"],
+  evening: ["dusk", "sunset", "zmierzch", "zmrok", "wieczorem"],
+  night: ["dark", "noc", "nocą", "nocy"],
 };
 
 /** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */

@@ -40,6 +40,20 @@ export function hasSampleWaters(book: Logbook) {
   return book.spots.some((spot) => SAMPLE_SPOT_IDS.has(spot.id));
 }
 
+/** Whether any of the sample week's invented fish is still in the book. */
+export function hasSampleFish(book: Logbook) {
+  return book.catches.some((entry) => SAMPLE_IDS.has(entry.id));
+}
+
+/** The book without the sample week: its fish, and its outings and waters unless a fish of the player's own is on them. */
+export function withoutSample(book: Logbook): Logbook {
+  const catches = book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id));
+  const usedTrips = new Set(catches.map((entry) => entry.tripId));
+  const trips = book.trips.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id) || usedTrips.has(trip.id));
+  const usedSpots = new Set([...catches.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
+  return { ...book, catches, trips, spots: book.spots.filter((spot) => !SAMPLE_SPOT_IDS.has(spot.id) || usedSpots.has(spot.id)) };
+}
+
 /** The player's own catches; the sample week's fish and the game's don't need a copy. */
 export function ownCatches(book: Logbook) {
   return book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id) && offPlayLake(entry)).length;

@@ -33,6 +33,7 @@ import {
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
 import { osmLink } from "../osmLink";
 import { hasSampleWaters } from "../bookCopy";
+import { PLAY_LAKE_ID } from "../playLake";
 import { spotsByLastFish } from "../spotOrder";
 import "./spot-map.css";
 
@@ -231,7 +232,8 @@ export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
-  const spots = spotsByLastFish(book).map((row) => row.spot);
+  // Not the game's lake: it has no place on a real map.
+  const spots = spotsByLastFish(book).map((row) => row.spot).filter((spot) => spot.id !== PLAY_LAKE_ID);
   const plotted = spots.flatMap((spot) => {
     const place = sheetPlace(spot);
     return place ? [{ spot, place }] : [];

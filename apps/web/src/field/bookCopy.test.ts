@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, isSampleOnly, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
+import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleFish, isSampleOnly, isSampleTrip, ownCatches, withoutSample, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
 
 describe("remind to download a copy of the book", () => {
   it("stays quiet until the book has some of the player's own catches", () => {
@@ -56,6 +56,18 @@ describe("remind to download a copy of the book", () => {
 });
 
 describe("a book that is still only the sample", () => {
+  it("takes the sample week out, keeping what holds the player's own fish", () => {
+    const book = sampleLogbook(new Date());
+    const trip = book.trips[0]!;
+    const own = { ...book.catches[0]!, id: "own-zq1", tripId: trip.id, spotId: trip.spotId };
+    const left = withoutSample({ ...book, catches: [...book.catches, own] });
+    expect(left.catches.map((entry) => entry.id)).toEqual(["own-zq1"]);
+    expect(left.trips.map((each) => each.id)).toEqual([trip.id]);
+    expect(left.spots.map((spot) => spot.id)).toEqual([trip.spotId]);
+    expect(hasSampleFish(left)).toBe(false);
+    expect(hasSampleFish(book)).toBe(true);
+  });
+
   it("knows the sample week's outings", () => {
     expect(isSampleTrip(sampleLogbook(new Date()).trips[0]!.id)).toBe(true);
     expect(isSampleTrip("trip-my-own-zz")).toBe(false);
