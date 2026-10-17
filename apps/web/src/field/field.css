@@ -1722,3 +1722,8 @@ button.field-primary:disabled {
 .lure-chips {
   align-items: center;
 }
+
+/* The middle fish's size, just above the bars it sits among. */
+.typical-size {
+  margin: 0 0 8px;
+}

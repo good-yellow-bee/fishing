@@ -20,7 +20,7 @@ import { MonthBars } from "./MonthBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
-import { sizeBands } from "./sizeBands";
+import { sizeBands, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -211,15 +211,17 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
         </p>
       ) : null}
       {charts.map((chart) => (
-        <TallyBars
-          key={chart.kind}
+        <Fragment key={chart.kind}>
+          <p className="meta typical-size">{t("Typical size: {size} (as many bigger as smaller)", { size: measureText(typicalSize(catches, chart.kind)!) })}</p>
+          <TallyBars
           rows={chart.bands.map((band) => ({
             key: `${chart.kind}-${band.from}`,
             label: t("{from} to {to}", { from: size(band.from, band.unit), to: size(band.to, band.unit) }),
             count: band.count,
             to: band.count > 0 ? findWithLink(within, band.search) : undefined,
           }))}
-        />
+          />
+        </Fragment>
       ))}
     </>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
-import { sizeBands } from "./sizeBands";
+import { sizeBands, typicalSize } from "./sizeBands";
 
 describe("size bands on a species page", () => {
   const base = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
@@ -36,5 +36,12 @@ describe("size bands on a species page", () => {
     expect(sizeBands([long("a", 18), long("b", 20), long("c", 21)], "length", false)).toEqual([]);
     expect(sizeBands([long("a", 20), long("b", 20.2), long("c", 20.5), long("d", 20.9)], "length", false)).toEqual([]);
     expect(sizeBands([long("a", 20), long("b", 22), long("c", 24), long("d", 26)], "weight", false)).toEqual([]);
+  });
+
+  it("names the middle fish's size, between the two middle ones for an even count", () => {
+    expect(typicalSize([long("a", 18), long("b", 26), long("c", 20)], "length")).toBeNull();
+    expect(typicalSize([long("a", 18), long("b", 26), long("c", 20), long("d", 30), long("e", 22)], "length")).toEqual({ kind: "length", inches: 22 });
+    expect(typicalSize([long("a", 18), long("b", 26), long("c", 20), long("d", 30)], "length")).toEqual({ kind: "length", inches: 23 });
+    expect(typicalSize([long("a", 18), long("b", 26), long("c", 20), long("d", 30)], "weight")).toBeNull();
   });
 });
