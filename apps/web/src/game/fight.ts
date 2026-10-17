@@ -266,6 +266,15 @@ export const SPRING_RUN_TIRE = 0.8;
 export function springRunTireMul(season: string | undefined, speciesId: string, spot: string) {
   return season === "spring" && spot === "inlet" && SPRING_RUNNERS.has(speciesId) ? SPRING_RUN_TIRE : 1;
 }
+/** Current fighters: built for moving water, they turn broadside to the inlet's current and fight it. */
+export const CURRENT_FIGHTERS: ReadonlySet<string> = new Set(["smallmouth-bass", "rainbow-trout"]);
+/** A current fighter hooked at the inlet tires only this fast on a run or against the reel. */
+export const CURRENT_FIGHTER_TIRE = 0.85;
+
+/** How the inlet's current slows a current fighter's tiring: slower at the inlet, else 1. */
+export function currentTireMul(speciesId: string, spot: string) {
+  return spot === "inlet" && CURRENT_FIGHTERS.has(speciesId) ? CURRENT_FIGHTER_TIRE : 1;
+}
 /** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
 export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
 /** The shallow spots where a nest guarder makes its nest. */
