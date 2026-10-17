@@ -41,7 +41,9 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       for (const entry of own) {
         if (pieceKey(entry.lure) !== key) continue;
         const name = entry.lure.trim().toLowerCase();
-        spellings.set(name, [...(spellings.get(name) ?? []), entry]);
+        const list = spellings.get(name);
+        if (list) list.push(entry);
+        else spellings.set(name, [entry]);
       }
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
       // The newest fish under any spelling of the piece: "Spinnerbaits" last week still counts for "Spinnerbait".

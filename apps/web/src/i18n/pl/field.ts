@@ -734,4 +734,5 @@ export const PL_FIELD: PlBook = {
   "Next Saturday": "Za tydzień w sobotę",
   "These waters are invented.": "Te łowiska są zmyślone.",
   "Add the one you fished": "Dodaj to, na którym łowisz",
+  "That day's outing": "Wyprawa z tego dnia",
 };

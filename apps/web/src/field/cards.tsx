@@ -73,7 +73,8 @@ export function CatchCard({
         {entry.note ? <p className="note">{noteText(entry.note)}</p> : null}
         {entry.tripId && tripTitle ? (
           <p className="trip-link">
-            <Link to={`/trips/${entry.tripId}`}>{tripTitle}</Link>
+            {/* An untitled outing goes by its water's name, already on the line above: said once. */}
+            <Link to={`/trips/${entry.tripId}`}>{tripTitle === spotName ? t("That day's outing") : tripTitle}</Link>
           </p>
         ) : null}
       </div>
