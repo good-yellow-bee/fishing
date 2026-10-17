@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, SEASON_LABELS, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, SEASON_LABELS, moonQuarterOf, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { lureByTemp, readingBefore, waterTips } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
-import { fishCountLabel, formatCatchDay } from "./format";
+import { fishCountLabel, formatCatchDay, formatDay } from "./format";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
@@ -79,6 +79,7 @@ export function WaterTipsBox({
   // Links narrow to the same water or kind of fish (`within`) when the box is about one.
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
+  const dayMoon = on ? moonQuarterOf(new Date(y!, m! - 1, d!, 12)) : null;
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
   const lastF = tips.lastTemp?.fahrenheit;
@@ -116,6 +117,8 @@ export function WaterTipsBox({
           </>
         ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
+        {/* The moon on the day in question, against the best one here. */}
+        {tips.moon && dayMoon ? (dayMoon === tips.moon ? ` ${t("({day} too)", { day: formatDay(on!) })}` : ` ${t("({day}: {moon})", { day: formatDay(on!), moon: t(MOON_QUARTER_LABELS[dayMoon]).toLowerCase() })}`) : null}
         {tips.season ? <TipLine text="Best season: {season}" name="season" value={t(SEASON_LABELS[tips.season])} to={find(exactTerm("season", t(SEASON_LABELS[tips.season])))} /> : null}
         {tips.temp ? <TipLine text="Best water temperature: {temp}" name="temp" value={tempBandLabel(tips.temp)} to={find(tempBandSearch(tips.temp))} /> : null}
         {sun && sun.near >= 2 ? (
