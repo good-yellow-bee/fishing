@@ -527,8 +527,8 @@ export function useFishingGame(
     if (topwaterWait < 1) reasons.unshift(t("Glassy water, made for a topwater."));
     else if (topwaterWait > 1) reasons.unshift(t("The chop hides the topwater, so the bites come slow."));
     // A spinner or spoon flashes in the sun, so a fish sees it from farther off.
-    const flashWait = flashWaitMul(lureRef?.current, sky, hour);
-    if (flashWait < 1) reasons.unshift(t("The sun catches the lure's flash."));
+    const flashWait = flashWaitMul(lureRef?.current, sky, hour, moon);
+    if (flashWait < 1) reasons.unshift(hour === "night" ? t("The full moon catches the lure's flash.") : t("The sun catches the lure's flash."));
     // After dark the fish hunt by sound, and a topwater's gurgle carries.
     const nightTopwaterWait = topwaterNightWaitMul(isTopwater(lureRef?.current), hour);
     if (nightTopwaterWait < 1) reasons.unshift(t("In the dark the fish hunt by sound, and they hear the topwater."));

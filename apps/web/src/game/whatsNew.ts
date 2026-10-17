@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzzb";
+export const NEWS_ID = "2026-10-17zzzzc";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a clear night under a full moon, a spinner or spoon flashes in the moonlight, so it draws a bite sooner.",
   "In winter the cold water makes a hooked fish sluggish, so it tires sooner in the fight.",
   "On a summer day the heat sends the fish down to the cool water off the ledge, so a cast to the Drop-off draws a bite sooner.",
   "In fall the fish fatten up for winter, so a big lure (streamer, spinner, spoon, crankbait or jig) draws a bite sooner.",

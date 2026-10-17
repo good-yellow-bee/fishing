@@ -212,9 +212,12 @@ export function topwaterWaitMul(topwater: boolean, wind: string | undefined) {
 /** A spinner or spoon flashes in sunlight, so on a clear day a fish sees it from farther and the bite comes sooner. */
 export const FLASH_SUN_WAIT = 0.85;
 
-/** How the light stretches the wait on a flashing lure: sooner under a clear sky from dawn to dusk, else 1. */
-export function flashWaitMul(lure: string | undefined, sky: string | undefined, hour: LakeHour) {
-  if (!lure?.trim() || sky !== "clear" || hour === "night") return 1;
+/** A clear night's moon this full (its lit share) is bright enough for a spinner or spoon to flash. */
+export const FULL_MOON_FLASH = 0.9;
+
+/** How the light stretches the wait on a flashing lure: sooner under a clear sky from dawn to dusk, or on a clear night under a full moon, else 1. */
+export function flashWaitMul(lure: string | undefined, sky: string | undefined, hour: LakeHour, moon = 0) {
+  if (!lure?.trim() || sky !== "clear" || (hour === "night" && moon < FULL_MOON_FLASH)) return 1;
   const kind = lureClass(lure).id;
   return kind === "spinner" || kind === "spoon" ? FLASH_SUN_WAIT : 1;
 }
