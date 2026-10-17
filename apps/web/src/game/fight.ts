@@ -248,8 +248,8 @@ export function deepCooled(season: string | undefined, speciesId: string, spot: 
 export function warmTireMul(season: string | undefined, speciesId: string, sky?: string, spot?: string) {
   return season === "summer" && COLDWATER.has(speciesId) && !rainCooled(season, speciesId, sky) && !deepCooled(season, speciesId, spot) ? SUMMER_TIRE : 1;
 }
-/** Fall run fish: in fall they run up to spawn, full of fight. */
-export const FALL_RUNNERS: ReadonlySet<string> = new Set(["salmon"]);
+/** Fall run fish: in fall they run up to spawn, full of fight (a brook trout spawns in fall too, in colour and on edge). */
+export const FALL_RUNNERS: ReadonlySet<string> = new Set(["salmon", "brook-trout"]);
 /** In fall a fish on its spawning run tires only this fast on a run or against the reel. */
 export const FALL_RUN_TIRE = 0.8;
 
