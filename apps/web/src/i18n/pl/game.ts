@@ -419,6 +419,7 @@ export const PL_GAME: PlBook = {
   "It thrives in the cold, so it keeps its strength.": "W zimnie czuje się najlepiej, więc nie traci sił.",
   "The swollen inlet pulls harder on a slack line.": "Wezbrane Ujście mocniej ciągnie luźną żyłkę.",
   "It's worn from spawning, so it tires sooner.": "Po tarle szybciej się męczy.",
+  "It turns its side to the current and fights it, so it tires slower.": "Ustawia się bokiem do nurtu i walczy z nim, więc wolniej się męczy.",
   "It's on its spring run up the inlet, so it tires slower.": "Wiosną ciągnie Ujściem na tarło, więc wolniej się męczy.",
   "It hunts hardest in the low light, so it tires slower.": "W półmroku poluje najzacieklej, więc wolniej się męczy.",
   "It has found cool water down deep, so it keeps its strength.": "W chłodnej głębi nie traci sił.",

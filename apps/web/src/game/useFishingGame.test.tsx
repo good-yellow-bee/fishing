@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
-import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, type FightOutcome, type FightPerformance } from "./fight";
+import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
@@ -54,6 +54,7 @@ vi.mock("./fight", async (importOriginal) => {
     makeFight: vi.fn(() => ({ sim: { line: fightLine, tension: 0.2, surge: 0, stamina: 1, runSide: 1 }, performance: fightPerformance, step })),
     floodedInlet: vi.fn(actual.floodedInlet),
     springRunTireMul: vi.fn(actual.springRunTireMul),
+    currentTireMul: vi.fn(actual.currentTireMul),
   };
 });
 
@@ -395,6 +396,15 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("fight:none");
     expect(hint()?.includes("It's on its spring run up the inlet, so it tires slower.")).toBe(running);
+  });
+
+  it.each([true, false])("says a fish fighting the inlet's current tires slower: %s", (fighting) => {
+    if (fighting) vi.mocked(currentTireMul).mockReturnValueOnce(CURRENT_FIGHTER_TIRE).mockReturnValueOnce(CURRENT_FIGHTER_TIRE);
+    const surface = mount();
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It turns its side to the current and fights it, so it tires slower.")).toBe(fighting);
   });
 
   it("says a burbot hooked in winter thrives in the cold", () => {
