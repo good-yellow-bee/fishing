@@ -12,7 +12,7 @@ import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, speciesWaters } from "./speciesLink";
 import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
-import { WaterTipsBox } from "./WaterTipsBox";
+import { WaterTipsBox, waterRange } from "./WaterTipsBox";
 import { bestSteps, type BestStep } from "./bestSteps";
 import { CM_PER_IN, KG_PER_LB, lengthText, measureText, measuresText, weightText } from "../i18n/content";
 import { WeatherBars } from "./WeatherBars";
@@ -128,6 +128,10 @@ export function SpeciesPage() {
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
+      {/* The water the kind came in, once two fish noted it: where to look for it. */}
+      {catches.filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(catches) ? (
+        <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(catches)! })}</p>
+      ) : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />

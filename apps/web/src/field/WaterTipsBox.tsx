@@ -31,13 +31,19 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
 
 /** "Water then: 54–61°F.": the water temperatures noted with those fish, so a planned day knows what to expect. */
 export function waterThen(fish: readonly CatchEntry[]): string | null {
+  const range = waterRange(fish);
+  return range ? t("Water then: {temp}.", { temp: range }) : null;
+}
+
+/** "54–61°F": the water temperatures noted with these fish, rounded as shown, or one value when they read the same. */
+export function waterRange(fish: readonly CatchEntry[]): string | null {
   const temps = fish.map((entry) => entry.weather?.waterTempF).map((f) => (f === undefined ? f : Math.round(f))).filter((f): f is number => f !== undefined && Number.isFinite(f));
   if (temps.length === 0) return null;
   const low = Math.min(...temps);
   const high = Math.max(...temps);
   // Rounded as shown: two readings a fraction apart read as one temperature, not a range of the same number twice.
   const [lowText, highText] = [tempText(low), tempText(high)];
-  return t("Water then: {temp}.", { temp: lowText === highText ? lowText : `${lowText.replace(/\s*°.*$/, "")}–${highText}` });
+  return lowText === highText ? lowText : `${lowText.replace(/\s*°.*$/, "")}–${highText}`;
 }
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */

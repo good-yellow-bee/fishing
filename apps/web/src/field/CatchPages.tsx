@@ -1107,6 +1107,9 @@ function CatchView() {
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
+  const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", t(entry.lure)), exactTerm("water", spot.name)] as const) : null;
+  const lureHereCount = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const caughtDay = localDate(new Date(entry.caughtAt));
   // Where the fish's time sat against the sun at its water, for a water with a place.
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
@@ -1197,6 +1200,11 @@ function CatchView() {
         {sameSize > 1 ? (
           <p className="meta same-size">
             <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species), count: sameSize })}</Link>
+          </p>
+        ) : null}
+        {lureHere && lureHereCount > 1 ? (
+          <p className="meta lure-here">
+            <Link to={findWithLink(...lureHere)}>{t("On {lure} at {water}: {count}", { lure: t(entry.lure), water: spot!.name, count: fishCountLabel(lureHereCount) })}</Link>
           </p>
         ) : null}
         {milestone ? (

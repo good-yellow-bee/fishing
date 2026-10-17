@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
 import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
@@ -17,6 +18,7 @@ import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
+import { notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
@@ -80,6 +82,7 @@ export function BestsPage() {
   const today = localDate(new Date());
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
   const days = daysOut(whole, today.slice(0, 4), today);
+  const notYet = notYetThisYear(whole.catches);
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const split = weekendSplit(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
@@ -278,6 +281,20 @@ export function BestsPage() {
             </div>
             <YearGoal catches={whole.catches} />
             {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
+            {/* Last year's kinds still to show up this year, each opening its page. */}
+            {notYet.length > 0 ? (
+              <p className="meta not-yet">
+                <span>
+                  {t("Not yet this year:")}{" "}
+                  {notYet.map((name, index) => (
+                    <Fragment key={name}>
+                      {index > 0 ? ", " : null}
+                      <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
+                    </Fragment>
+                  ))}
+                </span>
+              </p>
+            ) : null}
             {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
             {streak.best > 1 ? (
               <p className="meta">
@@ -286,6 +303,8 @@ export function BestsPage() {
             ) : null}
             {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
             {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
+            {/* A blank spell still running: how long since an outing gave a fish. */}
+            {streak.dryNow > 1 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
             {split ? (
               <p className="meta weekend-split">
                 {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}

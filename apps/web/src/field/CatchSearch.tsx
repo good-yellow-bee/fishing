@@ -1,12 +1,13 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { getLang, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
 import { bookBadges } from "./catchBadge";
 import { countedFish } from "./milestones";
+import { typicalSize } from "./sizeBands";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
@@ -64,6 +65,8 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
 const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekordy"].map((word) => normalize(word)));
 /** "first": the first fish of each kind in the book. */
 const FIRST_WORDS = new Set(["first", "firsts", "pierwsza", "pierwsze", "pierwszy"].map((word) => normalize(word)));
+/** "big": the fish bigger than their kind's typical size, by the measure each was logged with. */
+const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "duza", "duzy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -165,6 +168,18 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const day = localDate(new Date(entry.caughtAt));
     return day >= days.from && day <= days.to;
   });
+  if (BIG_WORDS.has(normalize(needle))) {
+    const byKind = new Map<string, CatchEntry[]>();
+    for (const entry of book.catches) {
+      const kind = entry.species.trim().toLowerCase();
+      byKind.set(kind, [...(byKind.get(kind) ?? []), entry]);
+    }
+    const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+    return catchesNewestFirst(book).filter((entry) => {
+      const typical = typicalSize(byKind.get(entry.species.trim().toLowerCase()) ?? [], entry.measure.kind);
+      return typical !== null && amount(entry.measure) > amount(typical);
+    });
+  }
   if (FIRST_WORDS.has(normalize(needle))) {
     const first = new Map<string, CatchEntry>();
     for (const entry of countedFish(book.catches)) {
@@ -479,7 +494,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
