@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, useFishingGame } from "./useFishingGame";
+import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -861,6 +861,39 @@ describe("level unlock integration", () => {
     for (let waited = 0; phase() === "hookset:none" && waited < 5_000; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(phase()).toBe("result:miss");
     expect(container!.querySelector("[data-testid=missed]")?.textContent).toMatch(/^tiger-muskie\|/);
+  });
+
+  it("brings a fish up sooner when a sitting topwater lure is popped, for the first two pops", () => {
+    const untilBite = (pops: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(300));
+      for (let pop = 0; pop < pops; pop++) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + pop)));
+        expect(hint()).toBe(pop < TOPWATER_POPS ? "Pop! The lure spits and gurgles. Let it sit…" : "Let it sit between pops.");
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + pop)));
+      }
+      let waited = 300;
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    const popped = untilBite(TOPWATER_POPS);
+    expect(popped).toBeLessThan(sat * 0.6);
+    // A third pop does nothing more.
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(popped);
+  });
+
+  it("leaves a sinking lure's early strike as too early", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    cast(surface);
+    act(() => vi.advanceTimersByTime(300));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/too early|only a nibble/i);
   });
 
   it("lets a fish that missed a topwater lure come back up for it once", () => {

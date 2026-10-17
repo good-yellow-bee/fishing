@@ -175,6 +175,10 @@ export function isTopwater(lure: string | undefined) {
   return lure !== undefined && lureClass(lure).id === "popper";
 }
 
+/** How many pops of a sitting topwater lure draw the fish up sooner. */
+export const TOPWATER_POPS = 2;
+/** Each pop leaves this share of the wait still to go. */
+export const TOPWATER_POP_LEFT = 0.6;
 /** The share of fish that, after a missed topwater blow-up, come back up for it once more. */
 export const TOPWATER_COMEBACK_ODDS = 0.5;
 /** How long a fish that missed a topwater lure takes to come back up for it. */
@@ -237,6 +241,8 @@ export function useFishingGame(
   const grabbedRef = useRef<string | undefined>(undefined);
   /** This fish came back for a second take after dropping the bait. */
   const secondTakeRef = useRef(false);
+  /** A topwater lure sitting before the bite: when the bite is due, how to bring it on, and the pops so far. */
+  const popRef = useRef<{ dueAt: number; take: () => void; pops: number } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
   const castSnagRef = useRef<SnagCover | null>(null);
@@ -306,6 +312,7 @@ export function useFishingGame(
 
   const clearTimers = () => {
     window.clearTimeout(timers.current.wait);
+    popRef.current = null;
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
@@ -511,6 +518,7 @@ export function useFishingGame(
       // A bite that comes while the game is out of sight waits for the player to come back, so no fish is lost unseen.
       const takeBait = () => {
         if (phaseRef.current !== "waiting") return;
+        popRef.current = null;
         setNibble(false);
         // A bait thief nibbled the hook clean: there is nothing left to bite.
         if (stolen) {
@@ -582,10 +590,13 @@ export function useFishingGame(
         };
         openWindow();
       };
-      timers.current.wait = window.setTimeout(() => {
+      const bringOn = () => {
         if (phaseRef.current !== "waiting") return;
         timers.current.shown = whenShown(takeBait);
-      }, wait);
+      };
+      timers.current.wait = window.setTimeout(bringOn, wait);
+      // A topwater lure can be popped while it sits, which draws the fish up sooner.
+      popRef.current = topwater ? { dueAt: performance.now() + wait, take: bringOn, pops: 0 } : null;
     };
     if (!castSnagRef.current) {
       arm();
@@ -696,6 +707,22 @@ export function useFishingGame(
         break;
       case "waiting": {
         const snag = snagRef.current;
+        const pop = popRef.current;
+        if (!snag && pop) {
+          // Popping a topwater lure draws the fish up sooner, but only the first few pops; then it wants to sit.
+          if (pop.pops >= TOPWATER_POPS) {
+            setHint(t("Let it sit between pops."));
+            break;
+          }
+          pop.pops += 1;
+          const sooner = Math.max(0, pop.dueAt - performance.now()) * TOPWATER_POP_LEFT;
+          window.clearTimeout(timers.current.wait);
+          timers.current.wait = window.setTimeout(pop.take, sooner);
+          pop.dueAt = performance.now() + sooner;
+          fx.plop();
+          setHint(t("Pop! The lure spits and gurgles. Let it sit…"));
+          break;
+        }
         if (!snag) {
           // Striking at a nibble is the usual early strike, so say what it was.
           const atNibble = surfaceRef.current?.dataset.nibble === "1";
