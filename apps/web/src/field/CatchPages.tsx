@@ -44,7 +44,7 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
-import { bookLures, closeSpecies, dayWeather, fullSpecies, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
@@ -212,7 +212,7 @@ function CatchForm() {
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
   const linkedSpot = params.get("spot") !== PLAY_LAKE_ID && book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
   // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
-  const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date())));
+  const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date()), new Date().getHours() < LATE_NIGHT_UNTIL));
 
   const asked = params.get("kind");
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
@@ -621,7 +621,9 @@ function CatchForm() {
     // of an earlier day, that fish's time, as the next one came after it that day.
     if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
       anotherAt = Date.now();
-      const earlier = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) ? caughtAt : undefined;
+      // Not a fish from minutes ago, before midnight on tonight's session: the next one comes now, not at 23:58 again.
+      const writtenUp = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
+      const earlier = writtenUp ? caughtAt : undefined;
       navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news));
       return;
     }

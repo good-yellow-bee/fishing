@@ -1843,3 +1843,11 @@ button.field-primary:disabled {
 .form-save .form-released .text-button {
   flex: none;
 }
+
+/* A phone on its side: the header scrolls away, so the form keeps more than a strip between it and the save bar. */
+@media (max-width: 860px) and (max-height: 500px) {
+  .field-mobile-bar {
+    position: static;
+  }
+}
+

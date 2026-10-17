@@ -4,6 +4,7 @@ import { authClient } from "./auth-client";
 import { useT } from "./i18n";
 import { useRootSettings } from "./game/settings";
 import { warmLake } from "./warmLake";
+import { MapOffline } from "./field/map/MapOffline";
 import { BestsPage } from "./field/bests/BestsPage";
 import { SpeciesPage } from "./field/SpeciesPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
@@ -24,7 +25,9 @@ const loadDock = () => import("./pages/Dock");
 const DockPage = lazy(() => loadDock().then((module) => ({ default: module.DockPage })));
 const LogPage = lazy(() => import("./pages/Log").then((module) => ({ default: module.LogPage })));
 const BoardPage = lazy(() => import("./pages/Board").then((module) => ({ default: module.BoardPage })));
-const SpotMapPage = lazy(() => import("./field/map/SpotMapPage").then((module) => ({ default: module.SpotMapPage })));
+const loadMap = () => import("./field/map/SpotMapPage");
+// Offline, before the map was ever fetched, a short note instead of a blank app.
+const SpotMapPage = lazy(() => loadMap().then((module) => ({ default: module.SpotMapPage }), () => ({ default: MapOffline })));
 
 function FogLifting() {
   const t = useT();
@@ -65,6 +68,9 @@ function Gate({ children }: { children: ReactNode }) {
 function FieldLayout() {
   useEffect(() => {
     warmLake(loadDock);
+    // The map's code too, while there is a connection, so it opens at the lake with none.
+    const timer = setTimeout(() => void loadMap().catch(() => undefined), 4000);
+    return () => clearTimeout(timer);
   }, []);
   return (
     <LogbookProvider>
