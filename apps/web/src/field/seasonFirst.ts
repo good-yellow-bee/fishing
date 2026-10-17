@@ -1,8 +1,8 @@
 import type { CatchEntry } from "@stillwater/shared";
 
-/** The day of the year in one fixed leap year, so 3 April is the same day whichever year it fell in. */
-function calendarDay(at: Date): number {
-  return Math.round((Date.UTC(2000, at.getMonth(), at.getDate()) - Date.UTC(2000, 0, 1)) / 86_400_000);
+/** The day of `year` with this date's month and day, so 3 April is the same day whichever year it fell in (29 February rolls to 1 March). */
+function calendarDay(at: Date, year: number): number {
+  return Math.round((Date.UTC(year, at.getMonth(), at.getDate()) - Date.UTC(year, 0, 1)) / 86_400_000);
 }
 
 /**
@@ -21,5 +21,5 @@ export function seasonFirst(catches: readonly CatchEntry[], today: Date = new Da
   const now = firsts.get(year);
   const before = firsts.get(year - 1);
   if (!now || !before) return null;
-  return { entry: now.entry, year, earlier: calendarDay(before.at) - calendarDay(now.at) };
+  return { entry: now.entry, year, earlier: calendarDay(before.at, year) - calendarDay(now.at, year) };
 }

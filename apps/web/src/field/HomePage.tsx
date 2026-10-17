@@ -143,7 +143,7 @@ export function HomePage() {
   const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
   // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
   const ownWaters = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
-  const ownOutings = book.trips.filter(offPlayLake).length;
+  const ownOutings = book.trips.filter((trip) => offPlayLake(trip) && trip.date <= today).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];

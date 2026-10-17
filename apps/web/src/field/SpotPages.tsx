@@ -134,7 +134,8 @@ export function SpotsPage() {
               key={row.spot.id}
               spot={row.spot}
               fishCount={row.fishCount}
-              tripCount={tripsForSpot(book, row.spot.id).length}
+              // Outings fished, as the water's own page counts them: not those still planned.
+              tripCount={tripsForSpot(book, row.spot.id).filter((trip) => trip.date <= today).length}
               lastFishAt={row.lastFishAt}
               restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}

@@ -10,6 +10,7 @@ import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { intoMergedWaters, readMergedWaters } from "./waterMerge";
+import { MERGE_PARAM } from "./MergeWater";
 import { forgetDeletedFish, readDeletedFish, restoreDeletedFish } from "./deletedFish";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
@@ -82,7 +83,7 @@ export function BookFile() {
     loadButton.current?.focus();
   };
   // `twins`: waters the file added under a name the book already had, each a tap from merging.
-  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string; twins?: { id: string; name: string }[] } | null>(null);
+  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string; twins?: { id: string; name: string; into: string }[] } | null>(null);
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
@@ -203,7 +204,11 @@ export function BookFile() {
     setPending(null);
     const namesHere = new Set(here.book.spots.map((spot) => foldText(spot.name)));
     const idsHere = new Set(here.book.spots.map((spot) => spot.id));
-    const twins = merged ? next.book.spots.filter((spot) => !idsHere.has(spot.id) && namesHere.has(foldText(spot.name))).map((spot) => ({ id: spot.id, name: spot.name })) : [];
+    const twins = merged
+      ? next.book.spots
+          .filter((spot) => !idsHere.has(spot.id) && namesHere.has(foldText(spot.name)))
+          .map((spot) => ({ id: spot.id, name: spot.name, into: here.book.spots.find((other) => foldText(other.name) === foldText(spot.name))!.id }))
+      : [];
     setNotice({
       tone: "loaded",
       ...(twins.length > 0 ? { twins } : {}),
@@ -424,7 +429,7 @@ export function BookFile() {
             {notice.twins?.map((twin) => (
               <span key={twin.id}>
                 {" "}
-                {t("{name} is now in the book twice.", { name: twin.name })} <Link to={`/spots/${twin.id}`}>{t("Merge them")}</Link>
+                {t("{name} is now in the book twice.", { name: twin.name })} <Link to={`/spots/${twin.id}?${MERGE_PARAM}=${encodeURIComponent(twin.into)}`}>{t("Merge them")}</Link>
               </span>
             ))}
             {notice.tone === "loaded" && canUndoLoad ? (
