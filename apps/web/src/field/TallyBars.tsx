@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { t, useT } from "../i18n";
 import { fishCountLabel } from "./format";
 
-type TallyRow = { key: string; label: string; count: number; to?: string };
+/** `note` is a short line under the label, such as the best fish of the row. */
+type TallyRow = { key: string; label: string; count: number; to?: string; note?: string };
 
 /** A count per row with a bar drawn to scale; the bar is for the eye, the words carry the number. */
 export function TallyBars({ rows }: { rows: TallyRow[] }) {
@@ -19,7 +20,10 @@ export function TallyBars({ rows }: { rows: TallyRow[] }) {
       <ol className="tally-bars">
         {shown.map((row) => (
           <li key={row.key} data-empty={row.count === 0 ? "1" : "0"}>
-            <span className="tally-label">{row.to ? <Link to={row.to}>{row.label}</Link> : row.label}</span>
+            <span className="tally-label">
+              {row.to ? <Link to={row.to}>{row.label}</Link> : row.label}
+              {row.note ? <small className="tally-note">{row.note}</small> : null}
+            </span>
             <span className="tally-bar" aria-hidden="true">
               <span style={{ width: `${(row.count / most) * 100}%` }} />
             </span>

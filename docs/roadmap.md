@@ -1610,3 +1610,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR374~~ | ~~News 2026-10-17zzz~~ (#788) | field | S |
 | ~~BR375~~ | ~~Section labels, size range ends, photos 0%~~ (#792) | field | S |
 | ~~BR376~~ | ~~Did you mean, unit check, exact size search~~ (#794) | field | S |
+| ~~BR377~~ | ~~Last time here, best wind, best per lure~~ (#796) | field | S |

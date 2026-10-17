@@ -963,6 +963,12 @@ button.field-primary:disabled {
   overflow-wrap: anywhere;
 }
 
+.tally-note {
+  display: block;
+  color: var(--field-muted);
+  font-size: 12px;
+}
+
 .tally-bar {
   height: 10px;
   background: var(--field-card);

@@ -1,4 +1,4 @@
-import { biteTimes, catchesForSpot, lakeSeason, lureTally, waterTempTally, type BiteTime, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type WaterTempTally } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lakeSeason, lureTally, waterTempTally, type BiteTime, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
@@ -9,6 +9,7 @@ export type WaterTips = {
   lures: LureTally[];
   time: BiteTime | null;
   sky: Sky | null;
+  wind: Wind | null;
   season: LakeSeason | null;
   temp: WaterTempTally | null;
   lastTemp: WaterReading | null;
@@ -22,7 +23,7 @@ export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   // The time of day most fish came at, when at least two did and no other time ties it.
   const [top, next] = [...biteTimes(book)].sort((a, b) => b.count - a.count);
   const time: BiteTime | null = top && top.count >= 2 && (!next || next.count < top.count) ? top : null;
-  return { lures, time, sky: leadingSky(catches), season: leadingSeason(catches), temp: leadingTemp(catches), lastTemp: lastReading(catches) };
+  return { lures, time, sky: leadingSky(catches), wind: leadingWind(catches), season: leadingSeason(catches), temp: leadingTemp(catches), lastTemp: lastReading(catches) };
 }
 
 /** The band of water temperature most of the fish came in, when at least two noted it and one band clearly leads. */
@@ -47,6 +48,15 @@ export function lastReading(catches: readonly CatchEntry[]): WaterReading | null
 function leadingSky(catches: readonly CatchEntry[]): Sky | null {
   const counts = new Map<Sky, number>();
   for (const entry of catches) if (entry.weather) counts.set(entry.weather.sky, (counts.get(entry.weather.sky) ?? 0) + 1);
+  const [top, next] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  if (!top || top[1] < 2 || (next && next[1] === top[1])) return null;
+  return top[0];
+}
+
+/** The wind most of the fish came in, when at least two noted it and one wind clearly leads. */
+function leadingWind(catches: readonly CatchEntry[]): Wind | null {
+  const counts = new Map<Wind, number>();
+  for (const entry of catches) if (entry.weather) counts.set(entry.weather.wind, (counts.get(entry.weather.wind) ?? 0) + 1);
   const [top, next] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   if (!top || top[1] < 2 || (next && next[1] === top[1])) return null;
   return top[0];
