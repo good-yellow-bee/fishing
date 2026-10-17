@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17x";
+export const NEWS_ID = "2026-10-17y";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A topwater lure rides over the reeds' weed and a crankbait's lip bumps it off the point's rocks, so neither snags there.",
   "Swing a fly or streamer on the inlet's current and it drifts down to the trout holding there, so the bite comes sooner.",
   "On live bait a late strike no longer hooks light: the fish has swallowed the worm, so it's hooked deep.",
   "Hop a jig down the drop-off's ledge, where the fish hold, and the bite comes sooner.",
