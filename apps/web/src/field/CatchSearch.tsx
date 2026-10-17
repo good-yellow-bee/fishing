@@ -6,13 +6,14 @@ import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
 import { bookBadges } from "./catchBadge";
+import { countedFish } from "./milestones";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
-import { noteText } from "./format";
+import { noteText, outingNameById } from "./format";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
@@ -166,7 +167,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   });
   if (FIRST_WORDS.has(normalize(needle))) {
     const first = new Map<string, CatchEntry>();
-    for (const entry of book.catches) {
+    for (const entry of countedFish(book.catches)) {
       const kind = entry.species.trim().toLowerCase();
       const held = first.get(kind);
       if (!held || entry.caughtAt < held.caughtAt) first.set(kind, entry);
@@ -515,7 +516,7 @@ export function CatchSearch() {
                   key={entry.id}
                   entry={entry}
                   spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                  tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                  tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                   list={largest ? undefined : `${onCatches ? "catches" : "find"}:${settled}`}
                 />
               )}

@@ -21,6 +21,7 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst } from "./seasonFirst";
+import { countedFish } from "./milestones";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
@@ -280,7 +281,7 @@ function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; w
 
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
 function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
-  const found = seasonFirst(catches);
+  const found = seasonFirst(countedFish(catches));
   if (!found) return null;
   const vars = { year: found.year, last: found.year - 1 };
   const gap = Math.abs(found.earlier);

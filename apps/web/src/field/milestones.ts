@@ -5,7 +5,17 @@ import { isSampleCatch } from "./bookCopy";
 const PLAY_LAKE_ID = "spot-stillwater";
 
 /** A fish the angler caught: not the sample week, not the game. */
-const ownFish = (entry: CatchEntry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID;
+export const ownFish = (entry: CatchEntry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID;
+
+/**
+ * The fish a "first" or "most" should be drawn from: never the game's, and the angler's own once there are any, so
+ * a new book's sample week still shows how a line reads.
+ */
+export function countedFish(catches: readonly CatchEntry[]): CatchEntry[] {
+  const real = catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID);
+  const own = real.filter((entry) => !isSampleCatch(entry.id));
+  return own.length > 0 ? own : real;
+}
 
 /** Round counts worth a line: the 50th fish, the 100th, and so on. */
 const BOOK_MARKS = [50, 100, 250, 500, 1000, 2500, 5000, 10000];

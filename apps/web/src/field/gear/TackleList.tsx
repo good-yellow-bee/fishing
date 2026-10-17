@@ -173,7 +173,7 @@ export function TackleList({
         <CopySummary
           text={() => {
             const trip = trips.find((row) => row.id === tripId);
-            return packingText(trip ? `${t("Tackle for {trip}", { trip: trip.title })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
+            return packingText(trip ? `${t("Tackle for {trip}", { trip: outingName(trip) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
           }}
           file="stillwater-tackle.txt"
           label={t("Copy the list")}

@@ -1,7 +1,7 @@
 import { WATER_LABELS, lureTally, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { measureText, measuresText } from "../i18n/content";
-import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText } from "./format";
+import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { catchMonth, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { speciesCounts, speciesWaters } from "./speciesLink";
@@ -11,7 +11,8 @@ import { speciesCounts, speciesWaters } from "./speciesLink";
  * A fish from another water than the outing's names its own; the day carries its year, as the text may be read years on.
  */
 export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null): string {
-  const head = [trip.title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(spotName ? [spotName] : [])].join(" · ");
+  // An outing saved without a title starts at its day.
+  const head = [trip.title.trim(), formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(spotName ? [spotName] : [])].filter(Boolean).join(" · ");
   const fish = [...catches]
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
@@ -52,7 +53,7 @@ export function spotSummary(
     `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
     `${tn(outings, "{n} outing", "{n} outings")} · ${fishCountLabel(catches.length)}`,
     ...(average ? [average] : []),
-    ...(best ? [`${t("Best outing here:")} ${best.trip.title} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),
+    ...(best ? [`${t("Best outing here:")} ${outingName(best.trip, [spot])} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),
     ...(lures ? [t("Lures that took the most: {lures}", { lures })] : []),
     ...(spot.bestConditions.trim() ? [t("Best conditions: {conditions}", { conditions: spot.bestConditions.trim() })] : []),
     ...(spot.notes.trim() ? ["", spot.notes.trim()] : []),

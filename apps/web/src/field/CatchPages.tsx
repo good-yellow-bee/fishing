@@ -43,7 +43,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { milestoneOf } from "./milestones";
+import { countedFish, milestoneOf } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, farPastBest, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
@@ -53,7 +53,7 @@ import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
-import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, outingName, toLocalInput } from "./format";
+import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, outingName, outingNameById, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
@@ -162,7 +162,7 @@ export function CatchesPage() {
                     key={entry.id}
                     entry={entry}
                     spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
-                    tripTitle={entry.tripId ? (tripById(book, entry.tripId)?.title ?? null) : null}
+                    tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
                   />
                 )}
               </PagedCatches>
@@ -410,12 +410,12 @@ function CatchForm() {
     () =>
       spotTrips.map((trip) => (
         <option key={trip.id} value={trip.id}>
-          {formatDay(trip.date)} · {outingName(trip)}
+          {formatDay(trip.date)} · {outingName(trip, book.spots)}
         </option>
       )),
     [spotTrips, lang],
   );
-  const heading = existing ? t(existing.species) : presetTrip ? presetTrip.title : t("Log a catch");
+  const heading = existing ? t(existing.species) : presetTrip ? outingName(presetTrip, book.spots) : t("Log a catch");
 
   const onSpot = (nextSpot: string) => {
     spotTouched.current = true;
@@ -1103,7 +1103,7 @@ function CatchView() {
   const kindNumber = kind.length - kind.findIndex((other) => other.id === entry.id);
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
-  const since = badge ? null : biggestSince(kind, entry);
+  const since = badge ? null : biggestSince(countedFish(kind), entry);
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1202,7 +1202,7 @@ function CatchView() {
         {milestone ? (
           <p className="meta milestone">
             {milestone.of === "book" ? (
-              t("Fish no. {n} in the book.", { n: milestone.n })
+              t("Your fish no. {n}.", { n: milestone.n })
             ) : (
               <Link to={`/species/${encodeURIComponent(entry.species)}`}>
                 {milestone.n === 1 ? t("Your first {species}.", { species: t(entry.species) }) : t("{species} no. {n}.", { species: t(entry.species), n: milestone.n })}
@@ -1252,12 +1252,12 @@ function CatchView() {
       <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
-          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip)}</Link>
+          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
           {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
-          {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{outingName(looseTrip)}</Link>{" "}
+          {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{outingName(looseTrip, book.spots)}</Link>{" "}
           <button
             type="button"
             className="text-button"
