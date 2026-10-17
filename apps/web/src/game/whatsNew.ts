@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field17";
+export const NEWS_ID = "2026-10-17-field18";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A catch page names the earlier fish it's the biggest since, and “first” in search lists each kind's first fish. A water's tips say which lure led at its last water temperature and where the moon stands on the day. A species page compares typical size by water, the Tackle page flags lures that have gone quiet, and Bests adds your longest blank spell and the day with the most kinds.",
   "Search finds your best fish with “record” or “pb”, and reads “this weekend” and “last weekend”. A water's tips add its best moon, the lure that leads at each water temperature, and whether the water is warming or cooling. A species page says how early the kind turned up this year, the Tackle page shows when each lure last took a fish, and Bests compares weekend and weekday outings.",
   "Summer's warm water no longer always wears out a trout, salmon or whitefish: in a summer rain, or hooked off the Drop-off where the water runs cool, it keeps its strength.",
   "A trophy-sized fish makes a long first run, so let it go. A catfish or burbot hooked at night fights at full strength, and in rain the swollen Inlet washes food in, so a cast there draws a bite sooner.",

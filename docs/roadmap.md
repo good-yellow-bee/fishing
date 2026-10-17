@@ -1652,3 +1652,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR396~~ | ~~Biggest since, lure for last water temperature~~ (#836) | field | S |
 | ~~BR397~~ | ~~Blank spell, quiet lures, first search word~~ (#837) | field | S |
 | ~~BR398~~ | ~~Moon on the day, typical size by water, most kinds~~ (#838) | field | S |
+| ~~BR399~~ | ~~News card for round 18~~ (#839) | field | S |
