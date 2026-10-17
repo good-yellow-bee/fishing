@@ -74,6 +74,12 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
 }
 
+/** "Last fish: Sat, Oct 10" under a water, from its newest fish. */
+function lastFishLine(catches: readonly CatchEntry[]) {
+  const last = catches.reduce<string | null>((newest, entry) => (!newest || entry.caughtAt > newest ? entry.caughtAt : newest), null);
+  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(localDate(new Date(last))) })}</p> : null;
+}
+
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
 const YEAR_PARAM = "year";
 
@@ -420,6 +426,8 @@ export function BestsPage() {
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
+                  {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
+                  {lastFishLine(bySpot.get(water.spotId) ?? [])}
                 </Link>
               ))}
             </div>

@@ -1817,3 +1817,8 @@ button.field-primary:disabled {
 .spot-order {
   margin: 0 0 14px;
 }
+
+.day-month-fish {
+  font-weight: 400;
+  color: var(--field-muted);
+}
