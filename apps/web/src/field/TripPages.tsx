@@ -425,14 +425,14 @@ function TripView() {
         <nav className="catch-steps" aria-label={t("More outings")}>
           {newer ? (
             <Link to={`/trips/${newer.id}`} rel="prev">
-              {t("← Later: {title}", { title: `${newer.title}, ${formatDay(newer.date)}` })}
+              {t("← Later: {title}", { title: [newer.title.trim(), formatDay(newer.date)].filter(Boolean).join(", ") })}
             </Link>
           ) : (
             <span />
           )}
           {older ? (
             <Link to={`/trips/${older.id}`} rel="next">
-              {t("Earlier: {title} →", { title: `${older.title}, ${formatDay(older.date)}` })}
+              {t("Earlier: {title} →", { title: [older.title.trim(), formatDay(older.date)].filter(Boolean).join(", ") })}
             </Link>
           ) : null}
         </nav>

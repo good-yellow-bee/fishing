@@ -571,7 +571,7 @@ export const PL_FIELD: PlBook = {
   "Let it go": "Porzuć",
   "Same as the last fish on this outing: {weather}": "Jak przy ostatniej rybie z tej wyprawy: {weather}",
   "Same as the last fish that day: {weather}": "Jak przy ostatniej rybie tego dnia: {weather}",
-  "Released it": "Wypuściłem ją",
+  "Released it": "Wypuszczona",
   Yes: "Tak",
   "{n} released": ["{n} wypuszczona", "{n} wypuszczone", "{n} wypuszczonych"],
   "Released: {count} of {total}": "Wypuszczone: {count} z {total}",
