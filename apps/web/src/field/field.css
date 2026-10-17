@@ -1727,3 +1727,11 @@ button.field-primary:disabled {
 .typical-size {
   margin: 0 0 8px;
 }
+
+/* When an outing's weather turned, ahead of what it turned to. */
+.run-time {
+  margin-right: 4px;
+  color: var(--field-muted);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+}
