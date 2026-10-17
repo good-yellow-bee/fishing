@@ -1232,7 +1232,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT187~~ | ~~Rain covers a lost fish: in rain the bank a lost fish fled doesn't spook, so the next bite isn't slower, and the cast says so~~ (#805) | game | S |
 | ~~GT188~~ | ~~Twilight schools: at dawn and dusk a school feeds hard and stays one cast longer (three, not two), and the landing says so~~ (#807) | game | S |
 | ~~GT189~~ | ~~Fog brings fish close: in fog a short cast isn't held to the commons, since the shy fish can't see the angler, and the cast says so~~ (#809) | game | S |
-| GT190 | Breezy chop: on a breezy day any lure but a topwater waits 0.9x, as the chop makes the fish bolder, and the cast says so | game | S |
+| ~~GT190~~ | ~~Breezy chop: on a breezy day any lure but a topwater waits 0.9x, as the chop makes the fish bolder, and the cast says so~~ (#811) | game | S |
+| GT191 | Storms put fish down: in a thunderstorm (rain, strong wind, not winter) every bite waits 1.25x, sparing a beginner, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 
