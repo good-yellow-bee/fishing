@@ -1389,6 +1389,7 @@ describe("a fight in winter", () => {
 
   it("slows a scent hunter's tiring only in rain", () => {
     expect(RAIN_HUNTER_TIRE).toBeLessThan(1);
+    expect(SCENT_HUNTERS.has("burbot")).toBe(true);
     for (const id of SCENT_HUNTERS) expect(rainHunterTireMul("rain", id)).toBe(RAIN_HUNTER_TIRE);
     expect(rainHunterTireMul("clear", "catfish")).toBe(1);
     expect(rainHunterTireMul("rain", "pike")).toBe(1);

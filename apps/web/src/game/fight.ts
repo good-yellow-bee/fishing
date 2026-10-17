@@ -284,8 +284,8 @@ export const FALL_FEED_TIRE = 0.85;
 export function fallFeedTireMul(season: string | undefined, speciesId: string) {
   return season === "fall" && FALL_FEEDERS.has(speciesId) ? FALL_FEED_TIRE : 1;
 }
-/** Scent hunters: they hunt by smell, so murky rain water suits them. */
-export const SCENT_HUNTERS: ReadonlySet<string> = new Set(["catfish"]);
+/** Scent hunters: they hunt by smell, so murky rain water suits them. A burbot feels and smells its way along the bottom too, its chin barbel searching the mud. */
+export const SCENT_HUNTERS: ReadonlySet<string> = new Set(["catfish", "burbot"]);
 /** In rain a scent hunter tires only this fast on a run or against the reel. */
 export const RAIN_HUNTER_TIRE = 0.85;
 
