@@ -4,7 +4,7 @@ export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
-  "A crankbait run past the Dock knocks off the pilings and draws a bite sooner. In spring a bluegill guards its nest in the shallows, a brook trout hooked at the Inlet turns its side to the current, and a black crappie hunts hardest at dawn and dusk, so each one tires slower.",
+  "A crankbait run past the Dock knocks off the pilings and draws a bite sooner. A bluegill guarding its spring nest in the shallows, a brook trout fighting the Inlet's current and a black crappie hunting at dawn or dusk all tire slower.",
   "For a safer book: if one saved fish is ever damaged, the field log keeps the rest of the book and its photos, and sets the whole book aside as a file you can load once mended; a line at the top of Home leads to it. When storage is full, the bar says so and offers the photos page to make room, and tackle lists and year goals now say when they could not be saved. Coming back to the app after a while picks up changes made in another tab.",
   "A float rig at the Reeds holds the bait still over the panfish in the stems, a streamer stripped up the Drop-off darts past the trout holding deep, and at the Inlet the current tumbles a worm downstream like washed-in food and spins a spinner's blade hard. Each draws a bite sooner.",
   "A worm fished at the Dock sinks down beside the pilings where the fish hide, a spoon cast from the boat flutters through the open water, a spinner flickers along the Reeds' edge past the hunters in ambush, and a float rig at the Reeds holds the bait still over the panfish in the stems. Each draws a bite sooner.",
