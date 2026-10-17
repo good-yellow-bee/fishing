@@ -1,6 +1,7 @@
 import { isLureLabel, localDate, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { pieceKey } from "./pieceKey";
 import { countedFish } from "../milestones";
+import { isSampleTrip } from "../bookCopy";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught;
@@ -14,7 +15,10 @@ export type PieceRecord = { label: string; outings: number; fish: number; lure?:
  * commonest spelling, as its search link opens them. Tools and line are left out. Most fish first, then most outings.
  */
 export function pieceRecords(book: Logbook, items: readonly TackleItem[], today: string): PieceRecord[] {
-  const past = new Set(book.trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
+  // The sample week's made-up bags count only while the book has no outings of the angler's own, as its fish do.
+  const ownTrips = book.trips.filter((trip) => !isSampleTrip(trip.id));
+  const trips = ownTrips.length > 0 ? ownTrips : book.trips;
+  const past = new Set(trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   const own = countedFish(book.catches);
   const byPiece = new Map<string, { label: string; trips: Set<string> }>();
