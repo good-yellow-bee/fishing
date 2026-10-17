@@ -170,6 +170,13 @@ function strikeCall(style: BiteStyle) {
   return t("NOW — strike!");
 }
 
+/** Whether the hook carries real bait a little fish can strip: live bait, a float rig, or anything unnamed. A hard lure has none. */
+export function carriesBait(lure: string | undefined) {
+  if (lure === undefined || !lure.trim()) return true;
+  const kind = lureClass(lure).id;
+  return kind === "worm" || kind === "bobber" || kind === "plain";
+}
+
 /** Whether the lure tied on is a topwater one, which fish hit at the top. */
 export function isTopwater(lure: string | undefined) {
   return lure !== undefined && lureClass(lure).id === "popper";
@@ -490,7 +497,7 @@ export function useFishingGame(
     const topwater = isTopwater(lureRef?.current);
     const style = takeStyle(species.id, topwater);
     const nibbles = nibblePlan(wait, Math.random, style);
-    const stolen = stealsBait(species.id, nibbles.length);
+    const stolen = carriesBait(lureRef?.current) && stealsBait(species.id, nibbles.length);
     const arm = () => {
       let secondTake = false;
       const nibbleTimers: number[] = [];

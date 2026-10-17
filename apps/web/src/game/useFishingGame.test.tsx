@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
+import { carriesBait, FOLLOW_MS, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -957,6 +957,28 @@ describe("level unlock integration", () => {
     act(() => vi.advanceTimersByTime(SECOND_TAKE_NIBBLE_MS));
     act(() => surface.dispatchEvent(pointer("pointerdown", 8)));
     expect(hint()).toBe("Too early. Wait for the bobber to go under, then strike.");
+  });
+
+  it("never lets a golden shiner strip a hard lure, which carries no bait", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Inline spinner");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    vi.mocked(stealsBait).mockReturnValueOnce(true);
+    cast(surface);
+    for (let waited = 0; phase() !== "hookset:none" && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("hookset:none");
+  });
+
+  it.each([
+    [undefined, true],
+    ["", true],
+    ["Nightcrawler", true],
+    ["Bobber rig", true],
+    ["Lucky charm", true],
+    ["Inline spinner", false],
+    ["Topwater frog", false],
+    ["Silver spoon", false],
+  ] as const)("says whether %s carries bait", (lure, baited) => {
+    expect(carriesBait(lure)).toBe(baited);
   });
 
   it("lets a golden shiner nibble the bait off the hook now and then", () => {
