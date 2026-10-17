@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Spirit of the lake", () => {
+  it("gives every level its own title, Greenhorn to Heart of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Spirit of the lake");
+    expect(titles.at(-1)).toBe("Heart of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Spirit of the lake");
+    expect(anglerTitle(99)).toBe("Heart of the lake");
   });
 });
 
@@ -126,5 +126,16 @@ describe("levels 11 and 12", () => {
     expect(hookWindowMulForLevel(11)).toBeGreaterThan(1);
     expect(perfectCastHalfForLevel(11)).toBe(0.035);
     expect(perfectCastHalfForLevel(12)).toBeGreaterThan(0.035);
+  });
+});
+
+describe("level 13", () => {
+  it("opens at 23000 lifetime points with its unlock and title, and works a lure a third time", () => {
+    expect(anglerLevel(22999)).toBe(12);
+    expect(anglerLevel(23000)).toBe(13);
+    expect(levelUnlock(13)).toMatch(/three times/);
+    expect(anglerTitle(13)).toBe("Heart of the lake");
+    expect(lureWorkTapsForLevel(12)).toBe(2);
+    expect(lureWorkTapsForLevel(13)).toBe(3);
   });
 });
