@@ -1346,6 +1346,7 @@ describe("a fight in winter", () => {
 
   it("slows a twilight hunter's tiring only at dawn and dusk", () => {
     expect(TWILIGHT_HUNTER_TIRE).toBeLessThan(1);
+    expect(TWILIGHT_HUNTERS.has("crappie")).toBe(true);
     for (const id of TWILIGHT_HUNTERS) {
       expect(twilightTireMul("dawn", id)).toBe(TWILIGHT_HUNTER_TIRE);
       expect(twilightTireMul("dusk", id)).toBe(TWILIGHT_HUNTER_TIRE);
