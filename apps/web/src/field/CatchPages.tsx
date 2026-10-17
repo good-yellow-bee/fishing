@@ -1249,6 +1249,12 @@ function CatchView() {
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
   const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", t(entry.lure)), exactTerm("water", spot.name)] as const) : null;
   const lureHereCount = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  // A bigger one of its kind on the same lure: what this lure can do.
+  const lureKey = entry.lure.trim().toLowerCase();
+  const onLure = isCounted && lureKey ? counted.filter((other) => other.lure.trim().toLowerCase() === lureKey && measureOf(other, entry.measure.kind)) : [];
+  const lureTop = onLure.length > 1 ? personalBests({ spots: [], trips: [], catches: onLure }) : null;
+  const lureBestFish = lureTop ? (entry.measure.kind === "weight" ? lureTop.heaviest : lureTop.longest) : null;
+  const lureBest = lureBestFish && lureBestFish.id !== entry.id ? lureBestFish : null;
   const caughtDay = localDate(new Date(entry.caughtAt));
   // Where the fish's time sat against the sun at its water, for a water with a place.
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
@@ -1364,6 +1370,18 @@ function CatchView() {
         {sameSize > 1 ? (
           <p className="meta same-size">
             <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species), count: sameSize })}</Link>
+          </p>
+        ) : null}
+        {lureBest ? (
+          <p className="meta lure-best">
+            <Link to={`/catches/${lureBest.id}`}>
+              {t("Biggest {species} on {lure}: {size}, {day}", {
+                species: t(entry.species),
+                lure: t(entry.lure),
+                size: measureText(measureOf(lureBest, entry.measure.kind)!),
+                day: formatDay(localDate(new Date(lureBest.caughtAt))),
+              })}
+            </Link>
           </p>
         ) : null}
         {lureHere && lureHereCount > 1 ? (

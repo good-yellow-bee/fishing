@@ -711,4 +711,6 @@ export const PL_FIELD: PlBook = {
   "Pick a day": "Wybierz dzień",
   "{fish}, last {day}": "{fish}, ostatnia {day}",
   "{n} left to pack": "Do spakowania: {n}",
+  "Biggest {species} on {lure}: {size}, {day}": "Największy okaz ({species}) na przynętę {lure}: {size}, {day}",
+  "{n} lost": ["{n} spięta", "{n} spięte", "{n} spiętych"],
 };
