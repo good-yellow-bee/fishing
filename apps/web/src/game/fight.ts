@@ -266,8 +266,8 @@ export const SPRING_RUN_TIRE = 0.8;
 export function springRunTireMul(season: string | undefined, speciesId: string, spot: string) {
   return season === "spring" && spot === "inlet" && SPRING_RUNNERS.has(speciesId) ? SPRING_RUN_TIRE : 1;
 }
-/** Current fighters: built for moving water, they turn broadside to the inlet's current and fight it. */
-export const CURRENT_FIGHTERS: ReadonlySet<string> = new Set(["smallmouth-bass", "rainbow-trout"]);
+/** Current fighters: built for moving water, they turn broadside to the inlet's current and fight it. A brook trout is a stream fish at heart and does the same. */
+export const CURRENT_FIGHTERS: ReadonlySet<string> = new Set(["smallmouth-bass", "rainbow-trout", "brook-trout"]);
 /** A current fighter hooked at the inlet tires only this fast on a run or against the reel. */
 export const CURRENT_FIGHTER_TIRE = 0.85;
 
