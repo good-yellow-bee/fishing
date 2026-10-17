@@ -219,6 +219,14 @@ export function flashWaitMul(lure: string | undefined, sky: string | undefined, 
   return kind === "spinner" || kind === "spoon" ? FLASH_SUN_WAIT : 1;
 }
 
+/** Worms crawl out after dark, so at night the fish are on the lookout for one and a worm bait draws a bite sooner. */
+export const WORM_NIGHT_WAIT = 0.85;
+
+/** How the hour stretches the wait on live bait: sooner at night, else 1. */
+export function wormNightWaitMul(lure: string | undefined, hour: LakeHour) {
+  return hour === "night" && lure?.trim() && lureClass(lure).id === "worm" ? WORM_NIGHT_WAIT : 1;
+}
+
 /** A jig hops down the drop-off's ledge, right where the fish hold, so the bite comes sooner there. */
 export const JIG_LEDGE_WAIT = 0.8;
 
