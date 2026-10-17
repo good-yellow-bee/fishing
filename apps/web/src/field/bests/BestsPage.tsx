@@ -153,6 +153,7 @@ export function BestsPage() {
     );
   }
 
+  const months = monthTally(book.catches);
   return (
     <div className="sheet">
       <header className="sheet-head">
@@ -367,14 +368,14 @@ export function BestsPage() {
             </section>
           ) : null}
 
-          {monthTally(book.catches).length > 1 ? (
+          {months.length > 1 ? (
             <section>
               <div className="section-head">
                 <h2>{t("By month")}</h2>
               </div>
               {/* Each month opens the catch search for its fish. */}
               <TallyBars
-                rows={monthTally(book.catches).map((row) => ({
+                rows={months.map((row) => ({
                   key: row.month,
                   label: monthName(row.month),
                   count: row.count,

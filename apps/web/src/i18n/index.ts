@@ -181,8 +181,16 @@ export function tn(n: number, one: string, other: string, vars?: Vars): string {
 
 /** A number with the language's decimal mark, e.g. 2.5 → "2,5" in Polish. */
 export function num(value: number, maxDigits = 1): string {
-  return value.toLocaleString(locale(), { maximumFractionDigits: maxDigits, useGrouping: false });
+  // One formatter per language and digits: every size on every card comes through here.
+  const key = `${locale()} ${maxDigits}`;
+  let format = numberFormats.get(key);
+  if (!format) {
+    format = new Intl.NumberFormat(locale(), { maximumFractionDigits: maxDigits, useGrouping: false });
+    numberFormats.set(key, format);
+  }
+  return format.format(value);
 }
+const numberFormats = new Map<string, Intl.NumberFormat>();
 
 /** For components: re-renders on a language change and hands back `t`. */
 export function useT() {

@@ -7,9 +7,9 @@ import { monthName } from "./tripMonths";
 export const CATCH_PAGE = 50;
 
 /** The items to draw and how many the next press of Show more adds. */
-export function catchPage<T>(all: readonly T[], shown: number) {
-  const visible = all.slice(0, shown);
-  return { visible, more: Math.min(CATCH_PAGE, all.length - visible.length) };
+export function catchPage<T>(all: readonly T[], shown: number, start = 0) {
+  const visible = all.slice(start, shown);
+  return { visible, more: Math.max(0, Math.min(CATCH_PAGE, all.length - Math.max(shown, start))) };
 }
 
 /**
@@ -30,9 +30,31 @@ export function useShowMore() {
     firstNew.current = box.current?.querySelectorAll("a[href]").length ?? 0;
     setShown((count) => count + CATCH_PAGE);
   };
+  // Where the drawn run starts: a jump far down a long book draws a page from there, not every card above it.
+  const [start, setStart] = useState(0);
+  const firstOld = useRef(false);
+  useEffect(() => {
+    if (!firstOld.current) return;
+    box.current?.querySelector<HTMLElement>("a[href]")?.focus();
+    firstOld.current = false;
+  }, [start]);
   /** Draws at least the first `count` items, a whole page further at a time. */
   const showUpTo = (count: number) => setShown((now) => (now >= count ? now : now + Math.ceil((count - now) / CATCH_PAGE) * CATCH_PAGE));
-  return { shown, showMore, showUpTo, box };
+  /** Draws a page from item `index` on, or down to it while that is near what is drawn already. */
+  const showFrom = (index: number) => {
+    if (index >= start && index < shown + CATCH_PAGE) {
+      showUpTo(index + 1);
+      return;
+    }
+    setStart(index);
+    setShown(index + CATCH_PAGE);
+  };
+  /** The page above a jump's run, newer fish first; focus goes to the first of them. */
+  const showNewer = () => {
+    firstOld.current = true;
+    setStart((now) => Math.max(0, now - CATCH_PAGE));
+  };
+  return { shown, start, showMore, showUpTo, showFrom, showNewer, box };
 }
 
 /** A list over more months than this offers a jump row; a list over more than JUMP_YEARS_FROM months jumps by year. */
@@ -74,8 +96,8 @@ export function PagedCatches<T>({
   headLevel?: 2 | 3;
 }) {
   const Head = headLevel === 2 ? "h2" : "h3";
-  const { shown, showMore, showUpTo, box } = useShowMore();
-  const { visible, more } = catchPage(items, shown);
+  const { shown, start, showMore, showFrom, showNewer, box } = useShowMore();
+  const { visible, more } = catchPage(items, shown, start);
   const monthCounts = new Map<string, number>();
   const firstOf = new Map<string, number>();
   if (monthOf)
@@ -108,7 +130,7 @@ export function PagedCatches<T>({
               type="button"
               className="lure-tip"
               onClick={() => {
-                showUpTo((firstOf.get(month) ?? 0) + 1);
+                showFrom(firstOf.get(month) ?? 0);
                 setJumpTo(month);
               }}
             >
@@ -117,12 +139,19 @@ export function PagedCatches<T>({
           ))}
         </nav>
       ) : null}
+      {start > 0 ? (
+        <div className="show-more">
+          <button type="button" className="text-button" onClick={showNewer}>
+            {t("Show newer ({count})", { count: Math.min(CATCH_PAGE, start) })}
+          </button>
+        </div>
+      ) : null}
       {monthOf
         ? visible.map((item, index) => {
             const month = monthOf(item);
             const head = index === 0 || monthOf(visible[index - 1] as T) !== month;
             return (
-              <Fragment key={index}>
+              <Fragment key={start + index}>
                 {head ? (
                   <Head className="month-head" id={headId(month)} tabIndex={-1}>
                     {monthName(month)} · {fishCountLabel(monthCounts.get(month) ?? 0)}
@@ -135,7 +164,7 @@ export function PagedCatches<T>({
         : visible.map(children)}
       {more > 0 && (
         <div className="show-more">
-          <p role="status">{t("{shown} of {total} fish", { shown: visible.length, total: items.length })}</p>
+          <p role="status">{t("{shown} of {total} fish", { shown: start + visible.length, total: items.length })}</p>
           <button type="button" className="field-primary inline" onClick={showMore}>
             {t("Show {count} more", { count: more })}
           </button>

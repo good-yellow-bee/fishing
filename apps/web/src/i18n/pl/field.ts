@@ -763,4 +763,5 @@ export const PL_FIELD: PlBook = {
   "The book could not be saved: this browser's storage is full.": "Nie udało się zapisać dziennika: pamięć tej przeglądarki jest pełna.",
   "Make room on the photos page": "Zrób miejsce na stronie zdjęć",
   "A book that could not be read was set aside. See what to do with it": "Dziennik, którego nie dało się odczytać, został odłożony. Zobacz, co można z nim zrobić",
+  "Show newer ({count})": "Pokaż nowsze ({count})",
 };

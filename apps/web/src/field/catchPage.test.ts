@@ -10,3 +10,11 @@ describe("catchPage", () => {
     expect(catchPage(all.slice(0, 7), CATCH_PAGE).more).toBe(0);
   });
 });
+
+describe("a page further down", () => {
+  it("draws from the start it is given, and counts what is left below", () => {
+    const all = Array.from({ length: 300 }, (_, index) => index);
+    expect(catchPage(all, 250, 200)).toEqual({ visible: all.slice(200, 250), more: 50 });
+    expect(catchPage(all, 300, 250).more).toBe(0);
+  });
+});

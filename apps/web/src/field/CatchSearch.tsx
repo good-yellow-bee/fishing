@@ -26,12 +26,31 @@ import { dateWords } from "./dateWords";
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 const ORDER_PARAM = "order";
 
-const normalize = foldText;
+/** Labels and words come round once per fish in a search: each is folded once, not 2,500 times. Notes are not kept. */
+const foldedLabels = new Map<string, string>();
+function normalize(text: string): string {
+  const known = foldedLabels.get(text);
+  if (known !== undefined) return known;
+  const folded = foldText(text);
+  if (text.length <= 60) foldedLabels.set(text, folded);
+  return folded;
+}
+
+/** What a fish's time says, worked out once per fish: the date sums and the moon are the slow part of a search. */
+type WhenOf = { month: string; season: ReturnType<typeof lakeSeason>; bite: (typeof BITE_TIMES)[number]["id"]; moon: MoonQuarter } | null;
+const whenCache = new WeakMap<CatchEntry, WhenOf>();
+function whenOf(entry: CatchEntry): WhenOf {
+  if (whenCache.has(entry)) return whenCache.get(entry)!;
+  const at = new Date(entry.caughtAt);
+  const when = Number.isNaN(at.getTime()) ? null : { month: catchMonth(entry), season: lakeSeason(at), bite: biteTimeOf(at.getHours()), moon: moonQuarterOf(at) };
+  whenCache.set(entry, when);
+  return when;
+}
 
 /** True when a word of the fish's month ("October 2026", "Październik 2026") starts with what was typed. */
 function monthHas(entry: CatchEntry, want: string): boolean {
   if (want.length < 3) return false;
-  const name = normalize(monthName(catchMonth(entry)));
+  const name = normalize(monthName(whenOf(entry)?.month ?? catchMonth(entry)));
   return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
 }
 
@@ -61,9 +80,8 @@ const SEASON_WORDS: Record<string, string[]> = { spring: ["wiosną"], summer: ["
 
 function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
-  const at = new Date(entry.caughtAt);
-  if (Number.isNaN(at.getTime())) return false;
-  const season = lakeSeason(at);
+  const season = whenOf(entry)?.season;
+  if (!season) return false;
   return [t(SEASON_LABELS[season]), ...(SEASON_WORDS[season] ?? [])].some((word) => normalize(word).startsWith(want));
 }
 
@@ -98,9 +116,8 @@ const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> =
 /** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */
 function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
-  const at = new Date(entry.caughtAt);
-  if (Number.isNaN(at.getTime())) return false;
-  const id = biteTimeOf(at.getHours());
+  const id = whenOf(entry)?.bite;
+  if (!id) return false;
   const band = BITE_TIMES.find((row) => row.id === id)!;
   return [t(band.label), ...(TIME_WORDS[id] ?? [])].some((word) => normalize(word).startsWith(want));
 }
@@ -108,9 +125,8 @@ function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 /** True when the week of the moon the fish came in ("Waxing moon", "Near the full moon") has a word starting what was typed ("full moon"), from three letters up. */
 function moonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
-  const at = new Date(entry.caughtAt);
-  if (Number.isNaN(at.getTime())) return false;
-  const quarter = moonQuarterOf(at);
+  const quarter = whenOf(entry)?.moon;
+  if (!quarter) return false;
   if ((MOON_WORDS[quarter] ?? []).some((word) => normalize(word).startsWith(want))) return true;
   if (MOON_FILLER.has(want)) return false;
   const label = normalize(t(MOON_QUARTER_LABELS[quarter]));
@@ -463,18 +479,20 @@ export function CatchSearch() {
   const [query, setQuery] = useState(() => params.get(FIND_PARAM) ?? "");
   const box = useRef<HTMLElement>(null);
   const linked = params.get(FIND_PARAM) ?? "";
-  // What was last typed here, so the address catching up with the box is not taken for a new link.
-  const typed = useRef<string | null>(null);
+  // Everything typed here since the last link, so the address catching up with the box is not taken for a new link:
+  // on a slow phone with a long book it can still be a few keys behind ("pi" arriving after "pik" was typed).
+  const typed = useRef<Set<string>>(new Set());
   useEffect(() => {
     // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
     const at = box.current;
     if (!linked) {
       // The search left the address (Home in the menu, say), not by clearing the box: clear the box too.
-      if (typed.current !== "") setQuery("");
-      typed.current = null;
+      if (!typed.current.has("")) setQuery("");
+      typed.current = new Set();
       return;
     }
-    if (linked === typed.current || !at) return;
+    if (typed.current.has(linked) || !at) return;
+    typed.current = new Set();
     setQuery(linked);
     // The phone's sticky bar would cover the search box, so stop below it.
     const bar = document.querySelector<HTMLElement>(".field-mobile-bar");
@@ -537,7 +555,7 @@ export function CatchSearch() {
         autoComplete="off"
         onChange={(event) => {
           const next = event.target.value;
-          typed.current = next;
+          typed.current.add(next);
           setQuery(next);
           setParams(
             (current) => {

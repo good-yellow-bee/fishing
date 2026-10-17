@@ -30,7 +30,7 @@ import { t, useLang } from "../i18n";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
-import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, openStoredLogbook, readStoredLogbook, saveLogbook, setAsideCatchIds } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bringBackClearedCopy, withoutSample } from "./bookCopy";
@@ -95,9 +95,11 @@ const LogbookContext = createContext<LogbookApi | null>(null);
 export function LogbookProvider({ children }: { children: ReactNode }) {
   const lang = useLang();
   // Read before the sample is put in its place: a book that is there but unreadable keeps its photos for now.
-  const [startedUnreadable] = useState(storedBookUnreadable);
+  // The stored book is read once for all three: a ten-year book takes a while to parse on a phone.
+  const [opening] = useState(openStoredLogbook);
+  const startedUnreadable = opening.unreadable;
   const [book, setBook] = useState<Logbook>(() => {
-    const stored = readStoredLogbook();
+    const stored = opening.book;
     if (stored) return stored;
     const seeded = sampleLogbook(new Date());
     try {
@@ -110,7 +112,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
   const [photos, setPhotos] = useState<CatchPhotoMap>(() => {
     const storedPhotos = readStoredPhotos();
     if (startedUnreadable) return storedPhotos;
-    const storedBook = readStoredLogbook() ?? { catches: [] };
+    const storedBook = opening.book ?? { catches: [] };
     const pruned = photosKept(storedBook, storedPhotos);
     if (pruned !== storedPhotos) {
       try {
@@ -172,6 +174,10 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Made again only for a new book or language, not for an undo or an error: pages keep what they worked out per book.
+  // The language is a dependency: the sample week's lines are shown in it.
+  const shownBook = useMemo(() => localizeSample(book), [book, lang]);
+
   const api = useMemo<LogbookApi>(() => {
     const persist = (nextBook: Logbook, nextPhotos: CatchPhotoMap): { ok: true } | { ok: false; message: string } => {
       try {
@@ -221,7 +227,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     };
 
     return {
-      book: localizeSample(book),
+      book: shownBook,
       storedBook: book,
       photoFor: (id) => photos[id] ?? null,
       addCatch: (draft, photo) => {
@@ -342,7 +348,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
     };
     // The language is a dependency: the sample week's lines are shown in it.
-  }, [book, photos, lang, undo, saveError]);
+  }, [book, shownBook, photos, lang, undo, saveError]);
 
   return <LogbookContext.Provider value={api}>{children}</LogbookContext.Provider>;
 }

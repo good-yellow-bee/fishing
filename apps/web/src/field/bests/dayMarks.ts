@@ -8,8 +8,21 @@ import { fishDay } from "../tripMonths";
  */
 export type DayMark = { fish: number; trips: string[]; lateTrip: string | null };
 
+/** Worked out once per book and year: Bests asks twice for the same one. */
+const known = new WeakMap<Logbook, Map<string, ReadonlyMap<string, DayMark>>>();
+
 /** The days of `year` that had a fish or an outing, by local "YYYY-MM-DD". */
-export function dayMarks(book: Logbook, year: string): Map<string, DayMark> {
+export function dayMarks(book: Logbook, year: string): ReadonlyMap<string, DayMark> {
+  const byYear = known.get(book) ?? new Map<string, ReadonlyMap<string, DayMark>>();
+  known.set(book, byYear);
+  const held = byYear.get(year);
+  if (held) return held;
+  const marks = countDays(book, year);
+  byYear.set(year, marks);
+  return marks;
+}
+
+function countDays(book: Logbook, year: string): Map<string, DayMark> {
   const marks = new Map<string, DayMark>();
   const mark = (day: string) => {
     const row = marks.get(day) ?? { fish: 0, trips: [] as string[], lateTrip: null };

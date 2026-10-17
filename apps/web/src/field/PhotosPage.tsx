@@ -12,6 +12,13 @@ import { speciesCounts } from "./speciesLink";
 import { catchLink } from "./catchList";
 import { exactTerm } from "./findLinks";
 
+/** The photos' stored length, as JSON.stringify would give it, without building a copy of every picture to count it. */
+export function storedSize(photos: Record<string, string>): number {
+  const entries = Object.entries(photos);
+  // Ids and data URLs need no escaping: each is `"id":"photo"`, with a comma between and braces round.
+  return 2 + Math.max(0, entries.length - 1) + entries.reduce((sum, [id, photo]) => sum + JSON.stringify(id).length + 1 + photo.length + 2, 0);
+}
+
 /** The catches that carry a photo, newest first: the game's snapshots and the player's own pictures. */
 export function catchesWithPhotos(catches: readonly CatchEntry[], hasPhoto: (id: string) => boolean) {
   return catches.filter((entry) => hasPhoto(entry.id));
@@ -38,7 +45,7 @@ export function PhotosPage() {
   const roomNote = useRef<HTMLParagraphElement>(null);
   // How full the room kept for photos is, and what of the game's could go to free some.
   // A kept photo never reads as 0%.
-  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((JSON.stringify(photos).length / CATCH_PHOTO_STORE_MAX_CHARS) * 100)));
+  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((storedSize(photos) / CATCH_PHOTO_STORE_MAX_CHARS) * 100)));
   const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
   const clear = spare.slice(0, 10);
   const makeRoom = () => {
