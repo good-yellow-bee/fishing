@@ -1,5 +1,6 @@
 import { localDate, type Logbook } from "@stillwater/shared";
 import { catchMonth, daysOut } from "../tripMonths";
+import { countedFish } from "../milestones";
 
 /** One season's totals beside the season before, and the kinds it brought into the book for the first time. */
 export type SeasonRecap = {
@@ -32,7 +33,7 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
   const kinds = (season: string) => new Set(of(season).map((entry) => entry.species.trim().toLowerCase())).size;
   // The first fish of each kind in the whole book, oldest first: those from this season are new to the book.
   const first = new Map<string, { name: string; at: string }>();
-  for (const entry of [...book.catches].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))) {
+  for (const entry of [...countedFish(book.catches)].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))) {
     const key = entry.species.trim().toLowerCase();
     if (!first.has(key)) first.set(key, { name: entry.species, at: catchMonth(entry) });
   }

@@ -1,5 +1,6 @@
 import { measureOf, type CatchEntry, type Measure } from "@stillwater/shared";
-import { t } from "../i18n";
+import { getUnits, t } from "../i18n";
+import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 
 const size = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
 
@@ -26,7 +27,14 @@ export function sizeRank(kind: readonly CatchEntry[], entry: CatchEntry): string
  * of the kind came in between, all smaller. Null when nothing earlier was as big (a best at the time) or the gap is short.
  */
 export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): CatchEntry | null {
-  const own = size(entry.measure);
+  // As the sizes read: 23.9 in and 24.0 in are both 61 cm to a metric reader, so neither is bigger.
+  const metric = getUnits() === "metric";
+  const shown = (measure: Measure) => {
+    const value = measure.kind === "length" ? (metric ? measure.inches * CM_PER_IN : measure.inches) : metric ? measure.pounds * KG_PER_LB : measure.pounds;
+    const places = measure.kind === "length" ? (metric ? 0 : 1) : value < 1 ? 2 : 1;
+    return Math.round(value * 10 ** places);
+  };
+  const own = shown(entry.measure);
   const at = Date.parse(entry.caughtAt);
   const earlier = kind
     .filter((other) => other.id !== entry.id && Date.parse(other.caughtAt) < at)
@@ -34,7 +42,7 @@ export function biggestSince(kind: readonly CatchEntry[], entry: CatchEntry): Ca
   let between = 0;
   for (const other of earlier) {
     const theirs = measureOf(other, entry.measure.kind);
-    if (theirs && size(theirs) >= own) return between >= 3 ? other : null;
+    if (theirs && shown(theirs) >= own) return between >= 3 ? other : null;
     if (theirs) between += 1;
   }
   return null;

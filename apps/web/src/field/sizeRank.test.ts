@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook, type CatchEntry } from "@stillwater/shared";
+import { setUnits } from "../i18n";
 import { biggestSince, sizeRank } from "./sizeRank";
 
 const fish = (id: string, inches: number, pounds?: number): CatchEntry => ({
@@ -41,5 +42,14 @@ describe("biggestSince", () => {
   it("says nothing for a best at the time", () => {
     const kind = [pike("a", 2, 20), pike("b", 3, 22), pike("c", 4, 21), pike("new", 5, 27)];
     expect(biggestSince(kind, kind[3]!)).toBeNull();
+  });
+
+  it("compares sizes as they read", () => {
+    setUnits("metric");
+    // 23.9 in and 24.0 in both read 61 cm: the newer is as big as that one, not the biggest since the 30 in fish.
+    const kind = [pike("big", 1, 30), pike("near", 2, 23.9), pike("a", 3, 20), pike("b", 4, 20), pike("c", 5, 20), pike("new", 6, 24)];
+    expect(biggestSince(kind, kind[5]!)?.id).toBe("near");
+    setUnits("imperial");
+    expect(biggestSince(kind, kind[5]!)?.id).toBe("big");
   });
 });

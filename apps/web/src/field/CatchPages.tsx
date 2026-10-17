@@ -43,7 +43,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
-import { countedFish, milestoneOf } from "./milestones";
+import { byTime, countedFish, milestoneOf } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, farPastBest, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
@@ -1119,12 +1119,15 @@ function CatchView() {
   const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
   const milestone = milestoneOf(book, entry);
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
-  const atWater = spot && counted.some((other) => other.id === entry.id) ? counted.filter((other) => other.spotId === entry.spotId) : [];
-  const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || other.caughtAt > entry.caughtAt);
+  const isCounted = counted.some((other) => other.id === entry.id);
+  const atWater = spot && isCounted ? counted.filter((other) => other.spotId === entry.spotId) : [];
+  // Two fish logged in the same minute go by id, as the milestones order them.
+  const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
   const yearSearch = [exactTerm("species", t(entry.species)), caughtYear] as const;
-  const yearCount = kind.length > 1 ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  // The angler's own fish of that year: game fish don't count toward it.
+  const yearCount = isCounted ? counted.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {

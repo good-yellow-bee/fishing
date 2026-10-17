@@ -23,7 +23,7 @@ const KIND_MARKS = [10, 25, 50, 100, 250, 500, 1000];
 
 export type Milestone = { of: "book"; n: number } | { of: "kind"; n: number };
 
-const byTime = (a: CatchEntry, b: CatchEntry) => a.caughtAt.localeCompare(b.caughtAt) || a.id.localeCompare(b.id);
+export const byTime = (a: CatchEntry, b: CatchEntry) => a.caughtAt.localeCompare(b.caughtAt) || a.id.localeCompare(b.id);
 
 /**
  * A round number this fish reached, by when it was caught: the 100th fish in the book, or the 10th of its kind,
