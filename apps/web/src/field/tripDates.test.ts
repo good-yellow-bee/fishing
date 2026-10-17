@@ -12,9 +12,9 @@ describe("one-tap outing days", () => {
     ]);
   });
 
-  it("leaves Saturday out on a Friday or a Saturday", () => {
-    expect(datePicks(new Date(2026, 9, 16, 9)).map((pick) => pick.label)).toEqual(["Today", "Tomorrow"]);
-    expect(datePicks(new Date(2026, 9, 17, 9)).map((pick) => pick.label)).toEqual(["Today", "Tomorrow"]);
+  it("offers the Saturday after on a Friday or a Saturday", () => {
+    expect(datePicks(new Date(2026, 9, 16, 9)).at(-1)).toEqual({ label: "Next Saturday", date: "2026-10-24" });
+    expect(datePicks(new Date(2026, 9, 17, 9)).at(-1)).toEqual({ label: "Next Saturday", date: "2026-10-24" });
   });
 });
 

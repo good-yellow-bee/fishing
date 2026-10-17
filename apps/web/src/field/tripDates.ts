@@ -2,9 +2,9 @@ import { shiftDate, type Logbook } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleTrip } from "./bookCopy";
 
-export type DatePick = { label: "Today" | "Tomorrow" | "Saturday"; date: string };
+export type DatePick = { label: "Today" | "Tomorrow" | "Saturday" | "Next Saturday"; date: string };
 
-/** One-tap days for a new outing: today, tomorrow, and the coming Saturday when it is neither. */
+/** One-tap days for a new outing: today, tomorrow, and the coming Saturday when it is neither, else the one after. */
 export function datePicks(now: Date): DatePick[] {
   const picks: DatePick[] = [
     { label: "Today", date: shiftDate(now, 0) },
@@ -12,6 +12,8 @@ export function datePicks(now: Date): DatePick[] {
   ];
   const ahead = (6 - now.getDay() + 7) % 7;
   if (ahead >= 2) picks.push({ label: "Saturday", date: shiftDate(now, ahead) });
+  // On a Friday or a Saturday, "next weekend" is a week on.
+  else picks.push({ label: "Next Saturday", date: shiftDate(now, ahead + 7) });
   return picks;
 }
 

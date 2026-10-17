@@ -731,4 +731,7 @@ export const PL_FIELD: PlBook = {
   Barbel: "Brzana",
   "European eel": "Węgorz",
   "e.g. {n}": "np. {n}",
+  "Next Saturday": "Za tydzień w sobotę",
+  "These waters are invented.": "Te łowiska są zmyślone.",
+  "Add the one you fished": "Dodaj to, na którym łowisz",
 };
