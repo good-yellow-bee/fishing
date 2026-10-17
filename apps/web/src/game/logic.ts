@@ -337,8 +337,12 @@ export const SCHOOL_WAIT = 0.7;
 export type School = { spot: SpotId; id: string; casts: number };
 
 /** The school left by a landed fish, or none when it doesn't school. */
-export function schoolAfterLanding(id: string, spot: SpotId): School | null {
-  return SCHOOLERS.has(id) ? { spot, id, casts: SCHOOL_CASTS } : null;
+/** At dawn and dusk a school feeds hard in the low light and stays this many casts longer. */
+export const TWILIGHT_SCHOOL_CASTS = 1;
+
+export function schoolAfterLanding(id: string, spot: SpotId, hour?: LakeHour): School | null {
+  const twilight = hour === "dawn" || hour === "dusk";
+  return SCHOOLERS.has(id) ? { spot, id, casts: SCHOOL_CASTS + (twilight ? TWILIGHT_SCHOOL_CASTS : 0) } : null;
 }
 
 /** Whether a cast at this bank lands in the school, and what the school is after the cast. */

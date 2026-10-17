@@ -1229,7 +1229,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT184~~ | ~~Moon flash: on a clear night under a full moon a spinner or spoon flashes like in the sun, so it waits 0.85x, and the cast says so~~ (#799) | game | S |
 | ~~GT185~~ | ~~No leaps in winter: in the cold water a jumper (trout, bass, salmon) stays down and never leaps, and the hookset says so~~ (#801) | game | S |
 | ~~GT186~~ | ~~A deep hook holds: a fish hooked deep on swallowed live bait takes TREBLE_HOLD longer in the red to tear free, like a treble~~ (#802) | game | S |
-| GT187 | Rain covers a lost fish: in rain the bank a lost fish fled doesn't spook, so the next bite isn't slower, and the cast says so | game | S |
+| ~~GT187~~ | ~~Rain covers a lost fish: in rain the bank a lost fish fled doesn't spook, so the next bite isn't slower, and the cast says so~~ (#805) | game | S |
+| GT188 | Twilight schools: at dawn and dusk a school feeds hard and stays one cast longer (three, not two), and the landing says so | game | S |
 
 ## Risks / open questions for the owner
 

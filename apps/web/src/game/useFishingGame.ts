@@ -36,7 +36,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, fallBigLureWaitMul, favorsLargeFish, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, jigWinterWaitMul, makeCatch, pickBite, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, spinnerThumpWaitMul, springShallowsWaitMul, summerDeepWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormNightWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -262,6 +262,8 @@ export function useFishingGame(
   risingRef.current = rising;
   const windRef = useRef(wind);
   windRef.current = wind;
+  const hourRef = useRef(hour);
+  hourRef.current = hour;
   const castRiseRef = useRef(false);
   /** The school a landed panfish left at its bank, for the next casts there. */
   const schoolRef = useRef<School | null>(null);
@@ -1148,7 +1150,7 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current);
+            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current);
             // A hunter that followed the small fish in stays about the bank for the next few casts.
             const follow = followRef.current;
             followRef.current = null;
@@ -1156,7 +1158,7 @@ export function useFishingGame(
             const followed = follow && gotAwayRef.current?.follow ? ` ${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
             setHint(
               (schoolRef.current
-                ? `${castHint("landed")} ${t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
+                ? `${castHint("landed")} ${schoolRef.current.casts > SCHOOL_CASTS ? t("{fish}: there's a school here, feeding hard in the low light. Cast again quickly!", { fish: t(current.species.name) }) : t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
                 : castHint("landed")) + followed,
             );
           } else if (result === "snapped") {
