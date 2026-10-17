@@ -1816,3 +1816,7 @@ button.field-primary:disabled {
 .spot-order {
   margin: 0 0 14px;
 }
+
+.date-picks {
+  margin-top: 6px;
+}

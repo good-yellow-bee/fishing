@@ -56,6 +56,7 @@ import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { ownFish } from "./milestones";
 import { speciesLink } from "./speciesLink";
+import { datePicks, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater } from "./spotOrder";
@@ -572,6 +573,8 @@ function TripForm() {
     [book, existing, params, spotId, date],
   );
   const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
+  // Names already given, offered as the title is typed.
+  const titles = useMemo(() => pastTitles(book, spotId), [book, spotId]);
   const [note, setNote] = useState(existing?.note ?? "");
   const [error, setError] = useState("");
   // Unsaved changes to an outing in the book wait for the next visit to its form.
@@ -662,6 +665,15 @@ function TripForm() {
           <label>
             {t("Date")}
             <input name="date" type="date" value={date} onChange={(event) => setDate(event.target.value)} required />
+            {!existing ? (
+              <small className="field-hint lure-tips date-picks">
+                {datePicks(new Date()).map((pick) => (
+                  <button key={pick.label} type="button" className="lure-tip" aria-pressed={date === pick.date} onClick={() => setDate(pick.date)}>
+                    {t(pick.label)}
+                  </button>
+                ))}
+              </small>
+            ) : null}
           </label>
           <div className="water-field">
             <label>
@@ -719,7 +731,15 @@ function TripForm() {
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t("Dawn patrol")}
+              list={titles.length > 0 ? "trip-titles" : undefined}
             />
+            {titles.length > 0 ? (
+              <datalist id="trip-titles">
+                {titles.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+            ) : null}
           </label>
           <label className="wide">
             {t("Note")}
