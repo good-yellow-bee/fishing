@@ -77,7 +77,9 @@ const BIG_WORDS = new Set(["big", "bigger", "duże", "duża", "duży", "duze", "
 const WEIGHED_WORDS = new Set(["weighed", "zważone", "zważona", "zważony", "zwazone", "zwazona", "zwazony"].map((word) => normalize(word)));
 const MEASURED_WORDS = new Set(["measured", "zmierzone", "zmierzona", "zmierzony"].map((word) => normalize(word)));
 /** "loose": fish left off an outing that water had that day, the ones "Add this fish to it" would file. */
-export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne", "bez wyprawy"].map((word) => normalize(word)));
+export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne"].map((word) => normalize(word)));
+/** Fish on no outing at all, as the Polish help offers them. */
+const NO_OUTING_WORDS = new Set(["no outing", "bez wyprawy"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -208,6 +210,11 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   }
   if (WEIGHED_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => measuresOf(entry).some((measure) => measure.kind === "weight"));
   if (MEASURED_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => measuresOf(entry).some((measure) => measure.kind === "length"));
+  // "bez wyprawy": every fish on no outing in the book, filed or not filable.
+  if (NO_OUTING_WORDS.has(normalize(needle))) {
+    const trips = new Set(book.trips.map((trip) => trip.id));
+    return catchesNewestFirst(book).filter((entry) => !entry.tripId || !trips.has(entry.tripId));
+  }
   if (LOOSE_WORDS.has(normalize(needle))) {
     return [...looseOutings(book).keys()].map((id) => book.catches.find((entry) => entry.id === id)!);
   }
