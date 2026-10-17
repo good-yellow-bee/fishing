@@ -6,6 +6,15 @@ describe("split a search on +", () => {
   const sample = sampleLogbook(new Date(2026, 9, 15));
   const book = { ...sample, spots: sample.spots.map((spot, i) => (i === 0 ? { ...spot, name: "Pond + creek" } : spot)) };
 
+  it("reads the words for a bound as > and <", () => {
+    expect(searchParts(book, "pike over 10 in")).toEqual(["pike >10 in"]);
+    expect(searchParts(book, "under 2 lb")).toEqual(["<2 lb"]);
+    expect(searchParts(book, "szczupak ponad 60 cm")).toEqual(["szczupak >60 cm"]);
+    expect(searchParts(book, "poniżej 1,5 kg")).toEqual(["<1,5 kg"]);
+    // Not before a word: "over the weeds" stays text.
+    expect(searchParts(book, "over the weeds")).toEqual(["over the weeds"]);
+  });
+
   it("reads a size range as both bounds, and leaves dates alone", () => {
     expect(searchParts(book, "pike 25-30 in")).toEqual(["pike >25 in", "<=30 in"]);
     expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<=2 kg"]);
