@@ -14,6 +14,7 @@ describe("closeSpecies", () => {
     expect(closeSpecies("walleye", names)).toBeNull();
     expect(closeSpecies("Pik", names)).toBeNull();
     expect(closeSpecies("Rainbow trout", names)).toBeNull();
+    expect(closeSpecies("Jig 9g", ["Jig 5g", "Spoon"])).toBeNull();
   });
 });
 

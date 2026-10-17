@@ -30,6 +30,7 @@ import {
   type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
+import { sameSizeSearch } from "./sizeQuery";
 import { PhotoFull } from "./PhotoFull";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
 import { tempBandSearch } from "./WeatherBars";
@@ -400,7 +401,9 @@ function CatchForm() {
   const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
   // The same for a lure, so a typo doesn't split its tally in two.
   const [typingLure, setTypingLure] = useState(false);
-  const misspeltLure = typingLure ? null : closeSpecies(lure, lureOptions);
+  // Against every lure in the book, not just the dozen offered, so one used once isn't taken for a slip.
+  const allLures = useMemo(() => ownFirst(bookLures(book, Number.MAX_SAFE_INTEGER), BAITS, t), [book, lang]);
+  const misspeltLure = typingLure ? null : closeSpecies(lure, allLures);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
     () =>
@@ -1095,7 +1098,7 @@ function CatchView() {
   // Short of a best, where it sits among the others of its kind.
   const rank = sizeRank(kind, entry);
   // The others of its kind that round to the same size, through the one-size search.
-  const sizeSearch = [exactTerm("species", t(entry.species)), measureText(entry.measure)] as const;
+  const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
   const caughtDay = localDate(new Date(entry.caughtAt));
   // Where the fish's time sat against the sun at its water, for a water with a place.

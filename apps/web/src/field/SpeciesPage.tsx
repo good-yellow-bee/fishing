@@ -212,7 +212,7 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
   const within = exactTerm("species", t(name));
   const released = catches.filter((entry) => entry.released).length;
   const charts = (["length", "weight"] as const)
-    .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric) }))
+    .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric), years: typicalByYear(catches, kind) }))
     .filter((chart) => chart.bands.length > 0);
   if (charts.length === 0) return null;
   const size = (value: number, unit: string) => `${num(value, 2)} ${unit}`;
@@ -230,13 +230,9 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
         <Fragment key={chart.kind}>
           <p className="meta typical-size">{t("Typical size: {size} (as many bigger as smaller)", { size: measureText(typicalSize(catches, chart.kind)!) })}</p>
           {/* Two years or more with enough fish: whether they are getting bigger. */}
-          {typicalByYear(catches, chart.kind).length > 1 ? (
+          {chart.years.length > 1 ? (
             <p className="meta typical-years">
-              {t("Typical size by year: {years}", {
-                years: typicalByYear(catches, chart.kind)
-                  .map((row) => `${row.year} ${measureText(row.size)}`)
-                  .join(" · "),
-              })}
+              {t("Typical size by year: {years}", { years: chart.years.map((row) => `${row.year}: ${measureText(row.size)}`).join(" · ") })}
             </p>
           ) : null}
           <TallyBars
