@@ -71,3 +71,16 @@ export function forItsLength(kind: readonly CatchEntry[], entry: CatchEntry): { 
   const ratio = weight.pounds / usual;
   return ratio > 1.15 ? { heavy: true, usual } : ratio < 0.85 ? { heavy: false, usual } : null;
 }
+
+/** The angler's last fish of the kind before this one, and the whole days between, once it is 30 days or more. */
+export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { before: CatchEntry; days: number } | null {
+  const at = Date.parse(entry.caughtAt);
+  let before: CatchEntry | null = null;
+  for (const other of kind) {
+    const when = Date.parse(other.caughtAt);
+    if (other.id !== entry.id && when < at && (!before || when > Date.parse(before.caughtAt))) before = other;
+  }
+  if (!before) return null;
+  const days = Math.floor((at - Date.parse(before.caughtAt)) / (24 * 60 * 60 * 1000));
+  return days >= 30 ? { before, days } : null;
+}

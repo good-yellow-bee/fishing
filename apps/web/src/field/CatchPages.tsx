@@ -68,7 +68,7 @@ import { findWithLink } from "./findLinks";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
-import { biggestSince, forItsLength, sizeRank } from "./sizeRank";
+import { biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
 
@@ -1196,6 +1196,8 @@ function CatchView() {
   const since = badge || !isCounted ? null : biggestSince(counted, entry);
   // Measured and weighed: a fat fish or a thin one, against the angler's own others of its kind.
   const build = isCounted ? forItsLength(counted, entry) : null;
+  // Back after a long spell without one, opening the one before.
+  const gap = isCounted ? longGap(counted, entry) : null;
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1292,6 +1294,11 @@ function CatchView() {
           </p>
         ) : rank ? (
           <p className="meta">{rank}</p>
+        ) : null}
+        {gap ? (
+          <p className="meta long-gap">
+            <Link to={`/catches/${gap.before.id}`}>{t("The first {species} in {n} days", { species: t(entry.species), n: gap.days })}</Link>
+          </p>
         ) : null}
         {build ? (
           <p className="meta for-its-length">
