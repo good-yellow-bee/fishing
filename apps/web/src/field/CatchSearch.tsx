@@ -269,10 +269,42 @@ function findWords(book: Logbook, part: string, t: (text: string) => string, pic
   return matched;
 }
 
+/**
+ * What to leave out of a search: a part that starts with "-" ("pike + -released"), and a word in a part that does
+ * ("pike -released"). A "-" before a number ("-5°C") is kept as it is. Returns the parts to find and the ones to drop.
+ */
+export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: string[] } {
+  const keep: string[] = [];
+  const drop: string[] = [];
+  const out = (text: string) => /^-\s*[^\s\d.,<>-]/.test(text);
+  for (const part of parts) {
+    if (out(part)) {
+      drop.push(part.replace(/^-\s*/, ""));
+      continue;
+    }
+    const words = part.split(/\s+/);
+    for (const word of words.filter(out)) drop.push(word.slice(1));
+    const rest = words.filter((word) => !out(word)).join(" ");
+    if (rest) keep.push(rest);
+  }
+  return { keep, drop };
+}
+
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 /** `pictured` says which fish have a photo kept, for "photo"; left out, none do. */
 export function findCatches(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean = () => false): CatchEntry[] {
-  const parts = searchParts(book, needle);
+  const { keep, drop } = splitLeftOut(searchParts(book, needle));
+  if (drop.length === 0) return findKept(book, keep, t, pictured);
+  // Only words to leave out ("-released"): every other fish in the book.
+  let found = keep.length > 0 ? findKept(book, keep, t, pictured) : catchesNewestFirst(book);
+  for (const part of drop) {
+    const left = new Set(findWords(book, part, t, pictured).map((entry) => entry.id));
+    found = found.filter((entry) => !left.has(entry.id));
+  }
+  return found;
+}
+
+function findKept(book: Logbook, parts: readonly string[], t: (text: string) => string, pictured: (id: string) => boolean): CatchEntry[] {
   // "pike +" while the second part is still being typed: just the first.
   if (parts.length < 2) return parts[0] ? findWords(book, parts[0], t, pictured) : [];
   let found = findWords(book, parts[0]!, t, pictured);
@@ -395,7 +427,10 @@ export function CatchSearch() {
       {settled ? (
         <>
           {matches.length === 0 ? (
-            <p className="search-tip">{t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}</p>
+            <p className="search-tip">
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Put “-” before a word to leave those fish out.")}
+            </p>
           ) : null}
           {matches.length > 0 ? (
             <p className="search-save">
