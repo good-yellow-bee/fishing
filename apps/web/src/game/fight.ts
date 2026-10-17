@@ -275,6 +275,15 @@ export const CURRENT_FIGHTER_TIRE = 0.85;
 export function currentTireMul(speciesId: string, spot: string) {
   return spot === "inlet" && CURRENT_FIGHTERS.has(speciesId) ? CURRENT_FIGHTER_TIRE : 1;
 }
+/** Fall feeders: they feed hard before winter and are at full strength in fall. */
+export const FALL_FEEDERS: ReadonlySet<string> = new Set(["tiger-muskie"]);
+/** In fall a fall feeder tires only this fast on a run or against the reel. */
+export const FALL_FEED_TIRE = 0.85;
+
+/** How fall feeding slows a fish's tiring: slower in fall for a fall feeder, else 1. */
+export function fallFeedTireMul(season: string | undefined, speciesId: string) {
+  return season === "fall" && FALL_FEEDERS.has(speciesId) ? FALL_FEED_TIRE : 1;
+}
 /** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
 export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
 /** The shallow spots where a nest guarder makes its nest. */
