@@ -8,6 +8,7 @@ import { formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { catchMonth, monthName } from "./tripMonths";
+import { speciesCounts } from "./speciesLink";
 
 /** The catches that carry a photo, newest first: the game's snapshots and the player's own pictures. */
 export function catchesWithPhotos(catches: readonly CatchEntry[], hasPhoto: (id: string) => boolean) {
@@ -45,7 +46,12 @@ export function PhotosPage() {
     // The button goes once there is room, so focus waits on the word of what was removed.
     roomNote.current?.focus();
   };
-  const all = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
+  const [kind, setKind] = useState<string | null>(null);
+  const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
+  const kinds = speciesCounts(pictured);
+  // A kind picked that has since lost its last photo shows them all again.
+  const picked = kind && kinds.some((row) => row.species.trim().toLowerCase() === kind) ? kind : null;
+  const all = picked ? pictured.filter((entry) => entry.species.trim().toLowerCase() === picked) : pictured;
   const { visible, more } = catchPage(all, shown);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
 
@@ -72,6 +78,19 @@ export function PhotosPage() {
             </>
           ) : null}
           <span role="status">{made !== null ? ` ${t("Snapshots removed: {count}.", { count: made })}` : ""}</span>
+        </p>
+      ) : null}
+      {/* One kind at a time, once the photos hold more than one. */}
+      {kinds.length > 1 ? (
+        <p className="bests-scope photo-kinds" role="group" aria-label={t("Which kinds")}>
+          <button type="button" className="text-button" aria-pressed={!picked} onClick={() => setKind(null)}>
+            {t("All kinds")}
+          </button>
+          {kinds.map((row) => (
+            <button key={row.species} type="button" className="text-button" aria-pressed={picked === row.species.trim().toLowerCase()} onClick={() => setKind(row.species.trim().toLowerCase())}>
+              {t(row.species)} ({row.count})
+            </button>
+          ))}
         </p>
       ) : null}
       {all.length === 0 ? (
