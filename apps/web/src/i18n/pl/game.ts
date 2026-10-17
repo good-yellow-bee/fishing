@@ -416,6 +416,7 @@ export const PL_GAME: PlBook = {
   "The warm water leaves it short of air, so it tires sooner.": "W ciepłej wodzie brakuje jej tlenu, więc szybciej się męczy.",
   "The rain has cooled the water, so it keeps its strength.": "Deszcz ochłodził wodę, więc nie traci sił.",
   "It thrives in the cold, so it keeps its strength.": "W zimnie czuje się najlepiej, więc nie traci sił.",
+  "The swollen inlet pulls harder on a slack line.": "Wezbrane Ujście mocniej ciągnie luźną żyłkę.",
   "It has found cool water down deep, so it keeps its strength.": "W chłodnej głębi nie traci sił.",
   "It's guarding its nest, so it fights harder and tires slower.": "Broni gniazda, więc walczy zacieklej i wolniej się męczy.",
   "It's out hunting after dark and fights at full strength, so it tires slower.": "Po zmroku poluje i walczy z pełną siłą, więc wolniej się męczy.",
