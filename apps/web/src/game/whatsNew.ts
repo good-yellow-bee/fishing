@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field39";
+export const NEWS_ID = "2026-10-17-field40";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The field log works better with large text and a screen reader: the save bar wraps instead of squeezing, a packed tally is read out as you tick pieces, map links say they open a new tab, and Undo sits right before the page after a delete. “Join them” on Bests now finds the same fish under two names in English too.",
   "A year goal on Bests now says where this pace ends the year and how many a week are left to reach it. When one kind of fish is in the book under two names, like Okoń and European perch, Bests offers to join them. The outing search keeps up with long books, and the catch search reads “between 20 and 30 in” and “od 20 do 25 cm”.",
   "A new outing offers next Saturday in one tap on a Friday or a Saturday. While the book holds only the sample waters, the catch form links to adding the one you fished, and a first fish is no longer filed on a sample outing. A short species name like “perch” offers the full one already in the book.",
   "The catch search reads “over 10 in”, “under 2 lb” and “bigger than 60 cm” like > and <. Bests lists every lure that took a fish, the top five until you ask for the rest.",

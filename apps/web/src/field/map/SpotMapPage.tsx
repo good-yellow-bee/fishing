@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, type Spot } from "@stillwater/shared";
 import { getUnits, t, useT } from "../../i18n";
 import { fishCountLabel, formatDay } from "../format";
@@ -31,7 +32,6 @@ import {
   type SamplePlace,
 } from "./places";
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
-import { osmLink } from "../osmLink";
 import { hasSampleWaters } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { spotsByLastFish } from "../spotOrder";
@@ -309,9 +309,9 @@ export function SpotMapPage() {
                 <span>{t(WATER_LABELS[spot.waterType])}</span>
                 <span>{fishLine(spot.id)}</span>
                 <span>
-                  <a className="map-coord-link" href={osmLink(place.lat, place.lng)} target="_blank" rel="noreferrer">
+                  <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
                     {formatCoord(place.lat, place.lng)}
-                  </a>
+                  </MapAnchor>
                 </span>
               </li>
             ))}

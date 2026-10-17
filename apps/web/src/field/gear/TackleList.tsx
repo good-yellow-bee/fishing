@@ -130,14 +130,15 @@ export function TackleList({
         <div className="section-head">
           <h2>{heading}</h2>
           <span className="tackle-count">
-            {count}
+            {/* Said as each piece is ticked, so the bag's progress is heard, not only seen. */}
+            <span role="status">{count}</span>
             {hideToggle}
             {unpack}
           </span>
         </div>
       ) : (
         <p className="tackle-count">
-          {count}
+          <span role="status">{count}</span>
           {hideToggle}
           {unpack}
         </p>

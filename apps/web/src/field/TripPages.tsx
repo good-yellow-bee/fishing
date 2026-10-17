@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
+import { MapAnchor } from "./MapAnchor";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
@@ -42,7 +43,6 @@ import { tripIcs, tripIcsName } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
-import { osmLink } from "./osmLink";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
 import { NearestWater, canFindNearest } from "./NearestWater";
@@ -465,9 +465,9 @@ function TripView() {
               {spot.place ? (
                 <span className="map-link">
                   {" · "}
-                  <a href={osmLink(spot.place.lat, spot.place.lng)} target="_blank" rel="noreferrer">
+                  <MapAnchor lat={spot.place.lat} lng={spot.place.lng}>
                     {t("Open on a map")}
-                  </a>
+                  </MapAnchor>
                 </span>
               ) : null}
             </>
