@@ -208,3 +208,24 @@ export function closeSpecies(typed: string, names: readonly string[]): string | 
   }
   return found?.name ?? null;
 }
+
+/**
+ * Lure names a letter or two apart ("Spiner" and "Spinner"), each folded into the one that took more fish: most likely
+ * one lure typed two ways. Each name shows up in one pair at most.
+ */
+export function nearTwinLures(tally: readonly { lure: string; count: number }[]): { from: string; into: string }[] {
+  const pairs: { from: string; into: string }[] = [];
+  const taken = new Set<string>();
+  // Most fish first, so the name kept is the one used most.
+  const rows = [...tally].sort((a, b) => b.count - a.count);
+  for (const [i, into] of rows.entries()) {
+    if (taken.has(into.lure)) continue;
+    for (const from of rows.slice(i + 1)) {
+      if (taken.has(from.lure) || closeSpecies(from.lure, [into.lure]) !== into.lure) continue;
+      pairs.push({ from: from.lure, into: into.lure });
+      taken.add(from.lure).add(into.lure);
+      break;
+    }
+  }
+  return pairs;
+}

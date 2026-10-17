@@ -1633,3 +1633,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR384~~ | ~~News 2026-10-17-field15c~~ (#810) | field | S |
 | ~~BR385~~ | ~~Same-size matches, lure size slips, labels~~ (#813) | field | S |
 | ~~BR386~~ | ~~Search leaders, weekend word, future-time check~~ (#814) | field | S |
+| ~~BR387~~ | ~~Water temp around a planned date, lure twins merge~~ (#818) | field | S |

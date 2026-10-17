@@ -24,7 +24,20 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
   });
   // A tie names no lure: "most on" would be a coin toss.
   const [lure, second] = lureTally({ spots: [], trips: [], catches: [...fish] }, 2);
-  return lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
+  const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
+  const water = waterThen(fish);
+  return water ? `${withLure} ${water}` : withLure;
+}
+
+/** "Water then: 54–61°F.": the water temperatures noted with those fish, so a planned day knows what to expect. */
+export function waterThen(fish: readonly CatchEntry[]): string | null {
+  const temps = fish.map((entry) => entry.weather?.waterTempF).map((f) => (f === undefined ? f : Math.round(f))).filter((f): f is number => f !== undefined && Number.isFinite(f));
+  if (temps.length === 0) return null;
+  const low = Math.min(...temps);
+  const high = Math.max(...temps);
+  // Rounded as shown: two readings a fraction apart read as one temperature, not a range of the same number twice.
+  const [lowText, highText] = [tempText(low), tempText(high)];
+  return t("Water then: {temp}.", { temp: lowText === highText ? lowText : `${lowText.replace(/\s*°.*$/, "")}–${highText}` });
 }
 
 /** A tip line such as "Best weather: {sky}", with the named value linked to the catch search for it. */
