@@ -74,6 +74,15 @@ function lureBest(catches: readonly CatchEntry[], lure: string): string | undefi
   return best ? t("best {size}", { size: measureText(best) }) : undefined;
 }
 
+/** "Up 2 in since 2023.": the first year with enough fish against the last, or nothing when they read the same. */
+function sizeChange(first: { year: string; size: Measure }, last: { year: string; size: Measure }): string {
+  if (measureText(first.size) === measureText(last.size)) return "";
+  const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
+  return amount(last.size) > amount(first.size)
+    ? t("Up {size} since {year}.", { size: gainText(first.size, last.size), year: first.year })
+    : t("Down {size} since {year}.", { size: gainText(last.size, first.size), year: first.year });
+}
+
 export function SpeciesPage() {
   const { book } = useLogbook();
   useT();
@@ -213,7 +222,8 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
   const released = catches.filter((entry) => entry.released).length;
   const charts = (["length", "weight"] as const)
     .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric), years: typicalByYear(catches, kind) }))
-    .filter((chart) => chart.bands.length > 0);
+    .filter((chart) => chart.bands.length > 0)
+    .map((chart) => ({ ...chart, change: chart.years.length > 1 ? sizeChange(chart.years[0]!, chart.years[chart.years.length - 1]!) : "" }));
   if (charts.length === 0) return null;
   const size = (value: number, unit: string) => `${num(value, 2)} ${unit}`;
   return (
@@ -233,6 +243,8 @@ function SizeSpread({ catches, name }: { catches: readonly CatchEntry[]; name: s
           {chart.years.length > 1 ? (
             <p className="meta typical-years">
               {t("Typical size by year: {years}", { years: chart.years.map((row) => `${row.year}: ${measureText(row.size)}`).join(" · ") })}
+              {/* The list has no full stop of its own: one goes in only before the change. */}
+              {chart.change ? `. ${chart.change}` : null}
             </p>
           ) : null}
           <TallyBars
