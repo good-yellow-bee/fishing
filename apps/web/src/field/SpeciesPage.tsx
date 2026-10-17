@@ -31,8 +31,11 @@ import { BiggestLinks } from "./BiggestHere";
 /** How many of the kind's newest photos show here; the rest are a search away. */
 const PHOTOS_SHOWN = 4;
 
-/** The kind's own pictures, newest first, each opening its fish; more than a few open in the catch search. */
-function SpeciesPhotos({ catches, name }: { catches: readonly CatchEntry[]; name: string }) {
+/**
+ * Pictures of some fish, newest first, each opening its fish; more than a few open in the catch search within `within`
+ * (a kind or a water). `named` puts each fish's kind in its caption, for a strip of mixed kinds.
+ */
+export function PhotoStrip({ catches, within, named = false }: { catches: readonly CatchEntry[]; within: string; named?: boolean }) {
   const { photoFor } = useLogbook();
   const pictured = catches.filter((entry) => photoFor(entry.id));
   if (pictured.length === 0) return null;
@@ -41,7 +44,7 @@ function SpeciesPhotos({ catches, name }: { catches: readonly CatchEntry[]; name
       <div className="section-head">
         <h2>{t("Photos")}</h2>
         {pictured.length > PHOTOS_SHOWN ? (
-          <Link to={findWithLink(exactTerm("species", t(name)), t("Photo").toLowerCase())}>{tn(pictured.length, "{n} photo", "{n} photos")}</Link>
+          <Link to={findWithLink(within, t("Photo").toLowerCase())}>{tn(pictured.length, "{n} photo", "{n} photos")}</Link>
         ) : null}
       </div>
       <ul className="photo-wall species-photos">
@@ -50,6 +53,7 @@ function SpeciesPhotos({ catches, name }: { catches: readonly CatchEntry[]; name
             <Link to={`/catches/${entry.id}`}>
               <img src={photoFor(entry.id)!} alt="" loading="lazy" />
               <span className="photo-caption">
+                {named ? <strong>{t(entry.species)}</strong> : null}
                 <small>
                   {measuresText(entry)} · {formatCatchDay(entry.caughtAt)}
                 </small>
@@ -144,7 +148,7 @@ export function SpeciesPage() {
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
       <BestGrowth catches={catches} />
       <LengthAndWeight catches={catches} />
-      <SpeciesPhotos catches={catches} name={name} />
+      <PhotoStrip catches={catches} within={kindTerm} />
       <div className="section-head">
         <h2>{t("Where it comes from")}</h2>
       </div>

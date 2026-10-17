@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field29";
+export const NEWS_ID = "2026-10-17-field30";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page now shows its newest photos. The catch search knows “weighed” and “measured”, to find the fish still missing a weight or a length, and “autumn” too. Opening a photo keeps your place in Photos, and Home counts only your own fish.",
   "The waters list can now be ordered by last fish, by name or by most fish, and it remembers your choice. A water's page sets this year's outings and fish there against last year by the same date. A new fish now opens on the water you really fish, and lure records leave game fish out.",
   "The catch form now shows your biggest of the kind at the water you picked, next to your biggest anywhere. An outing names the kinds that water gave you for the first time. A kind is now counted the same way on its chips, its page and each fish's page, and a fish caught after midnight on last evening's outing no longer gets a date warning.",
   "The biggest fish of an outing now says so on its page. A blank day out shows the water's last fish before it and what took it, for next time. A species page counts only your own fish, the way Bests does.",

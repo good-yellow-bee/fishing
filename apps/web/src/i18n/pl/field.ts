@@ -395,8 +395,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „{size}”), temperatury wody (np. „{temp}”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „{size}”), temperatury wody (np. „{temp}”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy”, „zważone” lub „zmierzone” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
