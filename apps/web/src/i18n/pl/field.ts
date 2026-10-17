@@ -92,6 +92,7 @@ export const PL_FIELD: PlBook = {
   "Save and log another": "Zapisz i następna",
   "Water from the photo's location.": "Łowisko z miejsca zrobienia zdjęcia.",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
+  "That time is still to come. Is the day right?": "Ta godzina jeszcze nie nadeszła. Czy dzień się zgadza?",
   "Nearest water to me": "Najbliższe łowisko",
   "Share": "Udostępnij",
   "Which seasons": "Które sezony",
@@ -516,6 +517,8 @@ export const PL_FIELD: PlBook = {
   "This week in years past": "Ten tydzień w minionych latach",
   "Around this date in earlier years here: {fish}, {species}.": "Około tej daty w poprzednich latach: {fish}, {species}.",
   "Most on {lure}.": "Najwięcej na {lure}.",
+  "Most at {time}.": "Najwięcej o porze: {time}.",
+  "Most from {water}.": "Najwięcej z łowiska: {water}.",
   "{n} years ago": ["{n} rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Weather is optional: note the sky and wind, and the water temperature if you took it.":
