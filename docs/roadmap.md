@@ -1257,7 +1257,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT212~~ | ~~Wind-blown point: a strong wind drives the baitfish onto the Point and the hunters follow, so a cast off the point draws the bite 0.85x sooner, and the wait hint says so; news 2026-10-17-game09~~ (#859) | bite | S |
 | ~~GT213~~ | ~~Summer carp: a carp hooked in summer thrives in the warm water and is at its strongest, so it tires only 0.85x as fast, and the hookset says so~~ (#861) | fight | S |
 | ~~GT214~~ | ~~Fall brook trout: a brook trout spawns in fall too, so like a salmon it is on its fall run, tires only 0.8x as fast, and the hookset says so~~ (#862) | fight | S |
-| GT215 | Midday glare: under a clear summer sky by day the fish shun the bright open water, so out on the boat the bite comes 1.15x slower (not while new anglers get mercy), and the wait hint says so | bite | S |
+| ~~GT215~~ | ~~Midday glare: under a clear summer sky by day the fish shun the bright open water, so out on the boat the bite comes 1.15x slower (not while new anglers get mercy), and the wait hint says so~~ (#863) | bite | S |
+| GT216 | Shiner schools: a golden shiner travels in a school like the panfish, so landing one leaves a school at that bank for the next casts, and the landing says so | game | S |
 
 ## Risks / open questions for the owner
 

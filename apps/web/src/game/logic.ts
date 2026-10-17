@@ -381,8 +381,8 @@ export function isSolidStrike(elapsedMs: number, windowMs: number) {
   return elapsedMs <= windowMs * SOLID_STRIKE_SHARE;
 }
 
-/** Panfish travel in schools: land one and more of its kind are still under the bobber. */
-export const SCHOOLERS: ReadonlySet<string> = new Set(["perch", "bluegill", "crappie"]);
+/** Panfish and baitfish travel in schools: land one and more of its kind are still under the bobber. */
+export const SCHOOLERS: ReadonlySet<string> = new Set(["perch", "bluegill", "crappie", "golden-shiner"]);
 /** Casts after landing a schooler that the school stays at that bank. */
 export const SCHOOL_CASTS = 2;
 /** Chance a bite in the school is one of the school's own kind. */
