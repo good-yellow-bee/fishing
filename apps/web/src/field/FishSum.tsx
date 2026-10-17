@@ -9,11 +9,12 @@ const SEP = "\u00a0· ";
 
 /** "6 fish · 3 species · 2 released · Largest: Northern pike, 28 in" for the fish of one outing or one water. */
 /** `oneKind` is for a page about one species, where naming it again says nothing. */
-export function FishSum({ catches, oneKind = false }: { catches: readonly CatchEntry[]; oneKind?: boolean }) {
+/** `best` is the fish the largest is picked from, when that is not all of them. */
+export function FishSum({ catches, oneKind = false, best = catches }: { catches: readonly CatchEntry[]; oneKind?: boolean; best?: readonly CatchEntry[] }) {
   useT();
   if (catches.length === 0) return null;
   const species = new Set(catches.map((entry) => entry.species.trim().toLowerCase())).size;
-  const bests = personalBests({ spots: [], trips: [], catches: [...catches] });
+  const bests = personalBests({ spots: [], trips: [], catches: [...best] });
   // One fish can be both the heaviest and the longest; two different ones are both named, so a long pike isn't hidden behind a light perch.
   const both = bests.heaviest && bests.longest && bests.heaviest.id !== bests.longest.id;
   const largest = bests.heaviest ?? bests.longest;

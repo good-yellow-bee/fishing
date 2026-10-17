@@ -270,7 +270,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         return saved.ok ? { ok: true, id } : saved;
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
-      fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
+      fileCatches: (catchIds, tripId) => remove("file", catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
       fileEach: (tripFor) => remove("file", [...tripFor].reduce((next, [id, tripId]) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
