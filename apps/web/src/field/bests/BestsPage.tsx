@@ -407,7 +407,8 @@ export function BestsPage() {
             <div className="section-head">
               <h2>{t("Lures that worked")}</h2>
             </div>
-            <TallyBars key={year ?? ""} rows={lureTally(book).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
+            {/* Every lure that took a fish, the top five until asked for the rest. */}
+            <TallyBars key={year ?? ""} limit={5} rows={lureTally(book, Infinity).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>

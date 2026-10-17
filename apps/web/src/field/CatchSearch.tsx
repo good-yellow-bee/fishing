@@ -282,8 +282,13 @@ export function searchParts(book: Logbook, needle: string): string[] {
     .filter((name) => name.includes("+"))
     .sort((a, b) => b.length - a.length);
   const kept: string[] = [];
+  // "over 10 in", "under 2 lb", "ponad 60 cm": the words for a bound, read as ">" and "<" before a size or temperature.
+  const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$))`;
+  let text = needle
+    .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz)\s+` + sized, "gi"), "$1>")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz)\s+` + sized, "gi"), "$1<");
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
-  let text = needle.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
+  text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   // "20+ in", the plus before the unit: the same.
   text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
   // "25-30 in" or "1–2 kg": a size between the two, both ends included, as ">25 in + <=30 in"; "30-25 in" reads the same.
