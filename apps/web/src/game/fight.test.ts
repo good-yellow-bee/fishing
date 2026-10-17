@@ -1339,8 +1339,9 @@ describe("a fight in winter", () => {
       expect(thrivesInCold("winter", id)).toBe(true);
       expect(seasonTireMul("winter", id)).toBe(1);
     }
-    expect(seasonTireMul("winter", "pike")).toBe(WINTER_TIRE);
+    expect(seasonTireMul("winter", "perch")).toBe(WINTER_TIRE);
     expect(thrivesInCold("summer", "burbot")).toBe(false);
+    expect(thrivesInCold("summer", "pike")).toBe(false);
   });
 
   it("slows a twilight hunter's tiring only at dawn and dusk", () => {

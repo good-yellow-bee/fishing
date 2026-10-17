@@ -217,8 +217,8 @@ export const BOAT_RUN = 0.65;
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
-/** Cold lovers: a burbot spawns under winter's ice and stays lively in the cold. */
-export const COLD_LOVERS: ReadonlySet<string> = new Set(["burbot"]);
+/** Cold lovers: a burbot spawns under winter's ice, and a pike hunts on through the winter, so both stay lively in the cold. */
+export const COLD_LOVERS: ReadonlySet<string> = new Set(["burbot", "pike"]);
 
 /** Whether a fish thrives in winter's cold rather than going sluggish. */
 export function thrivesInCold(season: string | undefined, speciesId?: string) {
