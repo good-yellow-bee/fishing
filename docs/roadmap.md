@@ -1217,7 +1217,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT172~~ | ~~A pike chases a streamer: a pike or ghost pike that misses a streamer follows it and hits once more, like a tiger muskie~~ (#777) | fish | S |
 | ~~GT173~~ | ~~A topwater after dark: the fish hunt by sound, so a topwater waits 0.85x at night, and the cast says so~~ (#779) | game | S |
 | ~~GT174~~ | ~~Hop a jig: a tap while a jig sits on the bottom hops it, and like a topwater's pops the first two hops bring the bite sooner~~ (#781) | game | S |
-| GT175 | Lift a spoon: a tap with a spoon in the water lifts it to flash and flutter down, and the first two lifts bring the bite sooner | game | S |
+| ~~GT175~~ | ~~Lift a spoon: a tap with a spoon in the water lifts it to flash and flutter down, and the first two lifts bring the bite sooner~~ (#783) | game | S |
+| GT176 | Yank the bait: a strike at a nibble on bait pulls it from the fish, which backs off, so the rest of the wait stretches 1.5x once a cast (not on a beginner's easy fish) | game | S |
 
 ## Risks / open questions for the owner
 

@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zu";
+export const NEWS_ID = "2026-10-17zv";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Strike only on the real dip with bait: a strike at a nibble yanks the bait away, and the fish backs off before it bites.",
   "Tap with a spoon in the water to lift it: it flashes and flutters back down, and the first two lifts draw a bite sooner.",
   "Tap while a jig sits on the bottom to hop it: the first two hops draw a bite sooner.",
   "Fish a topwater after dark: the fish hunt by sound, so its gurgle draws a bite sooner.",
