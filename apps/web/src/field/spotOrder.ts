@@ -33,12 +33,16 @@ export function spotsByLastFish(book: Logbook): SpotRow[] {
 /**
  * The water a new fish most likely came from: today's outing's water, or of several outings today the one fished
  * most recently; with none today, the water fished most recently; else the book's first. Never the game's lake.
+ * `smallHours`: before dawn, when last night's outing counts as today's.
  */
-export function likelyWater(book: Logbook, today: string): string {
+export function likelyWater(book: Logbook, today: string, smallHours = false): string {
   // Never the game's lake: a fish logged by hand came from a real water. Ranked by the angler's own fish, so a sample
   // week dated after their first real fish doesn't pull a new fish onto a made-up water.
   const order = spotsByLastFish({ ...book, catches: countedFish(book.catches) }).map((row) => row.spot.id).filter((id) => id !== PLAY_LAKE_ID);
-  const todays = new Set(book.trips.filter((trip) => trip.date === today && !isSampleTrip(trip.id)).map((trip) => trip.spotId));
+  // In the small hours, last night's outing is still the one on the water.
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const yesterday = smallHours ? localDate(new Date(y, m - 1, d - 1, 12)) : today;
+  const todays = new Set(book.trips.filter((trip) => (trip.date === today || trip.date === yesterday) && !isSampleTrip(trip.id)).map((trip) => trip.spotId));
   // No fish of the angler's own yet: their first water of their own, not one from the sample week.
   const noOwn = !book.catches.some(ownFish);
   const own = noOwn ? book.spots.find((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id))?.id : undefined;

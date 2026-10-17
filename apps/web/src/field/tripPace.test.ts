@@ -7,6 +7,10 @@ describe("fish pace", () => {
     expect(fishPace("2026-10-10T08:00:00.000Z", "2026-10-10T14:00:00.000Z", 3)).toBe("one every 3 h on average");
   });
 
+  it("keeps the pace of a night session past midnight", () => {
+    expect(fishPace("2026-10-10T23:00:00", "2026-10-11T00:20:00", 3)).toBe("one every 40 min on average");
+  });
+
   it("says nothing for two fish, fish at the same minute, or fish on different days", () => {
     expect(fishPace("2026-10-10T12:00:00.000Z", "2026-10-10T13:00:00.000Z", 2)).toBeNull();
     expect(fishPace("2026-10-10T12:00:00.000Z", "2026-10-10T12:00:00.000Z", 4)).toBeNull();

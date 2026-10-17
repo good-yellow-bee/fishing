@@ -28,6 +28,11 @@ describe("likely water", () => {
     expect(likelyWater(book, "2026-10-16")).toBe("creek");
   });
 
+  it("keeps last night's outing's water in the small hours", () => {
+    expect(likelyWater(book, "2026-10-17", true)).toBe("creek");
+    expect(likelyWater(book, "2026-10-17")).toBe("lake");
+  });
+
   it("picks the water fished last when nothing is on today, and the first water in an empty book", () => {
     expect(likelyWater(book, "2026-10-17")).toBe("lake");
     expect(likelyWater({ ...book, catches: [] }, "2026-10-17")).toBe("first");
