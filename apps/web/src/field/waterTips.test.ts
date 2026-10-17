@@ -116,6 +116,11 @@ describe("tempThroughYear", () => {
     expect(readings.map((reading) => reading.fahrenheit)).toEqual([52, 64, 58]);
   });
 
+  it("falls back to last year while this year has one month", () => {
+    const readings = tempThroughYear([at("a", 48, "2026-04-02T09:00:00"), at("b", 60, "2025-05-02T09:00:00"), at("c", 66, "2025-08-02T09:00:00")]);
+    expect(readings.map((reading) => reading.fahrenheit)).toEqual([60, 66]);
+  });
+
   it("stays empty with readings in one month only", () => {
     expect(tempThroughYear([at("a", 48, "2026-04-02T09:00:00"), at("c", 64, "2026-04-23T09:00:00")])).toEqual([]);
   });

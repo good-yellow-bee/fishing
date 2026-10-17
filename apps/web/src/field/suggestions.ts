@@ -201,6 +201,8 @@ export function closeSpecies(typed: string, names: readonly string[]): string | 
   const most = want.length >= 8 ? 2 : 1;
   let found: { name: string; distance: number } | null = null;
   for (const name of names) {
+    // "Jig 9g" beside "Jig 5g" is another size, not a slip.
+    if (want.replace(/\d/g, "") === name.toLowerCase().replace(/\d/g, "")) continue;
     const distance = editDistance(want, name.toLowerCase());
     if (distance <= most && (!found || distance < found.distance)) found = { name, distance };
   }

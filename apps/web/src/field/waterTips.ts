@@ -106,13 +106,19 @@ export function speciesLures(catches: readonly CatchEntry[], species: string, li
 }
 
 /**
- * How the water warmed and cooled through the year of the newest reading: the last reading of each month, in order.
- * Empty with readings in only one month of that year, which shows no change.
+ * How the water warmed and cooled through the year of the newest reading, or the year before when the newest has one
+ * month so far: the last reading of each month, in order. Empty when neither year has two months.
  */
 export function tempThroughYear(catches: readonly CatchEntry[]): WaterReading[] {
   const last = lastReading(catches);
   if (!last) return [];
-  const year = new Date(last.at).getFullYear();
+  const newest = new Date(last.at).getFullYear();
+  // Early in a season the newest year may have one month so far: last year's curve says more until it fills in.
+  const inYear = readingsByMonth(catches, newest);
+  return inYear.length >= 2 ? inYear : readingsByMonth(catches, newest - 1);
+}
+
+function readingsByMonth(catches: readonly CatchEntry[], year: number): WaterReading[] {
   const byMonth = new Map<number, WaterReading>();
   for (const entry of catches) {
     const fahrenheit = entry.weather?.waterTempF;

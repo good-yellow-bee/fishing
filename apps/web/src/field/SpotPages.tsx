@@ -429,7 +429,8 @@ function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
   useT();
   const readings = tempThroughYear(catches);
   if (readings.length === 0) return null;
-  const day = (iso: string) => new Date(iso).toLocaleDateString(locale(), { month: "short", day: "numeric" });
+  // The month written out, so Polish takes its "of" form ("16 maja").
+  const day = (iso: string) => new Date(iso).toLocaleDateString(locale(), { month: "long", day: "numeric" });
   return (
     <p className="meta temp-year">
       {t("Water temperature in {year}: {readings}", {
