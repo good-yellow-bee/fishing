@@ -1411,6 +1411,7 @@ describe("a fight in winter", () => {
     expect(CURRENT_FIGHTER_TIRE).toBeLessThan(1);
     for (const id of CURRENT_FIGHTERS) expect(currentTireMul(id, "inlet")).toBe(CURRENT_FIGHTER_TIRE);
     expect(currentTireMul("smallmouth-bass", "dock")).toBe(1);
+    expect(CURRENT_FIGHTERS.has("brook-trout")).toBe(true);
     expect(currentTireMul("pike", "inlet")).toBe(1);
   });
 
