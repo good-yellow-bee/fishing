@@ -59,7 +59,7 @@ import { speciesLink } from "./speciesLink";
 import { datePicks, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
-import { likelyWater } from "./spotOrder";
+import { likelyWater, spotsByLastFish } from "./spotOrder";
 import { useStepKeys } from "./stepKeys";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
@@ -335,7 +335,7 @@ function TripView() {
       </div>
       <FishSum catches={catches} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
-      {trip.date <= today ? <TripCounts trip={trip} landed={catches.length} /> : null}
+      {trip.date <= today && !play ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
       {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
       {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
@@ -386,7 +386,7 @@ function TripView() {
               if (fileCatches(loose.map((entry) => entry.id), trip.id)) document.getElementById("outing-fish")?.focus();
             }}
           >
-            {t("Add them")}
+            {tn(loose.length, "Add it", "Add them")}
           </button>
         </p>
       ) : null}
@@ -548,8 +548,15 @@ function TripForm() {
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
   // Never the game's lake: its days are made by playing.
-  const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID) ? (params.get("spot") as string) : likelyWater(book, localDate(new Date()));
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
+  // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
+  const busy = (spotId: string) => book.trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
+  const guess = likelyWater(book, localDate(new Date()));
+  const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
+    ? (params.get("spot") as string)
+    : busy(guess)
+      ? (spotsByLastFish(book).map((row) => row.spot.id).find((id) => id !== PLAY_LAKE_ID && !busy(id)) ?? guess)
+      : guess;
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.

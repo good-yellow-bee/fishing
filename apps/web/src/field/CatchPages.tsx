@@ -157,7 +157,8 @@ export function CatchesPage() {
           {searching ? null : (
             <>
               {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
-              <FishSum catches={catches} />
+              {/* The largest named is the angler's own, as Bests and the cards' records say. */}
+              <FishSum catches={catches} best={countedFish(catches)} />
               <SpeciesChips catches={catches} />
               <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
                 {(entry) => (
@@ -201,9 +202,11 @@ function CatchForm() {
   const { catchId } = useParams();
   const [params] = useSearchParams();
   const existing = catchId ? book.catches.find((row) => row.id === catchId) : undefined;
-  const presetTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
+  // Never the game's lake or one of its days for a new fish: those are landed by playing.
+  const linkedTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
+  const presetTrip = linkedTrip && linkedTrip.spotId !== PLAY_LAKE_ID ? linkedTrip : undefined;
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
-  const linkedSpot = book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
+  const linkedSpot = params.get("spot") !== PLAY_LAKE_ID && book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
   // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
   const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date())));
 
@@ -550,6 +553,8 @@ function CatchForm() {
     );
   };
 
+  // A control that takes itself away hands focus to the field it filled.
+  const focusSoon = (selector: string) => setTimeout(() => document.querySelector<HTMLElement>(selector)?.focus(), 0);
   const clearPhoto = () => {
     photoPick.current += 1;
     setReducing(false);
@@ -920,7 +925,16 @@ function CatchForm() {
             <p className="wide form-note lure-tips live-baits">
               {t("Live bait:")}{" "}
               {LIVE_BAITS.map((name) => (
-                <button key={name} type="button" className="lure-tip" onClick={() => setLure(t(name))}>
+                <button
+                  key={name}
+                  type="button"
+                  className="lure-tip"
+                  onClick={() => {
+                    setLure(t(name));
+                    // The row goes once the lure is in: focus stays with the lure.
+                    focusSoon('input[name="lure"]');
+                  }}
+                >
                   {t(name)}
                 </button>
               ))}
@@ -1031,6 +1045,7 @@ function CatchForm() {
                   setSky(offeredWeather.sky);
                   setWind(offeredWeather.wind);
                   setWaterTemp(offeredWeather.waterTempF === undefined ? "" : inputNumber(fromBookTemp(offeredWeather.waterTempF, units)));
+                  focusSoon('select[name="sky"]');
                 }}
               >
                 {outingWeather
@@ -1112,7 +1127,14 @@ function CatchForm() {
             </label>
             {photo ? <img className="catch-photo-preview" src={photo} alt={t("Selected catch photo")} /> : null}
             {photo ? (
-              <button type="button" className="text-button" onClick={clearPhoto}>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  clearPhoto();
+                  focusSoon('.entry-form input[type="file"]');
+                }}
+              >
                 {t("Remove photo")}
               </button>
             ) : null}
@@ -1220,8 +1242,10 @@ function CatchView() {
   // Short of a best of its kind, the day's best: the biggest of its outing.
   const outingBest = !badge && trip && trip.spotId !== PLAY_LAKE_ID && biggestOnOuting(book.catches.filter((other) => other.tripId === trip.id), entry);
   // The others of its kind that round to the same size, through the one-size search.
-  const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
-  const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  // Counted among the angler's own fish only, as the year line is: the link leaves the game's lake out too.
+  const countedIds = new Set(counted.map((other) => other.id));
+  const sizeSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)] as const;
+  const sameSize = isCounted && counted.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
   const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", t(entry.lure)), exactTerm("water", spot.name)] as const) : null;
   const lureHereCount = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1239,7 +1263,7 @@ function CatchView() {
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
   const yearSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))] as const;
-  const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -1436,9 +1460,12 @@ function CatchView() {
         </p>
       )}
       <p className="another-catch">
-        <Link to={anotherCatchLink(entry)} className="field-primary inline">
-          {t("Log another like this")}
-        </Link>
+        {/* Not from a game fish: another like it would be logged on the game's lake. */}
+        {entry.spotId === PLAY_LAKE_ID ? null : (
+          <Link to={anotherCatchLink(entry)} className="field-primary inline">
+            {t("Log another like this")}
+          </Link>
+        )}
         <button type="button" className="field-primary inline" onClick={savePicture}>
           {t("Save picture")}
         </button>
