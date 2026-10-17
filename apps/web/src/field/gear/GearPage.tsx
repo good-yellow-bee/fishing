@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -19,6 +19,7 @@ import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
 import { pieceRecords } from "./pieceRecord";
+import { notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
 import { packingTips } from "../waterTips";
 import { nearTwinLures } from "../suggestions";
@@ -64,6 +65,7 @@ function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
   const { items } = useTackle();
   const records = pieceRecords(book, items, today);
+  const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure);
   const [all, setAll] = useState(false);
   if (records.length === 0) return null;
   const fold = records.length > RECORD_ROWS;
@@ -102,6 +104,20 @@ function LureRecord({ today }: { today: string }) {
           <button type="button" className="text-button" aria-expanded={all} onClick={() => setAll((open) => !open)}>
             {all ? t("Show fewer") : t("Show all {count}", { count: records.length })}
           </button>
+        </p>
+      ) : null}
+      {/* Lures that took fish last year and none yet this year: worth a swim before the season ends. */}
+      {quiet.length > 0 ? (
+        <p className="meta not-yet">
+          <span>
+            {t("Not yet this year:")}{" "}
+            {quiet.map((lure, index) => (
+              <Fragment key={lure}>
+                {index > 0 ? ", " : null}
+                <Link to={findLink(exactTerm("lure", t(lure)))}>{t(lure)}</Link>
+              </Fragment>
+            ))}
+          </span>
         </p>
       ) : null}
     </>

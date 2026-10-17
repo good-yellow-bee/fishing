@@ -22,6 +22,7 @@ import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst } from "./seasonFirst";
 import { countedFish } from "./milestones";
+import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 
@@ -128,6 +129,7 @@ export function SpeciesPage() {
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
+      <NewWaters catches={catches} name={name} waters={waters} />
       {/* The water the kind came in, once two fish noted it: where to look for it. */}
       {/* The angler's own: the sample week's temperatures would widen it. */}
       {countedFish(catches).filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(countedFish(catches)) ? (
@@ -282,6 +284,25 @@ function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; w
   const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
   rows.sort((a, b) => amount(b.size) - amount(a.size));
   return <p className="meta typical-waters">{t("Typical size by water: {waters}", { waters: rows.map((row) => `${row.name}: ${measureText(row.size)}`).join(" · ") })}</p>;
+}
+
+/** "New waters this year: Cedar Lake": where the kind turned up somewhere it hadn't before, each opening those fish. */
+function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; name: string; waters: readonly { spotId: string; name?: string | null }[] }) {
+  const found = newWatersThisYear(catches).flatMap((id) => waters.filter((water) => water.spotId === id && water.name));
+  if (found.length === 0) return null;
+  return (
+    <p className="meta new-waters">
+      <span>
+        {t("New waters this year:")}{" "}
+        {found.map((water, index) => (
+          <Fragment key={water.spotId}>
+            {index > 0 ? ", " : null}
+            <Link to={findWithLink(exactTerm("species", t(name)), exactTerm("water", water.name!))}>{water.name}</Link>
+          </Fragment>
+        ))}
+      </span>
+    </p>
+  );
 }
 
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */

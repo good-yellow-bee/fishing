@@ -11,6 +11,11 @@ describe("notYetThisYear", () => {
     expect(notYetThisYear(catches, new Date(2026, 9, 17))).toEqual(["Walleye"]);
     expect(notYetThisYear([], new Date(2026, 9, 17))).toEqual([]);
   });
+
+  it("groups by something else when asked, such as the lure", () => {
+    const catches = [{ ...fish("a", 2025, "Walleye"), lure: "Jig" }, { ...fish("b", 2025, "Walleye"), lure: "Spoon" }, { ...fish("c", 2026, "Pike"), lure: "jig" }, { ...fish("d", 2025, "Pike"), lure: " " }];
+    expect(notYetThisYear(catches, new Date(2026, 9, 17), (entry) => entry.lure)).toEqual(["Spoon"]);
+  });
 });
 
 describe("newWatersThisYear", () => {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -18,18 +18,20 @@ import { PagedCatches } from "./PagedCatches";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { WaterTipsBox } from "./WaterTipsBox";
-import { exactTerm } from "./findLinks";
+import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { spotsByLastFish } from "./spotOrder";
 import { catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
-import { outingAverage, outingStreak, topOuting } from "./outingAverage";
+import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
+import { notYetThisYear } from "./bests/notYet";
+import { mostKindsDay } from "./bests/mostKinds";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
-import { fishCountLabel, messageText, outingName, outingNameById, tripWhen } from "./format";
+import { fishCountLabel, formatDay, messageText, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { locale, t, tn, useT } from "../i18n";
+import { locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
 import { tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
@@ -113,6 +115,11 @@ export function SpotPage() {
   const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
   const streak = outingStreak(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const split = weekendSplit(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
+  const notYet = notYetThisYear(catches);
+  const kindsDay = mostKindsDay({ ...book, catches });
+  const here = exactTerm("water", spot.name);
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
@@ -174,6 +181,9 @@ export function SpotPage() {
       </div>
       {average ? <p className="meta">{average}</p> : null}
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
+      {split ? (
+        <p className="meta weekend-split">{t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}</p>
+      ) : null}
       {streak.dryNow > 1 && streak.best > 0 ? <p className="meta dry-here">{t("Outings here since the last fish: {count}", { count: streak.dryNow })}</p> : null}
       {top ? (
         <p className="meta stand">
@@ -205,6 +215,24 @@ export function SpotPage() {
       </div>
       <FishSum catches={catches} />
       <SpeciesChips catches={catches} within={spot.name} />
+      {notYet.length > 0 ? (
+        <p className="meta not-yet">
+          <span>
+            {t("Not yet this year:")}{" "}
+            {notYet.map((name, index) => (
+              <Fragment key={name}>
+                {index > 0 ? ", " : null}
+                <Link to={findWithLink(here, exactTerm("species", t(name)))}>{t(name)}</Link>
+              </Fragment>
+            ))}
+          </span>
+        </p>
+      ) : null}
+      {kindsDay ? (
+        <p className="meta most-kinds">
+          <Link to={findWithLink(here, kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
+        </p>
+      ) : null}
       <BiggestHere catches={catches} spotId={spot.id} />
       <FishCsv catches={catches} name={spot.name} />
       <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
