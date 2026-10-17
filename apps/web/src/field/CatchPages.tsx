@@ -43,6 +43,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
+import { milestoneOf } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, farPastBest, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
@@ -1110,6 +1111,7 @@ function CatchView() {
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
   const sun = place ? sunMark(entry.caughtAt, place) : null;
   const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
+  const milestone = milestoneOf(book, entry);
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -1189,6 +1191,17 @@ function CatchView() {
         {sameSize > 1 ? (
           <p className="meta same-size">
             <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species), count: sameSize })}</Link>
+          </p>
+        ) : null}
+        {milestone ? (
+          <p className="meta milestone">
+            {milestone.of === "book" ? (
+              t("Fish no. {n} in the book.", { n: milestone.n })
+            ) : (
+              <Link to={`/species/${encodeURIComponent(entry.species)}`}>
+                {milestone.n === 1 ? t("Your first {species}.", { species: t(entry.species) }) : t("{species} no. {n}.", { species: t(entry.species), n: milestone.n })}
+              </Link>
+            )}
           </p>
         ) : null}
       </EditDelete>
