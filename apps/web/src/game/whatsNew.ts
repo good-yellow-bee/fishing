@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-field37";
+export const NEWS_ID = "2026-10-17-field38";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A new outing offers next Saturday in one tap on a Friday or a Saturday. While the book holds only the sample waters, the catch form links to adding the one you fished, and a first fish is no longer filed on a sample outing. A short species name like “perch” offers the full one already in the book.",
   "The catch search reads “over 10 in”, “under 2 lb” and “bigger than 60 cm” like > and <. Bests lists every lure that took a fish, the top five until you ask for the rest.",
   "The catch form now knows common European fish: perch, zander, bream, roach, chub, tench and more, each with its own records. A tackle name like “Line 0,25” stays one piece, and the form says when a fish will go in as released.",
   "Bests now gives each month of the calendar its fish count, and each water with fish the day of its last one.",

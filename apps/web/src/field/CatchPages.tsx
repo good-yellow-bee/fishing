@@ -58,7 +58,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
-import { isSampleCatch } from "./bookCopy";
+import { isSampleCatch, isSampleSpot } from "./bookCopy";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater, nearestWater } from "./spotOrder";
@@ -962,6 +962,12 @@ function CatchForm() {
             {photoSpot && photoSpot === spotId ? <span className="field-hint">{t("Water from the photo's location.")}</span> : null}
             {leftTrip ? <span className="field-hint">{t("No longer on {outing}: that outing was on another water.", { outing: leftTrip })}</span> : null}
             {canLocate ? <NearestWater book={book} onPick={onSpot} /> : null}
+            {/* Only the sample week's made-up waters to pick from: the real one is a tap away. */}
+            {!existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id)) ? (
+              <span className="field-hint own-water">
+                {t("These waters are invented.")} <Link to="/spots/new?then=catch">{t("Add the one you fished")}</Link>
+              </span>
+            ) : null}
           </div>
 
           <label>
