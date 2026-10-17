@@ -753,4 +753,6 @@ export const PL_FIELD: PlBook = {
   "Nothing in this file is new to this book.": "Nic w tym pliku nie jest nowe dla tego dziennika.",
   "{name} is now in the book twice.": "{name} jest teraz w dzienniku dwa razy.",
   "Merge them": "Połącz je",
+  "This outing is still to come.": "Ta wyprawa jeszcze przed tobą.",
+  Planned: "Zaplanowana",
 };

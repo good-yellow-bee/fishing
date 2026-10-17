@@ -13,6 +13,11 @@ describe("seasonFirst", () => {
     expect(seasonFirst(catches, now)?.entry.id).toBe("c");
   });
 
+  it("counts the days in this year's calendar, so a date past February isn't a day off", () => {
+    const catches = [fish("a", new Date(2025, 2, 6, 9)), fish("b", new Date(2026, 0, 1, 9))];
+    expect(seasonFirst(catches, now)?.earlier).toBe(64);
+  });
+
   it("counts a later first as negative, and needs the year before", () => {
     expect(seasonFirst([fish("a", new Date(2025, 3, 1)), fish("b", new Date(2026, 3, 5))], now)?.earlier).toBe(-4);
     expect(seasonFirst([fish("a", new Date(2024, 3, 1)), fish("b", new Date(2026, 3, 5))], now)).toBeNull();

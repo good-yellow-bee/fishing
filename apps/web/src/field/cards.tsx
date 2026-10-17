@@ -109,7 +109,10 @@ export function TripCard({
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
-      ? fishCountLabel(fishCount)
+      ? // Still ahead with nothing packed: planned, not a blank day.
+        fishCount === 0 && trip.date > today
+        ? t("Planned")
+        : fishCountLabel(fishCount)
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
