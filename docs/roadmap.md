@@ -1577,3 +1577,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR359~~ | ~~Lure chips on an outing~~ (#758) | field | S |
 | ~~BR360~~ | ~~Typical (median) size on species pages~~ (#760) | field | S |
 | ~~BR361~~ | ~~Wind/temp links on fish page; shorter search hints~~ (#762) | field | S |
+| ~~BR362~~ | ~~Outing weather in time order~~ (#764) | field | S |
