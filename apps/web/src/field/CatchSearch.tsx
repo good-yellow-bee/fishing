@@ -59,9 +59,9 @@ function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string)
   return !Number.isNaN(at.getTime()) && normalize(t(SEASON_LABELS[lakeSeason(at)])).startsWith(want);
 }
 
-/** Words for Saturdays and Sundays, in English and Polish. */
 /** "record", "pb": the book's biggest fish and the biggest of each kind, as their badges mark them. */
 const RECORD_WORDS = new Set(["record", "records", "pb", "pbs", "rekord", "rekordy"].map((word) => normalize(word)));
+/** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
 /** Other words anglers use for a part of the day, in English and Polish: "dusk" is the evening, "świt" the dawn. */
@@ -278,7 +278,8 @@ export function searchTerms(part: string): string[] {
         continue;
       }
     }
-    if (tokens[i]!.length > 2) terms.push(tokens[i]!);
+    // Short words are noise ("of", "na"), but "pb" is a word of its own.
+    if (tokens[i]!.length > 2 || RECORD_WORDS.has(normalize(tokens[i]!))) terms.push(tokens[i]!);
   }
   return terms;
 }
@@ -465,7 +466,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.")}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, or “released” or “kept”. Join two with “+”.")}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}

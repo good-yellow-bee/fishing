@@ -26,7 +26,7 @@ import { PagedCatches } from "./PagedCatches";
 import { EditDelete } from "./EditDelete";
 import { TackleList } from "./gear/TackleList";
 import { useTackle } from "./gear/TackleState";
-import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, toLocalInput, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, formatTimeOfDay, messageText, outingName, toLocalInput, tripWhen } from "./format";
 import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
@@ -381,7 +381,7 @@ function TripView() {
           {" · "}
           {tripWhen(trip.date, today, tomorrow)}
         </p>
-        <h1>{trip.title}</h1>
+        <h1>{outingName(trip)}</h1>
         <p className="meta stand">
           <time dateTime={trip.date}>{formatDay(trip.date)}</time>
           {spot ? (
@@ -616,7 +616,7 @@ function TripForm() {
           ) : null}
           {sameDay ? (
             <p className="wide form-note" role="status">
-              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{sameDay.title}</Link>
+              {t("You already have an outing on this water that day:")} <Link to={`/trips/${sameDay.id}`}>{outingName(sameDay)}</Link>
             </p>
           ) : null}
           {existing && ownFish.length > 0 && spotId !== existing.spotId ? (

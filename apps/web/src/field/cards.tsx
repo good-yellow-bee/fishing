@@ -11,7 +11,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
-import { fishCountLabel, formatClock, formatDay, noteText, tripWhen } from "./format";
+import { fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -115,7 +115,7 @@ export function TripCard({
     <Link to={`/trips/${trip.id}`} className="trip-card">
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
       <div>
-        <Head>{trip.title}</Head>
+        <Head>{outingName(trip)}</Head>
         <p className="meta">
           {[spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally].filter(Boolean).join(" · ")}
         </p>

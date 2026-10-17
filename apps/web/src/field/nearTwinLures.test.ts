@@ -11,3 +11,11 @@ describe("nearTwinLures", () => {
     expect(nearTwinLures([{ lure: "Hair jig", count: 2 }, { lure: "Hair rig", count: 1 }])).toEqual([]);
   });
 });
+
+describe("nearTwinLures with pairs kept apart", () => {
+  it("pairs a name with its next slip once the first pair is kept apart", () => {
+    const tally = [{ lure: "Spoon", count: 5 }, { lure: "Spook", count: 2 }, { lure: "Spoom", count: 1 }];
+    expect(nearTwinLures(tally)).toEqual([{ from: "Spook", into: "Spoon" }]);
+    expect(nearTwinLures(tally, (a, b) => [a, b].sort().join() === "Spook,Spoon")).toEqual([{ from: "Spoom", into: "Spoon" }]);
+  });
+});

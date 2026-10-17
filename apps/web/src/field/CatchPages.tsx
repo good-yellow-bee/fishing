@@ -53,7 +53,7 @@ import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
-import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, toLocalInput } from "./format";
+import { fishCountLabel, formatCatchDay, formatClock, formatDay, formatTimeOfDay, messageText, noteText, outingName, toLocalInput } from "./format";
 import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
@@ -410,7 +410,7 @@ function CatchForm() {
     () =>
       spotTrips.map((trip) => (
         <option key={trip.id} value={trip.id}>
-          {formatDay(trip.date)} · {trip.title}
+          {formatDay(trip.date)} · {outingName(trip)}
         </option>
       )),
     [spotTrips, lang],
@@ -1246,12 +1246,12 @@ function CatchView() {
       <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
-          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{trip.title}</Link>
+          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip)}</Link>
           {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
-          {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{looseTrip.title}</Link>{" "}
+          {t("An outing on this water that day:")} <Link to={`/trips/${looseTrip.id}`}>{outingName(looseTrip)}</Link>{" "}
           <button
             type="button"
             className="text-button"

@@ -82,7 +82,7 @@ export function WaterTipsBox({
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
   // Against the reading before it: a change too small to show as a whole degree says nothing.
-  const before = on ? readingBefore(catches, tips.lastTemp) : null;
+  const before = on && tips.lastTemp ? readingBefore(catches, tips.lastTemp, (fahrenheit) => tempText(fahrenheit) !== tempText(tips.lastTemp!.fahrenheit)) : null;
   const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
   const trend =
     before && tips.lastTemp && beforeText !== lastText

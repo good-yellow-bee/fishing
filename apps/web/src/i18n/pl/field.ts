@@ -211,8 +211,8 @@ export const PL_FIELD: PlBook = {
   "best {size}": "najlepsza {size}",
   "Best water temperature: {temp}": "Najlepsza temperatura wody: {temp}",
   "Last water temperature noted: {temp} on {day}.": "Ostatnia zapisana temperatura wody: {temp}, {day}.",
-  "Warming from {temp} on {day}.": "Cieplej niż {temp} ({day}).",
-  "Cooling from {temp} on {day}.": "Chłodniej niż {temp} ({day}).",
+  "Warming from {temp} on {day}.": "Woda się ociepla (było {temp}, {day}).",
+  "Cooling from {temp} on {day}.": "Woda się ochładza (było {temp}, {day}).",
   "Best season: {season}": "Najlepsza pora roku: {season}",
   "{n} fish from this water that day are not on this outing.": [
     "{n} ryba z tego łowiska z tego dnia nie jest w tej wyprawie.",
@@ -384,8 +384,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12”, “photo”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12”), słowa „zdjęcie” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), słowa „zdjęcie”, „rekord” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
