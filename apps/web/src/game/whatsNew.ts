@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzt";
+export const NEWS_ID = "2026-10-17zzzu";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a breezy day the chop on the water makes the fish bolder, so any lure but a topwater draws a bite sooner.",
   "In fog the shy fish can't see you and come in close, so even a short cast can draw more than the small fish.",
   "At dawn and dusk a school feeds hard in the low light, so it stays for three casts instead of two.",
   "In rain the patter on the water covers a lost fish's splash, so the bank doesn't spook and the next bite isn't slower.",

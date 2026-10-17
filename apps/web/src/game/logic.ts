@@ -209,6 +209,14 @@ export function topwaterWaitMul(topwater: boolean, wind: string | undefined) {
   return topwater && (wind === "calm" || wind === "strong") ? TOPWATER_WAIT[wind] : 1;
 }
 
+/** A breeze chops the surface, and under the broken light the fish feed bolder, so any lure but a topwater draws the bite sooner. */
+export const CHOP_WAIT = 0.9;
+
+/** How a breezy day stretches the wait under the surface: sooner on a breezy day for any lure but a topwater, else 1. */
+export function chopWaitMul(topwater: boolean, wind: string | undefined) {
+  return wind === "breezy" && !topwater ? CHOP_WAIT : 1;
+}
+
 /** A spinner or spoon flashes in sunlight, so on a clear day a fish sees it from farther and the bite comes sooner. */
 export const FLASH_SUN_WAIT = 0.85;
 
