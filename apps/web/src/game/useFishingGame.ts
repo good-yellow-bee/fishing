@@ -287,7 +287,7 @@ export function useFishingGame(
   const yankRef = useRef<{ dueAt: number; take: () => void } | null>(null);
   // The yank just made, so a camera pinch whose first finger looked like a strike can take it back.
   const yankedRef = useRef<{ dueAt: number; take: () => void; at: number } | null>(null);
-  const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" } | null>(null);
+  const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip" } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
   const castSnagRef = useRef<SnagCover | null>(null);
@@ -675,8 +675,8 @@ export function useFishingGame(
         timers.current.shown = whenShown(takeBait);
       };
       timers.current.wait = window.setTimeout(bringOn, wait);
-      // A sitting topwater can be popped, a jig on the bottom hopped and a spoon lifted, to draw the fish sooner.
-      const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : null;
+      // A sitting topwater can be popped, a jig on the bottom hopped, a spoon lifted and a streamer stripped, to draw the fish sooner.
+      const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : isStreamer(lureRef?.current) ? "strip" : null;
       popRef.current = work ? { dueAt: performance.now() + wait, take: bringOn, pops: 0, work } : null;
       // A beginner's easy fish never backs off.
       yankRef.current = carriesBait(lureRef?.current) && !mercyNow ? { dueAt: performance.now() + wait, take: bringOn } : null;
@@ -792,9 +792,9 @@ export function useFishingGame(
         const snag = snagRef.current;
         const pop = popRef.current;
         if (!snag && pop) {
-          // Popping a topwater, hopping a jig or lifting a spoon draws the fish sooner, but only the first few times; then it wants to sit.
+          // Popping a topwater, hopping a jig, lifting a spoon or stripping a streamer draws the fish sooner, but only the first few times; then it wants to sit.
           if (pop.pops >= TOPWATER_POPS) {
-            setHint(pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : t("Let it sit between pops."));
+            setHint(pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : pop.work === "strip" ? t("Let it hang between strips.") : t("Let it sit between pops."));
             break;
           }
           pop.pops += 1;
@@ -808,6 +808,9 @@ export function useFishingGame(
           } else if (pop.work === "lift") {
             fx.reel();
             setHint(t("Lift! The spoon flashes and flutters back down. Let it fall…"));
+          } else if (pop.work === "strip") {
+            fx.reel();
+            setHint(t("Strip! The streamer darts off like a fleeing fish. Let it hang…"));
           } else {
             fx.plop();
             setHint(t("Pop! The lure spits and gurgles. Let it sit…"));
