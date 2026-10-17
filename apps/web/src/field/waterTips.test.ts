@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { packingTips, speciesLures, waterSpecies, waterTips } from "./waterTips";
+import { packingTips, speciesLures, tempThroughYear, waterSpecies, waterTips } from "./waterTips";
 
 describe("water tips", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -98,5 +98,25 @@ describe("catch form picks", () => {
     expect(speciesLures(here, " brook TROUT")).toEqual(["Pheasant tail", "Elk hair caddis"]);
     expect(speciesLures(here, "Northern pike")).toEqual([]);
     expect(speciesLures(here, "")).toEqual([]);
+  });
+});
+
+describe("tempThroughYear", () => {
+  const book = sampleLogbook(new Date(2026, 9, 1));
+  const at = (id: string, temp: number, iso: string) => ({ ...book.catches[0]!, id, caughtAt: new Date(iso).toISOString(), weather: { sky: "clear" as const, wind: "calm" as const, waterTempF: temp } });
+
+  it("gives the last reading of each month of the newest year, in order", () => {
+    const readings = tempThroughYear([
+      at("a", 48, "2026-04-02T09:00:00"),
+      at("b", 52, "2026-04-20T09:00:00"),
+      at("c", 64, "2026-06-03T09:00:00"),
+      at("d", 58, "2026-09-09T09:00:00"),
+      at("e", 70, "2025-07-01T09:00:00"),
+    ]);
+    expect(readings.map((reading) => reading.fahrenheit)).toEqual([52, 64, 58]);
+  });
+
+  it("stays empty with readings in one month only", () => {
+    expect(tempThroughYear([at("a", 48, "2026-04-02T09:00:00"), at("c", 64, "2026-04-23T09:00:00")])).toEqual([]);
   });
 });
