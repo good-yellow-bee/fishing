@@ -1567,3 +1567,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR353~~ | ~~Review round 28 fixes: print map links, small record steps, Cancel keeps list, table labels, lure tie, Polish tackle~~ (#747) | field | S |
 | ~~BR355~~ | ~~News 2026-10-17p for #734-#747 (re-ship after conflict)~~ (#749) | field | S |
 | ~~BR356~~ | ~~Day calendar roving tabindex with arrow keys~~ (#751) | field | S |
+| ~~BR357~~ | ~~Round 12 bugs: Polish phone header one row, untitled outings named from water, map edge labels~~ (#754) | field | S |
