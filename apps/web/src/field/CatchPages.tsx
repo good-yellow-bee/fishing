@@ -1427,7 +1427,7 @@ function CatchView() {
             {t("Add this fish to it")}
           </button>
         </p>
-      ) : (
+      ) : entry.spotId === PLAY_LAKE_ID ? null : (
         // No outing that day on this water: one can be made around the fish, so its day gets the outing's counts and pace.
         <p className="trip-link">
           <Link to={`/trips/new?${new URLSearchParams({ spot: entry.spotId, date: localDate(new Date(entry.caughtAt)), loose: "1" }).toString()}`}>

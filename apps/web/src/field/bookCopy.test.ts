@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, isSampleOnly, ownCatches, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
+import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, isSampleOnly, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
 
 describe("remind to download a copy of the book", () => {
   it("stays quiet until the book has some of the player's own catches", () => {
@@ -56,6 +56,11 @@ describe("remind to download a copy of the book", () => {
 });
 
 describe("a book that is still only the sample", () => {
+  it("knows the sample week's outings", () => {
+    expect(isSampleTrip(sampleLogbook(new Date()).trips[0]!.id)).toBe(true);
+    expect(isSampleTrip("trip-my-own-zz")).toBe(false);
+  });
+
   it("is the sample until the player's own water or fish arrives", () => {
     const sample = sampleLogbook(new Date(2026, 9, 15));
     expect(isSampleOnly(sample)).toBe(true);

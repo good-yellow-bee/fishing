@@ -9,7 +9,7 @@ import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
 import { useLogbook } from "./LogbookState";
 import { intoMergedWaters, readMergedWaters } from "./waterMerge";
-import { forgetDeletedFish, readDeletedFish } from "./deletedFish";
+import { forgetDeletedFish, readDeletedFish, restoreDeletedFish } from "./deletedFish";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
 import { t, useT } from "../i18n";
@@ -84,6 +84,11 @@ export function BookFile() {
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
+  // An undo elsewhere (the sample week taken back) can put the copy record back: read it again with the book.
+  useEffect(() => {
+    setCopiedAt(readCopiedAt());
+    setCopyMark(readCopyMark());
+  }, [storedBook]);
   useEffect(() => {
     if (copiedAt === null || copiedAt <= own) return;
     lowerCopiedAt(own);
@@ -98,7 +103,7 @@ export function BookFile() {
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
   // What a loaded file replaced, while nothing has changed since: the load can be taken back.
-  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals } | null>(null);
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals; deleted: string[] } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
@@ -178,7 +183,7 @@ export function BookFile() {
     }
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
     const goalsHere = readYearGoals();
-    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere });
+    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()] });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
@@ -237,6 +242,8 @@ export function BookFile() {
     writeYearGoals(beforeLoad.goals);
     // The copy record as it was, its time and fingerprint included.
     restoreCopyRecord(beforeLoad.copyRecord);
+    // The fish deleted before the load are kept out of later merges again.
+    restoreDeletedFish(beforeLoad.deleted);
     setCopiedAt(beforeLoad.copiedAt);
     setCopyMark(readCopyMark());
     setBeforeLoad(null);

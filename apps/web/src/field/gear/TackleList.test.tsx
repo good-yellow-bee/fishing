@@ -1,8 +1,7 @@
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { localDate, sampleLogbook, shiftDate } from "@stillwater/shared";
-import { formatDay } from "../format";
+import { sampleLogbook, shiftDate } from "@stillwater/shared";
 import { TackleList } from "./TackleList";
 import { TackleProvider } from "./TackleState";
 
@@ -69,7 +68,7 @@ describe("tackle list", () => {
     expect(page.querySelector(".tackle-suggest")).toBeNull();
   });
 
-  it("offers an empty list the bag of the last outing on or before its day", () => {
+  it("doesn't offer an own outing the sample week's made-up bag", () => {
     const now = new Date();
     const trips = [...sampleLogbook(now).trips, { ...sampleLogbook(now).trips[0]!, id: "trip-new", date: shiftDate(now, 1), title: "Tomorrow" }];
     const page = JSDOM.fragment(
@@ -80,6 +79,6 @@ describe("tackle list", () => {
         </TackleProvider>,
       ),
     );
-    expect([...page.querySelectorAll(".empty button")].map((button) => button.textContent)).toEqual([`Copy the list from Dawn patrol, ${formatDay(localDate(now))}`]);
+    expect([...page.querySelectorAll(".empty button")].map((button) => button.textContent)).toEqual([]);
   });
 });

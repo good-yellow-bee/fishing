@@ -6,6 +6,7 @@ import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
 import { pieceKey } from "./pieceKey";
+import { isSampleTrip } from "../bookCopy";
 import "./gear.css";
 
 /**
@@ -16,7 +17,9 @@ export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleIte
   const listed = new Set(items.map((item) => item.tripId));
   const self = trips.find((trip) => trip.id === tripId);
   const day = self?.date ?? "9999-12-31";
-  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id)).sort((a, b) => b.date.localeCompare(a.date));
+  // The sample week's made-up bags only for one of its own outings.
+  const sample = isSampleTrip(tripId);
+  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleTrip(trip.id))).sort((a, b) => b.date.localeCompare(a.date));
   const pick = (from: readonly Trip[]) => from.find((trip) => trip.date <= day) ?? from[0] ?? null;
   return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
 }

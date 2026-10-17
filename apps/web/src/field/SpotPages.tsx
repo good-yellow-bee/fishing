@@ -310,7 +310,7 @@ export function SpotPage() {
         </p>
       ) : null}
       <BiggestHere catches={catches} spotId={spot.id} />
-      <PhotoStrip catches={catches} within={here} named />
+      <PhotoStrip catches={catches} within={here} named list={`water:${spot.id}`} />
       <FishCsv catches={catches} name={spot.name} />
       {catches.length > 1 ? (
         <>
