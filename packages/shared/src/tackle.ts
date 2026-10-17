@@ -101,9 +101,9 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?)\b/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?)\b/i;
 /** Line names end with the line word ("Steel leader"); "In-line spinner" does not. */
-const LINE = /\b(lines?|leaders?|tippets?)\s*$/i;
+const LINE = /\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$/i;
 
 /**
  * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.

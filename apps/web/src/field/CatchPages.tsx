@@ -95,10 +95,11 @@ function measureOfBest(entry: CatchEntry | null, kind: "length" | "weight"): str
 /** Common European fish the game's lake doesn't hold, so a Polish angler's okoń or sandacz is a known kind with its records. */
 export const FIELD_SPECIES = ["European perch", "Zander", "Common bream", "Roach", "Chub", "Tench", "Asp", "Wels catfish", "Crucian carp", "Rudd", "Ide", "Brown trout", "Grayling", "Barbel", "European eel"];
 
-const SPECIES = [...[...FISH].map((fish) => fish.name), ...FIELD_SPECIES];
+// Not the game's made-up ghost pike: this is a log of real water.
+const SPECIES = [...[...FISH].map((fish) => fish.name).filter((name) => name !== "Ghost pike"), ...FIELD_SPECIES];
 
-/** A fish name from the list above; its Polish line lives with the field log's. */
-const SPECIES_HINT = "European perch";
+/** The example fish: the reader's own perch, the yellow one in English and "Okoń" in Polish. */
+const speciesHint = (lang: string) => (lang === "pl" ? "European perch" : "Yellow perch");
 
 const BAITS = [
   "#5 Mepps",
@@ -741,7 +742,7 @@ function CatchForm() {
               onChange={(event) => setSpecies(event.target.value)}
               onFocus={() => setTypingSpecies(true)}
               onBlur={() => setTypingSpecies(false)}
-              placeholder={t(SPECIES_HINT)}
+              placeholder={t(speciesHint(lang))}
               autoComplete="off"
               required
             />
@@ -962,9 +963,11 @@ function CatchForm() {
           </div>
 
           <label>
-            {t("Time")}
+            {/* Named by this alone: the buttons beside the time keep their own names. */}
+            <span id="caught-at-label">{t("Time")}</span>
             <input
               name="caughtAt"
+              aria-labelledby="caught-at-label"
               type="datetime-local"
               value={caughtAt}
               max={toLocalInput(new Date())}
@@ -1089,7 +1092,7 @@ function CatchForm() {
               inputMode="decimal"
               value={waterTemp}
               onChange={(event) => setWaterTemp(event.target.value)}
-              placeholder={units === "metric" ? "14" : "58"}
+              placeholder={t("e.g. {n}", { n: units === "metric" ? "14" : "58" })}
               aria-label={units === "metric" ? t("Water temperature in Celsius") : t("Water temperature in Fahrenheit")}
             />
           </label>
@@ -1121,13 +1124,14 @@ function CatchForm() {
                 aria-describedby="photo-limit"
                 onChange={onPhoto}
               />
-              <small className="field-hint" id="photo-limit">
-                {t(
-                  "One photo, kept in this browser with the catch. Large files are reduced. Anything still over {kb} KB is turned away so it cannot crowd out the book.",
-                  { kb: CATCH_PHOTO_MAX_BYTES / 1024 },
-                )}
-              </small>
             </label>
+            {/* Outside the label, so it is read once, as the field's description. */}
+            <small className="field-hint" id="photo-limit">
+              {t(
+                "One photo, kept in this browser with the catch. Large files are reduced. Anything still over {kb} KB is turned away so it cannot crowd out the book.",
+                { kb: CATCH_PHOTO_MAX_BYTES / 1024 },
+              )}
+            </small>
             {photo ? <img className="catch-photo-preview" src={photo} alt={t("Selected catch photo")} /> : null}
             {photo ? (
               <button

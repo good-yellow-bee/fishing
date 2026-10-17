@@ -730,4 +730,5 @@ export const PL_FIELD: PlBook = {
   Grayling: "Lipień",
   Barbel: "Brzana",
   "European eel": "Węgorz",
+  "e.g. {n}": "np. {n}",
 };
