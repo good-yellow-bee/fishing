@@ -30,7 +30,7 @@ import { t, useLang } from "../i18n";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
-import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bringBackClearedCopy, withoutSample } from "./bookCopy";
@@ -82,6 +82,12 @@ type LogbookApi = {
 
 export type DeletedKind = "catch" | "spot" | "trip" | "sample" | "blank" | "unsample" | "rename" | "merge" | "file";
 
+/** The photos for this book's fish, and for the set-aside book's while it is kept: those can't be taken again. */
+function photosKept(book: { catches: { id: string }[] }, photos: CatchPhotoMap): CatchPhotoMap {
+  const aside = setAsideCatchIds();
+  return photosForBook(aside.length > 0 ? { catches: [...book.catches, ...aside.map((id) => ({ id }))] } : book, photos);
+}
+
 type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
@@ -105,7 +111,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     const storedPhotos = readStoredPhotos();
     if (startedUnreadable) return storedPhotos;
     const storedBook = readStoredLogbook() ?? { catches: [] };
-    const pruned = photosForBook(storedBook, storedPhotos);
+    const pruned = photosKept(storedBook, storedPhotos);
     if (pruned !== storedPhotos) {
       try {
         savePhotos(pruned);
@@ -131,7 +137,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
           setUndo(null);
         }
       }
-      if (event.key === PHOTO_STORAGE_KEY || event.key === null) setPhotos(readStoredPhotos());
+      if (event.key === PHOTO_STORAGE_KEY || event.key === null) {
+        setPhotos(readStoredPhotos());
+        // An undo would put back this tab's older photos over the other tab's.
+        setUndo(null);
+      }
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
@@ -180,7 +190,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
 
     // A full or blocked browser leaves the book as it was and says so in the bar, rather than the button doing nothing.
     const commit = (next: Logbook) => {
-      const result = persist(next, photosForBook(next, photos));
+      const result = persist(next, photosKept(next, photos));
       setSaveError(result.ok ? null : result.message);
       return result.ok;
     };
@@ -302,7 +312,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       photos,
       replaceBook: (nextBook, nextPhotos) => {
         setBook(nextBook);
-        setPhotos(photosForBook(nextBook, nextPhotos));
+        setPhotos(photosKept(nextBook, nextPhotos));
         setUndo(null);
       },
     };

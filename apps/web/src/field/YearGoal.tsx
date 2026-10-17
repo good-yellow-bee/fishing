@@ -26,11 +26,13 @@ export function readYearGoals(): YearGoals {
   }
 }
 
-export function writeYearGoals(goals: YearGoals) {
+/** False when storage refused it: a goal is only a nudge, so the book itself is untouched either way. */
+export function writeYearGoals(goals: YearGoals): boolean {
   try {
     localStorage.setItem(YEAR_GOAL_KEY, JSON.stringify(goals));
+    return true;
   } catch {
-    // A goal is only a nudge; the book itself is untouched.
+    return false;
   }
 }
 
@@ -38,11 +40,11 @@ export function readYearGoal(year: string): number | null {
   return readYearGoals()[year] ?? null;
 }
 
-function saveYearGoal(year: string, goal: number | null) {
+function saveYearGoal(year: string, goal: number | null): boolean {
   const next = { ...readYearGoals() };
   if (goal === null) delete next[year];
   else next[year] = goal;
-  writeYearGoals(next);
+  return writeYearGoals(next);
 }
 
 /**
@@ -69,7 +71,17 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
+  // A goal taken off that storage wouldn't let go of: it is still there on the next visit, and says so.
+  const [unsaved, setUnsaved] = useState(false);
   const errorId = useId();
+  // Set or taken off in another tab: shown here too, rather than this tab's older goal.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === YEAR_GOAL_KEY || event.key === null) setGoal(readYearGoal(year));
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [year]);
   // The form and the buttons take each other's place, so focus is handed back to the goal's own button.
   const back = useRef<HTMLButtonElement>(null);
   const [refocus, setRefocus] = useState(false);
@@ -92,7 +104,11 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
       setError(t("Give the goal as a whole number of fish, from 1 to 10000."));
       return;
     }
-    saveYearGoal(year, value);
+    if (!saveYearGoal(year, value)) {
+      setError(t("The goal could not be saved in this browser."));
+      return;
+    }
+    setUnsaved(false);
     setGoal(value);
     setError("");
     close();
@@ -139,6 +155,12 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
         <button ref={back} type="button" className="text-button" onClick={open}>
           {t("Set a goal for {year}", { year })}
         </button>
+        {unsaved ? (
+          <span className="field-error" role="alert">
+            {" "}
+            {t("The goal could not be removed in this browser, so it comes back next time.")}
+          </span>
+        ) : null}
       </p>
     );
   }
@@ -154,7 +176,7 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
           type="button"
           className="text-button"
           onClick={() => {
-            saveYearGoal(year, null);
+            setUnsaved(!saveYearGoal(year, null));
             setGoal(null);
             setRefocus(true);
           }}

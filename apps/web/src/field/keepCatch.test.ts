@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "./keepCatch";
-import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
 import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, CATCH_PHOTO_STORE_MAX_CHARS, sampleLogbook } from "@stillwater/shared";
 
 function memoryStorage() {
@@ -193,5 +193,26 @@ describe("a stored book that can't be read", () => {
     localStorage.setItem(LOGBOOK_STORAGE_KEY, "[]");
     readStoredLogbook();
     expect(localStorage.getItem(UNREADABLE_BOOK_KEY)).toBe("{not json");
+  });
+});
+
+describe("a stored book with one bad fish", () => {
+  beforeEach(() => {
+    vi.stubGlobal("localStorage", memoryStorage());
+  });
+
+  it("keeps the rest, sets the whole aside, and its fish keep their photo ids", () => {
+    const sample = sampleLogbook(new Date(2026, 9, 10));
+    const good = sample.catches[0]!;
+    const broken = JSON.stringify({ ...sample, catches: [good, { id: "bad", pounds: "lots" }] });
+    localStorage.setItem(LOGBOOK_STORAGE_KEY, broken);
+    const book = readStoredLogbook();
+    expect(book?.catches.map((entry) => entry.id)).toEqual([good.id]);
+    expect(book?.spots).toHaveLength(sample.spots.length);
+    expect(localStorage.getItem(UNREADABLE_BOOK_KEY)).toBe(broken);
+    // Stored in place, so the game adds a landed fish to the kept fish rather than starting over.
+    saveLandedCatch(landed);
+    expect(readStoredLogbook()?.catches.map((entry) => entry.id)).toContain(good.id);
+    expect(setAsideCatchIds()).toEqual([good.id, "bad"]);
   });
 });
