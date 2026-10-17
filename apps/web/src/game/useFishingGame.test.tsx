@@ -56,7 +56,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FOLLOW_MS, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
+import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -443,6 +443,17 @@ describe("useFishingGame strike timing", () => {
     [undefined, false],
   ] as const)("says whether %s is live bait", (lure, live) => {
     expect(isLiveBait(lure)).toBe(live);
+  });
+
+  it.each([
+    ["Inline spinner", true],
+    ["Kastmaster spoon", true],
+    ["Shallow crankbait", true],
+    ["Green pumpkin tube", false],
+    ["Nightcrawler", false],
+    [undefined, false],
+  ] as const)("says whether %s hangs treble hooks", (lure, trebles) => {
+    expect(hasTrebles(lure)).toBe(trebles);
   });
 
   it("tells the snag roll which lure was cast", () => {

@@ -89,6 +89,8 @@ export const TEAR_SEC = 0.8;
 /** A crappie's "paper mouth" is softer still: it tears out of it sooner, before the line would snap. */
 export const PAPER_MOUTHS: ReadonlySet<string> = new Set(["crappie"]);
 export const PAPER_TEAR_SEC = 0.45;
+/** A treble hook holds in three places, so a soft mouth or a light hook takes this much longer in the red to tear free. */
+export const TREBLE_HOLD = 1.5;
 /** Pound for pound a smallmouth bass fights hardest: it tires this much slower than its size says. */
 export const SCRAPPERS: ReadonlySet<string> = new Set(["smallmouth-bass"]);
 export const SCRAPPER_TIRE = 0.8;
@@ -308,6 +310,8 @@ export function makeFight(
   wind?: FightWind,
   /** Hooked on a topwater lure: a jumper is already at the top, so its first run is a leap. */
   topwater = false,
+  /** Hooked on a lure with treble hooks (a spinner, spoon or crankbait): a tearing hook holds longer. */
+  trebles = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -365,7 +369,7 @@ export function makeFight(
   let sulkUntil = -Infinity;
   let slackSec = 0;
   const softMouth = SOFT_MOUTHS.has(species.id);
-  const tearAt = PAPER_MOUTHS.has(species.id) ? PAPER_TEAR_SEC : TEAR_SEC;
+  const tearAt = (PAPER_MOUTHS.has(species.id) ? PAPER_TEAR_SEC : TEAR_SEC) * (trebles ? TREBLE_HOLD : 1);
   let tearSec = 0;
   let weedUntil = -Infinity;
   let wrapUntil = -Infinity;

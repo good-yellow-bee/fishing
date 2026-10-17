@@ -187,6 +187,13 @@ export function isTopwater(lure: string | undefined) {
   return lure !== undefined && lureClass(lure).id === "popper";
 }
 
+/** Whether the lure hangs treble hooks (a spinner, spoon or crankbait), which hold a tearing hook longer. */
+export function hasTrebles(lure: string | undefined) {
+  if (lure === undefined || !lure.trim()) return false;
+  const kind = lureClass(lure).id;
+  return kind === "spinner" || kind === "spoon" || kind === "crank";
+}
+
 /** How many pops of a sitting topwater lure draw the fish up sooner. */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
@@ -400,7 +407,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), water, windy, isTopwater(lureRef?.current));
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current));
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
