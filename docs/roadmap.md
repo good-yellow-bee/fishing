@@ -1657,3 +1657,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR401~~ | ~~Blank spell now, not yet back, water range, lure at a water, big search~~ (#841) | field | S |
 | ~~BR402~~ | ~~Lure's biggest fish, loose search word~~ (#842) | field | S |
 | ~~BR403~~ | ~~Round 19 news card~~ (#843) | field | S |
+| ~~BR404~~ | ~~Round 20 fixes~~ (#844) | field | S |
