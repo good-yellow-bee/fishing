@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17-game07";
+export const NEWS_ID = "2026-10-17-game08";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A smallmouth bass or rainbow trout hooked at the Inlet turns its side to the current and tires slower, a tiger muskie hooked in fall has fed hard for winter and fights at full strength, and in rain a catfish hunts by smell in the murky water and fights longer.",
   "A walleye hooked at dawn or dusk hunts hardest in the low light and tires slower, and a sturgeon hooked at the Inlet in spring is on its spawning run and fights longer. In winter a landed perch leaves a big school that stays a cast longer.",
   "A catch page says when a fish was the first of its kind at that water and how many of its kind came that year. A water page shows a blank spell running there, Bests names the waters new this year, and Photos can show one kind at a time. After a “loose” search, one tap files those fish on their outings, and untitled outings go by their water's name everywhere.",
   "A burbot hooked in winter thrives in the cold and keeps its strength, and a pike or walleye in spring is worn from spawning and tires sooner. With spring's melt or in rain the swollen Inlet pulls harder on a slack line.",
