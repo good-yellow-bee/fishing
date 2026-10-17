@@ -26,7 +26,7 @@ import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { upcomingOwnTrips } from "../playLake";
+import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "../playLake";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -76,7 +76,7 @@ function LureRecord({ today }: { today: string }) {
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
-            {row.lure ? <Link to={findLink(exactTerm("lure", t(row.lure)))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {row.lure ? <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(row.lure)), book.catches))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
@@ -143,7 +143,8 @@ function LureTwins() {
   // Either way round: the pair stays apart when the other spelling later takes more fish.
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
-  const twins = nearTwinLures(lureTally(storedBook, Number.MAX_SAFE_INTEGER), (from, into) =>
+  // The angler's own spellings: the game's lure names are its own and not slips to merge.
+  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(offPlayLake) }, Number.MAX_SAFE_INTEGER), (from, into) =>
     // The plain "from|into" key, either way round as the counts may have flipped, is how the first build kept a pair apart.
     [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`, `${into.toLowerCase()}|${from.toLowerCase()}`].some((key) => kept.includes(key)),
   ).filter(
@@ -264,7 +265,8 @@ export function GearPage() {
   }
 
   const upcoming = upcomingOwnTrips(book, today);
-  const recent = recentTrips(book, today);
+  // Real days out: a game day has nothing in the bag.
+  const recent = recentTrips(book, today).filter(offPlayLake);
   const fishByTrip = fishCountsByTrip(book);
 
   return (
