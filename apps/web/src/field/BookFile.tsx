@@ -203,12 +203,14 @@ export function BookFile() {
       tone: "loaded",
       text: merged
         ? [
-            // Just the waters and outings, when the file brought no fish.
-            ...(next.book.catches.length > here.book.catches.length || next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length
+            // Just the waters and outings, or the photos, when the file brought no fish.
+            ...(next.book.catches.length > here.book.catches.length ||
+            (next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length && Object.keys(next.photos).length === Object.keys(here.photos).length)
               ? [t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })]
               : []),
             ...(next.book.spots.length > here.book.spots.length ? [t("Waters added: {count}.", { count: next.book.spots.length - here.book.spots.length })] : []),
             ...(next.book.trips.length > here.book.trips.length ? [t("Outings added: {count}.", { count: next.book.trips.length - here.book.trips.length })] : []),
+            ...(Object.keys(next.photos).length > Object.keys(here.photos).length ? [t("Photos added: {count}.", { count: Object.keys(next.photos).length - Object.keys(here.photos).length })] : []),
             ...(leftOut > 0 ? [t("Photos left out, so the book still fits this browser: {count}.", { count: leftOut })] : []),
           ].join(" ")
         : t("This browser now has the book from that file."),
@@ -257,6 +259,8 @@ export function BookFile() {
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
   const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
+  // Photos the file has for fish both books share and this one has none for: taken on the other phone after a swap.
+  const photosOnly = pending && storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined).length : 0;
 
   return (
     <footer className="sheet-foot">
@@ -374,6 +378,8 @@ export function BookFile() {
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
             {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
             {kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
+            {/* The same file again: nothing to add, so Replace (which can lose fish) isn't the only way out that reads like one. */}
+            {storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 && photosOnly === 0 && kept === 0 ? ` ${t("Nothing in this file is new to this book.")}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
@@ -386,6 +392,10 @@ export function BookFile() {
           ) : placesOnly > 0 ? (
             <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add the new waters and outings ({count})", { count: placesOnly })}
+            </button>
+          ) : photosOnly > 0 ? (
+            <button type="button" className="text-button" onClick={() => onAddNew()}>
+              {t("Add the new photos ({count})", { count: photosOnly })}
             </button>
           ) : null}
           {kept > 0 && storedBook.catches.length > 0 ? (

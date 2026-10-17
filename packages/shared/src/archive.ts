@@ -103,11 +103,27 @@ function sizesReadable(book: Logbook): boolean {
   return book.catches.every((entry) => sizeReadable(entry.measure) && (entry.alsoMeasure === undefined || sizeReadable(entry.alsoMeasure)));
 }
 
-function cleanBook(book: Logbook): Logbook {
+/** The first of each id, so a hand-edited file that repeats one can't put the same fish (or water, or outing) in twice. */
+function firstOfEach<T extends { id: string }>(rows: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return rows.filter((row) => !seen.has(row.id) && Boolean(seen.add(row.id)));
+}
+
+/**
+ * The book as the file holds it, read the way this app writes one. Null when a fish or outing is on a water the file
+ * doesn't have: the counts on every page would stop agreeing. A fish's outing that isn't in the file is dropped.
+ */
+function cleanBook(book: Logbook): Logbook | null {
+  const spots = firstOfEach(book.spots);
+  const spotIds = new Set(spots.map((spot) => spot.id));
+  const trips = firstOfEach(book.trips);
+  const catches = firstOfEach(book.catches);
+  if (!trips.every((trip) => spotIds.has(trip.spotId)) || !catches.every((entry) => spotIds.has(entry.spotId))) return null;
+  const tripIds = new Set(trips.map((trip) => trip.id));
   return {
-    spots: book.spots.map(cleanSpot),
-    trips: book.trips.map((trip) => cleanTrip(trip, book.spots)),
-    catches: book.catches.map(cleanCatch),
+    spots: spots.map(cleanSpot),
+    trips: trips.map((trip) => cleanTrip(trip, spots)),
+    catches: catches.map((entry) => cleanCatch(entry.tripId && !tripIds.has(entry.tripId) ? { ...entry, tripId: null } : entry)),
   };
 }
 
@@ -125,8 +141,9 @@ function readPhotos(value: unknown, book: Logbook): { ok: true; photos: CatchPho
   const ids = new Set(book.catches.map((entry) => entry.id));
   const photos: CatchPhotoMap = {};
   for (const [id, photo] of Object.entries(value)) {
-    if (!ids.has(id) || !isCatchPhoto(photo)) return { ok: false, tooLarge: false };
-    photos[id] = photo;
+    if (!isCatchPhoto(photo)) return { ok: false, tooLarge: false };
+    // A photo whose fish was taken out of the file by hand goes with it, rather than the whole file.
+    if (ids.has(id)) photos[id] = photo;
   }
   if (JSON.stringify(photos).length > CATCH_PHOTO_STORE_MAX_CHARS) return { ok: false, tooLarge: true };
   return { ok: true, photos };
@@ -154,6 +171,7 @@ export function newFishIn(here: Logbook, file: Logbook): CatchEntry[] {
  * a water or outing deleted here comes back only when a new fish needs it.
  * Given `deletedHere`, the ids deleted in this book, the file's other waters and outings come along too (a water added
  * or an outing planned on another device), unless deleted here; without it, only what the new fish need.
+ * A photo for a fish both books have joins when this book has none for it.
  * The file's photos join only while they fit the room kept for photos, so the book can still be downloaded and loaded again.
  */
 export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, deletedHere?: ReadonlySet<string>): FieldArchive {
@@ -168,7 +186,10 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, delete
   const newTrips = new Set(trips.map((trip) => trip.id));
   const photos = { ...here.photos };
   let size = JSON.stringify(photos).length;
-  for (const entry of added) {
+  // The new fish's photos, then a photo the file has for a fish both books share and this one has none for (taken on
+  // the other phone after the fish was swapped over).
+  const shared = here.book.catches.filter((entry) => here.photos[entry.id] === undefined && file.photos[entry.id] !== undefined);
+  for (const entry of [...added, ...shared]) {
     const photo = file.photos[entry.id];
     if (photo === undefined) continue;
     const grows = JSON.stringify(entry.id).length + JSON.stringify(photo).length + 2;
@@ -205,6 +226,7 @@ export function parseFieldArchive(value: unknown): FieldArchiveResult {
   if (!isLogbook(prepared) || !datesReadable(prepared) || !sizesReadable(prepared)) return refuse();
   if (!isTackleBox(value.tackle)) return refuse();
   const book = cleanBook(prepared);
+  if (!book) return refuse();
   const photos = readPhotos(value.photos, book);
   if (!photos.ok) return photos.tooLarge ? { ok: false, message: FIELD_ARCHIVE_TOO_LARGE } : refuse();
   return { ok: true, value: { book, tackle: cleanTackle(value.tackle.items), photos: photos.photos } };
