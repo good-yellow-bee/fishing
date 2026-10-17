@@ -411,6 +411,14 @@ export function floatReedWaitMul(lure: string | undefined, spot: string) {
   return spot === "reeds" && !!lure?.trim() && lureClass(lure).id === "bobber" ? FLOAT_REED_WAIT : 1;
 }
 
+/** A streamer stripped back up the drop-off's edge darts like a fleeing baitfish past the trout holding deep, so the bite comes sooner. */
+export const STREAMER_LEDGE_WAIT = 0.85;
+
+/** How the bank stretches the wait on a streamer: sooner off the drop-off, else 1. */
+export function streamerLedgeWaitMul(lure: string | undefined, spot: string) {
+  return spot === "dropoff" && !!lure?.trim() && lureClass(lure).id === "streamer" ? STREAMER_LEDGE_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
