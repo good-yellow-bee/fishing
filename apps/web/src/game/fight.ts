@@ -306,6 +306,8 @@ export function makeFight(
   water: FightWater = "open",
   /** A breezy or strong day: slack line drifts out faster between runs. */
   wind?: FightWind,
+  /** Hooked on a topwater lure: a jumper is already at the top, so its first run is a leap. */
+  topwater = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -383,7 +385,8 @@ export function makeFight(
     if (nowMs >= nextAt) {
       if (sim.surge === 0) {
         sim.surge = 1;
-        sim.jump = (leaper && completedSurges % 2 === 1) || (breacher && completedSurges === 0);
+        // A jumper hooked at the top leaps on its first run and every second one after; otherwise on its second.
+        sim.jump = (leaper && completedSurges % 2 === (topwater ? 0 : 1)) || (breacher && completedSurges === 0);
         // A pike that sees the net rolls on the line rather than running.
         sim.roll = roller && sim.lastRun === true && !sim.jump;
         // A carp's or a salmon's first run is the long one.

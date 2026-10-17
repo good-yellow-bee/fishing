@@ -490,8 +490,8 @@ describe("turning runs", () => {
 
 describe("leaps", () => {
   /** Steps a fight with a fixed hand, recording each run's kind as it starts. */
-  function runs(id: string, reeling: (sim: FightSim) => boolean, ms = 30_000) {
-    const runtime = makeFight(fish(id), fish(id).minWeight, 20, seeded(7));
+  function runs(id: string, reeling: (sim: FightSim) => boolean, ms = 30_000, topwater = false) {
+    const runtime = makeFight(fish(id), fish(id).minWeight, 20, seeded(7), 1, "open", undefined, topwater);
     const kinds: boolean[] = [];
     let before = 0;
     for (let now = 0; now < ms; now += 20) {
@@ -531,6 +531,14 @@ describe("leaps", () => {
     expect(trout.length).toBeGreaterThan(3);
     trout.forEach((leap, i) => expect(leap, `run ${i}`).toBe(i % 2 === 1));
     expect(runs("pike", () => false).kinds.some(Boolean)).toBe(false);
+  });
+
+  it("has a jumper hooked on a topwater lure leap on its first run and every second one after", () => {
+    const bass = runs("largemouth-bass", () => false, 30_000, true).kinds;
+    expect(bass.length).toBeGreaterThan(3);
+    bass.forEach((leap, i) => expect(leap, `run ${i}`).toBe(i % 2 === 0));
+    // A fish that never jumps stays down whatever it took.
+    expect(runs("pike", () => false, 30_000, true).kinds.some(Boolean)).toBe(false);
   });
 
   it("loads the rod into the red when the line is held through a leap, but bowing keeps it clean", () => {

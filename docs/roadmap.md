@@ -1199,7 +1199,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT154~~ | ~~A topwater lure is hit at the top: every fish takes it like an ambush (no nibbles), with its own call and the big strike splash~~ (#746) | game | S |
 | ~~GT155~~ | ~~A topwater lure bites sooner on a calm day (0.8x wait) and slower in a strong wind's chop (1.4x; a beginner is spared), and the cast hint says which~~ (#748) | game | S |
 | ~~GT156~~ | ~~A missed topwater blow-up comes back half the time: the lure sits, the fish hits once more (no nibble), and a landing then reads "On the second take"~~ (#750) | game | S |
-| GT157 | Pop a sitting topwater lure: a strike press before the bite pops it instead of striking too early, and each of the first two pops leaves 0.6 of the wait; a third says to let it sit | game | S |
+| ~~GT157~~ | ~~Pop a sitting topwater lure: a strike press before the bite pops it instead of striking too early, and each of the first two pops leaves 0.6 of the wait; a third says to let it sit~~ (#752) | game | S |
+| GT158 | A jumper (trout, bass, salmon) hooked on a topwater lure leaps on its first run and every second one after, instead of on its second | fight | S |
 
 ## Risks / open questions for the owner
 
