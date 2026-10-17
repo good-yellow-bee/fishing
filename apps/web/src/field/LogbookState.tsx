@@ -51,6 +51,8 @@ type LogbookApi = {
   deleteCatch: (id: string) => boolean;
   /** Files fish logged without an outing under one on their water. */
   fileCatches: (catchIds: readonly string[], tripId: string) => boolean;
+  /** Files each fish under its own outing (catch id to outing id), in one save. */
+  fileEach: (tripFor: ReadonlyMap<string, string>) => boolean;
   deleteSpot: (id: string) => boolean;
   deleteTrip: (id: string) => boolean;
   /** One more or one fewer lost fish or missed strike on an outing. */
@@ -265,6 +267,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       },
       deleteCatch: (id) => remove("catch", withoutCatch(book, id)),
       fileCatches: (catchIds, tripId) => commit(catchIds.reduce((next, id) => withCatchOnTrip(next, id, tripId), book)),
+      fileEach: (tripFor) => commit([...tripFor].reduce((next, [id, tripId]) => withCatchOnTrip(next, id, tripId), book)),
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       countOnTrip: (tripId, count, delta) => commit(withTripCount(book, tripId, count, delta)),

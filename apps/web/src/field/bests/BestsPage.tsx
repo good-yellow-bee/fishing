@@ -1,11 +1,11 @@
 import { Fragment } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink } from "../speciesLink";
-import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, tripById, type CatchEntry } from "@stillwater/shared";
+import { bestDay, biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, type Logbook, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { fishCountLabel, formatDay } from "../format";
+import { fishCountLabel, formatDay, outingNameById } from "../format";
 import { hookTally, hookText } from "../hookTally";
 import { useLogbook } from "../LogbookState";
 import { TallyBars } from "../TallyBars";
@@ -18,7 +18,7 @@ import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
-import { notYetThisYear } from "./notYet";
+import { newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
@@ -83,6 +83,7 @@ export function BestsPage() {
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
   const days = daysOut(whole, today.slice(0, 4), today);
   const notYet = notYetThisYear(whole.catches);
+  const newWaters = newWatersThisYear(whole.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const split = weekendSplit(whole.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
@@ -120,7 +121,7 @@ export function BestsPage() {
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
-  const titleOf = (tripId: string | null) => (tripId ? (tripById(book, tripId)?.title ?? null) : null);
+  const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   // A book with no fish and no outings yet: one line and the way to the first, not a page of empty tiles. Outings
   // alone still have their days on the water and calendar to show.
@@ -290,6 +291,20 @@ export function BestsPage() {
                     <Fragment key={name}>
                       {index > 0 ? ", " : null}
                       <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
+                    </Fragment>
+                  ))}
+                </span>
+              </p>
+            ) : null}
+            {/* Waters that gave their first fish this year: where the season went exploring. */}
+            {newWaters.length > 0 ? (
+              <p className="meta new-waters">
+                <span>
+                  {t("New waters this year:")}{" "}
+                  {newWaters.map((spot, index) => (
+                    <Fragment key={spot.id}>
+                      {index > 0 ? ", " : null}
+                      <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
                     </Fragment>
                   ))}
                 </span>

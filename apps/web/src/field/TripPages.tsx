@@ -605,7 +605,7 @@ function TripForm() {
               {lastHere ? (
                 <small className="field-hint">
                   {t("Last here: {title}, {day} · {fish}", {
-                    title: lastHere.title,
+                    title: outingName(lastHere, book.spots),
                     day: formatDay(lastHere.date),
                     fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
                   })}

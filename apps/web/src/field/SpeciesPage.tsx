@@ -5,7 +5,7 @@ import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
-import { fishCountLabel, formatCatchDay } from "./format";
+import { fishCountLabel, formatCatchDay, outingNameById } from "./format";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
@@ -91,7 +91,7 @@ export function SpeciesPage() {
   const { species = "" } = useParams();
   const catches = catchesOfSpecies(book, species);
   const name = catches[0]?.species ?? species;
-  const titleOf = (tripId: string | null) => (tripId ? (book.trips.find((trip) => trip.id === tripId)?.title ?? null) : null);
+  const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   if (catches.length === 0) {
     return (

@@ -17,3 +17,25 @@ export function notYetThisYear(catches: readonly CatchEntry[], today: Date = new
     .map(([, name]) => name)
     .sort((a, b) => a.localeCompare(b));
 }
+
+/**
+ * The waters whose first fish came this year, oldest first, once the book has fish from an earlier year: in a book
+ * begun this year every water is new and the line would say nothing.
+ */
+export function newWatersThisYear(catches: readonly CatchEntry[], today: Date = new Date()): string[] {
+  const year = today.getFullYear();
+  const first = new Map<string, string>();
+  let earlier = false;
+  for (const entry of countedFish(catches)) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime()) || at.getFullYear() > year) continue;
+    if (at.getFullYear() < year) earlier = true;
+    const held = first.get(entry.spotId);
+    if (!held || entry.caughtAt < held) first.set(entry.spotId, entry.caughtAt);
+  }
+  if (!earlier) return [];
+  return [...first.entries()]
+    .filter(([, at]) => new Date(at).getFullYear() === year)
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .map(([spotId]) => spotId);
+}
