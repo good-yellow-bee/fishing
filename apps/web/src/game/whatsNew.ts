@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17v";
+export const NEWS_ID = "2026-10-17w";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On live bait a late strike no longer hooks light: the fish has swallowed the worm, so it's hooked deep.",
   "Hop a jig down the drop-off's ledge, where the fish hold, and the bite comes sooner.",
   "A spinner or spoon flashes in the sun: under a clear sky from dawn to dusk, fish see it from farther and bite sooner.",
   "A golden shiner can only steal real bait now: on a spinner, spoon or other hard lure it nibbles but can't strip the hook.",
