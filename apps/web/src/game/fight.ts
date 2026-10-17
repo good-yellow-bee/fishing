@@ -359,6 +359,8 @@ export function makeFight(
   trebles = false,
   /** Winter's cold water: a jumper stays down and never leaps. */
   cold = false,
+  /** A trophy-sized fish: like a carp, its first run is the long one. */
+  trophy = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -396,7 +398,7 @@ export function makeFight(
   const tailWalker = TAIL_WALKERS.has(species.id);
   let walked = false;
   const roller = ROLLERS.has(species.id);
-  const longRunner = LONG_RUNNERS.has(species.id);
+  const longRunner = LONG_RUNNERS.has(species.id) || trophy;
   const coverDiver = COVER_DIVERS.has(species.id);
   const darter = DARTERS.has(species.id);
   const headShaker = HEAD_SHAKERS.has(species.id);

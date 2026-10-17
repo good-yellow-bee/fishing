@@ -321,7 +321,7 @@ describe("useFishingGame lost fight", () => {
     vi.mocked(castForGotAway).mockReturnValueOnce({ again: { spot: "dock", species: pike, weight: pike.maxWeight, casts: 1 }, next: null });
     step.mockReturnValueOnce("fighting");
     castAndFight(surface, 1);
-    expect(hint()).toMatch(/^It's the one that got away! It feels heavy — could be a trophy! /);
+    expect(hint()).toMatch(/^It's the one that got away! It feels heavy — could be a trophy! A fish this big makes a long first run\. /);
     expect(fx.lift).toHaveBeenCalled();
   });
 
