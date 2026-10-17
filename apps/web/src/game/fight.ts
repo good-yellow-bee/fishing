@@ -317,7 +317,7 @@ export function makeFight(
   wind?: FightWind,
   /** Hooked on a topwater lure: a jumper is already at the top, so its first run is a leap. */
   topwater = false,
-  /** Hooked on a lure with treble hooks (a spinner, spoon or crankbait): a tearing hook holds longer. */
+  /** Hooked on a lure with treble hooks (a spinner, spoon or crankbait), or deep on swallowed bait: a tearing hook holds longer. */
   trebles = false,
   /** Winter's cold water: a jumper stays down and never leaps. */
   cold = false,

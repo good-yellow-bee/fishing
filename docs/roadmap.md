@@ -1227,7 +1227,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT182~~ | ~~Winter sluggish: in winter's cold water a hooked fish tires 1.25x faster, and the hookset says so~~ (#795) | game | S |
 | ~~GT183~~ | ~~Short cast hints: when several lure and weather reasons speed a bite, the cast tells only the two latest, so the hint stays readable~~ (#797) | game | S |
 | ~~GT184~~ | ~~Moon flash: on a clear night under a full moon a spinner or spoon flashes like in the sun, so it waits 0.85x, and the cast says so~~ (#799) | game | S |
-| GT185 | No leaps in winter: in the cold water a jumper (trout, bass, salmon) stays down and never leaps, and the hookset says so | game | S |
+| ~~GT185~~ | ~~No leaps in winter: in the cold water a jumper (trout, bass, salmon) stays down and never leaps, and the hookset says so~~ (#801) | game | S |
+| GT186 | A deep hook holds: a fish hooked deep on swallowed live bait takes TREBLE_HOLD longer in the red to tear free, like a treble | game | S |
 
 ## Risks / open questions for the owner
 

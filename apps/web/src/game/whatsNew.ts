@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zzzzd";
+export const NEWS_ID = "2026-10-17zzzze";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A fish that swallowed live bait is hooked deep, so the hook holds longer in the red before it tears out of a soft mouth.",
   "In winter's cold water trout, bass and salmon stay down: they never leap in the fight.",
   "On a clear night under a full moon, a spinner or spoon flashes in the moonlight, so it draws a bite sooner.",
   "In winter the cold water makes a hooked fish sluggish, so it tires sooner in the fight.",
