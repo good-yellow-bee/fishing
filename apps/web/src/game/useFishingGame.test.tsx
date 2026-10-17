@@ -371,6 +371,19 @@ describe("useFishingGame lost fight", () => {
     expect(hint()?.includes("It's on its fall run and full of fight, so it tires slower.")).toBe(run);
   });
 
+  it.each([
+    ["spring", "largemouth-bass", true],
+    ["summer", "largemouth-bass", false],
+    ["spring", "pike", false],
+  ] as const)("says a fish hooked at the dock in %s (%s) is guarding its nest: %s", (season, id, nest) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, season);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === id)!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("It's guarding its nest, so it fights harder and tires slower.")).toBe(nest);
+  });
+
   it("says a lost trophy-sized fish looked like a trophy", () => {
     const surface = mount();
     const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
