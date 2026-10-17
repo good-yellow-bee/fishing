@@ -1636,3 +1636,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR386~~ | ~~Search leaders, weekend word, future-time check~~ (#814) | field | S |
 | ~~BR387~~ | ~~Water temp around a planned date, lure twins merge~~ (#818) | field | S |
 | ~~BR388~~ | ~~Catch milestones, typical size change~~ (#820) | field | S |
+| ~~BR389~~ | ~~News card for round 16~~ (#822) | field | S |
