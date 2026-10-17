@@ -277,6 +277,15 @@ export const NIGHT_HUNTER_TIRE = 0.85;
 export function nightTireMul(hour: string | undefined, speciesId: string) {
   return hour === "night" && NIGHT_HUNTERS.has(speciesId) ? NIGHT_HUNTER_TIRE : 1;
 }
+/** Early spawners: they spawn as the ice goes out and are worn from it through spring. */
+export const EARLY_SPAWNERS: ReadonlySet<string> = new Set(["pike", "walleye"]);
+/** In spring an early spawner, worn from spawning, tires this much faster on a run or against the reel. */
+export const SPAWN_SPENT_TIRE = 1.15;
+
+/** How spawning wears an early spawner: faster tiring in spring, else 1. */
+export function spentTireMul(season: string | undefined, speciesId: string) {
+  return season === "spring" && EARLY_SPAWNERS.has(speciesId) ? SPAWN_SPENT_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;
