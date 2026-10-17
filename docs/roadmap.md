@@ -1266,7 +1266,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT221~~ | ~~Spinner along the reeds: a spinner cast to the Trzciny flickers along the reed edge past the hunters in ambush, so the bite comes 0.85x sooner, and the wait hint says so~~ (#873) | bite | S |
 | ~~GT222~~ | ~~Float rig at the reeds: a float rig set at the Trzciny holds the bait still over the panfish in the stems, so the bite comes 0.85x sooner, and the wait hint says so; news card game11~~ (#875) | bite | S |
 | ~~GT223~~ | ~~Streamer off the drop-off: a streamer stripped up the Uskok darts like a fleeing baitfish past the trout holding deep, so the bite comes 0.85x sooner, and the wait hint says so~~ (#911) | bite | S |
-| GT224 | Worm in the inlet current: a worm cast to the Ujście tumbles downstream like food washed in from the stream, so the bite comes 0.85x sooner, and the wait hint says so | bite | S |
+| ~~GT224~~ | ~~Worm in the inlet current: a worm cast to the Ujście tumbles downstream like food washed in from the stream, so the bite comes 0.85x sooner, and the wait hint says so~~ (#912) | bite | S |
+| GT225 | Spinner in the inlet current: the Ujście current spins a spinner's blade hard even on a slow retrieve, so the bite comes 0.85x sooner, and the wait hint says so; news card game12 | bite | S |
 
 ## Risks / open questions for the owner
 
