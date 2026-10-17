@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
-import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { Link } from "react-router-dom";
+import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
@@ -80,7 +81,8 @@ export function BookFile() {
     setPending(null);
     loadButton.current?.focus();
   };
-  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string } | null>(null);
+  // `twins`: waters the file added under a name the book already had, each a tap from merging.
+  const [notice, setNotice] = useState<{ tone: "ok" | "bad" | "loaded"; text: string; twins?: { id: string; name: string }[] } | null>(null);
 
   const own = ownCatches(book);
   const [copiedAt, setCopiedAt] = useState(readCopiedAt);
@@ -199,8 +201,12 @@ export function BookFile() {
       setCopyMark(readCopyMark());
     }
     setPending(null);
+    const namesHere = new Set(here.book.spots.map((spot) => foldText(spot.name)));
+    const idsHere = new Set(here.book.spots.map((spot) => spot.id));
+    const twins = merged ? next.book.spots.filter((spot) => !idsHere.has(spot.id) && namesHere.has(foldText(spot.name))).map((spot) => ({ id: spot.id, name: spot.name })) : [];
     setNotice({
       tone: "loaded",
+      ...(twins.length > 0 ? { twins } : {}),
       text: merged
         ? [
             // Just the waters and outings, or the photos, when the file brought no fish.
@@ -414,6 +420,13 @@ export function BookFile() {
         {notice ? (
           <p className={notice.tone === "bad" ? "field-error" : "book-note"}>
             {messageText(notice.text)}
+            {/* Two phones that each added the same water: the file's copy opens on its merge box. */}
+            {notice.twins?.map((twin) => (
+              <span key={twin.id}>
+                {" "}
+                {t("{name} is now in the book twice.", { name: twin.name })} <Link to={`/spots/${twin.id}`}>{t("Merge them")}</Link>
+              </span>
+            ))}
             {notice.tone === "loaded" && canUndoLoad ? (
               <>
                 {" "}
