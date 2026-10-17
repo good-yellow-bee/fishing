@@ -580,8 +580,9 @@ function CatchForm() {
       return;
     }
     const draft: CatchDraft = {
-      // A name already in the book is kept as written there, so "rock bass" joins "Rock bass".
-      species: bookName(species, [...(existing ? [existing.species] : []), ...SPECIES, ...book.catches.map((entry) => entry.species)]),
+      // A name already in the book is kept as written there, so "rock bass" joins "Rock bass", and an "Okoń" logged
+      // before the list knew perch stays one kind with the next "Okoń", ahead of the list's "European perch".
+      species: bookName(species, [...(existing ? [existing.species] : []), ...book.catches.map((entry) => entry.species), ...SPECIES]),
       measureKind,
       amount: bookAmount(amount, measureKind),
       alsoAmount: bookAmount(alsoAmount, otherKind),

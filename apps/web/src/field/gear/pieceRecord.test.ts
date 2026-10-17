@@ -43,6 +43,15 @@ describe("pieceRecords", () => {
     expect(rows.map((row) => row.label)).toEqual(["Jig"]);
   });
 
+  it("keeps the sample's bags while the angler has only planned an outing or played a round", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const sample = book.trips.find((each) => book.catches.some((entry) => entry.tripId === each.id))!;
+    const items: TackleItem[] = [{ id: "a", tripId: sample.id, label: book.catches.find((entry) => entry.tripId === sample.id)!.lure, packed: true }];
+    const planned = { ...sample, id: "zq-plan", date: "2026-10-24" };
+    const game = { ...sample, id: "zq-game", spotId: "spot-stillwater", date: "2026-10-14" };
+    expect(pieceRecords({ ...book, trips: [...book.trips, planned, game] }, items, "2026-10-15")).toHaveLength(1);
+  });
+
   it("leaves out outings still to come", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const items: TackleItem[] = [{ id: "a", tripId: book.trips[0]!.id, label: "Spoon", packed: true }];

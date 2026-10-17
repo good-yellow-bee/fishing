@@ -6,7 +6,7 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { hasSampleLeft, isSampleOnly } from "./bookCopy";
+import { hasSampleLeft, isSampleOnly, isSampleTrip } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
@@ -104,7 +104,17 @@ export function HomePage() {
   // The angler's own: a round of the game fills none of these cards.
   const catches = recentCatches({ ...book, catches: book.catches.filter(offPlayLake) }, 4);
   // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
-  const lateOuting = now.getHours() < LATE_NIGHT_UNTIL ? book.trips.find((trip) => offPlayLake(trip) && trip.date === shiftDate(now, -1)) : undefined;
+  // Not when today has an outing of its own, nor yesterday's morning outing: only one still going, with no fish yet or
+  // one in the last twelve hours.
+  const todayOuting = book.trips.some((trip) => offPlayLake(trip) && trip.date === today);
+  const lateOuting =
+    now.getHours() < LATE_NIGHT_UNTIL && !todayOuting
+      ? book.trips.find((trip) => {
+          if (!offPlayLake(trip) || isSampleTrip(trip.id) || trip.date !== shiftDate(now, -1)) return false;
+          const fish = catchesForTrip(book, trip.id);
+          return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
+        })
+      : undefined;
   const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingOwnTrips(book, today)];
   // Just back from the water, not from a round of the game.
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
