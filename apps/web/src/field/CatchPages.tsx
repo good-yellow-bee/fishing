@@ -30,6 +30,7 @@ import {
   type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
+import { PhotoFull } from "./PhotoFull";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
 import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
@@ -858,6 +859,22 @@ function CatchForm() {
               }}
               required
             />
+            {/* Back to the present after logging an earlier fish, without picking it out by hand. */}
+            {!existing && Math.abs(Date.parse(caughtAt) - Date.now()) > 5 * 60_000 ? (
+              <button
+                type="button"
+                className="text-button time-now"
+                aria-label={t("Set the time to now")}
+                onClick={() => {
+                  const now = toLocalInput(new Date());
+                  setCaughtAt(now);
+                  if (!tripPicked) setTripId(tripForFish(book, spotId, now)?.id ?? "");
+                  setTimeTouched(true);
+                }}
+              >
+                {t("Now")}
+              </button>
+            ) : null}
             {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
           </label>
 
@@ -1141,9 +1158,7 @@ function CatchView() {
         ) : null}
       </EditDelete>
       {photo ? (
-        <figure className="catch-photo">
-          <img src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} />
-        </figure>
+        <PhotoFull src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} />
       ) : null}
       <aside className="conditions" aria-label={t("Conditions")}>
         {entry.weather ? (
