@@ -68,7 +68,7 @@ import { findWithLink } from "./findLinks";
 import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
-import { biggestSince, sizeRank } from "./sizeRank";
+import { biggestSince, forItsLength, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
 
@@ -235,6 +235,8 @@ function CatchForm() {
   useEffect(() => {
     if (!existing && Date.now() - anotherAt < 2000) amountInput.current?.focus({ preventScroll: true });
   }, []);
+  // Within a run of "Save and log another", Enter on a complete form keeps the run going; the Save button ends it.
+  const [inRun] = useState(() => !existing && Date.now() - anotherAt < 2000);
   const likely = !(typedAmount > 0) ? null : measureKind === "length" ? likelyWeight(pairs, typedAmount) : likelyLength(pairs, typedAmount);
   const pickMeasureKind = (kind: CatchDraft["measureKind"]) => {
     // Both typed: switching which is the main measure swaps them, so each number stays with its kind.
@@ -683,10 +685,18 @@ function CatchForm() {
         onSubmit={onSubmit}
         onKeyDown={(event) => {
           // Enter in the fish, size or lure with the form not yet complete goes on to the field still missing, as a
-          // phone's "next" key says; a complete form still saves on Enter.
+          // phone's "next" key says; a complete form still saves on Enter (and logs another, in a run of them).
           const field = event.target;
           if (event.key !== "Enter" || event.nativeEvent.isComposing || !(field instanceof HTMLInputElement)) return;
-          if (!["species", "amount", "lure"].includes(field.name) || event.currentTarget.checkValidity()) return;
+          if (!["species", "amount", "lure"].includes(field.name)) return;
+          if (event.currentTarget.checkValidity()) {
+            const another = inRun ? event.currentTarget.querySelector<HTMLButtonElement>("button[name=another]") : null;
+            if (another && !another.disabled) {
+              event.preventDefault();
+              event.currentTarget.requestSubmit(another);
+            }
+            return;
+          }
           // A field still missing comes first, even one above; else the one after.
           const missing = [...event.currentTarget.querySelectorAll<HTMLElement>("input:invalid, select:invalid, textarea:invalid")].find((each) => each !== field);
           const fields = [...event.currentTarget.querySelectorAll<HTMLElement>("input:not([type=hidden]), select, textarea")].filter((each) => !each.hasAttribute("disabled"));
@@ -1183,6 +1193,8 @@ function CatchView() {
   const rank = isCounted ? sizeRank(counted, entry) : null;
   // A game or sample fish among the angler's own has no place in their run of sizes.
   const since = badge || !isCounted ? null : biggestSince(counted, entry);
+  // Measured and weighed: a fat fish or a thin one, against the angler's own others of its kind.
+  const build = isCounted ? forItsLength(counted, entry) : null;
   // The others of its kind that round to the same size, through the one-size search.
   const sizeSearch = [exactTerm("species", t(entry.species)), sameSizeSearch(entry.measure, getUnits() === "metric")] as const;
   const sameSize = kind.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).length : 0;
@@ -1280,6 +1292,11 @@ function CatchView() {
           </p>
         ) : rank ? (
           <p className="meta">{rank}</p>
+        ) : null}
+        {build ? (
+          <p className="meta for-its-length">
+            {t(build.heavy ? "Heavy for its length: about {size} is usual." : "Light for its length: about {size} is usual.", { size: measureText({ kind: "weight", pounds: build.usual }) })}
+          </p>
         ) : null}
         {since ? (
           <p className="meta biggest-since">

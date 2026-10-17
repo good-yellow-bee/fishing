@@ -1683,3 +1683,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR411~~ | ~~Round 23 fixes and news~~ (#860) | field | S |
 | ~~BR412~~ | ~~Round 24 regression fixes~~ (#864) | field | S |
 | ~~BR413~~ | ~~Round 25 fixes: game fish out of badges, Bests, goal and Home~~ (#867) | field | S |
+| ~~BR414~~ | ~~Round 25 ideas: heavy/light, bites per water, since last fish, Enter run~~ (#869) | field | S |

@@ -9,3 +9,11 @@ export function fishPace(first: string, last: string, count: number): string | n
   const gap = minutes < 90 ? t("{n} min", { n: Math.round(minutes) }) : t("{n} h", { n: num(minutes / 60) });
   return t("one every {gap} on average", { gap });
 }
+
+/** "Last fish 40 min ago", for an outing out on the water today; null once the last fish is under a minute or over 12 hours old. */
+export function sinceLastFish(caughtAt: string, now: Date = new Date()): string | null {
+  const minutes = (now.getTime() - new Date(caughtAt).getTime()) / 60000;
+  if (!(minutes >= 1) || minutes > 12 * 60) return null;
+  const time = minutes < 90 ? t("{n} min", { n: Math.round(minutes) }) : t("{n} h", { n: num(minutes / 60) });
+  return t("Last fish {time} ago", { time });
+}
