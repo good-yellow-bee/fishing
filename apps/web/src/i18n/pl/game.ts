@@ -374,6 +374,7 @@ export const PL_GAME: PlBook = {
   "The rain swells the inlet and washes food in, and the fish gather to feed.": "Deszcz podnosi wodę w Ujściu i spłukuje pokarm, a ryby zbierają się na żer.",
   "The cold water slows the fish, but they still chase a slow jig.": "Zimna woda spowalnia ryby, ale wolno prowadzony jig wciąż je kusi.",
   "The jig hops down the ledge.": "Jig skacze w dół po krawędzi uskoku.",
+  "The worm sinks down beside the pilings, where the fish hide.": "Robak opada tuż przy palach, gdzie kryją się ryby.",
   "In the dark the fish hunt by sound, and they hear the topwater.": "Po ciemku ryby polują na słuch i słyszą przynętę powierzchniową.",
   "The fish can't see far, but they feel the spinner's blade thump.": "Ryby słabo widzą, ale czują pulsowanie skrzydełka obrotówki.",
   "The fly matches what they're rising to.": "Mucha wygląda jak to, co zbierają z powierzchni.",

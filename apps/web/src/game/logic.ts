@@ -379,6 +379,14 @@ export function darkNightWaitMul(hour: LakeHour, moon: number | undefined) {
   return hour === "night" && moon !== undefined && moon <= NEW_MOON ? DARK_NIGHT_WAIT : 1;
 }
 
+/** A worm sinks slowly down beside the dock's pilings, right where the fish hide in their shade, so the bite there comes sooner. */
+export const WORM_PILING_WAIT = 0.85;
+
+/** How the bank stretches the wait on live bait: sooner at the dock, else 1. */
+export function wormPilingWaitMul(lure: string | undefined, spot: string) {
+  return spot === "dock" && !!lure?.trim() && lureClass(lure).id === "worm" ? WORM_PILING_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 
