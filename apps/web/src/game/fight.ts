@@ -232,6 +232,17 @@ export const FALL_RUN_TIRE = 0.8;
 export function runTireMul(season: string | undefined, speciesId: string) {
   return season === "fall" && FALL_RUNNERS.has(speciesId) ? FALL_RUN_TIRE : 1;
 }
+/** Nest guarders: in spring they guard a nest in the shallows and fight hard for it. */
+export const NEST_GUARDERS: ReadonlySet<string> = new Set(["largemouth-bass", "smallmouth-bass"]);
+/** The shallow spots where a nest guarder makes its nest. */
+export const NEST_SPOTS: ReadonlySet<string> = new Set(["reeds", "dock"]);
+/** In spring a nest guarder hooked by its nest tires only this fast on a run or against the reel. */
+export const NEST_TIRE = 0.85;
+
+/** How guarding a nest slows a fish's tiring: slower in spring for a nest guarder hooked in the shallows, else 1. */
+export function nestTireMul(season: string | undefined, speciesId: string, spot: string) {
+  return season === "spring" && NEST_GUARDERS.has(speciesId) && NEST_SPOTS.has(spot) ? NEST_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;

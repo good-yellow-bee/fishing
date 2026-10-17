@@ -1236,7 +1236,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT191~~ | ~~Storms put fish down: in a thunderstorm (rain, strong wind, not winter) every bite waits 1.25x, sparing a beginner, and the cast says so~~ (#812) | game | S |
 | ~~GT192~~ | ~~Level 13 at 23000 points (Heart of the lake): working a lure brings the bite sooner three times, not two~~ (#815) | game | S |
 | ~~GT193~~ | ~~Summer warm water: a cold-water fish (brook trout, rainbow trout, salmon, whitefish) tires 1.2x faster in summer, short of air, and the hookset says so~~ (#816) | fight | S |
-| GT194 | Fall run: a salmon on its fall spawning run is full of fight, so in fall it tires only 0.8x as fast, and the hookset says so | fight | S |
+| ~~GT194~~ | ~~Fall run: a salmon on its fall spawning run is full of fight, so in fall it tires only 0.8x as fast, and the hookset says so~~ (#817) | fight | S |
+| GT195 | Nest guard: in spring a bass hooked at the Reeds or the Dock guards its nest and tires only 0.85x as fast, and the hookset says so; news 2026-10-17-game03 | fight | S |
 
 ## Risks / open questions for the owner
 
