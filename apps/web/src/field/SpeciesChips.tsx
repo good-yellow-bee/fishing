@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { CatchEntry } from "@stillwater/shared";
+import { lureTally, type CatchEntry } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { speciesCounts, speciesLink } from "./speciesLink";
 import { exactTerm, findWithLink } from "./findLinks";
@@ -13,6 +13,26 @@ export function SpeciesChips({ catches, within }: { catches: readonly CatchEntry
       {speciesCounts(catches).map((row) => (
         <Link key={row.species} to={within ? findWithLink(exactTerm("water", within), exactTerm("species", t(row.species))) : speciesLink(row.species)}>
           {t(row.species)} ({row.count})
+        </Link>
+      ))}
+    </p>
+  );
+}
+
+/**
+ * What an outing's fish took, most first, each opening the fish from that water and day on that lure: "Jig (2)".
+ * Only once two or more fish name a lure.
+ */
+export function LureChips({ catches, water, day }: { catches: readonly CatchEntry[]; water: string; day: string }) {
+  useT();
+  const lures = lureTally({ spots: [], trips: [], catches: [...catches] }, Infinity);
+  if (lures.reduce((sum, row) => sum + row.count, 0) < 2) return null;
+  return (
+    <p className="species-chips lure-chips">
+      <span className="meta">{t("Took:")}</span>
+      {lures.map((row) => (
+        <Link key={row.lure} to={findWithLink(`${exactTerm("water", water)} + ${day}`, exactTerm("lure", t(row.lure)))}>
+          {t(row.lure)} ({row.count})
         </Link>
       ))}
     </p>

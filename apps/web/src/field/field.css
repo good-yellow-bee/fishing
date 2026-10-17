@@ -1717,3 +1717,8 @@ button.field-primary:disabled {
   min-width: 24px;
   min-height: 24px;
 }
+
+/* "Took:" before an outing's lure chips, so they don't read as more kinds of fish. */
+.lure-chips {
+  align-items: center;
+}
