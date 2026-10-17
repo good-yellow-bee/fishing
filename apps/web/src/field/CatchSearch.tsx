@@ -204,6 +204,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   // "weekend": every fish caught on a Saturday or a Sunday.
   if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(entry.caughtAt).getDay()));
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
+  // "2026": the fish of that local year, not every note or title with the number in it.
+  if (/^\d{4}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry).startsWith(`${needle.trim()}-`));
   // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
   if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
   // ">60°F", "<15°C": the fish from water on that side of a temperature.

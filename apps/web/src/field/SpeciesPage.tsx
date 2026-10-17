@@ -129,8 +129,9 @@ export function SpeciesPage() {
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
       {/* The water the kind came in, once two fish noted it: where to look for it. */}
-      {catches.filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(catches) ? (
-        <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(catches)! })}</p>
+      {/* The angler's own: the sample week's temperatures would widen it. */}
+      {countedFish(catches).filter((entry) => entry.weather?.waterTempF !== undefined).length >= 2 && waterRange(countedFish(catches)) ? (
+        <p className="meta water-range">{t("Caught in water of {temp}.", { temp: waterRange(countedFish(catches))! })}</p>
       ) : null}
       <WaterTipsBox catches={catches} label={t("What it takes")} within={exactTerm("species", t(name))} />
       <CopySummary text={() => speciesSummary(name, catches, waters)} file="stillwater-species.txt" />
@@ -158,7 +159,7 @@ export function SpeciesPage() {
           </li>
         ))}
       </ul>
-      <TypicalByWater catches={catches} waters={waters} />
+      <TypicalByWater catches={countedFish(catches)} waters={waters} />
       <SizeSpread catches={catches} name={name} />
       {catches.length > 1 ? (
         <>
