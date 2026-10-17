@@ -359,6 +359,19 @@ describe("useFishingGame lost fight", () => {
   });
 
   it.each([
+    ["rain", true],
+    [undefined, false],
+  ] as const)("says a summer rain has cooled the water for a cold-water fish (%s): %s", (sky, cooled) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, sky, "summer");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "brook-trout")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(hint()?.includes("The rain has cooled the water, so it keeps its strength.")).toBe(cooled);
+    expect(hint()?.includes("The warm water leaves it short of air, so it tires sooner.")).toBe(!cooled);
+  });
+
+  it.each([
     ["fall", "salmon", true],
     ["summer", "salmon", false],
     ["fall", "pike", false],
