@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17zs";
+export const NEWS_ID = "2026-10-17zt";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Tap while a jig sits on the bottom to hop it: the first two hops draw a bite sooner.",
   "Fish a topwater after dark: the fish hunt by sound, so its gurgle draws a bite sooner.",
   "Strip a streamer past a pike: if it misses, it chases the streamer down and hits once more.",
   "A water’s page lists the biggest of each kind caught there, and a species page shows each water’s biggest and a typical size. An outing shows what the fish took and its weather hour by hour. On a fish, the wind and water temperature open the fish caught like it, and a dash leaves fish out of a search, as in “Cedar -released”.",

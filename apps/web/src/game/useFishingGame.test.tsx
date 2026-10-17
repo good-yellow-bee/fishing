@@ -947,6 +947,30 @@ describe("level unlock integration", () => {
     expect(untilBite(TOPWATER_POPS + 1)).toBe(popped);
   });
 
+  it("brings a fish up sooner when a jig on the bottom is hopped, for the first two hops", () => {
+    const untilBite = (hops: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Green pumpkin tube");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "largemouth-bass")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(300));
+      for (let hop = 0; hop < hops; hop++) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + hop)));
+        expect(hint()).toBe(hop < TOPWATER_POPS ? "Hop! The jig lifts off the bottom and flutters down. Let it fall…" : "Let it fall between hops.");
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + hop)));
+      }
+      let waited = 300;
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    const hopped = untilBite(TOPWATER_POPS);
+    expect(hopped).toBeLessThan(sat * 0.6);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
+  });
+
   it("leaves a sinking lure's early strike as too early", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
     cast(surface);
