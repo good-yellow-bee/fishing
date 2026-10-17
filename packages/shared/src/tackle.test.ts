@@ -117,7 +117,8 @@ describe("tackle", () => {
     for (const tool of [
       "Steel leader", "Steel leaders", "6x tippet", "6x tippets", "Braided line", "Euro nymph leader", "Streamer leader",
       "Landing net", "Landing nets", "Jaw spreaders", "Headlamp", "Headlamps", "5-weight fly rod", "Fly rods",
-      "Spinning reel", "Spinning reels", "Hemostats", "Polarized sunglasses", "Nipper",
+      "Spinning reel", "Spinning reels", "Hemostats", "Polarized sunglasses", "Nipper", "8 lb fluoro", "20 lb braid",
+      "Fishing license", "Rain jacket", "Cooler", "Sunscreen", "Bait bucket", "Stringer",
     ]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }

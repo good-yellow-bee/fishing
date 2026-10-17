@@ -322,6 +322,11 @@ button.field-primary {
   white-space: nowrap;
 }
 
+/* A long line of its own ("Last time: … · Jig and minnow ×1"): it wraps rather than widen the page. */
+.stat-row .next-last a {
+  white-space: normal;
+}
+
 .home-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
@@ -903,6 +908,11 @@ button.field-primary:disabled {
     flex: 1 1 0;
     min-width: 0;
     text-align: start;
+  }
+
+  /* The released note takes a row of its own above the buttons, which keep theirs. */
+  .form-save:has(.form-released) {
+    flex-wrap: wrap;
   }
 
   /* Keyboard focus scrolled into view stops above the fixed tab bar rather than under it. */
@@ -1821,4 +1831,13 @@ button.field-primary:disabled {
 .day-month-fish {
   font-weight: 400;
   color: var(--field-muted);
+}
+
+.form-save .form-released {
+  flex: 1 0 100%;
+  order: -1;
+}
+
+.form-save .form-released .text-button {
+  flex: none;
 }
