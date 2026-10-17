@@ -14,6 +14,8 @@ describe("looksLikeOtherMeasure", () => {
   it("flags a weight far past the best that fits as a length", () => {
     expect(looksLikeOtherMeasure(best, "weight", 41, 41)).toBe(true);
     expect(looksLikeOtherMeasure(best, "weight", 12, 12)).toBe(false);
+    // A new best by weight: twice the old one is a fish about a quarter longer, not a slip.
+    expect(looksLikeOtherMeasure(best, "weight", 20, 20)).toBe(false);
   });
 
   it("leaves a number too big for either measure, or a kind with no best yet", () => {

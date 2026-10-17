@@ -24,5 +24,8 @@ describe("farPastBest", () => {
     expect(farPastBest({ longest, heaviest: null }, "length", 61)).toEqual({ kind: "length", inches: 30 });
     expect(farPastBest({ longest, heaviest: null }, "length", 59)).toBeNull();
     expect(farPastBest({ longest, heaviest: null }, "weight", 99)).toBeNull();
+    const heaviest = { id: "b", species: "Walleye", measure: { kind: "weight", pounds: 1.4 } } as never;
+    expect(farPastBest({ longest: null, heaviest }, "weight", 3)).toBeNull();
+    expect(farPastBest({ longest: null, heaviest }, "weight", 6)).toEqual({ kind: "weight", pounds: 1.4 });
   });
 });
