@@ -898,6 +898,11 @@ function CatchForm() {
               </button>
             ) : null}
             {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
+            {Date.parse(caughtAt) - Date.now() > 5 * 60_000 ? (
+              <span className="field-hint" role="status">
+                {t("That time is still to come. Is the day right?")}
+              </span>
+            ) : null}
           </label>
 
           <label>
