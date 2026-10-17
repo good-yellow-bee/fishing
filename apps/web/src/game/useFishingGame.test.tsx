@@ -410,6 +410,7 @@ describe("useFishingGame lost fight", () => {
 
   it.each([
     ["summer", "carp", true],
+    ["summer", "largemouth-bass", true],
     ["spring", "carp", false],
     ["summer", "pike", false],
   ] as const)("says a fish hooked in %s (%s) thrives in the warm water: %s", (season, id, said) => {

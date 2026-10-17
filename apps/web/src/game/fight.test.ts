@@ -1397,6 +1397,7 @@ describe("a fight in winter", () => {
 
   it("slows a warm lover's tiring only in summer", () => {
     expect(SUMMER_STRENGTH_TIRE).toBeLessThan(1);
+    expect(WARM_LOVERS.has("largemouth-bass")).toBe(true);
     for (const id of WARM_LOVERS) expect(summerStrengthTireMul("summer", id)).toBe(SUMMER_STRENGTH_TIRE);
     expect(summerStrengthTireMul("spring", "carp")).toBe(1);
     expect(summerStrengthTireMul(undefined, "carp")).toBe(1);
