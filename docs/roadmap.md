@@ -1235,7 +1235,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT190~~ | ~~Breezy chop: on a breezy day any lure but a topwater waits 0.9x, as the chop makes the fish bolder, and the cast says so~~ (#811) | game | S |
 | ~~GT191~~ | ~~Storms put fish down: in a thunderstorm (rain, strong wind, not winter) every bite waits 1.25x, sparing a beginner, and the cast says so~~ (#812) | game | S |
 | ~~GT192~~ | ~~Level 13 at 23000 points (Heart of the lake): working a lure brings the bite sooner three times, not two~~ (#815) | game | S |
-| GT193 | Summer warm water: a cold-water fish (brook trout, rainbow trout, salmon, whitefish) tires 1.2x faster in summer, short of air, and the hookset says so | fight | S |
+| ~~GT193~~ | ~~Summer warm water: a cold-water fish (brook trout, rainbow trout, salmon, whitefish) tires 1.2x faster in summer, short of air, and the hookset says so~~ (#816) | fight | S |
+| GT194 | Fall run: a salmon on its fall spawning run is full of fight, so in fall it tires only 0.8x as fast, and the hookset says so | fight | S |
 
 ## Risks / open questions for the owner
 

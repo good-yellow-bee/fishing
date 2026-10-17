@@ -223,6 +223,15 @@ export const SUMMER_TIRE = 1.2;
 export function warmTireMul(season: string | undefined, speciesId: string) {
   return season === "summer" && COLDWATER.has(speciesId) ? SUMMER_TIRE : 1;
 }
+/** Fall run fish: in fall they run up to spawn, full of fight. */
+export const FALL_RUNNERS: ReadonlySet<string> = new Set(["salmon"]);
+/** In fall a fish on its spawning run tires only this fast on a run or against the reel. */
+export const FALL_RUN_TIRE = 0.8;
+
+/** How a fall spawning run slows a fish's tiring: slower in fall for a fall runner, else 1. */
+export function runTireMul(season: string | undefined, speciesId: string) {
+  return season === "fall" && FALL_RUNNERS.has(speciesId) ? FALL_RUN_TIRE : 1;
+}
 /** A day's wind bellies a slack line, so between runs it drifts out this much faster. */
 export const WIND_SLACK = { breezy: 1.25, strong: 1.5 } as const;
 export type FightWind = keyof typeof WIND_SLACK;
