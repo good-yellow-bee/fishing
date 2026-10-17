@@ -391,8 +391,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “>2 lb”, a water temperature such as “>60°F”, a word from a note, a day such as “2026-10-12” or “last weekend”, “photo”, “record”, “first”, “big”, “loose”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „>1 kg”), temperatury wody (np. „>15°C”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",

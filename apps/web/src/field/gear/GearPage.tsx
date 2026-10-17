@@ -6,6 +6,7 @@ import {
   fishCountsByTrip,
   localDate,
   lureTally,
+  measureOf,
   recentTrips,
   shiftDate,
   spotById,
@@ -24,6 +25,7 @@ import { nearTwinLures } from "../suggestions";
 import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { t, tn, useT } from "../../i18n";
+import { measureText } from "../../i18n/content";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -80,6 +82,14 @@ function LureRecord({ today }: { today: string }) {
                   <span className="lure-last">{t("last fish {day}", { day: formatCatchDay(row.lastAt) })}</span>
                   {/* Packed since without a fish: a lure that has gone quiet. */}
                   {row.since && row.since >= 2 ? <span className="lure-last">{tn(row.since, "none on {n} outing since", "none on {n} outings since")}</span> : null}
+                  {/* Its biggest fish, opening that fish. */}
+                  {row.largest ? (
+                    <span className="lure-last">
+                      <Link to={`/catches/${row.largest.entry.id}`}>
+                        {t("Largest: {species}, {size}", { species: t(row.largest.entry.species), size: measureText(measureOf(row.largest.entry, row.largest.by)!) })}
+                      </Link>
+                    </span>
+                  ) : null}
                 </>
               ) : null}
             </span>
