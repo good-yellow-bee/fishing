@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, CRANK_ROCK_WAIT, crankRockWaitMul, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, FLASH_SUN_WAIT, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -164,5 +164,15 @@ describe("spooked water", () => {
     expect(castIntoSpooked("dock", "dock")).toBe(true);
     expect(castIntoSpooked("dock", "reeds")).toBe(false);
     expect(castIntoSpooked(null, "dock")).toBe(false);
+  });
+});
+
+describe("a crankbait off the point", () => {
+  it("bites sooner banging off the rocks, and nowhere else or on any other lure", () => {
+    expect(CRANK_ROCK_WAIT).toBeLessThan(1);
+    expect(crankRockWaitMul("Shallow crankbait", "point")).toBe(CRANK_ROCK_WAIT);
+    expect(crankRockWaitMul("Shallow crankbait", "dropoff")).toBe(1);
+    expect(crankRockWaitMul("Green pumpkin tube", "point")).toBe(1);
+    expect(crankRockWaitMul(undefined, "point")).toBe(1);
   });
 });

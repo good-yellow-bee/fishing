@@ -233,6 +233,14 @@ export function flyDriftWaitMul(lure: string | undefined, spot: string) {
   return kind === "fly" || kind === "streamer" ? FLY_DRIFT_WAIT : 1;
 }
 
+/** A crankbait dug down the point's rocks bangs and deflects off them, and that erratic bump draws a reaction bite sooner. */
+export const CRANK_ROCK_WAIT = 0.8;
+
+/** How the bank stretches the wait on a crankbait: sooner off the point, else 1. */
+export function crankRockWaitMul(lure: string | undefined, spot: string) {
+  return spot === "point" && lure?.trim() && lureClass(lure).id === "crank" ? CRANK_ROCK_WAIT : 1;
+}
+
 /** A strike after this share of the hook window only sets the hook light. */
 export const LIGHT_HOOK_SHARE = 0.75;
 

@@ -1206,7 +1206,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT161~~ | ~~A jig cast at the drop-off hops down the ledge where the fish hold: its wait is 0.8x, and the cast says so~~ (#759) | game | S |
 | ~~GT162~~ | ~~Live bait is swallowed: a late strike on a worm, leech or minnow hooks deep (a plain hook, own hint) instead of light~~ (#761) | fight | S |
 | ~~GT163~~ | ~~A fly or streamer cast at the inlet drifts on the current down to the trout: its wait is 0.8x, and the cast says so~~ (#763) | game | S |
-| GT164 | Lures slip their cover: a topwater never snags in the reeds' weed, and a crankbait never snags on the point's rocks | casting | S |
+| ~~GT164~~ | ~~Lures slip their cover: a topwater never snags in the reeds' weed, and a crankbait never snags on the point's rocks~~ (#765) | casting | S |
+| GT165 | A crankbait cast off the point bangs off the rocks and draws a reaction bite: its wait is 0.8x, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

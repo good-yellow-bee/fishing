@@ -36,7 +36,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, favorsLargeFish, flashWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, topwaterWaitMul, waitMs, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, crankRockWaitMul, favorsLargeFish, flashWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, makeCatch, pickBite, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, SLAP_POWER, solidStrikeMs, SPOOK_WAIT, sweetBand, topwaterWaitMul, waitMs, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -493,6 +493,9 @@ export function useFishingGame(
     // A fly or streamer swings down the inlet's current to the trout holding there.
     const driftWait = flyDriftWaitMul(lureRef?.current, spotRef.current);
     if (driftWait < 1) waitHintRef.current = `${t("The current swings the fly down to the fish.")} ${waitHintRef.current}`;
+    // A crankbait bangs off the point's rocks, and the erratic bump draws a reaction bite.
+    const rockWait = crankRockWaitMul(lureRef?.current, spotRef.current);
+    if (rockWait < 1) waitHintRef.current = `${t("The crankbait bangs off the rocks.")} ${waitHintRef.current}`;
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
@@ -509,7 +512,7 @@ export function useFishingGame(
     setBite(bitten);
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
-    const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1) * topwaterWait * flashWait * jigWait * driftWait;
+    const wait = (schoolFish ? Math.max(1100, unschooledWait * SCHOOL_WAIT) : unschooledWait) * (spooked ? SPOOK_WAIT : 1) * topwaterWait * flashWait * jigWait * driftWait * rockWait;
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
