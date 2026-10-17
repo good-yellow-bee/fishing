@@ -756,4 +756,8 @@ export const PL_FIELD: PlBook = {
   "This outing is still to come.": "Ta wyprawa jeszcze przed tobą.",
   Planned: "Zaplanowana",
   "Write up the day": "Opisz ten dzień",
+  "Part of this browser's book could not be read. What could be read was kept, and the whole book was set aside as it was, so nothing is lost.": "Części dziennika w tej przeglądarce nie dało się odczytać. To, co się dało, zostało zachowane, a cały dziennik odłożono w stanie, w jakim był, więc nic nie przepadło.",
+  "The tackle list could not be saved in this browser. It stays as it is until this page is closed.": "Nie udało się zapisać listy sprzętu w tej przeglądarce. Zostaje taka, jak jest, do zamknięcia tej strony.",
+  "The goal could not be saved in this browser.": "Nie udało się zapisać celu w tej przeglądarce.",
+  "The goal could not be removed in this browser, so it comes back next time.": "Nie udało się usunąć celu w tej przeglądarce, więc wróci przy następnej wizycie.",
 };

@@ -434,6 +434,29 @@ export function isLogbook(value: unknown): value is Logbook {
   );
 }
 
+/**
+ * What can be kept of a stored book that doesn't read as a whole: each water, outing and fish that reads on its own (the
+ * first of any id), less the outings and fish whose water is gone, with an outing link that leads nowhere taken off.
+ * Null when nothing in it reads.
+ */
+export function salvageLogbook(value: unknown): Logbook | null {
+  if (!isRecord(value)) return null;
+  const list = (key: string): unknown[] => (Array.isArray(value[key]) ? (value[key] as unknown[]) : []);
+  const firstOf = <T extends { id: string }>(rows: T[]) => {
+    const seen = new Set<string>();
+    return rows.filter((row) => !seen.has(row.id) && Boolean(seen.add(row.id)));
+  };
+  const spots = firstOf(list("spots").filter(isSpot));
+  const spotIds = new Set(spots.map((spot) => spot.id));
+  const trips = firstOf(list("trips").filter(isTrip)).filter((trip) => spotIds.has(trip.spotId));
+  const tripIds = new Set(trips.map((trip) => trip.id));
+  const catches = firstOf(list("catches").filter(isCatch))
+    .filter((entry) => spotIds.has(entry.spotId))
+    .map((entry) => (entry.tripId && !tripIds.has(entry.tripId) ? { ...entry, tripId: null } : entry));
+  if (spots.length + trips.length + catches.length === 0) return null;
+  return { spots, trips, catches };
+}
+
 export function spotById(book: Logbook, id: string): Spot | undefined {
   return book.spots.find((spot) => spot.id === id);
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   itemsForTrip,
   parseTackleLabel,
@@ -22,16 +22,20 @@ type TackleApi = {
   /** Puts another outing's list on this one, everything still to pack. */
   copyTrip: (fromTripId: string, toTripId: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
+  /** The outing whose list was last changed when storage refused the save, so that list can say so; null once one saves. */
+  unsavedTrip: string | null;
 };
 
 const TackleContext = createContext<TackleApi | null>(null);
 
 /** Saves the lists; storage that is full or blocked leaves them working for this visit rather than stopping the page. */
-function keep(items: TackleItem[]) {
+function keep(items: TackleItem[]): boolean {
   try {
     saveTackle(items);
+    return true;
   } catch {
-    // Kept in memory only.
+    // Kept in memory only, and the list says so.
+    return false;
   }
 }
 
@@ -42,8 +46,16 @@ export function TackleProvider({ children }: { children: ReactNode }) {
     return sampleTackle();
   });
 
+  const [first] = useState(items);
+  // The list last changed here, so a refused save is told where it happened rather than on every list.
+  const touched = useRef<string | null>(null);
+  const [unsavedTrip, setUnsavedTrip] = useState<string | null>(null);
   // Saved after each change rather than inside it, so a full or blocked storage can't stop the page drawing.
-  useEffect(() => keep(items), [items]);
+  // The sample lists put in on a first visit are no change of the angler's: a refused save of those says nothing.
+  useEffect(() => {
+    const saved = keep(items);
+    if (items !== first) setUnsavedTrip(saved ? null : touched.current);
+  }, [items, first]);
 
   useEffect(() => {
     // Another tab changed the lists (or loaded a book): carry on from its copy, so the next tick here keeps its items.
@@ -55,9 +67,14 @@ export function TackleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const api = useMemo<TackleApi>(() => {
+    const touch = (tripId: string | undefined) => {
+      touched.current = tripId ?? null;
+    };
     return {
       items,
+      unsavedTrip,
       toggle: (id, packed) => {
+        touch(items.find((item) => item.id === id)?.tripId);
         setItems((current) => withPacked(current, id, packed));
       },
       add: (tripId, label) => {
@@ -74,24 +91,31 @@ export function TackleProvider({ children }: { children: ReactNode }) {
           label: parsed.value,
           packed: false,
         };
+        touch(tripId);
         setItems((current) => withTackleItem(current, item));
         return null;
       },
       remove: (id) => {
+        touch(items.find((item) => item.id === id)?.tripId);
         setItems((current) => withoutTackleItem(current, id));
       },
       unpackTrip: (tripId) => {
+        touch(tripId);
         setItems((current) => withTripUnpacked(current, tripId));
       },
       copyTrip: (fromTripId, toTripId) => {
+        touch(toTripId);
         setItems((current) => [
           ...current,
           ...itemsForTrip(current, fromTripId).map((item) => ({ id: localId(), tripId: toTripId, label: item.label, packed: false })),
         ]);
       },
-      replaceTackle: (next) => setItems(next),
+      replaceTackle: (next) => {
+        touch(undefined);
+        setItems(next);
+      },
     };
-  }, [items]);
+  }, [items, unsavedTrip]);
 
   return <TackleContext.Provider value={api}>{children}</TackleContext.Provider>;
 }

@@ -1,10 +1,10 @@
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import { FIELD_ARCHIVE_REFUSAL, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
-import { forgetUnreadableBook, readUnreadableBook } from "./storage";
+import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
@@ -40,13 +40,26 @@ function bookSummary(book: Logbook): string {
   return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
 }
 
+/** The set-aside book in the shape of a downloaded copy, with its photos still kept here: it loads once mended by hand. */
+function setAsideFile(raw: string, photos: CatchPhotoMap): string {
+  try {
+    const book = JSON.parse(raw) as unknown;
+    if (typeof book !== "object" || book === null || Array.isArray(book)) return raw;
+    const ids = new Set(setAsideCatchIds());
+    const kept = Object.fromEntries(Object.entries(photos).filter(([id]) => ids.has(id)));
+    return JSON.stringify({ kind: FIELD_ARCHIVE_KIND, version: FIELD_ARCHIVE_VERSION, book, tackle: { items: [] }, photos: kept });
+  } catch {
+    return raw;
+  }
+}
+
 /** A stored copy that could not be read: offered as a file, or forgotten on the angler's word. */
-function SetAside(props: { text: string; download: string; ask: string; forget: string; raw: string; file: string; onForget: () => void }) {
+function SetAside(props: { text: string; download: string; ask: string; forget: string; raw: string | (() => string); file: string; onForget: () => void }) {
   return (
     <div className="copy-nudge">
       <p>{props.text}</p>
       <div className="book-file">
-        <button type="button" className="text-button" onClick={() => downloadFile(props.raw, "application/json", props.file)}>
+        <button type="button" className="text-button" onClick={() => downloadFile(typeof props.raw === "string" ? props.raw : props.raw(), "application/json", props.file)}>
           {props.download}
         </button>
         <button
@@ -288,11 +301,15 @@ export function BookFile() {
       ) : null}
       {setAside ? (
         <SetAside
-          text={t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")}
+          text={
+            salvageStored(setAside)
+              ? t("Part of this browser's book could not be read. What could be read was kept, and the whole book was set aside as it was, so nothing is lost.")
+              : t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")
+          }
           download={t("Download the set-aside book")}
           ask={t("Forget the set-aside book for good?")}
           forget={t("Forget it")}
-          raw={setAside}
+          raw={() => setAsideFile(setAside, photos)}
           file="stillwater-field-log-set-aside.json"
           onForget={() => {
             forgetUnreadableBook();

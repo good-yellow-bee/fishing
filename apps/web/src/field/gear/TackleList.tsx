@@ -47,7 +47,7 @@ export function TackleList({
   spots?: readonly Spot[];
 }) {
   const t = useT();
-  const { items, toggle, add, remove, unpackTrip, copyTrip } = useTackle();
+  const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip } = useTackle();
   const rows = itemsForTrip(items, tripId);
   const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
   const packed = packedCount(rows);
@@ -251,6 +251,11 @@ export function TackleList({
           </p>
         ) : null}
       </form>
+      {unsavedTrip === tripId ? (
+        <p className="field-error" role="alert">
+          {t("The tackle list could not be saved in this browser. It stays as it is until this page is closed.")}
+        </p>
+      ) : null}
     </section>
   );
 }

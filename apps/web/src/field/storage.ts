@@ -1,4 +1,4 @@
-import { isLogbook, prepareStoredLogbook, type Logbook } from "@stillwater/shared";
+import { isLogbook, prepareStoredLogbook, salvageLogbook, type Logbook } from "@stillwater/shared";
 
 export const LOGBOOK_STORAGE_KEY = "stillwater.field-log.v1";
 
@@ -23,8 +23,44 @@ export function readStoredLogbook(): Logbook | null {
   }
   if (!raw) return null;
   const book = parseStored(raw);
-  if (!book) keepUnreadable(raw);
-  return book;
+  if (book) return book;
+  keepUnreadable(raw);
+  // One bad fish doesn't cost the rest: what reads is kept, and stored in place so the game adds to it too.
+  const kept = salvageStored(raw);
+  if (kept) {
+    try {
+      localStorage.setItem(LOGBOOK_STORAGE_KEY, JSON.stringify(kept));
+    } catch {
+      // Not stored: it is salvaged again on the next read.
+    }
+  }
+  return kept;
+}
+
+/** What can be kept of a stored book that doesn't read as a whole, or null when nothing in it does. */
+export function salvageStored(raw: string): Logbook | null {
+  try {
+    const book = salvageLogbook(prepareStoredLogbook(JSON.parse(raw) as unknown));
+    return book && isLogbook(book) ? book : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The fish ids in the set-aside book: their photos are kept while it is, so a mended copy still finds them. */
+export function setAsideCatchIds(): string[] {
+  const raw = readUnreadableBook();
+  if (!raw) return [];
+  try {
+    const book = JSON.parse(raw) as { catches?: unknown };
+    if (!Array.isArray(book.catches)) return [];
+    return book.catches.flatMap((entry: unknown) => {
+      const id = typeof entry === "object" && entry !== null ? (entry as { id?: unknown }).id : undefined;
+      return typeof id === "string" ? [id] : [];
+    });
+  } catch {
+    return [];
+  }
 }
 
 /** True when a book is stored here but could not be read: its photos are left alone. */
