@@ -70,6 +70,7 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
     .map(([day]) => day)
     .sort();
   const active = current && linked.includes(current) ? current : linked[0];
+  const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const from = (event.target as HTMLElement).dataset.day;
     if (!from) return;
@@ -93,7 +94,11 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
         const lead = (first.getDay() + 6) % 7;
         return (
           <section key={month} className="day-month" aria-label={monthName(month)}>
-            <h3>{monthName(month)}</h3>
+            <h3>
+              {monthName(month)}
+              {/* The month's fish at a glance, counted as its days are. */}
+              {monthFish(month) > 0 ? <small className="day-month-fish">{` · ${tn(monthFish(month), "{n} fish", "{n} fish")}`}</small> : null}
+            </h3>
             {/* Which column is which day, for the eye; each day's link already says its whole date. */}
             <div className="day-grid day-weekdays" aria-hidden="true">
               {weekdayLetters().map((letter, index) => (
