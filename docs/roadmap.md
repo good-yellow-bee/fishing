@@ -1211,7 +1211,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT166~~ | ~~Treble hooks hold: on a spinner, spoon or crankbait a soft mouth or a light hook takes 1.5x as long in the red to tear free~~ (#769) | fight | S |
 | ~~GT167~~ | ~~A jig's stout single hook sets solid over 1.25x the usual share of the strike window, and the Strike bar's solid mark moves to match~~ (#770) | fight | S |
 | ~~GT168~~ | ~~Worms crawl out after dark: live bait (worm, leech, minnow) waits 0.85x at night, and the cast says so~~ (#772) | game | S |
-| GT169 | A fly matches the hatch: a fly cast onto a fresh ring of the evening rise waits a further 0.75x, and the cast says so | game | S |
+| ~~GT169~~ | ~~A fly matches the hatch: a fly cast onto a fresh ring of the evening rise waits a further 0.75x, and the cast says so~~ (#773) | game | S |
+| GT170 | A spinner's blade thumps: in rain or fog, when the fish can barely see, a spinner waits 0.85x, and the cast says so | game | S |
 
 ## Risks / open questions for the owner
 

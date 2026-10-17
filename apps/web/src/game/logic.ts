@@ -235,6 +235,14 @@ export function flyHatchWaitMul(lure: string | undefined, rise: boolean) {
   return rise && lure?.trim() && lureClass(lure).id === "fly" ? FLY_HATCH_WAIT : 1;
 }
 
+/** A spinner's blade thumps, and in rain or fog, when the fish can barely see, they feel it before anything else, so the bite comes sooner. */
+export const SPINNER_THUMP_WAIT = 0.85;
+
+/** How murky light stretches the wait on a spinner: sooner in rain or fog, else 1. */
+export function spinnerThumpWaitMul(lure: string | undefined, sky: string | undefined) {
+  return (sky === "rain" || sky === "fog") && lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_THUMP_WAIT : 1;
+}
+
 /** A jig hops down the drop-off's ledge, right where the fish hold, so the bite comes sooner there. */
 export const JIG_LEDGE_WAIT = 0.8;
 
