@@ -194,6 +194,13 @@ export const WEED_MS = 1600;
 export const WEED_REEL = 0.3;
 /** How much faster slack line drifts out in the inlet's current. */
 export const CURRENT_DRIFT = 1.6;
+/** A swollen inlet (spring melt or rain) pulls this much harder still on slack line. */
+export const FLOOD_DRIFT = 1.25;
+
+/** Whether the inlet runs swollen: with spring's melt or in rain. */
+export function floodedInlet(spot: string, season: string | undefined, sky: string | undefined) {
+  return spot === "inlet" && (season === "spring" || sky === "rain");
+}
 /** The inlet's current flows this way across the view; a run heading with it, left unturned, takes this much more line. */
 export const DOWNSTREAM_SIDE = 1;
 export const DOWNSTREAM_RUN = 1.3;
@@ -379,12 +386,14 @@ export function makeFight(
   cold = false,
   /** A trophy-sized fish: like a carp, its first run is the long one. */
   trophy = false,
+  /** The inlet runs swollen with spring's melt or rain: its current takes slack line faster still. */
+  flood = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
-  const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT : 1);
+  const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT * (flood ? FLOOD_DRIFT : 1) : 1);
   const driftCalm = driftWater * (wind ? WIND_SLACK[wind] : 1);
   // A run takes line by its own pull; the wind only shows on a resting line.
   const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
