@@ -746,4 +746,6 @@ export const PL_FIELD: PlBook = {
   "(opens OpenStreetMap in a new tab)": "(otwiera OpenStreetMap w nowej karcie)",
   "The map needs a connection the first time it opens.": "Mapa za pierwszym razem potrzebuje internetu.",
   "Try again": "Spróbuj ponownie",
+  "Fish saved: {when}.": "Ryba zapisana: {when}.",
+  "Move it to {day}": "Przenieś na {day}",
 };

@@ -624,10 +624,10 @@ function CatchForm() {
       // Not a fish from minutes ago, before midnight on tonight's session: the next one comes now, not at 23:58 again.
       const writtenUp = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
       const earlier = writtenUp ? caughtAt : undefined;
-      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news));
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined));
       return;
     }
-    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch", news));
+    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined));
   };
 
   if (catchId && !existing) {
@@ -1048,7 +1048,18 @@ function CatchForm() {
           {/* A small-hours fish on last evening's outing is on its day. */}
           {pickedTrip && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date) ? (
             <p className="wide form-note" role="status">
-              {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}
+              {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}{" "}
+              {/* The same clock time, on the outing's day: a fish moved to another outing keeps its old date otherwise. */}
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  setCaughtAt(`${pickedTrip.date}${caughtAt.slice(10)}`);
+                  setTimeTouched(true);
+                }}
+              >
+                {t("Move it to {day}", { day: formatDay(pickedTrip.date) })}
+              </button>
             </p>
           ) : null}
 
