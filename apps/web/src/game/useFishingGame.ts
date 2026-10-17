@@ -194,6 +194,14 @@ export function hasTrebles(lure: string | undefined) {
   return kind === "spinner" || kind === "spoon" || kind === "crank";
 }
 
+/** Whether the lure is a streamer, which a missed pike chases down for one more hit. */
+export function isStreamer(lure: string | undefined) {
+  return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "streamer";
+}
+
+/** Pike that, missing a streamer stripped away from them, chase it down for one more hit. */
+export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pike"]);
+
 /** How many pops of a sitting topwater lure draw the fish up sooner. */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
@@ -615,12 +623,13 @@ export function useFishingGame(
               }, TOPWATER_COMEBACK_MS);
               return;
             }
-            // A tiger muskie follows the bait it missed and hits once more, with no warning tap.
-            if (!secondTake && FOLLOWERS.has(species.id)) {
+            // A tiger muskie follows the bait it missed and hits once more, with no warning tap; a pike does the same after a streamer.
+            const follower = FOLLOWERS.has(species.id);
+            if (!secondTake && (follower || (STREAMER_CHASERS.has(species.id) && isStreamer(lureRef?.current)))) {
               secondTake = true;
               secondTakeRef.current = true;
               setPhaseBoth("waiting");
-              setHint(t("It swirled away, but a muskie follows. Watch for it to hit again…"));
+              setHint(follower ? t("It swirled away, but a muskie follows. Watch for it to hit again…") : t("It missed, but the streamer keeps it chasing. Watch for it to hit again…"));
               timers.current.wait = window.setTimeout(() => {
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
