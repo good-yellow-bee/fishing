@@ -996,6 +996,30 @@ describe("level unlock integration", () => {
     expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
   });
 
+  it("brings a fish up sooner when a streamer is stripped, for the first two strips", () => {
+    const untilBite = (strips: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Woolly bugger");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "rainbow-trout")!);
+      cast(surface);
+      act(() => vi.advanceTimersByTime(300));
+      for (let strip = 0; strip < strips; strip++) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + strip)));
+        expect(hint()).toBe(strip < TOPWATER_POPS ? "Strip! The streamer darts off like a fleeing fish. Let it hang…" : "Let it hang between strips.");
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + strip)));
+      }
+      let waited = 300;
+      for (; phase() !== "hookset:none" && waited < 20_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    const stripped = untilBite(TOPWATER_POPS);
+    expect(stripped).toBeLessThan(sat * 0.6);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(stripped);
+  });
+
   it("brings a fish up sooner when a spoon is lifted, for the first two lifts", () => {
     const untilBite = (hops: number) => {
       const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Kastmaster spoon");
