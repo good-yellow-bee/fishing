@@ -6,7 +6,7 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
-import { isSampleOnly } from "./bookCopy";
+import { hasSampleFish, isSampleOnly } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
@@ -19,7 +19,7 @@ import { osmLink } from "./osmLink";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -69,16 +69,17 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 }
 
 export function HomePage() {
-  const { book, storedBook, photos, startBlank } = useLogbook();
+  const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
   const heading = useRef<HTMLHeadingElement>(null);
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
-  const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
+  const photoCount = book.catches.filter((entry) => photos[entry.id] && offPlayLake(entry)).length;
   useT();
   const now = new Date();
   const today = localDate(now);
   const tomorrow = shiftDate(now, 1);
-  const catches = recentCatches(book, 4);
+  // The angler's own: a round of the game fills none of these cards.
+  const catches = recentCatches({ ...book, catches: book.catches.filter(offPlayLake) }, 4);
   const upcoming = upcomingOwnTrips(book, today);
   // Just back from the water, not from a round of the game.
   const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
@@ -103,6 +104,11 @@ export function HomePage() {
   // "0 by this date last year" says nothing when the book only starts after that date.
   const firstDay = real.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
   const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
+  // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
+  const ownWaters = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
+  const ownOutings = book.trips.filter(offPlayLake).length;
+  // Fish of their own logged beside the sample week: the invented part can go on its own.
+  const sampleLeft = !sampleOnly && hasSampleFish(storedBook);
   const next = upcoming[0];
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -129,6 +135,18 @@ export function HomePage() {
               if (startBlank()) heading.current?.focus();
             }}>
             {t("Start my own book")}
+          </button>
+        </aside>
+      ) : null}
+
+      {sampleLeft ? (
+        <aside className="conditions sample-start" aria-label={t("Sample book")}>
+          <span className="eyebrow">{t("Sample book")}</span>
+          <p>{t("The sample week's invented fish are still in this book, beside your own.")}</p>
+          <button type="button" className="field-primary inline" onClick={() => {
+              if (dropSample()) heading.current?.focus();
+            }}>
+            {t("Remove the sample week")}
           </button>
         </aside>
       ) : null}
@@ -177,11 +195,11 @@ export function HomePage() {
         <div>
           <span className="eyebrow">{t("Waters")}</span>
           <strong>
-            <Link to="/spots">{book.spots.length}</Link>
+            <Link to="/spots">{ownWaters}</Link>
           </strong>
-          {book.trips.length > 0 ? (
+          {ownOutings > 0 ? (
             <small>
-              <Link to="/trips">{tn(book.trips.length, "{n} outing", "{n} outings")}</Link>
+              <Link to="/trips">{tn(ownOutings, "{n} outing", "{n} outings")}</Link>
             </small>
           ) : null}
         </div>
