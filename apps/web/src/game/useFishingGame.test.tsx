@@ -1575,6 +1575,17 @@ describe("level unlock integration", () => {
     expect(hint()).toContain("The rain swells the inlet and washes food in, and the fish gather to feed.");
   });
 
+  it.each([
+    ["clear", true],
+    ["fog", false],
+  ] as const)("says the bright summer sun drives the fish under the dock (%s sky): %s", (sky, said) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, sky, "summer");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    if (said) expect(hint()).toContain("The bright summer sun drives the fish into the shade under the dock.");
+    else expect(hint()).not.toContain("shade under the dock");
+  });
+
   it("tells only the two latest reasons a bite comes sooner, so the hint stays short", () => {
     vi.mocked(springShallowsWaitMul).mockReturnValueOnce(SPRING_SHALLOWS_WAIT);
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Green pumpkin tube", undefined, undefined, "winter");

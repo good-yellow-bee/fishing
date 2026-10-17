@@ -366,6 +366,7 @@ export const PL_GAME: PlBook = {
   "The current swings the fly down to the fish.": "Nurt niesie muchę w dół, prosto do ryb.",
   "The fish are fattening up for winter and want a big meal.": "Ryby tuczą się przed zimą i szukają dużego kąska.",
   "The summer heat sends the fish down to the cool water off the ledge.": "Letni upał spycha ryby w chłodną wodę pod krawędzią uskoku.",
+  "The bright summer sun drives the fish into the shade under the dock.": "Ostre letnie słońce zagania ryby w cień pod Pomostem.",
   "The shallows by the reeds warm first in spring, and the fish crowd in.": "Wiosną płycizna przy trzcinach nagrzewa się pierwsza i ryby się tam tłoczą.",
   "The rain swells the inlet and washes food in, and the fish gather to feed.": "Deszcz podnosi wodę w Ujściu i spłukuje pokarm, a ryby zbierają się na żer.",
   "The cold water slows the fish, but they still chase a slow jig.": "Zimna woda spowalnia ryby, ale wolno prowadzony jig wciąż je kusi.",
