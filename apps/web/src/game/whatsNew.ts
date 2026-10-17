@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-17r";
+export const NEWS_ID = "2026-10-17s";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A trout, bass or salmon hooked on a topwater lure is already at the top, so its first run is a leap: bow to it.",
   "While a topwater lure sits, tap to pop it: the first two pops bring the fish up sooner. Then let it sit.",
   "Miss a fish that blows up on a topwater lure and it often comes back: let the lure sit and watch for a second strike.",
   "A search can ask for a month, as in “month:May”, and a fish opened from a list steps back to that list. Home sets this season against last year’s by the same date, a water’s page says what it gave around this date in earlier years, and the all-time Bests page sets each month against itself across the years. A printout drops on-screen links and fits more on a page.",
