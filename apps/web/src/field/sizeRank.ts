@@ -89,3 +89,10 @@ export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { befor
   const days = Math.round((day(entry.caughtAt) - day(before.caughtAt)) / (24 * 60 * 60 * 1000));
   return days >= 30 ? { before, days } : null;
 }
+
+/** Whether this fish was the biggest of its outing by the measure it was logged with, beating two or more others measured that way. */
+export function biggestOnOuting(outing: readonly CatchEntry[], entry: CatchEntry): boolean {
+  const own = shownSize(entry.measure);
+  const others = outing.filter((other) => other.id !== entry.id).map((other) => measureOf(other, entry.measure.kind)).filter((each): each is Measure => each !== null);
+  return others.length >= 2 && others.every((other) => shownSize(other) < own);
+}
