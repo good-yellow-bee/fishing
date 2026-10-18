@@ -629,6 +629,8 @@ export const PL_FIELD: PlBook = {
   "Most from {water}.": "Najwięcej z łowiska: {water}.",
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
+  "Next time here: {day}": "Następnym razem tutaj: {day}",
+  "Next time here, {day}: {fish}": "Następnym razem tutaj, {day}: {fish}",
   "Best month: {month} ({count} of {total})": "Najlepszy miesiąc: {month} ({count} z {total})",
   "Find a water": "Znajdź łowisko",
   "No water called “{query}”.": "Brak łowiska o nazwie „{query}”.",
