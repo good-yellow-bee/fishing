@@ -183,6 +183,7 @@ export const PL_GAME: PlBook = {
   "Click shore": "Kliknij brzeg",
   walk: "idziesz",
   "Click water": "Kliknij wodę",
+  Arrows: "Strzałki",
   aim: "celujesz",
   shop: "sklep",
   "Right drag": "Przeciągnij prawym",

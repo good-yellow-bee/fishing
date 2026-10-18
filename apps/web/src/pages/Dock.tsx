@@ -1012,7 +1012,7 @@ export function DockPage() {
           <aside className="camera-help" data-camera-control aria-label={t("Controls")}>
             <span>{t("Shore")}</span>
             <kbd>WASD</kbd> {t("or")} <kbd>{t("Click shore")}</kbd> {t("walk")}
-            <kbd>{t("Click water")}</kbd> {t("aim")}
+            <kbd>{t("Click water")}</kbd> {t("or")} <kbd>{t("Arrows")}</kbd> {t("aim")}
             <kbd>E</kbd> {t("shop")}
             <kbd>{t("Right drag")}</kbd> {t("look")}
           </aside>
