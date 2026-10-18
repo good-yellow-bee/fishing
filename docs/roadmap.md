@@ -1186,6 +1186,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC71~~ | ~~Fall pumpkins: three pumpkins sit under the big tree by the shack in fall, the biggest carved into a jack-o'-lantern whose candle flickers after dark~~ (#1170) | scene | S |
 | ~~SC72~~ | ~~Camp lights on the water: after dark the campers' fire and the lantern in their tent shine on the lake as broken streaks of warm light, as the cabin's windows do~~ (#1172) | scene | S |
 | ~~SC73~~ | ~~News card scene16: lapping waves and wakes, kite flyer, campers, fall pumpkins, winter skier~~ (#1172) | scene | S |
+| ~~SC74~~ | ~~Summer hummingbird: on dry summer days a ruby-throated hummingbird zips in to the wildflowers by the shack, hovers at five flowers in turn with its bill in them, and zips off again~~ (#1175) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

@@ -154,6 +154,8 @@ import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
 import { Pumpkins } from "./Pumpkins";
 import { pumpkinsOut } from "./pumpkinPatch";
+import { Hummingbird } from "./Hummingbird";
+import { hummingbirdOut } from "./hummingbirdVisits";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -2175,6 +2177,7 @@ export const LakeWorld = memo(function LakeWorld({
       {catPlace(hour, sky) && <Cat place={catPlace(hour, sky)!} />}
       {hareOut(hour, sky) && <Hare coat={hareCoat(season)} />}
       {season !== "winter" && <Wildflowers season={season} bees={beesOut(hour, sky, season)} />}
+      {hummingbirdOut(hour, sky, season) && <Hummingbird season={season} />}
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
       <ShorePath />
