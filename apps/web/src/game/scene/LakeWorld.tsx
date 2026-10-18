@@ -123,6 +123,10 @@ import { swallowsOut } from "./swallowFlight";
 import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
 import { Owl, OwlTree } from "./Owl";
+import { Woodpecker } from "./Woodpecker";
+import { woodpeckerOut } from "./woodpeckerDrum";
+import { Canoeist } from "./Canoeist";
+import { canoeOut } from "./canoeTrip";
 import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
@@ -2188,7 +2192,7 @@ export const LakeWorld = memo(function LakeWorld({
         (season === "winter" ? <LakeSnow light={weather.rainLight} /> : <LakeRain light={weather.rainLight} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
-      {firefliesOut(hour, sky) && <Fireflies />}
+      {firefliesOut(hour, sky, season) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
       {otterOut(hour, season) && <Otter />}
@@ -2206,6 +2210,8 @@ export const LakeWorld = memo(function LakeWorld({
       <BaskingLog />
       {turtleOut(hour, sky, season) && <Turtle />}
       <OwlTree />
+      {woodpeckerOut(hour) && <Woodpecker />}
+      {canoeOut(hour, sky, season) && <Canoeist />}
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}

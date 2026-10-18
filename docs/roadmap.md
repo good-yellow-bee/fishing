@@ -1087,6 +1087,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA42~~ | ~~An eyebrow above a page title is set solid, so when its links wrapped on a phone with larger text (a fish's "Catches · Northern pike: 1 of 2") the lines stood 3 px apart and a tap on "Catches" opened the kind instead. On a touch screen each eyebrow link now wraps as a piece of its own with 20 px between lines (#1103)~~ | phone UX | S |
 | ~~PA43~~ | ~~PA42 set an eyebrow's links on their own solid 11 px line, so "Catch log" above Photos and "Bests" above a kind kept only 29 px of reach on a touch screen. They now reach 11 px each way, 33 px, with 24 px between wrapped lines. A fish's stacked count links ("First Northern pike here.", "Northern pike in 2026: 2") stood 4 px apart and reached into each other; lines that are both links now part 12 px (#1106)~~ | phone UX | S |
 | ~~PA44~~ | ~~Bests' days calendar drew each day as a 24 px square, the smallest tap target left in the log. On a touch screen each day is now a 32 px square, shrinking only where a 320 px phone with larger text has no room for seven (#1110)~~ | phone UX | S |
+| ~~PA45~~ | ~~On a phone up to 420 px wide with larger text, each tab in the field log's bottom bar was only as wide as its word, so MAP stood 23 px wide, under even the 24 px floor. Each tab is now at least 32 px wide on screen, and all seven still fit at 320 px in English (#1112)~~ | phone UX | S |
+| ~~PA46~~ | ~~The lake page had no heading at all, so a screen reader's list of headings came up empty there while every field log page had its title. The HUD now carries a hidden "On the lake" heading, the page's tab title, ahead of the Stillwater brand (probe headings.cjs) (#1115)~~ | phone UX | S |
+| ~~PA47~~ | ~~On the lake page the chip naming where you stand (and whether it is biting) and the controls help were both unnamed side notes, so a screen reader's landmark list read "complementary" twice with nothing to tell them apart. They are now named "Where you stand" and "Controls", in Polish too (probe landmarks.cjs) (#1117)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1138,6 +1141,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC44~~ | ~~Red squirrels: on dry days from spring to fall, squirrels come down a tree, bound to the next, sit up to look about and run up it~~ (#1104) | scene | S |
 | ~~SC45~~ | ~~News card scene10: swan feathers, campfire, toadstools, dabbling ducks, squirrels~~ (#1104) | scene | S |
 | ~~SC46~~ | ~~Snowman: all winter a snowman with coal eyes, a carrot nose and a red scarf stands in front of the shack~~ (#1105) | scene | S |
+| ~~SC47~~ | ~~Woodpecker: at dawn and by day a woodpecker hitches up the owl's dead tree, drumming as it goes, and swoops back down~~ (#1108) | scene | S |
+| ~~SC48~~ | ~~Fireflies only in summer: they no longer come out on every dry night of the year, just summer nights~~ (#1114) | scene | S |
+| ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
+| ~~SC50~~ | ~~Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes~~ (#1116) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

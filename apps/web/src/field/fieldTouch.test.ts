@@ -80,6 +80,11 @@ describe("the field log's tab bar on a 320 px phone", () => {
     expect(block).toContain("grid-template-columns: repeat(7, minmax(max-content, 1fr));");
     expect(block).toContain("overflow-x: auto;");
   });
+
+  it("keeps each tab 32 px wide on screen under larger text, where a tab is as wide as its word", () => {
+    const narrow = css.slice(css.indexOf("@media (max-width: 420px) {"));
+    expect(/\n  \.field-tab a \{([^}]*)\}/.exec(narrow)?.[1]).toContain("min-width: calc(32px / var(--text-zoom, 1));");
+  });
 });
 
 describe("the field log's forms by keyboard", () => {
