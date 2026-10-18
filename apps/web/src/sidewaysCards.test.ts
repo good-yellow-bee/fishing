@@ -31,3 +31,12 @@ describe("the walking stick on a phone held sideways", () => {
     expect(sideways).toMatch(/html\[data-hand="left"\] \.hint \{\n    right: calc\(114px \/ var\(--text-zoom, 1\)\);/);
   });
 });
+
+describe("the catch card's pinned buttons", () => {
+  it("sit on solid paper upright and sideways, so the scrolled-under text never shows through", () => {
+    const upright = css.slice(css.indexOf("@media (max-width: 520px)"));
+    for (const block of [upright, sideways]) {
+      expect(/\n  \.landed-card \.catch-actions \{([^}]*position: sticky;[^}]*)\}/.exec(block)?.[1]).toContain("background: rgb(239, 224, 194);");
+    }
+  });
+});
