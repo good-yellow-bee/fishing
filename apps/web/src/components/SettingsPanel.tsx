@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { updateSettings, useSettings, type Settings } from "../game/settings";
 import { setLang, setUnits, useLang, useT, useUnits, type Lang, type Units } from "../i18n";
 import { FLOAT_COLOURS, FLOAT_SWATCH_HEX, type FloatColour } from "../game/scene/floatColour";
+import { useTabWrap } from "./tabWrap";
 
 type Choice<K extends keyof Settings> = { value: Settings[K]; label: string };
 
@@ -96,6 +97,7 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
   const current = useSettings();
   const t = useT();
   const panel = useRef<HTMLElement>(null);
+  useTabWrap(panel);
 
   // Focus moves in on open and back to the gear on close.
   useEffect(() => {

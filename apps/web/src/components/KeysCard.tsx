@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useT } from "../i18n";
+import { useTabWrap } from "./tabWrap";
 
 /** Every way to play from a keyboard or a controller: the key, the pad button, and what it does. */
 export const KEY_ROWS = [
@@ -20,6 +21,7 @@ export const KEY_ROWS = [
 export function KeysCard({ onClose }: { onClose: () => void }) {
   const t = useT();
   const panel = useRef<HTMLElement>(null);
+  useTabWrap(panel);
 
   useEffect(() => {
     const before = document.activeElement instanceof HTMLElement ? document.activeElement : null;
