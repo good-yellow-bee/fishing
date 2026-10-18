@@ -329,6 +329,17 @@
     position: absolute;
     inset: -8px -4px;
   }
+
+  /* The water's name stood 23 px tall: it reaches 6 px into the row's padding the same way. */
+  .map-index a:not(.map-plan, .map-coord-link) {
+    position: relative;
+  }
+
+  .map-index a:not(.map-plan, .map-coord-link)::after {
+    content: "";
+    position: absolute;
+    inset: -6px -3px;
+  }
 }
 
 .map-note {
