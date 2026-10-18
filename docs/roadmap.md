@@ -1063,6 +1063,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC6~~ | ~~Whitecaps on a windy day: on breezy days a few crests break white out on the deep water, on strong days many more and bigger; each slides downwind as its foam spreads and fades, dimmer after dark (one draw)~~ (#976) | scene | S |
 | ~~SC7~~ | ~~A bull moose wades out of the north-east woods at dawn and dusk from spring to fall, feeds belly-deep with its head under the water (rings as it goes in and comes up), moves to a second patch, and wades back; antlers in summer and fall; a close cast sends it trotting off till its next visit~~ (#981) | wildlife | M |
 | ~~SC8~~ | ~~News card 2026-10-18-scene02 covers SC5 to SC7: the sun and moon roads from where you stand, whitecaps on windy days and the moose in the shallows~~ (#981) | news | S |
+| SC9 | Shafts of dawn light: on a clear dawn, low sunlight slants down through the north-east trees and the morning mist across the lake, each shaft swelling and thinning as the mist drifts (full effects only, one draw) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
