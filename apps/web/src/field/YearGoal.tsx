@@ -66,11 +66,15 @@ export function goalPace(count: number, goal: number, now: Date): { pace: number
   return { pace: Math.round((count / gone) * total), left, perWeek: Math.ceil(left / Math.max(1, daysLeft / 7)), daysLeft, ahead: count - Math.round((goal * gone) / total) };
 }
 
+/** "/bests?goal=set": Bests with this year's goal form open, for a year that has none yet. */
+export const GOAL_PARAM = "goal";
+
 /** This year's fish against a goal the angler sets, or an offer to set one. */
-export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date }) {
+/** `openAtStart` opens the form at once when the year has no goal yet, as Home's "Set a goal for {year}" promises. */
+export function YearGoal({ book, now = new Date(), openAtStart = false }: { book: Logbook; now?: Date; openAtStart?: boolean }) {
   const year = String(now.getFullYear());
   const [goal, setGoal] = useState(() => readYearGoal(year));
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(() => openAtStart && readYearGoal(year) === null);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState("");
   // A goal taken off that storage wouldn't let go of: it is still there on the next visit, and says so.

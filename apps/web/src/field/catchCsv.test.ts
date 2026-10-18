@@ -18,9 +18,9 @@ describe("the catches as a spreadsheet", () => {
 
   it("writes a header and one row per fish, quoting cells that need it", () => {
     const lines = catchesCsv(bookWith('Hit on the "pause", twice')).replace(/^﻿/, "").trimEnd().split("\r\n");
-    expect(lines[0]).toBe("Date,Time,Species,Length (in),Weight (lb),Lure or bait,Water,Trip,Sky,Wind,Water °F,Released,Note");
+    expect(lines[0]).toBe("Date,Time,Outing day,Species,Length (in),Weight (lb),Lure or bait,Water,Trip,Sky,Wind,Water °F,Released,Note");
     expect(lines).toHaveLength(2);
-    expect(lines[1]).toMatch(/^2026-09-30,06:40,[^,]+,10,,/);
+    expect(lines[1]).toMatch(/^2026-09-30,06:40,,[^,]+,10,,/);
     expect(lines[1]!.endsWith(',"Hit on the ""pause"", twice"')).toBe(true);
   });
 
@@ -29,7 +29,7 @@ describe("the catches as a spreadsheet", () => {
     setUnits("metric");
     const lines = catchesCsv(bookWith("Ok")).trimEnd().split("\r\n");
     expect(lines[0]).toContain("Długość (cm);Waga (kg)");
-    expect(lines[1]).toMatch(/^2026-09-30;06:40;[^;]+;25,4;;/);
+    expect(lines[1]).toMatch(/^2026-09-30;06:40;;[^;]+;25,4;;/);
   });
 });
 
