@@ -38,6 +38,8 @@ import { SunfishNests } from "./SunfishNests";
 import { IceFloes } from "./IceFloes";
 import { Crayfish } from "./Crayfish";
 import { Waterweed } from "./Waterweed";
+import { SunkenLeaves } from "./SunkenLeaves";
+import { sunkenLeavesOut } from "./leafLitter";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
@@ -2125,6 +2127,7 @@ export const LakeWorld = memo(function LakeWorld({
       {floesOut(season) && <IceFloes wind={wind} />}
       {crayfishOut(season) && <Crayfish />}
       <Waterweed season={season} />
+      {sunkenLeavesOut(season) && <SunkenLeaves />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
