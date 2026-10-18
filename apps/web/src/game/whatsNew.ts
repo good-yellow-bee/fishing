@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa12";
+export const NEWS_ID = "2026-10-18-scene11";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "All winter a snowman in a red scarf stands in front of the shack. By day a woodpecker hitches up the owl's dead tree, drumming as it goes, and the fireflies now come out only on summer nights.",
   "On a phone, fewer taps land on the wrong link in the field log. Show all under a list no longer catches a tap meant for the row above it, the small links above a page's title stay apart when they wrap and are easier to hit, and the days in Bests' calendar are bigger squares. With larger text, every tab in the bottom bar is wide enough to tap.",
   "A water's page links to its row on the Map, the Map's list says how far each pinned water is from the nearest other, and saving a water from the Map says so.",
   "Home says when the year's goal is reached, the Bests calendar marks today and counts each month's days out, and Escape closes the goal form.",

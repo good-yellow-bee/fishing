@@ -1,4 +1,4 @@
-import type { LakeHour, Sky as WeatherSky } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky as WeatherSky } from "@stillwater/shared";
 
 /** Middles of the reed beds LakeWorld plants: the west shallows, the east point and the creek mouth. */
 export const REED_BEDS: { x: number; z: number; flies: number }[] = [
@@ -41,9 +41,9 @@ const HOMES: Home[] = REED_BEDS.flatMap((bed, b) =>
   }),
 );
 
-/** Fireflies come out on dry nights only. */
-export function firefliesOut(hour: LakeHour, sky: WeatherSky) {
-  return hour === "night" && sky !== "rain";
+/** Fireflies come out on dry summer nights only; there are none in the cold months. */
+export function firefliesOut(hour: LakeHour, sky: WeatherSky, season: LakeSeason) {
+  return hour === "night" && sky !== "rain" && season === "summer";
 }
 
 /**
