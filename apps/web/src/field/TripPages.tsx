@@ -56,11 +56,11 @@ import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { countedBook, ownFish } from "./milestones";
-import { isSampleTrip } from "./bookCopy";
+import { isSampleTrip, upcomingRealTrips } from "./bookCopy";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
-import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { likelyWater, spotsByLastFish } from "./spotOrder";
 import { useStepKeys } from "./stepKeys";
 
@@ -102,7 +102,7 @@ export function TripsPage() {
   const query = params.get(TRIP_FIND) ?? "";
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingOwnTrips(book, today);
+  const upcoming = upcomingRealTrips(book, today);
   // Today's round of the game too: "Coming up" leaves it out, and "Recent" starts from yesterday.
   const recent = [...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)), ...recentTrips(book, today)];
   const fishByTrip = fishCountsByTrip(book);

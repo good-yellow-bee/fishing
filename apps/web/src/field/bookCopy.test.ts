@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleFish, hasSampleLeft, isSampleOnly, isSampleTrip, ownCatches, withoutSample, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
+import { COPY_AGAIN_AFTER, COPY_AGAIN_DAYS, FIRST_COPY_AT, bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleFish, hasSampleLeft, isSampleOnly, isSampleTrip, ownCatches, upcomingRealTrips, withoutSample, readCopiedAt, readCopyMark, saveCopiedAt } from "./bookCopy";
 
 describe("remind to download a copy of the book", () => {
   it("stays quiet until the book has some of the player's own catches", () => {
@@ -103,5 +103,16 @@ describe("a book that is still only the sample", () => {
     const lake = { id: "spot-stillwater", name: "Stillwater", waterType: "lake" as const, notes: "", bestConditions: "" };
     const played = { spots: [...sample.spots, lake], trips: [...sample.trips, { ...sample.trips[0]!, id: "play", spotId: lake.id }], catches: [...sample.catches, { ...sample.catches[0]!, id: "landed", spotId: lake.id }] };
     expect(isSampleOnly(played)).toBe(true);
+  });
+});
+
+describe("the outings still ahead", () => {
+  it("leaves the sample's planned outings out once the book has anything of the angler's own", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const today = "2026-10-15";
+    const sampleAhead = upcomingRealTrips(book, today);
+    expect(sampleAhead.length).toBeGreaterThan(0);
+    const own = { ...sampleAhead[0]!, id: "zq-own", date: "2026-10-17" };
+    expect(upcomingRealTrips({ ...book, trips: [...book.trips, own] }, today).map((trip) => trip.id)).toEqual(["zq-own"]);
   });
 });

@@ -28,7 +28,8 @@ import { PagedTrips } from "../PagedTrips";
 import { countedSearch } from "../countedSearch";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { offPlayLake, upcomingOwnTrips } from "../playLake";
+import { offPlayLake } from "../playLake";
+import { upcomingRealTrips } from "../bookCopy";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -302,7 +303,7 @@ export function GearPage() {
     );
   }
 
-  const upcoming = upcomingOwnTrips(book, today);
+  const upcoming = upcomingRealTrips(book, today);
   // Real days out: a game day has nothing in the bag.
   const recent = recentTrips(book, today).filter(offPlayLake);
   const fishByTrip = fishCountsByTrip(book);

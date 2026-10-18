@@ -809,4 +809,5 @@ export const PL_FIELD: PlBook = {
   "What's still to pack was downloaded instead.": "Zamiast tego pobrano plik z tym, co jeszcze do spakowania.",
   "{n} days ago": ["{n} dzień temu", "{n} dni temu", "{n} dni temu"],
   "last {day}": "ostatnio {day}",
+  "Waters with fish: {count}": "Łowiska z rybami: {count}",
 };
