@@ -2,7 +2,7 @@ import { foldText, type SpotPlace, type Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return value.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r\n|\r|\n/g, "\\n");
 }
 
 const encoder = new TextEncoder();

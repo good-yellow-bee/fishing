@@ -61,6 +61,7 @@ import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { bookFishDay } from "./tripMonths";
 import { likelyWater, spotsByLastFish } from "./spotOrder";
 import { useStepKeys } from "./stepKeys";
 
@@ -270,7 +271,7 @@ function TripView() {
   // Not when that day's fish were only logged without the outing: those are offered just above.
   const lastFishHere =
     catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
-      ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => localDate(new Date(entry.caughtAt)) < trip.date)
+      ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => bookFishDay(book, entry) < trip.date)
       : undefined;
   // Kinds this water gave for the first time on this outing, once earlier fish from it say what it usually gives.
   const ownHere = catches.filter(ownFish);
@@ -470,7 +471,8 @@ function TripView() {
           <Link to={`/trips/${trip.id}/edit?${NOTE_PARAM}=1`}>{t("Write up the day")}</Link>
         </p>
       ) : null}
-      {play ? null : trip.date >= today ? (
+      {/* The sample week's planned days stay off a calendar, as "Add all to calendar" leaves them out. */}
+      {play || isSampleTrip(trip.id) ? null : trip.date >= today ? (
         <p className="trip-calendar">
           <button
             type="button"
@@ -690,8 +692,8 @@ function TripForm() {
             <label>
               {t("Spot")}
               <select name="spot" value={spotId} aria-describedby={lastHere ? "last-here" : undefined} onChange={(event) => setSpotId(event.target.value)}>
-                {/* The game's lake only for what is already there. */}
-                {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
+                {/* The game's lake only for what is already there, and a game day stays on it. */}
+                {book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId)).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>
