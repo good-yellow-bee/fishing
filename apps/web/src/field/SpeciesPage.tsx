@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, localDate, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, localDate, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
@@ -74,7 +74,7 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
 }
 
 /** The biggest fish of the kind on one lure, by the measure most of the kind were taken in, and the day of its newest: "best 32 in · last Oct 3". */
-function lureBest(catches: readonly CatchEntry[], lure: string): string | undefined {
+function lureBest(book: Logbook, catches: readonly CatchEntry[], lure: string): string | undefined {
   const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
   const kind: Measure["kind"] = lengths * 2 >= catches.length ? "length" : "weight";
   const want = lure.trim().replace(/\s+/g, " ").toLowerCase();
@@ -88,7 +88,8 @@ function lureBest(catches: readonly CatchEntry[], lure: string): string | undefi
   }
   // The newest fish on it too: a lure that took the kind once, long ago, reads apart from one still taking it.
   const newest = catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === want);
-  const last = newest ? t("last {day}", { day: formatCatchDay(newest.caughtAt) }) : null;
+  // On the day it counts on: a night session's small hours on its outing's, as the page's newest line says it.
+  const last = newest ? t("last {day}", { day: formatDay(bookFishDay(book, newest)) }) : null;
   return [best ? t("best {size}", { size: measureText(best) }) : null, last].filter(Boolean).join(" · ") || undefined;
 }
 
@@ -244,7 +245,7 @@ function SpeciesView() {
             <h2>{t("Lures that took it")}</h2>
           </div>
           {/* Each lure opens just this kind's fish on it. */}
-          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(catches, row.lure) }))} />
+          <TallyBars key={species} rows={lureTally({ ...book, catches }).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: findWithLink(kindTerm, exactTerm("lure", t(row.lure))), note: lureBest(book, catches, row.lure) }))} />
         </>
       ) : null}
       <div className="section-head">
@@ -331,7 +332,8 @@ function TypicalByWater({ catches, waters }: { catches: readonly CatchEntry[]; w
 
 /** "New waters this year: Cedar Lake": where the kind turned up somewhere it hadn't before, each opening those fish. */
 function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; name: string; waters: readonly { spotId: string; name?: string | null }[] }) {
-  const found = newWatersThisYear(catches).flatMap((id) => waters.filter((water) => water.spotId === id && water.name));
+  const { book } = useLogbook();
+  const found = newWatersThisYear(catches, new Date(), (entry) => bookFishDay(book, entry)).flatMap((id) => waters.filter((water) => water.spotId === id && water.name));
   if (found.length === 0) return null;
   return (
     <p className="meta new-waters">
@@ -350,7 +352,9 @@ function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; 
 
 /** "First of 2026: Apr 3, 9 days earlier than in 2025.": whether the kind turned up sooner this year. */
 function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
-  const found = seasonFirst(countedFish(catches));
+  const { book } = useLogbook();
+  // Each fish on the day it counts on, a night session's small hours on its outing's.
+  const found = seasonFirst(countedFish(catches), new Date(), (entry) => bookFishDay(book, entry));
   if (!found) return null;
   const vars = { year: found.year, last: found.year - 1 };
   const gap = Math.abs(found.earlier);
@@ -366,7 +370,7 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
       {/* One run of text: the paragraph lays its children out as separate items. */}
       <span>
         {before}
-        <Link to={`/catches/${found.entry.id}`}>{formatCatchDay(found.entry.caughtAt)}</Link>
+        <Link to={`/catches/${found.entry.id}`}>{formatDay(bookFishDay(book, found.entry))}</Link>
         {after}
       </span>
     </p>
@@ -376,7 +380,7 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
 /** When the kind's season ended last year: its last fish then, to plan the end of this one. */
 function SeasonLast({ catches }: { catches: readonly CatchEntry[] }) {
   const { book } = useLogbook();
-  const last = seasonLast(countedFish(catches));
+  const last = seasonLast(countedFish(catches), new Date(), (entry) => bookFishDay(book, entry));
   if (!last) return null;
   const day = bookFishDay(book, last);
   const [before, after] = t("Last one last year: {day}", { day: "\u0000" }).split("\u0000");

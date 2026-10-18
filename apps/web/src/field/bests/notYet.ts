@@ -33,20 +33,27 @@ export function notYetThisYear(
  * The waters whose first fish came this year, oldest first, once the book has fish from an earlier year: in a book
  * begun this year every water is new and the line would say nothing.
  */
-export function newWatersThisYear(catches: readonly CatchEntry[], today: Date = new Date()): string[] {
+export function newWatersThisYear(
+  catches: readonly CatchEntry[],
+  today: Date = new Date(),
+  dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+): string[] {
   const year = today.getFullYear();
   const first = new Map<string, string>();
   let earlier = false;
   for (const entry of countedFish(catches)) {
-    const at = new Date(entry.caughtAt);
-    if (Number.isNaN(at.getTime()) || at.getFullYear() > year) continue;
-    if (at.getFullYear() < year) earlier = true;
+    if (Number.isNaN(Date.parse(entry.caughtAt))) continue;
+    // The day it counts on, with its time to order fish of one day: a night fish files under its outing's day.
+    const at = `${dayOf(entry)} ${entry.caughtAt}`;
+    const fishYear = Number(at.slice(0, 4));
+    if (fishYear > year) continue;
+    if (fishYear < year) earlier = true;
     const held = first.get(entry.spotId);
-    if (!held || entry.caughtAt < held) first.set(entry.spotId, entry.caughtAt);
+    if (!held || at < held) first.set(entry.spotId, at);
   }
   if (!earlier) return [];
   return [...first.entries()]
-    .filter(([, at]) => new Date(at).getFullYear() === year)
+    .filter(([, at]) => Number(at.slice(0, 4)) === year)
     .sort((a, b) => a[1].localeCompare(b[1]))
     .map(([spotId]) => spotId);
 }

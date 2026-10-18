@@ -73,10 +73,10 @@ function waterFishLine(catches: readonly CatchEntry[]): string {
   return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
 }
 
-/** "Last fish: Sat, Oct 10" under a water, from its newest fish. */
-function lastFishLine(catches: readonly CatchEntry[]) {
-  const last = catches.reduce<string | null>((newest, entry) => (!newest || entry.caughtAt > newest ? entry.caughtAt : newest), null);
-  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(localDate(new Date(last))) })}</p> : null;
+/** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
+function lastFishLine(book: Logbook, catches: readonly CatchEntry[]) {
+  const last = catches.reduce<CatchEntry | null>((newest, entry) => (!newest || entry.caughtAt > newest.caughtAt ? entry : newest), null);
+  return last ? <p className="meta">{t("Last fish: {day}", { day: formatDay(bookFishDay(book, last)) })}</p> : null;
 }
 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
@@ -118,8 +118,10 @@ export function BestsPage() {
   const real = whole;
   const tail = (term: string) => countedSearch(all, term, all.catches);
   const days = daysOut(whole, today.slice(0, 4), today);
-  const notYet = notYetThisYear(real.catches);
-  const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
+  // A night session's small hours on its outing's day, as the calendar and the goal count them.
+  const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
+  const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
+  const newWaters = newWatersThisYear(real.catches, new Date(), dayOf).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(
     real.trips,
@@ -127,7 +129,7 @@ export function BestsPage() {
     today,
     real.catches.filter((entry) => !entry.tripId).map((entry) => bookFishDay(real, entry)),
   );
-  const weeks = weekStreak(real.trips, today);
+  const weeks = weekStreak(real.trips, today, (id) => wholeFishByTrip.get(id) ?? 0);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const years = yearTally(whole.catches).map((row) => row.year);
   const asked = params.get(YEAR_PARAM);
@@ -158,9 +160,11 @@ export function BestsPage() {
     if (list) list.push(entry);
     else bySpot.set(entry.spotId, [entry]);
   }
-  // Counted as the calendar below counts its days, so the tile and the calendar agree.
-  const topDay = bestFishDay(book);
-  const kindsDay = mostKindsDay(book);
+  // Counted as the calendar below counts its days, so the tile and the calendar agree: in a season, its fish by the day
+  // they count on, with every outing to file a night session's small hours under.
+  const dayBook = year ? { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)) } : book;
+  const topDay = bestFishDay(dayBook);
+  const kindsDay = mostKindsDay(dayBook);
   // When every fish of the best day came on one outing, the tile opens that outing.
   const topDayTrip = topDay?.tripId ?? null;
   const released = book.catches.filter((entry) => entry.released).length;
@@ -255,7 +259,8 @@ export function BestsPage() {
       </section>
       {kindsDay ? (
         <p className="meta most-kinds">
-          <Link to={linkFor(kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
+          {/* A day is already within one season: the season's word would leave out its small-hours fish. */}
+          <Link to={findLink(tail(kindsDay.date))}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
         </p>
       ) : null}
       {released > 0 ? (
@@ -322,7 +327,7 @@ export function BestsPage() {
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
-                    {lastFishLine(kindFish.get(row.species.trim().toLowerCase()) ?? [])}
+                    {lastFishLine(whole, kindFish.get(row.species.trim().toLowerCase()) ?? [])}
                   </article>
                 );
               })}
@@ -484,7 +489,7 @@ export function BestsPage() {
                   </div>
                   <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
-                  {lastFishLine(bySpot.get(water.spotId) ?? [])}
+                  {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
                 </Link>
               ))}
             </div>
