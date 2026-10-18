@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FISH, skyAt, skyTurnForDay } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, FOG_LIFT_WAIT, fogLiftWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { FISH, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
+import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, FOG_LIFT_WAIT, fogLiftWaitMul, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, CRANK_ROCK_WAIT, crankRockWaitMul, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -513,6 +513,32 @@ describe("the fog burning off", () => {
     const wet = days.find((day) => skyTurnForDay(day)?.to === "rain")!;
     const wetAt = new Date(wet.getFullYear(), wet.getMonth(), wet.getDate(), skyTurnForDay(wet)!.hour, 30);
     expect(fogLiftWaitMul(wetAt, skyAt(wetAt))).toBe(1);
+  });
+});
+
+describe("the bright morning after the rain", () => {
+  it("slows the bites on a clear morning after a day that ended in rain, but not on a jig or worm", () => {
+    expect(POST_FRONT_WAIT).toBeGreaterThan(1);
+    const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n));
+    const bright = days.find((day) => weatherForDay(day) === "clear" && rainedYesterday(day))!;
+    const at = (h: number) => new Date(bright.getFullYear(), bright.getMonth(), bright.getDate(), h, 30);
+    expect(postFrontWaitMul(at(8), skyAt(at(8)), "Inline spinner")).toBe(POST_FRONT_WAIT);
+    expect(postFrontWaitMul(at(8), skyAt(at(8)), undefined)).toBe(POST_FRONT_WAIT);
+    expect(postFrontWaitMul(at(8), skyAt(at(8)), "Twister jig")).toBe(1);
+    expect(postFrontWaitMul(at(8), skyAt(at(8)), "Nightcrawlers")).toBe(1);
+    expect(postFrontWaitMul(at(POST_FRONT_UNTIL), skyAt(at(POST_FRONT_UNTIL)), "Inline spinner")).toBe(1);
+    const dry = days.find((day) => weatherForDay(day) === "clear" && !rainedYesterday(day))!;
+    const dryAt = new Date(dry.getFullYear(), dry.getMonth(), dry.getDate(), 8, 30);
+    expect(postFrontWaitMul(dryAt, skyAt(dryAt), "Inline spinner")).toBe(1);
+    const wet = days.find((day) => weatherForDay(day) !== "clear" && rainedYesterday(day))!;
+    const wetAt = new Date(wet.getFullYear(), wet.getMonth(), wet.getDate(), 8, 30);
+    expect(postFrontWaitMul(wetAt, skyAt(wetAt), "Inline spinner")).toBe(1);
+  });
+
+  it("reads yesterday's sky at its end, so a day that turned to rain counts", () => {
+    const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n, 12));
+    const turned = days.find((day) => skyTurnForDay(day)?.to === "rain")!;
+    expect(rainedYesterday(new Date(turned.getFullYear(), turned.getMonth(), turned.getDate() + 1, 8))).toBe(true);
   });
 });
 

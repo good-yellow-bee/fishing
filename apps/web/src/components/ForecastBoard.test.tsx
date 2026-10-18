@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
+import { rainedYesterday } from "../game/logic";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -77,6 +78,19 @@ describe("ForecastBoard", () => {
     expect(host.querySelector("li:first-child")?.textContent).toContain(`The fish move up to feed as the fog burns off, from ${skyTurnForDay(foggy)!.hour}:00.`);
     act(() => root.render(<ForecastBoard now={days.find((day) => !skyTurnForDay(day))!} />));
     expect(host.querySelector("li:first-child")?.textContent).not.toContain("fog burns off");
+    act(() => root.unmount());
+  });
+
+  it("chalks the fish sulking on a bright day after the rain", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n, 8));
+    const tip = "Bright after the rain: the fish sulk deep till noon, but a slow jig or worm still draws them.";
+    act(() => root.render(<ForecastBoard now={days.find((day) => weatherForDay(day) === "clear" && rainedYesterday(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(tip);
+    act(() => root.render(<ForecastBoard now={days.find((day) => weatherForDay(day) === "clear" && !rainedYesterday(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain(tip);
     act(() => root.unmount());
   });
 

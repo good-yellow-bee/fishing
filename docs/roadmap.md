@@ -1086,6 +1086,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC11~~ | ~~Fall leaves rafted on the water: the fallen leaves gather in a raft along the bank the day's breeze blows onto, with a few strays out on the open water, each turning a little on the chop; a calm day spreads them round the shore~~ (#991) | scene | S |
 | ~~SC12~~ | ~~News card 2026-10-18-scene03 covers SC9 to SC11: dawn light shafts through the mist, spring pollen on the water and fall leaves rafted on the downwind bank~~ (#991) | news | S |
 | ~~SC13~~ | ~~Reeds in the wind: every clump of reeds leans downwind, further the stronger the day's wind, and nods about that lean on its own beat, faster and wider as the wind gets up; a calm day leaves only a breath of sway, and reduced motion keeps the lean without the nodding~~ (#1031) | scene | S |
+| ~~SC14~~ | ~~Duckweed in the still corners: in summer, ragged green beds of tiny fronds gather by the reeds, among the lilies and in two sheltered coves, thick in the middle and breaking up at the rim, nudged downwind by the breeze and riding the chop; fall thins them and winter and spring clear them~~ (#1033) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1357,7 +1358,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT264~~ | ~~Fish feed as the fog burns off: on a foggy morning that turns clear, every bite in the first clear hour comes a little sooner (0.85 wait), the bite reasons say the fish move up into the warming water, and the forecast board chalks the hour it starts~~ (#1023) | gameplay | S |
 | ~~GT265~~ | ~~News card 2026-10-18-game08 covers GT262 to GT264: a let-go fish coming back heavier, the fish feeding as the fog burns off, and the fight card warning that rocks and pilings fray the line~~ (#1024) | ui | S |
 | ~~GT266~~ | ~~A twisted line: each spinner cast turns the line, and after 12 spinner casts since the last knot the line is twisted (the stance chip says "line twisted" and the Retie button shows); a quarter of casts on it kink into a wind knot and go nowhere until Retie (or T) ties a fresh knot, and a break ties on a fresh line too; a beginner is spared~~ (#1027) | gameplay | M |
-| GT267 | Groundbait and retie on a controller: X tosses the groundbait (G) and the left trigger reties the line (T), and the keys card lists both | ui | S |
+| ~~GT267~~ | ~~Groundbait and retie on a controller: X tosses the groundbait (G) and the left trigger reties the line (T), and the keys card lists both~~ (#1030) | ui | S |
+| GT268 | The bright morning after the rain: on a clear day after a day that ended in rain, the fish sulk deep till noon, so bites come slower (1.15 wait) on any lure but a slow jig or worm; the bite reasons say so, the forecast board chalks it, and a beginner is spared | gameplay | S |
 
 ## Risks / open questions for the owner
 
@@ -1861,3 +1863,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR492~~ | ~~Round 65 fixes: adding from a book file keeps the sample week out of a book that has left it and no longer counts its fish as deleted here, the file's summary counts the angler's own fish, undoing a Replace keeps the photos removed on purpose out of later merges, Home's outings count waits for today's first fish, "by this date last year" and a photo's caption date night fish by their outing's day~~ (#1026) | field | S |
 | ~~BR493~~ | ~~Round 65 ideas: Home counts the days on the water this year beside the outings, a book file that would replace fish or places offers "Download this book first", news field19~~ (#1028) | field | S |
 | ~~BR494~~ | ~~Round 66 fixes: the year goal and year text count a night session's small hours on its outing's day, the spreadsheets leave out the game's rounds, the sample week and planned days, Undo keeps focus and Back history, the saved note gives way to the Undo bar, "Goal reached" in the year text, no "-0" water, calendar months are no longer landmarks~~ (#1034) | field | S |
+| ~~BR495~~ | ~~Round 66 ideas: the year goal says how many fish ahead of or behind an even pace, and the goal form shows last year's total, news field20~~ (#1036) | field | S |

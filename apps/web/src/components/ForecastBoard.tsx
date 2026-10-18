@@ -1,5 +1,6 @@
 import { forecast, hotBankForDay, lakeSeason, SPOT_LABELS, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
+import { rainedYesterday } from "../game/logic";
 
 function dayName(date: Date, index: number) {
   if (index === 0) return t("Today");
@@ -27,6 +28,8 @@ const RAIN_TIP = "Catfish and burbot hunt by scent in the murk and fight harder.
 const PRE_RAIN_TIP = "The fish feed hard in the hour before the rain, from {hour}:00.";
 /** The first clear hour after a foggy morning, when the fish move up to feed (fogLiftWaitMul). */
 const FOG_LIFT_TIP = "The fish move up to feed as the fog burns off, from {hour}:00.";
+/** A clear day after the rain, when the fish sulk deep till noon (postFrontWaitMul). */
+const POST_FRONT_TIP = "Bright after the rain: the fish sulk deep till noon, but a slow jig or worm still draws them.";
 
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
 export function ForecastBoard({ now = new Date() }: { now?: Date }) {
@@ -49,6 +52,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             <span className="forecast-bank">{t("Biting best at the {bank}", { bank: t(SPOT_LABELS[hotBankForDay(day.date)]) })}</span>
             {day.turn?.to === "rain" && <span className="forecast-tip">{t(PRE_RAIN_TIP, { hour: day.turn.hour - 1 })}</span>}
             {day.turn?.to === "clear" && <span className="forecast-tip">{t(FOG_LIFT_TIP, { hour: day.turn.hour })}</span>}
+            {day.sky === "clear" && rainedYesterday(day.date) && <span className="forecast-tip">{t(POST_FRONT_TIP)}</span>}
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}
