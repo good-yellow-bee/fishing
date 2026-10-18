@@ -1147,6 +1147,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
 | ~~SC50~~ | ~~Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes~~ (#1116) | scene | S |
 | ~~SC51~~ | ~~Far-bank cabin: a log cabin across the lake, windows lit from dusk, chimney smoking in fall and winter (and spring's cold ends of the day), snow on its roof in winter~~ (#1119) | scene | S |
+| ~~SC52~~ | ~~Shack cat: a ginger cat naps curled on the grass by the shack by day, lifting its head now and then, and sits facing the campfire while it burns; indoors in the rain~~ (#1122) | scene | S |
+| ~~SC53~~ | ~~News card scene12: canoeist, far-bank cabin, shack cat~~ (#1122) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
