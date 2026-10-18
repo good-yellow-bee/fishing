@@ -155,17 +155,19 @@ export function HomePage() {
   const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
-  const lastYearDays = real.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
+  // A night session's small hours on its outing's day, as the calendar counts it.
+  const lastYearDays = real.map((entry) => bookFishDay(book, entry)).filter((day) => day.startsWith(`${lastYear}-`));
   const lastYearByNow = lastYearDays.filter((day) => day.slice(5) <= today.slice(5)).length;
   // "0 by this date last year" says nothing when the book only starts after that date.
-  const firstDay = real.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
-  const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
+  const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
+  const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
   // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
   // The sample week's waters and outings go once the angler has their own.
   const countedOwn = countedBook(book);
   const ownAny = countedOwn.trips.some((trip) => !isSampleTrip(trip.id)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
-  const ownOutings = countedOwn.trips.filter((trip) => trip.date <= today).length;
+  // Today's outing counts once it has a fish, as the averages take it.
+  const ownOutings = countedOwn.trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];

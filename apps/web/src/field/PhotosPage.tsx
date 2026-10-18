@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { catchesNewestFirst, spotById, type CatchEntry } from "@stillwater/shared";
 import { photoRoomChars } from "./photoStore";
 import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
@@ -8,7 +8,7 @@ import { measuresText } from "../i18n/content";
 import { formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
-import { catchMonth, monthName } from "./tripMonths";
+import { bookFishDay, catchMonth, monthName } from "./tripMonths";
 import { speciesCounts } from "./speciesLink";
 import { catchLink } from "./catchList";
 import { exactTerm } from "./findLinks";
@@ -196,7 +196,7 @@ export function PhotosPage() {
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>
                           <small>
-                            {size} · {formatDay(localDate(new Date(entry.caughtAt)))}
+                            {size} · {formatDay(bookFishDay(book, entry))}
                             {spotById(book, entry.spotId) ? ` · ${spotById(book, entry.spotId)!.name}` : ""}
                           </small>
                         </span>
