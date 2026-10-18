@@ -1,5 +1,5 @@
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigationType, useSearchParams } from "react-router-dom";
+import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigationType, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, useLang, useT } from "../i18n";
@@ -19,7 +19,7 @@ import { noteText, outingNameById, toLocalInput } from "./format";
 import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
-import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
+import { FIND_PARAM, exactTerm, parseExactTerm, type ExactField } from "./findLinks";
 import { readSizePlus } from "./sizePlus";
 import { hasMovedInApp } from "./FieldShell";
 import { focusPageHeading } from "./pageFocus";
@@ -753,6 +753,7 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
+          {matches.length > 1 ? <MatchSplits matches={matches} search={settled} /> : null}
           {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
             // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
             <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
@@ -820,6 +821,42 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
 }
 
 /** What the found fish have in common, where one clearly leads: "Most on Jig (5). Most at Dawn (4). Most from Cedar Lake (6)." */
+/**
+ * The matches split by kind and by year, once they hold more than one: "By kind: Northern pike 3 · Zander 2", "By year:
+ * 2026 5 · 2025 3". Each narrows the search to that kind or year.
+ */
+function MatchSplits({ matches, search }: { matches: readonly CatchEntry[]; search: string }) {
+  const t = useT();
+  const { book } = useLogbook();
+  const { pathname } = useLocation();
+  const narrow = (term: string) => `${pathname}?${new URLSearchParams({ [FIND_PARAM]: `${search} + ${term}` }).toString()}`;
+  const tally = (key: (entry: CatchEntry) => string) => {
+    const counts = new Map<string, number>();
+    for (const entry of matches) counts.set(key(entry), (counts.get(key(entry)) ?? 0) + 1);
+    return [...counts];
+  };
+  const kinds = tally((entry) => entry.species).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
+  const line = (label: string, rows: [string, number][], term: (value: string) => string, name: (value: string) => string) =>
+    rows.length > 1 ? (
+      <p className="meta match-split">
+        {label}{" "}
+        {rows.map(([value, count], index) => (
+          <Fragment key={value}>
+            {index > 0 ? " · " : null}
+            <Link to={narrow(term(value))}>{`${name(value)} ${count}`}</Link>
+          </Fragment>
+        ))}
+      </p>
+    ) : null;
+  return (
+    <>
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species))}
+      {line(t("By year:"), years, (year) => year, (year) => year)}
+    </>
+  );
+}
+
 function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const t = useT();
   const { book } = useLogbook();
