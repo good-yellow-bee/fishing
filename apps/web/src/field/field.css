@@ -1462,8 +1462,13 @@ button.field-primary:disabled {
   font-size: 12px;
 }
 
-.year-goal-form .field-error {
+.year-goal-form .field-error,
+.year-goal-form .year-goal-hint {
   grid-column: 1 / -1;
+}
+
+.year-goal-form .year-goal-hint {
+  margin: 0;
 }
 
 /* After dark on the water: the same book, read from a dim screen. On screen only, so a printed page keeps dark ink on white paper. */
