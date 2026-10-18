@@ -86,6 +86,8 @@ import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
+import { Snowman } from "./Snowman";
+import { snowmanUp } from "./snowmanLook";
 import { Toadstools } from "./Toadstools";
 import { Squirrels } from "./Squirrels";
 import { squirrelRuns, squirrelsOut } from "./squirrelRun";
@@ -2139,6 +2141,7 @@ export const LakeWorld = memo(function LakeWorld({
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
+      {snowmanUp(season) && <Snowman />}
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
       <ShorePath />
