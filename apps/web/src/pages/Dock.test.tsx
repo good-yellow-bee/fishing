@@ -137,6 +137,20 @@ describe("dock weather", () => {
     expect(page.querySelector(".sky-chip")?.getAttribute("title")).toMatch(/^Snow on the water\. Pike and muskie hunt\. Wind: /);
   });
 
+  it("dots the walk signs of the banks the season, hour and weather favor", async () => {
+    const spring = await openDock("/?hour=day&sky=partly-cloudy&season=spring");
+    const sign = (name: string) => [...spring.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
+    expect(sign("Reeds")?.getAttribute("aria-label")).toBe("Reeds: bites sooner now");
+    expect(sign("Reeds")?.querySelector(".sign-now")).not.toBeNull();
+    expect(sign("Point")?.querySelector(".sign-now")).toBeNull();
+    act(() => root!.unmount());
+    root = null;
+    container?.remove();
+    const summer = await openDock("/?hour=day&sky=clear&season=summer");
+    const summerSigns = [...summer.querySelectorAll(".walk-signs button")].filter((button) => button.querySelector(".sign-now")).map((button) => button.textContent);
+    expect(summerSigns).toEqual(["Dock •"]);
+  });
+
   it("uses the day's weather on the same clock as the hour without an override", async () => {
     const now = new Date(2026, 9, 8, 22, 15);
     vi.useFakeTimers({ toFake: ["Date"], now });
