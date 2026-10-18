@@ -446,10 +446,22 @@ button.field-primary {
   object-fit: contain;
 }
 
-.photo-full form {
+/* Save and Share on the dark beside Close. */
+.photo-full-bar {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px 18px;
   margin-top: 8px;
+}
+
+.photo-full-bar .text-button {
+  color: #f3e6cc;
+}
+
+.photo-full form {
+  margin: 0;
 }
 
 .time-now {

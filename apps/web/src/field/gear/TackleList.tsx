@@ -14,14 +14,19 @@ import "./gear.css";
  * one, and on the same water ahead of any other.
  */
 export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip | null {
-  const listed = new Set(items.map((item) => item.tripId));
   const self = trips.find((trip) => trip.id === tripId);
   const day = self?.date ?? "9999-12-31";
-  // The sample week's made-up bags only for one of its own outings.
-  const sample = isSampleTrip(tripId);
-  const others = trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleTrip(trip.id))).sort((a, b) => b.date.localeCompare(a.date));
+  const others = packedTrips(trips, items, tripId);
   const pick = (from: readonly Trip[]) => from.find((trip) => trip.date <= day) ?? from[0] ?? null;
   return pick(others.filter((trip) => trip.spotId === self?.spotId)) ?? pick(others);
+}
+
+/** Every other outing with a list to copy, newest first. */
+export function packedTrips(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip[] {
+  const listed = new Set(items.map((item) => item.tripId));
+  // The sample week's made-up bags only for one of its own outings.
+  const sample = isSampleTrip(tripId);
+  return trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleTrip(trip.id))).sort((a, b) => b.date.localeCompare(a.date));
 }
 
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */
@@ -50,6 +55,9 @@ export function TackleList({
   const { items, toggle, add, remove, unpackTrip, copyTrip, unsavedTrip } = useTackle();
   const rows = itemsForTrip(items, tripId);
   const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
+  // Beyond the likeliest bag, any other outing's: a pike trip's list for this pike trip, a month on.
+  const otherBags = lastBag ? packedTrips(trips, items, tripId).filter((trip) => trip.id !== lastBag.id) : [];
+  const [copyFrom, setCopyFrom] = useState("");
   const packed = packedCount(rows);
   // Pieces compare as they read: "Rosówka" typed on a Polish list is the stored "Nightcrawler" of the tips and the fish.
   const readKey = (label: string) => pieceKey(t(label));
@@ -164,7 +172,34 @@ export function TackleList({
             </>
           ) : null}
         </p>
-      ) : (
+      ) : null}
+      {rows.length === 0 && otherBags.length > 0 ? (
+        <form
+          className="tackle-add tackle-copy-from"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!otherBags.some((trip) => trip.id === copyFrom)) return;
+            copyTrip(copyFrom, tripId);
+            focusAfter();
+          }}
+        >
+          <label>
+            {t("Or copy another outing's list")}
+            <select value={copyFrom} onChange={(event) => setCopyFrom(event.target.value)} required>
+              <option value="">{t("Choose an outing")}</option>
+              {otherBags.map((trip) => (
+                <option key={trip.id} value={trip.id}>
+                  {formatDay(trip.date)}, {outingName(trip, spots)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="submit">
+            {t("Copy")}
+          </button>
+        </form>
+      ) : null}
+      {rows.length === 0 ? null : (
         <ul className="tackle-list">
           {shown.map((item, index) => (
             <li key={item.id}>

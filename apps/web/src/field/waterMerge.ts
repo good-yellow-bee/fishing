@@ -54,6 +54,17 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
   };
 }
 
+/** What a merge would carry over, for the line under the picker: outings and fish moved, and outings that join one. */
+export function mergeMoves(book: Logbook, fromId: string, intoId: string): { outings: number; fish: number; joined: number } {
+  const days = new Set(book.trips.filter((trip) => trip.spotId === intoId).map((trip) => trip.date));
+  const moved = book.trips.filter((trip) => trip.spotId === fromId);
+  return {
+    outings: moved.length,
+    fish: book.catches.filter((entry) => entry.spotId === fromId).length,
+    joined: moved.filter((trip) => days.has(trip.date)).length,
+  };
+}
+
 /** Where each water merged away in this browser went, so a water from an older file lands in the one it joined. */
 export const MERGED_WATERS_KEY = "stillwater.field-log.merged-waters.v1";
 

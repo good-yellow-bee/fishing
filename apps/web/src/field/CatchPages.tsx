@@ -48,7 +48,7 @@ import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, fis
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
-import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
+import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
@@ -80,6 +80,28 @@ function amountText(entry: CatchEntry, units: Units): string {
 /** A number for a form box, with the decimal sign the reader writes: "0,64" in Polish. */
 function inputNumber(text: string): string {
   return locale().startsWith("pl") ? text.replace(".", ",") : text;
+}
+
+/** "850" typed as kilograms on a phone's number pad is grams: one tap turns it into "0,85". */
+function GramsHint({ units, kind, text, onUse, box }: { units: Units; kind: "length" | "weight"; text: string; onUse: (text: string) => void; box: string }) {
+  const kilos = units === "metric" && kind === "weight" ? gramsAsKilos(text) : null;
+  if (!kilos) return null;
+  const shown = inputNumber(kilos);
+  return (
+    <small className="field-hint">
+      {t("Grams?")}{" "}
+      <button
+        type="button"
+        className="text-button"
+        onClick={() => {
+          onUse(shown);
+          setTimeout(() => document.querySelector<HTMLElement>(box)?.focus(), 0);
+        }}
+      >
+        {t("Make it {kg} kg", { kg: shown })}
+      </button>
+    </small>
+  );
 }
 
 function measureAmountText(measure: Measure, units: Units): string {
@@ -298,6 +320,8 @@ function CatchForm() {
   const [timeTouched, setTimeTouched] = useState(Boolean(existing || carriedTime));
   // The time read from a photo's camera notes, while the time field still holds it.
   const [photoTime, setPhotoTime] = useState("");
+  // When the camera noted one: offered beside the time when it didn't fill it.
+  const [photoTaken, setPhotoTaken] = useState("");
   // The water a photo's location picked, while the water field still holds it.
   const [photoSpot, setPhotoSpot] = useState("");
   // Set once the player picks a water themselves; a photo's location doesn't overrule them.
@@ -526,42 +550,45 @@ function CatchForm() {
     setReducing(true);
     setPhotoError("");
     // A new fish takes the time the photo was taken, if the camera noted one and the time hasn't been set, and the
-    // pinned water within a couple of km of where it was taken, if the water and outing haven't been picked.
-    const canMoveWater = !tripPicked && !spotTouched.current;
-    if (!existing && (timeFreeNow.current || canMoveWater)) {
-      void file
-        .slice(0, PHOTO_HEAD_BYTES)
-        .arrayBuffer()
-        .then((head) => {
-          if (photoPick.current !== ticket) return;
-          const bytes = new Uint8Array(head);
-          const place = canMoveWater ? photoPlace(bytes) : null;
-          const near = place ? nearestWater(book, place) : null;
-          const water = near && near.km <= PHOTO_WATER_KM && !spotTouched.current ? near.spot.id : spotId;
-          if (water !== spotId) {
-            setSpotId(water);
-            setPhotoSpot(water);
-          }
-          const taken = photoTakenAt(bytes);
-          const timed = timeFreeNow.current && taken && taken <= toLocalInput(new Date()) ? taken : null;
-          if (timed) {
-            setCaughtAt(timed);
-            setPhotoTime(timed);
-            // Read off the camera, so picking an outing afterwards keeps it.
-            setTimeTouched(true);
-          }
-          if (!tripPicked && (timed || water !== spotId)) setTripId(tripForFish(book, water, timed ?? caughtAt)?.id ?? "");
-        })
-        .catch(() => {
-          // No camera notes to read: the time stays as it was.
-        });
-    }
+    // pinned water within a couple of km of where it was taken, if the water and outing haven't been picked. Otherwise
+    // the photo's time is offered beside the time box.
+    const canMoveWater = !existing && !tripPicked && !spotTouched.current;
+    setPhotoTaken("");
+    void file
+      .slice(0, PHOTO_HEAD_BYTES)
+      .arrayBuffer()
+      .then((head) => {
+        if (photoPick.current !== ticket) return;
+        const bytes = new Uint8Array(head);
+        const place = canMoveWater ? photoPlace(bytes) : null;
+        const near = place ? nearestWater(book, place) : null;
+        const water = near && near.km <= PHOTO_WATER_KM && !spotTouched.current ? near.spot.id : spotId;
+        if (water !== spotId) {
+          setSpotId(water);
+          setPhotoSpot(water);
+        }
+        const taken = photoTakenAt(bytes);
+        const usable = taken && taken <= toLocalInput(new Date()) ? taken : null;
+        if (usable) setPhotoTaken(usable);
+        const timed = !existing && timeFreeNow.current ? usable : null;
+        if (timed) {
+          setCaughtAt(timed);
+          setPhotoTime(timed);
+          // Read off the camera, so picking an outing afterwards keeps it.
+          setTimeTouched(true);
+        }
+        if (!tripPicked && (timed || water !== spotId)) setTripId(tripForFish(book, water, timed ?? caughtAt)?.id ?? "");
+      })
+      .catch(() => {
+        // No camera notes to read: the time stays as it was.
+      });
     void compressCatchPhoto(file).then(
       (result) => {
         if (photoPick.current !== ticket) return;
         setReducing(false);
         if (!result.ok) {
           setPhotoError(result.message);
+          setPhotoTaken("");
           return;
         }
         setPhoto(result.dataUrl);
@@ -570,6 +597,7 @@ function CatchForm() {
         if (photoPick.current !== ticket) return;
         setReducing(false);
         setPhotoError(t("That photo could not be read. Choose a JPEG, PNG, or WebP."));
+        setPhotoTaken("");
       },
     );
   };
@@ -581,6 +609,7 @@ function CatchForm() {
     setReducing(false);
     setPhoto(null);
     setPhotoError("");
+    setPhotoTaken("");
   };
 
   // An untouched number keeps its stored value, so a metric round trip doesn't nudge it; that holds for a length and
@@ -860,6 +889,7 @@ function CatchForm() {
               }
               required
             />
+            <GramsHint units={units} kind={measureKind} text={amount} onUse={setAmount} box='input[name="amount"]' />
             {/* Optional: a fish both measured and weighed keeps both, and counts for both bests. */}
             <label className="also-measure">
               {measureKind === "length" ? t("Also weighed (optional)") : t("Also measured (optional)")}
@@ -876,6 +906,7 @@ function CatchForm() {
                 }
               />
             </label>
+            <GramsHint units={units} kind={otherKind} text={alsoAmount} onUse={setAlsoAmount} box='input[name="alsoAmount"]' />
             {/* Kept in place so a screen reader hears the hint when it comes. */}
             <p className="field-hint wrong-measure" role="status">
               {otherMeasure ? (
@@ -1031,12 +1062,14 @@ function CatchForm() {
                 {t("Now")}
               </button>
             ) : null}
-            {/* Logged a little after it was landed: a step back from the time shown, a tap each. */}
+            {/* Logged a little or a day after it was landed: a step back from the time shown, a tap each. */}
             {!existing ? (
               <span className="time-back">
                 {[
                   [15, `−${t("{n} min", { n: 15 })}`],
                   [60, `−${t("{n} h", { n: 1 })}`],
+                  // Logged the morning after: the same time a day back.
+                  [24 * 60, `−${t("{n} day", { n: 1 })}`],
                 ].map(([minutes, label]) => (
                   <button
                     key={minutes}
@@ -1057,6 +1090,26 @@ function CatchForm() {
               </span>
             ) : null}
             {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
+            {/* The time was set first, or the fish was already in the book: the photo's own time is a tap away. */}
+            {photoTaken && photoTaken !== caughtAt ? (
+              <span className="field-hint">
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    setCaughtAt(photoTaken);
+                    setPhotoTime(photoTaken);
+                    if (!tripPicked) setTripId(tripForFish(book, spotId, photoTaken)?.id ?? "");
+                    setTimeTouched(true);
+                    focusSoon('input[name="caughtAt"]');
+                  }}
+                >
+                  {t("Use the photo's time ({time})", {
+                    time: photoTaken.slice(0, 10) === caughtAt.slice(0, 10) ? formatTimeOfDay(photoTaken) : formatClock(photoTaken),
+                  })}
+                </button>
+              </span>
+            ) : null}
             {Date.parse(caughtAt) - Date.now() > 5 * 60_000 ? (
               <span className="field-hint" role="status">
                 {t("That time is still to come. Is the day right?")}
@@ -1496,7 +1549,7 @@ function CatchView() {
         ) : null}
       </EditDelete>
       {photo ? (
-        <PhotoFull src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} />
+        <PhotoFull src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} name={`${t(entry.species)} ${caughtDay}`} />
       ) : null}
       <aside className="conditions" aria-label={t("Conditions")}>
         {entry.weather ? (
