@@ -1102,6 +1102,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA57~~ | ~~The news card shows only the newest four lines, but all 274 lines ever written (59 KB of text) shipped in the first script every page loads. The list now keeps the newest eight, so that script drops from 423 to 365 KB (137 to 117 KB gzipped) and a phone on a slow line starts sooner; the PA news script trims to eight each time it adds a line (#1150)~~ | phone UX | S |
 | ~~PA58~~ | ~~After PA57 the Polish translations still carried all 267 dropped news lines, so a Polish player's language file stayed at 260 KB (92 KB gzipped). Those lines are gone, and the file is 138 KB (49 KB gzipped), loaded before the first Polish screen shows (#1152)~~ | phone UX | S |
 | ~~PA59~~ | ~~With reduce motion on, the reed fluff and the creatures held still, but rain and snow still poured across the whole view and autumn leaves and spring petals kept spinning down. Those now hold at one moment too, as the reed fluff does: streaks hang in the air, flakes and leaves stay put, and the rain rings stay one size on the moving water (#1154)~~ | phone UX | S |
+| ~~PA60~~ | ~~The angler's model carried all 32 of the Kenney character's animations (sprint, jump, wheelchair moves, attacks and more), but the lake only plays idle, walk and holding the rod. The other 29 are gone, so the file the lake waits for drops from 263 to 140 KB; the angler looks and moves the same (#1157)~~ | phone UX | S |
+| ~~PA61~~ | ~~On a phone held sideways the lake's top bar showed the Stillwater wordmark, which pushed the last links (Logout in Polish, three of them with large text) onto a second row: about a quarter of a 360 px tall screen went to the bar. The wordmark now goes at that height, as it already did with larger text on a narrow phone, so normal and large text keep the bar to one row and the lure picker, signs and coach move up (#1159)~~ | phone UX | S |
+| ~~PA62~~ | ~~On a phone held sideways with the largest text, the catch card pinned its saved stamp and four buttons to its foot, which filled all but a 60 px sliver: the player saw the fish's outline and nothing about the catch. At that size the card now scrolls as one, so the name, rarity and story show first and the buttons follow a swipe or a Tab away (#1162)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1170,6 +1173,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC61~~ | ~~News card scene14: snowshoe hare, wildflowers and bumblebees, woodpile~~ (#1144) | scene | S |
 | ~~SC62~~ | ~~Cabin lights on the water: from dusk the far cabin's lit windows lie on the lake as two broken streaks of warm light running toward wherever you stand, dimmer in rain and fog~~ (#1148) | scene | S |
 | ~~SC63~~ | ~~Sailing dinghy: on breezy days from spring to fall a little dinghy reaches back and forth on the lake north-east of the dock, heeling to the wind with its boom out to lee, going about at each end~~ (#1151) | scene | S |
+| ~~SC64~~ | ~~Tyre swing: an old tyre hangs on a rope from the oak by the shack and rocks gently in the wind, further in a stronger breeze, wearing a cap of snow in winter~~ (#1153) | scene | S |
+| ~~SC65~~ | ~~News card scene15: cabin windows on the water, sailing dinghy, tyre swing~~ (#1153) | scene | S |
+| ~~SC66~~ | ~~Waves lapping at the shore: the foam along the waterline washes out over the water and draws back, wave after wave running along the bank, wider and thicker on the bank the wind blows onto~~ (#1160) | scene | S |
+| ~~SC67~~ | ~~Winter skier: on winter days a cross-country skier strides along the far bank from by the cabin to the east end and back, poles swinging, turning round at each end~~ (#1161) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

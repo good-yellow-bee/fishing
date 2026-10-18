@@ -3409,6 +3409,12 @@ html[data-contrast="high"] .sound-captions li {
     padding: 5px 10px;
   }
 
+  /* Height is what a phone on its side lacks, and the wordmark pushed the last links onto a second row; it goes,
+     as it does with larger text on a narrow phone. The page heading stays for screen readers. */
+  .hud-brand {
+    display: none;
+  }
+
   .hud-brand .eyebrow,
   .hud-user,
   .skill-chip,
@@ -3587,5 +3593,11 @@ html[data-contrast="high"] .sound-captions li {
 
   .landed-card .catch-actions .panel-btn {
     margin-top: 0;
+  }
+
+  /* With the largest text the header takes two rows and the pinned buttons and stamp filled the card, leaving a
+     sliver that showed only the fish's outline: the card scrolls as one instead, the catch first. */
+  html[data-text-size="larger"] .landed-card .catch-actions {
+    position: static;
   }
 }
