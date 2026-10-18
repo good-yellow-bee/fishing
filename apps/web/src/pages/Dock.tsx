@@ -71,6 +71,7 @@ import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } fro
 import { rememberReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
+import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
@@ -198,13 +199,6 @@ export function DockPage() {
   }, []);
   const prefs = useSettings();
   const steppedDownAt = useEffectsSteppedDown();
-  const [effectsNotice, setEffectsNotice] = useState(false);
-  useEffect(() => {
-    if (!steppedDownAt) return;
-    setEffectsNotice(true);
-    const timer = window.setTimeout(() => setEffectsNotice(false), EFFECTS_NOTICE_MS);
-    return () => window.clearTimeout(timer);
-  }, [steppedDownAt]);
   const chosenLure = pickedLure ?? defaultLure(lureChoices, me?.profile.strength ?? 1);
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
@@ -463,6 +457,8 @@ export function DockPage() {
   const shownLevel = useLevelToast(me?.level, bankClear);
   // A level-up has the floor first; the badge waits its turn behind it.
   const shownBadges = useBadgeToast(me?.badges, bankClear && !shownLevel);
+  // The effects notice waits its turn too, behind both: in a fight it covered the tension bar and the let-go cue.
+  const effectsNotice = useEffectsNotice(steppedDownAt, !bankClear || !!shownLevel || !!shownBadges, EFFECTS_NOTICE_MS);
 
   // Watch the clock; a new lake hour or sky waits for a calm moment so it never lands mid-strike or mid-fight.
   // One change at a time: the hour goes first and the sky follows on a later check.
