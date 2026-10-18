@@ -50,7 +50,7 @@ function photoMonths(entries: readonly CatchEntry[]) {
 export function PhotosPage() {
   const { book, storedBook, photos, photoFor, removePhotos } = useLogbook();
   useT();
-  const { shown, showMore, box } = useShowMore();
+  const { shown, showMore, box } = useShowMore("photos");
   const [made, setMade] = useState<number | null>(null);
   const roomNote = useRef<HTMLParagraphElement>(null);
   // How full the room kept for photos is, and what of the game's could go to free some.

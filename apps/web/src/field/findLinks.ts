@@ -21,7 +21,10 @@ export function exactTerm(field: ExactField, name: string): string {
 /** The field and name of an exact term, or null for any other search. */
 export function parseExactTerm(text: string): { field: ExactField; name: string } | null {
   const match = /^\s*(species|lure|water|sky|wind|time|season|moon|month|outing):"(.+)"\s*$/i.exec(text);
-  return match ? { field: match[1]!.toLowerCase() as ExactField, name: match[2]! } : null;
+  // A quote closing the name then more after it ('Jig" -water:"Stillwater') is two terms, not one name; an inch mark
+  // inside a name ('4" Senko - green') is not followed by a "+" or a "-word".
+  if (!match || /"\s*(?:\+|-[^\s\d])/.test(match[2]!)) return null;
+  return { field: match[1]!.toLowerCase() as ExactField, name: match[2]! };
 }
 
 /** The field log home, opened with this catch search already typed in. */
