@@ -1227,8 +1227,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC101~~ | ~~Winter eave lights: on winter evenings a string of red, green, yellow and blue bulbs droops in swags along the far cabin's front eave, the colours glowing up and fading in turn~~ (#1215) | scene | S |
 | ~~SC102~~ | ~~Coots: from spring to fall a pair of coots paddles by the lily bed at the lake's west end, nodding as they swim and diving now and then; in spring one charges the other across the water, pattering with wings half open and spray flying~~ (#1217) | scene | S |
 | ~~SC103~~ | ~~News card scene22: porch rocker, winter eave lights, sandpipers, coots~~ (#1217) | scene | S |
-| SC104 | Starling murmuration: at dusk in fall a great flock of starlings wheels high over the far shore, stretching, folding and turning as one, its mirror crossing the still lake | scene | S |
-| SC105 | Dock robin: every minute or so by day a robin flies in over the water to the dock's front-left post, cocks its head and flicks its tail, flits to the front-right post and flies off again; on the snow caps in winter | scene | S |
+| ~~SC104~~ | ~~Starling murmuration: at dusk in fall a great flock of starlings wheels high over the far shore, stretching, folding and turning as one, its mirror crossing the still lake~~ (#1219) | scene | S |
+| ~~SC105~~ | ~~Dock robin: every minute or so by day a robin flies in over the water to the dock's front-left post, cocks its head and flicks its tail, flits to the front-right post and flies off again; on the snow caps in winter~~ (#1219) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
