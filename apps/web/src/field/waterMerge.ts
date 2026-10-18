@@ -46,7 +46,7 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
   }
   return {
     spots: book.spots.filter((spot) => spot.id !== from.id).map((spot) => (spot.id === into.id ? kept : spot)),
-    trips: book.trips.filter((trip) => !foldInto.has(trip.id)).map((trip) => folded.get(trip.id) ?? (trip.spotId === from.id ? { ...trip, spotId: into.id } : trip)),
+    trips: book.trips.filter((trip) => !foldInto.has(trip.id)).map((trip) => folded.get(trip.id) ?? (trip.spotId === from.id ? movedTrip(trip, from.name, into) : trip)),
     catches: book.catches.map((entry) => {
       const host = entry.tripId ? foldInto.get(entry.tripId) : undefined;
       return entry.spotId === from.id || host ? { ...entry, ...(entry.spotId === from.id ? { spotId: into.id } : {}), ...(host ? { tripId: host.id } : {}) } : entry;
@@ -86,6 +86,12 @@ export function noteMergedWater(fromId: string, intoId: string) {
   }
 }
 
+/** An outing moved to another water; one untitled, so named after the water it left, takes the new water's name. */
+function movedTrip(trip: Trip, fromName: string, into: { id: string; name: string }): Trip {
+  const untitled = fromName.trim() !== "" && trip.title.trim().toLowerCase() === fromName.trim().toLowerCase();
+  return { ...trip, spotId: into.id, ...(untitled ? { title: into.name } : {}) };
+}
+
 /**
  * A file's book with every water merged away here moved into the one it joined: its fish and outings follow, and the
  * old water drops out. A merge that was undone (the water is back in `here`) is left alone.
@@ -102,7 +108,12 @@ export function intoMergedWaters(file: Logbook, here: Logbook, merged: Record<st
   if (!moved) return file;
   return {
     spots: file.spots.filter((spot) => target(spot.id) === spot.id),
-    trips: file.trips.map((trip) => (target(trip.spotId) === trip.spotId ? trip : { ...trip, spotId: target(trip.spotId) })),
+    trips: file.trips.map((trip) => {
+      const to = target(trip.spotId);
+      if (to === trip.spotId) return trip;
+      const into = here.spots.find((spot) => spot.id === to)!;
+      return movedTrip(trip, file.spots.find((spot) => spot.id === trip.spotId)?.name ?? "", into);
+    }),
     catches: file.catches.map((entry) => (target(entry.spotId) === entry.spotId ? entry : { ...entry, spotId: target(entry.spotId) })),
   };
 }

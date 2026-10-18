@@ -68,10 +68,33 @@ async function fresh(request) {
   return Response.error();
 }
 
+// The built scripts and styles the shell page loads: the first visit fetched them before this worker was there to keep them.
+function shellAssets(html) {
+  return [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((match) => match[1]))];
+}
+
+async function keepShellAssets() {
+  try {
+    const shell = await caches.match("/", { cacheName: SHELL });
+    if (!shell) return;
+    const cache = await caches.open(ASSETS);
+    await cache.addAll(shellAssets(await shell.text()));
+  } catch {
+    // Kept the next time they are fetched instead.
+  }
+}
+
 self.cachePlan = cachePlan;
+self.shellAssets = shellAssets;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(SHELL).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(SHELL)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(keepShellAssets)
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {

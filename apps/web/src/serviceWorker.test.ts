@@ -5,7 +5,7 @@ import { registerServiceWorker } from "./serviceWorker";
 type Plan = (url: string, method: string, mode: string, origin: string) => string;
 
 function loadWorker() {
-  const scope: { cachePlan?: Plan; addEventListener: (type: string) => void; location: { origin: string } } = {
+  const scope: { cachePlan?: Plan; shellAssets?: (html: string) => string[]; addEventListener: (type: string) => void; location: { origin: string } } = {
     addEventListener: vi.fn(),
     location: { origin: "https://lake.test" },
   };
@@ -18,6 +18,11 @@ describe("service worker", () => {
   const scope = loadWorker();
   const plan = (path: string, mode = "cors", method = "GET", origin = "https://lake.test") =>
     scope.cachePlan!(`${origin}${path}`, method, mode, "https://lake.test");
+
+  it("finds the shell page's built scripts and styles to keep at install", () => {
+    const html = '<script type="module" crossorigin src="/assets/index-a1.js"></script><link rel="stylesheet" href="/assets/index-b2.css"><link rel="icon" href="/icons/icon-192.png"><link rel="modulepreload" href="/assets/index-a1.js">';
+    expect(scope.shellAssets!(html)).toEqual(["/assets/index-a1.js", "/assets/index-b2.css"]);
+  });
 
   it("never caches the API or other sites", () => {
     expect(plan("/api/me")).toBe("skip");

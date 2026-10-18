@@ -7,6 +7,7 @@ import { warmLake } from "./warmLake";
 import { MapOffline } from "./field/map/MapOffline";
 import { BestsPage } from "./field/bests/BestsPage";
 import { SpeciesPage } from "./field/SpeciesPage";
+import { NotFoundPage } from "./field/NotFoundPage";
 import { CatchFormPage, CatchPage, CatchesPage } from "./field/CatchPages";
 import { FieldShell } from "./field/FieldShell";
 import { GearPage } from "./field/gear/GearPage";
@@ -114,6 +115,7 @@ export function App() {
         <Route path="/gear/:tripId" element={<GearPage />} />
         <Route path="/bests" element={<BestsPage />} />
         <Route path="/species/:species" element={<SpeciesPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />

@@ -488,8 +488,9 @@ function SpotForm() {
               {t("This book already has a water by that name:")} <Link to={`/spots/${sameName.id}`}>{sameName.name}</Link>
             </p>
           ) : null}
-          <fieldset>
-            <legend>{t("Water type")}</legend>
+          {/* The choice row is the group and carries the name, so the type isn't announced twice. */}
+          <fieldset role="presentation">
+            <legend aria-hidden="true">{t("Water type")}</legend>
             <ChoiceRow
               label={t("Water type")}
               value={waterType}
