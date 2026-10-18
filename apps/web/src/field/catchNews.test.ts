@@ -18,3 +18,14 @@ describe("catchNews", () => {
     expect(catchNews(book, { species: pike.species, measure: { kind: "weight", pounds: 0.1 } })).toBeNull();
   });
 });
+
+describe("catchNews beside the sample week", () => {
+  const book = sampleLogbook(new Date(2026, 9, 15));
+  const trout = book.catches.find((entry) => entry.species === "Brook trout")!;
+  const own = { ...trout, id: "own-perch", species: "Yellow perch", spotId: "own-water" };
+
+  it("leaves the sample's fish of a kind out once the angler has fish of their own", () => {
+    expect(catchNews({ ...book, catches: [...book.catches, own] }, { species: "Brook trout", measure: { kind: "length", inches: 12.5 } })).toBe("First Brook trout in the book.");
+    expect(catchNews(book, { species: "Brook trout", measure: { kind: "length", inches: 0.5 } })).toBeNull();
+  });
+});

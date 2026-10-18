@@ -5,11 +5,11 @@ import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
-import { fishCountLabel, formatCatchDay, outingNameById } from "./format";
+import { fishCountLabel, formatCatchDay, formatDay, outingNameById } from "./format";
 import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
-import { catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
@@ -102,6 +102,12 @@ function sizeChange(first: { year: string; size: Measure }, last: { year: string
 }
 
 export function SpeciesPage() {
+  const { species = "" } = useParams();
+  // Keyed by the kind, so a rename that lands on the merged kind's page starts it fresh.
+  return <SpeciesView key={species} />;
+}
+
+function SpeciesView() {
   const { book } = useLogbook();
   useT();
   const { species = "" } = useParams();
@@ -358,10 +364,12 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
 
 /** The first and the newest fish of the kind, each a link to its catch. */
 function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
-  const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
-  const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;
+  const { book } = useLogbook();
+  // Each on its outing's day, so a night's small-hours fish reads as the rest of the book dates it.
+  const firstDay = <Link to={`/catches/${first.id}`}>{formatDay(bookFishDay(book, first))}</Link>;
+  const lastDay = <Link to={`/catches/${last.id}`}>{formatDay(bookFishDay(book, last))}</Link>;
   // How long since the newest, once it is more than a day: whether the kind has gone quiet.
-  const since = daysBetween(localDate(new Date(last.caughtAt)), localDate(new Date()));
+  const since = daysBetween(bookFishDay(book, last), localDate(new Date()));
   return (
     <p className="meta species-span">
       {t("First in the book")} {firstDay} · {t("newest")} {lastDay}

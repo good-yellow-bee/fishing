@@ -78,7 +78,8 @@ describe("gramsAsKilos", () => {
     expect(gramsAsKilos("1250,5")).toBe("1.251");
     expect(gramsAsKilos("12,5")).toBeNull();
     expect(gramsAsKilos("36")).toBeNull();
-    expect(gramsAsKilos("40000")).toBeNull();
+    expect(gramsAsKilos("52")).toBeNull();
+    expect(gramsAsKilos("200000")).toBeNull();
     expect(gramsAsKilos("850 g")).toBeNull();
   });
 });

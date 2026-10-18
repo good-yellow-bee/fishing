@@ -104,6 +104,14 @@ describe("field log", () => {
     });
   });
 
+  it("refuses a fish on an outing planned for a later day", () => {
+    const later = book.trips.find((trip) => trip.id === "trip-mill")!;
+    const dayBefore = new Date(`${later.date}T12:00`);
+    dayBefore.setDate(dayBefore.getDate() - 1);
+    const before = `${dayBefore.getFullYear()}-${String(dayBefore.getMonth() + 1).padStart(2, "0")}-${String(dayBefore.getDate()).padStart(2, "0")}T21:00`;
+    expect(parseCatchDraft(draft("spot-mill", { tripId: "trip-mill", caughtAt: before }), book)).toMatchObject({ ok: false, field: "tripId" });
+  });
+
   it("accepts length or weight on a known water", () => {
     const length = parseCatchDraft(draft("spot-cedar", { amount: "18.5", lure: "Tube jig" }), book);
     expect(length.ok).toBe(true);
@@ -114,7 +122,7 @@ describe("field log", () => {
     }
 
     const weight = parseCatchDraft(
-      draft("spot-mill", { measureKind: "weight", amount: "1.2", tripId: "trip-mill" }),
+      draft("spot-mill", { measureKind: "weight", amount: "1.2", tripId: "trip-mill", caughtAt: `${book.trips.find((trip) => trip.id === "trip-mill")!.date}T07:15` }),
       book,
     );
     expect(weight.ok).toBe(true);
@@ -440,7 +448,7 @@ describe("a fish both measured and weighed", () => {
     expect(both).toMatchObject({ ok: true, value: { measure: { kind: "length", inches: 18.5 }, alsoMeasure: { kind: "weight", pounds: 2.4 } } });
     const one = parseCatchDraft(draft("spot-cedar", { alsoAmount: "  " }), book);
     expect(one.ok && "alsoMeasure" in one.value).toBe(false);
-    expect(parseCatchDraft(draft("spot-cedar", { alsoAmount: "200" }), book)).toMatchObject({ ok: false, field: "alsoAmount" });
+    expect(parseCatchDraft(draft("spot-cedar", { alsoAmount: "400" }), book)).toMatchObject({ ok: false, field: "alsoAmount" });
     expect(parseCatchDraft(draft("spot-cedar", { measureKind: "weight", amount: "3", alsoAmount: "big" }), book)).toMatchObject({ ok: false, field: "alsoAmount" });
   });
 

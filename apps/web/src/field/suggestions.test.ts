@@ -153,6 +153,11 @@ describe("the outing a new catch files under", () => {
     expect(tripForFish(only, trip.spotId, nextDay)).toBeUndefined();
     const morning = { ...trip, id: "next-morning", date: nextDay };
     expect(tripForFish({ ...book, trips: [trip, morning] }, trip.spotId, `${nextDay}T01:30`)?.id).toBe("next-morning");
+    // The evening still going, a fish on it at 23:40, stays the night's outing with the next morning planned.
+    const late = { ...book.catches[0]!, id: "late", spotId: trip.spotId, tripId: trip.id, caughtAt: new Date(y, m - 1, d, 23, 40).toISOString() };
+    expect(tripForFish({ ...book, trips: [trip, morning], catches: [late] }, trip.spotId, `${nextDay}T01:30`)?.id).toBe(trip.id);
+    // A picked outing takes its small hours whatever the next day holds.
+    expect(fishOnOutingDay({ ...book, trips: [trip, morning] }, trip.spotId, `${nextDay}T01:30`, trip.date, true)).toBe(true);
   });
 
   it("never files a new fish on one of the sample week's outings", () => {
