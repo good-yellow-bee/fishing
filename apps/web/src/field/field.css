@@ -1850,3 +1850,19 @@ button.field-primary:disabled {
     position: static;
   }
 }
+
+/* "Newest first" or "Largest first" over a list of fish (MatchOrder). */
+.search-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+/* The order in use reads as plain text; the other is the link to switch. */
+.search-order [aria-pressed="true"] {
+  color: var(--field-ink);
+  font-weight: 600;
+  text-decoration: none;
+}

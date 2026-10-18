@@ -65,7 +65,7 @@ export const PL_FIELD: PlBook = {
   "This outing already has fish, so it can't be moved to a day still to come.": "Ta wyprawa ma już ryby, więc nie można jej przenieść na dzień, który dopiero nadejdzie.",
   "Its {n} fish move to this water too.": ["Jej ryba też przeniesie się na to łowisko.", "Jej {n} ryby też przeniosą się na to łowisko.", "Jej {n} ryb też przeniesie się na to łowisko."],
   "Its fish were caught on {day} and keep that day.": ["Jej rybę złowiono dnia {day} i zostanie przy tym dniu.", "Jej {n} ryby złowiono dnia {day} i zostaną przy tym dniu.", "Jej {n} ryb złowiono dnia {day} i zostanie przy tym dniu."],
-  "Water, month, “no fish”…": "Łowisko, miesiąc, „bez ryb”…",
+  "Water, month, a fish, “no fish”…": "Łowisko, miesiąc, ryba, „bez ryb”…",
   "No outing matches that.": "Żadna wyprawa do tego nie pasuje.",
   "Outings: {count}": "Wyprawy: {count}",
 
@@ -766,4 +766,6 @@ export const PL_FIELD: PlBook = {
   "Show newer ({count})": "Pokaż nowsze ({count})",
   "sample|search word": "przykładowe",
   "Delete this water? Also leaving the book: {what}.": "Usunąć to łowisko? Z dziennika zniknie też: {what}.",
+  "Weeks in a row on the water: {count}, and still going": "Tygodnie z wyprawą z rzędu: {count} i seria trwa",
+  "Most weeks in a row on the water: {count}": "Najwięcej tygodni z wyprawą z rzędu: {count}",
 };

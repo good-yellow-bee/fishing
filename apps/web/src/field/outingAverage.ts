@@ -1,4 +1,4 @@
-import type { Trip } from "@stillwater/shared";
+import { localDate, type Trip } from "@stillwater/shared";
 import { num, t, tn } from "../i18n";
 
 /**
@@ -57,6 +57,32 @@ export function outingStreak(trips: readonly Trip[], fishOn: (tripId: string) =>
     dry = Math.max(dry, dryRun);
   }
   return { best, going: best > 0 && run === best, dry, dryNow: dryRun };
+}
+
+/** The Monday that starts the week of a YYYY-MM-DD day, `ahead` weeks on, as YYYY-MM-DD. */
+function weekOf(date: string, ahead = 0): string {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  const day = new Date(y, m - 1, d, 12);
+  day.setDate(day.getDate() - ((day.getDay() + 6) % 7) + ahead * 7);
+  return localDate(day);
+}
+
+/**
+ * The longest run of weeks in a row (Monday to Sunday) with an outing, fish or not, and whether it is still going:
+ * this week's or last week's outing keeps it alive, as this week may still bring one. Planned outings don't count.
+ */
+export function weekStreak(trips: readonly Trip[], today: string): { best: number; going: boolean } {
+  const weeks = [...new Set(trips.filter((trip) => trip.date <= today).map((trip) => weekOf(trip.date)))].sort();
+  let best = 0;
+  let run = 0;
+  let last = "";
+  for (const week of weeks) {
+    run = last && weekOf(last, 1) === week ? run + 1 : 1;
+    best = Math.max(best, run);
+    last = week;
+  }
+  const alive = last !== "" && (last === weekOf(today) || weekOf(last, 1) === weekOf(today));
+  return { best, going: alive && run === best };
 }
 
 /**

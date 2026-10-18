@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { bestOutingHere, outingAverage, outingStreak, topOuting } from "./outingAverage";
+import type { Trip } from "@stillwater/shared";
+import { bestOutingHere, outingAverage, outingStreak, topOuting, weekStreak } from "./outingAverage";
 
 const trip = (id: string, date: string) => ({ id, date, spotId: "spot-cedar", title: id, note: "" });
 
@@ -67,5 +68,19 @@ describe("top outing", () => {
     const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("c", "2026-10-09"), trip("later", "2026-11-01")];
     expect(topOuting(trips, (id) => ({ a: 1, b: 4, c: 2, later: 9 })[id] ?? 0, "2026-10-15")?.id).toBe("b");
     expect(topOuting(trips, (id) => ({ a: 4, b: 4, c: 2 })[id] ?? 0, "2026-10-15")).toBeNull();
+  });
+});
+
+describe("weeks in a row with an outing", () => {
+  const trip = (id: string, date: string): Trip => ({ id, date, spotId: "s", title: "", note: "" });
+  it("counts Monday-to-Sunday weeks in a row, and keeps a run going through this week", () => {
+    // Sun 4 Oct, Mon 5 Oct and Sat 17 Oct 2026: weeks of 28 Sep, 5 Oct, 12 Oct.
+    const trips = [trip("a", "2026-10-04"), trip("b", "2026-10-05"), trip("c", "2026-10-17")];
+    expect(weekStreak(trips, "2026-10-20")).toEqual({ best: 3, going: true });
+    expect(weekStreak(trips, "2026-10-27")).toEqual({ best: 3, going: false });
+    expect(weekStreak([trip("a", "2026-10-01"), trip("b", "2026-10-15")], "2026-10-15")).toEqual({ best: 1, going: true });
+  });
+  it("leaves planned outings out", () => {
+    expect(weekStreak([trip("a", "2026-10-30")], "2026-10-20")).toEqual({ best: 0, going: false });
   });
 });
