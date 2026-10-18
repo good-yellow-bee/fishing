@@ -5,6 +5,8 @@ import { APPROACH, PIER_TOP, type DeckRect } from "./pierDeck";
 export const FROST_COLOR = "#e4edf3";
 /** How far the frost pales the walkway's planks at its thickest. */
 export const FROST_PALE = 0.5;
+/** How far winter's snow pales the walkway's planks; the snow sheet covers the straight run. */
+export const SNOW_PALE = 0.75;
 /** Crystals scattered over the frost, catching the low sun. */
 export const FROST_SPECKS = 900;
 
@@ -16,6 +18,11 @@ export function dockFrost(hour: LakeHour, season: LakeSeason, sky: WeatherSky) {
   if (hour !== "dawn" || (sky !== "clear" && sky !== "partly-cloudy")) return 0;
   if (season === "fall") return 1;
   return season === "spring" ? 0.6 : 0;
+}
+
+/** How far the walkway's boards are paled: by winter's snow, or by the morning's frost. */
+export function walkwayPale(season: LakeSeason, frost: number) {
+  return season === "winter" ? SNOW_PALE : frost * FROST_PALE;
 }
 
 function seeded(i: number, salt: number) {

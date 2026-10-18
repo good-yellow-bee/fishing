@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { FROST_SHEETS, dockFrost, frostPrints, frostSpecks, sheetUv } from "./dockFrost";
+import { FROST_PALE, FROST_SHEETS, SNOW_PALE, dockFrost, frostPrints, frostSpecks, sheetUv, walkwayPale } from "./dockFrost";
 
 describe("hoar frost on the dock", () => {
   it("lies only at dawn after a clear night, thickest in fall", () => {
@@ -52,5 +52,13 @@ describe("hoar frost on the dock", () => {
     const [walk] = FROST_SHEETS;
     expect(walk!.rect.minZ).toBe(DOCK_PLANKS.maxZ);
     expect(walk!.rect.maxZ).toBeGreaterThan(walk!.rect.minZ + 1);
+  });
+
+  it("pales the walkway's boards under winter's snow, and by the frost's thickness otherwise", () => {
+    expect(walkwayPale("winter", 0)).toBe(SNOW_PALE);
+    expect(walkwayPale("fall", 1)).toBe(FROST_PALE);
+    expect(walkwayPale("spring", 0.6)).toBeCloseTo(0.6 * FROST_PALE);
+    expect(walkwayPale("summer", 0)).toBe(0);
+    expect(SNOW_PALE).toBeGreaterThan(FROST_PALE);
   });
 });
