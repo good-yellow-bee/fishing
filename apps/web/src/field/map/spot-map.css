@@ -211,11 +211,11 @@
   bottom: 26px;
 }
 
-/* The angler's own waters: the label sits right of the pin, or left of it in the east half. */
+/* The angler's own waters: the label sits right of the pin, or left of it in the east half, never wider than the half it has. */
 .map-pin-own .map-pin-label {
   left: 26px;
   top: 14px;
-  max-width: 180px;
+  max-width: min(180px, 35vw);
   overflow: hidden;
   text-overflow: ellipsis;
 }

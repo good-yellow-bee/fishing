@@ -11,6 +11,14 @@ describe("mostKindsDay", () => {
     expect(mostKindsDay({ spots: [], trips: [], catches })).toEqual({ date: "2026-10-05", kinds: 2 });
   });
 
+  it("counts a night session's small-hours fish on its outing's day, as the day search finds them", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const trip = { ...book.trips[0]!, id: "night", date: "2026-10-03" };
+    const late = { ...fish("a", 4, "Pike"), tripId: "night", caughtAt: new Date(2026, 9, 4, 0, 30).toISOString() };
+    const catches = [fish("b", 3, "Perch"), late, fish("c", 4, "Bream")];
+    expect(mostKindsDay({ spots: [], trips: [trip], catches })).toEqual({ date: "2026-10-03", kinds: 2 });
+  });
+
   it("says nothing when no day had two kinds", () => {
     expect(mostKindsDay({ spots: [], trips: [], catches: [fish("a", 3, "Pike"), fish("b", 3, "pike ")] })).toBeNull();
   });

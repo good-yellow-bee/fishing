@@ -32,8 +32,8 @@ import {
   type SamplePlace,
 } from "./places";
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
-import { hasSampleWaters } from "../bookCopy";
-import { PLAY_LAKE_ID, upcomingOwnTrips } from "../playLake";
+import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
+import { PLAY_LAKE_ID } from "../playLake";
 import { spotsByLastFish } from "../spotOrder";
 import "./spot-map.css";
 
@@ -144,7 +144,7 @@ function SpotPin({
   // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
   // A pin just beside an earlier one moves its label a line down (or up, near the foot of the sheet), off the other label.
   const shift = crowded ? (point.y > height * 0.7 ? " map-pin-up" : " map-pin-down") : "";
-  const own = spot.place ? ` map-pin-own${point.x > width * 0.6 ? " map-pin-east" : ""}${shift}` : "";
+  const own = spot.place ? ` map-pin-own${point.x > width * 0.5 ? " map-pin-east" : ""}${shift}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
@@ -166,10 +166,12 @@ function SpotPin({
 }
 
 /** Where a spot sits on the sheet: a sample water's own place, or the angler's place for a water inside the frame. */
-function sheetPlace(spot: Spot): SamplePlace | undefined {
+function sheetPlace(spot: Spot, sampleSheet: boolean): SamplePlace | undefined {
   // A place the angler set wins over the sample's, even on a sample water.
   const place = spot.place;
   if (!place) return placeFor(spot.id);
+  // With the sample waters gone, its made-up sheet is no place for a real water, even one inside its frame.
+  if (!sampleSheet) return undefined;
   const inside = place.lat <= MAP_FRAME.north && place.lat >= MAP_FRAME.south && place.lng >= MAP_FRAME.west && place.lng <= MAP_FRAME.east;
   return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
 }
@@ -248,7 +250,7 @@ export function SpotMapPage() {
   // And the next outing planned there, as the Waters page says it.
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingOwnTrips(book, today);
+  const upcoming = upcomingRealTrips(book, today);
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
@@ -256,11 +258,12 @@ export function SpotMapPage() {
     const next = upcoming.find((trip) => trip.spotId === spotId);
     return next ? `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}` : line;
   };
+  const sampleSheet = hasSampleWaters(book);
   const plotted = spots.flatMap((spot) => {
-    const place = sheetPlace(spot);
+    const place = sheetPlace(spot, sampleSheet);
     return place ? [{ spot, place }] : [];
   });
-  const unplotted = spots.filter((spot) => !sheetPlace(spot));
+  const unplotted = spots.filter((spot) => !sheetPlace(spot, sampleSheet));
   // Pinned off the sample sheet: drawn on a sheet of their own.
   const ownPinned = unplotted.flatMap((spot) => (spot.place ? [{ spot, place: { spotId: spot.id, lat: spot.place.lat, lng: spot.place.lng } }] : []));
   const unpinned = unplotted.filter((spot) => !spot.place);
@@ -272,7 +275,7 @@ export function SpotMapPage() {
           <p className="eyebrow">{t("Waters")}</p>
           <h1>{t("Map")}</h1>
           <p className="lede">
-            {hasSampleWaters(book)
+            {sampleSheet
               ? t("Sample spots on a north-woods sheet. The ink is local — no tile service and no key.")
               : t("Waters you note a place for are drawn here. The ink is local, with no tile service and no key.")}
           </p>

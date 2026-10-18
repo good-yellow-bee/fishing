@@ -50,7 +50,8 @@ import { BiggestHere } from "./BiggestHere";
 import { MergeWater } from "./MergeWater";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
-import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
+import { PLAY_LAKE_ID } from "./playLake";
+import { upcomingRealTrips } from "./bookCopy";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -75,7 +76,7 @@ export function SpotsPage() {
   useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingOwnTrips(book, today);
+  const upcoming = upcomingRealTrips(book, today);
   const [order, setOrder] = useState(readSpotOrder);
   const pickOrder = (next: SpotOrder) => {
     setOrder(next);

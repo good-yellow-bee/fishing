@@ -10,7 +10,7 @@ import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, 
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
-import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleTrip } from "./bookCopy";
+import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleTrip, upcomingRealTrips } from "./bookCopy";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
@@ -24,7 +24,7 @@ import { ThemeChoice } from "./ThemeChoice";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
-import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 
 function deskLine(now: Date): string {
@@ -127,7 +127,7 @@ export function HomePage() {
           return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
         })
       : undefined;
-  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingOwnTrips(book, today)];
+  const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingRealTrips(book, today)];
   // Just back from the water, not from a round of the game.
   // Last evening's outing still on the water shows once, among what's coming up.
   const recent = recentTrips({ ...book, trips: book.trips.filter((trip) => offPlayLake(trip) && trip.id !== lateOuting?.id) }, today, 3);

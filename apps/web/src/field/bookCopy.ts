@@ -1,5 +1,5 @@
 import { sampleLogbook, type Logbook, type TackleItem } from "@stillwater/shared";
-import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 
 export const BOOK_COPY_STORAGE_KEY = "stillwater.field-log.copied.v1";
 
@@ -52,6 +52,15 @@ export function withoutSample(book: Logbook): Logbook {
   const trips = book.trips.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id) || usedTrips.has(trip.id));
   const usedSpots = new Set([...catches.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
   return { ...book, catches, trips, spots: book.spots.filter((spot) => !SAMPLE_SPOT_IDS.has(spot.id) || usedSpots.has(spot.id)) };
+}
+
+/**
+ * The outings still ahead, the game's left out, and the sample week's made-up plans once the book holds anything of the
+ * angler's own: those would push a real outing down, and "Log a catch" would file a real fish on one.
+ */
+export function upcomingRealTrips(book: Logbook, today: string) {
+  const ahead = upcomingOwnTrips(book, today);
+  return isSampleOnly(book) ? ahead : ahead.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id));
 }
 
 /** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */

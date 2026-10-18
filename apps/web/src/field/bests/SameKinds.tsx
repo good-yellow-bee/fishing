@@ -3,7 +3,7 @@ import { t, useT } from "../../i18n";
 import { PL } from "../../i18n/pl";
 import { useLogbook } from "../LogbookState";
 import { renameInBook } from "../bookRename";
-import { offPlayLake } from "../playLake";
+import { countedFish } from "../milestones";
 import { kindPairs } from "./kindPairs";
 
 /** A stored name as Polish writes it, whatever the reader's language: "European perch" and "Okoń" meet there. */
@@ -18,7 +18,8 @@ export function SameKinds() {
   const { storedBook, changeBook } = useLogbook();
   useT();
   const box = useRef<HTMLElement>(null);
-  const pairs = kindPairs(storedBook.catches.filter(offPlayLake), t, inPolish);
+  // The fish the counts below hold: a sample fish under the other name is no slip of the angler's.
+  const pairs = kindPairs(countedFish(storedBook.catches), t, inPolish);
   if (pairs.length === 0) return null;
   return (
     <section ref={box} className="same-kinds" aria-label={t("Same kind, two names")}>
