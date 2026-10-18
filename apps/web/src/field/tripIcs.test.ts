@@ -35,7 +35,7 @@ describe("trip calendar file", () => {
 
   it("names the file by day and title", () => {
     expect(tripIcsName(trip)).toBe("stillwater-2026-10-31-dawn-patrol-weed-edge.ics");
-    expect(tripIcsName({ ...trip, title: "Łódź o świcie" })).toBe("stillwater-2026-10-31-odz-o-swicie.ics");
+    expect(tripIcsName({ ...trip, title: "Łódź o świcie" })).toBe("stillwater-2026-10-31-lodz-o-swicie.ics");
   });
 
   it("folds a long line at 75 bytes without splitting a letter", () => {

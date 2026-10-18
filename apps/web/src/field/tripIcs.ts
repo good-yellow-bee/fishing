@@ -1,4 +1,4 @@
-import type { SpotPlace, Trip } from "@stillwater/shared";
+import { foldText, type SpotPlace, type Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
@@ -57,6 +57,7 @@ export function tripIcs(trip: Trip, place: string | null, now: Date = new Date()
 }
 
 export function tripIcsName(trip: Trip): string {
-  const slug = trip.title.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "outing";
+  // Folded as the search folds it, so "Łowienie" keeps its Ł as an l.
+  const slug = foldText(trip.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "outing";
   return `stillwater-${trip.date}-${slug}.ics`;
 }

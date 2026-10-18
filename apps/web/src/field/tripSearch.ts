@@ -1,5 +1,6 @@
 import { WATER_LABELS, foldText, spotById, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
-import { dateWords } from "./dateWords";
+import { dateWords, monthWord } from "./dateWords";
+import { singularStems } from "./pluralWord";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
@@ -65,14 +66,19 @@ export function findTrips(book: Logbook, needle: string, fishOn: (tripId: string
   const parts = needle.split("+").map(plain).filter(Boolean);
   if (parts.length === 0) return [];
   // Each part's dates read once, not once per outing.
-  const ranges = new Map(parts.map((part) => [part, dateWords(part, now)]));
+  // Outings can be ahead: "this weekend" on a Thursday is the coming one, and "tomorrow" is a day to find.
+  const ranges = new Map(parts.map((part) => [part, dateWords(part, now, { ahead: true })]));
   const matches = (trip: Trip, text: string, part: string) => {
     if (NO_FISH.includes(part)) return trip.date < today && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     const range = ranges.get(part);
     if (range) return trip.date >= range.from && trip.date <= range.to;
-    return part.split(" ").every((word) => text.includes(word));
+    // "w październiku" finds the outings of any October, as the catch search finds its fish.
+    const month = monthWord(part);
+    if (month >= 0 && Number(trip.date.slice(5, 7)) - 1 === month) return true;
+    // "szczupaki" finds the outings that took a "szczupak": a plural stands for its shorter form.
+    return part.split(" ").every((word) => text.includes(word) || singularStems(word).some((stem) => text.includes(stem)));
   };
   return book.trips
     .filter((trip) => {

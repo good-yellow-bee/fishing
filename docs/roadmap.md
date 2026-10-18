@@ -1760,3 +1760,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR459~~ | ~~Round 48 ideas: the photo's time after a typed one, a day back, grams in metric, what a merge moves, save or share a photo, copy any outing's tackle~~ (#940) | field | S |
 | ~~BR460~~ | ~~Round 49 fixes: Bests and species pages leave the sample week out, dry spells end with fish logged off an outing, Polish lure record, Home night outing once, Spots card counts, focus after lure merges~~ (#941) | field | S |
 | ~~BR461~~ | ~~Round 49 ideas: Spots narrow to one kind of water, the lure record names lures packed four or more times without a fish, news field03~~ (#943) | field | S |
+| ~~BR462~~ | ~~Round 50 fixes: plural kinds and Polish month forms in both searches, mm and dag bounds, Trips date words look ahead, Map empty state, calendar file names keep Ł, night fish on date words~~ (#946) | field | S |

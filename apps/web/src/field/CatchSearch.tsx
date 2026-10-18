@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
@@ -22,7 +23,7 @@ import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
-import { dateWords } from "./dateWords";
+import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
@@ -51,8 +52,16 @@ function whenOf(entry: CatchEntry): WhenOf {
 /** True when a word of the fish's month ("October 2026", "Październik 2026") starts with what was typed. */
 function monthHas(entry: CatchEntry, want: string): boolean {
   if (want.length < 3) return false;
-  const name = normalize(monthName(whenOf(entry)?.month ?? catchMonth(entry)));
-  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want));
+  const month = whenOf(entry)?.month ?? catchMonth(entry);
+  const name = normalize(monthName(month));
+  // Any form of a month's name: "października", "w październiku".
+  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want)) || monthWord(want) === Number(month.slice(5)) - 1;
+}
+
+/** True when what was typed is a plural of a word of the fish's kind, in the book's name or the one shown: "szczupaki", "bluegills". */
+function speciesPlural(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
+  if (want.length < 4 || want.includes(" ")) return false;
+  return [entry.species, t(entry.species)].some((name) => normalize(name).split(" ").some((word) => pluralOf(want, word)));
 }
 
 /** True when the kind of water the fish came from ("River", "Rzeka") starts with what was typed, from three letters up. */
@@ -198,10 +207,11 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     });
   }
   // "2026-10-12": the fish of that local day.
-  // "yesterday", "last week", "Oct 15", "sobota": the fish of those local days.
+  // "yesterday", "last week", "Oct 15", "sobota": the fish of those days.
   const days = dateWords(needle);
   if (days) return catchesNewestFirst(book).filter((entry) => {
-    const day = localDate(new Date(entry.caughtAt));
+    // As the calendar counts it: a night session's small hours on its outing's day.
+    const day = bookFishDay(book, entry);
     return day >= days.from && day <= days.to;
   });
   if (BIG_WORDS.has(normalize(needle))) {
@@ -280,6 +290,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     if (hit.has(entry.id)) continue;
     if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
     else if (
+      speciesPlural(entry, want, t) ||
       monthHas(entry, want) ||
       (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
       waterTypeHas(book, entry, want, t) ||
@@ -319,28 +330,28 @@ export function searchParts(book: Logbook, needle: string): string[] {
     .sort((a, b) => b.length - a.length);
   const kept: string[] = [];
   // "over 10 in", "under 2 lb", "ponad 60 cm": the words for a bound, read as ">" and "<" before a size or temperature.
-  const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$))`;
+  const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$))`;
   // "10 inches" or "10 inch": the unit as the search reads it.
   let text = needle
     .replace(/(\d)\s?inch(?:es)?(?=[\s+]|$)/gi, "$1 in")
     // "od 20 do 25 cm", "between 20 and 25 in", "from 2 to 3 lb": the range "20-25 cm", read below.
-    .replace(/(^|[\s+])(?:od|from|between)\s+(\d+(?:[.,]\d+)?)\s+(?:do|to|and)\s+(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))(?=[\s+]|$)/gi, "$1$2-$3")
+    .replace(/(^|[\s+])(?:od|from|between)\s+(\d+(?:[.,]\d+)?)\s+(?:do|to|and)\s+(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]))(?=[\s+]|$)/gi, "$1$2-$3")
     .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|more than|bigger than|longer than|heavier than|warmer than|ponad|powyżej|powyzej|więcej niż|wiecej niz|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niż|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niz|od)\s+` + sized, "gi"), "$1>")
     // "do 25 cm", "up to 2 lb": the bound itself included.
     .replace(new RegExp(String.raw`(^|[\s+])(?:do|up to)\s+` + sized, "gi"), "$1<=")
     .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz)\s+` + sized, "gi"), "$1<");
   // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
-  text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|g|in|cm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
+  text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
   // "20+ in", the plus before the unit: the same.
-  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
+  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
   // "25-30 in" or "1–2 kg": a size between the two, both ends included, as ">25 in + <=30 in"; "30-25 in" reads the same.
-  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?=[\s+]|$)/gi, (_all, lead: string, a: string, b: string, unit: string) => {
+  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$)/gi, (_all, lead: string, a: string, b: string, unit: string) => {
     const [low, high] = Number(a.replace(",", ".")) <= Number(b.replace(",", ".")) ? [a, b] : [b, a];
     return `${lead}>${low} ${unit} + <=${high} ${unit}`;
   });
   // "17 in" or "2.5 lb" alone: the fish of that size as it rounds, from half a step under it to half a step over.
   // Not part of "3 lb 2 oz", which reads as one weight, nor a bound with a space in it ("> 1 lb").
-  text = text.replace(/(?<![<>]=?\s*)(^|[\s+])(?<!lbs?\s+)(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|g|in|cm|°?[cf])(?![\s]+\d+(?:[.,]\d+)?\s?oz)(?=[\s+]|$)/gi, (_all, lead: string, typed: string, unit: string) => {
+  text = text.replace(/(?<![<>]=?\s*)(^|[\s+])(?<!lbs?\s+)(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?![\s]+\d+(?:[.,]\d+)?\s?oz)(?=[\s+]|$)/gi, (_all, lead: string, typed: string, unit: string) => {
     const value = Number(typed.replace(",", "."));
     const half = 0.5 / 10 ** (typed.split(/[.,]/)[1]?.length ?? 0);
     const edge = (n: number) => String(Math.round(n * 1000) / 1000);
@@ -602,7 +613,7 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
-          {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|g|in|cm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
+          {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
             // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
             <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
           ) : null}

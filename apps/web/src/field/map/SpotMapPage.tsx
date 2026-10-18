@@ -273,7 +273,8 @@ export function SpotMapPage() {
       {plotted.length === 0 && ownPinned.length === 0 ? (
         <p className="empty">
           {t("None of the waters in this book are drawn on the sheet.")}
-          {book.spots.length === 0 ? (
+          {/* No water of the angler's own yet: the game's lake alone is no reason to hide the way to add one. */}
+          {spots.length === 0 ? (
             <>
               {" "}
               <Link to="/spots/new">{t("Add a spot")}</Link>
