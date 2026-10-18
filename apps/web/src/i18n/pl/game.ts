@@ -371,6 +371,7 @@ export const PL_GAME: PlBook = {
   "The bright summer sun drives the fish into the shade under the dock.": "Ostre letnie słońce zagania ryby w cień pod Pomostem.",
   "The winter sun warms the shallows by the reeds a little, and the cold fish drift in.": "Zimowe słońce lekko ogrzewa płyciznę przy Trzcinach i zmarznięte ryby podpływają.",
   "The wind drives the baitfish onto the point, and the hunters follow them in.": "Wiatr spycha drobnicę na Cypel, a drapieżniki płyną za nią.",
+  "The dock lanterns draw minnows into their light, and the fish follow them in.": "Latarnie na Pomoście zwabiają drobnicę do swojego światła, a ryby płyną za nią.",
   "On a clear summer day the fish hide in the shade under the Dock, on a clear winter day they drift into the sun-warmed shallows by the Reeds, and a strong wind drives the baitfish onto the Point. A cast to each draws a bite sooner.": "W pogodny letni dzień ryby chowają się w cieniu pod Pomostem, w pogodny zimowy dzień podpływają na nagrzaną słońcem płyciznę przy Trzcinach, a silny wiatr spycha drobnicę na Cypel. Rzut w każde z tych miejsc szybciej przynosi branie.",
   "The shallows by the reeds warm first in spring, and the fish crowd in.": "Wiosną płycizna przy trzcinach nagrzewa się pierwsza i ryby się tam tłoczą.",
   "The rain swells the inlet and washes food in, and the fish gather to feed.": "Deszcz podnosi wodę w Ujściu i spłukuje pokarm, a ryby zbierają się na żer.",

@@ -352,6 +352,14 @@ export function winterSunWaitMul(spot: string, season: LakeSeason | undefined, h
   return season === "winter" && hour === "day" && sky === "clear" && spot === "reeds" ? WINTER_SUN_WAIT : 1;
 }
 
+/** After dark the dock's lanterns light the water under them, minnows gather in the glow, and the fish that hunt them follow, so a cast off the dock draws the bite sooner. */
+export const LANTERN_DOCK_WAIT = 0.85;
+
+/** How the lanterns stretch the wait at the dock: sooner at night, when they burn full, else 1. */
+export function lanternDockWaitMul(spot: string, hour: LakeHour) {
+  return hour === "night" && spot === "dock" ? LANTERN_DOCK_WAIT : 1;
+}
+
 /** A strong wind drives the waves and the baitfish onto the point's rocks, and the hunters follow them in, so a cast off the point draws the bite sooner. */
 export const WIND_POINT_WAIT = 0.85;
 
