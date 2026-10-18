@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, stanceAt, walkableAt } from "@stillwater/shared";
-import { clearLine, routeWish, walkPath, WALK_TARGETS, type WalkTarget } from "./walkPath";
+import { clearLine, routeWish, walkPath, WALK_TARGETS, type WalkPoint, type WalkTarget } from "./walkPath";
 
 function walkAlong(fromX: number, fromZ: number, path: { x: number; z: number }[]) {
   let x = fromX;
@@ -86,6 +86,59 @@ describe("routeWish", () => {
       }
       expect(route, target).toHaveLength(0);
       expect(stanceAt(x, z), target).toBe(target);
+    }
+  });
+});
+
+/** Walks a signpost's route the way the angler's legs do (Player.tsx: 4.35 m/s top speed, 5.2 m/s² to change pace), sliding along the shore's edge. */
+function walkSign(from: WalkPoint, to: WalkPoint, dt: number) {
+  const route = walkPath(from.x, from.z, to.x, to.z)!;
+  const out = { x: 0, z: 0 };
+  let { x, z } = from;
+  let vx = 0;
+  let vz = 0;
+  for (let t = 0; t < 40 && route.length > 0; t += dt) {
+    routeWish(x, z, route, 4.35, out);
+    const ax = out.x - vx;
+    const az = out.z - vz;
+    const accel = Math.hypot(ax, az);
+    if (accel > 1e-6) {
+      const step = Math.min(accel, 5.2 * dt);
+      vx += (ax / accel) * step;
+      vz += (az / accel) * step;
+    }
+    const ox = x;
+    const oz = z;
+    if (walkableAt(x + vx * dt, z + vz * dt)) [x, z] = [x + vx * dt, z + vz * dt];
+    else if (walkableAt(x + vx * dt, z)) x += vx * dt;
+    else if (walkableAt(x, z + vz * dt)) z += vz * dt;
+    vx = (x - ox) / dt;
+    vz = (z - oz) / dt;
+  }
+  return { x, z };
+}
+
+describe("sharp bends", () => {
+  it("slow the angler into a sharp corner and leave a gentle one at full speed", () => {
+    const out = { x: 0, z: 0 };
+    // Two meters short of a right-angle turn down onto the pier.
+    routeWish(-1, 11.5, [{ x: 1, z: 11.5 }, { x: 1, z: 10.5 }], 4.35, out);
+    expect(Math.hypot(out.x, out.z)).toBeLessThan(4.35);
+    routeWish(-1, 11.5, [{ x: 1, z: 11.5 }, { x: 5, z: 11 }], 4.35, out);
+    expect(Math.hypot(out.x, out.z)).toBeCloseTo(4.35);
+  });
+
+  it("let every signpost walk arrive from every bank, at 60, 30 and 20 frames a second", () => {
+    // Walking to the dock from the reeds, point or inlet once overshot the turn onto the pier at full speed and stopped on the path.
+    const targets = Object.keys(WALK_TARGETS) as WalkTarget[];
+    for (const dt of [1 / 60, 1 / 30, 1 / 20]) {
+      for (const from of targets) {
+        for (const to of targets) {
+          if (from === to) continue;
+          const end = walkSign(WALK_TARGETS[from], WALK_TARGETS[to], dt);
+          expect(Math.hypot(end.x - WALK_TARGETS[to].x, end.z - WALK_TARGETS[to].z), `${from} to ${to} at ${Math.round(1 / dt)} fps`).toBeLessThan(0.3);
+        }
+      }
     }
   });
 });

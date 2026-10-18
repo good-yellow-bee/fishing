@@ -1051,6 +1051,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA6~~ | ~~On any phone held sideways the catch card's fish, rarity and name ran off the top of the screen, out of reach; it now stops under the header and scrolls with Release, Keep fishing, Field log and Save picture pinned at its foot, and the fight card sits lower and tighter so it clears a two-row header~~ (#980) | phone UX | S |
 | ~~PA7~~ | ~~On a 320 px phone with larger text (Polish especially) the last banks in the bottom row of shore signs ran past the screen edge, out of reach; the row now scrolls sideways when it must and looks as before when it fits. The lodge board's All time / This week tabs stand 32 px on touch screens, and the in-game Reduce motion setting also stills the fight card's note fade (the system setting already did)~~ (#982) | phone UX, access | S |
 | ~~PA8~~ | ~~On a sideways phone with larger text (640x360 in Polish) the first-cast coach's step chips wrapped three rows deep, so the coach covered the power meter and the stance chip's words; with larger text the chips now step aside (the coach's line says what to do), and while the coach shows the stance chip keeps to one line short of it~~ (#983) | phone UX, access | S |
+| ~~PA9~~ | ~~The Google Fonts stylesheet blocked the first paint, so on a weak signal (or with the fonts request hung) the app stayed blank for 7.7 s; it now loads without blocking (preload, then media print flipped to all, with a noscript copy) and the page draws in 1.8 s in the fallback fonts~~ (#986) | phone UX, speed | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1065,6 +1066,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC7~~ | ~~A bull moose wades out of the north-east woods at dawn and dusk from spring to fall, feeds belly-deep with its head under the water (rings as it goes in and comes up), moves to a second patch, and wades back; antlers in summer and fall; a close cast sends it trotting off till its next visit~~ (#981) | wildlife | M |
 | ~~SC8~~ | ~~News card 2026-10-18-scene02 covers SC5 to SC7: the sun and moon roads from where you stand, whitecaps on windy days and the moose in the shallows~~ (#981) | news | S |
 | ~~SC9~~ | ~~Shafts of dawn light: on a clear dawn, low sunlight slants down through the north-east trees and the morning mist across the lake, each shaft swelling and thinning as the mist drifts (full effects only, one draw)~~ (#984) | scene | S |
+| ~~SC10~~ | ~~Spring pollen on the water: a yellow film of pine and birch pollen lies on the lake in spring, in wavering streaks lined up with the breeze out on the open water and piled thickest against the downwind bank; rain thins it, and it rides the waves~~ (#987) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1325,7 +1327,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT253~~ | ~~News card 2026-10-18-game05 covers GT249 to GT252: groundbait feeders, the field guide's school and feeder lines, and a bank fished hard~~ (#959) | news | S |
 | ~~GT254~~ | ~~Fresh water: the first cast of a visit at each bank meets fish that haven't seen a lure today, so it bites a little sooner (0.9) and the wait hint says so (told after the bank's own reasons), which rewards walking the lake alongside the fished-hard rule~~ (#961) | gameplay | S |
 | ~~GT255~~ | ~~G tosses the groundbait from the keyboard wherever its button by the walk signs shows, and the keys card lists it~~ (#963) | ui | S |
-| GT256 | A fished bank rests instead of resetting: each bank keeps its count of casts through the visit, and every cast at another bank rests it by 2, so one cast next door and back no longer clears the wary fish; the stance chip says "fished hard" at any bank still wary | gameplay | S |
+| ~~GT256~~ | ~~A fished bank rests instead of resetting: each bank keeps its count of casts through the visit, and every cast at another bank rests it by 2, so one cast next door and back no longer clears the wary fish; the stance chip says "fished hard" at any bank still wary~~ (#978) | gameplay | S |
+| GT257 | Walk signs make the bend onto the pier: walking from the Reeds, Point or Inlet to the Dock took the right-angle turn at full speed, overshot it and stopped on the path; the angler now slows into a sharp bend (to 1.2 m/s) and keeps full speed round a gentle one | gameplay | S |
 
 ## Risks / open questions for the owner
 
