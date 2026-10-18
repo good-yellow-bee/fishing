@@ -16,4 +16,10 @@ describe("a phone held sideways", () => {
     expect(block).toContain("grid-auto-flow: column;");
     expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 72px);");
   });
+
+  it("lets a phone's bottom row of shore signs scroll sideways when the last banks would run past the edge", () => {
+    const narrow = css.slice(css.indexOf("/* One thumb row along the bottom"));
+    const block = /\.walk-signs \{([^}]*)\}/.exec(narrow)?.[1];
+    expect(block).toContain("overflow-x: auto;");
+  });
 });
