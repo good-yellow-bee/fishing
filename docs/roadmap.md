@@ -1202,6 +1202,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC81~~ | ~~Dog walker in the rain: the dog walker now comes out on rainy days too, under an umbrella~~ (#1186) | scene | S |
 | ~~SC82~~ | ~~Rain and snow in the wind: on breezy and windy days the rain streaks slant down the wind, still landing on their rings, and the snow drives across at a slant~~ (#1190) | scene | S |
 | ~~SC83~~ | ~~News card scene18: woodcutter, dawn sculler, dog walker in the rain, rain and snow in the wind~~ (#1190) | scene | S |
+| ~~SC84~~ | ~~Moored boats fill with the weather: the rowboats at their moorings hold a dome of snow in winter, a pool of rainwater in the rain and a scatter of fallen leaves in the fall~~ (#1196) | scene | S |
+| ~~SC85~~ | ~~Spring goose family: by day in spring a pair of Canada geese graze slowly along the far bank with five goslings, pecking at the grass, the parents' necks dipping as they feed~~ (#1196) | scene | S |
+| ~~SC86~~ | ~~Leaf-pile jumper: on dry fall days a child runs at a pile of raked leaves on the far bank, leaps in arms up, lies back in a burst of leaves, then climbs out and walks back for another go~~ (#1196) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
