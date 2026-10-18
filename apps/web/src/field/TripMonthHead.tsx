@@ -2,12 +2,13 @@ import { localDate, type Trip } from "@stillwater/shared";
 import { tn } from "../i18n";
 import { fishCountLabel } from "./format";
 import { monthName } from "./tripMonths";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /** A month's heading over its outings: the month, how many outings, and how many fish they brought. */
 /** An outing still to come, or today's before its first fish, is counted apart as planned, as a water's season line and the cards say it. */
 export function TripMonthHead({ month, trips, fishOn }: { month: string; trips: readonly Trip[]; fishOn: (tripId: string) => number }) {
   const today = localDate(new Date());
-  const planned = trips.filter((trip) => trip.date >= today && fishOn(trip.id) === 0).length;
+  const planned = trips.filter((trip) => isPlanned(trip, today, fishOn(trip.id))).length;
   const fished = trips.length - planned;
   return (
     <h3 className="month-head">
@@ -17,4 +18,9 @@ export function TripMonthHead({ month, trips, fishOn }: { month: string; trips: 
       {fished > 0 ? ` · ${fishCountLabel(trips.reduce((sum, trip) => sum + fishOn(trip.id), 0))}` : ""}
     </h3>
   );
+}
+
+/** An outing still to come, or today's before its first fish; never a round of the game, which is made by playing. */
+export function isPlanned(trip: Trip, today: string, fish: number): boolean {
+  return trip.spotId !== PLAY_LAKE_ID && trip.date >= today && fish === 0;
 }

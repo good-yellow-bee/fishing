@@ -19,6 +19,7 @@ import { exactTerm, findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
+import { isPlanned } from "./TripMonthHead";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -112,7 +113,7 @@ export function TripCard({
   const tally =
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
-        fishCount === 0 && trip.date >= today
+        isPlanned(trip, today, fishCount)
         ? t("Planned")
         : fishCountLabel(fishCount)
       : packed === bag.length

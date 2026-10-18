@@ -54,7 +54,7 @@ import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot, upcomingRealTrips } from "./bookCopy";
 import { hasMovedInApp } from "./FieldShell";
-import { leaveDeleted } from "./leaveDeleted";
+import { leaveDeleted, leaveSaved } from "./leaveDeleted";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -499,6 +499,7 @@ function SpotForm() {
   const { book, storedBook, addSpot, updateSpot } = useLogbook();
   useT();
   const navigate = useNavigate();
+  const location = useLocation();
   const { spotId } = useParams();
   const existing = spotId ? spotById(book, spotId) : undefined;
   // Sent here to note where the water is (from the map, or its page): straight to the place field.
@@ -558,6 +559,7 @@ function SpotForm() {
       if (hasMovedInApp()) navigate(-1);
       else navigate("/map", { replace: true });
     }
+    else if (existing) leaveSaved(navigate, location.state, `/spots/${result.id}`);
     else navigate(`/spots/${result.id}`, { replace: true });
   };
 

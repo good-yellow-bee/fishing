@@ -844,6 +844,8 @@ export const PL_FIELD: PlBook = {
   "A book that could not be read was set aside. See what to do with it": "Dziennik, którego nie dało się odczytać, został odłożony. Zobacz, co można z nim zrobić",
   "Show newer ({count})": "Pokaż nowsze ({count})",
   "sample|search word": "przykładowe",
+  "this month|search word": "w tym miesiącu",
+  "this year|search word": "w tym roku",
   "Delete this water? Also leaving the book: {what}.": "Usunąć to łowisko? Z dziennika zniknie też: {what}.",
   "Weeks in a row on the water: {count}, and still going": "Tygodnie z wyprawą z rzędu: {count} i seria trwa",
   "Most weeks in a row on the water: {count}": "Najwięcej tygodni z wyprawą z rzędu: {count}",
