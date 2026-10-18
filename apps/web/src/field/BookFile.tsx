@@ -498,6 +498,12 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {/* The same file again: nothing to add, so Replace (which can lose fish) isn't the only way out that reads like one. */}
             {hasBook && addable === 0 && placesOnly === 0 && photosOnly === 0 && countsOnly === 0 && kept === 0 ? ` ${t("Nothing in this file is new to this book.")}` : ""}
           </span>{" "}
+          {/* Fish or places Replace would lose: a copy of this book first, in one tap, before deciding. */}
+          {lost > 0 || placesLost > 0 ? (
+            <button type="button" className="text-button" onClick={onDownload}>
+              {t("Download this book first")}
+            </button>
+          ) : null}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>

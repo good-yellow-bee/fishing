@@ -433,6 +433,8 @@ export const PL_FIELD: PlBook = {
   "A copy of this book was sent.": "Kopia dziennika została wysłana.",
   "The copy could not be sent. Download it instead.": "Nie udało się wysłać kopii. Pobierz ją zamiast tego.",
   "Download this book": "Pobierz ten dziennik",
+  "Download this book first": "Najpierw pobierz ten dziennik",
+  "{n} days out this year": ["{n} dzień nad wodą w tym roku", "{n} dni nad wodą w tym roku", "{n} dni nad wodą w tym roku"],
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
