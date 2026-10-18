@@ -1747,3 +1747,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR454~~ | ~~Round 46 fixes: search keeps typed letters, long-book speed~~ (#923) | field | S |
 | ~~BR455~~ | ~~Round 46 follow-up: length and weight list, folded past bags, lighter lists~~ (#927) | field | S |
 | ~~BR456~~ | ~~Round 47 fixes: quoted search names, counts that open what they count, night-session days~~ (#931) | field | S |
+| ~~BR457~~ | ~~Round 47 ideas: outings by their fish, largest first on species and water pages, weeks in a row~~ (#933) | field | S |
