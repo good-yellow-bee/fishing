@@ -272,7 +272,7 @@
 
 .map-index li {
   display: grid;
-  grid-template-columns: 1.2fr 0.6fr 0.5fr 1.4fr;
+  grid-template-columns: 1.2fr 0.6fr 0.5fr 1.4fr auto;
   gap: 10px;
   align-items: baseline;
   padding: 8px 0;
@@ -287,6 +287,12 @@
   font-size: 18px;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+
+/* "Plan one" beside each water: a small link, not a second name. */
+.map-index a.map-plan {
+  color: var(--field-rust);
+  font: inherit;
 }
 
 /* The coordinates in the own-waters index read like the sample sheet's: small, beside the name. */

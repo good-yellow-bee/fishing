@@ -46,6 +46,18 @@ describe("find an outing", () => {
     expect(find("this month")).toEqual(["c", "a"]);
   });
 
+  it("reads a part with a size as a catch search, finding the outings of its fish", () => {
+    const asked: string[] = [];
+    const fishTrips = (part: string) => {
+      asked.push(part);
+      return new Set(["a"]);
+    };
+    const sized = (needle: string) => findTrips(book, needle, (id) => fish.get(id) ?? 0, "2026-10-16", (text) => text, now, fishTrips).map((row) => row.id);
+    expect(sized("pike over 20 in")).toEqual(["a"]);
+    expect(sized("dawn")).toEqual(["a"]);
+    expect(asked).toEqual(["pike over 20 in"]);
+  });
+
   it("finds an outing by the plural of a kind it caught", () => {
     const caught = book.catches[0]!;
     const word = caught.species.toLowerCase().split(" ").at(-1)!;

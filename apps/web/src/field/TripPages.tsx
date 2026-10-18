@@ -39,7 +39,7 @@ import { WaterTipsBox, sameTimeText } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
 import { packingTips } from "./waterTips";
 import { datedName, downloadFile } from "./download";
-import { tripIcs, tripIcsName } from "./tripIcs";
+import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
 import { bestOutingHere, outingAverage } from "./outingAverage";
@@ -52,6 +52,7 @@ import { TripWeather } from "./Weather";
 import { t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
+import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { ownFish } from "./milestones";
@@ -107,7 +108,9 @@ export function TripsPage() {
   // How the outings already fished have gone, across every water.
   const average = outingAverage(book.trips.filter(offPlayLake), (id) => fishByTrip.get(id) ?? 0, today);
   const needle = query.trim();
-  const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t) : [];
+  // A size in the search is read as the catch search reads it, and finds the outings of the fish it found.
+  const fishTrips = (part: string) => new Set(findCatches(book, part, t).flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
+  const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t, new Date(), fishTrips) : [];
   const card = (trip: Trip, level?: 4) => (
     <TripCard
       level={level}
@@ -177,6 +180,24 @@ export function TripsPage() {
               {upcoming.map((trip) => card(trip))}
             </div>
           )}
+          {/* Every planned outing into the calendar in one file, rather than one at a time. */}
+          {upcoming.length > 1 ? (
+            <p className="trip-calendar">
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  const outings = upcoming.map((trip) => {
+                    const spot = spotById(book, trip.spotId);
+                    return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place };
+                  });
+                  downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
+                }}
+              >
+                {t("Add all {n} to calendar", { n: upcoming.length })}
+              </button>
+            </p>
+          ) : null}
           <h2 className="subhead">{t("Recent")}</h2>
           {average ? <p className="meta">{average}</p> : null}
           {book.trips.length > 0 ? (
