@@ -2663,6 +2663,11 @@ html[data-reduce-motion="1"] .hour-veil {
   }
 }
 
+.log-page table:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 .board-tabs {
   display: flex;
   gap: 6px;
@@ -3010,6 +3015,18 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   html[data-hand="left"] .power-meter {
     right: auto;
     left: 12px;
+  }
+}
+
+/* A finger needs a bigger target than a mouse: on touch screens the header's links and the coach's Skip stand at least 32 px tall (they were 22). */
+@media (pointer: coarse) {
+  .hud .hud-link,
+  .walkthrough-skip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
   }
 }
 
