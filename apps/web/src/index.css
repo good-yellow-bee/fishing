@@ -128,6 +128,11 @@ a {
   margin: 8px 0 0;
 }
 
+/* The amber focus ring measured 1.5:1 on the card's paper (WCAG 1.4.11 asks 3:1); the same deep rust is 5.1:1. */
+.auth-card :is(a, button):focus-visible {
+  outline-color: #8f3a28;
+}
+
 .dock-page {
   position: relative;
   height: 100vh;
