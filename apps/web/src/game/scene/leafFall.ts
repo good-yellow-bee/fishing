@@ -23,6 +23,8 @@ const BLOWN_CARRY = 0.12;
 const WIND_PUSH = 1.4;
 
 export const LEAF_COLORS = ["#d9822b", "#c2452d", "#e0b13a", "#a8532a"] as const;
+/** Wild cherry and hawthorn blossom: white, blush and pink. */
+export const PETAL_COLORS = ["#fbf3f4", "#f7d3dd", "#f2b6c8"] as const;
 
 export type Leaf = {
   x: number;
@@ -39,6 +41,11 @@ export type Leaf = {
 
 export function leavesOut(season: LakeSeason) {
   return season === "fall";
+}
+
+/** Spring's blossom lets go from the shore trees the same way, petal by petal. */
+export function petalsOut(season: LakeSeason) {
+  return season === "spring";
 }
 
 function hash(i: number) {

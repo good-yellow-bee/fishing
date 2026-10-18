@@ -117,7 +117,7 @@ import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, type B
 import { sharedLilyPetals } from "./lilyPetals";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
-import { leavesOut } from "./leafFall";
+import { leavesOut, petalsOut } from "./leafFall";
 import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
@@ -2138,6 +2138,7 @@ export const LakeWorld = memo(function LakeWorld({
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
+      {petalsOut(season) && <FallingLeaves wind={wind} petals />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
