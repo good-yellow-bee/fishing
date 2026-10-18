@@ -483,7 +483,7 @@ html[data-hand="left"] .photo-shutter {
 }
 
 .spot-row button:hover:not(:disabled),
-.upgrade-row button:hover:not(:disabled),
+.upgrade-row button:hover:not([aria-disabled="true"]),
 .panel-btn:hover {
   border-color: #d9b56d;
   background: rgba(211, 168, 89, 0.16);
@@ -491,7 +491,7 @@ html[data-hand="left"] .photo-shutter {
 }
 
 .spot-row button:active:not(:disabled),
-.upgrade-row button:active:not(:disabled),
+.upgrade-row button:active:not([aria-disabled="true"]),
 .panel-btn:active,
 .auth-card button:active,
 .hud .hud-link:active {
@@ -515,7 +515,7 @@ a:focus-visible {
 }
 
 .spot-row button:disabled,
-.upgrade-row button:disabled {
+.upgrade-row button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }

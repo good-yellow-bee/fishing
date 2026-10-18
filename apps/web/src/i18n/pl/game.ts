@@ -339,6 +339,7 @@ export const PL_GAME: PlBook = {
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",
   " → {next} ({cost} pts)": " → {next} ({cost} pkt)",
+  "{skill} is now {rank}.": "{skill}: teraz {rank}.",
   " max": " maks.",
   "The request could not be claimed.": "Nie udało się odebrać nagrody za zlecenie.",
   "Claimed, but your points could not be refreshed.": "Odebrane, ale nie udało się odświeżyć punktów.",
