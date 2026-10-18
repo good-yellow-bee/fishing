@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { PL } from "./pl";
+import type { PlBook } from "./pl";
 
 /**
  * The game's language, picked from the browser on a first visit and then
@@ -41,6 +41,36 @@ function load(): Lang {
 let lang: Lang = load();
 const listeners = new Set<() => void>();
 
+/**
+ * The Polish book is its own chunk, so an English player never downloads it.
+ * Until it arrives `t` answers in English; `main.tsx` waits for it before the
+ * first paint when the player reads Polish.
+ */
+let PL: PlBook = {};
+let bookReady = false;
+let bookLoad: Promise<void> | null = null;
+
+export function loadPolish(): Promise<void> {
+  bookLoad ??= import("./pl").then(
+    (book) => {
+      PL = book.PL;
+      bookReady = true;
+      changed();
+    },
+    (error: unknown) => {
+      // Offline before the chunk was ever kept: try again on the next ask.
+      bookLoad = null;
+      throw error;
+    },
+  );
+  return bookLoad;
+}
+
+/** The Polish book as loaded so far (empty until `loadPolish` resolves). */
+export function polishBook(): PlBook {
+  return PL;
+}
+
 function mark() {
   if (typeof document !== "undefined") document.documentElement.lang = lang;
 }
@@ -62,7 +92,20 @@ function changed() {
   listeners.forEach((listener) => listener());
 }
 
+/** The language last asked for: a switch to Polish waits for its book, and a switch back meanwhile wins. */
+let wanted: Lang = lang;
+
 export function setLang(next: Lang) {
+  wanted = next;
+  if (next === "pl" && !bookReady) {
+    loadPolish().then(
+      () => {
+        if (wanted === "pl") setLang("pl");
+      },
+      () => {},
+    );
+    return;
+  }
   if (next === lang) return;
   lang = next;
   try {
@@ -115,6 +158,7 @@ export function useUnits(): Units {
 /** Reload from storage and the browser; for tests. */
 export function reloadLang() {
   lang = load();
+  wanted = lang;
   chosenUnits = loadUnits();
   mark();
   changed();

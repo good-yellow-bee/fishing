@@ -1,6 +1,5 @@
-import { useRef } from "react";
-import { t, useT } from "../../i18n";
-import { PL } from "../../i18n/pl";
+import { useEffect, useRef } from "react";
+import { loadPolish, polishBook, t, useT } from "../../i18n";
 import { useLogbook } from "../LogbookState";
 import { renameInBook } from "../bookRename";
 import { countedFish } from "../milestones";
@@ -8,7 +7,7 @@ import { kindPairs } from "./kindPairs";
 
 /** A stored name as Polish writes it, whatever the reader's language: "European perch" and "Okoń" meet there. */
 const inPolish = (name: string) => {
-  const line = PL[name];
+  const line = polishBook()[name];
   return typeof line === "string" ? line : name;
 };
 
@@ -17,6 +16,10 @@ export function SameKinds() {
   // The book as stored: the shown one has the sample week in the player's language.
   const { storedBook, changeBook } = useLogbook();
   useT();
+  // English readers fetch the Polish book here too; useT re-renders once it lands.
+  useEffect(() => {
+    loadPolish().catch(() => {});
+  }, []);
   const box = useRef<HTMLElement>(null);
   // The fish the counts below hold: a sample fish under the other name is no slip of the angler's.
   const pairs = kindPairs(countedFish(storedBook.catches), t, inPolish);

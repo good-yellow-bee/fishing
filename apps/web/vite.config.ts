@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -12,6 +13,10 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  test: {
+    // Tests switch to Polish synchronously, so the lazily loaded Polish book is in place before each file runs.
+    setupFiles: ["./src/testSetup.ts"],
   },
   optimizeDeps: {
     exclude: ["@stillwater/shared"],
