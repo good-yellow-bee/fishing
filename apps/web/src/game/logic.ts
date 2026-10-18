@@ -24,6 +24,7 @@ import {
   rareBiteMulForLevel,
   hookWindowMulForLevel,
   perfectCastHalfForLevel,
+  skyTurnForDay,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -215,6 +216,14 @@ export const STORM_WAIT = 1.25;
 /** How a thunderstorm stretches the wait: slower in a storm (rain, a strong wind, and not winter's snow), else 1. */
 export function stormWaitMul(sky: string | undefined, season: string | undefined, wind: string | undefined) {
   return sky === "rain" && wind === "strong" && season !== "winter" ? STORM_WAIT : 1;
+}
+
+/** The fish feed hard in the heavy air of the last hour before the day's clouds turn to rain, so every bite comes sooner. */
+export const PRE_RAIN_WAIT = 0.8;
+
+/** How the coming rain shortens the wait: in the hour before an overcast day turns to rain, PRE_RAIN_WAIT, else 1. */
+export function preRainWaitMul(now: Date, sky: string | undefined, turn = skyTurnForDay(now)) {
+  return turn?.to === "rain" && sky === "overcast" && now.getHours() === turn.hour - 1 ? PRE_RAIN_WAIT : 1;
 }
 
 /** A breeze chops the surface, and under the broken light the fish feed bolder, so any lure but a topwater draws the bite sooner. */

@@ -107,6 +107,7 @@ export const PL_CONTENT: PlBook = {
   "Snow on the water. Pike and muskie hunt.": "Śnieg na wodzie. Szczupaki polują.",
   "Fog on the lake. Catfish and burbot stir.": "Mgła nad jeziorem. Sumiki i miętusy się budzą.",
   "Catfish and burbot hunt by scent in the murk and fight harder.": "Sumiki i miętusy polują w mętnej wodzie na węch i walczą mocniej.",
+  "The fish feed hard in the hour before the rain, from {hour}:00.": "Ryby żerują zachłannie w godzinie przed deszczem, od {hour}:00.",
   "On a clear night a spinner or spoon flashes under it.": "W pogodną noc obrotówka lub wahadłówka błyska w jej świetle.",
   "Too dark to see: bites come slower after dark.": "Za ciemno, by widzieć: po zmroku brania przychodzą wolniej.",
 
