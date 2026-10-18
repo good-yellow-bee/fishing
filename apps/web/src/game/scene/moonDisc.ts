@@ -64,13 +64,15 @@ function unit(i: number) {
 }
 
 /**
- * The glints of the moon's road: a strip from just off the dock toward the
- * moon disc, widening with distance, kept to open water (`onWater`).
+ * The glints of the moon's road: a strip from the eye (`from`, on the water plane) toward the
+ * moon disc, between `near` and `far` meters out, widening with distance, kept to open water (`onWater`).
  */
 export function moonRoadGlints(
   from: { x: number; z: number },
   disc: readonly [number, number, number],
   onWater: (x: number, z: number) => boolean,
+  near = 3,
+  far = 24,
 ): RoadGlint[] {
   const dx = disc[0] - from.x;
   const dz = disc[2] - from.z;
@@ -78,7 +80,7 @@ export function moonRoadGlints(
   const ux = dx / len;
   const uz = dz / len;
   return Array.from({ length: MOON_ROAD_GLINTS }, (_, i) => {
-    const dist = 3 + (i / (MOON_ROAD_GLINTS - 1)) * 21;
+    const dist = near + (i / (MOON_ROAD_GLINTS - 1)) * (far - near);
     const side = (unit(i + 3) - 0.5) * (0.6 + dist * 0.12);
     return { x: from.x + ux * dist - uz * side, z: from.z + uz * dist + ux * side, scale: 0.4 + unit(i + 17) * 0.6, band: i % MOON_ROAD_BANDS };
   }).filter((glint) => onWater(glint.x, glint.z));
