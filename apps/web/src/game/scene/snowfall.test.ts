@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
-import { SNOW_COUNT, SNOW_FALL, SNOW_TOP, snowFlake } from "./snowfall";
+import { SNOW_COUNT, SNOW_FALL, SNOW_LEAN, SNOW_TOP, snowFlake } from "./snowfall";
 
 describe("winter snow", () => {
   it("keeps every flake over the lake and its shore, between the treetops and the ground", () => {
@@ -34,5 +34,17 @@ describe("winter snow", () => {
       return `${Math.round(flake.x)}:${Math.round(flake.z)}`;
     }));
     expect(spots.size).toBeGreaterThan(50);
+  });
+
+  it("carries the flakes down the wind as they fall", () => {
+    const wind = { x: 0, z: 0.08 };
+    for (let i = 0; i < 40; i += 1) {
+      const calm = snowFlake(i, 3);
+      const blown = snowFlake(i, 3, wind);
+      expect(blown.y).toBe(calm.y);
+      expect(blown.x).toBe(calm.x);
+      // Upwind of where it would be in still air, the more so the higher it is.
+      expect(calm.z - blown.z).toBeCloseTo(0.08 * SNOW_LEAN * calm.y, 6);
+    }
   });
 });
