@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field34";
+export const NEWS_ID = "2026-10-18-game14";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.",
   "Gear's lure record can pack its best lures for your next outing in one go.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.",
   "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.",
@@ -15,7 +16,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "The lake loads faster: the angler's model is half its old size. On a phone held sideways the top bar fits on one row, and with the largest text the catch card shows the fish before its buttons. A laptop zoomed to 200% now gets the same compact layout, so the lake is no longer hidden under the header.",
   "A fish's page offers “Add a photo” when it has none and says how the same day went in an earlier year, and Photos can show one year at a time.",
   "At night the far cabin's lit windows shine on the lake as streaks of warm light. On breezy days a little sailing dinghy reaches back and forth across the lake, heeling to the wind, and a tyre swing hangs from the oak by the shack, rocking in the breeze and capped with snow in winter.",
-  "The field log and the lake open faster on a phone: the first download is 20 KB smaller, and in Polish the language file is half its old size. The lake's hint bar and controls strip now mention the arrow keys for aiming. With reduce motion on, rain, snow and falling leaves hold still instead of sweeping across the screen.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
