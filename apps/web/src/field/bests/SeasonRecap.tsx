@@ -53,7 +53,8 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
           </span>
         ))}
       </p>
-      <CopySummary text={() => [yearSummary(book, year, today, goal), ...firsts].join("\n")} file="stillwater-season.txt" />
+      {/* The copy carries this season's goal too, which its own box below shows on the page. */}
+      <CopySummary text={() => [yearSummary(book, year, today, goal ?? (year === today.slice(0, 4) ? readYearGoal(year) : null)), ...firsts].join("\n")} file="stillwater-season.txt" />
     </aside>
   );
 }
