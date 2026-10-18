@@ -597,6 +597,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Each page now names its browser tab (the lodge board, your catch log, the lake), so a screen reader says where you are. On a touch screen the water names in the Map's list are easier to tap, and on a narrow phone the field log's tabs scroll rather than cut a word short when text is spaced wider.":
+    "Każda strona nazywa teraz swoją kartę przeglądarki (tablica przystani, rejestr połowów, jezioro), więc czytnik ekranu mówi, gdzie jesteś. Na ekranie dotykowym nazwy łowisk na liście pod mapą łatwiej trafić, a na wąskim telefonie zakładki dziennika przewijają się zamiast ucinać słowo, gdy tekst ma większe odstępy.",
   "On a touch screen the field log's links on every card (the fish, the lure, the water, the outing), Cancel, Released it and Rename or merge now take a finger-sized tap, and neighbouring links no longer steal each other's taps. On a tablet the lake's shore signs stand taller too.":
     "Na ekranie dotykowym odnośniki na każdej karcie dziennika (ryba, przynęta, łowisko, wyprawa), „Anuluj”, „Wypuszczona” i „Zmień nazwę lub połącz” łatwiej trafić palcem, a sąsiednie odnośniki nie przejmują już sobie nawzajem stuknięć. Na tablecie tabliczki na brzegu są też wyższe.",
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.":
