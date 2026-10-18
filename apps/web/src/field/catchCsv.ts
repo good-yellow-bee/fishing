@@ -3,6 +3,7 @@ import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { noteText } from "./format";
 import { countedBook } from "./milestones";
+import { bookFishDay } from "./tripMonths";
 
 /**
  * One cell, quoted when it holds the separator, a quote or a line break. Text a spreadsheet would read as a formula
@@ -29,6 +30,8 @@ export function catchesCsv(book: Logbook): string {
   const header = [
     t("Date"),
     t("Time"),
+    // A night session's small hours are filed on their outing's day, as Bests and the calendar count them.
+    t("Outing day"),
     t("Species"),
     `${t("Length")} (${metric ? "cm" : "in"})`,
     `${t("Weight")} (${metric ? "kg" : "lb"})`,
@@ -50,6 +53,7 @@ export function catchesCsv(book: Logbook): string {
     return [
       `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`,
       `${pad(at.getHours())}:${pad(at.getMinutes())}`,
+      bookFishDay(book, entry) === `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}` ? "" : bookFishDay(book, entry),
       t(entry.species),
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",

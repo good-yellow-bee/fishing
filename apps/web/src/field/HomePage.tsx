@@ -21,7 +21,7 @@ import { bookFishDay, daysOut } from "./tripMonths";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
-import { goalPace, readYearGoal } from "./YearGoal";
+import { GOAL_PARAM, goalPace, readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
@@ -295,6 +295,13 @@ export function HomePage() {
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
                   <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows, "book"))}>{goal === null ? t("{n} this year", { n: yearFish }) : yearFish >= goal ? t("Goal reached: {n} of {goal}", { n: yearFish, goal }) : t("{n} of {goal} this year", { n: yearFish, goal })}</Link>
+                </>
+              ) : null}
+              {/* A year with fish but no goal yet: one tap to Bests with the goal's form open. */}
+              {goal === null && yearFish > 0 ? (
+                <>
+                  {" · "}
+                  <Link to={`/bests?${GOAL_PARAM}=set`}>{t("Set a goal for {year}", { year: thisYear })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}

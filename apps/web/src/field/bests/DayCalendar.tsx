@@ -63,6 +63,14 @@ export function stepDay(days: readonly string[], from: string, key: string): str
  * and an outing that landed nothing marked as a blank that opens it.
  */
 /** `tail` adds to each day's search what the marks left out. */
+/** The month with the most days out, when more than one month is shown and one of them leads the rest; else null. */
+export function busiestMonth(days: readonly (readonly [string, number])[]): string | null {
+  if (days.length < 2) return null;
+  const top = Math.max(...days.map(([, count]) => count));
+  const leaders = days.filter(([, count]) => count === top);
+  return top > 0 && leaders.length === 1 ? leaders[0]![0] : null;
+}
+
 /** `tripTail` turns a day into the trip search for its outings, leaving out those the calendar doesn't count. */
 export function DayCalendar({
   book,
@@ -92,6 +100,8 @@ export function DayCalendar({
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
   const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < today))).length;
+  // The month with the most days out, once one leads the others.
+  const busiest = busiestMonth(months.map((month) => [month, monthDays(month)] as const));
   // Today's own day says so, so the season reads against the date.
   const dayName = (day: string) => (day === today ? t("{day}, today", { day: formatDay(day) }) : formatDay(day));
   const todayMark = (day: string) => (day === today ? ({ "aria-current": "date" } as const) : {});
@@ -124,6 +134,7 @@ export function DayCalendar({
               {/* The month's days out and fish at a glance, counted as its days are. */}
               {monthDays(month) > 0 ? <small className="day-month-days">{` · ${tn(monthDays(month), "{n} day out", "{n} days out")}`}</small> : null}
               {monthFish(month) > 0 ? <small className="day-month-fish">{` · ${tn(monthFish(month), "{n} fish", "{n} fish")}`}</small> : null}
+              {month === busiest ? <small className="day-month-best">{` · ${t("Busiest month")}`}</small> : null}
             </h3>
             {/* Which column is which day, for the eye; each day's link already says its whole date. */}
             <div className="day-grid day-weekdays" aria-hidden="true">
