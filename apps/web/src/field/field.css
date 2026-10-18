@@ -423,9 +423,15 @@ button.field-primary {
     margin-top: 10px;
   }
 
-  /* Download and Load a book stack when they wrap (larger text): the same 16 px parting. */
-  div.book-file {
+  /* Download and Load a book stack when they wrap (larger text), and so do Newest first and Largest first: the same 16 px parting. */
+  div.book-file,
+  p.search-order {
     row-gap: 16px;
+  }
+
+  /* "Download these as a spreadsheet" sat 12 px between the sizes line and Copy a summary, both reaching into the gap. */
+  p.fish-csv {
+    margin: 16px 0;
   }
 
   /* The eyebrow's way back ("Bests") is set in small capitals, 14 px tall. */
