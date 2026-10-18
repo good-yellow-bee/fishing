@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -22,7 +23,8 @@ import { catchLink, type ListKey } from "./catchList";
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
 
-export function CatchCard({
+/** Memoized: a long list that grows by a page redraws only the new cards (its props are ids, names and book entries). */
+export const CatchCard = memo(function CatchCard({
   entry,
   spotName,
   tripTitle,
@@ -80,7 +82,7 @@ export function CatchCard({
       </div>
     </article>
   );
-}
+});
 
 export function TripCard({
   trip,

@@ -232,7 +232,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     return catchesNewestFirst(book).filter((entry) => !entry.tripId || !trips.has(entry.tripId));
   }
   if (LOOSE_WORDS.has(normalize(needle))) {
-    return [...looseOutings(book).keys()].map((id) => book.catches.find((entry) => entry.id === id)!);
+    const loose = looseOutings(book);
+    return catchesNewestFirst(book).filter((entry) => loose.has(entry.id));
   }
   if (RECORD_WORDS.has(normalize(needle))) {
     const badges = bookBadges(book);
@@ -437,14 +438,20 @@ function findKept(book: Logbook, parts: readonly string[], t: (text: string) => 
 
 export { FIND_PARAM, exactTerm, findLink, findWithLink } from "./findLinks";
 
-/** The fish left off an outing their water had that day, newest first, each with that outing's id. */
-export function looseOutings(book: Logbook): Map<string, string> {
+const looseCache = new WeakMap<Logbook, ReadonlyMap<string, string>>();
+
+/** The fish left off an outing their water had that day, newest first, each with that outing's id; worked out once per book. */
+export function looseOutings(book: Logbook): ReadonlyMap<string, string> {
+  const known = looseCache.get(book);
+  if (known) return known;
+  const trips = new Set(book.trips.map((trip) => trip.id));
   const found = new Map<string, string>();
   for (const entry of catchesNewestFirst(book)) {
-    if ((entry.tripId && tripById(book, entry.tripId)) || Number.isNaN(Date.parse(entry.caughtAt))) continue;
+    if ((entry.tripId && trips.has(entry.tripId)) || Number.isNaN(Date.parse(entry.caughtAt))) continue;
     const trip = tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
     if (trip) found.set(entry.id, trip.id);
   }
+  looseCache.set(book, found);
   return found;
 }
 

@@ -28,6 +28,23 @@ describe("remind to download a copy of the book", () => {
     expect(changedDaysSince({ at, sig }, bookSignature({ ...book, trips: [] }), Date.parse("2026-10-16T00:00:00Z"))).toBe(45);
   });
 
+  it("keeps the fingerprint copies already saved, with the book hashed once", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    // The fingerprint as it was first written: FNV-1a over the whole text at once.
+    const whole = (text: string) => {
+      let hash = 0x811c9dc5;
+      for (let i = 0; i < text.length; i++) {
+        hash ^= text.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+      }
+      return (hash >>> 0).toString(16);
+    };
+    expect(bookSignature(book)).toBe(whole(JSON.stringify([book, [], [], null])));
+    expect(bookSignature(book, [], ["b", "a"], { 2026: 40 })).toBe(whole(JSON.stringify([book, [], ["a", "b"], { 2026: 40 }])));
+    // Asked again for the same book, the answer is the same.
+    expect(bookSignature(book, [], ["b", "a"], { 2026: 40 })).toBe(whole(JSON.stringify([book, [], ["a", "b"], { 2026: 40 }])));
+  });
+
   it("doesn't count the sample week's fish", () => {
     const sample = sampleLogbook(new Date());
     expect(ownCatches(sample)).toBe(0);

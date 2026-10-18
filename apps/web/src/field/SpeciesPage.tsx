@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FISH, biteTimes, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, tn, useT } from "../i18n";
@@ -27,6 +27,7 @@ import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 import { catchLink, type ListKey } from "./catchList";
+import { spreadRows } from "./spreadRows";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -377,23 +378,37 @@ function gainText(from: Measure, to: Measure): string {
   return `${num(b - a, places)} ${unit}`;
 }
 
+/** How many length and weight rows show until asked for all of them. */
+const PAIRS_SHOWN = 10;
+
 /** The fish of the kind that were both measured and weighed, shortest first: how weight goes with length. */
 function LengthAndWeight({ catches }: { catches: readonly CatchEntry[] }) {
+  const [all, setAll] = useState(false);
   const pairs = sizePairs(catches);
   if (pairs.length === 0) return null;
+  // A long book has hundreds: a few spread from shortest to longest tell the same story.
+  const cut = pairs.length > PAIRS_SHOWN;
+  const shown = cut && !all ? spreadRows(pairs, PAIRS_SHOWN) : pairs;
   return (
     <>
       <div className="section-head">
         <h2>{t("Length and weight")}</h2>
       </div>
       <ol className="species-waters best-steps" aria-label={t("Length and weight")}>
-        {pairs.map(({ entry, inches, pounds }) => (
+        {shown.map(({ entry, inches, pounds }) => (
           <li key={entry.id}>
             <Link to={`/catches/${entry.id}`}>{`${lengthText(inches)} · ${weightText(pounds)}`}</Link>
             <span className="meta">{formatCatchDay(entry.caughtAt)}</span>
           </li>
         ))}
       </ol>
+      {cut ? (
+        <p className="tally-more">
+          <button type="button" className="text-button" aria-expanded={all} onClick={() => setAll((open) => !open)}>
+            {all ? t("Show fewer") : t("Show all {count}", { count: pairs.length })}
+          </button>
+        </p>
+      ) : null}
     </>
   );
 }

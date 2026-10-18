@@ -83,13 +83,29 @@ export function copyNudge(own: number, copiedAt: number | null, changedDays: num
  * tell whether anything changed since a copy was made.
  */
 export function bookSignature(book: Logbook, tackle: readonly TackleItem[] = [], photoIds: readonly string[] = [], goals: unknown = null): string {
-  const text = JSON.stringify([book, tackle, [...photoIds].sort(), goals]);
-  let hash = 0x811c9dc5;
+  // The same hash as of JSON.stringify([book, tackle, photoIds, goals]), with the book's long part hashed once per book.
+  const rest = JSON.stringify([tackle, [...photoIds].sort(), goals]);
+  return (hashOn(bookHash(book), `,${rest.slice(1)}`) >>> 0).toString(16);
+}
+
+const bookHashes = new WeakMap<Logbook, number>();
+
+/** Where the hash stands after "[" and the book: a Home visit with the same book skips its thousands of fish. */
+function bookHash(book: Logbook): number {
+  const known = bookHashes.get(book);
+  if (known !== undefined) return known;
+  const hash = hashOn(0x811c9dc5, `[${JSON.stringify(book)}`);
+  bookHashes.set(book, hash);
+  return hash;
+}
+
+/** FNV-1a over the text, carrying on from `hash`. */
+function hashOn(hash: number, text: string): number {
   for (let i = 0; i < text.length; i++) {
     hash ^= text.charCodeAt(i);
     hash = Math.imul(hash, 0x01000193);
   }
-  return (hash >>> 0).toString(16);
+  return hash;
 }
 
 /** When the last copy was made and what the book was then; null when unknown (no copy, or one from before fingerprints). */
