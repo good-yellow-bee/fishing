@@ -46,7 +46,7 @@ import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
-import { bestOutingHere, lastOutingBefore, outingAverage, outingMean } from "./outingAverage";
+import { bestOutingHere, lastOutingBefore, outingAverage, outingMean, outingStreak } from "./outingAverage";
 import { RecordHere, recordHere } from "./RecordHere";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
@@ -118,6 +118,9 @@ export function TripsPage() {
   // How the outings already fished have gone, across every water.
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
   const average = outingAverage(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // A run of outings with a fish still going, once it is three long: worth keeping up.
+  const streak = outingStreak(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
+  const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
   // The sample's planned outings are made up: they stay out of a real calendar.
   const toCalendar = upcoming.filter((trip) => !isSampleTrip(trip.id));
   const needle = query.trim();
@@ -225,6 +228,7 @@ export function TripsPage() {
           ) : null}
           <h2 className="subhead">{t("Recent")}</h2>
           {average ? <p className="meta">{average}</p> : null}
+          {runNow > 0 ? <p className="meta outing-run">{tn(runNow, "A fish on each of your last {n} outings", "A fish on each of your last {n} outings")}</p> : null}
           {sheetOutings(book, today).trips.length > 0 ? (
             <p className="fish-csv">
               <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, today), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>

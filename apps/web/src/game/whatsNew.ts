@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene07";
+export const NEWS_ID = "2026-10-18-field24";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The outing search finds plans with “planned”, Trips says when your last few outings all gave a fish, and Home's Next card says how long ago you last fished that water.",
   "The trees round the lake now bend with the day's wind and sway in its gusts, and keep a gentle sway on a calm day. From spring to fall crayfish creep over the bed either side of the dock, now and then shooting backwards with a flick of the tail, and on still days from spring through summer a raft of whirligig beetles spins on the water off the dock. In winter a ragged rim of ice skirts the bank, with broken plates lying off its edge.",
   "Each page now names its browser tab (the lodge board, your catch log, the lake), so a screen reader says where you are. On a touch screen the water names in the Map's list are easier to tap, and on a narrow phone the field log's tabs scroll rather than cut a word short when text is spaced wider.",
   "A water's page names the next outing planned there and opens it, the kind filter on Spots counts its waters (“River (2)”), and merging two waters says what the kept one will then hold.",
