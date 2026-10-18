@@ -1113,7 +1113,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA68~~ | ~~On a touch tablet (an iPad either way up, a 1024x600 tablet sideways) the walking stick sat over the "Lately on the lake" feed in the bottom-left corner, hiding the newest catches behind its ring. The feed now sits right of the stick, and both grow together with larger text; a left-handed stick is on the other side, so the feed keeps its corner (#1185)~~ | phone UX | S |
 | ~~PA69~~ | ~~With larger text the walking stick grew with the words on a touch tablet, and on a 600 px tall one it ran up into the lure panel. The stick has no words, so it now keeps its size on every touch screen, as it already did on phones (#1188)~~ | phone UX | S |
 | ~~PA70~~ | ~~While the first-cast coach showed on a laptop or tablet, the bank chip beside it ("Dock · biting today · bites sooner now") ran on under the coach, worse with larger text. It now stops just short of the coach on one line, ending in an ellipsis when it runs long (#1191)~~ | phone UX | S |
-| ~~PA71~~ | ~~On a 600 px tall touch tablet with larger text, a lure panel showing both "suits it" notes ran down over the walking stick, so touches there landed on the panel. The panel now ends just above the stick and scrolls when its notes run long (#?)~~ | phone UX | S |
+| ~~PA71~~ | ~~On a 600 px tall touch tablet with larger text, a lure panel showing both "suits it" notes ran down over the walking stick, so touches there landed on the panel. The panel now ends just above the stick and scrolls when its notes run long (#1193)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
