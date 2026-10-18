@@ -94,7 +94,7 @@ function writeTripText(book: Logbook, trip: Trip, t: (text: string) => string): 
 
 /**
  * The outings a search names, newest first. Parts joined with "+" must all hold; each part is a date word ("last
- * week", "Oct 12"), "no fish" for a past outing that landed nothing, "lost" or "missed" for one that counted a fish
+ * week", "Oct 12"), "no fish" for a past outing that landed nothing, a time of day for one with a fish then ("night"), "lost" or "missed" for one that counted a fish
  * lost or a strike missed, or words that all appear in the outing's title, note, water, written-out day, or its fish's
  * kinds and lures ("october", "cedar dawn", "pike jig").
  */
@@ -106,6 +106,7 @@ export function findTrips(
   t: (text: string) => string,
   now = new Date(),
   fishTrips?: (part: string) => ReadonlySet<string>,
+  timeTrips?: (part: string) => ReadonlySet<string> | null,
 ): Trip[] {
   // "pike 30in+" is a 30-plus pike, as the catch search reads it, not "pike 30in" and an empty part.
   const typed = readSizePlus(needle).split("+").map(plain).filter(Boolean);
@@ -118,6 +119,8 @@ export function findTrips(
     out.some((word) => (SAMPLE.includes(word) ? isSampleOuting(trip) : GAME.includes(word) ? !offPlayLake(trip) : text.includes(word)));
   // "szczupak ponad 50 cm", "> 2 kg": a part with a size is a catch search, and finds the outings its fish came on.
   const sized = new Map(fishTrips ? parts.filter(SIZED.test.bind(SIZED)).map((part) => [part, fishTrips(part)]) : []);
+  // "night", "o świcie": the outings with a fish at that time of day, as well as those whose words say it.
+  const timed = new Map(timeTrips ? parts.flatMap((part) => { const found = timeTrips(part); return found ? [[part, found] as const] : []; }) : []);
   // Each part's dates read once, not once per outing.
   // Outings can be ahead: "this weekend" on a Thursday is the coming one, and "tomorrow" is a day to find.
   // A day both ways: "dec 31" in October is the coming New Year's Eve for a plan and last year's for the outings had.
@@ -136,6 +139,7 @@ export function findTrips(
       const weekend = [0, 6].includes(new Date(`${trip.date}T12:00:00`).getDay());
       return WEEKEND.includes(part) ? weekend : !weekend;
     }
+    if (timed.get(part)?.has(trip.id)) return true;
     const days = ranges.get(part) ?? [];
     if (days.length > 0) return days.some((range) => trip.date >= range.from && trip.date <= range.to);
     // "w październiku" finds the outings of any October, as the catch search finds its fish.

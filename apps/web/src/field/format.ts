@@ -74,6 +74,12 @@ export function formatClock(iso: string): string {
   return format("clock", otherYear(date)).format(date);
 }
 
+/** "in 6 days" for an outing still ahead past tomorrow, "" otherwise: plans are made around the days left. */
+export function daysAheadLabel(ymd: string, today: string): string {
+  const ahead = Math.round((Date.parse(ymd) - Date.parse(today)) / 86_400_000);
+  return ahead >= 2 ? tn(ahead, "in {n} day", "in {n} days") : "";
+}
+
 export function tripWhen(ymd: string, today: string, tomorrow: string): string {
   if (ymd === today) return t("Today");
   if (ymd === tomorrow) return t("Tomorrow");
