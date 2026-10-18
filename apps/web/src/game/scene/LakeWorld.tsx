@@ -87,6 +87,8 @@ import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
 import { Snowman } from "./Snowman";
+import { Cat } from "./Cat";
+import { catPlace } from "./catNap";
 import { snowmanUp } from "./snowmanLook";
 import { Toadstools } from "./Toadstools";
 import { Squirrels } from "./Squirrels";
@@ -2143,6 +2145,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       {snowmanUp(season) && <Snowman />}
+      {catPlace(hour, sky) && <Cat place={catPlace(hour, sky)!} />}
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
       <ShorePath />
