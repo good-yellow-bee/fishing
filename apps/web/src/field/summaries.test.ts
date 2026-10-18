@@ -43,9 +43,11 @@ describe("trip summary", () => {
   });
 
   it("sums up one fish with its day, water and note", () => {
-    const lines = catchSummary({ ...fish("a", "2026-10-10T12:00:00.000Z", true), note: "Off the weed edge." }, "Cedar Bend").split("\n");
+    const lines = catchSummary({ ...fish("a", "2026-10-10T12:00:00.000Z", true), note: "Off the weed edge." }, "Cedar Bend", "Dawn patrol").split("\n");
     expect(lines[0]).toBe("Largemouth bass, 3.2 lb, Texas-rig worm, Released");
     expect(lines[1]).toMatch(/ · Cedar Bend$/);
+    // The conditions: the moon always, the outing when it has one.
+    expect(lines[2]).toMatch(/moon.* · Outing: Dawn patrol$/i);
     expect(lines.at(-1)).toBe("Off the weed edge.");
   });
 });

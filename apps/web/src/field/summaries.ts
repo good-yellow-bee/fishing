@@ -1,6 +1,6 @@
-import { WATER_LABELS, lureTally, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_LABELS, WATER_LABELS, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
-import { measureText, measuresText } from "../i18n/content";
+import { measureText, measuresText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { catchMonth, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
@@ -28,11 +28,14 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
 }
 
 /** One fish as plain text: what it was, its size and lure, then when and where, and its note. */
-export function catchSummary(entry: CatchEntry, spotName: string | null): string {
+export function catchSummary(entry: CatchEntry, spotName: string | null, outing: string | null = null): string {
   const what = [t(entry.species), measuresText(entry), t(entry.lure), ...(entry.released ? [t("Released")] : [])].join(", ");
   const when = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)}`, ...(spotName ? [spotName] : [])].join(" · ");
+  // The conditions as the page shows them, so a pasted fish reads whole: the weather, the moon and its outing.
+  const at = new Date(entry.caughtAt);
+  const conditions = [...(entry.weather ? [weatherText(entry.weather)] : []), t(MOON_LABELS[moonName(moonPhase(at))]), ...(outing ? [`${t("Outing:")} ${outing}`] : [])].join(" · ");
   const note = noteText(entry.note).trim();
-  return [what, when, ...(note ? ["", note] : [])].join("\n");
+  return [what, when, conditions, ...(note ? ["", note] : [])].join("\n");
 }
 
 /**
