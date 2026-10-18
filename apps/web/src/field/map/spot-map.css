@@ -249,6 +249,21 @@
   background: #d9a94e;
 }
 
+/* A water's dot grows with its fish: pale with none yet, larger at 5 and at 20. */
+.map-pin-tier-0 .map-pin-dot {
+  background: #d9c6a5;
+}
+
+.map-pin-tier-2 .map-pin-dot {
+  width: 18px;
+  height: 18px;
+}
+
+.map-pin-tier-3 .map-pin-dot {
+  width: 22px;
+  height: 22px;
+}
+
 .map-pin:hover .map-pin-dot,
 .map-pin:focus-visible .map-pin-dot {
   background: #1c1814;

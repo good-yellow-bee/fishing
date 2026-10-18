@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { speciesCounts, speciesLink } from "../speciesLink";
-import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry } from "@stillwater/shared";
+import { speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
+import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { CatchCard } from "../cards";
 import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -80,6 +80,19 @@ function lastFishLine(catches: readonly CatchEntry[]) {
 
 /** "?year=2025": one season's fish and outings, or the whole book when it is left out. */
 const YEAR_PARAM = "year";
+
+/** A kind's best lure and best water, once one of each took two or more: where and on what to go for it. */
+function KindLeaders({ book, species }: { book: Logbook; species: string }) {
+  const key = species.trim().toLowerCase();
+  const fish = book.catches.filter((entry) => entry.species.trim().toLowerCase() === key);
+  const lure = lureTally({ ...book, catches: fish }, 1)[0];
+  const water = speciesWaters(book, fish)[0];
+  const parts = [
+    lure && lure.count >= 2 ? t("Most on {lure} ({count})", { lure: t(lure.lure), count: lure.count }) : null,
+    water && water.name && water.count >= 2 ? t("Most from {water} ({count})", { water: water.name, count: water.count }) : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
+}
 
 export function BestsPage() {
   const { book: all } = useLogbook();
@@ -291,6 +304,7 @@ export function BestsPage() {
                       {fishCountLabel(row.count)}
                       {measures ? ` · ${measures}` : ""}
                     </p>
+                    <KindLeaders book={book} species={row.species} />
                   </article>
                 );
               })}
