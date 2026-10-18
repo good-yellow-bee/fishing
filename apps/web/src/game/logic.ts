@@ -3,6 +3,7 @@ import {
   anglerLevel,
   biteWaitMulForLevel,
   canLand,
+  dailyConditions,
   legendaryCanBite,
   rollWeight,
   biteHourMul,
@@ -295,6 +296,29 @@ export function soakAfterCast(soak: number, lure: string | undefined, mercy = fa
 /** Whether the worm has soaked long enough to lose its scent. */
 export function isWashedOut(soak: number) {
   return soak >= WORM_SOAK_CASTS;
+}
+
+/** A day's water temperature on the lake in °F, as the field log records it for a catch that day. */
+export function waterTempFor(date: Date) {
+  return dailyConditions(date, weatherForDay(date)).waterTempF;
+}
+
+/** How many °F the water has to warm or cool since yesterday to wake the fish up or put them off. */
+export const WATER_SWING_F = 3;
+/** Water warming since yesterday wakes the fish to feed; water cooling makes them sluggish. */
+export const WARMING_WAIT = 0.9;
+export const COOLING_WAIT = 1.1;
+
+/** Whether the water has warmed or cooled by WATER_SWING_F or more since yesterday, or held about steady (null). */
+export function waterSwing(date: Date): "warming" | "cooling" | null {
+  const change = waterTempFor(date) - waterTempFor(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1, 12));
+  return change >= WATER_SWING_F ? "warming" : change <= -WATER_SWING_F ? "cooling" : null;
+}
+
+/** How the day's change in water temperature moves the wait: WARMING_WAIT on a warming day, COOLING_WAIT on a cooling one, else 1. */
+export function waterSwingWaitMul(now: Date): number {
+  const swing = waterSwing(now);
+  return swing === "warming" ? WARMING_WAIT : swing === "cooling" ? COOLING_WAIT : 1;
 }
 
 /** As a morning's fog burns off, the fish move up into the warming water to feed, so every bite comes a little sooner. */

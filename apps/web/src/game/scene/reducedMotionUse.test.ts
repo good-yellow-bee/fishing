@@ -17,4 +17,12 @@ describe("reduce motion on the lake", () => {
       expect(scene.find((file) => file.name === name)?.text).toContain("useReducedMotion()");
     }
   });
+
+  it("holds falling leaves, petals, rain and snow at one moment under it", () => {
+    for (const name of ["FallingLeaves.tsx", "LakeRain.tsx", "LakeSnow.tsx"]) {
+      const text = scene.find((file) => file.name === name)?.text ?? "";
+      expect(text, name).toContain("useReducedMotion()");
+      expect(text, name).toMatch(/still \? STILL_TIME : /);
+    }
+  });
 });

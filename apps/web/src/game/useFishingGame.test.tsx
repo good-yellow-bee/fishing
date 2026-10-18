@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
+import { castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -53,7 +53,8 @@ vi.mock("./logic", async (importOriginal) => {
   // Spooked water is tested on its own; elsewhere a lost fish leaves the next wait as it was.
   // Feeders over the groundbait and fresh water are tested on their own; elsewhere they leave the drawn fish and the wait as they were.
   // Skip casts off the dock are tested on their own; elsewhere a cast in the band's low end lands as it always did.
-  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs) };
+  // The day's water warming or cooling is tested on its own; elsewhere the water holds steady whatever the test's date.
+  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs), waterSwingWaitMul: vi.fn(() => 1) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -1839,6 +1840,17 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toContain("The wind drives the baitfish onto the point, and the hunters follow them in.");
+  });
+
+  it.each([
+    [WARMING_WAIT, "The water has warmed since yesterday, and the fish wake up to feed."],
+    [COOLING_WAIT, "The water has cooled since yesterday, and the sluggish fish bite slow."],
+  ])("says the water warmed or cooled since yesterday when the wait is %s times as long", (mul, reason) => {
+    vi.mocked(waterSwingWaitMul).mockReturnValueOnce(mul);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain(reason);
   });
 
   it("says a cast tight to the lily pads lands where the bass and pike wait, but not once the pads die back in winter", () => {

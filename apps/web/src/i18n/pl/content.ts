@@ -113,6 +113,8 @@ export const PL_CONTENT: PlBook = {
   "A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in.": "Lekki północny wiatr wieje na Pomost, Trzciny i Cypel, a ryby płyną za pokarmem.",
   "A light east breeze blows onto the Inlet and Reeds, and the fish follow the food in.": "Lekki wschodni wiatr wieje na Ujście i Trzciny, a ryby płyną za pokarmem.",
   "A light west breeze blows onto the Drop-off, and the fish follow the food in.": "Lekki zachodni wiatr wieje na Uskok, a ryby płyną za pokarmem.",
+  "The water warms to {temp}, and the fish wake up to feed.": "Woda ociepla się do {temp}, a ryby budzą się do żerowania.",
+  "The water cools to {temp}, and the sluggish fish bite slow.": "Woda ochładza się do {temp}, a ospałe ryby biorą powoli.",
   "The lake is turning over: slow bites, except in the inlet's fresh water.": "Jezioro się przewraca: brania są słabe, poza świeżą wodą w ujściu strumienia.",
   "On a clear night a spinner or spoon flashes under it.": "W pogodną noc obrotówka lub wahadłówka błyska w jej świetle.",
   "Too dark to see: bites come slower after dark.": "Za ciemno, by widzieć: po zmroku brania przychodzą wolniej.",

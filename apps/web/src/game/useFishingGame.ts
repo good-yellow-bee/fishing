@@ -40,7 +40,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -104,7 +104,7 @@ export function idleHint(stance: StanceId | null, touch = touchScreen()) {
   if (stance && isFishingStance(stance)) {
     return touch
       ? t("Touch the water to aim. Hold to charge, lift in the moss band.")
-      : t("Click the water to aim. Hold to charge, release in the moss band.");
+      : t("Click the water or use the arrow keys to aim. Hold to charge, release in the moss band.");
   }
   return t("Walk to the water.");
 }
@@ -737,6 +737,10 @@ export function useFishingGame(
     const turnoverWait = Math.min(turnoverWaitMul(new Date(), spotRef.current, season), mercyRef.current ? 1 : Infinity);
     if (turnoverWait > 1) reasons.unshift(t("The lake is turning over, and the stirred-up water puts the fish off. The inlet's fresh stream water still holds them."));
     else if (turnoverWait < 1) reasons.unshift(t("The lake is turning over, but the inlet's fresh stream water keeps its fish feeding."));
+    // Water warming since yesterday wakes the fish to feed, and water cooling makes them sluggish; a beginner is spared the slow side.
+    const swingWait = Math.min(waterSwingWaitMul(new Date()), mercyRef.current ? 1 : Infinity);
+    if (swingWait < 1) reasons.unshift(t("The water has warmed since yesterday, and the fish wake up to feed."));
+    else if (swingWait > 1) reasons.unshift(t("The water has cooled since yesterday, and the sluggish fish bite slow."));
     // A bank fished too long grows wary, and rests while the angler fishes elsewhere; fish feeding on groundbait don't mind, and a beginner is spared.
     const pressure = castUnderPressure(pressureRef.current, spotRef.current);
     pressureRef.current = pressure.next;
@@ -785,7 +789,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.

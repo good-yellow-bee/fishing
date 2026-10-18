@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
 import { LEAF_COLORS, LEAF_COUNT, PETAL_COLORS, leafAt } from "./leafFall";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -38,6 +39,7 @@ export function FallingLeaves({ wind = NO_WIND, petals = false }: { wind?: { x: 
   const material = useMemo(() => new THREE.MeshToonMaterial({ gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   const colors = useMemo(() => (petals ? PETAL_COLORS : LEAF_COLORS).map((c) => new THREE.Color(c)), [petals]);
   const scratch = useMemo(() => new THREE.Object3D(), []);
+  const still = useReducedMotion();
 
   useEffect(
     () => () => {
@@ -51,10 +53,12 @@ export function FallingLeaves({ wind = NO_WIND, petals = false }: { wind?: { x: 
     const leaves = mesh.current;
     if (!leaves) return;
     const time = clock.elapsedTime;
+    // Held mid-fall for reduced motion; the ones on the water still ride its swell.
+    const at = still ? STILL_TIME : time;
     const stride = settings.particles === "lite" ? 2 : 1;
     let slot = 0;
     for (let i = 0; i < LEAF_COUNT; i += stride) {
-      const leaf = leafAt(i, time, wind);
+      const leaf = leafAt(i, at, wind);
       if (!leaf || leaf.size <= 0) continue;
       scratch.position.set(leaf.x, waterHeight(leaf.x, leaf.z, time) + 0.02 + leaf.height, leaf.z);
       scratch.rotation.set(-Math.PI / 2 + leaf.tilt, leaf.spin, 0, "YXZ");

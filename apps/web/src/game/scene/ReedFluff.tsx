@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { settings } from "../settings";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { FLUFF_COUNT, tuftAt } from "./cattailTufts";
-import { useReducedMotion } from "./reducedMotion";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 
 const NO_WIND = { x: 0, z: 0 };
 const HIDDEN_Y = -50;
@@ -33,7 +33,7 @@ export function ReedFluff({ wind = NO_WIND, light }: { wind?: { x: number; z: nu
   );
   useFrame(({ clock }) => {
     // Held where they are for reduced motion, as if the air had stilled.
-    const time = still ? 8 : clock.elapsedTime;
+    const time = still ? STILL_TIME : clock.elapsedTime;
     const stride = settings.particles === "lite" ? 2 : 1;
     const spot = geometry.getAttribute("position") as THREE.BufferAttribute;
     const tint = geometry.getAttribute("color") as THREE.BufferAttribute;
