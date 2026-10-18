@@ -101,6 +101,7 @@ import { lookDrag, lookZoom } from "../game/scene/photoLook";
 import { PHOTO_KEY_TURNS, usePhotoDrag } from "../game/usePhotoDrag";
 import { bestBeatText, weightText } from "../i18n/content";
 import { usePageTitle } from "../pageTitle";
+import { useTabWrap } from "../components/tabWrap";
 
 /** How often the page reads the clock for a new lake hour. */
 const HOUR_CHECK_MS = 30_000;
@@ -182,6 +183,7 @@ export function DockPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [keysOpen, setKeysOpen] = useState(false);
   const shopPanel = useRef<HTMLDivElement>(null);
+  useTabWrap(shopPanel);
   // The lake's news sits just above the hint, however many lines the hint wraps to: its height rides on a CSS variable.
   const hintSize = useRef<ResizeObserver | null>(null);
   const hintRef = useCallback((node: HTMLParagraphElement | null) => {

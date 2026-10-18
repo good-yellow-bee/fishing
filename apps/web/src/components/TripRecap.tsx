@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { sessionSummary, sessionTitle, type SessionDraft } from "../game/session";
 import { useT } from "../i18n";
 import { weightText } from "../i18n/content";
+import { useTabWrap } from "./tabWrap";
 
 type Props = {
   draft: SessionDraft;
@@ -18,6 +19,7 @@ type Props = {
 export function TripRecap({ draft, leftover, filed, onFile, onClose }: Props) {
   const t = useT();
   const panel = useRef<HTMLElement>(null);
+  useTabWrap(panel);
   const summary = sessionSummary(draft);
 
   useEffect(() => {
