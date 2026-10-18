@@ -11,6 +11,7 @@ describe("high contrast themes", () => {
     expect(block).toContain("forced-color-adjust: none;");
     for (const part of [".bar .zone", ".bar .marker", ".bar .fill", ".bar .last-cast", ".fight-bar .danger-zone", ".strike-cue .cue-bar b"]) expect(block).toContain(part);
     expect(block).toContain(".power-meter .bar");
+    expect(block).toContain(".board-page .board-tabs button.active");
   });
 
   it("draws the days calendar and the tally bars in the theme's colours", () => {
