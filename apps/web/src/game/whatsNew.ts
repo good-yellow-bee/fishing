@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene11";
+export const NEWS_ID = "2026-10-18-game12";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The wind's direction now matters: a light breeze blowing onto a bank pushes the food in, so the fish there bite sooner. The walk signs show which banks, and the shack's chalk board names them for the next three days. And a cast tight to the lily pads lands where the bass and pike wait in ambush, so the bite comes sooner, but anything but a topwater can foul on the pad stems.",
   "All winter a snowman in a red scarf stands in front of the shack. By day a woodpecker hitches up the owl's dead tree, drumming as it goes, and the fireflies now come out only on summer nights.",
   "On a phone, fewer taps land on the wrong link in the field log. Show all under a list no longer catches a tap meant for the row above it, the small links above a page's title stay apart when they wrap and are easier to hit, and the days in Bests' calendar are bigger squares. With larger text, every tab in the bottom bar is wide enough to tap.",
   "A water's page links to its row on the Map, the Map's list says how far each pinned water is from the nearest other, and saving a water from the Map says so.",
