@@ -5,7 +5,7 @@ import { errorText, getMe, type Me } from "../api";
 import { FieldGuide } from "../components/FieldGuide";
 import { FishMark } from "../components/FishMark";
 import { readStoredLogbook } from "../field/storage";
-import { catchesOfSpecies } from "../field/speciesLink";
+import { kindOnPage } from "../field/speciesLink";
 import { locale, tn, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 
@@ -65,7 +65,7 @@ export function LogPage() {
           })}
         </ul>
       </section>
-      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? catchesOfSpecies(book, name).length : 0)} />
+      <FieldGuide stats={me.speciesStats} inBook={(name) => (book ? kindOnPage(book, name).length : 0)} />
       {heaviest && (
         <div className="log-summary">
           <div>

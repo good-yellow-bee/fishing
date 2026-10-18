@@ -5,7 +5,7 @@ import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
-import { pieceKey } from "./pieceKey";
+import { pieceKey, shownPieceKey } from "./pieceKey";
 import { isSampleTrip } from "../bookCopy";
 import "./gear.css";
 
@@ -60,7 +60,7 @@ export function TackleList({
   const [copyFrom, setCopyFrom] = useState("");
   const packed = packedCount(rows);
   // Pieces compare as they read: "Rosówka" typed on a Polish list is the stored "Nightcrawler" of the tips and the fish.
-  const readKey = (label: string) => pieceKey(t(label));
+  const readKey = (label: string) => shownPieceKey(label);
   const onList = new Set(rows.map((item) => readKey(item.label)));
   const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
   const took = new Map<string, number>();

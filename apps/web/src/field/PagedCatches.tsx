@@ -16,18 +16,29 @@ export function catchPage<T>(all: readonly T[], shown: number, start = 0) {
  * How many of a paged list to draw, and Show more. The press hands focus to the first link it brought in, since the
  * button itself goes once the last page is out; `box` wraps the list and its button.
  */
+/**
+ * What can take focus in a paged list, in order: links, and a folded card's summary in place of the links folded
+ * inside it, which can't take focus until it is opened.
+ */
+function focusable(box: HTMLElement | null): HTMLElement[] {
+  return [...(box?.querySelectorAll<HTMLElement>("a[href], summary") ?? [])].filter((node) => {
+    const folded = node.closest("details:not([open])");
+    return !folded || node.parentElement === folded;
+  });
+}
+
 export function useShowMore() {
   const [shown, setShown] = useState(CATCH_PAGE);
   const box = useRef<HTMLDivElement>(null);
   const firstNew = useRef<number | null>(null);
   useEffect(() => {
     if (firstNew.current === null) return;
-    box.current?.querySelectorAll<HTMLElement>("a[href]")[firstNew.current]?.focus();
+    focusable(box.current)[firstNew.current]?.focus();
     firstNew.current = null;
   }, [shown]);
   const showMore = () => {
     // The new cards come after every link already drawn, so the first of them is the next link along.
-    firstNew.current = box.current?.querySelectorAll("a[href]").length ?? 0;
+    firstNew.current = focusable(box.current).length;
     setShown((count) => count + CATCH_PAGE);
   };
   // Where the drawn run starts: a jump far down a long book draws a page from there, not every card above it.
@@ -35,7 +46,7 @@ export function useShowMore() {
   const firstOld = useRef(false);
   useEffect(() => {
     if (!firstOld.current) return;
-    box.current?.querySelector<HTMLElement>("a[href]")?.focus();
+    focusable(box.current)[0]?.focus();
     firstOld.current = false;
   }, [start]);
   /** Draws at least the first `count` items, a whole page further at a time. */

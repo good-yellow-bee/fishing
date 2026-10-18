@@ -55,7 +55,8 @@ import { useKeptForm } from "./keptForm";
 import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
-import { ownFish } from "./milestones";
+import { countedBook, ownFish } from "./milestones";
+import { isSampleTrip } from "./bookCopy";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
@@ -106,7 +107,10 @@ export function TripsPage() {
   const recent = [...book.trips.filter((trip) => trip.date === today && !offPlayLake(trip)), ...recentTrips(book, today)];
   const fishByTrip = fishCountsByTrip(book);
   // How the outings already fished have gone, across every water.
-  const average = outingAverage(book.trips.filter(offPlayLake), (id) => fishByTrip.get(id) ?? 0, today);
+  // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
+  const average = outingAverage(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The sample's planned outings are made up: they stay out of a real calendar.
+  const toCalendar = upcoming.filter((trip) => !isSampleTrip(trip.id));
   const needle = query.trim();
   // A size in the search is read as the catch search reads it, and finds the outings of the fish it found.
   const fishTrips = (part: string) => new Set(findCatches(book, part, t).flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
@@ -181,20 +185,20 @@ export function TripsPage() {
             </div>
           )}
           {/* Every planned outing into the calendar in one file, rather than one at a time. */}
-          {upcoming.length > 1 ? (
+          {toCalendar.length > 1 ? (
             <p className="trip-calendar">
               <button
                 type="button"
                 className="text-button"
                 onClick={() => {
-                  const outings = upcoming.map((trip) => {
+                  const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
                     return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
               >
-                {t("Add all {n} to calendar", { n: upcoming.length })}
+                {t("Add all {n} to calendar", { n: toCalendar.length })}
               </button>
             </p>
           ) : null}

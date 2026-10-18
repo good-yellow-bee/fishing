@@ -43,6 +43,14 @@ describe("pieceRecords", () => {
     expect(rows.map((row) => row.label)).toEqual(["Jig"]);
   });
 
+  it("counts no sample fish against an outing of the angler's own", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const fished = book.catches.find((entry) => entry.tripId)!;
+    const own = { ...book.trips.find((each) => each.id === fished.tripId)!, id: "zq-own", date: "2026-10-15" };
+    const items: TackleItem[] = [{ id: "a", tripId: own.id, label: fished.lure, packed: true }];
+    expect(pieceRecords({ ...book, trips: [...book.trips, own] }, items, "2026-10-16")[0]).toEqual({ label: fished.lure, outings: 1, fish: 0 });
+  });
+
   it("keeps the sample's bags while the angler has only planned an outing or played a round", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const sample = book.trips.find((each) => book.catches.some((entry) => entry.tripId === each.id))!;

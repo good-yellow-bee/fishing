@@ -276,7 +276,6 @@ export const PL_FIELD: PlBook = {
   "Wax worm": "Larwa barciaka",
   "Live bait:": "Żywa przynęta:",
   "Elk hair caddis": "Chruścik z sierści łosia",
-  "Green pumpkin tube": "Zielona tuba",
 
   // Trips
   Calendar: "Kalendarz",

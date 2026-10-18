@@ -26,12 +26,23 @@ export function kindOnPage(book: Logbook, species: string): CatchEntry[] {
   return own.length > 0 ? own : real.length > 0 ? real : every;
 }
 
-/** Each kind among `catches` counted as its page counts it: the angler's own fish, or its game fish when that is all. */
+/**
+ * Each kind among `catches` counted as its page counts it (kindOnPage): the angler's own fish, the sample week's once
+ * they have none of that kind, or its game fish when that is all.
+ */
 export function pageCounts(catches: readonly CatchEntry[]) {
-  const own = speciesCounts(catches.filter(offPlayLake));
-  const known = new Set(own.map((row) => row.species.trim().toLowerCase()));
-  const gameOnly = speciesCounts(catches.filter((entry) => !offPlayLake(entry))).filter((row) => !known.has(row.species.trim().toLowerCase()));
-  return [...own, ...gameOnly].sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
+  const real = catches.filter(offPlayLake);
+  const ownAnywhere = real.some((entry) => !isSampleCatch(entry.id));
+  // Tier by tier, each kind taking the first that has any of it.
+  const tiers = [ownAnywhere ? real.filter((entry) => !isSampleCatch(entry.id)) : real, real, catches];
+  const known = new Set<string>();
+  const rows: ReturnType<typeof speciesCounts> = [];
+  for (const tier of tiers) {
+    const fresh = speciesCounts(tier).filter((row) => !known.has(row.species.trim().toLowerCase()));
+    for (const row of fresh) known.add(row.species.trim().toLowerCase());
+    rows.push(...fresh);
+  }
+  return rows.sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
 }
 
 /** The waters this kind came from, most fish first, then by name. */

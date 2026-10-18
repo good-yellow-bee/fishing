@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { catchesOfSpecies, kindOnPage, speciesCounts, speciesLink, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, kindOnPage, pageCounts, speciesCounts, speciesLink, speciesWaters } from "./speciesLink";
 
 describe("species page", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -45,5 +45,9 @@ describe("species page", () => {
     // A kind only the sample caught still shows its sample fish rather than an empty page.
     const trout = catchesOfSpecies(book, "Brook trout");
     expect(kindOnPage(withOwn, "Brook trout")).toHaveLength(trout.length);
+    // A kind's chip counts what its page lists.
+    const counts = new Map(pageCounts(withOwn.catches).map((row) => [row.species, row.count]));
+    expect(counts.get("Northern pike")).toBe(1);
+    expect(counts.get("Brook trout")).toBe(trout.length);
   });
 });
