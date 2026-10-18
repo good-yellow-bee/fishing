@@ -1513,7 +1513,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT288~~ | ~~News card 2026-10-18-game14 covers GT285 to GT287: the cloud over the sun, the lily pad fight and a new kind of lure at a bank fished hard~~ (#1189) | ui | S |
 | ~~GT289~~ | ~~The angler's shadow under a low sun: at dawn the sun sits squarely behind the Drop-off and at dusk behind the Inlet, so under a clear or partly cloudy sky the angler's long shadow falls across the water and the fish there shy from it (1.15 wait), the cast says so and the stance chip reads "your shadow on the water"; a beginner is spared~~ (#1198) | gameplay | S |
 | ~~GT290~~ | ~~The moon overhead and underfoot: for an hour either side of the moon passing overhead (noon at new moon, midnight at full, about 50 minutes later each day) or underfoot 12 hours on, the fish come on the feed and every cast bites sooner (0.85 wait); the cast says so, the stance chip reads "moon overhead" or "moon underfoot", and the chalk board gives each day's daytime passing~~ (#1202) | gameplay | S |
-| GT291 | News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot | ui | S |
+| ~~GT291~~ | ~~News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot~~ (#1203) | ui | S |
+| GT292 | A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit | gameplay | S |
 
 ## Risks / open questions for the owner
 
