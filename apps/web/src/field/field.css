@@ -1837,8 +1837,10 @@ button.field-primary:disabled {
   font-size: 0.85em;
 }
 
-/* Spots: how the water list is ordered. */
+/* Spots: how the water list is ordered, and which kind of water it shows, a row apart. */
 .spot-order {
+  display: grid;
+  gap: 12px;
   margin: 0 0 14px;
 }
 

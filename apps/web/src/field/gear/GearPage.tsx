@@ -63,6 +63,9 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
 const RECORD_ROWS = 8;
 
 /** Each lure taken on past outings: the outings it went on and the fish it took there, most fish first. */
+/** Outings a lure goes out on without a fish before the record says it may as well stay home. */
+const NEVER_TOOK_OUTINGS = 4;
+
 function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
   const { items } = useTackle();
@@ -71,6 +74,7 @@ function LureRecord({ today }: { today: string }) {
   const [all, setAll] = useState(false);
   if (records.length === 0) return null;
   const fold = records.length > RECORD_ROWS;
+  const blanks = records.filter((row) => row.fish === 0 && row.outings >= NEVER_TOOK_OUTINGS);
   return (
     <>
       {/* Where focus goes once the last lure line above is settled. */}
@@ -109,6 +113,12 @@ function LureRecord({ today }: { today: string }) {
           <button type="button" className="text-button" aria-expanded={all} onClick={() => setAll((open) => !open)}>
             {all ? t("Show fewer") : t("Show all {count}", { count: records.length })}
           </button>
+        </p>
+      ) : null}
+      {/* Packed again and again and never a fish: a lure that may as well stay home, said where the folded list hides it. */}
+      {blanks.length > 0 ? (
+        <p className="meta never-took">
+          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${t(row.label)} (${row.outings})`).join(", ") })}
         </p>
       ) : null}
       {/* Lures that took fish last year and none yet this year: worth a swim before the season ends. */}
