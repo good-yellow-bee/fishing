@@ -52,8 +52,10 @@ import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
-import { isSampleSpot, upcomingRealTrips } from "./bookCopy";
-import { canGoBack } from "./FieldShell";
+import { isSampleSpot, nextRealTrips } from "./bookCopy";
+import { canGoBack, pageBefore } from "./FieldShell";
+import { noteAddedWater } from "./addedWater";
+import { keepDraft, readKeptDraft } from "./catchDraft";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState, sayAfterBack } from "./SavedNote";
 
@@ -80,7 +82,7 @@ export function SpotsPage() {
   useT();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingRealTrips(book, today);
+  const upcoming = nextRealTrips(book, today);
   const [storedOrder, setOrder] = useState(readSpotOrder);
   const pickOrder = (next: SpotOrder) => {
     setOrder(next);
@@ -253,7 +255,7 @@ function SpotView() {
   const twin = book.spots.find((other) => other.id !== spot.id && other.name.trim().toLowerCase() === spot.name.trim().toLowerCase());
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(book, today).get(spot.id);
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
-  const nextHere = upcomingRealTrips(book, today).find((trip) => trip.spotId === spot.id && (trip.date > today || (fishByTrip.get(trip.id) ?? 0) === 0));
+  const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
   // By the day a fish counts on, as the year search each bar opens reads it.
   const years = yearTally(catches, (entry) => bookFishDay(book, entry));
@@ -563,9 +565,18 @@ function SpotForm() {
       return;
     }
     kept.drop();
-    // The form gives way to the page it saved for, so Back doesn't open it again.
-    if (then === "catch") navigate(`/catches/new?spot=${result.id}`, { replace: true });
-    else if (then === "trip") navigate(`/trips/new?spot=${result.id}`, { replace: true });
+    // Back to the form it was added for, which picks the new water (and a fish typed there comes back on it); a form
+    // opened directly gives way to a fresh one on the water, so Back doesn't open it again.
+    if (then === "catch" || then === "trip") {
+      const form = then === "catch" ? "/catches/new" : "/trips/new";
+      if (then === "catch") {
+        const typed = readKeptDraft();
+        if (typed) keepDraft({ ...typed, spotId: result.id, tripId: "" });
+      }
+      noteAddedWater(result.id);
+      if (canGoBack() && pageBefore()?.split("?")[0] === form) navigate(-1);
+      else navigate(`${form}?spot=${result.id}`, { replace: true });
+    }
     // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
     // Said there as on the water's page, so a save with no place noted (no pin moves) still shows it went through.
     else if (then === "map") {

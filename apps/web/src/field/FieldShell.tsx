@@ -41,9 +41,16 @@ function FieldLinks() {
 /** The page shown, and the one under it in history when known (after a link; not after Back or Forward). */
 let shownPage = "";
 let pageBelow: string | null = null;
-/** The page a Back from here lands on, when this visit followed the link here; null when it can't be known. */
+/** The page this visit showed at each history entry, by the router's number for it (idx): known after Back too. */
+const pagesAt = new Map<number, string>();
+function historyIdx(): number | null {
+  const idx = (window.history.state as { idx?: unknown } | null)?.idx;
+  return typeof idx === "number" ? idx : null;
+}
+/** The page a Back from here lands on, when this visit has shown it there; null when it can't be known. */
 export function pageBefore(): string | null {
-  return pageBelow;
+  const idx = historyIdx();
+  return idx === null ? pageBelow : (pagesAt.get(idx - 1) ?? null);
 }
 
 /** Whether this visit has gone from one page to another yet: a Back can only come after one. */
@@ -58,8 +65,8 @@ export function hasMovedInApp(): boolean {
  * the number (a memory router) it falls back on whether this visit has moved yet.
  */
 export function canGoBack(): boolean {
-  const idx = (window.history.state as { idx?: unknown } | null)?.idx;
-  return typeof idx === "number" ? idx > 0 : movedInApp;
+  const idx = historyIdx();
+  return idx !== null ? idx > 0 : movedInApp;
 }
 
 export function FieldShell({ children }: { children: ReactNode }) {
@@ -100,6 +107,12 @@ export function FieldShell({ children }: { children: ReactNode }) {
     if (how === "PUSH") pageBelow = shownPage || null;
     else if (how === "POP") pageBelow = null;
     shownPage = pathname + search;
+    // A link drops the entries it cut off ahead of it; each entry then holds the page last shown there.
+    const idx = historyIdx();
+    if (idx !== null) {
+      if (how === "PUSH") for (const at of [...pagesAt.keys()]) if (at > idx) pagesAt.delete(at);
+      pagesAt.set(idx, shownPage);
+    }
   }, [key, how, pathname, search]);
   const lastPath = useRef(pathname);
   useLayoutEffect(() => {

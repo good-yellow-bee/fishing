@@ -33,7 +33,7 @@ import {
   type SamplePlace,
 } from "./places";
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
-import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
+import { hasSampleWaters, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
 import { distanceText } from "../NearestWater";
@@ -299,7 +299,7 @@ export function SpotMapPage() {
   // And the next outing planned there, as the Waters page says it.
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
-  const upcoming = upcomingRealTrips(book, today);
+  const upcoming = nextRealTrips(book, today);
   const lastOut = lastOutByWater(book, today);
   const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
   const fishLine = (spotId: string) => {
@@ -365,7 +365,8 @@ export function SpotMapPage() {
       {plotted.length > 0 ? (
         <ul className="map-index">
           {plotted.map(({ spot, place }) => (
-            <li key={spot.id}>
+            // An own water inside the sample sheet's frame is drawn there: "See it on the Map" finds its row here.
+            <li key={spot.id} id={`water-${spot.id}`} className={hash === `#water-${spot.id}` ? "map-row-picked" : undefined}>
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               <span>{t(WATER_LABELS[spot.waterType])}</span>
               <span>{fishLine(spot.id)}</span>
