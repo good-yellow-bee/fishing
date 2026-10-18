@@ -373,12 +373,13 @@ button.field-primary {
     inset: -8px -4px;
   }
 
-  /* Home's stacked count lines ("6 species", "Last time: …") sat 4 px apart: each link gets room of its own.
-     The margin parts the two halves of a line that wraps in a narrow card (a tablet's three columns), which touched. */
+  /* Home's stacked count lines ("6 species", "Last time: …", "Log a catch") were 23 px links 8 px apart: each is
+     now a full 32 px band of its own, touching the next rather than leaving a gap a tap falls into. */
   .stat-row small a {
     display: inline-block;
-    padding-block: 4px;
-    margin-block: 4px;
+    min-height: 32px;
+    padding-block: 8px;
+    box-sizing: border-box;
   }
 
   /* A one-digit count ("5" waters) was a 22 px-wide link. */
@@ -434,6 +435,18 @@ button.field-primary {
   /* "Download these as a spreadsheet" sat 12 px between the sizes line and Copy a summary, both reaching into the gap. */
   p.fish-csv {
     margin: 16px 0;
+  }
+
+  /* "Add the one you fished" under the Water picker stood 17 px tall on a phone held sideways. */
+  .own-water a {
+    display: inline-block;
+    padding-block: 8px;
+  }
+
+  /* The lone "Back to catches" (or spots, trips, bests) under a missing page's line stood 20 px tall. */
+  .sheet > .lede + a {
+    display: inline-block;
+    padding-block: 6px;
   }
 
   /* An outing's Add to calendar and Print the packing list wrap onto two touching lines on a phone, each reaching

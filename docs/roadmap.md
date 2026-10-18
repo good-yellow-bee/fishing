@@ -1080,6 +1080,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA35~~ | ~~Escape closed Settings, Keys and buttons and the shack but not the trip recap, so a keyboard player had to Tab to its button. Escape now closes it to keep fishing on today's trip or after the trip is written in the book; an old trip left over from another day still needs "Let it go" pressed, so Escape never throws one away (#1079)~~ | phone UX | S |
 | ~~PA36~~ | ~~On Sign in and Join, a refused sign-in ("Invalid email or password") appeared silently, so a screen reader said nothing, and its rust words on the card's paper measured 3.1:1, as did the light words on the hovered Enter the dock button (WCAG 4.1.3, 1.4.3). The error line is now an alert, and both use a deeper rust at 5.1:1 (probe authalert.cjs) (#1080)~~ | phone UX | S |
 | ~~PA37~~ | ~~On a phone an upcoming outing's Add to calendar and Print the packing list wrapped onto two touching lines, and Gear's "Pack for …" sat 8 px under its lure's Largest link, so each pair's tap reaches overlapped by 6 to 16 px and a finger between them could open the wrong one. A 16 px row gap and an 8 px margin part them (probe pairs.cjs, which skips folded details) (#1085)~~ | phone UX | S |
+| ~~PA38~~ | ~~A link to a fish, water, outing or kind no longer in the book showed one line and a lone "Back to catches" (or spots, trips, bests) only 20 px tall, below the 32 px the log keeps on a touch screen; it now has 6 px of padding above and below (audit.cjs on the missing pages) (#1089)~~ | phone UX | S |
+| ~~PA39~~ | ~~On a touch screen Home's stacked count and outing links ("6 species", "6 left to pack", "Last time: …", "Log a catch") were 23 px tall with 8 px gaps, so a tap a little off the words fell into a gap, and "Add the one you fished" under the Water picker stood 17 px tall on a phone held sideways. Each Home link is now a 32 px band touching the next, and the water link gets 8 px of padding above and below (#1090)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1121,6 +1123,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC34~~ | ~~Cygnets: in summer a brood of four grey cygnets paddles in a line behind the swans, now and then straying a little to one side~~ (#1078) | scene | S |
 | ~~SC35~~ | ~~News card: lily pads through the year, pondweed and cygnets~~ (#1078) | scene | S |
 | ~~SC36~~ | ~~Sunken leaves: from fall until spring, dark fallen leaves lie on the shallow bed round the dock, seen through the water~~ (#1081) | scene | S |
+| ~~SC37~~ | ~~Frogspawn: in spring, pale clumps of frogspawn float by the lily pads, riding the swell~~ (#1084) | scene | S |
+| ~~SC38~~ | ~~Foam lanes: on a windy day the wind rakes the foam into long lanes running down the wind across the open water~~ (#1088) | scene | S |
+| ~~SC39~~ | ~~News card scene09: sunken leaves, frogspawn, foam lanes~~ (#1088) | scene | S |
+| ~~SC40~~ | ~~Swan feathers: from summer into fall, moulted white feathers drift on the water with the wind~~ (#1092) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1400,7 +1406,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT272~~ | ~~The fall turnover: once each fall, for 3 days starting on a day between October 20 and November 12 (the same for everyone), the lake turns over and bites come slower everywhere (1.2 wait) but a little sooner in the inlet's fresh stream water (0.9); the bite reasons say so first, the forecast board chalks those days, and a beginner is spared the slow side~~ (#1068) | gameplay | S |
 | ~~GT273~~ | ~~News card 2026-10-18-game10 covers GT270 to GT272: a hook blunted on the rocks, the winter shore ice, and the fall turnover~~ (#1072) | ui | S |
 | ~~GT274~~ | ~~"Good now" and walk-sign dots follow the newer weather and calendar: on the bright morning after the rain the lure picker marks a jig or worm "good now" (they escape the sulk), and while the lake turns over the Inlet's sign gets its dot and the stance chip says "bites sooner now" there; the turnover only counts in fall, so a season picked by hand isn't slowed~~ (#1076) | ui | S |
-| GT275 | Skip casts off the dock: a cast off the Dock released in the bottom quarter of the sweet band skips the lure under the planks into the shade, so the bite comes sooner (0.85 wait) and the wait hint says "Skipped it under the dock, into the shade."; a float or popper rides too high to skip | gameplay | S |
+| ~~GT275~~ | ~~Skip casts off the dock: a cast off the Dock released in the bottom quarter of the sweet band skips the lure under the planks into the shade, so the bite comes sooner (0.85 wait) and the wait hint says "Skipped it under the dock, into the shade."; a float or popper rides too high to skip~~ (#1082) | gameplay | S |
+| GT276 | Live shiner bait: a landed golden shiner can go back out on the hook ("Use it as bait" on the landed card); the next cast carries it, and 60% of its bites are one of the bank's hunters the angler could land (pike, tiger muskie, largemouth or smallmouth bass, walleye), weighed as the bank draws them; the wait hint and strike say so, the stance chip says "live shiner on", a late strike on it still hooks deep, and a beginner is spared | gameplay | S |
 
 ## Risks / open questions for the owner
 

@@ -13,10 +13,14 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("inset: -8px -4px;");
   });
 
-  it("gives Home's stacked count links room of their own", () => {
+  it("makes each of Home's stacked count and outing links a 32 px band", () => {
     const block = /\.stat-row small a \{\n    display: inline-block;([^}]*)\}/.exec(css)?.[1];
-    expect(block).toContain("padding-block: 4px;");
-    expect(block).toContain("margin-block: 4px;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("padding-block: 8px;");
+  });
+
+  it("makes Add the one you fished 32 px tall", () => {
+    expect(/\n  \.own-water a \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 8px;");
   });
 
   it("keeps a one-digit count link on Bests at least 32 px wide", () => {
@@ -48,6 +52,10 @@ describe("the field log on a touch screen", () => {
     expect(/\n  p\.trip-calendar \{([^}]*)\}/.exec(css)?.[1]).toContain("gap: 16px 0.3em;");
     const coarse = gearCss.slice(gearCss.indexOf("@media (pointer: coarse) {"));
     expect(/\.lure-record \.lure-last:has\(> \.text-button\) \{([^}]*)\}/.exec(coarse)?.[1]).toContain("margin-top: 8px;");
+  });
+
+  it("makes a missing page's lone way back 32 px tall", () => {
+    expect(/\n  \.sheet > \.lede \+ a \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 6px;");
   });
 
   it("makes the species and lure chips 32 px tall", () => {

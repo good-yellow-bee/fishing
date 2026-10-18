@@ -40,6 +40,8 @@ import { Crayfish } from "./Crayfish";
 import { Waterweed } from "./Waterweed";
 import { SunkenLeaves } from "./SunkenLeaves";
 import { sunkenLeavesOut } from "./leafLitter";
+import { Frogspawn } from "./Frogspawn";
+import { spawnOut } from "./spawnClumps";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
@@ -94,6 +96,8 @@ import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
 import { Grebes } from "./Grebes";
+import { Feathers } from "./Feathers";
+import { feathersOut } from "./featherDrift";
 import { Terns } from "./Terns";
 import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
@@ -138,6 +142,8 @@ import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
+import { FoamLanes } from "./FoamLanes";
+import { foamLanesAmount } from "./foamLanesPlan";
 import { DuckweedFilm } from "./DuckweedFilm";
 import { ShoreIceFilm } from "./ShoreIceFilm";
 import { SNOW_BAND } from "./shoreIce";
@@ -1160,6 +1166,7 @@ function LakeSurface({
       {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
       {duckweed > 0 && <DuckweedFilm geometry={geometry} wind={wind} hour={hour} amount={duckweed} />}
       {pollen > 0 && <PollenFilm geometry={geometry} wind={wind} hour={hour} amount={pollen} />}
+      {foamLanesAmount(Math.hypot(wind.x, wind.z)) > 0 && <FoamLanes geometry={geometry} wind={wind} hour={hour} />}
       {shoreIce(season) && <ShoreIceFilm geometry={geometry} hour={hour} />}
       {cloudShade > 0 && (
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
@@ -2128,6 +2135,7 @@ export const LakeWorld = memo(function LakeWorld({
       {crayfishOut(season) && <Crayfish />}
       <Waterweed season={season} />
       {sunkenLeavesOut(season) && <SunkenLeaves />}
+      {spawnOut(season) && <Frogspawn />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
@@ -2176,6 +2184,7 @@ export const LakeWorld = memo(function LakeWorld({
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
+      {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {petalsOut(season) && <FallingLeaves wind={wind} petals />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
