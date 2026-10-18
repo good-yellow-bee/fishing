@@ -1,4 +1,4 @@
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
 
 /**
  * Campers' tent pitched on the far bank west of the cabin from spring to fall. By day it is just
@@ -18,6 +18,25 @@ function tentSpot() {
 export const TENT_AT = tentSpot();
 /** Its door faces the middle of the lake. */
 export const TENT_YAW = Math.atan2(0 - TENT_AT.x, LAKE_CENTER_Z - TENT_AT.z);
+
+/** A point `side` metres to the tent's right and `ahead` metres out in front of its door. */
+function besideTent(side: number, ahead: number) {
+  return {
+    x: TENT_AT.x + Math.cos(TENT_YAW) * side + Math.sin(TENT_YAW) * ahead,
+    z: TENT_AT.z - Math.sin(TENT_YAW) * side + Math.cos(TENT_YAW) * ahead,
+  };
+}
+
+/** The campers' fire pit, out in front of the tent and off to one side. */
+export const CAMP_FIRE_AT = besideTent(0.9, 1.8);
+/** The log the two campers sit on, behind the fire as seen from the lake, and which way they face (toward the fire). */
+export const CAMP_LOG_AT = besideTent(1.9, 1.3);
+export const CAMPERS_YAW = Math.atan2(CAMP_FIRE_AT.x - CAMP_LOG_AT.x, CAMP_FIRE_AT.z - CAMP_LOG_AT.z);
+
+/** The two campers sit out by their fire from dusk into the night, unless it is raining. */
+export function campersOut(hour: LakeHour, sky: Sky | undefined) {
+  return (hour === "dusk" || hour === "night") && sky !== "rain";
+}
 
 /** Pitched from spring to fall; nobody camps out in winter. */
 export function tentPitched(season: LakeSeason) {

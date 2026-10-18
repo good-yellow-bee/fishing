@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
 import { CABIN_AT } from "./cabinLook";
-import { TENT_AT, TENT_YAW, tentGlow, tentPitched } from "./campTent";
+import { CAMPERS_YAW, CAMP_FIRE_AT, CAMP_LOG_AT, TENT_AT, TENT_YAW, campersOut, tentGlow, tentPitched } from "./campTent";
 import { kiteFlyer } from "./kiteFlight";
-import { doorShape, tentShape } from "./Tent";
+import { camperShape, doorShape, tentShape } from "./Tent";
 
 describe("campers' tent", () => {
   it("is pitched from spring to fall", () => {
@@ -40,8 +40,27 @@ describe("campers' tent", () => {
     expect(tentGlow("night", 1, true)).toBe(tentGlow("night", 9, true));
   });
 
-  it("builds the tent and its doorway", () => {
-    for (const shape of [tentShape(), doorShape()]) {
+  it("lays the fire and the campers' log out in front of the tent, on dry land and apart", () => {
+    for (const spot of [CAMP_FIRE_AT, CAMP_LOG_AT]) {
+      expect(inLake(spot.x, spot.z)).toBe(false);
+      expect(Math.hypot(spot.x - TENT_AT.x, spot.z - TENT_AT.z)).toBeGreaterThan(1.3);
+    }
+    expect(Math.hypot(CAMP_FIRE_AT.x - CAMP_LOG_AT.x, CAMP_FIRE_AT.z - CAMP_LOG_AT.z)).toBeGreaterThan(0.9);
+    // Both nearer the lake than the tent.
+    expect(Math.hypot(CAMP_FIRE_AT.x, CAMP_FIRE_AT.z + 2)).toBeLessThan(Math.hypot(TENT_AT.x, TENT_AT.z + 2));
+  });
+
+  it("sits the campers facing their fire from dusk into the night, unless it rains", () => {
+    const ahead = { x: CAMP_LOG_AT.x + Math.sin(CAMPERS_YAW), z: CAMP_LOG_AT.z + Math.cos(CAMPERS_YAW) };
+    expect(Math.hypot(ahead.x - CAMP_FIRE_AT.x, ahead.z - CAMP_FIRE_AT.z)).toBeLessThan(0.2);
+    expect(campersOut("dusk", "clear")).toBe(true);
+    expect(campersOut("night", "fog")).toBe(true);
+    expect(campersOut("night", "rain")).toBe(false);
+    expect(campersOut("day", "clear")).toBe(false);
+  });
+
+  it("builds the tent, its doorway and the campers", () => {
+    for (const shape of [tentShape(), doorShape(), camperShape(0), camperShape(1)]) {
       expect(shape.getAttribute("position").count).toBeGreaterThan(0);
       shape.dispose();
     }

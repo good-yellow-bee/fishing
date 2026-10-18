@@ -13,8 +13,9 @@ const RING = 0.34;
 /**
  * The fire pit by the shack: a ring of stones round a few charred sticks, always there, and from
  * dusk to dawn (`lit`) a flickering fire whose smoke rises and leans away on the day's wind.
+ * `at` sets another fire pit elsewhere, such as the campers' on the far bank.
  */
-export function Campfire({ lit, hour, wind = NO_WIND }: { lit: boolean; hour: SmokeHour; wind?: { x: number; z: number } }) {
+export function Campfire({ lit, hour, wind = NO_WIND, at = FIRE_AT }: { lit: boolean; hour: SmokeHour; wind?: { x: number; z: number }; at?: { x: number; z: number } }) {
   const still = useReducedMotion();
   const flames = useRef<THREE.Group>(null);
   const glow = useRef<THREE.Mesh>(null);
@@ -52,7 +53,7 @@ export function Campfire({ lit, hour, wind = NO_WIND }: { lit: boolean; hour: Sm
   });
 
   return (
-    <group name="campfire" position={[FIRE_AT.x, 0, FIRE_AT.z]}>
+    <group name="campfire" position={[at.x, 0, at.z]}>
       {Array.from({ length: STONES }, (_, i) => {
         const a = (i / STONES) * Math.PI * 2;
         return (
