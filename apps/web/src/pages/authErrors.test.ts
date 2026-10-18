@@ -21,3 +21,16 @@ describe("keyboard focus on the sign-in card", () => {
     expect(/\n\.auth-card :is\(a, button\):focus-visible \{([^}]*)\}/.exec(read("../index.css"))?.[1]).toContain("outline-color: #8f3a28;");
   });
 });
+
+describe("joining", () => {
+  it("says the password's 8-character floor before the first try, tied to the field (WCAG 3.3.2)", () => {
+    const page = read("Register.tsx");
+    expect(page).toContain('aria-describedby="password-hint"');
+    expect(page).toContain('<p className="field-help" id="password-hint">');
+    expect(page).toContain('{t("At least 8 characters.")}');
+  });
+
+  it("names the display name's purpose so the phone can fill it in (WCAG 1.3.5)", () => {
+    expect(read("Register.tsx")).toContain('<input id="name" autoComplete="nickname"');
+  });
+});
