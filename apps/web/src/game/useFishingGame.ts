@@ -33,7 +33,7 @@ import { dragTone } from "./dragTone";
 import { fx } from "./fx";
 import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
-import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
+import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
@@ -922,6 +922,12 @@ export function useFishingGame(
       resetToIdle(castHint("overpowered"));
       return;
     }
+    // In winter the lure skitters across the ice that rims the shore instead of reaching the water; a beginner is spared it.
+    if (aimed !== null && !mercyRef.current && onShoreIce(season, aimed.x, aimed.z)) {
+      setOutcome({ kind: "miss", message: t("The lure skittered across the shore ice.") });
+      resetToIdle(t("Ice rims the shore in winter. Cast past it to the open water."));
+      return;
+    }
     // A line twisted by a spinner's blade kinks on the cast now and then, until it is retied.
     if (castTangles(twistRef.current, Math.random(), mercyRef.current)) {
       setOutcome({ kind: "miss", message: t("A wind knot: the twisted line kinked on the cast.") });
@@ -935,7 +941,7 @@ export function useFishingGame(
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
-  }, [profile, resetToIdle, startWait]);
+  }, [profile, resetToIdle, season, startWait]);
 
   const startCast = useCallback((via: "pointer" | "key") => {
     if (!profile || phaseRef.current !== "idle") return;
