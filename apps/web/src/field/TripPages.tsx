@@ -41,7 +41,8 @@ import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
-import { bestOutingHere, outingAverage } from "./outingAverage";
+import { bestOutingHere, outingAverage, outingMean } from "./outingAverage";
+import { RecordHere, recordHere } from "./RecordHere";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
 import { NearestWater, canFindNearest } from "./NearestWater";
@@ -49,13 +50,13 @@ import { CopySummary } from "./CopySummary";
 import { useLogbook } from "./LogbookState";
 import { TripCounts } from "./tripCounts";
 import { TripWeather } from "./Weather";
-import { t, tn, useT } from "../i18n";
+import { num, t, tn, useT } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
-import { countedBook, ownFish } from "./milestones";
+import { countedBook, countedFish, ownFish } from "./milestones";
 import { isSampleTrip, upcomingRealTrips } from "./bookCopy";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
@@ -291,6 +292,14 @@ function TripView() {
   const { newer, older } = tripNeighbors(book, trip.id);
   const fishByTrip = fishCountsByTrip(book);
   const best = bestOutingHere(tripsForSpot(book, trip.spotId), (id) => fishByTrip.get(id) ?? 0, trip.id, today);
+  // A day fished on a real water, against the other outings fished there, counted as the average is.
+  const ownTrips = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
+  const fished = trip.date < today || (trip.date === today && catches.length > 0);
+  const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, (id) => fishByTrip.get(id) ?? 0, today, trip.id) : null;
+  // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
+  const countedHere = countedFish(catchesForSpot(book, trip.spotId));
+  const countedIds = new Set(countedHere.map((entry) => entry.id));
+  const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
   const lastHere = tripsForSpot(book, trip.spotId)
     .filter((other) => other.date < trip.date && other.date <= today)
@@ -337,6 +346,12 @@ function TripView() {
       {weighed && !play ? <p className="meta total-weight">{t("Total weight: {weight} ({count} weighed)", { weight: measureText({ kind: "weight", pounds: weighed.pounds }), count: weighed.count })}</p> : null}
       {/* Against every other outing on the same water. */}
       {best ? <p className="meta best-outing">{best}</p> : null}
+      {meanHere !== null ? (
+        <p className="meta against-average">
+          {t("{fish}; your average here is {mean}", { fish: fishCountLabel(catches.length), mean: num(meanHere, meanHere > 0 && meanHere < 0.1 ? 2 : 1) })}
+        </p>
+      ) : null}
+      {sizeHere ? <RecordHere {...sizeHere} /> : null}
       {lastHere ? (
         <p className="meta last-here">
           <Link to={`/trips/${lastHere.id}`}>
