@@ -53,3 +53,12 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("inset: -6px -3px;");
   });
 });
+
+describe("the field log's tab bar on a 320 px phone", () => {
+  it("widens a tab and scrolls rather than clip a word spaced wider (WCAG 1.4.12)", () => {
+    const narrow = css.slice(css.indexOf("@media (max-width: 420px) {"));
+    const block = /\n  \.field-tab \{([^}]*)\}/.exec(narrow)?.[1];
+    expect(block).toContain("grid-template-columns: repeat(7, minmax(max-content, 1fr));");
+    expect(block).toContain("overflow-x: auto;");
+  });
+});
