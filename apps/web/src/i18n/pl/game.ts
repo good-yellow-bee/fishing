@@ -536,6 +536,8 @@ export const PL_GAME: PlBook = {
   "The lure slapped the dock.": "Przynęta plasnęła o pomost.",
   "Too little power. Hold longer.": "Za słabo. Trzymaj dłużej.",
   "Backlash. Recast.": "Splątana żyłka. Zarzuć ponownie.",
+  "The lure skittered across the shore ice.": "Przynęta prześlizgnęła się po lodzie przy brzegu.",
+  "Ice rims the shore in winter. Cast past it to the open water.": "Zimą brzeg obrasta lodem. Zarzuć dalej, na otwartą wodę.",
   "Overpowered. Release in the band.": "Za mocno. Puść w pasku.",
   "Keep the ring on the water. Release in the moss band.": "Trzymaj kółko na wodzie. Puść w zielonym pasku.",
   "Too early. Wait for the bobber to go under, then strike.": "Za wcześnie. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
