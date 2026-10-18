@@ -5,6 +5,7 @@ export const NEWS_KEY = "stillwater.news.v1";
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.",
+  "Casting a spinner twists the line, and after a dozen spinner casts a twisted line now and then kinks into a wind knot until you retie it with the button by the walk signs or T. On a controller, X tosses the groundbait and the left trigger reties the line. On a clear morning after a day of rain the fish sulk deep until noon, so bites come slower except on a slow jig or worm, and the shack's chalk board warns of it.",
   "Your year's goal now says how many fish ahead of or behind an even pace you are, and setting a goal shows last year's total to start from.",
   "On a clear dawn, shafts of low sunlight now slant through the trees and the morning mist onto the lake. In spring a yellow film of pollen streaks the water with the breeze and piles up on the downwind bank, and in fall the fallen leaves raft up along that bank instead.",
   "Home counts your days on the water this year beside your outings. When loading a book file would replace fish or places this browser has and the file doesn't, the question offers to download this book first.",
