@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CATCH_PHOTO_STORE_MAX_CHARS, catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { photoRoomChars } from "./photoStore";
 import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
@@ -45,7 +46,8 @@ export function PhotosPage() {
   const roomNote = useRef<HTMLParagraphElement>(null);
   // How full the room kept for photos is, and what of the game's could go to free some.
   // A kept photo never reads as 0%.
-  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((storedSize(photos) / CATCH_PHOTO_STORE_MAX_CHARS) * 100)));
+  // Against the room a save really leaves them: a big book beside them leaves less than the room kept for photos.
+  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((storedSize(photos) / photoRoomChars()) * 100)));
   const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
   const clear = spare.slice(0, 10);
   const makeRoom = () => {

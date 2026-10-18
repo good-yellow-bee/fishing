@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
-import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds } from "./storage";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
+import { keepBookStorage } from "./keepStorage";
+import { forgetRemovedPhotos, readRemovedPhotos } from "./removedPhotos";
+import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds, unreadableHeldOnly } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
 import { fishCountLabel, formatCatchDay, messageText } from "./format";
@@ -27,13 +29,17 @@ function newestAt(book: Logbook): string {
 /** Fish in this browser's book that the file doesn't have: what replacing it with the file would drop. */
 function lostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set(file.catches.map((entry) => entry.id));
-  return here.catches.filter((entry) => !kept.has(entry.id)).length;
+  // The sample week's invented fish are no loss.
+  return here.catches.filter((entry) => !kept.has(entry.id) && !isSampleCatch(entry.id)).length;
 }
 
 /** This book's waters and outings a file doesn't have, which replacing would drop; the game's lake comes back on its own. */
 function placesLostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set([...file.spots, ...file.trips].map((each) => each.id));
-  return here.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && !kept.has(spot.id)).length + here.trips.filter((trip) => offPlayLake(trip) && !kept.has(trip.id)).length;
+  return (
+    here.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && !kept.has(spot.id) && !isSampleSpot(spot.id)).length +
+    here.trips.filter((trip) => offPlayLake(trip) && !kept.has(trip.id) && !isSampleTrip(trip.id)).length
+  );
 }
 
 /** Outings both books share whose lost or missed count the file has higher: taps made on the other phone. */
@@ -60,6 +66,7 @@ const PREVIEW_FISH = 3;
 
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
+  if (isSampleOnly(book) && book.catches.every((entry) => isSampleCatch(entry.id))) return t("only the sample week");
   const newest = newestAt(book);
   return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
 }
@@ -81,10 +88,11 @@ function setAsideFile(raw: string, photos: CatchPhotoMap): string {
 }
 
 /** A stored copy that could not be read: offered as a file, or forgotten on the angler's word. */
-function SetAside(props: { id?: string; text: string; download: string; ask: string; forget: string; raw: string | (() => string); file: string; onForget: () => void }) {
+function SetAside(props: { id?: string; text: string; warn?: string; download: string; ask: string; forget: string; raw: string | (() => string); file: string; onForget: () => void }) {
   return (
     <div className="copy-nudge" id={props.id} tabIndex={props.id ? -1 : undefined}>
       <p>{props.text}</p>
+      {props.warn ? <p className="field-error">{props.warn}</p> : null}
       <div className="book-file">
         <button type="button" className="text-button" onClick={() => downloadFile(typeof props.raw === "string" ? props.raw : props.raw(), "application/json", props.file)}>
           {props.download}
@@ -105,7 +113,7 @@ function SetAside(props: { id?: string; text: string; download: string; ask: str
 
 /** `onSetAsideGone` tells the page the set-aside book was forgotten, so a note pointing at it can go too. */
 export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {}) {
-  const { book, storedBook, photos, replaceBook, restoreSample } = useLogbook();
+  const { book, storedBook, photos, replaceBook, restoreSample, undoable } = useLogbook();
   useT();
   const { items, replaceTackle } = useTackle();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -136,10 +144,11 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     setCopyMark(readCopyMark());
   }, [storedBook]);
   useEffect(() => {
-    if (copiedAt === null || copiedAt <= own) return;
+    // Not while a delete can still be undone: the fish it took may come straight back.
+    if (copiedAt === null || copiedAt <= own || undoable) return;
     lowerCopiedAt(own);
     setCopiedAt(own);
-  }, [copiedAt, own]);
+  }, [copiedAt, own, undoable]);
   const [copyMark, setCopyMark] = useState(readCopyMark);
   // What a download would hold; the goals are read fresh whenever the page shows.
   const signature = useMemo(() => bookSignature(storedBook, items, Object.keys(photos), readYearGoals()), [storedBook, items, photos]);
@@ -233,6 +242,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
       setNotice({ tone: "bad", text: saved.message });
       return;
     }
+    // A book of the angler's own now in this browser: ask it to keep the storage, as the first logged fish does.
+    if (ownCatches(next.book) > 0) void keepBookStorage();
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
     const goalsHere = readYearGoals();
     setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()] });
@@ -244,6 +255,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     if (pendingGoals && Object.keys(pendingGoals).length > 0) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
     // A fish, water or outing that is in the book again is no longer one deleted here.
     forgetDeletedFish([...next.book.catches, ...next.book.spots, ...next.book.trips].map((each) => each.id));
+    // A photo that came back with a replaced book is the book's again.
+    if (!merged) forgetRemovedPhotos(Object.keys(next.photos));
     if (!merged) {
       // The file is itself a copy of the book now in this browser, so the reminder counts from it.
       const loaded = ownCatches(next.book);
@@ -289,7 +302,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     const trimmed = withDeleted ? pending : withoutDeleted(pending);
     // A water merged away here since the file was made: its fish and outings go to the water it joined.
     const file = { ...trimmed, book: intoMergedWaters(trimmed.book, storedBook, readMergedWaters()) };
-    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file, readDeletedFish());
+    const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file, readDeletedFish(), readRemovedPhotos());
     // The file's photos that didn't fit beside this book's own.
     const leftOut = newFishIn(storedBook, file.book).filter((entry) => file.photos[entry.id] !== undefined && next.photos[entry.id] === undefined).length;
     load(next, true, leftOut);
@@ -319,15 +332,20 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
   const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
-  const hasBook = storedBook.catches.length + storedBook.spots.length + storedBook.trips.length > 0;
+  // The sample week's invented ones are nothing to keep: a new phone with only the sample just takes the file.
+  const hasBook =
+    storedBook.catches.some((entry) => !isSampleCatch(entry.id)) ||
+    storedBook.spots.some((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)) ||
+    storedBook.trips.some((trip) => !isSampleTrip(trip.id));
   const adds = pending ? catchesNewestFirst({ ...pending.book, catches: newFishIn(storedBook, withoutDeleted(pending).book) }) : [];
   const addable = adds.length;
   const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
   const adding = pending && hasBook ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
+  const removedHere = readRemovedPhotos();
   // Photos the file has for fish both books share and this one has none for: taken on the other phone after a swap.
-  const photosOnly = pending && hasBook && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined).length : 0;
+  const photosOnly = pending && hasBook && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined && !removedHere.has(entry.id)).length : 0;
   // Lost and missed taps the other phone made on an outing this book has too.
   const countsOnly = adding && addable === 0 && placesOnly === 0 && photosOnly === 0 ? countsIn(storedBook, adding.book) : 0;
 
@@ -354,6 +372,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
               ? t("Part of this browser's book could not be read. What could be read was kept, and the whole book was set aside as it was, so nothing is lost.")
               : t("An earlier book in this browser could not be read, so it was set aside instead of being lost.")
           }
+          warn={unreadableHeldOnly() ? t("There is no room to keep it in this browser: download it before this page closes.") : undefined}
           download={t("Download the set-aside book")}
           ask={t("Forget the set-aside book for good?")}
           forget={t("Forget it")}
@@ -363,6 +382,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             forgetUnreadableBook();
             setSetAside(null);
             onSetAsideGone?.();
+            // The notice leaves with the button tapped: the focus goes on to loading a book.
+            loadButton.current?.focus();
           }}
         />
       ) : null}
@@ -377,6 +398,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           onForget={() => {
             forgetUnreadableTackle();
             setTackleAside(null);
+            loadButton.current?.focus();
           }}
         />
       ) : null}

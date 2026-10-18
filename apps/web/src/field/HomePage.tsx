@@ -10,14 +10,14 @@ import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, 
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
-import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleTrip, upcomingRealTrips } from "./bookCopy";
+import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, catchMonth } from "./tripMonths";
-import { countedFish } from "./milestones";
+import { countedBook, countedFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
@@ -38,7 +38,8 @@ function deskLine(now: Date): string {
 function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | undefined; today: string; now: Date }) {
   const items = useTackleItems();
   const parts: ReactNode[] = [];
-  const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
+  // The sample's made-up waters sit far away: their sunrise read on this device's clock would mislead.
+  const place = spot && !isSampleSpot(spot.id) ? (spot.place ?? placeFor(spot.id)) : undefined;
   if (place) {
     const sun = sunTimes(trip.date, place.lat, place.lng);
     if ("rise" in sun) {
@@ -121,7 +122,8 @@ export function HomePage() {
   // In the small hours, last evening's outing is still the one out on the water: it stays first, with its log link.
   // Not when today has an outing of its own, nor yesterday's morning outing: only one still going, with no fish yet or
   // one in the last twelve hours.
-  const todayOuting = book.trips.some((trip) => offPlayLake(trip) && trip.date === today);
+  // The angler's own outing today: a sample one dated today doesn't end last night's session.
+  const todayOuting = upcomingRealTrips(book, today).some((trip) => offPlayLake(trip) && trip.date === today);
   const lateOuting =
     now.getHours() < LATE_NIGHT_UNTIL && !todayOuting
       ? book.trips.find((trip) => {
@@ -157,8 +159,11 @@ export function HomePage() {
   const firstDay = real.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
   const comparable = lastYearDays.length > 0 && localDate(new Date(firstDay)) <= `${lastYear}-${today.slice(5)}`;
   // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
-  const ownWaters = book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
-  const ownOutings = book.trips.filter((trip) => offPlayLake(trip) && trip.date <= today).length;
+  // The sample week's waters and outings go once the angler has their own.
+  const countedOwn = countedBook(book);
+  const ownAny = countedOwn.trips.some((trip) => !isSampleTrip(trip.id)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
+  const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
+  const ownOutings = countedOwn.trips.filter((trip) => trip.date <= today).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
