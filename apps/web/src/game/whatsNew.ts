@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field37";
+export const NEWS_ID = "2026-10-18-scene21";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "At dusk and at night an angler sits out on the far bank with a glowing float on the water, their headlamp's beam following where they look. On calm days a child skims stones from the water's edge, a ring spreading at every skip. In spring a birdwatcher scans the lake through binoculars from the far bank, and on winter days a jogger in a bobble hat runs the shore below the ski track.",
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.",
   "On dry summer days two people toss a flying disc back and forth on the far bank, and in winter two children have a snowball fight there, ducking the throws. On rainy days an angler sits it out on the far bank under a big green umbrella tipped into the wind, and in the fall a grown-up rakes the leaves back onto the pile the child keeps jumping into.",
   "The moon now matters by day too: for an hour either side of it passing overhead or underfoot the fish come on the feed at every bank, and the shack's chalk board says when. And mind the low sun at your back: at dawn at the Drop-off and at dusk at the Inlet your long shadow falls across the water and the fish shy from it.",
