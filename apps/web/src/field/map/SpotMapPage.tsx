@@ -126,6 +126,16 @@ function MapPlate() {
   );
 }
 
+/** What the dots' sizes say. */
+function MapKey() {
+  return <p className="meta map-key">{t("A bigger dot marks a water with more fish, a pale one a water with none yet.")}</p>;
+}
+
+/** How big a water's dot is drawn: pale with no fish yet, then larger at 5 and at 20 fish. */
+function fishTier(fish: number) {
+  return fish === 0 ? 0 : fish < 5 ? 1 : fish < 20 ? 2 : 3;
+}
+
 function SpotPin({
   spot,
   place,
@@ -133,9 +143,11 @@ function SpotPin({
   width = MAP_WIDTH,
   height = MAP_HEIGHT,
   crowded = false,
+  fish = 0,
 }: {
   spot: Spot;
   place: SamplePlace;
+  fish?: number;
   point?: { x: number; y: number };
   width?: number;
   height?: number;
@@ -148,7 +160,7 @@ function SpotPin({
   return (
     <Link
       to={`/spots/${spot.id}`}
-      className={own ? `map-pin${own}` : `map-pin map-pin-${spot.id}`}
+      className={`${own ? `map-pin${own}` : `map-pin map-pin-${spot.id}`} map-pin-tier-${fishTier(fish)}`}
       style={{
         left: `${(point.x / width) * 100}%`,
         top: `${(point.y / height) * 100}%`,
@@ -180,7 +192,7 @@ function sheetPlace(spot: Spot, sampleSheet: boolean): SamplePlace | undefined {
 const CROWDED = 80;
 
 /** The angler's own pins away from the sample sheet, on a plain sheet of their own: a grid fitted to them, north up. */
-function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) {
+function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace }[]; fishOf: (spotId: string) => number }) {
   const frame = fitFrame(pinned.map(({ place }) => place));
   const lats = gridLines(frame.south, frame.north);
   const lngs = gridLines(frame.west, frame.east);
@@ -223,7 +235,7 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
       </svg>
       <div className="spot-map-pins" aria-hidden="true">
         {points.map(({ spot, place, point }, i) => (
-          <SpotPin key={spot.id} spot={spot} place={place} point={point} width={OWN_WIDTH} height={OWN_HEIGHT} crowded={points.slice(0, i).some((other) => Math.hypot(other.point.x - point.x, other.point.y - point.y) < CROWDED)} />
+          <SpotPin key={spot.id} spot={spot} place={place} fish={fishOf(spot.id)} point={point} width={OWN_WIDTH} height={OWN_HEIGHT} crowded={points.slice(0, i).some((other) => Math.hypot(other.point.x - point.x, other.point.y - point.y) < CROWDED)} />
         ))}
       </div>
     </div>
@@ -251,6 +263,7 @@ export function SpotMapPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingRealTrips(book, today);
+  const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
@@ -298,11 +311,14 @@ export function SpotMapPage() {
           <MapPlate />
           <div className="spot-map-pins" aria-hidden="true">
             {plotted.map(({ spot, place }) => (
-              <SpotPin key={spot.id} spot={spot} place={place} />
+              <SpotPin key={spot.id} spot={spot} place={place} fish={fishOf(spot.id)} />
             ))}
           </div>
         </div>
       )}
+
+      {/* Under the first sheet drawn. */}
+      {plotted.length > 0 ? <MapKey /> : null}
 
       {plotted.length > 0 ? (
         <ul className="map-index">
@@ -321,7 +337,8 @@ export function SpotMapPage() {
       {ownPinned.length > 0 ? (
         <>
           <h2 className="subhead">{t("Your own waters")}</h2>
-          <OwnSheet pinned={ownPinned} />
+          <OwnSheet pinned={ownPinned} fishOf={fishOf} />
+          {plotted.length === 0 ? <MapKey /> : null}
           <ul className="map-index">
             {ownPinned.map(({ spot, place }) => (
               <li key={spot.id}>

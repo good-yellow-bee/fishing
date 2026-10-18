@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -51,6 +51,9 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
       );
     }
   }
+  // The moon's week, when it is near full or new: the nights it changes the bite.
+  const moon = moonQuarterOf(new Date(`${trip.date}T12:00:00`));
+  if (moon === "full" || moon === "new") parts.push(t(MOON_QUARTER_LABELS[moon]));
   const rows = items ? itemsForTrip(items, trip.id) : [];
   if (rows.length > 0) {
     const packed = packedCount(rows);
