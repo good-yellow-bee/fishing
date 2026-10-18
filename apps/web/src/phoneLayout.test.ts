@@ -81,3 +81,28 @@ describe("the shop on a phone", () => {
     expect(css).toMatch(/@media \(max-width: 520px\) \{\n  \/\*[^*]*\*\/\n  \.shop-overlay \{\n    right: calc\(4vw \/ var\(--text-zoom, 1\)\);/);
   });
 });
+
+describe("the trip recap on a phone", () => {
+  const from = css.indexOf('/* "Najcięższa" in its spaced capitals');
+  const phone = css.slice(from, css.indexOf("/* High contrast from Settings", from));
+
+  it("tightens the stat labels, and stacks the stats as rows with larger text or on the narrowest phones", () => {
+    expect(phone).toMatch(/@media \(max-width: 520px\) \{\n  \.trip-recap-stats dt \{\n    letter-spacing: 0\.04em;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+    expect(phone).toMatch(/@media \(max-width: 360px\) \{\n  \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+  });
+});
+
+describe("the news card on a phone", () => {
+  it("is solid, pins Got it at its foot, sits under the header and ends on screen at any text size", () => {
+    const card = /\n\.whats-new \{([^}]*)\}/.exec(css)?.[1];
+    expect(card).toContain("max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px);");
+    expect(card).toContain("background: rgb(20, 28, 25);");
+    const foot = /\n\.whats-new-foot \{([^}]*)\}/.exec(css)?.[1];
+    expect(foot).toContain("position: sticky;");
+    expect(foot).toContain("background: inherit;");
+    const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
+    const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
+    expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(\(100dvh - 38px\) \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 8px\);/);
+  });
+});

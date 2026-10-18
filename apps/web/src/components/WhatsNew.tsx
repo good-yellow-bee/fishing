@@ -19,16 +19,18 @@ export function WhatsNew({ caughtTotal, hidden }: { caughtTotal: number; hidden:
           <li key={item}>{t(item)}</li>
         ))}
       </ul>
-      <button
-        className="panel-btn"
-        type="button"
-        onClick={() => {
-          markNewsSeen();
-          setOpen(false);
-        }}
-      >
-        {t("Got it")}
-      </button>
+      <div className="whats-new-foot">
+        <button
+          className="panel-btn"
+          type="button"
+          onClick={() => {
+            markNewsSeen();
+            setOpen(false);
+          }}
+        >
+          {t("Got it")}
+        </button>
+      </div>
     </aside>
   );
 }
