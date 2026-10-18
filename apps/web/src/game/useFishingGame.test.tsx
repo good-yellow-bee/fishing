@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
+import { castIntoSpooked, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -1868,6 +1868,29 @@ describe("useFishingGame groundbait", () => {
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe(
       "Yellow perch: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!",
     );
+  });
+});
+
+describe("useFishingGame pressure", () => {
+  // Cast, let the bite come and go unstruck, and clear the miss for the next cast at the same bank.
+  const castAndReset = (surface: HTMLDivElement) => {
+    cast(surface);
+    const waited = hint();
+    for (let ms = 0; ms < 60_000 && !phase()?.startsWith("result"); ms += 50) act(() => vi.advanceTimersByTime(50));
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    return waited;
+  };
+
+  it("makes a bank fished too long without a move slow to bite, and says to try another", () => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    const hints = Array.from({ length: PRESSURE_CASTS + 1 }, () => castAndReset(surface));
+    expect(hints.slice(0, PRESSURE_CASTS).some((line) => line?.includes("fished hard"))).toBe(false);
+    expect(hints.at(-1)).toContain("This water has been fished hard");
+    // A move to another bank starts a fresh run.
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    expect(castAndReset(surface)).not.toContain("fished hard");
   });
 });
 

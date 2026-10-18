@@ -1292,7 +1292,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT247~~ | ~~Groundbait cloud: a soft muddy cloud (one draw, radial alpha) lies on the water a short toss out and to the angler's right of the bank it was thrown from, thinning as its five casts are fished out~~ (#945) | scene | S |
 | ~~GT248~~ | ~~A school over the groundbait: a schooling fish landed from a cast over the groundbait leaves its school feeding there a cast longer, and the landed card says so; news card 2026-10-18-game04 covers GT243 to GT248 (walk-sign dots, lantern minnows, groundbait and its cloud)~~ (#947) | gameplay | S |
 | ~~GT249~~ | ~~Feeders on the groundbait: about a third of the bites over the groundbait come from the feeders at that bank (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) within the lure's size split and a short cast's commons, never on a beginner's first fish; the landed card says the groundbait drew it in~~ (#951) | gameplay | S |
-| GT250 | Field guide: a logged schooling fish says "Schools: land one and more are still there", and a logged groundbait feeder (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) says "Feeder: it comes in to feed on groundbait" | ui | S |
+| ~~GT250~~ | ~~Field guide: a logged schooling fish says "Schools: land one and more are still there", and a logged groundbait feeder (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) says "Feeder: it comes in to feed on groundbait"~~ (#954) | ui | S |
+| GT251 | A bank fished hard: after 8 casts in a row at one bank its fish grow wary of the line, so each further cast there bites slower (1.2) and the wait hint says to try another bank; a cast at another bank starts a fresh run, fish feeding over groundbait don't mind, and a beginner is spared | gameplay | S |
 
 ## Risks / open questions for the owner
 

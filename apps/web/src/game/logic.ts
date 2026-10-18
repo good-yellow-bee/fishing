@@ -535,6 +535,19 @@ export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCa
   return feeders.at(-1) ?? null;
 }
 
+/** Casts in a row at one bank before its fish grow wary of the line. */
+export const PRESSURE_CASTS = 8;
+/** Bites come this much slower on a bank fished that long without a move. */
+export const PRESSURE_WAIT = 1.2;
+
+export type Pressure = { spot: SpotId; casts: number };
+
+/** Counts this cast against the bank's run of casts; a cast at another bank starts a new run. */
+export function castUnderPressure(pressure: Pressure | null, spot: SpotId): { pressured: boolean; next: Pressure } {
+  const casts = pressure?.spot === spot ? pressure.casts + 1 : 1;
+  return { pressured: casts > PRESSURE_CASTS, next: { spot, casts } };
+}
+
 /** A fish lost in a fight spooks its bank: the next cast there waits this much longer for a bite. */
 export const SPOOK_WAIT = 1.4;
 
