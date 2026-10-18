@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { canGoBack, pageBefore } from "./FieldShell";
-import { leaveDeleted, leaveSaved } from "./leaveDeleted";
+import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -42,7 +42,7 @@ import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
-import { AT_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
+import { AT_PARAM, PHOTO_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
 import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
@@ -80,6 +80,7 @@ import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
+import { sameDayBefore } from "./sameDayBefore";
 import { countedSearch } from "./countedSearch";
 import { useStepKeys } from "./stepKeys";
 
@@ -509,6 +510,17 @@ function CatchForm() {
   };
   // From Home's "Pick it up": the fish comes back at once, not after the same question again.
   // Back from adding the water it was caught on, likewise: the water form moved the fish typed here onto it.
+  // From a fish's "Add a photo": the form opens at its photo field.
+  useEffect(() => {
+    if (!existing || params.get(PHOTO_PARAM) !== "1") return;
+    const timer = setTimeout(() => {
+      const field = document.querySelector<HTMLInputElement>('.entry-form input[type="file"]');
+      field?.focus({ preventScroll: true });
+      field?.closest(".photo-field")?.scrollIntoView({ block: "center" });
+    }, 0);
+    return () => clearTimeout(timer);
+    // Once, on opening the form.
+  }, []);
   const resumed = useRef(false);
   useEffect(() => {
     forgetAddedWater();
@@ -1576,6 +1588,8 @@ function CatchView() {
   const caughtYear = caughtDay.slice(0, 4);
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
   const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => bookFishDay(book, other).startsWith(`${caughtYear}-`)))}${noSample}`] as const;
+  // The same day of an earlier year, the latest one the angler was out and caught: what the water gave then.
+  const onThisDay = isCounted ? sameDayBefore(book, caughtDay, bookCounted, t("sample|search word")) : null;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The water's 10° band, and the fish caught under the same sky and wind in it, counted as the link opens them.
   const tempBand =
@@ -1726,6 +1740,11 @@ function CatchView() {
             <Link to={findWithLink(exactTerm("water", spot!.name), `${exactTerm("species", t(entry.species))}${noSample}`)}>{t("First {species} here.", { species: t(entry.species) })}</Link>
           </p>
         ) : null}
+        {onThisDay ? (
+          <p className="meta on-this-day">
+            <Link to={findLink(onThisDay.search)}>{t("On this day in {year}: {fish}", { year: onThisDay.day.slice(0, 4), fish: fishCountLabel(onThisDay.count) })}</Link>
+          </p>
+        ) : null}
         {yearCount > 1 ? (
           <p className="meta kind-year">
             <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: t(entry.species), year: caughtYear, count: yearCount })}</Link>
@@ -1743,6 +1762,17 @@ function CatchView() {
           </p>
         ) : null}
       </EditDelete>
+      {/* The angler's own fish without a picture: one tap to the form's photo field. */}
+      {!photo && isCounted ? (
+        <p className="add-photo">
+          <Link
+            to={`/catches/${entry.id}/edit?${new URLSearchParams({ ...(list ? { [LIST_PARAM]: list.key } : {}), [PHOTO_PARAM]: "1" }).toString()}`}
+            state={editFromPage(location.state)}
+          >
+            {t("Add a photo")}
+          </Link>
+        </p>
+      ) : null}
       {photo ? (
         <PhotoFull
           src={photo}
