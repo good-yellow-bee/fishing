@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { LakeHour } from "@stillwater/shared";
-import { MIRROR_PX, MIRROR_PY, MIRROR_SPAN_X, mirrorCanvasPoint } from "./mirrorImage";
+import { filmTexture } from "./filmCanvas";
+import { MIRROR_PX, MIRROR_SPAN_X, mirrorCanvasPoint } from "./mirrorImage";
 import { pollenRim, pollenStreaks } from "./pollenDrift";
 
 /** The film is painted finer than the mirror, which is blurred anyway. */
@@ -65,25 +66,11 @@ export function PollenFilm({
   hour: LakeHour;
   amount: number;
 }) {
-  const texture = useMemo(() => {
-    const sheet = () => {
-      const el = document.createElement("canvas");
-      el.width = MIRROR_PX * FILM_SCALE;
-      el.height = MIRROR_PY * FILM_SCALE;
-      return el;
-    };
-    const sharp = sheet();
-    const canvas = sheet();
-    const raw = sharp.getContext("2d");
-    const ctx = canvas.getContext("2d");
-    if (raw && ctx) {
-      paintFilm(raw, { x: wind.x, z: wind.z });
-      ctx.filter = "blur(1.5px)";
-      ctx.drawImage(sharp, 0, 0);
-    }
-    return new THREE.CanvasTexture(canvas);
+  const texture = useMemo(
+    () => filmTexture(FILM_SCALE, 1.5, (ctx) => paintFilm(ctx, { x: wind.x, z: wind.z })),
     // The day's wind is set once a visit; only its numbers matter, not the object.
-  }, [wind.x, wind.z]);
+    [wind.x, wind.z],
+  );
   useEffect(() => () => texture.dispose(), [texture]);
   const color = useMemo(() => new THREE.Color(POLLEN).multiplyScalar(HOUR_LIGHT[hour]), [hour]);
   return (
