@@ -1166,7 +1166,11 @@ export function DockPage() {
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <div className="shop-foot">
-              {error && <p className="warn">{error}</p>}
+              {error && (
+                <p className="warn" role="alert">
+                  {error}
+                </p>
+              )}
               <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
                 {t("Back to the path")}
               </button>

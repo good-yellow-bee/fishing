@@ -39,4 +39,31 @@ describe("UpgradePanel", () => {
     expect(described(accuracy!)).toEqual(["Wider cast band and longer strike window."]);
     expect(described(patience!)).toEqual(["Shorter waits, heavier fish."]);
   });
+
+  it("keeps a button in reach while a purchase runs or points run short, and says the new rank", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    container = document.createElement("div");
+    document.body.append(container);
+    root = createRoot(container);
+    const bought: string[] = [];
+    const rich = { ...profile, points: 1000 };
+    act(() => root!.render(<UpgradePanel profile={rich} busy={false} onBuy={(skill) => bought.push(skill)} />));
+    const strength = container.querySelector("button")!;
+    strength.focus();
+    act(() => strength.click());
+    expect(bought).toEqual(["strength"]);
+    // While the purchase runs the button stays focusable and in place, only marked unavailable.
+    act(() => root!.render(<UpgradePanel profile={rich} busy onBuy={(skill) => bought.push(skill)} />));
+    expect(strength.disabled).toBe(false);
+    expect(strength.getAttribute("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(strength);
+    act(() => strength.click());
+    expect(bought).toEqual(["strength"]);
+    const status = container.querySelector("[role=status]")!;
+    expect(status.textContent).toBe("");
+    act(() => root!.render(<UpgradePanel profile={{ ...rich, strength: rich.strength + 1, points: 0 }} busy={false} onBuy={(skill) => bought.push(skill)} />));
+    expect(status.textContent).toBe(`Strength is now ${rich.strength + 1}.`);
+    expect(strength.getAttribute("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(strength);
+  });
 });
