@@ -1830,6 +1830,18 @@ describe("useFishingGame groundbait", () => {
     expect(hint()).toContain("Over the groundbait.");
     expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
   });
+
+  it("says a school landed over the groundbait stays to feed on it", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, undefined, undefined, undefined, "summer");
+    toss();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe(
+      "Yellow perch: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!",
+    );
+  });
 });
 
 describe("useFishingGame tap-to-walk", () => {
