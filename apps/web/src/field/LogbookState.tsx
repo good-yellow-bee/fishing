@@ -68,7 +68,8 @@ type LogbookApi = {
   /** Takes the sample week out from beside the player's own fish, with the same undo as a delete. */
   dropSample: () => boolean;
   /** Puts a new book in place for a change made across it, such as renaming a kind of fish, with the same undo as a delete. */
-  changeBook: (kind: "rename" | "merge", next: Logbook) => boolean;
+  /** `onUndo` puts back what went with the change outside the book (the packed lists), when Undo brings the book back. */
+  changeBook: (kind: "rename" | "merge", next: Logbook, onUndo?: () => void) => boolean;
   /** Takes these photos off their catches, leaving the fish. */
   removePhotos: (ids: readonly string[]) => boolean;
   /** Why the last delete, filing, sample or undo didn't save, until the next one or a dismiss. */
@@ -91,7 +92,7 @@ function photosKept(book: { catches: { id: string }[] }, photos: CatchPhotoMap):
   return photosForBook(aside.length > 0 ? { catches: [...book.catches, ...aside.map((id) => ({ id }))] } : book, photos);
 }
 
-type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string };
+type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string; onUndo?: () => void };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
 
@@ -210,9 +211,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       return { ok: true };
     };
 
-    const remove = (kind: DeletedKind, next: Logbook) => {
+    const remove = (kind: DeletedKind, next: Logbook, onUndo?: () => void) => {
       // Deletes are made from the entry's own page, before it navigates away.
-      const before = { kind, book, photos, from: window.location.pathname + window.location.search };
+      const before = { kind, book, photos, from: window.location.pathname + window.location.search, ...(onUndo ? { onUndo } : {}) };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
       // and so is a removed sample week, so adding an older copy doesn't bring it back.
@@ -338,7 +339,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       deleteSpot: (id) => remove("spot", withoutSpot(book, id)),
       deleteTrip: (id) => remove("trip", withoutTrip(book, id)),
       countOnTrip: (tripId, count, delta) => commit(withTripCount(book, tripId, count, delta)),
-      changeBook: (kind, next) => remove(kind, next),
+      changeBook: (kind, next, onUndo) => remove(kind, next, onUndo),
       undoable: undo?.kind ?? null,
       undoDelete: () => {
         if (!undo) return null;
@@ -347,6 +348,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (result.ok) forgetDeletedFish([...undo.book.catches, ...undo.book.spots, ...undo.book.trips].map((each) => each.id));
         // The book back from under the sample was downloaded when it was: its backup reminder comes back with it.
         if (result.ok && undo.kind === "sample") bringBackClearedCopy();
+        if (result.ok) undo.onUndo?.();
         return result.ok ? undo.from : null;
       },
       saveError,

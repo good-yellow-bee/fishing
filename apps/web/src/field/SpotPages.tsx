@@ -53,6 +53,7 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
 import { upcomingRealTrips } from "./bookCopy";
+import { hasMovedInApp } from "./FieldShell";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -179,7 +180,7 @@ export function SpotsPage() {
               fishCount={row.fishCount}
               // Outings fished, as the water's own page counts them: not those still planned, and today's once it has a fish.
               tripCount={tripsForSpot(book, row.spot.id).filter((trip) => trip.date < today || (trip.date === today && (fishOnTrip.get(trip.id) ?? 0) > 0)).length}
-              lastFishAt={row.lastFishAt}
+              lastFishDay={row.lastFishDay}
               restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
             />
@@ -520,7 +521,11 @@ function SpotForm() {
     kept.drop();
     if (then === "catch") navigate(`/catches/new?spot=${result.id}`);
     else if (then === "trip") navigate(`/trips/new?spot=${result.id}`);
-    else if (then === "map") navigate("/map", { replace: true });
+    // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
+    else if (then === "map") {
+      if (hasMovedInApp()) navigate(-1);
+      else navigate("/map", { replace: true });
+    }
     else navigate(`/spots/${result.id}`);
   };
 
@@ -541,7 +546,17 @@ function SpotForm() {
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: existing.name }) : undefined}>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
-        <Link to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
+        <Link
+          to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"}
+          onClick={(event) => {
+            kept.drop();
+            // From the map, Back to it: Back from there then leaves the map rather than reopening this form.
+            if (then === "map" && hasMovedInApp()) {
+              event.preventDefault();
+              navigate(-1);
+            }
+          }}
+        >
           {t("Cancel")}
         </Link>
       </header>

@@ -42,8 +42,10 @@ export function MergeWater({ spotId }: { spotId: string }) {
     if (next === storedBook) return;
     // An outing that joins the kept water's one on its day brings its tackle list along.
     const folds = new Map([...mergeFolds(storedBook, spotId, into)].map(([id, host]) => [id, host.id]));
-    if (!changeBook("merge", next)) return;
+    // Undo puts the folded lists back with the outings they came from.
     const lists = tackle ? foldedTackle(tackle.items, folds, localId) : null;
+    const before = tackle?.items ?? [];
+    if (!changeBook("merge", next, lists ? () => tackle?.replaceTackle([...before]) : undefined)) return;
     if (lists) tackle?.replaceTackle(lists);
     noteMergedWater(spotId, into);
     navigate(`/spots/${into}`, { replace: true });

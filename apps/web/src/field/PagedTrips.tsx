@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Trip } from "@stillwater/shared";
 import { t } from "../i18n";
 import { catchPage, useShowMore } from "./PagedCatches";
-import { monthName, tripsByMonth } from "./tripMonths";
+import { tripsByMonth } from "./tripMonths";
 import { TripMonthHead } from "./TripMonthHead";
 
 /**
@@ -28,7 +28,8 @@ export function PagedTrips({
     // Only there to hold the list for Show more's focus: it lays nothing out.
     <div ref={box} className="paged-list">
       {tripsByMonth(visible).map((group) => (
-        <section key={group.month} aria-label={monthName(group.month)}>
+        // Unnamed, so a season's months aren't a landmark each; the month's heading says which it is.
+        <section key={group.month}>
           <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} />
           {stack ? <div className="stack">{group.trips.map(children)}</div> : group.trips.map(children)}
         </section>

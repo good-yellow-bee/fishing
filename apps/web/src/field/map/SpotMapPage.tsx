@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
@@ -35,6 +36,8 @@ import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownShee
 import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
+import { countedFish } from "../milestones";
+import { focusPageHeading } from "../pageFocus";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -256,9 +259,19 @@ function PlanHere({ spot }: { spot: Spot }) {
 export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
+  // A first visit loads the page after the shell has moved focus, so it landed on the page itself; Back from a water's
+  // form leaves it nowhere. Either way, on to the heading.
+  useEffect(() => {
+    const active = document.activeElement;
+    if (!active || active === document.body || active.matches(".field-main")) focusPageHeading({ preventScroll: true });
+  }, []);
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
   // Not the game's lake: it has no place on a real map.
-  const rows = spotsByLastFish(book).filter((row) => row.spot.id !== PLAY_LAKE_ID);
+  // Ordered by the angler's own fish, as the Waters page is, so a sample week dated later doesn't put its waters on top.
+  const ownOrder = new Map(spotsByLastFish({ ...book, catches: countedFish(book.catches) }).map((row, index) => [row.spot.id, index]));
+  const rows = spotsByLastFish(book)
+    .filter((row) => row.spot.id !== PLAY_LAKE_ID)
+    .sort((a, b) => (ownOrder.get(a.spot.id) ?? 0) - (ownOrder.get(b.spot.id) ?? 0));
   const spots = rows.map((row) => row.spot);
   // Each water's fish and the day of its last one: where to go next, at a glance.
   // And the next outing planned there, as the Waters page says it.
@@ -270,7 +283,7 @@ export function SpotMapPage() {
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
-    const line = row?.lastFishAt ? t("{fish}, last {day}", { fish, day: formatDay(localDate(new Date(row.lastFishAt))) }) : fish;
+    const line = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
     const next = upcoming.find((trip) => trip.spotId === spotId);
     if (next) return `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}`;
     // A water left alone a week or more, by its last outing or fish: one that has had a rest.

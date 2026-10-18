@@ -375,11 +375,20 @@
   }
 }
 
-/* On the narrowest phones the pond's pin sits too near the sheet's left edge for a label on that side. */
+/* On the narrowest phones the pond's pin sits too near the sheet's left edge for a label on that side; the quarry's and
+   the mill's labels go a little lower again, clear of the pond's and the creek's. */
 @media (max-width: 360px) {
   .map-pin-spot-duck .map-pin-label {
     left: 26px;
     right: auto;
     top: 18px;
+  }
+
+  .map-pin-spot-quarry .map-pin-label {
+    top: 18px;
+  }
+
+  .map-pin-spot-mill .map-pin-label {
+    top: 16px;
   }
 }
