@@ -155,6 +155,12 @@ describe("field archive", () => {
     expect(mergeFieldArchive({ ...here, photos: { "catch-gill": other } }, file).photos["catch-gill"]).toBe(other);
   });
 
+  it("leaves out a photo taken off a fish here on purpose", () => {
+    const here = archiveFor(book, null);
+    const file = archiveFor(book, "catch-gill");
+    expect(mergeFieldArchive(here, file, undefined, new Set(["catch-gill"])).photos["catch-gill"]).toBeUndefined();
+  });
+
   it("doesn't bring back a water or outing no new fish needs", () => {
     const empty = { id: "spot-empty", name: "Gone Pond", waterType: "pond" as const, notes: "", bestConditions: "" };
     const file = archiveFor({ ...book, spots: [...book.spots, empty], trips: [...book.trips, { id: "trip-empty", date: "2026-09-01", spotId: "spot-empty", title: "Empty", note: "" }] }, null);
