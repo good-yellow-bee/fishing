@@ -50,6 +50,23 @@ function writeAutoPhotos(list: AutoPhoto[]) {
   }
 }
 
+/** The game's snapshots still in these photos as the game took them: they ride in a downloaded copy. */
+export function snapshotsIn(photos: CatchPhotoMap): AutoPhoto[] {
+  return readAutoPhotos().filter((shot) => photos[shot.id] !== undefined && tailOf(photos[shot.id]!) === shot.tail);
+}
+
+/** A loaded copy's snapshots join this browser's list, so they can make room here too. */
+export function noteSnapshots(raw: unknown, photos: CatchPhotoMap) {
+  if (!Array.isArray(raw)) return;
+  const known = readAutoPhotos().filter((shot) => photos[shot.id] !== undefined);
+  const ids = new Set(known.map((shot) => shot.id));
+  const loaded = raw.filter(
+    (shot): shot is AutoPhoto =>
+      typeof shot?.id === "string" && typeof shot?.tail === "string" && !ids.has(shot.id) && photos[shot.id] !== undefined && tailOf(photos[shot.id]!) === shot.tail,
+  );
+  if (loaded.length > 0) writeAutoPhotos([...loaded.map(({ id, tail }) => ({ id, tail })), ...known]);
+}
+
 /**
  * The game's snapshots that may go to make room, oldest first: still the
  * game's own picture, not the new catch, and not the heaviest of its species.

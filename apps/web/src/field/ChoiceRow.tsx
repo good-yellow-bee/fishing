@@ -13,7 +13,7 @@ export function ChoiceRow<T extends string>({
 }: {
   label: string;
   value: T;
-  options: ReadonlyArray<{ id: T; label: string }>;
+  options: ReadonlyArray<{ id: T; label: string; lang?: string }>;
   onChange: (id: T) => void;
   wrap?: boolean;
 }) {
@@ -42,6 +42,7 @@ export function ChoiceRow<T extends string>({
           aria-checked={value === option.id}
           tabIndex={value === option.id ? 0 : -1}
           className={value === option.id ? "on" : ""}
+          lang={option.lang}
           onClick={() => onChange(option.id)}
         >
           {option.label}
