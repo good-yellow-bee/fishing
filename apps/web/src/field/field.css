@@ -421,6 +421,12 @@ button.field-primary {
     row-gap: 12px;
   }
 
+  /* A fish's stacked count links ("First Northern pike here.", "Northern pike in 2026: 2") stood 4 px apart, each
+     reaching into the other: lines that are both links part 12 px, so each keeps its 32 px. */
+  p.meta:has(> a) + p.meta:has(> a) {
+    margin-top: 12px;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
@@ -475,21 +481,21 @@ button.field-primary {
     gap: 16px 0.3em;
   }
 
-  /* The eyebrow's way back ("Bests") is set in small capitals, 14 px tall. */
+  /* The eyebrow's way back ("Bests") is set in small capitals on a solid 11 px line. */
   .sheet .eyebrow a::after {
     content: "";
     position: absolute;
-    inset: -9px -4px;
+    inset: -11px -4px;
   }
 
   /* An eyebrow is set solid (line-height 1), so once its links wrapped (a fish's "Catches · Northern pike: 1 of 2"
      under larger text) the lines sat 3 px apart and a tap on "Catches" opened the kind. Each link now wraps as a
-     piece of its own, the lines 20 px apart. */
+     piece of its own, the lines 24 px apart. */
   .sheet p.eyebrow:has(a) {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 20px 0.3em;
+    gap: 24px 0.3em;
   }
 
   /* "Released it" is a whole-row label 20 px tall; the box grows no bigger. */
