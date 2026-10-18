@@ -166,8 +166,9 @@ export function BestsPage() {
   const dayBook = year ? { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)) } : book;
   const topDay = bestFishDay(dayBook);
   const kindsDay = mostKindsDay(dayBook);
-  // When every fish of the best day came on one outing, the tile opens that outing.
-  const topDayTrip = topDay?.tripId ?? null;
+  // When every fish of the best day came on one outing and that outing holds no others (a fish after the night's end,
+  // or one in the next season), the tile opens that outing; else the day's search, which counts as the tile does.
+  const topDayTrip = topDay?.tripId && wholeFishByTrip.get(topDay.tripId) === topDay.count ? topDay.tripId : null;
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
   // Each kind's fish as its card counts them, for the day of its last one: which kinds have gone quiet.
@@ -201,6 +202,81 @@ export function BestsPage() {
   }
 
   const months = monthTally(book.catches, 13, monthOf);
+  // This year's own numbers and the days out show with or without a fish: a first outing planned, or a blank one, still
+  // has its goal to set and its days to mark. A past season picked above has its recap instead of the goal.
+  const goalSection = !year || year === today.slice(0, 4) ? (
+      <section>
+        <div className="section-head">
+          <h2>{t("This year's goal")}</h2>
+        </div>
+        {/* Drawn afresh at New Year, so the new year's count never meets last year's goal. */}
+        <YearGoal key={today.slice(0, 4)} book={whole} />
+        {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
+        {/* Last year's kinds still to show up this year, each opening its page. */}
+        {notYet.length > 0 ? (
+          <p className="meta not-yet">
+            <span>
+              {t("Not yet this year:")}{" "}
+              {notYet.map((name, index) => (
+                <Fragment key={name}>
+                  {index > 0 ? ", " : null}
+                  <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
+                </Fragment>
+              ))}
+            </span>
+          </p>
+        ) : null}
+        {/* Waters that gave their first fish this year: where the season went exploring. */}
+        {newWaters.length > 0 ? (
+          <p className="meta new-waters">
+            <span>
+              {t("New waters this year:")}{" "}
+              {newWaters.map((spot, index) => (
+                <Fragment key={spot.id}>
+                  {index > 0 ? ", " : null}
+                  <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                </Fragment>
+              ))}
+            </span>
+          </p>
+        ) : null}
+        {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
+        {streak.best > 1 ? (
+          <p className="meta">
+            {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
+          </p>
+        ) : null}
+        {/* Weeks in a row with a day out, fish or not: the habit, once it has run three weeks. */}
+        {weeks.best > 2 ? (
+          <p className="meta">
+            {weeks.going ? t("Weeks in a row on the water: {count}, and still going", { count: weeks.best }) : t("Most weeks in a row on the water: {count}", { count: weeks.best })}
+          </p>
+        ) : null}
+        {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
+        {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
+        {/* A blank spell still running: how long since an outing gave a fish. */}
+        {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
+        {split ? (
+          <p className="meta weekend-split">
+            {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
+          </p>
+        ) : null}
+        {/* The year so far as text for a message, once it has a fish. */}
+        {whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+          <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+        ) : null}
+      </section>
+    ) : null;
+  const calendarSection = dayMarks(whole, year ?? today.slice(0, 4)).size > 0 ? (
+      <section>
+        <div className="section-head">
+          <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
+        </div>
+        <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
+        <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} />
+      </section>
+    ) : null;
+
   return (
     <div className="sheet">
       <header className="sheet-head">
@@ -273,7 +349,12 @@ export function BestsPage() {
       {hooks ? <p className="meta">{hookText(hooks)}</p> : null}
 
       {book.catches.length === 0 ? (
-        <p className="empty">{t("Nothing landed in the book yet.")}</p>
+        <>
+          {/* The tile above already says there is no fish: say why the sample week's are gone, when they are. */}
+          {all.catches.some((entry) => isSampleCatch(entry.id)) ? <p className="empty">{t("The sample week is left out now that you have an outing of your own.")}</p> : null}
+          {goalSection}
+          {calendarSection}
+        </>
       ) : (
         <>
           <section>
@@ -342,80 +423,9 @@ export function BestsPage() {
             <TallyBars key={year ?? ""} rows={biteTimes(book).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? linkFor(exactTerm("time", t(row.label))) : undefined }))} />
           </section>
 
-          {/* This year's own numbers: a past season picked above has its recap instead. */}
-          {!year || year === today.slice(0, 4) ? (
-            <section>
-              <div className="section-head">
-                <h2>{t("This year's goal")}</h2>
-              </div>
-              {/* Drawn afresh at New Year, so the new year's count never meets last year's goal. */}
-              <YearGoal key={today.slice(0, 4)} book={whole} />
-              {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
-              {/* Last year's kinds still to show up this year, each opening its page. */}
-              {notYet.length > 0 ? (
-                <p className="meta not-yet">
-                  <span>
-                    {t("Not yet this year:")}{" "}
-                    {notYet.map((name, index) => (
-                      <Fragment key={name}>
-                        {index > 0 ? ", " : null}
-                        <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
-                      </Fragment>
-                    ))}
-                  </span>
-                </p>
-              ) : null}
-              {/* Waters that gave their first fish this year: where the season went exploring. */}
-              {newWaters.length > 0 ? (
-                <p className="meta new-waters">
-                  <span>
-                    {t("New waters this year:")}{" "}
-                    {newWaters.map((spot, index) => (
-                      <Fragment key={spot.id}>
-                        {index > 0 ? ", " : null}
-                        <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-                      </Fragment>
-                    ))}
-                  </span>
-                </p>
-              ) : null}
-              {/* Outings in a row that each gave a fish, once there is a run worth naming. */}
-              {streak.best > 1 ? (
-                <p className="meta">
-                  {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
-                </p>
-              ) : null}
-              {/* Weeks in a row with a day out, fish or not: the habit, once it has run three weeks. */}
-              {weeks.best > 2 ? (
-                <p className="meta">
-                  {weeks.going ? t("Weeks in a row on the water: {count}, and still going", { count: weeks.best }) : t("Most weeks in a row on the water: {count}", { count: weeks.best })}
-                </p>
-              ) : null}
-              {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
-              {streak.dry > 1 ? <p className="meta">{t("Most outings in a row without a fish: {count}", { count: streak.dry })}</p> : null}
-              {/* A blank spell still running: how long since an outing gave a fish. */}
-              {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
-              {split ? (
-                <p className="meta weekend-split">
-                  {t("Fish an outing: {weekend} on weekends, {weekday} on weekdays.", { weekend: num(split.weekend), weekday: num(split.weekday) })}
-                </p>
-              ) : null}
-              {/* The year so far as text for a message, once it has a fish. */}
-              {whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-                <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
-              ) : null}
-            </section>
-          ) : null}
+          {goalSection}
 
-          {dayMarks(whole, year ?? today.slice(0, 4)).size > 0 ? (
-            <section>
-              <div className="section-head">
-                <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
-              </div>
-              <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
-              <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} />
-            </section>
-          ) : null}
+          {calendarSection}
 
           {!year && years.length > 1 ? (
             <section>

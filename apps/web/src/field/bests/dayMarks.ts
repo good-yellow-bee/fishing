@@ -40,9 +40,13 @@ function countDays(book: Logbook, year: string): Map<string, DayMark> {
     if (small) late.add(day);
     fishTrips.set(day, (fishTrips.get(day) ?? new Set()).add(entry.tripId));
   }
+  // Every fish an outing holds, across days: one that also had a fish after its night ended (counted the next day)
+  // would open a list longer than the day's count, so that day keeps its search, which counts as the day does.
+  const tripFish = new Map<string, number>();
+  for (const entry of book.catches) if (entry.tripId) tripFish.set(entry.tripId, (tripFish.get(entry.tripId) ?? 0) + 1);
   for (const day of late) {
     const only = [...fishTrips.get(day)!];
-    if (only.length === 1 && only[0]) mark(day).lateTrip = only[0];
+    if (only.length === 1 && only[0] && tripFish.get(only[0]) === mark(day).fish) mark(day).lateTrip = only[0];
   }
   return marks;
 }

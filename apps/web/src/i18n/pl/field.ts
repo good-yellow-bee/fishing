@@ -707,6 +707,7 @@ export const PL_FIELD: PlBook = {
   "Changes saved.": "Zmiany zapisane.",
   "Outing saved.": "Wyprawę zapisano.",
   "Water saved.": "Łowisko zapisano.",
+  "The sample week is left out now that you have an outing of your own.": "Przykładowy tydzień jest tu pominięty, odkąd masz własną wyprawę.",
   "See it on the Map": "Zobacz na Mapie",
   "{distance} from {water}": "{distance} od: {water}",
   "Your best day in the book so far": "Najlepszy dzień w dzienniku jak dotąd",
