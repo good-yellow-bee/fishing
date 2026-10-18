@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { hasMovedInApp } from "./FieldShell";
+import { hasMovedInApp, pageBefore } from "./FieldShell";
 import { leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
@@ -72,7 +72,7 @@ import { NearestWater, canFindNearest } from "./NearestWater";
 import { SpeciesChips } from "./SpeciesChips";
 import { CatchSearch, FIND_PARAM, exactTerm, findCatches, findLink } from "./CatchSearch";
 import { findWithLink } from "./findLinks";
-import { savedState } from "./SavedNote";
+import { savedState, sayAfterBack } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
@@ -417,6 +417,12 @@ function CatchForm() {
           return fromBookAmount(size.kind === "length" ? size.inches : size.pounds, measureKind, units) === fromBookAmount(typed, measureKind, units);
         });
 
+  // The names a pick from the lists is filed under: the book's, in English, whatever language the form shows.
+  const speciesNames = [...(existing ? [existing.species] : []), ...book.catches.map((entry) => entry.species), ...SPECIES];
+  const lureNames = [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS];
+  // Kept under the book's names too, so a draft picked up after a switch of language reads, and saves, as the same fish.
+  const keptNames = () => ({ species: bookName(species, speciesNames), lure: bookName(lure, lureNames) });
+
   // What the form opened with (presets from a trip or Log another), so untouched presets aren't kept.
   const opened = useRef<string | null>(null);
 
@@ -430,6 +436,7 @@ function CatchForm() {
       else
         keepEditDraft({
           ...(JSON.parse(now) as Omit<KeptDraft, "timeTouched" | "units" | "savedAt">),
+          ...keptNames(),
           timeTouched,
           units,
           savedAt: new Date().toISOString(),
@@ -446,11 +453,10 @@ function CatchForm() {
       return;
     }
     keepDraft({
-      species,
+      ...keptNames(),
       measureKind,
       amount,
       alsoAmount,
-      lure,
       spotId,
       tripId,
       caughtAt,
@@ -468,11 +474,11 @@ function CatchForm() {
   const pickUp = (kept: KeptDraft) => {
     const keptSpot = book.spots.some((spot) => spot.id === kept.spotId) ? kept.spotId : spotId;
     const keptTrip = tripsForSpot(book, keptSpot).some((trip) => trip.id === kept.tripId) ? kept.tripId : "";
-    setSpecies(kept.species);
+    setSpecies(t(kept.species));
     setMeasureKind(kept.measureKind);
     // The draft's measure was the player's: the kind it names doesn't move it.
     setMeasurePicked(true);
-    setLure(kept.lure);
+    setLure(t(kept.lure));
     setSpotId(keptSpot);
     setTripId(keptTrip);
     setTripPicked(true);
@@ -691,11 +697,11 @@ function CatchForm() {
     const draft: CatchDraft = {
       // A name already in the book is kept as written there, so "rock bass" joins "Rock bass", and an "Okoń" logged
       // before the list knew perch stays one kind with the next "Okoń", ahead of the list's "European perch".
-      species: bookName(species, [...(existing ? [existing.species] : []), ...book.catches.map((entry) => entry.species), ...SPECIES]),
+      species: bookName(species, speciesNames),
       measureKind,
       amount: bookAmount(amount, measureKind),
       alsoAmount: bookAmount(alsoAmount, otherKind),
-      lure: bookName(lure, [...(existing ? [existing.lure] : []), ...bookLures(book), ...BAITS]),
+      lure: bookName(lure, lureNames),
       spotId,
       tripId,
       caughtAt,
@@ -733,10 +739,21 @@ function CatchForm() {
       const fishDay = (tripId ? tripById(book, tripId)?.date : undefined) ?? caughtAt.slice(0, 10);
       const writtenUp = fishDay < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
       const earlier = writtenUp ? caughtAt : undefined;
-      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined));
+      // In this form's place: a run of fish leaves one form in history, not one per fish.
+      navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), {
+        replace: true,
+        ...savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined),
+      });
       return;
     }
-    navigate(tripId ? `/trips/${tripId}` : "/catches", savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined));
+    const savedAt = parsed?.ok ? parsed.value.caughtAt : undefined;
+    const landing = tripId ? `/trips/${tripId}` : "/catches";
+    // Back to the outing or log the form was opened from, so Back from there doesn't reopen a blank form; else the
+    // form gives way to it.
+    if (hasMovedInApp() && pageBefore()?.split("?")[0] === landing) {
+      sayAfterBack("catch", news, savedAt);
+      navigate(-1);
+    } else navigate(landing, { replace: true, ...savedState("catch", news, savedAt) });
   };
 
   if (catchId && !existing) {
@@ -1483,7 +1500,10 @@ function CatchView() {
     ? onPage
     : kind.filter((other) => (other.spotId === PLAY_LAKE_ID) === (entry.spotId === PLAY_LAKE_ID) && isSampleCatch(other.id) === isSampleCatch(entry.id));
   const kindNumber = eyebrowKind.length - eyebrowKind.findIndex((other) => other.id === entry.id);
-  const counted = countedFish(kind);
+  // Own against sample decided for the whole book, as the badges, Home and Bests decide it, then narrowed to the kind:
+  // a sample fish of a kind the angler hasn't caught yet isn't theirs either.
+  const bookCounted = new Set(countedFish(book.catches).map((other) => other.id));
+  const counted = kind.filter((other) => bookCounted.has(other.id));
   const isCounted = counted.some((other) => other.id === entry.id);
   // The counts below hold the angler's own fish of the kind; when the sample week still has some, their links leave it out.
   const noSample = kind.some((other) => isSampleCatch(other.id)) && !counted.some((other) => isSampleCatch(other.id)) ? ` -${t("sample|search word")}` : "";
@@ -1510,7 +1530,12 @@ function CatchView() {
   const onLure = isCounted && lureKey ? counted.filter((other) => other.lure.trim().toLowerCase() === lureKey && measureOf(other, entry.measure.kind)) : [];
   const lureTop = onLure.length > 1 ? personalBests({ spots: [], trips: [], catches: onLure }) : null;
   const lureBestFish = lureTop ? (entry.measure.kind === "weight" ? lureTop.heaviest : lureTop.longest) : null;
-  const lureBest = lureBestFish && lureBestFish.id !== entry.id ? lureBestFish : null;
+  // Only a bigger one: a tie would name another fish the same size as this one, beside its own "longest" line.
+  const sizeOf = (fish: CatchEntry) => {
+    const size = measureOf(fish, entry.measure.kind);
+    return size === null ? 0 : size.kind === "length" ? size.inches : size.pounds;
+  };
+  const lureBest = lureBestFish && lureBestFish.id !== entry.id && sizeOf(lureBestFish) > sizeOf(entry) ? lureBestFish : null;
   // The day as the calendar and its search count it: a night session's small hours on its outing's day.
   const caughtDay = bookFishDay(book, entry);
   // Where the fish's time sat against the sun at its water, for a water with a place.
@@ -1548,7 +1573,8 @@ function CatchView() {
       })()
     : null;
   const savePicture = () => {
-    const caught = new Date(entry.caughtAt);
+    // Dated by its outing's day, as the page and the photo's own file name date it: a night's small hours are that night's.
+    const caught = new Date(`${bookFishDay(book, entry)}T12:00:00`);
     const text = {
       title: t(entry.species),
       detail: [measuresText(entry), spot?.name].filter(Boolean).join(" · "),
@@ -1651,7 +1677,7 @@ function CatchView() {
         ) : null}
         {since ? (
           <p className="meta biggest-since">
-            <Link to={`/catches/${since.id}`}>{t("The biggest {species} since {day}", { species: t(entry.species), day: formatCatchDay(since.caughtAt) })}</Link>
+            <Link to={`/catches/${since.id}`}>{t("The biggest {species} since {day}", { species: t(entry.species), day: formatDay(bookFishDay(book, since)) })}</Link>
           </p>
         ) : null}
         {sameSize > 1 ? (

@@ -73,10 +73,12 @@ const PREVIEW_FISH = 3;
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
   if (isSampleOnly(book) && book.catches.every((entry) => isSampleCatch(entry.id))) return t("only the sample week");
-  const newest = newestAt(book);
-  // The sample week's invented fish beside the angler's own aren't counted as theirs.
-  const own = book.catches.filter((entry) => !isSampleCatch(entry.id)).length;
-  return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(own > 0 ? own : book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
+  // The sample week's invented fish and the game's beside the angler's own aren't counted as theirs, nor dated: they
+  // come in on their own, and would hide that one book's own newest fish is older than the other's.
+  const own = book.catches.filter((entry) => !isSampleCatch(entry.id) && offPlayLake(entry));
+  const counted = own.length > 0 ? own : book.catches;
+  const newest = newestAt({ ...book, catches: counted });
+  return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(counted.length), day: formatCatchDay(newest) }) : t("no fish");
 }
 
 /** Where the set-aside book's notice sits, for a note at the top of Home to lead to. */

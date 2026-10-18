@@ -38,6 +38,14 @@ function FieldLinks() {
   );
 }
 
+/** The page shown, and the one under it in history when known (after a link; not after Back or Forward). */
+let shownPage = "";
+let pageBelow: string | null = null;
+/** The page a Back from here lands on, when this visit followed the link here; null when it can't be known. */
+export function pageBefore(): string | null {
+  return pageBelow;
+}
+
 /** Whether this visit has gone from one page to another yet: a Back can only come after one. */
 let movedInApp = false;
 export function hasMovedInApp(): boolean {
@@ -48,7 +56,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
   const theme = useFieldTheme();
-  const { pathname } = useLocation();
+  const { pathname, key, search } = useLocation();
   useEffect(() => {
     // Each page's tab and history entry carries its own heading ("Northern pike · Stillwater"); home keeps the
     // app's name. The heading can change after the page has drawn (a book loading, the language switching).
@@ -77,6 +85,12 @@ export function FieldShell({ children }: { children: ReactNode }) {
 
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
   const how = useNavigationType();
+  useLayoutEffect(() => {
+    // A link puts the page shown under the new one; a replace keeps what was under; Back and Forward lose track.
+    if (how === "PUSH") pageBelow = shownPage || null;
+    else if (how === "POP") pageBelow = null;
+    shownPage = pathname + search;
+  }, [key, how, pathname, search]);
   const lastPath = useRef(pathname);
   useLayoutEffect(() => {
     if (lastPath.current === pathname) return;
