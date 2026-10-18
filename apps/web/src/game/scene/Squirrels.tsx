@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { squirrelAt, type Tree } from "./squirrelRun";
 import { toonRamp } from "./toon";
 
@@ -44,6 +45,8 @@ export function Squirrels({ runs }: { runs: readonly (readonly [Tree, Tree])[] }
   const animals = useRef<(THREE.Group | null)[]>([]);
   const torsos = useRef<(THREE.Group | null)[]>([]);
   const tails = useRef<(THREE.Group | null)[]>([]);
+  // Reduced motion holds each squirrel where it is at one moment, with no bounding run or tail flick.
+  const still = useReducedMotion();
   useEffect(
     () => () => {
       [shapes.body, shapes.tail, fur].forEach((thing) => thing.dispose());
@@ -52,7 +55,7 @@ export function Squirrels({ runs }: { runs: readonly (readonly [Tree, Tree])[] }
   );
 
   useFrame(({ clock }) => {
-    const time = clock.elapsedTime;
+    const time = still ? STILL_TIME : clock.elapsedTime;
     runs.forEach((pair, k) => {
       const animal = animals.current[k];
       if (!animal) return;
