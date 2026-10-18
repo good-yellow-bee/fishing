@@ -10,7 +10,8 @@ import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, 
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
-import { hasSampleLeft, isSampleOnly, isSampleTrip } from "./bookCopy";
+import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleTrip } from "./bookCopy";
+import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
@@ -95,13 +96,19 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   );
 }
 
+/** As many of the newest items as the game's card shows. */
+const NEWS_SHOWN = 4;
+
 export function HomePage() {
   const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
   const heading = useRef<HTMLHeadingElement>(null);
   const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
+  // The news the game's dock shows, here too for an angler who only keeps the book: decided once per visit.
+  const [news, setNews] = useState(() => newsDue(storedBook.catches.filter((entry) => offPlayLake(entry) && !isSampleCatch(entry.id)).length, readSeenNews()));
   // A first visit: the invented sample and nothing of the player's own yet.
   const sampleOnly = isSampleOnly(storedBook);
-  const photoCount = book.catches.filter((entry) => photos[entry.id] && offPlayLake(entry)).length;
+  // Every pictured fish, the game's snapshots too: the photo wall it opens shows them all.
+  const photoCount = book.catches.filter((entry) => photos[entry.id]).length;
   useT();
   const now = new Date();
   const today = localDate(now);
@@ -189,6 +196,26 @@ export function HomePage() {
               if (dropSample()) heading.current?.focus();
             }}>
             {t("Remove the sample week")}
+          </button>
+        </aside>
+      ) : null}
+
+      {news ? (
+        <aside className="conditions sample-start" aria-labelledby="field-news">
+          <span className="eyebrow" id="field-news">
+            {t("What's new")}
+          </span>
+          <ul className="field-news">
+            {NEWS_ITEMS.slice(0, NEWS_SHOWN).map((item) => (
+              <li key={item}>{t(item)}</li>
+            ))}
+          </ul>
+          <button type="button" className="text-button" onClick={() => {
+              markNewsSeen();
+              setNews(false);
+              heading.current?.focus();
+            }}>
+            {t("Got it")}
           </button>
         </aside>
       ) : null}

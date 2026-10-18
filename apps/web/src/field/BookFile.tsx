@@ -12,6 +12,8 @@ import { useLogbook } from "./LogbookState";
 import { intoMergedWaters, readMergedWaters } from "./waterMerge";
 import { MERGE_PARAM } from "./MergeWater";
 import { forgetDeletedFish, readDeletedFish, restoreDeletedFish } from "./deletedFish";
+import { noteSnapshots, snapshotsIn } from "./keepCatch";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
 import { t, useT } from "../i18n";
@@ -26,6 +28,21 @@ function newestAt(book: Logbook): string {
 function lostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set(file.catches.map((entry) => entry.id));
   return here.catches.filter((entry) => !kept.has(entry.id)).length;
+}
+
+/** This book's waters and outings a file doesn't have, which replacing would drop; the game's lake comes back on its own. */
+function placesLostOnLoad(here: Logbook, file: Logbook): number {
+  const kept = new Set([...file.spots, ...file.trips].map((each) => each.id));
+  return here.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && !kept.has(spot.id)).length + here.trips.filter((trip) => offPlayLake(trip) && !kept.has(trip.id)).length;
+}
+
+/** Outings both books share whose lost or missed count the file has higher: taps made on the other phone. */
+function countsIn(here: Logbook, merged: Logbook): number {
+  const before = new Map(here.trips.map((trip) => [trip.id, trip]));
+  return merged.trips.filter((trip) => {
+    const was = before.get(trip.id);
+    return was !== undefined && ((trip.lost ?? 0) !== (was.lost ?? 0) || (trip.missed ?? 0) !== (was.missed ?? 0));
+  }).length;
 }
 
 /** The file without the fish deleted in this browser, so adding its new fish doesn't bring them back. */
@@ -91,6 +108,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const [pending, setPending] = useState<FieldArchive | null>(null);
   // The file's goals for the year, or null for a file from before they were kept.
   const [pendingGoals, setPendingGoals] = useState<YearGoals | null>(null);
+  // The file's list of the game's snapshots, which may make room later.
+  const [pendingSnapshots, setPendingSnapshots] = useState<unknown>(null);
   // A picked file waits on a question: it takes focus on the safe answer, as the delete question does.
   useEffect(() => {
     if (pending) keepButton.current?.focus();
@@ -128,7 +147,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
 
   // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
   // The year's goals ride along, so a new browser keeps them too.
-  const archiveText = () => JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals() });
+  // So do the game's snapshots, so a new browser can still clear them to make room.
+  const archiveText = () => JSON.stringify({ ...fieldArchiveDocument({ book: storedBook, tackle: items, photos }), goals: readYearGoals(), snapshots: snapshotsIn(photos) });
   /** A copy went out: the reminder counts from it. */
   const markCopied = () => {
     saveCopiedAt(own, bookSignature(storedBook, items, Object.keys(photos), readYearGoals()));
@@ -186,15 +206,20 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     setNotice(null);
     setPending(parsed.value);
     try {
-      const raw = (JSON.parse(text) as { goals?: unknown }).goals;
-      setPendingGoals(raw === undefined ? null : cleanYearGoals(raw));
+      const raw = JSON.parse(text) as { goals?: unknown; snapshots?: unknown };
+      setPendingGoals(raw.goals === undefined ? null : cleanYearGoals(raw.goals));
+      setPendingSnapshots(raw.snapshots ?? null);
     } catch {
       setPendingGoals(null);
+      setPendingSnapshots(null);
     }
   };
 
   /** Puts `next` in this browser, where it can be undone; `merged` is for a book that is this one plus the file's new fish, `leftOut` the file's photos that didn't fit. */
-  const load = (next: FieldArchive, merged: boolean, leftOut = 0) => {
+  const load = (file: FieldArchive, merged: boolean, leftOut = 0) => {
+    // Replacing keeps the set-aside book's photos, which nothing else holds: adding already starts from this browser's.
+    const aside = merged ? [] : setAsideCatchIds().filter((id) => photos[id] !== undefined && file.photos[id] === undefined);
+    const next = aside.length > 0 ? { ...file, photos: { ...Object.fromEntries(aside.map((id) => [id, photos[id]!])), ...file.photos } } : file;
     const saved = commitFieldArchive(next);
     if (!saved.ok) {
       setPending(null);
@@ -206,6 +231,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()] });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
+    noteSnapshots(pendingSnapshots, next.photos);
     // Replacing takes the file's goals; adding keeps this browser's and fills in the years it has none for.
     // A file with no goals, from a browser that never set one, leaves this browser's alone.
     if (pendingGoals && Object.keys(pendingGoals).length > 0) writeYearGoals(merged ? { ...pendingGoals, ...goalsHere } : pendingGoals);
@@ -219,6 +245,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
       setCopyMark(readCopyMark());
     }
     setPending(null);
+    const counted = merged ? countsIn(here.book, next.book) : 0;
     const namesHere = new Set(here.book.spots.map((spot) => foldText(spot.name)));
     const idsHere = new Set(here.book.spots.map((spot) => spot.id));
     const twins = merged
@@ -233,9 +260,10 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
         ? [
             // Just the waters and outings, or the photos, when the file brought no fish.
             ...(next.book.catches.length > here.book.catches.length ||
-            (next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length && Object.keys(next.photos).length === Object.keys(here.photos).length)
+            (next.book.spots.length + next.book.trips.length === here.book.spots.length + here.book.trips.length && Object.keys(next.photos).length === Object.keys(here.photos).length && counted === 0)
               ? [t("Fish added from the file: {count}.", { count: next.book.catches.length - here.book.catches.length })]
               : []),
+            ...(counted > 0 ? [t("Outings with newer lost and missed counts: {count}.", { count: counted })] : []),
             ...(next.book.spots.length > here.book.spots.length ? [t("Waters added: {count}.", { count: next.book.spots.length - here.book.spots.length })] : []),
             ...(next.book.trips.length > here.book.trips.length ? [t("Outings added: {count}.", { count: next.book.trips.length - here.book.trips.length })] : []),
             ...(Object.keys(next.photos).length > Object.keys(here.photos).length ? [t("Photos added: {count}.", { count: Object.keys(next.photos).length - Object.keys(here.photos).length })] : []),
@@ -282,13 +310,18 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   };
 
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
+  const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
+  // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
+  const hasBook = storedBook.catches.length + storedBook.spots.length + storedBook.trips.length > 0;
   const addable = pending ? newFishIn(storedBook, withoutDeleted(pending).book).length : 0;
   const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
-  const adding = pending && storedBook.catches.length > 0 ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
+  const adding = pending && hasBook ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
   // Photos the file has for fish both books share and this one has none for: taken on the other phone after a swap.
-  const photosOnly = pending && storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined).length : 0;
+  const photosOnly = pending && hasBook && addable === 0 && placesOnly === 0 ? storedBook.catches.filter((entry) => photos[entry.id] === undefined && pending.photos[entry.id] !== undefined).length : 0;
+  // Lost and missed taps the other phone made on an outing this book has too.
+  const countsOnly = adding && addable === 0 && placesOnly === 0 && photosOnly === 0 ? countsIn(storedBook, adding.book) : 0;
 
   return (
     <footer className="sheet-foot">
@@ -411,14 +444,15 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
             {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
-            {kept > 0 ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
+            {placesLost > 0 ? ` ${t("Waters and outings here that aren't in the file, and would be lost: {count}.", { count: placesLost })}` : ""}
+            {kept > 0 && hasBook ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
             {/* The same file again: nothing to add, so Replace (which can lose fish) isn't the only way out that reads like one. */}
-            {storedBook.catches.length > 0 && addable === 0 && placesOnly === 0 && photosOnly === 0 && kept === 0 ? ` ${t("Nothing in this file is new to this book.")}` : ""}
+            {hasBook && addable === 0 && placesOnly === 0 && photosOnly === 0 && countsOnly === 0 && kept === 0 ? ` ${t("Nothing in this file is new to this book.")}` : ""}
           </span>{" "}
           <button type="button" className="text-button" onClick={onReplace}>
             {t("Replace")}
           </button>
-          {addable > 0 && storedBook.catches.length > 0 ? (
+          {addable > 0 && hasBook ? (
             // Two copies that each gained fish: keep this one and take the file's new ones.
             <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add only the new fish ({count})", { count: addable })}
@@ -431,8 +465,12 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             <button type="button" className="text-button" onClick={() => onAddNew()}>
               {t("Add the new photos ({count})", { count: photosOnly })}
             </button>
+          ) : countsOnly > 0 ? (
+            <button type="button" className="text-button" onClick={() => onAddNew()}>
+              {t("Add the newer lost and missed counts ({count})", { count: countsOnly })}
+            </button>
           ) : null}
-          {kept > 0 && storedBook.catches.length > 0 ? (
+          {kept > 0 && hasBook ? (
             // A fish deleted by mistake, still in an older copy, can come back without replacing the book.
             <button type="button" className="text-button" onClick={() => onAddNew(true)}>
               {t("Add with the deleted fish too ({count})", { count: addable + kept })}

@@ -209,8 +209,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       // Deletes are made from the entry's own page, before it navigates away.
       const before = { kind, book, photos, from: window.location.pathname + window.location.search };
       if (!commit(next)) return false;
-      // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges.
-      if (kind !== "sample" && kind !== "blank" && kind !== "unsample" && kind !== "file") {
+      // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
+      // and so is a removed sample week, so adding an older copy doesn't bring it back.
+      if (kind !== "sample" && kind !== "blank" && kind !== "file") {
         // Waters and outings too, so adding from an older file doesn't bring them back either.
         const kept = new Set([...next.catches, ...next.spots, ...next.trips].map((each) => each.id));
         noteDeletedFish([...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id));

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
-import { markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "./keepCatch";
+import { AUTO_PHOTO_STORAGE_KEY, markReleasedInBook, noteSnapshots, saveLandedCatch, saveLandedPhoto, snapshotsIn } from "./keepCatch";
 import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
 import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, CATCH_PHOTO_STORE_MAX_CHARS, sampleLogbook } from "@stillwater/shared";
 
@@ -214,5 +214,24 @@ describe("a stored book with one bad fish", () => {
     saveLandedCatch(landed);
     expect(readStoredLogbook()?.catches.map((entry) => entry.id)).toContain(good.id);
     expect(setAsideCatchIds()).toEqual([good.id, "bad"]);
+  });
+});
+
+describe("the game's snapshots in a copy", () => {
+  beforeEach(() => {
+    vi.stubGlobal("localStorage", memoryStorage());
+  });
+
+  it("go out with the photos they still match and join a new browser's list", () => {
+    const shot = "data:image/jpeg;base64," + "A".repeat(40);
+    localStorage.setItem(AUTO_PHOTO_STORAGE_KEY, JSON.stringify([{ id: "a", tail: shot.slice(-32) }, { id: "b", tail: "gone" }]));
+    const out = snapshotsIn({ a: shot, b: "data:image/jpeg;base64,BBBB" });
+    expect(out.map((each) => each.id)).toEqual(["a"]);
+    localStorage.clear();
+    noteSnapshots(out, { a: shot });
+    expect(snapshotsIn({ a: shot }).map((each) => each.id)).toEqual(["a"]);
+    // A photo the angler put there since is never counted as the game's.
+    noteSnapshots([{ id: "c", tail: "x" }], { c: "data:image/jpeg;base64,CCCC" });
+    expect(snapshotsIn({ a: shot, c: "data:image/jpeg;base64,CCCC" }).map((each) => each.id)).toEqual(["a"]);
   });
 });

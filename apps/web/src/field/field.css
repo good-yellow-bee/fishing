@@ -1764,7 +1764,8 @@ button.field-primary:disabled {
 
 /* A season against the one before: several short lines, so smaller than a single conditions line. */
 .season-recap p,
-.sample-start p {
+.sample-start p,
+.field-news li {
   font-size: 15px;
   line-height: 1.45;
 }
@@ -1879,4 +1880,10 @@ button.field-primary:disabled {
   color: var(--field-ink);
   font-weight: 600;
   text-decoration: none;
+}
+
+/* The news items read as a short list inside the notice. */
+.field-news {
+  margin: 6px 0 8px;
+  padding-left: 20px;
 }
