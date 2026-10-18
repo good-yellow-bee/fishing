@@ -1330,7 +1330,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT255~~ | ~~G tosses the groundbait from the keyboard wherever its button by the walk signs shows, and the keys card lists it~~ (#963) | ui | S |
 | ~~GT256~~ | ~~A fished bank rests instead of resetting: each bank keeps its count of casts through the visit, and every cast at another bank rests it by 2, so one cast next door and back no longer clears the wary fish; the stance chip says "fished hard" at any bank still wary~~ (#978) | gameplay | S |
 | ~~GT257~~ | ~~Walk signs make the bend onto the pier: walking from the Reeds, Point or Inlet to the Dock took the right-angle turn at full speed, overshot it and stopped on the path; the angler now slows into a sharp bend (to 1.2 m/s) and keeps full speed round a gentle one~~ (#988) | gameplay | S |
-| GT258 | News card 2026-10-18-game06 covers GT254 to GT257: fresh water, G for the groundbait, a fished bank resting, and the Dock walk sign's turn onto the pier; the game05 item no longer says a walk to another bank starts fresh | news | S |
+| ~~GT258~~ | ~~News card 2026-10-18-game06 covers GT254 to GT257: fresh water, G for the groundbait, a fished bank resting, and the Dock walk sign's turn onto the pier; the game05 item no longer says a walk to another bank starts fresh~~ (#992) | news | S |
+| GT259 | Walk signs show the banks fished hard: a bank whose next cast meets wary fish has its sign dimmed, and its label says "fished hard" (or "bites sooner now, but fished hard" on a favored bank), so the angler can pick where to move; groundbait at a bank hides it, as on the stance chip | ui | S |
 
 ## Risks / open questions for the owner
 

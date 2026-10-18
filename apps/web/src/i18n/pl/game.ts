@@ -96,6 +96,8 @@ export const PL_GAME: PlBook = {
   "{fish}: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!": "{fish}: tu jest ławica, żeruje na zanęcie. Zostanie dłużej, więc zarzuć szybko jeszcze raz!",
   "bites sooner now": "teraz szybciej bierze",
   "{bank}: bites sooner now": "{bank}: teraz szybciej bierze",
+  "{bank}: fished hard": "{bank}: mocno obłowione",
+  "{bank}: bites sooner now, but fished hard": "{bank}: teraz szybciej bierze, ale mocno obłowione",
   "Right on a rise.": "Prosto w spław ryby.",
   "Snagged in the weed. Tap {n} times to work it free.": "Zaczep w zielsku. Dotknij {n} razy, by go uwolnić.",
   "Snagged on the rocks. Tap {n} times to work it free.": "Zaczep o kamienie. Dotknij {n} razy, by go uwolnić.",
