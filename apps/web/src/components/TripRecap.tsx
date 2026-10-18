@@ -28,6 +28,15 @@ export function TripRecap({ draft, leftover, filed, onFile, onClose }: Props) {
     return () => before?.focus();
   }, []);
 
+  // Escape steps back to the lake like the other panels, but never lets an old trip go: that stays a button press.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && (!leftover || filed)) onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [leftover, filed, onClose]);
+
   return (
     <div className="settings-overlay trip-recap-overlay" onPointerDown={(event) => event.target === event.currentTarget && onClose()}>
       <section ref={panel} className="settings-panel trip-recap" role="dialog" aria-modal="true" aria-labelledby="trip-recap-title" tabIndex={-1}>
