@@ -320,6 +320,9 @@ button.field-primary {
   overflow-wrap: anywhere;
 }
 
+/* Counts wrap where the card needs it, as plain inline links: kept whole on one line, "5 days out this year" pushed the
+   Next card off a tablet's page with larger text, and as inline blocks they lost the inline-link spacing exception
+   (WCAG 2.5.8) on a desktop. On a touch screen each is a 32 px band of its own (below). */
 .stat-row small {
   display: block;
   margin-top: 4px;
@@ -327,11 +330,6 @@ button.field-primary {
   font-size: 12px;
 }
 
-/* Each count stays whole when the line wraps, and wraps inside itself only when it is wider than its card: kept on
-   one line, "5 days out this year" and "Set a goal for 2026" pushed Home's Next card off a tablet's page with larger text. */
-.stat-row small a {
-  display: inline-block;
-}
 
 /* Side by side at 1.15 to 0.85 while both fit, stacked when they don't: on a 900-1280 px window with larger text the
    right column squeezed a catch card's words into a 23 px column, one letter a line. */
