@@ -815,6 +815,7 @@ export function DockPage() {
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
+          {!rowing && game.fishedHard === game.stance && game.groundbait?.spot !== game.stance && <small className="stance-cold"> · {t("fished hard")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
