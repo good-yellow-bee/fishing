@@ -121,6 +121,13 @@ a {
   font-size: 13px;
 }
 
+/* Not .hint: that is the lake's fixed hint bar. */
+.auth-card .field-help {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #4a3b2a;
+}
+
 /* 5.1:1 on the card's paper, where --rust was 3.1. */
 .auth-card .error {
   color: #8f3a28;
