@@ -225,6 +225,13 @@
   display: block;
 }
 
+/* On a touch screen "Pack for …" sat 8 px under its lure's Largest link, the two tap reaches overlapping. */
+@media (pointer: coarse) {
+  .lure-record .lure-last:has(> .text-button) {
+    margin-top: 8px;
+  }
+}
+
 /* An outing under "Coming up" reads as big as the section heads it used to be. */
 .sheet .tackle-trip-title {
   margin: 0;

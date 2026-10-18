@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 const css = readFileSync(`${import.meta.dirname}/field.css`, "utf8");
 const mapCss = readFileSync(`${import.meta.dirname}/map/spot-map.css`, "utf8");
+const gearCss = readFileSync(`${import.meta.dirname}/gear/gear.css`, "utf8");
 
 describe("the field log on a touch screen", () => {
   it("reaches 8 px past each underlined text button and link without moving anything", () => {
@@ -41,6 +42,12 @@ describe("the field log on a touch screen", () => {
   it("makes the Released it row and Rename or merge at least 32 px tall", () => {
     expect(/\n  \.form-grid \.check-field \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 32px;");
     expect(/\n  \.rename-kind summary \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 6px;");
+  });
+
+  it("parts an outing's two wrapped calendar and print buttons, and Pack for from the Largest link above it", () => {
+    expect(/\n  p\.trip-calendar \{([^}]*)\}/.exec(css)?.[1]).toContain("gap: 16px 0.3em;");
+    const coarse = gearCss.slice(gearCss.indexOf("@media (pointer: coarse) {"));
+    expect(/\.lure-record \.lure-last:has\(> \.text-button\) \{([^}]*)\}/.exec(coarse)?.[1]).toContain("margin-top: 8px;");
   });
 
   it("makes the species and lure chips 32 px tall", () => {

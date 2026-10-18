@@ -436,6 +436,15 @@ button.field-primary {
     margin: 16px 0;
   }
 
+  /* An outing's Add to calendar and Print the packing list wrap onto two touching lines on a phone, each reaching
+     8 px into the other; a 16 px row gap parts them. */
+  p.trip-calendar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 16px 0.3em;
+  }
+
   /* The eyebrow's way back ("Bests") is set in small capitals, 14 px tall. */
   .sheet .eyebrow a::after {
     content: "";
