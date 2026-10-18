@@ -236,9 +236,12 @@ export function SettingsPanel({ onClose, onPhoto, onKeys }: { onClose: () => voi
             {t("Photo mode (H): hide the panels")}
           </button>
         )}
-        <button className="panel-btn" type="button" onClick={onClose}>
-          {t("Back to the lake")}
-        </button>
+        {/* Pinned to the panel's foot, so a phone need not scroll the whole list to get back to the lake. */}
+        <div className="settings-foot">
+          <button className="panel-btn" type="button" onClick={onClose}>
+            {t("Back to the lake")}
+          </button>
+        </div>
       </section>
     </div>
   );
