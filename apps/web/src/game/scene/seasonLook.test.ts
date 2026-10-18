@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { LAKE_SEASONS } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { isLeafColor, seasonGroundColor, seasonPlantColor, seasonWaterColor } from "./seasonLook.ts";
+import { isLeafColor, seasonGroundColor, seasonPlantColor, seasonWaterColor, shoreIce } from "./seasonLook.ts";
 
 const LEAF = new THREE.Color("#4d8a3e");
 const TRUNK = new THREE.Color("#7a5236");
@@ -45,6 +45,10 @@ describe("season look", () => {
     expect(ground.b).toBeGreaterThan(new THREE.Color("#4d6c48").b);
     // A winter night stays darker than a winter day.
     expect(hue(new THREE.Color(seasonGroundColor("#3a5240", "winter"))).l).toBeLessThan(hue(ground).l);
+  });
+
+  it("puts ice on the shore in winter only", () => {
+    expect(LAKE_SEASONS.filter(shoreIce)).toEqual(["winter"]);
   });
 });
 

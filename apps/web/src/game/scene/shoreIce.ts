@@ -1,21 +1,20 @@
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour } from "@stillwater/shared";
+import { SHORE_ICE_WIDTH } from "./seasonLook";
 
 /** Points round the rim; enough that the ragged edge reads as ragged, not as a polygon. */
 export const RIM_STEPS = 360;
-/** The rim ice's width off the bank, in metres, at its narrowest and widest. */
-export const RIM_MIN = 1.0;
-export const RIM_MAX = 3.0;
+/**
+ * The rim ice's width off the bank, in metres, at its narrowest and widest: ragged about
+ * SHORE_ICE_WIDTH, where a cast counts as landing on the ice (snag.ts).
+ */
+export const RIM_MIN = SHORE_ICE_WIDTH - 0.4;
+export const RIM_MAX = SHORE_ICE_WIDTH + 0.4;
 /** The snow-lit band nearest the bank: solid ice from under the bank's edge this far out, in metres. */
 export const SNOW_BAND = 0.6;
 /** Broken plates loose off the rim's edge. */
 export const SHARD_COUNT = 90;
 /** Lit by the sky like the other films: bright by day, dull at dawn and dusk, barely there at night. */
 export const ICE_LIGHT: Record<LakeHour, number> = { dawn: 0.75, day: 1, dusk: 0.55, night: 0.2 };
-
-/** A rim of ice skirts the bank all winter; it is gone by spring. */
-export function shoreIceOut(season: LakeSeason) {
-  return season === "winter";
-}
 
 function seeded(i: number, salt: number) {
   const s = Math.sin(i * 127.1 + salt * 311.7) * 43758.5453;

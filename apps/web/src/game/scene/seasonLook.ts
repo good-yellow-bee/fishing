@@ -75,6 +75,13 @@ export function seasonWaterColor(hex: string, season: LakeSeason): string {
   return `#${base.lerp(target, tint.amount).getHexString()}`;
 }
 
+/** Winter rims the lake with shore ice this wide, in meters. */
+export const SHORE_ICE_WIDTH = 1.3;
+
+export function shoreIce(season: LakeSeason) {
+  return season === "winter";
+}
+
 /** Tints a cloned model's foliage in place. Materials are the clone's own, so this never touches the cached GLTF. */
 export function tintPlant(root: THREE.Object3D, season: LakeSeason, kind: PlantKind, variant: number) {
   if (season === "summer") return;

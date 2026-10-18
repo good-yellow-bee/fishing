@@ -1,20 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { ICE_LIGHT, RIM_MAX, RIM_MIN, RIM_STEPS, iceShards, rimWidth, shoreIceOut, shoreIceRim } from "./shoreIce";
+import { ICE_LIGHT, RIM_MAX, RIM_MIN, RIM_STEPS, iceShards, rimWidth, shoreIceRim } from "./shoreIce";
+import { SHORE_ICE_WIDTH } from "./seasonLook";
 
 describe("winter's shore ice", () => {
-  it("skirts the bank in winter only", () => {
-    expect(shoreIceOut("winter")).toBe(true);
-    for (const season of ["spring", "summer", "fall"] as const) expect(shoreIceOut(season)).toBe(false);
-  });
-
-  it("reaches between its narrowest and widest off the bank, wider in some places than others", () => {
+  it("reaches between its narrowest and widest off the bank, ragged about where a cast lands on the ice", () => {
     const widths = Array.from({ length: RIM_STEPS }, (_, i) => rimWidth((i / RIM_STEPS) * Math.PI * 2));
     for (const w of widths) {
       expect(w).toBeGreaterThanOrEqual(RIM_MIN);
       expect(w).toBeLessThanOrEqual(RIM_MAX);
     }
-    expect(Math.max(...widths) - Math.min(...widths)).toBeGreaterThan(1.2);
+    expect(Math.max(...widths) - Math.min(...widths)).toBeGreaterThan(0.5);
+    const mean = widths.reduce((sum, w) => sum + w, 0) / widths.length;
+    expect(Math.abs(mean - SHORE_ICE_WIDTH)).toBeLessThan(0.15);
   });
 
   it("ends out on the water, its width off the bank", () => {
