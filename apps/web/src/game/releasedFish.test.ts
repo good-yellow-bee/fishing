@@ -1,5 +1,4 @@
-// @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FISH } from "@stillwater/shared";
 import { castForReleased, grownWeight, loadReleased, RECAPTURE_GROWTH_CAP, RECAPTURE_ODDS, RELEASED_KEEP, RELEASED_KEY, rememberReleased } from "./releasedFish";
 
@@ -7,7 +6,18 @@ const pike = FISH.find((fish) => fish.id === "pike")!;
 const common = FISH.find((fish) => fish.rarity === "common")!;
 const day = (date: number, hour = 12) => new Date(2026, 9, date, hour).getTime();
 
-afterEach(() => localStorage.clear());
+function memoryStorage() {
+  const items = new Map<string, string>();
+  return {
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => void items.set(key, value),
+    removeItem: (key: string) => void items.delete(key),
+  };
+}
+
+beforeEach(() => {
+  vi.stubGlobal("localStorage", memoryStorage());
+});
 
 describe("fish let go from the lake", () => {
   it("remembers the bigger kinds, newest first and only so many, but never a small common fish", () => {
