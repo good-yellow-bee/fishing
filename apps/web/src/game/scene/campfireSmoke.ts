@@ -26,19 +26,20 @@ export type Puff = { x: number; y: number; z: number; size: number; alpha: numbe
 /**
  * Puff `i` of the fire's smoke at `time`: rising from the flames, swelling and thinning as it climbs,
  * and bending over downwind, slowly at first and then more the higher it gets, the way a smoke trail
- * leans in a breeze. Heights are above the fire.
+ * leans in a breeze. Heights are above the fire. Another smoke (a chimney's) can rise the same way
+ * from `from`, drawn `scale` times as big.
  */
-export function smokePuff(i: number, time: number, wind: { x: number; z: number }): Puff {
+export function smokePuff(i: number, time: number, wind: { x: number; z: number }, from: { x: number; z: number } = FIRE_AT, scale = 1): Puff {
   const k = (((time / PUFF_RISE_SEC + i / PUFF_COUNT) % 1) + 1) % 1;
   const speed = Math.hypot(wind.x, wind.z);
   const dir = speed < 1e-4 ? { x: 0.6, z: -0.8 } : { x: wind.x / speed, z: wind.z / speed };
-  const lean = (CALM_LEAN + speed * LEAN_PER_WIND) * k * k;
-  const wobble = Math.sin(time * 0.9 + i * 2.1) * 0.12 * k;
+  const lean = (CALM_LEAN + speed * LEAN_PER_WIND) * k * k * scale;
+  const wobble = Math.sin(time * 0.9 + i * 2.1) * 0.12 * k * scale;
   return {
-    x: FIRE_AT.x + dir.x * lean - dir.z * wobble + (seeded(i, 1) - 0.5) * 0.08,
-    y: 0.25 + k * RISE * (1 - Math.min(0.5, speed * 4) * k),
-    z: FIRE_AT.z + dir.z * lean + dir.x * wobble + (seeded(i, 2) - 0.5) * 0.08,
-    size: 0.25 + k * 1.1,
+    x: from.x + dir.x * lean - dir.z * wobble + (seeded(i, 1) - 0.5) * 0.08 * scale,
+    y: (0.25 + k * RISE * (1 - Math.min(0.5, speed * 4) * k)) * scale,
+    z: from.z + dir.z * lean + dir.x * wobble + (seeded(i, 2) - 0.5) * 0.08 * scale,
+    size: (0.25 + k * 1.1) * scale,
     // Thick just over the flames, thinning to nothing at the top.
     alpha: Math.min(1, k / 0.08) * (1 - k) * 0.8,
   };
