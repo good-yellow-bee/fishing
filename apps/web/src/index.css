@@ -783,7 +783,7 @@ a:focus-visible {
   cursor: default;
 }
 
-.walk-signs .walk-shop {
+.walk-signs :is(.walk-shop, .walk-retie) {
   border-color: var(--amber);
   color: var(--amber);
 }
@@ -1138,6 +1138,14 @@ kbd {
   width: 3px;
   margin-left: -1px;
   background: #f4efe4;
+}
+
+/* Where a frayed line snaps: a pale post inside the hatched zone. */
+.fight-bar .tick.tick-frayed {
+  width: 3px;
+  margin-left: -1px;
+  background: #fbf3e2;
+  box-shadow: 0 0 0 1px rgba(40, 14, 8, 0.85);
 }
 
 .fight-bar .fight-status {
@@ -3032,7 +3040,7 @@ html[data-contrast="high"] :is(
 }
 
 /* The states the panels above would flatten keep their amber. */
-html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop) {
+html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop, .walk-signs .walk-retie) {
   border-color: #ffc95c;
   color: #ffc95c;
 }
@@ -3284,11 +3292,16 @@ html[data-contrast="high"] .sound-captions li {
     height: 92px;
   }
 
+  /* Larger text is for the words: grown with them, the stick ran up into the lure panel on a 360 px tall screen. */
+  html[data-text-size] .scene-wrap > .walk-stick {
+    zoom: 1;
+  }
+
   .hint {
     bottom: 10px;
-    left: 114px;
+    left: calc(114px / var(--text-zoom, 1));
     /* Stops short of the power meter (42vw wide at the right) whatever the text size. */
-    max-width: min(38ch, calc((58vw - 30px) / var(--text-zoom, 1) - 114px));
+    max-width: min(38ch, calc((58vw - 144px) / var(--text-zoom, 1)));
     padding: 7px 10px;
     font-size: 12px;
   }
@@ -3304,7 +3317,7 @@ html[data-contrast="high"] .sound-captions li {
   }
 
   html[data-hand="left"] .hint {
-    right: 114px;
+    right: calc(114px / var(--text-zoom, 1));
     left: auto;
   }
 

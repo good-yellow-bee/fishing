@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { habitLines } from "../game/habitLines";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
@@ -200,6 +200,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
             <div ref={tensionFill} className="fill" />
             <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
             <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
+            {/* A frayed line breaks here, short of the bar's end. */}
+            {sim.current?.frayed && <i className="tick tick-frayed" style={{ left: `${FRAYED_SNAP * 100}%` }} title={t("Frayed line: it snaps here")} />}
             <i ref={peakMark} className="peak" hidden />
           </div>
           <span className="fight-label" id="fight-line-label">
