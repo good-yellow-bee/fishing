@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { SpotId } from "@stillwater/shared";
-import { lureBlurb, smallLuresFirst } from "../game/lureChoice";
+import { lureBlurb, smallLuresFirst, suitsBank } from "../game/lureChoice";
 import { useT } from "../i18n";
 
 type Props = {
@@ -43,11 +43,12 @@ export function LureChoice({ choices, value, spot, locked, onChange }: Props) {
       >
         {smallLuresFirst(choices).map((label) => (
           <option key={label} value={label}>
-            {t(label)}
+            {suitsBank(label, spot) ? t("{lure} · good here", { lure: t(label) }) : t(label)}
           </option>
         ))}
       </select>
       <small>{lureBlurb(value, spot)}</small>
+      {suitsBank(value, spot) && <small className="lure-here">{t("This bank suits it: the bites come sooner.")}</small>}
     </label>
   );
 }
