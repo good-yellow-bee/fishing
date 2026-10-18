@@ -771,12 +771,12 @@ a:focus-visible {
   cursor: pointer;
 }
 
-.daily-requests li button:hover:not(:disabled) {
+.daily-requests li button:hover:not(:disabled, [aria-disabled="true"]) {
   border-color: #d9b56d;
   background: rgba(211, 168, 89, 0.16);
 }
 
-.daily-requests li button:disabled {
+.daily-requests li button:is(:disabled, [aria-disabled="true"]) {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -1612,8 +1612,11 @@ html[data-input="pad"] .fight-bar .on-pad {
   font-size: 28px;
 }
 
-/* The fish's name takes focus when the card comes up, so a screen reader reads it; a heading needs no ring. */
-.landed-card h2[tabindex="-1"]:focus {
+/* The fish's name takes focus when the card comes up, and the released note after Release, so a screen reader reads
+   them; neither is a control, so neither needs a ring. The shack's "Claimed" is the same. */
+.landed-card h2[tabindex="-1"]:focus,
+.landed-card .released[tabindex="-1"]:focus,
+.daily-request-claimed[tabindex="-1"]:focus {
   outline: none;
 }
 

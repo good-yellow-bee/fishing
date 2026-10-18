@@ -527,6 +527,15 @@ export function DockPage() {
   const [releasing, setReleasing] = useState(false);
   const [releaseError, setReleaseError] = useState(false);
   const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
+  // Release gives way to "Released back into the lake": the note takes focus so a screen reader reads it and the keyboard
+  // stays on the card. Space still casts again from it.
+  const releasedNote = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!landedReleased) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    releasedNote.current?.focus({ preventScroll: true });
+  }, [landedReleased]);
   const releaseFish = async () => {
     const outcome = game.outcome;
     if (outcome?.kind !== "landed" || releasing) return;
@@ -1069,9 +1078,11 @@ export function DockPage() {
                 </p>
               )}
               {landedReleased ? (
-                <p className="catch-stamp released">{t("Released back into the lake")}</p>
+                <p className="catch-stamp released" ref={releasedNote} tabIndex={-1}>
+                  {t("Released back into the lake")}
+                </p>
               ) : (
-                <button className="panel-btn" type="button" onClick={() => void releaseFish()} disabled={releasing}>
+                <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
                   {releasing ? t("Releasing…") : t("Release")}
                 </button>
               )}
