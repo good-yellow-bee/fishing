@@ -37,7 +37,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castIntoSpooked, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, type Groundbait, castIntoSpooked, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -271,6 +271,8 @@ export function useFishingGame(
   const castRiseRef = useRef(false);
   /** The school a landed panfish left at its bank, for the next casts there. */
   const schoolRef = useRef<School | null>(null);
+  /** The groundbait tossed off a bank, for the next casts there. */
+  const groundbaitRef = useRef<Groundbait | null>(null);
   /** The bank where a fish was just lost; its next cast waits longer. */
   const spookRef = useRef<SpotId | null>(null);
   /** A big fish that broke off, waiting to bite again at its bank. */
@@ -348,6 +350,9 @@ export function useFishingGame(
   const [nibble, setNibble] = useState(false);
   /** This cast landed in a school; the scene shows it milling round the float while it waits. */
   const [schooled, setSchooled] = useState(false);
+  // Handfuls left in the bag this visit, and the bank the last one still feeds, so the page can offer and show it.
+  const [handfuls, setHandfuls] = useState(GROUNDBAIT_HANDFULS);
+  const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   const [lurking, setLurking] = useState(false);
   const [lurkerCloseInMs, setLurkerCloseInMs] = useState(0);
   /** How long this bite's fish holds the bait, so the strike cue runs out when it lets go. */
@@ -543,9 +548,13 @@ export function useFishingGame(
     const rainCover = spookedBank && sky === "rain";
     const spooked = spookedBank && !rainCover;
     spookRef.current = null;
+    const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
+    groundbaitRef.current = bait.next;
+    setGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
     if (schoolFish) waitHintRef.current = `${t("Into the school.")} ${waitHintRef.current}`;
+    if (bait.baited) waitHintRef.current = `${t("Over the groundbait.")} ${waitHintRef.current}`;
     if (spooked) waitHintRef.current = `${t("The lost fish spooked this water, so the next bite is slower.")} ${waitHintRef.current}`;
     else if (rainCover) waitHintRef.current = `${t("The rain on the water covered the lost fish's splash, so this water isn't spooked.")} ${waitHintRef.current}`;
     // Why the lure and the conditions draw a bite sooner (or slower); only the two latest are told, so the hint stays short.
@@ -659,7 +668,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, chopWait, stormWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, topwaterWait, chopWait, stormWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -1316,6 +1325,17 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
+  /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
+  const throwGroundbait = useCallback(() => {
+    if (phaseRef.current !== "idle" || handfuls <= 0) return;
+    const next = { spot: spotRef.current, casts: GROUNDBAIT_CASTS };
+    groundbaitRef.current = next;
+    setGroundbait(next);
+    setHandfuls((left) => left - 1);
+    fx.plop();
+    setHint(t("You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.", { casts: GROUNDBAIT_CASTS }));
+  }, [handfuls]);
+
   const dismissResult = () => {
     setOutcome(null);
     resetToIdle(idleHint(stanceRef.current));
@@ -1334,6 +1354,9 @@ export function useFishingGame(
     hint,
     nibble,
     schooled,
+    handfuls,
+    groundbait,
+    throwGroundbait,
     lurking,
     lurkerCloseInMs,
     strikeWindowMs,
