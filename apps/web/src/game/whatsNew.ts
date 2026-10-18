@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field18";
+export const NEWS_ID = "2026-10-18-game08";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A fish you let go from the catch card now stays in the lake: on a later day it may take your lure again at the same bank, a little heavier for its time away, and the card says when you let it go. As a foggy morning clears, the fish move up to feed and bite sooner for an hour, and the shack's chalk board says when. In a fight at the Point or the Dock, the card now warns that the rocks and pilings fray the line.",
   "A fish logged in the small hours with nothing else since midnight is offered the evening before's weather from the same night. When a photo's time would put a fish on a different outing, the button to use it says which outing.",
   "On a phone, Settings and the keys card keep Back to the lake pinned at their foot, always in reach, and the keys card now opens at its title. With larger text the keys card fits the screen, the header's chips step aside during a fight so the fight card fits, and the catch card's buttons sit on a solid strip that hides the words behind them.",
   "The outing that gave your most fish in one day is marked as your best day in the book so far. A planned outing says how many days ago you were last on its water, and the new-outing form shows your notes from the last days there.",
