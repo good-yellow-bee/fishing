@@ -46,7 +46,7 @@ export function LoginPage() {
           required
           minLength={8}
         />
-        <p className="error">{error}</p>
+        <p className="error" role="alert">{error}</p>
         <button type="submit">{t("Enter the dock")}</button>
         <p className="foot">
           {t("New here?")} <Link to="/register">{t("Make a profile")}</Link>
