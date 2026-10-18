@@ -243,7 +243,7 @@ export const PL_FIELD: PlBook = {
   "Best season: {season}": "Najlepsza pora roku: {season}",
   "{n} fish from this water that day are not on this outing.": [
     "{n} ryba z tego łowiska z tego dnia nie należy do tej wyprawy.",
-    "{n} ryby z tego łowiska z tego dnia nie są w tej wyprawie.",
+    "{n} ryby z tego łowiska z tego dnia nie należą do tej wyprawy.",
     "{n} ryb z tego łowiska z tego dnia nie należy do tej wyprawy.",
   ],
   "Add them": ["Dodaj ją", "Dodaj je", "Dodaj je"],
@@ -682,6 +682,7 @@ export const PL_FIELD: PlBook = {
   "First {species} in the book.": "Pierwsza ryba tego gatunku w dzienniku: {species}.",
   "New best {species}: {size} (was {was}).": "Nowy rekord: {species}, {size} (wcześniej {was}).",
   "Changes saved.": "Zmiany zapisane.",
+  "Outing saved.": "Wyprawę zapisano.",
   "Sample book restored.": "Przywrócono przykładowy dziennik.",
   "The sample waters and fish are gone. Add your first water to begin.": "Przykładowe łowiska i ryby zniknęły. Dodaj pierwsze łowisko, by zacząć.",
   "Sample book": "Przykładowy dziennik",

@@ -227,7 +227,8 @@ function SpotView() {
   const fishByTrip = fishCountsByTrip({ ...book, catches });
   const hooks = hookTally(book, spot.id);
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
-  const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The best outing among the angler's own here, as an outing's page names it.
+  const top = topOuting(spot.id === PLAY_LAKE_ID ? trips : countedBook(book).trips.filter((trip) => trip.spotId === spot.id), (id) => fishByTrip.get(id) ?? 0, today);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
   // A fish here logged off its outing still ends a dry run: counted on the day it came.
   const looseByDay = new Map<string, number>();
@@ -317,7 +318,7 @@ function SpotView() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
+      <WaterTipsBox catches={countedFish(catches)} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
       <TempThroughYear catches={catches} />
       {catches.length > 0 ? (
         <CopySummary
