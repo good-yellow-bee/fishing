@@ -427,6 +427,18 @@ button.field-primary {
     margin-top: 12px;
   }
 
+  /* Bests' days calendar drew 24 px squares 3 px apart; on a touch screen each day is a 32 px square,
+     narrower where a small phone with larger text has no room for seven. */
+  .day-calendar .day-grid {
+    grid-template-columns: repeat(7, minmax(0, 32px));
+  }
+
+  .day-calendar .day-grid li {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;

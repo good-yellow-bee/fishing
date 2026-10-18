@@ -121,3 +121,11 @@ describe("a page's eyebrow links on a touch screen", () => {
     expect(/\n  \.sheet \.eyebrow a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("inset: -11px -4px;");
   });
 });
+
+describe("Bests' days calendar on a touch screen", () => {
+  it("draws each day as a square up to 32 px", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect(/\n  \.day-calendar \.day-grid \{([^}]*)\}/.exec(touch)?.[1]).toContain("grid-template-columns: repeat(7, minmax(0, 32px));");
+    expect(/\n  \.day-calendar \.day-grid li \{([^}]*)\}/.exec(touch)?.[1]).toContain("aspect-ratio: 1;");
+  });
+});
