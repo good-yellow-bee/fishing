@@ -14,7 +14,8 @@ export function anotherCatchLink(
   entry: Pick<CatchEntry, "spotId" | "species" | "lure" | "tripId"> & { measure: Pick<CatchEntry["measure"], "kind"> },
   at?: string,
 ): string {
-  const params = new URLSearchParams({ spot: entry.spotId, species: entry.species, lure: entry.lure, kind: entry.measure.kind });
+  // No water given ("" for a sample fish's made-up one): the form picks the likely water itself.
+  const params = new URLSearchParams({ ...(entry.spotId ? { spot: entry.spotId } : {}), species: entry.species, lure: entry.lure, kind: entry.measure.kind });
   if (entry.tripId) params.set("trip", entry.tripId);
   if (at) params.set(AT_PARAM, at);
   return `/catches/new?${params.toString()}`;

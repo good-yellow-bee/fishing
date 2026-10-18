@@ -2,15 +2,21 @@ import { catchesForSpot, catchesForTrip, type CatchEntry, type Logbook } from "@
 import { findCatches } from "./CatchSearch";
 import { FIND_PARAM, findLink } from "./findLinks";
 import { kindOnPage, speciesLink } from "./speciesLink";
+import { largestFirst } from "./largestFirst";
+import { ORDER_PARAM } from "./MatchOrder";
 
 /** The address parameter that says which list a catch was opened from, so its steps keep to that list. */
 export const LIST_PARAM = "in";
 
 /**
  * "find:pike" (the search on Home), "catches:pike" (the same search on the Catches page), "species:Northern pike",
- * "trip:<id>" or "water:<id>": a list a catch card can be opened from.
+ * "trip:<id>" or "water:<id>": a list a catch card can be opened from. "find-largest:pike" and "catches-largest:pike" are
+ * those searches shown largest first.
  */
-export type ListKey = `${"find" | "catches" | "species" | "trip" | "water"}:${string}`;
+export type ListKey = `${"find" | "catches" | "find-largest" | "catches-largest" | "species" | "trip" | "water"}:${string}`;
+
+/** Whether a list steps through its fish largest first, not newest first. */
+export const largestList = (key: string | undefined) => Boolean(key && /^(find|catches)-largest:/.test(key));
 
 /** A catch page address that remembers the list it was opened from. */
 export function catchLink(id: string, list?: ListKey): string {
@@ -33,12 +39,15 @@ export function catchList(
   const kind = list.slice(0, at);
   const value = list.slice(at + 1);
   if (!value) return null;
+  const search = kind.replace(/-largest$/, "");
+  const largest = search !== kind;
   const found =
-    kind === "find" || kind === "catches"
-      ? {
-          rows: findCatches(book, value, t, pictured),
-          back: kind === "find" ? findLink(value) : `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}`,
-        }
+    search === "find" || search === "catches"
+      ? (() => {
+          const rows = findCatches(book, value, t, pictured);
+          const back = search === "find" ? findLink(value) : `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}`;
+          return largest ? { rows: largestFirst(rows), back: `${back}&${ORDER_PARAM}=largest` } : { rows, back };
+        })()
       : kind === "species"
         ? { rows: kindOnPage(book, value), back: speciesLink(value) }
         : kind === "trip"

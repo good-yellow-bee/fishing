@@ -39,7 +39,7 @@ describe("round 69: a month's outings", () => {
 });
 
 describe("round 69: leaving a deleted page", () => {
-  beforeEach(() => vi.stubGlobal("window", { location: { pathname: "/spots/pine", search: "" } }));
+  beforeEach(() => vi.stubGlobal("window", { location: { pathname: "/spots/pine", search: "" }, history: { state: null } }));
   afterEach(() => vi.unstubAllGlobals());
 
   it("takes the gone page's place when it wasn't opened from a list", () => {

@@ -39,7 +39,7 @@ import { sameSizeSearch } from "./sizeQuery";
 import { PhotoFull } from "./PhotoFull";
 import { catchNeighbors, neighborsIn } from "./catchNeighbors";
 import { tempBandSearch } from "./WeatherBars";
-import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
+import { LIST_PARAM, catchLink, catchList, largestList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
 import { AT_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
@@ -47,7 +47,7 @@ import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay } from "./tripMonths";
 import { byTime, countedFish, milestoneOf, ownFish } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, dayAfter, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
@@ -64,7 +64,9 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
-import { isSampleCatch, isSampleSpot, ownWatersFirst } from "./bookCopy";
+import { isSampleCatch, isSampleOnly, isSampleSpot, ownWatersFirst } from "./bookCopy";
+import { readDeletedFish } from "./deletedFish";
+import { focusPageHeading } from "./pageFocus";
 import { addedWater, forgetAddedWater } from "./addedWater";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
@@ -218,13 +220,16 @@ export function CatchesPage() {
               {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
               {/* The largest named is the angler's own, as Bests and the cards' records say. */}
               {/* Counted as Home and Bests count them; the sample week and the game's fish still listed are said apart. */}
-              <FishSum catches={counted.length > 0 ? counted : catches} />
+              {/* With only the game's fish, none are the angler's own: the list says so rather than summing them as theirs. */}
+              {counted.length > 0 ? <FishSum catches={counted} /> : null}
               {counted.length > 0 && counted.length < catches.length ? (
                 <p className="meta">{tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+              ) : counted.length === 0 ? (
+                <p className="meta">{tn(catches.length, "Listed: {n} fish from the game.", "Listed: {n} fish from the game.")}</p>
               ) : null}
               <SpeciesChips catches={catches} />
               {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
-              <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth} headLevel={2}>
+              <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2}>
                 {(entry) => (
                   <CatchCard
                     key={entry.id}
@@ -1479,10 +1484,12 @@ function CatchView() {
   const entry = book.catches.find((row) => row.id === catchId);
 
   if (!entry) {
+    // Back can reach a deleted fish's page by an older entry for it; it says so, and the Undo bar can still bring it back.
+    const deleted = readDeletedFish().has(catchId);
     return (
       <div className="sheet">
-        <h1>{t("Missing fish")}</h1>
-        <p className="lede">{t("That catch is not in this book.")}</p>
+        <h1>{deleted ? t("Fish deleted") : t("Missing fish")}</h1>
+        <p className="lede">{deleted ? t("This fish was deleted.") : t("That catch is not in this book.")}</p>
         <Link to="/catches">{t("Back to catches")}</Link>
       </div>
     );
@@ -1525,7 +1532,7 @@ function CatchView() {
   // Measured and weighed: a fat fish or a thin one, against the angler's own others of its kind.
   const build = isCounted ? forItsLength(counted, entry) : null;
   // Back after a long spell without one, opening the one before.
-  const gap = isCounted ? longGap(counted, entry) : null;
+  const gap = isCounted ? longGap(counted, entry, (fish) => bookFishDay(book, fish)) : null;
   // Short of a best of its kind, the day's best: the biggest of its outing.
   const outingBest = !badge && trip && trip.spotId !== PLAY_LAKE_ID && biggestOnOuting(book.catches.filter((other) => other.tripId === trip.id), entry);
   // The others of its kind that round to the same size, through the one-size search.
@@ -1565,9 +1572,10 @@ function CatchView() {
   // Two fish logged in the same minute go by id, as the milestones order them.
   const firstHere = !(milestone?.of === "kind" && milestone.n === 1) && atWater.length > 1 && atWater.every((other) => other.id === entry.id || byTime(entry, other) < 0);
   // The fish of its kind that year, through the catch search.
-  const caughtYear = String(new Date(entry.caughtAt).getFullYear());
+  // A night fish's small hours count in its outing's year, as the search reads a year.
+  const caughtYear = caughtDay.slice(0, 4);
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
-  const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))}${noSample}`] as const;
+  const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => bookFishDay(book, other).startsWith(`${caughtYear}-`)))}${noSample}`] as const;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The water's 10° band, and the fish caught under the same sky and wind in it, counted as the link opens them.
   const tempBand =
@@ -1812,8 +1820,16 @@ function CatchView() {
       )}
       <p className="another-catch">
         {/* Not from a game fish: another like it would be logged on the game's lake. */}
+        {/* From a sample fish beside the angler's own, not on its made-up water: the form picks one of theirs. */}
         {entry.spotId === PLAY_LAKE_ID ? null : (
-          <Link to={anotherCatchLink({ ...entry, tripId: outingGoesOn(book, entry.tripId) ? entry.tripId : null })} className="field-primary inline">
+          <Link
+            to={anotherCatchLink(
+              isSampleCatch(entry.id) && !isSampleOnly(book)
+                ? { ...entry, spotId: "", tripId: null }
+                : { ...entry, tripId: outingGoesOn(book, entry.tripId) ? entry.tripId : null },
+            )}
+            className="field-primary inline"
+          >
             {t("Log another like this")}
           </Link>
         )}
@@ -1829,15 +1845,15 @@ function CatchView() {
       {newer || older ? (
         <nav className="catch-steps" aria-label={t("More catches")}>
           {newer ? (
-            <Link to={catchLink(newer.id, list?.key)} rel="prev">
-              {t("← Newer: {species}", { species: t(newer.species) })}
+            <Link to={catchLink(newer.id, list?.key)} state={location.state} rel="prev">
+              {largestList(list?.key) ? t("← Larger: {species}", { species: t(newer.species) }) : t("← Newer: {species}", { species: t(newer.species) })}
             </Link>
           ) : (
             <span />
           )}
           {older ? (
-            <Link to={catchLink(older.id, list?.key)} rel="next">
-              {t("Older: {species} →", { species: t(older.species) })}
+            <Link to={catchLink(older.id, list?.key)} state={location.state} rel="next">
+              {largestList(list?.key) ? t("Smaller: {species} →", { species: t(older.species) }) : t("Older: {species} →", { species: t(older.species) })}
             </Link>
           ) : null}
         </nav>
@@ -1846,7 +1862,15 @@ function CatchView() {
       {/* Its kind's list is the one its page shows, which leaves a game or sample fish out: offered only when this one is in it. */}
       {onPage.length > 1 && onPage.some((other) => other.id === entry.id) && !list?.key.startsWith("species:") ? (
         <p className="catch-list-at">
-          <Link to={catchLink(entry.id, `species:${entry.species}`)}>{t("Step through {species} only", { species: t(entry.species) })}</Link>
+          {/* The same fish, so it takes this page's place, and the top of the page takes the focus the link had. */}
+          <Link
+            to={catchLink(entry.id, `species:${entry.species}`)}
+            replace
+            state={location.state}
+            onClick={() => requestAnimationFrame(() => focusPageHeading({ preventScroll: true }))}
+          >
+            {t("Step through {species} only", { species: t(entry.species) })}
+          </Link>
         </p>
       ) : null}
       {list ? (
