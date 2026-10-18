@@ -8,12 +8,13 @@ import { CatchSearch } from "./CatchSearch";
 import { CatchCard, TripCard } from "./cards";
 import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
+import { countedSearch } from "./countedSearch";
 import { hasSampleLeft, isSampleOnly, isSampleTrip } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
-import { catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth } from "./tripMonths";
 import { countedFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { readYearGoal } from "./YearGoal";
@@ -225,7 +226,7 @@ export function HomePage() {
           <span className="eyebrow">{t("Fish")}</span>
           <strong>
             {/* The angler's own: game fish are left out of the count and of the list it opens. */}
-            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: withoutPlayLake(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
+            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: countedSearch(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
           </strong>
           {book.catches.length > 0 ? (
             <small>
@@ -234,14 +235,14 @@ export function HomePage() {
                 <>
                   {" · "}
                   {/* This month's fish, through the catch search. */}
-                  <Link to={findLink(withoutPlayLake(book, thisMonth, monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
+                  <Link to={findLink(countedSearch(book, thisMonth, monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
               {yearFish > monthFish || goal !== null ? (
                 <>
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
-                  <Link to={findLink(withoutPlayLake(book, thisYear, yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
+                  <Link to={findLink(countedSearch(book, thisYear, yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
@@ -323,7 +324,7 @@ export function HomePage() {
                       {tn(yearsBack(entry, now) ?? 1, "{n} year ago", "{n} years ago")}
                       {" · "}
                       {/* The whole day it came from, in the catch search. */}
-                      <Link to={findLink(withoutPlayLake(book, localDate(new Date(entry.caughtAt)), book.catches))}>{t("Every fish that day")}</Link>
+                      <Link to={findLink(withoutPlayLake(book, bookFishDay(book, entry), book.catches))}>{t("Every fish that day")}</Link>
                     </p>
                     <CatchCard
                       level={4}

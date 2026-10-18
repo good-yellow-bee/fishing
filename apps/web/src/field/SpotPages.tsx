@@ -207,7 +207,10 @@ export function SpotPage() {
           // How much goes with it, since a water with a season on it takes a lot.
           trips.length + catches.length === 0
             ? t("Delete this water?")
-            : t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(trips.length, "{n} outing", "{n} outings"), fish: fishCountLabel(catches.length) })
+            : trips.length > 0 && catches.length > 0
+              ? t("Delete this water? Its {outings} and {fish} leave the book too.", { outings: tn(trips.length, "{n} outing", "{n} outings"), fish: tn(catches.length, "{n} fish", "{n} fish") })
+              : // Only outings or only fish: "and Nothing logged" would read mid-sentence.
+                t("Delete this water? Also leaving the book: {what}.", { what: trips.length > 0 ? tn(trips.length, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
         }
         onDelete={() => {
           if (deleteSpot(spot.id)) navigate("/spots");
@@ -267,9 +270,10 @@ export function SpotPage() {
         <p className="meta season-pace">
           {t("This year here: {outings}, {fish} · last year by now: {lastOutings}, {lastFish}", {
             outings: tn(thisSeason.outings, "{n} outing", "{n} outings"),
-            fish: fishCountLabel(thisSeason.fish),
+            // Counts in a sentence: "0 fish", not the "Nothing logged" a label says alone.
+            fish: tn(thisSeason.fish, "{n} fish", "{n} fish"),
             lastOutings: tn(lastSeason.outings, "{n} outing", "{n} outings"),
-            lastFish: fishCountLabel(lastSeason.fish),
+            lastFish: tn(lastSeason.fish, "{n} fish", "{n} fish"),
           })}
         </p>
       ) : null}

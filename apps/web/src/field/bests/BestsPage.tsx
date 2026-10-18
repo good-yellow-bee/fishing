@@ -24,7 +24,7 @@ import { yearSummary } from "../summaries";
 import { outingStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
-import { countedFish } from "../milestones";
+import { countedBook, countedFish } from "../milestones";
 import { SameKinds } from "./SameKinds";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -91,7 +91,9 @@ export function BestsPage() {
   const whole = { ...all, spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID), trips: all.trips.filter(offPlayLake), catches: all.catches.filter(offPlayLake) };
   const real = whole;
   const tail = (term: string) => withoutPlayLake(all, term, all.catches);
-  const days = daysOut(real, today.slice(0, 4), today);
+  // This year's count leaves the sample week out once the angler has fish of their own, as Home's does.
+  const counted = countedBook(all);
+  const days = daysOut(counted, today.slice(0, 4), today);
   const notYet = notYetThisYear(real.catches);
   const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
@@ -296,7 +298,7 @@ export function BestsPage() {
               <div className="section-head">
                 <h2>{t("This year's goal")}</h2>
               </div>
-              <YearGoal catches={real.catches} />
+              <YearGoal catches={counted.catches} />
               {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
               {/* Last year's kinds still to show up this year, each opening its page. */}
               {notYet.length > 0 ? (
@@ -343,7 +345,7 @@ export function BestsPage() {
               ) : null}
               {/* The year so far as text for a message, once it has a fish. */}
               {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-                <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+                <CopySummary text={() => yearSummary(counted, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
               ) : null}
             </section>
           ) : null}

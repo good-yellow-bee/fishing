@@ -764,4 +764,6 @@ export const PL_FIELD: PlBook = {
   "Make room on the photos page": "Zrób miejsce na stronie zdjęć",
   "A book that could not be read was set aside. See what to do with it": "Dziennik, którego nie dało się odczytać, został odłożony. Zobacz, co można z nim zrobić",
   "Show newer ({count})": "Pokaż nowsze ({count})",
+  "sample|search word": "przykładowe",
+  "Delete this water? Also leaving the book: {what}.": "Usunąć to łowisko? Z dziennika zniknie też: {what}.",
 };
