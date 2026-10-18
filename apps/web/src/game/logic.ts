@@ -24,7 +24,9 @@ import {
   rareBiteMulForLevel,
   hookWindowMulForLevel,
   perfectCastHalfForLevel,
+  skyAt,
   skyTurnForDay,
+  weatherForDay,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -224,6 +226,23 @@ export const PRE_RAIN_WAIT = 0.8;
 /** How the coming rain shortens the wait: in the hour before an overcast day turns to rain, PRE_RAIN_WAIT, else 1. */
 export function preRainWaitMul(now: Date, sky: string | undefined, turn = skyTurnForDay(now)) {
   return turn?.to === "rain" && sky === "overcast" && now.getHours() === turn.hour - 1 ? PRE_RAIN_WAIT : 1;
+}
+
+/** The morning after a day that ended in rain dawns high and bright, and the fish sulk deep, so a bite comes slower to any lure but a slow jig or worm. */
+export const POST_FRONT_WAIT = 1.15;
+/** The bright sulk after the rain lasts until this hour. */
+export const POST_FRONT_UNTIL = 12;
+
+/** Whether the day before `date` ended in rain (its sky at 23:00). */
+export function rainedYesterday(date: Date) {
+  return skyAt(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1, 23)) === "rain";
+}
+
+/** How the bright morning after the rain stretches the wait: POST_FRONT_WAIT on a clear day's morning after a day that ended in rain, unless a jig or worm is tied on, else 1. */
+export function postFrontWaitMul(now: Date, sky: string | undefined, lure: string | undefined) {
+  if (sky !== "clear" || weatherForDay(now) !== "clear" || now.getHours() >= POST_FRONT_UNTIL || !rainedYesterday(now)) return 1;
+  const kind = lure?.trim() ? lureClass(lure).id : null;
+  return kind === "jig" || kind === "worm" ? 1 : POST_FRONT_WAIT;
 }
 
 /** A spinner's blade turns the line with every cast; after this many spinner casts since the last knot the line is twisted. */
