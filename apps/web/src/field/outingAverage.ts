@@ -87,10 +87,12 @@ function weekOf(date: string, ahead = 0): string {
 
 /**
  * The longest run of weeks in a row (Monday to Sunday) with an outing, fish or not, and whether it is still going:
- * this week's or last week's outing keeps it alive, as this week may still bring one. Planned outings don't count.
+ * this week's or last week's outing keeps it alive, as this week may still bring one. Planned outings don't count, nor
+ * today's until it has a fish when `fishOn` is given, as the averages take it.
  */
-export function weekStreak(trips: readonly Trip[], today: string): { best: number; going: boolean } {
-  const weeks = [...new Set(trips.filter((trip) => trip.date <= today).map((trip) => weekOf(trip.date)))].sort();
+export function weekStreak(trips: readonly Trip[], today: string, fishOn?: (tripId: string) => number): { best: number; going: boolean } {
+  const done = (trip: Trip) => trip.date < today || (trip.date === today && (!fishOn || fishOn(trip.id) > 0));
+  const weeks = [...new Set(trips.filter(done).map((trip) => weekOf(trip.date)))].sort();
   let best = 0;
   let run = 0;
   let last = "";
