@@ -81,3 +81,14 @@ describe("the shop on a phone", () => {
     expect(css).toMatch(/@media \(max-width: 520px\) \{\n  \/\*[^*]*\*\/\n  \.shop-overlay \{\n    right: calc\(4vw \/ var\(--text-zoom, 1\)\);/);
   });
 });
+
+describe("the trip recap on a phone", () => {
+  const from = css.indexOf('/* "Najcięższa" in its spaced capitals');
+  const phone = css.slice(from, css.indexOf("/* High contrast from Settings", from));
+
+  it("tightens the stat labels, and stacks the stats as rows with larger text or on the narrowest phones", () => {
+    expect(phone).toMatch(/@media \(max-width: 520px\) \{\n  \.trip-recap-stats dt \{\n    letter-spacing: 0\.04em;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+    expect(phone).toMatch(/@media \(max-width: 360px\) \{\n  \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+  });
+});
