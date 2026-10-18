@@ -1121,6 +1121,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC34~~ | ~~Cygnets: in summer a brood of four grey cygnets paddles in a line behind the swans, now and then straying a little to one side~~ (#1078) | scene | S |
 | ~~SC35~~ | ~~News card: lily pads through the year, pondweed and cygnets~~ (#1078) | scene | S |
 | ~~SC36~~ | ~~Sunken leaves: from fall until spring, dark fallen leaves lie on the shallow bed round the dock, seen through the water~~ (#1081) | scene | S |
+| ~~SC37~~ | ~~Frogspawn: in spring, pale clumps of frogspawn float by the lily pads, riding the swell~~ (#1084) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

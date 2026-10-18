@@ -40,6 +40,8 @@ import { Crayfish } from "./Crayfish";
 import { Waterweed } from "./Waterweed";
 import { SunkenLeaves } from "./SunkenLeaves";
 import { sunkenLeavesOut } from "./leafLitter";
+import { Frogspawn } from "./Frogspawn";
+import { spawnOut } from "./spawnClumps";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
@@ -2128,6 +2130,7 @@ export const LakeWorld = memo(function LakeWorld({
       {crayfishOut(season) && <Crayfish />}
       <Waterweed season={season} />
       {sunkenLeavesOut(season) && <SunkenLeaves />}
+      {spawnOut(season) && <Frogspawn />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
