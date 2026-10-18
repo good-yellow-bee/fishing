@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { CABIN_WINDOW_LIGHTS, GLINTS_PER_WINDOW, windowGlints } from "./cabinShine";
+import { CABIN_WINDOW_LIGHTS, GLINTS_PER_WINDOW, lightGlints, type Vec3 } from "./cabinShine";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
 
 const GLOW = "#ffcf7a";
 const GAIN = 1.2;
 
-/** The far cabin's lit windows mirrored on the lake as two broken streaks of warm light, dimmer when rain or fog breaks them up (`strength` 0..1). */
-export function WindowGlow({ strength }: { strength: number }) {
+/**
+ * The far cabin's lit windows mirrored on the lake as two broken streaks of warm light, dimmer when rain or fog breaks them up (`strength` 0..1).
+ * `lights` and `color` mirror other lights on the far bank the same way, such as the campers' fire and lantern.
+ */
+export function WindowGlow({ strength, lights = CABIN_WINDOW_LIGHTS, color = GLOW, name = "cabin-window-glow" }: { strength: number; lights?: readonly Vec3[]; color?: string; name?: string }) {
   const still = useReducedMotion();
   const geometry = useMemo(() => new THREE.PlaneGeometry(1.0, 0.35), []);
   const material = useMemo(
@@ -19,7 +22,7 @@ export function WindowGlow({ strength }: { strength: number }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const helper = useMemo(() => new THREE.Object3D(), []);
   const tint = useMemo(() => new THREE.Color(), []);
-  const base = useMemo(() => new THREE.Color(GLOW), []);
+  const base = useMemo(() => new THREE.Color(color), [color]);
   useEffect(
     () => () => {
       geometry.dispose();
@@ -33,8 +36,8 @@ export function WindowGlow({ strength }: { strength: number }) {
     const t = state.clock.elapsedTime;
     const eye = state.camera.position;
     let n = 0;
-    CABIN_WINDOW_LIGHTS.forEach((_, w) => {
-      const glints = windowGlints(w, eye, t, still);
+    lights.forEach((light, w) => {
+      const glints = lightGlints(light, w, eye, t, still);
       // Each glint lies across the line of sight, the way light breaks on ripples.
       const toEye = glints.length > 0 ? Math.atan2(-(eye.z - glints[0]!.z), eye.x - glints[0]!.x) + Math.PI / 2 : 0;
       glints.forEach((glint) => {
@@ -52,5 +55,5 @@ export function WindowGlow({ strength }: { strength: number }) {
     glow.instanceMatrix.needsUpdate = true;
     if (glow.instanceColor) glow.instanceColor.needsUpdate = true;
   });
-  return <instancedMesh ref={mesh} args={[geometry, material, CABIN_WINDOW_LIGHTS.length * GLINTS_PER_WINDOW]} frustumCulled={false} renderOrder={6} name="cabin-window-glow" />;
+  return <instancedMesh ref={mesh} args={[geometry, material, lights.length * GLINTS_PER_WINDOW]} frustumCulled={false} renderOrder={6} name={name} />;
 }

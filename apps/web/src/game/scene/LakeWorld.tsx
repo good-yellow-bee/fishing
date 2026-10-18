@@ -151,7 +151,7 @@ import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
 import { kiteOut } from "./kiteFlight";
 import { Campers, Tent } from "./Tent";
-import { CAMP_FIRE_AT, campersOut, tentPitched } from "./campTent";
+import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
 import { Pumpkins } from "./Pumpkins";
 import { pumpkinsOut } from "./pumpkinPatch";
 import { Cabin } from "./Cabin";
@@ -2250,6 +2250,7 @@ export const LakeWorld = memo(function LakeWorld({
           <Tent hour={hour} />
           <Campfire at={CAMP_FIRE_AT} lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
           {campersOut(hour, sky) && <Campers />}
+          {campfireLit(hour, sky) && <WindowGlow lights={CAMP_LIGHTS} color="#ffa64d" strength={sky === "fog" ? 0.4 : 0.8} name="camp-glow" />}
         </>
       )}
       {cabinWindowsLit(hour) && <WindowGlow strength={sky === "rain" || sky === "fog" ? 0.4 : 1} />}

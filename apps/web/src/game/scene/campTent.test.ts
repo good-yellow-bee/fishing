@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
 import { CABIN_AT } from "./cabinLook";
-import { CAMPERS_YAW, CAMP_FIRE_AT, CAMP_LOG_AT, TENT_AT, TENT_YAW, campersOut, tentGlow, tentPitched } from "./campTent";
+import { lightGlints } from "./cabinShine";
+import { CAMPERS_YAW, CAMP_FIRE_AT, CAMP_LIGHTS, CAMP_LOG_AT, TENT_AT, TENT_YAW, campersOut, tentGlow, tentPitched } from "./campTent";
 import { kiteFlyer } from "./kiteFlight";
 import { camperShape, doorShape, tentShape } from "./Tent";
 
@@ -57,6 +58,16 @@ describe("campers' tent", () => {
     expect(campersOut("night", "fog")).toBe(true);
     expect(campersOut("night", "rain")).toBe(false);
     expect(campersOut("day", "clear")).toBe(false);
+  });
+
+  it("mirrors the fire and the lantern on the water as seen from the dock", () => {
+    const eye = { x: 0, y: 4.2, z: 15.5 };
+    CAMP_LIGHTS.forEach((light, i) => {
+      expect(inLake(light.x, light.z)).toBe(false);
+      const glints = lightGlints(light, i, eye, 3);
+      expect(glints.length).toBeGreaterThan(3);
+      glints.forEach((glint) => expect(inLake(glint.x, glint.z)).toBe(true));
+    });
   });
 
   it("builds the tent, its doorway and the campers", () => {
