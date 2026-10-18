@@ -1048,6 +1048,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA3~~ | ~~The catch log's and lodge board's tables, which scroll sideways on their own on a phone, take keyboard focus (arrow keys scroll them) and are named by the page title for screen readers~~ (#970) | access | S |
 | ~~PA4~~ | ~~The Polish word list (75 kB gzipped, a quarter of the main script) loads only for players who read Polish, or when an English reader searches the catch log or opens Bests, which match Polish names; the main script drops from 279 to 204 kB gzipped, a Polish reader's first paint waits for the list and falls back to English if it cannot load; news pa01~~ (#975) | load speed | S |
 | ~~PA5~~ | ~~On touch screens the field log's underlined buttons and links ("−15 min", "change", "Copy a summary", section links) reach 8 px past their words to a 33 px tap area without moving anything, and Home's stacked count lines ("6 species", "Last time: …") get room of their own, clearing axe's target-size check~~ (#977) | touch, access | S |
+| ~~PA6~~ | ~~On any phone held sideways the catch card's fish, rarity and name ran off the top of the screen, out of reach; it now stops under the header and scrolls with Release, Keep fishing, Field log and Save picture pinned at its foot, and the fight card sits lower and tighter so it clears a two-row header~~ (#980) | phone UX | S |
+| ~~PA7~~ | ~~On a 320 px phone with larger text (Polish especially) the last banks in the bottom row of shore signs ran past the screen edge, out of reach; the row now scrolls sideways when it must and looks as before when it fits. The lodge board's All time / This week tabs stand 32 px on touch screens, and the in-game Reduce motion setting also stills the fight card's note fade (the system setting already did)~~ (#982) | phone UX, access | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1058,6 +1060,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC3~~ | ~~The far bank in the mirror: on still water the shore trees and the hills behind them lie mirrored on the lake, broken into bands by the chop and fading toward your feet; clearest on a calm clear dawn or dusk, washed out in fog, gone in rain or a strong wind (full effects only)~~ (#972) | scene | M |
 | ~~SC4~~ | ~~News card 2026-10-18-scene01 covers SC1 to SC3: sunlight on the sand, water by season and the far bank in the mirror~~ (#972) | news | S |
 | ~~SC5~~ | ~~The sun's glitter and the moon's road follow your eye: both used to start from the dock or the middle of the lake, so from the Point or the Reeds they ran off to one side; now they run from wherever you stand toward the sun or moon~~ (#973) | scene | S |
+| ~~SC6~~ | ~~Whitecaps on a windy day: on breezy days a few crests break white out on the deep water, on strong days many more and bigger; each slides downwind as its foam spreads and fades, dimmer after dark (one draw)~~ (#976) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1317,7 +1320,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT252~~ | ~~The stance chip says "fished hard" (dimmed) at a bank whose next cast meets wary fish, so the angler knows to move before casting; groundbait at that bank hides it~~ (#958) | ui | S |
 | ~~GT253~~ | ~~News card 2026-10-18-game05 covers GT249 to GT252: groundbait feeders, the field guide's school and feeder lines, and a bank fished hard~~ (#959) | news | S |
 | ~~GT254~~ | ~~Fresh water: the first cast of a visit at each bank meets fish that haven't seen a lure today, so it bites a little sooner (0.9) and the wait hint says so (told after the bank's own reasons), which rewards walking the lake alongside the fished-hard rule~~ (#961) | gameplay | S |
-| GT255 | G tosses the groundbait from the keyboard wherever its button by the walk signs shows, and the keys card lists it | ui | S |
+| ~~GT255~~ | ~~G tosses the groundbait from the keyboard wherever its button by the walk signs shows, and the keys card lists it~~ (#963) | ui | S |
+| GT256 | A fished bank rests instead of resetting: each bank keeps its count of casts through the visit, and every cast at another bank rests it by 2, so one cast next door and back no longer clears the wary fish; the stance chip says "fished hard" at any bank still wary | gameplay | S |
 
 ## Risks / open questions for the owner
 

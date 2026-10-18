@@ -548,12 +548,26 @@ export const PRESSURE_CASTS = 8;
 /** Bites come this much slower on a bank fished that long without a move. */
 export const PRESSURE_WAIT = 1.2;
 
-export type Pressure = { spot: SpotId; casts: number };
+/** Each cast at another bank rests a fished bank by this many casts, so it takes a few casts away before it is fresh again. */
+export const PRESSURE_REST = 2;
 
-/** Counts this cast against the bank's run of casts; a cast at another bank starts a new run. */
-export function castUnderPressure(pressure: Pressure | null, spot: SpotId): { pressured: boolean; next: Pressure } {
-  const casts = pressure?.spot === spot ? pressure.casts + 1 : 1;
-  return { pressured: casts > PRESSURE_CASTS, next: { spot, casts } };
+/** The casts counted against each bank this visit. */
+export type Pressure = Partial<Record<SpotId, number>>;
+
+/** Counts this cast against its bank, and rests every other bank a little. */
+export function castUnderPressure(pressure: Pressure, spot: SpotId): { pressured: boolean; next: Pressure } {
+  const next: Pressure = {};
+  for (const [bank, casts] of Object.entries(pressure) as [SpotId, number][]) {
+    if (bank !== spot && casts > PRESSURE_REST) next[bank] = casts - PRESSURE_REST;
+  }
+  const casts = (pressure[spot] ?? 0) + 1;
+  next[spot] = casts;
+  return { pressured: casts > PRESSURE_CASTS, next };
+}
+
+/** The banks whose next cast meets wary fish. */
+export function fishedHardBanks(pressure: Pressure): SpotId[] {
+  return (Object.entries(pressure) as [SpotId, number][]).filter(([, casts]) => casts >= PRESSURE_CASTS).map(([bank]) => bank);
 }
 
 /** A fish lost in a fight spooks its bank: the next cast there waits this much longer for a bite. */

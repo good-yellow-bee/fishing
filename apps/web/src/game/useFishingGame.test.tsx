@@ -113,7 +113,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
-      <i data-testid="fished-hard">{game.fishedHard ?? ""}</i>
+      <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
@@ -1882,7 +1882,7 @@ describe("useFishingGame pressure", () => {
     return waited;
   };
 
-  it("makes a bank fished too long without a move slow to bite, and says to try another", () => {
+  it("makes a bank fished too long slow to bite, says to try another, and rests it while the angler fishes elsewhere", () => {
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
     const hints = Array.from({ length: PRESSURE_CASTS - 1 }, () => castAndReset(surface));
     // The stance chip hears of it before the cast that meets the wary fish.
@@ -1893,12 +1893,18 @@ describe("useFishingGame pressure", () => {
     expect(hints.slice(0, PRESSURE_CASTS).some((line) => line?.includes("fished hard"))).toBe(false);
     expect(hints.at(-1)).toContain("This water has been fished hard");
     expect(container!.querySelector("[data-testid=fished-hard]")?.textContent).toBe("dock");
-    // A move to another bank starts a fresh run.
+    // A cast at another bank rests the dock a little, so it is no longer fished hard.
+    const dock = { ...surface.dataset };
     surface.dataset.stance = "dropoff";
     surface.dataset.angler = "15.4,7.8";
     surface.dataset.aim = "15.4,-5.4";
     expect(castAndReset(surface)).not.toContain("fished hard");
     expect(container!.querySelector("[data-testid=fished-hard]")?.textContent).toBe("");
+    // But one cast away is not enough: back at the dock its fish soon grow wary again.
+    Object.assign(surface.dataset, dock);
+    expect(castAndReset(surface)).not.toContain("fished hard");
+    expect(container!.querySelector("[data-testid=fished-hard]")?.textContent).toBe("dock");
+    expect(castAndReset(surface)).toContain("This water has been fished hard");
   });
 });
 
