@@ -517,6 +517,24 @@ export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { bai
   return { baited: true, next: bait.casts > 1 ? { ...bait, casts: bait.casts - 1 } : null };
 }
 
+/** Fish that crowd in to feed on groundbait: the panfish, baitfish and bottom feeders. */
+export const GROUNDBAIT_FEEDERS: ReadonlySet<string> = new Set(["golden-shiner", "bluegill", "crappie", "carp", "catfish", "lake-whitefish"]);
+/** Chance a bite over the groundbait is one of the feeders gathered there. */
+export const GROUNDBAIT_FEEDER_SHARE = 0.35;
+
+/** A feeder drawn to the groundbait for this bite, from the bank's own lure split and weighed as the bank draws them, or none. */
+export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCast: boolean, hour: LakeHour, random = Math.random): FishSpecies | null {
+  if (random() >= GROUNDBAIT_FEEDER_SHARE) return null;
+  const home = FISH.filter((fish) => fish.spots.includes(spot) && (!shortCast || fish.rarity === "common"));
+  const feeders = poolForLure(home, lure).filter((fish) => GROUNDBAIT_FEEDERS.has(fish.id));
+  let roll = random() * feeders.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  for (const fish of feeders) {
+    roll -= appeal(fish, hour);
+    if (roll <= 0) return fish;
+  }
+  return feeders.at(-1) ?? null;
+}
+
 /** A fish lost in a fight spooks its bank: the next cast there waits this much longer for a bite. */
 export const SPOOK_WAIT = 1.4;
 
