@@ -436,6 +436,12 @@ button.field-primary {
     margin: 16px 0;
   }
 
+  /* The lone "Back to catches" (or spots, trips, bests) under a missing page's line stood 20 px tall. */
+  .sheet > .lede + a {
+    display: inline-block;
+    padding-block: 6px;
+  }
+
   /* An outing's Add to calendar and Print the packing list wrap onto two touching lines on a phone, each reaching
      8 px into the other; a 16 px row gap parts them. */
   p.trip-calendar {
