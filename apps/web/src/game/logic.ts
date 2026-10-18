@@ -174,6 +174,20 @@ export function isPerfectCast(power: number, accuracy: number, level = 1) {
   return power >= band.min && power <= band.max;
 }
 
+/** A low, flat cast off the dock skips the lure across the water and under the planks, to the fish in the shade, so the bite comes sooner. */
+export const SKIP_CAST_WAIT = 0.85;
+/** The bottom share of the sweet band that makes a skip cast. */
+export const SKIP_CAST_SHARE = 0.25;
+
+/** Whether a cast off the dock went in low enough in the sweet band to skip under the planks; a float or a popper rides too high to skip. */
+export function isSkipCast(power: number, accuracy: number, spot: string, lure: string | undefined) {
+  if (spot !== "dock") return false;
+  const kind = lure?.trim() ? lureClass(lure).id : null;
+  if (kind === "bobber" || kind === "popper") return false;
+  const band = sweetBand(accuracy);
+  return power >= band.min && power < band.min + (band.max - band.min) * SKIP_CAST_SHARE;
+}
+
 /** A new angler's first fish come easy: this many landed fish keep the mercy on. */
 export const MERCY_CATCHES = 3;
 /** Mercy bites come quickly and give a little longer to strike. */
