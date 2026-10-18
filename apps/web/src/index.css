@@ -2028,6 +2028,8 @@ html[data-input="pad"] .fight-bar .on-pad {
   .stance-chip {
     top: calc(var(--hud-bottom, 140px) + 8px);
     left: 8px;
+    /* Wrap short of the lure box beside it, so "biting today · bites sooner now" is not hidden under it. */
+    max-width: calc(100% - 24px - min(210px, calc(56vw / var(--text-zoom, 1))));
     padding: 6px 10px;
     font-size: 14px;
   }
