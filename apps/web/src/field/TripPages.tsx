@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { hasMovedInApp } from "./FieldShell";
-import { leaveDeleted } from "./leaveDeleted";
+import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState } from "./SavedNote";
 import { MapAnchor } from "./MapAnchor";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -56,6 +56,7 @@ import { useLogbook } from "./LogbookState";
 import { TripCounts } from "./tripCounts";
 import { TripWeather } from "./Weather";
 import { num, t, tn, useT } from "../i18n";
+import { isPlanned } from "./TripMonthHead";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { findCatches } from "./CatchSearch";
@@ -123,6 +124,14 @@ export function TripsPage() {
   // A size in the search is read as the catch search reads it, and finds the outings of the fish it found.
   const fishTrips = (part: string) => new Set(findCatches(book, part, t).flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
   const found = needle ? findTrips(book, needle, (id) => fishByTrip.get(id) ?? 0, today, t, new Date(), fishTrips) : [];
+  // The plans among them said apart, as the month headings under the count say them.
+  const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishByTrip.get(trip.id) ?? 0)).length;
+  const foundLine = [
+    ...(found.length > foundPlanned || foundPlanned === 0
+      ? [t("Outings: {count} · {fish}", { count: found.length - foundPlanned, fish: fishCountLabel(found.reduce((sum, trip) => sum + (fishByTrip.get(trip.id) ?? 0), 0)) })]
+      : []),
+    ...(foundPlanned > 0 ? [tn(foundPlanned, "{n} planned", "{n} planned")] : []),
+  ].join(" · ");
   const card = (trip: Trip, level?: 4) => (
     <TripCard
       level={level}
@@ -175,7 +184,7 @@ export function TripsPage() {
             }}
           />
           <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
-            {needle ? <p>{found.length === 0 ? t("No outing matches that.") : t("Outings: {count} · {fish}", { count: found.length, fish: fishCountLabel(found.reduce((sum, trip) => sum + (fishByTrip.get(trip.id) ?? 0), 0)) })}</p> : null}
+            {needle ? <p>{found.length === 0 ? t("No outing matches that.") : foundLine}</p> : null}
           </div>
           {found.length > 0 ? (
             <PagedTrips key={needle} trips={found} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
@@ -249,9 +258,10 @@ function peakTime(catches: readonly CatchEntry[]): { label: string; count: numbe
   return top && top.count > (next?.count ?? 0) ? { label: top.label, count: top.count, total: catches.length } : null;
 }
 
-/** The day's sunrise and sunset at the water, for a water with a place (its own pin or the sample sheet's), in this device's clock. */
+/** The day's sunrise and sunset at the water, for a water with a place, in this device's clock. */
+/** Not from the sample sheet's pin: its made-up waters sit far away, and their sunrise read on this clock would mislead (as Home leaves it out). */
 function SunLine({ date, spot }: { date: string; spot: Spot }) {
-  const place = spot.place ?? placeFor(spot.id);
+  const place = spot.place ?? (isSampleSpot(spot.id) ? undefined : placeFor(spot.id));
   if (!place) return null;
   const sun = sunTimes(date, place.lat, place.lng);
   return (
@@ -511,7 +521,9 @@ function TripView() {
       ) : !play && trip.date <= today ? (
         // A day fished with nothing written: the note is one tap away, not behind Edit.
         <p className="trip-write-up">
-          <Link to={`/trips/${trip.id}/edit?${NOTE_PARAM}=1`}>{t("Write up the day")}</Link>
+          <Link to={`/trips/${trip.id}/edit?${NOTE_PARAM}=1`} state={editFromPage(location.state)}>
+            {t("Write up the day")}
+          </Link>
         </p>
       ) : null}
       {/* The sample week's planned days stay off a calendar, as "Add all to calendar" leaves them out. */}
@@ -581,6 +593,7 @@ function TripForm() {
   const { book, storedBook, addTrip, updateTrip } = useLogbook();
   useT();
   const navigate = useNavigate();
+  const location = useLocation();
   const { tripId } = useParams();
   const [params] = useSearchParams();
   const existing = tripId ? tripById(book, tripId) : undefined;
@@ -592,7 +605,8 @@ function TripForm() {
   // Never the game's lake: its days are made by playing.
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
   // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
-  const busy = (spotId: string) => book.trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
+  // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
+  const busy = (spotId: string) => countedBook(book).trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
   const guess = likelyWater(book, localDate(new Date()));
   const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
     ? (params.get("spot") as string)
@@ -624,7 +638,7 @@ function TripForm() {
         );
   const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
-  const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
+  const sameDay = countedBook(book).trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
   // What this water gave around the same date in earlier years, for an outing being planned.
   const pastWeek = useMemo(() => {
     const [y, m, d] = date.split("-").map(Number);
@@ -687,7 +701,8 @@ function TripForm() {
     for (const item of againTackle) add(result.id, item.label);
     kept.drop();
     // The form gives way to the outing it saved, so Back doesn't open it again, and the save is said.
-    navigate(`/trips/${result.id}`, { replace: true, ...savedState(existing ? "catchEdit" : "trip") });
+    if (existing) leaveSaved(navigate, location.state, `/trips/${result.id}`);
+    else navigate(`/trips/${result.id}`, { replace: true, ...savedState("trip") });
   };
 
   if (tripId && !existing) {

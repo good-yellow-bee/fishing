@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, tripsForSpot, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, catchesForTrip, fishCountsByTrip, itemsForTrip, localDate, lureTally, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -16,7 +16,7 @@ import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
-import { bookFishDay, catchMonth, daysOut } from "./tripMonths";
+import { bookFishDay, daysOut } from "./tripMonths";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { goalPace, readYearGoal } from "./YearGoal";
@@ -81,7 +81,8 @@ function NextDayLine({ trip, spot, today, now }: { trip: Trip; spot: Spot | unde
 
 /** How the last outing on the next outing's water went: its fish and the lure that took the most, to plan by. */
 function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today: string }) {
-  const last = tripsForSpot(book, trip.spotId)
+  // The outings as the outing's own page reads them: the sample week's made-up ones left out once the book has the angler's own.
+  const last = countedBook(book).trips.filter((other) => other.spotId === trip.spotId)
     // Today's outing only once it has given a fish: one still to happen says nothing yet.
     .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -146,7 +147,8 @@ export function HomePage() {
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(real, now);
   const thisMonth = today.slice(0, 7);
-  const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
+  // By the outing's day, as the year below: a New Year's Eve night's small hours are December's, not January's.
+  const monthRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisMonth}-`));
   const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
   const thisYear = today.slice(0, 4);
   // The goal counts a night session's small hours on its outing's day, as Bests does.
@@ -271,21 +273,22 @@ export function HomePage() {
             {/* The angler's own: game fish are left out of the count and of the list it opens. */}
             <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: countedSearch(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
           </strong>
-          {book.catches.length > 0 ? (
+          {/* Only the game's fish so far: no kinds or months of the angler's own to give. */}
+          {real.length > 0 ? (
             <small>
               <Link to="/bests">{tn(kinds, "{n} species", "{n} species")}</Link>
               {monthFish > 0 ? (
                 <>
                   {" · "}
-                  {/* This month's fish, through the catch search. */}
-                  <Link to={findLink(countedSearch(book, thisMonth, monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
+                  {/* This month's fish, through the catch search, which reads "this month" by the outing's day as counted here. */}
+                  <Link to={findLink(countedSearch(book, t("this month|search word"), monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
               {yearFish > monthFish || goal !== null ? (
                 <>
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
-                  <Link to={findLink(countedSearch(book, thisYear, yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
+                  <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
@@ -341,8 +344,8 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Nothing to find in a book with no fish yet. */}
-      {book.catches.length > 0 ? <CatchSearch /> : null}
+      {/* Nothing to find in a book with no fish of the angler's own yet; the game's stay findable on the catch log. */}
+      {real.length > 0 ? <CatchSearch /> : null}
 
       <div className="home-grid">
         <section>

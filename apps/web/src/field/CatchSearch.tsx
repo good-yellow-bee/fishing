@@ -22,6 +22,7 @@ import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { readSizePlus } from "./sizePlus";
 import { hasMovedInApp } from "./FieldShell";
+import { focusPageHeading } from "./pageFocus";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
@@ -606,12 +607,19 @@ export function CatchSearch() {
   const popped = useRef(false);
   // Back or Forward, not a first visit to the address (which has no entry of the router's own to come back to).
   popped.current = useNavigationType() === "POP" && hasMovedInApp();
+  const shownLink = useRef(linked);
   useEffect(() => {
     // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
     const at = box.current;
+    const hadLink = shownLink.current;
+    shownLink.current = linked;
     if (!linked) {
       // The search left the address (Home in the menu, say), not by clearing the box: clear the box too.
       if (!typed.current.has("")) setQuery("");
+      // Back from a search link on the same page: the matches that held focus are gone, so focus and the view go to the
+      // page's heading rather than falling to the document halfway down the page.
+      const active = document.activeElement;
+      if (hadLink && popped.current && !typed.current.has("") && (!active || active === document.body || (at && at.contains(active)))) focusPageHeading();
       typed.current = new Set();
       return;
     }

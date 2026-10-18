@@ -19,6 +19,12 @@ export function savedState(kind: SavedKind, news?: string | null, at?: string) {
   return { state: { saved: kind, ...(news ? { news } : {}), ...(at ? { at } : {}) } };
 }
 
+/** A save that went Back to the page its form was opened from: said there, since Back carries no link state. */
+let afterBack: SavedKind | null = null;
+export function sayAfterBack(kind: SavedKind) {
+  afterBack = kind;
+}
+
 /** After a save that lands on another page, a short line that it went through, gone after a few seconds. */
 export function SavedNote() {
   useT();
@@ -31,11 +37,19 @@ export function SavedNote() {
   const at = (location.state as { at?: unknown } | null)?.at;
 
   useEffect(() => {
+    if (!afterBack) return;
+    setShown({ kind: afterBack, on: location.pathname });
+    afterBack = null;
+  }, [location.key, location.pathname]);
+
+  useEffect(() => {
     if (!arrived || !(arrived in SAVED_LINES)) return;
     setShown({ kind: arrived, on: location.pathname, ...(typeof news === "string" ? { news } : {}), ...(typeof at === "string" && Number.isFinite(Date.parse(at)) ? { at } : {}) });
-    // Said once: a reload or a return to this page doesn't say it again.
-    navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, { replace: true, state: null });
-  }, [arrived, news, at, location.pathname, location.search, location.hash, navigate]);
+    // Said once: a reload or a return to this page doesn't say it again. Whatever else the link carried (that the page
+    // was opened from a list) stays.
+    const { saved: _saved, news: _news, at: _at, ...rest } = location.state as Record<string, unknown>;
+    navigate({ pathname: location.pathname, search: location.search, hash: location.hash }, { replace: true, state: Object.keys(rest).length > 0 ? rest : null });
+  }, [arrived, news, at, location.pathname, location.search, location.hash, location.state, navigate]);
 
   useEffect(() => {
     if (!shown) return;

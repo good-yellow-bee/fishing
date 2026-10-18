@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { editFromPage } from "./leaveDeleted";
 import { useT } from "../i18n";
 
 export function EditDelete({
@@ -16,6 +17,7 @@ export function EditDelete({
   children: ReactNode;
 }) {
   const t = useT();
+  const { state } = useLocation();
   const [open, setOpen] = useState(false);
   const askId = useId();
   const deleteButton = useRef<HTMLButtonElement>(null);
@@ -34,7 +36,9 @@ export function EditDelete({
       <header className="sheet-head">
         <div>{children}</div>
         <div className="sheet-actions">
-          <Link to={editTo}>{t("Edit")}</Link>
+          <Link to={editTo} state={editFromPage(state)}>
+            {t("Edit")}
+          </Link>
           <button ref={deleteButton} type="button" className="text-button" onClick={() => setOpen(true)} aria-expanded={open}>
             {t("Delete")}
           </button>

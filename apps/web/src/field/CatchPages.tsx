@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { hasMovedInApp } from "./FieldShell";
-import { leaveDeleted } from "./leaveDeleted";
+import { leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -262,6 +262,7 @@ function CatchForm() {
   useT();
   const lang = useLang();
   const navigate = useNavigate();
+  const location = useLocation();
   const { catchId } = useParams();
   const [params] = useSearchParams();
   const existing = catchId ? book.catches.find((row) => row.id === catchId) : undefined;
@@ -717,8 +718,8 @@ function CatchForm() {
     if (existing) {
       editDone.current = true;
       dropEditDraft(existing.id);
-      // Back to the fish, still within the list it was opened from, in the form's place so Back doesn't open it again.
-      navigate(catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined), { replace: true, ...savedState("catchEdit") });
+      // Back to the fish, still within the list it was opened from, so Back doesn't open the form again.
+      leaveSaved(navigate, location.state, catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined));
       return;
     }
     // The waiting draft, if any, stays for later; this one is saved.
