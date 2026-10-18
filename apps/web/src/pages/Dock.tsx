@@ -178,6 +178,16 @@ export function DockPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [keysOpen, setKeysOpen] = useState(false);
   const shopPanel = useRef<HTMLDivElement>(null);
+  // The lake's news sits just above the hint, however many lines the hint wraps to: its height rides on a CSS variable.
+  const hintSize = useRef<ResizeObserver | null>(null);
+  const hintRef = useCallback((node: HTMLParagraphElement | null) => {
+    hintSize.current?.disconnect();
+    hintSize.current = null;
+    if (!node || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => node.parentElement?.style.setProperty("--hint-h", `${node.offsetHeight}px`));
+    observer.observe(node);
+    hintSize.current = observer;
+  }, []);
   const prefs = useSettings();
   const steppedDownAt = useEffectsSteppedDown();
   const [effectsNotice, setEffectsNotice] = useState(false);
@@ -769,7 +779,7 @@ export function DockPage() {
           <PowerMeter phase={scenePhase} powerRef={game.powerRef} lastCastRef={game.lastCastRef} accuracy={me.profile.accuracy} level={me.level} />
         )}
         {prefs.walkStick && !shopOpen && scenePhase === "idle" && <WalkStick />}
-        <p className="hint" aria-live="polite">
+        <p className="hint" aria-live="polite" ref={hintRef}>
           {game.hint}
         </p>
         {(catchSync.pendingCount > 0 || catchSync.error || catchSync.rejectedCount > 0) && (

@@ -2741,17 +2741,24 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 12px;
 }
 
-/* Who else has been fishing: a quiet note above the hint, nothing to press. */
+/* Who else has been fishing: a quiet note above the hint (however tall the hint wraps), nothing to press. */
 .lodge-tracks {
   position: absolute;
   left: 24px;
-  bottom: 86px;
+  bottom: calc(32px + var(--hint-h, 54px));
   z-index: 2;
   max-width: min(42ch, calc(70vw / var(--text-zoom, 1)));
   padding: 7px 11px;
   background: rgba(17, 24, 22, 0.55);
   color: var(--paper-dim);
   pointer-events: none;
+}
+
+/* Under 800px the hint moves up under the HUD, so the lake's news keeps its old place above the sign row. */
+@media (max-width: 800px) {
+  .lodge-tracks {
+    bottom: 86px;
+  }
 }
 
 /* On a touch phone the walking stick owns the bottom-left corner; the lake's news gives way to it. */
