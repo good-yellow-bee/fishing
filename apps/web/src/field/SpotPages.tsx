@@ -24,6 +24,7 @@ import { FishCsv } from "./FishCsv";
 import { TallyBars } from "./TallyBars";
 import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
+import { kindOnPage, speciesLink } from "./speciesLink";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
 import { bookFishDay, yearTally } from "./tripMonths";
@@ -499,7 +500,12 @@ function SpotView() {
           <Link to={findWithLink(here, kindsDay.date)}>{t("Most kinds in one day: {count}, on {day}", { count: kindsDay.kinds, day: formatDay(kindsDay.date) })}</Link>
         </p>
       ) : null}
-      <BiggestHere catches={catches} spotId={spot.id} />
+      {/* The game's lake and a sample water beside the angler's own: a kind's page holds other fish, so the kind opens this water's. */}
+      <BiggestHere
+        catches={catches}
+        spotId={spot.id}
+        kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : findWithLink(here, exactTerm("species", t(species))))}
+      />
       <PhotoStrip catches={catches} within={here} named list={`water:${spot.id}`} />
       <FishCsv catches={catches} name={spot.name} />
       {catches.length > 1 ? (
