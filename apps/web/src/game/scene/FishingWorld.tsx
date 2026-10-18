@@ -26,6 +26,8 @@ import { JUMP_MS, ROLL_MS, SHAKE_MS, type FightSim } from "../fight";
 import { fx } from "../fx";
 import { snowing } from "./capSnow";
 import type { Hotspot } from "../hotspot";
+import type { Groundbait } from "../logic";
+import { GroundbaitCloud } from "./GroundbaitCloud";
 import { ShoreTracks } from "./ShoreTracks.tsx";
 import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
@@ -169,6 +171,8 @@ type Props = {
   /** The day's wind as a downwind drift on a sitting float, meters a second. */
   wind?: { x: number; z: number };
   hotspot: Hotspot | null;
+  /** The groundbait tossed off a bank, while it still feeds the fish there. */
+  groundbait?: Groundbait | null;
   /** An evening rise is on: rings dimple the water in reach of the bank. */
   rising?: boolean;
   /** A thunderstorm: the sky flashes now and then and thunder follows. */
@@ -2141,7 +2145,7 @@ function Tone({ hour }: { hour: LakeHour }) {
   return null;
 }
 
-function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
+function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = false, lurkerCloseInMs = 0, topwater = false, hour, sky, season = "summer", species, weight, golden = false, released = false, moon, wind, hotspot, groundbait = null, rising = false, storm = false, tracks, powerRef, accuracy }: Props) {
   // How this fish takes the bait: a topwater lure makes every take a hit at the top.
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
@@ -2170,6 +2174,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       <FrameCap />
       <LakeWorld spot={spot} hour={hour} sky={sky} season={season} hotspot={hotspot} moon={moon} wind={wind} />
       {tracks && tracks.length > 0 && <ShoreTracks tracks={tracks} />}
+      {groundbait && <GroundbaitCloud bait={groundbait} />}
       {rising && <RiseRings spot={spot} />}
       {rising && <Mayflies spot={spot} />}
       <Windsock wind={wind ?? NO_WIND} />
