@@ -1136,7 +1136,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC44~~ | ~~Red squirrels: on dry days from spring to fall, squirrels come down a tree, bound to the next, sit up to look about and run up it~~ (#1104) | scene | S |
 | ~~SC45~~ | ~~News card scene10: swan feathers, campfire, toadstools, dabbling ducks, squirrels~~ (#1104) | scene | S |
 | ~~SC46~~ | ~~Snowman: all winter a snowman with coal eyes, a carrot nose and a red scarf stands in front of the shack~~ (#1105) | scene | S |
-| SC47 | Woodpecker: at dawn and by day a woodpecker hitches up the owl's dead tree, drumming as it goes, and swoops back down | scene | S |
+| ~~SC47~~ | ~~Woodpecker: at dawn and by day a woodpecker hitches up the owl's dead tree, drumming as it goes, and swoops back down~~ (#1108) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
