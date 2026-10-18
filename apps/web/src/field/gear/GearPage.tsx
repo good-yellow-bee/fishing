@@ -19,7 +19,8 @@ import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
 import { renamedTackle } from "./renamedTackle";
-import { pieceRecords } from "./pieceRecord";
+import { pieceRecords, type PieceRecord } from "./pieceRecord";
+import { ChoiceRow } from "../ChoiceRow";
 import { shownPieceKey } from "./pieceKey";
 import { notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
@@ -67,6 +68,28 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
 /** How many lures the record lists before the rest. */
 const RECORD_ROWS = 8;
 
+/** How the lure record is ordered, kept for the next visit: most fish, fish an outing, or the newest fish. */
+type LureOrder = "most" | "rate" | "latest";
+const LURE_ORDER_KEY = "stillwater.field-log.lure-order.v1";
+
+function readLureOrder(): LureOrder {
+  try {
+    const stored = localStorage.getItem(LURE_ORDER_KEY);
+    return stored === "rate" || stored === "latest" ? stored : "most";
+  } catch {
+    return "most";
+  }
+}
+
+/** The records in the order picked; ties keep the most-fish order they came in. */
+export function orderedRecords(records: readonly PieceRecord[], order: LureOrder): PieceRecord[] {
+  const rows = [...records];
+  if (order === "rate") rows.sort((a, b) => b.fish / b.outings - a.fish / a.outings);
+  // Lures that never took a fish go last.
+  if (order === "latest") rows.sort((a, b) => (b.lastAt ? Date.parse(b.lastAt) : 0) - (a.lastAt ? Date.parse(a.lastAt) : 0));
+  return rows;
+}
+
 /** Each lure taken on past outings: the outings it went on and the fish it took there, most fish first. */
 /** Outings a lure goes out on without a fish before the record says it may as well stay home. */
 const NEVER_TOOK_OUTINGS = 4;
@@ -79,7 +102,18 @@ export function lureRate(fish: number, outings: number): string {
 function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
   const { items, add } = useTackle();
-  const records = pieceRecords(book, items, today);
+  const [order, setOrder] = useState(readLureOrder);
+  const pickOrder = (next: LureOrder) => {
+    setOrder(next);
+    try {
+      localStorage.setItem(LURE_ORDER_KEY, next);
+    } catch {
+      // Storage blocked: the order holds for this visit.
+    }
+  };
+  // The order picked holds while its control shows.
+  const found = pieceRecords(book, items, today);
+  const records = orderedRecords(found, found.length > 2 ? order : "most");
   const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
@@ -97,6 +131,21 @@ function LureRecord({ today }: { today: string }) {
       <h2 className="subhead" id="lure-record" tabIndex={-1}>
         {t("Lure record")}
       </h2>
+      {records.length > 2 ? (
+        <div className="spot-order">
+          <ChoiceRow<LureOrder>
+            wrap
+            label={t("Order")}
+            value={order}
+            options={[
+              { id: "most", label: t("Most fish") },
+              { id: "rate", label: t("Most fish an outing") },
+              { id: "latest", label: t("Last fish") },
+            ]}
+            onChange={pickOrder}
+          />
+        </div>
+      ) : null}
       <ul className="species-waters lure-record">
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>

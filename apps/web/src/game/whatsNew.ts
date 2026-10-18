@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa06";
+export const NEWS_ID = "2026-10-18-field21";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lure record on Gear can be ordered by most fish, most fish an outing, or the newest fish, and keeps that order for your next visit.",
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.",
   "The reeds now lean with the day's wind and nod in its gusts. In summer green duckweed gathers in the lake's still corners, by the reeds and among the lily pads, and the water lilies close at dusk, stay shut through the night and half close on a grey or rainy day.",
   "Casting a spinner twists the line, and after a dozen spinner casts a twisted line now and then kinks into a wind knot until you retie it with the button by the walk signs or T. On a controller, X tosses the groundbait and the left trigger reties the line. On a clear morning after a day of rain the fish sulk deep until noon, so bites come slower except on a slow jig or worm, and the shack's chalk board warns of it.",

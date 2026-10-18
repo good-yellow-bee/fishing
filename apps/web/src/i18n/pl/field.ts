@@ -627,6 +627,7 @@ export const PL_FIELD: PlBook = {
   "All waters": "Wszystkie łowiska",
   "Last fish": "Ostatnia ryba",
   "Most fish": "Najwięcej ryb",
+  "Most fish an outing": "Najwięcej ryb na wyprawę",
   "This year here: {outings}, {fish} · last year by now: {lastOutings}, {lastFish}": "W tym roku tutaj: {outings}, {fish} · w zeszłym roku do tego dnia: {lastOutings}, {lastFish}",
   "At this water: {measures}": "Na tym łowisku: {measures}",
   "First time at this water:": "Pierwszy raz na tym łowisku:",
