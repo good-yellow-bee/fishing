@@ -80,6 +80,8 @@ export const PL_GAME: PlBook = {
   "Biting best at the {bank}": "Najlepiej bierze: {bank}",
   "biting today": "dziś bierze",
   "fish rising": "ryby się spławiają",
+  "bites sooner now": "teraz szybciej bierze",
+  "{bank}: bites sooner now": "{bank}: teraz szybciej bierze",
   "Right on a rise.": "Prosto w spław ryby.",
   "Snagged in the weed. Tap {n} times to work it free.": "Zaczep w zielsku. Dotknij {n} razy, by go uwolnić.",
   "Snagged on the rocks. Tap {n} times to work it free.": "Zaczep o kamienie. Dotknij {n} razy, by go uwolnić.",

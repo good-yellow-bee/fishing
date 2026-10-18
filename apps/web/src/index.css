@@ -781,6 +781,12 @@ a:focus-visible {
   color: var(--amber);
 }
 
+/* A bank the season, hour and weather favor right now; the stance chip spells it out once you stand there. */
+.walk-signs .sign-now {
+  color: var(--amber);
+  font-weight: 700;
+}
+
 .walkthrough {
   position: absolute;
   top: 102px;
