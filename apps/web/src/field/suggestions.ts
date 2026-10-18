@@ -45,7 +45,8 @@ export function tripWeather(book: Logbook, tripId: string | undefined, skipId?: 
 export function dayWeather(book: Logbook, ymd: string, skipId?: string, spotId?: string): CatchWeather | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
   // The game's sky is made up: it says nothing about the day at a real water.
-  const day = catchesNewestFirst(book).filter((entry) => entry.id !== skipId && entry.weather && entry.spotId !== PLAY_LAKE_ID && localDate(new Date(entry.caughtAt)) === ymd);
+  // Nor is the sample week's: it was never anyone's day.
+  const day = catchesNewestFirst(book).filter((entry) => entry.id !== skipId && entry.weather && entry.spotId !== PLAY_LAKE_ID && !isSampleCatch(entry.id) && localDate(new Date(entry.caughtAt)) === ymd);
   if (spotId === undefined) return day[0]?.weather ?? null;
   const here = day.find((entry) => entry.spotId === spotId);
   if (here || !day[0]) return here?.weather ?? null;
@@ -75,10 +76,13 @@ export function lastReleased(book: Logbook): boolean {
 /**
  * When a new catch starts: now, unless it is logged for an outing on an earlier day.
  * Then it starts on that day at this clock time, so it lands on the outing's date. Last night's outing in the small
- * hours keeps now: the fish came after midnight.
+ * hours keeps now: the fish came after midnight. So does an outing whose newest fish (`lastFishAt`) came in the last few
+ * hours: a night or dawn session still going past the small hours.
  */
-export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = new Date()): Date {
+export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = new Date(), lastFishAt?: string): Date {
   if (!trip || trip.date >= localDate(now)) return now;
+  const since = lastFishAt ? now.getTime() - Date.parse(lastFishAt) : NaN;
+  if (since >= 0 && since < STILL_FISHING_MS) return now;
   if (now.getHours() < LATE_NIGHT_UNTIL && trip.date === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12))) return now;
   const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
   return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
@@ -88,6 +92,9 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
 export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | undefined {
   return book.trips.find((trip) => trip.spotId === spotId && trip.date === ymd);
 }
+
+/** A fish this soon after the outing's last one is the same session going on, whatever the clock says. */
+const STILL_FISHING_MS = 6 * 60 * 60_000;
 
 /** Before this hour a fish with no outing on its own day still belongs to the night before's. */
 export const LATE_NIGHT_UNTIL = 4;
