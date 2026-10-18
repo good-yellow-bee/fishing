@@ -44,7 +44,7 @@ import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, catchMonth } from "./tripMonths";
-import { byTime, countedFish, milestoneOf } from "./milestones";
+import { byTime, countedFish, milestoneOf, ownFish } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, dayAfter, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
@@ -556,6 +556,9 @@ function CatchForm() {
   const canLocate = !existing && canFindNearest(book);
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  // The angler's own fish of the kind kept on this fish's day (its outing's, for a night session).
+  const fishDayNow = pickedTrip?.date ?? caughtAt.slice(0, 10);
+  const keptThatDay = existing || released ? 0 : speciesCatches(book, species, t).filter((entry) => ownFish(entry) && !entry.released && bookFishDay(book, entry) === fishDayNow).length;
   // The sun at the water picked, at the time typed.
   const formSpot = book.spots.find((spot) => spot.id === spotId);
   const formPlace = formSpot ? (formSpot.place ?? placeFor(formSpot.id)) : undefined;
@@ -1338,6 +1341,10 @@ function CatchForm() {
               {t("Save and log another")}
             </button>
           )}
+          {/* A fish kept: how many of the kind that day, this one too, for a bag limit. */}
+          {!existing && !released && keptThatDay > 0 ? (
+            <small className="field-hint form-kept">{t("{species} kept that day, this one included: {count}", { species: t(species.trim()), count: keptThatDay + 1 })}</small>
+          ) : null}
           {/* Ticked like the last fish, far down the form: said beside the save, with a way to keep this one. */}
           {!existing && released ? (
             <small className="field-hint form-released">
