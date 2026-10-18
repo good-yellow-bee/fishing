@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field25";
+export const NEWS_ID = "2026-10-18-scene09";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In fall, sunken leaves settle on the shallow bed round the dock and lie there until spring. In spring, clumps of frogspawn float by the lily pads, and on a windy day the wind rakes the foam into long lanes running down the wind across the open water.",
   "The book's file box downloads the outings as a spreadsheet too, and the catch form says how many fish an outing has so far and when the last came.",
   "The lily pads now change with the year: small and fresh in spring, turning gold in fall and gone under the winter ice. Clumps of pondweed rock in the swell on the bed round the dock, and in summer a brood of grey cygnets paddles in a line behind the swans.",
   "With a keyboard, Tab now stays inside Settings, Keys and buttons, the shack and the trip recap instead of slipping onto the lake behind them, and a field or button you tab to scrolls clear of a pinned Save or Back to the lake rather than hiding under it. On a touch screen the species chips are a little taller to tap.",

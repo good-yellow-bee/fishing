@@ -140,6 +140,8 @@ import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
+import { FoamLanes } from "./FoamLanes";
+import { foamLanesAmount } from "./foamLanesPlan";
 import { DuckweedFilm } from "./DuckweedFilm";
 import { ShoreIceFilm } from "./ShoreIceFilm";
 import { SNOW_BAND } from "./shoreIce";
@@ -1162,6 +1164,7 @@ function LakeSurface({
       {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
       {duckweed > 0 && <DuckweedFilm geometry={geometry} wind={wind} hour={hour} amount={duckweed} />}
       {pollen > 0 && <PollenFilm geometry={geometry} wind={wind} hour={hour} amount={pollen} />}
+      {foamLanesAmount(Math.hypot(wind.x, wind.z)) > 0 && <FoamLanes geometry={geometry} wind={wind} hour={hour} />}
       {shoreIce(season) && <ShoreIceFilm geometry={geometry} hour={hour} />}
       {cloudShade > 0 && (
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
