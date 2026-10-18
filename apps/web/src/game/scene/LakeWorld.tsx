@@ -152,6 +152,8 @@ import { Kite } from "./Kite";
 import { kiteOut } from "./kiteFlight";
 import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, campersOut, tentPitched } from "./campTent";
+import { Pumpkins } from "./Pumpkins";
+import { pumpkinsOut } from "./pumpkinPatch";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -2165,6 +2167,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       <Woodpile season={season} />
+      {pumpkinsOut(season) && <Pumpkins hour={hour} />}
       {snowmanUp(season) && <Snowman />}
       {feederUp(season) && <BirdFeeder birds={chickadeesOut(hour, sky)} />}
       <Clothesline washing={washingOut(hour, sky, season)} wind={wind} />
