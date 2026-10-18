@@ -371,6 +371,8 @@ function CatchForm() {
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
   const [photo, setPhoto] = useState<string | null>(existing ? photoFor(existing.id) : null);
+  // What it opened with, so a save that leaves the photo alone keeps one another tab added meanwhile.
+  const [openedPhoto] = useState(photo);
   const [photoError, setPhotoError] = useState("");
   const [reducing, setReducing] = useState(false);
   const [error, setError] = useState("");
@@ -678,7 +680,7 @@ function CatchForm() {
     // Worked out against the book before this fish joins it.
     const parsed = existing ? null : parseCatchDraft(draft, book);
     const news = parsed?.ok ? catchNews(book, parsed.value) : null;
-    const result = existing ? updateCatch(existing.id, draft, photo) : addCatch(draft, photo);
+    const result = existing ? updateCatch(existing.id, draft, photo, openedPhoto) : addCatch(draft, photo);
     if (!result.ok) {
       setError(unitsMessage(result.message, units));
       markInvalid(event.currentTarget as HTMLFormElement, result.field);
@@ -1416,6 +1418,8 @@ function CatchView() {
   const kindNumber = eyebrowKind.length - eyebrowKind.findIndex((other) => other.id === entry.id);
   const counted = countedFish(kind);
   const isCounted = counted.some((other) => other.id === entry.id);
+  // The counts below hold the angler's own fish of the kind; when the sample week still has some, their links leave it out.
+  const noSample = kind.some((other) => isSampleCatch(other.id)) && !counted.some((other) => isSampleCatch(other.id)) ? ` -${t("sample|search word")}` : "";
   // Short of a best, where it sits among the angler's own others of its kind.
   const rank = isCounted ? sizeRank(counted, entry) : null;
   // A game or sample fish among the angler's own has no place in their run of sizes.
@@ -1429,7 +1433,7 @@ function CatchView() {
   // The others of its kind that round to the same size, through the one-size search.
   // Counted among the angler's own fish only, as the year line is: the link leaves the game's lake out too.
   const countedIds = new Set(counted.map((other) => other.id));
-  const sizeSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)] as const;
+  const sizeSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)}${noSample}`] as const;
   const sameSize = isCounted && counted.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
   const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", t(entry.lure)), exactTerm("water", spot.name)] as const) : null;
@@ -1445,7 +1449,10 @@ function CatchView() {
   // Where the fish's time sat against the sun at its water, for a water with a place.
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
   const sun = place ? sunMark(entry.caughtAt, place) : null;
-  const sameDay = book.catches.filter((other) => bookFishDay(book, other) === caughtDay).length;
+  // A real fish's day leaves the game's rounds out, as Home's "Every fish that day" does.
+  const dayFish = book.catches.filter((other) => bookFishDay(book, other) === caughtDay && (offPlayLake(other) || !offPlayLake(entry)));
+  const sameDay = dayFish.length;
+  const dayLink = findLink(offPlayLake(entry) ? withoutPlayLake(book, caughtDay, book.catches.filter((other) => bookFishDay(book, other) === caughtDay)) : caughtDay);
   const milestone = milestoneOf(book, entry);
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
   const atWater = spot && isCounted ? counted.filter((other) => other.spotId === entry.spotId) : [];
@@ -1454,7 +1461,7 @@ function CatchView() {
   // The fish of its kind that year, through the catch search.
   const caughtYear = String(new Date(entry.caughtAt).getFullYear());
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
-  const yearSearch = [exactTerm("species", t(entry.species)), withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))] as const;
+  const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))}${noSample}`] as const;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
@@ -1486,7 +1493,16 @@ function CatchView() {
           <Link to="/catches">{t("Catches")}</Link>
           {" · "}
           {/* A game fish's kind opens the game's fish of that kind, as it is counted here. */}
-          <Link to={onPage.some((other) => other.id === entry.id) || !spot ? speciesLink(entry.species) : findWithLink(exactTerm("water", spot.name), exactTerm("species", t(entry.species)))}>
+          {/* A sample fish beside the angler's own opens the sample week's of that kind. */}
+          <Link
+            to={
+              onPage.some((other) => other.id === entry.id) || !spot
+                ? speciesLink(entry.species)
+                : entry.spotId === PLAY_LAKE_ID
+                  ? findWithLink(exactTerm("water", spot.name), exactTerm("species", t(entry.species)))
+                  : findWithLink(exactTerm("species", t(entry.species)), t("sample|search word"))
+            }
+          >
             {eyebrowKind.length > 1
               ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: eyebrowKind.length })
               : t("All {species}", { species: t(entry.species) })}
@@ -1508,7 +1524,7 @@ function CatchView() {
           {" · "}
           {/* With other fish that day, the day opens all of them in the catch search. */}
           {sameDay > 1 ? (
-            <Link to={findLink(caughtDay)} aria-label={t("{when}, every fish that day ({count})", { when: formatClock(entry.caughtAt), count: sameDay })}>
+            <Link to={dayLink} aria-label={t("{when}, every fish that day ({count})", { when: formatClock(entry.caughtAt), count: sameDay })}>
               <time dateTime={entry.caughtAt}>{formatClock(entry.caughtAt)}</time>
             </Link>
           ) : (
@@ -1578,7 +1594,7 @@ function CatchView() {
         ) : null}
         {firstHere ? (
           <p className="meta first-here">
-            <Link to={findWithLink(exactTerm("water", spot!.name), exactTerm("species", t(entry.species)))}>{t("First {species} here.", { species: t(entry.species) })}</Link>
+            <Link to={findWithLink(exactTerm("water", spot!.name), `${exactTerm("species", t(entry.species))}${noSample}`)}>{t("First {species} here.", { species: t(entry.species) })}</Link>
           </p>
         ) : null}
         {yearCount > 1 ? (
@@ -1697,7 +1713,8 @@ function CatchView() {
         </nav>
       ) : null}
       {/* Outside a list of its kind, the steps can keep to this kind alone. */}
-      {kind.length > 1 && !list?.key.startsWith("species:") ? (
+      {/* Its kind's list is the one its page shows, which leaves a game or sample fish out: offered only when this one is in it. */}
+      {onPage.length > 1 && onPage.some((other) => other.id === entry.id) && !list?.key.startsWith("species:") ? (
         <p className="catch-list-at">
           <Link to={catchLink(entry.id, `species:${entry.species}`)}>{t("Step through {species} only", { species: t(entry.species) })}</Link>
         </p>

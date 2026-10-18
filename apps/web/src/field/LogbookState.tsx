@@ -46,7 +46,8 @@ type LogbookApi = {
   addSpot: (draft: SpotDraft) => SaveResult;
   /** `fileIds`: fish already logged on that water, filed on the new outing in the same save. */
   addTrip: (draft: TripDraft, fileIds?: readonly string[]) => SaveResult;
-  updateCatch: (id: string, draft: CatchDraft, photo: string | null) => SaveResult;
+  /** `openedWith`: the photo the form opened with; left unchanged, a photo another tab put on since stays. */
+  updateCatch: (id: string, draft: CatchDraft, photo: string | null, openedWith?: string | null) => SaveResult;
   updateSpot: (id: string, draft: SpotDraft) => SaveResult;
   updateTrip: (id: string, draft: TripDraft) => SaveResult;
   /** Each of these says whether the change was saved; one that wasn't leaves `saveError` for the bar to show. */
@@ -262,7 +263,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         const saved = persist(next, photos);
         return saved.ok ? { ok: true, id } : saved;
       },
-      updateCatch: (id, draft, photo) => {
+      updateCatch: (id, draft, photo, openedWith) => {
         const was = book.catches.find((entry) => entry.id === id);
         if (!was) {
           return { ok: false, message: t("That catch is not in this book.") };
@@ -271,7 +272,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         const current = photos[id] ?? null;
         let nextPhotos = photos;
-        if (photo !== current) {
+        // The form's photo untouched: whatever the book holds now stays, a photo added in another tab included.
+        const untouched = openedWith !== undefined && photo === openedWith;
+        if (!untouched && photo !== current) {
           if (photo) {
             const put = putCatchPhoto(photos, id, photo);
             if (!put.ok) return put;

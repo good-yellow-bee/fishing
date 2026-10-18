@@ -3,6 +3,8 @@
  * "bluegill". Both folded. The name's word takes three letters or more, and the typed one at most three more.
  */
 export function pluralOf(typed: string, word: string): boolean {
+  // A Polish adjective in the plural changes its ending rather than adding one: "tęczowy" → "tęczowe".
+  if (word.length >= 4 && /[yi]$/.test(word) && typed === `${word.slice(0, -1)}e`) return true;
   return word.length >= 3 && typed.length > word.length && typed.length - word.length <= 3 && typed.startsWith(word);
 }
 
