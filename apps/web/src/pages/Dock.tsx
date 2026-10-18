@@ -164,6 +164,7 @@ export function DockPage() {
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
   const storm = stormOn(sky, season, wind.wind);
+  const lureNow = useMemo(() => ({ sky, hour, season, wind: wind.wind, moon: moonLight(moon), rising }), [sky, hour, season, wind.wind, moon, rising]);
   const [me, setMe] = useState<Me | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -802,6 +803,7 @@ export function DockPage() {
           choices={lureChoices}
           value={lure}
           spot={bank}
+          now={lureNow}
           locked={lureLocked}
           onChange={(next) => {
             if (lureLocked || !lureChoices.includes(next)) return;
