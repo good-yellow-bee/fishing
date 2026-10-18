@@ -2014,3 +2014,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR519~~ | ~~Round 78 ideas: Home offers Set a goal for the year once it has fish, the Days out calendar marks its busiest month, the catches spreadsheet has an Outing day column for night fish~~ (#1168) | field | S |
 | ~~BR520~~ | ~~Round 79 fixes: line clippers, keepnets and other tools no longer count as lures, a lure search opens both spellings Gear counted together, map labels stay off other waters' dots and on the sheet, long names wrap in the map's list~~ (#1181) | field | S |
 | ~~BR521~~ | ~~Round 79 ideas: the Map's own sheet has a scale bar, each water on the Map names its best lure, a sample water's page links to its place on the Map~~ (#1183) | field | S |
+| ~~BR522~~ | ~~Gear: the lure record packs its best lures for the next outing in one go~~ (#1184) | field | S |

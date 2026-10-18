@@ -123,6 +123,10 @@ function LureRecord({ today }: { today: string }) {
   const [justPacked, setJustPacked] = useState<string | null>(null);
   // The button goes once the lure is on the list: focus moves to the line saying so.
   const focusPacked = useRef(false);
+  // The record's best lures not yet on that list, packed in one go.
+  const best = next ? orderedRecords(found, "most").filter((row) => row.fish > 0 && !onNext.has(shownPieceKey(row.label))).slice(0, 3) : [];
+  const [packedBest, setPackedBest] = useState<string[] | null>(null);
+  const focusPackedBest = useRef(false);
   if (records.length === 0) return null;
   const fold = records.length > RECORD_ROWS;
   const blanks = records.filter((row) => row.fish === 0 && row.outings >= NEVER_TOOK_OUTINGS);
@@ -206,6 +210,35 @@ function LureRecord({ today }: { today: string }) {
           </li>
         ))}
       </ul>
+      {next && packedBest ? (
+        <p
+          className="meta packed-best"
+          tabIndex={-1}
+          ref={(line) => {
+            if (line && focusPackedBest.current) {
+              focusPackedBest.current = false;
+              line.focus();
+            }
+          }}
+        >
+          {t("Packed: {lures}.", { lures: packedBest.map((label) => t(label)).join(", ") })}
+        </p>
+      ) : next && best.length >= 2 ? (
+        <p className="meta packed-best">
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              const packed = best.filter((row) => add(next.id, row.label) === null).map((row) => row.label);
+              if (packed.length === 0) return;
+              focusPackedBest.current = true;
+              setPackedBest(packed);
+            }}
+          >
+            {t("Pack the {n} best for {outing}", { n: best.length, outing: outingName(next, book.spots) })}
+          </button>
+        </p>
+      ) : null}
       {fold ? (
         <p className="tally-more">
           <button type="button" className="text-button" aria-expanded={all} onClick={() => setAll((open) => !open)}>
