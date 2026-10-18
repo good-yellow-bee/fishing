@@ -575,10 +575,19 @@ function CatchForm() {
   const outingWeather = useMemo(() => tripWeather(book, tripId, existing?.id), [book, tripId, existing?.id]);
   // No outing weather to go by: the newest fish logged the same day may still say what the sky was doing.
   const sameDayWeather = useMemo(
-    () => (outingWeather ? null : dayWeather(book, caughtAt.slice(0, 10), existing?.id, spotId)),
+    () => {
+      if (outingWeather) return null;
+      const sameDay = dayWeather(book, caughtAt.slice(0, 10), existing?.id, spotId);
+      // A small-hours fish with nothing logged since midnight: the evening before's sky is the same night's.
+      const [y, m, d] = caughtAt.slice(0, 10).split("-").map(Number);
+      if (sameDay || !y || !m || !d || !(Number(caughtAt.slice(11, 13)) < LATE_NIGHT_UNTIL)) return sameDay;
+      return dayWeather(book, localDate(new Date(y, m - 1, d - 1, 12)), existing?.id, spotId);
+    },
     [book, outingWeather, caughtAt, existing?.id, spotId],
   );
   const offeredWeather = outingWeather ?? sameDayWeather;
+  // The outing a photo's time would file the fish under, when the angler hasn't picked one.
+  const photoTrip = photoTaken && !tripPicked ? tripForFish(book, spotId, photoTaken) : undefined;
 
   const onTrip = (nextTrip: string) => {
     setTripId(nextTrip);
@@ -1183,9 +1192,15 @@ function CatchForm() {
                     focusSoon('input[name="caughtAt"]');
                   }}
                 >
-                  {t("Use the photo's time ({time})", {
-                    time: photoTaken.slice(0, 10) === caughtAt.slice(0, 10) ? formatTimeOfDay(photoTaken) : formatClock(photoTaken),
-                  })}
+                  {photoTrip && photoTrip.id !== tripId
+                    ? // The photo's time lands on another outing: say which, before it moves there.
+                      t("Use the photo's time ({time}), on {outing}", {
+                        time: photoTaken.slice(0, 10) === caughtAt.slice(0, 10) ? formatTimeOfDay(photoTaken) : formatClock(photoTaken),
+                        outing: outingName(photoTrip, book.spots),
+                      })
+                    : t("Use the photo's time ({time})", {
+                        time: photoTaken.slice(0, 10) === caughtAt.slice(0, 10) ? formatTimeOfDay(photoTaken) : formatClock(photoTaken),
+                      })}
                 </button>
               </span>
             ) : null}
@@ -1645,7 +1660,7 @@ function CatchView() {
                 species: t(entry.species),
                 lure: t(entry.lure),
                 size: measureText(measureOf(lureBest, entry.measure.kind)!),
-                day: formatDay(localDate(new Date(lureBest.caughtAt))),
+                day: formatDay(bookFishDay(book, lureBest)),
               })}
             </Link>
           </p>
