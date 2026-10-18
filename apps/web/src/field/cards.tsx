@@ -18,6 +18,7 @@ import { WeatherLine } from "./Weather";
 import { exactTerm, findLink } from "./findLinks";
 import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
+import { FROM_LIST } from "./leaveDeleted";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -49,7 +50,7 @@ export const CatchCard = memo(function CatchCard({
       <p className={`measure measure-${entry.measure.kind}`}>{measuresText(entry)}</p>
       <div>
         <Head>
-          <Link to={catchLink(entry.id, list)}>{t(entry.species)}</Link>
+          <Link to={catchLink(entry.id, list)} state={FROM_LIST}>{t(entry.species)}</Link>
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </Head>
         <p className="meta">
@@ -110,15 +111,15 @@ export function TripCard({
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
-      ? // Still ahead with nothing packed: planned, not a blank day.
-        fishCount === 0 && trip.date > today
+      ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
+        fishCount === 0 && trip.date >= today
         ? t("Planned")
         : fishCountLabel(fishCount)
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });
   return (
-    <Link to={`/trips/${trip.id}`} className="trip-card">
+    <Link to={`/trips/${trip.id}`} className="trip-card" state={FROM_LIST}>
       <p className="when">{tripWhen(trip.date, today, tomorrow)}</p>
       <div>
         <Head>{outingName(trip, book.spots)}</Head>
@@ -151,7 +152,7 @@ export function SpotCard({
 }) {
   const t = useT();
   return (
-    <Link to={`/spots/${spot.id}`} className="spot-card">
+    <Link to={`/spots/${spot.id}`} className="spot-card" state={FROM_LIST}>
       <div className="spot-card-top">
         <h2>{spot.name}</h2>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
