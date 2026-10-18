@@ -92,9 +92,11 @@ export function FieldShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (lastFocused.current === pathname) return;
     lastFocused.current = pathname;
-    if (how === "POP") return;
     const main = document.querySelector<HTMLElement>(".field-main");
     const active = document.activeElement;
+    // Back and Forward leave focus where a page put it (a search's box); what held it went with the old page, so
+    // otherwise it would fall to the document and the keyboard would start again from the top of the app.
+    if (how === "POP" && main && active && active !== main && main.contains(active)) return;
     if (!main || (active && main.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) return;
     focusPageHeading({ preventScroll: true });
   }, [pathname, how]);

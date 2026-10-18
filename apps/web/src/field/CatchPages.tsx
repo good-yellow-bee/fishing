@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { hasMovedInApp } from "./FieldShell";
+import { leaveDeleted } from "./leaveDeleted";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -54,7 +55,7 @@ import { placeFor } from "./map/places";
 import { TripCounts } from "./tripCounts";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
-import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
+import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -183,6 +184,7 @@ export function CatchesPage() {
   const { book, photos } = useLogbook();
   useT();
   const catches = catchesNewestFirst(book);
+  const counted = countedFish(catches);
   const photoCount = catches.filter((entry) => photos[entry.id]).length;
   // While a search is typed, its matches take the list's place.
   const [params] = useSearchParams();
@@ -214,7 +216,11 @@ export function CatchesPage() {
             <>
               {/* The whole book at a glance: how many, how many kinds and went back, and the largest. */}
               {/* The largest named is the angler's own, as Bests and the cards' records say. */}
-              <FishSum catches={catches} best={countedFish(catches)} />
+              {/* Counted as Home and Bests count them; the sample week and the game's fish still listed are said apart. */}
+              <FishSum catches={counted.length > 0 ? counted : catches} />
+              {counted.length > 0 && counted.length < catches.length ? (
+                <p className="meta">{tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+              ) : null}
               <SpeciesChips catches={catches} />
               {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
               <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth} headLevel={2}>
@@ -711,8 +717,8 @@ function CatchForm() {
     if (existing) {
       editDone.current = true;
       dropEditDraft(existing.id);
-      // Back to the fish, still within the list it was opened from.
-      navigate(catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined), savedState("catchEdit"));
+      // Back to the fish, still within the list it was opened from, in the form's place so Back doesn't open it again.
+      navigate(catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined), { replace: true, ...savedState("catchEdit") });
       return;
     }
     // The waiting draft, if any, stays for later; this one is saved.
@@ -775,11 +781,9 @@ function CatchForm() {
           // Cancelling means it: the changes are not kept for later. A new fish goes back where it was started from.
           onClick={(event) => {
             editDone.current = true;
-            if (existing) {
-              dropEditDraft(existing.id);
-              return;
-            }
-            if (!waiting) dropKeptDraft();
+            if (existing) dropEditDraft(existing.id);
+            else if (!waiting) dropKeptDraft();
+            // Back to where the form was opened, so Back from there doesn't reopen it; opened directly, to the link's page.
             if (!hasMovedInApp()) return;
             event.preventDefault();
             navigate(-1);
@@ -1439,6 +1443,7 @@ function CatchView() {
   useT();
   useStepKeys();
   const navigate = useNavigate();
+  const location = useLocation();
   const { catchId = "" } = useParams();
   const [params] = useSearchParams();
   const [pictureError, setPictureError] = useState(false);
@@ -1564,8 +1569,7 @@ function CatchView() {
         editTo={list ? `/catches/${entry.id}/edit?${LIST_PARAM}=${encodeURIComponent(list.key)}` : `/catches/${entry.id}/edit`}
         ask={t("Delete this fish from the book?")}
         onDelete={() => {
-          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
-          if (deleteCatch(entry.id)) navigate(list?.back ?? "/catches", { replace: true });
+          if (deleteCatch(entry.id)) leaveDeleted(navigate, location.state, list?.back ?? "/catches");
         }}
       >
         <p className="eyebrow">

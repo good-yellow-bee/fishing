@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLogbook } from "./LogbookState";
 import { focusPageHeading } from "./pageFocus";
+import { leftBackTo } from "./leaveDeleted";
 import { STORAGE_FULL } from "./storage";
 import { ALL_LISTS, useTackleIfAny } from "./gear/TackleState";
 import { t, useT } from "../i18n";
@@ -84,9 +85,10 @@ export function UndoBar() {
   if (!undoable) return <div role="status" />;
   const onUndo = () => {
     // Back to the page the entry was deleted from, now that it is there again.
-    // In place of the page it went to, so Back doesn't pass through that page, or this one, twice.
+    // In place of the page it went to, so Back doesn't pass through that page, or this one, twice; after a delete
+    // that went Back to its list, forward from the list again.
     const from = undoDelete();
-    if (from && from !== location.pathname + location.search) navigate(from, { replace: true });
+    if (from && from !== location.pathname + location.search) navigate(from, { replace: !leftBackTo(from) });
     // The button goes with the bar: focus moves to the top of the page it lands on.
     requestAnimationFrame(() => focusPageHeading());
   };

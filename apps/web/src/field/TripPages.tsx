@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { hasMovedInApp } from "./FieldShell";
+import { leaveDeleted } from "./leaveDeleted";
 import { savedState } from "./SavedNote";
 import { MapAnchor } from "./MapAnchor";
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
   biteTimes,
@@ -269,6 +270,7 @@ function TripView() {
   useT();
   useStepKeys();
   const navigate = useNavigate();
+  const location = useLocation();
   const { tripId = "" } = useParams();
   const trip = tripById(book, tripId);
 
@@ -463,8 +465,7 @@ function TripView() {
         editTo={`/trips/${trip.id}/edit`}
         ask={t("Delete this outing? Its fish stay in the book.")}
         onDelete={() => {
-          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
-          if (deleteTrip(trip.id)) navigate("/trips", { replace: true });
+          if (deleteTrip(trip.id)) leaveDeleted(navigate, location.state, "/trips");
         }}
         aside={
           // An outing still ahead has no fish to log yet; a catch can't be dated in the future.
@@ -719,12 +720,12 @@ function TripForm() {
           <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: outingName(existing, book.spots) }) : undefined}>{existing ? outingName(existing, book.spots) : t("Add a trip")}</h1>
         </div>
-        {/* A new outing's Cancel goes back where it was started (a fish, the map, a water, the outing gone again); opened by a link from outside, to the outing or water it names. */}
+        {/* Cancel goes back where the form was opened (the outing, a fish, the map, a water); opened by a link from outside, to the outing or water it names. */}
         <Link
           to={existing ? `/trips/${existing.id}` : again ? `/trips/${again.id}` : cancelSpot ? `/spots/${cancelSpot}` : "/trips"}
           onClick={(event) => {
             kept.drop();
-            if (existing || !hasMovedInApp()) return;
+            if (!hasMovedInApp()) return;
             event.preventDefault();
             navigate(-1);
           }}

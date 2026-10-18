@@ -47,13 +47,14 @@ import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
-import { MergeWater } from "./MergeWater";
+import { MERGE_PARAM, MergeWater } from "./MergeWater";
 import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
-import { upcomingRealTrips } from "./bookCopy";
+import { isSampleSpot, upcomingRealTrips } from "./bookCopy";
 import { hasMovedInApp } from "./FieldShell";
+import { leaveDeleted } from "./leaveDeleted";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -202,6 +203,7 @@ function SpotView() {
   const { book, deleteSpot } = useLogbook();
   useT();
   const navigate = useNavigate();
+  const location = useLocation();
   const { spotId = "" } = useParams();
   const spot = spotById(book, spotId);
   const today = localDate(new Date());
@@ -242,6 +244,8 @@ function SpotView() {
   const notYet = notYetThisYear(catches, new Date(), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches });
   const here = exactTerm("water", spot.name);
+  // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
+  const twin = book.spots.find((other) => other.id !== spot.id && other.name.trim().toLowerCase() === spot.name.trim().toLowerCase());
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(book, today).get(spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
   const years = yearTally(catches);
@@ -278,8 +282,7 @@ function SpotView() {
                 t("Delete this water? Also leaving the book: {what}.", { what: trips.length > 0 ? tn(trips.length, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
         }
         onDelete={() => {
-          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
-          if (deleteSpot(spot.id)) navigate("/spots", { replace: true });
+          if (deleteSpot(spot.id)) leaveDeleted(navigate, location.state, "/spots");
         }}
         aside={
           // The game's lake fills itself as it is played; nothing to log or plan by hand.
@@ -295,6 +298,23 @@ function SpotView() {
         </p>
         <h1>{spot.name}</h1>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
+        {twin ? (
+          <p className="meta twin-note">
+            {t("Another water is also called {name}, so the links on this page open the fish of both.", { name: spot.name })}{" "}
+            {spot.id === PLAY_LAKE_ID || twin.id === PLAY_LAKE_ID || isSampleSpot(spot.id) || isSampleSpot(twin.id) ? (
+              // The game's lake keeps its name: the other one is the one to rename.
+              <Link to={`/spots/${spot.id === PLAY_LAKE_ID ? twin.id : spot.id}/edit`}>{t("Rename one")}</Link>
+            ) : (
+              <>
+                <Link to={`/spots/${spot.id}?${MERGE_PARAM}=${encodeURIComponent(twin.id)}`} replace>
+                  {t("Merge them")}
+                </Link>
+                {" · "}
+                <Link to={`/spots/${spot.id}/edit`}>{t("Rename this one")}</Link>
+              </>
+            )}
+          </p>
+        ) : null}
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
@@ -519,14 +539,15 @@ function SpotForm() {
       return;
     }
     kept.drop();
-    if (then === "catch") navigate(`/catches/new?spot=${result.id}`);
-    else if (then === "trip") navigate(`/trips/new?spot=${result.id}`);
+    // The form gives way to the page it saved for, so Back doesn't open it again.
+    if (then === "catch") navigate(`/catches/new?spot=${result.id}`, { replace: true });
+    else if (then === "trip") navigate(`/trips/new?spot=${result.id}`, { replace: true });
     // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
     else if (then === "map") {
       if (hasMovedInApp()) navigate(-1);
       else navigate("/map", { replace: true });
     }
-    else navigate(`/spots/${result.id}`);
+    else navigate(`/spots/${result.id}`, { replace: true });
   };
 
   if (spotId && !existing) {
@@ -550,8 +571,8 @@ function SpotForm() {
           to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"}
           onClick={(event) => {
             kept.drop();
-            // From the map, Back to it: Back from there then leaves the map rather than reopening this form.
-            if (then === "map" && hasMovedInApp()) {
+            // Back where the form was opened from (the map, the water, Waters): Back from there then doesn't reopen this form.
+            if (hasMovedInApp()) {
               event.preventDefault();
               navigate(-1);
             }
