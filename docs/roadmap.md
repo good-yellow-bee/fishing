@@ -1283,7 +1283,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT238~~ | ~~Fight habits in the field guide: a logged fish's card lists its own fight habits (Jumper, Roller, Soft mouth, Long runner…) in the same words as the fight card, which now reads them from one shared list~~ (#930) | ui | S |
 | ~~GT239~~ | ~~Landed note on the catch card: the landed card covers the hint, so the school left at the bank (plain, twilight, winter) and the hunter that followed the fish in were never seen; the card now says it above its buttons; news card 2026-10-18-game02 for the field guide's fight lines and this~~ (#932) | ui | S |
 | ~~GT240~~ | ~~Lures for this bank: the lure picker marks the packed lures that draw the bite sooner at the bank you stand on in any weather (spinner at the Reeds and Inlet, worm and crankbait at the Dock, jig and streamer off the Drop-off…) with "good here", and says so under a tied one~~ (#934) | ui | S |
-| GT241 | Forecast board tips: a rainy day (or one turning to rain) says catfish and burbot hunt by scent and fight harder; a full moon says a spinner or spoon flashes on a clear night; a new moon says bites come slower after dark | ui | S |
+| ~~GT241~~ | ~~Forecast board tips: a rainy day (or one turning to rain) says catfish and burbot hunt by scent and fight harder; a full moon says a spinner or spoon flashes on a clear night; a new moon says bites come slower after dark~~ (#935) | ui | S |
+| GT242 | Lures for right now: the lure picker marks the packed lures the season, hour and weather favor (spinner or spoon on a clear day or full-moon night, spinner in rain or fog, worm or popper after dark, popper on a calm day, fly on the rise, big lure in fall, jig in winter) with "good now" ("good here and now" with a bank bonus), says so under a tied one; news card 2026-10-18-game03 for this, GT240 and GT241 | ui | S |
 
 ## Risks / open questions for the owner
 
