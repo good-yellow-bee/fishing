@@ -157,6 +157,7 @@ import { bankMirrorStrength, mirrorStale } from "./mirrorImage";
 import { ROAD_RELAY, SUN_ROAD_FAR, SUN_ROAD_NEAR, roadBands, roadFrom } from "./glintRoad";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
+import { DABBLE_TIP, dabble } from "./duckDabble";
 import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
@@ -1516,6 +1517,7 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
   const leftWing = useRef<THREE.Group>(null);
   const rightWing = useRef<THREE.Group>(null);
   const flush = useRef<DuckState>({ mode: "paddling" });
+  const still = useReducedMotion();
   const shapes = useMemo(
     () => ({
       duck: duckShape(body, head),
@@ -1574,15 +1576,20 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
     if (flight) {
       duck.position.set(flight.x, floatY + flight.y, flight.z);
       duck.rotation.y = flight.yaw;
+      duck.rotation.x = 0;
       if (leftWing.current) leftWing.current.rotation.z = 0.2 + flight.flap * 0.7;
       if (rightWing.current) rightWing.current.rotation.z = -0.2 - flight.flap * 0.7;
       return;
     }
-    position.y = floatY + Math.sin(time * 1.3 + phase * 9) * 0.015;
+    // Up-ended to feed, it sinks its front and points its tail at the sky; the yaw comes first so the tip is about its own shoulders.
+    const tip = dabble(time, phase, still);
+    position.y = floatY + Math.sin(time * 1.3 + phase * 9) * 0.015 - tip * 0.1;
     duck.position.copy(position);
     const target = Math.atan2(tangent.x, tangent.z);
     const turn = Math.atan2(Math.sin(target - duck.rotation.y), Math.cos(target - duck.rotation.y));
+    duck.rotation.order = "YXZ";
     duck.rotation.y += turn * (1 - Math.exp(-4 * delta));
+    duck.rotation.x = tip * DABBLE_TIP;
     if (ripple.current && rippleMaterial.current) {
       const pulse = (state.clock.elapsedTime * 0.5 + phase) % 1;
       ripple.current.scale.setScalar(0.7 + pulse * 1.6);
