@@ -106,6 +106,7 @@ import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
+import { sunCaustics } from "./sunCaustics";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
@@ -991,7 +992,21 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
-function LakeSurface({ spot, hour, sky, weather, wind }: { spot: SpotId; hour: LakeHour; sky: WeatherSky; weather: WeatherLook; wind: { x: number; z: number } }) {
+function LakeSurface({
+  spot,
+  hour,
+  sky,
+  season,
+  weather,
+  wind,
+}: {
+  spot: SpotId;
+  hour: LakeHour;
+  sky: WeatherSky;
+  season: LakeSeason;
+  weather: WeatherLook;
+  wind: { x: number; z: number };
+}) {
   const material = useRef<THREE.MeshToonMaterial>(null);
   const glintA = useRef<THREE.MeshBasicMaterial>(null);
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
@@ -1012,7 +1027,7 @@ function LakeSurface({ spot, hour, sky, weather, wind }: { spot: SpotId; hour: L
   const rimColor = useMemo(() => ({ value: new THREE.Color() }), []);
   rimColor.value.set(weather.sky[1]);
   const withRim = useMemo(() => (shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }) => addWaterRim(shader, rimColor), [rimColor]);
-  const causticLight = weather.glint * 0.22;
+  const caustics = sunCaustics(weather, LAKE_HOUR_LOOK[hour].sun, season);
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
   const cloudShade = cloudShadowStrength(hour, sky);
@@ -1057,14 +1072,15 @@ function LakeSurface({ spot, hour, sky, weather, wind }: { spot: SpotId; hour: L
         <meshToonMaterial color="#ffffff" vertexColors gradientMap={toonRamp()} />
       </mesh>
       {/* Drawn after the water, so the shallows' light isn't dimmed by the surface over it. */}
-      {causticLight > 0.05 &&
+      {caustics.opacity > 0.05 &&
         [causticA, causticB].map((map, i) => (
           <mesh key={i} geometry={causticGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} renderOrder={2}>
             <meshBasicMaterial
               map={map}
+              color={caustics.color}
               vertexColors
               transparent
-              opacity={causticLight}
+              opacity={caustics.opacity}
               // Fog would tint the masked-off deep bed, and additive blending would add that tint as light.
               fog={false}
               depthWrite={false}
@@ -1943,7 +1959,7 @@ export const LakeWorld = memo(function LakeWorld({
         <circleGeometry args={[4.2, 48]} />
         <meshBasicMaterial color="#1c3d4c" transparent opacity={spot === "dropoff" ? 0.62 : 0.38} />
       </mesh>
-      <LakeSurface spot={spot} hour={hour} sky={sky} weather={weather} wind={wind} />
+      <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
