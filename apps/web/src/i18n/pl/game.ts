@@ -419,6 +419,7 @@ export const PL_GAME: PlBook = {
   "The full moon catches the lure's flash.": "Pełnia księżyca odbija się w przynęcie i błyska.",
   "Thunder puts the fish down, so the bites come slow.": "Grzmoty spychają ryby w głąb, więc brania przychodzą wolno.",
   "The air hangs heavy with the rain coming, and the fish feed hard ahead of it.": "Przed deszczem powietrze ciąży, a ryby żerują zachłannie, zanim spadnie.",
+  "The fog is burning off, and the fish move up to feed in the warming water.": "Mgła się rozwiewa, a ryby podchodzą żerować w nagrzewającej się wodzie.",
   "The midday glare drives the fish from the open water, so the bites come slow.": "Południowy blask przegania ryby z otwartej wody, więc brania przychodzą powoli.",
   "There's no moon tonight and the fish can barely see to feed, so the bites come slow.": "Dziś nie ma księżyca i ryby ledwo widzą żer, więc brania przychodzą powoli.",
   "A worm fished at the Dock sinks down beside the pilings where the fish hide, a spoon cast from the boat flutters through the open water, a spinner flickers along the Reeds' edge past the hunters in ambush, and a float rig at the Reeds holds the bait still over the panfish in the stems. Each draws a bite sooner.": "Robak przy Pomoście opada tuż przy palach, gdzie kryją się ryby, wahadłówka zarzucona z łodzi trzepocze przez otwartą wodę, obrotówka migocze wzdłuż ściany Trzcin obok drapieżników w zasadzce, a zestaw spławikowy przy Trzcinach trzyma przynętę nieruchomo nad rybkami wśród łodyg. Każde z nich szybciej przynosi branie.",
