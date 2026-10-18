@@ -291,15 +291,11 @@ button.field-primary {
 
 .stat-row {
   display: grid;
-  /* Three across, or two and one when a card would be under 150 px (a tablet with larger text), where "Poranny patrol"
-     broke mid-word. */
+  /* Three (or Bests' four) across, wrapping when a card would be under 150 px (a tablet with larger text), where
+     "Poranny patrol" broke mid-word and "28 in" took two lines. */
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: 12px;
   margin: 8px 0 28px;
-}
-
-.stat-row[data-cols="4"] {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .stat-row > div,
@@ -337,11 +333,22 @@ button.field-primary {
   display: inline-block;
 }
 
+/* Side by side at 1.15 to 0.85 while both fit, stacked when they don't: on a 900-1280 px window with larger text the
+   right column squeezed a catch card's words into a 23 px column, one letter a line. */
 .home-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 28px;
-  align-items: start;
+  align-items: flex-start;
+}
+
+.home-grid > * {
+  flex: 1.15 1 345px;
+  min-width: 0;
+}
+
+.home-grid > :last-child {
+  flex: 0.85 1 255px;
 }
 
 .section-head {
@@ -553,8 +560,9 @@ button.field-primary {
   gap: 10px;
 }
 
+/* Two across, or one when a card would be under 220 px: two cards ran off the page on a 900 px window with larger text. */
 .card-grid {
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(220px, calc(50% - 5px))), 1fr));
 }
 
 .catch-card,

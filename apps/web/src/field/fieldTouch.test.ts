@@ -148,3 +148,16 @@ describe("Home's count cards on a tablet with larger text", () => {
     expect(css).not.toMatch(/\.stat-row small a \{\n  white-space: nowrap;/);
   });
 });
+
+describe("Home's columns and the card grids on a tablet-width window with larger text", () => {
+  it("stack Home's two columns when they no longer fit side by side at 1.15 to 0.85", () => {
+    expect(/\n\.home-grid \{([^}]*)\}/.exec(css)?.[1]).toContain("flex-wrap: wrap;");
+    expect(/\n\.home-grid > \* \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 1.15 1 345px;");
+    expect(/\n\.home-grid > :last-child \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 0.85 1 255px;");
+  });
+
+  it("keep Spots and Bests cards two across at most, one when a card would be under 220 px", () => {
+    expect(/\n\.card-grid \{\n  grid-template-columns: ([^;]*);/.exec(css)?.[1]).toBe("repeat(auto-fit, minmax(min(100%, max(220px, calc(50% - 5px))), 1fr))");
+    expect(css).not.toContain('\n.stat-row[data-cols="4"] {');
+  });
+});
