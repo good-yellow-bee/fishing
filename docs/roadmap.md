@@ -1116,6 +1116,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC31~~ | ~~News card: trees in the wind, crayfish, whirligig beetles and shore ice~~ (#1066) | scene | S |
 | ~~SC32~~ | ~~Lily pads through the year: young and small in spring, full grown in summer, yellowing in fall, died back under the ice in winter~~ (#1071) | scene | S |
 | ~~SC33~~ | ~~Pondweed: three clumps of tall strands rooted on the shallow bed round the dock, rocking with the swell, lush in summer and thin in winter~~ (#1074) | scene | S |
+| ~~SC34~~ | ~~Cygnets: in summer a brood of four grey cygnets paddles in a line behind the swans, now and then straying a little to one side~~ (#1078) | scene | S |
+| ~~SC35~~ | ~~News card: lily pads through the year, pondweed and cygnets~~ (#1078) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
