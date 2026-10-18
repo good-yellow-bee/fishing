@@ -1,4 +1,4 @@
-import type { SpotPlace, Trip } from "@stillwater/shared";
+import { foldText, type SpotPlace, type Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
@@ -36,27 +36,35 @@ function nextDay(ymd: string): string {
 /** One all-day calendar event for an outing, for any calendar app to import. */
 /** `at` is the water's own place, when the angler noted it: calendar apps can open it on a map. */
 export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace): string {
+  return tripsIcs([{ trip, place, at }], now);
+}
+
+/** Several outings in one calendar file: every outing coming up, imported in one go. */
+export function tripsIcs(outings: readonly { trip: Trip; place: string | null; at?: SpotPlace }[], now: Date = new Date()): string {
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Stillwater//Field log//EN",
-    "BEGIN:VEVENT",
-    `UID:${trip.id}@stillwater`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART;VALUE=DATE:${trip.date.replace(/-/g, "")}`,
-    `DTEND;VALUE=DATE:${nextDay(trip.date).replace(/-/g, "")}`,
-    `SUMMARY:${icsText(trip.title)}`,
-    ...(place ? [`LOCATION:${icsText(place)}`] : []),
-    ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
-    ...(trip.note ? [`DESCRIPTION:${icsText(trip.note)}`] : []),
-    "END:VEVENT",
+    ...outings.flatMap(({ trip, place, at }) => [
+      "BEGIN:VEVENT",
+      `UID:${trip.id}@stillwater`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;VALUE=DATE:${trip.date.replace(/-/g, "")}`,
+      `DTEND;VALUE=DATE:${nextDay(trip.date).replace(/-/g, "")}`,
+      `SUMMARY:${icsText(trip.title)}`,
+      ...(place ? [`LOCATION:${icsText(place)}`] : []),
+      ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
+      ...(trip.note ? [`DESCRIPTION:${icsText(trip.note)}`] : []),
+      "END:VEVENT",
+    ]),
     "END:VCALENDAR",
   ];
   return `${lines.map(fold).join("\r\n")}\r\n`;
 }
 
 export function tripIcsName(trip: Trip): string {
-  const slug = trip.title.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "outing";
+  // Folded as the search folds it, so "Łowienie" keeps its Ł as an l.
+  const slug = foldText(trip.title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "outing";
   return `stillwater-${trip.date}-${slug}.ics`;
 }

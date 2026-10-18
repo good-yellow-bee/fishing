@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tripIcs, tripIcsName } from "./tripIcs";
+import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 
 const trip = { id: "trip-dawn", date: "2026-10-31", spotId: "spot-cedar", title: "Dawn patrol, weed edge", note: "Bring the net; early\nstart" };
 
@@ -35,7 +35,7 @@ describe("trip calendar file", () => {
 
   it("names the file by day and title", () => {
     expect(tripIcsName(trip)).toBe("stillwater-2026-10-31-dawn-patrol-weed-edge.ics");
-    expect(tripIcsName({ ...trip, title: "Łódź o świcie" })).toBe("stillwater-2026-10-31-odz-o-swicie.ics");
+    expect(tripIcsName({ ...trip, title: "Łódź o świcie" })).toBe("stillwater-2026-10-31-lodz-o-swicie.ics");
   });
 
   it("folds a long line at 75 bytes without splitting a letter", () => {
@@ -45,5 +45,13 @@ describe("trip calendar file", () => {
     for (const line of lines) expect(new TextEncoder().encode(line).length).toBeLessThanOrEqual(75);
     const description = text.slice(text.indexOf("DESCRIPTION:")).split("\r\nEND")[0]!.replace(/\r\n /g, "");
     expect(description).toBe(`DESCRIPTION:${note.replace(/,/g, "\\,")}`);
+  });
+
+  it("puts every outing coming up in one file, one event each", () => {
+    const text = tripsIcs([{ trip, place: "Cedar Bend" }, { trip: { ...trip, id: "trip-2", date: "2026-11-07", title: "Second" }, place: null }], new Date(Date.UTC(2026, 9, 1)));
+    expect(text.match(/BEGIN:VEVENT/g)).toHaveLength(2);
+    expect(text.match(/BEGIN:VCALENDAR/g)).toHaveLength(1);
+    expect(text).toContain("UID:trip-2@stillwater");
+    expect(text).toContain("DTSTART;VALUE=DATE:20261107");
   });
 });
