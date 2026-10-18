@@ -688,7 +688,8 @@ a:focus-visible {
   background: inherit;
 }
 
-.shop-foot .panel-btn {
+/* Outranks .shop-overlay .panel-btn below, which otherwise left a 12 px gap over the pinned button. */
+.shop-overlay .shop-foot .panel-btn {
   margin-top: 0;
 }
 
@@ -3602,6 +3603,37 @@ html[data-contrast="high"] .sound-captions li {
      sliver that showed only the fish's outline: the card scrolls as one instead, the catch first. */
   html[data-text-size="larger"] .landed-card .catch-actions {
     position: static;
+  }
+
+  /* The shack kept a 24 px margin and a roomy foot, so with larger text its upgrades scrolled in a 210 px window
+     over an 85 px pinned Back to the path; the margins and the foot tighten and the list gets 270 px. */
+  .shop-overlay {
+    right: 8px;
+    bottom: 8px;
+    max-height: calc(100dvh / var(--text-zoom, 1) - 16px);
+    padding-top: 12px;
+    scroll-padding-bottom: 60px;
+  }
+
+  .shop-foot {
+    margin-top: 8px;
+    padding: 6px 16px 8px;
+  }
+
+  /* The same for Settings, the keys card and the trip recap: Settings' long list scrolled in a 230 px window over an
+     85 px foot with larger text. */
+  .settings-overlay {
+    padding: 8px;
+  }
+
+  .settings-panel {
+    max-height: calc(100dvh / var(--text-zoom, 1) - 16px);
+    padding-top: 12px;
+    scroll-padding-bottom: 60px;
+  }
+
+  .settings-foot {
+    padding: 6px 18px 8px;
   }
 }
 

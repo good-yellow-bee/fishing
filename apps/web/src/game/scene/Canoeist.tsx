@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { BoatWake } from "./BoatWake";
 import { canoeAt } from "./canoeTrip";
 import { mergePainted } from "./mergeParts";
 import { toonRamp } from "./toon";
@@ -72,12 +73,15 @@ export function Canoeist() {
     }
   });
   return (
-    <group ref={boat} name="canoeist">
-      <ToonModel url={CANOE_URL} scale={2.6} shadows={false} />
-      <mesh geometry={shapes.paddler} material={material} />
-      <group ref={paddle} position={[0, SEAT_Y + SHOULDER_Y - 0.12, 0.08]}>
-        <mesh geometry={shapes.paddle} material={material} />
+    <>
+      <group ref={boat} name="canoeist">
+        <ToonModel url={CANOE_URL} scale={2.6} shadows={false} />
+        <mesh geometry={shapes.paddler} material={material} />
+        <group ref={paddle} position={[0, SEAT_Y + SHOULDER_Y - 0.12, 0.08]}>
+          <mesh geometry={shapes.paddle} material={material} />
+        </group>
       </group>
-    </group>
+      <BoatWake at={canoeAt} stern={1.1} still={still} />
+    </>
   );
 }
