@@ -199,10 +199,13 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 export const JIG_SOLID = 1.25;
 
 /** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string) {
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1);
+  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1);
 }
+
+/** A hook point blunted on the rocks needs a quicker strike to drive home: its share of the usual solid-strike time, until it is touched up. */
+export const DULL_SOLID = 0.5;
 
 /** A topwater lure's splash carries on glassy water and drowns in a strong wind's chop, so the wait for a bite shifts. */
 export const TOPWATER_WAIT = { calm: 0.8, strong: 1.4 } as const;

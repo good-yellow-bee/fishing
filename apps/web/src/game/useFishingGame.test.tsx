@@ -122,6 +122,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.retie}>retie</button>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
+      <i data-testid="dulled">{String(game.dulled)}</i>
       <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
@@ -862,7 +863,41 @@ describe("useFishingGame strike timing", () => {
       act(() => surface.dispatchEvent(pointer("pointerdown", 30 + tap)));
       act(() => window.dispatchEvent(pointer("pointerup", 30 + tap)));
     }
-    expect(hint()).toBe("Off the rocks. Let it settle.");
+    expect(hint()).toBe("Off the rocks, but they blunted the hook point. Let it settle.");
+    expect(container!.querySelector("[data-testid=dulled]")?.textContent).toBe("true");
+  });
+
+  it("halves the solid strike on a hook blunted on the rocks, until it is touched up", () => {
+    const dulled = () => container!.querySelector("[data-testid=dulled]")?.textContent;
+    const freeOfRocks = (surface: HTMLDivElement, base: number) => {
+      vi.mocked(castSnags).mockReturnValueOnce("rocks");
+      cast(surface);
+      act(() => vi.advanceTimersByTime(SNAG_AT_MS + 1));
+      for (let tap = 1; tap <= SNAG_TAPS; tap += 1) {
+        act(() => surface.dispatchEvent(pointer("pointerdown", base + tap)));
+        act(() => window.dispatchEvent(pointer("pointerup", base + tap)));
+      }
+    };
+    let surface = mount();
+    freeOfRocks(surface, 40);
+    expect(dulled()).toBe("true");
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 900;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 60)));
+    expect(phase()).toBe("fight:none");
+    expect(hint()).toMatch(/^Hooked in 0\.90 s \(solid under 0\.\d\d s on the dull hook\)\. /);
+    act(() => root!.unmount());
+    container!.remove();
+
+    surface = mount();
+    freeOfRocks(surface, 70);
+    // Let the bite go by unstruck, back to idle, and touch the hook up.
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(phase()).toBe("result:miss");
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "dismiss") as HTMLButtonElement).click());
+    act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "retie") as HTMLButtonElement).click());
+    expect(dulled()).toBe("false");
+    expect(hint()).toBe("You touch up the dull hook point and tie the lure on again. It sets solid again.");
   });
 
   it("holds the bite and the strike window while the game is in another tab", () => {
