@@ -30,6 +30,12 @@ export function countedBook(book: Logbook): Logbook {
 const BOOK_MARKS = [50, 100, 250, 500, 1000, 2500, 5000, 10000];
 const KIND_MARKS = [10, 25, 50, 100, 250, 500, 1000];
 
+/** The book's next round number when it is a few fish away (`within`), as the fish to go and the mark; else null. */
+export function nextBookMark(count: number, within = 5): { left: number; mark: number } | null {
+  const mark = BOOK_MARKS.find((each) => each > count);
+  return mark !== undefined && mark - count <= within ? { left: mark - count, mark } : null;
+}
+
 export type Milestone = { of: "book"; n: number } | { of: "kind"; n: number };
 
 export const byTime = (a: CatchEntry, b: CatchEntry) => a.caughtAt.localeCompare(b.caughtAt) || a.id.localeCompare(b.id);
