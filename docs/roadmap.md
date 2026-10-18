@@ -1212,9 +1212,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC88~~ | ~~News card scene19: moored boats' fill, spring goose family, leaf-pile jumper, painter on the far bank~~ (#1200) | scene | S |
 | ~~SC89~~ | ~~Disc tossers: on summer days that are dry and not too windy two people toss a flying disc back and forth on the east end of the far bank, winding up, flinging it on a curving arc and reaching up to catch it~~ (#1204) | scene | S |
 | ~~SC90~~ | ~~Angler under the brolly: on rainy dawns and days an angler sits it out on the far bank under a big green umbrella tipped into the wind, the rod out on its rests, sipping from a flask cup and leaning in when the float bobs~~ (#1204) | scene | S |
-| SC91 | Snowball fight: on winter days two children on the east end of the far bank scoop, pack and throw snowballs at each other in turn, ducking some, each bursting in a puff of snow | scene | S |
-| SC92 | Leaf raker: on dry fall days a grown-up rakes the leaves back onto the pile the child keeps jumping into, a few strokes from each spot round behind it | scene | S |
-| SC93 | News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker | scene | S |
+| ~~SC91~~ | ~~Snowball fight: on winter days two children on the east end of the far bank scoop, pack and throw snowballs at each other in turn, ducking some, each bursting in a puff of snow~~ (#1207) | scene | S |
+| ~~SC92~~ | ~~Leaf raker: on dry fall days a grown-up rakes the leaves back onto the pile the child keeps jumping into, a few strokes from each spot round behind it~~ (#1207) | scene | S |
+| ~~SC93~~ | ~~News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker~~ (#1207) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
