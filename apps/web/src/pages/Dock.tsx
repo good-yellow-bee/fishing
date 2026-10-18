@@ -83,6 +83,7 @@ import { walkAnglerTo } from "../game/scene/pose";
 import { aboard, boatMode, rowBack, rowOut, subscribeBoat } from "../game/scene/boat";
 import { latestCatchShot, subscribeCatchShot } from "../game/scene/catchPhoto";
 import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
+import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
 import { isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
@@ -655,6 +656,9 @@ export function DockPage() {
   const inletOpen = canUseSpot("inlet", me.level);
   const boatOpen = canUseSpot("open", me.level);
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
+  /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
+  const favoredNow = (target: WalkTarget) =>
+    target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
   const stanceLabel = rowing
     ? t("Rowing")
     : game.stance === "dropoff" && !dropoffOpen
@@ -797,6 +801,7 @@ export function DockPage() {
         <aside className="stance-chip" data-stance={game.stance}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
+          {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
         </aside>
         <LureChoice
@@ -842,6 +847,9 @@ export function DockPage() {
                 className="panel-btn"
                 type="button"
                 aria-current={game.stance === target ? "location" : undefined}
+                aria-label={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
+                title={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
+                data-now={favoredNow(target) ? "1" : undefined}
                 disabled={game.stance === target}
                 onClick={(event) => {
                   // Leave Space free for casting.
@@ -850,6 +858,7 @@ export function DockPage() {
                 }}
               >
                 {t(label)}
+                {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
               </button>
             ))}
           </nav>
