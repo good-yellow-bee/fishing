@@ -1277,7 +1277,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT232~~ | ~~Pike feeds in fall: a pike hooked in fall has fed hard for winter like the tiger muskie and tires slower, and the hookset hint says so; news card game14~~ (#922) | fight | S |
 | ~~GT233~~ | ~~Largemouth in summer: a largemouth bass hooked in summer thrives in the warm water like the carp and tires slower, and the hookset hint says so~~ (#924) | fight | S |
 | ~~GT234~~ | ~~Short hookset hints: when several season, hour, sky or spot reasons change how fast a hooked fish tires, the hookset tells only the first two, like the cast hint~~ (#925) | ui | S |
-| GT235 | Hookset note on the fight card: the hint is hidden in a fight, so the hookset's message (strike time, trophy feel, why the fish tires slower or sooner, a grab call) was never seen; the fight card now shows it at the top for 3.5-9 s by its length | ui | S |
+| ~~GT235~~ | ~~Hookset note on the fight card: the hint is hidden in a fight, so the hookset's message (strike time, trophy feel, why the fish tires slower or sooner, a grab call) was never seen; the fight card now shows it at the top for 3.5-9 s by its length~~ (#926) | ui | S |
+| ~~GT236~~ | ~~Coach clear of the fight card: on a phone the new angler's coach drops below the fight card (above the thumb buttons, without its step chips) instead of hiding under it; news card 2026-10-18-game01 for the hookset note~~ (#928) | ui | S |
+| GT237 | Fight moods in the field guide: a logged fish's card says when it fights hard (Burbot: in winter's cold, after dark, in rain) and when it tires sooner (Walleye: in spring, after spawning), from the same habit sets the fight uses, and the guide notes that most fish tire sooner in winter | ui | S |
 
 ## Risks / open questions for the owner
 

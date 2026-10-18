@@ -18,6 +18,7 @@ import {
 import { Link } from "react-router-dom";
 import { bestHourFor, lureSizeFor, rarityLabel, type LureSize } from "../game/logic";
 import { biteStyle, type BiteStyle } from "../game/nibblePlan";
+import { fightsHardWhen, tiresSoonerWhen } from "../game/fishMoods";
 import { t, useT } from "../i18n";
 import { weightText } from "../i18n/content";
 import { FishMark } from "./FishMark";
@@ -120,6 +121,8 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
       )}
       {known && drawsOn(species.id) && <p className="guide-draws">{t("Draws on: {lures}", { lures: drawsOn(species.id) })}</p>}
       {known && biteLabel(biteStyle(species.id)) && <p className="guide-bite">{biteLabel(biteStyle(species.id))}</p>}
+      {known && fightsHardWhen(species.id).length > 0 && <p className="guide-mood">{t("Fights hard: {when}", { when: fightsHardWhen(species.id).join(", ") })}</p>}
+      {known && tiresSoonerWhen(species.id).length > 0 && <p className="guide-mood">{t("Tires sooner: {when}", { when: tiresSoonerWhen(species.id).join(", ") })}</p>}
       {known && peakSeason(species.id) && <p className="guide-season">{t("Runs in {season}", { season: t(SEASON_LABELS[peakSeason(species.id)!]).toLowerCase() })}</p>}
       {known && inBook > 0 && (
         <p className="guide-book">
@@ -142,7 +145,9 @@ export function FieldGuide({ stats, inBook }: Props) {
           {t("{found} / {total} species", { found, total })}
         </h2>
       </div>
-      <p className="guide-note">{t("Lure and time clues assume a cast released in the band.")}</p>
+      <p className="guide-note">
+        {t("Lure and time clues assume a cast released in the band.")} {t("Most fish tire sooner in winter's cold.")}
+      </p>
       <div className="guide-grid">
         {entries.map((entry) => (
           <GuideCard key={entry.species.id} entry={entry} inBook={inBook?.(entry.species.name)} />
