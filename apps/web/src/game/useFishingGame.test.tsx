@@ -113,6 +113,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
+      <button type="button" onClick={game.retie}>retie</button>
+      <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
@@ -276,6 +278,48 @@ describe("useFishingGame landed outcome", () => {
     act(() => vi.advanceTimersByTime(5_000));
     land(0.5, 6);
     expect(run()).toBe("1");
+  });
+});
+
+describe("useFishingGame frayed line", () => {
+  const frayed = () => container!.querySelector("[data-testid=frayed]")?.textContent;
+  const dismiss = () => act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+  const retie = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "retie") as HTMLButtonElement).click());
+  const frayedArg = () => vi.mocked(makeFight).mock.calls.at(-1)?.[12];
+
+  it("frays the line on a fight that rubbed the piling, says so once, and fights the next fish on it until retied", () => {
+    const surface = mount();
+    fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(frayedArg()).toBe(false);
+    expect(frayed()).toBe("true");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("Rubbing round the piling frayed your line: it snaps sooner until you retie it.");
+    dismiss();
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 2);
+    expect(frayedArg()).toBe(true);
+    // Already frayed: the card doesn't say it again.
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).not.toContain("frayed");
+    dismiss();
+    retie();
+    expect(frayed()).toBe("false");
+    expect(hint()).toBe("You cut off the frayed line and tie the lure on again. The line holds full strain.");
+    fightPerformance = { peakTension: 0.5, maxLine: 1 };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 3);
+    expect(frayedArg()).toBe(false);
+  });
+
+  it("ties on a fresh line after a break", () => {
+    const surface = mount();
+    fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    dismiss();
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 2);
+    expect(frayed()).toBe("false");
   });
 });
 

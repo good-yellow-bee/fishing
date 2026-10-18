@@ -246,6 +246,8 @@ export function DockPage() {
   shopOpenRef.current = shopOpen;
   // Read by the G key: tosses the groundbait whenever its button by the walk signs would.
   const groundbaitKey = useRef(() => {});
+  // Read by the T key: reties a frayed line whenever its button by the walk signs shows.
+  const retieKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -642,6 +644,11 @@ export function DockPage() {
         groundbaitKey.current();
         return;
       }
+      if (event.code === "KeyT" && !event.repeat) {
+        event.preventDefault();
+        retieKey.current();
+        return;
+      }
       if (event.code !== "KeyE" || event.repeat) return;
       if (game.stance !== "shop") return;
       event.preventDefault();
@@ -676,6 +683,9 @@ export function DockPage() {
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
   groundbaitKey.current = () => {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
+  };
+  retieKey.current = () => {
+    if (!rowing && game.frayed && !shopOpen) game.retie();
   };
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
@@ -838,6 +848,7 @@ export function DockPage() {
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -891,6 +902,20 @@ export function DockPage() {
                 {/* A phone's sign row has no room for the long word, so it shows the short one; the label keeps the full name. */}
                 <span className="bait-full">{t("Groundbait")}</span>
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
+              </button>
+            )}
+            {!rowing && game.frayed && (
+              <button
+                className="panel-btn walk-retie"
+                type="button"
+                title={t("Retie the frayed line, so it holds full strain again.")}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  game.retie();
+                }}
+              >
+                {t("Retie")}
               </button>
             )}
             {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
