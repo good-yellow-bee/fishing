@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const css = readFileSync(`${import.meta.dirname}/index.css`, "utf8");
-const SIDEWAYS = "@media (pointer: coarse) and (max-height: 500px) {";
+const SIDEWAYS = "@media (max-height: 500px) {";
 
 describe("a phone held sideways", () => {
   it("skips the narrow-screen layout, so a 740-800 px wide phone does not get both", () => {
     const narrow = /^@media ([^{]*) \{\n  \.hud \{/m.exec(css)?.[1];
-    expect(narrow).toBe("(max-width: 800px) and (min-height: 501px), (max-width: 800px) and (pointer: fine), (max-width: 800px) and (pointer: none)");
+    expect(narrow).toBe("(max-width: 800px) and (min-height: 501px)");
   });
 
   it("stops the shore signs above the power meter and starts a second column when they run long", () => {
@@ -21,6 +21,15 @@ describe("a phone held sideways", () => {
     const narrow = css.slice(css.indexOf("/* One thumb row along the bottom"));
     const block = /\.walk-signs \{([^}]*)\}/.exec(narrow)?.[1];
     expect(block).toContain("overflow-x: auto;");
+  });
+});
+
+describe("a window zoomed in on a laptop", () => {
+  it("gets the short-screen layout whatever the pointer, with the hint in the corner a phone's stick would take", () => {
+    expect(css).toContain("\n@media (max-height: 500px) {\n");
+    const fine = css.slice(css.indexOf("@media (max-height: 500px) and (pointer: fine), (max-height: 500px) and (pointer: none) {"));
+    expect(/\n  \.hint \{([^}]*)\}/.exec(fine)?.[1]).toContain("left: 10px;");
+    expect(fine).toMatch(/html\[data-hand="left"\] \.hint \{\n    right: 10px;/);
   });
 });
 
