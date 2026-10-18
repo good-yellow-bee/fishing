@@ -3,6 +3,7 @@ import { REEDS_STAND } from "./scene/bankWalk";
 import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, POINT_PAD } from "@stillwater/shared";
 import { castSnags, inWeeds, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
 import { waterDepth } from "./scene/water";
+import { LILY_SNAG_ODDS } from "./lilyCover";
 
 describe("snags", () => {
   it("grow only in the reeds' shallow water", () => {
@@ -25,6 +26,14 @@ describe("snags", () => {
     expect(castSnags("reeds", x, z, false, 0, "Topwater frog")).toBeNull();
     expect(castSnags("reeds", x, z, false, 0, "Shallow crankbait")).toBe("weed");
     expect(castSnags("reeds", x, z, false, 0, "Nightcrawler")).toBe("weed");
+  });
+
+  it("foul some casts tight to the lily pads on their stems, but not a topwater, and none in winter when the pads are gone", () => {
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS - 0.01, "Nightcrawler", "summer")).toBe("weed");
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS + 0.01, "Nightcrawler", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, 0, "Popper", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, 0, "Nightcrawler", "winter")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, true, 0, "Nightcrawler", "summer")).toBeNull();
   });
 
   it("lie on the point's rocks in its shallows, less often than the weed, never on a mercy cast", () => {
