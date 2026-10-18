@@ -106,3 +106,12 @@ describe("the news card on a phone", () => {
     expect(upright).toMatch(/\.whats-new \{\n    top: calc\(var\(--hud-bottom, 140px\) \+ 8px\);\n    max-height: calc\(\(100dvh - 38px\) \/ var\(--text-zoom, 1\) - var\(--hud-bottom, 140px\) - 8px\);/);
   });
 });
+
+describe("photo mode on a phone", () => {
+  it("opens the hint at the top, clear of the shutter, and gives the saved note its own width", () => {
+    expect(css).toMatch(/@media \(pointer: coarse\) \{\n  \.photo-exit \{\n    align-items: flex-start;/);
+    const note = /\n\.photo-note \{([^}]*)\}/.exec(css)?.[1];
+    expect(note).toContain("width: max-content;");
+    expect(css).toMatch(/\.photo-exit:has\(~ \.photo-note\) span \{\n  visibility: hidden;/);
+  });
+});
