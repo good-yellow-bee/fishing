@@ -70,7 +70,7 @@ import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
+import { GROUNDBAIT_CASTS, hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
@@ -803,6 +803,7 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
+          {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -841,6 +842,20 @@ export function DockPage() {
               </button>
             )}
             {/* The inlet's signpost goes up with the level that opens it; until then the west shore is just a walk. */}
+            {fishing && !rowing && game.handfuls > 0 && (
+              <button
+                className="panel-btn walk-bait"
+                type="button"
+                title={t("Toss a handful of groundbait here: the next {casts} casts bite sooner.", { casts: GROUNDBAIT_CASTS })}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  game.throwGroundbait();
+                }}
+              >
+                {t("Groundbait")}
+              </button>
+            )}
             {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
               <button
                 key={target}

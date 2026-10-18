@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { castIntoSpooked, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
+import { castIntoSpooked, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 
 const step = vi.fn<() => FightOutcome>(() => {
@@ -111,6 +111,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="strike-window">{game.strikeWindowMs}</i>
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
+      <button type="button" onClick={game.throwGroundbait}>groundbait</button>
+      <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
@@ -1797,6 +1799,36 @@ describe("level unlock integration", () => {
       act(() => window.dispatchEvent(pointer("pointerup")));
       expect(phase()).toBe("waiting:none");
     }
+  });
+});
+
+describe("useFishingGame groundbait", () => {
+  const groundbait = () => container!.querySelector("[data-testid=groundbait]")?.textContent;
+  const toss = () => act(() => [...container!.querySelectorAll("button")].find((button) => button.textContent === "groundbait")!.click());
+
+  it("tosses the one handful off the bank, and the next casts there are over it", () => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    expect(groundbait()).toBe(`${GROUNDBAIT_HANDFULS}|`);
+    toss();
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS}`);
+    expect(hint()).toContain("You toss a handful of groundbait.");
+    surface.dataset.stance = "dropoff";
+    surface.dataset.angler = "15.4,7.8";
+    surface.dataset.aim = "15.4,-5.4";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    // Cast from another bank: the groundbait at the dock keeps.
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS}`);
+    expect(hint()).not.toContain("Over the groundbait.");
+  });
+
+  it("says a cast over the groundbait is over it, counts it down, and leaves no second handful", () => {
+    const surface = mount();
+    toss();
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("Over the groundbait.");
+    expect(groundbait()).toBe(`0|dock:${GROUNDBAIT_CASTS - 1}`);
   });
 });
 
