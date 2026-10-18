@@ -1130,7 +1130,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC40~~ | ~~Swan feathers: from summer into fall, moulted white feathers drift on the water with the wind~~ (#1092) | scene | S |
 | ~~SC41~~ | ~~Campfire: a stone fire pit by the shack, lit from dusk to dawn on dry days, its smoke leaning away on the wind~~ (#1094) | scene | S |
 | ~~SC42~~ | ~~Toadstools: in fall, little patches of fly agarics and brown toadstools come up under the shore trees~~ (#1098) | scene | S |
-| SC43 | Dabbling ducks: now and then a paddling duck up-ends to feed, tail to the sky | scene | S |
+| ~~SC43~~ | ~~Dabbling ducks: now and then a paddling duck up-ends to feed, tail to the sky~~ (#1100) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
