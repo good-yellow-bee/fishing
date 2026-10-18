@@ -1294,7 +1294,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT249~~ | ~~Feeders on the groundbait: about a third of the bites over the groundbait come from the feeders at that bank (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) within the lure's size split and a short cast's commons, never on a beginner's first fish; the landed card says the groundbait drew it in~~ (#951) | gameplay | S |
 | ~~GT250~~ | ~~Field guide: a logged schooling fish says "Schools: land one and more are still there", and a logged groundbait feeder (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) says "Feeder: it comes in to feed on groundbait"~~ (#954) | ui | S |
 | ~~GT251~~ | ~~A bank fished hard: after 8 casts in a row at one bank its fish grow wary of the line, so each further cast there bites slower (1.2) and the wait hint says to try another bank; a cast at another bank starts a fresh run, fish feeding over groundbait don't mind, and a beginner is spared~~ (#955) | gameplay | S |
-| GT252 | The stance chip says "fished hard" (dimmed) at a bank whose next cast meets wary fish, so the angler knows to move before casting; groundbait at that bank hides it | ui | S |
+| ~~GT252~~ | ~~The stance chip says "fished hard" (dimmed) at a bank whose next cast meets wary fish, so the angler knows to move before casting; groundbait at that bank hides it~~ (#958) | ui | S |
+| GT253 | News card 2026-10-18-game05 covers GT249 to GT252: groundbait feeders, the field guide's school and feeder lines, and a bank fished hard | news | S |
 
 ## Risks / open questions for the owner
 
