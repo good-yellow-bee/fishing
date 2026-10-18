@@ -409,3 +409,10 @@
     top: 16px;
   }
 }
+
+/* The row a water's page sent here for ("See it on the Map"), marked while the address names it (a link within the
+   app doesn't set :target). */
+.map-index li.map-row-picked {
+  background: color-mix(in srgb, var(--field-water) 16%, transparent);
+  border-radius: 4px;
+}

@@ -55,6 +55,7 @@ import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot, upcomingRealTrips } from "./bookCopy";
 import { canGoBack } from "./FieldShell";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
+import { savedState, sayAfterBack } from "./SavedNote";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -343,6 +344,9 @@ function SpotView() {
             <MapAnchor lat={spot.place.lat} lng={spot.place.lng}>
               {t("Open on a map")}
             </MapAnchor>
+            {/* Among the angler's other waters, on the Map page's own sheet. */}
+            {" · "}
+            <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
           </p>
         ) : placeFor(spot.id) || spot.id === PLAY_LAKE_ID ? null : (
           // A sample water already has its pin on the map; any other water with no place is offered one.
@@ -563,9 +567,13 @@ function SpotForm() {
     if (then === "catch") navigate(`/catches/new?spot=${result.id}`, { replace: true });
     else if (then === "trip") navigate(`/trips/new?spot=${result.id}`, { replace: true });
     // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
+    // Said there as on the water's page, so a save with no place noted (no pin moves) still shows it went through.
     else if (then === "map") {
-      if (canGoBack()) navigate(-1);
-      else navigate("/map", { replace: true });
+      const kind = existing ? "catchEdit" : "spot";
+      if (canGoBack()) {
+        sayAfterBack(kind);
+        navigate(-1);
+      } else navigate("/map", { replace: true, ...savedState(kind) });
     }
     else if (existing) leaveSaved(navigate, location.state, `/spots/${result.id}`);
     else navigate(`/spots/${result.id}`, { replace: true });
