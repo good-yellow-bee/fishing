@@ -108,7 +108,8 @@ import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
-import { bankMirrorStrength } from "./mirrorImage";
+import { bankMirrorStrength, mirrorStale } from "./mirrorImage";
+import { ROAD_RELAY, SUN_ROAD_FAR, SUN_ROAD_NEAR, roadBands, roadFrom } from "./glintRoad";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
@@ -516,17 +517,20 @@ const FISH: FishProps[] = [
   },
 ];
 
-// Streak of sparkle quads on the water toward the sun disc, wherever the hour puts it.
-function glitterQuads(discPos: Vec3) {
-  const dir = glitterDirection(discPos);
-  return Array.from({ length: 16 }, (_, i) => {
-    const dist = 2.5 + (i / 15) * 12;
+const GLITTER_QUADS = 16;
+const GLITTER_BANDS = 3;
+
+// Streak of sparkle quads on the water from the eye toward the sun disc, wherever the hour puts it.
+function glitterQuads(from: { x: number; z: number }, discPos: Vec3) {
+  const dir = glitterDirection(discPos, from);
+  return Array.from({ length: GLITTER_QUADS }, (_, i) => {
+    const dist = SUN_ROAD_NEAR + (i / (GLITTER_QUADS - 1)) * (SUN_ROAD_FAR - SUN_ROAD_NEAR);
     const side = (jitter(i + 7) - 0.5) * (1 + dist * 0.16);
     return {
-      x: dir.x * dist - dir.z * side,
-      z: LAKE_CENTER_Z + dir.z * dist + dir.x * side,
+      x: from.x + dir.x * dist - dir.z * side,
+      z: from.z + dir.z * dist + dir.x * side,
       scale: 0.3 + jitter(i + 31) * 0.45,
-      mat: i % 3,
+      band: i % GLITTER_BANDS,
     };
   }).filter((quad) => glitterOnWater(quad.x, quad.z));
 }
@@ -1340,11 +1344,11 @@ function SunGlitter({ discPos }: { discPos: Vec3 }) {
     [],
   );
   const [dx, , dz] = discPos;
-  const bands = useMemo(() => {
-    const quads = glitterQuads([dx, 0, dz]);
-    return [0, 1, 2].map((mat) => quads.filter((quad) => quad.mat === mat));
+  // Laid from the eye, so the glitter runs toward the sun from whichever bank you stand on.
+  const road = useRef<{ eye: { x: number; y: number; z: number } | null; bands: ReturnType<typeof glitterQuads>[]; angle: number }>({ eye: null, bands: [], angle: 0 });
+  useEffect(() => {
+    road.current.eye = null;
   }, [dx, dz]);
-  const angle = Math.atan2(-(dz - LAKE_CENTER_Z), dx);
   const helper = useMemo(() => new THREE.Object3D(), []);
   const meshes = useRef<Array<THREE.InstancedMesh | null>>([]);
   useEffect(() => {
@@ -1355,12 +1359,22 @@ function SunGlitter({ discPos }: { discPos: Vec3 }) {
   }, [geometry, materials]);
   useFrame((state) => {
     const t = state.clock.elapsedTime;
-    helper.rotation.set(-Math.PI / 2, 0, angle);
+    const eye = state.camera.position;
+    if (mirrorStale(road.current.eye, eye, ROAD_RELAY)) {
+      const from = roadFrom(eye);
+      road.current = {
+        eye: { x: eye.x, y: eye.y, z: eye.z },
+        bands: roadBands(glitterQuads(from, [dx, 0, dz]), GLITTER_BANDS),
+        angle: Math.atan2(-(dz - from.z), dx - from.x),
+      };
+    }
+    helper.rotation.set(-Math.PI / 2, 0, road.current.angle);
     for (let i = 0; i < materials.length; i += 1) {
       materials[i]!.opacity = 0.04 + (Math.sin(t * (0.9 + i * 0.33) + i * 2.1) * 0.5 + 0.5) * 0.09;
       const mesh = meshes.current[i];
-      const quads = bands[i];
+      const quads = road.current.bands[i];
       if (!mesh || !quads) continue;
+      mesh.count = quads.length;
       quads.forEach((quad, j) => {
         helper.position.set(quad.x, waterHeight(quad.x, quad.z, t) + 0.07, quad.z);
         helper.scale.setScalar(quad.scale);
@@ -1370,10 +1384,10 @@ function SunGlitter({ discPos }: { discPos: Vec3 }) {
       mesh.instanceMatrix.needsUpdate = true;
     }
   });
-  return bands.map((quads, i) => (
+  return materials.map((material, i) => (
     <instancedMesh
-      key={`${i}-${quads.length}-${dx}-${dz}`}
-      args={[geometry, materials[i], quads.length]}
+      key={i}
+      args={[geometry, material, Math.ceil(GLITTER_QUADS / GLITTER_BANDS)]}
       frustumCulled={false}
       ref={(mesh) => {
         meshes.current[i] = mesh;

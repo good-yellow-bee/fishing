@@ -175,10 +175,10 @@ export function waterRayHit(
   return null;
 }
 
-/** Flat direction from the middle of the lake toward the sun or moon disc, unit length. The sun road runs along it. */
-export function glitterDirection(discPos: readonly [number, number, number]) {
-  const x = discPos[0];
-  const z = discPos[2] - LAKE_CENTER_Z;
+/** Flat direction from `from` (the middle of the lake unless given) toward the sun or moon disc, unit length. The sun road runs along it. */
+export function glitterDirection(discPos: readonly [number, number, number], from: { x: number; z: number } = { x: 0, z: LAKE_CENTER_Z }) {
+  const x = discPos[0] - from.x;
+  const z = discPos[2] - from.z;
   const len = Math.hypot(x, z);
   if (len < 1e-6) return { x: 0, z: -1 };
   return { x: x / len, z: z / len };
