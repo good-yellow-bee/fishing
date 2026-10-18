@@ -111,8 +111,9 @@ a {
   cursor: pointer;
 }
 
+/* A deeper rust than the lake's: the light words on --rust measured 3.1:1, short of the 4.5 text needs. */
 .auth-card button:hover {
-  background: var(--rust);
+  background: #8f3a28;
 }
 
 .auth-card .foot {
@@ -120,8 +121,9 @@ a {
   font-size: 13px;
 }
 
+/* 5.1:1 on the card's paper, where --rust was 3.1. */
 .auth-card .error {
-  color: var(--rust);
+  color: #8f3a28;
   min-height: 1.2em;
   margin: 8px 0 0;
 }
