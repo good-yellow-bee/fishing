@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
-import { WATER_LABELS, localDate, lureTally, shiftDate, type Spot } from "@stillwater/shared";
+import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
+import { bestLureAt } from "../waterLure";
 import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
@@ -341,10 +342,7 @@ export function SpotMapPage() {
   const upcoming = nextRealTrips(book, today);
   const lastOut = lastOutByWater(book, today);
   const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
-  const bestLure = (spotId: string) => {
-    const [top, next] = lureTally({ spots: [], trips: [], catches: book.catches.filter((entry) => entry.spotId === spotId) }, 2);
-    return top && top.count >= 2 && (!next || next.count < top.count) ? top.lure : null;
-  };
+  const bestLure = (spotId: string) => bestLureAt(book.catches, spotId);
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);

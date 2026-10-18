@@ -64,7 +64,8 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
-import { isSampleCatch, isSampleOnly, isSampleSpot, ownWatersFirst } from "./bookCopy";
+import { isSampleCatch, isSampleOnly, isSampleSpot } from "./bookCopy";
+import { WaterOptions } from "./WaterOptions";
 import { readDeletedFish } from "./deletedFish";
 import { focusPageHeading } from "./pageFocus";
 import { addedWater, forgetAddedWater } from "./addedWater";
@@ -1134,11 +1135,7 @@ function CatchForm() {
               {t("Water")}
               <select name="spot" aria-describedby={onlySampleWaters ? "own-water-hint" : undefined} value={spotId} onChange={(event) => onSpot(event.target.value)}>
                 {/* The game's lake only for what is already there, and a game fish stays on it. */}
-                {ownWatersFirst(book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))).map((spot) => (
-                  <option key={spot.id} value={spot.id}>
-                    {spot.name}
-                  </option>
-                ))}
+                <WaterOptions book={book} spots={book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))} />
               </select>
             </label>
             {photoSpot && photoSpot === spotId ? <span className="field-hint">{t("Water from the photo's location.")}</span> : null}

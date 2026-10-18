@@ -1216,6 +1216,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC91~~ | ~~Snowball fight: on winter days two children on the east end of the far bank scoop, pack and throw snowballs at each other in turn, ducking some, each bursting in a puff of snow~~ (#1207) | scene | S |
 | ~~SC92~~ | ~~Leaf raker: on dry fall days a grown-up rakes the leaves back onto the pile the child keeps jumping into, a few strokes from each spot round behind it~~ (#1207) | scene | S |
 | ~~SC93~~ | ~~News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker~~ (#1207) | scene | S |
+| ~~SC94~~ | ~~Night angler: at dusk and at night from spring to fall an angler sits on the middle of the far bank by a rod on its rests, a glowing green float out on the water and a headlamp beam following their looks between the float, the tackle box and the water~~ (#1210) | scene | S |
+| ~~SC95~~ | ~~Stone skimmer: on calm, dry days from spring to fall a child at the water's edge on the far bank stoops for flat stones and skims them sidearm, each skipping out in shrinking hops with a ring spreading at every touch~~ (#1210) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1511,7 +1513,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT288~~ | ~~News card 2026-10-18-game14 covers GT285 to GT287: the cloud over the sun, the lily pad fight and a new kind of lure at a bank fished hard~~ (#1189) | ui | S |
 | ~~GT289~~ | ~~The angler's shadow under a low sun: at dawn the sun sits squarely behind the Drop-off and at dusk behind the Inlet, so under a clear or partly cloudy sky the angler's long shadow falls across the water and the fish there shy from it (1.15 wait), the cast says so and the stance chip reads "your shadow on the water"; a beginner is spared~~ (#1198) | gameplay | S |
 | ~~GT290~~ | ~~The moon overhead and underfoot: for an hour either side of the moon passing overhead (noon at new moon, midnight at full, about 50 minutes later each day) or underfoot 12 hours on, the fish come on the feed and every cast bites sooner (0.85 wait); the cast says so, the stance chip reads "moon overhead" or "moon underfoot", and the chalk board gives each day's daytime passing~~ (#1202) | gameplay | S |
-| GT291 | News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot | ui | S |
+| ~~GT291~~ | ~~News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot~~ (#1203) | ui | S |
+| GT292 | A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit | gameplay | S |
 
 ## Risks / open questions for the owner
 
@@ -2046,3 +2049,6 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR523~~ | ~~Round 80 fixes: month words and Through the year count a night fish in its outing's month, a year typed alone never matches a month, Largest first on a species or water page keeps its list, dates with a year or in numbers find their day, -2025 leaves a year out, game/gra finds the game's fish, the rename box under a search no longer widens the page, Polish kind cards read Najczęściej na:~~ (#1194) | field | S |
 | ~~BR524~~ | ~~Round 80 ideas: a search splits its fish By kind and By year, each a link that narrows it, and the season recap's best day opens its fish~~ (#1195) | field | S |
 | ~~BR525~~ | ~~A kind's page says when its next round number is a few fish away, and shows its biggest of this year beside the record~~ (#1199) | field | S |
+| ~~BR526~~ | ~~Round 81 fixes: Find a water keeps every letter typed, a water deleted from its outing or fish goes Back past them, GPS waypoints and more map links read, a sample water counts the angler's own fish, and six more~~ (#1208) | field | S |
+| ~~BR527~~ | ~~Round 81 ideas: a water's last outing opens with its fish and lure, Copy the place, the best lure on Waters cards, waters fished lately first in pickers, and Home's Next tile opens the water~~ (#1211) | field | S |
+| ~~BR528~~ | ~~Gear keeps past outings' bags open across Back, with Fold all~~ (#1212) | field | S |

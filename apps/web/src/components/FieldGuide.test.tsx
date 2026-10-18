@@ -44,6 +44,7 @@ describe("field guide card", () => {
       "Bites: runs off with it, sliding the float away",
       "Jumper: every second run is a leap, so let go when it comes up",
       "Scrapper: pound for pound it fights hardest, so it tires slowly",
+      "Charger: once a fight it runs straight at you, so reel fast to keep the line tight",
       "Fights hard: guarding its nest at the Reeds or the Dock in spring, in the Inlet's current",
       "Runs in summer",
     ]);

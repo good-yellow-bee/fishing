@@ -1460,6 +1460,9 @@ export function useFishingGame(
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Hooked light — strike sooner, and ease off as soon as the bar turns red.") + stillAbout());
+            } else if (sim.thrown) {
+              setOutcome({ kind: "broke", message: t("The {fish} charged straight at you and the light hook dropped out of the slack line.", { fish: t(current.species.name) }) + trophy });
+              resetToIdle(t("Hooked light — when it charges, reel fast to keep the line tight.") + stillAbout());
             } else if (sim.tornOut) {
               setOutcome({ kind: "broke", message: t("The hook tore out of the {fish}'s soft mouth.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Soft mouth — ease off as soon as the bar turns red.") + stillAbout());

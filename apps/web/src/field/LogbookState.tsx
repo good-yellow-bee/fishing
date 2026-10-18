@@ -215,7 +215,12 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       // Deletes are made from the entry's own page, before it navigates away.
       // With the page's link state, so the page put back still knows the list it was opened from.
       const fromState = (window.history.state as { usr?: unknown } | null)?.usr ?? null;
-      const before = { kind, book, photos, from: window.location.pathname + window.location.search, fromState, ...(onUndo ? { onUndo } : {}) };
+      // A merge's link ("Merge them") names the other water: Undo comes back to the water, not to its merge box open again.
+      const search = new URLSearchParams(window.location.search);
+      if (kind === "merge") search.delete("merge");
+      const query = search.toString();
+      const from = window.location.pathname + (query ? `?${query}` : "");
+      const before = { kind, book, photos, from, fromState, ...(onUndo ? { onUndo } : {}) };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
       // and so is a removed sample week, so adding an older copy doesn't bring it back.

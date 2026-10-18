@@ -576,6 +576,8 @@ export const PL_GAME: PlBook = {
   "{fish} took all the line and threw the hook.": "{fish} — cała żyłka wybrana, haczyk zrzucony.",
   "Ran out of line — hold to reel whenever the fish is calm.": "Skończyła się żyłka — przytrzymuj, by zwijać, gdy ryba jest spokojna.",
   "The hook tore out of the {fish}'s soft mouth.": "{fish} — haczyk wyrwał się z miękkiego pyska.",
+  "The {fish} charged straight at you and the light hook dropped out of the slack line.": "{fish} — ryba ruszyła prosto na ciebie, a płytko wbity haczyk wypadł na luźnej żyłce.",
+  "Hooked light — when it charges, reel fast to keep the line tight.": "Płytko zacięte — gdy ryba rusza na ciebie, zwijaj szybko, żeby żyłka była napięta.",
   "Soft mouth — ease off as soon as the bar turns red.": "Miękki pysk — odpuść, gdy tylko pasek zrobi się czerwony.",
   "The light hook pulled out of the {fish}.": "{fish} — płytko wbity haczyk wysunął się.",
   "Hooked light — strike sooner, and ease off as soon as the bar turns red.": "Płytko zacięte — zatnij szybciej i odpuść, gdy tylko pasek zrobi się czerwony.",
@@ -601,6 +603,8 @@ export const PL_GAME: PlBook = {
   "Circler: it turns its flat side and circles, so it comes in slowly till it tires": "Krąży bokiem: ustawia się płaskim bokiem i krąży, więc idzie powoli, dopóki się nie zmęczy",
   "Quitter: it fights hard for a moment, then gives up fast": "Szybko odpuszcza: przez chwilę walczy mocno, potem szybko się poddaje",
   "Long runner: the first run is the long one, so let it go": "Długi odjazd: pierwszy odjazd jest najdłuższy, więc daj mu iść",
+  "Charger: once a fight it runs straight at you, so reel fast to keep the line tight":
+    "Szarżująca: raz w walce płynie prosto na ciebie, więc zwijaj szybko, żeby żyłka była napięta",
   "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",
   "Hooked light: reel in the red and the hook pulls out": "Płytko zacięte: zwijanie w czerwieni wysuwa haczyk",
   "The fishing loop hit a problem. You can cast again.": "Coś poszło nie tak z łowieniem. Możesz zarzucić ponownie.",
@@ -678,6 +682,9 @@ export const PL_GAME: PlBook = {
   "Let it run — the first run is the longest!": "Niech płynie — pierwszy odjazd jest najdłuższy!",
   "A leap can't be turned — just let go": "Skoku nie da się zawrócić — po prostu odpuść",
   "A roll can't be turned — just let go": "Obrotu nie da się zawrócić — po prostu odpuść",
+  "A charge can't be turned — just reel": "Szarży nie da się zawrócić — po prostu zwijaj",
+  "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
+  "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
   "Save picture": "Zapisz obrazek",
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
@@ -713,6 +720,10 @@ export const PL_GAME: PlBook = {
     "Łodzie przy cumach wypełniają się teraz pogodą: zimą śniegiem, w deszczu deszczówką, a jesienią opadłymi liśćmi. Wiosną na drugim brzegu pasie się para bernikli kanadyjskich z gąsiętami, w suche jesienne dni dziecko z rozbiegu skacze w stos zgrabionych liści, a w bezwietrzne, pogodne dni ktoś rozstawia sztalugę pod białym parasolem na drugim brzegu i maluje wzgórza.",
   "On fall and winter days someone splits firewood beside the far cabin, and on calm dawns a sculler rows a racing shell along the far half of the lake. The dog walker now comes out in the rain too, under an umbrella, and on windy days the rain and snow slant down the wind.":
     "Jesienią i zimą ktoś rąbie drewno przy chacie po drugiej stronie jeziora, a o bezwietrznym świcie ktoś wiosłuje w wyścigowej łodzi wzdłuż dalszego brzegu. Osoba z psem wychodzi teraz na spacer także w deszcz, pod parasolem, a w wietrzne dni deszcz i śnieg padają ukośnie z wiatrem.",
+  "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.":
+    "W suche letnie dni do polnych kwiatów przy szopie przylatuje koliber i zawisa przy nich jeden po drugim, a w pogodne letnie dni ktoś pływa żabką na płyciźnie przy drugim brzegu, zostawiwszy ręcznik na piasku. Od wiosny do jesieni ktoś spaceruje drugim brzegiem z psem, który wybiega naprzód i przystaje, żeby coś obwąchać. W mgliste dni samotna osoba w żółtym sztormiaku łowi z łódki zakotwiczonej na jeziorze.",
+  "Past outings' bags opened on Gear stay open when you come Back from an outing, and \"Fold all\" closes them in one tap.": "Torby z minionych wypraw otwarte w Sprzęcie zostają otwarte po powrocie z wyprawy, a „Zwiń wszystkie” zamyka je jednym dotknięciem.",
+  "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.": "Strona łowiska otwiera ostatnią wyprawę z jej wynikiem i kopiuje współrzędne do echosondy; karty łowisk podają najlepszą przynętę, a długie listy łowisk zaczynają się od ostatnio łowionych.",
   "A kind's page says when its next round number is a few fish away (3 more to 25 of this kind), and its biggest of this year beside the all-time record.": "Strona gatunku mówi, gdy do kolejnej okrągłej liczby brakuje kilku ryb (jeszcze 3 do 25 tego gatunku), i pokazuje największe z tego roku obok rekordu wszech czasów.",
   "A search with fish of several kinds or years splits them “By kind” and “By year”, each a tap to narrow it, and a season's best day on Bests opens its fish.": "Wyszukiwanie z rybami kilku gatunków lub lat dzieli je „Według gatunku” i „Według roku”, a każdy wpis zawęża je jednym dotknięciem; najlepszy dzień sezonu w Rekordach otwiera jego ryby.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",

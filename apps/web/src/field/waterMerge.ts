@@ -93,6 +93,26 @@ export function noteMergedWater(fromId: string, intoId: string) {
   }
 }
 
+/** An undone merge: the water is back, so an old link to it no longer says where it went. */
+export function forgetMergedWater(fromId: string) {
+  try {
+    const { [fromId]: _gone, ...rest } = readMergedWaters();
+    localStorage.setItem(MERGED_WATERS_KEY, JSON.stringify(rest));
+  } catch {
+    // Storage blocked: nothing was noted either.
+  }
+}
+
+/** Where a water merged away went in the end: a water merged twice is followed to the one still in the book. */
+export function mergedInto(merged: Record<string, string>, id: string, inBook: (id: string) => boolean): string | null {
+  let at = id;
+  for (let step = 0; step < 10 && merged[at]; step++) {
+    at = merged[at]!;
+    if (inBook(at)) return at;
+  }
+  return null;
+}
+
 /** An outing moved to another water; one untitled, so named after the water it left, takes the new water's name. */
 function movedTrip(trip: Trip, fromName: string, into: { id: string; name: string }): Trip {
   const untitled = fromName.trim() !== "" && trip.title.trim().toLowerCase() === fromName.trim().toLowerCase();

@@ -370,7 +370,8 @@ function isSpotPlace(value: unknown): value is SpotPlace {
   );
 }
 
-const PLACE_NUMBER = /(-?\d+(?:[.,]\d+)?)\s*°?\s*([NSEW])?/gi;
+/** A coordinate with its letter after it ("46.85° N"), or before it, as a GPS or echo sounder shows a waypoint ("N 53.8000"). */
+const PLACE_NUMBER = /(?:([NSEW])\s*(-?\d+(?:[.,]\d+)?)\s*°?|(-?\d+(?:[.,]\d+)?)\s*°?\s*([NSEW])?)/gi;
 
 /**
  * "46.85, -94.24", "46,85; -94,24" or "46.85° N 94.24° W": latitude then longitude, or the other way round when
@@ -383,8 +384,8 @@ export function parseSpotPlace(raw: string): SpotPlace | null {
   const found = [...raw.matchAll(PLACE_NUMBER)];
   if (found.length !== 2 || raw.replace(PLACE_NUMBER, "").replace(/[\s,;]/g, "") !== "") return null;
   const parts = found.map((match) => {
-    const value = Number(match[1]!.replace(",", "."));
-    const letter = match[2]?.toUpperCase();
+    const value = Number((match[2] ?? match[3])!.replace(",", "."));
+    const letter = (match[1] ?? match[4])?.toUpperCase();
     return { value: letter === "S" || letter === "W" ? -Math.abs(value) : value, letter };
   });
   const lngFirst = (parts[0]!.letter === "E" || parts[0]!.letter === "W") && (parts[1]!.letter === "N" || parts[1]!.letter === "S" || !parts[1]!.letter);
@@ -393,15 +394,21 @@ export function parseSpotPlace(raw: string): SpotPlace | null {
   return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
 }
 
-const DEGREES = /(\d{1,3})\s*°\s*(\d{1,2}(?:[.,]\d+)?)\s*['′’]\s*(?:(\d{1,2}(?:[.,]\d+)?)\s*(?:["″”]|''))?\s*([NSEW])/gi;
+/** Degrees, then minutes (and seconds), the degree and minute signs left out as a GPS unit may: "53 48.000N". */
+const DEGREES_TAIL = "(\\d{1,3})(?:\\s*°\\s*|\\s+)(\\d{1,2}(?:[.,]\\d+)?)\\s*(?:['′’]\\s*(?:(\\d{1,2}(?:[.,]\\d+)?)\\s*(?:[\"″”]|''))?)?";
+/** The hemisphere's letter after the numbers, as a map's place card writes it, or before them, as a GPS waypoint does. */
+const DEGREES = new RegExp(`${DEGREES_TAIL}\\s*([NSEW])`, "gi");
+const DEGREES_LEAD = new RegExp(`([NSEW])\\s*${DEGREES_TAIL}`, "gi");
 
 /**
  * Degrees and minutes, as a map's place card shows them: 53°48'00.0"N 21°36'00.0"E, or 53°48.5'N 21°36.2'E.
  * Undefined when the text isn't written that way, so the decimal reading can have it; null when it is but can't be a place.
  */
 function degreesPlace(raw: string): SpotPlace | null | undefined {
-  const found = [...raw.matchAll(DEGREES)];
-  if (found.length !== 2 || raw.replace(DEGREES, "").replace(/[\s,;]/g, "") !== "") return undefined;
+  const lead = [...raw.matchAll(DEGREES_LEAD)];
+  const leading = lead.length === 2 && raw.replace(DEGREES_LEAD, "").replace(/[\s,;]/g, "") === "";
+  const found = leading ? lead.map((match) => [match[0], match[2], match[3], match[4], match[1]]) : [...raw.matchAll(DEGREES)];
+  if (!leading && (found.length !== 2 || raw.replace(DEGREES, "").replace(/[\s,;]/g, "") !== "")) return undefined;
   const parts = found.map((match) => {
     const value = Number(match[1]) + Number(match[2]!.replace(",", ".")) / 60 + Number((match[3] ?? "0").replace(",", ".")) / 3600;
     const letter = match[4]!.toUpperCase();
@@ -418,7 +425,7 @@ export function isShortMapLink(raw: string): boolean {
   return /^\s*https?:\/\/(?:maps\.app\.goo\.gl|goo\.gl\/maps|maps\.apple(?:\.com)?\/p\/)/i.test(raw);
 }
 
-/** The pin in a map link pasted whole: Google Maps (@lat,lng, !3d…!4d…, q= or ll=), OpenStreetMap (mlat/mlon, #map=z/lat/lng), Apple Maps or geo:. */
+/** The pin in a map link pasted whole: Google Maps (@lat,lng, !3d…!4d…, q=, ll= or destination=), OpenStreetMap (mlat/mlon, #map=z/lat/lng), Apple Maps, Bing, Yandex, Mapy.cz or geo:. */
 function mapLinkPlace(link: string): SpotPlace | null {
   const decoded = (() => {
     try {
@@ -428,19 +435,33 @@ function mapLinkPlace(link: string): SpotPlace | null {
     }
   })();
   const n = "(-?\\d{1,3}(?:\\.\\d+)?)";
+  // Yandex and Mapy.cz write the longitude first; the rest latitude first.
+  const lngFirst = /^https?:\/\/(?:[\w-]+\.)*(?:yandex\.[a-z.]+|mapy\.(?:cz|com))\//i.test(link);
   const patterns = [
     new RegExp(`!3d${n}!4d${n}`),
     new RegExp(`[?&]mlat=${n}&mlon=${n}`),
     new RegExp(`#map=\\d+(?:\\.\\d+)?/${n}/${n}`),
-    new RegExp(`[?&](?:q|query|ll|daddr|sll)=${n},\\s*${n}`),
+    ...(lngFirst ? [new RegExp(`[?&](?:ll|pt|whatshere\\[point\\])=${n},\\s*${n}`)] : []),
+    new RegExp(`[?&](?:q|query|ll|daddr|sll|coordinate|destination)=${n},\\s*${n}`),
+    new RegExp(`[?&]cp=${n}~${n}`),
     new RegExp(`@${n},${n}`),
     new RegExp(`^geo:${n},${n}`, "i"),
   ];
-  for (const pattern of patterns) {
+  // Mapy.cz names the two apart: x the longitude, y the latitude, in either order.
+  const x = lngFirst ? decoded.match(new RegExp(`[?&]x=${n}(?:&|$)`)) : null;
+  const y = lngFirst ? decoded.match(new RegExp(`[?&]y=${n}(?:&|$)`)) : null;
+  if (x && y) {
+    const lat = Number(y[1]);
+    const lng = Number(x[1]);
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+    return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
+  }
+  for (const [index, pattern] of patterns.entries()) {
     const match = decoded.match(pattern);
     if (!match) continue;
-    const lat = Number(match[1]);
-    const lng = Number(match[2]);
+    const swap = lngFirst && index === 3;
+    const lat = Number(match[swap ? 2 : 1]);
+    const lng = Number(match[swap ? 1 : 2]);
     if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
     return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
   }

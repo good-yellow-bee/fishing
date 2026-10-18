@@ -159,7 +159,7 @@ function SpeciesView() {
           </Link>
         </div>
       </header>
-      <FishSum catches={catches} oneKind />
+      <FishSum catches={catches} oneKind list={`species:${species}`} />
       <KindMark catches={catches} />
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}

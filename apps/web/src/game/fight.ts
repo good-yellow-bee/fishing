@@ -56,6 +56,10 @@ export type FightSim = {
   carried?: boolean;
   /** Fought on a line the rocks or a piling scuffed in an earlier fight: it snaps at FRAYED_SNAP, short of full tension. */
   frayed?: boolean;
+  /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
+  charge?: boolean;
+  /** Hooked light, the fish charged and the slack line let the hook drop out: why it got away. */
+  thrown?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -122,6 +126,14 @@ export const COVER_HOLD = 1.6;
 export const LONG_RUNNERS: ReadonlySet<string> = new Set(["carp", "salmon"]);
 /** How much longer that first run lasts than the carp's other runs. */
 export const FIRST_RUN_LONGER = 1.6;
+/** Smallmouth bass and rainbow trout charge: once in a fight they run straight at the angler, and a line not reeled in fast goes slack, costing the clean bonus, or the fish if it is hooked light. */
+export const CHARGERS: ReadonlySet<string> = new Set(["smallmouth-bass", "rainbow-trout"]);
+/** Seconds of slack line, not reeling, through a charge before it counts as left slack. */
+export const CHARGE_SLACK_SEC = 0.6;
+/** Line comes in this much faster while reeling up the slack of a charge. */
+export const CHARGE_REEL = 1.8;
+/** A fish sprinting straight at the angler tires this much faster than on an ordinary run. */
+export const CHARGE_TIRE = 2;
 /** A leap is in the air this long. */
 export const JUMP_MS = 750;
 /** Seconds into a leap before a held line costs anything: a prompt bow is always in time. */
@@ -151,6 +163,8 @@ export type FightPerformance = {
   clearOf?: "weeds" | "rocks" | "pilings" | "current";
   /** The line was reeled over the rocks or wrapped round a piling, and is frayed until retied. */
   scuffed?: boolean;
+  /** A charge was left slack instead of reeled up: the clean bonus goes. */
+  slackCharge?: boolean;
 };
 
 /** A frayed line snaps at this tension instead of the full 1, so the red band is half as wide. */
@@ -388,7 +402,7 @@ export function isCloseCall(performance: FightPerformance) {
 
 /** Clean = tension never went red and the fish never nearly ran out the line. */
 export function isCleanFight(performance: FightPerformance) {
-  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE;
+  return performance.peakTension < RED_TENSION && performance.maxLine < RUN_OUT_LINE && !performance.slackCharge;
 }
 
 type Pattern = {
@@ -494,6 +508,9 @@ export function makeFight(
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id) && !cold;
   const breacher = BREACHERS.has(species.id);
+  const charger = CHARGERS.has(species.id);
+  let charged = false;
+  let chargeSlack = 0;
   const tailWalker = TAIL_WALKERS.has(species.id);
   let walked = false;
   const roller = ROLLERS.has(species.id);
@@ -545,6 +562,10 @@ export function makeFight(
         sim.firstRun = longRunner && completedSurges === 0 && !sim.jump && !sim.roll;
         sim.tailWalk = tailWalker && sim.jump === true && !walked;
         if (sim.tailWalk) walked = true;
+        // A charger runs straight at the angler once, on a run from its third on that isn't a leap or its last.
+        sim.charge = charger && !charged && completedSurges >= 2 && !sim.jump && !sim.roll && !sim.lastRun;
+        if (sim.charge) charged = true;
+        chargeSlack = 0;
         sim.runSide = (completedSurges % 2 === 0 ? firstSide : -firstSide) as -1 | 1;
         jumpAge = 0;
         heldThroughLeap = false;
@@ -554,30 +575,30 @@ export function makeFight(
         sim.surge = 2;
         nextAt = nowMs + (sim.jump ? JUMP_MS * (sim.tailWalk ? TAIL_WALK : 1) : sim.roll ? ROLL_MS : range(pattern.surgeMin, pattern.surgeMax) * (sim.firstRun ? FIRST_RUN_LONGER : 1));
         // Starter head shakes skip this: their 220 ms warning is about one reaction time.
-        if (reeling && species.challenge !== "mash") sim.tension = Math.max(sim.tension, RED_TENSION);
+        if (reeling && species.challenge !== "mash" && !sim.charge) sim.tension = Math.max(sim.tension, RED_TENSION);
         graceUntil = nowMs + RUN_GRACE_MS;
-        dartLeft = darter && !sim.jump && !sim.roll ? (nextAt - nowMs) / 2 : null;
+        dartLeft = darter && !sim.jump && !sim.roll && !sim.charge ? (nextAt - nowMs) / 2 : null;
       } else {
         if (sim.jump && !heldThroughLeap) performance.bowedLeaps = (performance.bowedLeaps ?? 0) + 1;
         if (followedDart) performance.followedDarts = (performance.followedDarts ?? 0) + 1;
         followedDart = false;
         // At the reeds a run nobody turned carries the fish into the weeds; a leap goes up, not in.
-        if (weedy && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
+        if (weedy && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.weeded = true;
           weedUntil = nowMs + WEED_MS * coverHold;
         }
         // At the dock it wraps the line round a piling instead.
-        if (water === "pilings" && turnable && !sim.jump && !sim.roll && !turnedThisRun && sim.line > 0) {
+        if (water === "pilings" && turnable && !sim.jump && !sim.roll && !sim.charge && !turnedThisRun && sim.line > 0) {
           sim.wrapped = true;
           wrapUntil = nowMs + WRAP_MS * coverHold;
         }
         // A clean run at the reeds or the point counts toward the landed card's note; one that went in spoils it.
-        if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll) {
+        if ((weedy || water === "rocks" || water === "pilings") && turnable && !sim.jump && !sim.roll && !sim.charge) {
           if (sim.weeded || sim.wrapped || rockedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : weedy ? "weeds" : water === "pilings" ? "pilings" : "rocks";
         }
         // At the inlet only a run downstream counts: turned upstream it keeps the note, left to run with the current it spoils it.
-        if (water === "current" && turnable && !sim.jump && !sim.roll && sim.runSide === DOWNSTREAM_SIDE) {
+        if (water === "current" && turnable && !sim.jump && !sim.roll && !sim.charge && sim.runSide === DOWNSTREAM_SIDE) {
           if (!turnedThisRun) fouled = true;
           performance.clearOf = fouled ? undefined : "current";
         }
@@ -587,6 +608,7 @@ export function makeFight(
         sim.roll = false;
         sim.firstRun = false;
         sim.tailWalk = false;
+        sim.charge = false;
         sim.darted = false;
         dartLeft = null;
         sim.lastRun = false;
@@ -644,29 +666,31 @@ export function makeFight(
       sim.runSide = -sim.runSide as -1 | 1;
     }
     // A leap goes up, not sideways, so only a run can be turned.
-    sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && steer === -sim.runSide;
+    sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && steer === -sim.runSide;
     if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     if (sim.turning && sim.darted) followedDart = true;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
     const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
-    const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll;
+    const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll && !sim.charge;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
-    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump && !sim.roll;
-    sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
+    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge;
+    sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
+    // Charging straight at the angler the fish pulls nothing: the line only goes slack.
+    const charging = sim.charge === true && sim.surge === 2;
     sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
     // Line reeled over the rocks or rubbing round a piling comes out of the fight frayed.
     if ((sim.rocky && reeling) || sim.wrapped) performance.scuffed = true;
     if (reeling) {
-      sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
+      sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.
-      if (!sim.sulk && !sim.weeded && !sim.wrapped) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
+      if (!sim.sulk && !sim.weeded && !sim.wrapped && !charging) sim.line += (sim.surge === 2 ? driftSurge * (sim.downstream ? DOWNSTREAM_RUN : 1) : driftCalm) * dtSec;
     }
     // Like a leap, a shake reeled through costs the clean bonus, never the fish.
     if (reeling && sim.shake && nowMs >= shakeAt + SHAKE_GRACE_SEC * 1000) {
@@ -683,7 +707,7 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
+    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) * (charging ? CHARGE_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * tireHabit : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
@@ -695,7 +719,16 @@ export function makeFight(
     else tearSec = 0;
     sim.tearing = tearSec > 0;
 
+    // Slack through a charge costs the clean bonus, and lets a light hook drop out of its mouth.
+    if (charging && !reeling) chargeSlack += dtSec;
     if (sim.line <= 0) return "landed";
+    if (chargeSlack >= CHARGE_SLACK_SEC) {
+      performance.slackCharge = true;
+      if (sim.lightHook) {
+        sim.thrown = true;
+        return "escaped";
+      }
+    }
     if (sim.tension >= (frayed ? FRAYED_SNAP : 1)) return "snapped";
     if (tearSec >= tearAt) {
       sim.tornOut = true;

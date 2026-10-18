@@ -334,9 +334,26 @@ export function HomePage() {
           <span className="eyebrow">{t("Next")}</span>
           <strong>{next ? <Link to={`/trips/${next.id}`} state={FROM_LIST}>{outingName(next, book.spots)}</Link> : t("None planned")}</strong>
           <small>
-            {next
-              ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
-              : t("Add an outing when you know the day")}
+            {next ? (
+              <>
+                {tripWhen(next.date, today, tomorrow)}
+                {/* The water opens too, for what works there; an untitled outing already goes by its name above, so not again. */}
+                {nextSpot ? (
+                  <>
+                    {" · "}
+                    {outingName(next, book.spots) !== nextSpot.name ? (
+                      <Link to={`/spots/${nextSpot.id}`}>{nextSpot.name}</Link>
+                    ) : (
+                      <Link to={`/spots/${nextSpot.id}`} aria-label={t("{water}: water page", { water: nextSpot.name })}>
+                        {t("Water page")}
+                      </Link>
+                    )}
+                  </>
+                ) : null}
+              </>
+            ) : (
+              t("Add an outing when you know the day")
+            )}
             {next && nextSpot?.place ? (
               <span className="map-link">
                 {" · "}
