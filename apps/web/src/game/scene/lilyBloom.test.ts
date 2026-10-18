@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { easeLily, lilyBloom, lilyCup, lilyOpen, PETAL_COUNT, petalAngles } from "./lilyBloom";
+import { easeLily, lilyBloom, lilyCup, lilyOpen, lilyPads, PETAL_COUNT, petalAngles } from "./lilyBloom";
 
 describe("lilyBloom", () => {
   it("flowers in summer, buds in spring, and rests in fall and winter", () => {
@@ -7,6 +7,13 @@ describe("lilyBloom", () => {
     expect(lilyBloom("spring")).toBe("bud");
     expect(lilyBloom("fall")).toBeNull();
     expect(lilyBloom("winter")).toBeNull();
+  });
+
+  it("grows its pads small in spring and full in summer and fall, and lets them die back in winter", () => {
+    expect(lilyPads("spring")!.grow).toBeLessThan(1);
+    expect(lilyPads("summer")!.grow).toBe(1);
+    expect(lilyPads("fall")!.grow).toBe(1);
+    expect(lilyPads("winter")).toBeNull();
   });
 
   it("spaces the petals evenly round the flower", () => {

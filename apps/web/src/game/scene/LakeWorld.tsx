@@ -118,7 +118,7 @@ import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, type Bloom } from "./lilyBloom";
+import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, lilyPads, type Bloom } from "./lilyBloom";
 import { sharedLilyPetals } from "./lilyPetals";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
@@ -1273,7 +1273,9 @@ function LilyFlower({ bloom, color, open }: { bloom: Exclude<Bloom, null>; color
 
 function FloatingLily({ url, position, scale, index, open }: Lily & { index: number; open: number }) {
   const ref = useRef<THREE.Group>(null);
-  const bloom = lilyBloom(useContext(SeasonContext));
+  const season = useContext(SeasonContext);
+  const bloom = lilyBloom(season);
+  const pads = lilyPads(season);
   useFrame((state) => {
     const lily = ref.current;
     if (!lily) return;
@@ -1284,9 +1286,10 @@ function FloatingLily({ url, position, scale, index, open }: Lily & { index: num
     lily.rotation.x = THREE.MathUtils.clamp((waterHeight(position[0], position[2] + sample, t) - y) * 1.3, -0.28, 0.28);
     lily.rotation.z = THREE.MathUtils.clamp((y - waterHeight(position[0] + sample, position[2], t)) * 1.3, -0.28, 0.28);
   });
+  if (!pads) return null;
   return (
     <group ref={ref} position={position}>
-      <ToonModel url={url} scale={scale} shadows={false} />
+      <ToonModel url={url} scale={scale * pads.grow} shadows={false} plant={{ season, kind: "grass", variant: 0.5 }} />
       {bloom && (
         // Drawn a little large so the flowers read from the bank.
         <group position={[0.12 * scale, 0, 0.08 * scale]} scale={scale * 1.8}>

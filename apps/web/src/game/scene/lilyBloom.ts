@@ -9,6 +9,15 @@ export function lilyBloom(season: LakeSeason): Bloom {
   return null;
 }
 
+/**
+ * The pads themselves: young and small in spring, full grown in summer, yellowing in fall (they
+ * take the season's colour as the bank's grass does), and died back under the ice in winter.
+ */
+export function lilyPads(season: LakeSeason): { grow: number } | null {
+  if (season === "winter") return null;
+  return { grow: season === "spring" ? 0.75 : 1 };
+}
+
 /** White and pink lilies, alternating along the beds. */
 export const LILY_PETALS = ["#f7f3ea", "#f2b8c8"] as const;
 export const LILY_HEART = "#f2c94c";
