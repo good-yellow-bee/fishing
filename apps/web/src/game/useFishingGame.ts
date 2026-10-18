@@ -142,7 +142,7 @@ export function lostTrophy(species: FishSpecies, weight: number) {
 export type FightNotes = { perfectCast: boolean; hookedSolid: boolean; lightHook?: boolean; turnedRuns: number; cleanRun?: number; closeCall?: boolean; fightSec?: number; bowedLeaps?: number; easedShakes?: number; followedDarts?: number; encore?: boolean; secondTake?: boolean; grabbed?: string; gotAway?: boolean; followedIn?: boolean; clearOf?: "weeds" | "rocks" | "pilings" | "current" };
 
 export type Outcome =
-  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes }
+  | { kind: "landed"; id: string; species: FishSpecies; weight: number; spot: SpotId; clean: boolean; notes?: FightNotes; note?: string }
   | { kind: "broke"; message: string }
   | { kind: "miss"; message: string; fish?: { species: FishSpecies; weight: number } }
   | { kind: "error"; message: string };
@@ -1193,6 +1193,21 @@ export function useFishingGame(
             fx.haptic("land");
             const clean = isCleanFight(runtime.performance);
             cleanRunRef.current = clean ? cleanRunRef.current + 1 : 0;
+            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current, season);
+            // A hunter that followed the small fish in stays about the bank for the next few casts.
+            const follow = followRef.current;
+            followRef.current = null;
+            if (follow && !gotAwayRef.current) gotAwayRef.current = { spot: spotRef.current, species: follow.species, weight: follow.weight, casts: AGAIN_CASTS, follow: true };
+            const schooled = !schoolRef.current
+              ? ""
+              : isWinterSchool(current.species.id, season)
+                ? t("{fish}: there's a big winter school here, and it stays a while. Cast again quickly!", { fish: t(current.species.name) })
+                : schoolRef.current.casts > SCHOOL_CASTS
+                  ? t("{fish}: there's a school here, feeding hard in the low light. Cast again quickly!", { fish: t(current.species.name) })
+                  : t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) });
+            const followed = follow && gotAwayRef.current?.follow ? `${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
+            // The landed card covers the hint, so what the bank holds now rides on the card too.
+            const landedNote = [schooled, followed].filter(Boolean).join(" ");
             setOutcome({
               kind: "landed",
               id: localId(),
@@ -1200,6 +1215,7 @@ export function useFishingGame(
               weight: current.weight,
               spot: spotRef.current,
               clean,
+              ...(landedNote ? { note: landedNote } : {}),
               notes: {
                 perfectCast: castPerfectRef.current,
                 hookedSolid: hookedSolidRef.current,
@@ -1221,17 +1237,7 @@ export function useFishingGame(
             });
             clearFight();
             setPhaseBoth("result");
-            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current, season);
-            // A hunter that followed the small fish in stays about the bank for the next few casts.
-            const follow = followRef.current;
-            followRef.current = null;
-            if (follow && !gotAwayRef.current) gotAwayRef.current = { spot: spotRef.current, species: follow.species, weight: follow.weight, casts: AGAIN_CASTS, follow: true };
-            const followed = follow && gotAwayRef.current?.follow ? ` ${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
-            setHint(
-              (schoolRef.current
-                ? `${castHint("landed")} ${isWinterSchool(current.species.id, season) ? t("{fish}: there's a big winter school here, and it stays a while. Cast again quickly!", { fish: t(current.species.name) }) : schoolRef.current.casts > SCHOOL_CASTS ? t("{fish}: there's a school here, feeding hard in the low light. Cast again quickly!", { fish: t(current.species.name) }) : t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) })}`
-                : castHint("landed")) + followed,
-            );
+            setHint([castHint("landed"), landedNote].filter(Boolean).join(" "));
           } else if (result === "snapped") {
             fx.snap();
             fx.haptic("snap");
