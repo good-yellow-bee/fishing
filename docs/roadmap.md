@@ -1216,8 +1216,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC91~~ | ~~Snowball fight: on winter days two children on the east end of the far bank scoop, pack and throw snowballs at each other in turn, ducking some, each bursting in a puff of snow~~ (#1207) | scene | S |
 | ~~SC92~~ | ~~Leaf raker: on dry fall days a grown-up rakes the leaves back onto the pile the child keeps jumping into, a few strokes from each spot round behind it~~ (#1207) | scene | S |
 | ~~SC93~~ | ~~News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker~~ (#1207) | scene | S |
-| SC94 | Night angler: at dusk and at night from spring to fall an angler sits on the middle of the far bank by a rod on its rests, a glowing green float out on the water and a headlamp beam following their looks between the float, the tackle box and the water | scene | S |
-| SC95 | Stone skimmer: on calm, dry days from spring to fall a child at the water's edge on the far bank stoops for flat stones and skims them sidearm, each skipping out in shrinking hops with a ring spreading at every touch | scene | S |
+| ~~SC94~~ | ~~Night angler: at dusk and at night from spring to fall an angler sits on the middle of the far bank by a rod on its rests, a glowing green float out on the water and a headlamp beam following their looks between the float, the tackle box and the water~~ (#1210) | scene | S |
+| ~~SC95~~ | ~~Stone skimmer: on calm, dry days from spring to fall a child at the water's edge on the far bank stoops for flat stones and skims them sidearm, each skipping out in shrinking hops with a ring spreading at every touch~~ (#1210) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
