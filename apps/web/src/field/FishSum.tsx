@@ -3,6 +3,8 @@ import { measureOf, personalBests, type CatchEntry } from "@stillwater/shared";
 import { t, tn, useT } from "../i18n";
 import { measureText } from "../i18n/content";
 import { fishCountLabel } from "./format";
+import { catchLink, type ListKey } from "./catchList";
+import { FROM_LIST } from "./leaveDeleted";
 
 /** The dot held to the words before it, so a wrap never leaves it alone at the start of a line. */
 const SEP = "\u00a0· ";
@@ -10,7 +12,8 @@ const SEP = "\u00a0· ";
 /** "6 fish · 3 species · 2 released · Largest: Northern pike, 28 in" for the fish of one outing or one water. */
 /** `oneKind` is for a page about one species, where naming it again says nothing. */
 /** `best` is the fish the largest is picked from, when that is not all of them. */
-export function FishSum({ catches, oneKind = false, best = catches }: { catches: readonly CatchEntry[]; oneKind?: boolean; best?: readonly CatchEntry[] }) {
+/** `list` is the page's list of fish, so the largest opens within it, its arrows stepping through the page's fish. */
+export function FishSum({ catches, oneKind = false, best = catches, list }: { catches: readonly CatchEntry[]; oneKind?: boolean; best?: readonly CatchEntry[]; list?: ListKey }) {
   useT();
   if (catches.length === 0) return null;
   const species = new Set(catches.map((entry) => entry.species.trim().toLowerCase())).size;
@@ -29,15 +32,15 @@ export function FishSum({ catches, oneKind = false, best = catches }: { catches:
       {both ? (
         <>
           {SEP}
-          <BestLink entry={bests.heaviest!} kind="weight" oneKind={oneKind} />
+          <BestLink entry={bests.heaviest!} kind="weight" oneKind={oneKind} list={list} />
           {SEP}
-          <BestLink entry={bests.longest!} kind="length" oneKind={oneKind} />
+          <BestLink entry={bests.longest!} kind="length" oneKind={oneKind} list={list} />
         </>
       ) : largest ? (
         <>
           {SEP}
           {/* The largest opens its own catch page. */}
-          <Link to={`/catches/${largest.id}`}>
+          <Link to={catchLink(largest.id, list)} state={list ? FROM_LIST : undefined}>
             {oneKind
               ? t("Largest: {size}", { size })
               : t("Largest: {species}, {size}", { species: t(largest.species), size })}
@@ -49,7 +52,7 @@ export function FishSum({ catches, oneKind = false, best = catches }: { catches:
 }
 
 /** "Heaviest: Yellow perch, 0.5 lb" or "Longest: 40 in", opening that fish. */
-function BestLink({ entry, kind, oneKind }: { entry: CatchEntry; kind: "weight" | "length"; oneKind: boolean }) {
+function BestLink({ entry, kind, oneKind, list }: { entry: CatchEntry; kind: "weight" | "length"; oneKind: boolean; list?: ListKey }) {
   const size = measureText(measureOf(entry, kind)!);
   const label =
     kind === "weight"
@@ -59,5 +62,9 @@ function BestLink({ entry, kind, oneKind }: { entry: CatchEntry; kind: "weight" 
       : oneKind
         ? t("Longest: {size}", { size })
         : t("Longest: {species}, {size}", { species: t(entry.species), size });
-  return <Link to={`/catches/${entry.id}`}>{label}</Link>;
+  return (
+    <Link to={catchLink(entry.id, list)} state={list ? FROM_LIST : undefined}>
+      {label}
+    </Link>
+  );
 }

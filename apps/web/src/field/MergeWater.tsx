@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { t, tn, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
-import { mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
+import { forgetMergedWater, mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
 import { useTackleIfAny } from "./gear/TackleState";
 import { foldedTackle } from "./gear/foldedTackle";
 import { undoneTackle } from "./gear/undoneTackle";
@@ -58,7 +58,12 @@ export function MergeWater({ spotId }: { spotId: string }) {
     const lists = tackle ? foldedTackle(tackle.items, folds, localId) : null;
     const before = tackle?.items ?? [];
     // Only the folded lists are taken back: what was packed since stays.
-    if (!changeBook("merge", next, lists ? () => tackle?.updateTackle((current) => undoneTackle(current, before, lists)) : undefined)) return;
+    // Undo brings the water back, so its old links stop saying it was merged.
+    const onUndo = () => {
+      forgetMergedWater(spotId);
+      if (lists) tackle?.updateTackle((current) => undoneTackle(current, before, lists));
+    };
+    if (!changeBook("merge", next, onUndo)) return;
     if (lists) tackle?.replaceTackle(lists);
     noteMergedWater(spotId, into);
     // The kept water's page takes this one's place, opened from where this one was (a delete there goes Back to the list).

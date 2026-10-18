@@ -369,7 +369,7 @@ function TripView() {
           {t("Fish on this outing")}
         </h2>
       </div>
-      <FishSum catches={catches} />
+      <FishSum catches={catches} list={`trip:${trip.id}`} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
       {trip.date <= today && !play ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
@@ -822,11 +822,14 @@ function TripForm() {
             {/* Outside the label, so the field's name stays "Spot" while this changes with each pick. */}
             {lastHere ? (
               <small className="field-hint" id="last-here">
-                {t("Last here: {title}, {day} · {fish}", {
-                  title: outingName(lastHere, book.spots),
-                  day: formatDay(lastHere.date),
-                  fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
-                })}
+                {/* An untitled outing goes by the water's name, which the field above already shows. */}
+                {outingName(lastHere, book.spots) === spotById(book, lastHere.spotId)?.name
+                  ? t("Last here: {day} · {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(catchesForTrip(book, lastHere.id).length) })
+                  : t("Last here: {title}, {day} · {fish}", {
+                      title: outingName(lastHere, book.spots),
+                      day: formatDay(lastHere.date),
+                      fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
+                    })}
               </small>
             ) : null}
             {/* Planning a day on a water: what was learned on the last days there, in the angler's own words. */}

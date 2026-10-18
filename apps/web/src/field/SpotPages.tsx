@@ -43,14 +43,14 @@ import { tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
-import { countedBook, countedFish } from "./milestones";
+import { countedBook, countedFish, ownFish } from "./milestones";
 import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MERGE_PARAM, MergeWater } from "./MergeWater";
-import { readMergedWaters } from "./waterMerge";
+import { mergedInto, readMergedWaters } from "./waterMerge";
 import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
@@ -123,6 +123,12 @@ export function SpotsPage() {
       return !x ? (y ? 1 : 0) : !y ? -1 : x < y ? -1 : x > y ? 1 : 0;
     });
   }
+  // Once the angler has fish of their own, the sample week's invented waters follow theirs under every order, as they
+  // do by the last fish: by name or by the most fish they would sit among, or above, the angler's own.
+  if (book.catches.some(ownFish)) {
+    const invented = (row: { spot: { id: string } }) => Number(isSampleSpot(row.spot.id) && countOf(row) === 0);
+    rows.sort((a, b) => invented(a) - invented(b));
+  }
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
   // With rivers and lakes both in the book, the list can narrow to one kind of water; the game's lake shows under all.
   const types = WATER_TYPES.filter((type) => rows.some((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type));
@@ -143,9 +149,22 @@ export function SpotsPage() {
   const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
   // A long list narrows by name, accents and case aside; kept in the address like the kind, so Back keeps it.
   const finding = rows.length > FIND_WATER_FROM;
-  const query = finding ? (params.get(WATER_FIND) ?? "") : "";
+  // What was typed, held here as well as in the address: read from the address alone, a quick key arrived before the
+  // address caught up and the box wrote the older text back, dropping letters and sending the caret to the end.
+  const linkedQuery = params.get(WATER_FIND) ?? "";
+  const [typedQuery, setTypedQuery] = useState(linkedQuery);
+  const typed = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    // The address catching up with the box is not a new search; Back or Forward to another one is.
+    if (typed.current.has(linkedQuery)) return;
+    typed.current = new Set();
+    setTypedQuery(linkedQuery);
+  }, [linkedQuery]);
+  const query = finding ? typedQuery : "";
   const needle = foldText(query.trim()).toLowerCase();
-  const setQuery = (next: string) =>
+  const setQuery = (next: string) => {
+    typed.current.add(next.trim() ? next : "");
+    setTypedQuery(next);
     setParams(
       (current) => {
         const out = new URLSearchParams(current);
@@ -155,9 +174,11 @@ export function SpotsPage() {
       },
       { replace: true },
     );
-  const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(
-    (row) => !needle || foldText(row.spot.name).toLowerCase().includes(needle),
-  );
+  };
+  const byName = (row: { spot: { name: string } }) => !needle || foldText(row.spot.name).toLowerCase().includes(needle);
+  const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
+  // Waters of that name under another kind: the kind picked hides them, so say so and offer them.
+  const elsewhere = needle && shownRows.length === 0 && shownKind !== "all" && rows.some(byName);
 
   return (
     <div className="sheet">
@@ -208,7 +229,21 @@ export function SpotsPage() {
           <div className="catch-search spot-find">
             <label htmlFor="spot-find">{t("Find a water")}</label>
             <input id="spot-find" type="search" value={query} autoComplete="off" onChange={(event) => setQuery(event.target.value)} />
-            <div role="status">{needle && shownRows.length === 0 ? <p className="empty">{t("No water called “{query}”.", { query: query.trim() })}</p> : null}</div>
+            <div role="status">
+              {elsewhere ? (
+                <p className="empty">
+                  {t("No water of this kind called “{query}”.", { query: query.trim() })}{" "}
+                  <button type="button" className="text-button" onClick={() => setKind("all")}>
+                    {t("Show all kinds")}
+                  </button>
+                </p>
+              ) : needle && shownRows.length === 0 ? (
+                <p className="empty">{t("No water called “{query}”.", { query: query.trim() })}</p>
+              ) : needle ? (
+                // Heard as the list narrows: how many waters the name finds.
+                <p className="sr-only">{tn(shownRows.length, "{n} water", "{n} waters")}</p>
+              ) : null}
+            </div>
           </div>
         ) : null}
         <div className="card-grid">
@@ -250,7 +285,8 @@ function SpotView() {
 
   if (!spot) {
     // Merged into another water (an old link, a bookmark): say where its outings and fish went.
-    const into = spotById(book, readMergedWaters()[spotId] ?? "");
+    // Followed as far as a water still in the book: one merged twice names where its fish are now.
+    const into = spotById(book, mergedInto(readMergedWaters(), spotId, (id) => Boolean(spotById(book, id))) ?? "");
     return (
       <div className="sheet">
         <h1>{t("Missing water")}</h1>
@@ -300,7 +336,10 @@ function SpotView() {
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
   // By the day a fish counts on, as the year search each bar opens reads it.
-  const years = yearTally(catches, (entry) => bookFishDay(book, entry));
+  // A sample water the angler has fished too: its counts are their own fish, as Bests counts them, not the sample's
+  // invented ones beside them. The game's lake counts its own.
+  const summed = spot.id === PLAY_LAKE_ID ? catches : countedFish(catches);
+  const years = yearTally(summed, (entry) => bookFishDay(book, entry));
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
   // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
@@ -485,8 +524,11 @@ function SpotView() {
       <div className="section-head">
         <h2>{t("Fish from this water")}</h2>
       </div>
-      <FishSum catches={catches} />
-      <SpeciesChips catches={catches} within={spot.name} />
+      <FishSum catches={summed} list={`water:${spot.id}`} />
+      {summed.length < catches.length ? (
+        <p className="meta">{tn(catches.length - summed.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+      ) : null}
+      <SpeciesChips catches={summed} within={spot.name} />
       {notYet.length > 0 ? (
         <p className="meta not-yet">
           <span>
@@ -507,21 +549,21 @@ function SpotView() {
       ) : null}
       {/* The game's lake and a sample water beside the angler's own: a kind's page holds other fish, so the kind opens this water's. */}
       <BiggestHere
-        catches={catches}
+        catches={summed}
         spotId={spot.id}
         kindLink={(species) => (kindOnPage(book, species).some((entry) => entry.spotId === spot.id) ? speciesLink(species) : findWithLink(here, exactTerm("species", t(species))))}
       />
       <PhotoStrip catches={catches} within={here} named list={`water:${spot.id}`} />
       <FishCsv catches={catches} name={spot.name} />
-      {catches.length > 1 ? (
+      {summed.length > 1 ? (
         <>
           <div className="section-head">
             <h2>{t("When it bites")}</h2>
           </div>
-          <TallyBars key={spot.id} rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
+          <TallyBars key={spot.id} rows={biteTimes({ ...book, catches: summed }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <MonthBars catches={catches} within={exactTerm("water", spot.name)} monthOf={(entry) => bookFishDay(book, entry).slice(0, 7)} />
+      <MonthBars catches={summed} within={exactTerm("water", spot.name)} monthOf={(entry) => bookFishDay(book, entry).slice(0, 7)} />
       {/* Each season's fish here, newest first: whether the water is holding up or fading. */}
       {years.length > 1 ? (
         <>
@@ -607,6 +649,18 @@ function SpotForm() {
     ? book.spots.find((spot) => spot.id !== existing?.id && spot.name.trim().toLowerCase() === name.trim().toLowerCase())
     : undefined;
 
+  // Back to the catch or outing form this water was added for, with it picked.
+  const backToForm = (spotId: string) => {
+    const form = then === "catch" ? "/catches/new" : "/trips/new";
+    if (then === "catch") {
+      const typed = readKeptDraft();
+      if (typed) keepDraft({ ...typed, spotId, tripId: "" });
+    }
+    noteAddedWater(spotId);
+    if (canGoBack() && pageBefore()?.split("?")[0] === form) navigate(-1);
+    else navigate(`${form}?spot=${spotId}`, { replace: true });
+  };
+
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     const draft = { name, waterType, notes, bestConditions, place };
@@ -619,16 +673,7 @@ function SpotForm() {
     kept.drop();
     // Back to the form it was added for, which picks the new water (and a fish typed there comes back on it); a form
     // opened directly gives way to a fresh one on the water, so Back doesn't open it again.
-    if (then === "catch" || then === "trip") {
-      const form = then === "catch" ? "/catches/new" : "/trips/new";
-      if (then === "catch") {
-        const typed = readKeptDraft();
-        if (typed) keepDraft({ ...typed, spotId: result.id, tripId: "" });
-      }
-      noteAddedWater(result.id);
-      if (canGoBack() && pageBefore()?.split("?")[0] === form) navigate(-1);
-      else navigate(`${form}?spot=${result.id}`, { replace: true });
-    }
+    if (then === "catch" || then === "trip") backToForm(result.id);
     // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
     // Said there as on the water's page, so a save with no place noted (no pin moves) still shows it went through.
     else if (then === "map") {
@@ -691,7 +736,22 @@ function SpotForm() {
           </label>
           {sameName ? (
             <p className="wide form-note" role="status">
-              {t("This book already has a water by that name:")} <Link to={`/spots/${sameName.id}`}>{sameName.name}</Link>
+              {t("This book already has a water by that name:")}{" "}
+              {/* Added for a fish or an outing: the one already here is picked for it, rather than leaving the form. */}
+              {!existing && (then === "catch" || then === "trip") ? (
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    kept.drop();
+                    backToForm(sameName.id);
+                  }}
+                >
+                  {t("Use {name}", { name: sameName.name })}
+                </button>
+              ) : (
+                <Link to={`/spots/${sameName.id}`}>{sameName.name}</Link>
+              )}
             </p>
           ) : null}
           {/* The choice row is the group and carries the name, so the type isn't announced twice. */}
@@ -804,15 +864,17 @@ function SpotForm() {
 /** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
 function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
   useT();
-  const readings = tempThroughYear(catches);
+  const { book } = useLogbook();
+  // By the day a fish counts on: a New Year's Eve night's small hours read as the old year's last day, not the new one's first.
+  const readings = tempThroughYear(catches, (entry) => bookFishDay(book, entry));
   if (readings.length === 0) return null;
-  // The month written out, so Polish takes its "of" form ("16 maja").
-  const day = (iso: string) => new Date(iso).toLocaleDateString(locale(), { month: "long", day: "numeric" });
+  // The month written out, so Polish takes its "of" form ("16 maja"); read at noon, so no time zone moves the day.
+  const day = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString(locale(), { month: "long", day: "numeric" });
   return (
     <p className="meta temp-year">
       {t("Water temperature in {year}: {readings}", {
-        year: new Date(readings[0]!.at).getFullYear(),
-        readings: readings.map((reading) => `${day(reading.at)}: ${tempText(reading.fahrenheit)}`).join(" → "),
+        year: readings[0]!.day.slice(0, 4),
+        readings: readings.map((reading) => `${day(reading.day)}: ${tempText(reading.fahrenheit)}`).join(" → "),
       })}
     </p>
   );
