@@ -9,8 +9,10 @@ import { waterHeight } from "./water";
 const STREAK_COLOR = "#d4e3ea";
 const RING_COLOR = "#e2eff3";
 
-/** Thin, see-through streaks and rings, so a shower never hides the line or the fish. */
-export function LakeRain({ light }: { light: number }) {
+const NO_WIND = { x: 0, z: 0 };
+
+/** Thin, see-through streaks and rings, so a shower never hides the line or the fish. The streaks slant down the day's `wind`. */
+export function LakeRain({ light, wind = NO_WIND }: { light: number; wind?: { x: number; z: number } }) {
   const streaks = useRef<THREE.InstancedMesh>(null);
   const rings = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => new THREE.Object3D(), []);
@@ -69,11 +71,13 @@ export function LakeRain({ light }: { light: number }) {
     const stride = settings.particles === "lite" ? 2 : 1;
     let slot = 0;
     for (let i = 0; i < RAIN_COUNT; i += stride, slot += 1) {
-      const drop = rainStreak(i, at);
+      const drop = rainStreak(i, at, wind);
       if (drop) {
         const yaw = Math.atan2(camera.position.x - drop.x, camera.position.z - drop.z);
         scratch.position.set(drop.x, drop.y, drop.z);
         scratch.rotation.set(0, yaw, 0);
+        // Tilt the streak in its own plane by as much of the slant as runs across the view, top upwind.
+        scratch.rotateZ(Math.atan(drop.lean.x * Math.cos(yaw) - drop.lean.z * Math.sin(yaw)));
         scratch.scale.set(1, drop.length, 1);
       } else {
         scratch.position.set(0, -40, 0);

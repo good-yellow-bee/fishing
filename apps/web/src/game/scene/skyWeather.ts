@@ -7,13 +7,22 @@ export const RAIN_RIPPLE_SEC = 0.62;
 export const RAIN_STREAK_LENGTH = 1.3;
 /** Meters a splash ring rides above the chop. */
 export const RAIN_RIPPLE_LIFT = 0.06;
+/** How far the wind drives a drop sideways for each metre it falls, per m/s of the day's drift: a strong wind slants the rain about 25 degrees. */
+export const RAIN_LEAN = 3.5;
 
 const CYCLE = RAIN_FALL_SEC + RAIN_RIPPLE_SEC;
 const STEP_X = 2.7;
 const STEP_Z = 2.6;
 
 export type RainColumn = { x: number; z: number; phase: number };
-export type RainStreak = { x: number; y: number; z: number; length: number };
+export type RainStreak = {
+  x: number;
+  y: number;
+  z: number;
+  length: number;
+  /** Metres it moves downwind for each metre it falls, so the streak leans with its top upwind. */
+  lean: { x: number; z: number };
+};
 export type RainRipple = { x: number; y: number; z: number; radius: number; open: number };
 
 /** Every bank's water gets the same shower, so rain falls around the bobber wherever the angler casts. */
@@ -41,18 +50,26 @@ function cycleU(index: number, time: number) {
   return u < 0 ? u + 1 : u;
 }
 
-/** Streak falling through the sky. Null once it has hit and the ring takes over. */
-export function rainStreak(index: number, time: number): RainStreak | null {
+const NO_WIND = { x: 0, z: 0 };
+
+/**
+ * Streak falling through the sky, slanting down the day's `wind` to land on its column. Null once
+ * it has hit and the ring takes over.
+ */
+export function rainStreak(index: number, time: number, wind = NO_WIND): RainStreak | null {
   const column = rainColumn(index);
   const u = cycleU(index, time);
   const fall = RAIN_FALL_SEC / CYCLE;
   if (u >= fall) return null;
   const head = RAIN_SKY_TOP * (1 - u / fall);
+  const y = head - RAIN_STREAK_LENGTH * 0.5;
+  const lean = { x: wind.x * RAIN_LEAN, z: wind.z * RAIN_LEAN };
   return {
-    x: column.x,
-    y: head - RAIN_STREAK_LENGTH * 0.5,
-    z: column.z,
+    x: column.x - lean.x * y,
+    y,
+    z: column.z - lean.z * y,
     length: RAIN_STREAK_LENGTH,
+    lean,
   };
 }
 

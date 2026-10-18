@@ -8,6 +8,8 @@ export const SNOW_TOP = 8;
 export const SNOW_FALL = [0.55, 0.95] as const;
 /** How far a flake sways side to side as it comes down. */
 export const SNOW_SWAY = 0.35;
+/** How far the wind carries a flake sideways for each metre it falls, per m/s of the day's drift: snow falls slowly, so a strong wind drives it at a slant of about 33 degrees. */
+export const SNOW_LEAN = 5;
 /** The flurry reaches this far past the water, over the shore the angler stands on. */
 const SHORE_MARGIN = 6;
 
@@ -19,15 +21,18 @@ function unit(index: number, salt: number) {
   return x - Math.floor(x);
 }
 
-/** Where flake `index` is at `time`: drifting down on a loop, swaying on its own beat. */
-export function snowFlake(index: number, time: number): Flake {
+const NO_WIND = { x: 0, z: 0 };
+
+/** Where flake `index` is at `time`: drifting down on a loop, swaying on its own beat, and carried down the day's `wind` as it falls. */
+export function snowFlake(index: number, time: number, wind = NO_WIND): Flake {
   const speed = SNOW_FALL[0] + unit(index, 1) * (SNOW_FALL[1] - SNOW_FALL[0]);
   const loop = SNOW_TOP / speed;
   const u = ((time / loop + unit(index, 2)) % 1 + 1) % 1;
   const sway = Math.sin(time * (0.6 + unit(index, 3) * 0.8) + unit(index, 4) * Math.PI * 2) * SNOW_SWAY;
+  const y = SNOW_TOP * (1 - u);
   return {
-    x: (unit(index, 5) * 2 - 1) * (LAKE_RX + SHORE_MARGIN) + sway,
-    y: SNOW_TOP * (1 - u),
-    z: LAKE_CENTER_Z + (unit(index, 6) * 2 - 1) * (LAKE_RZ + SHORE_MARGIN) + sway * 0.6,
+    x: (unit(index, 5) * 2 - 1) * (LAKE_RX + SHORE_MARGIN) + sway - wind.x * SNOW_LEAN * y,
+    y,
+    z: LAKE_CENTER_Z + (unit(index, 6) * 2 - 1) * (LAKE_RZ + SHORE_MARGIN) + sway * 0.6 - wind.z * SNOW_LEAN * y,
   };
 }

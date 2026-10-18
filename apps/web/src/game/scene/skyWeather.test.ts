@@ -4,6 +4,7 @@ import { waterHeight } from "./water.ts";
 import {
   RAIN_COUNT,
   RAIN_FALL_SEC,
+  RAIN_LEAN,
   RAIN_RIPPLE_LIFT,
   RAIN_RIPPLE_SEC,
   RAIN_SKY_TOP,
@@ -97,5 +98,21 @@ describe("lake rain", () => {
     expect(ripple!.z).toBe(column.z);
     expect(later!.radius).toBeGreaterThan(ripple!.radius + 0.25);
     expect(later!.open).toBeGreaterThan(ripple!.open);
+  });
+
+  it("slants the streaks down the wind, so each still lands on its own ring", () => {
+    const wind = { x: 0.13, z: 0 };
+    const index = 4;
+    const column = rainColumn(index);
+    const start = fallStart(index);
+    const high = rainStreak(index, start + 0.04, wind)!;
+    const low = rainStreak(index, start + 0.85, wind)!;
+    // Higher up the drop is further upwind, and it closes on its column as it falls.
+    expect(high.x).toBeLessThan(column.x - 3);
+    expect(Math.abs(low.x - column.x)).toBeLessThan(Math.abs(high.x - column.x));
+    expect(high.z).toBe(column.z);
+    expect(high.lean.x).toBeCloseTo(0.13 * RAIN_LEAN, 6);
+    expect(Math.abs(high.x - column.x) / high.y).toBeCloseTo(high.lean.x, 6);
+    expect(rainStreak(index, start + 0.04)!.lean).toEqual({ x: 0, z: 0 });
   });
 });
