@@ -59,6 +59,8 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
   }, []);
   return (
     <header ref={header} className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
+      {/* The lake page's one heading, for a screen reader's jump list; the brand below is its visible name. */}
+      <h1 className="sr-only">{t("On the lake")}</h1>
       <div className="hud-brand">
         {/* The season rides in the eyebrow: one more chip wrapped the HUD on laptop widths. */}
         <span className="eyebrow" title={season ? t(SEASON_BLURB[season]) : undefined}>

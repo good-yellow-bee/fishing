@@ -1088,6 +1088,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA43~~ | ~~PA42 set an eyebrow's links on their own solid 11 px line, so "Catch log" above Photos and "Bests" above a kind kept only 29 px of reach on a touch screen. They now reach 11 px each way, 33 px, with 24 px between wrapped lines. A fish's stacked count links ("First Northern pike here.", "Northern pike in 2026: 2") stood 4 px apart and reached into each other; lines that are both links now part 12 px (#1106)~~ | phone UX | S |
 | ~~PA44~~ | ~~Bests' days calendar drew each day as a 24 px square, the smallest tap target left in the log. On a touch screen each day is now a 32 px square, shrinking only where a 320 px phone with larger text has no room for seven (#1110)~~ | phone UX | S |
 | ~~PA45~~ | ~~On a phone up to 420 px wide with larger text, each tab in the field log's bottom bar was only as wide as its word, so MAP stood 23 px wide, under even the 24 px floor. Each tab is now at least 32 px wide on screen, and all seven still fit at 320 px in English (#1112)~~ | phone UX | S |
+| ~~PA46~~ | ~~The lake page had no heading at all, so a screen reader's list of headings came up empty there while every field log page had its title. The HUD now carries a hidden "On the lake" heading, the page's tab title, ahead of the Stillwater brand (probe headings.cjs) (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
