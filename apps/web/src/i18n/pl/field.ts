@@ -137,7 +137,7 @@ export const PL_FIELD: PlBook = {
   "Merge into another water": "Połącz z innym łowiskiem",
   "Move its outings and fish to": "Przenieś wyprawy i ryby do",
   "Choose a water": "Wybierz łowisko",
-  "This water then leaves the book; its notes and place fill in only what the other one lacks.": "To łowisko zniknie wtedy z książki; jego notatki i położenie uzupełnią tylko to, czego brakuje drugiemu.",
+  "This water then leaves the book; its notes and place fill in only what the other one lacks, and an outing on a day the other water has one joins it.": "To łowisko zniknie wtedy z dziennika; jego notatki i położenie uzupełnią tylko to, czego brakuje drugiemu, a wyprawa z dnia, w którym drugie łowisko też ma wyprawę, do niej dołączy.",
   "Merge": "Połącz",
   "Book record": "Rekord dziennika",
   "Best of its kind": "Najlepszy w gatunku",
@@ -272,7 +272,7 @@ export const PL_FIELD: PlBook = {
 
   // Trips
   Calendar: "Kalendarz",
-  "A day on a water, and the fish that came with it.": "Dzień nad wodą i ryby, które z niego przywiozłeś.",
+  "A day on a water, and the fish that came with it.": "Dzień nad wodą i ryby z tego dnia.",
   "Add a trip": "Dodaj wyprawę",
   "No upcoming outings.": "Brak nadchodzących wypraw.",
   Recent: "Ostatnie",
@@ -308,7 +308,7 @@ export const PL_FIELD: PlBook = {
   Spot: "Łowisko",
   Title: "Tytuł",
   "Dawn patrol": "Poranny patrol",
-  "Wind, water color, what you meant to try.": "Wiatr, kolor wody, co chciałeś wypróbować.",
+  "Wind, water color, what you meant to try.": "Wiatr, kolor wody, co warto wypróbować.",
   "Save trip": "Zapisz wyprawę",
 
   // Spots
@@ -370,8 +370,11 @@ export const PL_FIELD: PlBook = {
   "Summary copied.": "Podsumowanie skopiowane.",
   "The summary was downloaded instead.": "Podsumowanie zostało pobrane jako plik.",
   "Length and weight": "Długość i waga",
-  "Remove the lake's {count} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.":
-    "Usunąć {count} najstarszych zdjęć z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
+  "Remove the lake's {n} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.": [
+    "Usunąć najstarsze zdjęcie z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
+    "Usunąć {n} najstarsze zdjęcia z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
+    "Usunąć {n} najstarszych zdjęć z jeziora? Twoje własne zdjęcia i najcięższa ryba każdego gatunku zostają.",
+  ],
   "Photos fill {percent}% of the room this browser keeps for them.": "Zdjęcia zajmują {percent}% miejsca, które ta przeglądarka dla nich trzyma.",
   "Make room": "Zrób miejsce",
   "Every fish that day": "Wszystkie ryby z tego dnia",
@@ -453,7 +456,7 @@ export const PL_FIELD: PlBook = {
   "Pick the water this fish came from.": "Wybierz łowisko, z którego pochodzi ta ryba.",
   "That outing is not in the book.": "Tej wyprawy nie ma w dzienniku.",
   "That outing was on a different water.": "Ta wyprawa była na innym łowisku.",
-  "Set the time you landed it.": "Ustaw godzinę, o której ją wyholowałeś.",
+  "Set the time you landed it.": "Ustaw godzinę połowu.",
   "That time is still ahead of you.": "Ta godzina dopiero przed tobą.",
   "Keep the note to a few lines.": "Zmieść notatkę w kilku linijkach.",
   "Give the spot a short name.": "Nadaj łowisku krótką nazwę.",
@@ -642,8 +645,8 @@ export const PL_FIELD: PlBook = {
   "Go again": "Jedź jeszcze raz",
   "The tackle list from “{title}” comes along, unpacked.": "Lista sprzętu z wyprawy „{title}” zostanie skopiowana, jeszcze nic nie spakowane.",
   "Take {piece} off the list": "Usuń z listy: {piece}",
-  "A fish you started logging was not saved: {species}.": "Ryba, którą zacząłeś zapisywać, nie została zapisana: {species}.",
-  "A fish you started logging was not saved.": "Ryba, którą zacząłeś zapisywać, nie została zapisana.",
+  "A fish you started logging was not saved: {species}.": "Niezapisana ryba: {species}.",
+  "A fish you started logging was not saved.": "Jedna ryba nie została zapisana.",
   "Changes you made to this fish were not saved.": "Zmiany w tej rybie nie zostały zapisane.",
   "A {species} was already logged here at {time}. Saving adds another.": "Ryba {species} została już tu zapisana o {time}. Zapis doda kolejną.",
   "Open it": "Otwórz ją",

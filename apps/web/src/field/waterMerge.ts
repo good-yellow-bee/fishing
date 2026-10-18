@@ -1,7 +1,12 @@
-import type { Logbook } from "@stillwater/shared";
+import type { Logbook, Trip } from "@stillwater/shared";
+
+/** The most a lost or missed tally holds, and the longest an outing note runs, as the book allows. */
+const TRIP_COUNT_CAP = 999;
+const NOTE_CAP = 400;
 
 /**
- * One water folded into another: its outings and fish move over, and it leaves the book. The water kept holds on to
+ * One water folded into another: its outings and fish move over (an outing on a day the kept water has one joins
+ * that one), and it leaves the book. The water kept holds on to
  * its own notes, best conditions and place, taking the other's only where it had none. The book unchanged when either
  * water is missing or they are the same one.
  */
@@ -15,10 +20,37 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
     bestConditions: into.bestConditions.trim() ? into.bestConditions : from.bestConditions,
     ...(into.place ?? from.place ? { place: into.place ?? from.place } : {}),
   };
+  // The same day out logged on both phones: the moved outing folds into the kept water's outing of that date, its
+  // fish, counts and note with it, rather than leaving two outings on one day.
+  const sameDay = new Map<string, Trip>();
+  for (const trip of book.trips) if (trip.spotId === into.id && !sameDay.has(trip.date)) sameDay.set(trip.date, trip);
+  const foldInto = new Map<string, Trip>();
+  for (const trip of book.trips) {
+    const host = trip.spotId === from.id ? sameDay.get(trip.date) : undefined;
+    if (host) foldInto.set(trip.id, host);
+  }
+  const folded = new Map<string, Trip>();
+  for (const [id, host] of foldInto) {
+    const trip = book.trips.find((each) => each.id === id)!;
+    const was = folded.get(host.id) ?? host;
+    const named = (title: string) => [from.name, into.name].some((name) => name.trim().toLowerCase() === title.trim().toLowerCase()) || !title.trim();
+    const lost = Math.min(TRIP_COUNT_CAP, (was.lost ?? 0) + (trip.lost ?? 0));
+    const missed = Math.min(TRIP_COUNT_CAP, (was.missed ?? 0) + (trip.missed ?? 0));
+    folded.set(host.id, {
+      ...was,
+      title: named(was.title) && !named(trip.title) ? trip.title : was.title,
+      note: [was.note.trim(), trip.note.trim()].filter((note, index, notes) => note && notes.indexOf(note) === index).join("\n").slice(0, NOTE_CAP),
+      ...(lost > 0 ? { lost } : {}),
+      ...(missed > 0 ? { missed } : {}),
+    });
+  }
   return {
     spots: book.spots.filter((spot) => spot.id !== from.id).map((spot) => (spot.id === into.id ? kept : spot)),
-    trips: book.trips.map((trip) => (trip.spotId === from.id ? { ...trip, spotId: into.id } : trip)),
-    catches: book.catches.map((entry) => (entry.spotId === from.id ? { ...entry, spotId: into.id } : entry)),
+    trips: book.trips.filter((trip) => !foldInto.has(trip.id)).map((trip) => folded.get(trip.id) ?? (trip.spotId === from.id ? { ...trip, spotId: into.id } : trip)),
+    catches: book.catches.map((entry) => {
+      const host = entry.tripId ? foldInto.get(entry.tripId) : undefined;
+      return entry.spotId === from.id || host ? { ...entry, ...(entry.spotId === from.id ? { spotId: into.id } : {}), ...(host ? { tripId: host.id } : {}) } : entry;
+    }),
   };
 }
 

@@ -295,7 +295,10 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
           bestConditions: bookLine(draft.bestConditions, was.bestConditions),
         });
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
-        const saved = persist(replaceSpot(book, { ...parsed.value, id }), photos);
+        // Its untitled outings were saved under the old name: they take the new one.
+        const renamed = parsed.value.name !== was.name;
+        const next = replaceSpot(renamed ? { ...book, trips: book.trips.map((trip) => (trip.spotId === id && trip.title.trim() === was.name.trim() ? { ...trip, title: parsed.value.name } : trip)) } : book, { ...parsed.value, id });
+        const saved = persist(next, photos);
         return saved.ok ? { ok: true, id } : saved;
       },
       updateTrip: (id, draft) => {

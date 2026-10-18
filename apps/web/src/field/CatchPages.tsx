@@ -37,7 +37,7 @@ import { tempBandSearch } from "./WeatherBars";
 import { LIST_PARAM, catchLink, catchList, type ListKey } from "./catchList";
 import { catchBadge } from "./catchBadge";
 import { photoPlace, photoTakenAt } from "./photoTime";
-import { AT_PARAM, anotherCatchLink } from "./anotherCatch";
+import { AT_PARAM, RESUME_PARAM, anotherCatchLink } from "./anotherCatch";
 import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
@@ -304,14 +304,21 @@ function CatchForm() {
   // A water brought in by a link (Log a fish on a water's page) counts as picked: a photo's place won't move it.
   const spotTouched = useRef(Boolean(linkedSpot));
   // Read when the photo's notes come in, so a time typed while they were read is kept.
-  const timeTouchedNow = useRef(timeTouched);
-  timeTouchedNow.current = timeTouched;
+  // The last fish's time carried by "Save and log another" is only a start: a photo's camera time still beats it,
+  // until the player sets the time themselves.
+  const timeFreeNow = useRef(false);
+  timeFreeNow.current = !timeTouched || (carriedTime !== null && caughtAt === carriedTime && photoTime === "");
   const [note, setNote] = useState(existing?.note ?? "");
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
   const [startTemp] = useState(() => (existing?.weather?.waterTempF === undefined ? "" : inputNumber(fromBookTemp(existing.weather.waterTempF, units))));
   const [waterTemp, setWaterTemp] = useState(startTemp);
+  // A temperature put in the box from the book (this fish's own, or one copied from the last fish), with the °F it
+  // came from: saved as it was while the box still shows it, not rounded through °C and back.
+  const [heldTemp, setHeldTemp] = useState(() =>
+    existing?.weather?.waterTempF !== undefined ? { shown: startTemp, tempF: existing.weather.waterTempF } : null,
+  );
   // Conditions are optional, but once one is noted the other two are needed.
   const weatherStarted = Boolean(sky || wind || waterTemp.trim());
   const [photo, setPhoto] = useState<string | null>(existing ? photoFor(existing.id) : null);
@@ -417,7 +424,15 @@ function CatchForm() {
     // Picked up counts as typed: it stays kept even before the next keystroke.
     opened.current = "";
     setWaiting(null);
+    focusSoon('input[name="species"]');
   };
+  // From Home's "Pick it up": the fish comes back at once, not after the same question again.
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (resumed.current || existing || !waiting || !params.has(RESUME_PARAM)) return;
+    resumed.current = true;
+    pickUp(waiting);
+  });
 
   // A long book makes these slow enough to drag typing, so they wait for the book, water or language to change.
   const spotTrips = useMemo(() => tripsForSpot(book, spotId), [book, spotId]);
@@ -513,7 +528,7 @@ function CatchForm() {
     // A new fish takes the time the photo was taken, if the camera noted one and the time hasn't been set, and the
     // pinned water within a couple of km of where it was taken, if the water and outing haven't been picked.
     const canMoveWater = !tripPicked && !spotTouched.current;
-    if (!existing && (!timeTouched || canMoveWater)) {
+    if (!existing && (timeFreeNow.current || canMoveWater)) {
       void file
         .slice(0, PHOTO_HEAD_BYTES)
         .arrayBuffer()
@@ -528,7 +543,7 @@ function CatchForm() {
             setPhotoSpot(water);
           }
           const taken = photoTakenAt(bytes);
-          const timed = !timeTouchedNow.current && taken && taken <= toLocalInput(new Date()) ? taken : null;
+          const timed = timeFreeNow.current && taken && taken <= toLocalInput(new Date()) ? taken : null;
           if (timed) {
             setCaughtAt(timed);
             setPhotoTime(timed);
@@ -596,7 +611,7 @@ function CatchForm() {
       sky,
       wind,
       waterTemp:
-        existing?.weather?.waterTempF !== undefined && waterTemp === startTemp ? String(existing.weather.waterTempF) : toBookTemp(waterTemp, units),
+        heldTemp && waterTemp === heldTemp.shown ? String(heldTemp.tempF) : toBookTemp(waterTemp, units),
       released,
     };
     // Worked out against the book before this fish joins it.
@@ -694,6 +709,8 @@ function CatchForm() {
               if (existing) dropEditDraft(existing.id);
               else dropKeptDraft();
               setWaiting(null);
+              // The banner goes with its buttons: on to the form's first box.
+              focusSoon('input[name="species"]');
             }}
           >
             {t("Let it go")}
@@ -759,7 +776,11 @@ function CatchForm() {
             {misspelt ? (
               <small className="field-hint">
                 {t("Did you mean")}{" "}
-                <button type="button" className="text-button" onClick={() => setSpecies(misspelt)}>
+                <button type="button" className="text-button" onClick={() => {
+                    setSpecies(misspelt);
+                    // The hint goes once taken: the keyboard carries on from the box it filled.
+                    focusSoon('input[name="species"]');
+                  }}>
                   {misspelt}
                 </button>
                 ?
@@ -907,7 +928,10 @@ function CatchForm() {
             {misspeltLure ? (
               <small className="field-hint">
                 {t("Did you mean")}{" "}
-                <button type="button" className="text-button" onClick={() => setLure(misspeltLure)}>
+                <button type="button" className="text-button" onClick={() => {
+                    setLure(misspeltLure);
+                    focusSoon('input[name="lure"]');
+                  }}>
                   {misspeltLure}
                 </button>
                 ?
@@ -1000,6 +1024,8 @@ function CatchForm() {
                   setCaughtAt(now);
                   if (!tripPicked) setTripId(tripForFish(book, spotId, now)?.id ?? "");
                   setTimeTouched(true);
+                  // "Now" goes once the time is now: focus stays on the time.
+                  focusSoon('input[name="caughtAt"]');
                 }}
               >
                 {t("Now")}
@@ -1061,6 +1087,7 @@ function CatchForm() {
                 onClick={() => {
                   setCaughtAt(`${pickedTrip.date}${caughtAt.slice(10)}`);
                   setTimeTouched(true);
+                  focusSoon('input[name="caughtAt"]');
                 }}
               >
                 {t("Move it to {day}", { day: formatDay(pickedTrip.date) })}
@@ -1077,7 +1104,9 @@ function CatchForm() {
                 onClick={() => {
                   setSky(offeredWeather.sky);
                   setWind(offeredWeather.wind);
-                  setWaterTemp(offeredWeather.waterTempF === undefined ? "" : inputNumber(fromBookTemp(offeredWeather.waterTempF, units)));
+                  const shown = offeredWeather.waterTempF === undefined ? "" : inputNumber(fromBookTemp(offeredWeather.waterTempF, units));
+                  setWaterTemp(shown);
+                  setHeldTemp(offeredWeather.waterTempF === undefined ? null : { shown, tempF: offeredWeather.waterTempF });
                   focusSoon('select[name="sky"]');
                 }}
               >

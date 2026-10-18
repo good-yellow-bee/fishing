@@ -39,3 +39,19 @@ describe("mergeWaters", () => {
     expect(mergeWaters(book, "x", "a")).toBe(book);
   });
 });
+
+describe("merging a day out logged twice", () => {
+  it("folds the moved outing into the kept water's outing of the same day, with its fish, counts and note", () => {
+    const twice = {
+      ...book,
+      trips: [...book.trips, { id: "t3", date: "2026-05-01", title: "Cedar lake", spotId: "b", note: "Fog early", lost: 1 }],
+      catches: [...book.catches, { ...book.catches[0]!, id: "f3", spotId: "b", tripId: "t3" }],
+    } as Logbook;
+    twice.trips[0] = { ...twice.trips[0]!, note: "Calm", lost: 2, missed: 1 };
+    const next = mergeWaters(twice, "a", "b");
+    expect(next.trips.map((trip) => trip.id)).toEqual(["t2", "t3"]);
+    // The kept outing had only its water's name: the moved one's own title comes along.
+    expect(next.trips.find((trip) => trip.id === "t3")).toMatchObject({ spotId: "b", title: "Dawn", note: "Fog early\nCalm", lost: 3, missed: 1 });
+    expect(next.catches.filter((entry) => entry.tripId === "t3").map((entry) => entry.id).sort()).toEqual(["f1", "f3"]);
+  });
+});

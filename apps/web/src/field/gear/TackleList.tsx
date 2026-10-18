@@ -51,10 +51,12 @@ export function TackleList({
   const rows = itemsForTrip(items, tripId);
   const lastBag = rows.length === 0 ? lastPackedTrip(trips, items, tripId) : null;
   const packed = packedCount(rows);
-  const onList = new Set(rows.map((item) => pieceKey(item.label)));
-  const missing = suggest.filter((lure) => !onList.has(pieceKey(lure)));
+  // Pieces compare as they read: "Rosówka" typed on a Polish list is the stored "Nightcrawler" of the tips and the fish.
+  const readKey = (label: string) => pieceKey(t(label));
+  const onList = new Set(rows.map((item) => readKey(item.label)));
+  const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
   const took = new Map<string, number>();
-  for (const entry of caught) took.set(pieceKey(entry.lure), (took.get(pieceKey(entry.lure)) ?? 0) + 1);
+  for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   // While packing, the pieces already in the bag can step aside.
@@ -185,7 +187,7 @@ export function TackleList({
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
-                {took.get(pieceKey(item.label)) ? <span className="tackle-caught">{fishCountLabel(took.get(pieceKey(item.label))!)}</span> : null}
+                {took.get(readKey(item.label)) ? <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span> : null}
               </label>
               <button
                 type="button"

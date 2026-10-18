@@ -12,6 +12,7 @@ import {
 import { localId } from "../../game/localId";
 import { TACKLE_STORAGE_KEY, readTackle, saveTackle } from "./storage";
 import { pieceKey } from "./pieceKey";
+import { t } from "../../i18n";
 
 type TackleApi = {
   items: TackleItem[];
@@ -81,8 +82,9 @@ export function TackleProvider({ children }: { children: ReactNode }) {
         const parsed = parseTackleLabel(label);
         if (!parsed.ok) return parsed.message;
         // "Spinnerbaits" on a list with "Spinnerbait" is the same piece, as the fish counts take it.
-        const name = pieceKey(parsed.value);
-        if (items.some((item) => item.tripId === tripId && pieceKey(item.label) === name)) {
+        // And as it reads: "Rosówka" typed in Polish is the "Nightcrawler" a tip added.
+        const name = pieceKey(t(parsed.value));
+        if (items.some((item) => item.tripId === tripId && (pieceKey(item.label) === pieceKey(parsed.value) || pieceKey(t(item.label)) === name))) {
           return "That piece is already on this list.";
         }
         const item: TackleItem = {
