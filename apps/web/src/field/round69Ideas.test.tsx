@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Logbook } from "@stillwater/shared";
-import { NEWS_ID, NEWS_ITEMS } from "../game/whatsNew";
+import { NEWS_ITEMS } from "../game/whatsNew";
 import { PL } from "../i18n/pl";
 import { MergeWater } from "./MergeWater";
 
@@ -38,8 +38,10 @@ describe("round 69 ideas", () => {
     expect(html).toContain("Moves 1 outing and 1 fish. Own Lake then holds 2 fish and 2 outings.");
   });
 
+  // Its line, wherever later news has put it on the card: another batch moves NEWS_ID on.
   it("has news for it, in Polish too", () => {
-    expect(NEWS_ID).toBe("2026-10-18-field23");
-    expect(PL[NEWS_ITEMS[0]!]).toBeTruthy();
+    const line = NEWS_ITEMS.find((item) => item.startsWith("A water's page names the next outing planned there"));
+    expect(line).toBeTruthy();
+    expect(PL[line!]).toBeTruthy();
   });
 });
