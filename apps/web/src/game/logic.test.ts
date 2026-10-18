@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
-import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, FOG_LIFT_WAIT, fogLiftWaitMul, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, FOG_LIFT_WAIT, fogLiftWaitMul, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -539,6 +539,25 @@ describe("the bright morning after the rain", () => {
     const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n, 12));
     const turned = days.find((day) => skyTurnForDay(day)?.to === "rain")!;
     expect(rainedYesterday(new Date(turned.getFullYear(), turned.getMonth(), turned.getDate() + 1, 8))).toBe(true);
+  });
+});
+
+describe("the fall turnover", () => {
+  it("lasts a few days in late fall each year, slowing the bite everywhere but the inlet", () => {
+    for (const year of [2026, 2027, 2028]) {
+      const start = turnoverStart(year);
+      expect(start.getTime()).toBeGreaterThanOrEqual(new Date(year, 9, 20).getTime());
+      expect(start.getTime()).toBeLessThan(new Date(year, 9, 20 + TURNOVER_SPAN).getTime());
+      const day = (n: number, hour = 10) => new Date(year, start.getMonth(), start.getDate() + n, hour);
+      expect(isTurnover(day(-1))).toBe(false);
+      expect(isTurnover(day(0, 0))).toBe(true);
+      expect(isTurnover(day(TURNOVER_DAYS - 1, 23))).toBe(true);
+      expect(isTurnover(day(TURNOVER_DAYS))).toBe(false);
+      expect(turnoverWaitMul(day(1), "dock")).toBe(TURNOVER_WAIT);
+      expect(turnoverWaitMul(day(1), "inlet")).toBe(TURNOVER_INLET_WAIT);
+      expect(turnoverWaitMul(day(TURNOVER_DAYS), "dock")).toBe(1);
+    }
+    expect(isTurnover(new Date(2027, 6, 1))).toBe(false);
   });
 });
 

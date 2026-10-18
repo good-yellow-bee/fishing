@@ -276,6 +276,34 @@ export function fogLiftWaitMul(now: Date, sky: string | undefined, turn = skyTur
   return turn?.to === "clear" && sky === "clear" && now.getHours() === turn.hour ? FOG_LIFT_WAIT : 1;
 }
 
+/** Once each fall the cooling top water sinks and the lake turns over, stirring up the bottom for a few days: the fish go off the bite, but the inlet's fresh stream water keeps its fish feeding. */
+export const TURNOVER_WAIT = 1.2;
+export const TURNOVER_INLET_WAIT = 0.9;
+/** How many days the turnover lasts, and the span of late fall it can start in (from October 20, this many days). */
+export const TURNOVER_DAYS = 3;
+export const TURNOVER_SPAN = 24;
+
+/** The year's turnover start, a day from October 20 on, the same for everyone. */
+export function turnoverStart(year: number) {
+  let hash = 2166136261;
+  for (const char of `turnover:${year}`) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  return new Date(year, 9, 20 + ((hash >>> 0) % TURNOVER_SPAN));
+}
+
+/** Whether the lake is turning over on this day. */
+export function isTurnover(date: Date) {
+  const start = turnoverStart(date.getFullYear());
+  const day = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const days = Math.round((day.getTime() - start.getTime()) / 86_400_000);
+  return days >= 0 && days < TURNOVER_DAYS;
+}
+
+/** How the turnover changes the wait: slower everywhere while it lasts, a little sooner in the inlet's fresh water, else 1. */
+export function turnoverWaitMul(now: Date, spot: string) {
+  if (!isTurnover(now)) return 1;
+  return spot === "inlet" ? TURNOVER_INLET_WAIT : TURNOVER_WAIT;
+}
+
 /** A breeze chops the surface, and under the broken light the fish feed bolder, so any lure but a topwater draws the bite sooner. */
 export const CHOP_WAIT = 0.9;
 

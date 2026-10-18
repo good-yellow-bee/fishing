@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
-import { rainedYesterday } from "../game/logic";
+import { isTurnover, rainedYesterday, turnoverStart } from "../game/logic";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -90,6 +90,21 @@ describe("ForecastBoard", () => {
     act(() => root.render(<ForecastBoard now={days.find((day) => weatherForDay(day) === "clear" && rainedYesterday(day))!} />));
     expect(host.querySelector("li:first-child")?.textContent).toContain(tip);
     act(() => root.render(<ForecastBoard now={days.find((day) => weatherForDay(day) === "clear" && !rainedYesterday(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain(tip);
+    act(() => root.unmount());
+  });
+
+  it("chalks the days the lake turns over", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const start = turnoverStart(2026);
+    const tip = "The lake is turning over: slow bites, except in the inlet's fresh water.";
+    act(() => root.render(<ForecastBoard now={new Date(2026, start.getMonth(), start.getDate(), 9)} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(tip);
+    const calm = new Date(2026, start.getMonth(), start.getDate() - 5, 9);
+    expect(isTurnover(calm)).toBe(false);
+    act(() => root.render(<ForecastBoard now={calm} />));
     expect(host.querySelector("li:first-child")?.textContent).not.toContain(tip);
     act(() => root.unmount());
   });
