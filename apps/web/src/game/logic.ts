@@ -499,6 +499,21 @@ export function castIntoSchool(school: School | null, spot: SpotId): { schoolId:
   return { schoolId: school.id, next: school.casts > 1 ? { ...school, casts: school.casts - 1 } : null };
 }
 
+/** A handful of groundbait tossed off a bank keeps the fish feeding there for this many casts. */
+export const GROUNDBAIT_CASTS = 5;
+/** Bites come this much sooner over the groundbait. */
+export const GROUNDBAIT_WAIT = 0.8;
+/** Handfuls of groundbait in the bag each visit. */
+export const GROUNDBAIT_HANDFULS = 1;
+
+export type Groundbait = { spot: SpotId; casts: number };
+
+/** Whether a cast at this bank lands over the groundbait, and what is left of it after the cast. */
+export function castOverGroundbait(bait: Groundbait | null, spot: SpotId): { baited: boolean; next: Groundbait | null } {
+  if (!bait || bait.spot !== spot || bait.casts <= 0) return { baited: false, next: bait };
+  return { baited: true, next: bait.casts > 1 ? { ...bait, casts: bait.casts - 1 } : null };
+}
+
 /** A fish lost in a fight spooks its bank: the next cast there waits this much longer for a bite. */
 export const SPOOK_WAIT = 1.4;
 
