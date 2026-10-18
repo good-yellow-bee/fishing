@@ -1361,7 +1361,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT265~~ | ~~News card 2026-10-18-game08 covers GT262 to GT264: a let-go fish coming back heavier, the fish feeding as the fog burns off, and the fight card warning that rocks and pilings fray the line~~ (#1024) | ui | S |
 | ~~GT266~~ | ~~A twisted line: each spinner cast turns the line, and after 12 spinner casts since the last knot the line is twisted (the stance chip says "line twisted" and the Retie button shows); a quarter of casts on it kink into a wind knot and go nowhere until Retie (or T) ties a fresh knot, and a break ties on a fresh line too; a beginner is spared~~ (#1027) | gameplay | M |
 | ~~GT267~~ | ~~Groundbait and retie on a controller: X tosses the groundbait (G) and the left trigger reties the line (T), and the keys card lists both~~ (#1030) | ui | S |
-| GT268 | The bright morning after the rain: on a clear day after a day that ended in rain, the fish sulk deep till noon, so bites come slower (1.15 wait) on any lure but a slow jig or worm; the bite reasons say so, the forecast board chalks it, and a beginner is spared | gameplay | S |
+| ~~GT268~~ | ~~The bright morning after the rain: on a clear day after a day that ended in rain, the fish sulk deep till noon, so bites come slower (1.15 wait) on any lure but a slow jig or worm; the bite reasons say so, the forecast board chalks it, and a beginner is spared~~ (#1035) | gameplay | S |
+| GT269 | News card 2026-10-18-game09 covers GT266 to GT268: a twisted line from spinner casts, groundbait and retie on a controller, and the bright morning after the rain | ui | S |
 
 ## Risks / open questions for the owner
 
