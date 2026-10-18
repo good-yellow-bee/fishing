@@ -162,3 +162,12 @@ describe("Home's columns and the card grids on a tablet-width window with larger
     expect(css).not.toContain('\n.stat-row[data-cols="4"] {');
   });
 });
+
+describe("the field log with larger text", () => {
+  it("divides every height or width taken from the window by the text zoom it is drawn at", () => {
+    const uses = css.match(/100d?v[hw][^;]*;/g) ?? [];
+    expect(uses.length).toBeGreaterThanOrEqual(10);
+    for (const use of uses) expect(use).toMatch(/^100d?v[hw] \/ var\(--text-zoom, 1\)/);
+    expect(/\n\.field-rail \{([^}]*)\}/.exec(css)?.[1]).toContain("height: calc(100dvh / var(--text-zoom, 1));");
+  });
+});
