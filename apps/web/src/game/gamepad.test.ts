@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aimLean, CURSOR_SPEED, keyChanges, moveCursor, padKeys, type PadInput } from "./gamepad";
+import { aimLean, arrowLean, CURSOR_SPEED, keyChanges, moveCursor, padKeys, type PadInput } from "./gamepad";
 
 function pad(pressed: number[] = [], axes: number[] = [0, 0, 0, 0], trigger = 0): PadInput {
   const buttons = Array.from({ length: 16 }, (_, i) => ({ pressed: pressed.includes(i), value: i === 7 ? trigger : pressed.includes(i) ? 1 : 0 }));
@@ -44,5 +44,15 @@ describe("gamepad", () => {
     const fine = moveCursor({ x: 640, y: 400 }, { x: 0.2, y: 0 }, 0.1, box);
     expect(fine.x - 640).toBeCloseTo(CURSOR_SPEED * 0.1 * 0.04);
     expect(moveCursor({ x: 5, y: 795 }, { x: -1, y: 1 }, 1, box)).toEqual({ x: 0, y: 799 });
+  });
+});
+
+describe("arrowLean", () => {
+  it("leans the way the arrows point, slow at first and full after a second's hold", () => {
+    expect(arrowLean(new Set(), 3)).toEqual({ x: 0, y: 0 });
+    expect(arrowLean(new Set(["ArrowLeft", "ArrowRight"]), 3)).toEqual({ x: 0, y: 0 });
+    expect(arrowLean(new Set(["ArrowRight"]), 0)).toEqual({ x: 0.35, y: 0 });
+    expect(arrowLean(new Set(["ArrowUp", "ArrowLeft"]), 2)).toEqual({ x: -1, y: -1 });
+    expect(arrowLean(new Set(["ArrowDown"]), 0.5).y).toBeCloseTo(0.675);
   });
 });

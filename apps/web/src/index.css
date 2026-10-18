@@ -121,6 +121,13 @@ a {
   font-size: 13px;
 }
 
+/* Not .hint: that is the lake's fixed hint bar. */
+.auth-card .field-help {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #4a3b2a;
+}
+
 /* 5.1:1 on the card's paper, where --rust was 3.1. */
 .auth-card .error {
   color: #8f3a28;
@@ -476,7 +483,7 @@ html[data-hand="left"] .photo-shutter {
 }
 
 .spot-row button:hover:not(:disabled),
-.upgrade-row button:hover:not(:disabled),
+.upgrade-row button:hover:not([aria-disabled="true"]),
 .panel-btn:hover {
   border-color: #d9b56d;
   background: rgba(211, 168, 89, 0.16);
@@ -484,7 +491,7 @@ html[data-hand="left"] .photo-shutter {
 }
 
 .spot-row button:active:not(:disabled),
-.upgrade-row button:active:not(:disabled),
+.upgrade-row button:active:not([aria-disabled="true"]),
 .panel-btn:active,
 .auth-card button:active,
 .hud .hud-link:active {
@@ -508,7 +515,7 @@ a:focus-visible {
 }
 
 .spot-row button:disabled,
-.upgrade-row button:disabled {
+.upgrade-row button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -764,12 +771,12 @@ a:focus-visible {
   cursor: pointer;
 }
 
-.daily-requests li button:hover:not(:disabled) {
+.daily-requests li button:hover:not(:disabled, [aria-disabled="true"]) {
   border-color: #d9b56d;
   background: rgba(211, 168, 89, 0.16);
 }
 
-.daily-requests li button:disabled {
+.daily-requests li button:is(:disabled, [aria-disabled="true"]) {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -1603,6 +1610,14 @@ html[data-input="pad"] .fight-bar .on-pad {
 
 .landed-card h2 {
   font-size: 28px;
+}
+
+/* The fish's name takes focus when the card comes up, and the released note after Release, so a screen reader reads
+   them; neither is a control, so neither needs a ring. The shack's "Claimed" is the same. */
+.landed-card h2[tabindex="-1"]:focus,
+.landed-card .released[tabindex="-1"]:focus,
+.daily-request-claimed[tabindex="-1"]:focus {
+  outline: none;
 }
 
 .landed-card .guide-fish {

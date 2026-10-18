@@ -12,6 +12,7 @@ export const PL_PAGES: PlBook = {
   "Password": "Hasło",
   "Could not sign in": "Nie udało się zalogować",
   "Could not register": "Nie udało się założyć konta",
+  "At least 8 characters.": "Co najmniej 8 znaków.",
   "First light on a northern lake. Cast, wait, fight whatever takes the hook.":
     "Pierwszy brzask nad północnym jeziorem. Zarzuć, poczekaj i holuj to, co weźmie.",
   "Enter the dock": "Wejdź na pomost",

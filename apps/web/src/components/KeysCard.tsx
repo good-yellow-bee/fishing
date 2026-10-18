@@ -5,7 +5,7 @@ import { useTabWrap } from "./tabWrap";
 /** Every way to play from a keyboard or a controller: the key, the pad button, and what it does. */
 export const KEY_ROWS = [
   { keys: "Space / click", pad: "A / RT", does: "Hold to charge a cast, then strike and reel" },
-  { keys: "Mouse", pad: "Right stick", does: "Aim the cast" },
+  { keys: "Mouse / arrows", pad: "Right stick", does: "Aim the cast" },
   { keys: "W A S D", pad: "Left stick", does: "Walk the shore" },
   { keys: "E", pad: "Y", does: "Open the shop at the shack" },
   { keys: "Q / R", pad: "LB / RB", does: "Change the lure" },

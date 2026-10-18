@@ -94,6 +94,11 @@ export const PL_GAME: PlBook = {
   "Retie the line or touch up a dull hook": "Przewiąż żyłkę albo podostrz tępy haczyk",
   "line twisted": "żyłka skręcona",
   "hook dulled": "haczyk stępiony",
+  "worm washed out": "robak wypłukany",
+  "Rebait": "Nowy robak",
+  "Put a fresh worm on, so its scent draws the fish again.": "Załóż świeżego robaka, żeby jego zapach znów zwabiał ryby.",
+  "You thread a fresh worm on the hook. Its scent draws the fish again.": "Nawlekasz na haczyk świeżego robaka. Jego zapach znów zwabia ryby.",
+  "The worm has soaked pale and lost its scent, so the bites come slow. Put a fresh one on.": "Robak namókł, zbladł i stracił zapach, więc brania są powolne. Załóż świeżego.",
   "live shiner on": "żywy złotawiec na haczyku",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "The breeze blows onto this bank and pushes the food in, and the fish follow it.": "Wiatr wieje na ten brzeg i spycha tu pokarm, a ryby płyną za nim.",
@@ -339,6 +344,7 @@ export const PL_GAME: PlBook = {
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",
   " → {next} ({cost} pts)": " → {next} ({cost} pkt)",
+  "{skill} is now {rank}.": "{skill}: teraz {rank}.",
   " max": " maks.",
   "The request could not be claimed.": "Nie udało się odebrać nagrody za zlecenie.",
   "Claimed, but your points could not be refreshed.": "Odebrane, ale nie udało się odświeżyć punktów.",
@@ -610,6 +616,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "A screen reader now hears how each cast ends: a landed fish's name is read and the next key goes to Release, and a missed bite or a snapped line is said aloud. If your phone or computer is set to reduce motion, storms no longer flash the lake and no shooting stars cross the night sky, even with the game's own setting off. And Join says up front that a password needs at least 8 characters.":
+    "Czytnik ekranu mówi teraz, jak skończył się każdy rzut: odczytuje nazwę wyłowionej ryby, a następny klawisz przenosi do Wypuść, a chybione branie lub zerwana żyłka są ogłaszane na głos. Jeśli telefon lub komputer ma włączone ograniczenie ruchu, burza nie rozświetla już jeziora błyskami, a po nocnym niebie nie przelatują spadające gwiazdy, nawet gdy ustawienie w grze jest wyłączone. Formularz dołączenia od razu mówi też, że hasło musi mieć co najmniej 8 znaków.",
   "Screen readers and keyboards find their way more easily. The lake now has a page heading, so a screen reader can jump straight to it, and the notes beside the dock (where you stand, the controls) are named, so the list of page areas says what each one is. Keyboard focus rings on the field log's pages and the sign-in card are a deeper colour that stands out against the paper.":
     "Czytniki ekranu i klawiatura łatwiej odnajdują drogę. Jezioro ma teraz nagłówek strony, więc czytnik ekranu może od razu do niego przeskoczyć, a notatki przy pomoście (gdzie stoisz, sterowanie) mają nazwy, więc lista obszarów strony mówi, czym jest każdy z nich. Obwódka fokusu klawiatury na stronach dziennika i na karcie logowania ma ciemniejszy kolor, który wyraźnie odcina się od papieru.",
   "On a phone, fewer taps land on the wrong link in the field log. Show all under a list no longer catches a tap meant for the row above it, the small links above a page's title stay apart when they wrap and are easier to hit, and the days in Bests' calendar are bigger squares. With larger text, every tab in the bottom bar is wide enough to tap.":
@@ -874,6 +882,8 @@ export const PL_GAME: PlBook = {
   "The lure picker now marks a slow jig or worm “good now” on the bright morning after the rain, and while the lake turns over the Inlet's walk sign gets its dot. A cast off the Dock released low in the band skips the lure under the planks into the shade, so the bite comes sooner. And a golden shiner you land can go back out as live bait: “Use it as bait” on its card hooks it on, and the next cast draws the pike, bass and walleye that hunt it.":
     "Wybór przynęty oznacza teraz wolny jig albo robaka jako „dobre teraz” w jasny poranek po deszczu, a gdy jezioro się przewraca, drogowskaz Ujścia dostaje kropkę. Rzut z Pomostu puszczony nisko w pasie odbija przynętę po wodzie pod deski, w cień, więc branie przychodzi szybciej. A złowiony złotawiec może wrócić do wody jako żywa przynęta: „Użyj go jako przynęty” na jego karcie zakłada go na haczyk, a następny rzut przyciąga polujące na niego szczupaki, bassy i sandacze.",
   "Working a lure free of the Point's rocks now blunts its hook, so a strike has half the time to set solid until you touch it up with the Retie button or T. In winter a cast onto the ice that rims the shore skitters across it, so cast past it to open water. Once each fall the lake turns over for three days: bites come slower everywhere but the inlet, where the fresh stream water keeps the fish feeding, and the shack's chalk board marks the days.": "Uwalnianie przynęty z kamieni Cypla tępi teraz haczyk, więc na pewne zacięcie masz o połowę mniej czasu, dopóki go nie podostrzysz przyciskiem Przewiąż albo klawiszem T. Zimą rzut na lód obrastający brzeg ślizga się po nim, więc zarzucaj dalej, na otwartą wodę. Raz każdej jesieni jezioro przewraca się na trzy dni: brania są słabsze wszędzie poza ujściem, gdzie świeża woda strumienia zachęca ryby do żerowania, a tablica przy szopie zaznacza te dni.",
+  "In winter a bird feeder goes up by the shack, and chickadees flit between it and the oak all day. When it rains, puddles gather on the grass in front of the shack with raindrops ringing them, and on dry days the washing hangs out on a line by the water, blowing in the wind.":
+    "Zimą przy szopie stoi karmnik, a sikory przez cały dzień kursują między nim a dębem. Gdy pada, na trawie przed szopą zbierają się kałuże, na których krople deszczu rysują kręgi, a w suche dni nad wodą suszy się na sznurze pranie, które łopocze na wietrze.",
   "On fine days someone paddles a canoe along the far shore and back. Across the lake a log cabin lights its windows at dusk and smokes from its chimney when the weather turns cold, and the shack now has a ginger cat that naps on the grass by day and sits by the campfire at night.":
     "W pogodne dni ktoś płynie kanadyjką wzdłuż dalekiego brzegu i z powrotem. Po drugiej stronie jeziora o zmierzchu zapalają się okna drewnianej chaty, a gdy robi się zimno, z jej komina leci dym. Przy szopie mieszka teraz rudy kot, który za dnia drzemie na trawie, a nocą siedzi przy ognisku.",
   "All winter a snowman in a red scarf stands in front of the shack. By day a woodpecker hitches up the owl's dead tree, drumming as it goes, and the fireflies now come out only on summer nights.":
@@ -1078,6 +1088,7 @@ export const PL_GAME: PlBook = {
   "P / Space": "P / Spacja",
   "Arrows / + −": "Strzałki / + −",
   Mouse: "Mysz",
+  "Mouse / arrows": "Mysz / strzałki",
   "Hold to charge a cast, then strike and reel": "Przytrzymaj, by naładować rzut, potem zacinaj i zwijaj",
   "Aim the cast": "Celuj rzutem",
   "Walk the shore": "Chodź brzegiem",

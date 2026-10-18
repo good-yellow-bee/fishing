@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { WALK_DEADZONE, aimLean, keyChanges, moveCursor, padKeys, type PadKeys } from "./gamepad";
+import { ARROW_KEYS, WALK_DEADZONE, aimLean, arrowLean, keyChanges, moveCursor, padKeys, type PadKeys } from "./gamepad";
 import { lookDrag, lookZoom } from "./scene/photoLook";
 
 /** Photo mode: drag pixels per second the right stick turns the view at full lean. */
@@ -12,17 +12,50 @@ export const PAD_ZOOM_SPEED = 1.1;
  * from an on-screen cursor. Returns whether a controller is connected, and where to draw the cursor
  * (null while it has not aimed). In photo mode (`lookAround`) the right stick turns the view and the left
  * stick's up and down zoom instead.
+ *
+ * The arrow keys drive the same cursor while `arrowAim` is on, so a keyboard with no mouse can aim a cast too
+ * (the fight keeps Left and Right for steering, and photo mode keeps the arrows for turning the view).
  */
-export function useGamepad(enabled = true, lookAround = false) {
+export function useGamepad(enabled = true, lookAround = false, arrowAim = false) {
   const looking = useRef(lookAround);
   looking.current = lookAround;
+  const aiming = useRef(arrowAim);
+  aiming.current = arrowAim;
+  const arrows = useRef(new Set<string>());
+  const arrowsSince = useRef(0);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [connected, setConnected] = useState(false);
   const keys = useRef<PadKeys>(new Set());
   const at = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
-    if (!enabled || typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return;
+    if (!enabled) return;
+    const down = (event: KeyboardEvent) => {
+      if (!ARROW_KEYS.has(event.code) || !aiming.current || looking.current) return;
+      // Arrows on a button, field or open panel are theirs.
+      if (event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select, [contenteditable], [role=dialog]")) return;
+      event.preventDefault();
+      if (arrows.current.size === 0) arrowsSince.current = performance.now();
+      arrows.current.add(event.code);
+    };
+    const up = (event: KeyboardEvent) => {
+      arrows.current.delete(event.code);
+    };
+    const letGo = () => arrows.current.clear();
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", letGo);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", letGo);
+      letGo();
+    };
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled || typeof navigator === "undefined") return;
+    const readPads = () => (typeof navigator.getGamepads === "function" ? [...navigator.getGamepads()] : []);
     let frame = 0;
     let last = performance.now();
     const send = (type: "keydown" | "keyup", code: string, key: string) =>
@@ -35,21 +68,26 @@ export function useGamepad(enabled = true, lookAround = false) {
       frame = requestAnimationFrame(tick);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      const pad = [...navigator.getGamepads()].find((one) => one?.connected);
+      const pad = readPads().find((one) => one?.connected);
       setConnected(pad !== undefined && pad !== null);
-      if (!pad) {
+      let lean = { x: 0, y: 0 };
+      if (pad) {
+        const next = padKeys(pad);
+        for (const change of keyChanges(keys.current, next)) send(change.type, change.code, change.key);
+        keys.current = next;
+        lean = aimLean(pad);
+        if (looking.current) {
+          if (lean.x !== 0 || lean.y !== 0) lookDrag(lean.x * PAD_LOOK_SPEED * dt, lean.y * PAD_LOOK_SPEED * dt);
+          const zoom = pad.axes[1] ?? 0;
+          if (Math.abs(zoom) > WALK_DEADZONE) lookZoom(Math.exp(zoom * PAD_ZOOM_SPEED * dt));
+          return;
+        }
+      } else {
         releaseAll();
-        return;
       }
-      const next = padKeys(pad);
-      for (const change of keyChanges(keys.current, next)) send(change.type, change.code, change.key);
-      keys.current = next;
-      const lean = aimLean(pad);
-      if (looking.current) {
-        if (lean.x !== 0 || lean.y !== 0) lookDrag(lean.x * PAD_LOOK_SPEED * dt, lean.y * PAD_LOOK_SPEED * dt);
-        const zoom = pad.axes[1] ?? 0;
-        if (Math.abs(zoom) > WALK_DEADZONE) lookZoom(Math.exp(zoom * PAD_ZOOM_SPEED * dt));
-        return;
+      // The stick wins when both lean; the arrows stop once the fight or photo mode takes them.
+      if (lean.x === 0 && lean.y === 0 && aiming.current && !looking.current && arrows.current.size > 0) {
+        lean = arrowLean(arrows.current, (now - arrowsSince.current) / 1000);
       }
       if (lean.x === 0 && lean.y === 0) return;
       const box = { width: window.innerWidth, height: window.innerHeight };
