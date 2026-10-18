@@ -227,7 +227,8 @@ export function DockPage() {
   // A controller replays as keys and pointer moves; its cursor is drawn over the scene.
   // Photo mode hides every panel for a clean shot; a bite brings them straight back.
   const [photo, setPhoto] = useState(false);
-  const { cursor: padCursor, connected: padConnected } = useGamepad(true, photo);
+  // The arrow keys aim too, except in a fight, where Left and Right steer.
+  const { cursor: padCursor, connected: padConnected } = useGamepad(true, photo, scenePhase !== "fight");
   // The fight card swaps its key and screen words for the controller's while one is connected.
   useEffect(() => {
     const root = document.documentElement;

@@ -1088,6 +1088,7 @@ export const PL_GAME: PlBook = {
   "P / Space": "P / Spacja",
   "Arrows / + −": "Strzałki / + −",
   Mouse: "Mysz",
+  "Mouse / arrows": "Mysz / strzałki",
   "Hold to charge a cast, then strike and reel": "Przytrzymaj, by naładować rzut, potem zacinaj i zwijaj",
   "Aim the cast": "Celuj rzutem",
   "Walk the shore": "Chodź brzegiem",
