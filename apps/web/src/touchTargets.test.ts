@@ -9,6 +9,13 @@ describe("touch targets", () => {
     expect(block).toContain("min-height: 32px;");
     expect(block).toContain("min-width: 32px;");
   });
+
+  it("stands the shore signs 36 px on a tablet, before the phone layouts set their own", () => {
+    const css = read("index.css");
+    const tablet = css.indexOf("@media (pointer: coarse) {\n  .walk-signs .panel-btn {\n    min-height: 36px;");
+    expect(tablet).toBeGreaterThan(-1);
+    expect(tablet).toBeLessThan(css.indexOf("    min-height: 44px;\n    padding: 6px 4px;"));
+  });
 });
 
 describe("tables that scroll sideways on a phone", () => {

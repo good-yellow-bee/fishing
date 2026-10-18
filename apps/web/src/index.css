@@ -815,6 +815,13 @@ a:focus-visible {
   backdrop-filter: blur(8px);
 }
 
+/* A tablet keeps this column down the right edge, where the signs stood 29 px tall: a finger gets 36, as on a sideways phone. The phone layouts below set their own. */
+@media (pointer: coarse) {
+  .walk-signs .panel-btn {
+    min-height: 36px;
+  }
+}
+
 .walk-signs .panel-btn:disabled {
   color: var(--amber);
   cursor: default;
