@@ -91,6 +91,8 @@ export const PL_GAME: PlBook = {
   "You thread a fresh worm on the hook. Its scent draws the fish again.": "Nawlekasz na haczyk świeżego robaka. Jego zapach znów zwabia ryby.",
   "The worm has soaked pale and lost its scent, so the bites come slow. Put a fresh one on.": "Robak namókł, zbladł i stracił zapach, więc brania są powolne. Załóż świeżego.",
   "live shiner on": "żywy złotawiec na haczyku",
+  "cloud over the sun": "chmura zasłania słońce",
+  "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "The breeze blows onto this bank and pushes the food in, and the fish follow it.": "Wiatr wieje na ten brzeg i spycha tu pokarm, a ryby płyną za nim.",
   "The water has warmed since yesterday, and the fish wake up to feed.": "Woda ociepliła się od wczoraj, a ryby budzą się do żerowania.",

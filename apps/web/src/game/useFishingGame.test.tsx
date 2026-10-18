@@ -24,6 +24,11 @@ vi.mock("@stillwater/shared", async (importOriginal) => {
   return { ...actual, hotBankForDay: () => "inlet" };
 });
 vi.mock("./eveningRise", () => ({ isRiseCast: () => true }));
+// A cloud over the sun comes and goes with the clock; each test that wants one says so.
+vi.mock("./sunCover", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./sunCover")>();
+  return { ...actual, cloudShadeWaitMul: vi.fn(() => 1) };
+});
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
   return { ...actual, castSnags: vi.fn(() => null) };
@@ -71,6 +76,7 @@ import { updateSettings } from "./settings";
 import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
+import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
 import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
@@ -1840,6 +1846,15 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toContain("The wind drives the baitfish onto the point, and the hunters follow them in.");
+  });
+
+  it("says a cloud over the sun brings the fish up into the shallows when the cast's wait comes sooner for it", () => {
+    vi.mocked(cloudShadeWaitMul).mockReturnValueOnce(CLOUD_SHADE_WAIT);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("A cloud slides over the sun, and the fish move up into the shallows to feed.");
+    expect(vi.mocked(cloudShadeWaitMul).mock.lastCall?.[0]).toBe("dock");
   });
 
   it.each([
