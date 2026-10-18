@@ -1193,6 +1193,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC76~~ | ~~Dog walker: by day from spring to fall, unless it rains, someone strolls along the far bank's sand and back with their dog, which runs on ahead, noses about, and runs on again~~ (#1177) | scene | S |
 | ~~SC77~~ | ~~Summer swimmer: on clear summer days someone swims breaststroke up and down the shallows off the far bank, head bobbing with each stroke and rings spreading round it, treading water to turn, their striped towel and bag on the sand~~ (#1180) | scene | S |
 | ~~SC78~~ | ~~News card scene17: summer hummingbird, swimmer, dog walker, fog angler~~ (#1180) | scene | S |
+| ~~SC79~~ | ~~Woodcutter at the cabin: on fall and winter days someone in a check shirt splits firewood on a block beside the far cabin, raising the axe overhead and bringing it down so the halves fall apart, then tossing them on the stack against the wall~~ (#1186) | scene | S |
+| ~~SC80~~ | ~~Dawn sculler: on calm dawns from spring to fall a sculler rows a long racing shell along the far half of the lake, sliding and sweeping the oars with each stroke and leaving a wake, then spins it round to row back~~ (#1186) | scene | S |
+| ~~SC81~~ | ~~Dog walker in the rain: the dog walker now comes out on rainy days too, under an umbrella~~ (#1186) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
