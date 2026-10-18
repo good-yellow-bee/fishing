@@ -3052,6 +3052,14 @@ html[data-reduce-motion="1"] .hour-veil {
   }
 }
 
+/* On a tablet there is room beside the stick, so the news moves right of it instead of sitting under it (both grow with larger text). */
+@media (pointer: coarse) and (min-width: 521px) {
+  html:not([data-hand="left"]) .lodge-tracks {
+    left: 136px;
+    max-width: min(42ch, calc(100vw / var(--text-zoom, 1) - 156px));
+  }
+}
+
 .lodge-tracks p {
   margin: 3px 0 0;
   font-size: 11px;
