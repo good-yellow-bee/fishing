@@ -4,15 +4,15 @@
  * strike, reel and walk code needs no second path.
  *
  * Standard mapping: A (0) and the right trigger (7) are Space, B (1) is Escape, Y (3) opens the shop (E),
- * Back (8) is photo mode (H), the bumpers (4, 5) change the lure (Q, R), the left stick walks (W A S D)
- * and the right stick aims.
+ * Back (8) is photo mode (H), the bumpers (4, 5) change the lure (Q, R), X (2) tosses the groundbait (G),
+ * the left trigger (6) reties the line (T), the left stick walks (W A S D) and the right stick aims.
  */
 
 export type PadInput = { buttons: readonly { pressed: boolean; value: number }[]; axes: readonly number[] };
 
 /** Which keys the pad is holding down this frame. */
 export type PadKeys = ReadonlySet<PadKey>;
-export type PadKey = "Space" | "Escape" | "KeyE" | "KeyH" | "KeyQ" | "KeyR" | "KeyW" | "KeyA" | "KeyS" | "KeyD";
+export type PadKey = "Space" | "Escape" | "KeyE" | "KeyH" | "KeyQ" | "KeyR" | "KeyG" | "KeyT" | "KeyW" | "KeyA" | "KeyS" | "KeyD";
 
 /** A stick must lean this far before it walks, so a resting stick never drifts the angler. */
 export const WALK_DEADZONE = 0.4;
@@ -21,7 +21,7 @@ export const AIM_DEADZONE = 0.15;
 /** Cursor pixels per second at full lean. */
 export const CURSOR_SPEED = 900;
 
-const KEY_NAMES: Record<PadKey, string> = { Space: " ", Escape: "Escape", KeyE: "e", KeyH: "h", KeyQ: "q", KeyR: "r", KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d" };
+const KEY_NAMES: Record<PadKey, string> = { Space: " ", Escape: "Escape", KeyE: "e", KeyH: "h", KeyQ: "q", KeyR: "r", KeyG: "g", KeyT: "t", KeyW: "w", KeyA: "a", KeyS: "s", KeyD: "d" };
 
 function held(pad: PadInput, index: number, threshold = 0.5) {
   const button = pad.buttons[index];
@@ -36,6 +36,8 @@ export function padKeys(pad: PadInput): PadKeys {
   if (held(pad, 8)) keys.add("KeyH");
   if (held(pad, 4)) keys.add("KeyQ");
   if (held(pad, 5)) keys.add("KeyR");
+  if (held(pad, 2)) keys.add("KeyG");
+  if (held(pad, 6)) keys.add("KeyT");
   const x = pad.axes[0] ?? 0;
   const y = pad.axes[1] ?? 0;
   if (y < -WALK_DEADZONE) keys.add("KeyW");

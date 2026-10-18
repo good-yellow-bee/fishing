@@ -716,7 +716,12 @@ export function DockPage() {
     <main className="dock-page" data-photo={photo ? "1" : undefined}>
       {photo && (
         <button className="photo-exit" type="button" {...photoDrag.handlers} onClick={() => photoDrag.tapped() && setPhoto(false)}>
-          <span>{t("Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.")}</span>
+          <span>
+            {/* A phone has no P, Space or H, so its hint names the button and the tap instead. */}
+            {touchScreen()
+              ? t("Photo mode. Drag to look around, tap Save this view to keep a picture, or tap anywhere else to bring the panels back.")
+              : t("Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.")}
+          </span>
         </button>
       )}
       {photo && (

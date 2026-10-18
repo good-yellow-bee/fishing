@@ -158,6 +158,14 @@ a {
   cursor: grabbing;
 }
 
+/* On a touch screen the hint opens at the top, clear of the Save this view button in the thumb's corner. */
+@media (pointer: coarse) {
+  .photo-exit {
+    align-items: flex-start;
+    padding: 20px 16px 0;
+  }
+}
+
 .photo-exit span {
   padding: 6px 12px;
   border-radius: 4px;
@@ -206,9 +214,17 @@ html[data-hand="left"] .photo-shutter {
   background: rgba(12, 18, 16, 0.6);
   color: #f1e4ca;
   font-size: 13px;
+  /* Its own width: a box centred with left: 50% shrinks to half the screen and broke "Zdjęcie zapisane" over two lines. */
+  width: max-content;
+  max-width: calc((100vw - 32px) / var(--text-zoom, 1));
   transform: translateX(-50%);
   pointer-events: none;
   animation: photo-hint 2.4s ease-in forwards;
+}
+
+/* A picture saved while the hint still shows: the note takes over instead of landing on top of it. */
+.photo-exit:has(~ .photo-note) span {
+  visibility: hidden;
 }
 
 @keyframes photo-hint {
