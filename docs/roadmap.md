@@ -1176,6 +1176,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC65~~ | ~~News card scene15: cabin windows on the water, sailing dinghy, tyre swing~~ (#1153) | scene | S |
 | ~~SC66~~ | ~~Waves lapping at the shore: the foam along the waterline washes out over the water and draws back, wave after wave running along the bank, wider and thicker on the bank the wind blows onto~~ (#1160) | scene | S |
 | ~~SC67~~ | ~~Winter skier: on winter days a cross-country skier strides along the far bank from by the cabin to the east end and back, poles swinging, turning round at each end~~ (#1161) | scene | S |
+| SC68 | Kite flyer: on breezy days from spring to fall a child stands on whichever bank the wind comes from and flies a kite out over the lake, swooping from side to side with its tail streaming | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
