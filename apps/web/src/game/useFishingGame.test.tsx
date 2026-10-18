@@ -7,6 +7,7 @@ import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTire
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { castIntoSpooked, castOnFreshWater, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
+import { castForReleased } from "./releasedFish";
 
 const step = vi.fn<() => FightOutcome>(() => {
   throw new Error("simulated fight failure");
@@ -36,6 +37,11 @@ vi.mock("./nibblePlan", async (importOriginal) => {
 vi.mock("./grab", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./grab")>();
   return { ...actual, grabberFor: vi.fn(() => null), followerFor: vi.fn(() => null) };
+});
+// A fish let go on an earlier day comes back only when a test says so.
+vi.mock("./releasedFish", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./releasedFish")>();
+  return { ...actual, castForReleased: vi.fn(() => ({ fish: null, next: [] })) };
 });
 // The fish that got away comes back only when a test says so.
 vi.mock("./gotAway", async (importOriginal) => {
@@ -113,6 +119,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="clean-run">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.cleanRun) : ""}</i>
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
+      <button type="button" onClick={game.retie}>retie</button>
+      <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
@@ -276,6 +284,48 @@ describe("useFishingGame landed outcome", () => {
     act(() => vi.advanceTimersByTime(5_000));
     land(0.5, 6);
     expect(run()).toBe("1");
+  });
+});
+
+describe("useFishingGame frayed line", () => {
+  const frayed = () => container!.querySelector("[data-testid=frayed]")?.textContent;
+  const dismiss = () => act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+  const retie = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "retie") as HTMLButtonElement).click());
+  const frayedArg = () => vi.mocked(makeFight).mock.calls.at(-1)?.[12];
+
+  it("frays the line on a fight that rubbed the piling, says so once, and fights the next fish on it until retied", () => {
+    const surface = mount();
+    fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(frayedArg()).toBe(false);
+    expect(frayed()).toBe("true");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("Rubbing round the piling frayed your line: it snaps sooner until you retie it.");
+    dismiss();
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 2);
+    expect(frayedArg()).toBe(true);
+    // Already frayed: the card doesn't say it again.
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).not.toContain("frayed");
+    dismiss();
+    retie();
+    expect(frayed()).toBe("false");
+    expect(hint()).toBe("You cut off the frayed line and tie the lure on again. The line holds full strain.");
+    fightPerformance = { peakTension: 0.5, maxLine: 1 };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 3);
+    expect(frayedArg()).toBe(false);
+  });
+
+  it("ties on a fresh line after a break", () => {
+    const surface = mount();
+    fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    dismiss();
+    step.mockReturnValueOnce("snapped");
+    castAndFight(surface, 2);
+    expect(frayed()).toBe("false");
   });
 });
 
@@ -1849,6 +1899,22 @@ describe("useFishingGame groundbait", () => {
     act(() => frames.at(-1)!(now));
     expect(phase()).toBe("result:landed");
     expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Common carp: it came in to feed on the groundbait.");
+  });
+
+  it("brings back a fish let go here on an earlier day, grown, and says so on the card", () => {
+    const surface = mount();
+    const pike = FISH.find((fish) => fish.id === "pike")!;
+    const at = new Date(2026, 9, 4, 12).getTime();
+    vi.mocked(castForReleased).mockReturnValueOnce({ fish: { species: pike, weight: 6.5, was: 6, at }, next: [] });
+    cast(surface);
+    expect(castForReleased).toHaveBeenCalledWith([], "dock", expect.any(Number), expect.any(Number));
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^pike\|6\.5/);
+    step.mockReturnValueOnce("landed");
+    act(() => vi.advanceTimersByTime(2_201));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    act(() => frames.at(-1)!(now));
+    expect(phase()).toBe("result:landed");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("Northern pike: you let this one go here on October 4, and it has put on 0.5 lb since.");
   });
 
   it("leaves the drawn fish to bite off the groundbait", () => {

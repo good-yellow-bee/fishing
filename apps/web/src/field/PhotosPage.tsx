@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { CATCH_PHOTO_STORE_MAX_CHARS, catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
+import { photoRoomChars } from "./photoStore";
 import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
@@ -11,6 +12,8 @@ import { catchMonth, monthName } from "./tripMonths";
 import { speciesCounts } from "./speciesLink";
 import { catchLink } from "./catchList";
 import { exactTerm } from "./findLinks";
+import { biggestOf } from "./BiggestHere";
+import { ownFish } from "./milestones";
 
 /** The photos' stored length, as JSON.stringify would give it, without building a copy of every picture to count it. */
 export function storedSize(photos: Record<string, string>): number {
@@ -22,6 +25,13 @@ export function storedSize(photos: Record<string, string>): number {
 /** The catches that carry a photo, newest first: the game's snapshots and the player's own pictures. */
 export function catchesWithPhotos(catches: readonly CatchEntry[], hasPhoto: (id: string) => boolean) {
   return catches.filter((entry) => hasPhoto(entry.id));
+}
+
+/** The angler's longest and heaviest fish that have no picture yet, the heaviest first when one fish is both. */
+export function unpicturedBests(catches: readonly CatchEntry[], hasPhoto: (id: string) => boolean): { entry: CatchEntry; kind: "length" | "weight" }[] {
+  const { longest, heaviest } = biggestOf(catches.filter(ownFish));
+  const rows = [heaviest ? { entry: heaviest, kind: "weight" as const } : null, longest ? { entry: longest, kind: "length" as const } : null].flatMap((row) => (row ? [row] : []));
+  return rows.filter((row, index) => !hasPhoto(row.entry.id) && rows.findIndex((other) => other.entry.id === row.entry.id) === index);
 }
 
 /** Photos already newest first, cut into runs by the month they were caught. */
@@ -40,12 +50,13 @@ function photoMonths(entries: readonly CatchEntry[]) {
 export function PhotosPage() {
   const { book, storedBook, photos, photoFor, removePhotos } = useLogbook();
   useT();
-  const { shown, showMore, box } = useShowMore();
+  const { shown, showMore, box } = useShowMore("photos");
   const [made, setMade] = useState<number | null>(null);
   const roomNote = useRef<HTMLParagraphElement>(null);
   // How full the room kept for photos is, and what of the game's could go to free some.
   // A kept photo never reads as 0%.
-  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((storedSize(photos) / CATCH_PHOTO_STORE_MAX_CHARS) * 100)));
+  // Against the room a save really leaves them: a big book beside them leaves less than the room kept for photos.
+  const fill = Math.min(100, Math.max(Object.keys(photos).length > 0 ? 1 : 0, Math.round((storedSize(photos) / photoRoomChars()) * 100)));
   const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
   const clear = spare.slice(0, 10);
   const makeRoom = () => {
@@ -94,6 +105,7 @@ export function PhotosPage() {
   const pickedWater = water && waters.some((row) => row.id === water) ? water : null;
   const all = pickedWater ? ofKind.filter((entry) => entry.spotId === pickedWater) : ofKind;
   const { visible, more } = catchPage(all, shown);
+  const unpictured = unpicturedBests(book.catches, (id) => photoFor(id) !== null);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
 
   return (
@@ -119,6 +131,19 @@ export function PhotosPage() {
             </>
           ) : null}
           <span role="status">{made !== null ? ` ${t("Snapshots removed: {count}.", { count: made })}` : ""}</span>
+        </p>
+      ) : null}
+      {/* The book's biggest fish still without a picture: the one most worth adding a photo to. */}
+      {unpictured.length > 0 ? (
+        <p className="meta photo-missing">
+          {unpictured.map(({ entry, kind }, index) => (
+            <span key={kind}>
+              {index > 0 ? " · " : ""}
+              <Link to={catchLink(entry.id)}>
+                {t(kind === "weight" ? "Your heaviest fish has no photo: {fish}" : "Your longest fish has no photo: {fish}", { fish: `${t(entry.species)}, ${measuresText(entry)}` })}
+              </Link>
+            </span>
+          ))}
         </p>
       ) : null}
       {/* One kind at a time, once the photos hold more than one. */}

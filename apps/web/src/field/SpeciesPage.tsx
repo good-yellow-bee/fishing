@@ -9,7 +9,7 @@ import { fishCountLabel, formatCatchDay, formatDay, outingNameById } from "./for
 import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
@@ -23,7 +23,7 @@ import { MonthBars } from "./MonthBars";
 import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
-import { seasonFirst } from "./seasonFirst";
+import { seasonFirst, seasonLast } from "./seasonFirst";
 import { countedFish } from "./milestones";
 import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
@@ -137,6 +137,7 @@ function SpeciesView() {
   const waters = speciesWaters(book, catches);
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
+  const years = yearTally(catches);
 
   return (
     <div className="sheet">
@@ -159,6 +160,7 @@ function SpeciesView() {
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
+      <SeasonLast catches={catches} />
       <NewWaters catches={catches} name={name} waters={waters} />
       {/* The water the kind came in, once two fish noted it: where to look for it. */}
       {/* The angler's own: the sample week's temperatures would widen it. */}
@@ -210,6 +212,15 @@ function SpeciesView() {
         </>
       ) : null}
       <MonthBars key={`months-${species}`} catches={catches} within={kindTerm} />
+      {/* Each season's count of the kind, newest first, each opening that season's fish of it: once it spans two. */}
+      {years.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By year")}</h2>
+          </div>
+          <TallyBars key={`years-${species}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: findWithLink(kindTerm, row.year) }))} />
+        </>
+      ) : null}
       {catches.filter((entry) => entry.weather).length > 1 ? (
         <>
           <div className="section-head">
@@ -356,6 +367,24 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
       <span>
         {before}
         <Link to={`/catches/${found.entry.id}`}>{formatCatchDay(found.entry.caughtAt)}</Link>
+        {after}
+      </span>
+    </p>
+  );
+}
+
+/** When the kind's season ended last year: its last fish then, to plan the end of this one. */
+function SeasonLast({ catches }: { catches: readonly CatchEntry[] }) {
+  const { book } = useLogbook();
+  const last = seasonLast(countedFish(catches));
+  if (!last) return null;
+  const day = bookFishDay(book, last);
+  const [before, after] = t("Last one last year: {day}", { day: "\u0000" }).split("\u0000");
+  return (
+    <p className="meta season-last">
+      <span>
+        {before}
+        <Link to={`/catches/${last.id}`}>{formatDay(day)}</Link>
         {after}
       </span>
     </p>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { FRAYED_SNAP, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -785,6 +785,18 @@ describe("runs at the drop-off", () => {
   });
 });
 
+describe("a frayed line", () => {
+  it("snaps short of full tension, where a sound line holds", () => {
+    const frayed = makeFight(fish("perch"), 0.8, 2, () => 0, 1, "open", undefined, false, false, false, false, false, true);
+    const sound = makeFight(fish("perch"), 0.8, 2, () => 0, 1, "open");
+    expect(frayed.sim.frayed).toBe(true);
+    expect(sound.sim.frayed).toBeUndefined();
+    for (const runtime of [frayed, sound]) runtime.sim.tension = (FRAYED_SNAP + 1) / 2;
+    expect(frayed.step(1, 0, false)).toBe("snapped");
+    expect(sound.step(1, 0, false)).toBe("fighting");
+  });
+});
+
 describe("runs off the point", () => {
   /** How much one reeling step, past the run's opening grace, loads the line. */
   function runPull(water: "open" | "rocks", steer: Steer) {
@@ -807,7 +819,7 @@ describe("runs off the point", () => {
 
 describe("keeping a fish clear of the reeds' weeds and the point's rocks", () => {
   /** Plays two runs, turning them or not, reeling between and through them, and returns what the landed card would note. */
-  function twoRuns(water: "weeds" | "rocks" | "pilings" | "open", turn: boolean) {
+  function twoRuns(water: "weeds" | "rocks" | "pilings" | "open", turn: boolean, read: "clearOf" | "scuffed" = "clearOf") {
     const runtime = makeFight(fish("lake-whitefish"), 2, 3, () => 0, 1, water);
     let runs = 0;
     let was = runtime.sim.surge;
@@ -818,8 +830,17 @@ describe("keeping a fish clear of the reeds' weeds and the point's rocks", () =>
       was = runtime.sim.surge;
     }
     expect(runs).toBe(2);
-    return runtime.performance.clearOf;
+    return runtime.performance[read];
   }
+
+  it("frays the line on runs dragged over the rocks or round a piling, and not on turned ones or in the weeds", () => {
+    expect(twoRuns("rocks", false, "scuffed")).toBe(true);
+    expect(twoRuns("pilings", false, "scuffed")).toBe(true);
+    expect(twoRuns("rocks", true, "scuffed")).toBeFalsy();
+    expect(twoRuns("pilings", true, "scuffed")).toBeFalsy();
+    expect(twoRuns("weeds", false, "scuffed")).toBeFalsy();
+    expect(twoRuns("open", false, "scuffed")).toBeFalsy();
+  });
 
   it("notes runs turned clear of them, and not runs that went in", () => {
     expect(twoRuns("weeds", true)).toBe("weeds");

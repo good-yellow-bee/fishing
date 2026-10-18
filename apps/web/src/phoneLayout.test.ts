@@ -23,3 +23,72 @@ describe("a phone held sideways", () => {
     expect(block).toContain("overflow-x: auto;");
   });
 });
+
+describe("larger text on a phone held upright", () => {
+  const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
+  const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
+
+  it("keeps the walking stick its size and brings the cast meter down beside it, clear of the hint and the coach", () => {
+    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap > div\.walk-stick \{\n    zoom: 1;/);
+    expect(upright).toMatch(/html\[data-text-size\] \.power-meter \{\n    bottom: calc\(104px \/ var\(--text-zoom, 1\)\);\n    width: min\(160px, calc\(\(100vw - 152px\) \/ var\(--text-zoom, 1\)\)\);/);
+    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.walkthrough ol \{\n    display: none;/);
+  });
+});
+
+describe("a fight on a phone held upright with larger text", () => {
+  const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
+  const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
+
+  it("clears the header's status chips, the coach and the bank chip so the card ends above the thumb button", () => {
+    expect(upright).toContain('html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),');
+    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\n    display: none;/);
+    expect(upright).toMatch(/@media \(pointer: coarse\) and \(max-width: 800px\) and \(min-height: 501px\) \{\n  html\[data-text-size\] \.fight-bar \.fight-controls \{\n    display: none;/);
+  });
+});
+
+describe("the effects notice", () => {
+  it("takes its own width up to its cap instead of wrapping to half the screen", () => {
+    expect(/\n\.effects-toast \{([^}]*)\}/.exec(css)?.[1]).toContain("width: max-content;");
+  });
+});
+
+describe("the settings panel on a phone", () => {
+  it("is solid and keeps Back to the lake pinned at its foot while the long list scrolls", () => {
+    expect(/\n\.settings-panel \{([^}]*)\}/.exec(css)?.[1]).toContain("background: rgb(24, 29, 25);");
+    const foot = /\n\.settings-foot \{([^}]*)\}/.exec(css)?.[1];
+    expect(foot).toContain("position: sticky;");
+    expect(foot).toContain("background: inherit;");
+  });
+});
+
+describe("the keys card on a phone", () => {
+  const from = css.indexOf("/* On a phone the three columns only fit");
+  const phone = css.slice(from, css.indexOf("\n.settings-overlay {", from));
+
+  it("lets long keys wrap, and with larger text puts what each key does on a line of its own", () => {
+    expect(phone).toMatch(/@media \(max-width: 520px\) \{\n  \.keys-card kbd \{\n    white-space: normal;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.keys-card tr \{\n    display: grid;\n    grid-template-columns: 1fr 1fr;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.keys-card td:nth-child\(3\) \{\n    grid-column: 1 \/ -1;/);
+  });
+});
+
+describe("the shop on a phone", () => {
+  it("is solid, keeps Back to the path pinned at its foot, and sits centred", () => {
+    expect(/\n\.shop-overlay \{([^}]*)\}/.exec(css)?.[1]).toContain("background: rgb(24, 29, 25);");
+    const foot = /\n\.shop-foot \{([^}]*)\}/.exec(css)?.[1];
+    expect(foot).toContain("position: sticky;");
+    expect(foot).toContain("background: inherit;");
+    expect(css).toMatch(/@media \(max-width: 520px\) \{\n  \/\*[^*]*\*\/\n  \.shop-overlay \{\n    right: calc\(4vw \/ var\(--text-zoom, 1\)\);/);
+  });
+});
+
+describe("the trip recap on a phone", () => {
+  const from = css.indexOf('/* "Najcięższa" in its spaced capitals');
+  const phone = css.slice(from, css.indexOf("/* High contrast from Settings", from));
+
+  it("tightens the stat labels, and stacks the stats as rows with larger text or on the narrowest phones", () => {
+    expect(phone).toMatch(/@media \(max-width: 520px\) \{\n  \.trip-recap-stats dt \{\n    letter-spacing: 0\.04em;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+    expect(phone).toMatch(/@media \(max-width: 360px\) \{\n  \.trip-recap-stats \{\n    grid-template-columns: 1fr;/);
+  });
+});

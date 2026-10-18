@@ -1,4 +1,4 @@
-import { catchPhotoWriteBlocked, catchPhotosFromUnknown, type CatchPhotoMap } from "@stillwater/shared";
+import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, CATCH_PHOTO_STORE_MAX_CHARS, catchPhotoWriteBlocked, catchPhotosFromUnknown, type CatchPhotoMap } from "@stillwater/shared";
 import { t } from "../i18n";
 
 export const PHOTO_STORAGE_KEY = "stillwater.field-log.photos.v1";
@@ -20,6 +20,20 @@ function storageChars(): number {
     total += key.length + (localStorage.getItem(key)?.length ?? 0);
   }
   return total;
+}
+
+/**
+ * The room photos really have here: the room kept for them, or less once the book and everything else stored leave
+ * less than that beside the book's headroom, as a save weighs it.
+ */
+export function photoRoomChars(): number {
+  try {
+    const stored = localStorage.getItem(PHOTO_STORAGE_KEY);
+    const others = storageChars() - (stored === null ? 0 : PHOTO_STORAGE_KEY.length + stored.length);
+    return Math.max(1, Math.min(CATCH_PHOTO_STORE_MAX_CHARS, CATCH_PHOTO_QUOTA_CHARS - CATCH_PHOTO_BOOK_HEADROOM_CHARS - others - PHOTO_STORAGE_KEY.length));
+  } catch {
+    return CATCH_PHOTO_STORE_MAX_CHARS;
+  }
 }
 
 export function savePhotos(photos: CatchPhotoMap) {

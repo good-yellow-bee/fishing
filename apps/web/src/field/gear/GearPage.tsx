@@ -19,6 +19,7 @@ import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
 import { renamedTackle } from "./renamedTackle";
 import { pieceRecords } from "./pieceRecord";
+import { shownPieceKey } from "./pieceKey";
 import { notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
 import { packingTips } from "../waterTips";
@@ -26,9 +27,10 @@ import { nearTwinLures } from "../suggestions";
 import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
 import { countedSearch } from "../countedSearch";
-import { t, tn, useT } from "../../i18n";
+import { locale, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
+import { ownFish } from "../milestones";
 import { upcomingRealTrips } from "../bookCopy";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -68,12 +70,23 @@ const RECORD_ROWS = 8;
 /** Outings a lure goes out on without a fish before the record says it may as well stay home. */
 const NEVER_TOOK_OUTINGS = 4;
 
+/** Fish per outing a lure went on, to one decimal: "0.8". */
+export function lureRate(fish: number, outings: number): string {
+  return (fish / outings).toLocaleString(locale(), { maximumFractionDigits: 1 });
+}
+
 function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
-  const { items } = useTackle();
+  const { items, add } = useTackle();
   const records = pieceRecords(book, items, today);
   const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure);
   const [all, setAll] = useState(false);
+  // A lure that took fish goes straight into the next outing's bag, unless it is already there.
+  const next = upcomingRealTrips(book, today)[0];
+  const onNext = new Set(next ? items.filter((item) => item.tripId === next.id).map((item) => shownPieceKey(item.label)) : []);
+  const [justPacked, setJustPacked] = useState<string | null>(null);
+  // The button goes once the lure is on the list: focus moves to the line saying so.
+  const focusPacked = useRef(false);
   if (records.length === 0) return null;
   const fold = records.length > RECORD_ROWS;
   const blanks = records.filter((row) => row.fish === 0 && row.outings >= NEVER_TOOK_OUTINGS);
@@ -90,6 +103,8 @@ function LureRecord({ today }: { today: string }) {
             {row.lure ? <Link to={findLink(countedSearch(book, exactTerm("lure", t(row.lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
+              {/* How often it pays, once it has been out more than once. */}
+              {row.fish > 0 && row.outings >= 2 ? ` · ${t("{n} fish an outing", { n: lureRate(row.fish, row.outings) })}` : null}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
               {row.lastAt ? (
                 <>
@@ -105,6 +120,34 @@ function LureRecord({ today }: { today: string }) {
                     </span>
                   ) : null}
                 </>
+              ) : null}
+              {next && justPacked === row.label ? (
+                <span
+                  className="lure-last"
+                  tabIndex={-1}
+                  ref={(line) => {
+                    if (line && focusPacked.current) {
+                      focusPacked.current = false;
+                      line.focus();
+                    }
+                  }}
+                >
+                  {t("On the list for {outing}", { outing: outingName(next, book.spots) })}
+                </span>
+              ) : next && row.fish > 0 && !onNext.has(shownPieceKey(row.label)) ? (
+                <span className="lure-last">
+                  <button
+                    type="button"
+                    className="text-button"
+                    onClick={() => {
+                      if (add(next.id, row.label) !== null) return;
+                      focusPacked.current = true;
+                      setJustPacked(row.label);
+                    }}
+                  >
+                    {t("Pack for {outing}", { outing: outingName(next, book.spots) })}
+                  </button>
+                </span>
               ) : null}
             </span>
           </li>
@@ -162,8 +205,8 @@ function LureTwins() {
   // Either way round: the pair stays apart when the other spelling later takes more fish.
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
-  // The angler's own spellings: the game's lure names are its own and not slips to merge.
-  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(offPlayLake) }, Number.MAX_SAFE_INTEGER), (from, into) =>
+  // The angler's own spellings: the game's lure names are its own and not slips to merge, and the sample week's fish are made up.
+  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(ownFish) }, Number.MAX_SAFE_INTEGER), (from, into) =>
     // The plain "from|into" key, either way round as the counts may have flipped, is how the first build kept a pair apart.
     [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`, `${into.toLowerCase()}|${from.toLowerCase()}`].some((key) => kept.includes(key)),
   ).filter(

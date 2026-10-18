@@ -45,6 +45,7 @@ import {
   type LakeSeason,
   type Sky,
   type SkillId,
+  type StanceId,
 } from "@stillwater/shared";
 import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
@@ -66,6 +67,7 @@ import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { rememberReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
@@ -245,6 +247,8 @@ export function DockPage() {
   shopOpenRef.current = shopOpen;
   // Read by the G key: tosses the groundbait whenever its button by the walk signs would.
   const groundbaitKey = useRef(() => {});
+  // Read by the T key: reties a frayed line whenever its button by the walk signs shows.
+  const retieKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -527,6 +531,8 @@ export function DockPage() {
       await catchSync.sync();
       await releaseCatch(outcome.id);
       setReleasedId(outcome.id);
+      // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
+      rememberReleased(outcome.species, outcome.weight, outcome.spot);
       try {
         markReleasedInBook(outcome.id);
       } catch {
@@ -641,6 +647,11 @@ export function DockPage() {
         groundbaitKey.current();
         return;
       }
+      if (event.code === "KeyT" && !event.repeat) {
+        event.preventDefault();
+        retieKey.current();
+        return;
+      }
       if (event.code !== "KeyE" || event.repeat) return;
       if (game.stance !== "shop") return;
       event.preventDefault();
@@ -676,9 +687,23 @@ export function DockPage() {
   groundbaitKey.current = () => {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
+  retieKey.current = () => {
+    if (!rowing && game.frayed && !shopOpen) game.retie();
+  };
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
     target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
+  /** A bank whose next cast meets wary fish, unless groundbait there keeps them feeding: its sign is dimmed and the stance chip says so. */
+  const fishedHardAt = (target: StanceId) => game.fishedHard.some((bank) => bank === target) && game.groundbait?.spot !== target;
+  /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
+  const signNote = (target: WalkTarget, label: string) =>
+    fishedHardAt(target)
+      ? favoredNow(target)
+        ? t("{bank}: bites sooner now, but fished hard", { bank: t(label) })
+        : t("{bank}: fished hard", { bank: t(label) })
+      : favoredNow(target)
+        ? t("{bank}: bites sooner now", { bank: t(label) })
+        : undefined;
   const stanceLabel = rowing
     ? t("Rowing")
     : game.stance === "dropoff" && !dropoffOpen
@@ -825,7 +850,8 @@ export function DockPage() {
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
-          {!rowing && game.fishedHard.some((bank) => bank === game.stance) && game.groundbait?.spot !== game.stance && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -881,15 +907,30 @@ export function DockPage() {
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
+            {!rowing && game.frayed && (
+              <button
+                className="panel-btn walk-retie"
+                type="button"
+                title={t("Retie the frayed line, so it holds full strain again.")}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  game.retie();
+                }}
+              >
+                {t("Retie")}
+              </button>
+            )}
             {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
               <button
                 key={target}
                 className="panel-btn"
                 type="button"
                 aria-current={game.stance === target ? "location" : undefined}
-                aria-label={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
-                title={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
+                aria-label={signNote(target, label)}
+                title={signNote(target, label)}
                 data-now={favoredNow(target) ? "1" : undefined}
+                data-cold={fishedHardAt(target) ? "1" : undefined}
                 disabled={game.stance === target}
                 onClick={(event) => {
                   // Leave Space free for casting.
@@ -1079,10 +1120,12 @@ export function DockPage() {
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
-            <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
-              {t("Back to the path")}
-            </button>
-            {error && <p className="warn">{error}</p>}
+            <div className="shop-foot">
+              {error && <p className="warn">{error}</p>}
+              <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
+                {t("Back to the path")}
+              </button>
+            </div>
           </div>
         )}
       </div>

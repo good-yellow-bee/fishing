@@ -23,6 +23,16 @@ describe("pieceRecords", () => {
     expect(records.find((row) => row.label === "Never-used spoon")).toEqual({ label: "Never-used spoon", outings: 1, fish: 0 });
   });
 
+  it("counts today's outing once it has a fish, not while it is still to come", () => {
+    const book = sampleLogbook(new Date(2026, 9, 15));
+    const own = { ...book.trips[0]!, id: "zq-today", date: "2026-10-15" };
+    const items: TackleItem[] = [{ id: "a", tripId: own.id, label: "Jig", packed: true }];
+    const planned = { ...book, trips: [...book.trips, own] };
+    expect(pieceRecords(planned, items, "2026-10-15")).toEqual([]);
+    const fish = { ...book.catches[0]!, id: "zq-fish", tripId: own.id, lure: "Spoon" };
+    expect(pieceRecords({ ...planned, catches: [...book.catches, fish] }, items, "2026-10-15")).toEqual([{ label: "Jig", outings: 1, fish: 0 }]);
+  });
+
   it("leaves the game's fish out of a lure's record", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const trip = book.trips[0]!;

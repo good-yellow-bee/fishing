@@ -14,7 +14,8 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
   const mean = counts.reduce((sum, count) => sum + count, 0) / fished.length;
   const average = t("{n} fish an outing on average", { n: num(mean, mean > 0 && mean < 0.1 ? 2 : 1) });
   const blank = counts.filter((count) => count === 0).length;
-  return blank > 0 ? `${average}, ${tn(blank, "{n} without a fish", "{n} without a fish")}` : average;
+  // Joined as the language reads it: Polish decimal commas would run "1,7, 1" together.
+  return blank > 0 ? t("{average}, {blank}", { average, blank: tn(blank, "{n} without a fish", "{n} without a fish") }) : average;
 }
 
 /** The outing on a water that caught strictly more fish than every other one fished there, once three have been fished. */
@@ -24,6 +25,16 @@ export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => nu
   const top = fished.reduce((best, trip) => (fishOn(trip.id) > fishOn(best.id) ? trip : best));
   if (fishOn(top.id) === 0 || fished.some((trip) => trip.id !== top.id && fishOn(trip.id) === fishOn(top.id))) return null;
   return top;
+}
+
+/**
+ * The latest outing fished before a day: today's counts once it has a fish, a planned one never.
+ * "Last time here" on an outing and its form, so both name the same day.
+ */
+export function lastOutingBefore(trips: readonly Trip[], before: string, today: string, fishOn: (tripId: string) => number): Trip | undefined {
+  return trips
+    .filter((trip) => trip.date < before && (trip.date < today || (trip.date === today && fishOn(trip.id) > 0)))
+    .reduce<Trip | undefined>((last, trip) => (!last || trip.date > last.date ? trip : last), undefined);
 }
 
 /**

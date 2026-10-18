@@ -107,6 +107,8 @@ export const PL_CONTENT: PlBook = {
   "Snow on the water. Pike and muskie hunt.": "Śnieg na wodzie. Szczupaki polują.",
   "Fog on the lake. Catfish and burbot stir.": "Mgła nad jeziorem. Sumiki i miętusy się budzą.",
   "Catfish and burbot hunt by scent in the murk and fight harder.": "Sumiki i miętusy polują w mętnej wodzie na węch i walczą mocniej.",
+  "The fish feed hard in the hour before the rain, from {hour}:00.": "Ryby żerują zachłannie w godzinie przed deszczem, od {hour}:00.",
+  "The fish move up to feed as the fog burns off, from {hour}:00.": "Gdy mgła się rozwiewa, od {hour}:00, ryby podchodzą żerować.",
   "On a clear night a spinner or spoon flashes under it.": "W pogodną noc obrotówka lub wahadłówka błyska w jej świetle.",
   "Too dark to see: bites come slower after dark.": "Za ciemno, by widzieć: po zmroku brania przychodzą wolniej.",
 
@@ -285,7 +287,7 @@ export const PL_CONTENT: PlBook = {
   "That outing is not in the book.": "Tej wyprawy nie ma w dzienniku.",
   "That outing was on a different water.": "Ta wyprawa była na innej wodzie.",
   "Set the time you landed it.": "Ustaw godzinę połowu.",
-  "That time is still ahead of you.": "Ta godzina jeszcze przed tobą.",
+  "That time is still ahead of you.": "Ta godzina jeszcze przed Tobą.",
   "Keep the note to a few lines.": "Zmieść notatkę w kilku linijkach.",
   "Give the spot a short name.": "Nadaj łowisku krótką nazwę.",
   "Pick a water type.": "Wybierz rodzaj wody.",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, FRAYED_SNAP, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
 import { habitLines } from "../game/habitLines";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
@@ -200,6 +200,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
             <div ref={tensionFill} className="fill" />
             <i className="tick" style={{ left: `${TIGHT_TENSION * 100}%` }} />
             <i className="tick tick-red" style={{ left: `${RED_TENSION * 100}%` }} />
+            {/* A frayed line breaks here, short of the bar's end. */}
+            {sim.current?.frayed && <i className="tick tick-frayed" style={{ left: `${FRAYED_SNAP * 100}%` }} title={t("Frayed line: it snaps here")} />}
             <i ref={peakMark} className="peak" hidden />
           </div>
           <span className="fight-label" id="fight-line-label">
@@ -247,8 +249,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
           {fight.water === "weeds" && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
-          {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
-          {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling")}</p>}
+          {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
+          {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling and frays it")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
           {fight.lightHook && !SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Hooked light: reel in the red and the hook pulls out")}</p>}
           {habits.map((line) => (

@@ -23,6 +23,11 @@ const MOON_TIPS = {
 /** Rain muddies the water, and catfish and burbot hunt by scent in it and fight harder (rainHunterTireMul). */
 const RAIN_TIP = "Catfish and burbot hunt by scent in the murk and fight harder.";
 
+/** The last hour before an overcast day turns to rain, when the fish feed hard (preRainWaitMul). */
+const PRE_RAIN_TIP = "The fish feed hard in the hour before the rain, from {hour}:00.";
+/** The first clear hour after a foggy morning, when the fish move up to feed (fogLiftWaitMul). */
+const FOG_LIFT_TIP = "The fish move up to feed as the fog burns off, from {hour}:00.";
+
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
 export function ForecastBoard({ now = new Date() }: { now?: Date }) {
   useT();
@@ -42,6 +47,8 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             )}
             <small>{t(skyBlurb(day.sky, lakeSeason(day.date)))}</small>
             <span className="forecast-bank">{t("Biting best at the {bank}", { bank: t(SPOT_LABELS[hotBankForDay(day.date)]) })}</span>
+            {day.turn?.to === "rain" && <span className="forecast-tip">{t(PRE_RAIN_TIP, { hour: day.turn.hour - 1 })}</span>}
+            {day.turn?.to === "clear" && <span className="forecast-tip">{t(FOG_LIFT_TIP, { hour: day.turn.hour })}</span>}
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}

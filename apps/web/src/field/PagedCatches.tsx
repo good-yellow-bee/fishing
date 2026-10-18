@@ -27,8 +27,56 @@ function focusable(box: HTMLElement | null): HTMLElement[] {
   });
 }
 
-export function useShowMore() {
-  const [shown, setShown] = useState(CATCH_PAGE);
+/** How far each list was drawn, by history entry, so Back to a list finds the card just opened still drawn. */
+const SHOWN_KEY = "stillwater.field-log.shown.v1";
+/** Entries kept: the lists of a long browse, not of every page ever visited. */
+const SHOWN_KEPT = 40;
+type Drawn = { shown: number; start: number };
+
+/**
+ * This history entry's key for `list`: the router's own place in the history and the address, as the first page
+ * visited has no key of its own. None outside a browser router.
+ */
+function entryKey(list: string): string | null {
+  const index = (window.history.state as { idx?: unknown } | null)?.idx;
+  return typeof index === "number" ? `${index}:${window.location.pathname}${window.location.search}:${list}` : null;
+}
+
+function readDrawn(): Record<string, Drawn> {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(SHOWN_KEY) ?? "{}") as unknown;
+    return raw && typeof raw === "object" ? (raw as Record<string, Drawn>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function rememberedDrawn(list: string): Drawn | null {
+  const key = entryKey(list);
+  const row = key ? readDrawn()[key] : undefined;
+  return row && Number.isInteger(row.shown) && row.shown >= CATCH_PAGE && Number.isInteger(row.start) && row.start >= 0 ? row : null;
+}
+
+function rememberDrawn(list: string, drawn: Drawn) {
+  const key = entryKey(list);
+  if (!key) return;
+  const all = readDrawn();
+  delete all[key];
+  // A list at its first page needs nothing kept.
+  if (drawn.shown > CATCH_PAGE || drawn.start > 0) all[key] = drawn;
+  const keys = Object.keys(all);
+  for (const old of keys.slice(0, Math.max(0, keys.length - SHOWN_KEPT))) delete all[old];
+  try {
+    sessionStorage.setItem(SHOWN_KEY, JSON.stringify(all));
+  } catch {
+    // A browser that keeps nothing just starts the list at its first page again.
+  }
+}
+
+/** `list` names the list on its page, so two lists there keep their own counts. */
+export function useShowMore(list = "list") {
+  const [remembered] = useState(() => rememberedDrawn(list));
+  const [shown, setShown] = useState(remembered?.shown ?? CATCH_PAGE);
   const box = useRef<HTMLDivElement>(null);
   const firstNew = useRef<number | null>(null);
   useEffect(() => {
@@ -42,7 +90,8 @@ export function useShowMore() {
     setShown((count) => count + CATCH_PAGE);
   };
   // Where the drawn run starts: a jump far down a long book draws a page from there, not every card above it.
-  const [start, setStart] = useState(0);
+  const [start, setStart] = useState(remembered?.start ?? 0);
+  useEffect(() => rememberDrawn(list, { shown, start }), [list, shown, start]);
   const firstOld = useRef(false);
   useEffect(() => {
     if (!firstOld.current) return;
@@ -107,7 +156,7 @@ export function PagedCatches<T>({
   headLevel?: 2 | 3;
 }) {
   const Head = headLevel === 2 ? "h2" : "h3";
-  const { shown, start, showMore, showFrom, showNewer, box } = useShowMore();
+  const { shown, start, showMore, showFrom, showNewer, box } = useShowMore("catches");
   const { visible, more } = catchPage(items, shown, start);
   const monthCounts = new Map<string, number>();
   const firstOf = new Map<string, number>();

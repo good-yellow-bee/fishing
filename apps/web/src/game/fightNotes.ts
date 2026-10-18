@@ -15,6 +15,7 @@ export function fightNotesText(notes: FightNotes | undefined): string | null {
   if (notes.secondTake) parts.push(t("On the second take"));
   if (notes.gotAway) parts.push(t("The one that got away"));
   if (notes.followedIn) parts.push(t("Followed your fish in"));
+  if (notes.recaught) parts.push(t("Caught again"));
   if (notes.grabbed) parts.push(grabNote(notes.grabbed));
   if (notes.turnedRuns > 0) parts.push(tn(notes.turnedRuns, "Turned {n} run", "Turned {n} runs"));
   if (notes.clearOf === "weeds") parts.push(t("Kept it out of the weeds"));

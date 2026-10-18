@@ -236,7 +236,7 @@ describe("FightBar for screen readers", () => {
   it("warns of the dock's pilings for a fish whose runs can be turned", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     act(() => root!.render(<FightBar fight={{ species: FISH.find((f) => f.id === "lake-whitefish")!, weight: 2, underpowered: false, water: "pilings" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
-    expect(container!.querySelector(".fight-water")?.textContent).toBe("Dock: turn every run, or it wraps the line round a piling");
+    expect(container!.querySelector(".fight-water")?.textContent).toBe("Dock: turn every run, or it wraps the line round a piling and frays it");
   });
 
   it("calls a rainbow trout's tail-walk while it dances", () => {

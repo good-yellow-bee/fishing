@@ -4,9 +4,10 @@ import type { Trip } from "@stillwater/shared";
 const EXCERPT = 100;
 
 /** The latest notes written on outings already fished, newest first, each as its first line, cut short when long. */
-export function notesHere(trips: readonly Trip[], today: string, limit = 3): { trip: Trip; text: string }[] {
+/** Today's outing counts once it has a fish (`fishOn`), as the average takes it: until then its note is the day's plan. */
+export function notesHere(trips: readonly Trip[], today: string, limit = 3, fishOn: (tripId: string) => number = () => 0): { trip: Trip; text: string }[] {
   return trips
-    .filter((trip) => trip.date <= today && trip.note.trim())
+    .filter((trip) => (trip.date < today || (trip.date === today && fishOn(trip.id) > 0)) && trip.note.trim())
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, limit)
     .map((trip) => {

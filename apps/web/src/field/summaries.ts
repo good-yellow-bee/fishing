@@ -4,6 +4,7 @@ import { measureText, measuresText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { catchMonth, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
+import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
 
 /**
@@ -130,7 +131,12 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
  * ("species:\"Pike\"") is just its name, anything typed by hand sits in quotes, and the parts keep their "+".
  */
 function searchLabel(parts: readonly string[]): string {
-  return parts.map((part) => parseExactTerm(part)?.name ?? t("“{query}”", { query: part })).join(" + ");
+  const { keep, drop } = splitLeftOut(parts);
+  const said = (part: string) => parseExactTerm(part)?.name ?? t("“{query}”", { query: part });
+  // What the angler left out reads after a minus; what a count's link leaves out for itself (the game's lake, the
+  // sample week) is no part of the search as they would say it.
+  const left = drop.filter((part) => !parseExactTerm(part) && part.trim().toLowerCase() !== t("sample|search word").toLowerCase());
+  return [keep.map(said).join(" + "), ...left.map((part) => `− ${said(part)}`)].filter(Boolean).join(" ");
 }
 
 /**

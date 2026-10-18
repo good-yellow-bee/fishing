@@ -25,7 +25,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
 import { notYetThisYear } from "./bests/notYet";
@@ -78,7 +78,7 @@ export function SpotsPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingRealTrips(book, today);
-  const [order, setOrder] = useState(readSpotOrder);
+  const [storedOrder, setOrder] = useState(readSpotOrder);
   const pickOrder = (next: SpotOrder) => {
     setOrder(next);
     try {
@@ -89,9 +89,18 @@ export function SpotsPage() {
   };
   // Last fish first by default, else by name or by the most fish; the game's lake last, as it is played, not fished.
   const rows = spotsByLastFish(book);
+  // By the angler's own fish, as the catch form guesses the water: a sample week dated after a back-filled season
+  // doesn't put its made-up waters on top. The cards still count every fish on their water.
+  const ownRows = spotsByLastFish({ ...book, catches: countedFish(book.catches) });
+  const ownOrder = new Map(ownRows.map((row, index) => [row.spot.id, index]));
+  const ownCount = new Map(ownRows.map((row) => [row.spot.id, row.fishCount]));
+  const countOf = (row: { spot: { id: string } }) => ownCount.get(row.spot.id) ?? 0;
+  rows.sort((a, b) => (ownOrder.get(a.spot.id) ?? 0) - (ownOrder.get(b.spot.id) ?? 0));
+  // The order picked holds while its control shows: a list cut to two waters goes back to the last fish.
+  const order: SpotOrder = rows.length > 2 ? storedOrder : "fish";
   const fishOnTrip = fishCountsByTrip(book);
   if (order === "name") rows.sort((a, b) => a.spot.name.localeCompare(b.spot.name, locale()));
-  if (order === "most") rows.sort((a, b) => b.fishCount - a.fishCount);
+  if (order === "most") rows.sort((a, b) => countOf(b) - countOf(a));
   // The water left alone longest first, to give a rested one a go; waters never fished after them.
   const lastOut = lastOutByWater(book, today);
   if (order === "rested") {
@@ -104,7 +113,20 @@ export function SpotsPage() {
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
   // With rivers and lakes both in the book, the list can narrow to one kind of water; the game's lake shows under all.
   const types = WATER_TYPES.filter((type) => rows.some((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type));
-  const [kind, setKind] = useState<WaterType | "all">("all");
+  // Kept in the address, so Back from a water returns to the kind picked.
+  const [params, setParams] = useSearchParams();
+  const asked = params.get("kind");
+  const kind = (WATER_TYPES as readonly string[]).includes(asked ?? "") ? (asked as WaterType) : "all";
+  const setKind = (next: WaterType | "all") =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next === "all") out.delete("kind");
+        else out.set("kind", next);
+        return out;
+      },
+      { replace: true },
+    );
   const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
   const shownRows = shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind);
 
@@ -197,10 +219,16 @@ function SpotView() {
 
   const trips = tripsForSpot(book, spot.id);
   const catches = catchesForSpot(book, spot.id);
+  // An untitled outing goes by this water's name, which the page already says: its link reads as the day's outing.
+  const outingHere = (tripId: string) => {
+    const name = outingNameById(book, tripId);
+    return name === spot.name ? t("That day's outing") : name;
+  };
   const fishByTrip = fishCountsByTrip({ ...book, catches });
   const hooks = hookTally(book, spot.id);
   const average = outingAverage(trips, (id) => fishByTrip.get(id) ?? 0, today);
-  const top = topOuting(trips, (id) => fishByTrip.get(id) ?? 0, today);
+  // The best outing among the angler's own here, as an outing's page names it.
+  const top = topOuting(spot.id === PLAY_LAKE_ID ? trips : countedBook(book).trips.filter((trip) => trip.spotId === spot.id), (id) => fishByTrip.get(id) ?? 0, today);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
   // A fish here logged off its outing still ends a dry run: counted on the day it came.
   const looseByDay = new Map<string, number>();
@@ -209,9 +237,13 @@ function SpotView() {
   const streak = outingStreak(trips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today, looseByDay.keys());
   const split = weekendSplit(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
-  const notYet = notYetThisYear(catches);
+  // Dated as the season line above dates them, so a New Year's Eve night fish is last year's on both.
+  const notYet = notYetThisYear(catches, new Date(), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches });
   const here = exactTerm("water", spot.name);
+  const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(book, today).get(spot.id);
+  const restHere = lastHere ? daysBetween(lastHere, today) : 0;
+  const years = yearTally(catches);
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
   // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
@@ -228,7 +260,7 @@ function SpotView() {
   const thisSeason = seasonSoFar(today.slice(0, 4));
   const lastSeason = seasonSoFar(String(Number(today.slice(0, 4)) - 1));
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
-  const notes = spot.id === PLAY_LAKE_ID ? [] : notesHere(countedTrips, today);
+  const notes = spot.id === PLAY_LAKE_ID ? [] : notesHere(countedTrips, today, 3, (id) => fishByTrip.get(id) ?? 0);
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (
@@ -261,6 +293,12 @@ function SpotView() {
         </p>
         <h1>{spot.name}</h1>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
+        {/* When it was last fished, by its last outing or fish: how long it has rested. */}
+        {lastHere ? (
+          <p className="meta last-here">
+            {restHere === 0 ? t("Fished here today") : restHere === 1 ? t("Last fished here yesterday") : `${tn(restHere, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(lastHere)}`}
+          </p>
+        ) : null}
         {spot.place ? (
           <p className="meta spot-place">
             {formatCoord(spot.place.lat, spot.place.lng)}{" "}
@@ -280,7 +318,7 @@ function SpotView() {
         <span className="eyebrow">{t("Best conditions")}</span>
         <p>{spot.bestConditions || t("Not noted yet.")}</p>
       </aside>
-      <WaterTipsBox catches={catches} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
+      <WaterTipsBox catches={countedFish(catches)} on={today} within={exactTerm("water", spot.name)} place={spot.place ?? placeFor(spot.id)} />
       <TempThroughYear catches={catches} />
       {catches.length > 0 ? (
         <CopySummary
@@ -385,6 +423,15 @@ function SpotView() {
         </>
       ) : null}
       <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
+      {/* Each season's fish here, newest first: whether the water is holding up or fading. */}
+      {years.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By year")}</h2>
+          </div>
+          <TallyBars key={`years-${spot.id}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: findWithLink(here, row.year) }))} />
+        </>
+      ) : null}
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
@@ -398,7 +445,7 @@ function SpotView() {
                 key={entry.id}
                 entry={entry}
                 spotName={null}
-                tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
+                tripTitle={entry.tripId ? outingHere(entry.tripId) : null}
                 list={largest ? undefined : `water:${spot.id}`}
               />
             )}
@@ -425,7 +472,8 @@ function SpotForm() {
   const toPlace = useLocation().hash === "#place";
   // Sent from the catch or outing form of a book with no water yet: back there with the new water once it is saved.
   const [params] = useSearchParams();
-  const then = existing ? null : params.get("then");
+  // Sent from the map to note a place: back to the map, where the new pin shows.
+  const then = existing ? (params.get("then") === "map" ? "map" : null) : params.get("then");
   const placeInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // After the page's own scroll to the top has run.
@@ -471,6 +519,7 @@ function SpotForm() {
     kept.drop();
     if (then === "catch") navigate(`/catches/new?spot=${result.id}`);
     else if (then === "trip") navigate(`/trips/new?spot=${result.id}`);
+    else if (then === "map") navigate("/map", { replace: true });
     else navigate(`/spots/${result.id}`);
   };
 
@@ -491,7 +540,7 @@ function SpotForm() {
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: existing.name }) : undefined}>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
-        <Link to={existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
+        <Link to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
           {t("Cancel")}
         </Link>
       </header>

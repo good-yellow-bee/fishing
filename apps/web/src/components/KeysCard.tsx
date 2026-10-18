@@ -9,6 +9,7 @@ export const KEY_ROWS = [
   { keys: "E", pad: "Y", does: "Open the shop at the shack" },
   { keys: "Q / R", pad: "LB / RB", does: "Change the lure" },
   { keys: "G", pad: "", does: "Toss the groundbait" },
+  { keys: "T", pad: "", does: "Retie a frayed line" },
   { keys: "H", pad: "Back", does: "Photo mode: hide the panels" },
   { keys: "P / Space", pad: "A", does: "In photo mode: save a picture of the lake" },
   { keys: "Arrows / + −", pad: "Sticks", does: "In photo mode: turn and zoom the view" },
@@ -51,9 +52,12 @@ export function KeysCard({ onClose }: { onClose: () => void }) {
           </tbody>
         </table>
         <p className="settings-note">{t("On a touch screen, tap the water to aim and cast, and tap anywhere to strike.")}</p>
-        <button className="panel-btn" type="button" onClick={onClose}>
-          {t("Back to the lake")}
-        </button>
+        {/* Pinned to the foot, so focusing it on open leaves the card at its title instead of scrolling a phone to the end. */}
+        <div className="settings-foot">
+          <button className="panel-btn" type="button" onClick={onClose}>
+            {t("Back to the lake")}
+          </button>
+        </div>
       </section>
     </div>
   );

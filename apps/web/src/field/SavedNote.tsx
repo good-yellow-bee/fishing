@@ -7,6 +7,7 @@ import { formatClock } from "./format";
 export const SAVED_LINES = {
   catch: "Fish saved.",
   catchEdit: "Changes saved.",
+  trip: "Outing saved.",
 } as const;
 
 export type SavedKind = keyof typeof SAVED_LINES;

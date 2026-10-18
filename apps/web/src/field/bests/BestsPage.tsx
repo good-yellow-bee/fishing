@@ -16,6 +16,7 @@ import { bestFishDay, bookFishDay, catchMonth, daysOut, monthName, monthTally, y
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
+import { seasonRecap } from "./seasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
 import { newWatersThisYear, notYetThisYear } from "./notYet";
@@ -85,11 +86,12 @@ const YEAR_PARAM = "year";
 function KindLeaders({ book, species }: { book: Logbook; species: string }) {
   const key = species.trim().toLowerCase();
   const fish = book.catches.filter((entry) => entry.species.trim().toLowerCase() === key);
-  const lure = lureTally({ ...book, catches: fish }, 1)[0];
-  const water = speciesWaters(book, fish)[0];
+  const [lure, nextLure] = lureTally({ ...book, catches: fish }, 2);
+  const [water, nextWater] = speciesWaters(book, fish);
+  // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
-    lure && lure.count >= 2 ? t("Most on {lure} ({count})", { lure: t(lure.lure), count: lure.count }) : null,
-    water && water.name && water.count >= 2 ? t("Most from {water} ({count})", { water: water.name, count: water.count }) : null,
+    lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: t(lure.lure), count: lure.count }) : null,
+    water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: water.name, count: water.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
 }
@@ -108,7 +110,11 @@ export function BestsPage() {
   const counted = countedBook(all);
   // The sample's waters go with its fish and outings, as taking the sample week out would take them.
   const ownAny = counted.catches.some((entry) => !isSampleCatch(entry.id)) || counted.trips.some((trip) => !isSampleTrip(trip.id));
-  const whole = { ...counted, spots: (ownAny ? withoutSample(all) : all).spots.filter((spot) => spot.id !== PLAY_LAKE_ID) };
+  // But a sample water keeps its name while a fish or outing still counted here is on it: an outing planned before the
+  // first own fish leaves the sample's fish counted, and their waters would read "Unknown water".
+  const used = new Set([...counted.catches.map((entry) => entry.spotId), ...counted.trips.map((trip) => trip.spotId)]);
+  const kept = new Set((ownAny ? withoutSample(all) : all).spots.map((spot) => spot.id));
+  const whole = { ...counted, spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && (kept.has(spot.id) || used.has(spot.id))) };
   const real = whole;
   const tail = (term: string) => countedSearch(all, term, all.catches);
   const days = daysOut(whole, today.slice(0, 4), today);
@@ -159,6 +165,15 @@ export function BestsPage() {
   const topDayTrip = topDay?.tripId ?? null;
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
+  // Each kind's fish as its card counts them, for the day of its last one: which kinds have gone quiet.
+  const kindFish = new Map<string, CatchEntry[]>();
+  for (const entry of countedFish(book.catches)) {
+    const key = entry.species.trim().toLowerCase();
+    const list = kindFish.get(key);
+    if (list) list.push(entry);
+    else kindFish.set(key, [entry]);
+  }
+  const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map((name) => name.trim().toLowerCase())) : null;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
@@ -299,12 +314,15 @@ export function BestsPage() {
                         <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{t(row.species)}</Link>
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
+                      {/* A kind the season brought into the book for the first time. */}
+                      {freshKinds?.has(row.species.trim().toLowerCase()) ? <span className="stamp">{t("New this season")}</span> : null}
                     </div>
                     <p className="meta">
                       {fishCountLabel(row.count)}
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
+                    {lastFishLine(kindFish.get(row.species.trim().toLowerCase()) ?? [])}
                   </article>
                 );
               })}
