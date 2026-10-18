@@ -503,21 +503,30 @@ describe("feeders over the groundbait", () => {
   const rolls = (...values: number[]) => () => values.shift() ?? 0;
 
   it("draws a feeder from the bank only on the share's roll", () => {
-    expect(groundbaitFeeder("dock", undefined, false, rolls(GROUNDBAIT_FEEDER_SHARE))).toBeNull();
-    const fish = groundbaitFeeder("dock", undefined, false, rolls(0, 0.99));
+    expect(groundbaitFeeder("dock", undefined, false, "day", rolls(GROUNDBAIT_FEEDER_SHARE))).toBeNull();
+    const fish = groundbaitFeeder("dock", undefined, false, "day", rolls(0, 0.99));
     expect(fish && GROUNDBAIT_FEEDERS.has(fish.id)).toBe(true);
     expect(fish?.spots).toContain("dock");
   });
 
   it("keeps to the lure's size split and a short cast's commons", () => {
     for (let roll = 0; roll < 1; roll += 0.1) {
-      const small = groundbaitFeeder("dock", "Worm", false, rolls(0, roll));
+      const small = groundbaitFeeder("dock", "Worm", false, "day", rolls(0, roll));
       expect(["golden-shiner", "crappie"]).toContain(small?.id);
-      expect(groundbaitFeeder("dock", undefined, true, rolls(0, roll))?.rarity).toBe("common");
+      expect(groundbaitFeeder("dock", undefined, true, "day", rolls(0, roll))?.rarity).toBe("common");
     }
   });
 
+  it("draws the commons more often than the uncommon feeders, as the bank does", () => {
+    const seen = new Map<string, number>();
+    for (let roll = 0.005; roll < 1; roll += 0.01) {
+      const id = groundbaitFeeder("dock", undefined, false, "day", rolls(0, roll))!.id;
+      seen.set(id, (seen.get(id) ?? 0) + 1);
+    }
+    expect(seen.get("golden-shiner")!).toBeGreaterThan(seen.get("catfish")!);
+  });
+
   it("finds a feeder at every bank", () => {
-    for (const spot of ["dock", "reeds", "dropoff", "point", "inlet", "open"] as const) expect(groundbaitFeeder(spot, undefined, false, rolls(0, 0.5))).not.toBeNull();
+    for (const spot of ["dock", "reeds", "dropoff", "point", "inlet", "open"] as const) expect(groundbaitFeeder(spot, undefined, false, "day", rolls(0, 0.5))).not.toBeNull();
   });
 });

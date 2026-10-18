@@ -1839,7 +1839,7 @@ describe("useFishingGame groundbait", () => {
     toss();
     cast(surface);
     expect(phase()).toBe("waiting:none");
-    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false);
+    expect(groundbaitFeeder).toHaveBeenCalledWith("dock", undefined, false, "day");
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^carp\|/);
     // Landed, the card says the groundbait drew it in.
     step.mockReturnValueOnce("landed");

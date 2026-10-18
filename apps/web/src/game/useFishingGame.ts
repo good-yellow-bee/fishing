@@ -667,7 +667,7 @@ export function useFishingGame(
     againRef.current = lost.again !== null;
     followedRef.current = !!lost.again?.follow;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
-    const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short) : null;
+    const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
     const species = lost.again ? lost.again.species : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
     fedRef.current = !!feeder && species === feeder;
     const bitten = lost.again ? { species, weight: lost.again.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
