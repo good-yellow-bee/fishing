@@ -30,6 +30,7 @@ import { dewGlintsOut } from "./dewGlints";
 import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
 import { DockLeaves } from "./DockLeaves";
+import { boatHeading } from "./boatSwing";
 import { DockFrost } from "./DockFrost";
 import { DockSnow } from "./DockSnow";
 import { FROST_COLOR, FROST_PALE, dockFrost } from "./dockFrost";
@@ -1280,8 +1281,9 @@ function FloatingLily({ url, position, scale, index, open }: Lily & { index: num
   );
 }
 
-function Boat({ url, position, heading, delay, scale }: BoatProps) {
+function Boat({ url, position, heading, delay, scale, wind }: BoatProps & { wind: { x: number; z: number } }) {
   const ref = useRef<THREE.Group>(null);
+  const still = useReducedMotion();
   useFrame((state) => {
     const boat = ref.current;
     if (!boat) return;
@@ -1291,7 +1293,8 @@ function Boat({ url, position, heading, delay, scale }: BoatProps) {
     boat.position.y = position[1] + y;
     boat.rotation.x = THREE.MathUtils.clamp((waterHeight(position[0], position[2] + sample, t) - y) * 1.15, -0.2, 0.2);
     boat.rotation.z = THREE.MathUtils.clamp((y - waterHeight(position[0] + sample, position[2], t)) * 1.15, -0.2, 0.2);
-    boat.rotation.y = heading + Math.sin(t * 0.35) * 0.04;
+    // Moored by the bow, it swings head to wind.
+    boat.rotation.y = boatHeading(heading, wind, state.clock.elapsedTime, delay, still);
   });
   return (
     <group ref={ref} position={position} rotation={[0, heading, 0]}>
@@ -2077,7 +2080,7 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {BOATS.map((boat, i) => (
-        <Boat key={`${boat.url}-${i}`} {...boat} />
+        <Boat key={`${boat.url}-${i}`} {...boat} wind={wind} />
       ))}
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
