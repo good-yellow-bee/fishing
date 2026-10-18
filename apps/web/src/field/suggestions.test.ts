@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sampleLogbook } from "@stillwater/shared";
+import { localDate, sampleLogbook } from "@stillwater/shared";
 import { fullSpecies, bookLures, dayWeather, kindMeasure, lastMeasureKind, ownFirst, fishOnOutingDay, startTimeFor, tripForFish, tripLure, tripOnDay, tripWeather, lastReleased, speciesBestSoFar } from "./suggestions";
 
 describe("suggest the player's own names first", () => {
@@ -110,6 +110,15 @@ describe("when a new catch starts", () => {
     expect(startTimeFor({ date: "2026-10-15" }, late)).toBe(late);
     expect(startTimeFor({ date: "2026-10-14" }, late)).toEqual(new Date(2026, 9, 14, 1, 20));
   });
+
+  it("keeps now past the small hours while the outing's fish are still coming in", () => {
+    const dawn = new Date(2026, 9, 16, 4, 30);
+    const lastFish = new Date(2026, 9, 16, 4, 20).toISOString();
+    expect(startTimeFor({ date: "2026-10-15" }, dawn, lastFish)).toBe(dawn);
+    // Written up the next morning, hours after the last fish: back on the outing's day.
+    const morning = new Date(2026, 9, 16, 11, 0);
+    expect(startTimeFor({ date: "2026-10-15" }, morning, lastFish)).toEqual(new Date(2026, 9, 15, 11, 0));
+  });
 });
 
 describe("the outing a new catch files under", () => {
@@ -173,6 +182,11 @@ describe("weather from the same day", () => {
   it("never offers the game's made-up sky", () => {
     const played = { ...noon, id: "g", spotId: "spot-stillwater", caughtAt: new Date(2026, 9, 10, 15, 0).toISOString(), weather: { sky: "rain" as const, wind: "strong" as const } };
     expect(dayWeather({ ...book, catches: [morning, noon, played] }, "2026-10-10", undefined, "another-water")).toEqual({ sky: "clear", wind: "calm" });
+  });
+
+  it("never offers the sample week's invented weather", () => {
+    const sample = book.catches.find((entry) => entry.weather)!;
+    expect(dayWeather(book, localDate(new Date(sample.caughtAt)))).toBeNull();
   });
 
   it("offers nothing for a day with no fish or a half-typed day", () => {

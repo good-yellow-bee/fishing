@@ -27,6 +27,7 @@ import {
   waterTempTally,
   type CatchDraft,
   type CatchEntry,
+  type Logbook,
   type Measure,
 } from "@stillwater/shared";
 import { CatchCard } from "./cards";
@@ -70,8 +71,20 @@ import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
-import { PLAY_LAKE_ID, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
+
+/** When the outing's newest fish came, so a session still going past the small hours keeps the clock's day. */
+function lastFishOn(book: Logbook, tripId: string | undefined): string | undefined {
+  if (!tripId) return undefined;
+  return book.catches.reduce<string | undefined>((last, entry) => (entry.tripId === tripId && (!last || entry.caughtAt > last) ? entry.caughtAt : last), undefined);
+}
+
+/** Whether a fish caught now still belongs to this outing: its day, or the small hours after it. */
+function outingGoesOn(book: Logbook, tripId: string | null): boolean {
+  const trip = tripId ? tripById(book, tripId) : undefined;
+  return trip !== undefined && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date()), trip.date);
+}
 
 function amountText(entry: CatchEntry, units: Units): string {
   return measureAmountText(entry.measure, units);
@@ -300,9 +313,13 @@ function CatchForm() {
   const sampleBest = [bestSoFar?.longest, bestSoFar?.heaviest].some((best) => best && isSampleCatch(best.id));
   const hereBest = spotId ? speciesBestSoFar({ ...book, catches: book.catches.filter((entry) => entry.spotId === spotId && (sampleBest || !isSampleCatch(entry.id))) }, species, t, existing?.id) : null;
   const hereDiffers = hereBest && (hereBest.longest?.id !== bestSoFar?.longest?.id || hereBest.heaviest?.id !== bestSoFar?.heaviest?.id);
-  // A new fish on a water with an outing planned today (or last night, in the small hours) files under that outing.
+  // The last fish's time, when "Save and log another" came from a fish of an earlier day.
+  const startAt = existing ? null : params.get(AT_PARAM);
+  const carriedTime = startAt && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(startAt) ? startAt : null;
+  // A new fish on a water with an outing planned that day (or last night, in the small hours) files under that outing:
+  // the day of a carried time, else today.
   const [tripId, setTripId] = useState(() =>
-    existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, toLocalInput(new Date()))?.id ?? ""),
+    existing ? (existing.tripId ?? "") : (presetTrip?.id ?? tripForFish(book, presetSpot, carriedTime ?? toLocalInput(new Date()))?.id ?? ""),
   );
   // Until the player picks an outing themselves, the outing follows the water and the day.
   const [tripPicked, setTripPicked] = useState(Boolean(existing || presetTrip));
@@ -310,11 +327,8 @@ function CatchForm() {
   const [leftTrip, setLeftTrip] = useState("");
   // Set while a change of water is what took the fish off its own outing, so going back to that water can put it back.
   const [waterTookTrip, setWaterTookTrip] = useState(false);
-  // The last fish's time, when "Save and log another" came from a fish of an earlier day.
-  const startAt = existing ? null : params.get(AT_PARAM);
-  const carriedTime = startAt && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(startAt) ? startAt : null;
   const [caughtAt, setCaughtAt] = useState(() =>
-    existing ? toLocalInput(new Date(existing.caughtAt)) : (carriedTime ?? toLocalInput(startTimeFor(presetTrip))),
+    existing ? toLocalInput(new Date(existing.caughtAt)) : (carriedTime ?? toLocalInput(startTimeFor(presetTrip, new Date(), lastFishOn(book, presetTrip?.id)))),
   );
   // Until the player sets the time themselves, picking an outing moves the catch to its day.
   const [timeTouched, setTimeTouched] = useState(Boolean(existing || carriedTime));
@@ -469,25 +483,27 @@ function CatchForm() {
     [hereCatches, species, lang],
   );
   const lurePicks = kindLures.length > 0 ? kindLures : hereLures;
+  // The game's fish and tackle stay out of the real form's lists: a Ghost pike is no one's guess for "pike".
+  const realBook = useMemo(() => ({ ...book, catches: book.catches.filter(offPlayLake) }), [book]);
   const speciesOptions = useMemo(
     () =>
       ownFirst(
-        book.catches.map((entry) => entry.species),
+        realBook.catches.map((entry) => entry.species),
         SPECIES,
         t,
       ).sort((a, b) => a.localeCompare(b)),
-    [book, lang],
+    [realBook, lang],
   );
   // A name one or two letters off one already known, offered before it starts a kind of its own.
   // Said once the name is typed and the field left, not while "Walley" is on its way to "Walleye".
   const [typingSpecies, setTypingSpecies] = useState(false);
   // "perch" alone is most likely the perch already in the book, not a kind of its own.
-  const misspelt = typingSpecies ? null : (closeSpecies(species, speciesOptions) ?? fullSpecies(species, [...ownFirst(book.catches.map((entry) => entry.species), [], t), ...speciesOptions]));
-  const lureOptions = useMemo(() => ownFirst(bookLures(book), BAITS, t), [book, lang]);
+  const misspelt = typingSpecies ? null : (closeSpecies(species, speciesOptions) ?? fullSpecies(species, [...ownFirst(realBook.catches.map((entry) => entry.species), [], t), ...speciesOptions]));
+  const lureOptions = useMemo(() => ownFirst(bookLures(realBook), BAITS, t), [realBook, lang]);
   // The same for a lure, so a typo doesn't split its tally in two.
   const [typingLure, setTypingLure] = useState(false);
   // Against every lure in the book, not just the dozen offered, so one used once isn't taken for a slip.
-  const allLures = useMemo(() => ownFirst(bookLures(book, Number.MAX_SAFE_INTEGER), BAITS, t), [book, lang]);
+  const allLures = useMemo(() => ownFirst(bookLures(realBook, Number.MAX_SAFE_INTEGER), BAITS, t), [realBook, lang]);
   const misspeltLure = typingLure ? null : closeSpecies(lure, allLures);
   // Made once per water: a water fished for years lists hundreds of outings.
   const tripOptions = useMemo(
@@ -538,7 +554,7 @@ function CatchForm() {
     setLeftTrip("");
     setWaterTookTrip(false);
     setTripPicked(true);
-    if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip))));
+    if (!timeTouched) setCaughtAt(toLocalInput(startTimeFor(tripById(book, nextTrip), new Date(), lastFishOn(book, nextTrip))));
   };
 
   const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
@@ -1078,7 +1094,9 @@ function CatchForm() {
                     onClick={() => {
                       const at = new Date(caughtAt);
                       if (Number.isNaN(at.getTime())) return;
-                      const earlier = toLocalInput(new Date(at.getTime() - Number(minutes) * 60_000));
+                      // A day back by the calendar, so the clock change doesn't move the hour.
+                      const back = minutes === 24 * 60 ? new Date(at.getFullYear(), at.getMonth(), at.getDate() - 1, at.getHours(), at.getMinutes()) : new Date(at.getTime() - Number(minutes) * 60_000);
+                      const earlier = toLocalInput(back);
                       setCaughtAt(earlier);
                       if (!tripPicked) setTripId(tripForFish(book, spotId, earlier)?.id ?? "");
                       setTimeTouched(true);
@@ -1620,7 +1638,7 @@ function CatchView() {
       <p className="another-catch">
         {/* Not from a game fish: another like it would be logged on the game's lake. */}
         {entry.spotId === PLAY_LAKE_ID ? null : (
-          <Link to={anotherCatchLink(entry)} className="field-primary inline">
+          <Link to={anotherCatchLink({ ...entry, tripId: outingGoesOn(book, entry.tripId) ? entry.tripId : null })} className="field-primary inline">
             {t("Log another like this")}
           </Link>
         )}
