@@ -1,5 +1,6 @@
 import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { offPlayLake } from "./playLake";
+import { isSampleCatch } from "./bookCopy";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -13,13 +14,16 @@ export function catchesOfSpecies(book: Logbook, species: string): CatchEntry[] {
 }
 
 /**
- * The fish a kind's page lists, newest first: the angler's own, leaving the game's out; a kind only ever caught in the
- * game shows its game fish. Every count that opens the kind's page goes by this.
+ * The fish a kind's page lists, newest first: the angler's own, leaving the game's out, and the sample week's once
+ * they have fish of their own, as Bests counts them; a kind only ever caught in the sample or the game shows those.
+ * Every count that opens the kind's page goes by this.
  */
 export function kindOnPage(book: Logbook, species: string): CatchEntry[] {
   const every = catchesOfSpecies(book, species);
-  const own = every.filter(offPlayLake);
-  return own.length > 0 ? own : every;
+  const real = every.filter(offPlayLake);
+  const ownAnywhere = book.catches.some((entry) => offPlayLake(entry) && !isSampleCatch(entry.id));
+  const own = ownAnywhere ? real.filter((entry) => !isSampleCatch(entry.id)) : real;
+  return own.length > 0 ? own : real.length > 0 ? real : every;
 }
 
 /** Each kind among `catches` counted as its page counts it: the angler's own fish, or its game fish when that is all. */

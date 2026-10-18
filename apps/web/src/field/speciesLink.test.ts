@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { catchesOfSpecies, speciesCounts, speciesLink, speciesWaters } from "./speciesLink";
+import { catchesOfSpecies, kindOnPage, speciesCounts, speciesLink, speciesWaters } from "./speciesLink";
 
 describe("species page", () => {
   const book = sampleLogbook(new Date(2026, 9, 1));
@@ -34,5 +34,16 @@ describe("species page", () => {
       { species: "Bass", count: 1 },
       { species: "Pike", count: 1 },
     ]);
+  });
+
+  it("leaves the sample week's fish off a kind's page once the angler has fish of their own", () => {
+    const pike = catchesOfSpecies(book, "Northern pike");
+    expect(kindOnPage(book, "Northern pike")).toHaveLength(pike.length);
+    const own = { ...pike[0]!, id: "own-pike" };
+    const withOwn = { ...book, catches: [...book.catches, own] };
+    expect(kindOnPage(withOwn, "Northern pike").map((entry) => entry.id)).toEqual(["own-pike"]);
+    // A kind only the sample caught still shows its sample fish rather than an empty page.
+    const trout = catchesOfSpecies(book, "Brook trout");
+    expect(kindOnPage(withOwn, "Brook trout")).toHaveLength(trout.length);
   });
 });

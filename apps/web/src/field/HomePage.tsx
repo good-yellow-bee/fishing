@@ -122,7 +122,8 @@ export function HomePage() {
       : undefined;
   const upcoming = [...(lateOuting ? [lateOuting] : []), ...upcomingOwnTrips(book, today)];
   // Just back from the water, not from a round of the game.
-  const recent = recentTrips({ ...book, trips: book.trips.filter(offPlayLake) }, today, 3);
+  // Last evening's outing still on the water shows once, among what's coming up.
+  const recent = recentTrips({ ...book, trips: book.trips.filter((trip) => offPlayLake(trip) && trip.id !== lateOuting?.id) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
   // The counts are the angler's own: a round of the game moves none of them.

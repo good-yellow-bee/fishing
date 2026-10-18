@@ -85,6 +85,7 @@ export function SpotsPage() {
   };
   // Last fish first by default, else by name or by the most fish; the game's lake last, as it is played, not fished.
   const rows = spotsByLastFish(book);
+  const fishOnTrip = fishCountsByTrip(book);
   if (order === "name") rows.sort((a, b) => a.spot.name.localeCompare(b.spot.name, locale()));
   if (order === "most") rows.sort((a, b) => b.fishCount - a.fishCount);
   // The water left alone longest first, to give a rested one a go; waters never fished after them.
@@ -136,8 +137,8 @@ export function SpotsPage() {
               key={row.spot.id}
               spot={row.spot}
               fishCount={row.fishCount}
-              // Outings fished, as the water's own page counts them: not those still planned.
-              tripCount={tripsForSpot(book, row.spot.id).filter((trip) => trip.date <= today).length}
+              // Outings fished, as the water's own page counts them: not those still planned, and today's once it has a fish.
+              tripCount={tripsForSpot(book, row.spot.id).filter((trip) => trip.date < today || (trip.date === today && (fishOnTrip.get(trip.id) ?? 0) > 0)).length}
               lastFishAt={row.lastFishAt}
               restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
@@ -181,7 +182,7 @@ export function SpotPage() {
   const looseByDay = new Map<string, number>();
   for (const entry of catches) if (!entry.tripId) looseByDay.set(localDate(new Date(entry.caughtAt)), (looseByDay.get(localDate(new Date(entry.caughtAt))) ?? 0) + 1);
   const dayOf = new Map(trips.map((trip) => [trip.id, trip.date]));
-  const streak = outingStreak(trips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today);
+  const streak = outingStreak(trips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today, looseByDay.keys());
   const split = weekendSplit(trips, (id) => fishByTrip.get(id) ?? 0, today);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
   const notYet = notYetThisYear(catches);

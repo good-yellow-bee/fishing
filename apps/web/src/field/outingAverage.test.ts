@@ -63,6 +63,17 @@ describe("outing streak", () => {
   });
 });
 
+describe("outing streak with fish logged off an outing", () => {
+  it("ends a blank spell with a fish logged on a later day without an outing", () => {
+    const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-08"), trip("c", "2026-10-12")];
+    const fish: Record<string, number> = { a: 1 };
+    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15").dryNow).toBe(2);
+    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15", ["2026-10-15"]).dryNow).toBe(0);
+    // A loose fish dated ahead of today is left out, as planned outings are.
+    expect(outingStreak(trips, (id) => fish[id] ?? 0, "2026-10-15", ["2026-10-20"]).dryNow).toBe(2);
+  });
+});
+
 describe("top outing", () => {
   it("picks the one outing with the most fish, and none on a tie", () => {
     const trips = [trip("a", "2026-10-01"), trip("b", "2026-10-05"), trip("c", "2026-10-09"), trip("later", "2026-11-01")];

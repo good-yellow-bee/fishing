@@ -1,5 +1,6 @@
 import { isLureLabel, localDate, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { pieceKey } from "./pieceKey";
+import { t } from "../../i18n";
 import { countedFish } from "../milestones";
 import { isSampleCatch, isSampleTrip } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
@@ -25,10 +26,12 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   const past = new Set(trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   const own = countedFish(book.catches);
+  // Pieces match as they read, as the outing's list matches them: "Rosówka" packed is the "Nightcrawler" the fish were logged under.
+  const readKey = (label: string) => pieceKey(t(label));
   const byPiece = new Map<string, { label: string; trips: Set<string> }>();
   for (const item of items) {
     if (!past.has(item.tripId) || !isLureLabel(item.label)) continue;
-    const key = pieceKey(item.label);
+    const key = readKey(item.label);
     const row = byPiece.get(key) ?? { label: item.label.trim(), trips: new Set<string>() };
     row.trips.add(item.tripId);
     byPiece.set(key, row);
@@ -37,7 +40,7 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   // to its record nor ends a dry run.
   const fishByPiece = new Map<string, Map<string, CatchEntry[]>>();
   for (const entry of own) {
-    const key = pieceKey(entry.lure);
+    const key = readKey(entry.lure);
     if (!byPiece.has(key)) continue;
     const spellings = fishByPiece.get(key) ?? new Map<string, CatchEntry[]>();
     fishByPiece.set(key, spellings);
