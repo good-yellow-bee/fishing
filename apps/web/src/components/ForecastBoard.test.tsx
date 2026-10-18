@@ -54,6 +54,19 @@ describe("ForecastBoard", () => {
     act(() => root.unmount());
   });
 
+  it("chalks the hour before the rain on a day that turns wet", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n, 9));
+    const wet = days.find((day) => skyTurnForDay(day)?.to === "rain")!;
+    act(() => root.render(<ForecastBoard now={wet} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(`The fish feed hard in the hour before the rain, from ${skyTurnForDay(wet)!.hour - 1}:00.`);
+    act(() => root.render(<ForecastBoard now={days.find((day) => !skyTurnForDay(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain("before the rain");
+    act(() => root.unmount());
+  });
+
   it("chalks what a full or new moon does to the night's bite", () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     const host = document.createElement("div");
