@@ -48,6 +48,7 @@ import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MergeWater } from "./MergeWater";
+import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
@@ -227,6 +228,7 @@ function SpotView() {
   const thisSeason = seasonSoFar(today.slice(0, 4));
   const lastSeason = seasonSoFar(String(Number(today.slice(0, 4)) - 1));
   // The outings already fished, as the average counts them: a planned one has nothing to tell yet.
+  const notes = spot.id === PLAY_LAKE_ID ? [] : notesHere(countedTrips, today);
   const fishedOutings = trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
 
   return (
@@ -313,6 +315,21 @@ function SpotView() {
           {/* The best day here, opening that outing. */}
           {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${outingName(top, book.spots)} · ${tripWhen(top.date, today, tomorrow)}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
         </p>
+      ) : null}
+      {/* What the angler wrote after recent days here, each opening its outing. */}
+      {notes.length > 0 ? (
+        <div className="notes-here">
+          <p className="meta">{t("From your outing notes here:")}</p>
+          <ul className="species-waters">
+            {notes.map(({ trip, text }) => (
+              <li key={trip.id}>
+                <span>
+                  <Link to={`/trips/${trip.id}`}>{formatDay(trip.date)}</Link>: {t("“{query}”", { query: text })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>

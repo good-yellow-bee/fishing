@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa01";
+export const NEWS_ID = "2026-10-18-field11";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A past outing's page now sets its fish against your average on that water and its largest fish against the water's record, and its tackle list names the lures packed that took nothing. A water's page shows the latest notes you wrote after outings there, each opening its day.",
   "On a phone held sideways, the walk signs line the right edge again instead of covering the lake, and the header's links and the guide's Skip are bigger to tap. The catch log and lodge board tables now scroll with the arrow keys, and the game starts a little faster.",
   "On the lake, the light on the shallows' sand now takes the sun's colour, amber at dawn and dusk, and needs the sun itself, so it fades under cloud and in winter. The water turns with the season, greener in spring, tea-stained in fall and steel-cold in winter, and on a still morning the far bank's trees and hills lie mirrored in the lake until the wind breaks them up.",
   "The catch search now reads clock hours (“5-8am”, “godz. 5–8”), a size range without “from” (“50 to 60 cm”), a weight as the scale shows it (“3 lb 2 oz”) and phrases like “at dawn” or “o świcie”. A fish's page counts the fish caught under the same sky, wind and water temperature, and copying a fish now carries its weather, moon and outing.",

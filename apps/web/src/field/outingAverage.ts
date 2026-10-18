@@ -108,3 +108,10 @@ export function weekendSplit(trips: readonly Trip[], fishOn: (tripId: string) =>
   const average = (list: readonly Trip[]) => list.reduce((sum, trip) => sum + fishOn(trip.id), 0) / list.length;
   return { weekend: average(weekend!), weekday: average(weekday!) };
 }
+
+/** The fish an outing here averages, leaving out `exceptId`, once two other outings have been fished; null before. */
+export function outingMean(trips: readonly Trip[], fishOn: (tripId: string) => number, today: string, exceptId: string): number | null {
+  const fished = trips.filter((trip) => trip.id !== exceptId && (trip.date < today || (trip.date === today && fishOn(trip.id) > 0)));
+  if (fished.length < 2) return null;
+  return fished.reduce((sum, trip) => sum + fishOn(trip.id), 0) / fished.length;
+}

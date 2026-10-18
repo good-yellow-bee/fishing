@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from "react";
-import { isLureLabel, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
+import { isLureLabel, localDate, itemsForTrip, lureClass, packedCount, type CatchEntry, type Spot, type TackleItem, type Trip } from "@stillwater/shared";
 import { useT } from "../../i18n";
 import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
@@ -70,6 +70,8 @@ export function TackleList({
   const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
+  const outing = trips.find((row) => row.id === tripId);
+  const idle = outing && caught.length > 0 && outing.date < localDate(new Date()) ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   // While packing, the pieces already in the bag can step aside.
@@ -244,6 +246,8 @@ export function TackleList({
           ))}
         </ul>
       )}
+      {/* A day fished and done: the lures taken along that took nothing, to leave home or try another way. */}
+      {idle.length > 0 ? <p className="meta tackle-idle">{t("Packed, no fish on: {lures}", { lures: idle.map((item) => t(item.label)).join(", ") })}</p> : null}
       {rows.length > 0 ? (
         <CopySummary
           text={() => packingText(listTitle(), rows)}
