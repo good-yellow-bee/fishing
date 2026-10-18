@@ -102,6 +102,8 @@ import { WindowGlow } from "./WindowGlow";
 import { Dinghy } from "./Dinghy";
 import { sailingOut } from "./sailingTrip";
 import { TireSwing } from "./TireSwing";
+import { ShoreWash } from "./ShoreWash";
+import { foamOpacity } from "./lappingWaves";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
@@ -1095,7 +1097,6 @@ function LakeSurface({
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
   const geometry = useMemo(() => makeWaveSurface(LAKE_RX, LAKE_RZ), []);
   const bedGeometry = useMemo(() => makeBedSurface(LAKE_RX + 0.35, LAKE_RZ + 0.35), []);
-  const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
   const cloudMap = useMemo(() => makeCloudShadowTexture(), []);
@@ -1127,7 +1128,6 @@ function LakeSurface({
     return () => {
       geometry.dispose();
       bedGeometry.dispose();
-      foamGeometry.dispose();
       waterMap.dispose();
       detailMap.dispose();
       cloudMap.dispose();
@@ -1135,7 +1135,7 @@ function LakeSurface({
       causticA.dispose();
       causticB.dispose();
     };
-  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap, cloudMap, causticGeometry, causticA, causticB]);
+  }, [geometry, bedGeometry, waterMap, detailMap, cloudMap, causticGeometry, causticA, causticB]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
@@ -1206,9 +1206,7 @@ function LakeSurface({
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
         </mesh>
       )}
-      <mesh geometry={foamGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
-        <meshBasicMaterial color="#e9f3ef" transparent opacity={hour === "night" ? 0.08 : 0.3} depthWrite={false} />
-      </mesh>
+      <ShoreWash wind={wind} opacity={foamOpacity(hour, season)} />
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>
         <ringGeometry args={[2.4, 2.48, 64]} />
         <meshBasicMaterial ref={glintA} color="#e3f0ec" transparent opacity={0.14} depthWrite={false} />
