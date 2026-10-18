@@ -3,6 +3,7 @@ import { MapAnchor } from "./MapAnchor";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   MOON_LABELS,
+  biteTimes,
   WATER_LABELS,
   moonName,
   moonPhase,
@@ -17,6 +18,7 @@ import {
   recentTrips,
   itemsForTrip,
   tripsForSpot,
+  type CatchEntry,
   type Spot,
   type Trip,
 } from "@stillwater/shared";
@@ -230,6 +232,13 @@ export function TripsPage() {
 export function TripPage() {
   const { tripId = "" } = useParams();
   return <TripView key={tripId} />;
+}
+
+/** The part of the day that gave a water strictly the most fish, once it has given five. */
+function peakTime(catches: readonly CatchEntry[]): { label: string; count: number; total: number } | null {
+  if (catches.length < 5) return null;
+  const [top, next] = [...biteTimes({ spots: [], trips: [], catches: [...catches] })].sort((a, b) => b.count - a.count);
+  return top && top.count > (next?.count ?? 0) ? { label: top.label, count: top.count, total: catches.length } : null;
 }
 
 /** The day's sunrise and sunset at the water, for a water with a place (its own pin or the sample sheet's), in this device's clock. */
@@ -576,6 +585,7 @@ function TripForm() {
   // Planning a day on a water: how the last one there went.
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
   const pickedSpot = spotById(book, spotId);
+  const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
   // What this water gave around the same date in earlier years, for an outing being planned.
@@ -728,6 +738,10 @@ function TripForm() {
             ) : null}
             {/* The light that day at the water picked, while the outing is planned around it. */}
             {pickedSpot && /^\d{4}-\d{2}-\d{2}$/.test(date) ? <SunLine date={date} spot={pickedSpot} /> : null}
+            {/* The moon that night, which the water tips and Home weigh too. */}
+            {/^\d{4}-\d{2}-\d{2}$/.test(date) ? <p className="meta moon-line">{t("Moon that night: {moon}", { moon: t(MOON_LABELS[moonName(moonPhase(new Date(`${date}T22:00:00`)))]) })}</p> : null}
+            {/* Planning a day here: the hours this water has given the most. */}
+            {!existing && peak ? <p className="meta peak-hours">{t("Most fish here: {time} ({count} of {total})", { time: t(peak.label).toLowerCase(), count: peak.count, total: peak.total })}</p> : null}
             {!existing && canFindNearest(book) ? <NearestWater book={book} onPick={setSpotId} /> : null}
           </div>
           {pastWeek.length > 0 ? (
