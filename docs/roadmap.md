@@ -1076,6 +1076,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA31~~ | ~~Five pages outside the field log (Sign in, Join, the lake, the catch log and the lodge board) all titled their browser tab "Stillwater", so a screen reader announced the same name on each and the tab list could not tell them apart (WCAG 2.4.2). Each now names its tab after its page ("Lodge board · Stillwater", "On the lake · Stillwater"), in English or Polish, and leaving puts the app's name back; the field log already named its own pages (#1064)~~ | phone UX | S |
 | ~~PA32~~ | ~~The species and lure chips on a water's, an outing's and the catches page stood 30 px tall in a wrapping row, under the 32 px the rest of the log keeps on a touch screen; a pixel more padding each way makes them 32 (#1069)~~ | phone UX | S |
 | ~~PA33~~ | ~~Tabbing down a log form on a phone left the Water picker, the "Add the one you fished" link and the weather pickers on a desktop wholly under the sticky Save buttons, since the browser saw them on screen and did not scroll (WCAG 2.4.11). A form page now pads the window's scroll edge by the save bar's height, so a field tabbed to stops above it (probe tabobscure.cjs) (#1069)~~ | phone UX | S |
+| ~~PA34~~ | ~~The lake's Settings, Keys and buttons, shack and trip recap panels say they are modal, but Tab ran past their last button onto the lake's buttons hidden behind them (WCAG 2.4.3), and on a phone Keys and buttons and Photo mode sat wholly under Settings' pinned Back to the lake (WCAG 2.4.11). Tab and Shift+Tab now wrap inside the topmost panel, one stop a radio group, and the Settings and shack panels pad their scroll edge so a control tabbed to stops above the foot (probe dlgtab.cjs) (#1075)~~ | phone UX | S |
+| ~~PA35~~ | ~~Escape closed Settings, Keys and buttons and the shack but not the trip recap, so a keyboard player had to Tab to its button. Escape now closes it to keep fishing on today's trip or after the trip is written in the book; an old trip left over from another day still needs "Let it go" pressed, so Escape never throws one away (#1079)~~ | phone UX | S |
+| ~~PA36~~ | ~~On Sign in and Join, a refused sign-in ("Invalid email or password") appeared silently, so a screen reader said nothing, and its rust words on the card's paper measured 3.1:1, as did the light words on the hovered Enter the dock button (WCAG 4.1.3, 1.4.3). The error line is now an alert, and both use a deeper rust at 5.1:1 (probe authalert.cjs) (#1080)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1113,6 +1116,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC30~~ | ~~Shore ice: in winter a ragged rim of ice skirts the bank, wider in the coves, snowy near the bank and bare grey at its broken edge, with loose plates lying off it~~ (#1066) | scene | S |
 | ~~SC31~~ | ~~News card: trees in the wind, crayfish, whirligig beetles and shore ice~~ (#1066) | scene | S |
 | ~~SC32~~ | ~~Lily pads through the year: young and small in spring, full grown in summer, yellowing in fall, died back under the ice in winter~~ (#1071) | scene | S |
+| ~~SC33~~ | ~~Pondweed: three clumps of tall strands rooted on the shallow bed round the dock, rocking with the swell, lush in summer and thin in winter~~ (#1074) | scene | S |
+| ~~SC34~~ | ~~Cygnets: in summer a brood of four grey cygnets paddles in a line behind the swans, now and then straying a little to one side~~ (#1078) | scene | S |
+| ~~SC35~~ | ~~News card: lily pads through the year, pondweed and cygnets~~ (#1078) | scene | S |
+| ~~SC36~~ | ~~Sunken leaves: from fall until spring, dark fallen leaves lie on the shallow bed round the dock, seen through the water~~ (#1081) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1390,7 +1397,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT270~~ | ~~A hook blunted on the rocks: working a lure free of the Point's rocks dulls its hook point, so a strike has half the usual time to set solid (the hookset says "on the dull hook"); the stance chip says "hook dulled", and the Retie button (or T, or LT) touches it up; a break ties on a fresh one~~ (#1055) | gameplay | S |
 | ~~GT271~~ | ~~Winter shore ice: a winter cast landing on the ice the scene draws round the shore skitters across it ("The lure skittered across the shore ice.") instead of fishing there, and the hint says to cast past it to the open water; a beginner is spared~~ (#1067) | gameplay | S |
 | ~~GT272~~ | ~~The fall turnover: once each fall, for 3 days starting on a day between October 20 and November 12 (the same for everyone), the lake turns over and bites come slower everywhere (1.2 wait) but a little sooner in the inlet's fresh stream water (0.9); the bite reasons say so first, the forecast board chalks those days, and a beginner is spared the slow side~~ (#1068) | gameplay | S |
-| GT273 | News card 2026-10-18-game10 covers GT270 to GT272: a hook blunted on the rocks, the winter shore ice, and the fall turnover | ui | S |
+| ~~GT273~~ | ~~News card 2026-10-18-game10 covers GT270 to GT272: a hook blunted on the rocks, the winter shore ice, and the fall turnover~~ (#1072) | ui | S |
+| ~~GT274~~ | ~~"Good now" and walk-sign dots follow the newer weather and calendar: on the bright morning after the rain the lure picker marks a jig or worm "good now" (they escape the sulk), and while the lake turns over the Inlet's sign gets its dot and the stance chip says "bites sooner now" there; the turnover only counts in fall, so a season picked by hand isn't slowed~~ (#1076) | ui | S |
+| GT275 | Skip casts off the dock: a cast off the Dock released in the bottom quarter of the sweet band skips the lure under the planks into the shade, so the bite comes sooner (0.85 wait) and the wait hint says "Skipped it under the dock, into the shade."; a float or popper rides too high to skip | gameplay | S |
 
 ## Risks / open questions for the owner
 

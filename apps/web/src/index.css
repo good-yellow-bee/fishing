@@ -111,8 +111,9 @@ a {
   cursor: pointer;
 }
 
+/* A deeper rust than the lake's: the light words on --rust measured 3.1:1, short of the 4.5 text needs. */
 .auth-card button:hover {
-  background: var(--rust);
+  background: #8f3a28;
 }
 
 .auth-card .foot {
@@ -120,8 +121,9 @@ a {
   font-size: 13px;
 }
 
+/* 5.1:1 on the card's paper, where --rust was 3.1. */
 .auth-card .error {
-  color: var(--rust);
+  color: #8f3a28;
   min-height: 1.2em;
   margin: 8px 0 0;
 }
@@ -654,6 +656,8 @@ a:focus-visible {
   max-height: calc(100vh / var(--text-zoom, 1) - 48px);
   max-height: calc(100dvh / var(--text-zoom, 1) - 48px);
   overflow-y: auto;
+  /* A control tabbed to scrolls clear of the pinned Back to the lake rather than under it (WCAG 2.4.11). */
+  scroll-padding-bottom: 76px;
   padding: 16px 16px 14px;
   border: 1px solid rgba(215, 190, 142, 0.38);
   /* Solid, like the settings panel: at 0.94 the header's words showed through behind the upgrades. */
@@ -2653,6 +2657,8 @@ html[data-reduce-motion="1"] .walkthrough li {
   width: min(380px, 100%);
   max-height: calc(100dvh / var(--text-zoom, 1) - 32px);
   overflow-y: auto;
+  /* A control tabbed to scrolls clear of the pinned foot rather than under it (WCAG 2.4.11). */
+  scroll-padding-bottom: 76px;
   padding: 18px 18px 16px;
   border: 1px solid rgba(215, 190, 142, 0.38);
   /* Solid: at 0.96 the header's and hint's light words showed through behind the settings. */

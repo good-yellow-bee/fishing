@@ -174,6 +174,20 @@ export function isPerfectCast(power: number, accuracy: number, level = 1) {
   return power >= band.min && power <= band.max;
 }
 
+/** A low, flat cast off the dock skips the lure across the water and under the planks, to the fish in the shade, so the bite comes sooner. */
+export const SKIP_CAST_WAIT = 0.85;
+/** The bottom share of the sweet band that makes a skip cast. */
+export const SKIP_CAST_SHARE = 0.25;
+
+/** Whether a cast off the dock went in low enough in the sweet band to skip under the planks; a float or a popper rides too high to skip. */
+export function isSkipCast(power: number, accuracy: number, spot: string, lure: string | undefined) {
+  if (spot !== "dock") return false;
+  const kind = lure?.trim() ? lureClass(lure).id : null;
+  if (kind === "bobber" || kind === "popper") return false;
+  const band = sweetBand(accuracy);
+  return power >= band.min && power < band.min + (band.max - band.min) * SKIP_CAST_SHARE;
+}
+
 /** A new angler's first fish come easy: this many landed fish keep the mercy on. */
 export const MERCY_CATCHES = 3;
 /** Mercy bites come quickly and give a little longer to strike. */
@@ -298,9 +312,9 @@ export function isTurnover(date: Date) {
   return days >= 0 && days < TURNOVER_DAYS;
 }
 
-/** How the turnover changes the wait: slower everywhere while it lasts, a little sooner in the inlet's fresh water, else 1. */
-export function turnoverWaitMul(now: Date, spot: string) {
-  if (!isTurnover(now)) return 1;
+/** How the turnover changes the wait: slower everywhere while it lasts, a little sooner in the inlet's fresh water, else 1 (and 1 outside fall, as when a season is picked by hand). */
+export function turnoverWaitMul(now: Date, spot: string, season: string | undefined = "fall") {
+  if (season !== "fall" || !isTurnover(now)) return 1;
   return spot === "inlet" ? TURNOVER_INLET_WAIT : TURNOVER_WAIT;
 }
 

@@ -49,7 +49,7 @@ export function RegisterPage() {
           required
           minLength={8}
         />
-        <p className="error">{error}</p>
+        <p className="error" role="alert">{error}</p>
         <button type="submit">{t("Create profile")}</button>
         <p className="foot">
           {t("Already an angler?")} <Link to="/login">{t("Sign in")}</Link>

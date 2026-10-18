@@ -1,9 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field24";
+export const NEWS_ID = "2026-10-18-scene08";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The lily pads now change with the year: small and fresh in spring, turning gold in fall and gone under the winter ice. Clumps of pondweed rock in the swell on the bed round the dock, and in summer a brood of grey cygnets paddles in a line behind the swans.",
+  "With a keyboard, Tab now stays inside Settings, Keys and buttons, the shack and the trip recap instead of slipping onto the lake behind them, and a field or button you tab to scrolls clear of a pinned Save or Back to the lake rather than hiding under it. On a touch screen the species chips are a little taller to tap.",
   "The outing search finds plans with “planned”, Trips says when your last few outings all gave a fish, and Home's Next card says how long ago you last fished that water.",
   "Working a lure free of the Point's rocks now blunts its hook, so a strike has half the time to set solid until you touch it up with the Retie button or T. In winter a cast onto the ice that rims the shore skitters across it, so cast past it to open water. Once each fall the lake turns over for three days: bites come slower everywhere but the inlet, where the fresh stream water keeps the fish feeding, and the shack's chalk board marks the days.",
   "The trees round the lake now bend with the day's wind and sway in its gusts, and keep a gentle sway on a calm day. From spring to fall crayfish creep over the bed either side of the dock, now and then shooting backwards with a flick of the tail, and on still days from spring through summer a raft of whirligig beetles spins on the water off the dock. In winter a ragged rim of ice skirts the bank, with broken plates lying off its edge.",

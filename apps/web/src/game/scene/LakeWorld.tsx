@@ -37,6 +37,9 @@ import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
 import { IceFloes } from "./IceFloes";
 import { Crayfish } from "./Crayfish";
+import { Waterweed } from "./Waterweed";
+import { SunkenLeaves } from "./SunkenLeaves";
+import { sunkenLeavesOut } from "./leafLitter";
 import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
@@ -96,6 +99,8 @@ import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
+import { Cygnets } from "./Cygnets";
+import { cygnetsOut } from "./cygnetBrood";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
@@ -2121,6 +2126,8 @@ export const LakeWorld = memo(function LakeWorld({
       {nestsOut(season) && <SunfishNests />}
       {floesOut(season) && <IceFloes wind={wind} />}
       {crayfishOut(season) && <Crayfish />}
+      <Waterweed season={season} />
+      {sunkenLeavesOut(season) && <SunkenLeaves />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
@@ -2159,6 +2166,7 @@ export const LakeWorld = memo(function LakeWorld({
       {batsOut(hour, sky, season) && <Bats />}
       {geeseOut(hour, sky, season) && <Geese />}
       {swansOut(hour, sky, season) && <Swans />}
+      {cygnetsOut(hour, sky, season) && <Cygnets />}
       {cormorantOut(hour, season) && <Cormorant />}
       {grebesOut(hour, sky, season) && <Grebes />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
