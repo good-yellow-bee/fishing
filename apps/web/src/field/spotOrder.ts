@@ -1,5 +1,6 @@
 import { localDate, type Logbook, type Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
+import { bookFishDay } from "./tripMonths";
 import { countedFish, ownFish } from "./milestones";
 import { isSampleSpot, isSampleTrip } from "./bookCopy";
 
@@ -79,7 +80,8 @@ export function lastOutByWater(book: Logbook, today: string): Map<string, string
   };
   // Today's outing counts once it has a fish, which the fish below already says.
   for (const trip of book.trips) if (trip.date < today && trip.spotId !== PLAY_LAKE_ID) note(trip.spotId, trip.date);
-  for (const entry of book.catches) if (entry.spotId !== PLAY_LAKE_ID) note(entry.spotId, localDate(new Date(entry.caughtAt)));
+  // A night's small-hours fish on its outing's day, as the rest of the book dates it.
+  for (const entry of book.catches) if (entry.spotId !== PLAY_LAKE_ID) note(entry.spotId, bookFishDay(book, entry));
   return last;
 }
 

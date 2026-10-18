@@ -325,6 +325,7 @@ export const PL_FIELD: PlBook = {
   "No waters yet.": "Jeszcze żadnych łowisk.",
   "Missing water": "Brak łowiska",
   "That spot is not in this book.": "Tego łowiska nie ma w dzienniku.",
+  "What was caught in the game stays on the game's lake.": "To, co złowiono w grze, zostaje na jeziorze z gry.",
   "Back to spots": "Wróć do łowisk",
   "Delete this water?": "Usunąć to łowisko?",
   "Delete this water? Its {outings} and {fish} leave the book too.": "Usunąć to łowisko? Jego {outings} i {fish} też znikną z dziennika.",

@@ -1044,8 +1044,8 @@ function CatchForm() {
             <label>
               {t("Water")}
               <select name="spot" aria-describedby={onlySampleWaters ? "own-water-hint" : undefined} value={spotId} onChange={(event) => onSpot(event.target.value)}>
-                {/* The game's lake only for what is already there. */}
-                {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
+                {/* The game's lake only for what is already there, and a game fish stays on it. */}
+                {book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId)).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>

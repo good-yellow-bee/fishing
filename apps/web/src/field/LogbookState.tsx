@@ -270,6 +270,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note, was.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
+        if (offPlayLake(was) !== offPlayLake(parsed.value)) return { ok: false, message: t("What was caught in the game stays on the game's lake."), field: "spotId" };
         const current = photos[id] ?? null;
         let nextPhotos = photos;
         // The form's photo untouched: whatever the book holds now stays, a photo added in another tab included.
@@ -312,6 +313,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title, before.title), note: bookLine(draft.note, before.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
+        // A game day and its fish stay on the game's lake, and a real outing stays off it.
+        if (offPlayLake(before) !== offPlayLake(parsed.value)) return { ok: false, message: t("What was caught in the game stays on the game's lake."), field: "spotId" };
         // The lost and missed tallies are kept on the water, not on the form: an edit leaves them be.
         const counts = { ...(before.lost ? { lost: before.lost } : {}), ...(before.missed ? { missed: before.missed } : {}) };
         const saved = persist(replaceTrip(book, { ...parsed.value, id, ...counts }), photos);

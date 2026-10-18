@@ -11,8 +11,9 @@ import { speciesCounts, speciesWaters } from "./speciesLink";
  * A fish from another water than the outing's names its own; the day carries its year, as the text may be read years on.
  */
 export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null): string {
-  // An outing saved without a title starts at its day.
-  const head = [trip.title.trim(), formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(spotName ? [spotName] : [])].filter(Boolean).join(" · ");
+  // An outing saved without a title, which keeps its water's name for one, starts at its day.
+  const title = trip.title.trim();
+  const head = [spotName && title.toLowerCase() === spotName.trim().toLowerCase() ? "" : title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(spotName ? [spotName] : [])].filter(Boolean).join(" · ");
   const fish = [...catches]
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {

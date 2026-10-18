@@ -20,15 +20,7 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
     bestConditions: into.bestConditions.trim() ? into.bestConditions : from.bestConditions,
     ...(into.place ?? from.place ? { place: into.place ?? from.place } : {}),
   };
-  // The same day out logged on both phones: the moved outing folds into the kept water's outing of that date, its
-  // fish, counts and note with it, rather than leaving two outings on one day.
-  const sameDay = new Map<string, Trip>();
-  for (const trip of book.trips) if (trip.spotId === into.id && !sameDay.has(trip.date)) sameDay.set(trip.date, trip);
-  const foldInto = new Map<string, Trip>();
-  for (const trip of book.trips) {
-    const host = trip.spotId === from.id ? sameDay.get(trip.date) : undefined;
-    if (host) foldInto.set(trip.id, host);
-  }
+  const foldInto = mergeFolds(book, from.id, into.id);
   const folded = new Map<string, Trip>();
   for (const [id, host] of foldInto) {
     const trip = book.trips.find((each) => each.id === id)!;
@@ -52,6 +44,21 @@ export function mergeWaters(book: Logbook, fromId: string, intoId: string): Logb
       return entry.spotId === from.id || host ? { ...entry, ...(entry.spotId === from.id ? { spotId: into.id } : {}), ...(host ? { tripId: host.id } : {}) } : entry;
     }),
   };
+}
+
+/**
+ * The same day out logged on both phones: each outing of the water merged away that folds into the kept water's
+ * outing of that date (its fish, counts and note with it), rather than leaving two outings on one day.
+ */
+export function mergeFolds(book: Logbook, fromId: string, intoId: string): Map<string, Trip> {
+  const sameDay = new Map<string, Trip>();
+  for (const trip of book.trips) if (trip.spotId === intoId && !sameDay.has(trip.date)) sameDay.set(trip.date, trip);
+  const foldInto = new Map<string, Trip>();
+  for (const trip of book.trips) {
+    const host = trip.spotId === fromId ? sameDay.get(trip.date) : undefined;
+    if (host) foldInto.set(trip.id, host);
+  }
+  return foldInto;
 }
 
 /** What a merge would carry over, for the line under the picker: outings and fish moved, and outings that join one. */
@@ -106,14 +113,27 @@ export function intoMergedWaters(file: Logbook, here: Logbook, merged: Record<st
   };
   const moved = file.spots.some((spot) => target(spot.id) !== spot.id) || file.catches.some((entry) => target(entry.spotId) !== entry.spotId);
   if (!moved) return file;
+  // An outing the merge folded into the kept water's outing of its day joins that one again, its newer fish with it,
+  // rather than coming back as a second outing on the day.
+  const hereTrips = new Set(here.trips.map((trip) => trip.id));
+  const folded = new Map<string, string>();
+  for (const trip of file.trips) {
+    const to = target(trip.spotId);
+    if (to === trip.spotId || hereTrips.has(trip.id)) continue;
+    const host = here.trips.find((each) => each.spotId === to && each.date === trip.date);
+    if (host) folded.set(trip.id, host.id);
+  }
   return {
     spots: file.spots.filter((spot) => target(spot.id) === spot.id),
-    trips: file.trips.map((trip) => {
+    trips: file.trips.filter((trip) => !folded.has(trip.id)).map((trip) => {
       const to = target(trip.spotId);
       if (to === trip.spotId) return trip;
       const into = here.spots.find((spot) => spot.id === to)!;
       return movedTrip(trip, file.spots.find((spot) => spot.id === trip.spotId)?.name ?? "", into);
     }),
-    catches: file.catches.map((entry) => (target(entry.spotId) === entry.spotId ? entry : { ...entry, spotId: target(entry.spotId) })),
+    catches: file.catches.map((entry) => {
+      const host = entry.tripId ? folded.get(entry.tripId) : undefined;
+      return target(entry.spotId) === entry.spotId && !host ? entry : { ...entry, spotId: target(entry.spotId), ...(host ? { tripId: host } : {}) };
+    }),
   };
 }
