@@ -469,6 +469,22 @@ export function windPointWaitMul(spot: string, wind: string | undefined) {
   return wind === "strong" && spot === "point" ? WIND_POINT_WAIT : 1;
 }
 
+/** A light breeze blowing onto a bank pushes the warm surface water and the food in it there, and the fish follow, so a cast there bites a little sooner. */
+export const WINDWARD_WAIT = 0.9;
+
+/** The banks each light wind blows squarely onto: north is the far shore (-z), so a north wind blows onto the near banks; no bank faces a south wind. */
+export const WINDWARD_BANKS: Readonly<Record<string, readonly SpotId[]>> = {
+  "light-north": ["dock", "reeds", "point"],
+  "light-east": ["inlet", "reeds"],
+  "light-west": ["dropoff"],
+  "light-south": [],
+};
+
+/** How the breeze stretches the wait at this bank: sooner where a light wind blows onto it, else 1. Breezy and strong days chop the water too much to carry the food in. */
+export function windwardWaitMul(spot: string, wind: string | undefined) {
+  return wind !== undefined && (WINDWARD_BANKS[wind] ?? []).some((bank) => bank === spot) ? WINDWARD_WAIT : 1;
+}
+
 /** Under a clear summer midday sun the open water glares bright and the fish shun it, so out on the boat the bite comes slower. */
 export const OPEN_GLARE_WAIT = 1.15;
 
