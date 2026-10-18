@@ -226,6 +226,26 @@ export function preRainWaitMul(now: Date, sky: string | undefined, turn = skyTur
   return turn?.to === "rain" && sky === "overcast" && now.getHours() === turn.hour - 1 ? PRE_RAIN_WAIT : 1;
 }
 
+/** A spinner's blade turns the line with every cast; after this many spinner casts since the last knot the line is twisted. */
+export const TWIST_CASTS = 12;
+/** Chance a cast on a twisted line kinks into a wind knot and goes nowhere. */
+export const TWIST_TANGLE = 0.25;
+
+/** The line's twist after a cast went out: each spinner cast adds a turn, and other lures leave it as it is. */
+export function twistAfterCast(twist: number, lure: string | undefined) {
+  return lure?.trim() && lureClass(lure).id === "spinner" ? twist + 1 : twist;
+}
+
+/** Whether the line has taken enough turns to kink. */
+export function isTwisted(twist: number) {
+  return twist >= TWIST_CASTS;
+}
+
+/** Whether this cast on the line's twist kinks into a wind knot; a beginner is spared it. */
+export function castTangles(twist: number, roll: number, mercy = false) {
+  return !mercy && isTwisted(twist) && roll < TWIST_TANGLE;
+}
+
 /** As a morning's fog burns off, the fish move up into the warming water to feed, so every bite comes a little sooner. */
 export const FOG_LIFT_WAIT = 0.85;
 

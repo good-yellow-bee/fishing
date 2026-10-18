@@ -39,7 +39,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, castTangles, isTwisted, twistAfterCast, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -377,6 +377,13 @@ export function useFishingGame(
   const markFrayed = (next: boolean) => {
     frayedRef.current = next;
     setFrayed(next);
+  };
+  /** Spinner casts since the last knot; enough of them twist the line until it is retied. */
+  const twistRef = useRef(0);
+  const [twisted, setTwisted] = useState(false);
+  const setTwist = (next: number) => {
+    twistRef.current = next;
+    setTwisted(isTwisted(next));
   };
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
@@ -899,6 +906,13 @@ export function useFishingGame(
       resetToIdle(castHint("overpowered"));
       return;
     }
+    // A line twisted by a spinner's blade kinks on the cast now and then, until it is retied.
+    if (castTangles(twistRef.current, Math.random(), mercyRef.current)) {
+      setOutcome({ kind: "miss", message: t("A wind knot: the twisted line kinked on the cast.") });
+      resetToIdle(t("A spinner twists the line as it turns. Retie to take the twist out."));
+      return;
+    }
+    setTwist(twistAfterCast(twistRef.current, lureRef?.current));
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), lureRef?.current) : null;
@@ -1328,6 +1342,7 @@ export function useFishingGame(
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
             const snapped = sim.frayed ? t("{fish} snapped the frayed line, short of the usual strain.", { fish: t(current.species.name) }) : t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
             markFrayed(false);
+            setTwist(0);
             setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
           } else if (result === "escaped") {
@@ -1392,11 +1407,13 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
-  /** Tie the frayed end off and a fresh knot on, so the line holds full strain again. */
+  /** Tie the frayed or twisted end off and a fresh knot on, so the line holds full strain and casts clean again. */
   const retie = useCallback(() => {
-    if (phaseRef.current !== "idle" || !frayedRef.current) return;
+    if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current))) return;
+    const wasFrayed = frayedRef.current;
     markFrayed(false);
-    setHint(t("You cut off the frayed line and tie the lure on again. The line holds full strain."));
+    setTwist(0);
+    setHint(wasFrayed ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.") : t("You cut off the twisted line and tie the lure on again. It casts clean."));
   }, []);
 
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
@@ -1433,6 +1450,7 @@ export function useFishingGame(
     fishedHard,
     throwGroundbait,
     frayed,
+    twisted,
     retie,
     lurking,
     lurkerCloseInMs,
