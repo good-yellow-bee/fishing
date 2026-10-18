@@ -1087,6 +1087,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC12~~ | ~~News card 2026-10-18-scene03 covers SC9 to SC11: dawn light shafts through the mist, spring pollen on the water and fall leaves rafted on the downwind bank~~ (#991) | news | S |
 | ~~SC13~~ | ~~Reeds in the wind: every clump of reeds leans downwind, further the stronger the day's wind, and nods about that lean on its own beat, faster and wider as the wind gets up; a calm day leaves only a breath of sway, and reduced motion keeps the lean without the nodding~~ (#1031) | scene | S |
 | ~~SC14~~ | ~~Duckweed in the still corners: in summer, ragged green beds of tiny fronds gather by the reeds, among the lilies and in two sheltered coves, thick in the middle and breaking up at the rim, nudged downwind by the breeze and riding the chop; fall thins them and winter and spring clear them~~ (#1033) | scene | S |
+| ~~SC15~~ | ~~Lilies that close: the water lilies' flowers open wide by day, half open at dawn, close toward dusk and stand shut through the night, half closing on a grey or rainy day, easing open and shut as the light turns~~ (#1037) | scene | S |
+| ~~SC16~~ | ~~News card scene04: the reeds in the wind, the summer duckweed and the closing lilies~~ (#1037) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

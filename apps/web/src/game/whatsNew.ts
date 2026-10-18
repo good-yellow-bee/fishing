@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game09";
+export const NEWS_ID = "2026-10-18-scene04";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "The reeds now lean with the day's wind and nod in its gusts. In summer green duckweed gathers in the lake's still corners, by the reeds and among the lily pads, and the water lilies close at dusk, stay shut through the night and half close on a grey or rainy day.",
   "Casting a spinner twists the line, and after a dozen spinner casts a twisted line now and then kinks into a wind knot until you retie it with the button by the walk signs or T. On a controller, X tosses the groundbait and the left trigger reties the line. On a clear morning after a day of rain the fish sulk deep until noon, so bites come slower except on a slow jig or worm, and the shack's chalk board warns of it.",
   "Your year's goal now says how many fish ahead of or behind an even pace you are, and setting a goal shows last year's total to start from.",
   "On a clear dawn, shafts of low sunlight now slant through the trees and the morning mist onto the lake. In spring a yellow film of pollen streaks the water with the breeze and piles up on the downwind bank, and in fall the fallen leaves raft up along that bank instead.",
