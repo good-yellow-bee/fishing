@@ -25,7 +25,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
-import { catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
 import { notYetThisYear } from "./bests/notYet";
@@ -41,7 +41,7 @@ import { tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
-import { countedFish } from "./milestones";
+import { countedBook, countedFish } from "./milestones";
 import { PhotoStrip } from "./SpeciesPage";
 import { formatCoord, placeFor } from "./map/places";
 import { hookTally, hookText } from "./hookTally";
@@ -169,6 +169,12 @@ export function SpotsPage() {
 }
 
 export function SpotPage() {
+  const { spotId = "" } = useParams();
+  // Keyed by the water, so a merge that lands on the kept water's page starts it fresh.
+  return <SpotView key={spotId} />;
+}
+
+function SpotView() {
   const { book, deleteSpot } = useLogbook();
   useT();
   const navigate = useNavigate();
@@ -208,10 +214,13 @@ export function SpotPage() {
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
   // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
+  // The outings as the fish are counted: the sample week's left out once the book has the angler's own.
+  const countedTrips = countedBook(book).trips.filter((trip) => trip.spotId === spot.id);
   const seasonSoFar = (year: string) => ({
-    outings: trips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && (trip.date < today || (fishByTrip.get(trip.id) ?? 0) > 0)).length,
+    outings: countedTrips.filter((trip) => trip.date.startsWith(`${year}-`) && trip.date.slice(5) <= today.slice(5) && (trip.date < today || (fishByTrip.get(trip.id) ?? 0) > 0)).length,
     fish: ownHere.filter((entry) => {
-      const day = localDate(new Date(entry.caughtAt));
+      // A night's small-hours fish counts on its outing's day, as Bests and the day search put it.
+      const day = bookFishDay(book, entry);
       return day.startsWith(`${year}-`) && day.slice(5) <= today.slice(5);
     }).length,
   });

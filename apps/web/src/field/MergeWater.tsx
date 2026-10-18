@@ -2,7 +2,10 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { t, tn, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
-import { mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
+import { mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
+import { useTackleIfAny } from "./gear/TackleState";
+import { foldedTackle } from "./gear/foldedTackle";
+import { localId } from "../game/localId";
 import { PLAY_LAKE_ID } from "./playLake";
 
 /** In a water's link, the water to merge it into: the merge box opens with it picked. */
@@ -12,6 +15,7 @@ export const MERGE_PARAM = "merge";
 export function MergeWater({ spotId }: { spotId: string }) {
   // The book as stored: the shown one has the sample week in the player's language, which must not be saved.
   const { storedBook, book, changeBook } = useLogbook();
+  const tackle = useTackleIfAny();
   useT();
   const navigate = useNavigate();
   const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID).sort((a, b) => a.name.localeCompare(b.name));
@@ -34,7 +38,11 @@ export function MergeWater({ spotId }: { spotId: string }) {
     if (!into) return;
     const next = mergeWaters(storedBook, spotId, into);
     if (next === storedBook) return;
+    // An outing that joins the kept water's one on its day brings its tackle list along.
+    const folds = new Map([...mergeFolds(storedBook, spotId, into)].map(([id, host]) => [id, host.id]));
     if (!changeBook("merge", next)) return;
+    const lists = tackle ? foldedTackle(tackle.items, folds, localId) : null;
+    if (lists) tackle?.replaceTackle(lists);
     noteMergedWater(spotId, into);
     navigate(`/spots/${into}`, { replace: true });
   };
