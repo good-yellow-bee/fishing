@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field16";
+export const NEWS_ID = "2026-10-18-pa05";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a phone, Settings and the keys card keep Back to the lake pinned at their foot, always in reach, and the keys card now opens at its title. With larger text the keys card fits the screen, the header's chips step aside during a fight so the fight card fits, and the catch card's buttons sit on a solid strip that hides the words behind them.",
   "A water's page now says how long ago it was last fished, and once it spans two seasons it counts its fish year by year, each year opening that season's fish there. The whole catch log can now be read largest first, as a search's matches already could.",
   "At the lake, a walk sign now dims a bank fished hard, so you can see where to move. A fight dragged over the Point's rocks or round a Dock piling frays the line, and a frayed line snaps sooner until you retie it with the button by the walk signs or T. In the overcast hour before the day's rain the fish feed hard, so every bite comes sooner, and the shack's chalk board says when that hour starts.",
   "Each kind on Bests now names the day of its last fish, and in a season's view a kind caught there for the first time carries a “New this season” stamp. A kind's page counts its fish year by year, each year opening that season's fish.",
