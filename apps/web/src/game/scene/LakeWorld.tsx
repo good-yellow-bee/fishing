@@ -33,6 +33,8 @@ import { DockLeaves } from "./DockLeaves";
 import { boatHeading } from "./boatSwing";
 import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
+import { SunfishNests } from "./SunfishNests";
+import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
 import { DockFrost } from "./DockFrost";
@@ -2084,6 +2086,7 @@ export const LakeWorld = memo(function LakeWorld({
         <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} open={lilyOpen(hour, sky)} />
       ))}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
+      {nestsOut(season) && <SunfishNests />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
