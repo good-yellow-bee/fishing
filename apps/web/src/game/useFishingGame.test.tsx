@@ -121,6 +121,8 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
       <button type="button" onClick={game.retie}>retie</button>
+      <button type="button" onClick={game.baitShiner}>bait shiner</button>
+      <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
       <i data-testid="dulled">{String(game.dulled)}</i>
@@ -287,6 +289,42 @@ describe("useFishingGame landed outcome", () => {
     act(() => vi.advanceTimersByTime(5_000));
     land(0.5, 6);
     expect(run()).toBe("1");
+  });
+});
+
+describe("useFishingGame live shiner", () => {
+  const liveShiner = () => container!.querySelector("[data-testid=live-shiner]")?.textContent;
+  const baitShiner = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "bait shiner") as HTMLButtonElement).click());
+  const shiner = FISH.find((fish) => fish.id === "golden-shiner")!;
+
+  it("hooks a landed shiner on as bait, and the next cast draws the bank's hunter to it once", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    baitShiner();
+    expect(phase()).toBe("idle:none");
+    expect(liveShiner()).toBe("true");
+    expect(hint()).toBe("You hook the shiner on as live bait. Cast it out to the hunters.");
+    cast(surface);
+    expect(liveShiner()).toBe("false");
+    expect(hint()).toMatch(/^The live shiner swims down off the hook, and the hunters here come to it\./);
+    // The dock's hunter is the smallmouth bass.
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
+    act(() => vi.advanceTimersByTime(2_201));
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/^It took the live shiner! /);
+  });
+
+  it("leaves any other landed fish on the card", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    baitShiner();
+    expect(phase()).toBe("result:landed");
+    expect(liveShiner()).toBe("false");
   });
 });
 

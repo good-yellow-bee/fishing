@@ -39,7 +39,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, castTangles, isTwisted, twistAfterCast, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, castTangles, isTwisted, twistAfterCast, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -298,6 +298,8 @@ export function useFishingGame(
   const recaughtRef = useRef<Recaught | null>(null);
   /** The bite came from a feeder the groundbait drew in, for the landed card to say so. */
   const fedRef = useRef(false);
+  /** This bite is a hunter come to the live shiner. */
+  const shinerTakenRef = useRef(false);
   /** The hunter that will follow this small fish in if it isn't grabbed, with the weight it bites at. */
   const followRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
   /** The last cast landed in the middle of the sweet band. */
@@ -394,6 +396,9 @@ export function useFishingGame(
     dullRef.current = next;
     setDulled(next);
   };
+  /** A landed golden shiner hooked back on as live bait, for the next cast. */
+  const liveShinerRef = useRef(false);
+  const [liveShiner, setLiveShiner] = useState(false);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
@@ -476,7 +481,7 @@ export function useFishingGame(
     const solid = strike !== undefined && strike.elapsedMs <= strike.solidMs;
     const late = strike !== undefined && !solid && isLightHook(strike.elapsedMs, strike.windowMs);
     // Live bait held that long is swallowed, so a late strike still hooks deep rather than light.
-    const deep = late && isLiveBait(lureRef?.current);
+    const deep = late && (isLiveBait(lureRef?.current) || shinerTakenRef.current);
     const lightHook = late && !deep;
     const underpowered = !canLand(current, species);
     const water = fightWater(spotRef.current);
@@ -512,7 +517,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${t("It's a fish you let go here before!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -726,6 +731,13 @@ export function useFishingGame(
     fishedRef.current = fresh.next;
     const freshWait = fresh.fresh ? FRESH_WAIT : 1;
     if (fresh.fresh) reasons.push(t("Fresh water: the fish here haven't seen a lure today."));
+    // A live shiner on the hook swims down and draws the bank's hunters; it goes out on this one cast, and is told first.
+    const shiner = liveShinerRef.current;
+    if (shiner) {
+      liveShinerRef.current = false;
+      setLiveShiner(false);
+      reasons.unshift(t("The live shiner swims down off the hook, and the hunters here come to it."));
+    }
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
@@ -743,7 +755,9 @@ export function useFishingGame(
     recaughtRef.current = released?.fish ?? null;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
-    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
+    const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour) : null;
+    shinerTakenRef.current = !!hunter;
+    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
     fedRef.current = !!feeder && species === feeder;
     const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
@@ -1474,6 +1488,15 @@ export function useFishingGame(
     resetToIdle(idleHint(stanceRef.current));
   };
 
+  /** Hook the landed golden shiner back on as live bait, so the next cast carries it out to the bank's hunters. */
+  const baitShiner = () => {
+    if (outcome?.kind !== "landed" || !canBaitShiner(outcome.species.id)) return;
+    liveShinerRef.current = true;
+    setLiveShiner(true);
+    setOutcome(null);
+    resetToIdle(t("You hook the shiner on as live bait. Cast it out to the hunters."));
+  };
+
   return {
     surfaceRef,
     phase,
@@ -1504,5 +1527,7 @@ export function useFishingGame(
     powerRef,
     lastCastRef,
     dismissResult,
+    liveShiner,
+    baitShiner,
   };
 }

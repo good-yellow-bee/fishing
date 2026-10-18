@@ -636,6 +636,27 @@ export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCa
   return feeders.at(-1) ?? null;
 }
 
+/** A landed golden shiner can go back out on the hook as live bait for one cast. */
+export function canBaitShiner(speciesId: string) {
+  return speciesId === "golden-shiner";
+}
+/** The hunters that take a live shiner fished on the hook. */
+export const SHINER_HUNTERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "largemouth-bass", "smallmouth-bass", "walleye"]);
+/** Chance a bite on a live shiner is one of the bank's hunters. */
+export const LIVE_SHINER_SHARE = 0.6;
+
+/** A hunter drawn to the live shiner for this bite, from the bank's own and weighed as the bank draws them, only one the angler could land, or none. */
+export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  if (random() >= LIVE_SHINER_SHARE) return null;
+  const hunters = FISH.filter((fish) => fish.spots.includes(spot) && SHINER_HUNTERS.has(fish.id) && canLand(profile, fish));
+  let roll = random() * hunters.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  for (const fish of hunters) {
+    roll -= appeal(fish, hour);
+    if (roll <= 0) return fish;
+  }
+  return hunters.at(-1) ?? null;
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 

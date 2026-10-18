@@ -72,7 +72,7 @@ import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { GROUNDBAIT_CASTS, hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
+import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
@@ -863,6 +863,7 @@ export function DockPage() {
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
           {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}
+          {game.liveShiner && <small className="stance-hot"> · {t("live shiner on")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -1065,6 +1066,12 @@ export function DockPage() {
               <button className="panel-btn" type="button" onClick={game.dismissResult}>
                 {t("Keep fishing")}
               </button>
+              {/* A shiner goes back out on the hook as live bait, for the pike and bass that hunt it. */}
+              {!landedReleased && canBaitShiner(game.outcome.species.id) && (
+                <button className="panel-btn" type="button" onClick={game.baitShiner} title={t("Hook it on as live bait: the next cast draws the hunters here.")}>
+                  {t("Use it as bait")}
+                </button>
+              )}
               {fieldLogError && (
                 <button className="panel-btn" type="button" onClick={saveFieldLog}>
                   {t("Try saving again")}
