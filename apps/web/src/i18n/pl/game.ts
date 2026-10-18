@@ -446,6 +446,9 @@ export const PL_GAME: PlBook = {
   "The lake is turning over, and the stirred-up water puts the fish off. The inlet's fresh stream water still holds them.": "Jezioro się przewraca, a zmącona woda zniechęca ryby. Świeża woda strumienia w ujściu wciąż je trzyma.",
   "The lake is turning over, but the inlet's fresh stream water keeps its fish feeding.": "Jezioro się przewraca, ale świeża woda strumienia w ujściu wciąż zachęca ryby do żerowania.",
   "The midday glare drives the fish from the open water, so the bites come slow.": "Południowy blask przegania ryby z otwartej wody, więc brania przychodzą powoli.",
+  "The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets.":
+    "Niskie słońce za plecami rzuca twój cień na wodę, a ryby go unikają. Spróbuj innego brzegu, aż słońce wzejdzie wyżej albo zajdzie.",
+  "your shadow on the water": "cień na wodzie",
   "There's no moon tonight and the fish can barely see to feed, so the bites come slow.": "Dziś nie ma księżyca i ryby ledwo widzą żer, więc brania przychodzą powoli.",
   "The breeze chops the surface, and the fish feed bolder under it.": "Wiatr marszczy powierzchnię, a ryby pod nią żerują śmielej.",
   "The sun catches the lure's flash.": "Słońce odbija się w przynęcie i błyska.",

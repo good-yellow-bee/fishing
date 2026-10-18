@@ -532,6 +532,17 @@ export function openGlareWaitMul(spot: string, season: LakeSeason | undefined, h
   return season === "summer" && hour === "day" && sky === "clear" && spot === "open" ? OPEN_GLARE_WAIT : 1;
 }
 
+/** With the sun low behind the angler their long shadow falls across the water, and the fish shy from it, so the bite comes slower. */
+export const LONG_SHADOW_WAIT = 1.15;
+
+/** The banks with the low sun squarely at the angler's back: the Drop-off on the east shore looks west into the lake at dawn, and the Inlet on the west shore looks east at dusk. */
+const LONG_SHADOW_BANKS: Partial<Record<LakeHour, string>> = { dawn: "dropoff", dusk: "inlet" };
+
+/** How the angler's shadow stretches the wait: slower at the bank with the low sun behind it under a clear or partly cloudy sky, else 1. */
+export function longShadowWaitMul(spot: string, hour: LakeHour, sky: string | undefined) {
+  return (sky === "clear" || sky === "partly-cloudy") && LONG_SHADOW_BANKS[hour] === spot ? LONG_SHADOW_WAIT : 1;
+}
+
 /** On a night with the moon this thin (its lit share) or less, it is too dark for the fish to see to feed. */
 export const NEW_MOON = 0.1;
 

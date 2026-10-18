@@ -20,6 +20,9 @@ describe("bankSuitsNow", () => {
     ["inlet", { wind: "light-north" }, false],
     ["inlet", { wind: "light-east" }, true],
     ["dropoff", { wind: "light-west" }, true],
+    // At dawn the low sun at the drop-off angler's back throws their shadow on the water, which outweighs a west breeze.
+    ["dropoff", { wind: "light-west", hour: "dawn", sky: "clear" }, false],
+    ["dropoff", { wind: "light-west", hour: "dawn", sky: "overcast" }, true],
     ["dock", { wind: "light-south" }, false],
     ["inlet", { sky: "rain" }, true],
     ["open", { season: "summer", sky: "clear" }, false],
