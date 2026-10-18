@@ -353,18 +353,20 @@ function LureTwins() {
   );
 }
 
+/** The past outings' lists left open, for this visit: Back from an outing opened from one finds it still open. */
+let openPast = new Set<string>();
+
 /** A past outing's list, folded away: it matters again only when the same bag goes out. */
-function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
+function PastTripTackle({ trip, today, tomorrow, open, onToggle }: { trip: Trip; today: string; tomorrow: string; open: boolean; onToggle: (open: boolean) => void }) {
   const { book } = useLogbook();
   useT();
   const spot = spotById(book, trip.spotId);
   // Once for the line and the list: each look-up sorts the whole book.
   const fish = catchesForTrip(book, trip.id);
-  // A folded list is drawn once opened: a page of past outings would otherwise build every bag unseen.
-  const [open, setOpen] = useState(false);
 
+  // A folded list is drawn once opened: a page of past outings would otherwise build every bag unseen.
   return (
-    <details className="tackle-trip tackle-past" onToggle={(event) => setOpen(event.currentTarget.open)}>
+    <details className="tackle-trip tackle-past" open={open} onToggle={(event) => event.currentTarget.open !== open && onToggle(event.currentTarget.open)}>
       <summary>
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
@@ -387,6 +389,13 @@ export function GearPage() {
   const { tripId } = useParams();
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
+  // Kept for the visit as well as here, so a list left open is open again on coming Back.
+  const [openIds, keepOpenIds] = useState(() => new Set(openPast));
+  const setOpenIds = (next: Set<string> | ((current: Set<string>) => Set<string>)) =>
+    keepOpenIds((current) => {
+      openPast = typeof next === "function" ? next(current) : next;
+      return openPast;
+    });
 
   if (tripId) {
     const trip = tripById(book, tripId);
@@ -460,14 +469,46 @@ export function GearPage() {
       )}
       <LureRecord today={today} />
       <LureTwins />
-      <h2 className="subhead" id="gear-recent" tabIndex={-1}>
-        {t("Recent")}
-      </h2>
+      <div className="section-head">
+        <h2 className="subhead" id="gear-recent" tabIndex={-1}>
+          {t("Recent")}
+        </h2>
+        {/* Several bags opened to compare: one tap folds them away again. */}
+        {openIds.size > 1 ? (
+          <button
+            type="button"
+            className="text-button fold-all"
+            onClick={() => {
+              setOpenIds(new Set());
+              // The button goes with the open lists: focus stays at the heading it sat beside.
+              document.getElementById("gear-recent")?.focus();
+            }}
+          >
+            {t("Fold all")}
+          </button>
+        ) : null}
+      </div>
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (
         <PagedTrips trips={recent} fishOn={(id) => fishByTrip.get(id) ?? 0}>
-          {(trip) => <PastTripTackle key={trip.id} trip={trip} today={today} tomorrow={tomorrow} />}
+          {(trip) => (
+            <PastTripTackle
+              key={trip.id}
+              trip={trip}
+              today={today}
+              tomorrow={tomorrow}
+              open={openIds.has(trip.id)}
+              onToggle={(open) =>
+                setOpenIds((current) => {
+                  const next = new Set(current);
+                  if (open) next.add(trip.id);
+                  else next.delete(trip.id);
+                  return next;
+                })
+              }
+            />
+          )}
         </PagedTrips>
       )}
     </div>

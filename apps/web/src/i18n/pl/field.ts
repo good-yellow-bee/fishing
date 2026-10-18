@@ -636,6 +636,7 @@ export const PL_FIELD: PlBook = {
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Busiest month": "Najwięcej dni nad wodą",
+  "Fold all": "Zwiń wszystkie",
   "Copy the place": "Skopiuj współrzędne",
   "Place copied.": "Skopiowano współrzędne.",
   "This browser won't copy; the place is {place}.": "Ta przeglądarka nie kopiuje; współrzędne to {place}.",
