@@ -39,7 +39,7 @@ export function LogPage() {
         {" · "}
         <Link to="/board">{t("Lodge board")}</Link>
       </p>
-      <h1>{t("{name}’s catch log", { name: me.profile.displayName })}</h1>
+      <h1 id="log-title">{t("{name}’s catch log", { name: me.profile.displayName })}</h1>
       <p>
         {tn(me.profile.lifetimePoints, "{n} lifetime points", "{n} lifetime points")} ·{" "}
         {tn(catches.length, "{n} recent fish", "{n} recent fish")}
@@ -83,7 +83,8 @@ export function LogPage() {
           </div>
         </div>
       )}
-      <table>
+      {/* On a phone the table scrolls sideways on its own, so it takes focus for the arrow keys and is named by the page title. */}
+      <table tabIndex={0} aria-labelledby="log-title">
         <thead>
           <tr>
             <th>{t("Fish")}</th>
