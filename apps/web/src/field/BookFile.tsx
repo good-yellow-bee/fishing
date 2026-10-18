@@ -51,6 +51,13 @@ function withoutDeleted(file: FieldArchive): FieldArchive {
   return { ...file, book: { ...file.book, catches: file.book.catches.filter((entry) => !deleted.has(entry.id)) } };
 }
 
+/** The first few fish by kind and day, then how many more. */
+function fishPreview(entries: readonly { species: string; caughtAt: string }[]): string {
+  const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${t(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
+  return entries.length > PREVIEW_FISH ? t("{list} and {n} more", { list: shown, n: entries.length - PREVIEW_FISH }) : shown;
+}
+const PREVIEW_FISH = 3;
+
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
   const newest = newestAt(book);
@@ -313,7 +320,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
   const hasBook = storedBook.catches.length + storedBook.spots.length + storedBook.trips.length > 0;
-  const addable = pending ? newFishIn(storedBook, withoutDeleted(pending).book).length : 0;
+  const adds = pending ? catchesNewestFirst({ ...pending.book, catches: newFishIn(storedBook, withoutDeleted(pending).book) }) : [];
+  const addable = adds.length;
   const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
   const adding = pending && hasBook ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
@@ -335,6 +343,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
               ? t("Catches since the last download: {count}. A fresh copy keeps them safe.", { count: nudge.count })
               : t("The last download was {days} days ago, and the book has changed since. A fresh copy keeps it safe.", { days: nudge.days })}
         </p>
+      ) : copyMark ? (
+        <p className="meta">{t("Last copy: {day}.", { day: formatCatchDay(new Date(copyMark.at).toISOString()) })}</p>
       ) : null}
       {setAside ? (
         <SetAside
@@ -444,6 +454,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {/* What each side holds, so an older copy doesn't quietly drop the fish logged since. */}
             {t("This browser: {here}. The file: {there}.", { here: bookSummary(storedBook), there: bookSummary(pending.book) })}
             {lost > 0 ? ` ${t("Fish here that aren't in the file, and would be lost: {count}.", { count: lost })}` : ""}
+            {/* The newest of the fish adding would bring, so an older or a stranger's file shows itself before a tap. */}
+            {addable > 0 && hasBook ? ` ${t("New in the file: {fish}.", { fish: fishPreview(adds) })}` : ""}
             {placesLost > 0 ? ` ${t("Waters and outings here that aren't in the file, and would be lost: {count}.", { count: placesLost })}` : ""}
             {kept > 0 && hasBook ? ` ${t("Fish deleted in this browser stay out when adding: {count}.", { count: kept })}` : ""}
             {/* The same file again: nothing to add, so Replace (which can lose fish) isn't the only way out that reads like one. */}

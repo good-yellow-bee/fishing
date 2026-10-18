@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game04";
+export const NEWS_ID = "2026-10-18-field05";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Loading a copy from another phone now shows its newest fish before you add them, and brings over the lost and missed taps made there. Photos can be narrowed to one water, the book says when its last copy was made, and What's new now shows in the field log too, a tap away at the bottom of Home.",
   "At the lake, an amber dot on a walk sign marks the banks the season, hour and weather favor right now. After dark the dock lanterns draw a shoal of minnows into their light, and the fish follow them in. Each visit brings one handful of groundbait: toss it with the button by the walk signs and the next five casts there bite sooner over its muddy cloud, and a school landed over it stays a cast longer.",
   "The Trips search now finds outings by the size of their fish (“pike over 20 in”) and looks ahead to planned ones (“tomorrow”, “next week”). Both searches find a kind typed in the plural and a month in any Polish form, and read “at least”, “max.” and sizes in mm or dag. Trips can put every planned outing in your calendar in one file, and the Map has “Plan one” beside each water.",
   "Once you log your own fish, Bests and each kind's page leave the sample week out, as Home does, so a best day or a largest fish is always yours. The Spots list can narrow to one kind of water, like rivers or lakes, and Gear's lure record names the lures packed for four or more outings without a fish.",
