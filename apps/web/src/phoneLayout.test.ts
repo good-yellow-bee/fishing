@@ -81,6 +81,22 @@ describe("the keys card on a phone", () => {
   });
 });
 
+describe("a fight on a phone held sideways with larger text", () => {
+  const from = css.indexOf("@media (pointer: coarse) and (max-height: 500px) {");
+  const block = css.slice(from, css.indexOf("\n}\n", from));
+
+  it("drops the card's hold-and-release line and the bar's status chips, so the card stays under the bar", () => {
+    expect(from).toBeGreaterThan(-1);
+    expect(block).toContain("html[data-text-size] .fight-bar .fight-controls,");
+    expect(block).toContain('html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),');
+  });
+
+  it("centres the card in the room beside the Reel button, on either hand", () => {
+    expect(block).toMatch(/\n  \.fight-bar \{\n    left: calc\(50% - 56px\);/);
+    expect(block).toMatch(/html\[data-hand="left"\] \.fight-bar \{\n    left: calc\(50% \+ 56px\);/);
+  });
+});
+
 describe("Settings, the keys card and the trip recap on a short screen", () => {
   it("sit 8 px from the edges and pin a tighter foot, so the list scrolls in a taller window", () => {
     const short = css.slice(css.indexOf(SIDEWAYS));
