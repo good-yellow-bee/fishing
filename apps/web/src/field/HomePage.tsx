@@ -16,7 +16,7 @@ import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth, daysOut } from "./tripMonths";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { goalPace, readYearGoal } from "./YearGoal";
@@ -167,6 +167,7 @@ export function HomePage() {
   const ownAny = countedOwn.trips.some((trip) => !isSampleTrip(trip.id)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
+  const daysThisYear = daysOut(countedOwn, thisYear, today);
   const ownOutings = countedOwn.trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
@@ -302,6 +303,13 @@ export function HomePage() {
           {ownOutings > 0 ? (
             <small>
               <Link to="/trips">{tn(ownOutings, "{n} outing", "{n} outings")}</Link>
+              {/* Days on the water this year, as Bests counts them: a night's small hours on its outing's day. */}
+              {daysThisYear > 0 ? (
+                <>
+                  {" · "}
+                  <Link to="/bests">{tn(daysThisYear, "{n} day out this year", "{n} days out this year")}</Link>
+                </>
+              ) : null}
             </small>
           ) : null}
         </div>
