@@ -51,6 +51,7 @@ export const PL_FIELD: PlBook = {
   "Nothing logged": "Nic nie zapisano",
   "{n} outings": ["{n} wyprawa", "{n} wyprawy", "{n} wypraw"],
   "{n} planned": ["{n} zaplanowana", "{n} zaplanowane", "{n} zaplanowanych"],
+  "A fish on each of your last {n} outings": ["Ryba na każdej z ostatnich {n} wypraw", "Ryba na każdej z ostatnich {n} wypraw", "Ryba na każdej z ostatnich {n} wypraw"],
   "Also listed: {n} fish from the sample week or the game.": [
     "Na liście jest też {n} ryba z przykładowego tygodnia lub z gry.",
     "Na liście są też {n} ryby z przykładowego tygodnia lub z gry.",

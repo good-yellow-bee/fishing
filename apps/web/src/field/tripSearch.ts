@@ -2,6 +2,7 @@ import { WATER_LABELS, foldText, spotById, type CatchEntry, type Logbook, type T
 import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
+import { isPlanned } from "./TripMonthHead";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
@@ -15,6 +16,8 @@ const plain = foldText;
 /** Words that ask for the outings that counted a fish lost, or a strike missed. */
 const LOST = ["lost", "lost fish", "spięte", "spięta", "spiętych"].map(plain);
 const MISSED = ["missed", "missed strikes", "puste brania", "puste branie"].map(plain);
+/** Words that ask for the outings still planned: ahead, or today's before its first fish, as the month headings count them. */
+const PLANNED = ["planned", "plans", "zaplanowane", "zaplanowana", "zaplanowanych"].map(plain);
 
 /** Each outing's fish, gathered once per book: an outing is found by what it caught too. */
 const fishCache = new WeakMap<Logbook, Map<string, CatchEntry[]>>();
@@ -89,6 +92,7 @@ export function findTrips(
     if (NO_FISH.includes(part)) return trip.date < today && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
+    if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
     const range = ranges.get(part);
     if (range) return trip.date >= range.from && trip.date <= range.to;
     // "w październiku" finds the outings of any October, as the catch search finds its fish.

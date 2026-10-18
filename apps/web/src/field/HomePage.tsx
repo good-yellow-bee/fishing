@@ -14,6 +14,7 @@ import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip,
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
+import { daysBetween } from "./spotOrder";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
@@ -89,7 +90,9 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   if (!last) return null;
   const fish = catchesForTrip(book, last.id);
   const lure = lureTally({ ...book, catches: fish }, 1)[0];
-  const day = formatDay(last.date);
+  // How long the water has rested, as the outing's own page says it.
+  const rest = daysBetween(last.date, today);
+  const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
   return (
     <small className="next-last">
       <Link to={`/trips/${last.id}`}>
