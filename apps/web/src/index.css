@@ -3637,6 +3637,26 @@ html[data-contrast="high"] .sound-captions li {
   }
 }
 
+/* In a fight on a phone held sideways with large or larger text, the card ran up over the top bar, and with the largest
+   off the top of the screen. As on an upright phone, the thumb button says Reel and the status line says when to let go,
+   so the card's hold-and-release line goes, and the bar's status chips step aside so its links fit one row. */
+@media (pointer: coarse) and (max-height: 500px) {
+  html[data-text-size] .fight-bar .fight-controls,
+  html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
+  html[data-text-size] .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+    display: none;
+  }
+
+  /* Centred in the room beside the Reel button, which stood over its right edge on a 640 px phone. */
+  .fight-bar {
+    left: calc(50% - 56px);
+  }
+
+  html[data-hand="left"] .fight-bar {
+    left: calc(50% + 56px);
+  }
+}
+
 /* A zoomed window has no walking stick, so the hint takes its corner. */
 @media (max-height: 500px) and (pointer: fine), (max-height: 500px) and (pointer: none) {
   .hint {
