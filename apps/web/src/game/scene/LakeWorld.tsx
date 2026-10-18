@@ -102,7 +102,7 @@ import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { LILY_HEART, LILY_PETALS, lilyBloom, type Bloom } from "./lilyBloom";
+import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, type Bloom } from "./lilyBloom";
 import { sharedLilyPetals } from "./lilyPetals";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
@@ -1217,7 +1217,18 @@ const LAKE_ROCKS: RockSpec[] = [
 const CREEK_ROCK_SPECS: RockSpec[] = CREEK_ROCKS.map((rock) => ({ position: [rock.x, rock.scale[1] * 0.45, rock.z], scale: rock.scale, rotation: rock.rot }));
 
 /** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
-function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: string }) {
+function LilyFlower({ bloom, color, open }: { bloom: Exclude<Bloom, null>; color: string; open: number }) {
+  const cup = useRef<THREE.Group>(null);
+  const still = useReducedMotion();
+  const shown = useRef(open);
+  useFrame((_, delta) => {
+    const flower = cup.current;
+    if (!flower) return;
+    // The flower eases open and shut as the hour and the weather turn.
+    shown.current = still ? open : easeLily(shown.current, open, delta);
+    const shape = lilyCup(shown.current);
+    flower.scale.set(shape.spread, shape.rise, shape.spread);
+  });
   if (bloom === "bud") {
     return (
       <mesh position={[0, 0.07, 0]} scale={[0.045, 0.08, 0.045]}>
@@ -1228,9 +1239,11 @@ function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: stri
   }
   return (
     <group position={[0, 0.03, 0]}>
-      <mesh geometry={sharedLilyPetals()}>
-        <meshToonMaterial color={color} gradientMap={toonRamp()} />
-      </mesh>
+      <group ref={cup}>
+        <mesh geometry={sharedLilyPetals()}>
+          <meshToonMaterial color={color} gradientMap={toonRamp()} />
+        </mesh>
+      </group>
       <mesh position={[0, 0.04, 0]} scale={[0.03, 0.022, 0.03]}>
         <sphereGeometry args={[1, 8, 6]} />
         <meshToonMaterial color={LILY_HEART} gradientMap={toonRamp()} />
@@ -1239,7 +1252,7 @@ function LilyFlower({ bloom, color }: { bloom: Exclude<Bloom, null>; color: stri
   );
 }
 
-function FloatingLily({ url, position, scale, index }: Lily & { index: number }) {
+function FloatingLily({ url, position, scale, index, open }: Lily & { index: number; open: number }) {
   const ref = useRef<THREE.Group>(null);
   const bloom = lilyBloom(useContext(SeasonContext));
   useFrame((state) => {
@@ -1258,7 +1271,7 @@ function FloatingLily({ url, position, scale, index }: Lily & { index: number })
       {bloom && (
         // Drawn a little large so the flowers read from the bank.
         <group position={[0.12 * scale, 0, 0.08 * scale]} scale={scale * 1.8}>
-          <LilyFlower bloom={bloom} color={LILY_PETALS[index % LILY_PETALS.length]!} />
+          <LilyFlower bloom={bloom} color={LILY_PETALS[index % LILY_PETALS.length]!} open={open} />
         </group>
       )}
     </group>
@@ -2052,7 +2065,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
       {LILIES.map((lily, i) => (
-        <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} />
+        <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} open={lilyOpen(hour, sky)} />
       ))}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {BOATS.map((boat, i) => (
