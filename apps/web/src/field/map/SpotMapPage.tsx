@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
@@ -32,7 +32,7 @@ import {
   ringPath,
   type SamplePlace,
 } from "./places";
-import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
+import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
 import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
@@ -145,7 +145,7 @@ function SpotPin({
   point = project(place),
   width = MAP_WIDTH,
   height = MAP_HEIGHT,
-  crowded = false,
+  shift = 0,
   fish = 0,
 }: {
   spot: Spot;
@@ -154,12 +154,15 @@ function SpotPin({
   point?: { x: number; y: number };
   width?: number;
   height?: number;
-  crowded?: boolean;
+  /** labelShifts' place for this pin's label: 0 its own, 1 a line off, 2 a line the other way, 3 none. */
+  shift?: number;
 }) {
   // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
-  // A pin just beside an earlier one moves its label a line down (or up, near the foot of the sheet), off the other label.
-  const shift = crowded ? (point.y > height * 0.7 ? " map-pin-up" : " map-pin-down") : "";
-  const own = spot.place ? ` map-pin-own${point.x > width * 0.5 ? " map-pin-east" : ""}${shift}` : "";
+  // A pin just beside an earlier one moves its label a line down (or up, near the foot of the sheet), off the other label;
+  // a third takes the other way, and past that only the dot shows.
+  const low = point.y > height * 0.7;
+  const moved = shift === 0 ? "" : shift >= 3 ? " map-pin-bare" : (shift === 1) === low ? " map-pin-up" : " map-pin-down";
+  const own = spot.place ? ` map-pin-own${point.x > width * 0.5 ? " map-pin-east" : ""}${moved}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
@@ -191,9 +194,6 @@ function sheetPlace(spot: Spot, sampleSheet: boolean): SamplePlace | undefined {
   return inside ? { spotId: spot.id, lat: place.lat, lng: place.lng } : undefined;
 }
 
-/** Sheet units within which two pins' labels would sit on each other. */
-const CROWDED = 80;
-
 /** The angler's own pins away from the sample sheet, on a plain sheet of their own: a grid fitted to them, north up. */
 function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace }[]; fishOf: (spotId: string) => number }) {
   const frame = fitFrame(pinned.map(({ place }) => place));
@@ -204,8 +204,21 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
   const TICK_ROOM = 26;
   const TICK_WIDTH = 110;
   const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
+  // The labels keep a size on screen while the sheet scales, so which ones meet depends on how wide it is drawn.
+  const sheet = useRef<HTMLDivElement>(null);
+  const [pxPerUnit, setPxPerUnit] = useState(0.9);
+  useEffect(() => {
+    const box = sheet.current;
+    if (!box || typeof ResizeObserver === "undefined") return;
+    const measure = () => setPxPerUnit(box.getBoundingClientRect().width / OWN_WIDTH || 0.9);
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, []);
+  const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit);
   return (
-    <div className="spot-map own-sheet">
+    <div className="spot-map own-sheet" ref={sheet}>
       <svg className="spot-map-plate" viewBox={`0 0 ${OWN_WIDTH} ${OWN_HEIGHT}`} role="img" aria-label={t("Your own waters, north up")}>
         <rect width={OWN_WIDTH} height={OWN_HEIGHT} className="map-land" />
         {lats.values.map((lat) => {
@@ -238,7 +251,7 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
       </svg>
       <div className="spot-map-pins" aria-hidden="true">
         {points.map(({ spot, place, point }, i) => (
-          <SpotPin key={spot.id} spot={spot} place={place} fish={fishOf(spot.id)} point={point} width={OWN_WIDTH} height={OWN_HEIGHT} crowded={points.slice(0, i).some((other) => Math.hypot(other.point.x - point.x, other.point.y - point.y) < CROWDED)} />
+          <SpotPin key={spot.id} spot={spot} place={place} fish={fishOf(spot.id)} point={point} width={OWN_WIDTH} height={OWN_HEIGHT} shift={shifts[i]} />
         ))}
       </div>
     </div>

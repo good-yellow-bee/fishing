@@ -6,6 +6,7 @@ import { exactTerm, findLink } from "./findLinks";
 import { useLogbook } from "./LogbookState";
 import { useTackleIfAny } from "./gear/TackleState";
 import { renamedTackle } from "./gear/renamedTackle";
+import { undoneTackle } from "./gear/undoneTackle";
 
 /** Where a renamed kind or lure is found again under its new name. */
 function pageOf(field: NameField, name: string) {
@@ -37,7 +38,8 @@ export function RenameKind({ field, name }: { field: NameField; name: string }) 
     // The packed lists follow a lure's new name, so its record still finds its fish; Undo puts them back with the book.
     const lists = field === "lure" && tackle ? renamedTackle(tackle.items, name, result.name) : null;
     const before = tackle?.items ?? [];
-    if (!changeBook("rename", result.book, lists ? () => tackle?.replaceTackle([...before]) : undefined)) return;
+    // Only the rename is taken back: what was packed since stays.
+    if (!changeBook("rename", result.book, lists ? () => tackle?.updateTackle((current) => undoneTackle(current, before, lists)) : undefined)) return;
     if (lists) tackle?.replaceTackle(lists);
     navigate(pageOf(field, result.name), { replace: true });
   };
