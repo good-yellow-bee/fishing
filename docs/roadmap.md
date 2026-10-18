@@ -1085,6 +1085,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC11~~ | ~~Fall leaves rafted on the water: the fallen leaves gather in a raft along the bank the day's breeze blows onto, with a few strays out on the open water, each turning a little on the chop; a calm day spreads them round the shore~~ (#991) | scene | S |
 | ~~SC12~~ | ~~News card 2026-10-18-scene03 covers SC9 to SC11: dawn light shafts through the mist, spring pollen on the water and fall leaves rafted on the downwind bank~~ (#991) | news | S |
 | ~~SC13~~ | ~~Reeds in the wind: every clump of reeds leans downwind, further the stronger the day's wind, and nods about that lean on its own beat, faster and wider as the wind gets up; a calm day leaves only a breath of sway, and reduced motion keeps the lean without the nodding~~ (#1031) | scene | S |
+| SC14 | Duckweed in the still corners: in summer, ragged green beds of tiny fronds gather by the reeds, among the lilies and in two sheltered coves, thick in the middle and breaking up at the rim, nudged downwind by the breeze and riding the chop; fall thins them and winter and spring clear them | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

@@ -117,6 +117,8 @@ import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
+import { DuckweedFilm } from "./DuckweedFilm";
+import { duckweedAmount } from "./duckweedBeds";
 import { pollenAmount } from "./pollenDrift";
 import { bankMirrorStrength, mirrorStale } from "./mirrorImage";
 import { ROAD_RELAY, SUN_ROAD_FAR, SUN_ROAD_NEAR, roadBands, roadFrom } from "./glintRoad";
@@ -1050,6 +1052,7 @@ function LakeSurface({
   // The bank's mirror image is a repaint and one more layer over the lake: full effects only.
   const mirror = useSettings().particles === "full" ? bankMirrorStrength(hour, sky, wind) : 0;
   const pollen = pollenAmount(season, sky);
+  const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
     () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: seasonGroundColor(hour === "night" ? hill.night : hill.day, season) })),
     [hour, season],
@@ -1132,6 +1135,7 @@ function LakeSurface({
         <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
       {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
+      {duckweed > 0 && <DuckweedFilm geometry={geometry} wind={wind} hour={hour} amount={duckweed} />}
       {pollen > 0 && <PollenFilm geometry={geometry} wind={wind} hour={hour} amount={pollen} />}
       {cloudShade > 0 && (
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
