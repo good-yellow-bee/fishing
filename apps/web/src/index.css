@@ -599,6 +599,17 @@ a:focus-visible {
   pointer-events: none;
 }
 
+/* While the first-cast coach shows, the chip stops 8 px short of the coach's left edge on one line instead of running
+   under it ("Dock · biting today · bites sooner here" did on a laptop or a tablet, worse with larger text). */
+@media (min-width: 801px) {
+  .scene-wrap[data-walkthrough="1"] .stance-chip {
+    max-width: calc(50vw / var(--text-zoom, 1) - min(210px, 30vw / var(--text-zoom, 1)) - 32px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
 .lure-choice {
   position: absolute;
   left: 24px;

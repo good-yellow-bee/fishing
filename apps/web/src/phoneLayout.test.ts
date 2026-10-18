@@ -190,3 +190,14 @@ describe("the walking stick with larger text", () => {
     expect(css.match(/\.walk-stick \{\n    zoom: 1;/g)).toHaveLength(1);
   });
 });
+
+describe("the bank chip while the first-cast coach shows", () => {
+  it("stops short of the coach's left edge on one line on a laptop or tablet, at any text size", () => {
+    const from = css.indexOf('@media (min-width: 801px) {\n  .scene-wrap[data-walkthrough="1"] .stance-chip {');
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    expect(block).toContain("max-width: calc(50vw / var(--text-zoom, 1) - min(210px, 30vw / var(--text-zoom, 1)) - 32px);");
+    expect(block).toContain("text-overflow: ellipsis;");
+    expect(/\n\.walkthrough \{([^}]*)\}/.exec(css)?.[1]).toContain("width: min(420px, calc(60vw / var(--text-zoom, 1)));");
+  });
+});
