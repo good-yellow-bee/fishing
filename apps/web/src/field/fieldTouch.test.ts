@@ -15,6 +15,7 @@ describe("the field log on a touch screen", () => {
   it("gives Home's stacked count links room of their own", () => {
     const block = /\.stat-row small a \{\n    display: inline-block;([^}]*)\}/.exec(css)?.[1];
     expect(block).toContain("padding-block: 4px;");
+    expect(block).toContain("margin-block: 4px;");
   });
 
   it("keeps a one-digit count link on Bests at least 32 px wide", () => {
