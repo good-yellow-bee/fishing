@@ -113,7 +113,7 @@ import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
 import { Stars } from "./Stars";
-import { SHORE_ICE_WIDTH, seasonGroundColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
+import { SHORE_ICE_WIDTH, seasonGroundColor, seasonWaterColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { fx } from "../fx";
 import { useSettings } from "../settings";
@@ -1093,7 +1093,7 @@ function LakeSurface({
           ref={material}
           onBeforeCompile={withRim}
           customProgramCacheKey={rimCacheKey}
-          color={spot === "dropoff" ? weather.waterDrop : weather.water}
+          color={seasonWaterColor(spot === "dropoff" ? weather.waterDrop : weather.water, season)}
           map={waterMap}
           vertexColors
           gradientMap={toonRamp()}
@@ -1766,6 +1766,7 @@ function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
   const bank = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH + CREEK_BANK), []);
   const water = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH), []);
   const flow = useMemo(() => makeCreekTexture(), []);
+  const season = useContext(SeasonContext);
   useEffect(() => {
     return () => {
       bank.dispose();
@@ -1783,7 +1784,7 @@ function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
         <meshToonMaterial color={hour === "night" ? "#5a4c38" : "#86704f"} gradientMap={toonRamp()} />
       </mesh>
       <mesh geometry={water} position={[0, -0.012, 0]} receiveShadow>
-        <meshToonMaterial color={weather.water} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
+        <meshToonMaterial color={seasonWaterColor(weather.water, season)} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
       <Rocks items={CREEK_ROCK_SPECS} />
       <Reeds count={6} origin={[-23.2, 0.03, -11.0]} />

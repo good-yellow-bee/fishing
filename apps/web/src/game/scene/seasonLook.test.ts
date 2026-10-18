@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { LAKE_SEASONS } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { isLeafColor, seasonGroundColor, seasonPlantColor, shoreIce } from "./seasonLook.ts";
+import { isLeafColor, seasonGroundColor, seasonPlantColor, seasonWaterColor, shoreIce } from "./seasonLook.ts";
 
 const LEAF = new THREE.Color("#4d8a3e");
 const TRUNK = new THREE.Color("#7a5236");
@@ -49,5 +49,36 @@ describe("season look", () => {
 
   it("puts ice on the shore in winter only", () => {
     expect(LAKE_SEASONS.filter(shoreIce)).toEqual(["winter"]);
+  });
+});
+
+describe("season water", () => {
+  const luma = (hex: string) => {
+    const c = new THREE.Color(hex);
+    return c.r + c.g + c.b;
+  };
+
+  it("leaves summer water as it is", () => {
+    expect(seasonWaterColor("#357795", "summer")).toBe("#357795");
+  });
+
+  it("turns winter water toward cold grey: less saturated, about as bright", () => {
+    const summer = new THREE.Color("#357795");
+    const winter = new THREE.Color(seasonWaterColor("#357795", "winter"));
+    const spread = (c: THREE.Color) => Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b);
+    expect(spread(winter)).toBeLessThan(spread(summer) * 0.75);
+    expect(luma(seasonWaterColor("#357795", "winter"))).toBeCloseTo(luma("#357795"), 1);
+  });
+
+  it("stains fall water toward tea and greens spring water", () => {
+    const fall = new THREE.Color(seasonWaterColor("#357795", "fall"));
+    const spring = new THREE.Color(seasonWaterColor("#357795", "spring"));
+    const summer = new THREE.Color("#357795");
+    expect(fall.r - fall.b).toBeGreaterThan(summer.r - summer.b);
+    expect(spring.g - spring.b).toBeGreaterThan(summer.g - summer.b);
+  });
+
+  it("keeps a night lake dark", () => {
+    expect(luma(seasonWaterColor("#1a3a48", "winter"))).toBeCloseTo(luma("#1a3a48"), 1);
   });
 });
