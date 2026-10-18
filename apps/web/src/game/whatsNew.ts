@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field34";
+export const NEWS_ID = "2026-10-18-scene18";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On fall and winter days someone splits firewood beside the far cabin, and on calm dawns a sculler rows a racing shell along the far half of the lake. The dog walker now comes out in the rain too, under an umbrella, and on windy days the rain and snow slant down the wind.",
   "Gear's lure record can pack its best lures for your next outing in one go.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.",
   "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.",
