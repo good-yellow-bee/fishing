@@ -668,13 +668,14 @@ function SpotForm() {
                 setPlace(event.target.value);
                 setLocating("idle");
               }}
-              // A map link pasted whole turns into its pin's numbers, so what is saved is what the field shows.
+              // A map link pasted whole, or a place card's degrees and minutes, turns into plain numbers, so what is saved
+              // is what the field shows.
               onBlur={() => {
-                if (!/^\s*(https?:|geo:)/i.test(place)) return;
+                if (!/^\s*(https?:|geo:)|°/i.test(place)) return;
                 const pin = parseSpotPlace(place);
                 if (pin) {
                   setPlace(`${pin.lat}, ${pin.lng}`);
-                  setLocating("linked");
+                  if (/^\s*(https?:|geo:)/i.test(place)) setLocating("linked");
                 }
               }}
               // An example place near the reader: a north-woods lake in English, a Masurian one in Polish.

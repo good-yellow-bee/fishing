@@ -11,8 +11,7 @@ import {
 } from "@stillwater/shared";
 import { localId } from "../../game/localId";
 import { TACKLE_STORAGE_KEY, readTackle, saveTackle } from "./storage";
-import { pieceKey } from "./pieceKey";
-import { t } from "../../i18n";
+import { pieceKey, shownPieceKey } from "./pieceKey";
 
 type TackleApi = {
   items: TackleItem[];
@@ -23,6 +22,8 @@ type TackleApi = {
   /** Puts another outing's list on this one, everything still to pack. */
   copyTrip: (fromTripId: string, toTripId: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
+  /** Changes every list from the lists as they are now, so an Undo keeps what was packed since. */
+  updateTackle: (change: (items: TackleItem[]) => TackleItem[]) => void;
   /** The outing whose list was last changed when storage refused the save, so that list can say so; null once one saves. */
   /** ALL_LISTS when the refused change was to every list at once (a merge or rename), which the bar says. */
   unsavedTrip: string | null;
@@ -88,9 +89,9 @@ export function TackleProvider({ children }: { children: ReactNode }) {
         const parsed = parseTackleLabel(label);
         if (!parsed.ok) return parsed.message;
         // "Spinnerbaits" on a list with "Spinnerbait" is the same piece, as the fish counts take it.
-        // And as it reads: "Rosówka" typed in Polish is the "Nightcrawler" a tip added.
-        const name = pieceKey(t(parsed.value));
-        if (items.some((item) => item.tripId === tripId && (pieceKey(item.label) === pieceKey(parsed.value) || pieceKey(t(item.label)) === name))) {
+        // And as it reads: "Rosówka" typed in Polish is the "Nightcrawler" a tip added, and "Wobler" the "Woblery" there.
+        const name = shownPieceKey(parsed.value);
+        if (items.some((item) => item.tripId === tripId && (pieceKey(item.label) === pieceKey(parsed.value) || shownPieceKey(item.label) === name))) {
           return "That piece is already on this list.";
         }
         const item: TackleItem = {
@@ -121,6 +122,10 @@ export function TackleProvider({ children }: { children: ReactNode }) {
       replaceTackle: (next) => {
         touch(ALL_LISTS);
         setItems(next);
+      },
+      updateTackle: (change) => {
+        touch(ALL_LISTS);
+        setItems((current) => change(current));
       },
     };
   }, [items, unsavedTrip]);

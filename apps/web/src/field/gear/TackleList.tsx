@@ -98,9 +98,11 @@ export function TackleList({
     const seen = new Set<string>();
     // Not a decimal comma ("Żyłka 0,25", "Wędka 2,7 m"), nor a list of sizes ("Haczyki nr 8, 10"): one piece each.
     const parts = label.split(/(?<!\d),|,(?!\s*\d)/).filter((part) => {
-      const key = pieceKey(part);
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
+      // As the pieces read and as they were written: "Obrotówka, Obrotówki" is one piece in Polish, and so is
+      // "Spinner, Spinners", which reads "Obrotówka" once and "Spinners" once.
+      const keys = [shownPieceKey(part), pieceKey(part)];
+      if (!keys[0] || keys.some((key) => seen.has(key))) return false;
+      for (const key of keys) seen.add(key);
       return true;
     });
     const refused: { part: string; message: string }[] = [];

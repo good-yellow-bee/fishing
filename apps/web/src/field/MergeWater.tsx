@@ -5,6 +5,7 @@ import { useLogbook } from "./LogbookState";
 import { mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
 import { useTackleIfAny } from "./gear/TackleState";
 import { foldedTackle } from "./gear/foldedTackle";
+import { undoneTackle } from "./gear/undoneTackle";
 import { localId } from "../game/localId";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot } from "./bookCopy";
@@ -49,7 +50,8 @@ export function MergeWater({ spotId }: { spotId: string }) {
     // Undo puts the folded lists back with the outings they came from.
     const lists = tackle ? foldedTackle(tackle.items, folds, localId) : null;
     const before = tackle?.items ?? [];
-    if (!changeBook("merge", next, lists ? () => tackle?.replaceTackle([...before]) : undefined)) return;
+    // Only the folded lists are taken back: what was packed since stays.
+    if (!changeBook("merge", next, lists ? () => tackle?.updateTackle((current) => undoneTackle(current, before, lists)) : undefined)) return;
     if (lists) tackle?.replaceTackle(lists);
     noteMergedWater(spotId, into);
     navigate(`/spots/${into}`, { replace: true });

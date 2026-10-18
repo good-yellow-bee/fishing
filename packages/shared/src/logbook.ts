@@ -378,6 +378,8 @@ const PLACE_NUMBER = /(-?\d+(?:[.,]\d+)?)\s*°?\s*([NSEW])?/gi;
  */
 export function parseSpotPlace(raw: string): SpotPlace | null {
   if (/^\s*(https?:|geo:)/i.test(raw)) return mapLinkPlace(raw.trim());
+  const sexagesimal = degreesPlace(raw);
+  if (sexagesimal !== undefined) return sexagesimal;
   const found = [...raw.matchAll(PLACE_NUMBER)];
   if (found.length !== 2 || raw.replace(PLACE_NUMBER, "").replace(/[\s,;]/g, "") !== "") return null;
   const parts = found.map((match) => {
@@ -389,6 +391,31 @@ export function parseSpotPlace(raw: string): SpotPlace | null {
   const [lat, lng] = lngFirst ? [parts[1]!.value, parts[0]!.value] : [parts[0]!.value, parts[1]!.value];
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
+}
+
+const DEGREES = /(\d{1,3})\s*°\s*(\d{1,2}(?:[.,]\d+)?)\s*['′’]\s*(?:(\d{1,2}(?:[.,]\d+)?)\s*(?:["″”]|''))?\s*([NSEW])/gi;
+
+/**
+ * Degrees and minutes, as a map's place card shows them: 53°48'00.0"N 21°36'00.0"E, or 53°48.5'N 21°36.2'E.
+ * Undefined when the text isn't written that way, so the decimal reading can have it; null when it is but can't be a place.
+ */
+function degreesPlace(raw: string): SpotPlace | null | undefined {
+  const found = [...raw.matchAll(DEGREES)];
+  if (found.length !== 2 || raw.replace(DEGREES, "").replace(/[\s,;]/g, "") !== "") return undefined;
+  const parts = found.map((match) => {
+    const value = Number(match[1]) + Number(match[2]!.replace(",", ".")) / 60 + Number((match[3] ?? "0").replace(",", ".")) / 3600;
+    const letter = match[4]!.toUpperCase();
+    return { value: letter === "S" || letter === "W" ? -value : value, east: letter === "E" || letter === "W" };
+  });
+  if (parts[0]!.east === parts[1]!.east) return null;
+  const [lat, lng] = parts[0]!.east ? [parts[1]!.value, parts[0]!.value] : [parts[0]!.value, parts[1]!.value];
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
+}
+
+/** A map app's Share link that only names a page to open, with no place written in it to read. */
+export function isShortMapLink(raw: string): boolean {
+  return /^\s*https?:\/\/(?:maps\.app\.goo\.gl|goo\.gl\/maps|maps\.apple(?:\.com)?\/p\/)/i.test(raw);
 }
 
 /** The pin in a map link pasted whole: Google Maps (@lat,lng, !3d…!4d…, q= or ll=), OpenStreetMap (mlat/mlon, #map=z/lat/lng), Apple Maps or geo:. */
@@ -657,6 +684,7 @@ export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {
   const placeText = (draft.place ?? "").trim();
   if (!placeText) return { ok: true, value: { name, waterType: draft.waterType, notes, bestConditions } };
   const place = parseSpotPlace(placeText);
+  if (!place && isShortMapLink(placeText)) return fail("place", "That short link has no place in it. Open it, then hold the pin and copy its numbers.");
   if (!place) return fail("place", "Give the place as latitude, then longitude, like 46.85, -94.24.");
   return { ok: true, value: { name, waterType: draft.waterType, notes, bestConditions, place } };
 }

@@ -41,3 +41,33 @@ export function gridLines(from: number, to: number): { values: number[]; digits:
   for (let value = Math.ceil(from / step + 1e-9) * step; value < to - 1e-9; value += step) values.push(Number(value.toFixed(digits)));
   return { values, digits };
 }
+
+/** A label's room on screen, in pixels: a long name's width, and its two lines (the name and its fish). */
+const LABEL_WIDTH = 190;
+const LABEL_HEIGHT = 46;
+/** How far a moved label goes, in pixels, as spot-map.css moves it (62px down, 34px up, from 14px). */
+const LABEL_STEP = 48;
+
+/**
+ * Where each pin's label goes beside the earlier pins' labels (in order): 0 in its own place, 1 a line off (down, or
+ * up near the foot of the sheet), 2 a line the other way, 3 none (the dot only; the list under the sheet still names
+ * it). Labels keep their size on screen while the sheet scales, so `pxPerUnit` (the sheet's drawn width over
+ * OWN_WIDTH) decides which meet: a phone's narrow sheet spreads labels that a wide one has room for.
+ */
+export function labelShifts(points: readonly { x: number; y: number }[], pxPerUnit: number): number[] {
+  const shifts: number[] = [];
+  const placed: { x: number; y: number }[] = [];
+  const offset = (point: { y: number }, shift: number) => {
+    const low = point.y > OWN_HEIGHT * 0.7;
+    if (shift === 0) return 0;
+    return (shift === 1) === low ? -LABEL_STEP : LABEL_STEP;
+  };
+  for (const point of points) {
+    const at = { x: point.x * pxPerUnit, y: point.y * pxPerUnit };
+    let shift = 0;
+    while (shift < 3 && placed.some((other) => Math.abs(other.x - at.x) < LABEL_WIDTH && Math.abs(other.y - (at.y + offset(point, shift))) < LABEL_HEIGHT)) shift++;
+    shifts.push(shift);
+    if (shift < 3) placed.push({ x: at.x, y: at.y + offset(point, shift) });
+  }
+  return shifts;
+}

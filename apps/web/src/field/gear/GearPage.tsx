@@ -19,6 +19,7 @@ import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
 import { renamedTackle } from "./renamedTackle";
+import { undoneTackle } from "./undoneTackle";
 import { pieceRecords, type PieceRecord } from "./pieceRecord";
 import { ChoiceRow } from "../ChoiceRow";
 import { shownPieceKey } from "./pieceKey";
@@ -251,7 +252,7 @@ function readKeptApart(): string[] {
 /** Lure names that look like one lure typed two ways, each with a button to fold one into the other or keep both. */
 function LureTwins() {
   const { storedBook, changeBook } = useLogbook();
-  const { items, replaceTackle } = useTackle();
+  const { items, replaceTackle, updateTackle } = useTackle();
   const [kept, setKept] = useState(readKeptApart);
   const box = useRef<HTMLUListElement>(null);
   // Either way round: the pair stays apart when the other spelling later takes more fish.
@@ -302,7 +303,8 @@ function LureTwins() {
               // them back with the book.
               const lists = renamedTackle(items, pair.from, result.name);
               const before = items;
-              if (!changeBook("rename", result.book, lists ? () => replaceTackle([...before]) : undefined)) return;
+              // Only the merge is taken back: what was packed since stays.
+              if (!changeBook("rename", result.book, lists ? () => updateTackle((current) => undoneTackle(current, before, lists)) : undefined)) return;
               if (lists) replaceTackle(lists);
               focusNext(index);
             }}

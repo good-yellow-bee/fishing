@@ -364,6 +364,7 @@ export const PL_FIELD: PlBook = {
   "Finding you…": "Szukam położenia…",
   "The browser didn't give a place.": "Przeglądarka nie podała położenia.",
   "Give the place as latitude, then longitude, like 46.85, -94.24.": "Podaj miejsce jako szerokość, potem długość, np. 53.80, 21.60.",
+  "That short link has no place in it. Open it, then hold the pin and copy its numbers.": "Ten skrócony link nie zawiera miejsca. Otwórz go, przytrzymaj pinezkę i skopiuj jej współrzędne.",
   "Not noted yet.": "Jeszcze nie zanotowano.",
   "Plan one": "Zaplanuj",
   "No outings on this water yet.": "Na tym łowisku nie było jeszcze wypraw.",

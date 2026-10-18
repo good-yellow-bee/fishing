@@ -225,12 +225,18 @@
   right: 26px;
 }
 
+/* A whole label's height (its name and fish line) off its own place, with a little air, so the two never touch. */
 .map-pin-own.map-pin-down .map-pin-label {
-  top: 58px;
+  top: 62px;
 }
 
 .map-pin-own.map-pin-up .map-pin-label {
-  top: -30px;
+  top: -34px;
+}
+
+/* A third pin in a cluster: the dot only, named in the list under the sheet. */
+.map-pin-own.map-pin-bare .map-pin-label {
+  display: none;
 }
 
 .map-pin-label small {
