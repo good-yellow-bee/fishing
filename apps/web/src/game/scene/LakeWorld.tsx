@@ -164,6 +164,8 @@ import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
 import { Woodcutter } from "./Woodcutter";
 import { choppingOut } from "./woodChopping";
+import { BoatFill } from "./BoatFill";
+import { fillKind, type FillKind } from "./boatBilge";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -1363,7 +1365,7 @@ function FloatingLily({ url, position, scale, index, open }: Lily & { index: num
   );
 }
 
-function Boat({ url, position, heading, delay, scale, wind }: BoatProps & { wind: { x: number; z: number } }) {
+function Boat({ url, position, heading, delay, scale, wind, fill }: BoatProps & { wind: { x: number; z: number }; fill: FillKind | null }) {
   const ref = useRef<THREE.Group>(null);
   const still = useReducedMotion();
   useFrame((state) => {
@@ -1381,6 +1383,7 @@ function Boat({ url, position, heading, delay, scale, wind }: BoatProps & { wind
   return (
     <group ref={ref} position={position} rotation={[0, heading, 0]}>
       <ToonModel url={url} scale={scale} shadows={false} />
+      {fill && <BoatFill url={url} scale={scale} kind={fill} seed={delay * 10} across={url === MODELS.rowboat ? ROWBOAT_HULL : undefined} />}
     </group>
   );
 }
@@ -1944,7 +1947,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
 }
 
 /** The angler's own rowboat. Moored by the pier until level 7 unties it; follows the row out and back, rocking on the chop. */
-function PlayerBoat() {
+function PlayerBoat({ fill }: { fill: FillKind | null }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
     const hull = ref.current;
@@ -1962,8 +1965,17 @@ function PlayerBoat() {
   return (
     <group ref={ref}>
       <ToonModel url={MODELS.rowboat} scale={0.66} shadows={false} />
+      {fill && <BoatFill url={MODELS.rowboat} scale={0.66} kind={fill} seed={3} across={ROWBOAT_HULL} shown={mooredNow} />}
     </group>
   );
+}
+
+/** The rowboat model's box takes in its oars, so its hull is only this share of the box's width either side of the middle. */
+const ROWBOAT_HULL = 0.22;
+
+/** Whether the angler's boat is tied up, so nobody is sitting in what lies in its bottom. */
+function mooredNow() {
+  return boat.mode === "moored";
 }
 
 /** Marks the deep hole the boat anchors over. Bobs a little off to one side so it never sits in the cast. */
@@ -2193,7 +2205,7 @@ export const LakeWorld = memo(function LakeWorld({
       <ShorePath />
       <BankWalks />
       <Creek hour={hour} weather={weather} wind={wind} />
-      <PlayerBoat />
+      <PlayerBoat fill={fillKind(season, sky)} />
       <AnchorBuoy />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
@@ -2210,7 +2222,7 @@ export const LakeWorld = memo(function LakeWorld({
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
-        <Boat key={`${boat.url}-${i}`} {...boat} wind={wind} />
+        <Boat key={`${boat.url}-${i}`} {...boat} wind={wind} fill={fillKind(season, sky)} />
       ))}
       {FISH.map((fish, i) => (
         <SwimmingFish key={i} {...fish} />
