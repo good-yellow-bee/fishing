@@ -90,6 +90,17 @@ describe("field guide card", () => {
     expect(cards([stat("golden-shiner", 0.2)])("golden-shiner").lines.filter((line) => /^(Jumper|Breacher|Roller|Tail-walker|Scrapper|Circler|Quitter|Head-shaker|Bottom-sticker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line))).toEqual([]);
   });
 
+  it("says when a logged fish schools or comes to groundbait, and keeps it hidden until then", () => {
+    const shiner = cards([stat("golden-shiner", 0.2)])("golden-shiner");
+    expect(shiner.lines).toContain("Schools: land one and more are still there, so cast again quickly");
+    expect(shiner.lines).toContain("Feeder: it comes in to feed on groundbait");
+    expect(cards([stat("perch", 0.5)])("perch").lines).toContain("Schools: land one and more are still there, so cast again quickly");
+    expect(cards([stat("perch", 0.5)])("perch").text).not.toContain("Feeder:");
+    expect(cards([stat("carp", 8)])("carp").lines).toContain("Feeder: it comes in to feed on groundbait");
+    expect(cards([stat("pike", 4)])("pike").text).not.toMatch(/Schools:|Feeder:/);
+    expect(cards([])("golden-shiner").text).not.toMatch(/Schools:|Feeder:/);
+  });
+
   it("says when a logged fish fights hard or tires sooner, and keeps it hidden until then", () => {
     expect(cards([stat("burbot", 3)])("burbot").lines).toContain("Fights hard: in winter's cold, after dark, in rain");
     expect(cards([stat("walleye", 3)])("walleye").lines).toContain("Tires sooner: in spring, after spawning");
