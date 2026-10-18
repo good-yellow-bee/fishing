@@ -1185,6 +1185,10 @@ kbd {
   }
 }
 
+html[data-reduce-motion="1"] .fight-bar .fight-note {
+  animation: none;
+}
+
 /* On a phone the card has no room to grow: the standing habit and control lines step aside while the note shows. */
 @media (max-width: 800px) {
   .fight-bar:has(.fight-note) .fight-water,
@@ -1994,6 +1998,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     left: 8px;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
+    /* On a 320 px phone with larger text the last banks ran past the edge out of reach: the row scrolls sideways instead. The padding keeps focus rings inside the scroller. */
+    overflow-x: auto;
+    padding: 3px;
+    margin: -3px;
+    scrollbar-width: none;
   }
 
   .walk-signs .panel-btn {
@@ -3021,7 +3030,8 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
 /* A finger needs a bigger target than a mouse: on touch screens the header's links and the coach's Skip stand at least 32 px tall (they were 22). */
 @media (pointer: coarse) {
   .hud .hud-link,
-  .walkthrough-skip {
+  .walkthrough-skip,
+  .board-tabs button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
