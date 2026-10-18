@@ -28,6 +28,7 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
+import { shownPieceKey } from "./gear/pieceKey";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
@@ -231,7 +232,10 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     // One name whole, as stored or as it reads in the player's language, or in Polish: a link made in Polish still
     // opens its fish after a switch to English.
     const want = normalize(exact.name);
-    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want || normalize(inPolish(name)) === want;
+    // A lure goes by the piece Gear counts it as, so "Spinnerbait" opens the "Spinnerbaits" its record counted too.
+    const piece = exact.field === "lure" ? shownPieceKey(exact.name) : null;
+    const named = (name: string) =>
+      normalize(name) === want || normalize(t(name)) === want || normalize(inPolish(name)) === want || (piece !== null && shownPieceKey(name) === piece);
     return catchesNewestFirst(book).filter((entry) => {
       const name = exactName(book, entry, exact.field);
       return name !== null && named(name);

@@ -183,3 +183,18 @@ describe("lure classes", () => {
     expect(new Set(LURE_CLASSES.map((one) => one.id)).size).toBe(LURE_CLASSES.length);
   });
 });
+
+describe("round 79: lures rigged with gear stay lures, and everyday kit is gear", () => {
+  it("keeps weighted and rigged lures as lures", () => {
+    for (const lure of ["Nimfa obciążona", "Obciążona nimfa", "Frog on braid", "Shad on wire leader", "Texas rig with bullet weight", "Guma na przyponie", "In-line spinner"]) {
+      expect(isLureLabel(lure), lure).toBe(true);
+    }
+  });
+
+  it("knows common kit as gear", () => {
+    for (const tool of ["Line clippers", "Keepnet", "Keep net", "Hook remover", "Disgorger", "Scissors", "Head torch", "Unhooking mat", "Thermos", "Split weights", "Weights", "Siatka", "Wypychacz", "Termos", "Mata", "Wiadro", "Kalosze", "Plecak", "Torba", "Obciążenie 10 g", "Żyłka 0,25", "Steel leader"]) {
+      expect(isLureLabel(tool), tool).toBe(false);
+    }
+  });
+});
+

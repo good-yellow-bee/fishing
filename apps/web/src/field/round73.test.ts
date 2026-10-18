@@ -75,7 +75,9 @@ describe("round 73: map places", () => {
   });
 
   it("gives three pins close together three different label places", () => {
-    expect(labelShifts([{ x: 500, y: 300 }, { x: 505, y: 300 }, { x: 510, y: 300 }, { x: 515, y: 300 }], 0.9)).toEqual([0, 1, 2, 3]);
+    // Round 79: a label only where it is nearer its own dot than any other, so the row's two ends are named, each label
+    // on its outer side, and the two dots between them show bare.
+    expect(labelShifts([{ x: 500, y: 300 }, { x: 505, y: 300 }, { x: 510, y: 300 }, { x: 515, y: 300 }], 0.9)).toEqual([4, 3, 3, 4]);
     // Far apart on a wide sheet: each in its own place.
     expect(labelShifts([{ x: 100, y: 100 }, { x: 600, y: 400 }], 0.9)).toEqual([0, 0]);
   });

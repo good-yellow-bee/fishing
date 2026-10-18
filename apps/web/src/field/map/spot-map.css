@@ -293,13 +293,19 @@
 
 .map-index li {
   display: grid;
-  grid-template-columns: 1.2fr 0.6fr 0.5fr 1.4fr auto;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.6fr) minmax(0, 0.5fr) minmax(0, 1.4fr) auto;
   gap: 10px;
   align-items: baseline;
   padding: 8px 0;
   border-bottom: 1px solid var(--field-line);
   color: var(--field-muted);
   font-size: 13px;
+}
+
+/* A long unbroken water name wraps in its row rather than widening the page. */
+.map-index li > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .map-index a {
@@ -387,7 +393,7 @@
   }
 
   .map-index li {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
 }
