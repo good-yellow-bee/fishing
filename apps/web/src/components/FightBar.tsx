@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
-import { BREACHERS, BROADSIDERS, QUITTERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, STICKERS, TAIL_WALKERS, SCRAPPERS, canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, LEAPERS, LONG_RUNNERS, ROLLERS, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { canTurnRuns, ESCAPE_LINE, fightLines, isCleanFight, jumpLines, RED_TENSION, SHORT_LINE, SOFT_MOUTHS, staminaState, TIGHT_TENSION, tensionZone, type FightPerformance, type FightSim, type StaminaState, type TensionZone } from "../game/fight";
+import { habitLines } from "../game/habitLines";
 import { useSettings } from "../game/settings";
 import type { Fight } from "../game/useFishingGame";
 import { useLang, useT } from "../i18n";
@@ -33,6 +34,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
   // A language change reads the lines again.
   const lines = useMemo(() => fightLines(fight.species.challenge), [fight.species.challenge, lang]);
   const leapLines = useMemo(() => jumpLines(), [lang]);
+  const habits = useMemo(() => habitLines(fight.species.id), [fight.species.id, lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
   const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);
@@ -248,20 +250,12 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
           {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
-          {SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Soft mouth: reel in the red and the hook tears out")}</p>}
           {fight.lightHook && !SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Hooked light: reel in the red and the hook pulls out")}</p>}
-          {LEAPERS.has(fight.species.id) && <p className="fight-water">{t("Jumper: every second run is a leap, so let go when it comes up")}</p>}
-          {BREACHERS.has(fight.species.id) && <p className="fight-water">{t("Breacher: its first run is a leap, so let go when it comes up")}</p>}
-          {ROLLERS.has(fight.species.id) && <p className="fight-water">{t("Roller: at the net it rolls on the line instead of running")}</p>}
-          {TAIL_WALKERS.has(fight.species.id) && <p className="fight-water">{t("Tail-walker: its first leap dances across the top, so keep bowing till it's down")}</p>}
-          {SCRAPPERS.has(fight.species.id) && <p className="fight-water">{t("Scrapper: pound for pound it fights hardest, so it tires slowly")}</p>}
-          {BROADSIDERS.has(fight.species.id) && <p className="fight-water">{t("Circler: it turns its flat side and circles, so it comes in slowly till it tires")}</p>}
-          {QUITTERS.has(fight.species.id) && <p className="fight-water">{t("Quitter: it fights hard for a moment, then gives up fast")}</p>}
-          {HEAD_SHAKERS.has(fight.species.id) && <p className="fight-water">{t("Head-shaker: between runs it shakes its head, so ease off a moment when it does")}</p>}
-          {STICKERS.has(fight.species.id) && <p className="fight-water">{t("Bottom-sticker: when it sulks it takes two pumps to lift, not one")}</p>}
-          {DARTERS.has(fight.species.id) && <p className="fight-water">{t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it")}</p>}
-          {COVER_DIVERS.has(fight.species.id) && <p className="fight-water">{t("Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there")}</p>}
-          {LONG_RUNNERS.has(fight.species.id) && <p className="fight-water">{t("Long runner: the first run is the long one, so let it go")}</p>}
+          {habits.map((line) => (
+            <p key={line} className="fight-water">
+              {line}
+            </p>
+          ))}
           {fight.windy && (
             <p className="fight-water fight-wind">
               {fight.windy === "strong" ? t("Strong wind: a slack line drifts out much faster") : t("Breezy: a slack line drifts out faster")}
