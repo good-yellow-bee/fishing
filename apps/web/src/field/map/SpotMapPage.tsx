@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
-import { getUnits, t, useT } from "../../i18n";
+import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
 import {
@@ -34,7 +34,7 @@ import {
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, projectIn } from "./ownSheet";
 import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
-import { spotsByLastFish } from "../spotOrder";
+import { daysBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
 import "./spot-map.css";
 
 const POND = oval(POND_CENTER, 0.0052, 0.014);
@@ -265,13 +265,18 @@ export function SpotMapPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingRealTrips(book, today);
+  const lastOut = lastOutByWater(book, today);
   const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
     const line = row?.lastFishAt ? t("{fish}, last {day}", { fish, day: formatDay(localDate(new Date(row.lastFishAt))) }) : fish;
     const next = upcoming.find((trip) => trip.spotId === spotId);
-    return next ? `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}` : line;
+    if (next) return `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}`;
+    // A water left alone a week or more, by its last outing or fish: one that has had a rest.
+    const out = lastOut.get(spotId);
+    const rested = out ? daysBetween(out, today) : 0;
+    return rested >= 7 ? `${line} · ${tn(rested, "rested {n} day", "rested {n} days")}` : line;
   };
   const sampleSheet = hasSampleWaters(book);
   const plotted = spots.flatMap((spot) => {
