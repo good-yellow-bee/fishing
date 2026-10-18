@@ -1281,7 +1281,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT236~~ | ~~Coach clear of the fight card: on a phone the new angler's coach drops below the fight card (above the thumb buttons, without its step chips) instead of hiding under it; news card 2026-10-18-game01 for the hookset note~~ (#928) | ui | S |
 | ~~GT237~~ | ~~Fight moods in the field guide: a logged fish's card says when it fights hard (Burbot: in winter's cold, after dark, in rain) and when it tires sooner (Walleye: in spring, after spawning), from the same habit sets the fight uses, and the guide notes that most fish tire sooner in winter~~ (#929) | ui | S |
 | ~~GT238~~ | ~~Fight habits in the field guide: a logged fish's card lists its own fight habits (Jumper, Roller, Soft mouth, Long runner…) in the same words as the fight card, which now reads them from one shared list~~ (#930) | ui | S |
-| GT239 | Landed note on the catch card: the landed card covers the hint, so the school left at the bank (plain, twilight, winter) and the hunter that followed the fish in were never seen; the card now says it above its buttons; news card 2026-10-18-game02 for the field guide's fight lines and this | ui | S |
+| ~~GT239~~ | ~~Landed note on the catch card: the landed card covers the hint, so the school left at the bank (plain, twilight, winter) and the hunter that followed the fish in were never seen; the card now says it above its buttons; news card 2026-10-18-game02 for the field guide's fight lines and this~~ (#932) | ui | S |
+| GT240 | Lures for this bank: the lure picker marks the packed lures that draw the bite sooner at the bank you stand on in any weather (spinner at the Reeds and Inlet, worm and crankbait at the Dock, jig and streamer off the Drop-off…) with "good here", and says so under a tied one | ui | S |
 
 ## Risks / open questions for the owner
 

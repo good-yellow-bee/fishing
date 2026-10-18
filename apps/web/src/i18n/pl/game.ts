@@ -551,6 +551,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "{lure} · good here": "{lure} · dobra tutaj",
+  "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "Fights hard: {when}": "Walczy mocno: {when}",
   "Tires sooner: {when}": "Męczy się szybciej: {when}",
   "Most fish tire sooner in winter's cold.": "Większość ryb męczy się szybciej w zimowym chłodzie.",
