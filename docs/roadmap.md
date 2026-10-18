@@ -1184,6 +1184,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC69~~ | ~~Campers on the far bank: from spring to fall a tent stands west of the cabin, lit from inside by a lantern from dusk; two campers sit out on a log by their campfire in the evening, one toasting a marshmallow; both fire pits now draw in one mesh each~~ (#1164) | scene | S |
 | ~~SC70~~ | ~~Boat wakes: the canoe and the sailing dinghy leave a V of wake behind them, longer and brighter the faster they go, gone when they stop or go about~~ (#1169) | scene | S |
 | ~~SC71~~ | ~~Fall pumpkins: three pumpkins sit under the big tree by the shack in fall, the biggest carved into a jack-o'-lantern whose candle flickers after dark~~ (#1170) | scene | S |
+| ~~SC72~~ | ~~Camp lights on the water: after dark the campers' fire and the lantern in their tent shine on the lake as broken streaks of warm light, as the cabin's windows do~~ (#1172) | scene | S |
+| ~~SC73~~ | ~~News card scene16: lapping waves and wakes, kite flyer, campers, fall pumpkins, winter skier~~ (#1172) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

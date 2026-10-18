@@ -33,6 +33,12 @@ export const CAMP_FIRE_AT = besideTent(0.9, 1.8);
 export const CAMP_LOG_AT = besideTent(1.9, 1.3);
 export const CAMPERS_YAW = Math.atan2(CAMP_FIRE_AT.x - CAMP_LOG_AT.x, CAMP_FIRE_AT.z - CAMP_LOG_AT.z);
 
+/** The lights at the camp that shine on the water after dark: the fire's flames, and the lantern through the tent's door. */
+export const CAMP_LIGHTS = [
+  { x: CAMP_FIRE_AT.x, y: 0.35, z: CAMP_FIRE_AT.z },
+  { ...besideTent(0, 1.05), y: 0.45 },
+];
+
 /** The two campers sit out by their fire from dusk into the night, unless it is raining. */
 export function campersOut(hour: LakeHour, sky: Sky | undefined) {
   return (hour === "dusk" || hour === "night") && sky !== "rain";
