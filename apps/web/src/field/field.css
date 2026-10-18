@@ -482,6 +482,16 @@ button.field-primary {
     inset: -9px -4px;
   }
 
+  /* An eyebrow is set solid (line-height 1), so once its links wrapped (a fish's "Catches · Northern pike: 1 of 2"
+     under larger text) the lines sat 3 px apart and a tap on "Catches" opened the kind. Each link now wraps as a
+     piece of its own, the lines 20 px apart. */
+  .sheet p.eyebrow:has(a) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 20px 0.3em;
+  }
+
   /* "Released it" is a whole-row label 20 px tall; the box grows no bigger. */
   .form-grid .check-field {
     min-height: 32px;

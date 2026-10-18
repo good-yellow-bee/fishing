@@ -103,3 +103,12 @@ describe("a list's Show all on a touch screen", () => {
     expect(/\n  p\.tally-more \{([^}]*)\}/.exec(touch)?.[1]).toContain("margin-top: 12px;");
   });
 });
+
+describe("a page's eyebrow links on a touch screen", () => {
+  it("wraps each link as a piece of its own, the lines far enough apart for their reaches", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.sheet p\.eyebrow:has\(a\) \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("flex-wrap: wrap;");
+    expect(block).toContain("gap: 20px 0.3em;");
+  });
+});
