@@ -142,9 +142,10 @@ describe("keyboard focus on the log's paper", () => {
 });
 
 describe("Home's count cards on a tablet with larger text", () => {
-  it("go two and one when a card would be under 150 px, and let a long count wrap inside its card", () => {
+  it("go two and one when a card would be under 150 px, and let a long count wrap as an inline link", () => {
     expect(/\n\.stat-row \{([^}]*)\}/.exec(css)?.[1]).toContain("grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));");
-    expect(css).toMatch(/\n\.stat-row small a \{\n  display: inline-block;\n\}/);
+    // Plain inline links on a desktop: an inline block loses the inline-link spacing exception (WCAG 2.5.8).
+    expect(css).not.toMatch(/\n\.stat-row small a \{/);
     expect(css).not.toMatch(/\.stat-row small a \{\n  white-space: nowrap;/);
   });
 });
