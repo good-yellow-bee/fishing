@@ -51,7 +51,7 @@ export function sampleTackle(): TackleItem[] {
     row("gear-cedar-eve-lamp", "trip-cedar-eve", "Headlamp"),
 
     row("gear-quarry-tubes", "trip-quarry", "Green pumpkin tubes"),
-    row("gear-quarry-crank", "trip-quarry", "Crayfish crankbait"),
+    row("gear-quarry-crank", "trip-quarry", "Crayfish crank"),
     row("gear-quarry-leader", "trip-quarry", "Fluorocarbon leader"),
     row("gear-quarry-pliers", "trip-quarry", "Needle-nose pliers"),
 

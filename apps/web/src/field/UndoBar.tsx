@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogbook } from "./LogbookState";
 import { STORAGE_FULL } from "./storage";
+import { ALL_LISTS, useTackleIfAny } from "./gear/TackleState";
 import { t, useT } from "../i18n";
 
 const DELETED = {
@@ -20,6 +21,7 @@ const DELETED = {
 export function UndoBar() {
   const { undoable, undoDelete, dismissUndo, saveError, dismissSaveError, photos } = useLogbook();
   const navigate = useNavigate();
+  const tackle = useTackleIfAny();
   useT();
 
   useEffect(() => {
@@ -51,6 +53,19 @@ export function UndoBar() {
             ) : null}
           </span>
           <button type="button" className="text-button undo-close" onClick={dismissSaveError} aria-label={t("Dismiss")}>
+            ×
+          </button>
+        </div>
+      </div>
+    );
+  }
+  // A merge or rename the book took but the packed lists could not keep: no list owns it, so the bar says it.
+  if (tackle?.unsavedTrip === ALL_LISTS) {
+    return (
+      <div role="status">
+        <div className="undo-bar undo-bar-error">
+          <span>{t("The packed lists could not be updated in this browser. They stay as they are until this page is closed.")}</span>
+          <button type="button" className="text-button undo-close" onClick={tackle.dismissUnsaved} aria-label={t("Dismiss")}>
             ×
           </button>
         </div>

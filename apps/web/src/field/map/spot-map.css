@@ -346,6 +346,13 @@
     display: none;
   }
 
+  /* A long name (a renamed water, or Polish) ends in an ellipsis rather than running off the sheet. */
+  .map-pin-label {
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* On a phone the labels crowd: the pond's goes to its pin's left, the quarry's level with its pin, and the mill's a little lower, clear of the creek's. */
   .map-pin-spot-duck .map-pin-label {
     left: auto;
@@ -365,5 +372,14 @@
   .map-index li {
     grid-template-columns: 1fr;
     gap: 2px;
+  }
+}
+
+/* On the narrowest phones the pond's pin sits too near the sheet's left edge for a label on that side. */
+@media (max-width: 360px) {
+  .map-pin-spot-duck .map-pin-label {
+    left: 26px;
+    right: auto;
+    top: 18px;
   }
 }

@@ -24,8 +24,13 @@ type TackleApi = {
   copyTrip: (fromTripId: string, toTripId: string) => void;
   replaceTackle: (items: TackleItem[]) => void;
   /** The outing whose list was last changed when storage refused the save, so that list can say so; null once one saves. */
+  /** ALL_LISTS when the refused change was to every list at once (a merge or rename), which the bar says. */
   unsavedTrip: string | null;
+  dismissUnsaved: () => void;
 };
+
+/** A refused save of a change to every list at once, owned by none of them. */
+export const ALL_LISTS = "*";
 
 const TackleContext = createContext<TackleApi | null>(null);
 
@@ -74,6 +79,7 @@ export function TackleProvider({ children }: { children: ReactNode }) {
     return {
       items,
       unsavedTrip,
+      dismissUnsaved: () => setUnsavedTrip(null),
       toggle: (id, packed) => {
         touch(items.find((item) => item.id === id)?.tripId);
         setItems((current) => withPacked(current, id, packed));
@@ -113,7 +119,7 @@ export function TackleProvider({ children }: { children: ReactNode }) {
         ]);
       },
       replaceTackle: (next) => {
-        touch(undefined);
+        touch(ALL_LISTS);
         setItems(next);
       },
     };

@@ -425,7 +425,8 @@ function SpotForm() {
   const toPlace = useLocation().hash === "#place";
   // Sent from the catch or outing form of a book with no water yet: back there with the new water once it is saved.
   const [params] = useSearchParams();
-  const then = existing ? null : params.get("then");
+  // Sent from the map to note a place: back to the map, where the new pin shows.
+  const then = existing ? (params.get("then") === "map" ? "map" : null) : params.get("then");
   const placeInput = useRef<HTMLInputElement>(null);
   useEffect(() => {
     // After the page's own scroll to the top has run.
@@ -471,6 +472,7 @@ function SpotForm() {
     kept.drop();
     if (then === "catch") navigate(`/catches/new?spot=${result.id}`);
     else if (then === "trip") navigate(`/trips/new?spot=${result.id}`);
+    else if (then === "map") navigate("/map", { replace: true });
     else navigate(`/spots/${result.id}`);
   };
 
@@ -491,7 +493,7 @@ function SpotForm() {
           <p className="eyebrow">{existing ? t("Edit water") : t("New water")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: existing.name }) : undefined}>{existing ? existing.name : t("Add a spot")}</h1>
         </div>
-        <Link to={existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
+        <Link to={then === "map" ? "/map" : existing ? `/spots/${existing.id}` : "/spots"} onClick={kept.drop}>
           {t("Cancel")}
         </Link>
       </header>

@@ -29,6 +29,7 @@ import { countedSearch } from "../countedSearch";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
+import { ownFish } from "../milestones";
 import { upcomingRealTrips } from "../bookCopy";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -162,8 +163,8 @@ function LureTwins() {
   // Either way round: the pair stays apart when the other spelling later takes more fish.
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
-  // The angler's own spellings: the game's lure names are its own and not slips to merge.
-  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(offPlayLake) }, Number.MAX_SAFE_INTEGER), (from, into) =>
+  // The angler's own spellings: the game's lure names are its own and not slips to merge, and the sample week's fish are made up.
+  const twins = nearTwinLures(lureTally({ ...storedBook, catches: storedBook.catches.filter(ownFish) }, Number.MAX_SAFE_INTEGER), (from, into) =>
     // The plain "from|into" key, either way round as the counts may have flipped, is how the first build kept a pair apart.
     [keyOf({ from, into }), `${from.toLowerCase()}|${into.toLowerCase()}`, `${into.toLowerCase()}|${from.toLowerCase()}`].some((key) => kept.includes(key)),
   ).filter(
