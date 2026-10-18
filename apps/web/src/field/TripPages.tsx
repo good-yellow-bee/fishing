@@ -64,7 +64,8 @@ import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { countedBook, countedFish, ownFish } from "./milestones";
-import { isSampleOnly, isSampleSpot, isSampleOuting, ownWatersFirst, upcomingRealTrips } from "./bookCopy";
+import { isSampleOnly, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
+import { WaterOptions } from "./WaterOptions";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
@@ -812,11 +813,7 @@ function TripForm() {
               {t("Spot")}
               <select name="spot" value={spotId} aria-describedby={lastHere ? "last-here" : undefined} onChange={(event) => setSpotId(event.target.value)}>
                 {/* The game's lake only for what is already there, and a game day stays on it. */}
-                {ownWatersFirst(book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))).map((spot) => (
-                  <option key={spot.id} value={spot.id}>
-                    {spot.name}
-                  </option>
-                ))}
+                <WaterOptions book={book} spots={book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))} />
               </select>
             </label>
             {/* Outside the label, so the field's name stays "Spot" while this changes with each pick. */}

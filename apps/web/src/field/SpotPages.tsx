@@ -7,7 +7,9 @@ import {
   type WaterType,
   biteTimes,
   catchesForSpot,
+  catchesForTrip,
   fishCountsByTrip,
+  lureTally,
   localDate,
   shiftDate,
   spotById,
@@ -58,6 +60,8 @@ import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot, nextRealTrips } from "./bookCopy";
 import { canGoBack, pageBefore } from "./FieldShell";
 import { noteAddedWater } from "./addedWater";
+import { bestLureAt } from "./waterLure";
+import { CopyPlace } from "./CopyPlace";
 import { keepDraft, readKeptDraft } from "./catchDraft";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState, sayAfterBack } from "./SavedNote";
@@ -104,7 +108,8 @@ export function SpotsPage() {
   const rows = spotsByLastFish(book);
   // By the angler's own fish, as the catch form guesses the water: a sample week dated after a back-filled season
   // doesn't put its made-up waters on top. The cards still count every fish on their water.
-  const ownRows = spotsByLastFish({ ...book, catches: countedFish(book.catches) });
+  const countedCatches = countedFish(book.catches);
+  const ownRows = spotsByLastFish({ ...book, catches: countedCatches });
   const ownOrder = new Map(ownRows.map((row, index) => [row.spot.id, index]));
   const ownCount = new Map(ownRows.map((row) => [row.spot.id, row.fishCount]));
   const countOf = (row: { spot: { id: string } }) => ownCount.get(row.spot.id) ?? 0;
@@ -257,6 +262,8 @@ export function SpotsPage() {
               lastFishDay={row.lastFishDay}
               restDays={order === "rested" && lastOut.has(row.spot.id) ? daysBetween(lastOut.get(row.spot.id)!, today) : null}
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
+              // The angler's own fish, once there are any; the game's lake its own.
+              bestLure={bestLureAt(row.spot.id === PLAY_LAKE_ID ? book.catches : countedCatches, row.spot.id)}
             />
           ))}
         </div>
@@ -413,7 +420,7 @@ function SpotView() {
         {/* When it was last fished, by its last outing or fish: how long it has rested. */}
         {lastHere ? (
           <p className="meta last-here">
-            {restHere === 0 ? t("Fished here today") : restHere === 1 ? t("Last fished here yesterday") : `${tn(restHere, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(lastHere)}`}
+            <LastHereLine rest={restHere} day={lastHere} trip={countedTrips.filter((trip) => trip.date === lastHere).sort((a, b) => (fishByTrip.get(b.id) ?? 0) - (fishByTrip.get(a.id) ?? 0))[0]} fish={(id) => fishByTrip.get(id) ?? 0} />
           </p>
         ) : null}
         {nextHere ? (
@@ -430,6 +437,9 @@ function SpotView() {
             {/* Among the angler's other waters, on the Map page's own sheet. */}
             {" · "}
             <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
+            {/* To paste into a sounder, a message or the car's navigation: the numbers above are fiddly to select on a phone. */}
+            {" · "}
+            <CopyPlace lat={spot.place.lat} lng={spot.place.lng} />
           </p>
         ) : placeFor(spot.id) ? (
           // A sample water has its pin on the sample sheet: its row there, as an own water's place leads to its own.
@@ -862,6 +872,22 @@ function SpotForm() {
 }
 
 /** "Water temperature in 2026: Apr 20 52°F → Jun 3 64°F → Sep 9 58°F", from the readings noted with fish. */
+/** "Last fished here 8 days ago · Sat, Oct 10 · 2 fish · Spinner ×1": that day's outing, with what it gave and on what. */
+function LastHereLine({ rest, day, trip, fish }: { rest: number; day: string; trip: Trip | undefined; fish: (tripId: string) => number }) {
+  const { book } = useLogbook();
+  const when = rest === 0 ? t("Fished here today") : rest === 1 ? t("Last fished here yesterday") : `${tn(rest, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(day)}`;
+  // A day fished off any outing (fish logged loose) has no page to open: the line stays as it was.
+  if (!trip) return <>{when}</>;
+  const caught = fish(trip.id);
+  const lure = lureTally({ ...book, catches: catchesForTrip(book, trip.id) }, 1)[0];
+  return (
+    <Link to={`/trips/${trip.id}`}>
+      {when} · {fishCountLabel(caught)}
+      {lure ? ` · ${t(lure.lure)} ×${lure.count}` : ""}
+    </Link>
+  );
+}
+
 function TempThroughYear({ catches }: { catches: readonly CatchEntry[] }) {
   useT();
   const { book } = useLogbook();

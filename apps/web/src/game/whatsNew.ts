@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene20";
+export const NEWS_ID = "2026-10-18-field37";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.",
   "On dry summer days two people toss a flying disc back and forth on the far bank, and in winter two children have a snowball fight there, ducking the throws. On rainy days an angler sits it out on the far bank under a big green umbrella tipped into the wind, and in the fall a grown-up rakes the leaves back onto the pile the child keeps jumping into.",
   "The moon now matters by day too: for an hour either side of it passing overhead or underfoot the fish come on the feed at every bank, and the shack's chalk board says when. And mind the low sun at your back: at dawn at the Drop-off and at dusk at the Inlet your long shadow falls across the water and the fish shy from it.",
   "The boats at their moorings now fill with the weather: snow in winter, rainwater in the rain and fallen leaves in the fall. In spring a pair of Canada geese graze the far bank with their goslings, on dry fall days a child takes running leaps into a pile of raked leaves, and on calm, clear days someone sets up an easel under a sun umbrella on the far bank and paints the hills.",
