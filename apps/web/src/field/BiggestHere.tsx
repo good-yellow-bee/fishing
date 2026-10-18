@@ -3,6 +3,7 @@ import { measureOf, personalBests, type CatchEntry } from "@stillwater/shared";
 import { t } from "../i18n";
 import { measureText } from "../i18n/content";
 import { catchLink, type ListKey } from "./catchList";
+import { FROM_LIST } from "./leaveDeleted";
 import { speciesCounts, speciesLink } from "./speciesLink";
 
 /** The longest and the heaviest of some fish, either null when none was measured that way. */
@@ -27,7 +28,7 @@ export function BiggestLinks({ catches, list, about }: { catches: readonly Catch
           <span key={kind}>
             {/* The dot holds to the size before it, so a wrapped line does not start with one. */}
             {index > 0 ? "\u00a0· " : null}
-            <Link to={catchLink(entry.id, list)} aria-label={`${about}: ${measureText(measure)}`}>{measureText(measure)}</Link>
+            <Link to={catchLink(entry.id, list)} state={FROM_LIST} aria-label={`${about}: ${measureText(measure)}`}>{measureText(measure)}</Link>
           </span>
         );
       })}
@@ -36,7 +37,8 @@ export function BiggestLinks({ catches, list, about }: { catches: readonly Catch
 }
 
 /** A water's biggest fish of each kind, once more than one kind came from it: the water page's one record says less. */
-export function BiggestHere({ catches, spotId }: { catches: readonly CatchEntry[]; spotId: string }) {
+/** `kindLink` opens a kind's fish when its page wouldn't hold this water's (the game's lake, a sample water). */
+export function BiggestHere({ catches, spotId, kindLink = speciesLink }: { catches: readonly CatchEntry[]; spotId: string; kindLink?: (species: string) => string }) {
   const kinds = speciesCounts(catches);
   if (kinds.length < 2) return null;
   return (
@@ -49,7 +51,7 @@ export function BiggestHere({ catches, spotId }: { catches: readonly CatchEntry[
           const key = species.trim().toLowerCase();
           return (
             <li key={key}>
-              <Link to={speciesLink(species)}>{t(species)}</Link>
+              <Link to={kindLink(species)}>{t(species)}</Link>
               <span className="meta sizes">
                 <BiggestLinks catches={catches.filter((entry) => entry.species.trim().toLowerCase() === key)} list={`water:${spotId}`} about={t(species)} />
               </span>

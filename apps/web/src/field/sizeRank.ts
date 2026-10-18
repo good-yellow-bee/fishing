@@ -73,7 +73,7 @@ export function forItsLength(kind: readonly CatchEntry[], entry: CatchEntry): { 
 }
 
 /** The angler's last fish of the kind before this one, and the whole days between, once it is 30 days or more. */
-export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { before: CatchEntry; days: number } | null {
+export function longGap(kind: readonly CatchEntry[], entry: CatchEntry, dayOf?: (entry: CatchEntry) => string): { before: CatchEntry; days: number } | null {
   const at = Date.parse(entry.caughtAt);
   let before: CatchEntry | null = null;
   for (const other of kind) {
@@ -81,12 +81,16 @@ export function longGap(kind: readonly CatchEntry[], entry: CatchEntry): { befor
     if (other.id !== entry.id && when < at && (!before || when > Date.parse(before.caughtAt))) before = other;
   }
   if (!before) return null;
-  // Calendar days between the two, whatever the hours or a clock change.
-  const day = (time: string) => {
-    const when = new Date(time);
+  // Calendar days between the two, whatever the hours or a clock change; by `dayOf` when given (a night fish on its outing's day).
+  const day = (fish: CatchEntry) => {
+    if (dayOf) {
+      const [year, month, date] = dayOf(fish).split("-").map(Number);
+      return Date.UTC(year!, month! - 1, date!);
+    }
+    const when = new Date(fish.caughtAt);
     return Date.UTC(when.getFullYear(), when.getMonth(), when.getDate());
   };
-  const days = Math.round((day(entry.caughtAt) - day(before.caughtAt)) / (24 * 60 * 60 * 1000));
+  const days = Math.round((day(entry) - day(before)) / (24 * 60 * 60 * 1000));
   return days >= 30 ? { before, days } : null;
 }
 
