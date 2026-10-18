@@ -1113,7 +1113,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC30~~ | ~~Shore ice: in winter a ragged rim of ice skirts the bank, wider in the coves, snowy near the bank and bare grey at its broken edge, with loose plates lying off it~~ (#1066) | scene | S |
 | ~~SC31~~ | ~~News card: trees in the wind, crayfish, whirligig beetles and shore ice~~ (#1066) | scene | S |
 | ~~SC32~~ | ~~Lily pads through the year: young and small in spring, full grown in summer, yellowing in fall, died back under the ice in winter~~ (#1071) | scene | S |
-| SC33 | Pondweed: three clumps of tall strands rooted on the shallow bed round the dock, rocking with the swell, lush in summer and thin in winter | scene | S |
+| ~~SC33~~ | ~~Pondweed: three clumps of tall strands rooted on the shallow bed round the dock, rocking with the swell, lush in summer and thin in winter~~ (#1074) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
