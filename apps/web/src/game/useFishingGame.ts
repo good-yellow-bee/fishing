@@ -34,6 +34,7 @@ import { fx } from "./fx";
 import { whenShown } from "./whenShown";
 import { isRiseCast } from "./eveningRise";
 import { LILY_COVER_WAIT, tightToPads } from "./lilyCover";
+import { cloudShadeWaitMul } from "./sunCover";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -715,6 +716,9 @@ export function useFishingGame(
     // A strong wind drives the baitfish onto the point, and the hunters follow.
     const blowWait = windPointWaitMul(spotRef.current, windRef.current);
     if (blowWait < 1) reasons.unshift(t("The wind drives the baitfish onto the point, and the hunters follow them in."));
+    // A cloud sliding over the sun shades the water, and the fish move up into the shallows to feed while it lasts.
+    const cloudWait = cloudShadeWaitMul(spotRef.current, sky, hour, Date.now());
+    if (cloudWait < 1) reasons.unshift(t("A cloud slides over the sun, and the fish move up into the shallows to feed."));
     // A light breeze blowing onto this bank pushes the warm surface water and its food in, and the fish follow.
     const windwardWait = windwardWaitMul(spotRef.current, windRef.current);
     if (windwardWait < 1) reasons.unshift(t("The breeze blows onto this bank and pushes the food in, and the fish follow it."));
@@ -789,7 +793,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
