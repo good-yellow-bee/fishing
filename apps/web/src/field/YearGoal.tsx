@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import type { Logbook } from "@stillwater/shared";
+import { localDate, type Logbook } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { bookFishDay } from "./tripMonths";
+import { seasonRecap } from "./bests/seasonRecap";
 
 /** The angler's own target of fish for a year, kept in this browser by year. */
 export const YEAR_GOAL_KEY = "stillwater.field-log.year-goal.v1";
@@ -102,6 +103,8 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
   const lastYear = String(Number(year) - 1);
   const lastYearCount = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)).length;
   const hintId = useId();
+  // Last year up to this same day, counted as this year's count is: where the year stood then.
+  const lastYearByNow = lastYearCount > 0 ? seasonRecap(book, year, localDate(now)).fishBefore : 0;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -207,6 +210,8 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
             : t("{left} to go, about {week} a week", { left: pace.left, week: pace.perWeek })}
         </p>
       ) : null}
+      {/* Where last year stood on this day, once it had a fish by then. */}
+      {lastYearByNow > 0 && count < goal ? <p className="meta goal-last-year">{t("{n} by this date last year", { n: lastYearByNow })}</p> : null}
     </div>
   );
 }

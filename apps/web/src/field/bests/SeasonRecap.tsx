@@ -2,6 +2,7 @@ import type { Logbook } from "@stillwater/shared";
 import { t, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
+import { readYearGoal } from "../YearGoal";
 import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
 import { bookFishDay } from "../tripMonths";
@@ -19,6 +20,7 @@ function against(count: number, before: number, year: string): string {
 export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: string; today: string }) {
   useT();
   const recap = seasonRecap(book, year, today);
+  const goal = year < today.slice(0, 4) ? readYearGoal(year) : null;
   if (recap.fish === 0 && recap.days === 0) return null;
   // A season still going is set against the one before up to the same day.
   // The waters that gave their first fish that season.
@@ -28,6 +30,10 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
     t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) }),
     t("Days out: {count}", { count: against(recap.days, recap.daysBefore, before) }),
     t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, before) }),
+    // A past season's goal, how it ended; this year's has its own box below.
+    ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
+  ];
+  const firsts = [
     ...(recap.newKinds.length > 0 ? [t("New to the book: {kinds}", { kinds: recap.newKinds.map((name) => t(name)).join(", ") })] : []),
     ...(newWaters.length > 0 ? [t("New waters: {waters}", { waters: newWaters.join(", ") })] : []),
   ];
@@ -35,14 +41,14 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
     <aside className="conditions season-recap" aria-label={t("{year} in the book", { year })}>
       <span className="eyebrow">{t("{year} in the book", { year })}</span>
       <p>
-        {lines.map((line, index) => (
+        {[...lines, ...firsts].map((line, index) => (
           <span key={line}>
             {index > 0 ? <br /> : null}
             {line}
           </span>
         ))}
       </p>
-      <CopySummary text={() => [yearSummary(book, year, today, null), ...lines.slice(3)].join("\n")} file="stillwater-season.txt" />
+      <CopySummary text={() => [yearSummary(book, year, today, goal), ...firsts].join("\n")} file="stillwater-season.txt" />
     </aside>
   );
 }

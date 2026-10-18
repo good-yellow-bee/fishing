@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene05";
+export const NEWS_ID = "2026-10-18-field22";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A past season on Bests shows how its goal ended, in its box and its copied summary, and this year's goal says where last year stood by this date.",
   "On a clear fall dawn the walkway out to the dock is white with frost, with your boot prints melted through it, and spring dawns bring a lighter one. The canoe and rowboat moored out on the lake swing round to face the wind. In spring schools of tadpoles wriggle in the warm shallows, and on summer days a grass snake swims out from the lily pads.",
   "The lure record on Gear can be ordered by most fish, most fish an outing, or the newest fish, and keeps that order for your next visit.",
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.",
