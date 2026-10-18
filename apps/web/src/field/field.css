@@ -1208,6 +1208,8 @@ html:has(.undo-bar) .field-main {
     letter-spacing: 0;
     overflow: hidden;
     text-overflow: clip;
+    /* With larger text each tab is only as wide as its word: MAP stood 23 px wide. 32 px on screen, inside the zoom. */
+    min-width: calc(32px / var(--text-zoom, 1));
   }
 
   .catch-card,
