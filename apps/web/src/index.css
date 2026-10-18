@@ -61,8 +61,10 @@ a {
   color: inherit;
 }
 
+/* Pages drawn larger by zoom divide the window's height by it, or the sign-in card sat lower than the middle with
+   larger text and the page scrolled past its end. */
 .auth-shell {
-  min-height: 100vh;
+  min-height: calc(100vh / var(--text-zoom, 1));
   display: grid;
   place-items: center;
   background:
@@ -1844,7 +1846,7 @@ html[data-input="pad"] .fight-bar .on-pad {
 }
 
 .log-page {
-  min-height: 100vh;
+  min-height: calc(100vh / var(--text-zoom, 1));
   background:
     radial-gradient(900px 400px at 80% 0%, #3b4c52, transparent),
     #161310;
