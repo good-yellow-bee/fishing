@@ -316,7 +316,7 @@ export function waterSwing(date: Date): "warming" | "cooling" | null {
 }
 
 /** How the day's change in water temperature moves the wait: WARMING_WAIT on a warming day, COOLING_WAIT on a cooling one, else 1. */
-export function waterSwingWaitMul(now: Date) {
+export function waterSwingWaitMul(now: Date): number {
   const swing = waterSwing(now);
   return swing === "warming" ? WARMING_WAIT : swing === "cooling" ? COOLING_WAIT : 1;
 }
