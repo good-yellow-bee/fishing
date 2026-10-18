@@ -6,9 +6,13 @@ const INPUT_NAMES: Record<string, string> = { spotId: "spot", tripId: "trip" };
 
 /** Clears any field marked wrong by an earlier save. */
 export function clearInvalid(form: HTMLFormElement): void {
-  for (const input of form.querySelectorAll('[aria-invalid="true"]')) {
+  for (const input of form.querySelectorAll<HTMLElement>('[aria-invalid="true"]')) {
     input.removeAttribute("aria-invalid");
-    input.removeAttribute("aria-describedby");
+    // The field's own hint, set aside while the error spoke for it, comes back.
+    const own = input.dataset.ownDescribedby;
+    if (own) input.setAttribute("aria-describedby", own);
+    else input.removeAttribute("aria-describedby");
+    delete input.dataset.ownDescribedby;
   }
 }
 
@@ -19,6 +23,8 @@ export function markInvalid(form: HTMLFormElement, field: string | undefined): v
   const input = form.querySelector<HTMLElement>(`[name="${INPUT_NAMES[field] ?? field}"]`);
   if (!input) return;
   input.setAttribute("aria-invalid", "true");
-  input.setAttribute("aria-describedby", FORM_ERROR_ID);
+  const own = input.getAttribute("aria-describedby");
+  if (own) input.dataset.ownDescribedby = own;
+  input.setAttribute("aria-describedby", own ? `${FORM_ERROR_ID} ${own}` : FORM_ERROR_ID);
   input.focus();
 }

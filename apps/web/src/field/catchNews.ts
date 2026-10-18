@@ -1,8 +1,7 @@
 import { measureOf, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { t } from "../i18n";
 import { measureText } from "../i18n/content";
-import { speciesCatches } from "./suggestions";
-import { countedFish } from "./milestones";
+import { kindToBeat } from "./suggestions";
 
 /**
  * What a fish about to be added means for the book, said with the save: the first of its kind, or a new best by weight
@@ -10,7 +9,7 @@ import { countedFish } from "./milestones";
  */
 export function catchNews(book: Logbook, fish: Pick<CatchEntry, "species" | "measure" | "alsoMeasure">): string | null {
   // Against the angler's own fish: the game's first walleye doesn't make a real one any less the first.
-  const before = countedFish(speciesCatches(book, fish.species));
+  const before = kindToBeat(book, fish.species);
   const name = t(fish.species);
   if (before.length === 0) return t("First {species} in the book.", { species: name });
   for (const kind of ["weight", "length"] as const) {

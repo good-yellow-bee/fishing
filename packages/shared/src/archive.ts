@@ -96,7 +96,7 @@ function datesReadable(book: Logbook): boolean {
 
 /** A size the catch form or the lake could have written: more than nothing, and no bigger than the form allows. */
 function sizeReadable(measure: Measure): boolean {
-  return measure.kind === "length" ? measure.inches > 0 && measure.inches <= 120 : measure.pounds > 0 && measure.pounds <= 80;
+  return measure.kind === "length" ? measure.inches > 0 && measure.inches <= 120 : measure.pounds > 0 && measure.pounds <= 300;
 }
 
 function sizesReadable(book: Logbook): boolean {

@@ -57,7 +57,7 @@ import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { countedBook, countedFish, ownFish } from "./milestones";
-import { isSampleTrip, upcomingRealTrips } from "./bookCopy";
+import { isSampleSpot, isSampleTrip, upcomingRealTrips } from "./bookCopy";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
@@ -568,7 +568,8 @@ function TripForm() {
   const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
     ? (params.get("spot") as string)
     : busy(guess)
-      ? (spotsByLastFish(book).map((row) => row.spot.id).find((id) => id !== PLAY_LAKE_ID && !busy(id)) ?? guess)
+      ? // The next water by the angler's own fish, never one of the sample week's made-up waters.
+        (spotsByLastFish({ ...book, catches: countedFish(book.catches) }).map((row) => row.spot.id).find((id) => id !== PLAY_LAKE_ID && !isSampleSpot(id) && !busy(id)) ?? guess)
       : guess;
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
@@ -617,7 +618,7 @@ function TripForm() {
 
   // An outing with fish already on it: they go where it goes, but they keep the times they were caught.
   const ownFish = existing ? catchesForTrip(book, existing.id) : [];
-  const fishDays = ownFish.filter((entry) => fishOnOutingDay(book, spotId, toLocalInput(new Date(entry.caughtAt)), date)).length;
+  const fishDays = ownFish.filter((entry) => fishOnOutingDay(book, spotId, toLocalInput(new Date(entry.caughtAt)), date, true)).length;
   const firstFishDay = ownFish.length > 0 ? localDate(new Date([...ownFish].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))[0]!.caughtAt)) : null;
   const today = localDate(new Date());
 

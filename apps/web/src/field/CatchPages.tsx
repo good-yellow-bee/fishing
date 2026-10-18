@@ -45,7 +45,7 @@ import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
-import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
+import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, dayAfter, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
 import { TripCounts } from "./tripCounts";
@@ -95,7 +95,7 @@ function looseOutingDay(book: Logbook, entry: CatchEntry): string {
 /** Whether a fish caught now still belongs to this outing: its day, or the small hours after it. */
 function outingGoesOn(book: Logbook, tripId: string | null): boolean {
   const trip = tripId ? tripById(book, tripId) : undefined;
-  return trip !== undefined && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date()), trip.date);
+  return trip !== undefined && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date()), trip.date, true);
 }
 
 function amountText(entry: CatchEntry, units: Units): string {
@@ -358,7 +358,8 @@ function CatchForm() {
   // until the player sets the time themselves.
   const timeFreeNow = useRef(false);
   timeFreeNow.current = !timeTouched || (carriedTime !== null && caughtAt === carriedTime && photoTime === "");
-  const [note, setNote] = useState(existing?.note ?? "");
+  // A game fish's note in the player's language, as its page shows it; saved back as stored while unchanged.
+  const [note, setNote] = useState(existing ? noteText(existing.note) : "");
   const [released, setReleased] = useState(() => (existing ? existing.released === true : lastReleased(book)));
   const [sky, setSky] = useState(existing?.weather?.sky ?? "");
   const [wind, setWind] = useState(existing?.weather?.wind ?? "");
@@ -1123,6 +1124,8 @@ function CatchForm() {
                       setCaughtAt(earlier);
                       if (!tripPicked) setTripId(tripForFish(book, spotId, earlier)?.id ?? "");
                       setTimeTouched(true);
+                      // "+15 min" leaves once the time is within 15 minutes of now: the focus goes back to the time.
+                      if (Number(minutes) < 0 && back.getTime() + 15 * 60_000 > Date.now()) focusSoon('input[name="caughtAt"]');
                     }}
                   >
                     {label}
@@ -1173,7 +1176,7 @@ function CatchForm() {
             <p className="wide form-note" role="status">
               {t("This outing is still to come.")}
             </p>
-          ) : pickedTrip && caughtAt && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date) ? (
+          ) : pickedTrip && caughtAt && !fishOnOutingDay(book, pickedTrip.spotId, caughtAt, pickedTrip.date, true) ? (
             <p className="wide form-note" role="status">
               {t("This outing was on {day}; the fish is dated another day.", { day: formatDay(pickedTrip.date) })}{" "}
               {/* The same clock time, on the outing's day: a fish moved to another outing keeps its old date otherwise. */}
@@ -1181,7 +1184,8 @@ function CatchForm() {
                 type="button"
                 className="text-button"
                 onClick={() => {
-                  setCaughtAt(`${pickedTrip.date}${caughtAt.slice(10)}`);
+                  // A small-hours time goes to the night after the outing's day, so it stays on that session.
+                  setCaughtAt(`${Number(caughtAt.slice(11, 13)) < LATE_NIGHT_UNTIL ? dayAfter(pickedTrip.date) : pickedTrip.date}${caughtAt.slice(10)}`);
                   setTimeTouched(true);
                   focusSoon('input[name="caughtAt"]');
                 }}

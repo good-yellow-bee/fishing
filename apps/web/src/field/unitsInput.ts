@@ -70,7 +70,7 @@ export function toBookAmount(text: string, kind: "length" | "weight", units: Uni
 }
 
 /** The book's heaviest fish, in kilograms. */
-const MAX_KG = 80 * KG_PER_LB;
+const MAX_KG = 300 * KG_PER_LB;
 
 /**
  * A bare metric weight past any fish's kilograms ("850"), read as the grams a phone's number pad
@@ -105,7 +105,7 @@ export function fromBookTemp(fahrenheit: number, units: Units) {
 /** The book's range messages name imperial bounds; a metric reader gets the same bounds in their units. */
 const METRIC_MESSAGES: Record<string, string> = {
   "Length should sit between 1 and 120 inches.": "Length should sit between 3 and 304 centimetres.",
-  "Weight should sit between 0.1 and 80 pounds.": "Weight should sit between 0.05 and 36 kilograms.",
+  "Weight should sit between 0.1 and 300 pounds.": "Weight should sit between 0.05 and 136 kilograms.",
   "Water temperature should sit between 32 and 90.": "Water temperature should sit between 0 and 32 °C.",
 };
 

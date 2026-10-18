@@ -210,7 +210,8 @@ describe("field archive", () => {
     expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: -2 } }))).toMatchObject({ ok: false });
     expect(parseFieldArchive(sized({ measure: { kind: "length", inches: 5000 } }))).toMatchObject({ ok: false });
     expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 2 }, alsoMeasure: { kind: "length", inches: 0 } }))).toMatchObject({ ok: false });
-    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 80 }, alsoMeasure: { kind: "length", inches: 120 } }))).toMatchObject({ ok: true });
+    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 300 }, alsoMeasure: { kind: "length", inches: 120 } }))).toMatchObject({ ok: true });
+    expect(parseFieldArchive(sized({ measure: { kind: "weight", pounds: 301 } }))).toMatchObject({ ok: false });
   });
 
   it("writes a file's catch times the way the book does, so newest first holds", () => {

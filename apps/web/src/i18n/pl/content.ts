@@ -278,7 +278,7 @@ export const PL_CONTENT: PlBook = {
   "Name the fish, in a few words.": "Nazwij rybę w kilku słowach.",
   "Use a number for length or weight.": "Podaj długość lub wagę liczbą.",
   "Length should sit between 1 and 120 inches.": "Długość powinna wynosić od 1 do 120 cali.",
-  "Weight should sit between 0.1 and 80 pounds.": "Waga powinna wynosić od 0,1 do 80 funtów.",
+  "Weight should sit between 0.1 and 300 pounds.": "Waga powinna wynosić od 0,1 do 300 funtów.",
   "Choose length or weight.": "Wybierz długość lub wagę.",
   "What was on the line?": "Co było na żyłce?",
   "Pick the water this fish came from.": "Wybierz wodę, z której pochodzi ta ryba.",

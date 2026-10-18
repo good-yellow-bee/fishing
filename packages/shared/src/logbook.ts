@@ -608,6 +608,10 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
   if (when.getTime() > Date.now() + 5 * 60 * 1000) {
     return fail("caughtAt", "That time is still ahead of you.");
   }
+  // A fish goes on its own day's outing or the night before's, never on one planned for later.
+  if (tripId && tripById(book, tripId)!.date > draft.caughtAt.slice(0, 10)) {
+    return fail("tripId", "That outing comes after the time this fish was landed.");
+  }
 
   const note = draft.note.trim();
   if (note.length > 280) return fail("note", "Keep the note to a few lines.");
@@ -637,7 +641,8 @@ function measureFrom(kind: Measure["kind"], amount: number, field: string): Pars
     if (amount < 1 || amount > 120) return fail(field, "Length should sit between 1 and 120 inches.");
     return { ok: true, value: { kind: "length", inches: amount } };
   }
-  if (amount < 0.1 || amount > 80) return fail(field, "Weight should sit between 0.1 and 80 pounds.");
+  // A wels catfish runs past 200 lb: the cap leaves room for the biggest fish an angler logs.
+  if (amount < 0.1 || amount > 300) return fail(field, "Weight should sit between 0.1 and 300 pounds.");
   return { ok: true, value: { kind: "weight", pounds: amount } };
 }
 

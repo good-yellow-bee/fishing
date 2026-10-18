@@ -33,6 +33,7 @@ import { bookLine, localizeSample } from "./sampleText";
 import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, openStoredLogbook, readStoredLogbook, saveLogbook, setAsideCatchIds } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
+import { noteText, toLocalInput } from "./format";
 import { bringBackClearedCopy, withoutSample } from "./bookCopy";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
@@ -268,9 +269,11 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!was) {
           return { ok: false, message: t("That catch is not in this book.") };
         }
-        const parsed = parseCatchDraft({ ...draft, note: bookLine(draft.note, was.note) }, book);
+        const parsed = parseCatchDraft({ ...draft, note: draft.note === noteText(was.note) ? was.note : bookLine(draft.note, was.note) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         if (offPlayLake(was) !== offPlayLake(parsed.value)) return { ok: false, message: t("What was caught in the game stays on the game's lake."), field: "spotId" };
+        // The time box untouched keeps the stored moment: its seconds, and the hour a clock change repeats.
+        if (draft.caughtAt === toLocalInput(new Date(was.caughtAt))) parsed.value.caughtAt = was.caughtAt;
         const current = photos[id] ?? null;
         let nextPhotos = photos;
         // The form's photo untouched: whatever the book holds now stays, a photo added in another tab included.

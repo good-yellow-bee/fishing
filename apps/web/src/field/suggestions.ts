@@ -1,7 +1,7 @@
 import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
 import { isSampleCatch, isSampleTrip } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
-import { countedFish } from "./milestones";
+import { countedFish, ownFish } from "./milestones";
 
 /**
  * Names for a form's suggestion list: the player's own first, most used on
@@ -101,14 +101,21 @@ export const LATE_NIGHT_UNTIL = 4;
 
 /**
  * Whether a fish caught at this local time (YYYY-MM-DDTHH:MM) on this water belongs to an outing on `ymd`: caught that
- * day, or in the small hours after it with no outing of its own day there.
+ * day, or in the small hours after it with no outing of its own day there. An outing the angler `picked` takes its
+ * small hours whatever the next day holds: the night session is the one they say they were on.
  */
-export function fishOnOutingDay(book: Logbook, spotId: string, local: string, ymd: string): boolean {
+export function fishOnOutingDay(book: Logbook, spotId: string, local: string, ymd: string, picked = false): boolean {
   if (local.slice(0, 10) === ymd) return true;
   const hour = Number(local.slice(11, 13));
   if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return false;
   const [y, m, d] = local.slice(0, 10).split("-").map(Number) as [number, number, number];
-  return localDate(new Date(y, m - 1, d - 1, 12)) === ymd && !tripOnDay(book, spotId, local.slice(0, 10));
+  return localDate(new Date(y, m - 1, d - 1, 12)) === ymd && (picked || !tripOnDay(book, spotId, local.slice(0, 10)));
+}
+
+/** The day after a YYYY-MM-DD, as YYYY-MM-DD. */
+export function dayAfter(ymd: string): string {
+  const [y, m, d] = ymd.split("-").map(Number) as [number, number, number];
+  return localDate(new Date(y, m - 1, d + 1, 12));
 }
 
 /**
@@ -120,11 +127,17 @@ export function tripForFish(book: Logbook, spotId: string, local: string): Trip 
   book = { ...book, trips: book.trips.filter((trip) => !isSampleTrip(trip.id)) };
   const ymd = local.slice(0, 10);
   const sameDay = tripOnDay(book, spotId, ymd);
-  if (sameDay) return sameDay;
   const hour = Number(local.slice(11, 13));
-  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return undefined;
+  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return sameDay;
   const [y, m, d] = ymd.split("-").map(Number) as [number, number, number];
-  return tripOnDay(book, spotId, localDate(new Date(y, m - 1, d - 1, 12)));
+  const eve = tripOnDay(book, spotId, localDate(new Date(y, m - 1, d - 1, 12)));
+  if (!sameDay) return eve;
+  // The next day planned too: the evening's session still going (a fish on it these last hours, none yet on the
+  // day's own outing) keeps the fish, as a night out does.
+  const at = new Date(y, m - 1, d, hour, Number(local.slice(14, 16)) || 0).getTime();
+  const fishOn = (trip: Trip) => book.catches.filter((entry) => entry.tripId === trip.id && Date.parse(entry.caughtAt) <= at);
+  const going = eve !== undefined && fishOn(eve).some((entry) => at - Date.parse(entry.caughtAt) < STILL_FISHING_MS);
+  return going && fishOn(sameDay).length === 0 ? eve : sameDay;
 }
 
 /**
@@ -145,6 +158,15 @@ export function speciesCatches(
   );
 }
 
+/**
+ * The fish of a kind a size is set against: the angler's own once the book has any of their own (so the sample
+ * week's brook trout is no best to beat for a first real one), the sample week's while it is all there is; never the game's.
+ */
+export function kindToBeat(book: Logbook, typed: string, shown: (name: string) => string = (name) => name, skipId?: string): CatchEntry[] {
+  const rows = speciesCatches(book, typed, shown, skipId);
+  return book.catches.some(ownFish) ? rows.filter(ownFish) : countedFish(rows);
+}
+
 export function speciesBestSoFar(
   book: Logbook,
   typed: string,
@@ -152,7 +174,7 @@ export function speciesBestSoFar(
   skipId?: string,
 ): { longest: CatchEntry | null; heaviest: CatchEntry | null } | null {
   // The angler's own: a game fish is no size to beat.
-  const catches = countedFish(speciesCatches(book, typed, shown, skipId));
+  const catches = kindToBeat(book, typed, shown, skipId);
   if (catches.length === 0) return null;
   const { longest, heaviest } = personalBests({ ...book, catches });
   return { longest, heaviest };

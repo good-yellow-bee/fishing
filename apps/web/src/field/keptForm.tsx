@@ -57,6 +57,12 @@ export function dropKeptForm(key: string) {
  * Keeps an edit form's unsaved changes for its record (`base` is the record as stored), and offers them back when the
  * form opens again. `key` is null for a form with nothing to keep (a new record). `fields` are the form's text values.
  */
+/** The banner leaves with the button tapped: the focus goes on to the form's first field below it. */
+function focusFormAfter(button: HTMLElement) {
+  const form = button.closest(".kept-draft")?.parentElement?.querySelector<HTMLElement>(".entry-form input:not([type=hidden]), .entry-form select, .entry-form textarea");
+  setTimeout(() => form?.focus(), 0);
+}
+
 export function useKeptForm(key: string | null, base: string, fields: Record<string, string>, pickUp: (fields: Record<string, string>) => void) {
   const [waiting, setWaiting] = useState<KeptForm | null>(() => {
     if (!key) return null;
@@ -85,7 +91,8 @@ export function useKeptForm(key: string | null, base: string, fields: Record<str
       <button
         type="button"
         className="field-primary inline"
-        onClick={() => {
+        onClick={(event) => {
+          focusFormAfter(event.currentTarget);
           pickUp(waiting.fields);
           // Picked up counts as typed: it stays kept even before the next keystroke.
           opened.current = "";
@@ -97,7 +104,8 @@ export function useKeptForm(key: string | null, base: string, fields: Record<str
       <button
         type="button"
         className="text-button"
-        onClick={() => {
+        onClick={(event) => {
+          focusFormAfter(event.currentTarget);
           if (key) dropKeptForm(key);
           setWaiting(null);
         }}
