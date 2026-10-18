@@ -14,12 +14,16 @@ const BOOTS = "#3a2e26";
 const COAT = "#a8743f";
 const BIB = "#efe6d6";
 const NOSE = "#2a2420";
+const UMBRELLA = "#2f4f8f";
+const UMBRELLA_RIB = "#e8c547";
 /** The walker's hips and shoulders, and their legs' length. */
 const HIP_Y = 0.86;
 const LEG = 0.84;
 const SHOULDER_Y = 0.56;
 const LEG_SWING = 0.38;
 const ARM_SWING = 0.45;
+/** How far the arm holding an umbrella is raised; the shaft leans back from the hand so the canopy is over the head. */
+const HOLD = 0.8;
 /** The dog: its hips' height, its legs, and where its four feet are. */
 const DOG_HIP_Y = 0.27;
 const DOG_LEG = 0.25;
@@ -56,6 +60,15 @@ export function walkerArmShape() {
   ]);
 }
 
+/** An open umbrella on its shaft, the handle at the origin. */
+export function umbrellaShape() {
+  return mergePainted([
+    { geometry: new THREE.CylinderGeometry(0.012, 0.012, 1, 5), position: [0, 0.5, 0], color: "#3b3b3b" },
+    { geometry: new THREE.ConeGeometry(0.55, 0.22, 8, 1, true), position: [0, 0.98, 0], color: UMBRELLA },
+    { geometry: new THREE.TorusGeometry(0.55, 0.012, 3, 8), position: [0, 0.87, 0], rotation: [Math.PI / 2, 0, Math.PI / 8], color: UMBRELLA_RIB },
+  ]);
+}
+
 /** The dog's body, facing +z, with a pale bib on its chest. */
 export function dogBodyShape() {
   return mergePainted([
@@ -86,8 +99,8 @@ export function dogTailShape() {
   return mergePainted([{ geometry: new THREE.CylinderGeometry(0.015, 0.03, 0.2, 5), position: [0, 0.08, -0.06], rotation: [-0.7, 0, 0], color: COAT }]);
 }
 
-/** Someone walking their dog along the far bank, the dog running on ahead, nosing about and running on again. */
-export function DogWalker() {
+/** Someone walking their dog along the far bank, the dog running on ahead, nosing about and running on again. In the rain they carry an umbrella. */
+export function DogWalker({ rain = false }: { rain?: boolean }) {
   const still = useReducedMotion();
   const walker = useRef<THREE.Group>(null);
   const upper = useRef<THREE.Group>(null);
@@ -107,6 +120,7 @@ export function DogWalker() {
       head: dogHeadShape(),
       paw: dogLegShape(),
       tail: dogTailShape(),
+      umbrella: umbrellaShape(),
     }),
     [],
   );
@@ -134,7 +148,8 @@ export function DogWalker() {
         leg.position.y = HIP_Y - dip;
       }
       const arm = arms[i]!.current;
-      if (arm) arm.rotation.x = swing * (ARM_SWING / LEG_SWING);
+      // Under an umbrella the right arm holds it steady in front of the chest.
+      if (arm) arm.rotation.x = rain && i === 1 ? -HOLD : swing * (ARM_SWING / LEG_SWING);
     });
     const pup = dogAt(time, still);
     if (dog.current) {
@@ -163,6 +178,7 @@ export function DogWalker() {
           {[1, -1].map((side, i) => (
             <group key={side} ref={arms[i]} position={[side * 0.2, SHOULDER_Y, 0]}>
               <mesh geometry={shapes.arm} material={material} />
+              {rain && i === 1 && <mesh geometry={shapes.umbrella} material={material} position={[0, -0.52, 0]} rotation={[HOLD - 0.35, 0, 0]} />}
             </group>
           ))}
         </group>

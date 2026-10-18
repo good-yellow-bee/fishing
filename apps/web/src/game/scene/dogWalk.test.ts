@@ -11,12 +11,11 @@ function onLand({ x, z }: { x: number; z: number }) {
 }
 
 describe("dog walk", () => {
-  it("is out by day from spring to fall, unless it rains", () => {
-    expect(dogWalkOut("day", "clear", "summer")).toBe(true);
-    expect(dogWalkOut("day", "fog", "fall")).toBe(true);
-    expect(dogWalkOut("day", "rain", "summer")).toBe(false);
-    expect(dogWalkOut("day", "clear", "winter")).toBe(false);
-    expect(dogWalkOut("dusk", "clear", "spring")).toBe(false);
+  it("is out by day from spring to fall, rain or shine", () => {
+    expect(dogWalkOut("day", "summer")).toBe(true);
+    expect(dogWalkOut("day", "fall")).toBe(true);
+    expect(dogWalkOut("day", "winter")).toBe(false);
+    expect(dogWalkOut("dusk", "spring")).toBe(false);
   });
 
   it("keeps the path on dry land along the far bank", () => {

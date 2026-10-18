@@ -1,4 +1,4 @@
-import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, type LakeHour, type LakeSeason } from "@stillwater/shared";
 
 /**
  * Someone walking their dog along the far bank, from spring to fall: they stroll one way along the
@@ -24,9 +24,9 @@ const DOG_ROUND = 12;
 /** How far the dog strays from the path, toward the water and back. */
 const DOG_STRAY = 0.4;
 
-/** Out by day from spring to fall, unless it is raining. */
-export function dogWalkOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
-  return hour === "day" && season !== "winter" && sky !== "rain";
+/** Out by day from spring to fall, whatever the weather: the dog needs its walk, so in the rain they take an umbrella. */
+export function dogWalkOut(hour: LakeHour, season: LakeSeason) {
+  return hour === "day" && season !== "winter";
 }
 
 /** A point on the path, 0 at its west end and 1 at its east end, `out` metres back from the waterline. */
