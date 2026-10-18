@@ -1388,7 +1388,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT269~~ | ~~News card 2026-10-18-game09 covers GT266 to GT268: a twisted line from spinner casts, groundbait and retie on a controller, and the bright morning after the rain~~ (#1039) | ui | S |
 | ~~GT270~~ | ~~A hook blunted on the rocks: working a lure free of the Point's rocks dulls its hook point, so a strike has half the usual time to set solid (the hookset says "on the dull hook"); the stance chip says "hook dulled", and the Retie button (or T, or LT) touches it up; a break ties on a fresh one~~ (#1055) | gameplay | S |
 | ~~GT271~~ | ~~Winter shore ice: a winter cast landing on the ice the scene draws round the shore skitters across it ("The lure skittered across the shore ice.") instead of fishing there, and the hint says to cast past it to the open water; a beginner is spared~~ (#1067) | gameplay | S |
-| GT272 | The fall turnover: once each fall, for 3 days starting on a day between October 20 and November 12 (the same for everyone), the lake turns over and bites come slower everywhere (1.2 wait) but a little sooner in the inlet's fresh stream water (0.9); the bite reasons say so first, the forecast board chalks those days, and a beginner is spared the slow side | gameplay | S |
+| ~~GT272~~ | ~~The fall turnover: once each fall, for 3 days starting on a day between October 20 and November 12 (the same for everyone), the lake turns over and bites come slower everywhere (1.2 wait) but a little sooner in the inlet's fresh stream water (0.9); the bite reasons say so first, the forecast board chalks those days, and a beginner is spared the slow side~~ (#1068) | gameplay | S |
+| GT273 | News card 2026-10-18-game10 covers GT270 to GT272: a hook blunted on the rocks, the winter shore ice, and the fall turnover | ui | S |
 
 ## Risks / open questions for the owner
 
