@@ -1288,7 +1288,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT243~~ | ~~Banks for right now: the walk signs put an amber dot on the banks the season, hour and weather favor (Reeds in spring or under a clear winter sun, Drop-off on a summer day, Dock shade under a clear summer sky, Point in a strong wind, Inlet in rain), and the stance chip says "bites sooner now" at one~~ (#938) | ui | S |
 | ~~GT244~~ | ~~Lantern minnows: after dark the dock lanterns draw a small shoal of minnows into their light (one instanced draw, half on Lite, still for reduced motion), and the fish follow, so a cast off the Dock at night bites sooner; the wait hint says so and the Dock's walk sign gets its dot~~ (#939) | gameplay | S |
 | ~~GT245~~ | ~~Groundbait: one handful a visit, tossed with a "Groundbait" button by the walk signs; the next 5 casts at that bank bite sooner (0.8) with "Over the groundbait." on the wait hint, and the stance chip counts what is left; casts at other banks leave it be~~ (#942) | gameplay | S |
-| GT246 | Lake news above a long hint: "Lately on the lake" sat at a fixed 86px and a three-line hint ran under it on desktop; the hint's height now rides on --hint-h (ResizeObserver) and the news sits just above it (86px kept under 800px, where the hint moves up) | ui | S |
+| ~~GT246~~ | ~~Lake news above a long hint: "Lately on the lake" sat at a fixed 86px and a three-line hint ran under it on desktop; the hint's height now rides on --hint-h (ResizeObserver) and the news sits just above it (86px kept under 800px, where the hint moves up)~~ (#944) | ui | S |
+| GT247 | Groundbait cloud: a soft muddy cloud (one draw, radial alpha) lies on the water a short toss out and to the angler's right of the bank it was thrown from, thinning as its five casts are fished out | scene | S |
 
 ## Risks / open questions for the owner
 
