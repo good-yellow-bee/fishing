@@ -1,21 +1,27 @@
-import type { CatchEntry } from "@stillwater/shared";
+import { localDate, type CatchEntry } from "@stillwater/shared";
 import { countedFish } from "../milestones";
 
 /**
  * The kinds caught last year that haven't come in yet this year, by their name as last logged, alphabetical. `nameOf`
  * groups by something else, such as the lure.
  */
-export function notYetThisYear(catches: readonly CatchEntry[], today: Date = new Date(), nameOf: (entry: CatchEntry) => string = (entry) => entry.species): string[] {
+/** `dayOf` dates a fish ("2026-01-01"): a page that files a night fish under its outing's day passes its own. */
+export function notYetThisYear(
+  catches: readonly CatchEntry[],
+  today: Date = new Date(),
+  nameOf: (entry: CatchEntry) => string = (entry) => entry.species,
+  dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+): string[] {
   const year = today.getFullYear();
   const lastYear = new Map<string, string>();
   const thisYear = new Set<string>();
   for (const entry of countedFish(catches)) {
-    const at = new Date(entry.caughtAt);
+    const at = Number(dayOf(entry).slice(0, 4));
     const name = nameOf(entry).trim();
     if (!name) continue;
     const kind = name.toLowerCase();
-    if (at.getFullYear() === year) thisYear.add(kind);
-    else if (at.getFullYear() === year - 1) lastYear.set(kind, name);
+    if (at === year) thisYear.add(kind);
+    else if (at === year - 1) lastYear.set(kind, name);
   }
   return [...lastYear.entries()]
     .filter(([kind]) => !thisYear.has(kind))
