@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sampleLogbook } from "@stillwater/shared";
-import { datePicks, pastTitles } from "./tripDates";
+import { datePicks, ownTitle, pastTitles } from "./tripDates";
 
 describe("one-tap outing days", () => {
   it("adds the coming Saturday when it is neither today nor tomorrow", () => {
@@ -30,5 +30,28 @@ describe("names of earlier outings", () => {
       { id: "tz5", date: "2026-10-06", spotId: first!.id, title: " ", note: "" },
     ];
     expect(pastTitles(book, first!.id)).toEqual(["Dawn patrol", "Evening run"]);
+  });
+});
+
+describe("an outing saved under its water's name", () => {
+  const book = {
+    spots: [
+      { id: "a", name: "Jezioro A", waterType: "lake" as const, notes: "", bestConditions: "" },
+      { id: "b", name: "Jezioro B", waterType: "lake" as const, notes: "", bestConditions: "" },
+    ],
+    trips: [
+      { id: "t1", date: "2026-10-01", spotId: "a", title: "Jezioro A", note: "" },
+      { id: "t2", date: "2026-10-02", spotId: "a", title: "Dawn patrol", note: "" },
+    ],
+    catches: [],
+  };
+
+  it("has no title of its own in its form", () => {
+    expect(ownTitle(book.trips[0]!, book.spots)).toBe("");
+    expect(ownTitle(book.trips[1]!, book.spots)).toBe("Dawn patrol");
+  });
+
+  it("offers no water's name as a title hint", () => {
+    expect(pastTitles(book, "b")).toEqual(["Dawn patrol"]);
   });
 });

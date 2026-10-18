@@ -49,7 +49,7 @@ export function PhotosPage() {
   const spare = fill >= 50 ? spareGameSnapshots(storedBook, photos) : [];
   const clear = spare.slice(0, 10);
   const makeRoom = () => {
-    if (!window.confirm(t("Remove the lake's {count} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs.", { count: clear.length }))) return;
+    if (!window.confirm(tn(clear.length, "Remove the lake's oldest snapshot? Your own photos and each kind's heaviest fish keep theirs.", "Remove the lake's {n} oldest snapshots? Your own photos and each kind's heaviest fish keep theirs."))) return;
     if (!removePhotos(clear)) return;
     setMade(clear.length);
     // The button goes once there is room, so focus waits on the word of what was removed.

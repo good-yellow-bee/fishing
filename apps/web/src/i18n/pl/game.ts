@@ -873,9 +873,9 @@ export const PL_GAME: PlBook = {
   "Mark a fish as released and the field log counts it on trips and waters. A catch you start but don't save is kept for a day, and the next fish on an outing can take the last one's weather in one tap.":
     "Zaznacz rybę jako wypuszczoną, a dziennik policzy to na wyprawach i łowiskach. Niezapisany połów czeka dobę, a kolejna ryba z wyprawy przejmie pogodę poprzedniej jednym dotknięciem.",
   "Deleted something in the field log by mistake? Undo brings it back. Past outings have Go again, which copies the tackle list, and pieces can be taken off a list.":
-    "Usunąłeś coś w dzienniku przez pomyłkę? Cofnij przywraca to od razu. Minione wyprawy mają Jedź znowu, które kopiuje listę sprzętu, a z listy można już usuwać rzeczy.",
+    "Coś w dzienniku usunięte przez pomyłkę? Cofnij przywraca to od razu. Minione wyprawy mają Jedź znowu, które kopiuje listę sprzętu, a z listy można już usuwać rzeczy.",
   "Upcoming trips in the field log can go straight into your calendar, and the Spots list puts the waters you fished last on top.":
-    "Nadchodzące wyprawy z dziennika dodasz prosto do kalendarza, a lista łowisk pokazuje na górze te, na których łowiłeś ostatnio.",
+    "Nadchodzące wyprawy z dziennika dodasz prosto do kalendarza, a lista łowisk pokazuje na górze te, na których łowiono ostatnio.",
   "Any catch page in the field log can save a picture card of the fish, and the lake's fish now go in the book under Stillwater, apart from your own waters.":
     "Każda strona połowu w dzienniku zapisze obrazek z rybą, a ryby z jeziora trafiają teraz do dziennika pod Stillwater, osobno od twoich łowisk.",
   "Each water in the field log shows what works there: its best lures and the time of day with the most fish, also on upcoming trips.":

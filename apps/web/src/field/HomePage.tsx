@@ -9,6 +9,7 @@ import { CatchCard, TripCard } from "./cards";
 import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, outingNameById, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
+import { RESUME_PARAM } from "./anotherCatch";
 import { hasSampleLeft, isSampleOnly, isSampleTrip } from "./bookCopy";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
@@ -198,7 +199,7 @@ export function HomePage() {
               ? t("A fish you started logging was not saved: {species}.", { species: kept.species.trim() })
               : t("A fish you started logging was not saved.")}
           </p>
-          <Link to="/catches/new" className="field-primary inline">
+          <Link to={`/catches/new?${RESUME_PARAM}=1`} className="field-primary inline">
             {t("Pick it up")}
           </Link>
         </div>

@@ -53,7 +53,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
           </select>
         </label>
         <p className="field-hint" id="merge-water-hint">
-          {t("This water then leaves the book; its notes and place fill in only what the other one lacks.")}
+          {t("This water then leaves the book; its notes and place fill in only what the other one lacks, and an outing on a day the other water has one joins it.")}
         </p>
         <button type="submit" className="field-primary inline">
           {t("Merge")}

@@ -56,7 +56,7 @@ import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { ownFish } from "./milestones";
 import { speciesLink } from "./speciesLink";
-import { datePicks, pastTitles } from "./tripDates";
+import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake, upcomingOwnTrips } from "./playLake";
 import { likelyWater, spotsByLastFish } from "./spotOrder";
@@ -589,7 +589,11 @@ function TripForm() {
             .map((entry) => entry.id),
     [book, existing, params, spotId, date],
   );
-  const [title, setTitle] = useState(existing?.title ?? again?.title ?? "");
+  // An untitled outing is saved under its water's name: the box stays empty, so a change of water renames it too.
+  const [title, setTitle] = useState(() => {
+    const from = existing ?? again;
+    return from ? ownTitle(from, book.spots) : "";
+  });
   // Names already given, offered as the title is typed.
   const titles = useMemo(() => pastTitles(book, spotId), [book, spotId]);
   const [note, setNote] = useState(existing?.note ?? "");
