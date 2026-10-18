@@ -1145,6 +1145,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC48~~ | ~~Fireflies only in summer: they no longer come out on every dry night of the year, just summer nights~~ (#1114) | scene | S |
 | ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
 | ~~SC50~~ | ~~Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes~~ (#1116) | scene | S |
+| ~~SC51~~ | ~~Far-bank cabin: a log cabin across the lake, windows lit from dusk, chimney smoking in fall and winter (and spring's cold ends of the day), snow on its roof in winter~~ (#1119) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1428,7 +1429,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT276~~ | ~~Live shiner bait: a landed golden shiner can go back out on the hook ("Use it as bait" on the landed card); the next cast carries it, and 60% of its bites are one of the bank's hunters the angler could land (pike, tiger muskie, largemouth or smallmouth bass, walleye), weighed as the bank draws them; the wait hint and strike say so, the stance chip says "live shiner on", a late strike on it still hooks deep, and a beginner is spared~~ (#1091) | gameplay | S |
 | ~~GT277~~ | ~~News card 2026-10-18-game11 covers GT274 to GT276: "good now" after the rain and at the turning Inlet, skip casts off the dock, and live shiner bait~~ (#1096) | ui | S |
 | ~~GT278~~ | ~~The windward bank: a light breeze blowing squarely onto a bank pushes the warm surface water and its food there, so a cast there bites a little sooner (0.9 wait); a north wind blows onto the Dock, Reeds and Point, an east wind onto the Inlet and Reeds, a west wind onto the Drop-off, and a south wind onto no bank; the wait hint says so, and those banks' walk signs and the stance chip say "bites sooner now"~~ (#1102) | gameplay | S |
-| GT279 | The shack's chalk board names the banks a light breeze blows onto ("A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in."), on a day whose wind holds; a south breeze, a breezy or strong day, or a sky that turns and changes the wind says nothing | ui | S |
+| ~~GT279~~ | ~~The shack's chalk board names the banks a light breeze blows onto ("A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in."), on a day whose wind holds; a south breeze, a breezy or strong day, or a sky that turns and changes the wind says nothing~~ (#1107) | ui | S |
+| GT280 | Lily pad cover: from spring to fall a cast landing within 1.6 m of a lily pad (the beds off the Reeds, Point and Drop-off) lands where the bass and pike wait in ambush, so the bite comes sooner (0.85 wait) and the wait hint says "Tight to the lily pads, where the bass and pike wait in ambush."; a quarter of such casts foul on the pad stems (a weed snag) unless the lure is a topwater, and the pads die back in winter | gameplay | S |
 
 ## Risks / open questions for the owner
 
