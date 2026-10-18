@@ -1173,6 +1173,14 @@ kbd {
   }
 }
 
+/* On a phone the card has no room to grow: the standing habit and control lines step aside while the note shows. */
+@media (max-width: 800px) {
+  .fight-bar:has(.fight-note) .fight-water,
+  .fight-bar:has(.fight-note) .fight-controls {
+    display: none;
+  }
+}
+
 .fight-bar .fight-best {
   margin: 2px 0 6px;
   color: #a8771f;
