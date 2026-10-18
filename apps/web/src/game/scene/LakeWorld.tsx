@@ -34,6 +34,8 @@ import { boatHeading } from "./boatSwing";
 import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
+import { IceFloes } from "./IceFloes";
+import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
@@ -2087,6 +2089,7 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {nestsOut(season) && <SunfishNests />}
+      {floesOut(season) && <IceFloes wind={wind} />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
