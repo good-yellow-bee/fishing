@@ -812,6 +812,7 @@ export const PL_FIELD: PlBook = {
   "Pack for {outing}": "Spakuj na: {outing}",
   "On the list for {outing}": "Na liście na: {outing}",
   "rested {n} days": ["odpoczywa {n} dzień", "odpoczywa {n} dni", "odpoczywa {n} dni"],
+  "New this season": "Nowość sezonu",
   "The packed lists could not be updated in this browser. They stay as they are until this page is closed.": "Nie udało się zaktualizować list sprzętu w tej przeglądarce. Zostają takie, jakie są, do zamknięcia tej strony.",
   "The tackle list could not be saved in this browser. It stays as it is until this page is closed.": "Nie udało się zapisać listy sprzętu w tej przeglądarce. Zostaje taka, jak jest, do zamknięcia tej strony.",
   "The goal could not be saved in this browser.": "Nie udało się zapisać celu w tej przeglądarce.",

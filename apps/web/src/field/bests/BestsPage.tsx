@@ -16,6 +16,7 @@ import { bestFishDay, bookFishDay, catchMonth, daysOut, monthName, monthTally, y
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
+import { seasonRecap } from "./seasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
 import { newWatersThisYear, notYetThisYear } from "./notYet";
@@ -164,6 +165,15 @@ export function BestsPage() {
   const topDayTrip = topDay?.tripId ?? null;
   const released = book.catches.filter((entry) => entry.released).length;
   const hooks = hookTally(book);
+  // Each kind's fish as its card counts them, for the day of its last one: which kinds have gone quiet.
+  const kindFish = new Map<string, CatchEntry[]>();
+  for (const entry of countedFish(book.catches)) {
+    const key = entry.species.trim().toLowerCase();
+    const list = kindFish.get(key);
+    if (list) list.push(entry);
+    else kindFish.set(key, [entry]);
+  }
+  const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map((name) => name.trim().toLowerCase())) : null;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
@@ -304,12 +314,15 @@ export function BestsPage() {
                         <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{t(row.species)}</Link>
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
+                      {/* A kind the season brought into the book for the first time. */}
+                      {freshKinds?.has(row.species.trim().toLowerCase()) ? <span className="stamp">{t("New this season")}</span> : null}
                     </div>
                     <p className="meta">
                       {fishCountLabel(row.count)}
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
+                    {lastFishLine(kindFish.get(row.species.trim().toLowerCase()) ?? [])}
                   </article>
                 );
               })}
