@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from "reac
 import {
   WATER_LABELS,
   WATER_TYPES,
+  type WaterType,
   biteTimes,
   catchesForSpot,
   fishCountsByTrip,
@@ -98,6 +99,11 @@ export function SpotsPage() {
     });
   }
   rows.sort((a, b) => Number(a.spot.id === PLAY_LAKE_ID) - Number(b.spot.id === PLAY_LAKE_ID));
+  // With rivers and lakes both in the book, the list can narrow to one kind of water; the game's lake shows under all.
+  const types = WATER_TYPES.filter((type) => rows.some((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type));
+  const [kind, setKind] = useState<WaterType | "all">("all");
+  const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
+  const shownRows = shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind);
 
   return (
     <div className="sheet">
@@ -129,10 +135,19 @@ export function SpotsPage() {
               ]}
               onChange={pickOrder}
             />
+            {types.length > 1 ? (
+              <ChoiceRow<WaterType | "all">
+                wrap
+                label={t("Kind of water")}
+                value={shownKind}
+                options={[{ id: "all", label: t("All waters") }, ...types.map((type) => ({ id: type, label: t(WATER_LABELS[type]) }))]}
+                onChange={setKind}
+              />
+            ) : null}
           </div>
         ) : null}
         <div className="card-grid">
-          {rows.map((row) => (
+          {shownRows.map((row) => (
             <SpotCard
               key={row.spot.id}
               spot={row.spot}
