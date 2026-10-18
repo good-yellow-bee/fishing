@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field32";
+export const NEWS_ID = "2026-10-18-scene17";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.",
   "Home offers “Set a goal for the year” once the year has fish, the Days out calendar marks its busiest month, and the catches spreadsheet gives a night session's small-hours fish its outing's day.",
   "Little waves now lap in and out along the shore, washing furthest up the bank the wind blows onto, and the canoe and the dinghy leave a wake. On breezy days from spring to fall a child flies a kite out over the lake from the upwind bank. Campers have pitched a tent on the far bank: it glows with lantern light from dusk, and in the evening they sit out by their campfire. In fall pumpkins sit under the big tree by the shack, one carved into a jack-o'-lantern that glows after dark, and in winter someone skis along the far bank.",
   "A worm cast six times without landing a fish now soaks pale and loses its scent, so bites on it come slower until you put a fresh one on with Rebait (or T). And the lake's water temperature now matters: on a day the water has warmed since yesterday the fish wake up to feed and bite sooner, on a day it has cooled they bite slower, and the shack's chalk board says which days, with the temperature.",
