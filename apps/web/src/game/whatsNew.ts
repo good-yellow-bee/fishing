@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game02";
+export const NEWS_ID = "2026-10-18-field01";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Outings can now be found by what they caught: type “pike” or “jig” in the Trips search, or “lost” and “missed” for the days a fish got away. Species and water pages can list their fish largest first, Bests counts the weeks in a row you went out, and Home's month and year counts open just your own fish.",
   "The field guide now says how each fish you have landed fights: its own habits, like a pike rolling at the net or a trout tail-walking, when it fights hard (a burbot after dark or in rain) and when it tires sooner (a walleye spent from spawning in spring). After a catch, the card also says when a school is feeding at that bank or a hunter followed your fish in.",
   "When a fish takes the hook, the fight card now shows what the strike says for a few seconds: how quick it was, whether it feels like a trophy, and up to two reasons it may tire slower or sooner today. On a phone the new angler's guide moves below the fight card, so the card no longer covers it.",
   "A perch hooked in spring is worn from spawning and tires sooner. A burbot hooked in rain hunts by smell in the murky water, and a pike hooked in fall has fed hard for winter, so both fight longer.",

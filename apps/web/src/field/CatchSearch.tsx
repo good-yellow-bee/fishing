@@ -21,11 +21,11 @@ import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
+import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
-const ORDER_PARAM = "order";
 
 /** Labels and words come round once per fish in a search: each is folded once, not 2,500 times. Notes are not kept. */
 const foldedLabels = new Map<string, string>();
@@ -547,20 +547,10 @@ export function CatchSearch() {
   const settled = useDeferredValue(needle);
   const metric = getUnits() === "metric";
   const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
-  const largest = params.get(ORDER_PARAM) === "largest";
+  const [largest, setLargest] = useLargestOrder();
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
   const onCatches = useLocation().pathname.startsWith("/catches");
   const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
-  const setLargest = (next: boolean) =>
-    setParams(
-      (current) => {
-        const out = new URLSearchParams(current);
-        if (next) out.set(ORDER_PARAM, "largest");
-        else out.delete(ORDER_PARAM);
-        return out;
-      },
-      { replace: true },
-    );
 
   return (
     <section
@@ -638,14 +628,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
-            <p className="search-order" role="group" aria-label={t("Order of the matches")}>
-              <button type="button" className="text-button" aria-pressed={!largest} onClick={() => setLargest(false)}>
-                {t("Newest first")}
-              </button>
-              <button type="button" className="text-button" aria-pressed={largest} onClick={() => setLargest(true)}>
-                {t("Largest first")}
-              </button>
-            </p>
+            <MatchOrder largest={largest} onChange={setLargest} />
           ) : null}
           {matches.length > 0 && (
             // Month headings only make sense newest first.

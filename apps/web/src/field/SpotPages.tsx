@@ -46,6 +46,8 @@ import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MergeWater } from "./MergeWater";
+import { largestFirst } from "./largestFirst";
+import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID, upcomingOwnTrips } from "./playLake";
 
 /** The soonest planned outing on a water, as the card says it. */
@@ -156,6 +158,7 @@ export function SpotPage() {
   const spot = spotById(book, spotId);
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
+  const [largest, setLargest] = useLargestOrder();
 
   if (!spot) {
     return (
@@ -341,18 +344,22 @@ export function SpotPage() {
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
-        <PagedCatches items={catches} monthOf={catchMonth}>
-          {(entry) => (
-            <CatchCard
-              level={4}
-              key={entry.id}
-              entry={entry}
-              spotName={null}
-              tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
-              list={`water:${spot.id}`}
-            />
-          )}
-        </PagedCatches>
+        <>
+          {/* "Which was my biggest here": the same fish, largest first. */}
+          {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
+          <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth}>
+            {(entry) => (
+              <CatchCard
+                level={4}
+                key={entry.id}
+                entry={entry}
+                spotName={null}
+                tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
+                list={largest ? undefined : `water:${spot.id}`}
+              />
+            )}
+          </PagedCatches>
+        </>
       )}
       <MergeWater spotId={spot.id} />
     </div>

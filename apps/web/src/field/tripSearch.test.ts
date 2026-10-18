@@ -43,4 +43,16 @@ describe("find an outing", () => {
     expect(find("october + run")).toEqual([]);
     expect(find("october + next")).toEqual(["c"]);
   });
+
+  it("finds an outing by the kinds and lures it caught, and by fish lost or strikes missed", () => {
+    const caught = book.catches[0]!;
+    expect(find(caught.species.toLowerCase())).toContain("a");
+    expect(find(caught.lure.toLowerCase())).toContain("a");
+    const counted = { ...book, trips: book.trips.map((row) => (row.id === "b" ? { ...row, lost: 2 } : row.id === "a" ? { ...row, missed: 1 } : row)) };
+    const findIn = (needle: string) => findTrips(counted, needle, (id) => fish.get(id) ?? 0, "2026-10-16", (text) => text, now).map((row) => row.id);
+    expect(findIn("lost")).toEqual(["b"]);
+    expect(findIn("spięte")).toEqual(["b"]);
+    expect(findIn("missed")).toEqual(["a"]);
+    expect(findIn("puste brania")).toEqual(["a"]);
+  });
 });

@@ -27,6 +27,8 @@ import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks } from "./BiggestHere";
 import { catchLink, type ListKey } from "./catchList";
+import { largestFirst } from "./largestFirst";
+import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { spreadRows } from "./spreadRows";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
@@ -98,6 +100,7 @@ export function SpeciesPage() {
   const { book } = useLogbook();
   useT();
   const { species = "" } = useParams();
+  const [largest, setLargest] = useLargestOrder();
   // The angler's own fish of the kind, as Bests counts them; a kind only ever caught in the game shows its game fish.
   const every = catchesOfSpecies(book, species);
   const catches = kindOnPage(book, species);
@@ -221,7 +224,9 @@ export function SpeciesPage() {
       <div className="section-head">
         <h2>{t("Every one in the book")}</h2>
       </div>
-      <PagedCatches items={catches} monthOf={catchMonth}>
+      {/* "Which was my biggest": the same fish, largest first. */}
+      {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
+      <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth}>
         {(entry) => (
           <CatchCard
             level={4}
@@ -229,7 +234,7 @@ export function SpeciesPage() {
             entry={entry}
             spotName={book.spots.find((spot) => spot.id === entry.spotId)?.name ?? t("Unknown water")}
             tripTitle={titleOf(entry.tripId)}
-            list={`species:${species}`}
+            list={largest ? undefined : `species:${species}`}
           />
         )}
       </PagedCatches>

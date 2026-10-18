@@ -21,7 +21,7 @@ import { mostKindsDay } from "./mostKinds";
 import { newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
-import { outingStreak, weekendSplit } from "../outingAverage";
+import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
 import { countedBook, countedFish } from "../milestones";
@@ -98,6 +98,7 @@ export function BestsPage() {
   const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
   const streak = outingStreak(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const weeks = weekStreak(real.trips, today);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const years = yearTally(whole.catches).map((row) => row.year);
   const asked = params.get(YEAR_PARAM);
@@ -332,6 +333,12 @@ export function BestsPage() {
               {streak.best > 1 ? (
                 <p className="meta">
                   {streak.going ? t("Outings in a row with a fish: {count}, and still going", { count: streak.best }) : t("Most outings in a row with a fish: {count}", { count: streak.best })}
+                </p>
+              ) : null}
+              {/* Weeks in a row with a day out, fish or not: the habit, once it has run three weeks. */}
+              {weeks.best > 2 ? (
+                <p className="meta">
+                  {weeks.going ? t("Weeks in a row on the water: {count}, and still going", { count: weeks.best }) : t("Most weeks in a row on the water: {count}", { count: weeks.best })}
                 </p>
               ) : null}
               {/* The other side of the streak: how long the blank spell ran, once it ran past one. */}
