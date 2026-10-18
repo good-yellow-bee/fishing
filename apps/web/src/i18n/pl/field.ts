@@ -92,6 +92,7 @@ export const PL_FIELD: PlBook = {
   "Save and log another": "Zapisz i następna",
   "Water from the photo's location.": "Łowisko z miejsca zrobienia zdjęcia.",
   "Taken from the photo.": "Odczytany ze zdjęcia.",
+  "Use the photo's time ({time}), on {outing}": "Weź godzinę ze zdjęcia ({time}), wyprawa: {outing}",
   "Use the photo's time ({time})": "Weź godzinę ze zdjęcia ({time})",
   "That time is still to come. Is the day right?": "Ta godzina jeszcze nie nadeszła. Czy dzień się zgadza?",
   "Nearest water to me": "Najbliższe łowisko",
