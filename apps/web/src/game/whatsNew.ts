@@ -5,6 +5,7 @@ export const NEWS_KEY = "stillwater.news.v1";
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
   "Escape now closes the trip recap like the other panels (an old trip still needs Let it go). A refused sign-in is read out by a screen reader and drawn in a darker rust that is easier to read. On a phone an outing's Add to calendar and Print the packing list, and Gear's Pack for under a lure's biggest fish, sit far enough apart that a finger opens the one it meant.",
+  "The book's file box downloads the outings as a spreadsheet too, and the catch form says how many fish an outing has so far and when the last came.",
   "The lily pads now change with the year: small and fresh in spring, turning gold in fall and gone under the winter ice. Clumps of pondweed rock in the swell on the bed round the dock, and in summer a brood of grey cygnets paddles in a line behind the swans.",
   "With a keyboard, Tab now stays inside Settings, Keys and buttons, the shack and the trip recap instead of slipping onto the lake behind them, and a field or button you tab to scrolls clear of a pinned Save or Back to the lake rather than hiding under it. On a touch screen the species chips are a little taller to tap.",
   "The outing search finds plans with “planned”, Trips says when your last few outings all gave a fish, and Home's Next card says how long ago you last fished that water.",
