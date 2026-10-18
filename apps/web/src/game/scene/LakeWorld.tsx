@@ -191,6 +191,8 @@ import { PorchRocker } from "./PorchRocker";
 import { porchOut } from "./porchRocking";
 import { Sandpipers } from "./Sandpipers";
 import { sandpipersOut } from "./sandpiperRun";
+import { EaveLights } from "./EaveLights";
+import { eaveLightsOn } from "./festiveBulbs";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2312,6 +2314,7 @@ export const LakeWorld = memo(function LakeWorld({
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
+      {eaveLightsOn(hour, season) && <EaveLights />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
