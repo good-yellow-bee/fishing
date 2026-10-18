@@ -48,10 +48,11 @@ function saveYearGoal(year: string, goal: number | null): boolean {
 }
 
 /**
- * How the year is going against its goal: the fish the year ends with at this rate, and how many a week the rest
- * needs. Null before a first fish, once the goal is reached, and in the year's first fortnight, when a rate says little.
+ * How the year is going against its goal: the fish the year ends with at this rate, how many a week the rest
+ * needs, and how far ahead of an even pace to the goal it is (behind when below 0). Null before a first fish, once the
+ * goal is reached, and in the year's first fortnight, when a rate says little.
  */
-export function goalPace(count: number, goal: number, now: Date): { pace: number; left: number; perWeek: number; daysLeft: number } | null {
+export function goalPace(count: number, goal: number, now: Date): { pace: number; left: number; perWeek: number; daysLeft: number; ahead: number } | null {
   if (count === 0 || count >= goal) return null;
   const year = now.getFullYear();
   // Calendar days, counted in UTC so a clock change never makes a day of 23 or 25 hours.
@@ -61,7 +62,7 @@ export function goalPace(count: number, goal: number, now: Date): { pace: number
   const total = Math.round((Date.UTC(year + 1, 0, 1) - Date.UTC(year, 0, 1)) / DAY);
   const daysLeft = total - gone + 1;
   const left = goal - count;
-  return { pace: Math.round((count / gone) * total), left, perWeek: Math.ceil(left / Math.max(1, daysLeft / 7)), daysLeft };
+  return { pace: Math.round((count / gone) * total), left, perWeek: Math.ceil(left / Math.max(1, daysLeft / 7)), daysLeft, ahead: count - Math.round((goal * gone) / total) };
 }
 
 /** This year's fish against a goal the angler sets, or an offer to set one. */
@@ -97,6 +98,10 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
   };
   // A night session's small hours count on its outing's day, as the calendar and days out do.
   const count = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)).length;
+  // Last year's total, counted the same way: a place to start a goal from.
+  const lastYear = String(Number(year) - 1);
+  const lastYearCount = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)).length;
+  const hintId = useId();
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -130,13 +135,18 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
               setError("");
             }}
             aria-invalid={error ? true : undefined}
-            aria-describedby={error ? errorId : undefined}
+            aria-describedby={[lastYearCount > 0 ? hintId : "", error ? errorId : ""].filter(Boolean).join(" ") || undefined}
           />
         </label>
         <button type="submit">{t("Save goal")}</button>
         <button type="button" className="text-button" onClick={close}>
           {t("Cancel")}
         </button>
+        {lastYearCount > 0 ? (
+          <p className="meta year-goal-hint" id={hintId}>
+            {tn(lastYearCount, "Last year: {n} fish", "Last year: {n} fish")}
+          </p>
+        ) : null}
         {error ? (
           <p className="field-error" role="alert" id={errorId}>
             {error}
@@ -190,7 +200,9 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
       </span>
       {pace ? (
         <p className="meta goal-pace">
-          {t("On pace for {pace} by the year's end", { pace: pace.pace })} · {pace.daysLeft < 7
+          {t("On pace for {pace} by the year's end", { pace: pace.pace })}
+          {/* Against an even spread of the goal over the year, so far. */}
+          {pace.ahead > 0 ? ` · ${tn(pace.ahead, "{n} fish ahead of pace", "{n} fish ahead of pace")}` : pace.ahead < 0 ? ` · ${tn(-pace.ahead, "{n} fish behind pace", "{n} fish behind pace")}` : ""} · {pace.daysLeft < 7
             ? tn(pace.daysLeft, "{left} to go, {n} day left", "{left} to go, {n} days left", { left: pace.left })
             : t("{left} to go, about {week} a week", { left: pace.left, week: pace.perWeek })}
         </p>

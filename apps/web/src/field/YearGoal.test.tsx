@@ -36,7 +36,7 @@ describe("year goal", () => {
 describe("pace toward the goal", () => {
   it("projects the year and spreads what is left over the weeks left", () => {
     // 17 October 2026: day 290 of 365, 76 days (about 11 weeks) left.
-    expect(goalPace(141, 250, new Date(2026, 9, 17, 12))).toEqual({ pace: 177, left: 109, perWeek: 11, daysLeft: 76 });
+    expect(goalPace(141, 250, new Date(2026, 9, 17, 12))).toEqual({ pace: 177, left: 109, perWeek: 11, daysLeft: 76, ahead: -58 });
   });
 
   it("counts the days left in the year's last week", () => {
