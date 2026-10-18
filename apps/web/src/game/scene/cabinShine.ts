@@ -7,7 +7,7 @@ import { CABIN_AT, CABIN_SCALE, CABIN_WALLS, CABIN_YAW } from "./cabinLook";
  * eye to the window's mirror image meets the surface. Pure in time.
  */
 
-type Vec3 = { x: number; y: number; z: number };
+export type Vec3 = { x: number; y: number; z: number };
 
 /** Each window's middle in the world: either side of the door on the cabin's front wall, as Cabin.tsx draws them. */
 export const CABIN_WINDOW_LIGHTS: readonly Vec3[] = [-0.8, 0.8].map((wx) => {
@@ -35,12 +35,17 @@ function unit(n: number) {
   return s - Math.floor(s);
 }
 
-/**
- * The glints of window `w`'s reflection seen from `eye` at `time`: strung along the line toward the
- * eye, swaying a little on the ripples and winking in and out. None when the reflection falls on land.
- */
+/** The glints of window `w`'s reflection seen from `eye` at `time`, as `lightGlints` strings them. */
 export function windowGlints(w: number, eye: Vec3, time: number, still = false): Glint[] {
-  const light = CABIN_WINDOW_LIGHTS[w]!;
+  return lightGlints(CABIN_WINDOW_LIGHTS[w]!, w, eye, time, still);
+}
+
+/**
+ * The glints of a `light`'s reflection seen from `eye` at `time`: strung along the line toward the
+ * eye, swaying a little on the ripples and winking in and out. None when the reflection falls on land.
+ * `w` numbers the light, so each one's glints wink to their own beat.
+ */
+export function lightGlints(light: Vec3, w: number, eye: Vec3, time: number, still = false): Glint[] {
   const at = reflectionPoint(eye, light);
   if (!inLake(at.x, at.z)) return [];
   const dx = eye.x - at.x;

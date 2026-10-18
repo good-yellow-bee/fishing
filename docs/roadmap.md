@@ -1184,6 +1184,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC69~~ | ~~Campers on the far bank: from spring to fall a tent stands west of the cabin, lit from inside by a lantern from dusk; two campers sit out on a log by their campfire in the evening, one toasting a marshmallow; both fire pits now draw in one mesh each~~ (#1164) | scene | S |
 | ~~SC70~~ | ~~Boat wakes: the canoe and the sailing dinghy leave a V of wake behind them, longer and brighter the faster they go, gone when they stop or go about~~ (#1169) | scene | S |
 | ~~SC71~~ | ~~Fall pumpkins: three pumpkins sit under the big tree by the shack in fall, the biggest carved into a jack-o'-lantern whose candle flickers after dark~~ (#1170) | scene | S |
+| ~~SC72~~ | ~~Camp lights on the water: after dark the campers' fire and the lantern in their tent shine on the lake as broken streaks of warm light, as the cabin's windows do~~ (#1172) | scene | S |
+| ~~SC73~~ | ~~News card scene16: lapping waves and wakes, kite flyer, campers, fall pumpkins, winter skier~~ (#1172) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1472,7 +1474,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT281~~ | ~~News card 2026-10-18-game12 covers GT278 to GT280: the windward bank, the chalk board naming it, and lily pad cover~~ (#1123) | ui | S |
 | ~~GT282~~ | ~~A washed-out worm: a worm cast 6 times without landing a fish soaks pale and loses its scent, so bites on it come slower (1.2 wait) and the wait hint says so; the stance chip says "worm washed out" and a Rebait button (or T, or LT) puts a fresh one on; a landed fish, a stolen bait or a break means a fresh worm too, any other lure starts it over, and a beginner is spared~~ (#1135) | gameplay | S |
 | ~~GT283~~ | ~~Water warming or cooling: on a day the lake's water (the field log's water temperature) is 3°F or more warmer than yesterday the fish wake up to feed and bites come sooner (0.9 wait); 3°F or more colder and the sluggish fish bite slower (1.1); the wait hint says so, the chalk board names the day's water temperature, and a beginner is spared the slow side~~ (#1146) | gameplay | S |
-| GT284 | News card 2026-10-18-game13 covers GT282 and GT283: the washed-out worm and the water warming or cooling since yesterday | ui | S |
+| ~~GT284~~ | ~~News card 2026-10-18-game13 covers GT282 and GT283: the washed-out worm and the water warming or cooling since yesterday~~ (#1149) | ui | S |
+| GT285 | A cloud over the sun: on a clear or partly cloudy day, by day, a cloud covers the sun for a quarter of the 45-second spells (the same for everyone); while it does, the fish move up into the shallows, so a cast at the Dock, Reeds, Point or Inlet bites sooner (0.85 wait), the wait hint says so, and the stance chip says "cloud over the sun" there | gameplay | S |
 
 ## Risks / open questions for the owner
 

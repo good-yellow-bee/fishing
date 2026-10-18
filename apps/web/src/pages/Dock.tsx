@@ -63,6 +63,7 @@ import { stormOn } from "../game/scene/storm";
 import { WalkStick } from "../components/WalkStick";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
+import { SHALLOW_BANKS, useCloudOverSun } from "../game/sunCover";
 import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
@@ -169,6 +170,7 @@ export function DockPage() {
   // The field log's wind for the day, as a drift on the sitting float.
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
+  const clouded = useCloudOverSun(sky, hour);
   const storm = stormOn(sky, season, wind.wind);
   const lureNow = useMemo(() => ({ sky, hour, season, wind: wind.wind, moon: moonLight(moon), rising }), [sky, hour, season, wind.wind, moon, rising]);
   const [me, setMe] = useState<Me | null>(null);
@@ -880,6 +882,7 @@ export function DockPage() {
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
+          {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
