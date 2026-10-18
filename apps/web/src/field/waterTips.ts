@@ -1,4 +1,4 @@
-import { biteTimes, catchesForSpot, lakeSeason, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lakeSeason, localDate, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
 import { isSampleOuting } from "./bookCopy";
 import { countedFish, ownFish } from "./milestones";
 
@@ -160,25 +160,30 @@ export function speciesLures(catches: readonly CatchEntry[], species: string, li
 
 /**
  * How the water warmed and cooled through the year of the newest reading, or the year before when the newest has one
- * month so far: the last reading of each month, in order. Empty when neither year has two months.
+ * month so far: the last reading of each month, in order, with the day it counts on. Empty when neither year has two
+ * months. `dayOf` is the day a fish counts on ("2025-12-31" for a New Year's Eve night's small hours), its clock day
+ * unless given.
  */
-export function tempThroughYear(catches: readonly CatchEntry[]): WaterReading[] {
-  const last = lastReading(catches);
-  if (!last) return [];
-  const newest = new Date(last.at).getFullYear();
+export function tempThroughYear(catches: readonly CatchEntry[], dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt))): (WaterReading & { day: string })[] {
+  const read = catches.filter((entry) => {
+    const fahrenheit = entry.weather?.waterTempF;
+    return fahrenheit !== undefined && Number.isFinite(fahrenheit) && !Number.isNaN(Date.parse(entry.caughtAt));
+  });
+  if (read.length === 0) return [];
+  const newest = Math.max(...read.map((entry) => Number(dayOf(entry).slice(0, 4))));
   // Early in a season the newest year may have one month so far: last year's curve says more until it fills in.
-  const inYear = readingsByMonth(catches, newest);
-  return inYear.length >= 2 ? inYear : readingsByMonth(catches, newest - 1);
+  const inYear = readingsByMonth(read, newest, dayOf);
+  return inYear.length >= 2 ? inYear : readingsByMonth(read, newest - 1, dayOf);
 }
 
-function readingsByMonth(catches: readonly CatchEntry[], year: number): WaterReading[] {
-  const byMonth = new Map<number, WaterReading>();
+function readingsByMonth(catches: readonly CatchEntry[], year: number, dayOf: (entry: CatchEntry) => string): (WaterReading & { day: string })[] {
+  const byMonth = new Map<string, WaterReading & { day: string }>();
   for (const entry of catches) {
-    const fahrenheit = entry.weather?.waterTempF;
-    const at = new Date(entry.caughtAt);
-    if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(at.getTime()) || at.getFullYear() !== year) continue;
-    const held = byMonth.get(at.getMonth());
-    if (!held || at.getTime() > Date.parse(held.at)) byMonth.set(at.getMonth(), { fahrenheit, at: entry.caughtAt });
+    const day = dayOf(entry);
+    if (Number(day.slice(0, 4)) !== year) continue;
+    const month = day.slice(5, 7);
+    const held = byMonth.get(month);
+    if (!held || Date.parse(entry.caughtAt) > Date.parse(held.at)) byMonth.set(month, { fahrenheit: entry.weather!.waterTempF!, at: entry.caughtAt, day });
   }
-  return byMonth.size < 2 ? [] : [...byMonth.entries()].sort((a, b) => a[0] - b[0]).map(([, reading]) => reading);
+  return byMonth.size < 2 ? [] : [...byMonth.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([, reading]) => reading);
 }

@@ -1,5 +1,6 @@
 import type { NavigateFunction } from "react-router-dom";
-import { canGoBack, pageBefore } from "./FieldShell";
+import { canGoBack, pageBefore, replaceAfterBack } from "./FieldShell";
+import { readDeletedFish } from "./deletedFish";
 import { savedState, sayAfterBack, type SavedKind } from "./SavedNote";
 
 /** The link state a list's card gives the page it opens, so a delete there can go back to the list. */
@@ -22,7 +23,23 @@ export function leaveDeleted(navigate: NavigateFunction, state: unknown, fallbac
   deletedOn = window.location.pathname + window.location.search;
   landedOn = fromList ? pageBefore() : fallback;
   if (fromList) navigate(-1);
-  else navigate(fallback, { replace: true });
+  else if (canGoBack() && wentWithIt(pageBefore())) {
+    // Opened from one of its own outings or fish, which went with it: Back over that page too, and on to `fallback`, so
+    // Back from there never opens a missing outing or fish.
+    replaceAfterBack(fallback);
+    navigate(-1);
+  } else navigate(fallback, { replace: true });
+}
+
+/** Whether a page is an outing's, a fish's or a water's that is no longer in the book. */
+function wentWithIt(page: string | null): boolean {
+  const id = /^\/(?:trips|catches|spots)\/([^/?#]+)/.exec(page ?? "")?.[1];
+  if (!id || id === "new") return false;
+  try {
+    return readDeletedFish().has(decodeURIComponent(id));
+  } catch {
+    return false;
+  }
 }
 
 /** Whether the delete made from `from` went Back to its list. */

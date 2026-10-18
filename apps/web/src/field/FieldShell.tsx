@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
-import { NavLink, useLocation, useNavigationType } from "react-router-dom";
+import { NavLink, useLocation, useNavigate, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
 import { focusPageHeading } from "./pageFocus";
 import { SavedNote } from "./SavedNote";
@@ -69,6 +69,12 @@ export function canGoBack(): boolean {
   return idx !== null ? idx > 0 : movedInApp;
 }
 
+/** Where a Back about to be taken goes on to, in the place of the page it reaches (one a delete just took). */
+let replaceOnBack: string | null = null;
+export function replaceAfterBack(to: string) {
+  replaceOnBack = to;
+}
+
 export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
@@ -102,6 +108,13 @@ export function FieldShell({ children }: { children: ReactNode }) {
 
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
   const how = useNavigationType();
+  const navigate = useNavigate();
+  useLayoutEffect(() => {
+    if (!replaceOnBack) return;
+    const to = replaceOnBack;
+    replaceOnBack = null;
+    if (how === "POP") navigate(to, { replace: true });
+  }, [key, how, navigate]);
   useLayoutEffect(() => {
     // A link puts the page shown under the new one; a replace keeps what was under; Back and Forward lose track.
     if (how === "PUSH") pageBelow = shownPage || null;

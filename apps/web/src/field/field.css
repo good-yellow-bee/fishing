@@ -717,6 +717,8 @@ button.field-primary {
   font-size: 13px;
   line-height: 1.4;
   color: var(--field-muted);
+  /* A long unbroken water or outing name wraps in the hint rather than widening the form. */
+  overflow-wrap: anywhere;
 }
 
 button.field-primary:disabled {
