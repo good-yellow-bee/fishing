@@ -744,7 +744,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length > 0 && (
             // Month headings only make sense newest first.
-            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : catchMonth} headLevel={2}>
+            <PagedCatches key={`${settled}:${largest}`} items={matches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)} headLevel={2}>
               {(entry) => (
                 <CatchCard
                   key={entry.id}

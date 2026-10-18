@@ -5,11 +5,11 @@ import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
-import { fishCountLabel, formatCatchDay, formatDay, outingNameById } from "./format";
+import { fishCountLabel, formatDay, outingNameById } from "./format";
 import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
-import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
+import { bookFishDay, yearTally } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
@@ -43,7 +43,7 @@ const PHOTOS_SHOWN = 4;
  */
 /** `list` is the list each photo's fish steps through. */
 export function PhotoStrip({ catches, within, named = false, list }: { catches: readonly CatchEntry[]; within: string; named?: boolean; list?: ListKey }) {
-  const { photoFor } = useLogbook();
+  const { photoFor, book } = useLogbook();
   const pictured = catches.filter((entry) => photoFor(entry.id));
   if (pictured.length === 0) return null;
   return (
@@ -62,7 +62,7 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
               <span className="photo-caption">
                 {named ? <strong>{t(entry.species)}</strong> : null}
                 <small>
-                  {measuresText(entry)} · {formatCatchDay(entry.caughtAt)}
+                  {measuresText(entry)} · {formatDay(bookFishDay(book, entry))}
                 </small>
               </span>
             </Link>
@@ -254,7 +254,7 @@ function SpeciesView() {
       </div>
       {/* "Which was my biggest": the same fish, largest first. */}
       {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
-      <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth}>
+      <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)}>
         {(entry) => (
           <CatchCard
             level={4}
@@ -274,10 +274,11 @@ function SpeciesView() {
 /** How the kind's fish spread by length and by weight, each band opening its fish, and how many went back. */
 /** `within` is the page's own search for the kind, so a band opens the fish it counted (the game's lake left out). */
 function SizeSpread({ catches, within }: { catches: readonly CatchEntry[]; within: string }) {
+  const { book } = useLogbook();
   const metric = getUnits() === "metric";
   const released = catches.filter((entry) => entry.released).length;
   const charts = (["length", "weight"] as const)
-    .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric), years: typicalByYear(catches, kind) }))
+    .map((kind) => ({ kind, bands: sizeBands(catches, kind, metric), years: typicalByYear(catches, kind, (entry) => bookFishDay(book, entry)) }))
     .filter((chart) => chart.bands.length > 0)
     .map((chart) => ({ ...chart, change: chart.years.length > 1 ? sizeChange(chart.years[0]!, chart.years[chart.years.length - 1]!) : "" }));
   if (charts.length === 0) return null;
@@ -442,6 +443,7 @@ const PAIRS_SHOWN = 10;
 
 /** The fish of the kind that were both measured and weighed, shortest first: how weight goes with length. */
 function LengthAndWeight({ catches }: { catches: readonly CatchEntry[] }) {
+  const { book } = useLogbook();
   const [all, setAll] = useState(false);
   const pairs = sizePairs(catches);
   if (pairs.length === 0) return null;
@@ -457,7 +459,7 @@ function LengthAndWeight({ catches }: { catches: readonly CatchEntry[] }) {
         {shown.map(({ entry, inches, pounds }) => (
           <li key={entry.id}>
             <Link to={`/catches/${entry.id}`}>{`${lengthText(inches)} · ${weightText(pounds)}`}</Link>
-            <span className="meta">{formatCatchDay(entry.caughtAt)}</span>
+            <span className="meta">{formatDay(bookFishDay(book, entry))}</span>
           </li>
         ))}
       </ol>
@@ -474,6 +476,7 @@ function LengthAndWeight({ catches }: { catches: readonly CatchEntry[] }) {
 
 /** Each fish that beat the best of the kind before it, oldest first, with what it added; shown once the first was ever beaten. */
 function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
+  const { book } = useLogbook();
   const lists = [bestSteps(catches, "length"), bestSteps(catches, "weight")].filter((steps): steps is BestStep[] => steps !== null);
   if (lists.length === 0) return null;
   return (
@@ -492,7 +495,7 @@ function BestGrowth({ catches }: { catches: readonly CatchEntry[] }) {
                 <li key={entry.id}>
                   <Link to={`/catches/${entry.id}`}>{measureText(measure)}</Link>
                   <span className="meta">
-                    {formatCatchDay(entry.caughtAt)}
+                    {formatDay(bookFishDay(book, entry))}
                     {gain && index > 0 ? ` · +${gainText(steps[index - 1]!.measure, measure)}` : ` · ${t("the first")}`}
                   </span>
                 </li>

@@ -1478,8 +1478,13 @@ html:has(.undo-bar) .field-main {
   accent-color: var(--field-rust);
 }
 
+/* Pulled up under the tiles only: after a line of its own (most kinds in a day), a wrapped one would run into it. */
 .released-share {
-  margin: -8px 0 18px;
+  margin: 0 0 18px;
+}
+
+.stat-row + .released-share {
+  margin-top: -8px;
 }
 
 .conditions .eyebrow + p + .eyebrow {

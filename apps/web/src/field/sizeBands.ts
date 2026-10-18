@@ -69,13 +69,20 @@ export function typicalSize(catches: readonly CatchEntry[], kind: Measure["kind"
   return kind === "length" ? { kind, inches: value } : { kind, pounds: value };
 }
 
-/** The typical size in each year with enough fish measured that way, oldest year first: whether they run bigger. */
-export function typicalByYear(catches: readonly CatchEntry[], kind: Measure["kind"]): { year: string; size: Measure }[] {
+/**
+ * The typical size in each year with enough fish measured that way, oldest year first: whether they run bigger.
+ * `dayOf` names a fish's day (yyyy-mm-dd), so a fish landed past midnight on New Year's night counts in its outing's year.
+ */
+export function typicalByYear(
+  catches: readonly CatchEntry[],
+  kind: Measure["kind"],
+  dayOf?: (entry: CatchEntry) => string,
+): { year: string; size: Measure }[] {
   const years = new Map<string, CatchEntry[]>();
   for (const entry of catches) {
     const at = new Date(entry.caughtAt);
     if (Number.isNaN(at.getTime())) continue;
-    const year = String(at.getFullYear());
+    const year = dayOf ? dayOf(entry).slice(0, 4) : String(at.getFullYear());
     years.set(year, [...(years.get(year) ?? []), entry]);
   }
   return [...years.entries()]

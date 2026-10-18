@@ -25,7 +25,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
-import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
+import { bookFishDay, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
 import { notYetThisYear } from "./bests/notYet";
@@ -483,7 +483,7 @@ function SpotView() {
         <>
           {/* "Which was my biggest here": the same fish, largest first. */}
           {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
-          <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth}>
+          <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : (entry) => bookFishDay(book, entry).slice(0, 7)}>
             {(entry) => (
               <CatchCard
                 level={4}

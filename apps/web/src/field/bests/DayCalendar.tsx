@@ -126,8 +126,8 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
                 const day = `${month}-${String(index + 1).padStart(2, "0")}`;
                 const mark = marks.get(day);
                 if (mark && mark.fish > 0) {
-                  // A day whose fish include some from after midnight opens their outing, since a search by day
-                  // would miss those; several outings' fish fall back to the day's search.
+                  // A day whose fish include some from after midnight opens their outing when it holds just those;
+                  // otherwise the day's search, which files the small hours on their outing's day as this count does.
                   const label = `${dayName(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}${day === today ? " day-today" : ""}`}>
