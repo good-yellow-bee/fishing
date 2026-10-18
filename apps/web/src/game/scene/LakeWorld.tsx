@@ -60,6 +60,8 @@ import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
+import { LanternMinnows } from "./LanternMinnows";
+import { minnowsOut } from "./minnowSwirl";
 import { Loon } from "./Loon";
 import { loonOut } from "./loonMotion";
 import { Bats } from "./Bats";
@@ -2021,6 +2023,7 @@ export const LakeWorld = memo(function LakeWorld({
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
+      {minnowsOut(hour) && <LanternMinnows />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
       {hotspot && ternsOut(hour, sky, season) && <Terns center={hotspot} />}
     </SeasonContext.Provider>

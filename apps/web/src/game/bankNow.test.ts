@@ -12,6 +12,8 @@ describe("bankSuitsNow", () => {
     ["dropoff", { season: "summer" }, true],
     ["dropoff", { season: "summer", hour: "dusk" }, false],
     ["dock", { season: "summer", sky: "clear" }, true],
+    ["dock", { hour: "night" }, true],
+    ["dock", { hour: "dusk" }, false],
     ["point", { wind: "strong" }, true],
     ["inlet", { sky: "rain" }, true],
     ["open", { season: "summer", sky: "clear" }, false],
