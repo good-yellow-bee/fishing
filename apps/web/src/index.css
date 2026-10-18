@@ -3110,6 +3110,47 @@ html[data-reduce-motion="1"] .hour-veil {
   gap: 8px;
 }
 
+/* "Najcięższa" in its spaced capitals was wider than a third of a phone-width card and ran into the next box. */
+@media (max-width: 520px) {
+  .trip-recap-stats dt {
+    letter-spacing: 0.04em;
+  }
+
+  /* With larger text the three boxes become rows, each label beside its number. */
+  html[data-text-size] .trip-recap-stats {
+    grid-template-columns: 1fr;
+  }
+
+  html[data-text-size] .trip-recap-stats div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 10px;
+  }
+
+  html[data-text-size] .trip-recap-stats dd {
+    margin: 0;
+  }
+}
+
+/* The same rows on the narrowest phones, where even the tighter label does not fit a third of the card. */
+@media (max-width: 360px) {
+  .trip-recap-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .trip-recap-stats div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 10px;
+  }
+
+  .trip-recap-stats dd {
+    margin: 0;
+  }
+}
+
 /* High contrast from Settings: solid panels with bright borders, and no dimmed text, so words never sit on a see-through lake. */
 html[data-contrast="high"] {
   --paper: #fbf3e2;
