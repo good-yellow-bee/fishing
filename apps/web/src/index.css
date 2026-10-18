@@ -2316,6 +2316,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     display: none;
   }
 
+  /* The angler's name has gone above, so with larger text only the wordmark held a row of its own and the header wrapped to four, a third of the screen. */
+  html[data-text-size] .hud-brand {
+    display: none;
+  }
+
   .hud-brand {
     justify-content: space-between;
   }
