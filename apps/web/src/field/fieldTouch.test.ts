@@ -96,3 +96,10 @@ describe("a fish's page on a touch screen", () => {
     expect(/\n  \.trip-again \+ \.trip-link \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 18px;");
   });
 });
+
+describe("a list's Show all on a touch screen", () => {
+  it("stands far enough below the last row that its reach leaves that row's link alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect(/\n  p\.tally-more \{([^}]*)\}/.exec(touch)?.[1]).toContain("margin-top: 12px;");
+  });
+});
