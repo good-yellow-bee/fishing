@@ -30,11 +30,12 @@ import { t, useLang } from "../i18n";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { keepBookStorage } from "./keepStorage";
 import { bookLine, localizeSample } from "./sampleText";
-import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, openStoredLogbook, readStoredLogbook, saveLogbook, setAsideCatchIds } from "./storage";
+import { LOGBOOK_STORAGE_KEY, STORAGE_FULL, isStorageFull, openStoredLogbook, readStoredLogbook, saveLogbook, setAsideCatchIds, unreadableHeldOnly } from "./storage";
 import { forgetDeletedFish, noteDeletedFish } from "./deletedFish";
+import { forgetRemovedPhotos, noteRemovedPhotos } from "./removedPhotos";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { noteText, toLocalInput } from "./format";
-import { bringBackClearedCopy, withoutSample } from "./bookCopy";
+import { bringBackClearedCopy, isSampleCatch, isSampleSpot, isSampleTrip, withoutSample } from "./bookCopy";
 
 type SaveResult = { ok: true; id: string } | { ok: false; message: string; field?: string };
 
@@ -104,6 +105,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
     const stored = opening.book;
     if (stored) return stored;
     const seeded = sampleLogbook(new Date());
+    // An unreadable book with no room to set it aside stays stored as it was until it is downloaded or replaced.
+    if (opening.unreadable && unreadableHeldOnly()) return seeded;
     try {
       saveLogbook(seeded);
     } catch {
@@ -213,10 +216,12 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
       // and so is a removed sample week, so adding an older copy doesn't bring it back.
-      if (kind !== "sample" && kind !== "blank" && kind !== "file") {
-        // Waters and outings too, so adding from an older file doesn't bring them back either.
+      if (kind !== "sample" && kind !== "file") {
+        // Waters and outings too, so adding from an older file doesn't bring them back either. A blank start keeps
+        // just the sample week out: the angler's own fish it clears can still come back from a copy.
         const kept = new Set([...next.catches, ...next.spots, ...next.trips].map((each) => each.id));
-        noteDeletedFish([...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id));
+        const gone = [...book.catches, ...book.spots, ...book.trips].filter((each) => !kept.has(each.id)).map((each) => each.id);
+        noteDeletedFish(kind === "blank" ? gone.filter((id) => isSampleCatch(id) || isSampleSpot(id) || isSampleTrip(id)) : gone);
       }
       setUndo(before);
       return true;
@@ -289,6 +294,10 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         }
         const saved = persist(replaceCatch(book, { ...parsed.value, id }), nextPhotos);
         if (!saved.ok) return saved;
+        if (nextPhotos !== photos) {
+          if (nextPhotos[id] === undefined) noteRemovedPhotos([id]);
+          else forgetRemovedPhotos([id]);
+        }
         return { ok: true, id };
       },
       updateSpot: (id, draft) => {
@@ -346,6 +355,8 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
       removePhotos: (ids) => {
         const result = persist(book, ids.reduce(withoutCatchPhoto, photos));
         setSaveError(result.ok ? null : result.message);
+        // Removed on purpose: adding from an older copy leaves them out.
+        if (result.ok) noteRemovedPhotos(ids);
         return result.ok;
       },
       // The sample takes the whole book's place, so it can be undone like a delete.

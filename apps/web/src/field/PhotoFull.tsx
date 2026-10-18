@@ -14,7 +14,8 @@ export function photoFileName(src: string, name: string): string {
 }
 
 /** A fish's photo on its page, opening full size over the page on a tap; Escape or Close puts it away. */
-export function PhotoFull({ src, alt, name }: { src: string; alt: string; name: string }) {
+/** `caption` says under the full-size picture what fish it is, as its page heads it. */
+export function PhotoFull({ src, alt, name, caption }: { src: string; alt: string; name: string; caption?: string }) {
   useT();
   const dialog = useRef<HTMLDialogElement>(null);
   const fileName = photoFileName(src, name);
@@ -51,6 +52,7 @@ export function PhotoFull({ src, alt, name }: { src: string; alt: string; name: 
         }}
       >
         <img src={src} alt={alt} />
+        {caption ? <p className="photo-full-caption">{caption}</p> : null}
         <div className="photo-full-bar">
           <a className="text-button" href={src} download={fileName}>
             {t("Save photo")}

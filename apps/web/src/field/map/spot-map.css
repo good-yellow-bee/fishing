@@ -316,6 +316,21 @@
   font: inherit;
 }
 
+/* On a touch screen the small links reach past their words into the row's padding, so a thumb finds them. */
+@media (pointer: coarse) {
+  .map-index a.map-plan,
+  .map-index a.map-coord-link {
+    position: relative;
+  }
+
+  .map-index a.map-plan::after,
+  .map-index a.map-coord-link::after {
+    content: "";
+    position: absolute;
+    inset: -8px -4px;
+  }
+}
+
 .map-note {
   margin: 14px 0 0;
   color: var(--field-muted);

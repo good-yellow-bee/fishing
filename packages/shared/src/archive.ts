@@ -171,10 +171,11 @@ export function newFishIn(here: Logbook, file: Logbook): CatchEntry[] {
  * a water or outing deleted here comes back only when a new fish needs it.
  * Given `deletedHere`, the ids deleted in this book, the file's other waters and outings come along too (a water added
  * or an outing planned on another device), unless deleted here; without it, only what the new fish need.
- * A photo for a fish both books have joins when this book has none for it.
+ * A photo for a fish both books have joins when this book has none for it, unless `photosRemovedHere` says it was
+ * taken off here.
  * The file's photos join only while they fit the room kept for photos, so the book can still be downloaded and loaded again.
  */
-export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, deletedHere?: ReadonlySet<string>): FieldArchive {
+export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, deletedHere?: ReadonlySet<string>, photosRemovedHere?: ReadonlySet<string>): FieldArchive {
   const added = newFishIn(here.book, file.book);
   const spotIds = new Set(here.book.spots.map((spot) => spot.id));
   const tripIds = new Set(here.book.trips.map((trip) => trip.id));
@@ -191,7 +192,8 @@ export function mergeFieldArchive(here: FieldArchive, file: FieldArchive, delete
   const shared = here.book.catches.filter((entry) => here.photos[entry.id] === undefined && file.photos[entry.id] !== undefined);
   for (const entry of [...added, ...shared]) {
     const photo = file.photos[entry.id];
-    if (photo === undefined) continue;
+    // A photo taken off a fish here on purpose stays off.
+    if (photo === undefined || photosRemovedHere?.has(entry.id)) continue;
     const grows = JSON.stringify(entry.id).length + JSON.stringify(photo).length + 2;
     if (size + grows > CATCH_PHOTO_STORE_MAX_CHARS) continue;
     photos[entry.id] = photo;

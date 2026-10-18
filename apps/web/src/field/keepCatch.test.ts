@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PHOTO_STORAGE_KEY, readStoredPhotos, savePhotos } from "./photoStore";
 import { AUTO_PHOTO_STORAGE_KEY, markReleasedInBook, noteSnapshots, saveLandedCatch, saveLandedPhoto, snapshotsIn } from "./keepCatch";
-import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, readStoredLogbook, saveLogbook, setAsideCatchIds, storedBookUnreadable } from "./storage";
+import { LOGBOOK_STORAGE_KEY, UNREADABLE_BOOK_KEY, forgetUnreadableBook, readStoredLogbook, readUnreadableBook, saveLogbook, setAsideCatchIds, storedBookUnreadable, unreadableHeldOnly } from "./storage";
 import { CATCH_PHOTO_BOOK_HEADROOM_CHARS, CATCH_PHOTO_QUOTA_CHARS, CATCH_PHOTO_STORE_MAX_CHARS, sampleLogbook } from "@stillwater/shared";
 
 function memoryStorage() {
@@ -193,6 +193,23 @@ describe("a stored book that can't be read", () => {
     localStorage.setItem(LOGBOOK_STORAGE_KEY, "[]");
     readStoredLogbook();
     expect(localStorage.getItem(UNREADABLE_BOOK_KEY)).toBe("{not json");
+  });
+
+  it("leaves a damaged book where it is when there is no room to set it aside", () => {
+    const good = sampleLogbook(new Date(2026, 9, 15)).catches[0]!;
+    const broken = JSON.stringify({ spots: [], trips: [], catches: [good, { id: "x", pounds: null }] });
+    localStorage.setItem(LOGBOOK_STORAGE_KEY, broken);
+    const setItem = localStorage.setItem;
+    localStorage.setItem = (key: string, value: string) => {
+      if (key === UNREADABLE_BOOK_KEY) throw new Error("full");
+      setItem(key, value);
+    };
+    readStoredLogbook();
+    expect(localStorage.getItem(LOGBOOK_STORAGE_KEY)).toBe(broken);
+    expect(readUnreadableBook()).toBe(broken);
+    expect(unreadableHeldOnly()).toBe(true);
+    forgetUnreadableBook();
+    expect(readUnreadableBook()).toBeNull();
   });
 });
 

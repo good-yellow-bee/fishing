@@ -1378,6 +1378,53 @@ html[data-input="pad"] .fight-bar .on-pad {
   background: #d9a94ecc;
 }
 
+/* A high contrast theme (Windows) drops background colours, which emptied the cast and fight bars and the strike timer: draw them in the theme's own colours. */
+@media (forced-colors: active) {
+  .bar,
+  .strike-cue i,
+  .strike-cue .cue-bar b {
+    forced-color-adjust: none;
+  }
+
+  .bar,
+  .power-meter .bar {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+
+  .bar .zone {
+    background: GrayText;
+  }
+
+  .bar .perfect,
+  .bar .fill {
+    background-color: Highlight !important;
+  }
+
+  .bar .marker,
+  .fight-bar .tick,
+  .strike-cue .cue-bar b {
+    background: CanvasText;
+  }
+
+  .bar .last-cast {
+    background: repeating-linear-gradient(to bottom, CanvasText 0 3px, transparent 3px 5px);
+  }
+
+  .fight-bar .danger-zone {
+    background: repeating-linear-gradient(-45deg, GrayText 0 3px, transparent 3px 7px);
+  }
+
+  .fight-bar .overrun {
+    background: repeating-linear-gradient(-45deg, CanvasText 0 3px, transparent 3px 7px);
+  }
+
+  .fight-bar .peak,
+  .fight-bar .peak[data-zone="red"] {
+    border-top-color: CanvasText;
+  }
+}
+
 .landed-card,
 .toast {
   position: absolute;
