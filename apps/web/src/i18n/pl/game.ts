@@ -620,10 +620,10 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a tablet or a narrow laptop window with larger text, the field log keeps everything on the page: Home's cards and columns stack instead of squeezing words one letter a line, and Spots shows one card a row. The side menu now reaches Gear and Bests on a short window, and a full-size photo fits the screen with Close in reach.":
+    "Na tablecie lub wąskim oknie laptopa przy większym tekście dziennik połowów mieści wszystko na stronie: karty i kolumny na Starcie układają się jedna pod drugą, zamiast ściskać słowa po literze w wierszu, a Łowiska pokazują jedną kartę w rzędzie. Boczne menu sięga teraz Sprzętu i Rekordów w niskim oknie, a zdjęcie w pełnym rozmiarze mieści się na ekranie razem z przyciskiem Zamknij.",
   "On a touch tablet the walking stick no longer covers \"Lately on the lake\": the feed now sits beside it, and the stick keeps its size with larger text, so it stays clear of the lure panel. While the first-cast guide shows on a laptop or tablet, the bank name beside it stops short of the guide instead of running under it.":
     "Na tablecie dotykowym drążek chodzenia nie zasłania już „Ostatnio na jeziorze”: ta lista stoi teraz obok niego, a sam drążek przy większym tekście zachowuje swój rozmiar, więc nie wchodzi na panel przynęty. Gdy na laptopie lub tablecie widać przewodnik pierwszego rzutu, nazwa brzegu obok kończy się przed nim, zamiast chować się pod spodem.",
-  "On a phone held sideways the fight card now stays under the top bar and clear of the Reel button, even with the largest text, and the shack and Settings give their lists more room. The notice that effects went to Lite now waits until the fight is over instead of covering the tension bar.":
-    "Na telefonie trzymanym poziomo karta holu mieści się teraz pod górnym paskiem i nie zasłania jej przycisk Zwijaj, nawet przy największym tekście, a szopa i Ustawienia dają swoim listom więcej miejsca. Komunikat o przełączeniu efektów na lekkie czeka teraz do końca holu, zamiast zasłaniać pasek napięcia.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -730,8 +730,6 @@ export const PL_GAME: PlBook = {
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.": "Strona łowiska otwiera ostatnią wyprawę z jej wynikiem i kopiuje współrzędne do echosondy; karty łowisk podają najlepszą przynętę, a długie listy łowisk zaczynają się od ostatnio łowionych.",
   "A kind's page says when its next round number is a few fish away (3 more to 25 of this kind), and its biggest of this year beside the all-time record.": "Strona gatunku mówi, gdy do kolejnej okrągłej liczby brakuje kilku ryb (jeszcze 3 do 25 tego gatunku), i pokazuje największe z tego roku obok rekordu wszech czasów.",
   "A search with fish of several kinds or years splits them “By kind” and “By year”, each a tap to narrow it, and a season's best day on Bests opens its fish.": "Wyszukiwanie z rybami kilku gatunków lub lat dzieli je „Według gatunku” i „Według roku”, a każdy wpis zawęża je jednym dotknięciem; najlepszy dzień sezonu w Rekordach otwiera jego ryby.",
-  "Gear's lure record can pack its best lures for your next outing in one go.": "Rekord przynęt w Sprzęcie pakuje najlepsze przynęty na następną wyprawę jednym przyciskiem.",
-  "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.": "Arkusz z własnymi łowiskami ma podziałkę, każde łowisko na Mapie podaje przynętę, na którą wzięło najwięcej ryb, a strona przykładowego łowiska prowadzi do jego miejsca na Mapie.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",

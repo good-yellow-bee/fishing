@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene21";
+export const NEWS_ID = "2026-10-18-pa20";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a tablet or a narrow laptop window with larger text, the field log keeps everything on the page: Home's cards and columns stack instead of squeezing words one letter a line, and Spots shows one card a row. The side menu now reaches Gear and Bests on a short window, and a full-size photo fits the screen with Close in reach.",
   "At dusk and at night an angler sits out on the far bank with a glowing float on the water, their headlamp's beam following where they look. On calm days a child skims stones from the water's edge, a ring spreading at every skip. In spring a birdwatcher scans the lake through binoculars from the far bank, and on winter days a jogger in a bobble hat runs the shore below the ski track.",
   "Past outings' bags opened on Gear stay open when you come Back from an outing, and \"Fold all\" closes them in one tap.",
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.",
@@ -15,11 +16,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "A search with fish of several kinds or years splits them “By kind” and “By year”, each a tap to narrow it, and a season's best day on Bests opens its fish.",
   "On fall and winter days someone splits firewood beside the far cabin, and on calm dawns a sculler rows a racing shell along the far half of the lake. The dog walker now comes out in the rain too, under an umbrella, and on windy days the rain and snow slant down the wind.",
   "On a touch tablet the walking stick no longer covers \"Lately on the lake\": the feed now sits beside it, and the stick keeps its size with larger text, so it stays clear of the lure panel. While the first-cast guide shows on a laptop or tablet, the bank name beside it stops short of the guide instead of running under it.",
-  "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.",
-  "Gear's lure record can pack its best lures for your next outing in one go.",
-  "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.",
-  "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.",
-  "On a phone held sideways the fight card now stays under the top bar and clear of the Reel button, even with the largest text, and the shack and Settings give their lists more room. The notice that effects went to Lite now waits until the fight is over instead of covering the tension bar.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
