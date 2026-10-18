@@ -68,11 +68,31 @@ export function PhotosPage() {
       },
       { replace: true },
     );
+  // One water at a time too, kept in the address beside the kind.
+  const water = params.get("water");
+  const setWater = (next: string | null) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next) out.set("water", next);
+        else out.delete("water");
+        return out;
+      },
+      { replace: true },
+    );
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
   // A kind picked that has since lost its last photo shows them all again.
   const picked = kind && kinds.some((row) => row.species.trim().toLowerCase() === kind) ? kind : null;
-  const all = picked ? pictured.filter((entry) => entry.species.trim().toLowerCase() === picked) : pictured;
+  const ofKind = picked ? pictured.filter((entry) => entry.species.trim().toLowerCase() === picked) : pictured;
+  // The waters with photos, most pictured first; a water picked that has none left shows them all again.
+  const perWater = new Map<string, number>();
+  for (const entry of pictured) perWater.set(entry.spotId, (perWater.get(entry.spotId) ?? 0) + 1);
+  const waters = [...perWater]
+    .map(([id, count]) => ({ id, name: spotById(book, id)?.name ?? t("Unknown water"), count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  const pickedWater = water && waters.some((row) => row.id === water) ? water : null;
+  const all = pickedWater ? ofKind.filter((entry) => entry.spotId === pickedWater) : ofKind;
   const { visible, more } = catchPage(all, shown);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
 
@@ -114,7 +134,21 @@ export function PhotosPage() {
           ))}
         </p>
       ) : null}
-      {all.length === 0 ? (
+      {waters.length > 1 ? (
+        <p className="bests-scope photo-kinds" role="group" aria-label={t("Which waters")}>
+          <button type="button" className="text-button" aria-pressed={!pickedWater} onClick={() => setWater(null)}>
+            {t("All waters")}
+          </button>
+          {waters.map((row) => (
+            <button key={row.id} type="button" className="text-button" aria-pressed={pickedWater === row.id} onClick={() => setWater(row.id)}>
+              {row.name} ({row.count})
+            </button>
+          ))}
+        </p>
+      ) : null}
+      {all.length === 0 && pictured.length > 0 ? (
+        <p className="empty">{t("No photos of this kind from this water.")}</p>
+      ) : all.length === 0 ? (
         <p className="empty">{t("No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.")}</p>
       ) : (
         <div ref={box} className="paged-list">

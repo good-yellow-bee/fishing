@@ -416,6 +416,18 @@ export function HomePage() {
         </section>
       </div>
 
+      {/* The news again, after Got it here or on the dock. */}
+      {news ? null : (
+        <p className="meta">
+          <button type="button" className="text-button" onClick={() => {
+              setNews(true);
+              // The card opens at the top of the page: the heading above it is where reading starts again.
+              heading.current?.focus();
+            }}>
+            {t("What's new")}
+          </button>
+        </p>
+      )}
       <BookFile onSetAsideGone={() => setSetAside(false)} />
       <ThemeChoice />
     </div>
