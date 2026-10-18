@@ -137,6 +137,7 @@ import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
 import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, lilyPads, type Bloom } from "./lilyBloom";
 import { sharedLilyPetals } from "./lilyPetals";
+import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
 import { leavesOut, petalsOut } from "./leafFall";
@@ -511,14 +512,8 @@ const NEAR_GRASS: Scatter[] = [
   { url: MODELS.bushLarge, position: [2.1, -0.02, 16.6], scale: 1.35, rot: 3.2 },
 ];
 
-const LILIES: Lily[] = [
-  { url: MODELS.lilyLarge, position: [-8.4, 0.04, 5.5], scale: 1.35 },
-  { url: MODELS.lilySmall, position: [-6.8, 0.04, 4.8], scale: 1.5 },
-  { url: MODELS.lilyLarge, position: [7.8, 0.04, -8.4], scale: 1.2 },
-  { url: MODELS.lilySmall, position: [9.1, 0.04, -7.7], scale: 1.4 },
-  { url: MODELS.lilySmall, position: [-12.2, 0.04, -4.1], scale: 1.2 },
-  { url: MODELS.lilyLarge, position: [-10.6, 0.04, -6.8], scale: 1.15 },
-];
+// The pads' places are shared with the casts that land tight to them (lilyCover.ts).
+const LILIES: Lily[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
 
 const BOATS: BoatProps[] = [
   { url: MODELS.canoe, position: [-8.5, 0.08, -5], heading: 0.72, delay: 0.2, scale: 2.6 },

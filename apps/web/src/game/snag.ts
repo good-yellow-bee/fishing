@@ -1,6 +1,7 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, lureClass, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { SHORE_ICE_WIDTH, shoreIce } from "./scene/seasonLook";
 import { waterDepth } from "./scene/water";
+import { LILY_SNAG_ODDS, tightToPads } from "./lilyCover";
 
 /** Share of casts into the reed shallows that snag on the weed. */
 export const SNAG_ODDS = 0.3;
@@ -28,12 +29,13 @@ export function onRocks(spot: SpotId, x: number, z: number) {
   return spot === "point" && waterDepth(x, z) <= ROCK_DEPTH;
 }
 
-/** What this cast snags on, if anything: the reeds' weed or the point's rocks, never on a new angler's easy first fish.
- * A topwater lure rides over the weed, and a crankbait's lip bumps it off the rocks, so each slips its own cover. */
-export function castSnags(spot: SpotId, x: number, z: number, mercy: boolean, roll: number, lure?: string): SnagCover | null {
+/** What this cast snags on, if anything: the reeds' weed, the lily pads' stems or the point's rocks, never on a new angler's easy first fish.
+ * A topwater lure rides over the weed and the pads, and a crankbait's lip bumps it off the rocks, so each slips its own cover. */
+export function castSnags(spot: SpotId, x: number, z: number, mercy: boolean, roll: number, lure?: string, season?: LakeSeason): SnagCover | null {
   if (mercy) return null;
   const kind = lure?.trim() ? lureClass(lure).id : null;
   if (inWeeds(spot, x, z) && roll < SNAG_ODDS && kind !== "popper") return "weed";
+  if (tightToPads(season, x, z) && roll < LILY_SNAG_ODDS && kind !== "popper") return "weed";
   if (onRocks(spot, x, z) && roll < ROCK_SNAG_ODDS && kind !== "crank") return "rocks";
   return null;
 }

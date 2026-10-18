@@ -1809,6 +1809,24 @@ describe("level unlock integration", () => {
     expect(hint()).toContain("The wind drives the baitfish onto the point, and the hunters follow them in.");
   });
 
+  it("says a cast tight to the lily pads lands where the bass and pike wait, but not once the pads die back in winter", () => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Popper", undefined, undefined, "summer");
+    surface.dataset.stance = "point";
+    surface.dataset.angler = "-5.6,12.2";
+    surface.dataset.aim = "-6.8,4.8";
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Tight to the lily pads, where the bass and pike wait in ambush\. /);
+    act(() => root!.unmount());
+    container!.remove();
+    const winter = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Popper", undefined, undefined, "winter");
+    winter.dataset.stance = "point";
+    winter.dataset.angler = "-5.6,12.2";
+    winter.dataset.aim = "-6.8,4.8";
+    cast(winter);
+    expect(hint()).not.toContain("lily pads");
+  });
+
   it("says the breeze pushes the food onto a bank it blows onto", () => {
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, "light-north");
     cast(surface);
