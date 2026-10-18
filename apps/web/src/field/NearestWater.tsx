@@ -4,7 +4,7 @@ import { getUnits, num, t, type Units } from "../i18n";
 import { nearestWater } from "./spotOrder";
 
 /** "1.2 km" or "0.7 mi", in the player's units. */
-function distanceText(km: number, units: Units): string {
+export function distanceText(km: number, units: Units): string {
   const value = units === "metric" ? km : km / 1.609344;
   return `${num(value, value < 10 ? 1 : 0)} ${units === "metric" ? "km" : "mi"}`;
 }

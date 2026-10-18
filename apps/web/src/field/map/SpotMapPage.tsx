@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
 import { getUnits, t, tn, useT } from "../../i18n";
@@ -35,7 +35,8 @@ import {
 import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
 import { hasSampleWaters, upcomingRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
-import { daysBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
+import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
+import { distanceText } from "../NearestWater";
 import { countedFish } from "../milestones";
 import { focusPageHeading } from "../pageFocus";
 import "./spot-map.css";
@@ -274,10 +275,18 @@ export function SpotMapPage() {
   useT();
   // A first visit loads the page after the shell has moved focus, so it landed on the page itself; Back from a water's
   // form leaves it nowhere. Either way, on to the heading.
+  const { hash } = useLocation();
   useEffect(() => {
+    // Sent here for one water ("See it on the Map"): its row in the list, in view and focused.
+    const row = hash.startsWith("#water-") ? document.getElementById(hash.slice(1)) : null;
+    if (row) {
+      row.scrollIntoView({ block: "center" });
+      row.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
+      return;
+    }
     const active = document.activeElement;
     if (!active || active === document.body || active.matches(".field-main")) focusPageHeading({ preventScroll: true });
-  }, []);
+  }, [hash]);
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
   // Not the game's lake: it has no place on a real map.
   // Ordered by the angler's own fish, as the Waters page is, so a sample week dated later doesn't put its waters on top.
@@ -373,19 +382,27 @@ export function SpotMapPage() {
           <OwnSheet pinned={ownPinned} fishOf={fishOf} />
           {plotted.length === 0 ? <MapKey /> : null}
           <ul className="map-index">
-            {ownPinned.map(({ spot, place }) => (
-              <li key={spot.id}>
-                <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
-                <span>{t(WATER_LABELS[spot.waterType])}</span>
-                <span>{fishLine(spot.id)}</span>
-                <span>
-                  <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
-                    {formatCoord(place.lat, place.lng)}
-                  </MapAnchor>
-                </span>
-                <PlanHere spot={spot} />
-              </li>
-            ))}
+            {ownPinned.map(({ spot, place }) => {
+              // How far the nearest of the angler's other pinned waters is: which swims are a walk apart.
+              const nearest = ownPinned
+                .filter((other) => other.spot.id !== spot.id)
+                .map((other) => ({ name: other.spot.name, km: kmBetween(place, other.place) }))
+                .sort((a, b) => a.km - b.km)[0];
+              return (
+                <li key={spot.id} id={`water-${spot.id}`} className={hash === `#water-${spot.id}` ? "map-row-picked" : undefined}>
+                  <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                  <span>{t(WATER_LABELS[spot.waterType])}</span>
+                  <span>{fishLine(spot.id)}</span>
+                  <span>
+                    <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
+                      {formatCoord(place.lat, place.lng)}
+                    </MapAnchor>
+                  </span>
+                  {nearest ? <span className="map-nearest">{t("{distance} from {water}", { distance: distanceText(nearest.km, getUnits()), water: nearest.name })}</span> : null}
+                  <PlanHere spot={spot} />
+                </li>
+              );
+            })}
           </ul>
         </>
       ) : null}
