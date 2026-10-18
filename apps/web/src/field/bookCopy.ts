@@ -63,6 +63,12 @@ export function upcomingRealTrips(book: Logbook, today: string) {
   return isSampleOnly(book) ? ahead : ahead.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id));
 }
 
+/** The outings still to start, for "Next outing": today's once it has a fish is under way, not ahead. */
+export function nextRealTrips(book: Logbook, today: string) {
+  const fished = new Set(book.catches.map((entry) => entry.tripId));
+  return upcomingRealTrips(book, today).filter((trip) => trip.date > today || !fished.has(trip.id));
+}
+
 /** Whether taking the sample week out would take anything: a fish, an outing or a water of it with none of the player's own. */
 export function hasSampleLeft(book: Logbook) {
   const left = withoutSample(book);

@@ -65,6 +65,7 @@ import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
 import { isSampleCatch, isSampleSpot } from "./bookCopy";
+import { addedWater, forgetAddedWater } from "./addedWater";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
 import { likelyWater, nearestWater } from "./spotOrder";
@@ -268,12 +269,14 @@ function CatchForm() {
   const existing = catchId ? book.catches.find((row) => row.id === catchId) : undefined;
   // Never the game's lake or one of its days for a new fish: those are landed by playing.
   const linkedTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
-  const presetTrip = linkedTrip && linkedTrip.spotId !== PLAY_LAKE_ID ? linkedTrip : undefined;
+  // A water just added from this form's "Add the one you fished": the fish goes there, whatever the link first named.
+  const [justAdded] = useState(() => (!existing && book.spots.some((spot) => spot.id === addedWater() && spot.id !== PLAY_LAKE_ID) ? addedWater() : null));
+  const presetTrip = !justAdded && linkedTrip && linkedTrip.spotId !== PLAY_LAKE_ID ? linkedTrip : undefined;
   const cancelSpot = existing ? null : book.spots.find((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)?.id ?? null;
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
   const linkedSpot = params.get("spot") !== PLAY_LAKE_ID && book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
   // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
-  const [presetSpot] = useState(() => existing?.spotId ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date()), new Date().getHours() < LATE_NIGHT_UNTIL));
+  const [presetSpot] = useState(() => existing?.spotId ?? justAdded ?? presetTrip?.spotId ?? linkedSpot ?? likelyWater(book, localDate(new Date()), new Date().getHours() < LATE_NIGHT_UNTIL));
 
   const asked = params.get("kind");
   const [species, setSpecies] = useState(existing ? t(existing.species) : t(params.get("species") ?? ""));
@@ -500,9 +503,11 @@ function CatchForm() {
     focusSoon('input[name="species"]');
   };
   // From Home's "Pick it up": the fish comes back at once, not after the same question again.
+  // Back from adding the water it was caught on, likewise: the water form moved the fish typed here onto it.
   const resumed = useRef(false);
   useEffect(() => {
-    if (resumed.current || existing || !waiting || !params.has(RESUME_PARAM)) return;
+    forgetAddedWater();
+    if (resumed.current || existing || !waiting || !(params.has(RESUME_PARAM) || justAdded)) return;
     resumed.current = true;
     pickUp(waiting);
   });

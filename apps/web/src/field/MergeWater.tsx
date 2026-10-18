@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { t, tn, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
 import { mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
@@ -20,6 +20,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
   const tackle = useTackleIfAny();
   useT();
   const navigate = useNavigate();
+  const location = useLocation();
   // The sample week's waters are made up: merged either way, their fish would count as the angler's or theirs would sit on a made-up place.
   const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => a.name.localeCompare(b.name));
   const [params] = useSearchParams();
@@ -30,11 +31,17 @@ export function MergeWater({ spotId }: { spotId: string }) {
   // Sent here to merge (from a book file that added this water twice): the box comes into view, open, with focus on it.
   useEffect(() => {
     if (!asked || !box.current) return;
+    // A link on this same page ("Merge them") changes the address without drawing the box anew: pick the water it names.
+    if (others.some((spot) => spot.id === asked)) setInto(asked);
     box.current.open = true;
     box.current.scrollIntoView({ block: "center" });
     setTimeout(() => select.current?.focus(), 0);
   }, [asked]);
   if (others.length === 0 || spotId === PLAY_LAKE_ID || isSampleSpot(spotId)) return null;
+  // Two waters of one name read alike in the list: each says how many fish it holds, to tell them apart.
+  const names = [spotId, ...others.map((spot) => spot.id)].map((id) => book.spots.find((spot) => spot.id === id)?.name.trim().toLowerCase() ?? "");
+  const twinNames = new Set(names.filter((name, index) => name && names.indexOf(name) !== index));
+  const fishAt = (id: string) => storedBook.catches.filter((entry) => entry.spotId === id).length;
   const moves = into ? mergeMoves(storedBook, spotId, into) : null;
   const keptSpot = into ? storedBook.spots.find((spot) => spot.id === into) : undefined;
   const kept = keptSpot
@@ -54,7 +61,8 @@ export function MergeWater({ spotId }: { spotId: string }) {
     if (!changeBook("merge", next, lists ? () => tackle?.updateTackle((current) => undoneTackle(current, before, lists)) : undefined)) return;
     if (lists) tackle?.replaceTackle(lists);
     noteMergedWater(spotId, into);
-    navigate(`/spots/${into}`, { replace: true });
+    // The kept water's page takes this one's place, opened from where this one was (a delete there goes Back to the list).
+    navigate(`/spots/${into}`, { replace: true, state: location.state });
   };
   return (
     <details ref={box} className="rename-kind">
@@ -66,7 +74,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
             <option value="">{t("Choose a water")}</option>
             {others.map((spot) => (
               <option key={spot.id} value={spot.id}>
-                {spot.name}
+                {twinNames.has(spot.name.trim().toLowerCase()) ? `${spot.name} · ${tn(fishAt(spot.id), "{n} fish", "{n} fish")}` : spot.name}
               </option>
             ))}
           </select>

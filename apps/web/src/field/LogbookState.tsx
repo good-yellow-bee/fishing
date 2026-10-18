@@ -77,8 +77,8 @@ type LogbookApi = {
   dismissSaveError: () => void;
   /** What the last delete took out, until the next change to the book. */
   undoable: DeletedKind | null;
-  /** Puts the book back and gives the page the delete was made from, to return to. */
-  undoDelete: () => string | null;
+  /** Puts the book back and gives the page the delete was made from, to return to, with the link state it had there. */
+  undoDelete: () => { from: string; state: unknown } | null;
   dismissUndo: () => void;
   photos: CatchPhotoMap;
   replaceBook: (book: Logbook, photos: CatchPhotoMap) => void;
@@ -92,7 +92,7 @@ function photosKept(book: { catches: { id: string }[] }, photos: CatchPhotoMap):
   return photosForBook(aside.length > 0 ? { catches: [...book.catches, ...aside.map((id) => ({ id }))] } : book, photos);
 }
 
-type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string; onUndo?: () => void };
+type Undo = { kind: DeletedKind; book: Logbook; photos: CatchPhotoMap; from: string; fromState: unknown; onUndo?: () => void };
 
 const LogbookContext = createContext<LogbookApi | null>(null);
 
@@ -213,7 +213,9 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
 
     const remove = (kind: DeletedKind, next: Logbook, onUndo?: () => void) => {
       // Deletes are made from the entry's own page, before it navigates away.
-      const before = { kind, book, photos, from: window.location.pathname + window.location.search, ...(onUndo ? { onUndo } : {}) };
+      // With the page's link state, so the page put back still knows the list it was opened from.
+      const fromState = (window.history.state as { usr?: unknown } | null)?.usr ?? null;
+      const before = { kind, book, photos, from: window.location.pathname + window.location.search, fromState, ...(onUndo ? { onUndo } : {}) };
       if (!commit(next)) return false;
       // The sample or a blank book takes the book's place on purpose; a deleted fish or water is kept out of later merges,
       // and so is a removed sample week, so adding an older copy doesn't bring it back.
@@ -349,7 +351,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         // The book back from under the sample was downloaded when it was: its backup reminder comes back with it.
         if (result.ok && undo.kind === "sample") bringBackClearedCopy();
         if (result.ok) undo.onUndo?.();
-        return result.ok ? undo.from : null;
+        return result.ok ? { from: undo.from, state: undo.fromState } : null;
       },
       saveError,
       dismissSaveError: () => setSaveError(null),

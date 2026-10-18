@@ -59,6 +59,7 @@ import { num, t, tn, useT } from "../i18n";
 import { isPlanned } from "./TripMonthHead";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
+import { addedWater, forgetAddedWater } from "./addedWater";
 import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
@@ -612,7 +613,12 @@ function TripForm() {
   // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
   const busy = (spotId: string) => countedBook(book).trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
   const guess = likelyWater(book, localDate(new Date()));
-  const preset = book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
+  // A water just added from this form's "Add a spot" comes back picked.
+  const [justAdded] = useState(() => (!existing && book.spots.some((spot) => spot.id === addedWater() && spot.id !== PLAY_LAKE_ID) ? addedWater() : null));
+  useEffect(() => forgetAddedWater(), []);
+  const preset = justAdded
+    ? justAdded
+    : book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)
     ? (params.get("spot") as string)
     : busy(guess)
       ? // The next water by the angler's own fish, never one of the sample week's made-up waters.

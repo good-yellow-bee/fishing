@@ -87,8 +87,9 @@ export function UndoBar() {
     // Back to the page the entry was deleted from, now that it is there again.
     // In place of the page it went to, so Back doesn't pass through that page, or this one, twice; after a delete
     // that went Back to its list, forward from the list again.
-    const from = undoDelete();
-    if (from && from !== location.pathname + location.search) navigate(from, { replace: !leftBackTo(from) });
+    const undone = undoDelete();
+    const from = undone?.from;
+    if (from && from !== location.pathname + location.search) navigate(from, { replace: !leftBackTo(from), state: undone?.state });
     // The button goes with the bar: focus moves to the top of the page it lands on.
     requestAnimationFrame(() => focusPageHeading());
   };
