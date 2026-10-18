@@ -110,6 +110,7 @@ export const PL_CONTENT: PlBook = {
   "The fish feed hard in the hour before the rain, from {hour}:00.": "Ryby żerują zachłannie w godzinie przed deszczem, od {hour}:00.",
   "The fish move up to feed as the fog burns off, from {hour}:00.": "Gdy mgła się rozwiewa, od {hour}:00, ryby podchodzą żerować.",
   "Bright after the rain: the fish sulk deep till noon, but a slow jig or worm still draws them.": "Jasno po deszczu: do południa ryby stoją ospale w głębi, ale wolny jig albo robak wciąż je skusi.",
+  "The lake is turning over: slow bites, except in the inlet's fresh water.": "Jezioro się przewraca: brania są słabe, poza świeżą wodą w ujściu strumienia.",
   "On a clear night a spinner or spoon flashes under it.": "W pogodną noc obrotówka lub wahadłówka błyska w jej świetle.",
   "Too dark to see: bites come slower after dark.": "Za ciemno, by widzieć: po zmroku brania przychodzą wolniej.",
 
