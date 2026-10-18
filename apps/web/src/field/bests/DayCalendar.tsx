@@ -99,7 +99,8 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
         // Blank cells before the 1st, so it lands under its weekday.
         const lead = (first.getDay() + 6) % 7;
         return (
-          <section key={month} className="day-month" aria-label={monthName(month)}>
+          // Unnamed, so a season's twelve months aren't twelve landmarks; each one's heading says which it is.
+          <section key={month} className="day-month">
             <h3>
               {monthName(month)}
               {/* The month's fish at a glance, counted as its days are. */}

@@ -54,7 +54,7 @@ describe("the outings as a spreadsheet", () => {
     const book = sampleLogbook(new Date(2026, 9, 1));
     const [first] = book.trips;
     const counted = { ...book, trips: book.trips.map((trip) => (trip.id === first!.id ? { ...trip, lost: 2, missed: 3 } : trip)) };
-    const lines = tripsCsv(counted).replace(/^\ufeff/, "").trimEnd().split("\r\n");
+    const lines = tripsCsv(counted, "2099-01-01").replace(/^\ufeff/, "").trimEnd().split("\r\n");
     expect(lines[0]).toBe("Date,Trip,Water,Fish,Lost fish,Missed strikes,Note");
     expect(lines).toHaveLength(book.trips.length + 1);
     const dates = lines.slice(1).map((line) => line.slice(0, 10));

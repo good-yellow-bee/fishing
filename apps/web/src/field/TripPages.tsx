@@ -36,7 +36,7 @@ import { PagedTrips } from "./PagedTrips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
-import { tripsCsv } from "./catchCsv";
+import { sheetOutings, tripsCsv } from "./catchCsv";
 import { LureChips, SpeciesChips } from "./SpeciesChips";
 import { WaterTipsBox, sameTimeText } from "./WaterTipsBox";
 import { exactTerm } from "./findLinks";
@@ -215,9 +215,9 @@ export function TripsPage() {
           ) : null}
           <h2 className="subhead">{t("Recent")}</h2>
           {average ? <p className="meta">{average}</p> : null}
-          {book.trips.length > 0 ? (
+          {sheetOutings(book, today).trips.length > 0 ? (
             <p className="fish-csv">
-              <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
+              <button type="button" className="text-button" onClick={() => downloadFile(tripsCsv(book, today), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"))}>
                 {t("Download the outings as a spreadsheet")}
               </button>
             </p>
@@ -463,7 +463,8 @@ function TripView() {
         editTo={`/trips/${trip.id}/edit`}
         ask={t("Delete this outing? Its fish stay in the book.")}
         onDelete={() => {
-          if (deleteTrip(trip.id)) navigate("/trips");
+          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
+          if (deleteTrip(trip.id)) navigate("/trips", { replace: true });
         }}
         aside={
           // An outing still ahead has no fish to log yet; a catch can't be dated in the future.

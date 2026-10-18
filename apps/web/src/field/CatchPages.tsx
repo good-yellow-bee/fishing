@@ -1564,7 +1564,8 @@ function CatchView() {
         editTo={list ? `/catches/${entry.id}/edit?${LIST_PARAM}=${encodeURIComponent(list.key)}` : `/catches/${entry.id}/edit`}
         ask={t("Delete this fish from the book?")}
         onDelete={() => {
-          if (deleteCatch(entry.id)) navigate(list?.back ?? "/catches");
+          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
+          if (deleteCatch(entry.id)) navigate(list?.back ?? "/catches", { replace: true });
         }}
       >
         <p className="eyebrow">

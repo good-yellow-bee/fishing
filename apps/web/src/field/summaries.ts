@@ -2,7 +2,7 @@ import { MOON_LABELS, WATER_LABELS, lureTally, moonName, moonPhase, measureOf, p
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
-import { catchMonth, daysOut } from "./tripMonths";
+import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
 import { speciesCounts, speciesWaters } from "./speciesLink";
@@ -100,7 +100,7 @@ export function speciesSummary(species: string, catches: readonly CatchEntry[], 
  * its longest and heaviest, and the waters and lures that gave the most.
  */
 export function yearSummary(book: Logbook, year: string, today: string, goal: number | null): string {
-  const catches = book.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`));
+  const catches = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
   const days = daysOut(book, year, today);
   const bests = personalBests({ ...book, catches });
   const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
@@ -118,7 +118,9 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     t("{year} in the book", { year }),
     `${fishCountLabel(catches.length)} · ${tn(speciesCounts(catches).length, "{n} species", "{n} species")}`,
     ...(days > 0 ? [t("Days on the water in {year}: {count}", { year, count: days })] : []),
-    ...(goal !== null ? [t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })] : []),
+    ...(goal !== null
+      ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
+      : []),
     ...best(bests.longest, "length"),
     ...best(bests.heaviest, "weight"),
     ...(waters.length > 0 ? [t("Waters: {waters}", { waters: waters.join(", ") })] : []),

@@ -1,6 +1,7 @@
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLogbook } from "./LogbookState";
+import { focusPageHeading } from "./pageFocus";
 import { STORAGE_FULL } from "./storage";
 import { ALL_LISTS, useTackleIfAny } from "./gear/TackleState";
 import { t, useT } from "../i18n";
@@ -21,8 +22,16 @@ const DELETED = {
 export function UndoBar() {
   const { undoable, undoDelete, dismissUndo, saveError, dismissSaveError, photos } = useLogbook();
   const navigate = useNavigate();
+  const location = useLocation();
   const tackle = useTackleIfAny();
+  const bar = useRef<HTMLDivElement>(null);
   useT();
+  // Closed from inside the bar, focus goes to the top of the page rather than falling to the document.
+  const dismiss = () => {
+    const inside = bar.current?.contains(document.activeElement) ?? false;
+    dismissUndo();
+    if (inside) requestAnimationFrame(() => focusPageHeading());
+  };
 
   useEffect(() => {
     if (!undoable) return;
@@ -31,11 +40,11 @@ export function UndoBar() {
       // Escape in a field (clearing the search) or in a question ("Keep" in a delete prompt) is about that, not this bar.
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest("input, textarea, select, [role=dialog], [role=alertdialog]")) return;
-      dismissUndo();
+      dismiss();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undoable, dismissUndo]);
+  });
 
   // The live region stays in the page so the line is read out when it appears.
   if (saveError) {
@@ -75,19 +84,20 @@ export function UndoBar() {
   if (!undoable) return <div role="status" />;
   const onUndo = () => {
     // Back to the page the entry was deleted from, now that it is there again.
+    // In place of the page it went to, so Back doesn't pass through that page, or this one, twice.
     const from = undoDelete();
-    if (from) navigate(from);
+    if (from && from !== location.pathname + location.search) navigate(from, { replace: true });
     // The button goes with the bar: focus moves to the top of the page it lands on.
-    requestAnimationFrame(() => document.querySelector<HTMLElement>("main h1")?.focus());
+    requestAnimationFrame(() => focusPageHeading());
   };
   return (
     <div role="status">
-      <div className="undo-bar">
+      <div className="undo-bar" ref={bar}>
         <span>{t(DELETED[undoable])}</span>
         <button type="button" className="text-button" onClick={onUndo}>
           {t("Undo")}
         </button>
-        <button type="button" className="text-button undo-close" onClick={dismissUndo} aria-label={t("Dismiss")}>
+        <button type="button" className="text-button undo-close" onClick={dismiss} aria-label={t("Dismiss")}>
           ×
         </button>
       </div>

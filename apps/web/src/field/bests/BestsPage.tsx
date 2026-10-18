@@ -343,7 +343,7 @@ export function BestsPage() {
                 <h2>{t("This year's goal")}</h2>
               </div>
               {/* Drawn afresh at New Year, so the new year's count never meets last year's goal. */}
-              <YearGoal key={today.slice(0, 4)} catches={whole.catches} />
+              <YearGoal key={today.slice(0, 4)} book={whole} />
               {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
               {/* Last year's kinds still to show up this year, each opening its page. */}
               {notYet.length > 0 ? (

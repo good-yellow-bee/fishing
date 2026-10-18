@@ -149,7 +149,8 @@ export function HomePage() {
   const monthRows = book.catches.filter((entry) => catchMonth(entry) === thisMonth);
   const monthFish = monthRows.filter((entry) => counted.has(entry.id)).length;
   const thisYear = today.slice(0, 4);
-  const yearRows = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`));
+  // The goal counts a night session's small hours on its outing's day, as Bests does.
+  const yearRows = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
   const goal = readYearGoal(thisYear);
   const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
