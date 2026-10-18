@@ -1091,6 +1091,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC16~~ | ~~News card scene04: the reeds in the wind, the summer duckweed and the closing lilies~~ (#1037) | scene | S |
 | ~~SC17~~ | ~~Frost on the dock: after a clear, cold night in fall (and more lightly in spring), the dawn finds the walkway's boards white with sparkling hoar frost, the angler's boot prints melted back to bare wood out along it~~ (#1040) | scene | S |
 | ~~SC18~~ | ~~Boats ride to the wind: the canoe and rowboat moored out on the lake swing their bows round into the day's breeze and sheer slowly to and fro about it, half round in a light air, and lie as they were left on a calm day~~ (#1043) | scene | S |
+| SC19 | Spring tadpoles: schools of tadpoles mill in the warm shallows off the dock, below the Point, by the Reeds and at the Drop-off on spring days, darting and wriggling about a middle that wanders slowly round, gone at night | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
