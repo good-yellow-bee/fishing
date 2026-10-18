@@ -37,8 +37,7 @@ describe("larger text on a phone held upright", () => {
   const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
   const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
 
-  it("keeps the walking stick its size and brings the cast meter down beside it, clear of the hint and the coach", () => {
-    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap > div\.walk-stick \{\n    zoom: 1;/);
+  it("brings the cast meter down beside it, clear of the hint and the coach", () => {
     expect(upright).toMatch(/html\[data-text-size\] \.power-meter \{\n    bottom: calc\(104px \/ var\(--text-zoom, 1\)\);\n    width: min\(160px, calc\(\(100vw - 152px\) \/ var\(--text-zoom, 1\)\)\);/);
     expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.walkthrough ol \{\n    display: none;/);
   });
@@ -169,5 +168,36 @@ describe("the lake header on a phone with larger text", () => {
     const from = css.indexOf("@media (max-width: 520px) {\n  .hud-user,");
     const phone = css.slice(from, css.indexOf("\n}\n", from));
     expect(phone).toMatch(/html\[data-text-size\] \.hud-brand \{\n    display: none;/);
+  });
+});
+
+describe("the lake's news on a touch tablet", () => {
+  it("moves right of the walking stick instead of sitting under it, unless the stick is on the other side", () => {
+    const from = css.indexOf("@media (pointer: coarse) and (min-width: 521px) {");
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    expect(block).toMatch(/html:not\(\[data-hand="left"\]\) \.lodge-tracks \{\n    left: calc\(136px \/ var\(--text-zoom, 1\)\);/);
+    expect(block).toContain("max-width: min(42ch, calc(100vw / var(--text-zoom, 1) - 156px));");
+  });
+});
+
+describe("the walking stick with larger text", () => {
+  it("keeps its size on any touch screen, phone or tablet, with a rule that outranks the text-size zoom", () => {
+    const from = css.indexOf("/* The walking stick: only on touch screens");
+    const start = css.indexOf("@media (pointer: coarse) {", from);
+    const touch = css.slice(start, css.indexOf("\n}\n", start));
+    expect(touch).toMatch(/html\[data-text-size\] \.scene-wrap > div\.walk-stick \{\n    zoom: 1;/);
+    expect(css.match(/\.walk-stick \{\n    zoom: 1;/g)).toHaveLength(1);
+  });
+});
+
+describe("the bank chip while the first-cast coach shows", () => {
+  it("stops short of the coach's left edge on one line on a laptop or tablet, at any text size", () => {
+    const from = css.indexOf('@media (min-width: 801px) {\n  .scene-wrap[data-walkthrough="1"] .stance-chip {');
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    expect(block).toContain("max-width: calc(50vw / var(--text-zoom, 1) - min(210px, 30vw / var(--text-zoom, 1)) - 32px);");
+    expect(block).toContain("text-overflow: ellipsis;");
+    expect(/\n\.walkthrough \{([^}]*)\}/.exec(css)?.[1]).toContain("width: min(420px, calc(60vw / var(--text-zoom, 1)));");
   });
 });

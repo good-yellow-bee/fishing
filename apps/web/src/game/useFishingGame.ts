@@ -41,7 +41,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -290,6 +290,8 @@ export function useFishingGame(
   const spookRef = useRef<SpotId | null>(null);
   /** The run of casts at one bank; a long one makes its fish wary until the angler moves. */
   const pressureRef = useRef<Pressure>({});
+  /** The kinds of lure each bank's fish have seen this visit, so a new kind can catch the wary ones off guard. */
+  const shownRef = useRef<LuresShown>({});
   /** The banks cast at this visit; the first cast at each meets fish that haven't seen a lure today. */
   const fishedRef = useRef<ReadonlySet<SpotId>>(new Set());
   /** A big fish that broke off, waiting to bite again at its bank. */
@@ -750,11 +752,15 @@ export function useFishingGame(
     if (swingWait < 1) reasons.unshift(t("The water has warmed since yesterday, and the fish wake up to feed."));
     else if (swingWait > 1) reasons.unshift(t("The water has cooled since yesterday, and the sluggish fish bite slow."));
     // A bank fished too long grows wary, and rests while the angler fishes elsewhere; fish feeding on groundbait don't mind, and a beginner is spared.
+    // A kind of lure the wary fish haven't seen yet catches them off guard, and buys the bank a few more casts.
     const pressure = castUnderPressure(pressureRef.current, spotRef.current);
-    pressureRef.current = pressure.next;
-    setFishedHard(mercyRef.current ? [] : fishedHardBanks(pressure.next));
-    const pressureWait = pressure.pressured && !bait.baited && !mercyRef.current ? PRESSURE_WAIT : 1;
-    if (pressureWait > 1) reasons.unshift(t("This water has been fished hard and the fish are wary of the line, so the bites come slow. Try another bank."));
+    const switched = castNewLure(shownRef.current, pressure.next, spotRef.current, lureRef?.current, pressure.pressured);
+    pressureRef.current = switched.pressure;
+    shownRef.current = switched.shown;
+    setFishedHard(mercyRef.current ? [] : fishedHardBanks(switched.pressure));
+    const pressureWait = pressure.pressured && !switched.relieved && !bait.baited && !mercyRef.current ? PRESSURE_WAIT : 1;
+    if (pressureWait > 1) reasons.unshift(t("This water has been fished hard and the fish are wary of the line, so the bites come slow. Try another bank or another kind of lure."));
+    else if (switched.relieved && !bait.baited && !mercyRef.current) reasons.unshift(t("The wary fish here haven't seen this kind of lure yet, so they come to it."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
     const fresh = castOnFreshWater(fishedRef.current, spotRef.current);
     fishedRef.current = fresh.next;
