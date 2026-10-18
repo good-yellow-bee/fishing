@@ -51,6 +51,13 @@ describe("settings", () => {
     expect(parseSettings(JSON.stringify({ vibration: "no" })).vibration).toBe(true);
   });
 
+  it("starts in high contrast when the system asks for more contrast, until the player picks", () => {
+    expect(parseSettings(null, true).highContrast).toBe(true);
+    expect(parseSettings(null, false).highContrast).toBe(false);
+    expect(parseSettings(JSON.stringify({ highContrast: false }), true).highContrast).toBe(false);
+    expect(parseSettings(JSON.stringify({ highContrast: true }), false).highContrast).toBe(true);
+  });
+
   it("remembers a change for the next visit", () => {
     updateSettings({ reelMode: "toggle", lastLure: "Mepps spinner" });
     expect(settings.reelMode).toBe("toggle");
