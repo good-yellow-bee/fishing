@@ -1964,7 +1964,8 @@ html[data-input="pad"] .fight-bar .on-pad {
   border-left: 3px solid var(--rarity-legendary);
 }
 
-@media (max-width: 800px) {
+/* Not for a phone held sideways (its own block below lays that out): a 740-800 px wide one got both and the shore signs stretched over the whole lake. */
+@media (max-width: 800px) and (min-height: 501px), (max-width: 800px) and (pointer: fine), (max-width: 800px) and (pointer: none) {
   .hud {
     top: 8px;
     right: 8px;
@@ -3117,9 +3118,13 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* Down the right edge, stopping above the power meter; more signs than fit (larger text, the inlet, the boat) start a second column. */
   .walk-signs {
     top: calc(var(--hud-bottom, 52px) + 6px);
     right: 8px;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(auto-fill, 36px);
+    max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 72px);
   }
 
   .walk-signs .panel-btn {
@@ -3134,8 +3139,13 @@ html[data-contrast="high"] .sound-captions li {
 
   /* Between the lure panel on the left and the shore signs on the right, at any text size. */
   .walkthrough {
-    left: 56%;
-    width: min(420px, calc(40vw / var(--text-zoom, 1)));
+    left: 51%;
+    width: min(400px, calc(36vw / var(--text-zoom, 1)));
+  }
+
+  /* With larger text the hint would run into the coach, which already says what it says. */
+  html[data-text-size] .scene-wrap[data-walkthrough="1"] .hint {
+    display: none;
   }
 
   .walkthrough ol {

@@ -1039,6 +1039,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~BQ1~~ | ~~The catch log, a spot's page and a trip's page draw their catches 50 at a time with a "Show 50 more" button and an "N of M fish" count, instead of every card at once (a 2,000-catch log drew 30,000 elements and took 1.6 s to open; now about 800 and 0.7 s)~~ (#239) | perf | S |
 | ~~BQ2~~ | ~~Find a catch keeps up with typing in a long log (2.6 s to type a word over 2,000 catches, now under 0.1 s): results follow the keys a beat behind, show 50 at a time, and only a "Matches: N" line is read out instead of every card~~ (#240) | perf, access | S |
 
+## Phone and access track (added 2026-10-18; its own thread works phone layouts, touch, larger text, keyboard and screen readers, contrast, motion and load speed across the app)
+
+| # | Title | Area | Size |
+|---|---|---|---|
+| ~~PA1~~ | ~~A phone held sideways at 740-800 px (most Androids) no longer gets the narrow-screen layout on top of its own: the shore signs stretched over the whole lake and the hint ran up the screen; the signs now stop above the power meter and start a second column when they run long (larger text, the inlet, the boat), the coach fits between the lure panel and the signs, and with larger text the hint gives way to the coach~~ (#968) | phone UX | S |
+
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
 | # | Title | Area | Size |
