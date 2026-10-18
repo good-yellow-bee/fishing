@@ -576,6 +576,8 @@ export const PL_GAME: PlBook = {
   "{fish} took all the line and threw the hook.": "{fish} — cała żyłka wybrana, haczyk zrzucony.",
   "Ran out of line — hold to reel whenever the fish is calm.": "Skończyła się żyłka — przytrzymuj, by zwijać, gdy ryba jest spokojna.",
   "The hook tore out of the {fish}'s soft mouth.": "{fish} — haczyk wyrwał się z miękkiego pyska.",
+  "The {fish} charged straight at you and the light hook dropped out of the slack line.": "{fish} — ryba ruszyła prosto na ciebie, a płytko wbity haczyk wypadł na luźnej żyłce.",
+  "Hooked light — when it charges, reel fast to keep the line tight.": "Płytko zacięte — gdy ryba rusza na ciebie, zwijaj szybko, żeby żyłka była napięta.",
   "Soft mouth — ease off as soon as the bar turns red.": "Miękki pysk — odpuść, gdy tylko pasek zrobi się czerwony.",
   "The light hook pulled out of the {fish}.": "{fish} — płytko wbity haczyk wysunął się.",
   "Hooked light — strike sooner, and ease off as soon as the bar turns red.": "Płytko zacięte — zatnij szybciej i odpuść, gdy tylko pasek zrobi się czerwony.",
@@ -601,6 +603,8 @@ export const PL_GAME: PlBook = {
   "Circler: it turns its flat side and circles, so it comes in slowly till it tires": "Krąży bokiem: ustawia się płaskim bokiem i krąży, więc idzie powoli, dopóki się nie zmęczy",
   "Quitter: it fights hard for a moment, then gives up fast": "Szybko odpuszcza: przez chwilę walczy mocno, potem szybko się poddaje",
   "Long runner: the first run is the long one, so let it go": "Długi odjazd: pierwszy odjazd jest najdłuższy, więc daj mu iść",
+  "Charger: once a fight it runs straight at you, so reel fast to keep the line tight":
+    "Szarżująca: raz w walce płynie prosto na ciebie, więc zwijaj szybko, żeby żyłka była napięta",
   "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",
   "Hooked light: reel in the red and the hook pulls out": "Płytko zacięte: zwijanie w czerwieni wysuwa haczyk",
   "The fishing loop hit a problem. You can cast again.": "Coś poszło nie tak z łowieniem. Możesz zarzucić ponownie.",
@@ -616,10 +620,10 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a tablet or a narrow laptop window with larger text, the field log keeps everything on the page: Home's cards and columns stack instead of squeezing words one letter a line, and Spots shows one card a row. The side menu now reaches Gear and Bests on a short window, and a full-size photo fits the screen with Close in reach.":
+    "Na tablecie lub wąskim oknie laptopa przy większym tekście dziennik połowów mieści wszystko na stronie: karty i kolumny na Starcie układają się jedna pod drugą, zamiast ściskać słowa po literze w wierszu, a Łowiska pokazują jedną kartę w rzędzie. Boczne menu sięga teraz Sprzętu i Rekordów w niskim oknie, a zdjęcie w pełnym rozmiarze mieści się na ekranie razem z przyciskiem Zamknij.",
   "On a touch tablet the walking stick no longer covers \"Lately on the lake\": the feed now sits beside it, and the stick keeps its size with larger text, so it stays clear of the lure panel. While the first-cast guide shows on a laptop or tablet, the bank name beside it stops short of the guide instead of running under it.":
     "Na tablecie dotykowym drążek chodzenia nie zasłania już „Ostatnio na jeziorze”: ta lista stoi teraz obok niego, a sam drążek przy większym tekście zachowuje swój rozmiar, więc nie wchodzi na panel przynęty. Gdy na laptopie lub tablecie widać przewodnik pierwszego rzutu, nazwa brzegu obok kończy się przed nim, zamiast chować się pod spodem.",
-  "On a phone held sideways the fight card now stays under the top bar and clear of the Reel button, even with the largest text, and the shack and Settings give their lists more room. The notice that effects went to Lite now waits until the fight is over instead of covering the tension bar.":
-    "Na telefonie trzymanym poziomo karta holu mieści się teraz pod górnym paskiem i nie zasłania jej przycisk Zwijaj, nawet przy największym tekście, a szopa i Ustawienia dają swoim listom więcej miejsca. Komunikat o przełączeniu efektów na lekkie czeka teraz do końca holu, zamiast zasłaniać pasek napięcia.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -678,6 +682,9 @@ export const PL_GAME: PlBook = {
   "Let it run — the first run is the longest!": "Niech płynie — pierwszy odjazd jest najdłuższy!",
   "A leap can't be turned — just let go": "Skoku nie da się zawrócić — po prostu odpuść",
   "A roll can't be turned — just let go": "Obrotu nie da się zawrócić — po prostu odpuść",
+  "A charge can't be turned — just reel": "Szarży nie da się zawrócić — po prostu zwijaj",
+  "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
+  "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
   "Save picture": "Zapisz obrazek",
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
@@ -709,6 +716,10 @@ export const PL_GAME: PlBook = {
     "Księżyc liczy się teraz także za dnia: przez godzinę przed i po tym, jak przechodzi nad głową albo pod stopami, ryby żerują przy każdym brzegu, a tablica w szopie podaje, kiedy. I uważaj na niskie słońce za plecami: o świcie na Uskoku i o zmierzchu przy Ujściu twój długi cień pada na wodę, a ryby go unikają.",
   "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.":
     "Gdy w jasny dzień chmura zasłoni słońce, ryby podpływają na płyciznę żerować, więc na Pomoście, w Trzcinach, na Cyplu i przy Ujściu brania przychodzą szybciej, póki chmura nie odpłynie. Ryba zacięta przy grzybieniach walczy teraz jak w zielsku i nurkuje między łodygi, więc zawracaj każdy odjazd. A gdy łowisko jest mocno obłowione, rodzaj przynęty, którego ostrożne ryby jeszcze nie widziały, zaskakuje je.",
+  "Of an evening from spring to fall someone rocks in a chair in front of the far cabin, a lantern flickering beside them, and on winter evenings coloured lights twinkle along its eaves. At dawn in spring and fall a little flock of sandpipers works the far bank's waterline, and a pair of coots keeps to the lilies at the lake's west end, diving now and then and squabbling across the water in spring.":
+    "Wieczorami od wiosny do jesieni ktoś buja się w fotelu przed chatką na drugim brzegu, a obok migocze latarnia; w zimowe wieczory pod okapem chatki mrugają kolorowe lampki. O świcie wiosną i jesienią stadko biegusów przeszukuje brzeg tuż przy wodzie, a para łysek trzyma się lilii przy zachodnim krańcu jeziora, co jakiś czas nurkując, a wiosną goniąc się z pluskiem po wodzie.",
+  "At dusk and at night an angler sits out on the far bank with a glowing float on the water, their headlamp's beam following where they look. On calm days a child skims stones from the water's edge, a ring spreading at every skip. In spring a birdwatcher scans the lake through binoculars from the far bank, and on winter days a jogger in a bobble hat runs the shore below the ski track.":
+    "O zmierzchu i nocą na drugim brzegu ktoś łowi ze świecącym spławikiem na wodzie, oświetlając czołówką to, na co akurat patrzy. W spokojne dni dziecko puszcza kaczki z brzegu, a przy każdym odbiciu rozchodzi się kółko na wodzie. Wiosną ktoś z lornetką obserwuje ptaki nad jeziorem z drugiego brzegu, a w zimowe dni osoba w czapce z pomponem biega brzegiem poniżej trasy narciarskiej.",
   "On dry summer days two people toss a flying disc back and forth on the far bank, and in winter two children have a snowball fight there, ducking the throws. On rainy days an angler sits it out on the far bank under a big green umbrella tipped into the wind, and in the fall a grown-up rakes the leaves back onto the pile the child keeps jumping into.":
     "W suche letnie dni na drugim brzegu dwie osoby rzucają do siebie frisbee, a zimą dwoje dzieci toczy tam bitwę na śnieżki, uchylając się przed rzutami. W deszczowe dni na drugim brzegu ktoś łowi, przeczekując deszcz pod dużym zielonym parasolem pochylonym pod wiatr, a jesienią dorosła osoba zgarnia grabiami liście z powrotem na stos, w który dziecko wciąż skacze.",
   "The boats at their moorings now fill with the weather: snow in winter, rainwater in the rain and fallen leaves in the fall. In spring a pair of Canada geese graze the far bank with their goslings, on dry fall days a child takes running leaps into a pile of raked leaves, and on calm, clear days someone sets up an easel under a sun umbrella on the far bank and paints the hills.":
@@ -721,8 +732,6 @@ export const PL_GAME: PlBook = {
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.": "Strona łowiska otwiera ostatnią wyprawę z jej wynikiem i kopiuje współrzędne do echosondy; karty łowisk podają najlepszą przynętę, a długie listy łowisk zaczynają się od ostatnio łowionych.",
   "A kind's page says when its next round number is a few fish away (3 more to 25 of this kind), and its biggest of this year beside the all-time record.": "Strona gatunku mówi, gdy do kolejnej okrągłej liczby brakuje kilku ryb (jeszcze 3 do 25 tego gatunku), i pokazuje największe z tego roku obok rekordu wszech czasów.",
   "A search with fish of several kinds or years splits them “By kind” and “By year”, each a tap to narrow it, and a season's best day on Bests opens its fish.": "Wyszukiwanie z rybami kilku gatunków lub lat dzieli je „Według gatunku” i „Według roku”, a każdy wpis zawęża je jednym dotknięciem; najlepszy dzień sezonu w Rekordach otwiera jego ryby.",
-  "Gear's lure record can pack its best lures for your next outing in one go.": "Rekord przynęt w Sprzęcie pakuje najlepsze przynęty na następną wyprawę jednym przyciskiem.",
-  "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.": "Arkusz z własnymi łowiskami ma podziałkę, każde łowisko na Mapie podaje przynętę, na którą wzięło najwięcej ryb, a strona przykładowego łowiska prowadzi do jego miejsca na Mapie.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",

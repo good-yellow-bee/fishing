@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
-import { CABIN_AT, CABIN_SCALE, CABIN_WALLS, CABIN_YAW, CHIMNEY, chimneyTop } from "./cabinLook";
+import { CABIN_AT, CABIN_OVERHANG as OVERHANG, CABIN_SCALE, CABIN_WALLS, CABIN_YAW, CHIMNEY, chimneyTop } from "./cabinLook";
 import { mergePainted } from "./mergeParts";
 import { SmokePlume, type SmokeHour } from "./SmokePlume";
 import { toonRamp } from "./toon";
@@ -13,7 +13,6 @@ const TRIM = "#d9cdb0";
 const ROOF = { spring: "#5b4338", summer: "#5b4338", fall: "#5b4338", winter: "#eef2f4" } as const;
 const WINDOW_LIT = "#ffd27a";
 const WINDOW_DARK = "#2c3438";
-const OVERHANG = 0.18;
 
 const { width: W, depth: D, height: H, roof: R } = CABIN_WALLS;
 /** The two windows either side of the door on the front wall (+z). */

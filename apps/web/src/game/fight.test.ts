@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { FRAYED_SNAP, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { FRAYED_SNAP, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -30,7 +30,8 @@ function seeded(seed: number) {
 
 type Policy = (sim: FightSim, reeling: boolean) => boolean;
 
-const releaseOnTelegraph: Policy = (sim) => sim.surge === 0 && !sim.shake && sim.tension < 0.7;
+/** Follows the card: lets go on a run's warning, but reels a charge up as it calls for. */
+const releaseOnTelegraph: Policy = (sim) => (sim.surge === 0 || sim.charge === true) && !sim.shake && sim.tension < 0.7;
 /** Ignores surges; 0.6 leaves room for the reaction delay, so calm water alone never turns the bar red. */
 const barOnly: Policy = (sim, reeling) => sim.tension < (reeling ? 0.6 : 0.45);
 /** Misses the warning and lets go only on LET GO or red, resuming once calm and back in the green. */
@@ -1479,5 +1480,59 @@ describe("a fight in winter", () => {
     }
     expect(nightTireMul("night", "pike")).toBe(1);
     expect(nightTireMul(undefined, "catfish")).toBe(1);
+  });
+});
+
+describe("charges", () => {
+  /** Steps a fight at 50 Hz with `hand` deciding the reel, and records each run as it starts: a leap, a charge or a plain run. */
+  function chargeRuns(id: string, hand: (sim: FightSim) => boolean, lightHook = false) {
+    const species = fish(id);
+    const runtime = makeFight(species, species.maxWeight, species.minStrength, seeded(7));
+    if (lightHook) runtime.sim.lightHook = true;
+    const kinds: ("leap" | "charge" | "run")[] = [];
+    let before = 0;
+    let outcome: FightOutcome = "fighting";
+    for (let now = 0; now < 40_000 && outcome === "fighting"; now += 20) {
+      outcome = runtime.step(now, 0.02, hand(runtime.sim));
+      if (runtime.sim.surge === 2 && before !== 2) kinds.push(runtime.sim.jump ? "leap" : runtime.sim.charge ? "charge" : "run");
+      before = runtime.sim.surge;
+    }
+    return { kinds, outcome, runtime };
+  }
+  /** Reels in the calm and through a charge, and lets go on every other run. */
+  const followsCalls = (sim: FightSim) => (sim.surge === 0 || sim.charge === true) && sim.tension < 0.7;
+  /** Lets go on every run, charge or not. */
+  const letsGoOnRuns = (sim: FightSim) => sim.surge === 0 && sim.tension < 0.7;
+
+  it("has a smallmouth or a rainbow charge once a fight, from its third run on and never on a leap", () => {
+    for (const id of CHARGERS) {
+      const { kinds } = chargeRuns(id, followsCalls);
+      expect(kinds.filter((kind) => kind === "charge"), id).toHaveLength(1);
+      expect(kinds.indexOf("charge"), id).toBeGreaterThanOrEqual(2);
+    }
+    for (const id of ["largemouth-bass", "brook-trout", "pike", "perch"]) {
+      expect(chargeRuns(id, followsCalls).kinds, id).not.toContain("charge");
+    }
+  });
+
+  it("pulls no line out and keeps the clean bonus while the charge is reeled up", () => {
+    const { runtime } = chargeRuns("smallmouth-bass", followsCalls);
+    expect(runtime.performance.slackCharge).toBeUndefined();
+  });
+
+  it("costs the clean bonus, but not the fish, when the charge is left slack", () => {
+    const { kinds, outcome, runtime } = chargeRuns("smallmouth-bass", letsGoOnRuns);
+    expect(kinds).toContain("charge");
+    expect(runtime.performance.slackCharge).toBe(true);
+    expect(isCleanFight(runtime.performance)).toBe(false);
+    expect(runtime.sim.thrown).toBeUndefined();
+    expect(outcome).not.toBe("escaped");
+  });
+
+  it("lets a light hook drop out when the charge is left slack", () => {
+    const { outcome, runtime } = chargeRuns("rainbow-trout", letsGoOnRuns, true);
+    expect(outcome).toBe("escaped");
+    expect(runtime.sim.thrown).toBe(true);
+    expect(CHARGE_SLACK_SEC).toBeGreaterThan(0);
   });
 });

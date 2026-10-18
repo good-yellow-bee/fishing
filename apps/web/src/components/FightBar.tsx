@@ -87,6 +87,10 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
             ? t("EASE OFF — it's rolling on the line!")
             : state.tailWalk && state.surge === 2
             ? t("BOW — it's tail-walking across the top!")
+            : state.charge && state.surge === 1
+            ? t("It's turning toward you — get ready to reel!")
+            : state.charge && state.surge === 2
+            ? t("REEL — it's charging straight at you!")
             : state.firstRun && state.surge === 1
             ? t("Let go now — its first run is the long one!")
             : state.firstRun && state.surge === 2
@@ -131,7 +135,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
           );
         }
         // Which way to pull the rod: said once a run is coming, and cheered while it is being turned. A leap or a roll can't be turned.
-        const steerCall = state.surge === 0 ? "calm" : state.roll ? "roll" : state.jump ? "leap" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
+        const steerCall = state.surge === 0 ? "calm" : state.roll ? "roll" : state.jump ? "leap" : state.charge ? "charge" : state.turning ? "turning" : state.runSide > 0 ? "left" : "right";
         if (steerLine.current && steerLine.current.dataset.call !== steerCall) {
           steerLine.current.dataset.call = steerCall;
           for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
@@ -243,6 +247,9 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
             </span>
             <span data-for="roll" hidden>
               {t("A roll can't be turned — just let go")}
+            </span>
+            <span data-for="charge" hidden>
+              {t("A charge can't be turned — just reel")}
             </span>
           </p>
           )}

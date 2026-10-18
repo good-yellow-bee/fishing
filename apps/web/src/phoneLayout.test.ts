@@ -220,3 +220,25 @@ describe("the sign-in page and the catch log with larger text", () => {
     expect(/\n\.log-page \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: calc(100vh / var(--text-zoom, 1));");
   });
 });
+
+describe("the shack's three-day board", () => {
+  const rule = /\n\.forecast-board ul \{([^}]*)\}/.exec(css)?.[1] ?? "";
+  // auto-fit's count for a given list width, from the rule's own minimum: max((W - 17px) / 3, min(W, (364px - W) * 999)).
+  const columns = (width: number) => {
+    const least = Math.max((width - 17) / 3, Math.min(width, (364 - width) * 999));
+    return Math.max(1, Math.floor((width + 8) / (least + 8)));
+  };
+
+  it("keeps the three days side by side in the 420 px panel, at any text size", () => {
+    expect(rule).toContain("grid-template-columns: repeat(auto-fit, minmax(max(calc((100% - 17px) / 3), min(100%, calc((364px - 100%) * 999))), 1fr));");
+    expect(rule).toContain("gap: 8px;");
+    expect(columns(388)).toBe(3);
+    expect(columns(364)).toBe(3);
+  });
+
+  it("puts one day a row on a phone instead of tips a word a line, never two and one", () => {
+    // A 360 px phone's panel list at normal, larger and largest text.
+    for (const width of [299, 256, 223]) expect(columns(width)).toBe(1);
+    for (let width = 200; width <= 400; width++) expect([1, 3]).toContain(columns(width));
+  });
+});

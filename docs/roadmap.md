@@ -1118,6 +1118,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA73~~ | ~~On a 900-1280 px window with larger text, Home's two columns stayed side by side and squeezed each recent catch's words into a 23 px column, one letter a line, and on Spots two cards a row ran off the page. Home's columns now stack when they no longer fit, Spots and Bests cards go one a row when a card would be under 220 px, and Bests' four counts wrap two and two (#1201)~~ | phone UX | S |
 | ~~PA74~~ | ~~PA72 made Home's count links inline blocks so a long count could wrap inside its card, but on a desktop that took them out of the inline-link spacing exception, and Home went from 2 to 5 targets under 24 px apart. They are plain inline links again; the cards' wrapping (PA72) still keeps every count on the page (#1205)~~ | phone UX | S |
 | ~~PA75~~ | ~~The field log is drawn larger by zoom with larger text, so its heights and widths taken from the window came out 15-30 % too big: the side menu ran past the window's foot and out of reach of its own scroll (Gear and Bests could not be reached on a short window or a tablet with the keyboard up), a full-size photo grew past the top and foot of the screen and took Close with it, the Undo bar could grow wider than a phone, and the sign-in card sat below the middle of a page that scrolled past its end. All are now divided by the zoom (#1206)~~ | phone UX | S |
+| ~~PA76~~ | ~~Shack's three-day board puts one day a row on a phone instead of three 70-95 px columns wrapping the tips a word a line; three across in the 420 px panel at any text size, never two and one (#1216)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1218,6 +1219,14 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC93~~ | ~~News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker~~ (#1207) | scene | S |
 | ~~SC94~~ | ~~Night angler: at dusk and at night from spring to fall an angler sits on the middle of the far bank by a rod on its rests, a glowing green float out on the water and a headlamp beam following their looks between the float, the tackle box and the water~~ (#1210) | scene | S |
 | ~~SC95~~ | ~~Stone skimmer: on calm, dry days from spring to fall a child at the water's edge on the far bank stoops for flat stones and skims them sidearm, each skipping out in shrinking hops with a ring spreading at every touch~~ (#1210) | scene | S |
+| ~~SC96~~ | ~~Winter jogger: on winter days that are not snowing or foggy a jogger in a bobble hat runs the far bank end to end and back on the sand below the ski track~~ (#1214) | scene | S |
+| ~~SC97~~ | ~~Spring birdwatcher: at dawn and by day in spring someone on the far bank raises binoculars and slowly scans the lake, then lowers them to jot in a notebook~~ (#1214) | scene | S |
+| ~~SC98~~ | ~~News card scene21: night angler, stone skimmer, spring birdwatcher, winter jogger~~ (#1214) | scene | S |
+| ~~SC99~~ | ~~Porch rocker: at dusk and at night from spring to fall someone rocks in a chair in front of the far cabin, a lantern flickering beside them, now and then lifting a mug to sip~~ (#1215) | scene | S |
+| ~~SC100~~ | ~~Sandpipers: at dawn in spring and fall a little flock works the far bank's waterline, each bird running a few quick steps, stopping to probe the sand with its bill and teetering its tail, the flock turning back at the ends of its stretch~~ (#1215) | scene | S |
+| ~~SC101~~ | ~~Winter eave lights: on winter evenings a string of red, green, yellow and blue bulbs droops in swags along the far cabin's front eave, the colours glowing up and fading in turn~~ (#1215) | scene | S |
+| ~~SC102~~ | ~~Coots: from spring to fall a pair of coots paddles by the lily bed at the lake's west end, nodding as they swim and diving now and then; in spring one charges the other across the water, pattering with wings half open and spray flying~~ (#1217) | scene | S |
+| ~~SC103~~ | ~~News card scene22: porch rocker, winter eave lights, sandpipers, coots~~ (#1217) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1513,7 +1522,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT288~~ | ~~News card 2026-10-18-game14 covers GT285 to GT287: the cloud over the sun, the lily pad fight and a new kind of lure at a bank fished hard~~ (#1189) | ui | S |
 | ~~GT289~~ | ~~The angler's shadow under a low sun: at dawn the sun sits squarely behind the Drop-off and at dusk behind the Inlet, so under a clear or partly cloudy sky the angler's long shadow falls across the water and the fish there shy from it (1.15 wait), the cast says so and the stance chip reads "your shadow on the water"; a beginner is spared~~ (#1198) | gameplay | S |
 | ~~GT290~~ | ~~The moon overhead and underfoot: for an hour either side of the moon passing overhead (noon at new moon, midnight at full, about 50 minutes later each day) or underfoot 12 hours on, the fish come on the feed and every cast bites sooner (0.85 wait); the cast says so, the stance chip reads "moon overhead" or "moon underfoot", and the chalk board gives each day's daytime passing~~ (#1202) | gameplay | S |
-| GT291 | News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot | ui | S |
+| ~~GT291~~ | ~~News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot~~ (#1203) | ui | S |
+| GT292 | A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit | gameplay | S |
 
 ## Risks / open questions for the owner
 

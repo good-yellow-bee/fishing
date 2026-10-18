@@ -3092,7 +3092,9 @@ html[data-reduce-motion="1"] .hour-veil {
 
 .forecast-board ul {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Three days side by side while each column keeps 116 px, else one day a row: a phone's 70-95 px columns (narrower with
+     larger text) wrapped the moon and weather tips a word or two a line. Never two plus one. */
+  grid-template-columns: repeat(auto-fit, minmax(max(calc((100% - 17px) / 3), min(100%, calc((364px - 100%) * 999))), 1fr));
   gap: 8px;
   margin: 8px 0 0;
   padding: 0;
