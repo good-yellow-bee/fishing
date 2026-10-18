@@ -1751,3 +1751,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR455~~ | ~~Round 46 follow-up: length and weight list, folded past bags, lighter lists~~ (#927) | field | S |
 | ~~BR456~~ | ~~Round 47 fixes: quoted search names, counts that open what they count, night-session days~~ (#931) | field | S |
 | ~~BR457~~ | ~~Round 47 ideas: outings by their fish, largest first on species and water pages, weeks in a row~~ (#933) | field | S |
+| ~~BR458~~ | ~~Round 48 fixes: photo time after Save and log another, outing titles that follow their water, Polish tackle, merging a day out logged twice~~ (#937) | field | S |
