@@ -9,7 +9,7 @@ import { fishCountLabel, formatCatchDay, formatDay, outingNameById } from "./for
 import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
@@ -137,6 +137,7 @@ function SpeciesView() {
   const waters = speciesWaters(book, catches);
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
+  const years = yearTally(catches);
 
   return (
     <div className="sheet">
@@ -211,6 +212,15 @@ function SpeciesView() {
         </>
       ) : null}
       <MonthBars key={`months-${species}`} catches={catches} within={kindTerm} />
+      {/* Each season's count of the kind, newest first, each opening that season's fish of it: once it spans two. */}
+      {years.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By year")}</h2>
+          </div>
+          <TallyBars key={`years-${species}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: findWithLink(kindTerm, row.year) }))} />
+        </>
+      ) : null}
       {catches.filter((entry) => entry.weather).length > 1 ? (
         <>
           <div className="section-head">

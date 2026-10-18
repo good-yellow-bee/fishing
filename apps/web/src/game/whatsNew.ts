@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa04";
+export const NEWS_ID = "2026-10-18-field15";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Each kind on Bests now names the day of its last fish, and in a season's view a kind caught there for the first time carries a “New this season” stamp. A kind's page counts its fish year by year, each year opening that season's fish.",
   "After an update the game opens faster on a phone it has run on before, because the 3D engine and the app's other libraries stay saved on the phone. With larger text on a phone, the walking stick keeps its size instead of running into the lure picker, and the cast meter sits beside it, where the hint and the first-cast guide no longer cover it.",
   "A lure that took fish can now go straight into the next outing's bag from Gear's lure record, which also says how many fish each lure takes an outing. The Map says how long each water has rested since your last outing there.",
   "A phone or computer set to increase contrast now starts the lake in high contrast, which Settings can turn off. In Windows high contrast mode the cast and fight meters, the strike timer and the Bests calendar and charts no longer vanish, and the page, tab or choice in use is marked.",
