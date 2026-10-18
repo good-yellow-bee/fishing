@@ -43,6 +43,7 @@ vi.mock("../game/scene/FishingWorld", () => ({
 }));
 
 import { DockPage } from "./Dock";
+import { loadReleased } from "../game/releasedFish";
 
 const me: Me = {
   user: { id: "u1", email: "ash@stillwater.test", name: "Ash" },
@@ -327,6 +328,18 @@ describe("days on the water", () => {
 });
 
 describe("letting a fish go", () => {
+  it("remembers a let-go pike at its bank, so it may bite there again another day", async () => {
+    const pike = fishById("pike")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pike", points: 5, speciesId: pike.id, weight: 6 });
+    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-pike", released: true });
+    landed.outcome = { kind: "landed", id: "catch-pike", species: pike, weight: 6, spot: "reeds", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    const release = [...page.querySelectorAll(".landed-card button")].find((b) => b.textContent === "Release") as HTMLButtonElement;
+    await act(async () => release.click());
+    expect(loadReleased()).toEqual([expect.objectContaining({ species: "pike", weight: 6, spot: "reeds" })]);
+  });
+
   it("releases the landed fish from the card and drops it back in the scene", async () => {
     const perch = fishById("perch")!;
     vi.mocked(recordCatch).mockResolvedValue({ id: "catch-release", points: 1, speciesId: perch.id, weight: 0.6 });

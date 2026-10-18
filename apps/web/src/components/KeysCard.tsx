@@ -52,9 +52,12 @@ export function KeysCard({ onClose }: { onClose: () => void }) {
           </tbody>
         </table>
         <p className="settings-note">{t("On a touch screen, tap the water to aim and cast, and tap anywhere to strike.")}</p>
-        <button className="panel-btn" type="button" onClick={onClose}>
-          {t("Back to the lake")}
-        </button>
+        {/* Pinned to the foot, so focusing it on open leaves the card at its title instead of scrolling a phone to the end. */}
+        <div className="settings-foot">
+          <button className="panel-btn" type="button" onClick={onClose}>
+            {t("Back to the lake")}
+          </button>
+        </div>
       </section>
     </div>
   );
