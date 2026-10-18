@@ -20,9 +20,9 @@ export function savedState(kind: SavedKind, news?: string | null, at?: string) {
 }
 
 /** A save that went Back to the page its form was opened from: said there, since Back carries no link state. */
-let afterBack: SavedKind | null = null;
-export function sayAfterBack(kind: SavedKind) {
-  afterBack = kind;
+let afterBack: { kind: SavedKind; news?: string; at?: string } | null = null;
+export function sayAfterBack(kind: SavedKind, news?: string | null, at?: string) {
+  afterBack = { kind, ...(news ? { news } : {}), ...(at ? { at } : {}) };
 }
 
 /** After a save that lands on another page, a short line that it went through, gone after a few seconds. */
@@ -38,7 +38,7 @@ export function SavedNote() {
 
   useEffect(() => {
     if (!afterBack) return;
-    setShown({ kind: afterBack, on: location.pathname });
+    setShown({ ...afterBack, on: location.pathname });
     afterBack = null;
   }, [location.key, location.pathname]);
 

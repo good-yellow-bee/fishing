@@ -1,15 +1,16 @@
 import { useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { catchesNewestFirst, spotById, type CatchEntry } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, spotById, type CatchEntry } from "@stillwater/shared";
 import { photoRoomChars } from "./photoStore";
 import { spareGameSnapshots } from "./keepCatch";
 import { t, tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
-import { formatDay } from "./format";
+import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
 import { bookFishDay, catchMonth, monthName } from "./tripMonths";
 import { speciesCounts } from "./speciesLink";
+import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
 import { exactTerm } from "./findLinks";
 import { biggestOf } from "./BiggestHere";
@@ -139,7 +140,7 @@ export function PhotosPage() {
           {unpictured.map(({ entry, kind }, index) => (
             <span key={kind}>
               {index > 0 ? " · " : ""}
-              <Link to={catchLink(entry.id)}>
+              <Link to={catchLink(entry.id)} state={FROM_LIST}>
                 {t(kind === "weight" ? "Your heaviest fish has no photo: {fish}" : "Your longest fish has no photo: {fish}", { fish: `${t(entry.species)}, ${measuresText(entry)}` })}
               </Link>
             </span>
@@ -191,12 +192,13 @@ export function PhotosPage() {
                     <li key={entry.id}>
                       {/* Stepping on from the fish goes through the photos shown here, not the whole book. */}
                       {/* The water picked too, when it has a name to search by. */}
-                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}photo`)}>
+                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}photo`)} state={FROM_LIST}>
                         <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>
                           <small>
-                            {size} · {formatDay(bookFishDay(book, entry))}
+                            {/* Under its clock month, a night's small-hours fish says its time, as the catch cards do. */}
+                            {size} · {bookFishDay(book, entry) === localDate(new Date(entry.caughtAt)) ? formatDay(bookFishDay(book, entry)) : formatClock(entry.caughtAt)}
                             {spotById(book, entry.spotId) ? ` · ${spotById(book, entry.spotId)!.name}` : ""}
                           </small>
                         </span>
