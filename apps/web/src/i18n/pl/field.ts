@@ -268,6 +268,8 @@ export const PL_FIELD: PlBook = {
   "{fish}, all {species}": "{fish}, wszystkie: {species}",
   "{fish}, mostly {species}": "{fish}, głównie {species}",
   "Next outing: {when}": "Następna wyprawa: {when}",
+  "Next outing here: {when}": "Następna wyprawa tutaj: {when}",
+  "{name} then holds {fish} and {outings}.": "Potem na łowisku {name}: {fish}, {outings}.",
   "Last here: {title}, {day} · {fish}": "Ostatnio tutaj: {title}, {day} · {fish}",
   "Not on a trip": "Poza wyprawą",
   Sky: "Niebo",
