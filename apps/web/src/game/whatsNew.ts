@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game12";
+export const NEWS_ID = "2026-10-18-pa13";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Screen readers and keyboards find their way more easily. The lake now has a page heading, so a screen reader can jump straight to it, and the notes beside the dock (where you stand, the controls) are named, so the list of page areas says what each one is. Keyboard focus rings on the field log's pages and the sign-in card are a deeper colour that stands out against the paper.",
   "The wind's direction now matters: a light breeze blowing onto a bank pushes the food in, so the fish there bite sooner. The walk signs show which banks, and the shack's chalk board names them for the next three days. And a cast tight to the lily pads lands where the bass and pike wait in ambush, so the bite comes sooner, but anything but a topwater can foul on the pad stems.",
   "In January, Bests still offers last season's recap, a season's recap and its copy name its best day, and a year search with no fish says where the book starts.",
   "All winter a snowman in a red scarf stands in front of the shack. By day a woodpecker hitches up the owl's dead tree, drumming as it goes, and the fireflies now come out only on summer nights.",
