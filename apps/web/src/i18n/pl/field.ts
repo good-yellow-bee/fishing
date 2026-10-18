@@ -802,4 +802,11 @@ export const PL_FIELD: PlBook = {
   "Delete this water? Also leaving the book: {what}.": "Usunąć to łowisko? Z dziennika zniknie też: {what}.",
   "Weeks in a row on the water: {count}, and still going": "Tygodnie z wyprawą z rzędu: {count} i seria trwa",
   "Most weeks in a row on the water: {count}": "Najwięcej tygodni z wyprawą z rzędu: {count}",
+  "Outings: {count} · {fish}": "Wyprawy: {count} · {fish}",
+  "still to pack": "jeszcze do spakowania",
+  "Copy what's still to pack": "Skopiuj, co jeszcze do spakowania",
+  "Still to pack copied.": "Skopiowano, co jeszcze do spakowania.",
+  "What's still to pack was downloaded instead.": "Zamiast tego pobrano plik z tym, co jeszcze do spakowania.",
+  "{n} days ago": ["{n} dzień temu", "{n} dni temu", "{n} dni temu"],
+  "last {day}": "ostatnio {day}",
 };

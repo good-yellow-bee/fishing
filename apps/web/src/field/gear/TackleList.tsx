@@ -61,6 +61,11 @@ export function TackleList({
   const packed = packedCount(rows);
   // Pieces compare as they read: "Rosówka" typed on a Polish list is the stored "Nightcrawler" of the tips and the fish.
   const readKey = (label: string) => shownPieceKey(label);
+  // The copied list's first line: the outing and its day where it has one.
+  const listTitle = () => {
+    const trip = trips.find((row) => row.id === tripId);
+    return trip ? `${t("Tackle for {trip}", { trip: outingName(trip, spots) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle"));
+  };
   const onList = new Set(rows.map((item) => readKey(item.label)));
   const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
   const took = new Map<string, number>();
@@ -241,14 +246,21 @@ export function TackleList({
       )}
       {rows.length > 0 ? (
         <CopySummary
-          text={() => {
-            const trip = trips.find((row) => row.id === tripId);
-            return packingText(trip ? `${t("Tackle for {trip}", { trip: outingName(trip, spots) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle")), rows);
-          }}
+          text={() => packingText(listTitle(), rows)}
           file="stillwater-tackle.txt"
           label={t("Copy the list")}
           copied={t("List copied.")}
           saved={t("The list was downloaded instead.")}
+        />
+      ) : null}
+      {/* Half packed: just what's left, as a list to shop for or gather. */}
+      {rows.some((item) => item.packed) && rows.some((item) => !item.packed) ? (
+        <CopySummary
+          text={() => packingText(`${listTitle()} · ${t("still to pack")}`, rows.filter((item) => !item.packed))}
+          file="stillwater-still-to-pack.txt"
+          label={t("Copy what's still to pack")}
+          copied={t("Still to pack copied.")}
+          saved={t("What's still to pack was downloaded instead.")}
         />
       ) : null}
       {missing.length > 0 ? (

@@ -163,7 +163,7 @@ export function TripsPage() {
             }}
           />
           <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
-            {needle ? <p>{found.length === 0 ? t("No outing matches that.") : t("Outings: {count}", { count: found.length })}</p> : null}
+            {needle ? <p>{found.length === 0 ? t("No outing matches that.") : t("Outings: {count} · {fish}", { count: found.length, fish: fishCountLabel(found.reduce((sum, trip) => sum + (fishByTrip.get(trip.id) ?? 0), 0)) })}</p> : null}
           </div>
           {found.length > 0 ? (
             <PagedTrips key={needle} trips={found} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>

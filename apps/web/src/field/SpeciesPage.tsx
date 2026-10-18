@@ -1,11 +1,12 @@
 import { Fragment, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FISH, biteTimes, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
+import { FISH, biteTimes, localDate, lureTally, measureOf, moonTally, seasonTally, sizePairs, skyTally, type CatchEntry, type Measure } from "@stillwater/shared";
 import { getUnits, num, t, tn, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { FishSum } from "./FishSum";
 import { FishCsv } from "./FishCsv";
 import { fishCountLabel, formatCatchDay, outingNameById } from "./format";
+import { daysBetween } from "./spotOrder";
 import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
@@ -72,7 +73,7 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
   );
 }
 
-/** The biggest fish of the kind on one lure, by the measure most of the kind were taken in: "best 32 in". */
+/** The biggest fish of the kind on one lure, by the measure most of the kind were taken in, and the day of its newest: "best 32 in · last Oct 3". */
 function lureBest(catches: readonly CatchEntry[], lure: string): string | undefined {
   const lengths = catches.filter((entry) => measureOf(entry, "length")).length;
   const kind: Measure["kind"] = lengths * 2 >= catches.length ? "length" : "weight";
@@ -85,7 +86,10 @@ function lureBest(catches: readonly CatchEntry[], lure: string): string | undefi
     const size = (m: Measure) => (m.kind === "length" ? m.inches : m.pounds);
     if (!best || size(measure) > size(best)) best = measure;
   }
-  return best ? t("best {size}", { size: measureText(best) }) : undefined;
+  // The newest fish on it too: a lure that took the kind once, long ago, reads apart from one still taking it.
+  const newest = catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === want);
+  const last = newest ? t("last {day}", { day: formatCatchDay(newest.caughtAt) }) : null;
+  return [best ? t("best {size}", { size: measureText(best) }) : null, last].filter(Boolean).join(" · ") || undefined;
 }
 
 /** "Up 2 in since 2023.": the first year with enough fish against the last, or nothing when they read the same. */
@@ -356,9 +360,12 @@ function SeasonFirst({ catches }: { catches: readonly CatchEntry[] }) {
 function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   const firstDay = <Link to={`/catches/${first.id}`}>{formatCatchDay(first.caughtAt)}</Link>;
   const lastDay = <Link to={`/catches/${last.id}`}>{formatCatchDay(last.caughtAt)}</Link>;
+  // How long since the newest, once it is more than a day: whether the kind has gone quiet.
+  const since = daysBetween(localDate(new Date(last.caughtAt)), localDate(new Date()));
   return (
     <p className="meta species-span">
       {t("First in the book")} {firstDay} · {t("newest")} {lastDay}
+      {since >= 2 ? ` (${tn(since, "{n} day ago", "{n} days ago")})` : null}
     </p>
   );
 }
