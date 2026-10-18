@@ -56,6 +56,8 @@ import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
 import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
+import { Whirligigs } from "./Whirligigs";
+import { whirligigsOut } from "./whirligigSpin";
 import { ReedFluff } from "./ReedFluff";
 import { Gusts } from "./Gusts";
 import { Whitecaps } from "./Whitecaps";
@@ -2097,6 +2099,7 @@ export const LakeWorld = memo(function LakeWorld({
       {deerOut(hour, sky) && <Deer />}
       {mooseOut(hour, sky, season) && <Moose antlers={mooseAntlers(season)} />}
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
+      {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <ShorePath />
       <BankWalks />
