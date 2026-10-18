@@ -1,4 +1,4 @@
-import { forecast, hotBankForDay, lakeSeason, SPOT_LABELS, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
+import { dailyWind, forecast, hotBankForDay, type ForecastDay, lakeSeason, SPOT_LABELS, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
 import { isTurnover, rainedYesterday } from "../game/logic";
 
@@ -33,6 +33,20 @@ const POST_FRONT_TIP = "Bright after the rain: the fish sulk deep till noon, but
 /** The days the lake turns over in late fall (turnoverWaitMul). */
 const TURNOVER_TIP = "The lake is turning over: slow bites, except in the inlet's fresh water.";
 
+/** The banks a light breeze blows onto, so the fish follow the food in (windwardWaitMul); a south wind blows onto no bank. */
+const WINDWARD_TIPS: Partial<Record<string, string>> = {
+  "light-north": "A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in.",
+  "light-east": "A light east breeze blows onto the Inlet and Reeds, and the fish follow the food in.",
+  "light-west": "A light west breeze blows onto the Drop-off, and the fish follow the food in.",
+};
+
+/** The day's breeze tip, when the wind holds all day: a sky that turns can change the wind, so that day says nothing. */
+function windwardTip(day: ForecastDay) {
+  const wind = dailyWind(day.date, day.sky).wind;
+  if (day.turn && dailyWind(day.date, day.turn.to).wind !== wind) return null;
+  return WINDWARD_TIPS[wind] ?? null;
+}
+
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
 export function ForecastBoard({ now = new Date() }: { now?: Date }) {
   useT();
@@ -56,6 +70,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             {day.turn?.to === "clear" && <span className="forecast-tip">{t(FOG_LIFT_TIP, { hour: day.turn.hour })}</span>}
             {day.sky === "clear" && rainedYesterday(day.date) && <span className="forecast-tip">{t(POST_FRONT_TIP)}</span>}
             {isTurnover(day.date) && <span className="forecast-tip">{t(TURNOVER_TIP)}</span>}
+            {windwardTip(day) && <span className="forecast-tip">{t(windwardTip(day)!)}</span>}
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}

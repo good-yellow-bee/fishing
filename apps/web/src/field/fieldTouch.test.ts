@@ -91,6 +91,10 @@ describe("the field log's forms by keyboard", () => {
 });
 
 describe("a fish's page on a touch screen", () => {
+  it("parts stacked count links far enough that each keeps its reach", () => {
+    expect(/\n  p\.meta:has\(> a\) \+ p\.meta:has\(> a\) \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 12px;");
+  });
+
   it("parts the head's wrapped links and Copy a summary from the outing link below", () => {
     expect(/\n  p\.meta\.stand \{([^}]*)\}/.exec(css)?.[1]).toContain("line-height: 2.2;");
     expect(/\n  \.trip-again \+ \.trip-link \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 18px;");
@@ -109,6 +113,11 @@ describe("a page's eyebrow links on a touch screen", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
     const block = /\n  \.sheet p\.eyebrow:has\(a\) \{([^}]*)\}/.exec(touch)?.[1];
     expect(block).toContain("flex-wrap: wrap;");
-    expect(block).toContain("gap: 20px 0.3em;");
+    expect(block).toContain("gap: 24px 0.3em;");
+  });
+
+  it("reaches 11 px past an eyebrow link's solid line, to 33 px", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect(/\n  \.sheet \.eyebrow a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("inset: -11px -4px;");
   });
 });
