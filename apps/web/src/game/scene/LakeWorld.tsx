@@ -197,6 +197,8 @@ import { Coots } from "./Coots";
 import { cootsOut } from "./cootSquabble";
 import { murmurationOut } from "./murmuration";
 import { Starlings } from "./Starlings";
+import { DockRobin } from "./DockRobin";
+import { robinOut } from "./robinVisit";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2321,6 +2323,7 @@ export const LakeWorld = memo(function LakeWorld({
       {eaveLightsOn(hour, season) && <EaveLights />}
       {cootsOut(hour, season) && <Coots squabbling={season === "spring"} />}
       {murmurationOut(hour, sky, season) && <Starlings />}
+      {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
