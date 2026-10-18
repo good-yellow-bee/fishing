@@ -67,6 +67,19 @@ describe("ForecastBoard", () => {
     act(() => root.unmount());
   });
 
+  it("chalks the hour the fog burns off on a foggy morning", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 365 }, (_, n) => new Date(2026, 0, 1 + n, 8));
+    const foggy = days.find((day) => skyTurnForDay(day)?.to === "clear")!;
+    act(() => root.render(<ForecastBoard now={foggy} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(`The fish move up to feed as the fog burns off, from ${skyTurnForDay(foggy)!.hour}:00.`);
+    act(() => root.render(<ForecastBoard now={days.find((day) => !skyTurnForDay(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain("fog burns off");
+    act(() => root.unmount());
+  });
+
   it("chalks what a full or new moon does to the night's bite", () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     const host = document.createElement("div");

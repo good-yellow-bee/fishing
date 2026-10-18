@@ -226,6 +226,14 @@ export function preRainWaitMul(now: Date, sky: string | undefined, turn = skyTur
   return turn?.to === "rain" && sky === "overcast" && now.getHours() === turn.hour - 1 ? PRE_RAIN_WAIT : 1;
 }
 
+/** As a morning's fog burns off, the fish move up into the warming water to feed, so every bite comes a little sooner. */
+export const FOG_LIFT_WAIT = 0.85;
+
+/** How the lifting fog shortens the wait: in the first clear hour after a foggy morning (only fog turns clear), FOG_LIFT_WAIT, else 1. */
+export function fogLiftWaitMul(now: Date, sky: string | undefined, turn = skyTurnForDay(now)) {
+  return turn?.to === "clear" && sky === "clear" && now.getHours() === turn.hour ? FOG_LIFT_WAIT : 1;
+}
+
 /** A breeze chops the surface, and under the broken light the fish feed bolder, so any lure but a topwater draws the bite sooner. */
 export const CHOP_WAIT = 0.9;
 
