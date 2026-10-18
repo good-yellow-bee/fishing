@@ -535,6 +535,14 @@ export function groundbaitFeeder(spot: SpotId, lure: string | undefined, shortCa
   return feeders.at(-1) ?? null;
 }
 
+/** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
+export const FRESH_WAIT = 0.9;
+
+/** Whether this is the visit's first cast at the bank, and the banks fished after it. */
+export function castOnFreshWater(fished: ReadonlySet<SpotId>, spot: SpotId): { fresh: boolean; next: ReadonlySet<SpotId> } {
+  return fished.has(spot) ? { fresh: false, next: fished } : { fresh: true, next: new Set([...fished, spot]) };
+}
+
 /** Casts in a row at one bank before its fish grow wary of the line. */
 export const PRESSURE_CASTS = 8;
 /** Bites come this much slower on a bank fished that long without a move. */
