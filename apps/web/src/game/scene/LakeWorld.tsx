@@ -97,6 +97,7 @@ import { Hare } from "./Hare";
 import { hareCoat, hareOut } from "./hareRounds";
 import { Wildflowers } from "./Wildflowers";
 import { beesOut } from "./meadowFlowers";
+import { Woodpile } from "./Woodpile";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
@@ -2155,6 +2156,7 @@ export const LakeWorld = memo(function LakeWorld({
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
+      <Woodpile season={season} />
       {snowmanUp(season) && <Snowman />}
       {feederUp(season) && <BirdFeeder birds={chickadeesOut(hour, sky)} />}
       <Clothesline washing={washingOut(hour, sky, season)} wind={wind} />
