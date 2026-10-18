@@ -42,6 +42,8 @@ describe("field guide card", () => {
       "Drop-off: small lure at dusk",
       "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
       "Bites: runs off with it, sliding the float away",
+      "Jumper: every second run is a leap, so let go when it comes up",
+      "Scrapper: pound for pound it fights hardest, so it tires slowly",
       "Fights hard: guarding its nest at the Reeds or the Dock in spring, in the Inlet's current",
       "Runs in summer",
     ]);
@@ -79,6 +81,13 @@ describe("field guide card", () => {
 
   it("says the clues are for a cast released in the band", () => {
     expect(render([]).querySelector(".guide-note")?.textContent).toBe("Lure and time clues assume a cast released in the band. Most fish tire sooner in winter's cold.");
+  });
+
+  it("lists a logged fish's own fight habits, as the fight card does, and keeps them hidden until then", () => {
+    expect(cards([stat("pike", 4)])("pike").lines).toContain("Roller: at the net it rolls on the line instead of running");
+    expect(cards([stat("crappie", 0.6)])("crappie").lines).toContain("Soft mouth: reel in the red and the hook tears out");
+    expect(cards([])("pike").text).not.toContain("Roller:");
+    expect(cards([stat("golden-shiner", 0.2)])("golden-shiner").lines.filter((line) => /^(Jumper|Breacher|Roller|Tail-walker|Scrapper|Circler|Quitter|Head-shaker|Bottom-sticker|Darter|Cover-diver|Long runner|Soft mouth):/.test(line))).toEqual([]);
   });
 
   it("says when a logged fish fights hard or tires sooner, and keeps it hidden until then", () => {
