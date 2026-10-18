@@ -154,6 +154,12 @@ import { Campers, Tent } from "./Tent";
 import { CAMP_FIRE_AT, CAMP_LIGHTS, campersOut, tentPitched } from "./campTent";
 import { Pumpkins } from "./Pumpkins";
 import { pumpkinsOut } from "./pumpkinPatch";
+import { Hummingbird } from "./Hummingbird";
+import { hummingbirdOut } from "./hummingbirdVisits";
+import { FogAngler } from "./FogAngler";
+import { fogAnglerOut } from "./fogFishing";
+import { DogWalker } from "./DogWalker";
+import { dogWalkOut } from "./dogWalk";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -2175,6 +2181,7 @@ export const LakeWorld = memo(function LakeWorld({
       {catPlace(hour, sky) && <Cat place={catPlace(hour, sky)!} />}
       {hareOut(hour, sky) && <Hare coat={hareCoat(season)} />}
       {season !== "winter" && <Wildflowers season={season} bees={beesOut(hour, sky, season)} />}
+      {hummingbirdOut(hour, sky, season) && <Hummingbird season={season} />}
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
       <ShorePath />
@@ -2244,6 +2251,8 @@ export const LakeWorld = memo(function LakeWorld({
       {skiingOut(hour, sky, season) && <Skier />}
       {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
+      {fogAnglerOut(hour, sky) && <FogAngler />}
+      {dogWalkOut(hour, sky, season) && <DogWalker />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>

@@ -233,6 +233,14 @@ describe("FightBar for screen readers", () => {
     expect(water("pilings")).toBeNull();
   });
 
+  it("names the lily pads, not the reeds, for a fish hooked tight to the pads", () => {
+    mount({ peakTension: 0.3, maxLine: 1 });
+    act(() => root!.render(<FightBar fight={{ species: FISH.find((f) => f.id === "largemouth-bass")!, weight: 2, underpowered: false, water: "weeds", pads: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    const lines = [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent);
+    expect(lines).toContain("Lily pads: turn every run, or it dives into the pad stems");
+    expect(lines).not.toContain("Reeds: turn every run, or it goes into the weeds");
+  });
+
   it("warns of the dock's pilings for a fish whose runs can be turned", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     act(() => root!.render(<FightBar fight={{ species: FISH.find((f) => f.id === "lake-whitefish")!, weight: 2, underpowered: false, water: "pilings" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
