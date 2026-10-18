@@ -384,6 +384,66 @@ button.field-primary {
     display: inline-block;
     min-width: 32px;
   }
+
+  /* The links on every card (fish, lure, water, outing) and the page head's Cancel stood 20-28 px tall: each reaches past its line the same way. */
+  :is(.catch-card, .trip-card, .spot-card) :is(h2, h3, h4) a,
+  .meta a,
+  .trip-link a,
+  .tackle-past-link a,
+  .species-waters li a,
+  .sheet-head a:not(.field-primary),
+  .sheet .eyebrow a {
+    position: relative;
+  }
+
+  :is(.catch-card, .trip-card, .spot-card) :is(h2, h3, h4) a::after,
+  .trip-link a::after,
+  .tackle-past-link a::after,
+  .species-waters li a::after,
+  .sheet-head a:not(.field-primary)::after {
+    content: "";
+    position: absolute;
+    inset: -6px -3px;
+  }
+
+  /* Less reach upward, where the fish's name sits close above. */
+  .meta a::after {
+    content: "";
+    position: absolute;
+    inset: -4px -3px -6px;
+  }
+
+  /* When a card's line wraps (lure above water on a phone), the rows part far enough that their reach doesn't overlap. */
+  p.meta {
+    row-gap: 12px;
+  }
+
+  /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
+  :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
+    margin-top: 10px;
+  }
+
+  /* Download and Load a book stack when they wrap (larger text): the same 16 px parting. */
+  div.book-file {
+    row-gap: 16px;
+  }
+
+  /* The eyebrow's way back ("Bests") is set in small capitals, 14 px tall. */
+  .sheet .eyebrow a::after {
+    content: "";
+    position: absolute;
+    inset: -9px -4px;
+  }
+
+  /* "Released it" is a whole-row label 20 px tall; the box grows no bigger. */
+  .form-grid .check-field {
+    min-height: 32px;
+  }
+
+  /* "Rename or merge" and "Merge into another water" open from a 20 px line. */
+  .rename-kind summary {
+    padding-block: 6px;
+  }
 }
 
 .subhead,
