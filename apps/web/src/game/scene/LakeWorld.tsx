@@ -166,6 +166,8 @@ import { Woodcutter } from "./Woodcutter";
 import { choppingOut } from "./woodChopping";
 import { BoatFill } from "./BoatFill";
 import { fillKind, type FillKind } from "./boatBilge";
+import { GooseFamily } from "./GooseFamily";
+import { gooseFamilyOut } from "./gooseGraze";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2274,6 +2276,7 @@ export const LakeWorld = memo(function LakeWorld({
       {swimmingOut(hour, sky, season) && <Swimmer />}
       {choppingOut(hour, sky, season) && <Woodcutter />}
       {scullOut(hour, sky, season, wind) && <Sculler />}
+      {gooseFamilyOut(hour, season) && <GooseFamily />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
