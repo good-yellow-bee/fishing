@@ -1106,7 +1106,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC26~~ | ~~News card: the snowy walkway, pancake ice, spring blossom and sunfish nests~~ (#1057) | scene | S |
 | ~~SC27~~ | ~~Trees in the wind: the shore trees bend downwind, further the stronger the wind, and sway about that lean, with a breath of sway on a calm day; the shack's trees too~~ (#1060) | scene | S |
 | ~~SC28~~ | ~~Crayfish: from spring to fall, crayfish creep over the bed round the dock, claws out in front, then flick their tails and shoot backwards~~ (#1062) | scene | S |
-| SC29 | Whirligig beetles: on still, dry days from spring through summer, a raft of whirligig beetles whirls in tight loops on the water off the dock's right side, each in its own ring of ripple | scene | S |
+| ~~SC29~~ | ~~Whirligig beetles: on still, dry days from spring through summer, a raft of whirligig beetles whirls in tight loops on the water off the dock's right side, each in its own ring of ripple~~ (#1063) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
