@@ -51,3 +51,12 @@ describe("the effects notice", () => {
     expect(/\n\.effects-toast \{([^}]*)\}/.exec(css)?.[1]).toContain("width: max-content;");
   });
 });
+
+describe("the settings panel on a phone", () => {
+  it("is solid and keeps Back to the lake pinned at its foot while the long list scrolls", () => {
+    expect(/\n\.settings-panel \{([^}]*)\}/.exec(css)?.[1]).toContain("background: rgb(24, 29, 25);");
+    const foot = /\n\.settings-foot \{([^}]*)\}/.exec(css)?.[1];
+    expect(foot).toContain("position: sticky;");
+    expect(foot).toContain("background: inherit;");
+  });
+});
