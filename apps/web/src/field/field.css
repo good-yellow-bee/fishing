@@ -448,6 +448,12 @@ button.field-primary {
     margin-top: 18px;
   }
 
+  /* "Show all" under a list sat 4 px below its last row, its reach covering the foot of that row's link
+     (a tap on "Dawn" opened the list instead). */
+  p.tally-more {
+    margin-top: 12px;
+  }
+
   /* "Add the one you fished" under the Water picker stood 17 px tall on a phone held sideways. */
   .own-water a {
     display: inline-block;
