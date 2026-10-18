@@ -160,6 +160,8 @@ import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
 import { dogWalkOut } from "./dogWalk";
+import { Swimmer } from "./Swimmer";
+import { swimmingOut } from "./swimLane";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -2253,6 +2255,7 @@ export const LakeWorld = memo(function LakeWorld({
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
       {fogAnglerOut(hour, sky) && <FogAngler />}
       {dogWalkOut(hour, sky, season) && <DogWalker />}
+      {swimmingOut(hour, sky, season) && <Swimmer />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
