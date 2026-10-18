@@ -488,9 +488,12 @@ export function isWinterSchool(id: string, season?: string) {
   return season === "winter" && WINTER_SCHOOLERS.has(id);
 }
 
-export function schoolAfterLanding(id: string, spot: SpotId, hour?: LakeHour, season?: string): School | null {
+/** A school landed over groundbait keeps feeding on it and stays this many casts longer. */
+export const GROUNDBAIT_SCHOOL_CASTS = 1;
+
+export function schoolAfterLanding(id: string, spot: SpotId, hour?: LakeHour, season?: string, baited = false): School | null {
   const twilight = hour === "dawn" || hour === "dusk";
-  return SCHOOLERS.has(id) ? { spot, id, casts: SCHOOL_CASTS + (twilight ? TWILIGHT_SCHOOL_CASTS : 0) + (isWinterSchool(id, season) ? WINTER_SCHOOL_CASTS : 0) } : null;
+  return SCHOOLERS.has(id) ? { spot, id, casts: SCHOOL_CASTS + (twilight ? TWILIGHT_SCHOOL_CASTS : 0) + (isWinterSchool(id, season) ? WINTER_SCHOOL_CASTS : 0) + (baited ? GROUNDBAIT_SCHOOL_CASTS : 0) } : null;
 }
 
 /** Whether a cast at this bank lands in the school, and what the school is after the cast. */

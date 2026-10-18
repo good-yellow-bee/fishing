@@ -37,7 +37,7 @@ import { castSnags, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, type Groundbait, castIntoSpooked, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, type Groundbait, castIntoSpooked, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -285,6 +285,8 @@ export function useFishingGame(
   const followRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
+  /** This cast went in over the groundbait, so a school landed from it stays to feed. */
+  const castBaitedRef = useRef(false);
   /** The hook went in solid on a quick strike. */
   const hookedSolidRef = useRef(false);
   /** A pike waiting to hit the shiner on the line, and the angler it was rolled for. */
@@ -550,6 +552,7 @@ export function useFishingGame(
     spookRef.current = null;
     const bait = castOverGroundbait(groundbaitRef.current, spotRef.current);
     groundbaitRef.current = bait.next;
+    castBaitedRef.current = bait.baited;
     setGroundbait(bait.next);
     const schoolFish = school.schoolId ? FISH.find((fish) => fish.id === school.schoolId) : undefined;
     setSchooled(!!schoolFish);
@@ -1205,7 +1208,7 @@ export function useFishingGame(
             fx.haptic("land");
             const clean = isCleanFight(runtime.performance);
             cleanRunRef.current = clean ? cleanRunRef.current + 1 : 0;
-            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current, season);
+            schoolRef.current = schoolAfterLanding(current.species.id, spotRef.current, hourRef.current, season, castBaitedRef.current);
             // A hunter that followed the small fish in stays about the bank for the next few casts.
             const follow = followRef.current;
             followRef.current = null;
@@ -1214,9 +1217,11 @@ export function useFishingGame(
               ? ""
               : isWinterSchool(current.species.id, season)
                 ? t("{fish}: there's a big winter school here, and it stays a while. Cast again quickly!", { fish: t(current.species.name) })
-                : schoolRef.current.casts > SCHOOL_CASTS
+                : hourRef.current === "dawn" || hourRef.current === "dusk"
                   ? t("{fish}: there's a school here, feeding hard in the low light. Cast again quickly!", { fish: t(current.species.name) })
-                  : t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) });
+                  : castBaitedRef.current
+                    ? t("{fish}: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!", { fish: t(current.species.name) })
+                    : t("{fish}: there's a school here, cast again quickly!", { fish: t(current.species.name) });
             const followed = follow && gotAwayRef.current?.follow ? `${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
             // The landed card covers the hint, so what the bank holds now rides on the card too.
             const landedNote = [schooled, followed].filter(Boolean).join(" ");
