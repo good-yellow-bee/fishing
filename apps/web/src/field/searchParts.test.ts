@@ -27,12 +27,27 @@ describe("split a search on +", () => {
     expect(searchParts(book, "1,5–2 kg")).toEqual([">1,5 kg", "<=2 kg"]);
     expect(searchParts(book, "30-25 in")).toEqual([">25 in", "<=30 in"]);
     expect(searchParts(book, "pike 20+ in")).toEqual(["pike >20 in"]);
+    // Without "from" or "od", and with the unit typed on both ends.
+    expect(searchParts(book, "pike 50 to 60 cm")).toEqual(["pike >50 cm", "<=60 cm"]);
+    expect(searchParts(book, "szczupak 50 do 60 cm")).toEqual(["szczupak >50 cm", "<=60 cm"]);
+    expect(searchParts(book, "from 50 cm to 60 cm")).toEqual([">50 cm", "<=60 cm"]);
+    expect(searchParts(book, "50 cm - 60 cm")).toEqual([">50 cm", "<=60 cm"]);
+    expect(searchParts(book, "between 2 and 3 lb")).toEqual([">2 lb", "<=3 lb"]);
+    expect(searchParts(book, "do 25 cm")).toEqual(["<=25 cm"]);
+  });
+
+  it("leaves a name with a size in it whole", () => {
+    const sized = { ...book, catches: [{ ...book.catches[0]!, lure: "Kopyto 8 cm" }] };
+    expect(searchParts(sized, "Kopyto 8 cm")).toEqual(["Kopyto 8 cm"]);
+    expect(searchParts(sized, "20 dkg")).toEqual([">19.5 dag", "<20.5 dag"]);
   });
 
   it("reads one size as the fish that round to it", () => {
     expect(searchParts(book, "pike 17 in")).toEqual(["pike >16.5 in", "<17.5 in"]);
     expect(searchParts(book, "2,5 kg")).toEqual([">2.45 kg", "<2.55 kg"]);
-    expect(searchParts(book, "3 lb 2 oz")).toEqual(["3 lb 2 oz"]);
+    // A weight as the scale reads it: to the nearest ounce.
+    expect(searchParts(book, "bass 3 lb 2 oz")).toEqual(["bass >3.094 lb", "<3.156 lb"]);
+    expect(searchParts(book, "< 3 lb 2 oz")).toEqual(["< 3 lb 2 oz"]);
     expect(searchParts(book, ">3 lb")).toEqual([">3 lb"]);
     expect(searchParts(book, "2026-10-12")).toEqual(["2026-10-12"]);
   });

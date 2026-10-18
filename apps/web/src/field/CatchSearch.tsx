@@ -25,6 +25,13 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
+import { PL } from "../i18n/pl";
+
+/** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
+function inPolish(name: string): string {
+  const line = PL[name];
+  return typeof line === "string" ? line : name;
+}
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 
@@ -86,7 +93,7 @@ function windHas(entry: CatchEntry, want: string, t: (text: string) => string): 
 
 /** True when the season the fish came in ("Fall", "Jesień") starts with what was typed, from three letters up. */
 /** Other words for the seasons: "autumn", and the Polish "in summer" forms ("latem"). */
-const SEASON_WORDS: Record<string, string[]> = { spring: ["wiosną"], summer: ["latem"], fall: ["autumn", "jesienią"], winter: ["zimą"] };
+const SEASON_WORDS: Record<string, string[]> = { spring: ["wiosną", "wiosnę"], summer: ["latem", "lecie"], fall: ["autumn", "jesienią", "jesieni"], winter: ["zimą", "zimie"] };
 
 function seasonHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
@@ -198,9 +205,10 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     return month === null ? [] : catchesNewestFirst(book).filter((entry) => Number(catchMonth(entry).slice(5)) === month);
   }
   if (exact) {
-    // One name whole, as stored or as it reads in the player's language.
+    // One name whole, as stored or as it reads in the player's language, or in Polish: a link made in Polish still
+    // opens its fish after a switch to English.
     const want = normalize(exact.name);
-    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want;
+    const named = (name: string) => normalize(name) === want || normalize(t(name)) === want || normalize(inPolish(name)) === want;
     return catchesNewestFirst(book).filter((entry) => {
       const name = exactName(book, entry, exact.field);
       return name !== null && named(name);
@@ -254,7 +262,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     return catchesNewestFirst(book).filter((entry) => badges.has(entry.id));
   }
   // "weekend": every fish caught on a Saturday or a Sunday.
-  if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(entry.caughtAt).getDay()));
+  // By the day it counts on: a night session's small hours stay on its outing's day, as the day searches take them.
+  if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(`${bookFishDay(book, entry)}T12:00:00`).getDay()));
   // A day's fish as the calendar counts them: a night session's small hours on its outing's day.
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => bookFishDay(book, entry) === needle.trim());
   // "2026": the fish of that local year, not every note or title with the number in it.
@@ -274,7 +283,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   const translated = getLang() !== "en";
   const want = normalize(needle);
   // "released" or "kept" whole: just the fish put back, or just the ones taken home, not every note with the word.
-  if (want === normalize(t("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
+  if (want === normalize(t("Released")) || want === normalize(inPolish("Released"))) return catchesNewestFirst(book).filter((entry) => entry.released);
   if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
@@ -310,7 +319,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
 }
 
 /** A `field:"name"` term: its name is the book's own words, sizes, dashes and "+" included ("Kopyto 8 cm", "Mille Lacs - north"). */
-const QUOTED_TERM = /[a-z]+:"[^"]*"/gi;
+// It ends at a quote with nothing, a "+" or a " -" after it, so an inch mark inside a lure's name ('4" Senko - green') stays in.
+const QUOTED_TERM = /[a-z]+:".*?"(?=\s*(?:\+|\s-(?!\d)|$))|[a-z]+:"[^"]*"/gi;
 
 /** Each quoted term set aside behind a mark, so nothing reads inside it; `back` puts them in again. */
 function holdQuoted(text: string): { text: string; back: (part: string) => string } {
@@ -325,17 +335,31 @@ function holdQuoted(text: string): { text: string; back: (part: string) => strin
 export function searchParts(book: Logbook, needle: string): string[] {
   const quoted = holdQuoted(needle);
   needle = quoted.text;
-  const names = [...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])]
-    .filter((name) => name.includes("+"))
-    .sort((a, b) => b.length - a.length);
+  const bookNames = [...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])];
+  const names = bookNames.filter((name) => name.includes("+")).sort((a, b) => b.length - a.length);
   const kept: string[] = [];
+  // A name with a size in it ("Kopyto 8 cm", "Wahadłówka 10 g") is the name, not a size to find: set aside before the
+  // sizes are read, as a quoted name is.
+  const sizedNames = [...new Set(bookNames.filter((name) => /\d\s?(?:lbs?|oz|kg|dag|dkg|g|in|cm|mm)\b/i.test(name)))].sort((a, b) => b.length - a.length);
+  for (const name of sizedNames) {
+    const at = needle.toLowerCase().indexOf(name.toLowerCase());
+    if (at < 0) continue;
+    kept.push(needle.slice(at, at + name.length));
+    needle = `${needle.slice(0, at)}\u0000${kept.length - 1}\u0000${needle.slice(at + name.length)}`;
+  }
   // "over 10 in", "under 2 lb", "ponad 60 cm": the words for a bound, read as ">" and "<" before a size or temperature.
   const sized = String.raw`(?=\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$))`;
   // "10 inches" or "10 inch": the unit as the search reads it.
+  const unit = String.raw`(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])`;
   let text = needle
     .replace(/(\d)\s?inch(?:es)?(?=[\s+]|$)/gi, "$1 in")
-    // "od 20 do 25 cm", "between 20 and 25 in", "from 2 to 3 lb": the range "20-25 cm", read below.
-    .replace(/(^|[\s+])(?:od|from|between)\s+(\d+(?:[.,]\d+)?)\s+(?:do|to|and)\s+(\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]))(?=[\s+]|$)/gi, "$1$2-$3")
+    // "20 dkg": the Polish shorthand for decagrams.
+    .replace(/(\d)\s?dkg(?=[\s+]|$)/gi, "$1 dag")
+    // "od 20 do 25 cm", "between 20 and 25 in", "from 2 to 3 lb", "50 to 60 cm", "50 cm do 60 cm": the range "20-25 cm", read below.
+    .replace(new RegExp(String.raw`(^|[\s+])between\s+(\d+(?:[.,]\d+)?)(?:\s?${unit})?\s+and\s+(\d+(?:[.,]\d+)?\s?${unit})(?=[\s+]|$)`, "gi"), "$1$2-$3")
+    .replace(new RegExp(String.raw`(^|[\s+])(?:(?:od|from)\s+)?(\d+(?:[.,]\d+)?)(?:\s?${unit})?\s+(?:do|to)\s+(\d+(?:[.,]\d+)?\s?${unit})(?=[\s+]|$)`, "gi"), "$1$2-$3")
+    // "50 cm - 60 cm": the same, the unit typed twice.
+    .replace(new RegExp(String.raw`(^|[\s+])(\d+(?:[.,]\d+)?)\s?${unit}\s?[-–]\s?(\d+(?:[.,]\d+)?\s?${unit})(?=[\s+]|$)`, "gi"), "$1$2-$3")
     .replace(new RegExp(String.raw`(^|[\s+])(?:over|above|at least|more than|bigger than|longer than|heavier than|warmer than|co najmniej|minimum|min\.?|ponad|powyżej|powyzej|więcej niż|wiecej niz|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niż|(?:większ|wieksz|dłuższ|dluzsz|cięższ|ciezsz|cieplejsz)[eya] niz|od)\s+` + sized, "gi"), "$1>")
     // "do 25 cm", "up to 2 lb", "max. 2 kg": the bound itself included; "at least" and "min." read as "over", which includes it too.
     .replace(new RegExp(String.raw`(^|[\s+])(?:do|up to|at most|co najwyżej|co najwyzej|najwyżej|najwyzej|maksymalnie|maks\.?|maximum|max\.?)\s+` + sized, "gi"), "$1<=")
@@ -348,6 +372,12 @@ export function searchParts(book: Logbook, needle: string): string[] {
   text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$)/gi, (_all, lead: string, a: string, b: string, unit: string) => {
     const [low, high] = Number(a.replace(",", ".")) <= Number(b.replace(",", ".")) ? [a, b] : [b, a];
     return `${lead}>${low} ${unit} + <=${high} ${unit}`;
+  });
+  // "3 lb 2 oz" alone, as a scale reads: the fish of that weight to the nearest ounce, half an ounce either way.
+  text = text.replace(/(?<![<>]=?\s*)(^|[\s+])(\d+)\s?lbs?\s+(\d+(?:[.,]\d+)?)\s?oz(?=[\s+]|$)/gi, (_all, lead: string, lb: string, oz: string) => {
+    const pounds = Number(lb) + Number(oz.replace(",", ".")) / 16;
+    const edge = (n: number) => String(Math.round(n * 1000) / 1000);
+    return `${lead}>${edge(pounds - 1 / 32)} lb + <${edge(pounds + 1 / 32)} lb`;
   });
   // "17 in" or "2.5 lb" alone: the fish of that size as it rounds, from half a step under it to half a step over.
   // Not part of "3 lb 2 oz", which reads as one weight, nor a bound with a space in it ("> 1 lb").
@@ -412,6 +442,8 @@ function findWords(book: Logbook, part: string, t: (text: string) => string, pic
   const found = findOne(book, part, t, pictured);
   if (found.length > 0 || part.trim().split(/\s+/).length < 2 || /[:"“”„]/.test(part)) return found;
   const words = searchTerms(part);
+  // "o świcie", "at night": the one word left once the short ones go.
+  if (words.length === 1) return words[0] === part.trim() ? found : findOne(book, words[0]!, t, pictured);
   if (words.length < 2) return found;
   let matched = findOne(book, words[0]!, t, pictured);
   for (const word of words.slice(1)) {

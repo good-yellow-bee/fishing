@@ -135,6 +135,10 @@ describe("field log", () => {
     expect(isLogbook({ ...book, catches: [{ ...entry, released: "yes" }] })).toBe(false);
   });
 
+  it("refuses a fish whose time reads as no date", () => {
+    expect(isLogbook({ ...book, catches: [{ ...book.catches[0]!, caughtAt: "yesterday-ish" }] })).toBe(false);
+  });
+
   it("rejects a time that has not happened yet", () => {
     expect(parseCatchDraft(draft("spot-cedar", { caughtAt: "2999-01-01T08:00" }), book)).toMatchObject({
       ok: false,

@@ -165,7 +165,8 @@ export function PhotosPage() {
                   return (
                     <li key={entry.id}>
                       {/* Stepping on from the fish goes through the photos shown here, not the whole book. */}
-                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}photo`)}>
+                      {/* The water picked too, when it has a name to search by. */}
+                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}photo`)}>
                         <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>

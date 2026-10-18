@@ -445,6 +445,8 @@ function isCatch(value: unknown): value is CatchEntry {
     typeof value.spotId === "string" &&
     (value.tripId === null || typeof value.tripId === "string") &&
     typeof value.caughtAt === "string" &&
+    // A time no date reads would break every list that groups fish by month.
+    !Number.isNaN(Date.parse(value.caughtAt)) &&
     typeof value.note === "string" &&
     (value.weather === null || isWeather(value.weather)) &&
     (value.released === undefined || typeof value.released === "boolean") &&

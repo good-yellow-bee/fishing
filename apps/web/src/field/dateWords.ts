@@ -53,7 +53,10 @@ function weekdayNames(): string[][] {
     const names = new Set<string>();
     for (const lang of LANGS) {
       // Whole names only: "sun" and "wed" already find sunny days and notes.
-      names.add(plain(new Intl.DateTimeFormat(lang, { weekday: "long" }).format(at)));
+      const name = plain(new Intl.DateTimeFormat(lang, { weekday: "long" }).format(at));
+      names.add(name);
+      // "w sobotę", "w środę": the Polish days ending in "a" as they read after "w".
+      if (lang === "pl" && name.endsWith("a")) names.add(`${name.slice(0, -1)}e`);
     }
     return [...names].filter(Boolean);
   });
