@@ -1149,6 +1149,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC51~~ | ~~Far-bank cabin: a log cabin across the lake, windows lit from dusk, chimney smoking in fall and winter (and spring's cold ends of the day), snow on its roof in winter~~ (#1119) | scene | S |
 | ~~SC52~~ | ~~Shack cat: a ginger cat naps curled on the grass by the shack by day, lifting its head now and then, and sits facing the campfire while it burns; indoors in the rain~~ (#1122) | scene | S |
 | ~~SC53~~ | ~~News card scene12: canoeist, far-bank cabin, shack cat~~ (#1122) | scene | S |
+| SC54 | Winter bird feeder: a snowy-roofed feeder on a post by the shack in winter, with chickadees pecking at the seed and flitting to the oak and back by day | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
