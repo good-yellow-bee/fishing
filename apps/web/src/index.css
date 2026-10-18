@@ -1599,6 +1599,16 @@ html[data-input="pad"] .fight-bar .on-pad {
   background: #28362f;
 }
 
+/* What the bank holds after the catch (a school, a hunter that followed it in): the card covers the hint, so it is told here. */
+.landed-card .catch-note {
+  max-width: 52ch;
+  margin: 12px auto 4px;
+  color: #6b4f22;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
 .landed-card .catch-actions {
   display: flex;
   flex-wrap: wrap;
