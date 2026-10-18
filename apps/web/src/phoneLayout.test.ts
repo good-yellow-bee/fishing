@@ -171,3 +171,13 @@ describe("the lake header on a phone with larger text", () => {
     expect(phone).toMatch(/html\[data-text-size\] \.hud-brand \{\n    display: none;/);
   });
 });
+
+describe("the lake's news on a touch tablet", () => {
+  it("moves right of the walking stick instead of sitting under it, unless the stick is on the other side", () => {
+    const from = css.indexOf("@media (pointer: coarse) and (min-width: 521px) {");
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    expect(block).toMatch(/html:not\(\[data-hand="left"\]\) \.lodge-tracks \{\n    left: 136px;/);
+    expect(block).toContain("max-width: min(42ch, calc(100vw / var(--text-zoom, 1) - 156px));");
+  });
+});
