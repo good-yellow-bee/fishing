@@ -158,6 +158,15 @@ describe("field log", () => {
   it("reads a spot's place however it was typed", () => {
     expect(parseSpotPlace("46.85, -94.24")).toEqual({ lat: 46.85, lng: -94.24 });
     expect(parseSpotPlace("46,85; -94,24")).toEqual({ lat: 46.85, lng: -94.24 });
+    // A map link pasted whole gives its pin.
+    expect(parseSpotPlace("https://www.google.com/maps/place/Lake/@52.2297,21.0122,14z/data=!3m1!4b1!4m6!3m5!1s0x0:0x0!8m2!3d52.23!4d21.01")).toEqual({ lat: 52.23, lng: 21.01 });
+    expect(parseSpotPlace("https://www.google.com/maps/@52.2297,21.0122,14z")).toEqual({ lat: 52.2297, lng: 21.0122 });
+    expect(parseSpotPlace("https://maps.google.com/?q=46.85,-94.24")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("https://www.openstreetmap.org/?mlat=50.06&mlon=19.94#map=15/50.06/19.94")).toEqual({ lat: 50.06, lng: 19.94 });
+    expect(parseSpotPlace("https://www.openstreetmap.org/#map=12/54.35123/18.64663")).toEqual({ lat: 54.35123, lng: 18.64663 });
+    expect(parseSpotPlace("https://maps.apple.com/?ll=46.85,-94.24&q=Pin")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("geo:46.85,-94.24")).toEqual({ lat: 46.85, lng: -94.24 });
+    expect(parseSpotPlace("https://example.com/lake")).toBeNull();
     expect(parseSpotPlace("46,85 -94,24")).toEqual({ lat: 46.85, lng: -94.24 });
     expect(parseSpotPlace("46.8551° N, 94.2438° W")).toEqual({ lat: 46.8551, lng: -94.2438 });
     expect(parseSpotPlace("94.2438 W 46.8551 N")).toEqual({ lat: 46.8551, lng: -94.2438 });

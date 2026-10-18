@@ -14,6 +14,7 @@ import {
   tripsForSpot,
   type CatchEntry,
   type Trip,
+  parseSpotPlace,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
@@ -410,7 +411,7 @@ function SpotForm() {
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [bestConditions, setBestConditions] = useState(existing?.bestConditions ?? "");
   const [place, setPlace] = useState(existing?.place ? `${existing.place.lat}, ${existing.place.lng}` : "");
-  const [locating, setLocating] = useState<"idle" | "busy" | "found" | "failed">("idle");
+  const [locating, setLocating] = useState<"idle" | "busy" | "found" | "failed" | "linked">("idle");
   const canLocate = typeof navigator !== "undefined" && "geolocation" in navigator;
   const [error, setError] = useState("");
   // Unsaved changes to a water in the book wait for the next visit to its form.
@@ -528,14 +529,28 @@ function SpotForm() {
               autoFocus={toPlace}
               autoComplete="off"
               value={place}
+              aria-describedby="place-link-hint"
               onChange={(event) => {
                 setPlace(event.target.value);
                 setLocating("idle");
+              }}
+              // A map link pasted whole turns into its pin's numbers, so what is saved is what the field shows.
+              onBlur={() => {
+                if (!/^\s*(https?:|geo:)/i.test(place)) return;
+                const pin = parseSpotPlace(place);
+                if (pin) {
+                  setPlace(`${pin.lat}, ${pin.lng}`);
+                  setLocating("linked");
+                }
               }}
               // An example place near the reader: a north-woods lake in English, a Masurian one in Polish.
               placeholder={t("46.85, -94.24")}
             />
           </label>
+          {/* Outside the label, so the field keeps its own name. */}
+          <p className="wide form-note" id="place-link-hint" role="status">
+            {locating === "linked" ? t("Place read from the map link.") : t("A link copied from a map app works too.")}
+          </p>
           {canLocate ? (
             <p className="wide form-note">
               <button

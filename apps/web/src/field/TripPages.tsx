@@ -553,6 +553,7 @@ function TripForm() {
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
   const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
+  const pickedSpot = spotById(book, spotId);
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
   // What this water gave around the same date in earlier years, for an outing being planned.
@@ -703,6 +704,8 @@ function TripForm() {
                 })}
               </small>
             ) : null}
+            {/* The light that day at the water picked, while the outing is planned around it. */}
+            {pickedSpot && /^\d{4}-\d{2}-\d{2}$/.test(date) ? <SunLine date={date} spot={pickedSpot} /> : null}
             {!existing && canFindNearest(book) ? <NearestWater book={book} onPick={setSpotId} /> : null}
           </div>
           {pastWeek.length > 0 ? (

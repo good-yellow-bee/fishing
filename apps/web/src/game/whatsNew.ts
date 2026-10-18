@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field06";
+export const NEWS_ID = "2026-10-18-field07";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's place can now be pasted as a link from Google Maps, OpenStreetMap or Apple Maps, and the field log reads the pin from it. Planning an outing offers Sunday beside Saturday and shows sunrise and sunset at the water for the day picked.",
   "The catch form now says where the time sits against the sun at the water (“40 min after sunrise”), steps forward 15 minutes as well as back when writing up an outing fish by fish, and counts lost fish and missed strikes on the outing without leaving the form.",
   "Loading a copy from another phone now shows its newest fish before you add them, and brings over the lost and missed taps made there. Photos can be narrowed to one water, the book says when its last copy was made, and What's new now shows in the field log too, a tap away at the bottom of Home.",
   "At the lake, an amber dot on a walk sign marks the banks the season, hour and weather favor right now. After dark the dock lanterns draw a shoal of minnows into their light, and the fish follow them in. Each visit brings one handful of groundbait: toss it with the button by the walk signs and the next five casts there bite sooner over its muddy cloud, and a school landed over it stays a cast longer.",

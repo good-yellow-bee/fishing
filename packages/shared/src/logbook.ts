@@ -374,9 +374,10 @@ const PLACE_NUMBER = /(-?\d+(?:[.,]\d+)?)\s*°?\s*([NSEW])?/gi;
 
 /**
  * "46.85, -94.24", "46,85; -94,24" or "46.85° N 94.24° W": latitude then longitude, or the other way round when
- * the letters say so. Null when it isn't two coordinates.
+ * the letters say so. A map link pasted whole gives its pin. Null when it isn't two coordinates.
  */
 export function parseSpotPlace(raw: string): SpotPlace | null {
+  if (/^\s*(https?:|geo:)/i.test(raw)) return mapLinkPlace(raw.trim());
   const found = [...raw.matchAll(PLACE_NUMBER)];
   if (found.length !== 2 || raw.replace(PLACE_NUMBER, "").replace(/[\s,;]/g, "") !== "") return null;
   const parts = found.map((match) => {
@@ -388,6 +389,35 @@ export function parseSpotPlace(raw: string): SpotPlace | null {
   const [lat, lng] = lngFirst ? [parts[1]!.value, parts[0]!.value] : [parts[0]!.value, parts[1]!.value];
   if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
   return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
+}
+
+/** The pin in a map link pasted whole: Google Maps (@lat,lng, !3d…!4d…, q= or ll=), OpenStreetMap (mlat/mlon, #map=z/lat/lng), Apple Maps or geo:. */
+function mapLinkPlace(link: string): SpotPlace | null {
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(link);
+    } catch {
+      return link;
+    }
+  })();
+  const n = "(-?\\d{1,3}(?:\\.\\d+)?)";
+  const patterns = [
+    new RegExp(`!3d${n}!4d${n}`),
+    new RegExp(`[?&]mlat=${n}&mlon=${n}`),
+    new RegExp(`#map=\\d+(?:\\.\\d+)?/${n}/${n}`),
+    new RegExp(`[?&](?:q|query|ll|daddr|sll)=${n},\\s*${n}`),
+    new RegExp(`@${n},${n}`),
+    new RegExp(`^geo:${n},${n}`, "i"),
+  ];
+  for (const pattern of patterns) {
+    const match = decoded.match(pattern);
+    if (!match) continue;
+    const lat = Number(match[1]);
+    const lng = Number(match[2]);
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+    return { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 };
+  }
+  return null;
 }
 
 function isTrip(value: unknown): value is Trip {
