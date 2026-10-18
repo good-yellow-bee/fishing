@@ -97,6 +97,8 @@ import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
 import { CORMORANT_ROCK, cormorantOut } from "./cormorantPerch";
 import { swansOut } from "./swanGlide";
+import { Cygnets } from "./Cygnets";
+import { cygnetsOut } from "./cygnetBrood";
 import { Kingfisher } from "./Kingfisher";
 import { kingfisherOut } from "./kingfisherFlight";
 import { Swallows } from "./Swallows";
@@ -2161,6 +2163,7 @@ export const LakeWorld = memo(function LakeWorld({
       {batsOut(hour, sky, season) && <Bats />}
       {geeseOut(hour, sky, season) && <Geese />}
       {swansOut(hour, sky, season) && <Swans />}
+      {cygnetsOut(hour, sky, season) && <Cygnets />}
       {cormorantOut(hour, season) && <Cormorant />}
       {grebesOut(hour, sky, season) && <Grebes />}
       {kingfisherOut(hour, sky, season) && <Kingfisher />}
