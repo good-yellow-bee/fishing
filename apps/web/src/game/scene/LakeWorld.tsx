@@ -85,6 +85,8 @@ import { Fireflies, LakeMist, makeSoftSpotTexture } from "./Atmosphere";
 import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
+import { Campfire } from "./Campfire";
+import { campfireLit } from "./campfireSmoke";
 import { LanternMinnows } from "./LanternMinnows";
 import { minnowsOut } from "./minnowSwirl";
 import { Loon } from "./Loon";
@@ -2119,6 +2121,7 @@ export const LakeWorld = memo(function LakeWorld({
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
+      <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       <ShorePath />
       <BankWalks />
       <Creek hour={hour} weather={weather} wind={wind} />

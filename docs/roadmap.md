@@ -1127,6 +1127,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC38~~ | ~~Foam lanes: on a windy day the wind rakes the foam into long lanes running down the wind across the open water~~ (#1088) | scene | S |
 | ~~SC39~~ | ~~News card scene09: sunken leaves, frogspawn, foam lanes~~ (#1088) | scene | S |
 | ~~SC40~~ | ~~Swan feathers: from summer into fall, moulted white feathers drift on the water with the wind~~ (#1092) | scene | S |
+| SC41 | Campfire: a stone fire pit by the shack, lit from dusk to dawn on dry days, its smoke leaning away on the wind | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
