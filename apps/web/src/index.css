@@ -1393,7 +1393,7 @@ html[data-input="pad"] .fight-bar .on-pad {
 
   .bar .marker,
   .fight-bar .tick,
-  .strike-cue .cue-bar b {
+  html .strike-cue .cue-bar b {
     background: CanvasText;
   }
 
@@ -1412,6 +1412,14 @@ html[data-input="pad"] .fight-bar .on-pad {
   .fight-bar .peak,
   .fight-bar .peak[data-zone="red"] {
     border-top-color: CanvasText;
+  }
+
+  /* The lodge board's period tab in use was told apart only by its fill. */
+  .board-page .board-tabs button.active {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
   }
 }
 
