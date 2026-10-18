@@ -406,7 +406,11 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           {t("Load a book")}
         </button>
         {canInstall ? (
-          <button type="button" className="text-button" onClick={() => void installApp()}>
+          <button type="button" className="text-button" onClick={() => {
+            // The button goes once the offer is taken: focus waits on the load button beside it.
+            loadButton.current?.focus();
+            void installApp();
+          }}>
             {t("Install the app")}
           </button>
         ) : null}

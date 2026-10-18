@@ -81,6 +81,16 @@ function lastFishOn(book: Logbook, tripId: string | undefined): string | undefin
   return book.catches.reduce<string | undefined>((last, entry) => (entry.tripId === tripId && (!last || entry.caughtAt > last) ? entry.caughtAt : last), undefined);
 }
 
+/** The day an outing made around a loose fish goes on: the evening before for a small-hours fish that has loose fish there that evening, so a night session stays one outing. */
+function looseOutingDay(book: Logbook, entry: CatchEntry): string {
+  const caught = new Date(entry.caughtAt);
+  const eve = localDate(new Date(caught.getFullYear(), caught.getMonth(), caught.getDate() - 1, 12));
+  const night =
+    caught.getHours() < LATE_NIGHT_UNTIL &&
+    book.catches.some((other) => other.id !== entry.id && other.spotId === entry.spotId && !other.tripId && localDate(new Date(other.caughtAt)) === eve);
+  return night ? eve : localDate(caught);
+}
+
 /** Whether a fish caught now still belongs to this outing: its day, or the small hours after it. */
 function outingGoesOn(book: Logbook, tripId: string | null): boolean {
   const trip = tripId ? tripById(book, tripId) : undefined;
@@ -1649,7 +1659,7 @@ function CatchView() {
       ) : entry.spotId === PLAY_LAKE_ID ? null : (
         // No outing that day on this water: one can be made around the fish, so its day gets the outing's counts and pace.
         <p className="trip-link">
-          <Link to={`/trips/new?${new URLSearchParams({ spot: entry.spotId, date: localDate(new Date(entry.caughtAt)), loose: "1" }).toString()}`}>
+          <Link to={`/trips/new?${new URLSearchParams({ spot: entry.spotId, date: looseOutingDay(book, entry), loose: "1" }).toString()}`}>
             {t("Make an outing of this day")}
           </Link>
         </p>

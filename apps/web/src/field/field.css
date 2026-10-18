@@ -1582,8 +1582,10 @@ button.field-primary:disabled {
   font-size: 13px;
 }
 
-.rename-kind-form input {
+.rename-kind-form input,
+.rename-kind-form select {
   min-width: 0;
+  max-width: 100%;
   border: 1px solid var(--field-input-line);
   background: var(--field-input);
   color: var(--field-ink);

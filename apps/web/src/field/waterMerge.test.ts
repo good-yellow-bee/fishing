@@ -40,6 +40,15 @@ describe("mergeWaters", () => {
   });
 });
 
+describe("an untitled outing in a merge", () => {
+  it("takes the kept water's name instead of keeping the old one's", () => {
+    const named = { ...book, trips: [...book.trips, { id: "t4", date: "2026-07-01", title: "Mill Creek", spotId: "c", note: "" }] } as Logbook;
+    const next = mergeWaters(named, "c", "a");
+    expect(next.trips.find((trip) => trip.id === "t4")).toMatchObject({ spotId: "a", title: "Cedar Lake" });
+    expect(next.trips.find((trip) => trip.id === "t2")).toMatchObject({ spotId: "a", title: "Dusk" });
+  });
+});
+
 describe("merging a day out logged twice", () => {
   it("folds the moved outing into the kept water's outing of the same day, with its fish, counts and note", () => {
     const twice = {

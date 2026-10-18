@@ -433,7 +433,8 @@ function TripView() {
           {" · "}
           {tripWhen(trip.date, today, tomorrow)}
         </p>
-        <h1>{outingName(trip, book.spots)}</h1>
+        {/* The tab tells untitled outings on one water apart by their day. */}
+        <h1 data-title={`${outingName(trip, book.spots)} · ${formatDay(trip.date)}`}>{outingName(trip, book.spots)}</h1>
         <p className="meta stand">
           <time dateTime={trip.date}>{formatDay(trip.date)}</time>
           {spot ? (
@@ -683,7 +684,7 @@ function TripForm() {
           <div className="water-field">
             <label>
               {t("Spot")}
-              <select name="spot" value={spotId} onChange={(event) => setSpotId(event.target.value)}>
+              <select name="spot" value={spotId} aria-describedby={lastHere ? "last-here" : undefined} onChange={(event) => setSpotId(event.target.value)}>
                 {/* The game's lake only for what is already there. */}
                 {book.spots.filter((spot) => spot.id !== PLAY_LAKE_ID || spot.id === spotId).map((spot) => (
                   <option key={spot.id} value={spot.id}>
@@ -691,16 +692,17 @@ function TripForm() {
                   </option>
                 ))}
               </select>
-              {lastHere ? (
-                <small className="field-hint">
-                  {t("Last here: {title}, {day} · {fish}", {
-                    title: outingName(lastHere, book.spots),
-                    day: formatDay(lastHere.date),
-                    fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
-                  })}
-                </small>
-              ) : null}
             </label>
+            {/* Outside the label, so the field's name stays "Spot" while this changes with each pick. */}
+            {lastHere ? (
+              <small className="field-hint" id="last-here">
+                {t("Last here: {title}, {day} · {fish}", {
+                  title: outingName(lastHere, book.spots),
+                  day: formatDay(lastHere.date),
+                  fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
+                })}
+              </small>
+            ) : null}
             {!existing && canFindNearest(book) ? <NearestWater book={book} onPick={setSpotId} /> : null}
           </div>
           {pastWeek.length > 0 ? (
