@@ -3409,6 +3409,12 @@ html[data-contrast="high"] .sound-captions li {
     padding: 5px 10px;
   }
 
+  /* Height is what a phone on its side lacks, and the wordmark pushed the last links onto a second row; it goes,
+     as it does with larger text on a narrow phone. The page heading stays for screen readers. */
+  .hud-brand {
+    display: none;
+  }
+
   .hud-brand .eyebrow,
   .hud-user,
   .skill-chip,
