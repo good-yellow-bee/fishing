@@ -169,6 +169,7 @@ import { fillKind, type FillKind } from "./boatBilge";
 import { GooseFamily } from "./GooseFamily";
 import { gooseFamilyOut } from "./gooseGraze";
 import { LeafPile } from "./LeafPile";
+import { LeafRaker } from "./LeafRaker";
 import { leafJumpOut } from "./leafJump";
 import { Painter } from "./Painter";
 import { painterOut } from "./pleinAir";
@@ -2288,6 +2289,7 @@ export const LakeWorld = memo(function LakeWorld({
       {scullOut(hour, sky, season, wind) && <Sculler />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
+      {leafJumpOut(hour, sky, season) && <LeafRaker />}
       {painterOut(hour, sky, season, wind) && <Painter />}
       {discOut(hour, sky, season, wind) && <DiscTossers />}
       {brollyOut(hour, sky) && <BrollyFisher wind={wind} />}
