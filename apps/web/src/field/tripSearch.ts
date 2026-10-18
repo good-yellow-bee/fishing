@@ -3,7 +3,7 @@ import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
-import { isSampleOuting } from "./bookCopy";
+import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
 /** Words that ask for the outings already fished that landed nothing. */
@@ -125,6 +125,9 @@ export function findTrips(
   const matches = (trip: Trip, text: string, part: string) => {
     const bySize = sized.get(part);
     if (bySize) return bySize.has(trip.id);
+    // "game" and "sample" on their own ask for those outings, as "-game" and "-sample" leave them out.
+    if (GAME.includes(part)) return !offPlayLake(trip);
+    if (SAMPLE.includes(part)) return isSampleOuting(trip);
     if (NO_FISH.includes(part)) return trip.date < today && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
@@ -141,8 +144,11 @@ export function findTrips(
     // "szczupaki" finds the outings that took a "szczupak": a plural stands for its shorter form.
     return part.split(" ").every((word) => text.includes(word) || singularStems(word).some((stem) => text.includes(stem)));
   };
+  // The sample week's plans still ahead stay hidden once the book has the angler's own, as Coming up hides them.
+  const hideSamplePlans = !isSampleOnly(book);
   return book.trips
     .filter((trip) => {
+      if (hideSamplePlans && isSampleOuting(trip) && trip.date >= today) return false;
       const text = tripText(book, trip, t);
       return !left(trip, text) && parts.every((part) => matches(trip, text, part));
     })

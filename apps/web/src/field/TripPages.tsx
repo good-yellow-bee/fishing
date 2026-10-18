@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
 import { canGoBack } from "./FieldShell";
+import { useTypedParam } from "./typedParam";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState } from "./SavedNote";
 import { MapAnchor } from "./MapAnchor";
@@ -109,8 +110,7 @@ const TRIP_FIND = "find";
 export function TripsPage() {
   const { book } = useLogbook();
   useT();
-  const [params, setParams] = useSearchParams();
-  const query = params.get(TRIP_FIND) ?? "";
+  const [query, setQuery] = useTypedParam(TRIP_FIND);
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = upcomingRealTrips(book, today);
@@ -175,18 +175,7 @@ export function TripsPage() {
             value={query}
             placeholder={t("Water, month, a fish, “no fish”…")}
             autoComplete="off"
-            onChange={(event) => {
-              const next = event.target.value;
-              setParams(
-                (current) => {
-                  const out = new URLSearchParams(current);
-                  if (next.trim()) out.set(TRIP_FIND, next);
-                  else out.delete(TRIP_FIND);
-                  return out;
-                },
-                { replace: true },
-              );
-            }}
+            onChange={(event) => setQuery(event.target.value)}
           />
           <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
             {needle ? <p>{found.length === 0 ? t("No outing matches that.") : foundLine}</p> : null}
@@ -306,7 +295,8 @@ function TripView() {
   // Not when that day's fish were only logged without the outing: those are offered just above.
   const lastFishHere =
     catches.length === 0 && trip.date < localDate(new Date()) && trip.spotId !== PLAY_LAKE_ID
-      ? catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => bookFishDay(book, entry) < trip.date)
+      ? // Another outing here the same day counts too: a blank dusk names the morning's fish, not last month's.
+        catchesForSpot(book, trip.spotId).filter(ownFish).find((entry) => entry.tripId !== trip.id && bookFishDay(book, entry) <= trip.date)
       : undefined;
   // Kinds this water gave for the first time on this outing, once earlier fish from it say what it usually gives.
   const ownHere = catches.filter(ownFish);
@@ -629,12 +619,27 @@ function TripForm() {
   const cancelSpot = !existing && !params.has("loose") && book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID) ? params.get("spot") : null;
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
+  // In the small hours, last night's water is still the one fished.
+  const smallHours = new Date().getHours() < LATE_NIGHT_UNTIL;
+  const guess = likelyWater(book, localDate(new Date()), smallHours);
+  const lastEvening = shiftDate(new Date(), -1);
+  // Logged after midnight on a night session with no outing yet: the outing is last night's, and the night's fish so
+  // far (the evening's and the small hours') go on it, rather than splitting the session over two days.
+  const [nightOuting] = useState(
+    () =>
+      !existing &&
+      !params.has("date") &&
+      smallHours &&
+      !countedBook(book).trips.some((trip) => trip.spotId === guess && (trip.date === lastEvening || trip.date === localDate(new Date()))) &&
+      book.catches.some((entry) => !entry.tripId && entry.spotId === guess && fishOnOutingDay(book, guess, toLocalInput(new Date(entry.caughtAt)), lastEvening)),
+  );
   // Never the game's lake: its days are made by playing.
-  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : localDate(new Date());
+  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : localDate(new Date());
   // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
   // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
   const busy = (spotId: string) => countedBook(book).trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);
-  const guess = likelyWater(book, localDate(new Date()));
+  // A new book holds only the sample week's made-up waters.
+  const onlySampleWaters = !existing && book.spots.every((spot) => spot.id === PLAY_LAKE_ID || isSampleSpot(spot.id));
   // A water just added from this form's "Add a spot" comes back picked.
   const [justAdded] = useState(() => (!existing && book.spots.some((spot) => spot.id === addedWater() && spot.id !== PLAY_LAKE_ID) ? addedWater() : null));
   useEffect(() => forgetAddedWater(), []);
@@ -680,12 +685,12 @@ function TripForm() {
   // Made from a fish logged without an outing: that day's fish (and its small hours') on this water with none go on the new one.
   const loose = useMemo(
     () =>
-      existing || !params.has("loose")
+      existing || (!params.has("loose") && !nightOuting)
         ? []
         : book.catches
             .filter((entry) => !entry.tripId && entry.spotId === spotId && fishOnOutingDay(book, spotId, toLocalInput(new Date(entry.caughtAt)), date))
             .map((entry) => entry.id),
-    [book, existing, params, spotId, date],
+    [book, existing, params, nightOuting, spotId, date],
   );
   // An untitled outing is saved under its water's name: the box stays empty, so a change of water renames it too.
   const [title, setTitle] = useState(() => {
@@ -811,11 +816,17 @@ function TripForm() {
           <div className="water-field">
             <label>
               {t("Spot")}
-              <select name="spot" value={spotId} aria-describedby={lastHere ? "last-here" : undefined} onChange={(event) => setSpotId(event.target.value)}>
+              <select name="spot" value={spotId} aria-describedby={[lastHere ? "last-here" : "", onlySampleWaters ? "own-water-hint" : ""].filter(Boolean).join(" ") || undefined} onChange={(event) => setSpotId(event.target.value)}>
                 {/* The game's lake only for what is already there, and a game day stays on it. */}
                 <WaterOptions book={book} spots={book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))} />
               </select>
             </label>
+            {/* A new book holds only the sample week's made-up waters: a first plan goes on the angler's own, as a first fish does. */}
+            {onlySampleWaters ? (
+              <span className="field-hint own-water" id="own-water-hint">
+                {t("These waters are invented.")} <Link to="/spots/new?then=trip">{t("Add the one you'll fish")}</Link>
+              </span>
+            ) : null}
             {/* Outside the label, so the field's name stays "Spot" while this changes with each pick. */}
             {lastHere ? (
               <small className="field-hint" id="last-here">
