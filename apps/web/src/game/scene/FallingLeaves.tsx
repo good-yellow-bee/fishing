@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
-import { LEAF_COLORS, LEAF_COUNT, leafAt } from "./leafFall";
+import { LEAF_COLORS, LEAF_COUNT, PETAL_COLORS, leafAt } from "./leafFall";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -19,12 +19,24 @@ export function leafGeometry() {
   return new THREE.ShapeGeometry(shape, 4);
 }
 
-/** Autumn leaves spinning down off the shore trees and drifting on the water with the day's wind. */
-export function FallingLeaves({ wind = NO_WIND }: { wind?: { x: number; z: number } }) {
+/** A rounded blossom petal, 8 cm long, lying in the xy plane. */
+export function petalGeometry() {
+  const shape = new THREE.Shape();
+  shape.moveTo(0, -0.04);
+  shape.bezierCurveTo(0.05, -0.02, 0.04, 0.04, 0, 0.035);
+  shape.bezierCurveTo(-0.04, 0.04, -0.05, -0.02, 0, -0.04);
+  return new THREE.ShapeGeometry(shape, 4);
+}
+
+/**
+ * Autumn leaves spinning down off the shore trees and drifting on the water with the day's wind;
+ * or, in spring (`petals`), the blossom's petals doing the same.
+ */
+export function FallingLeaves({ wind = NO_WIND, petals = false }: { wind?: { x: number; z: number }; petals?: boolean }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
-  const geometry = useMemo(leafGeometry, []);
+  const geometry = useMemo(() => (petals ? petalGeometry() : leafGeometry()), [petals]);
   const material = useMemo(() => new THREE.MeshToonMaterial({ gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
-  const colors = useMemo(() => LEAF_COLORS.map((c) => new THREE.Color(c)), []);
+  const colors = useMemo(() => (petals ? PETAL_COLORS : LEAF_COLORS).map((c) => new THREE.Color(c)), [petals]);
   const scratch = useMemo(() => new THREE.Object3D(), []);
 
   useEffect(
@@ -49,7 +61,7 @@ export function FallingLeaves({ wind = NO_WIND }: { wind?: { x: number; z: numbe
       scratch.scale.setScalar(leaf.size * LEAF_SCALE);
       scratch.updateMatrix();
       leaves.setMatrixAt(slot, scratch.matrix);
-      leaves.setColorAt(slot, colors[leaf.color]!);
+      leaves.setColorAt(slot, colors[leaf.color % colors.length]!);
       slot += 1;
     }
     leaves.count = slot;
@@ -57,5 +69,5 @@ export function FallingLeaves({ wind = NO_WIND }: { wind?: { x: number; z: numbe
     if (leaves.instanceColor) leaves.instanceColor.needsUpdate = true;
   });
 
-  return <instancedMesh ref={mesh} name="falling-leaves" args={[geometry, material, LEAF_COUNT]} frustumCulled={false} />;
+  return <instancedMesh ref={mesh} name={petals ? "falling-petals" : "falling-leaves"} args={[geometry, material, LEAF_COUNT]} frustumCulled={false} />;
 }

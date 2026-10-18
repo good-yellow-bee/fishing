@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { LEAF_COUNT, LEAF_CYCLE_SEC, LEAF_FALL_SEC, LEAF_FLOAT_SEC, LEAF_TOP, leafAt, leavesOut } from "./leafFall";
+import { LEAF_COUNT, LEAF_CYCLE_SEC, LEAF_FALL_SEC, LEAF_FLOAT_SEC, LEAF_TOP, PETAL_COLORS, leafAt, leavesOut, petalsOut } from "./leafFall";
 
 const CALM = { x: 0, z: 0 };
 
@@ -44,5 +44,13 @@ describe("falling leaves", () => {
   it("keeps a good share of the leaves down at any moment", () => {
     const down = Array.from({ length: LEAF_COUNT }, (_, i) => leafAt(i, 100, CALM)).filter(Boolean).length;
     expect(down).toBeGreaterThan(LEAF_COUNT / 3);
+  });
+
+  it("lets spring's blossom petals fall the same way, white to pink", () => {
+    expect(petalsOut("spring")).toBe(true);
+    expect(petalsOut("summer")).toBe(false);
+    expect(petalsOut("fall")).toBe(false);
+    expect(petalsOut("winter")).toBe(false);
+    for (const color of PETAL_COLORS) expect(color).toMatch(/^#[0-9a-f]{6}$/);
   });
 });
