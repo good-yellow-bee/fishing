@@ -591,6 +591,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a touch screen the field log's links on every card (the fish, the lure, the water, the outing), Cancel, Released it and Rename or merge now take a finger-sized tap, and neighbouring links no longer steal each other's taps. On a tablet the lake's shore signs stand taller too.":
+    "Na ekranie dotykowym odnośniki na każdej karcie dziennika (ryba, przynęta, łowisko, wyprawa), „Anuluj”, „Wypuszczona” i „Zmień nazwę lub połącz” łatwiej trafić palcem, a sąsiednie odnośniki nie przejmują już sobie nawzajem stuknięć. Na tablecie tabliczki na brzegu są też wyższe.",
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.":
     "Na telefonie szopa ma przycisk „Wróć na ścieżkę” przypięty na dole i stoi na środku, a karta nowości i podpowiedź trybu zdjęcia nie chowają się pod nagłówkiem ani pod przyciskami. Przy większym tekście nagłówek nad jeziorem zajmuje o jeden rząd mniej, oddając wodzie około 50 px, a liczby w podsumowaniu wyprawy nie nachodzą już na siebie.",
   "On a phone, Settings and the keys card keep Back to the lake pinned at their foot, always in reach, and the keys card now opens at its title. With larger text the keys card fits the screen, the header's chips step aside during a fight so the fight card fits, and the catch card's buttons sit on a solid strip that hides the words behind them.":
