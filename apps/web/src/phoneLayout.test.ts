@@ -28,10 +28,6 @@ describe("larger text on a phone held upright", () => {
   const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
   const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
 
-  it("drops the header's wordmark row, so the chips and links take three rows instead of four", () => {
-    expect(upright).toMatch(/html\[data-text-size\] \.hud-brand \{\n    display: none;/);
-  });
-
   it("keeps the walking stick its size and brings the cast meter down beside it, clear of the hint and the coach", () => {
     expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap > div\.walk-stick \{\n    zoom: 1;/);
     expect(upright).toMatch(/html\[data-text-size\] \.power-meter \{\n    bottom: calc\(104px \/ var\(--text-zoom, 1\)\);\n    width: min\(160px, calc\(\(100vw - 152px\) \/ var\(--text-zoom, 1\)\)\);/);
@@ -117,5 +113,13 @@ describe("photo mode on a phone", () => {
     const note = /\n\.photo-note \{([^}]*)\}/.exec(css)?.[1];
     expect(note).toContain("width: max-content;");
     expect(css).toMatch(/\.photo-exit:has\(~ \.photo-note\) span \{\n  visibility: hidden;/);
+  });
+});
+
+describe("the lake header on a phone with larger text", () => {
+  it("drops the wordmark's row on a phone, where the angler's name is already hidden, so it takes three rows instead of four", () => {
+    const from = css.indexOf("@media (max-width: 520px) {\n  .hud-user,");
+    const phone = css.slice(from, css.indexOf("\n}\n", from));
+    expect(phone).toMatch(/html\[data-text-size\] \.hud-brand \{\n    display: none;/);
   });
 });
