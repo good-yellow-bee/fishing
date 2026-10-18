@@ -2341,7 +2341,8 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: -16px;
     margin: 0 -18px -16px;
     padding: 8px 18px 12px;
-    background: rgba(239, 224, 194, 0.98);
+    /* Solid: at 0.98 the card's blurred backdrop let the scrolled-under description show through the buttons. */
+    background: rgb(239, 224, 194);
   }
 
   .landed-card .catch-actions .panel-btn {
@@ -3385,7 +3386,7 @@ html[data-contrast="high"] .sound-captions li {
     bottom: -12px;
     margin: 0 -18px -12px;
     padding: 8px 18px 10px;
-    background: rgba(239, 224, 194, 0.98);
+    background: rgb(239, 224, 194);
   }
 
   .landed-card .catch-actions .panel-btn {
