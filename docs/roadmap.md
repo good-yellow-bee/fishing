@@ -2033,3 +2033,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR522~~ | ~~Gear: the lure record packs its best lures for the next outing in one go~~ (#1184) | field | S |
 | ~~BR523~~ | ~~Round 80 fixes: month words and Through the year count a night fish in its outing's month, a year typed alone never matches a month, Largest first on a species or water page keeps its list, dates with a year or in numbers find their day, -2025 leaves a year out, game/gra finds the game's fish, the rename box under a search no longer widens the page, Polish kind cards read Najczęściej na:~~ (#1194) | field | S |
 | ~~BR524~~ | ~~Round 80 ideas: a search splits its fish By kind and By year, each a link that narrows it, and the season recap's best day opens its fish~~ (#1195) | field | S |
+| ~~BR525~~ | ~~A kind's page says when its next round number is a few fish away, and shows its biggest of this year beside the record~~ (#1199) | field | S |

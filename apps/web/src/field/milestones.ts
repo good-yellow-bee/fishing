@@ -37,6 +37,12 @@ export function nextBookMark(count: number, within = 5): { left: number; mark: n
   return mark !== undefined && mark - count <= within ? { left: mark - count, mark } : null;
 }
 
+/** The kind's next round number when it is a few fish away, as `nextBookMark` reads the book's. */
+export function nextKindMark(count: number, within = 3): { left: number; mark: number } | null {
+  const mark = KIND_MARKS.find((each) => each > count);
+  return mark !== undefined && mark - count <= within ? { left: mark - count, mark } : null;
+}
+
 export type Milestone = { of: "book"; n: number } | { of: "kind"; n: number };
 
 export const byTime = (a: CatchEntry, b: CatchEntry) => a.caughtAt.localeCompare(b.caughtAt) || a.id.localeCompare(b.id);
