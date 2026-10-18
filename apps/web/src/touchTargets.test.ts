@@ -21,3 +21,16 @@ describe("tables that scroll sideways on a phone", () => {
     expect(source).toContain(`<table tabIndex={0} aria-labelledby="${id}">`);
   });
 });
+
+// iOS Safari zooms the page into a focused field whose text is under 16px, and the game stays zoomed after.
+describe("fields iOS would zoom into", () => {
+  it("gives the lure select 16px text on touch screens", () => {
+    const block = /@media \(pointer: coarse\) \{\n  \.lure-choice select \{([^}]*)\}/.exec(read("index.css"))?.[1];
+    expect(block).toContain("font-size: 16px;");
+  });
+
+  it("gives the rename field 16px text", () => {
+    const rule = /\.rename-kind-form input,\n\.rename-kind-form select \{([^}]*)\}/.exec(read("field/field.css"))?.[1];
+    expect(rule).toContain("font-size: 16px;");
+  });
+});

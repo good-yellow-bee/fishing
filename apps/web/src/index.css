@@ -614,6 +614,13 @@ a:focus-visible {
   padding: 6px 8px;
 }
 
+/* Under 16px, iOS Safari zooms the page into the select on a tap and leaves the lake zoomed. */
+@media (pointer: coarse) {
+  .lure-choice select {
+    font-size: 16px;
+  }
+}
+
 .lure-choice select:disabled {
   color: #f0dfbf;
   background: rgba(17, 24, 22, 0.45);
@@ -3137,7 +3144,7 @@ html[data-contrast="high"] .sound-captions li {
   .lure-choice {
     top: calc(var(--hud-bottom, 52px) + 40px);
     left: 8px;
-    width: min(190px, calc(30vw / var(--text-zoom, 1)));
+    width: min(220px, calc(30vw / var(--text-zoom, 1)));
     padding: 5px 8px 7px;
   }
 

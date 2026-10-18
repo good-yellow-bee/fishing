@@ -568,6 +568,7 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone held sideways, the catch card fits under the header with its buttons always in reach, and with larger text the first-cast guide no longer covers the cast meter. The app shows up sooner on a weak signal, tapping the lure picker on an iPhone no longer zooms in on the lake, and the field log's small links are easier to tap.": "Na telefonie trzymanym poziomo karta połowu mieści się pod nagłówkiem z przyciskami zawsze pod ręką, a przy większym tekście przewodnik pierwszego rzutu nie zasłania już paska rzutu. Przy słabym zasięgu aplikacja pojawia się szybciej, stuknięcie wyboru przynęty na iPhonie nie przybliża już jeziora, a drobne linki w dzienniku połowów łatwiej trafić palcem.",
   "On a phone held sideways, the walk signs line the right edge again instead of covering the lake, and the header's links and the guide's Skip are bigger to tap. The catch log and lodge board tables now scroll with the arrow keys, and the game starts a little faster.": "Na telefonie trzymanym poziomo drogowskazy znów stoją przy prawej krawędzi, zamiast zasłaniać jezioro, a linki w nagłówku i „Pomiń” w przewodniku łatwiej trafić palcem. Tabele dziennika połowów i tablicy przewijają się strzałkami, a gra uruchamia się nieco szybciej.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
