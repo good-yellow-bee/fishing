@@ -587,6 +587,14 @@ function FileLoose() {
   );
 }
 
+/** Why nothing matched: a bare year with no fish in it says so, and where the book starts when it is before that. */
+export function emptyText(book: Logbook, needle: string, t: ReturnType<typeof useT>): string {
+  const year = needle.trim();
+  if (!/^\d{4}$/.test(year) || book.catches.length === 0) return t("Nothing in the book matches that.");
+  const first = book.catches.map((entry) => bookFishDay(book, entry).slice(0, 4)).reduce((a, b) => (b < a ? b : a));
+  return year < first ? t("No fish in {year}. The book starts in {first}.", { year, first }) : t("No fish in {year}.", { year });
+}
+
 export function CatchSearch() {
   const { book, photoFor } = useLogbook();
   const t = useT();
@@ -709,7 +717,7 @@ export function CatchSearch() {
             <TopLure catches={matches} />
           </>
         ) : (
-          <p>{matches.length === 0 ? t("Nothing in the book matches that.") : t("Matches: {count}", { count: matches.length })}</p>
+          <p>{matches.length === 0 ? emptyText(book, settled, t) : t("Matches: {count}", { count: matches.length })}</p>
         )}
       </div>
       {settled ? (
