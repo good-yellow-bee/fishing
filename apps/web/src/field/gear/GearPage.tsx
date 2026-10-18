@@ -17,6 +17,7 @@ import { fishCountLabel, formatCatchDay, formatDay, outingName, tripWhen } from 
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
+import { renamedTackle } from "./renamedTackle";
 import { pieceRecords } from "./pieceRecord";
 import { notYetThisYear } from "../bests/notYet";
 import { exactTerm, findLink } from "../findLinks";
@@ -27,7 +28,7 @@ import { PagedTrips } from "../PagedTrips";
 import { countedSearch } from "../countedSearch";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
-import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "../playLake";
+import { offPlayLake, upcomingOwnTrips } from "../playLake";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
@@ -129,7 +130,7 @@ function LureRecord({ today }: { today: string }) {
             {quiet.map((lure, index) => (
               <Fragment key={lure}>
                 {index > 0 ? ", " : null}
-                <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(lure)), book.catches))}>{t(lure)}</Link>
+                <Link to={findLink(countedSearch(book, exactTerm("lure", t(lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === lure.trim().toLowerCase())))}>{t(lure)}</Link>
               </Fragment>
             ))}
           </span>
@@ -154,6 +155,7 @@ function readKeptApart(): string[] {
 /** Lure names that look like one lure typed two ways, each with a button to fold one into the other or keep both. */
 function LureTwins() {
   const { storedBook, changeBook } = useLogbook();
+  const { items, replaceTackle } = useTackle();
   const [kept, setKept] = useState(readKeptApart);
   const box = useRef<HTMLUListElement>(null);
   // Either way round: the pair stays apart when the other spelling later takes more fish.
@@ -175,7 +177,8 @@ function LureTwins() {
       const rows = list?.querySelectorAll<HTMLLIElement>("li") ?? [];
       const next = (rows[index] ?? rows[index - 1])?.querySelector<HTMLButtonElement>("button");
       if (next?.isConnected) next.focus();
-      else document.querySelector<HTMLElement>("#lure-record")?.focus();
+      // No record when no lure went on a past outing's list: the past outings' heading below.
+      else (document.querySelector<HTMLElement>("#lure-record") ?? document.querySelector<HTMLElement>("#gear-recent"))?.focus();
     }, 0);
   };
   const keepApart = (pair: { from: string; into: string }, index: number) => {
@@ -199,6 +202,9 @@ function LureTwins() {
             onClick={() => {
               const result = renameInBook(storedBook, "lure", pair.from, pair.into);
               if (!result.ok || !changeBook("rename", result.book)) return;
+              // The packed lists take the merged name too, or the lure record would call the old one a blank.
+              const lists = renamedTackle(items, pair.from, result.name);
+              if (lists) replaceTackle(lists);
               focusNext(index);
             }}
           >
@@ -320,7 +326,9 @@ export function GearPage() {
       )}
       <LureRecord today={today} />
       <LureTwins />
-      <h2 className="subhead">{t("Recent")}</h2>
+      <h2 className="subhead" id="gear-recent" tabIndex={-1}>
+        {t("Recent")}
+      </h2>
       {recent.length === 0 ? (
         <p className="empty">{t("No past outings.")}</p>
       ) : (

@@ -128,6 +128,11 @@ export function useTackle(): TackleApi {
   return api;
 }
 
+/** The lists and their changes where a page has them, or null outside the field log. */
+export function useTackleIfAny(): TackleApi | null {
+  return useContext(TackleContext);
+}
+
 /** The tackle lists where a page can show them, or null outside the field log (a card rendered on its own). */
 export function useTackleItems(): TackleItem[] | null {
   return useContext(TackleContext)?.items ?? null;

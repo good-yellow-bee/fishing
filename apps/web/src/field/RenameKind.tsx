@@ -4,6 +4,8 @@ import { t, useT } from "../i18n";
 import { renameInBook, type NameField } from "./bookRename";
 import { exactTerm, findLink } from "./findLinks";
 import { useLogbook } from "./LogbookState";
+import { useTackleIfAny } from "./gear/TackleState";
+import { renamedTackle } from "./gear/renamedTackle";
 
 /** Where a renamed kind or lure is found again under its new name. */
 function pageOf(field: NameField, name: string) {
@@ -16,6 +18,7 @@ export function RenameKind({ field, name }: { field: NameField; name: string }) 
   const { storedBook, changeBook } = useLogbook();
   useT();
   const navigate = useNavigate();
+  const tackle = useTackleIfAny();
   const [typed, setTyped] = useState(() => t(name));
   const [error, setError] = useState("");
   const onSubmit = (event: FormEvent) => {
@@ -31,7 +34,11 @@ export function RenameKind({ field, name }: { field: NameField; name: string }) 
       navigate(pageOf(field, result.name), { replace: true });
       return;
     }
-    if (changeBook("rename", result.book)) navigate(pageOf(field, result.name), { replace: true });
+    if (!changeBook("rename", result.book)) return;
+    // The packed lists follow a lure's new name, so its record still finds its fish (the book's Undo leaves them so).
+    const lists = field === "lure" && tackle ? renamedTackle(tackle.items, name, result.name) : null;
+    if (lists) tackle?.replaceTackle(lists);
+    navigate(pageOf(field, result.name), { replace: true });
   };
   return (
     <details className="rename-kind">

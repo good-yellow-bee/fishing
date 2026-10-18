@@ -1,6 +1,5 @@
 import { isLureLabel, localDate, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
-import { pieceKey } from "./pieceKey";
-import { t } from "../../i18n";
+import { shownPieceKey } from "./pieceKey";
 import { countedFish } from "../milestones";
 import { isSampleCatch, isSampleTrip } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
@@ -25,9 +24,10 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   const trips = ownTrips.length > 0 || ownFish ? ownTrips : book.trips;
   const past = new Set(trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
-  const own = countedFish(book.catches);
+  // The fish make the same switch as the bags: a sample fish never counts against an outing of the angler's own.
+  const own = ownTrips.length > 0 || ownFish ? book.catches.filter((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID) : countedFish(book.catches);
   // Pieces match as they read, as the outing's list matches them: "Rosówka" packed is the "Nightcrawler" the fish were logged under.
-  const readKey = (label: string) => pieceKey(t(label));
+  const readKey = (label: string) => shownPieceKey(label);
   const byPiece = new Map<string, { label: string; trips: Set<string> }>();
   for (const item of items) {
     if (!past.has(item.tripId) || !isLureLabel(item.label)) continue;
