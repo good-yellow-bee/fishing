@@ -1086,6 +1086,25 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
   color: #f0dfbf;
 }
 
+.camera-help kbd {
+  white-space: nowrap;
+}
+
+/* Between the phone layout and a wide window the full strip runs off the left edge in Polish; tighten it. */
+@media (min-width: 801px) and (max-width: 960px) {
+  .camera-help {
+    gap: 5px;
+  }
+
+  .camera-help > span:first-child {
+    display: none;
+  }
+
+  .camera-help kbd {
+    padding: 3px 4px;
+  }
+}
+
 kbd {
   border: 1px solid rgba(220, 196, 150, 0.38);
   background: rgba(238, 218, 181, 0.1);
@@ -2126,8 +2145,9 @@ html[data-input="pad"] .fight-bar .on-pad {
   border-left: 3px solid var(--rarity-legendary);
 }
 
-/* Not for a phone held sideways (its own block below lays that out): a 740-800 px wide one got both and the shore signs stretched over the whole lake. */
-@media (max-width: 800px) and (min-height: 501px), (max-width: 800px) and (pointer: fine), (max-width: 800px) and (pointer: none) {
+/* Not for a short screen (its own block below lays that out): a 740-800 px wide phone held sideways got both and the
+   shore signs stretched over the whole lake, and a laptop window zoomed to 200% got a header and coach over all of it. */
+@media (max-width: 800px) and (min-height: 501px) {
   .hud {
     top: 8px;
     right: 8px;
@@ -3381,13 +3401,21 @@ html[data-contrast="high"] .sound-captions li {
 }
 
 /* A phone held sideways: little height, so the header shrinks to one row and the panels tuck into the corners. */
-@media (pointer: coarse) and (max-height: 500px) {
+/* A short screen: a phone held sideways, or a window zoomed in (a 1366x768 laptop at 175-200% is 683-780 by 330-380),
+   which used to get the narrow, stacked layout and lost the lake under its header and the coach. */
+@media (max-height: 500px) {
   .hud {
     top: 6px;
     right: 6px;
     left: 6px;
     gap: 10px;
     padding: 5px 10px;
+  }
+
+  /* Height is what a phone on its side lacks, and the wordmark pushed the last links onto a second row; it goes,
+     as it does with larger text on a narrow phone. The page heading stays for screen readers. */
+  .hud-brand {
+    display: none;
   }
 
   .hud-brand .eyebrow,
@@ -3568,5 +3596,23 @@ html[data-contrast="high"] .sound-captions li {
 
   .landed-card .catch-actions .panel-btn {
     margin-top: 0;
+  }
+
+  /* With the largest text the header takes two rows and the pinned buttons and stamp filled the card, leaving a
+     sliver that showed only the fish's outline: the card scrolls as one instead, the catch first. */
+  html[data-text-size="larger"] .landed-card .catch-actions {
+    position: static;
+  }
+}
+
+/* A zoomed window has no walking stick, so the hint takes its corner. */
+@media (max-height: 500px) and (pointer: fine), (max-height: 500px) and (pointer: none) {
+  .hint {
+    left: 10px;
+    max-width: min(38ch, calc((58vw - 40px) / var(--text-zoom, 1)));
+  }
+
+  html[data-hand="left"] .hint {
+    right: 10px;
   }
 }

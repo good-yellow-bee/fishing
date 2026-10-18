@@ -50,6 +50,8 @@ describe("first-cast walkthrough", () => {
 
   it("says what to do now, including on the run", () => {
     expect(stepLine("aim", { ...idle, fishing: false })).toMatch(/Walk onto a bank/);
+    expect(stepLine("aim", { ...idle, fishing: true, touch: false })).toMatch(/arrow keys/);
+    expect(stepLine("aim", { ...idle, fishing: true, touch: true })).not.toMatch(/arrow keys/);
     expect(stepLine("wait", { ...idle, nibble: true })).toMatch(/Not yet/);
     expect(stepLine("ease", { ...idle, surge: 2, reeling: true })).toBe("It's running. Let go!");
     expect(stepLine("ease", { ...idle, surge: 2 })).toMatch(/Let it run/);

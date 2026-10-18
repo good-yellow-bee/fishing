@@ -4,6 +4,8 @@ import type { CatchEntry } from "@stillwater/shared";
 export const AT_PARAM = "at";
 /** "?resume=1": open the catch form on the unsaved fish, as Home's "Pick it up" promises. */
 export const RESUME_PARAM = "resume";
+/** "?photo=1": open a fish's edit form at its photo field, as its page's "Add a photo" promises. */
+export const PHOTO_PARAM = "photo";
 
 /**
  * A new catch form that starts from this fish: same water, outing, species, lure and measure, but the time is now.
@@ -14,7 +16,8 @@ export function anotherCatchLink(
   entry: Pick<CatchEntry, "spotId" | "species" | "lure" | "tripId"> & { measure: Pick<CatchEntry["measure"], "kind"> },
   at?: string,
 ): string {
-  const params = new URLSearchParams({ spot: entry.spotId, species: entry.species, lure: entry.lure, kind: entry.measure.kind });
+  // No water given ("" for a sample fish's made-up one): the form picks the likely water itself.
+  const params = new URLSearchParams({ ...(entry.spotId ? { spot: entry.spotId } : {}), species: entry.species, lure: entry.lure, kind: entry.measure.kind });
   if (entry.tripId) params.set("trip", entry.tripId);
   if (at) params.set(AT_PARAM, at);
   return `/catches/new?${params.toString()}`;

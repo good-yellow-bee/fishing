@@ -11,6 +11,7 @@ import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, yearTally } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
+import { FROM_LIST } from "./leaveDeleted";
 import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
 import { TallyBars } from "./TallyBars";
@@ -57,7 +58,7 @@ export function PhotoStrip({ catches, within, named = false, list }: { catches: 
       <ul className="photo-wall species-photos">
         {pictured.slice(0, PHOTOS_SHOWN).map((entry) => (
           <li key={entry.id}>
-            <Link to={catchLink(entry.id, list)}>
+            <Link to={catchLink(entry.id, list)} state={FROM_LIST}>
               <img src={photoFor(entry.id)!} alt="" loading="lazy" />
               <span className="photo-caption">
                 {named ? <strong>{t(entry.species)}</strong> : null}

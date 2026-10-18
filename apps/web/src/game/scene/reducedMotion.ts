@@ -3,6 +3,9 @@ import { useSettings } from "../settings";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
+/** The moment drifting things are held at for reduced motion, as if the air had stilled. */
+export const STILL_TIME = 8;
+
 export function prefersReducedMotion() {
   return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(QUERY).matches;
 }

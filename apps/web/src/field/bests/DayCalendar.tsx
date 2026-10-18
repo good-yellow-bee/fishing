@@ -63,7 +63,20 @@ export function stepDay(days: readonly string[], from: string, key: string): str
  * and an outing that landed nothing marked as a blank that opens it.
  */
 /** `tail` adds to each day's search what the marks left out. */
-export function DayCalendar({ book, year, today, tail = (term) => term }: { book: Logbook; year: string; today: string; tail?: (term: string) => string }) {
+/** `tripTail` turns a day into the trip search for its outings, leaving out those the calendar doesn't count. */
+export function DayCalendar({
+  book,
+  year,
+  today,
+  tail = (term) => term,
+  tripTail = (day) => day,
+}: {
+  book: Logbook;
+  year: string;
+  today: string;
+  tail?: (term: string) => string;
+  tripTail?: (day: string) => string;
+}) {
   useT();
   const marks = dayMarks(book, year);
   const months = markedMonths(marks);
@@ -137,19 +150,19 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
                 }
                 if (mark && mark.trips.length > 0 && day < today) {
                   // The blank opens its outing, or the day's outings when there were several.
-                  const label = `${dayName(day)}: ${t("an outing with no fish")}`;
+                  const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing with no fish", "{n} outings with no fish")}`;
                   return (
                     <li key={day} className={`day-blank${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
                 if (mark && mark.trips.length > 0) {
                   // An outing still ahead (or today's, before its first fish) opens its plan.
-                  const label = `${dayName(day)}: ${t("an outing ahead")}`;
+                  const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing ahead", "{n} outings ahead")}`;
                   return (
                     <li key={day} className={`day-planned${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }

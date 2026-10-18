@@ -567,13 +567,14 @@ button.field-primary {
 
 .catch-card {
   display: grid;
-  grid-template-columns: 92px 1fr;
+  /* The text column can shrink below a long unbroken name, which then wraps rather than widening the list. */
+  grid-template-columns: 92px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
 }
 
 .catch-card.has-photo {
-  grid-template-columns: 72px 92px 1fr;
+  grid-template-columns: 72px 92px minmax(0, 1fr);
 }
 
 .catch-thumb {
@@ -599,6 +600,12 @@ button.field-primary {
   background: #14211f;
 }
 
+/* A card's heading wraps a long unbroken name at any width, so a pictured card doesn't widen the list. */
+.catch-card :is(h2, h3, h4),
+.trip-card :is(h2, h3, h4) {
+  overflow-wrap: anywhere;
+}
+
 .photo-open {
   display: block;
   width: 100%;
@@ -614,6 +621,23 @@ button.field-primary {
   padding: 8px;
   border: 0;
   background: #14211f;
+}
+
+/* Open, a column the screen's height: a long caption shrinks the picture rather than pushing Close off the screen. */
+.photo-full[open] {
+  display: flex;
+  flex-direction: column;
+  max-height: 100dvh;
+}
+
+.photo-full[open] img {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: calc(100dvh - 124px);
+}
+
+.photo-full[open] > :not(img) {
+  flex: none;
 }
 
 .photo-full::backdrop {
@@ -746,6 +770,18 @@ button.field-primary:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* A one-link line on a fish's page, or a line of links in a span (Bests' new waters): a long unbroken name wraps
+   rather than widening the page. */
+.sheet .meta > :is(a, span) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A kind's leading lure and water on Bests, plain text in a flex line, wraps a long unbroken name the same way. */
+.kind-leaders {
+  overflow-wrap: anywhere;
 }
 
 .meta.stand {
@@ -930,6 +966,15 @@ html:has(.undo-bar) .field-main {
 /* A "Fish saved." line after Save and log another sits above the save buttons, not over them. */
 .field:has(.form-save) .undo-bar {
   bottom: 92px;
+}
+
+/* With the Undo bar raised above the save buttons, a focused field and the form's last row scroll clear of it too. */
+html:has(.form-save):has(.undo-bar) {
+  scroll-padding-bottom: calc(92px + 80px);
+}
+
+html:has(.form-save):has(.undo-bar) .field-main {
+  padding-bottom: calc(92px + 80px + 8px);
 }
 
 .choice-row {
@@ -1162,6 +1207,15 @@ html:has(.undo-bar) .field-main {
     bottom: calc(150px + env(safe-area-inset-bottom));
   }
 
+  /* Raised over the save buttons, the bar is up to 80px tall: focus and the form's last row stop above it. */
+  html:has(.form-save):has(.undo-bar) {
+    scroll-padding-bottom: calc(150px + 80px + env(safe-area-inset-bottom));
+  }
+
+  html:has(.form-save):has(.undo-bar) .field-main {
+    padding-bottom: calc(150px + 80px + env(safe-area-inset-bottom));
+  }
+
   .field-tab {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -1231,11 +1285,6 @@ html:has(.undo-bar) .field-main {
 
   .catch-card.has-photo {
     grid-template-columns: 64px 76px minmax(0, 1fr);
-  }
-
-  .catch-card :is(h2, h3, h4),
-  .trip-card :is(h2, h3, h4) {
-    overflow-wrap: anywhere;
   }
 
   .catch-thumb {
@@ -1428,6 +1477,9 @@ html:has(.undo-bar) .field-main {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  /* "From {water}:" with a long unbroken name wraps rather than widening the form. */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .lure-tip {
@@ -1543,6 +1595,16 @@ html:has(.undo-bar) .field-main {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 0 14px;
+}
+
+/* Kind and water chips, lure tips and a kind's waters: a long unbroken name wraps inside its chip or line. */
+.species-waters a,
+.species-chips a,
+.bests-scope :is(a, button),
+.lure-tip {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .species-chips a {

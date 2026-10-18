@@ -97,6 +97,13 @@ import { Hare } from "./Hare";
 import { hareCoat, hareOut } from "./hareRounds";
 import { Wildflowers } from "./Wildflowers";
 import { beesOut } from "./meadowFlowers";
+import { Woodpile } from "./Woodpile";
+import { WindowGlow } from "./WindowGlow";
+import { Dinghy } from "./Dinghy";
+import { sailingOut } from "./sailingTrip";
+import { TireSwing } from "./TireSwing";
+import { ShoreWash } from "./ShoreWash";
+import { foamOpacity } from "./lappingWaves";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
@@ -139,6 +146,12 @@ import { Woodpecker } from "./Woodpecker";
 import { woodpeckerOut } from "./woodpeckerDrum";
 import { Canoeist } from "./Canoeist";
 import { canoeOut } from "./canoeTrip";
+import { Skier } from "./Skier";
+import { skiingOut } from "./skiTour";
+import { Kite } from "./Kite";
+import { kiteOut } from "./kiteFlight";
+import { Campers, Tent } from "./Tent";
+import { CAMP_FIRE_AT, campersOut, tentPitched } from "./campTent";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -1090,7 +1103,6 @@ function LakeSurface({
   const glintB = useRef<THREE.MeshBasicMaterial>(null);
   const geometry = useMemo(() => makeWaveSurface(LAKE_RX, LAKE_RZ), []);
   const bedGeometry = useMemo(() => makeBedSurface(LAKE_RX + 0.35, LAKE_RZ + 0.35), []);
-  const foamGeometry = useMemo(() => makeEdgeRingGeometry(0.32, 0.02), []);
   const waterMap = useMemo(() => makeWaterTexture(), []);
   const detailMap = useMemo(() => makeWaterDetailTexture(), []);
   const cloudMap = useMemo(() => makeCloudShadowTexture(), []);
@@ -1122,7 +1134,6 @@ function LakeSurface({
     return () => {
       geometry.dispose();
       bedGeometry.dispose();
-      foamGeometry.dispose();
       waterMap.dispose();
       detailMap.dispose();
       cloudMap.dispose();
@@ -1130,7 +1141,7 @@ function LakeSurface({
       causticA.dispose();
       causticB.dispose();
     };
-  }, [geometry, bedGeometry, foamGeometry, waterMap, detailMap, cloudMap, causticGeometry, causticA, causticB]);
+  }, [geometry, bedGeometry, waterMap, detailMap, cloudMap, causticGeometry, causticA, causticB]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
@@ -1201,9 +1212,7 @@ function LakeSurface({
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
         </mesh>
       )}
-      <mesh geometry={foamGeometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]}>
-        <meshBasicMaterial color="#e9f3ef" transparent opacity={hour === "night" ? 0.08 : 0.3} depthWrite={false} />
-      </mesh>
+      <ShoreWash wind={wind} opacity={foamOpacity(hour, season)} />
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>
         <ringGeometry args={[2.4, 2.48, 64]} />
         <meshBasicMaterial ref={glintA} color="#e3f0ec" transparent opacity={0.14} depthWrite={false} />
@@ -2155,9 +2164,11 @@ export const LakeWorld = memo(function LakeWorld({
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
+      <Woodpile season={season} />
       {snowmanUp(season) && <Snowman />}
       {feederUp(season) && <BirdFeeder birds={chickadeesOut(hour, sky)} />}
       <Clothesline washing={washingOut(hour, sky, season)} wind={wind} />
+      <TireSwing season={season} wind={wind} />
       {catPlace(hour, sky) && <Cat place={catPlace(hour, sky)!} />}
       {hareOut(hour, sky) && <Hare coat={hareCoat(season)} />}
       {season !== "winter" && <Wildflowers season={season} bees={beesOut(hour, sky, season)} />}
@@ -2227,7 +2238,18 @@ export const LakeWorld = memo(function LakeWorld({
       <OwlTree />
       {woodpeckerOut(hour) && <Woodpecker />}
       {canoeOut(hour, sky, season) && <Canoeist />}
+      {skiingOut(hour, sky, season) && <Skier />}
+      {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
+      {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
+      {tentPitched(season) && (
+        <>
+          <Tent hour={hour} />
+          <Campfire at={CAMP_FIRE_AT} lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
+          {campersOut(hour, sky) && <Campers />}
+        </>
+      )}
+      {cabinWindowsLit(hour) && <WindowGlow strength={sky === "rain" || sky === "fog" ? 0.4 : 1} />}
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}

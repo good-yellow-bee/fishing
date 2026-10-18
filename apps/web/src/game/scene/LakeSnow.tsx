@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { SNOW_COUNT, snowFlake } from "./snowfall";
 
 const FLAKE_COLOR = "#f4f8fb";
@@ -32,6 +33,7 @@ export function LakeSnow({ light }: { light: number }) {
     return geo;
   }, []);
   const texture = useMemo(flakeTexture, []);
+  const still = useReducedMotion();
   const material = useMemo(
     () =>
       new THREE.PointsMaterial({
@@ -62,7 +64,8 @@ export function LakeSnow({ light }: { light: number }) {
   );
 
   useFrame(({ clock }) => {
-    const time = clock.elapsedTime;
+    // Flakes hang where they are for reduced motion.
+    const time = still ? STILL_TIME : clock.elapsedTime;
     const positions = geometry.getAttribute("position") as THREE.BufferAttribute;
     const stride = settings.particles === "lite" ? 2 : 1;
     let slot = 0;

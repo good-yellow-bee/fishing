@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const css = readFileSync(`${import.meta.dirname}/index.css`, "utf8");
-const sideways = css.slice(css.indexOf("@media (pointer: coarse) and (max-height: 500px) {"));
+const sideways = css.slice(css.indexOf("@media (max-height: 500px) {"));
 
 describe("the catch card on a phone held sideways", () => {
   it("stops under the header and scrolls, so the fish's name never runs off the top", () => {

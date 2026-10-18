@@ -29,6 +29,7 @@ import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { isSampleCatch, isSampleOuting, withoutSample } from "../bookCopy";
 import { SameKinds } from "./SameKinds";
+import { tripDaySearch } from "../tripSearch";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -262,7 +263,8 @@ export function BestsPage() {
           </p>
         ) : null}
         {/* The year so far as text for a message, once it has a fish. */}
-        {whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+        {/* With this season picked, its recap below copies the year, goal and all: one Copy, not two. */}
+        {!year && whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
           <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
         ) : null}
       </section>
@@ -273,7 +275,7 @@ export function BestsPage() {
           <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
         </div>
         <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
-        <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} />
+        <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} tripTail={(day) => tripDaySearch(all, day, new Set(whole.trips.map((trip) => trip.id)), t)} />
       </section>
     ) : null;
 
