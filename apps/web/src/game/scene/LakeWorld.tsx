@@ -91,6 +91,8 @@ import { BirdFeeder } from "./BirdFeeder";
 import { Puddles } from "./Puddles";
 import { puddlesOut } from "./rainPuddles";
 import { Cat } from "./Cat";
+import { Clothesline } from "./Clothesline";
+import { washingOut } from "./washingLine";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
 import { snowmanUp } from "./snowmanLook";
@@ -2151,6 +2153,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       {snowmanUp(season) && <Snowman />}
       {feederUp(season) && <BirdFeeder birds={chickadeesOut(hour, sky)} />}
+      <Clothesline washing={washingOut(hour, sky, season)} wind={wind} />
       {catPlace(hour, sky) && <Cat place={catPlace(hour, sky)!} />}
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
