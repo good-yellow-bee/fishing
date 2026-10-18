@@ -35,6 +35,13 @@ export function unpicturedBests(catches: readonly CatchEntry[], hasPhoto: (id: s
   return rows.filter((row, index) => !hasPhoto(row.entry.id) && rows.findIndex((other) => other.entry.id === row.entry.id) === index);
 }
 
+/** The years the photos come from, newest first, with how many each. */
+export function photoYears(pictured: readonly CatchEntry[], yearOf: (entry: CatchEntry) => string): [string, number][] {
+  const perYear = new Map<string, number>();
+  for (const entry of pictured) perYear.set(yearOf(entry), (perYear.get(yearOf(entry)) ?? 0) + 1);
+  return [...perYear].sort((a, b) => b[0].localeCompare(a[0]));
+}
+
 /** Photos already newest first, cut into runs by the month they were caught. */
 function photoMonths(entries: readonly CatchEntry[]) {
   const months: { month: string; entries: CatchEntry[] }[] = [];
@@ -104,7 +111,24 @@ export function PhotosPage() {
     .map(([id, count]) => ({ id, name: spotById(book, id)?.name ?? t("Unknown water"), count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   const pickedWater = water && waters.some((row) => row.id === water) ? water : null;
-  const all = pickedWater ? ofKind.filter((entry) => entry.spotId === pickedWater) : ofKind;
+  const ofWater = pickedWater ? ofKind.filter((entry) => entry.spotId === pickedWater) : ofKind;
+  // One season at a time too, once the photos span more than one: a night's small hours count on its outing's day.
+  const yearOf = (entry: CatchEntry) => bookFishDay(book, entry).slice(0, 4);
+  const years = photoYears(pictured, yearOf);
+  const perYear = new Map(years);
+  const year = params.get("year");
+  const setYear = (next: string | null) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next) out.set("year", next);
+        else out.delete("year");
+        return out;
+      },
+      { replace: true },
+    );
+  const pickedYear = year && perYear.has(year) ? year : null;
+  const all = pickedYear ? ofWater.filter((entry) => yearOf(entry) === pickedYear) : ofWater;
   const { visible, more } = catchPage(all, shown);
   const unpictured = unpicturedBests(book.catches, (id) => photoFor(id) !== null);
   const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
@@ -172,8 +196,20 @@ export function PhotosPage() {
           ))}
         </p>
       ) : null}
+      {years.length > 1 ? (
+        <p className="bests-scope photo-kinds" role="group" aria-label={t("Which years")}>
+          <button type="button" className="text-button" aria-pressed={!pickedYear} onClick={() => setYear(null)}>
+            {t("All years")}
+          </button>
+          {years.map(([value, count]) => (
+            <button key={value} type="button" className="text-button" aria-pressed={pickedYear === value} onClick={() => setYear(value)}>
+              {value} ({count})
+            </button>
+          ))}
+        </p>
+      ) : null}
       {all.length === 0 && pictured.length > 0 ? (
-        <p className="empty">{t("No photos of this kind from this water.")}</p>
+        <p className="empty">{pickedYear ? t("No photos match these picks.") : t("No photos of this kind from this water.")}</p>
       ) : all.length === 0 ? (
         <p className="empty">{t("No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.")}</p>
       ) : (
@@ -192,7 +228,7 @@ export function PhotosPage() {
                     <li key={entry.id}>
                       {/* Stepping on from the fish goes through the photos shown here, not the whole book. */}
                       {/* The water picked too, when it has a name to search by. */}
-                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}photo`)} state={FROM_LIST}>
+                      <Link to={catchLink(entry.id, `catches:${picked ? `${exactTerm("species", t(entry.species))} + ` : ""}${pickedWater && spotById(book, pickedWater) ? `${exactTerm("water", spotById(book, pickedWater)!.name)} + ` : ""}${pickedYear ? `${pickedYear} + ` : ""}photo`)} state={FROM_LIST}>
                         <img src={photoFor(entry.id)!} alt="" loading="lazy" />
                         <span className="photo-caption">
                           <strong>{t(entry.species)}</strong>
