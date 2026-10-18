@@ -1191,6 +1191,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC74~~ | ~~Summer hummingbird: on dry summer days a ruby-throated hummingbird zips in to the wildflowers by the shack, hovers at five flowers in turn with its bill in them, and zips off again~~ (#1175) | scene | S |
 | ~~SC75~~ | ~~Fog angler: on foggy days from dawn to dusk a lone angler in a yellow oilskin and sou'wester fishes from a rowboat anchored out on the lake, the boat swinging on its rope, the float out on the water, now and then reeling in and casting again~~ (#1177) | scene | S |
 | ~~SC76~~ | ~~Dog walker: by day from spring to fall, unless it rains, someone strolls along the far bank's sand and back with their dog, which runs on ahead, noses about, and runs on again~~ (#1177) | scene | S |
+| SC77 | Summer swimmer: on clear summer days someone swims breaststroke up and down the shallows off the far bank, head bobbing with each stroke and rings spreading round it, treading water to turn, their striped towel and bag on the sand | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

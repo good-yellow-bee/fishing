@@ -43,9 +43,9 @@ export function wakeGeometry() {
 
 /**
  * The wake behind a boat whose path is `at` (where it is and which way its bow points at a time),
- * its stern `stern` metres behind that point. `still` leaves the water smooth.
+ * its stern `stern` metres behind that point. `still` leaves the water smooth. `size` shrinks it for a small swimmer.
  */
-export function BoatWake({ at, stern, still }: { at: (time: number) => { x: number; z: number; yaw: number }; stern: number; still: boolean }) {
+export function BoatWake({ at, stern, still, size = 1 }: { at: (time: number) => { x: number; z: number; yaw: number }; stern: number; still: boolean; size?: number }) {
   const group = useRef<THREE.Group>(null);
   const geometry = useMemo(wakeGeometry, []);
   const material = useMemo(() => new THREE.MeshBasicMaterial({ color: WAKE, vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }), []);
@@ -68,7 +68,7 @@ export function BoatWake({ at, stern, still }: { at: (time: number) => { x: numb
     const z = pose.z - Math.cos(pose.yaw) * stern;
     wake.position.set(x, waterHeight(x, z, time) + 0.04, z);
     wake.rotation.y = pose.yaw;
-    wake.scale.set(look.length, 1, look.length);
+    wake.scale.set(look.length * size, 1, look.length * size);
     material.opacity = look.opacity;
   });
   return (
