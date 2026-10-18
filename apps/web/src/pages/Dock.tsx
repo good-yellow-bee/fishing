@@ -64,6 +64,7 @@ import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
+import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
@@ -190,6 +191,17 @@ export function DockPage() {
   const mercy = isMercy(caughtTotal);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind);
   const scenePhase = game.outcome ? "result" : game.phase;
+  // The hint is hidden in a fight, so the fight card holds the hookset's message (or a mid-fight call) for a while instead.
+  const [hookNote, setHookNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (scenePhase !== "fight" || !game.hint) {
+      setHookNote(null);
+      return;
+    }
+    setHookNote(game.hint);
+    const timer = window.setTimeout(() => setHookNote(null), hookNoteMs(game.hint));
+    return () => window.clearTimeout(timer);
+  }, [game.hint, scenePhase]);
   const boatState = useSyncExternalStore(subscribeBoat, boatMode);
   // One fish from the rise under the bobber through the fight to the hand, or the turn-away on a miss.
   const shownFish =
@@ -870,7 +882,7 @@ export function DockPage() {
             <kbd>{t("Right drag")}</kbd> {t("look")}
           </aside>
         )}
-        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} best={fightBest} />}
+        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} best={fightBest} note={hookNote} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}${landedGolden ? " golden" : ""}`}>
             {fieldBeat && (
