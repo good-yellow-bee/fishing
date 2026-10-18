@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { t, useT } from "../i18n";
 import { formatClock } from "./format";
+import { useLogbook } from "./LogbookState";
 
 /** What a page can say it just saved, passed along in the link's state. */
 export const SAVED_LINES = {
@@ -23,6 +24,7 @@ export function SavedNote() {
   useT();
   const location = useLocation();
   const navigate = useNavigate();
+  const { undoable, saveError } = useLogbook();
   const [shown, setShown] = useState<{ kind: SavedKind; on: string; news?: string; at?: string } | null>(null);
   const arrived = (location.state as { saved?: SavedKind } | null)?.saved;
   const news = (location.state as { news?: unknown } | null)?.news;
@@ -41,8 +43,13 @@ export function SavedNote() {
     const timer = window.setTimeout(() => setShown(null), shown.news ? 7000 : 4000);
     return () => window.clearTimeout(timer);
   }, [shown]);
+  // A delete's Undo bar or a failed save sits in the same spot: the newer bar wins, and this line goes.
+  const otherBar = Boolean(undoable || saveError);
+  useEffect(() => {
+    if (otherBar) setShown(null);
+  }, [otherBar]);
   // Only on the page the save landed on.
-  const here = shown && shown.on === location.pathname ? shown : null;
+  const here = shown && shown.on === location.pathname && !otherBar ? shown : null;
 
   // The live region stays in the page so the line is read out when it appears.
   return (

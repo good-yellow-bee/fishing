@@ -2,6 +2,7 @@ import { catchesNewestFirst, measuresOf, spotById, tripById, SKY_LABELS, WIND_LA
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { noteText } from "./format";
+import { countedBook } from "./milestones";
 
 /**
  * One cell, quoted when it holds the separator, a quote or a line break. Text a spreadsheet would read as a formula
@@ -13,6 +14,9 @@ export function cell(value: string, separator: string) {
 }
 
 const pad = (value: number) => String(value).padStart(2, "0");
+
+/** A water temperature as a cell: one that rounds to nothing is 0, never "-0". */
+const waterTemp = (value: number) => num(Math.round(value * 10) / 10 || 0);
 
 /**
  * The catches as a spreadsheet file, newest first, in the reader's language
@@ -54,7 +58,7 @@ export function catchesCsv(book: Logbook): string {
       entry.tripId ? (tripById(book, entry.tripId)?.title ?? "") : "",
       weather ? t(SKY_LABELS[weather.sky]) : "",
       weather ? t(WIND_LABELS[weather.wind]) : "",
-      weather?.waterTempF === undefined ? "" : num(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF),
+      weather?.waterTempF === undefined ? "" : waterTemp(metric ? ((weather.waterTempF - 32) * 5) / 9 : weather.waterTempF),
       entry.released ? t("Yes") : "",
       noteText(entry.note),
     ];
@@ -67,8 +71,19 @@ function sheet(rows: string[][], separator: string): string {
   return "﻿" + rows.map((row) => row.map((value) => cell(value, separator)).join(separator)).join("\r\n") + "\r\n";
 }
 
+/**
+ * The outings a spreadsheet holds: the angler's own up to today, as the counts on the page take them. Not the game's
+ * rounds, not the sample week once there is an outing or a fish of their own, and not a planned day, which would read as
+ * a blank one.
+ */
+export function sheetOutings(book: Logbook, today: string): Logbook {
+  const counted = countedBook(book);
+  return { ...counted, trips: counted.trips.filter((trip) => trip.date <= today) };
+}
+
 /** The outings as a spreadsheet file, newest first: the day, the water, the fish landed, and the fish lost and strikes missed. */
-export function tripsCsv(book: Logbook): string {
+export function tripsCsv(whole: Logbook, today: string): string {
+  const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
   const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Lost fish"), t("Missed strikes"), t("Note")];
   const fish = new Map<string, number>();

@@ -277,7 +277,8 @@ function SpotView() {
                 t("Delete this water? Also leaving the book: {what}.", { what: trips.length > 0 ? tn(trips.length, "{n} outing", "{n} outings") : tn(catches.length, "{n} fish", "{n} fish") })
         }
         onDelete={() => {
-          if (deleteSpot(spot.id)) navigate("/spots");
+          // In the gone page's place, so Back never lands on it and Undo can put it back where it was.
+          if (deleteSpot(spot.id)) navigate("/spots", { replace: true });
         }}
         aside={
           // The game's lake fills itself as it is played; nothing to log or plan by hand.

@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import type { CatchEntry } from "@stillwater/shared";
+import type { Logbook } from "@stillwater/shared";
 import { t, tn } from "../i18n";
-import { catchMonth } from "./tripMonths";
+import { bookFishDay } from "./tripMonths";
 
 /** The angler's own target of fish for a year, kept in this browser by year. */
 export const YEAR_GOAL_KEY = "stillwater.field-log.year-goal.v1";
@@ -65,7 +65,7 @@ export function goalPace(count: number, goal: number, now: Date): { pace: number
 }
 
 /** This year's fish against a goal the angler sets, or an offer to set one. */
-export function YearGoal({ catches, now = new Date() }: { catches: readonly CatchEntry[]; now?: Date }) {
+export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date }) {
   const year = String(now.getFullYear());
   const [goal, setGoal] = useState(() => readYearGoal(year));
   const [editing, setEditing] = useState(false);
@@ -95,7 +95,8 @@ export function YearGoal({ catches, now = new Date() }: { catches: readonly Catc
     setEditing(false);
     setRefocus(true);
   };
-  const count = catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)).length;
+  // A night session's small hours count on its outing's day, as the calendar and days out do.
+  const count = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)).length;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();

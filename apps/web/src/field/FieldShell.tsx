@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { NavLink, useLocation, useNavigationType } from "react-router-dom";
 import { useLang, useT } from "../i18n";
+import { focusPageHeading } from "./pageFocus";
 import { SavedNote } from "./SavedNote";
 import { UndoBar } from "./UndoBar";
 import { useFieldTheme } from "./fieldTheme";
@@ -95,9 +96,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
     const main = document.querySelector<HTMLElement>(".field-main");
     const active = document.activeElement;
     if (!main || (active && main.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) return;
-    const heading = main.querySelector<HTMLElement>("[data-focus-target]") ?? main.querySelector<HTMLElement>("h1") ?? main;
-    if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
-    heading.focus({ preventScroll: true });
+    focusPageHeading({ preventScroll: true });
   }, [pathname, how]);
 
   return (
@@ -108,11 +107,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
         href="#field-main"
         onClick={(event) => {
           event.preventDefault();
-          const main = document.getElementById("field-main");
-          const heading = main?.querySelector<HTMLElement>("[data-focus-target]") ?? main?.querySelector<HTMLElement>("h1") ?? main;
-          if (!heading) return;
-          if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
-          heading.focus();
+          focusPageHeading();
         }}
       >
         {t("Skip to the page")}

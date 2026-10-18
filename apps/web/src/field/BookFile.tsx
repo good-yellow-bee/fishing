@@ -4,6 +4,7 @@ import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catch
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
+import { countedBook } from "./milestones";
 import { keepBookStorage } from "./keepStorage";
 import { forgetRemovedPhotos, readRemovedPhotos, restoreRemovedPhotos } from "./removedPhotos";
 import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds, unreadableHeldOnly } from "./storage";
@@ -428,7 +429,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             type="button"
             className="text-button"
             onClick={() => {
-              downloadFile(catchesCsv(book), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"));
+              // The angler's own fish, as the pages count them: not the game's, nor the sample week beside fish of their own.
+              downloadFile(catchesCsv({ ...book, catches: countedBook(book).catches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"));
               setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
             }}
           >
