@@ -683,6 +683,7 @@ export const PL_FIELD: PlBook = {
   "New best {species}: {size} (was {was}).": "Nowy rekord: {species}, {size} (wcześniej {was}).",
   "Changes saved.": "Zmiany zapisane.",
   "Outing saved.": "Wyprawę zapisano.",
+  "Your best day in the book so far": "Najlepszy dzień w dzienniku jak dotąd",
   "Sample book restored.": "Przywrócono przykładowy dziennik.",
   "The sample waters and fish are gone. Add your first water to begin.": "Przykładowe łowiska i ryby zniknęły. Dodaj pierwsze łowisko, by zacząć.",
   "Sample book": "Przykładowy dziennik",

@@ -66,8 +66,9 @@ import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
-import { bookFishDay } from "./tripMonths";
-import { likelyWater, spotsByLastFish } from "./spotOrder";
+import { bestFishDay, bookFishDay } from "./tripMonths";
+import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
+import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
@@ -326,6 +327,9 @@ function TripView() {
   );
   // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
   const play = trip.spotId === PLAY_LAKE_ID;
+  // The book's day with the most fish, when this outing holds all of it: the angler's best day so far.
+  const topDay = play || !fished ? null : bestFishDay(countedBook(book));
+  const bestDay = topDay && topDay.tripId === trip.id && topDay.count >= 2;
   const tackle = play ? null : (
     <TackleList
       tripId={trip.id}
@@ -366,12 +370,19 @@ function TripView() {
           {t("{fish}; your average here is {mean}", { fish: fishCountLabel(catches.length), mean: num(meanHere, meanHere > 0 && meanHere < 0.1 ? 2 : 1) })}
         </p>
       ) : null}
+      {bestDay ? (
+        <p className="meta best-day">
+          <Link to="/bests">{t("Your best day in the book so far")}</Link>
+        </p>
+      ) : null}
       {sizeHere ? <RecordHere {...sizeHere} recordDay={bookFishDay(book, sizeHere.record)} /> : null}
       {lastHere ? (
         <p className="meta last-here">
           <Link to={`/trips/${lastHere.id}`}>
             {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(fishByTrip.get(lastHere.id) ?? 0) })}
           </Link>
+          {/* Before going back: how long the water has rested. */}
+          {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
         </p>
       ) : null}
       {/* Before going back: what was learned there last time, in the angler's own words. */}
@@ -600,6 +611,15 @@ function TripForm() {
         (id) => catchesForTrip(book, id).length,
       );
   const pickedSpot = spotById(book, spotId);
+  const notesBefore =
+    existing || !spotId || spotId === PLAY_LAKE_ID
+      ? []
+      : notesHere(
+          countedBook(book).trips.filter((trip) => trip.spotId === spotId && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || trip.date < date)),
+          localDate(new Date()),
+          2,
+          (id) => catchesForTrip(book, id).length,
+        );
   const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
@@ -759,6 +779,18 @@ function TripForm() {
                   day: formatDay(lastHere.date),
                   fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
                 })}
+              </small>
+            ) : null}
+            {/* Planning a day on a water: what was learned on the last days there, in the angler's own words. */}
+            {notesBefore.length > 0 ? (
+              <small className="field-hint notes-before">
+                {t("From your outing notes here:")}{" "}
+                {notesBefore.map(({ trip, text }, index) => (
+                  <Fragment key={trip.id}>
+                    {index > 0 ? " · " : null}
+                    {formatDay(trip.date)}: {t("“{query}”", { query: text })}
+                  </Fragment>
+                ))}
               </small>
             ) : null}
             {/* The light that day at the water picked, while the outing is planned around it. */}
