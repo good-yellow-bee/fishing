@@ -123,6 +123,8 @@ import { swallowsOut } from "./swallowFlight";
 import { BaskingLog, Turtle } from "./Turtle";
 import { turtleOut } from "./turtleMotion";
 import { Owl, OwlTree } from "./Owl";
+import { Woodpecker } from "./Woodpecker";
+import { woodpeckerOut } from "./woodpeckerDrum";
 import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
@@ -2206,6 +2208,7 @@ export const LakeWorld = memo(function LakeWorld({
       <BaskingLog />
       {turtleOut(hour, sky, season) && <Turtle />}
       <OwlTree />
+      {woodpeckerOut(hour) && <Woodpecker />}
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
