@@ -14,7 +14,7 @@ import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
-import { bookFishDay, catchMonth, monthName } from "./tripMonths";
+import { bookFishDay, monthName } from "./tripMonths";
 import { noteText, outingNameById, toLocalInput } from "./format";
 import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
@@ -28,6 +28,7 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
+import { offPlayLake } from "./playLake";
 import { shownPieceKey } from "./gear/pieceKey";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
@@ -49,23 +50,34 @@ function normalize(text: string): string {
 }
 
 /** What a fish's time says, worked out once per fish: the date sums and the moon are the slow part of a search. */
-type WhenOf = { month: string; season: ReturnType<typeof lakeSeason>; bite: (typeof BITE_TIMES)[number]["id"]; moon: MoonQuarter } | null;
+type WhenOf = { season: ReturnType<typeof lakeSeason>; bite: (typeof BITE_TIMES)[number]["id"]; moon: MoonQuarter } | null;
 const whenCache = new WeakMap<CatchEntry, WhenOf>();
 function whenOf(entry: CatchEntry): WhenOf {
   if (whenCache.has(entry)) return whenCache.get(entry)!;
   const at = new Date(entry.caughtAt);
-  const when = Number.isNaN(at.getTime()) ? null : { month: catchMonth(entry), season: lakeSeason(at), bite: biteTimeOf(at.getHours()), moon: moonQuarterOf(at) };
+  const when = Number.isNaN(at.getTime()) ? null : { season: lakeSeason(at), bite: biteTimeOf(at.getHours()), moon: moonQuarterOf(at) };
   whenCache.set(entry, when);
   return when;
 }
 
-/** True when a word of the fish's month ("October 2026", "Październik 2026") starts with what was typed. */
-function monthHas(entry: CatchEntry, want: string): boolean {
-  if (want.length < 3) return false;
-  const month = whenOf(entry)?.month ?? catchMonth(entry);
+/** A fish's month as the book counts it ("2025-12"), its outing's day for a night fish; worked out once per fish. */
+const monthCache = new WeakMap<Logbook, WeakMap<CatchEntry, string>>();
+function fishMonth(book: Logbook, entry: CatchEntry): string {
+  let months = monthCache.get(book);
+  if (!months) monthCache.set(book, (months = new WeakMap()));
+  let month = months.get(entry);
+  if (month === undefined) months.set(entry, (month = bookFishDay(book, entry).slice(0, 7)));
+  return month;
+}
+
+/** True when the fish's month's own name ("October", "Październik", "w październiku") starts with what was typed. */
+function monthHas(book: Logbook, entry: CatchEntry, want: string): boolean {
+  // A year is no month: "2027" typed in January would otherwise find last New Year's Eve's small-hours fish.
+  if (want.length < 3 || /^\d+$/.test(want)) return false;
+  const month = fishMonth(book, entry);
   const name = normalize(monthName(month));
-  // Any form of a month's name: "października", "w październiku".
-  return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want)) || monthWord(want) === Number(month.slice(5)) - 1;
+  // The month and year whole ("October 2026"), or any form of the month's name: "października", "w październiku".
+  return name.startsWith(want) || name.split(" ")[0]!.startsWith(want) || monthWord(want) === Number(month.slice(5)) - 1;
 }
 
 /**
@@ -141,6 +153,8 @@ export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne"].map((
 const NO_OUTING_WORDS = new Set(["no outing", "bez wyprawy"].map((word) => normalize(word)));
 /** "sample": the sample week's fish, so a link can leave them out where the count beside it does (countedSearch). */
 export const SAMPLE_WORDS = new Set(["sample", "przykładowe", "przykladowe"].map((word) => normalize(word)));
+/** "game": the fish landed in the game, on its lake, as the outing search and the calendar's links say "-game". */
+export const GAME_WORDS = new Set(["game", "gra"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -226,7 +240,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (exact?.field === "month") {
     // A month of any year ("May", "Maj"), by the month itself, so a note that "may" have said something doesn't count.
     const month = monthOfYear(exact.name);
-    return month === null ? [] : catchesNewestFirst(book).filter((entry) => Number(catchMonth(entry).slice(5)) === month);
+    return month === null ? [] : catchesNewestFirst(book).filter((entry) => Number(fishMonth(book, entry).slice(5)) === month);
   }
   if (exact) {
     // One name whole, as stored or as it reads in the player's language, or in Polish: a link made in Polish still
@@ -280,6 +294,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     return catchesNewestFirst(book).filter((entry) => !entry.tripId || !trips.has(entry.tripId));
   }
   if (SAMPLE_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => isSampleCatch(entry.id));
+  if (GAME_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => !offPlayLake(entry));
   if (LOOSE_WORDS.has(normalize(needle))) {
     const loose = looseOutings(book);
     return catchesNewestFirst(book).filter((entry) => loose.has(entry.id));
@@ -333,7 +348,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
     else if (
       speciesPlural(entry, want, t) ||
-      monthHas(entry, want) ||
+      monthHas(book, entry, want) ||
       (entry.released && releasedWords.some((word) => word.startsWith(want))) ||
       waterTypeHas(book, entry, want, t) ||
       skyHas(entry, want, t) ||
@@ -440,7 +455,7 @@ export function searchTerms(part: string): string[] {
   for (let i = 0; i < tokens.length; i++) {
     // A date of a few words ("last week", "oct 15") stays one term.
     let dated = 0;
-    for (let j = Math.min(tokens.length, i + 3); j > i + 1 && dated === 0; j--) if (dateWords(tokens.slice(i, j).join(" "))) dated = j;
+    for (let j = Math.min(tokens.length, i + 5); j > i + 1 && dated === 0; j--) if (dateWords(tokens.slice(i, j).join(" "))) dated = j;
     if (dated > 0) {
       terms.push(tokens.slice(i, dated).join(" "));
       i = dated - 1;
@@ -488,13 +503,14 @@ function findWords(book: Logbook, part: string, t: (text: string) => string, pic
 /**
  * What to leave out of a search: a part that starts with "-" ("pike + -released"), and what follows a "-" in a part
  * ("pike -released", "pike -soft plastic", "pike -water:"Cedar Lake"", "pike -released -jig"): to the next "-" or the
- * part's end. A "-" before a number ("-5°C") is kept as it is. Returns the parts to find and the ones to drop.
+ * part's end. A "-" before a number ("-5°C") is kept as it is, unless the number is a year, month or day ("-2025"). Returns the parts to find and the ones to drop.
  */
 export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: string[] } {
   const keep: string[] = [];
   const drop: string[] = [];
-  // A "-" at the start, or after a space, that comes before a word or a size bound ("-<10 in"), not a number ("-5°C").
-  const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-]|[<>]=?\s?\d)/;
+  // A "-" at the start, or after a space, that comes before a word, a size bound ("-<10 in") or a year, month or day
+  // ("-2025", "-2025-12"), not a number ("-5°C").
+  const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-]|[<>]=?\s?\d|\d{4}(?:-\d{2}){0,2}(?:\s|\+|$))/;
   for (const whole of parts) {
     // A dash inside a quoted name ("Rapala - silver") is part of the name.
     const quoted = holdQuoted(whole);

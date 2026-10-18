@@ -1890,7 +1890,7 @@ function CatchView() {
       ) : null}
       {/* Outside a list of its kind, the steps can keep to this kind alone. */}
       {/* Its kind's list is the one its page shows, which leaves a game or sample fish out: offered only when this one is in it. */}
-      {onPage.length > 1 && onPage.some((other) => other.id === entry.id) && !list?.key.startsWith("species:") ? (
+      {onPage.length > 1 && onPage.some((other) => other.id === entry.id) && !/^species(-largest)?:/.test(list?.key ?? "") ? (
         <p className="catch-list-at">
           {/* The same fish, so it takes this page's place, and the top of the page takes the focus the link had. */}
           <Link

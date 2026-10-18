@@ -1885,6 +1885,7 @@ html:has(.form-save):has(.undo-bar) .field-main {
   display: grid;
   gap: 6px;
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 .rename-kind-form input,

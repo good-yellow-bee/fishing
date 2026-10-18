@@ -5,12 +5,15 @@ import { exactTerm, findLink, findWithLink } from "./findLinks";
 import { TallyBars } from "./TallyBars";
 import { catchMonth, monthName } from "./tripMonths";
 
-/** Fish per month of the year, January first, every year together: when a kind or a water gives its fish. */
-export function monthOfYearTally(catches: readonly CatchEntry[]): { month: number; count: number }[] {
+/**
+ * Fish per month of the year, January first, every year together: when a kind or a water gives its fish. `monthOf` says
+ * which month a fish counts in: a night fish's outing's, as the search and the lists go by.
+ */
+export function monthOfYearTally(catches: readonly CatchEntry[], monthOf: (entry: CatchEntry) => string = catchMonth): { month: number; count: number }[] {
   const counts = Array.from({ length: 12 }, () => 0);
   for (const entry of catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
-    counts[Number(catchMonth(entry).slice(5)) - 1]! += 1;
+    counts[Number(monthOf(entry).slice(5)) - 1]! += 1;
   }
   return counts.map((count, index) => ({ month: index + 1, count }));
 }
@@ -21,8 +24,8 @@ function monthWord(month: number): string {
 }
 
 /** "Through the year", once fish came in more than one month; each month opens its fish, within a kind or water when given. */
-export function MonthBars({ catches, within }: { catches: readonly CatchEntry[]; within?: string }) {
-  const rows = monthOfYearTally(catches);
+export function MonthBars({ catches, within, monthOf }: { catches: readonly CatchEntry[]; within?: string; monthOf?: (entry: CatchEntry) => string }) {
+  const rows = monthOfYearTally(catches, monthOf);
   if (rows.filter((row) => row.count > 0).length < 2) return null;
   const link = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const total = rows.reduce((sum, row) => sum + row.count, 0);

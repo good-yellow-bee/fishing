@@ -10,13 +10,16 @@ export const LIST_PARAM = "in";
 
 /**
  * "find:pike" (the search on Home), "catches:pike" (the same search on the Catches page), "species:Northern pike",
- * "trip:<id>" or "water:<id>": a list a catch card can be opened from. "find-largest:pike" and "catches-largest:pike" are
- * those searches shown largest first.
+ * "trip:<id>" or "water:<id>": a list a catch card can be opened from. "find-largest:pike", "catches-largest:pike",
+ * "species-largest:Northern pike" and "water-largest:<id>" are those lists shown largest first.
  */
-export type ListKey = `${"find" | "catches" | "find-largest" | "catches-largest" | "species" | "trip" | "water"}:${string}`;
+export type ListKey = `${"find" | "catches" | "species" | "water"}${"" | "-largest"}:${string}` | `trip:${string}`;
 
 /** Whether a list steps through its fish largest first, not newest first. */
-export const largestList = (key: string | undefined) => Boolean(key && /^(find|catches)-largest:/.test(key));
+export const largestList = (key: string | undefined) => Boolean(key && /^(find|catches|species|water)-largest:/.test(key));
+
+/** The page a list's back link opens, largest first again when the list was. */
+const inOrder = (back: string, largest: boolean) => (largest ? `${back}${back.includes("?") ? "&" : "?"}${ORDER_PARAM}=largest` : back);
 
 /** A catch page address that remembers the list it was opened from. */
 export function catchLink(id: string, list?: ListKey): string {
@@ -46,14 +49,14 @@ export function catchList(
       ? (() => {
           const rows = findCatches(book, value, t, pictured);
           const back = search === "find" ? findLink(value) : `/catches?${new URLSearchParams({ [FIND_PARAM]: value }).toString()}`;
-          return largest ? { rows: largestFirst(rows), back: `${back}&${ORDER_PARAM}=largest` } : { rows, back };
+          return largest ? { rows: largestFirst(rows), back: inOrder(back, true) } : { rows, back };
         })()
-      : kind === "species"
-        ? { rows: kindOnPage(book, value), back: speciesLink(value) }
+      : search === "species"
+        ? { rows: largest ? largestFirst(kindOnPage(book, value)) : kindOnPage(book, value), back: inOrder(speciesLink(value), largest) }
         : kind === "trip"
           ? { rows: catchesForTrip(book, value), back: `/trips/${value}` }
-          : kind === "water"
-            ? { rows: catchesForSpot(book, value), back: `/spots/${value}` }
+          : search === "water"
+            ? { rows: largest ? largestFirst(catchesForSpot(book, value)) : catchesForSpot(book, value), back: inOrder(`/spots/${value}`, largest) }
             : null;
   if (!found || !found.rows.some((row) => row.id === id)) return null;
   return { key: list as ListKey, ...found };

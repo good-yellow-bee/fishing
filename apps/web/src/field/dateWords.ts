@@ -64,6 +64,17 @@ function weekdayNames(): string[][] {
 
 let months: string[][] | null = null;
 let weekdays: string[][] | null = null;
+let dayHeads: Set<string> | null = null;
+
+/** Whether a word is a weekday as a written date opens with it: "wed", "wednesday", "śr", "środa". */
+function isDayHead(word: string): boolean {
+  dayHeads ??= new Set(
+    Array.from({ length: 7 }, (_, day) => new Date(2026, 9, 11 + day)).flatMap((at) =>
+      LANGS.flatMap((lang) => (["short", "long"] as const).map((weekday) => plain(new Intl.DateTimeFormat(lang, { weekday }).format(at)))),
+    ),
+  );
+  return dayHeads.has(word);
+}
 
 /** The month a word names, from its first three letters up ("oct", "paźdz"), or -1. */
 function monthOf(word: string): number {
@@ -147,11 +158,33 @@ export function dateWords(text: string, now = new Date(), { ahead = false }: { a
   weekdays ??= weekdayNames();
   const weekday = want.length >= 3 ? weekdays.findIndex((names) => names.includes(want)) : -1;
   if (weekday >= 0) return one(dayOf(today, -((today.getDay() - weekday + 7) % 7)));
-  const found = /^(\d{1,2}) (\p{L}+)$/u.exec(want) ?? /^(\p{L}+) (\d{1,2})$/u.exec(want);
+  // Numbers alone, with the year or with a slash, which no size has: "31.12.2025", "12/31/2025", "12/31", "31/12".
+  const dotted = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(text.trim());
+  const slashed = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(text.trim());
+  if (dotted) return dayIn(Number(dotted[2]) - 1, Number(dotted[1]), Number(dotted[3]));
+  if (slashed) {
+    // Month first, as English writes it, unless the first can't be a month.
+    const [month, day] = Number(slashed[1]) > 12 ? [Number(slashed[2]), Number(slashed[1])] : [Number(slashed[1]), Number(slashed[2])];
+    return dayIn(month - 1, day, slashed[3] ? Number(slashed[3]) : null);
+  }
+  // A day as the cards write it, its weekday and commas and all: "Wed, Dec 31, 2025", "śr., 31 gru 2025", "1 czerwca 2025".
+  const words = want.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+  if (words.length >= 3 && isDayHead(words[0]!)) words.shift();
+  const written = words.join(" ");
+  const found = /^(\d{1,2}) (\p{L}+)(?: (\d{4}))?$/u.exec(written) ?? /^(\p{L}+) (\d{1,2})(?: (\d{4}))?$/u.exec(written);
   if (found) {
     const [day, word] = /^\d/.test(found[1]!) ? [Number(found[1]), found[2]!] : [Number(found[2]), found[1]!];
-    const month = monthOf(word);
-    if (month < 0 || day < 1 || day > 31) return null;
+    return dayIn(monthOf(word), day, found[3] ? Number(found[3]) : null);
+  }
+  return null;
+
+  /** That day of that month: in the year given, else as a date with no year reads (below). */
+  function dayIn(month: number, day: number, year: number | null): DayRange | null {
+    if (month < 0 || month > 11 || day < 1 || day > 31) return null;
+    if (year !== null) {
+      const date = new Date(year, month, day);
+      return date.getMonth() === month ? one(date) : null;
+    }
     // Looking ahead, the nearest such day either side of today: "Oct 24" on the 22nd is this Saturday.
     if (ahead) {
       const near = [-1, 0, 1]
@@ -168,5 +201,4 @@ export function dateWords(text: string, now = new Date(), { ahead = false }: { a
     }
     return null;
   }
-  return null;
 }

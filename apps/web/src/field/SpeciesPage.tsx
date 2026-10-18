@@ -214,7 +214,7 @@ function SpeciesView() {
           <TallyBars key={species} rows={seasons.map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(kindTerm, exactTerm("season", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <MonthBars key={`months-${species}`} catches={catches} within={kindTerm} />
+      <MonthBars key={`months-${species}`} catches={catches} within={kindTerm} monthOf={(entry) => bookFishDay(book, entry).slice(0, 7)} />
       {/* Each season's count of the kind, newest first, each opening that season's fish of it: once it spans two. */}
       {years.length > 1 ? (
         <>
@@ -263,7 +263,7 @@ function SpeciesView() {
             entry={entry}
             spotName={book.spots.find((spot) => spot.id === entry.spotId)?.name ?? t("Unknown water")}
             tripTitle={titleOf(entry.tripId)}
-            list={largest ? undefined : `species:${species}`}
+            list={`species${largest ? "-largest" : ""}:${species}`}
           />
         )}
       </PagedCatches>
