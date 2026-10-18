@@ -1090,8 +1090,12 @@ button.field-primary:disabled {
 
 /* Seven tabs on a narrow phone: long labels such as WYPRAWY and REKORDY must still fit their column. */
 @media (max-width: 420px) {
-  /* The bar's own side padding goes to the tabs, so seven letters of CATCHES fit at 320px. */
+  /* The bar's own side padding goes to the tabs, so seven letters of CATCHES fit at 320px.
+     A tab whose word still runs wider (a reader's own letter spacing, WCAG 1.4.12) widens its column and the bar scrolls, rather than clipping the word. */
   .field-tab {
+    grid-template-columns: repeat(7, minmax(max-content, 1fr));
+    overflow-x: auto;
+    scrollbar-width: none;
     padding-inline: 0;
   }
 

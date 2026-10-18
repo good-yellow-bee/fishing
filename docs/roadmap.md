@@ -1072,6 +1072,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA27~~ | ~~On a touch screen "Download these as a spreadsheet" (a kind of fish's page, an outing's page) sat 12 px between the sizes line and Copy a summary, all three reaching into the gaps, so its lower edge opened Copy a summary; and with larger text Newest first and Largest first wrapped 4 px apart. Both now part 16 px, so each keeps its 32 px reach (#1047)~~ | phone UX | S |
 | ~~PA28~~ | ~~On a tablet (1024x768 touch) the lake's shore signs kept the desk column down the right edge at 29 px tall, and on Home a count line that wrapped in a narrow card ("5 outings" over "5 days out this year") left its two links touching, which axe flags as a WCAG 2.5.8 target-size failure. The signs now stand 36 px on any touch screen (phones keep their own 44 and 36), and the count links part 8 px (#1052)~~ | phone UX | S |
 | ~~PA29~~ | ~~On a touch screen the Map's list of waters gave each water's name a 23 px tall link (the Plan one and coordinate links beside it already reached further). The name now reaches 6 px into its row's padding, to 35 px, moving nothing; the phone audit at 360x740 and 1024x768 finds nothing small left on the Map (#1056)~~ | phone UX | S |
+| ~~PA30~~ | ~~With a reader's own text spacing (WCAG 1.4.12: letters 0.12em, words 0.16em, lines 1.5) the field log's tab bar on a 320 px phone clipped CATCHES, and in Polish ŁOWISKA, WYPRAWY and REKORDY, by up to 8 px. A tab whose word runs wider now widens its column and the bar scrolls sideways, as it already does with larger text; at normal spacing nothing changes. A text-spacing probe over every page at 360 and 320 px finds nothing else clipped (#1059)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1103,6 +1104,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC24~~ | ~~Pancake ice: in winter, round plates of pancake ice float in the shallows, drifting slowly with the wind and bobbing on the swell, clear of the dock~~ (#1053) | scene | S |
 | ~~SC25~~ | ~~Spring blossom: in spring the shore trees drop blossom petals, white and pink, that spin down onto the water and drift with the wind~~ (#1057) | scene | S |
 | ~~SC26~~ | ~~News card: the snowy walkway, pancake ice, spring blossom and sunfish nests~~ (#1057) | scene | S |
+| ~~SC27~~ | ~~Trees in the wind: the shore trees bend downwind, further the stronger the wind, and sway about that lean, with a breath of sway on a calm day; the shack's trees too~~ (#1060) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
