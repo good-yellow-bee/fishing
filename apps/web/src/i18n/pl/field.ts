@@ -629,6 +629,9 @@ export const PL_FIELD: PlBook = {
   "Most from {water}.": "Najwięcej z łowiska: {water}.",
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
+  "Best day: {day} · {fish}": "Najlepszy dzień: {day} · {fish}",
+  "No fish in {year}.": "Brak ryb w {year}.",
+  "No fish in {year}. The book starts in {first}.": "Brak ryb w {year}. Dziennik zaczyna się w {first}.",
   "Weather is optional: note the sky and wind, and the water temperature if you took it.":
     "Pogoda jest opcjonalna: zapisz niebo i wiatr, a temperaturę wody, jeśli ją znasz.",
   "Lures that worked": "Przynęty, które łowiły",
