@@ -577,6 +577,8 @@ function CatchForm() {
   const canLocate = !existing && canFindNearest(book);
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  const soFar = pickedTrip ? book.catches.filter((entry) => entry.tripId === pickedTrip.id).length : 0;
+  const lastOnTrip = pickedTrip ? lastFishOn(book, pickedTrip.id) : undefined;
   // The angler's own fish of the kind kept on this fish's day (its outing's, for a night session).
   const fishDayNow = pickedTrip?.date ?? caughtAt.slice(0, 10);
   const keptThatDay = existing || released ? 0 : speciesCatches(book, species, t).filter((entry) => ownFish(entry) && !entry.released && bookFishDay(book, entry) === fishDayNow).length;
@@ -1240,6 +1242,10 @@ function CatchForm() {
               {tripOptions}
             </select>
           </label>
+          {/* A run of fish on one outing: how many are in so far, and when the last came, so a slip in the time shows. */}
+          {!existing && soFar > 0 && lastOnTrip ? (
+            <p className="wide form-note so-far">{t("On this outing so far: {fish} · the last at {time}", { fish: fishCountLabel(soFar), time: formatTimeOfDay(lastOnTrip) })}</p>
+          ) : null}
           {/* A small-hours fish on last evening's outing is on its day. */}
           {/* An outing still ahead: no fish is on it yet, and none can be moved there. */}
           {pickedTrip && caughtAt && pickedTrip.date > localDate(new Date()) ? (
