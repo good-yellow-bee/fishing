@@ -1,5 +1,5 @@
 import { biteTimes, catchesForSpot, lakeSeason, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
-import { isSampleTrip } from "./bookCopy";
+import { isSampleOuting } from "./bookCopy";
 import { countedFish, ownFish } from "./milestones";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
@@ -131,7 +131,7 @@ export function packingTips(book: Logbook, trip: Trip, today: string): string[] 
   if (trip.date < today) return [];
   // The angler's own fish for their own outing, as the water's page tips: the sample week's only for its own outings.
   const here = catchesForSpot(book, trip.spotId);
-  const own = !isSampleTrip(trip.id) && book.catches.some(ownFish);
+  const own = !isSampleOuting(trip) && book.catches.some(ownFish);
   return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures.map((row) => row.lure) ?? [];
 }
 

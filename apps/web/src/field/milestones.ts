@@ -1,5 +1,5 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
-import { isSampleCatch, isSampleTrip } from "./bookCopy";
+import { isSampleCatch, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 
 /** A fish the angler caught: not the sample week, not the game. */
@@ -21,10 +21,10 @@ export function countedFish(catches: readonly CatchEntry[]): CatchEntry[] {
  */
 export function countedBook(book: Logbook): Logbook {
   const real = { ...book, trips: book.trips.filter((trip) => trip.spotId !== PLAY_LAKE_ID), catches: book.catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID) };
-  const own = real.catches.some((entry) => !isSampleCatch(entry.id)) || real.trips.some((trip) => !isSampleTrip(trip.id));
+  const own = real.catches.some((entry) => !isSampleCatch(entry.id)) || real.trips.some((trip) => !isSampleOuting(trip));
   // The sample week goes whole with the first of the angler's own outings or fish, so a planned outing alone doesn't
   // leave its invented fish on the goal, the days out and the spreadsheet.
-  return own ? { ...real, trips: real.trips.filter((trip) => !isSampleTrip(trip.id)), catches: real.catches.filter((entry) => !isSampleCatch(entry.id)) } : real;
+  return own ? { ...real, trips: real.trips.filter((trip) => !isSampleOuting(trip)), catches: real.catches.filter((entry) => !isSampleCatch(entry.id)) } : real;
 }
 
 /** Round counts worth a line: the 50th fish, the 100th, and so on. */

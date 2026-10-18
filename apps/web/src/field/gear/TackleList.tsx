@@ -6,7 +6,7 @@ import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
 import { pieceKey, shownPieceKey } from "./pieceKey";
-import { isSampleTrip } from "../bookCopy";
+import { isSampleOuting, isSampleTrip } from "../bookCopy";
 import "./gear.css";
 
 /**
@@ -25,8 +25,9 @@ export function lastPackedTrip(trips: readonly Trip[], items: readonly TackleIte
 export function packedTrips(trips: readonly Trip[], items: readonly TackleItem[], tripId: string): Trip[] {
   const listed = new Set(items.map((item) => item.tripId));
   // The sample week's made-up bags only for one of its own outings.
-  const sample = isSampleTrip(tripId);
-  return trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleTrip(trip.id))).sort((a, b) => b.date.localeCompare(a.date));
+  const self = trips.find((trip) => trip.id === tripId);
+  const sample = self ? isSampleOuting(self) : isSampleTrip(tripId);
+  return trips.filter((trip) => trip.id !== tripId && listed.has(trip.id) && (sample || !isSampleOuting(trip))).sort((a, b) => b.date.localeCompare(a.date));
 }
 
 /** `name` tells screen readers which list this is where several sit on one page; it defaults to the heading. */

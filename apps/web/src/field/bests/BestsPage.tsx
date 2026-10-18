@@ -27,7 +27,7 @@ import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
-import { isSampleCatch, isSampleTrip, withoutSample } from "../bookCopy";
+import { isSampleCatch, isSampleOuting, withoutSample } from "../bookCopy";
 import { SameKinds } from "./SameKinds";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
@@ -109,7 +109,7 @@ export function BestsPage() {
   // or a streak is never one of its made-up days.
   const counted = countedBook(all);
   // The sample's waters go with its fish and outings, as taking the sample week out would take them.
-  const ownAny = counted.catches.some((entry) => !isSampleCatch(entry.id)) || counted.trips.some((trip) => !isSampleTrip(trip.id));
+  const ownAny = counted.catches.some((entry) => !isSampleCatch(entry.id)) || counted.trips.some((trip) => !isSampleOuting(trip));
   // But a sample water keeps its name while a fish or outing still counted here is on it: an outing planned before the
   // first own fish leaves the sample's fish counted, and their waters would read "Unknown water".
   const used = new Set([...counted.catches.map((entry) => entry.spotId), ...counted.trips.map((trip) => trip.spotId)]);

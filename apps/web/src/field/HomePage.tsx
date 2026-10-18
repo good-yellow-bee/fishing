@@ -10,7 +10,7 @@ import { fishCountLabel, formatDay, formatLongDay, formatTimeOfDay, outingName, 
 import { useLogbook } from "./LogbookState";
 import { countedSearch } from "./countedSearch";
 import { RESUME_PARAM } from "./anotherCatch";
-import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, upcomingRealTrips, withoutSample } from "./bookCopy";
+import { hasSampleLeft, isSampleCatch, isSampleOnly, isSampleSpot, isSampleOuting, upcomingRealTrips, withoutSample } from "./bookCopy";
 import { NEWS_ITEMS, markNewsSeen, newsDue, readSeenNews } from "../game/whatsNew";
 import { readKeptDraft } from "./catchDraft";
 import { t, tn, useT } from "../i18n";
@@ -131,7 +131,7 @@ export function HomePage() {
   const lateOuting =
     now.getHours() < LATE_NIGHT_UNTIL && !todayOuting
       ? book.trips.find((trip) => {
-          if (!offPlayLake(trip) || isSampleTrip(trip.id) || trip.date !== shiftDate(now, -1)) return false;
+          if (!offPlayLake(trip) || isSampleOuting(trip) || trip.date !== shiftDate(now, -1)) return false;
           const fish = catchesForTrip(book, trip.id);
           return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
         })
@@ -171,7 +171,7 @@ export function HomePage() {
   // "0 by this date last year" says nothing when the book only starts after that date.
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
-  const ownAny = countedOwn.trips.some((trip) => !isSampleTrip(trip.id)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
+  const ownAny = countedOwn.trips.some((trip) => !isSampleOuting(trip)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
   const daysThisYear = daysOut(countedOwn, thisYear, today);

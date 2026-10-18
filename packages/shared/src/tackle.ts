@@ -101,15 +101,18 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?)\b/i;
-/** Line names end with the line word ("Steel leader"); "In-line spinner" does not. */
-const LINE = /\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?|knife(?! jigs?\b)|knives|chairs?|stools?|umbrellas?|brollys?|tape|measures?|scales|weights?|snaps|towels?|gloves?|(tackle |fly )?box(es)?|hats?|tents?|bite alarms?|first aid|cameras?|phones?)\b/i;
+/**
+ * Line names end with the line word ("Steel leader"), or start with it before a size ("Line 0.25 mm"); "In-line
+ * spinner" does neither.
+ */
+const LINE = /\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$|^(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s+[\d.,]/i;
 
 /**
  * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.
  */
 const TACKLE_TOOL_PL =
-  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet)/;
+  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet|noz|krzes|parasol|miark|waga|wagi|agrafk|obciaz|recznik|rekawic|namiot|pudel)/;
 /**
  * Polish names a line by its word wherever it sits ("Żyłka 0,25", "Zapasowy przypon"), but a lure rigged on one
  * ("Guma na przyponie") is still a lure.

@@ -85,7 +85,8 @@ export function findTrips(
   const sized = new Map(fishTrips ? parts.filter(SIZED.test.bind(SIZED)).map((part) => [part, fishTrips(part)]) : []);
   // Each part's dates read once, not once per outing.
   // Outings can be ahead: "this weekend" on a Thursday is the coming one, and "tomorrow" is a day to find.
-  const ranges = new Map(parts.map((part) => [part, dateWords(part, now, { ahead: true })]));
+  // A day both ways: "dec 31" in October is the coming New Year's Eve for a plan and last year's for the outings had.
+  const ranges = new Map(parts.map((part) => [part, [dateWords(part, now, { ahead: true }), dateWords(part, now)].filter((range) => range !== null)]));
   const matches = (trip: Trip, text: string, part: string) => {
     const bySize = sized.get(part);
     if (bySize) return bySize.has(trip.id);
@@ -93,8 +94,8 @@ export function findTrips(
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
-    const range = ranges.get(part);
-    if (range) return trip.date >= range.from && trip.date <= range.to;
+    const days = ranges.get(part) ?? [];
+    if (days.length > 0) return days.some((range) => trip.date >= range.from && trip.date <= range.to);
     // "w październiku" finds the outings of any October, as the catch search finds its fish.
     const month = monthWord(part);
     if (month >= 0 && Number(trip.date.slice(5, 7)) - 1 === month) return true;

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, localDate, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv, sheetOutings, tripsCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleOuting, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
 import { countedBook } from "./milestones";
 import { keepBookStorage } from "./keepStorage";
 import { forgetRemovedPhotos, readRemovedPhotos, restoreRemovedPhotos } from "./removedPhotos";
@@ -39,7 +39,7 @@ function placesLostOnLoad(here: Logbook, file: Logbook): number {
   const kept = new Set([...file.spots, ...file.trips].map((each) => each.id));
   return (
     here.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && !kept.has(spot.id) && !isSampleSpot(spot.id)).length +
-    here.trips.filter((trip) => offPlayLake(trip) && !kept.has(trip.id) && !isSampleTrip(trip.id)).length
+    here.trips.filter((trip) => offPlayLake(trip) && !kept.has(trip.id) && !isSampleOuting(trip)).length
   );
 }
 
@@ -348,7 +348,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const hasBook =
     storedBook.catches.some((entry) => !isSampleCatch(entry.id)) ||
     storedBook.spots.some((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)) ||
-    storedBook.trips.some((trip) => !isSampleTrip(trip.id));
+    storedBook.trips.some((trip) => !isSampleOuting(trip));
   // What the file brings this book: the sample week only while this book still has it.
   const fromFile = pending ? withoutSampleFor(pending, storedBook) : null;
   const adds = fromFile ? catchesNewestFirst({ ...fromFile.book, catches: newFishIn(storedBook, withoutDeleted(fromFile).book) }) : [];

@@ -1,4 +1,5 @@
-import { catchesNewestFirst, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
+import { catchesNewestFirst, localDate, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
+import { isSampleOnly, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 
 export type Neighbors<T> = { newer: T | null; older: T | null };
@@ -16,9 +17,16 @@ export function catchNeighbors(book: Logbook, id: string): Neighbors<CatchEntry>
   return neighborsIn(catchesNewestFirst(book).filter((entry) => (entry.spotId === PLAY_LAKE_ID) === play), id);
 }
 
-/** The outings either side, by day: game days step only among themselves, real ones among real ones. */
-export function tripNeighbors(book: Logbook, id: string): Neighbors<Trip> {
-  const play = book.trips.find((trip) => trip.id === id)?.spotId === PLAY_LAKE_ID;
-  const rows = book.trips.filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play).sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+/**
+ * The outings either side, by day: game days step only among themselves, real ones among real ones. Once the book
+ * holds the angler's own, the sample week's plans still ahead are hidden, as Coming up hides them, unless one is shown.
+ */
+export function tripNeighbors(book: Logbook, id: string, today = localDate(new Date())): Neighbors<Trip> {
+  const self = book.trips.find((trip) => trip.id === id);
+  const play = self?.spotId === PLAY_LAKE_ID;
+  const hideSamplePlans = !isSampleOnly(book) && !(self && isSampleOuting(self));
+  const rows = book.trips
+    .filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play && !(hideSamplePlans && isSampleOuting(trip) && trip.date >= today))
+    .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
   return neighborsIn(rows, id);
 }
