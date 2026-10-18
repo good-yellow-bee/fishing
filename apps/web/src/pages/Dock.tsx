@@ -45,6 +45,7 @@ import {
   type LakeSeason,
   type Sky,
   type SkillId,
+  type StanceId,
 } from "@stillwater/shared";
 import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
@@ -679,6 +680,17 @@ export function DockPage() {
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
     target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
+  /** A bank whose next cast meets wary fish, unless groundbait there keeps them feeding: its sign is dimmed and the stance chip says so. */
+  const fishedHardAt = (target: StanceId) => game.fishedHard.some((bank) => bank === target) && game.groundbait?.spot !== target;
+  /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
+  const signNote = (target: WalkTarget, label: string) =>
+    fishedHardAt(target)
+      ? favoredNow(target)
+        ? t("{bank}: bites sooner now, but fished hard", { bank: t(label) })
+        : t("{bank}: fished hard", { bank: t(label) })
+      : favoredNow(target)
+        ? t("{bank}: bites sooner now", { bank: t(label) })
+        : undefined;
   const stanceLabel = rowing
     ? t("Rowing")
     : game.stance === "dropoff" && !dropoffOpen
@@ -825,7 +837,7 @@ export function DockPage() {
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
-          {!rowing && game.fishedHard.some((bank) => bank === game.stance) && game.groundbait?.spot !== game.stance && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -887,9 +899,10 @@ export function DockPage() {
                 className="panel-btn"
                 type="button"
                 aria-current={game.stance === target ? "location" : undefined}
-                aria-label={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
-                title={favoredNow(target) ? t("{bank}: bites sooner now", { bank: t(label) }) : undefined}
+                aria-label={signNote(target, label)}
+                title={signNote(target, label)}
                 data-now={favoredNow(target) ? "1" : undefined}
+                data-cold={fishedHardAt(target) ? "1" : undefined}
                 disabled={game.stance === target}
                 onClick={(event) => {
                   // Leave Space free for casting.

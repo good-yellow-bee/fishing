@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky } from "@stillwater/shared";
+import { badgeProgress, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -12,7 +12,7 @@ import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -29,7 +29,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return landed.outcome ? { ...game, outcome: landed.outcome } : game;
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}) };
     },
   };
 });
@@ -77,6 +77,7 @@ afterEach(() => {
   root = null;
   container = null;
   landed.outcome = null;
+  landed.fishedHard = null;
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
@@ -149,6 +150,18 @@ describe("dock weather", () => {
     const summer = await openDock("/?hour=day&sky=clear&season=summer");
     const summerSigns = [...summer.querySelectorAll(".walk-signs button")].filter((button) => button.querySelector(".sign-now")).map((button) => button.textContent);
     expect(summerSigns).toEqual(["Dock •"]);
+  });
+
+  it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {
+    landed.fishedHard = ["point", "reeds"];
+    const spring = await openDock("/?hour=day&sky=partly-cloudy&season=spring");
+    const sign = (name: string) => [...spring.querySelectorAll(".walk-signs button")].find((button) => button.textContent?.startsWith(name));
+    expect(sign("Point")?.getAttribute("data-cold")).toBe("1");
+    expect(sign("Point")?.getAttribute("aria-label")).toBe("Point: fished hard");
+    // A spring day still favors the reeds, so their sign says both.
+    expect(sign("Reeds")?.getAttribute("aria-label")).toBe("Reeds: bites sooner now, but fished hard");
+    expect(sign("Reeds")?.querySelector(".sign-now")).not.toBeNull();
+    expect(sign("Drop-off")?.hasAttribute("data-cold")).toBe(false);
   });
 
   it("uses the day's weather on the same clock as the hour without an override", async () => {
