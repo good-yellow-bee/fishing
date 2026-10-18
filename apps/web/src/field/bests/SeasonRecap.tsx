@@ -1,4 +1,5 @@
 import type { Logbook } from "@stillwater/shared";
+import { Link } from "react-router-dom";
 import { t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
@@ -18,7 +19,7 @@ function against(count: number, before: number, year: string): string {
 }
 
 /** A picked season at a glance against the one before: fish, days out, kinds, and the kinds new to the book. */
-export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: string; today: string }) {
+export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; year: string; today: string; dayLink?: (date: string) => string }) {
   useT();
   const recap = seasonRecap(book, year, today);
   const goal = year < today.slice(0, 4) ? readYearGoal(year) : null;
@@ -49,7 +50,8 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
         {[...lines, ...firsts].map((line, index) => (
           <span key={line}>
             {index > 0 ? <br /> : null}
-            {line}
+            {/* The best day opens its fish, as the Best day tile does. */}
+            {top && dayLink && line === bestDay[0] ? <Link to={dayLink(top.date)}>{line}</Link> : line}
           </span>
         ))}
       </p>

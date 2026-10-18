@@ -304,7 +304,7 @@ export function BestsPage() {
           ))}
         </p>
       ) : null}
-      {year ? <SeasonRecapBox book={whole} year={year} today={today} /> : null}
+      {year ? <SeasonRecapBox book={whole} year={year} today={today} dayLink={(date) => findLink(tail(date))} /> : null}
 
       <section className="stat-row" data-cols="4" aria-label={t("Personal bests")}>
         <div>

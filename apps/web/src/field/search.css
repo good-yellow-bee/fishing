@@ -58,3 +58,9 @@
   color: var(--field-muted);
   font-size: 13px;
 }
+
+/* "By kind" and "By year" under a search's count: a long kind's name breaks rather than widening the page. */
+.match-split {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
