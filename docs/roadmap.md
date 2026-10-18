@@ -1073,6 +1073,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA28~~ | ~~On a tablet (1024x768 touch) the lake's shore signs kept the desk column down the right edge at 29 px tall, and on Home a count line that wrapped in a narrow card ("5 outings" over "5 days out this year") left its two links touching, which axe flags as a WCAG 2.5.8 target-size failure. The signs now stand 36 px on any touch screen (phones keep their own 44 and 36), and the count links part 8 px (#1052)~~ | phone UX | S |
 | ~~PA29~~ | ~~On a touch screen the Map's list of waters gave each water's name a 23 px tall link (the Plan one and coordinate links beside it already reached further). The name now reaches 6 px into its row's padding, to 35 px, moving nothing; the phone audit at 360x740 and 1024x768 finds nothing small left on the Map (#1056)~~ | phone UX | S |
 | ~~PA30~~ | ~~With a reader's own text spacing (WCAG 1.4.12: letters 0.12em, words 0.16em, lines 1.5) the field log's tab bar on a 320 px phone clipped CATCHES, and in Polish ŁOWISKA, WYPRAWY and REKORDY, by up to 8 px. A tab whose word runs wider now widens its column and the bar scrolls sideways, as it already does with larger text; at normal spacing nothing changes. A text-spacing probe over every page at 360 and 320 px finds nothing else clipped (#1059)~~ | phone UX | S |
+| ~~PA31~~ | ~~Five pages outside the field log (Sign in, Join, the lake, the catch log and the lodge board) all titled their browser tab "Stillwater", so a screen reader announced the same name on each and the tab list could not tell them apart (WCAG 2.4.2). Each now names its tab after its page ("Lodge board · Stillwater", "On the lake · Stillwater"), in English or Polish, and leaving puts the app's name back; the field log already named its own pages (#1064)~~ | phone UX | S |
+| ~~PA32~~ | ~~The species and lure chips on a water's, an outing's and the catches page stood 30 px tall in a wrapping row, under the 32 px the rest of the log keeps on a touch screen; a pixel more padding each way makes them 32 (#1069)~~ | phone UX | S |
+| ~~PA33~~ | ~~Tabbing down a log form on a phone left the Water picker, the "Add the one you fished" link and the weather pickers on a desktop wholly under the sticky Save buttons, since the browser saw them on screen and did not scroll (WCAG 2.4.11). A form page now pads the window's scroll edge by the save bar's height, so a field tabbed to stops above it (probe tabobscure.cjs) (#1069)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1105,6 +1108,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC25~~ | ~~Spring blossom: in spring the shore trees drop blossom petals, white and pink, that spin down onto the water and drift with the wind~~ (#1057) | scene | S |
 | ~~SC26~~ | ~~News card: the snowy walkway, pancake ice, spring blossom and sunfish nests~~ (#1057) | scene | S |
 | ~~SC27~~ | ~~Trees in the wind: the shore trees bend downwind, further the stronger the wind, and sway about that lean, with a breath of sway on a calm day; the shack's trees too~~ (#1060) | scene | S |
+| ~~SC28~~ | ~~Crayfish: from spring to fall, crayfish creep over the bed round the dock, claws out in front, then flick their tails and shoot backwards~~ (#1062) | scene | S |
+| ~~SC29~~ | ~~Whirligig beetles: on still, dry days from spring through summer, a raft of whirligig beetles whirls in tight loops on the water off the dock's right side, each in its own ring of ripple~~ (#1063) | scene | S |
+| ~~SC30~~ | ~~Shore ice: in winter a ragged rim of ice skirts the bank, wider in the coves, snowy near the bank and bare grey at its broken edge, with loose plates lying off it~~ (#1066) | scene | S |
+| ~~SC31~~ | ~~News card: trees in the wind, crayfish, whirligig beetles and shore ice~~ (#1066) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1379,7 +1386,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT267~~ | ~~Groundbait and retie on a controller: X tosses the groundbait (G) and the left trigger reties the line (T), and the keys card lists both~~ (#1030) | ui | S |
 | ~~GT268~~ | ~~The bright morning after the rain: on a clear day after a day that ended in rain, the fish sulk deep till noon, so bites come slower (1.15 wait) on any lure but a slow jig or worm; the bite reasons say so, the forecast board chalks it, and a beginner is spared~~ (#1035) | gameplay | S |
 | ~~GT269~~ | ~~News card 2026-10-18-game09 covers GT266 to GT268: a twisted line from spinner casts, groundbait and retie on a controller, and the bright morning after the rain~~ (#1039) | ui | S |
-| GT270 | A hook blunted on the rocks: working a lure free of the Point's rocks dulls its hook point, so a strike has half the usual time to set solid (the hookset says "on the dull hook"); the stance chip says "hook dulled", and the Retie button (or T, or LT) touches it up; a break ties on a fresh one | gameplay | S |
+| ~~GT270~~ | ~~A hook blunted on the rocks: working a lure free of the Point's rocks dulls its hook point, so a strike has half the usual time to set solid (the hookset says "on the dull hook"); the stance chip says "hook dulled", and the Retie button (or T, or LT) touches it up; a break ties on a fresh one~~ (#1055) | gameplay | S |
+| ~~GT271~~ | ~~Winter shore ice: a winter cast landing on the ice the scene draws round the shore skitters across it ("The lure skittered across the shore ice.") instead of fishing there, and the hint says to cast past it to the open water; a beginner is spared~~ (#1067) | gameplay | S |
+| GT272 | The fall turnover: once each fall, for 3 days starting on a day between October 20 and November 12 (the same for everyone), the lake turns over and bites come slower everywhere (1.2 wait) but a little sooner in the inlet's fresh stream water (0.9); the bite reasons say so first, the forecast board chalks those days, and a beginner is spared the slow side | gameplay | S |
 
 ## Risks / open questions for the owner
 

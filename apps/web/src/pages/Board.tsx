@@ -5,6 +5,7 @@ import { errorText, getBoard, getSpeciesRecords } from "../api";
 import { FishMark } from "../components/FishMark";
 import { t, tn, useT } from "../i18n";
 import { weightText } from "../i18n/content";
+import { usePageTitle } from "../pageTitle";
 
 function periodLabel(period: BoardPeriod): string {
   return period === "all" ? t("All time") : t("This week");
@@ -41,6 +42,7 @@ export function BoardPage() {
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const [error, setError] = useState("");
   const t = useT();
+  usePageTitle(`${t("Lodge board")} · Stillwater`);
 
   useEffect(() => {
     let live = true;

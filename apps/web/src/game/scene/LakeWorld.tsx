@@ -36,6 +36,8 @@ import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
 import { IceFloes } from "./IceFloes";
+import { Crayfish } from "./Crayfish";
+import { crayfishOut } from "./crayfishCrawl";
 import { floesOut } from "./iceFloes";
 import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
@@ -54,6 +56,8 @@ import { DewWeb } from "./DewWeb";
 import { Deer } from "./Deer";
 import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, ducklingsOut } from "./ducklingTrail";
 import { Striders } from "./Striders";
+import { Whirligigs } from "./Whirligigs";
+import { whirligigsOut } from "./whirligigSpin";
 import { ReedFluff } from "./ReedFluff";
 import { Gusts } from "./Gusts";
 import { Whitecaps } from "./Whitecaps";
@@ -130,6 +134,8 @@ import { LightShafts } from "./LightShafts";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
 import { DuckweedFilm } from "./DuckweedFilm";
+import { ShoreIceFilm } from "./ShoreIceFilm";
+import { SNOW_BAND } from "./shoreIce";
 import { duckweedAmount } from "./duckweedBeds";
 import { pollenAmount } from "./pollenDrift";
 import { bankMirrorStrength, mirrorStale } from "./mirrorImage";
@@ -140,7 +146,7 @@ import { mistAmount } from "./mist";
 import { cloudBlobs, cloudScroll, cloudShadowStrength } from "./cloudShadow";
 import { starOpacity } from "./starField";
 import { Stars } from "./Stars";
-import { SHORE_ICE_WIDTH, seasonGroundColor, seasonWaterColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
+import { seasonGroundColor, seasonWaterColor, shoreIce, tintPlant, type PlantKind } from "./seasonLook";
 import { treeShape, type HillShape, type TreeShape } from "./cameraClear";
 import { fx } from "../fx";
 import { useSettings } from "../settings";
@@ -1149,6 +1155,7 @@ function LakeSurface({
       {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
       {duckweed > 0 && <DuckweedFilm geometry={geometry} wind={wind} hour={hour} amount={duckweed} />}
       {pollen > 0 && <PollenFilm geometry={geometry} wind={wind} hour={hour} amount={pollen} />}
+      {shoreIce(season) && <ShoreIceFilm geometry={geometry} hour={hour} />}
       {cloudShade > 0 && (
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
@@ -2019,8 +2026,8 @@ export const LakeWorld = memo(function LakeWorld({
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
-  // Shore ice reaches from under the bank out over the shallows.
-  const ice = useMemo(() => (shoreIce(season) ? makeEdgeRingGeometry(0.4, -SHORE_ICE_WIDTH) : null), [season]);
+  // The snowy band of the shore ice, from under the bank out over the water; the ragged rest is ShoreIceFilm.
+  const ice = useMemo(() => (shoreIce(season) ? makeEdgeRingGeometry(0.4, -SNOW_BAND) : null), [season]);
   useEffect(() => () => ice?.dispose(), [ice]);
   const ground = (color: string) => seasonGroundColor(color, season);
   const groundGeo = useMemo(() => makeGroundGeometry(), []);
@@ -2095,6 +2102,7 @@ export const LakeWorld = memo(function LakeWorld({
       {deerOut(hour, sky) && <Deer />}
       {mooseOut(hour, sky, season) && <Moose antlers={mooseAntlers(season)} />}
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
+      {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <ShorePath />
       <BankWalks />
@@ -2109,6 +2117,7 @@ export const LakeWorld = memo(function LakeWorld({
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {nestsOut(season) && <SunfishNests />}
       {floesOut(season) && <IceFloes wind={wind} />}
+      {crayfishOut(season) && <Crayfish />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (

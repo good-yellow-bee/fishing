@@ -43,6 +43,10 @@ describe("the field log on a touch screen", () => {
     expect(/\n  \.rename-kind summary \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 6px;");
   });
 
+  it("makes the species and lure chips 32 px tall", () => {
+    expect(/\n  p\.species-chips a \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 5px;");
+  });
+
   it("reaches past the Map's Plan one and coordinate links into their row", () => {
     const block = /\.map-index a\.map-plan::after,\n  \.map-index a\.map-coord-link::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -8px -4px;");
@@ -60,5 +64,13 @@ describe("the field log's tab bar on a 320 px phone", () => {
     const block = /\n  \.field-tab \{([^}]*)\}/.exec(narrow)?.[1];
     expect(block).toContain("grid-template-columns: repeat(7, minmax(max-content, 1fr));");
     expect(block).toContain("overflow-x: auto;");
+  });
+});
+
+describe("the field log's forms by keyboard", () => {
+  it("scrolls a field tabbed to clear of the sticky save buttons (WCAG 2.4.11)", () => {
+    expect(/\nhtml:has\(\.form-save\) \{([^}]*)\}/.exec(css)?.[1]).toContain("scroll-padding-bottom: 88px;");
+    const phone = css.slice(css.indexOf("@media (max-width: 860px) {"));
+    expect(/\n  html:has\(\.form-save\) \{([^}]*)\}/.exec(phone)?.[1]).toContain("scroll-padding-bottom: calc(48px + 88px + env(safe-area-inset-bottom));");
   });
 });

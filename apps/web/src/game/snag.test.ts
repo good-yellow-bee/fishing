@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REEDS_STAND } from "./scene/bankWalk";
-import { POINT_PAD } from "@stillwater/shared";
-import { castSnags, inWeeds, onRocks, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
+import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, POINT_PAD } from "@stillwater/shared";
+import { castSnags, inWeeds, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
 import { waterDepth } from "./scene/water";
 
 describe("snags", () => {
@@ -47,5 +47,20 @@ describe("snags", () => {
     // A crankbait's lip bumps it off the rocks; a topwater lure still hangs up on them.
     expect(castSnags("point", x, z, false, 0, "Shallow crankbait")).toBeNull();
     expect(castSnags("point", x, z, false, 0, "Topwater frog")).toBe("rocks");
+  });
+});
+
+describe("shore ice", () => {
+  it("rims the lake's water just inside the shore in winter only", () => {
+    const east = { x: LAKE_RX * lakeEdge(0) * 0.95, z: LAKE_CENTER_Z };
+    const south = { x: 0, z: LAKE_CENTER_Z + LAKE_RZ * lakeEdge(Math.PI / 2) * 0.95 };
+    for (const near of [east, south]) {
+      expect(inLake(near.x, near.z)).toBe(true);
+      expect(onShoreIce("winter", near.x, near.z)).toBe(true);
+      expect(onShoreIce("fall", near.x, near.z)).toBe(false);
+    }
+    expect(onShoreIce(undefined, east.x, east.z)).toBe(false);
+    expect(onShoreIce("winter", LAKE_RX * 0.8, LAKE_CENTER_Z)).toBe(false);
+    expect(onShoreIce("winter", 0, LAKE_CENTER_Z)).toBe(false);
   });
 });

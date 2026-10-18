@@ -452,6 +452,11 @@ button.field-primary {
   .rename-kind summary {
     padding-block: 6px;
   }
+
+  /* Species and lure chips sit 30 px tall in a wrapping row; one more pixel each way makes 32. */
+  p.species-chips a {
+    padding-block: 5px;
+  }
 }
 
 .subhead,
@@ -812,6 +817,12 @@ button.field-primary:disabled {
   scroll-margin-bottom: 120px;
 }
 
+/* Tabbing to a field near the bottom scrolls it clear of the sticky save buttons rather than leave it under them
+   (WCAG 2.4.11). */
+html:has(.form-save) {
+  scroll-padding-bottom: 88px;
+}
+
 /* The save buttons ride along the bottom of the window while the form scrolls. */
 .form-save {
   position: sticky;
@@ -1036,6 +1047,11 @@ button.field-primary:disabled {
   /* Keyboard focus scrolled into view stops above the fixed tab bar rather than under it. */
   html {
     scroll-padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  /* And above the save buttons too, which ride on top of the tab bar. */
+  html:has(.form-save) {
+    scroll-padding-bottom: calc(48px + 88px + env(safe-area-inset-bottom));
   }
 
   /* Clear of the save bar and the tab bar together. */

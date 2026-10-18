@@ -8,6 +8,7 @@ import { readStoredLogbook } from "../field/storage";
 import { kindOnPage } from "../field/speciesLink";
 import { locale, tn, useT } from "../i18n";
 import { weightText } from "../i18n/content";
+import { usePageTitle } from "../pageTitle";
 
 export function LogPage() {
   const [me, setMe] = useState<Me | null>(null);
@@ -15,6 +16,7 @@ export function LogPage() {
   // The field log lives on this device; the guide links each kind it holds.
   const [book] = useState(readStoredLogbook);
   const t = useT();
+  usePageTitle(`${me ? t("{name}’s catch log", { name: me.profile.displayName }) : t("Catch log")} · Stillwater`);
 
   useEffect(() => {
     getMe()

@@ -1,4 +1,5 @@
-import { lureClass, type SpotId } from "@stillwater/shared";
+import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, lureClass, type LakeSeason, type SpotId } from "@stillwater/shared";
+import { SHORE_ICE_WIDTH, shoreIce } from "./scene/seasonLook";
 import { waterDepth } from "./scene/water";
 
 /** Share of casts into the reed shallows that snag on the weed. */
@@ -35,4 +36,12 @@ export function castSnags(spot: SpotId, x: number, z: number, mercy: boolean, ro
   if (inWeeds(spot, x, z) && roll < SNAG_ODDS && kind !== "popper") return "weed";
   if (onRocks(spot, x, z) && roll < ROCK_SNAG_ODDS && kind !== "crank") return "rocks";
   return null;
+}
+
+/** Whether a cast landing at (x, z) lands on the winter's shore ice, the rim the scene draws SHORE_ICE_WIDTH in from the lake's edge. */
+export function onShoreIce(season: LakeSeason | undefined, x: number, z: number) {
+  if (!season || !shoreIce(season)) return false;
+  const dz = z - LAKE_CENTER_Z;
+  const edge = lakeEdge(Math.atan2(dz / LAKE_RZ, x / LAKE_RX));
+  return Math.hypot(x / (LAKE_RX * edge - SHORE_ICE_WIDTH), dz / (LAKE_RZ * edge - SHORE_ICE_WIDTH)) > 1;
 }
