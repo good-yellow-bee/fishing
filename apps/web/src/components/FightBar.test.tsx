@@ -15,7 +15,7 @@ let frames: FrameRequestCallback[] = [];
 
 let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
-function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null) {
+function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null, note: string | null = null) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
@@ -24,7 +24,7 @@ function mount(performance: FightPerformance | null, underpowered = false, speci
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} />));
+  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} note={note} />));
   return record;
 }
 
@@ -41,6 +41,23 @@ afterEach(() => {
   container = null;
   frames = [];
   vi.unstubAllGlobals();
+});
+
+describe("FightBar hookset note", () => {
+  it("shows the hookset's message at the top of the card", () => {
+    mount(null, false, perch, null, "Hooked solid in 0.31 s! It's worn from spawning, so it tires sooner.");
+    expect(container!.querySelector(".fight-note")?.textContent).toBe("Hooked solid in 0.31 s! It's worn from spawning, so it tires sooner.");
+  });
+
+  it("shows nothing without a note, or when the fish is too heavy for the line", () => {
+    mount(null);
+    expect(container!.querySelector(".fight-note")).toBeNull();
+    act(() => root?.unmount());
+    container?.remove();
+    mount(null, true, perch, null, "This fish is too heavy for your line.");
+    expect(container!.querySelector(".fight-note")).toBeNull();
+    expect(container!.querySelector(".warn")?.textContent).toBe("This fish is too heavy for your line.");
+  });
 });
 
 describe("FightBar controls", () => {

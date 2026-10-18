@@ -524,7 +524,7 @@ a:focus-visible {
   pointer-events: none;
 }
 
-/* The fight bar repeats the hint's instruction — avoid overlapping it. */
+/* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
 .scene-wrap[data-phase="fight"] .hint {
   display: none;
 }
@@ -1148,6 +1148,37 @@ kbd {
 .fight-bar .fight-steer[data-call="turning"] {
   color: #4d6b3f;
   font-weight: 600;
+}
+
+/* The hookset's message, held on the card for a while as the fight starts. */
+.fight-bar .fight-note {
+  margin: 0 0 6px;
+  padding-left: 8px;
+  border-left: 2px solid #b98a3a;
+  color: #4a3a28;
+  font-size: 12px;
+  line-height: 1.35;
+  animation: fight-note-in 0.25s ease-out;
+}
+
+@keyframes fight-note-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fight-bar .fight-note {
+    animation: none;
+  }
+}
+
+/* On a phone the card has no room to grow: the standing habit and control lines step aside while the note shows. */
+@media (max-width: 800px) {
+  .fight-bar:has(.fight-note) .fight-water,
+  .fight-bar:has(.fight-note) .fight-controls {
+    display: none;
+  }
 }
 
 .fight-bar .fight-best {
