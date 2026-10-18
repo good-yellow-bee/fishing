@@ -88,6 +88,8 @@ import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
 import { Snowman } from "./Snowman";
 import { BirdFeeder } from "./BirdFeeder";
+import { Puddles } from "./Puddles";
+import { puddlesOut } from "./rainPuddles";
 import { Cat } from "./Cat";
 import { catPlace } from "./catNap";
 import { chickadeesOut, feederUp } from "./feederVisits";
@@ -2134,6 +2136,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Dock wet={dockWet(weather.rain, season)} pale={walkwayPale(season, frost)} />
       {frost > 0 && <DockFrost amount={frost} />}
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
+      {puddlesOut(weather.rain, season) && <Puddles light={weather.rainLight} />}
       {dockSnowy(season) && <DockSnow />}
       {dockSnowy(season) && <DockFrost amount={1} snow />}
       {iciclesOut(season) && <Icicles />}
