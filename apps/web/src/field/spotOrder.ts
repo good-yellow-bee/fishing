@@ -65,7 +65,7 @@ export function kmBetween(a: { lat: number; lng: number }, b: { lat: number; lng
 export function nearestWater(book: Logbook, here: { lat: number; lng: number }): { spot: Spot; km: number } | null {
   let best: { spot: Spot; km: number } | null = null;
   for (const spot of book.spots) {
-    if (!spot.place) continue;
+    if (!spot.place || spot.id === PLAY_LAKE_ID) continue;
     const km = kmBetween(here, spot.place);
     if (!best || km < best.km) best = { spot, km };
   }

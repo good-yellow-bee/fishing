@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { hasMovedInApp } from "./FieldShell";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -261,6 +262,7 @@ function CatchForm() {
   // Never the game's lake or one of its days for a new fish: those are landed by playing.
   const linkedTrip = existing ? undefined : tripById(book, params.get("trip") ?? "");
   const presetTrip = linkedTrip && linkedTrip.spotId !== PLAY_LAKE_ID ? linkedTrip : undefined;
+  const cancelSpot = existing ? null : book.spots.find((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID)?.id ?? null;
   // A ?spot= that is no longer in the book (deleted, or an old link) falls back like no spot at all.
   const linkedSpot = params.get("spot") !== PLAY_LAKE_ID && book.spots.some((spot) => spot.id === params.get("spot")) ? params.get("spot") : null;
   // Opened without a water or outing ("Log a catch" anywhere): today's outing's water, else the one fished last. Worked out once.
@@ -504,7 +506,8 @@ function CatchForm() {
   );
   const lurePicks = kindLures.length > 0 ? kindLures : hereLures;
   // The game's fish and tackle stay out of the real form's lists: a Ghost pike is no one's guess for "pike".
-  const realBook = useMemo(() => ({ ...book, catches: book.catches.filter(offPlayLake) }), [book]);
+  // The sample week's too, once the angler has fish of their own: their lures come first, not the made-up week's.
+  const realBook = useMemo(() => ({ ...book, catches: countedFish(book.catches) }), [book]);
   const speciesOptions = useMemo(
     () =>
       ownFirst(
@@ -710,7 +713,9 @@ function CatchForm() {
     if ((event.nativeEvent as SubmitEvent).submitter?.getAttribute("name") === "another") {
       anotherAt = Date.now();
       // Not a fish from minutes ago, before midnight on tonight's session: the next one comes now, not at 23:58 again.
-      const writtenUp = caughtAt.slice(0, 10) < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
+      // A small-hours fish on last night's outing is that outing's day: a write-up the next morning carries its time too.
+      const fishDay = (tripId ? tripById(book, tripId)?.date : undefined) ?? caughtAt.slice(0, 10);
+      const writtenUp = fishDay < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
       const earlier = writtenUp ? caughtAt : undefined;
       navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), savedState("catch", news, parsed?.ok ? parsed.value.caughtAt : undefined));
       return;
@@ -749,16 +754,27 @@ function CatchForm() {
           <h1 data-title={existing ? t("Editing {name}", { name: t(existing.species) }) : t("Log a catch")}>{heading}</h1>
         </div>
         <Link
-          to={existing ? catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined) : tripId ? `/trips/${tripId}` : "/catches"}
-          // Cancelling an edit means it: the changes are not kept for later.
-          onClick={
+          to={
             existing
-              ? () => {
-                  editDone.current = true;
-                  dropEditDraft(existing.id);
-                }
-              : undefined
+              ? catchLink(existing.id, (params.get(LIST_PARAM) ?? undefined) as ListKey | undefined)
+              : presetTrip
+                ? `/trips/${presetTrip.id}`
+                : cancelSpot
+                  ? `/spots/${cancelSpot}`
+                  : "/catches"
           }
+          // Cancelling means it: the changes are not kept for later. A new fish goes back where it was started from.
+          onClick={(event) => {
+            editDone.current = true;
+            if (existing) {
+              dropEditDraft(existing.id);
+              return;
+            }
+            if (!waiting) dropKeptDraft();
+            if (!hasMovedInApp()) return;
+            event.preventDefault();
+            navigate(-1);
+          }}
         >
           {t("Cancel")}
         </Link>
@@ -887,7 +903,12 @@ function CatchForm() {
                   type="button"
                   className="lure-tip"
                   aria-pressed={species.trim().toLowerCase() === name.toLowerCase()}
-                  onClick={() => setSpecies(name)}
+                  // A toggle: pressed again, the kind is cleared for one typed in.
+                  onClick={() => {
+                    if (species.trim().toLowerCase() !== name.toLowerCase()) return setSpecies(name);
+                    setSpecies("");
+                    focusSoon('input[name="species"]');
+                  }}
                 >
                   {name}
                 </button>
@@ -1021,8 +1042,12 @@ function CatchForm() {
                   key={name}
                   type="button"
                   className="lure-tip"
-                  aria-pressed={lure === name}
-                  onClick={() => setLure(name)}
+                  aria-pressed={lure.trim().toLowerCase() === name.toLowerCase()}
+                  onClick={() => {
+                    if (lure.trim().toLowerCase() !== name.toLowerCase()) return setLure(name);
+                    setLure("");
+                    focusSoon('input[name="lure"]');
+                  }}
                 >
                   {name}
                 </button>
@@ -1074,7 +1099,7 @@ function CatchForm() {
 
           <label>
             {/* Named by this alone: the buttons beside the time keep their own names. */}
-            <span id="caught-at-label">{t("Time")}</span>
+            <span id="caught-at-label">{t("Time|date and time")}</span>
             <input
               name="caughtAt"
               aria-labelledby="caught-at-label"
@@ -1193,7 +1218,12 @@ function CatchForm() {
                 className="text-button"
                 onClick={() => {
                   // A small-hours time goes to the night after the outing's day, so it stays on that session.
-                  setCaughtAt(`${Number(caughtAt.slice(11, 13)) < LATE_NIGHT_UNTIL ? dayAfter(pickedTrip.date) : pickedTrip.date}${caughtAt.slice(10)}`);
+                  // Never past now: tonight's small hours haven't come yet, so the time stays on the outing's day, or is now.
+                  const now = toLocalInput(new Date());
+                  const night = `${dayAfter(pickedTrip.date)}${caughtAt.slice(10)}`;
+                  const sameDay = `${pickedTrip.date}${caughtAt.slice(10)}`;
+                  const moved = Number(caughtAt.slice(11, 13)) < LATE_NIGHT_UNTIL && night <= now ? night : sameDay <= now ? sameDay : now;
+                  setCaughtAt(moved);
                   setTimeTouched(true);
                   focusSoon('input[name="caughtAt"]');
                 }}
@@ -1264,7 +1294,6 @@ function CatchForm() {
               value={waterTemp}
               onChange={(event) => setWaterTemp(event.target.value)}
               placeholder={t("e.g. {n}", { n: units === "metric" ? "14" : "58" })}
-              aria-label={units === "metric" ? t("Water temperature in Celsius") : t("Water temperature in Fahrenheit")}
             />
           </label>
 
@@ -1467,9 +1496,12 @@ function CatchView() {
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
   const sun = place ? sunMark(entry.caughtAt, place) : null;
   // A real fish's day leaves the game's rounds out, as Home's "Every fish that day" does.
-  const dayFish = book.catches.filter((other) => bookFishDay(book, other) === caughtDay && (offPlayLake(other) || !offPlayLake(entry)));
+  // The angler's own fish leaves the sample week's out of its day too, as the other counts here do.
+  const ownDay = offPlayLake(entry) && !isSampleCatch(entry.id);
+  const dayFish = book.catches.filter((other) => bookFishDay(book, other) === caughtDay && (offPlayLake(other) || !offPlayLake(entry)) && !(ownDay && isSampleCatch(other.id)));
   const sameDay = dayFish.length;
-  const dayLink = findLink(offPlayLake(entry) ? withoutPlayLake(book, caughtDay, book.catches.filter((other) => bookFishDay(book, other) === caughtDay)) : caughtDay);
+  const daySample = ownDay && book.catches.some((other) => isSampleCatch(other.id) && bookFishDay(book, other) === caughtDay) ? ` -${t("sample|search word")}` : "";
+  const dayLink = findLink(`${offPlayLake(entry) ? withoutPlayLake(book, caughtDay, book.catches.filter((other) => bookFishDay(book, other) === caughtDay)) : caughtDay}${daySample}`);
   const milestone = milestoneOf(book, entry);
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
   const atWater = spot && isCounted ? counted.filter((other) => other.spotId === entry.spotId) : [];
