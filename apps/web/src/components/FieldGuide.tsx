@@ -16,7 +16,7 @@ import {
   type SpotId,
 } from "@stillwater/shared";
 import { Link } from "react-router-dom";
-import { bestHourFor, lureSizeFor, rarityLabel, type LureSize } from "../game/logic";
+import { bestHourFor, GROUNDBAIT_FEEDERS, lureSizeFor, rarityLabel, SCHOOLERS, type LureSize } from "../game/logic";
 import { biteStyle, type BiteStyle } from "../game/nibblePlan";
 import { fightsHardWhen, tiresSoonerWhen } from "../game/fishMoods";
 import { habitLines } from "../game/habitLines";
@@ -128,6 +128,8 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
             {line}
           </p>
         ))}
+      {known && SCHOOLERS.has(species.id) && <p className="guide-feeds">{t("Schools: land one and more are still there, so cast again quickly")}</p>}
+      {known && GROUNDBAIT_FEEDERS.has(species.id) && <p className="guide-feeds">{t("Feeder: it comes in to feed on groundbait")}</p>}
       {known && fightsHardWhen(species.id).length > 0 && <p className="guide-mood">{t("Fights hard: {when}", { when: fightsHardWhen(species.id).join(", ") })}</p>}
       {known && tiresSoonerWhen(species.id).length > 0 && <p className="guide-mood">{t("Tires sooner: {when}", { when: tiresSoonerWhen(species.id).join(", ") })}</p>}
       {known && peakSeason(species.id) && <p className="guide-season">{t("Runs in {season}", { season: t(SEASON_LABELS[peakSeason(species.id)!]).toLowerCase() })}</p>}
