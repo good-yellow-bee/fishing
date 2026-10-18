@@ -1290,7 +1290,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT245~~ | ~~Groundbait: one handful a visit, tossed with a "Groundbait" button by the walk signs; the next 5 casts at that bank bite sooner (0.8) with "Over the groundbait." on the wait hint, and the stance chip counts what is left; casts at other banks leave it be~~ (#942) | gameplay | S |
 | ~~GT246~~ | ~~Lake news above a long hint: "Lately on the lake" sat at a fixed 86px and a three-line hint ran under it on desktop; the hint's height now rides on --hint-h (ResizeObserver) and the news sits just above it (86px kept under 800px, where the hint moves up)~~ (#944) | ui | S |
 | ~~GT247~~ | ~~Groundbait cloud: a soft muddy cloud (one draw, radial alpha) lies on the water a short toss out and to the angler's right of the bank it was thrown from, thinning as its five casts are fished out~~ (#945) | scene | S |
-| GT248 | A school over the groundbait: a schooling fish landed from a cast over the groundbait leaves its school feeding there a cast longer, and the landed card says so; news card 2026-10-18-game04 covers GT243 to GT248 (walk-sign dots, lantern minnows, groundbait and its cloud) | gameplay | S |
+| ~~GT248~~ | ~~A school over the groundbait: a schooling fish landed from a cast over the groundbait leaves its school feeding there a cast longer, and the landed card says so; news card 2026-10-18-game04 covers GT243 to GT248 (walk-sign dots, lantern minnows, groundbait and its cloud)~~ (#947) | gameplay | S |
+| GT249 | Feeders on the groundbait: about a third of the bites over the groundbait come from the feeders at that bank (golden shiner, bluegill, crappie, carp, catfish, lake whitefish) within the lure's size split and a short cast's commons, never on a beginner's first fish; the landed card says the groundbait drew it in | gameplay | S |
 
 ## Risks / open questions for the owner
 
