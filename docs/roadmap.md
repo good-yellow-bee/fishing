@@ -1207,6 +1207,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC84~~ | ~~Moored boats fill with the weather: the rowboats at their moorings hold a dome of snow in winter, a pool of rainwater in the rain and a scatter of fallen leaves in the fall~~ (#1196) | scene | S |
 | ~~SC85~~ | ~~Spring goose family: by day in spring a pair of Canada geese graze slowly along the far bank with five goslings, pecking at the grass, the parents' necks dipping as they feed~~ (#1196) | scene | S |
 | ~~SC86~~ | ~~Leaf-pile jumper: on dry fall days a child runs at a pile of raked leaves on the far bank, leaps in arms up, lies back in a burst of leaves, then climbs out and walks back for another go~~ (#1196) | scene | S |
+| ~~SC87~~ | ~~Painter on the far bank: on calm, clear days from spring to fall a painter works at an easel under a white sun umbrella, dabbing at the canvas and stepping back to look, the picture of sky, bank and water filling in over a few minutes~~ (#1200) | scene | S |
+| ~~SC88~~ | ~~News card scene19: moored boats' fill, spring goose family, leaf-pile jumper, painter on the far bank~~ (#1200) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
