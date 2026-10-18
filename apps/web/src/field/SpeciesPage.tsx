@@ -138,7 +138,8 @@ function SpeciesView() {
   const waters = speciesWaters(book, catches);
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
-  const years = yearTally(catches);
+  // By the day a fish counts on, as the year search each bar opens reads it.
+  const years = yearTally(catches, (entry) => bookFishDay(book, entry));
 
   return (
     <div className="sheet">

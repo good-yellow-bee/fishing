@@ -145,7 +145,11 @@ export function HomePage() {
   // The counts are the angler's own: a round of the game moves none of them.
   const real = countedFish(book.catches);
   const nextMark = nextBookMark(book.catches.filter(ownFish).length);
-  const counted = new Set(real.map((entry) => entry.id));
+  // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
+  // The sample week's waters, outings and fish go once the angler has an outing or a fish of their own.
+  const countedOwn = countedBook(book);
+  // The month, the year and the goal count as Bests does: a planned outing of their own already leaves the sample's fish out.
+  const counted = new Set(countedOwn.catches.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
   const yearsAgo = thisWeekInPastYears(real, now);
@@ -167,9 +171,6 @@ export function HomePage() {
   // "0 by this date last year" says nothing when the book only starts after that date.
   const firstDay = real.reduce((first, entry) => (bookFishDay(book, entry) < first ? bookFishDay(book, entry) : first), "9999");
   const comparable = lastYearDays.length > 0 && firstDay <= `${lastYear}-${today.slice(5)}`;
-  // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
-  // The sample week's waters and outings go once the angler has their own.
-  const countedOwn = countedBook(book);
   const ownAny = countedOwn.trips.some((trip) => !isSampleTrip(trip.id)) || countedOwn.catches.some((entry) => !isSampleCatch(entry.id));
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.

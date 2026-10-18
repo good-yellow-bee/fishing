@@ -845,6 +845,16 @@ html:has(.form-save) {
   scroll-padding-bottom: 88px;
 }
 
+/* And clear of the Undo bar while it is up, which stays until the book changes again. */
+html:has(.undo-bar) {
+  scroll-padding-bottom: 100px;
+}
+
+/* And room below the page for its last link to scroll there. */
+html:has(.undo-bar) .field-main {
+  padding-bottom: 120px;
+}
+
 /* The save buttons ride along the bottom of the window while the form scrolls. */
 .form-save {
   position: sticky;
@@ -1011,6 +1021,11 @@ html:has(.form-save) {
     padding: 0 0 92px;
   }
 
+  /* Room for the page's last link to scroll clear of the Undo bar too while it is up. */
+  html:has(.undo-bar) .field-main {
+    padding-bottom: calc(92px + 80px);
+  }
+
   .sheet {
     border-left-width: 10px;
     min-height: calc(100dvh - 150px);
@@ -1074,6 +1089,11 @@ html:has(.form-save) {
   /* And above the save buttons too, which ride on top of the tab bar. */
   html:has(.form-save) {
     scroll-padding-bottom: calc(48px + 88px + env(safe-area-inset-bottom));
+  }
+
+  /* The Undo bar sits above the tab bar, and is up to 80px tall with its words wrapped. */
+  html:has(.undo-bar) {
+    scroll-padding-bottom: calc(76px + 80px + env(safe-area-inset-bottom));
   }
 
   /* Clear of the save bar and the tab bar together. */

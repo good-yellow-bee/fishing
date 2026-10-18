@@ -426,7 +426,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {t("Send a copy…")}
           </button>
         ) : null}
-        {book.catches.length > 0 ? (
+        {/* Only when the file would hold a fish: a book of game rounds alone has none of the angler's own to give. */}
+        {countedBook(book).catches.length > 0 ? (
           <button
             type="button"
             className="text-button"

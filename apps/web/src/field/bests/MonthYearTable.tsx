@@ -9,11 +9,11 @@ import { catchMonth, monthName } from "../tripMonths";
 export const TABLE_YEARS = 4;
 
 /** Fish per month (rows, January first) and year (columns, oldest first) over the newest TABLE_YEARS years with fish. */
-export function monthYearCounts(catches: readonly CatchEntry[]): { years: string[]; counts: Map<string, number> } {
+export function monthYearCounts(catches: readonly CatchEntry[], monthOf: (entry: CatchEntry) => string = catchMonth): { years: string[]; counts: Map<string, number> } {
   const counts = new Map<string, number>();
   for (const entry of catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
-    const month = catchMonth(entry);
+    const month = monthOf(entry);
     counts.set(month, (counts.get(month) ?? 0) + 1);
   }
   const years = [...new Set([...counts.keys()].map((month) => month.slice(0, 4)))].sort().slice(-TABLE_YEARS);
@@ -22,8 +22,18 @@ export function monthYearCounts(catches: readonly CatchEntry[]): { years: string
 
 /** The same month set against itself across the years, as a table a screen reader can walk; each count opens its fish. */
 /** `tail` adds to each month's search what the counts left out. */
-export function MonthYearTable({ catches, today = new Date(), tail = (term) => term }: { catches: readonly CatchEntry[]; today?: Date; tail?: (term: string) => string }) {
-  const { years, counts } = monthYearCounts(catches);
+export function MonthYearTable({
+  catches,
+  today = new Date(),
+  tail = (term) => term,
+  monthOf = catchMonth,
+}: {
+  catches: readonly CatchEntry[];
+  today?: Date;
+  tail?: (term: string) => string;
+  monthOf?: (entry: CatchEntry) => string;
+}) {
+  const { years, counts } = monthYearCounts(catches, monthOf);
   // Months still to come are left blank, not counted as none.
   const thisMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
   if (years.length < 2) return null;

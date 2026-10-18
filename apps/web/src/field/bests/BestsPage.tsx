@@ -12,7 +12,7 @@ import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
-import { bestFishDay, bookFishDay, catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
+import { bestFishDay, bookFishDay, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
@@ -120,6 +120,7 @@ export function BestsPage() {
   const days = daysOut(whole, today.slice(0, 4), today);
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
+  const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
   const newWaters = newWatersThisYear(real.catches, new Date(), dayOf).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
@@ -131,13 +132,13 @@ export function BestsPage() {
   );
   const weeks = weekStreak(real.trips, today, (id) => wholeFishByTrip.get(id) ?? 0);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
-  const years = yearTally(whole.catches).map((row) => row.year);
+  const years = yearTally(whole.catches, monthOf).map((row) => row.year);
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;
   // Everything else is worked out from the season picked, fish and outings alike.
   const book = year
-    ? // By the fish's own date, as the season's search links, month rows and recap take it, so each count opens its fish.
-      { ...whole, catches: whole.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
+    ? // By the day a fish counts on, as the goal, the calendar and the season's search links take it, so each count opens its fish.
+      { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
     : whole;
   // A row's link opens the same fish it counted: within the season picked, when there is one.
   const linkFor = (term: string) => (year ? findWithLink(term, tail(year)) : findLink(tail(term)));
@@ -199,7 +200,7 @@ export function BestsPage() {
     );
   }
 
-  const months = monthTally(book.catches);
+  const months = monthTally(book.catches, 13, monthOf);
   return (
     <div className="sheet">
       <header className="sheet-head">
@@ -400,7 +401,7 @@ export function BestsPage() {
                 </p>
               ) : null}
               {/* The year so far as text for a message, once it has a fish. */}
-              {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
+              {whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
                 <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
               ) : null}
             </section>
@@ -422,7 +423,7 @@ export function BestsPage() {
                 <h2>{t("By year")}</h2>
               </div>
               {/* Each year opens the catch search for its fish. */}
-              <TallyBars key={year ?? ""} rows={yearTally(book.catches).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(tail(row.year)) }))} />
+              <TallyBars key={year ?? ""} rows={yearTally(book.catches, monthOf).map((row) => ({ key: row.year, label: row.year, count: row.count, to: findLink(tail(row.year)) }))} />
             </section>
           ) : null}
 
@@ -443,7 +444,7 @@ export function BestsPage() {
             </section>
           ) : null}
 
-          {!year ? <MonthYearTable catches={book.catches} tail={tail} /> : null}
+          {!year ? <MonthYearTable catches={book.catches} tail={tail} monthOf={monthOf} /> : null}
 
           <section>
             <div className="section-head">

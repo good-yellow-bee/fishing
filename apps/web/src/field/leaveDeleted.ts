@@ -1,5 +1,5 @@
 import type { NavigateFunction } from "react-router-dom";
-import { hasMovedInApp } from "./FieldShell";
+import { canGoBack } from "./FieldShell";
 import { savedState, sayAfterBack, type SavedKind } from "./SavedNote";
 
 /** The link state a list's card gives the page it opens, so a delete there can go back to the list. */
@@ -13,7 +13,7 @@ let leftBackFrom: string | null = null;
  * to `fallback` in the gone page's place, so Back never lands on it. Undo can put it back where it was either way.
  */
 export function leaveDeleted(navigate: NavigateFunction, state: unknown, fallback: string) {
-  const fromList = openedFromList(state) && hasMovedInApp();
+  const fromList = openedFromList(state) && canGoBack();
   leftBackFrom = fromList ? window.location.pathname + window.location.search : null;
   if (fromList) navigate(-1);
   else navigate(fallback, { replace: true });
@@ -38,7 +38,7 @@ export function editFromPage(state: unknown) {
  * other way, the form gives way to `to`. The page still knows it came from a list, so a delete there goes back to it.
  */
 export function leaveSaved(navigate: NavigateFunction, state: unknown, to: string, kind: SavedKind = "catchEdit") {
-  if ((state as { fromPage?: unknown } | null)?.fromPage && hasMovedInApp()) {
+  if ((state as { fromPage?: unknown } | null)?.fromPage && canGoBack()) {
     sayAfterBack(kind);
     navigate(-1);
     return;

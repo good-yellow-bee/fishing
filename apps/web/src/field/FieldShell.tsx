@@ -52,6 +52,16 @@ export function hasMovedInApp(): boolean {
   return movedInApp;
 }
 
+/**
+ * Whether a Back from here stays in the app: the router numbers its history entries (idx), so a form opened first and
+ * then left and come back to still knows nothing of ours is under it, and a reload still knows something is. Without
+ * the number (a memory router) it falls back on whether this visit has moved yet.
+ */
+export function canGoBack(): boolean {
+  const idx = (window.history.state as { idx?: unknown } | null)?.idx;
+  return typeof idx === "number" ? idx > 0 : movedInApp;
+}
+
 export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
