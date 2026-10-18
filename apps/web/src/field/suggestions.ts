@@ -1,5 +1,5 @@
 import { catchesNewestFirst, localDate, lureTally, measureOf, personalBests, type CatchEntry, type CatchWeather, type Logbook, type Measure, type Trip } from "@stillwater/shared";
-import { isSampleCatch, isSampleTrip } from "./bookCopy";
+import { isSampleCatch, isSampleOuting } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 import { countedFish, ownFish } from "./milestones";
 
@@ -127,7 +127,7 @@ export function dayAfter(ymd: string): string {
  */
 export function tripForFish(book: Logbook, spotId: string, local: string): Trip | undefined {
   // A fish the angler logs is their own: never filed on one of the sample week's invented outings.
-  book = { ...book, trips: book.trips.filter((trip) => !isSampleTrip(trip.id)) };
+  book = { ...book, trips: book.trips.filter((trip) => !isSampleOuting(trip)) };
   const ymd = local.slice(0, 10);
   const sameDay = tripOnDay(book, spotId, ymd);
   const hour = Number(local.slice(11, 13));

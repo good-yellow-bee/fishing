@@ -22,7 +22,19 @@ export const isSampleTrip = (id: string) => SAMPLE_TRIP_IDS.has(id);
 
 /** Whether a water is one of the sample week's. */
 export const isSampleSpot = (id: string) => SAMPLE_SPOT_IDS.has(id);
+
+/**
+ * Whether an outing is still the sample week's: one of its outings on one of its made-up waters. A sample plan the
+ * angler moved to a water of their own has become theirs, so it is planned, counted and kept like any other.
+ */
+export const isSampleOuting = (trip: { id: string; spotId: string }) => SAMPLE_TRIP_IDS.has(trip.id) && SAMPLE_SPOT_IDS.has(trip.spotId);
 const SAMPLE_TRIP_IDS = new Set(sampleLogbook(new Date()).trips.map((trip) => trip.id));
+
+/** Waters for a picker: the angler's own first, then the sample week's made-up ones, the game's lake last; else as given. */
+export function ownWatersFirst<T extends { id: string }>(spots: readonly T[]): T[] {
+  const rank = (spot: T) => (spot.id === PLAY_LAKE_ID ? 2 : SAMPLE_SPOT_IDS.has(spot.id) ? 1 : 0);
+  return [...spots].sort((a, b) => rank(a) - rank(b));
+}
 
 /** Whether the book is still only the sample: its waters, outings and fish, and nothing of the player's own. The game's lake doesn't count either way. */
 export function isSampleOnly(book: Logbook) {
@@ -30,7 +42,7 @@ export function isSampleOnly(book: Logbook) {
   return (
     spots.length > 0 &&
     spots.every((spot) => SAMPLE_SPOT_IDS.has(spot.id)) &&
-    book.trips.filter(offPlayLake).every((trip) => SAMPLE_TRIP_IDS.has(trip.id)) &&
+    book.trips.filter(offPlayLake).every(isSampleOuting) &&
     book.catches.filter(offPlayLake).every((entry) => SAMPLE_IDS.has(entry.id))
   );
 }
@@ -49,7 +61,7 @@ export function hasSampleFish(book: Logbook) {
 export function withoutSample(book: Logbook): Logbook {
   const catches = book.catches.filter((entry) => !SAMPLE_IDS.has(entry.id));
   const usedTrips = new Set(catches.map((entry) => entry.tripId));
-  const trips = book.trips.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id) || usedTrips.has(trip.id));
+  const trips = book.trips.filter((trip) => !isSampleOuting(trip) || usedTrips.has(trip.id));
   const usedSpots = new Set([...catches.map((entry) => entry.spotId), ...trips.map((trip) => trip.spotId)]);
   return { ...book, catches, trips, spots: book.spots.filter((spot) => !SAMPLE_SPOT_IDS.has(spot.id) || usedSpots.has(spot.id)) };
 }
@@ -60,7 +72,7 @@ export function withoutSample(book: Logbook): Logbook {
  */
 export function upcomingRealTrips(book: Logbook, today: string) {
   const ahead = upcomingOwnTrips(book, today);
-  return isSampleOnly(book) ? ahead : ahead.filter((trip) => !SAMPLE_TRIP_IDS.has(trip.id));
+  return isSampleOnly(book) ? ahead : ahead.filter((trip) => !isSampleOuting(trip));
 }
 
 /** The outings still to start, for "Next outing": today's once it has a fish is under way, not ahead. */

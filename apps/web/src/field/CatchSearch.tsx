@@ -614,7 +614,11 @@ export function CatchSearch() {
   const typed = useRef<Set<string>>(new Set());
   const popped = useRef(false);
   // Back or Forward, not a first visit to the address (which has no entry of the router's own to come back to).
-  popped.current = useNavigationType() === "POP" && hasMovedInApp();
+  const how = useNavigationType();
+  popped.current = how === "POP" && hasMovedInApp();
+  // Any Back or Forward: once this search has shown a link, a Back from it is one, even on the visit's first page.
+  const poppedHere = useRef(false);
+  poppedHere.current = how === "POP";
   const shownLink = useRef(linked);
   useEffect(() => {
     // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
@@ -627,7 +631,14 @@ export function CatchSearch() {
       // Back from a search link on the same page: the matches that held focus are gone, so focus and the view go to the
       // page's heading rather than falling to the document halfway down the page.
       const active = document.activeElement;
-      if (hadLink && popped.current && !typed.current.has("") && (!active || active === document.body || (at && at.contains(active)))) focusPageHeading();
+      if (hadLink && poppedHere.current && !typed.current.has("") && (!active || active === document.body || (at && at.contains(active)))) {
+        focusPageHeading({ preventScroll: true });
+        // After the browser has put back where the matches were scrolled (on a first page it can come a little late),
+        // so the view shows what has focus.
+        const toTop = () => window.scrollTo(0, 0);
+        requestAnimationFrame(toTop);
+        setTimeout(toTop, 150);
+      }
       typed.current = new Set();
       return;
     }

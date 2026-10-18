@@ -64,7 +64,7 @@ import { findCatches } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
 import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
 import { countedBook, countedFish, ownFish } from "./milestones";
-import { isSampleSpot, isSampleTrip, upcomingRealTrips } from "./bookCopy";
+import { isSampleOnly, isSampleSpot, isSampleOuting, ownWatersFirst, upcomingRealTrips } from "./bookCopy";
 import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
@@ -123,7 +123,7 @@ export function TripsPage() {
   const streak = outingStreak(countedBook(book).trips, (id) => fishByTrip.get(id) ?? 0, today);
   const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
   // The sample's planned outings are made up: they stay out of a real calendar.
-  const toCalendar = upcoming.filter((trip) => !isSampleTrip(trip.id));
+  const toCalendar = upcoming.filter((trip) => !isSampleOuting(trip));
   const needle = query.trim();
   // A size in the search is read as the catch search reads it, and finds the outings of the fish it found.
   const fishTrips = (part: string) => new Set(findCatches(book, part, t).flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
@@ -344,6 +344,8 @@ function TripView() {
   );
   // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
   const play = trip.spotId === PLAY_LAKE_ID;
+  // The sample week's outings once the book holds the angler's own: a real fish logged on one would be filed on a made-up day.
+  const samplePlan = isSampleOuting(trip) && !isSampleOnly(book);
   // The book's day with the most fish, when this outing holds all of it: the angler's best day so far.
   const topDay = play || !fished ? null : bestFishDay(countedBook(book));
   const bestDay = topDay && topDay.tripId === trip.id && topDay.count >= 2;
@@ -447,7 +449,7 @@ function TripView() {
               </Link>
             </>
           ) : null}
-          {trip.date === today && !play ? (
+          {trip.date === today && !play && !samplePlan ? (
             <>
               {" "}
               <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`}>{t("Log the first one")}</Link>
@@ -484,7 +486,7 @@ function TripView() {
         }}
         aside={
           // An outing still ahead has no fish to log yet; a catch can't be dated in the future.
-          trip.date <= today && !play ? (
+          trip.date <= today && !play && !samplePlan ? (
             <Link to={`/catches/new?trip=${trip.id}&spot=${trip.spotId}`} className="field-primary inline">
               {t("Add a catch")}
             </Link>
@@ -532,7 +534,7 @@ function TripView() {
         </p>
       ) : null}
       {/* The sample week's planned days stay off a calendar, as "Add all to calendar" leaves them out. */}
-      {play || isSampleTrip(trip.id) ? null : trip.date >= today ? (
+      {play || isSampleOuting(trip) ? null : trip.date >= today ? (
         <p className="trip-calendar">
           <button
             type="button"
@@ -791,7 +793,7 @@ function TripForm() {
               {t("Spot")}
               <select name="spot" value={spotId} aria-describedby={lastHere ? "last-here" : undefined} onChange={(event) => setSpotId(event.target.value)}>
                 {/* The game's lake only for what is already there, and a game day stays on it. */}
-                {book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId)).map((spot) => (
+                {ownWatersFirst(book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>

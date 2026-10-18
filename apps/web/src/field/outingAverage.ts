@@ -56,21 +56,28 @@ export function outingStreak(
   today: string,
   looseDays: Iterable<string> = [],
 ): { best: number; going: boolean; dry: number; dryNow: number } {
-  // Two outings on one day are one step, fished if either gave a fish: their order within the day isn't known.
-  const days = new Map<string, boolean>();
+  // Each outing is a step. Two on one day are in no known order: the run counts them all when both gave a fish, and a
+  // day with a blank among them ends it (and ends a dry spell when one gave a fish).
+  const days = new Map<string, { outings: number; fished: number }>();
   for (const trip of trips) {
     if (trip.date > today || (trip.date === today && fishOn(trip.id) === 0)) continue;
-    days.set(trip.date, (days.get(trip.date) ?? false) || fishOn(trip.id) > 0);
+    const day = days.get(trip.date) ?? { outings: 0, fished: 0 };
+    days.set(trip.date, { outings: day.outings + 1, fished: day.fished + (fishOn(trip.id) > 0 ? 1 : 0) });
   }
-  for (const day of looseDays) if (day <= today) days.set(day, true);
+  for (const day of looseDays) {
+    if (day > today) continue;
+    const held = days.get(day);
+    days.set(day, held ? { ...held, fished: held.outings } : { outings: 1, fished: 1 });
+  }
   let best = 0;
   let run = 0;
   // The longest run the other way: outings in a row that came home without a fish.
   let dry = 0;
   let dryRun = 0;
   for (const day of [...days.keys()].sort()) {
-    run = days.get(day) ? run + 1 : 0;
-    dryRun = days.get(day) ? 0 : dryRun + 1;
+    const { outings, fished } = days.get(day)!;
+    run = fished === outings ? run + outings : 0;
+    dryRun = fished === 0 ? dryRun + outings : 0;
     best = Math.max(best, run);
     dry = Math.max(dry, dryRun);
   }

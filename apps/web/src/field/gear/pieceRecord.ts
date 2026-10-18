@@ -1,7 +1,7 @@
 import { isLureLabel, personalBests, type CatchEntry, type Logbook, type TackleItem } from "@stillwater/shared";
 import { shownPieceKey } from "./pieceKey";
 import { countedFish } from "../milestones";
-import { isSampleCatch, isSampleTrip } from "../bookCopy";
+import { isSampleCatch, isSampleOuting } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { bookFishDay } from "../tripMonths";
 
@@ -19,11 +19,11 @@ export type PieceRecord = { label: string; outings: number; fish: number; lure?:
 export function pieceRecords(book: Logbook, items: readonly TackleItem[], today: string): PieceRecord[] {
   // The sample week's made-up bags count only while the book has no outings of the angler's own, as its fish do.
   // Own outings already fished: not the game's, and not one still only planned.
-  const ownTrips = book.trips.filter((trip) => !isSampleTrip(trip.id) && trip.spotId !== PLAY_LAKE_ID && trip.date <= today);
+  const ownTrips = book.trips.filter((trip) => !isSampleOuting(trip) && trip.spotId !== PLAY_LAKE_ID && trip.date <= today);
   // The same switch countedBook makes: once the angler has a fish or an outing of their own, even one only planned,
   // the sample's go, so none of its made-up lures is offered for packing onto a real outing.
   const ownFish = book.catches.some((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
-  const ownAny = ownFish || book.trips.some((trip) => !isSampleTrip(trip.id) && trip.spotId !== PLAY_LAKE_ID);
+  const ownAny = ownFish || book.trips.some((trip) => !isSampleOuting(trip) && trip.spotId !== PLAY_LAKE_ID);
   const trips = ownAny ? ownTrips : book.trips;
   // Today's outing counts once it has a fish: packed this morning, it hasn't yet gone without one.
   const withFish = new Set(book.catches.map((entry) => entry.tripId));

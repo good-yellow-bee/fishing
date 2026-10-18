@@ -2,7 +2,7 @@ import { localDate, type CatchEntry, type Logbook, type Spot } from "@stillwater
 import { PLAY_LAKE_ID } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 import { countedFish, ownFish } from "./milestones";
-import { isSampleSpot, isSampleTrip } from "./bookCopy";
+import { isSampleSpot, isSampleOuting } from "./bookCopy";
 
 /** `lastFishDay`: the day the newest fish counts on, a night session's small hours on its outing's, as the calendar has it. */
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null; lastFishDay: string | null };
@@ -44,7 +44,7 @@ export function likelyWater(book: Logbook, today: string, smallHours = false): s
   // In the small hours, last night's outing is still the one on the water.
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const yesterday = smallHours ? localDate(new Date(y, m - 1, d - 1, 12)) : today;
-  const todays = new Set(book.trips.filter((trip) => (trip.date === today || trip.date === yesterday) && !isSampleTrip(trip.id)).map((trip) => trip.spotId));
+  const todays = new Set(book.trips.filter((trip) => (trip.date === today || trip.date === yesterday) && !isSampleOuting(trip)).map((trip) => trip.spotId));
   // No fish of the angler's own yet: their first water of their own, not one from the sample week.
   const noOwn = !book.catches.some(ownFish);
   const own = noOwn ? book.spots.find((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id))?.id : undefined;

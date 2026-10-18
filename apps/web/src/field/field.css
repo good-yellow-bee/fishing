@@ -227,7 +227,13 @@ button.field-primary {
   box-shadow: 0 3px 0 var(--field-paper), 0 4px 0 var(--field-ink);
 }
 
+/* A title of one long unbroken word wraps rather than widening the page past its Edit and Delete. */
+.sheet-head > div {
+  min-width: 0;
+}
+
 .sheet h1 {
+  overflow-wrap: anywhere;
   font-size: clamp(40px, 5vw, 64px);
   line-height: 0.92;
   margin-top: 6px;
@@ -1368,6 +1374,13 @@ html:has(.undo-bar) .field-main {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A long unbroken water or lure name in a card's line wraps on any width, not only on a phone. */
+:is(.trip-card, .catch-card) .meta {
+  overflow-wrap: anywhere;
 }
 
 .catch-list-at {

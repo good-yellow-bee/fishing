@@ -111,7 +111,7 @@ describe("tackle", () => {
   });
 
   it("tells typed lures from tools and line", () => {
-    for (const lure of ["In-line spinner", "Lamprey", "Live scale shad", "Knife jig", "Spreader bar", "Rapala minnow", "Mister Twister", "Size 8 hooks", "Woolly buggers"]) {
+    for (const lure of ["In-line spinner", "Lamprey", "Live scale shad", "Knife jig", "Spreader bar", "Rapala minnow", "Mister Twister", "Size 8 hooks", "Woolly buggers", "Knife jigs", "Lineside special"]) {
       expect(isLureLabel(lure), lure).toBe(true);
     }
     for (const tool of [
@@ -119,6 +119,7 @@ describe("tackle", () => {
       "Landing net", "Landing nets", "Jaw spreaders", "Headlamp", "Headlamps", "5-weight fly rod", "Fly rods",
       "Spinning reel", "Spinning reels", "Hemostats", "Polarized sunglasses", "Nipper", "8 lb fluoro", "20 lb braid",
       "Fishing license", "Rain jacket", "Cooler", "Sunscreen", "Bait bucket", "Stringer", "Bullet sinkers", "Swivels", "Split shot",
+      "Knife", "Chair", "Umbrella", "Weights", "Snaps", "Tape measure", "Scales", "Line 0.25 mm", "Braid 20 lb", "Tackle box",
     ]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }
@@ -128,7 +129,7 @@ describe("tackle", () => {
     for (const lure of ["Obrotówka", "Wahadłówka", "Woblery", "Gumka 7 cm", "Kogut", "Mucha sucha", "Twister", "Rosówka"]) {
       expect(isLureLabel(lure), lure).toBe(true);
     }
-    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz", "Obcinaczki", "Nożyczki", "Ciężarki", "Krętliki", "Zanęta"]) {
+    for (const tool of ["Podbierak", "Wodery", "Waders", "Zapasowy przypon", "Przypony stalowe", "Żyłka 0,25", "Plecionka", "Szczypce", "Wędka spinningowa", "Kołowrotek", "Latarka czołowa", "Okulary polaryzacyjne", "Rozwieracz", "Obcinaczki", "Nożyczki", "Ciężarki", "Krętliki", "Zanęta", "Nóż", "Krzesełko", "Parasol", "Miarka", "Waga", "Agrafki", "Obciążenie 10 g", "Ręcznik"]) {
       expect(isLureLabel(tool), tool).toBe(false);
     }
   });

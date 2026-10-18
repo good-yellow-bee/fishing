@@ -64,7 +64,7 @@ import { useLogbook } from "./LogbookState";
 import { compressCatchPhoto } from "./photoFile";
 import { catchNews } from "./catchNews";
 import { likelyDuplicate } from "./likelyDuplicate";
-import { isSampleCatch, isSampleSpot } from "./bookCopy";
+import { isSampleCatch, isSampleSpot, ownWatersFirst } from "./bookCopy";
 import { addedWater, forgetAddedWater } from "./addedWater";
 import { dropEditDraft, dropKeptDraft, keepDraft, keepEditDraft, readEditDraft, readKeptDraft, type KeptDraft } from "./catchDraft";
 import { FishSum } from "./FishSum";
@@ -1117,7 +1117,7 @@ function CatchForm() {
               {t("Water")}
               <select name="spot" aria-describedby={onlySampleWaters ? "own-water-hint" : undefined} value={spotId} onChange={(event) => onSpot(event.target.value)}>
                 {/* The game's lake only for what is already there, and a game fish stays on it. */}
-                {book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId)).map((spot) => (
+                {ownWatersFirst(book.spots.filter((spot) => (existing?.spotId === PLAY_LAKE_ID ? spot.id === PLAY_LAKE_ID : spot.id !== PLAY_LAKE_ID || spot.id === spotId))).map((spot) => (
                   <option key={spot.id} value={spot.id}>
                     {spot.name}
                   </option>

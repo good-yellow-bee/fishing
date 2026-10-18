@@ -1,6 +1,6 @@
 import { shiftDate, type Logbook } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
-import { isSampleTrip } from "./bookCopy";
+import { isSampleOuting } from "./bookCopy";
 
 export type DatePick = { label: "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
 
@@ -34,7 +34,7 @@ export function ownTitle(trip: { title: string; spotId: string }, spots: Logbook
 /** Names given to earlier outings, this water's first, newest first, each once; a water's name is no title of its own. */
 export function pastTitles(book: Logbook, spotId: string, limit = 8): string[] {
   const named = book.trips
-    .filter((trip) => trip.spotId !== PLAY_LAKE_ID && !isSampleTrip(trip.id) && trip.title.trim() && !waterNamed(trip.title, book.spots))
+    .filter((trip) => trip.spotId !== PLAY_LAKE_ID && !isSampleOuting(trip) && trip.title.trim() && !waterNamed(trip.title, book.spots))
     .sort((a, b) => Number(b.spotId === spotId) - Number(a.spotId === spotId) || b.date.localeCompare(a.date));
   const seen = new Set<string>();
   const titles: string[] = [];
