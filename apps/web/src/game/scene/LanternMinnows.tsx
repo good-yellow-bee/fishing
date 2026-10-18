@@ -16,7 +16,7 @@ const MINNOW = new THREE.Color("#d8e4e0").lerp(new THREE.Color(LANTERN_COLOR), 0
  */
 export function LanternMinnows() {
   const still = useReducedMotion();
-  const geo = useMemo(() => new THREE.BoxGeometry(0.16, 0.025, 0.045), []);
+  const geo = useMemo(() => new THREE.BoxGeometry(0.2, 0.025, 0.05), []);
   const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: MINNOW, transparent: true, opacity: 0.8, depthWrite: false }), []);
   const shoal = useRef<THREE.InstancedMesh>(null);
   const place = useMemo(() => ({ matrix: new THREE.Matrix4(), at: new THREE.Vector3(), turn: new THREE.Quaternion(), up: new THREE.Vector3(0, 1, 0), size: new THREE.Vector3(1, 1, 1) }), []);

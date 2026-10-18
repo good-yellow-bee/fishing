@@ -3,7 +3,7 @@ import type { LakeHour } from "@stillwater/shared";
 /** Minnows milling in the dock lanterns' glow after dark; Lite effects keep the first half. */
 export const MINNOW_COUNT = 10;
 /** The lit water just off the dock's lake end, under its two lanterns. */
-export const MINNOW_POOL = { x: 0, z: 4.7, r: 1.1 } as const;
+export const MINNOW_POOL = { x: 0, z: 4.3, r: 1.4 } as const;
 /** Just under the surface, so they read as glints through the water. */
 export const MINNOW_DEPTH = 0.05;
 
