@@ -50,6 +50,10 @@ describe("the field log on a touch screen", () => {
     expect(/\.lure-record \.lure-last:has\(> \.text-button\) \{([^}]*)\}/.exec(coarse)?.[1]).toContain("margin-top: 8px;");
   });
 
+  it("makes a missing page's lone way back 32 px tall", () => {
+    expect(/\n  \.sheet > \.lede \+ a \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 6px;");
+  });
+
   it("makes the species and lure chips 32 px tall", () => {
     expect(/\n  p\.species-chips a \{([^}]*)\}/.exec(css)?.[1]).toContain("padding-block: 5px;");
   });
