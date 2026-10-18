@@ -95,6 +95,7 @@ export const PL_GAME: PlBook = {
   "line twisted": "żyłka skręcona",
   "hook dulled": "haczyk stępiony",
   "live shiner on": "żywy złotawiec na haczyku",
+  "The breeze blows onto this bank and pushes the food in, and the fish follow it.": "Wiatr wieje na ten brzeg i spycha tu pokarm, a ryby płyną za nim.",
   "Use it as bait": "Użyj go jako przynęty",
   "Hook it on as live bait: the next cast draws the hunters here.": "Załóż go na haczyk jako żywą przynętę: następny rzut przyciągnie tutejsze drapieżniki.",
   "You hook the shiner on as live bait. Cast it out to the hunters.": "Zakładasz złotawca na haczyk jako żywą przynętę. Zarzuć go do drapieżników.",
