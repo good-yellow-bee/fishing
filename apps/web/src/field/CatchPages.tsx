@@ -48,6 +48,7 @@ import { byTime, countedFish, milestoneOf } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
 import { placeFor } from "./map/places";
+import { TripCounts } from "./tripCounts";
 import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, useLang, useT, type Units } from "../i18n";
@@ -541,6 +542,11 @@ function CatchForm() {
   const canLocate = !existing && canFindNearest(book);
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  // The sun at the water picked, at the time typed.
+  const formSpot = book.spots.find((spot) => spot.id === spotId);
+  const formPlace = formSpot ? (formSpot.place ?? placeFor(formSpot.id)) : undefined;
+  const typedAt = new Date(caughtAt);
+  const formSun = formPlace && !Number.isNaN(typedAt.getTime()) ? sunMark(typedAt.toISOString(), formPlace) : null;
   const outingWeather = useMemo(() => tripWeather(book, tripId, existing?.id), [book, tripId, existing?.id]);
   // No outing weather to go by: the newest fish logged the same day may still say what the sky was doing.
   const sameDayWeather = useMemo(
@@ -1086,7 +1092,11 @@ function CatchForm() {
                   [60, `−${t("{n} h", { n: 1 })}`],
                   // Logged the morning after: the same time a day back.
                   [24 * 60, `−${t("{n} day", { n: 1 })}`],
-                ].map(([minutes, label]) => (
+                  // Going through an outing fish by fish: the next one a little later, never past now.
+                  [-15, `+${t("{n} min", { n: 15 })}`],
+                ]
+                  .filter(([minutes]) => Number(minutes) > 0 || new Date(caughtAt).getTime() + 15 * 60_000 <= Date.now())
+                  .map(([minutes, label]) => (
                   <button
                     key={minutes}
                     type="button"
@@ -1107,6 +1117,8 @@ function CatchForm() {
                 ))}
               </span>
             ) : null}
+            {/* Where the time sits against the sun at the water, as the catch page will say it. */}
+            {formSun ? <span className="field-hint">{sunMarkText(formSun)}</span> : null}
             {photoTime && photoTime === caughtAt ? <span className="field-hint">{t("Taken from the photo.")}</span> : null}
             {/* The time was set first, or the fish was already in the book: the photo's own time is a tap away. */}
             {photoTaken && photoTaken !== caughtAt ? (
@@ -1164,6 +1176,13 @@ function CatchForm() {
                 {t("Move it to {day}", { day: formatDay(pickedTrip.date) })}
               </button>
             </p>
+          ) : null}
+
+          {/* A fish lost or a strike missed while writing this one up: counted on the outing without leaving the form. */}
+          {pickedTrip && !existing && pickedTrip.date <= localDate(new Date()) && pickedTrip.spotId !== PLAY_LAKE_ID ? (
+            <div className="wide">
+              <TripCounts trip={pickedTrip} landed={book.catches.filter((entry) => entry.tripId === pickedTrip.id).length} />
+            </div>
           ) : null}
 
           <p className="wide form-note">{t("Weather is optional: note the sky and wind, and the water temperature if you took it.")}</p>
