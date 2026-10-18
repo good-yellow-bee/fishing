@@ -1103,7 +1103,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC24~~ | ~~Pancake ice: in winter, round plates of pancake ice float in the shallows, drifting slowly with the wind and bobbing on the swell, clear of the dock~~ (#1053) | scene | S |
 | ~~SC25~~ | ~~Spring blossom: in spring the shore trees drop blossom petals, white and pink, that spin down onto the water and drift with the wind~~ (#1057) | scene | S |
 | ~~SC26~~ | ~~News card: the snowy walkway, pancake ice, spring blossom and sunfish nests~~ (#1057) | scene | S |
-| SC27 | Trees in the wind: the shore trees bend downwind, further the stronger the wind, and sway about that lean, with a breath of sway on a calm day; the shack's trees too | scene | S |
+| ~~SC27~~ | ~~Trees in the wind: the shore trees bend downwind, further the stronger the wind, and sway about that lean, with a breath of sway on a calm day; the shack's trees too~~ (#1060) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
