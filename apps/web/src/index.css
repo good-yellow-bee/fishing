@@ -626,6 +626,16 @@ a:focus-visible {
   backdrop-filter: blur(8px);
 }
 
+/* On a touch tablet the walking stick's ring tops out 208 px above the bottom: the panel ends 8 px above it and scrolls,
+   since with larger text and both "suits it" lines it ran down over the stick on a 600 px tall screen. */
+@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {
+  html:not([data-hand="left"]) .lure-choice {
+    max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
 /* Author `display: grid` would override the UA `[hidden]` rule and leave a dead click spot. */
 .lure-choice[hidden] {
   display: none;
