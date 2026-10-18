@@ -52,6 +52,8 @@ import { gustsOut } from "./gustPatch";
 import { fluffOut } from "./cattailTufts";
 import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
+import { Moose } from "./Moose";
+import { mooseAntlers, mooseOut } from "./mooseWade";
 import { dewWebOut } from "./orbWeb";
 import { dockSnowy } from "./snowyDock";
 import { Breath } from "./Breath";
@@ -2007,6 +2009,7 @@ export const LakeWorld = memo(function LakeWorld({
       {dewWebOut(hour, season) && <DewWeb />}
       {dewGlintsOut(hour, season) && <DewGrass />}
       {deerOut(hour, sky) && <Deer />}
+      {mooseOut(hour, sky, season) && <Moose antlers={mooseAntlers(season)} />}
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       <Shack />
       <ShorePath />
