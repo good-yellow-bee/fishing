@@ -1055,7 +1055,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC2~~ | ~~Water by season: colder, steel-blue water in winter, tea-tinted water in fall and a greener spring, so the lake no longer looks like July all year~~ (#967) | scene | S |
 | ~~SC3~~ | ~~The far bank in the mirror: on still water the shore trees and the hills behind them lie mirrored on the lake, broken into bands by the chop and fading toward your feet; clearest on a calm clear dawn or dusk, washed out in fog, gone in rain or a strong wind (full effects only)~~ (#972) | scene | M |
 | ~~SC4~~ | ~~News card 2026-10-18-scene01 covers SC1 to SC3: sunlight on the sand, water by season and the far bank in the mirror~~ (#972) | news | S |
-| SC5 | The sun's glitter and the moon's road follow your eye: both used to start from the dock or the middle of the lake, so from the Point or the Reeds they ran off to one side; now they run from wherever you stand toward the sun or moon | scene | S |
+| ~~SC5~~ | ~~The sun's glitter and the moon's road follow your eye: both used to start from the dock or the middle of the lake, so from the Point or the Reeds they ran off to one side; now they run from wherever you stand toward the sun or moon~~ (#973) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
