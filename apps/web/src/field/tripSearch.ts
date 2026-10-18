@@ -18,6 +18,9 @@ const LOST = ["lost", "lost fish", "spięte", "spięta", "spiętych"].map(plain)
 const MISSED = ["missed", "missed strikes", "puste brania", "puste branie"].map(plain);
 /** Words that ask for the outings still planned: ahead, or today's before its first fish, as the month headings count them. */
 const PLANNED = ["planned", "plans", "zaplanowane", "zaplanowana", "zaplanowanych"].map(plain);
+/** Words that ask for the outings on a Saturday or Sunday, or on the days between, as Bests splits them. */
+const WEEKEND = ["weekend", "weekends", "weekendy", "weekendowe"].map(plain);
+const WEEKDAY = ["weekday", "weekdays", "dni powszednie", "dzien powszedni", "w tygodniu"].map(plain);
 
 /** Each outing's fish, gathered once per book: an outing is found by what it caught too. */
 const fishCache = new WeakMap<Logbook, Map<string, CatchEntry[]>>();
@@ -94,6 +97,10 @@ export function findTrips(
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
+    if (WEEKEND.includes(part) || WEEKDAY.includes(part)) {
+      const weekend = [0, 6].includes(new Date(`${trip.date}T12:00:00`).getDay());
+      return WEEKEND.includes(part) ? weekend : !weekend;
+    }
     const days = ranges.get(part) ?? [];
     if (days.length > 0) return days.some((range) => trip.date >= range.from && trip.date <= range.to);
     // "w październiku" finds the outings of any October, as the catch search finds its fish.

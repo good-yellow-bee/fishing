@@ -337,6 +337,9 @@ function TripView() {
   const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
   const lastHere = lastOutingBefore(tripsHere, trip.date, today, (id) => fishByTrip.get(id) ?? 0);
+  // And the one after it there, looking back from a day already fished: how the water did the next time.
+  const nextHere = fished ? tripsHere.filter((other) => other.date > trip.date).sort((a, b) => a.date.localeCompare(b.date))[0] : undefined;
+  const nextPlanned = nextHere && (nextHere.date > today || (nextHere.date === today && (fishByTrip.get(nextHere.id) ?? 0) === 0));
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   const loose = book.catches.filter(
@@ -402,6 +405,15 @@ function TripView() {
           </Link>
           {/* Before going back: how long the water has rested. */}
           {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
+        </p>
+      ) : null}
+      {nextHere ? (
+        <p className="meta next-here">
+          <Link to={`/trips/${nextHere.id}`}>
+            {nextPlanned
+              ? t("Next time here: {day}", { day: formatDay(nextHere.date) })
+              : t("Next time here, {day}: {fish}", { day: formatDay(nextHere.date), fish: fishCountLabel(fishByTrip.get(nextHere.id) ?? 0) })}
+          </Link>
         </p>
       ) : null}
       {/* Before going back: what was learned there last time, in the angler's own words. */}
@@ -515,6 +527,13 @@ function TripView() {
                   <MapAnchor lat={spot.place.lat} lng={spot.place.lng}>
                     {t("Open on a map")}
                   </MapAnchor>
+                  {/* Beside the angler's other waters, on the field log's own map. */}
+                  {play ? null : (
+                    <>
+                      {" · "}
+                      <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
+                    </>
+                  )}
                 </span>
               ) : null}
             </>
