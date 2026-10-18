@@ -2,7 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
+import { dailyWind, forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { isTurnover, rainedYesterday, turnoverStart } from "../game/logic";
 import { ForecastBoard } from "./ForecastBoard";
 
@@ -106,6 +106,25 @@ describe("ForecastBoard", () => {
     expect(isTurnover(calm)).toBe(false);
     act(() => root.render(<ForecastBoard now={calm} />));
     expect(host.querySelector("li:first-child")?.textContent).not.toContain(tip);
+    act(() => root.unmount());
+  });
+
+  it("chalks the banks a light breeze blows onto, only on a day whose wind holds", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 120 }, (_, n) => new Date(2026, 9, 1 + n, 12));
+    const windOf = (day: Date) => dailyWind(day, weatherForDay(day)).wind;
+    const settled = (day: Date) => !skyTurnForDay(day);
+    const north = days.find((day) => settled(day) && windOf(day) === "light-north")!;
+    act(() => root.render(<ForecastBoard now={north} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain("A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in.");
+    const south = days.find((day) => settled(day) && windOf(day) === "light-south")!;
+    act(() => root.render(<ForecastBoard now={south} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain("breeze blows onto");
+    const strong = days.find((day) => settled(day) && windOf(day) === "strong")!;
+    act(() => root.render(<ForecastBoard now={strong} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toContain("breeze blows onto");
     act(() => root.unmount());
   });
 
