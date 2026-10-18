@@ -1099,7 +1099,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC21~~ | ~~News card scene05: the frosty walkway, the boats swinging to the wind, the spring tadpoles and the grass snake~~ (#1046) | scene | S |
 | ~~SC22~~ | ~~Snow on the walkway: in winter the walkway out to the dock lies under snow like the dock itself, with the angler's trail of boot prints trodden into it, and the rest of the walk's boards are paled with snow~~ (#1048) | scene | S |
 | ~~SC23~~ | ~~Sunfish nests: from late spring through summer, colonies of pale round nests are fanned in the sand of the shallows either side of the dock, each with its guard hovering over the bed and turning about it~~ (#1050) | scene | S |
-| SC24 | Pancake ice: in winter, round plates of pancake ice float in the shallows, drifting slowly with the wind and bobbing on the swell, clear of the dock | scene | S |
+| ~~SC24~~ | ~~Pancake ice: in winter, round plates of pancake ice float in the shallows, drifting slowly with the wind and bobbing on the swell, clear of the dock~~ (#1053) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
