@@ -1,10 +1,13 @@
 .catch-search {
   display: grid;
+  /* A long name in the rename box under a search wraps rather than widening the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   margin: 0 0 28px;
 }
 
-.catch-search label {
+/* The search's own label, not the rename box's under it. */
+.catch-search > label {
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -521,7 +521,7 @@ function SpotView() {
           <TallyBars key={spot.id} rows={biteTimes({ ...book, catches }).map((row) => ({ key: row.id, label: t(row.label), count: row.count, to: row.count > 0 ? findWithLink(here, exactTerm("time", t(row.label))) : undefined }))} />
         </>
       ) : null}
-      <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
+      <MonthBars catches={catches} within={exactTerm("water", spot.name)} monthOf={(entry) => bookFishDay(book, entry).slice(0, 7)} />
       {/* Each season's fish here, newest first: whether the water is holding up or fading. */}
       {years.length > 1 ? (
         <>
@@ -545,7 +545,7 @@ function SpotView() {
                 entry={entry}
                 spotName={null}
                 tripTitle={entry.tripId ? outingHere(entry.tripId) : null}
-                list={largest ? undefined : `water:${spot.id}`}
+                list={`water${largest ? "-largest" : ""}:${spot.id}`}
               />
             )}
           </PagedCatches>
