@@ -150,7 +150,8 @@ export function searchSummary(parts: readonly string[], matches: readonly CatchE
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
       const water = waterOf(entry.spotId);
-      const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
+      // With its time, so a night session's small hours read as such under the day search that found them.
+      const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${bits.join(", ")}`;
     });
   return [searchLabel(parts), fishCountLabel(matches.length), ...fish].join("\n");

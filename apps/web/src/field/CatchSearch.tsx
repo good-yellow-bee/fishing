@@ -289,14 +289,14 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(`${bookFishDay(book, entry)}T12:00:00`).getDay()));
   // A day's fish as the calendar counts them: a night session's small hours on its outing's day.
   if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => bookFishDay(book, entry) === needle.trim());
-  // "2026": the fish of that local year, not every note or title with the number in it.
+  // "2026": the fish of that year by the day they count on, not every note or title with the number in it.
   // A number the book has no fish in (a lure's "1100", a note's "1500 m") is searched as text instead.
   if (/^\d{4}$/.test(needle.trim())) {
-    const inYear = catchesNewestFirst(book).filter((entry) => catchMonth(entry).startsWith(`${needle.trim()}-`));
+    const inYear = catchesNewestFirst(book).filter((entry) => bookFishDay(book, entry).startsWith(`${needle.trim()}-`));
     if (inYear.length > 0) return inYear;
   }
-  // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
-  if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
+  // "2026-10": the fish of that month by the day they count on, and only those, which the month bars and tiles open.
+  if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => bookFishDay(book, entry).slice(0, 7) === needle.trim());
   // "5-8am", "05:00-08:00", "godz. 5-8": the fish landed in those clock hours, the last one not included; "22-2" runs past midnight.
   const hours = hourRange(needle);
   if (hours) return catchesNewestFirst(book).filter((entry) => {

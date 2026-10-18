@@ -53,8 +53,8 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
 import { isSampleSpot, upcomingRealTrips } from "./bookCopy";
-import { hasMovedInApp } from "./FieldShell";
-import { leaveDeleted, leaveSaved } from "./leaveDeleted";
+import { canGoBack } from "./FieldShell";
+import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 
 /** The soonest planned outing on a water, as the card says it. */
 function nextOutingLine(trip: Trip | undefined, today: string, tomorrow: string): string | null {
@@ -254,7 +254,8 @@ function SpotView() {
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = upcomingRealTrips(book, today).find((trip) => trip.spotId === spot.id && (trip.date > today || (fishByTrip.get(trip.id) ?? 0) === 0));
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
-  const years = yearTally(catches);
+  // By the day a fish counts on, as the year search each bar opens reads it.
+  const years = yearTally(catches, (entry) => bookFishDay(book, entry));
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
   // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
@@ -309,14 +310,18 @@ function SpotView() {
             {t("Another water is also called {name}, so the links on this page open the fish of both.", { name: spot.name })}{" "}
             {spot.id === PLAY_LAKE_ID || twin.id === PLAY_LAKE_ID || isSampleSpot(spot.id) || isSampleSpot(twin.id) ? (
               // The game's lake keeps its name: the other one is the one to rename.
-              <Link to={`/spots/${spot.id === PLAY_LAKE_ID ? twin.id : spot.id}/edit`}>{t("Rename one")}</Link>
+              <Link to={`/spots/${spot.id === PLAY_LAKE_ID ? twin.id : spot.id}/edit`} state={spot.id === PLAY_LAKE_ID ? undefined : editFromPage(location.state)}>
+                {t("Rename one")}
+              </Link>
             ) : (
               <>
                 <Link to={`/spots/${spot.id}?${MERGE_PARAM}=${encodeURIComponent(twin.id)}`} replace>
                   {t("Merge them")}
                 </Link>
                 {" · "}
-                <Link to={`/spots/${spot.id}/edit`}>{t("Rename this one")}</Link>
+                <Link to={`/spots/${spot.id}/edit`} state={editFromPage(location.state)}>
+                  {t("Rename this one")}
+                </Link>
               </>
             )}
           </p>
@@ -342,7 +347,10 @@ function SpotView() {
         ) : placeFor(spot.id) || spot.id === PLAY_LAKE_ID ? null : (
           // A sample water already has its pin on the map; any other water with no place is offered one.
           <p className="meta spot-place">
-            <Link to={`/spots/${spot.id}/edit#place`}>{t("Note where it is")}</Link>
+            {/* Opened from this page as its Edit is, so Save goes back to it rather than stacking a second copy. */}
+            <Link to={`/spots/${spot.id}/edit#place`} state={editFromPage(location.state)}>
+              {t("Note where it is")}
+            </Link>
           </p>
         )}
       </EditDelete>
@@ -556,7 +564,7 @@ function SpotForm() {
     else if (then === "trip") navigate(`/trips/new?spot=${result.id}`, { replace: true });
     // Back to the map it was opened from, rather than a second map on top of the first; a form opened directly takes its place.
     else if (then === "map") {
-      if (hasMovedInApp()) navigate(-1);
+      if (canGoBack()) navigate(-1);
       else navigate("/map", { replace: true });
     }
     else if (existing) leaveSaved(navigate, location.state, `/spots/${result.id}`);
@@ -585,7 +593,7 @@ function SpotForm() {
           onClick={(event) => {
             kept.drop();
             // Back where the form was opened from (the map, the water, Waters): Back from there then doesn't reopen this form.
-            if (hasMovedInApp()) {
+            if (canGoBack()) {
               event.preventDefault();
               navigate(-1);
             }

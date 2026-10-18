@@ -17,13 +17,14 @@ export function countedFish(catches: readonly CatchEntry[]): CatchEntry[] {
 
 /**
  * The book a year's count reads (the goal, days on the water, the year in text): the game's lake left out, and the
- * sample week once the angler has fish of their own (its outings once they have an outing or a fish).
+ * sample week, fish and outings, once the angler has an outing or a fish of their own.
  */
 export function countedBook(book: Logbook): Logbook {
   const real = { ...book, trips: book.trips.filter((trip) => trip.spotId !== PLAY_LAKE_ID), catches: book.catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID) };
   const own = real.catches.some((entry) => !isSampleCatch(entry.id)) || real.trips.some((trip) => !isSampleTrip(trip.id));
-  // The fish exactly as Home counts them (countedFish); the sample's outings go with the first of the angler's own.
-  return { ...real, trips: own ? real.trips.filter((trip) => !isSampleTrip(trip.id)) : real.trips, catches: countedFish(real.catches) };
+  // The sample week goes whole with the first of the angler's own outings or fish, so a planned outing alone doesn't
+  // leave its invented fish on the goal, the days out and the spreadsheet.
+  return own ? { ...real, trips: real.trips.filter((trip) => !isSampleTrip(trip.id)), catches: real.catches.filter((entry) => !isSampleCatch(entry.id)) } : real;
 }
 
 /** Round counts worth a line: the 50th fish, the 100th, and so on. */

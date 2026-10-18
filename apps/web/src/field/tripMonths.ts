@@ -41,11 +41,11 @@ export function catchMonth(entry: CatchEntry): string {
  * that month sits beside the same month a year before it) or to the first fish. A month between with none is there at 0,
  * not left out.
  */
-export function monthTally(catches: readonly CatchEntry[], limit = 13): { month: string; count: number }[] {
+export function monthTally(catches: readonly CatchEntry[], limit = 13, monthOf: (entry: CatchEntry) => string = catchMonth): { month: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const entry of catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
-    const month = catchMonth(entry);
+    const month = monthOf(entry);
     counts.set(month, (counts.get(month) ?? 0) + 1);
   }
   const months = [...counts.keys()].sort();
@@ -61,12 +61,12 @@ export function monthTally(catches: readonly CatchEntry[], limit = 13): { month:
   return rows;
 }
 
-/** Fish per calendar year they came in, newest year first. */
-export function yearTally(catches: readonly CatchEntry[]): { year: string; count: number }[] {
+/** Fish per calendar year they came in, newest year first; `monthOf` can file a fish elsewhere (its outing's day). */
+export function yearTally(catches: readonly CatchEntry[], monthOf: (entry: CatchEntry) => string = catchMonth): { year: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const entry of catches) {
     if (Number.isNaN(new Date(entry.caughtAt).getTime())) continue;
-    const year = catchMonth(entry).slice(0, 4);
+    const year = monthOf(entry).slice(0, 4);
     counts.set(year, (counts.get(year) ?? 0) + 1);
   }
   return [...counts.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([year, count]) => ({ year, count }));

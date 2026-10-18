@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { hasMovedInApp, pageBefore } from "./FieldShell";
+import { canGoBack, pageBefore } from "./FieldShell";
 import { leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
@@ -752,7 +752,7 @@ function CatchForm() {
     const landing = tripId ? `/trips/${tripId}` : "/catches";
     // Back to the outing or log the form was opened from, so Back from there doesn't reopen a blank form; else the
     // form gives way to it.
-    if (hasMovedInApp() && pageBefore()?.split("?")[0] === landing) {
+    if (canGoBack() && pageBefore()?.split("?")[0] === landing) {
       sayAfterBack("catch", news, savedAt);
       navigate(-1);
     } else navigate(landing, { replace: true, ...savedState("catch", news, savedAt) });
@@ -804,7 +804,7 @@ function CatchForm() {
             if (existing) dropEditDraft(existing.id);
             else if (!waiting) dropKeptDraft();
             // Back to where the form was opened, so Back from there doesn't reopen it; opened directly, to the link's page.
-            if (!hasMovedInApp()) return;
+            if (!canGoBack()) return;
             event.preventDefault();
             navigate(-1);
           }}

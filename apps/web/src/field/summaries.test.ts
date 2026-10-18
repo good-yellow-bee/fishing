@@ -122,8 +122,8 @@ describe("search summary", () => {
     const lines = searchSummary(["bass"], [fish("b", "2026-10-11T14:00:00.000Z", true), fish("a", "2026-09-10T12:00:00.000Z")], () => "Cedar Bend").split("\n");
     expect(lines[0]).toBe("“bass”");
     expect(lines[1]).toBe("2 fish");
-    expect(lines[2]).toMatch(/^- .*Sep 10, 2026 Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend$/);
-    expect(lines[3]).toMatch(/^- .*Oct 11, 2026 Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend, Released$/);
+    expect(lines[2]).toMatch(/^- .*Sep 10, 2026 \d{1,2}:\d{2}( [AP]M)? Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend$/);
+    expect(lines[3]).toMatch(/^- .*Oct 11, 2026 \d{1,2}:\d{2}( [AP]M)? Largemouth bass, 3.2 lb, Texas-rig worm, Cedar Bend, Released$/);
   });
 
   it("names a linked search by its terms, without the field names", () => {

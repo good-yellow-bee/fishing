@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
-import { hasMovedInApp } from "./FieldShell";
+import { canGoBack } from "./FieldShell";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
 import { savedState } from "./SavedNote";
 import { MapAnchor } from "./MapAnchor";
@@ -744,7 +744,7 @@ function TripForm() {
           to={existing ? `/trips/${existing.id}` : again ? `/trips/${again.id}` : cancelSpot ? `/spots/${cancelSpot}` : "/trips"}
           onClick={(event) => {
             kept.drop();
-            if (!hasMovedInApp()) return;
+            if (!canGoBack()) return;
             event.preventDefault();
             navigate(-1);
           }}

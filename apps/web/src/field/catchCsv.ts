@@ -73,12 +73,14 @@ function sheet(rows: string[][], separator: string): string {
 
 /**
  * The outings a spreadsheet holds: the angler's own up to today, as the counts on the page take them. Not the game's
- * rounds, not the sample week once there is an outing or a fish of their own, and not a planned day, which would read as
- * a blank one.
+ * rounds, not the sample week once there is an outing or a fish of their own, and not a planned day (today's included
+ * until its first fish), which would read as a blank one.
  */
 export function sheetOutings(book: Logbook, today: string): Logbook {
   const counted = countedBook(book);
-  return { ...counted, trips: counted.trips.filter((trip) => trip.date <= today) };
+  // Today's outing once it has a fish: before that it is still ahead, as the calendar and the averages take it.
+  const fished = new Set(counted.catches.map((entry) => entry.tripId));
+  return { ...counted, trips: counted.trips.filter((trip) => trip.date < today || (trip.date === today && fished.has(trip.id))) };
 }
 
 /** The outings as a spreadsheet file, newest first: the day, the water, the fish landed, and the fish lost and strikes missed. */
