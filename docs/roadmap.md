@@ -1043,7 +1043,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 
 | # | Title | Area | Size |
 |---|---|---|---|
-| ~~PA1~~ | ~~A phone held sideways at 740-800 px (most Androids) no longer gets the narrow-screen layout on top of its own: the shore signs stretched over the whole lake and the hint ran up the screen; the signs now stop above the power meter and start a second column when they run long (larger text, the inlet, the boat), the coach fits between the lure panel and the signs, and with larger text the hint gives way to the coach~~ (#PR) | phone UX | S |
+| ~~PA1~~ | ~~A phone held sideways at 740-800 px (most Androids) no longer gets the narrow-screen layout on top of its own: the shore signs stretched over the whole lake and the hint ran up the screen; the signs now stop above the power meter and start a second column when they run long (larger text, the inlet, the boat), the coach fits between the lure panel and the signs, and with larger text the hint gives way to the coach~~ (#968) | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
