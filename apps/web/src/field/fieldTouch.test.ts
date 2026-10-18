@@ -17,6 +17,11 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("padding-block: 4px;");
   });
 
+  it("keeps a one-digit count link on Bests at least 32 px wide", () => {
+    const block = /\.stat-row strong a \{([^}]*)\}/.exec(css)?.[1];
+    expect(block).toContain("min-width: 32px;");
+  });
+
   it("reaches past the Map's Plan one and coordinate links into their row", () => {
     const block = /\.map-index a\.map-plan::after,\n  \.map-index a\.map-coord-link::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -8px -4px;");

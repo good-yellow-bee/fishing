@@ -378,6 +378,12 @@ button.field-primary {
     display: inline-block;
     padding-block: 4px;
   }
+
+  /* A one-digit count ("5" waters) was a 22 px-wide link. */
+  .stat-row strong a {
+    display: inline-block;
+    min-width: 32px;
+  }
 }
 
 .subhead,
