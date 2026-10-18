@@ -2,6 +2,7 @@ import { dailyWind, forecast, hotBankForDay, type ForecastDay, lakeSeason, SPOT_
 import { locale, t, useT } from "../i18n";
 import { tempText } from "../i18n/content";
 import { isTurnover, rainedYesterday, waterSwing, waterTempFor } from "../game/logic";
+import { daytimeMoonPass } from "../game/solunar";
 
 function dayName(date: Date, index: number) {
   if (index === 0) return t("Today");
@@ -20,6 +21,12 @@ function nightMoon(date: Date) {
 const MOON_TIPS = {
   full: "On a clear night a spinner or spoon flashes under it.",
   new: "Too dark to see: bites come slower after dark.",
+} as const;
+
+/** The moon's daytime passing, when the fish feed for an hour either side (moonFeedWaitMul). */
+const MOON_PASS_TIPS = {
+  overhead: "The moon passes overhead around {hour}:00, and the fish feed for an hour either side.",
+  underfoot: "The moon passes underfoot around {hour}:00, and the fish feed for an hour either side.",
 } as const;
 
 /** Rain muddies the water, and catfish and burbot hunt by scent in it and fight harder (rainHunterTireMul). */
@@ -79,6 +86,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             {isTurnover(day.date) && <span className="forecast-tip">{t(TURNOVER_TIP)}</span>}
             {windwardTip(day) && <span className="forecast-tip">{t(windwardTip(day)!)}</span>}
             {waterSwing(day.date) && <span className="forecast-tip">{t(WATER_SWING_TIPS[waterSwing(day.date)!], { temp: tempText(waterTempFor(day.date)) })}</span>}
+            <span className="forecast-tip">{t(MOON_PASS_TIPS[daytimeMoonPass(day.date).pass], { hour: daytimeMoonPass(day.date).hour })}</span>
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}
