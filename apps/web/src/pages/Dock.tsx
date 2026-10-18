@@ -88,7 +88,7 @@ import { WALK_TARGETS, type WalkTarget } from "../game/scene/walkPath";
 import { bankSuitsNow } from "../game/bankNow";
 import { PowerMeter } from "../game/scene/PowerMeter";
 import { prefersReducedMotion } from "../game/scene/reducedMotion";
-import { isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
+import { isLiveBait, isTopwater, touchScreen, useFishingGame } from "../game/useFishingGame";
 import { useCatchSync } from "../game/useCatchSync";
 import { settings as savedSettings, updateSettings, useSettings } from "../game/settings";
 import { rarityLabel } from "../game/logic";
@@ -241,6 +241,8 @@ export function DockPage() {
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
   const lure = tiedLure.current;
+  // A worm soaked through many casts, still tied on: the stance chip says so and the Retie button puts a fresh one on.
+  const washedWorm = game.washed && isLiveBait(lure);
   const lureLocked = !lureCanChange(scenePhase);
   // Read by the Q and R keys, whose listener is set up once.
   const scenePhaseRef = useRef(scenePhase);
@@ -702,7 +704,7 @@ export function DockPage() {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
   retieKey.current = () => {
-    if (!rowing && (game.frayed || game.twisted || game.dulled) && !shopOpen) game.retie();
+    if (!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && !shopOpen) game.retie();
   };
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
@@ -873,6 +875,7 @@ export function DockPage() {
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
           {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}
+          {washedWorm && <small className="stance-cold"> · {t("worm washed out")}</small>}
           {game.liveShiner && <small className="stance-hot"> · {t("live shiner on")}</small>}
         </aside>
         <LureChoice
@@ -929,7 +932,7 @@ export function DockPage() {
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
-            {!rowing && (game.frayed || game.twisted || game.dulled) && (
+            {!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && (
               <button
                 className="panel-btn walk-retie"
                 type="button"
@@ -938,7 +941,9 @@ export function DockPage() {
                     ? t("Retie the frayed line, so it holds full strain again.")
                     : game.twisted
                       ? t("Retie the twisted line, so it casts clean again.")
-                      : t("Touch up the dull hook, so it sets solid again.")
+                      : game.dulled
+                        ? t("Touch up the dull hook, so it sets solid again.")
+                        : t("Put a fresh worm on, so its scent draws the fish again.")
                 }
                 onClick={(event) => {
                   // Leave Space free for casting.
@@ -946,7 +951,7 @@ export function DockPage() {
                   game.retie();
                 }}
               >
-                {t("Retie")}
+                {game.frayed || game.twisted || game.dulled ? t("Retie") : t("Rebait")}
               </button>
             )}
             {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (

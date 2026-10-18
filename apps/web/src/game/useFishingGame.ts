@@ -40,7 +40,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, castTangles, isTwisted, twistAfterCast, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, type Groundbait, castIntoSpooked, castUnderPressure, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -399,6 +399,15 @@ export function useFishingGame(
     dullRef.current = next;
     setDulled(next);
   };
+  /** Casts on the worm since a fresh one went on; enough of them wash its scent out until it is swapped for a fresh one. */
+  const soakRef = useRef(0);
+  const [washed, setWashed] = useState(false);
+  const setSoak = (next: number) => {
+    soakRef.current = next;
+    setWashed(isWashedOut(next));
+  };
+  /** This cast went out on a washed-out worm, so its bite comes slower. */
+  const castWashedRef = useRef(false);
   /** A landed golden shiner hooked back on as live bait, for the next cast. */
   const liveShinerRef = useRef(false);
   const [liveShiner, setLiveShiner] = useState(false);
@@ -739,6 +748,9 @@ export function useFishingGame(
     fishedRef.current = fresh.next;
     const freshWait = fresh.fresh ? FRESH_WAIT : 1;
     if (fresh.fresh) reasons.push(t("Fresh water: the fish here haven't seen a lure today."));
+    // A worm soaked through many casts has lost its scent, so the fish are slow to find it; told ahead of the bank's reasons.
+    const washedWait = castWashedRef.current ? WASHED_WAIT : 1;
+    if (washedWait > 1) reasons.unshift(t("The worm has soaked pale and lost its scent, so the bites come slow. Put a fresh one on."));
     // A live shiner on the hook swims down and draws the bank's hunters; it goes out on this one cast, and is told first.
     const shiner = liveShinerRef.current;
     if (shiner) {
@@ -773,7 +785,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, glareWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -814,6 +826,7 @@ export function useFishingGame(
         setNibble(false);
         // A bait thief nibbled the hook clean: there is nothing left to bite.
         if (stolen) {
+          setSoak(0);
           setOutcome({ kind: "miss", message: t("{fish} nibbled the bait clean off the hook.", { fish: t(species.name) }), fish: bitten });
           resetToIdle(t("Little fish steal bait. Cast again."), "result");
           return;
@@ -965,6 +978,8 @@ export function useFishingGame(
       return;
     }
     setTwist(twistAfterCast(twistRef.current, lureRef?.current));
+    castWashedRef.current = !mercyRef.current && isWashedOut(soakRef.current) && isLiveBait(lureRef?.current);
+    setSoak(soakAfterCast(soakRef.current, lureRef?.current, mercyRef.current));
     castHotspotRef.current = aimed !== null && isHotspotCast(hotspotRef.current, aimed.x, aimed.z, landing.spot);
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), lureRef?.current, season) : null;
@@ -1346,6 +1361,8 @@ export function useFishingGame(
             const fed = fedRef.current ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) }) : "";
             const scuffed = runtime.performance.scuffed && !frayedRef.current ? scuffNote(spotRef.current) : "";
             if (runtime.performance.scuffed) markFrayed(true);
+            // The fish took the worm, so a fresh one goes on.
+            setSoak(0);
             const recaught = recaughtRef.current;
             const back = !recaught
               ? ""
@@ -1400,6 +1417,7 @@ export function useFishingGame(
             markFrayed(false);
             setTwist(0);
             markDull(false);
+            setSoak(0);
             setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
           } else if (result === "escaped") {
@@ -1464,20 +1482,24 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
-  /** Tie the frayed or twisted end off and a fresh knot on, and touch up a dull hook point, so the line holds full strain, casts clean and sets solid again. */
+  /** Tie the frayed or twisted end off and a fresh knot on, touch up a dull hook point, and put a fresh worm on, so the line holds full strain, casts clean, sets solid and draws the fish again. */
   const retie = useCallback(() => {
-    if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current) && !dullRef.current)) return;
+    if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current) && !dullRef.current && !isWashedOut(soakRef.current))) return;
     const wasFrayed = frayedRef.current;
     const wasTwisted = isTwisted(twistRef.current);
+    const wasDull = dullRef.current;
     markFrayed(false);
     setTwist(0);
     markDull(false);
+    setSoak(0);
     setHint(
       wasFrayed
         ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
         : wasTwisted
           ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
-          : t("You touch up the dull hook point and tie the lure on again. It sets solid again."),
+          : wasDull
+            ? t("You touch up the dull hook point and tie the lure on again. It sets solid again.")
+            : t("You thread a fresh worm on the hook. Its scent draws the fish again."),
     );
   }, []);
 
@@ -1526,6 +1548,7 @@ export function useFishingGame(
     frayed,
     twisted,
     dulled,
+    washed,
     retie,
     lurking,
     lurkerCloseInMs,
