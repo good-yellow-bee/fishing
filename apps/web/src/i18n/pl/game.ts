@@ -86,6 +86,8 @@ export const PL_GAME: PlBook = {
   "Toss a handful of groundbait here: the next {casts} casts bite sooner.": "Rzuć tu garść zanęty: przez kolejne rzuty ({casts}) brania przyjdą szybciej.",
   "You toss a handful of groundbait. The fish will gather to feed here for the next {casts} casts.": "Rzucasz garść zanęty. Ryby zbiorą się tu na żer przez kolejne rzuty ({casts}).",
   "Over the groundbait.": "Nad zanętą.",
+  "Schools: land one and more are still there, so cast again quickly": "Ławica: po jednej rybie zostają kolejne, więc zarzuć szybko jeszcze raz",
+  "Feeder: it comes in to feed on groundbait": "Żeruje na zanęcie: przypływa, gdy ją rzucisz",
   "{fish}: it came in to feed on the groundbait.": "{fish}: ta ryba przypłynęła żerować na zanęcie.",
   "{fish}: there's a school here, feeding on the groundbait. It stays a while, so cast again quickly!": "{fish}: tu jest ławica, żeruje na zanęcie. Zostanie dłużej, więc zarzuć szybko jeszcze raz!",
   "bites sooner now": "teraz szybciej bierze",
