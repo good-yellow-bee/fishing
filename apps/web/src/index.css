@@ -3175,6 +3175,19 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* While the coach shows, the stance chip stops short of its left edge (51% less half of 36vw) on one line, since the lure panel sits right below it. */
+  .scene-wrap[data-walkthrough="1"] .stance-chip {
+    max-width: calc((33vw - 16px) / var(--text-zoom, 1));
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* With larger text the step chips wrapped three rows deep and pushed the coach over the power meter; its line says what to do. */
+  html[data-text-size] .walkthrough ol {
+    display: none;
+  }
+
   .walkthrough ol {
     flex-wrap: wrap;
     justify-content: center;

@@ -16,3 +16,10 @@ describe("the catch card on a phone held sideways", () => {
     expect(block).toContain("position: sticky;");
   });
 });
+
+describe("the first-cast coach on a phone held sideways", () => {
+  it("keeps the stance chip on one line short of the coach, and drops the step chips with larger text", () => {
+    expect(sideways).toMatch(/\.scene-wrap\[data-walkthrough="1"\] \.stance-chip \{[^}]*max-width: calc\(\(33vw - 16px\) \/ var\(--text-zoom, 1\)\);[^}]*text-overflow: ellipsis;/);
+    expect(sideways).toMatch(/html\[data-text-size\] \.walkthrough ol \{\n    display: none;/);
+  });
+});

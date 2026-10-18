@@ -52,6 +52,8 @@ import { gustsOut } from "./gustPatch";
 import { fluffOut } from "./cattailTufts";
 import { stridersOut } from "./striderSkate";
 import { deerOut } from "./deerMotion";
+import { Moose } from "./Moose";
+import { mooseAntlers, mooseOut } from "./mooseWade";
 import { dewWebOut } from "./orbWeb";
 import { dockSnowy } from "./snowyDock";
 import { Breath } from "./Breath";
@@ -110,6 +112,8 @@ import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
+import { LightShafts } from "./LightShafts";
+import { shaftStrength } from "./shaftLight";
 import { bankMirrorStrength, mirrorStale } from "./mirrorImage";
 import { ROAD_RELAY, SUN_ROAD_FAR, SUN_ROAD_NEAR, roadBands, roadFrom } from "./glintRoad";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
@@ -1934,6 +1938,7 @@ export const LakeWorld = memo(function LakeWorld({
   const mist = mistAmount(hour, sky);
   const stars = starOpacity(hour === "night", weather.sunOut, moonLight(moon));
   const road = moonRoad(hour === "night", weather.sunOut, moonLight(moon));
+  const shafts = useSettings().particles === "full" ? shaftStrength(hour, sky) : 0;
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -2007,6 +2012,7 @@ export const LakeWorld = memo(function LakeWorld({
       {dewWebOut(hour, season) && <DewWeb />}
       {dewGlintsOut(hour, season) && <DewGrass />}
       {deerOut(hour, sky) && <Deer />}
+      {mooseOut(hour, sky, season) && <Moose antlers={mooseAntlers(season)} />}
       {stridersOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Striders />}
       <Shack />
       <ShorePath />
@@ -2044,6 +2050,7 @@ export const LakeWorld = memo(function LakeWorld({
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} /> : <LakeRain light={weather.rainLight} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}

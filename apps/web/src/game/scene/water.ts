@@ -2,7 +2,7 @@ import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge } from "@stillwater/shared";
 import { APPROACH } from "./pierDeck";
 
 /** 0 on the bank, 1 at the middle of the basin. */
-function shoreInland(x: number, z: number) {
+export function shoreInland(x: number, z: number) {
   const nx = x / LAKE_RX;
   const nz = (z - LAKE_CENTER_Z) / LAKE_RZ;
   const radius = Math.hypot(nx, nz);

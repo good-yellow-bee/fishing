@@ -1050,6 +1050,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA5~~ | ~~On touch screens the field log's underlined buttons and links ("−15 min", "change", "Copy a summary", section links) reach 8 px past their words to a 33 px tap area without moving anything, and Home's stacked count lines ("6 species", "Last time: …") get room of their own, clearing axe's target-size check~~ (#977) | touch, access | S |
 | ~~PA6~~ | ~~On any phone held sideways the catch card's fish, rarity and name ran off the top of the screen, out of reach; it now stops under the header and scrolls with Release, Keep fishing, Field log and Save picture pinned at its foot, and the fight card sits lower and tighter so it clears a two-row header~~ (#980) | phone UX | S |
 | ~~PA7~~ | ~~On a 320 px phone with larger text (Polish especially) the last banks in the bottom row of shore signs ran past the screen edge, out of reach; the row now scrolls sideways when it must and looks as before when it fits. The lodge board's All time / This week tabs stand 32 px on touch screens, and the in-game Reduce motion setting also stills the fight card's note fade (the system setting already did)~~ (#982) | phone UX, access | S |
+| ~~PA8~~ | ~~On a sideways phone with larger text (640x360 in Polish) the first-cast coach's step chips wrapped three rows deep, so the coach covered the power meter and the stance chip's words; with larger text the chips now step aside (the coach's line says what to do), and while the coach shows the stance chip keeps to one line short of it~~ (#983) | phone UX, access | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1061,6 +1062,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC4~~ | ~~News card 2026-10-18-scene01 covers SC1 to SC3: sunlight on the sand, water by season and the far bank in the mirror~~ (#972) | news | S |
 | ~~SC5~~ | ~~The sun's glitter and the moon's road follow your eye: both used to start from the dock or the middle of the lake, so from the Point or the Reeds they ran off to one side; now they run from wherever you stand toward the sun or moon~~ (#973) | scene | S |
 | ~~SC6~~ | ~~Whitecaps on a windy day: on breezy days a few crests break white out on the deep water, on strong days many more and bigger; each slides downwind as its foam spreads and fades, dimmer after dark (one draw)~~ (#976) | scene | S |
+| ~~SC7~~ | ~~A bull moose wades out of the north-east woods at dawn and dusk from spring to fall, feeds belly-deep with its head under the water (rings as it goes in and comes up), moves to a second patch, and wades back; antlers in summer and fall; a close cast sends it trotting off till its next visit~~ (#981) | wildlife | M |
+| ~~SC8~~ | ~~News card 2026-10-18-scene02 covers SC5 to SC7: the sun and moon roads from where you stand, whitecaps on windy days and the moose in the shallows~~ (#981) | news | S |
+| ~~SC9~~ | ~~Shafts of dawn light: on a clear dawn, low sunlight slants down through the north-east trees and the morning mist across the lake, each shaft swelling and thinning as the mist drifts (full effects only, one draw)~~ (#984) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
