@@ -1,4 +1,4 @@
-import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
+import type { LakeHour, Sky } from "@stillwater/shared";
 import { DOCK_POST_CAPS } from "./snowyDock";
 
 /**
