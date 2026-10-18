@@ -59,7 +59,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
+import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { followerFor, grabberFor } from "./grab";
@@ -553,6 +553,18 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("fight:none");
     expect(hint()?.includes("It's out hunting after dark and fights at full strength, so it tires slower.")).toBe(hunter);
+  });
+
+  it("tells only the first two reasons a hooked fish tires slower, so the hookset hint stays short", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "night", false, undefined, undefined, "rain", "winter");
+    vi.mocked(waitMs).mockReturnValueOnce(2_000);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "burbot")!);
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("fight:none");
+    expect(TIRE_REASONS).toBe(2);
+    expect(hint()).toMatch(/^It thrives in the cold, so it keeps its strength\. It's out hunting after dark and fights at full strength, so it tires slower\. /);
+    expect(hint()).not.toContain("It hunts by smell in the murky rain water");
   });
 
   it("says a lost trophy-sized fish looked like a trophy", () => {
