@@ -1,6 +1,7 @@
 import { dailyWind, forecast, hotBankForDay, type ForecastDay, lakeSeason, SPOT_LABELS, MOON_LABELS, moonName, moonPhase, skyBlurb, skyLabel } from "@stillwater/shared";
 import { locale, t, useT } from "../i18n";
-import { isTurnover, rainedYesterday } from "../game/logic";
+import { tempText } from "../i18n/content";
+import { isTurnover, rainedYesterday, waterSwing, waterTempFor } from "../game/logic";
 
 function dayName(date: Date, index: number) {
   if (index === 0) return t("Today");
@@ -32,6 +33,12 @@ const FOG_LIFT_TIP = "The fish move up to feed as the fog burns off, from {hour}
 const POST_FRONT_TIP = "Bright after the rain: the fish sulk deep till noon, but a slow jig or worm still draws them.";
 /** The days the lake turns over in late fall (turnoverWaitMul). */
 const TURNOVER_TIP = "The lake is turning over: slow bites, except in the inlet's fresh water.";
+
+/** Water that warmed or cooled since yesterday, which wakes the fish or puts them off (waterSwingWaitMul). */
+const WATER_SWING_TIPS = {
+  warming: "The water warms to {temp}, and the fish wake up to feed.",
+  cooling: "The water cools to {temp}, and the sluggish fish bite slow.",
+} as const;
 
 /** The banks a light breeze blows onto, so the fish follow the food in (windwardWaitMul); a south wind blows onto no bank. */
 const WINDWARD_TIPS: Partial<Record<string, string>> = {
@@ -71,6 +78,7 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             {day.sky === "clear" && rainedYesterday(day.date) && <span className="forecast-tip">{t(POST_FRONT_TIP)}</span>}
             {isTurnover(day.date) && <span className="forecast-tip">{t(TURNOVER_TIP)}</span>}
             {windwardTip(day) && <span className="forecast-tip">{t(windwardTip(day)!)}</span>}
+            {waterSwing(day.date) && <span className="forecast-tip">{t(WATER_SWING_TIPS[waterSwing(day.date)!], { temp: tempText(waterTempFor(day.date)) })}</span>}
             {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
             {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}

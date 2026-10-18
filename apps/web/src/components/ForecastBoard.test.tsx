@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { dailyWind, forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
-import { isTurnover, rainedYesterday, turnoverStart } from "../game/logic";
+import { isTurnover, rainedYesterday, turnoverStart, waterSwing, waterTempFor } from "../game/logic";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -125,6 +125,22 @@ describe("ForecastBoard", () => {
     const strong = days.find((day) => settled(day) && windOf(day) === "strong")!;
     act(() => root.render(<ForecastBoard now={strong} />));
     expect(host.querySelector("li:first-child")?.textContent).not.toContain("breeze blows onto");
+    act(() => root.unmount());
+  });
+
+  it("chalks the water warming or cooling since yesterday, with its temperature", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 120 }, (_, n) => new Date(2026, 9, 1 + n, 9));
+    const warm = days.find((day) => waterSwing(day) === "warming")!;
+    act(() => root.render(<ForecastBoard now={warm} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(`The water warms to ${waterTempFor(warm)}°F, and the fish wake up to feed.`);
+    const cool = days.find((day) => waterSwing(day) === "cooling")!;
+    act(() => root.render(<ForecastBoard now={cool} />));
+    expect(host.querySelector("li:first-child")?.textContent).toContain(`The water cools to ${waterTempFor(cool)}°F, and the sluggish fish bite slow.`);
+    act(() => root.render(<ForecastBoard now={days.find((day) => !waterSwing(day))!} />));
+    expect(host.querySelector("li:first-child")?.textContent).not.toMatch(/The water (warms|cools)/);
     act(() => root.unmount());
   });
 
