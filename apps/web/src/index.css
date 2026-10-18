@@ -3619,6 +3619,22 @@ html[data-contrast="high"] .sound-captions li {
     margin-top: 8px;
     padding: 6px 16px 8px;
   }
+
+  /* The same for Settings, the keys card and the trip recap: Settings' long list scrolled in a 230 px window over an
+     85 px foot with larger text. */
+  .settings-overlay {
+    padding: 8px;
+  }
+
+  .settings-panel {
+    max-height: calc(100dvh / var(--text-zoom, 1) - 16px);
+    padding-top: 12px;
+    scroll-padding-bottom: 60px;
+  }
+
+  .settings-foot {
+    padding: 6px 18px 8px;
+  }
 }
 
 /* A zoomed window has no walking stick, so the hint takes its corner. */
