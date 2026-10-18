@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field29";
+export const NEWS_ID = "2026-10-18-scene13";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In winter a bird feeder goes up by the shack, and chickadees flit between it and the oak all day. When it rains, puddles gather on the grass in front of the shack with raindrops ringing them, and on dry days the washing hangs out on a line by the water, blowing in the wind.",
   "Waters has a Find a water box once the list is long, a water's and a kind's “Through the year” name the best month, and an old link to a merged water says where it went.",
   "Screen readers and keyboards find their way more easily. The lake now has a page heading, so a screen reader can jump straight to it, and the notes beside the dock (where you stand, the controls) are named, so the list of page areas says what each one is. Keyboard focus rings on the field log's pages and the sign-in card are a deeper colour that stands out against the paper.",
   "On fine days someone paddles a canoe along the far shore and back. Across the lake a log cabin lights its windows at dusk and smokes from its chimney when the weather turns cold, and the shack now has a ginger cat that naps on the grass by day and sits by the campfire at night.",

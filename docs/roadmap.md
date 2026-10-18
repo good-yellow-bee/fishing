@@ -1153,6 +1153,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC53~~ | ~~News card scene12: canoeist, far-bank cabin, shack cat~~ (#1122) | scene | S |
 | ~~SC54~~ | ~~Winter bird feeder: a snowy-roofed feeder on a post by the shack in winter, with chickadees pecking at the seed and flitting to the oak and back by day~~ (#1126) | scene | S |
 | ~~SC55~~ | ~~Rain puddles: while it rains (not in winter) puddles gather on the grass by the shack, pricked by raindrop rings~~ (#1129) | scene | S |
+| SC56 | Washing line: a line on two posts by the water in front of the shack, with a shirt, a towel and socks pegged out by day from spring to fall when it is dry, blowing out on the wind | scene | S |
+| SC57 | News card scene13: bird feeder, rain puddles, washing line | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
