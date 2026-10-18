@@ -14,3 +14,11 @@ describe("round 63 outing fixes", () => {
     expect(lastOutingBefore(trips, "2026-10-01", "2026-10-18", () => 1)).toBeUndefined();
   });
 });
+
+describe("round 63 outing ideas", () => {
+  it("leaves a note out of the form until its outing is over", async () => {
+    const { notesHere } = await import("./outingNotes");
+    const trips = [{ ...trip("a", "2026-10-10"), note: "Weed edge" }, { ...trip("b", "2026-10-18"), note: "Plan" }];
+    expect(notesHere(trips, "2026-10-18", 2).map((row) => row.text)).toEqual(["Weed edge"]);
+  });
+});
