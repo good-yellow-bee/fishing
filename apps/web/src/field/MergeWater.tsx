@@ -35,6 +35,10 @@ export function MergeWater({ spotId }: { spotId: string }) {
   }, [asked]);
   if (others.length === 0 || spotId === PLAY_LAKE_ID || isSampleSpot(spotId)) return null;
   const moves = into ? mergeMoves(storedBook, spotId, into) : null;
+  const keptSpot = into ? storedBook.spots.find((spot) => spot.id === into) : undefined;
+  const kept = keptSpot
+    ? { name: keptSpot.name, fish: storedBook.catches.filter((entry) => entry.spotId === into).length, outings: storedBook.trips.filter((trip) => trip.spotId === into).length }
+    : null;
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!into) return;
@@ -72,7 +76,10 @@ export function MergeWater({ spotId }: { spotId: string }) {
               ? t("No outings or fish to move.")
               : (moves.outings > 0 && moves.fish > 0
                   ? t("Moves {outings} and {fish}.", { outings: tn(moves.outings, "{n} outing", "{n} outings"), fish: tn(moves.fish, "{n} fish", "{n} fish") })
-                  : t("Moves {what}.", { what: moves.outings > 0 ? tn(moves.outings, "{n} outing", "{n} outings") : tn(moves.fish, "{n} fish", "{n} fish") })) + (moves.joined > 0 ? ` ${tn(moves.joined, "{n} outing joins the one on its day.", "{n} outings join the ones on their days.")}` : "")
+                  : t("Moves {what}.", { what: moves.outings > 0 ? tn(moves.outings, "{n} outing", "{n} outings") : tn(moves.fish, "{n} fish", "{n} fish") })) +
+                (moves.joined > 0 ? ` ${tn(moves.joined, "{n} outing joins the one on its day.", "{n} outings join the ones on their days.")}` : "") +
+                // What the kept water holds after, so a merge into the wrong one shows itself in its totals too.
+                (kept ? ` ${t("{name} then holds {fish} and {outings}.", { name: kept.name, fish: tn(kept.fish + moves.fish, "{n} fish", "{n} fish"), outings: tn(kept.outings + moves.outings - moves.joined, "{n} outing", "{n} outings") })}` : "")
             : null}
         </p>
         <p className="field-hint" id="merge-water-hint">

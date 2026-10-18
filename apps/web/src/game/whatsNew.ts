@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene06";
+export const NEWS_ID = "2026-10-18-field23";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page names the next outing planned there and opens it, the kind filter on Spots counts its waters (“River (2)”), and merging two waters says what the kept one will then hold.",
   "In winter the walkway out to the dock lies under snow, with your trail of boot prints trodden into it, and plates of pancake ice drift in the shallows. In spring the shore trees drop blossom petals onto the water, and from late spring through summer sunfish fan pale nests in the sand either side of the dock, each with its guard hovering over it.",
   "On a touch screen the field log's links on every card (the fish, the lure, the water, the outing), Cancel, Released it and Rename or merge now take a finger-sized tap, and neighbouring links no longer steal each other's taps. On a tablet the lake's shore signs stand taller too.",
   "A past season on Bests shows how its goal ended, in its box and its copied summary, and this year's goal says where last year stood by this date.",

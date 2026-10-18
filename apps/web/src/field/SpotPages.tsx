@@ -167,7 +167,11 @@ export function SpotsPage() {
                 wrap
                 label={t("Kind of water")}
                 value={shownKind}
-                options={[{ id: "all", label: t("All waters") }, ...types.map((type) => ({ id: type, label: t(WATER_LABELS[type]) }))]}
+                // How many of each, the game's lake left out as the list leaves it out under a kind.
+                options={[
+                  { id: "all", label: t("All waters") },
+                  ...types.map((type) => ({ id: type, label: `${t(WATER_LABELS[type])} (${rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === type).length})` })),
+                ]}
                 onChange={setKind}
               />
             ) : null}
@@ -247,6 +251,8 @@ function SpotView() {
   // A search finds a water by its name, so while another shares it, this page's links open both waters' fish.
   const twin = book.spots.find((other) => other.id !== spot.id && other.name.trim().toLowerCase() === spot.name.trim().toLowerCase());
   const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(book, today).get(spot.id);
+  // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
+  const nextHere = upcomingRealTrips(book, today).find((trip) => trip.spotId === spot.id && (trip.date > today || (fishByTrip.get(trip.id) ?? 0) === 0));
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
   const years = yearTally(catches);
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
@@ -319,6 +325,11 @@ function SpotView() {
         {lastHere ? (
           <p className="meta last-here">
             {restHere === 0 ? t("Fished here today") : restHere === 1 ? t("Last fished here yesterday") : `${tn(restHere, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(lastHere)}`}
+          </p>
+        ) : null}
+        {nextHere ? (
+          <p className="meta next-here">
+            <Link to={`/trips/${nextHere.id}`}>{t("Next outing here: {when}", { when: tripWhen(nextHere.date, today, tomorrow) })}</Link>
           </p>
         ) : null}
         {spot.place ? (
