@@ -243,6 +243,8 @@ export function DockPage() {
   lureChoicesRef.current = lureChoices;
   const shopOpenRef = useRef(shopOpen);
   shopOpenRef.current = shopOpen;
+  // Read by the G key: tosses the groundbait whenever its button by the walk signs would.
+  const groundbaitKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -634,6 +636,11 @@ export function DockPage() {
         updateSettings({ lastLure: next });
         return;
       }
+      if (event.code === "KeyG" && !event.repeat) {
+        event.preventDefault();
+        groundbaitKey.current();
+        return;
+      }
       if (event.code !== "KeyE" || event.repeat) return;
       if (game.stance !== "shop") return;
       event.preventDefault();
@@ -666,6 +673,9 @@ export function DockPage() {
   const inletOpen = canUseSpot("inlet", me.level);
   const boatOpen = canUseSpot("open", me.level);
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
+  groundbaitKey.current = () => {
+    if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
+  };
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
     target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
