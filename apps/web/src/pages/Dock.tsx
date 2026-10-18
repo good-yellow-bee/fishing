@@ -846,6 +846,7 @@ export function DockPage() {
               <button
                 className="panel-btn walk-bait"
                 type="button"
+                aria-label={t("Groundbait")}
                 title={t("Toss a handful of groundbait here: the next {casts} casts bite sooner.", { casts: GROUNDBAIT_CASTS })}
                 onClick={(event) => {
                   // Leave Space free for casting.
@@ -853,7 +854,9 @@ export function DockPage() {
                   game.throwGroundbait();
                 }}
               >
-                {t("Groundbait")}
+                {/* A phone's sign row has no room for the long word, so it shows the short one; the label keeps the full name. */}
+                <span className="bait-full">{t("Groundbait")}</span>
+                <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
             {!aboard(boatState) && SIGNPOSTS.filter(({ target }) => target !== "inlet" || inletOpen).map(({ target, label }) => (
