@@ -115,3 +115,11 @@ describe("photo mode on a phone", () => {
     expect(css).toMatch(/\.photo-exit:has\(~ \.photo-note\) span \{\n  visibility: hidden;/);
   });
 });
+
+describe("the lake header on a phone with larger text", () => {
+  it("drops the wordmark's row on a phone, where the angler's name is already hidden, so it takes three rows instead of four", () => {
+    const from = css.indexOf("@media (max-width: 520px) {\n  .hud-user,");
+    const phone = css.slice(from, css.indexOf("\n}\n", from));
+    expect(phone).toMatch(/html\[data-text-size\] \.hud-brand \{\n    display: none;/);
+  });
+});
