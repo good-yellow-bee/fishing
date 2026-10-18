@@ -620,7 +620,9 @@ export function CatchSearch() {
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
   const metric = getUnits() === "metric";
-  const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor]);
+  // The Polish book arrives a beat after the first search; matching runs again once it is in.
+  const polish = polishBook();
+  const found = useMemo(() => (settled ? findCatches(book, settled, t, (id) => photoFor(id) !== null) : []), [book, settled, t, lang, photoFor, polish]);
   const [largest, setLargest] = useLargestOrder();
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
   const onCatches = useLocation().pathname.startsWith("/catches");
