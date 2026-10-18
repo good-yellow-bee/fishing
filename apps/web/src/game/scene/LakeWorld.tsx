@@ -111,6 +111,7 @@ import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
+import { reedTilt } from "./reedSway";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
@@ -1799,7 +1800,7 @@ function ribbonGeometry(halfWidth: number) {
 }
 
 /** The creek that feeds the inlet: a muddy bed, running water, rocks on the banks. */
-function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
+function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; wind: { x: number; z: number } }) {
   const bank = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH + CREEK_BANK), []);
   const water = useMemo(() => ribbonGeometry(CREEK_HALF_WIDTH), []);
   const flow = useMemo(() => makeCreekTexture(), []);
@@ -1824,7 +1825,7 @@ function Creek({ hour, weather }: { hour: LakeHour; weather: WeatherLook }) {
         <meshToonMaterial color={seasonWaterColor(weather.water, season)} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
       <Rocks items={CREEK_ROCK_SPECS} />
-      <Reeds count={6} origin={[-23.2, 0.03, -11.0]} />
+      <Reeds count={6} origin={[-23.2, 0.03, -11.0]} wind={wind} />
       <ScatterModels items={CREEK_TREES} />
       <ScatterModels items={CREEK_GRASS} />
     </group>
@@ -1871,19 +1872,38 @@ function AnchorBuoy() {
   );
 }
 
-function Reeds({ count, origin }: { count: number; origin: Vec3 }) {
+const NO_WIND = { x: 0, z: 0 };
+
+/** A clump of reeds, each leaning and nodding with the wind on its own beat (reedSway.ts). */
+function Reeds({ count, origin, wind = NO_WIND }: { count: number; origin: Vec3; wind?: { x: number; z: number } }) {
   const season = useContext(SeasonContext);
+  const still = useReducedMotion();
+  const stems = useRef<(THREE.Group | null)[]>([]);
   const keyPrefix = origin.join("-");
+  useFrame(({ clock }) => {
+    stems.current.forEach((stem, i) => {
+      if (!stem) return;
+      const tilt = reedTilt(wind, clock.elapsedTime, i * 1.9 + origin[0], still);
+      stem.rotation.set(tilt.x, 0, tilt.z);
+    });
+  });
   return Array.from({ length: count }, (_, i) => (
-    <ToonModel
+    <group
       key={`${keyPrefix}-${i}`}
-      url={MODELS.reed}
+      ref={(stem) => {
+        stems.current[i] = stem;
+      }}
       position={[origin[0] + (i % 4) * 0.52, origin[1], origin[2] - Math.floor(i / 4) * 0.44]}
-      rotation={[0, i * 0.73, 0]}
-      scale={1.45 + (i % 3) * 0.16}
-      shadows={false}
-      plant={{ season, kind: "grass", variant: 0 }}
-    />
+    >
+      <ToonModel
+        url={MODELS.reed}
+        position={[0, 0, 0]}
+        rotation={[0, i * 0.73, 0]}
+        scale={1.45 + (i % 3) * 0.16}
+        shadows={false}
+        plant={{ season, kind: "grass", variant: 0 }}
+      />
+    </group>
   ));
 }
 
@@ -2022,11 +2042,11 @@ export const LakeWorld = memo(function LakeWorld({
       <Shack />
       <ShorePath />
       <BankWalks />
-      <Creek hour={hour} weather={weather} />
+      <Creek hour={hour} weather={weather} wind={wind} />
       <PlayerBoat />
       <AnchorBuoy />
-      <Reeds count={14} origin={[-13.2, 0.03, 1.8]} />
-      <Reeds count={6} origin={[11.4, 0.03, -9.7]} />
+      <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
+      <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
       {LILIES.map((lily, i) => (
         <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} />
       ))}
