@@ -1,6 +1,7 @@
 import { WATER_LABELS, foldText, spotById, type CatchEntry, type Logbook, type Trip } from "@stillwater/shared";
 import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
+import { readSizePlus } from "./sizePlus";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
@@ -74,7 +75,8 @@ export function findTrips(
   now = new Date(),
   fishTrips?: (part: string) => ReadonlySet<string>,
 ): Trip[] {
-  const parts = needle.split("+").map(plain).filter(Boolean);
+  // "pike 30in+" is a 30-plus pike, as the catch search reads it, not "pike 30in" and an empty part.
+  const parts = readSizePlus(needle).split("+").map(plain).filter(Boolean);
   if (parts.length === 0) return [];
   // "szczupak ponad 50 cm", "> 2 kg": a part with a size is a catch search, and finds the outings its fish came on.
   const sized = new Map(fishTrips ? parts.filter(SIZED.test.bind(SIZED)).map((part) => [part, fishTrips(part)]) : []);

@@ -21,7 +21,7 @@ export function PagedTrips({
   children: (trip: Trip) => ReactNode;
   stack?: boolean;
 }) {
-  const { shown, showMore, box } = useShowMore();
+  const { shown, showMore, box } = useShowMore("trips");
   const { visible, more } = catchPage(trips, shown);
   const wholeMonths = new Map(tripsByMonth(trips).map((group) => [group.month, group.trips]));
   return (
