@@ -450,6 +450,7 @@ export const PL_GAME: PlBook = {
   "{fish}: there's a big winter school here, and it stays a while. Cast again quickly!": "{fish}: tu jest duża zimowa ławica i chwilę zostanie. Zarzuć szybko jeszcze raz!",
   "{fish}: there's a school here, cast again quickly!": "{fish}: tu jest ławica, zarzuć szybko jeszcze raz!",
   "Perfect cast.": "Idealny rzut.",
+  "Skipped it under the dock, into the shade.": "Przynęta odbiła się po wodzie pod pomost, w cień.",
   "Perfect cast": "Idealny rzut",
   "Hooked solid": "Hak siedzi pewnie",
   "On the second take": "Przy drugim braniu",
