@@ -201,3 +201,15 @@ describe("the bank chip while the first-cast coach shows", () => {
     expect(/\n\.walkthrough \{([^}]*)\}/.exec(css)?.[1]).toContain("width: min(420px, calc(60vw / var(--text-zoom, 1)));");
   });
 });
+
+describe("the lure panel on a touch tablet", () => {
+  it("ends above the walking stick and scrolls, so its longest notes never run over the stick", () => {
+    const from = css.indexOf("@media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {\n  html:not([data-hand=\"left\"]) .lure-choice {");
+    expect(from).toBeGreaterThan(-1);
+    const block = css.slice(from, css.indexOf("\n}\n", from));
+    expect(block).toContain("max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px);");
+    expect(block).toContain("overflow-y: auto;");
+    expect(/\n\.lure-choice \{([^}]*)\}/.exec(css)?.[1]).toContain("top: 154px;");
+    expect(/@media \(pointer: coarse\) \{\n  \.walk-stick \{([^}]*)\}/.exec(css)?.[1]).toMatch(/bottom: 104px;[\s\S]*height: 104px;/);
+  });
+});
