@@ -25,7 +25,7 @@ import { WaterTipsBox } from "./WaterTipsBox";
 import { exactTerm, findWithLink } from "./findLinks";
 import { SpeciesChips } from "./SpeciesChips";
 import { daysBetween, lastOutByWater, spotsByLastFish } from "./spotOrder";
-import { bookFishDay, catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
 import { notYetThisYear } from "./bests/notYet";
@@ -240,6 +240,9 @@ function SpotView() {
   const notYet = notYetThisYear(catches, new Date(), undefined, (entry) => bookFishDay(book, entry));
   const kindsDay = mostKindsDay({ ...book, catches });
   const here = exactTerm("water", spot.name);
+  const lastHere = spot.id === PLAY_LAKE_ID ? undefined : lastOutByWater(book, today).get(spot.id);
+  const restHere = lastHere ? daysBetween(lastHere, today) : 0;
+  const years = yearTally(catches);
   // This season here against last season up to the same date, once last season had begun by now. Today's outing
   // counts once it has a fish, as the average counts outings.
   const ownHere = countedFish(catches);
@@ -289,6 +292,12 @@ function SpotView() {
         </p>
         <h1>{spot.name}</h1>
         <span className={`stamp stamp-${spot.waterType}`}>{t(WATER_LABELS[spot.waterType])}</span>
+        {/* When it was last fished, by its last outing or fish: how long it has rested. */}
+        {lastHere ? (
+          <p className="meta last-here">
+            {restHere === 0 ? t("Fished here today") : restHere === 1 ? t("Last fished here yesterday") : `${tn(restHere, "Last fished here {n} day ago", "Last fished here {n} days ago")} · ${formatDay(lastHere)}`}
+          </p>
+        ) : null}
         {spot.place ? (
           <p className="meta spot-place">
             {formatCoord(spot.place.lat, spot.place.lng)}{" "}
@@ -413,6 +422,15 @@ function SpotView() {
         </>
       ) : null}
       <MonthBars catches={catches} within={exactTerm("water", spot.name)} />
+      {/* Each season's fish here, newest first: whether the water is holding up or fading. */}
+      {years.length > 1 ? (
+        <>
+          <div className="section-head">
+            <h2>{t("By year")}</h2>
+          </div>
+          <TallyBars key={`years-${spot.id}`} rows={years.map((row) => ({ key: row.year, label: row.year, count: row.count, to: findWithLink(here, row.year) }))} />
+        </>
+      ) : null}
       {catches.length === 0 ? (
         <p className="empty">{t("Nothing logged here yet.")}</p>
       ) : (
