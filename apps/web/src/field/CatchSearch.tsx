@@ -65,6 +65,27 @@ function monthHas(entry: CatchEntry, want: string): boolean {
   return name.startsWith(want) || name.split(" ").some((word) => word.startsWith(want)) || monthWord(want) === Number(month.slice(5)) - 1;
 }
 
+/**
+ * A run of clock hours typed as "5-8am", "5am-8am", "05:00-08:00", "godz. 5-8" or "w godz. 5–8", or null. A bare "5-8"
+ * says nothing about hours, so it needs the "am"/"pm", the ":00" or the "godz.".
+ */
+export function hourRange(text: string): { from: number; to: number } | null {
+  const match = /^(?:(?:w\s+)?godz\.?\s*)?(\d{1,2})(:00)?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(:00)?\s*(am|pm)?$/i.exec(text.trim());
+  if (!match) return null;
+  const [, a, aColon, aHalf, b, bColon, bHalf] = match;
+  if (!/godz/i.test(text) && !aColon && !bColon && !aHalf && !bHalf) return null;
+  const hour = (typed: string, half: string | undefined) => {
+    const n = Number(typed);
+    if (!half) return n;
+    return (n % 12) + (half.toLowerCase() === "pm" ? 12 : 0);
+  };
+  // "5-8pm" is 17 to 20: a half typed once goes with both ends.
+  const from = hour(a!, aHalf ?? bHalf);
+  const to = hour(b!, bHalf ?? aHalf);
+  if (from > 23 || to > 24 || from === to) return null;
+  return { from, to: to % 24 };
+}
+
 /** True when what was typed is a plural of a word of the fish's kind, in the book's name or the one shown: "szczupaki", "bluegills". */
 function speciesPlural(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 4 || want.includes(" ")) return false;
@@ -274,6 +295,12 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   }
   // "2026-10": the fish of that local month, and only those, which the month bars and tiles open.
   if (/^\d{4}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => catchMonth(entry) === needle.trim());
+  // "5-8am", "05:00-08:00", "godz. 5-8": the fish landed in those clock hours, the last one not included; "22-2" runs past midnight.
+  const hours = hourRange(needle);
+  if (hours) return catchesNewestFirst(book).filter((entry) => {
+    const hour = new Date(entry.caughtAt).getHours();
+    return hours.from <= hours.to ? hour >= hours.from && hour < hours.to : hour >= hours.from || hour < hours.to;
+  });
   // ">60°F", "<15°C": the fish from water on that side of a temperature.
   const temp = parseTempQuery(needle);
   if (temp) return catchesNewestFirst(book).filter((entry) => tempMatches(entry.weather?.waterTempF, temp));

@@ -45,3 +45,24 @@ describe("searches as people type them, round 56", () => {
     expect(pluralOf("zrodlane", "zrodlany")).toBe(true);
   });
 });
+
+describe("clock hours in a search", () => {
+  it("reads a run of hours only with am/pm, a :00 or godz.", async () => {
+    const { hourRange } = await import("./CatchSearch");
+    expect(hourRange("5-8am")).toEqual({ from: 5, to: 8 });
+    expect(hourRange("5-8pm")).toEqual({ from: 17, to: 20 });
+    expect(hourRange("05:00-08:00")).toEqual({ from: 5, to: 8 });
+    expect(hourRange("godz. 5–8")).toEqual({ from: 5, to: 8 });
+    expect(hourRange("22:00-2:00")).toEqual({ from: 22, to: 2 });
+    expect(hourRange("5-8")).toBeNull();
+    expect(hourRange("2026-10")).toBeNull();
+  });
+
+  it("finds the fish in those hours", () => {
+    const sample = sampleLogbook(new Date(2026, 9, 15));
+    const at = (id: string, hour: number) => ({ ...sample.catches[0]!, id, caughtAt: new Date(2026, 9, 3, hour, 30).toISOString() });
+    const book = { ...sample, catches: [at("a", 5), at("b", 7), at("c", 8), at("d", 23)] };
+    expect(findCatches(book, "5-8am", t).map((entry) => entry.id).sort()).toEqual(["a", "b"]);
+    expect(findCatches(book, "22:00-2:00", t).map((entry) => entry.id)).toEqual(["d"]);
+  });
+});

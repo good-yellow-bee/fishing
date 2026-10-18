@@ -73,6 +73,7 @@ import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
+import { countedSearch } from "./countedSearch";
 import { useStepKeys } from "./stepKeys";
 
 /** When the outing's newest fish came, so a session still going past the small hours keeps the clock's day. */
@@ -1463,6 +1464,20 @@ function CatchView() {
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
   const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => String(new Date(other.caughtAt).getFullYear()) === caughtYear))}${noSample}`] as const;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
+  // The water's 10° band, and the fish caught under the same sky and wind in it, counted as the link opens them.
+  const tempBand =
+    entry.weather?.waterTempF === undefined
+      ? null
+      : tempBandSearch(waterTempTally({ spots: [], trips: [], catches: [{ ...entry, weather: { ...entry.weather, waterTempF: Math.round(entry.weather.waterTempF * 10) / 10 } }] }).find((row) => row.count > 0)!);
+  // Only on the angler's own counted fish: a game or sample fish isn't among what the count holds.
+  const sameConditions = entry.weather && isCounted
+    ? (() => {
+        const base = [exactTerm("sky", t(SKY_LABELS[entry.weather.sky])), exactTerm("wind", t(WIND_LABELS[entry.weather.wind])), ...(tempBand ? [tempBand] : [])].join(" + ");
+        const rows = findCatches(book, base, t);
+        const search = countedSearch(book, base, rows);
+        return { search, count: findCatches(book, search, t).length };
+      })()
+    : null;
   const savePicture = () => {
     const caught = new Date(entry.caughtAt);
     const text = {
@@ -1629,12 +1644,16 @@ function CatchView() {
               {entry.weather.waterTempF === undefined ? null : (
                 <>
                   {" · "}
-                  <Link to={findLink(tempBandSearch(waterTempTally({ spots: [], trips: [], catches: [{ ...entry, weather: { ...entry.weather, waterTempF: Math.round(entry.weather.waterTempF * 10) / 10 } }] }).find((row) => row.count > 0)!))}>
-                    {tempText(entry.weather.waterTempF)}
-                  </Link>
+                  <Link to={findLink(tempBand!)}>{tempText(entry.weather.waterTempF)}</Link>
                 </>
               )}
             </p>
+            {/* All three together: how this sky, wind and water have fished, among the angler's own. */}
+            {sameConditions && sameConditions.count > 1 ? (
+              <p className="meta same-conditions">
+                <Link to={findLink(sameConditions.search)}>{t("Fish in these conditions: {count}", { count: sameConditions.count })}</Link>
+              </p>
+            ) : null}
           </>
         ) : null}
         {sun ? (
@@ -1652,7 +1671,7 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
-      <CopySummary text={() => catchSummary(entry, spot?.name ?? null)} file="stillwater-catch.txt" photo={photo} />
+      <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>

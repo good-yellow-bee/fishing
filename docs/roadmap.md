@@ -1044,6 +1044,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~PA1~~ | ~~A phone held sideways at 740-800 px (most Androids) no longer gets the narrow-screen layout on top of its own: the shore signs stretched over the whole lake and the hint ran up the screen; the signs now stop above the power meter and start a second column when they run long (larger text, the inlet, the boat), the coach fits between the lure panel and the signs, and with larger text the hint gives way to the coach~~ (#968) | phone UX | S |
+| ~~PA2~~ | ~~On touch screens the header's links (Field log, Catch log, Board, Mute, Settings, Logout) and the coach's Skip stand at least 32 px tall and wide instead of 22, so a thumb lands on the one it means~~ (#970) | touch, access | S |
+| ~~PA3~~ | ~~The catch log's and lodge board's tables, which scroll sideways on their own on a phone, take keyboard focus (arrow keys scroll them) and are named by the page title for screen readers~~ (#970) | access | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1796,3 +1798,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR472~~ | ~~Round 55 fixes: a picked season on Bests counts fish by their own date like its links, most kinds in a day by the outing's day, Home and the outing lists skip the sample's planned outings once the book has the angler's own, Same kind two names leaves sample fish out, the waters tile leaves sample waters out and reads its label, real waters stay off the sample map sheet, own-sheet labels fit 320px, the year goal turns over at New Year~~ (#964) | field | S |
 | ~~BR473~~ | ~~Round 55 ideas: each kind on Bests names its best lure and water, Home's Next line marks a full or new moon, map dots grow with a water's fish, news field09~~ (#965) | field | S |
 | ~~BR474~~ | ~~Round 56 fixes: ranges without "from", sizes in lure names, "3 lb 2 oz" and "dkg" in search; "o świcie" and "at night"; quoted lure names with an inch mark; weekend by the outing's day; Polish plural adjectives; Polish links after a switch to English; catch page counts and links agree on the sample week and the game; step-through only where the fish is listed; Photos steps keep the water; an edit keeps a photo another tab added; unreadable times refused~~ (#969) | field | S |
+| ~~BR475~~ | ~~Round 56 ideas: clock-hour ranges in the catch search, a fish's page counts the fish in the same sky, wind and water temperature, a copied fish carries its weather, moon and outing, news field10~~ (#971) | field | S |
