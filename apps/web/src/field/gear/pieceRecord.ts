@@ -33,18 +33,23 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
     row.trips.add(item.tripId);
     byPiece.set(key, row);
   }
+  // The angler's own fish by piece, then by spelling, in one pass: a round of the game with the same lure neither adds
+  // to its record nor ends a dry run.
+  const fishByPiece = new Map<string, Map<string, CatchEntry[]>>();
+  for (const entry of own) {
+    const key = pieceKey(entry.lure);
+    if (!byPiece.has(key)) continue;
+    const spellings = fishByPiece.get(key) ?? new Map<string, CatchEntry[]>();
+    fishByPiece.set(key, spellings);
+    const name = entry.lure.trim().toLowerCase();
+    const list = spellings.get(name);
+    if (list) list.push(entry);
+    else spellings.set(name, [entry]);
+  }
   return [...byPiece.entries()]
     .map(([key, row]) => {
       // The spelling most of its fish were logged under, and those fish: what the lure's search link opens.
-      const spellings = new Map<string, CatchEntry[]>();
-      // The angler's own fish: a round of the game with the same lure neither adds to its record nor ends a dry run.
-      for (const entry of own) {
-        if (pieceKey(entry.lure) !== key) continue;
-        const name = entry.lure.trim().toLowerCase();
-        const list = spellings.get(name);
-        if (list) list.push(entry);
-        else spellings.set(name, [entry]);
-      }
+      const spellings = fishByPiece.get(key) ?? new Map<string, CatchEntry[]>();
       const took = [...spellings.values()].sort((a, b) => b.length - a.length)[0] ?? [];
       // The newest fish under any spelling of the piece: "Spinnerbaits" last week still counts for "Spinnerbait".
       const all = [...spellings.values()].flat();

@@ -193,9 +193,11 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
   const spot = spotById(book, trip.spotId);
   // Once for the line and the list: each look-up sorts the whole book.
   const fish = catchesForTrip(book, trip.id);
+  // A folded list is drawn once opened: a page of past outings would otherwise build every bag unseen.
+  const [open, setOpen] = useState(false);
 
   return (
-    <details className="tackle-trip tackle-past">
+    <details className="tackle-trip tackle-past" onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary>
         <span className="tackle-past-title">{outingName(trip, book.spots)}</span>
         <span className="meta">
@@ -207,7 +209,7 @@ function PastTripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; 
       <p className="tackle-past-link">
         <Link to={`/trips/${trip.id}`}>{t("Open the outing")}</Link>
       </p>
-      <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} spots={book.spots} />
+      {open ? <TackleList tripId={trip.id} name={t("Tackle for {trip}", { trip: outingName(trip, book.spots) })} caught={fish} trips={book.trips} spots={book.spots} /> : null}
     </details>
   );
 }
