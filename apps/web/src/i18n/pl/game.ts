@@ -320,6 +320,7 @@ export const PL_GAME: PlBook = {
   Wait: "Czekaj",
   Ease: "Odpuść",
   "Point at open water until the ring shows.": "Celuj w otwartą wodę, aż pojawi się kółko.",
+  "Point at open water, or press the arrow keys, until the ring shows.": "Celuj w otwartą wodę albo naciskaj strzałki, aż pojawi się kółko.",
   "Walk onto a bank: tap a signpost, the shore, or use WASD.": "Wejdź na brzeg: dotknij drogowskazu, brzegu albo użyj WASD.",
   "It got away. Cast again.": "Uciekła. Zarzuć ponownie.",
   "Hold a finger on the water, and lift it in the moss band.": "Przytrzymaj palec na wodzie i podnieś go w zielonym pasku.",
@@ -391,7 +392,8 @@ export const PL_GAME: PlBook = {
   "Missed the lake.": "Chybiony rzut — nie w jezioro.",
   "Open the tackle shack with E or the Open shop button. Walk down to the water to fish.":
     "Otwórz szopę ze sprzętem klawiszem E albo przyciskiem Otwórz sklep. Zejdź nad wodę, by łowić.",
-  "Click the water to aim. Hold to charge, release in the moss band.": "Kliknij wodę, by wycelować. Przytrzymaj, by napiąć, puść w zielonym pasku.",
+  "Click the water or use the arrow keys to aim. Hold to charge, release in the moss band.":
+    "Kliknij wodę albo użyj strzałek, by wycelować. Przytrzymaj, by napiąć, puść w zielonym pasku.",
   "Touch the water to aim. Hold to charge, lift in the moss band.": "Dotknij wody, by wycelować. Przytrzymaj, by napiąć, podnieś palec w zielonym pasku.",
   "Tap Open shop to visit the tackle shack. Walk down to the water to fish.":
     "Stuknij Otwórz sklep, by zajrzeć do szopy ze sprzętem. Zejdź nad wodę, by łowić.",

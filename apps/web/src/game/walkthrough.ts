@@ -70,7 +70,8 @@ export function nextStep(step: WalkthroughStep, snap: WalkthroughSnapshot): Walk
 export function stepLine(step: WalkthroughStep, snap: WalkthroughSnapshot): string {
   switch (step) {
     case "aim":
-      return snap.fishing ? t("Point at open water until the ring shows.") : t("Walk onto a bank: tap a signpost, the shore, or use WASD.");
+      if (snap.fishing) return snap.touch ? t("Point at open water until the ring shows.") : t("Point at open water, or press the arrow keys, until the ring shows.");
+      return t("Walk onto a bank: tap a signpost, the shore, or use WASD.");
     case "charge":
       if (snap.outcome) return t("It got away. Cast again.");
       return snap.touch ? t("Hold a finger on the water, and lift it in the moss band.") : t("Hold the mouse or Space, and let go in the moss band.");
