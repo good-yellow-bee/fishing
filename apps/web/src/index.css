@@ -2105,6 +2105,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     padding: 10px 12px;
   }
 
+  /* With larger text the header wrapped to four rows, a third of the screen; the wordmark's row goes, and the chips and links keep theirs. */
+  html[data-text-size] .hud-brand {
+    display: none;
+  }
+
   .hud-stats {
     justify-content: flex-start;
   }
