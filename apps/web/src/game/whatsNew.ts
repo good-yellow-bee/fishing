@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene02";
+export const NEWS_ID = "2026-10-18-scene03";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a clear dawn, shafts of low sunlight now slant through the trees and the morning mist onto the lake. In spring a yellow film of pollen streaks the water with the breeze and piles up on the downwind bank, and in fall the fallen leaves raft up along that bank instead.",
   "On the lake, the sun's glitter and the moon's road now run from wherever you stand toward the sun or moon. On breezy and strong days whitecaps break out on the deep water, and at dawn and dusk from spring to fall a moose may wade out of the north-east woods to feed in the shallows; a cast too close sends it off.",
   "A past outing's page now sets its fish against your average on that water and its largest fish against the water's record, and its tackle list names the lures packed that took nothing. A water's page shows the latest notes you wrote after outings there, each opening its day.",
   "On a phone held sideways, the walk signs line the right edge again instead of covering the lake, and the header's links and the guide's Skip are bigger to tap. The catch log and lodge board tables now scroll with the arrow keys, and the game starts a little faster.",

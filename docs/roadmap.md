@@ -1068,6 +1068,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC9~~ | ~~Shafts of dawn light: on a clear dawn, low sunlight slants down through the north-east trees and the morning mist across the lake, each shaft swelling and thinning as the mist drifts (full effects only, one draw)~~ (#984) | scene | S |
 | ~~SC10~~ | ~~Spring pollen on the water: a yellow film of pine and birch pollen lies on the lake in spring, in wavering streaks lined up with the breeze out on the open water and piled thickest against the downwind bank; rain thins it, and it rides the waves~~ (#987) | scene | S |
 | SC11 | Fall leaves rafted on the water: the fallen leaves gather in a raft along the bank the day's breeze blows onto, with a few strays out on the open water, each turning a little on the chop; a calm day spreads them round the shore | scene | S |
+| SC12 | News card 2026-10-18-scene03 covers SC9 to SC11: dawn light shafts through the mist, spring pollen on the water and fall leaves rafted on the downwind bank | news | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
