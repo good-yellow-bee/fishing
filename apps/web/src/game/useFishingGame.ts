@@ -708,7 +708,7 @@ export function useFishingGame(
     const rockWait = crankRockWaitMul(lureRef?.current, spotRef.current);
     if (rockWait < 1) reasons.unshift(t("The crankbait bangs off the rocks."));
     // While the lake turns over in late fall the stirred-up water puts the fish off, but the inlet's fresh stream water keeps them feeding; a beginner is spared the slow side. Told late, so the lake-wide news comes first.
-    const turnoverWait = Math.min(turnoverWaitMul(new Date(), spotRef.current), mercyRef.current ? 1 : Infinity);
+    const turnoverWait = Math.min(turnoverWaitMul(new Date(), spotRef.current, season), mercyRef.current ? 1 : Infinity);
     if (turnoverWait > 1) reasons.unshift(t("The lake is turning over, and the stirred-up water puts the fish off. The inlet's fresh stream water still holds them."));
     else if (turnoverWait < 1) reasons.unshift(t("The lake is turning over, but the inlet's fresh stream water keeps its fish feeding."));
     // A bank fished too long grows wary, and rests while the angler fishes elsewhere; fish feeding on groundbait don't mind, and a beginner is spared.

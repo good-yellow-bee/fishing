@@ -39,7 +39,7 @@ describe("LureChoice", () => {
   });
 
   it("marks the lures the lake favors right now, and says so under a tied one", () => {
-    const night: LureConditions = { sky: "partly-cloudy", hour: "night", season: "spring", wind: "light-north", moon: 0.5, rising: false };
+    const night: LureConditions = { sky: "partly-cloudy", hour: "night", season: "spring", wind: "light-north", moon: 0.5, rising: false, date: new Date(2026, 6, 15, 10) };
     const select = mount("Popper", () => undefined, "reeds", night);
     expect([...select.options].map((option) => option.textContent)).toEqual(["Popper · good now", "Spinnerbait · good here", "#5 Mepps · good here"]);
     expect([...container!.querySelectorAll(".lure-here")].map((note) => note.textContent)).toEqual(["The season, hour and weather suit it: the bites come sooner."]);
