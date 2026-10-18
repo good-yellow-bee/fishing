@@ -1,4 +1,5 @@
 import type { CatchEntry } from "@stillwater/shared";
+import { Link } from "react-router-dom";
 import { t } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./findLinks";
 import { TallyBars } from "./TallyBars";
@@ -24,12 +25,21 @@ export function MonthBars({ catches, within }: { catches: readonly CatchEntry[];
   const rows = monthOfYearTally(catches);
   if (rows.filter((row) => row.count > 0).length < 2) return null;
   const link = (text: string) => (within ? findWithLink(within, text) : findLink(text));
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+  const most = Math.max(...rows.map((row) => row.count));
+  const best = rows.filter((row) => row.count === most).length === 1 ? rows.find((row) => row.count === most)! : null;
   return (
     <section>
       <div className="section-head">
         <h2>{t("Through the year")}</h2>
       </div>
       <TallyBars rows={rows.map((row) => ({ key: String(row.month), label: monthWord(row.month), count: row.count, to: row.count > 0 ? link(exactTerm("month", monthWord(row.month))) : undefined }))} />
+      {/* The month it gives most, once one stands clear of the rest. */}
+      {best ? (
+        <p className="meta">
+          <Link to={link(exactTerm("month", monthWord(best.month)))}>{t("Best month: {month} ({count} of {total})", { month: monthWord(best.month), count: best.count, total })}</Link>
+        </p>
+      ) : null}
     </section>
   );
 }

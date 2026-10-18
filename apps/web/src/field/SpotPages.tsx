@@ -15,6 +15,7 @@ import {
   type CatchEntry,
   type Trip,
   parseSpotPlace,
+  foldText,
 } from "@stillwater/shared";
 import { CatchCard, SpotCard, TripCard } from "./cards";
 import { PagedCatches } from "./PagedCatches";
@@ -48,6 +49,7 @@ import { hookTally, hookText } from "./hookTally";
 import { MonthBars } from "./MonthBars";
 import { BiggestHere } from "./BiggestHere";
 import { MERGE_PARAM, MergeWater } from "./MergeWater";
+import { readMergedWaters } from "./waterMerge";
 import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
@@ -76,6 +78,11 @@ function readSpotOrder(): SpotOrder {
     return "fish";
   }
 }
+
+/** Past this many waters, the list offers a box to find one by name. */
+const FIND_WATER_FROM = 8;
+/** In the address: the name the list is narrowed to. */
+const WATER_FIND = "q";
 
 export function SpotsPage() {
   const { book } = useLogbook();
@@ -133,7 +140,23 @@ export function SpotsPage() {
       { replace: true },
     );
   const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
-  const shownRows = shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind);
+  // A long list narrows by name, accents and case aside; kept in the address like the kind, so Back keeps it.
+  const finding = rows.length > FIND_WATER_FROM;
+  const query = finding ? (params.get(WATER_FIND) ?? "") : "";
+  const needle = foldText(query.trim()).toLowerCase();
+  const setQuery = (next: string) =>
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        if (next.trim()) out.set(WATER_FIND, next);
+        else out.delete(WATER_FIND);
+        return out;
+      },
+      { replace: true },
+    );
+  const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(
+    (row) => !needle || foldText(row.spot.name).toLowerCase().includes(needle),
+  );
 
   return (
     <div className="sheet">
@@ -180,6 +203,13 @@ export function SpotsPage() {
             ) : null}
           </div>
         ) : null}
+        {finding ? (
+          <div className="catch-search spot-find">
+            <label htmlFor="spot-find">{t("Find a water")}</label>
+            <input id="spot-find" type="search" value={query} autoComplete="off" onChange={(event) => setQuery(event.target.value)} />
+            <div role="status">{needle && shownRows.length === 0 ? <p className="empty">{t("No water called “{query}”.", { query: query.trim() })}</p> : null}</div>
+          </div>
+        ) : null}
         <div className="card-grid">
           {shownRows.map((row) => (
             <SpotCard
@@ -218,10 +248,21 @@ function SpotView() {
   const [largest, setLargest] = useLargestOrder();
 
   if (!spot) {
+    // Merged into another water (an old link, a bookmark): say where its outings and fish went.
+    const into = spotById(book, readMergedWaters()[spotId] ?? "");
     return (
       <div className="sheet">
         <h1>{t("Missing water")}</h1>
-        <p className="lede">{t("That spot is not in this book.")}</p>
+        {into ? (
+          <>
+            <p className="lede">{t("This water was merged into {name}.", { name: into.name })}</p>
+            <p>
+              <Link to={`/spots/${into.id}`}>{t("Open {name}", { name: into.name })}</Link>
+            </p>
+          </>
+        ) : (
+          <p className="lede">{t("That spot is not in this book.")}</p>
+        )}
         <Link to="/spots">{t("Back to spots")}</Link>
       </div>
     );
