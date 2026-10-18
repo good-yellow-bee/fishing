@@ -140,3 +140,11 @@ describe("keyboard focus on the log's paper", () => {
     expect(/\n\.field-main :is\(a, button, summary\):focus-visible \{([^}]*)\}/.exec(css)?.[1]).toContain("outline-color: var(--field-rust);");
   });
 });
+
+describe("Home's count cards on a tablet with larger text", () => {
+  it("go two and one when a card would be under 150 px, and let a long count wrap inside its card", () => {
+    expect(/\n\.stat-row \{([^}]*)\}/.exec(css)?.[1]).toContain("grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));");
+    expect(css).toMatch(/\n\.stat-row small a \{\n  display: inline-block;\n\}/);
+    expect(css).not.toMatch(/\.stat-row small a \{\n  white-space: nowrap;/);
+  });
+});
