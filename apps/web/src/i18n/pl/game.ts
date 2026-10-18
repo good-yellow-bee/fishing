@@ -981,6 +981,8 @@ export const PL_GAME: PlBook = {
   Key: "Klawisz",
   Does: "Działanie",
   "Space / click": "Spacja / klik",
+  "P / Space": "P / Spacja",
+  "Arrows / + −": "Strzałki / + −",
   Mouse: "Mysz",
   "Hold to charge a cast, then strike and reel": "Przytrzymaj, by naładować rzut, potem zacinaj i zwijaj",
   "Aim the cast": "Celuj rzutem",

@@ -60,3 +60,14 @@ describe("the settings panel on a phone", () => {
     expect(foot).toContain("background: inherit;");
   });
 });
+
+describe("the keys card on a phone", () => {
+  const from = css.indexOf("/* On a phone the three columns only fit");
+  const phone = css.slice(from, css.indexOf("\n.settings-overlay {", from));
+
+  it("lets long keys wrap, and with larger text puts what each key does on a line of its own", () => {
+    expect(phone).toMatch(/@media \(max-width: 520px\) \{\n  \.keys-card kbd \{\n    white-space: normal;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.keys-card tr \{\n    display: grid;\n    grid-template-columns: 1fr 1fr;/);
+    expect(phone).toMatch(/html\[data-text-size\] \.keys-card td:nth-child\(3\) \{\n    grid-column: 1 \/ -1;/);
+  });
+});
