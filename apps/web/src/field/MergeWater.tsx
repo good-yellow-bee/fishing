@@ -7,6 +7,7 @@ import { useTackleIfAny } from "./gear/TackleState";
 import { foldedTackle } from "./gear/foldedTackle";
 import { localId } from "../game/localId";
 import { PLAY_LAKE_ID } from "./playLake";
+import { isSampleSpot } from "./bookCopy";
 
 /** In a water's link, the water to merge it into: the merge box opens with it picked. */
 export const MERGE_PARAM = "merge";
@@ -18,7 +19,8 @@ export function MergeWater({ spotId }: { spotId: string }) {
   const tackle = useTackleIfAny();
   useT();
   const navigate = useNavigate();
-  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID).sort((a, b) => a.name.localeCompare(b.name));
+  // The sample week's waters are made up: merged either way, their fish would count as the angler's or theirs would sit on a made-up place.
+  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => a.name.localeCompare(b.name));
   const [params] = useSearchParams();
   const asked = params.get(MERGE_PARAM);
   const [into, setInto] = useState(() => (asked && others.some((spot) => spot.id === asked) ? asked : ""));
@@ -31,7 +33,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
     box.current.scrollIntoView({ block: "center" });
     setTimeout(() => select.current?.focus(), 0);
   }, [asked]);
-  if (others.length === 0 || spotId === PLAY_LAKE_ID) return null;
+  if (others.length === 0 || spotId === PLAY_LAKE_ID || isSampleSpot(spotId)) return null;
   const moves = into ? mergeMoves(storedBook, spotId, into) : null;
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();

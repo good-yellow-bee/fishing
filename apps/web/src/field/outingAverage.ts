@@ -14,7 +14,8 @@ export function outingAverage(trips: readonly Trip[], fishOn: (tripId: string) =
   const mean = counts.reduce((sum, count) => sum + count, 0) / fished.length;
   const average = t("{n} fish an outing on average", { n: num(mean, mean > 0 && mean < 0.1 ? 2 : 1) });
   const blank = counts.filter((count) => count === 0).length;
-  return blank > 0 ? `${average}, ${tn(blank, "{n} without a fish", "{n} without a fish")}` : average;
+  // Joined as the language reads it: Polish decimal commas would run "1,7, 1" together.
+  return blank > 0 ? t("{average}, {blank}", { average, blank: tn(blank, "{n} without a fish", "{n} without a fish") }) : average;
 }
 
 /** The outing on a water that caught strictly more fish than every other one fished there, once three have been fished. */

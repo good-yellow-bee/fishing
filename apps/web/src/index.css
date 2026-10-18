@@ -1489,6 +1489,8 @@ html[data-input="pad"] .fight-bar .on-pad {
   transform: translateX(-50%);
   padding: 10px 16px;
   min-width: 0;
+  /* Its own width up to the cap: from left: 50% it could only wrap to half the screen, a tall column over a phone's fight card. */
+  width: max-content;
   max-width: min(420px, calc(88vw / var(--text-zoom, 1)));
   font-size: 13px;
   pointer-events: none;
@@ -2239,6 +2241,22 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: calc(104px / var(--text-zoom, 1));
     width: min(160px, calc((100vw - 152px) / var(--text-zoom, 1)));
   }
+
+  /* In a fight with larger text the card ran down under the thumb button, over the "let go" line: the header's
+     time, weather, level and points chips step aside until the fight ends, and the coach and bank chip, which only
+     showed through the card, go too. */
+  html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
+  html[data-text-size] .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+    display: none;
+  }
+}
+
+/* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
+   hold-and-release line goes with larger text too. */
+@media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
+  html[data-text-size] .fight-bar .fight-controls {
+    display: none;
+  }
 }
 
 @media (max-width: 520px) {
@@ -2323,7 +2341,8 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: -16px;
     margin: 0 -18px -16px;
     padding: 8px 18px 12px;
-    background: rgba(239, 224, 194, 0.98);
+    /* Solid: at 0.98 the card's blurred backdrop let the scrolled-under description show through the buttons. */
+    background: rgb(239, 224, 194);
   }
 
   .landed-card .catch-actions .panel-btn {
@@ -3367,7 +3386,7 @@ html[data-contrast="high"] .sound-captions li {
     bottom: -12px;
     margin: 0 -18px -12px;
     padding: 8px 18px 10px;
-    background: rgba(239, 224, 194, 0.98);
+    background: rgb(239, 224, 194);
   }
 
   .landed-card .catch-actions .panel-btn {
