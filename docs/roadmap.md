@@ -1209,8 +1209,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC86~~ | ~~Leaf-pile jumper: on dry fall days a child runs at a pile of raked leaves on the far bank, leaps in arms up, lies back in a burst of leaves, then climbs out and walks back for another go~~ (#1196) | scene | S |
 | ~~SC87~~ | ~~Painter on the far bank: on calm, clear days from spring to fall a painter works at an easel under a white sun umbrella, dabbing at the canvas and stepping back to look, the picture of sky, bank and water filling in over a few minutes~~ (#1200) | scene | S |
 | ~~SC88~~ | ~~News card scene19: moored boats' fill, spring goose family, leaf-pile jumper, painter on the far bank~~ (#1200) | scene | S |
-| SC89 | Disc tossers: on summer days that are dry and not too windy two people toss a flying disc back and forth on the east end of the far bank, winding up, flinging it on a curving arc and reaching up to catch it | scene | S |
-| SC90 | Angler under the brolly: on rainy dawns and days an angler sits it out on the far bank under a big green umbrella tipped into the wind, the rod out on its rests, sipping from a flask cup and leaning in when the float bobs | scene | S |
+| ~~SC89~~ | ~~Disc tossers: on summer days that are dry and not too windy two people toss a flying disc back and forth on the east end of the far bank, winding up, flinging it on a curving arc and reaching up to catch it~~ (#1204) | scene | S |
+| ~~SC90~~ | ~~Angler under the brolly: on rainy dawns and days an angler sits it out on the far bank under a big green umbrella tipped into the wind, the rod out on its rests, sipping from a flask cup and leaning in when the float bobs~~ (#1204) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
