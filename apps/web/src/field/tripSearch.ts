@@ -3,6 +3,8 @@ import { dateWords, monthWord } from "./dateWords";
 import { singularStems } from "./pluralWord";
 import { readSizePlus } from "./sizePlus";
 import { isPlanned } from "./TripMonthHead";
+import { isSampleOuting } from "./bookCopy";
+import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
@@ -12,6 +14,30 @@ const SIZED = /\d\s?(?:lbs?|oz|kg|dag|g|in|cm|mm)(?=\s|$)/i;
 
 /** Lower case with single spaces, so typed words compare however they were spaced. */
 const plain = foldText;
+
+/** Words that name the sample week's outings and the game's rounds, as "-sample" and "-game" leave them out. */
+const SAMPLE = ["sample", "przykładowe"].map(plain);
+const GAME = ["game", "gra"].map(plain);
+
+/** A part's "-word"s, which leave out the outings they name, apart from the rest of it. */
+function splitOut(part: string): { rest: string; out: string[] } {
+  const words = part.split(" ");
+  const isOut = (word: string) => word.length > 1 && word.startsWith("-");
+  return { rest: words.filter((word) => !isOut(word)).join(" "), out: words.filter(isOut).map((word) => word.slice(1)) };
+}
+
+/**
+ * A day's outings for the trip search, leaving out those not in `kept` (the game's round, the sample week's outings
+ * beside the angler's own), as a count of `kept` says: "2026-10-12 -game -sample".
+ */
+export function tripDaySearch(book: Logbook, day: string, kept: ReadonlySet<string>, t: (text: string) => string): string {
+  const left = book.trips.filter((trip) => trip.date === day && !kept.has(trip.id));
+  return [
+    day,
+    ...(left.some((trip) => trip.spotId === PLAY_LAKE_ID) ? [`-${t("game|search word")}`] : []),
+    ...(left.some(isSampleOuting) ? [`-${t("sample|search word")}`] : []),
+  ].join(" ");
+}
 
 /** Words that ask for the outings that counted a fish lost, or a strike missed. */
 const LOST = ["lost", "lost fish", "spięte", "spięta", "spiętych"].map(plain);
@@ -82,8 +108,14 @@ export function findTrips(
   fishTrips?: (part: string) => ReadonlySet<string>,
 ): Trip[] {
   // "pike 30in+" is a 30-plus pike, as the catch search reads it, not "pike 30in" and an empty part.
-  const parts = readSizePlus(needle).split("+").map(plain).filter(Boolean);
-  if (parts.length === 0) return [];
+  const typed = readSizePlus(needle).split("+").map(plain).filter(Boolean);
+  if (typed.length === 0) return [];
+  // "-sample", "-game", "-cedar": what a part leaves out, apart from what it asks for.
+  const split = typed.map(splitOut);
+  const parts = split.map((part) => part.rest).filter(Boolean);
+  const out = split.flatMap((part) => part.out);
+  const left = (trip: Trip, text: string) =>
+    out.some((word) => (SAMPLE.includes(word) ? isSampleOuting(trip) : GAME.includes(word) ? !offPlayLake(trip) : text.includes(word)));
   // "szczupak ponad 50 cm", "> 2 kg": a part with a size is a catch search, and finds the outings its fish came on.
   const sized = new Map(fishTrips ? parts.filter(SIZED.test.bind(SIZED)).map((part) => [part, fishTrips(part)]) : []);
   // Each part's dates read once, not once per outing.
@@ -112,7 +144,7 @@ export function findTrips(
   return book.trips
     .filter((trip) => {
       const text = tripText(book, trip, t);
-      return parts.every((part) => matches(trip, text, part));
+      return !left(trip, text) && parts.every((part) => matches(trip, text, part));
     })
     .sort((a, b) => b.date.localeCompare(a.date));
 }

@@ -19,6 +19,7 @@ import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
+import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
 import { goalPace, readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
@@ -95,7 +96,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
   return (
     <small className="next-last">
-      <Link to={`/trips/${last.id}`}>
+      <Link to={`/trips/${last.id}`} state={FROM_LIST}>
         {lure
           ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: `${t(lure.lure)} ×${lure.count}` })
           : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
@@ -142,12 +143,13 @@ export function HomePage() {
   const recent = recentTrips({ ...book, trips: book.trips.filter((trip) => offPlayLake(trip) && trip.id !== lateOuting?.id) }, today, 3);
   // Counted once for every card, not by sorting the whole book once per outing.
   const fishByTrip = fishCountsByTrip(book);
-  // The counts are the angler's own: a round of the game moves none of them.
-  const real = countedFish(book.catches);
   const nextMark = nextBookMark(book.catches.filter(ownFish).length);
   // Waters and outings of the angler's own, as Bests counts them: not the game's lake or its days.
   // The sample week's waters, outings and fish go once the angler has an outing or a fish of their own.
   const countedOwn = countedBook(book);
+  // The counts are the angler's own, as Bests and the goal count them: a round of the game moves none of them, and a
+  // first outing of their own already leaves the sample week's fish out.
+  const real = countedOwn.catches;
   // The month, the year and the goal count as Bests does: a planned outing of their own already leaves the sample's fish out.
   const counted = new Set(countedOwn.catches.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
@@ -275,7 +277,7 @@ export function HomePage() {
           <span className="eyebrow">{t("Fish")}</span>
           <strong>
             {/* The angler's own: game fish are left out of the count and of the list it opens. */}
-            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: countedSearch(book, "", book.catches).trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
+            <Link to={real.length < book.catches.length ? `/catches?${new URLSearchParams({ find: countedSearch(book, "", book.catches, "book").trim() }).toString()}` : "/catches"} aria-label={fishCountLabel(real.length)}>{real.length}</Link>
           </strong>
           {/* Only the game's fish so far: no kinds or months of the angler's own to give. */}
           {real.length > 0 ? (
@@ -285,14 +287,14 @@ export function HomePage() {
                 <>
                   {" · "}
                   {/* This month's fish, through the catch search, which reads "this month" by the outing's day as counted here. */}
-                  <Link to={findLink(countedSearch(book, t("this month|search word"), monthRows))}>{t("{n} this month", { n: monthFish })}</Link>
+                  <Link to={findLink(countedSearch(book, t("this month|search word"), monthRows, "book"))}>{t("{n} this month", { n: monthFish })}</Link>
                 </>
               ) : null}
               {yearFish > monthFish || goal !== null ? (
                 <>
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
-                  <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows))}>{goal === null ? t("{n} this year", { n: yearFish }) : yearFish >= goal ? t("Goal reached: {n} of {goal}", { n: yearFish, goal }) : t("{n} of {goal} this year", { n: yearFish, goal })}</Link>
+                  <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows, "book"))}>{goal === null ? t("{n} this year", { n: yearFish }) : yearFish >= goal ? t("Goal reached: {n} of {goal}", { n: yearFish, goal }) : t("{n} of {goal} this year", { n: yearFish, goal })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
@@ -323,7 +325,7 @@ export function HomePage() {
         </div>
         <div>
           <span className="eyebrow">{t("Next")}</span>
-          <strong>{next ? <Link to={`/trips/${next.id}`}>{outingName(next, book.spots)}</Link> : t("None planned")}</strong>
+          <strong>{next ? <Link to={`/trips/${next.id}`} state={FROM_LIST}>{outingName(next, book.spots)}</Link> : t("None planned")}</strong>
           <small>
             {next
               ? [tripWhen(next.date, today, tomorrow), nextSpot?.name].filter(Boolean).join(" · ")
@@ -349,7 +351,7 @@ export function HomePage() {
       </section>
 
       {/* Nothing to find in a book with no fish of the angler's own yet; the game's stay findable on the catch log. */}
-      {real.length > 0 ? <CatchSearch /> : null}
+      {countedFish(book.catches).length > 0 ? <CatchSearch /> : null}
 
       <div className="home-grid">
         <section>

@@ -7,6 +7,9 @@ export const FROM_LIST = { fromList: true } as const;
 
 /** The page a delete went Back from, so its Undo comes forward to it again rather than in the list's place. */
 let leftBackFrom: string | null = null;
+/** The page a delete was made on and the page it landed on, so an Undo pressed there takes its place, and one pressed elsewhere doesn't. */
+let deletedOn: string | null = null;
+let landedOn: string | null = null;
 
 /**
  * After a delete, off the gone page: Back to the list it was opened from, so the list isn't in history twice; else
@@ -16,6 +19,8 @@ export function leaveDeleted(navigate: NavigateFunction, state: unknown, fallbac
   // A link that gave no list state but came from the very page the delete would go to: Back there too.
   const fromList = canGoBack() && (openedFromList(state) || samePage(pageBefore(), fallback));
   leftBackFrom = fromList ? window.location.pathname + window.location.search : null;
+  deletedOn = window.location.pathname + window.location.search;
+  landedOn = fromList ? pageBefore() : fallback;
   if (fromList) navigate(-1);
   else navigate(fallback, { replace: true });
 }
@@ -23,6 +28,11 @@ export function leaveDeleted(navigate: NavigateFunction, state: unknown, fallbac
 /** Whether the delete made from `from` went Back to its list. */
 export function leftBackTo(from: string): boolean {
   return leftBackFrom === from;
+}
+
+/** Whether the angler has gone on to another page since the delete made on `from` landed: Undo then leaves `here` be. */
+export function movedOnSince(from: string, here: string): boolean {
+  return deletedOn === from && !samePage(landedOn, here);
 }
 
 function samePage(a: string | null, b: string): boolean {
