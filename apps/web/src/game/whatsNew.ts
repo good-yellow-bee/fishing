@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa03";
+export const NEWS_ID = "2026-10-18-field14";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A lure that took fish can now go straight into the next outing's bag from Gear's lure record, which also says how many fish each lure takes an outing. The Map says how long each water has rested since your last outing there.",
   "A phone or computer set to increase contrast now starts the lake in high contrast, which Settings can turn off. In Windows high contrast mode the cast and fight meters, the strike timer and the Bests calendar and charts no longer vanish, and the page, tab or choice in use is marked.",
   "Home's fish count now says where this year's pace would end it and how many fish are left to the book's next milestone. A fish's full-size photo is captioned with its kind, size, day and water, and the Photos page names your heaviest and longest fish still without a picture.",
   "The first cast of a visit at each bank meets fish that haven't seen a lure today, so the bite comes a little sooner. A bank fished hard now rests while you fish elsewhere, a little with each cast away, so one cast next door and straight back no longer clears it. G tosses the groundbait from the keyboard, and the Dock's walk sign now makes the turn onto the pier from the far banks instead of stopping on the path.",
