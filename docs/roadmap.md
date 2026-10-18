@@ -1142,6 +1142,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC47~~ | ~~Woodpecker: at dawn and by day a woodpecker hitches up the owl's dead tree, drumming as it goes, and swoops back down~~ (#1108) | scene | S |
 | ~~SC48~~ | ~~Fireflies only in summer: they no longer come out on every dry night of the year, just summer nights~~ (#1114) | scene | S |
 | ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
+| SC50 | Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
