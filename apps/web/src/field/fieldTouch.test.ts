@@ -134,3 +134,9 @@ describe("Bests' days calendar on a touch screen", () => {
     expect(/\n  \.day-calendar \.day-grid li \{([^}]*)\}/.exec(touch)?.[1]).toContain("aspect-ratio: 1;");
   });
 });
+
+describe("keyboard focus on the log's paper", () => {
+  it("draws the focus ring in the log's rust, not the lake's amber (WCAG 1.4.11)", () => {
+    expect(/\n\.field-main :is\(a, button, summary\):focus-visible \{([^}]*)\}/.exec(css)?.[1]).toContain("outline-color: var(--field-rust);");
+  });
+});

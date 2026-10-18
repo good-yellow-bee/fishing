@@ -15,3 +15,9 @@ describe("the sign-in pages' errors", () => {
     expect(/\n\.auth-card button:hover \{([^}]*)\}/.exec(css)?.[1]).toContain("background: #8f3a28;");
   });
 });
+
+describe("keyboard focus on the sign-in card", () => {
+  it("draws the focus ring in the card's deep rust, 5.1:1 where the amber was 1.5:1", () => {
+    expect(/\n\.auth-card :is\(a, button\):focus-visible \{([^}]*)\}/.exec(read("../index.css"))?.[1]).toContain("outline-color: #8f3a28;");
+  });
+});
