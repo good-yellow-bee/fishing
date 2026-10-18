@@ -2231,7 +2231,7 @@ export const LakeWorld = memo(function LakeWorld({
       {dragonfliesOut(hour, sky, season) &&
         Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
       {weather.rain &&
-        (season === "winter" ? <LakeSnow light={weather.rainLight} /> : <LakeRain light={weather.rainLight} />)}
+        (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
