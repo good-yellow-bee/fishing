@@ -249,8 +249,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
           {fight.water === "weeds" && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
-          {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run, or it drags the line over the rocks")}</p>}
-          {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling")}</p>}
+          {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}
+          {fight.water === "pilings" && canTurnRuns(fight.species.challenge) && <p className="fight-water">{t("Dock: turn every run, or it wraps the line round a piling and frays it")}</p>}
           {fight.water === "boat" && <p className="fight-water">{t("Boat: it swings to follow a run, so runs take less line")}</p>}
           {fight.lightHook && !SOFT_MOUTHS.has(fight.species.id) && <p className="fight-water">{t("Hooked light: reel in the red and the hook pulls out")}</p>}
           {habits.map((line) => (

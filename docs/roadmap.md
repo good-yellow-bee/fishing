@@ -1341,7 +1341,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT258~~ | ~~News card 2026-10-18-game06 covers GT254 to GT257: fresh water, G for the groundbait, a fished bank resting, and the Dock walk sign's turn onto the pier; the game05 item no longer says a walk to another bank starts fresh~~ (#992) | news | S |
 | ~~GT259~~ | ~~Walk signs show the banks fished hard: a bank whose next cast meets wary fish has its sign dimmed, and its label says "fished hard" (or "bites sooner now, but fished hard" on a favored bank), so the angler can pick where to move; groundbait at a bank hides it, as on the stance chip~~ (#999) | ui | S |
 | ~~GT260~~ | ~~A frayed line: a fight whose line was reeled over the Point's rocks or wrapped round a Dock piling leaves it frayed, and a frayed line snaps at 0.9 tension instead of 1 (a red post on the tension bar marks it); the landed card or loss says so once, the stance chip says "line frayed", and a Retie button by the walk signs (or T) ties a fresh knot; a break ties on a fresh line too~~ (#1003) | gameplay | M |
-| GT261 | Fish feed hard in the hour before the rain: on a day whose overcast turns to rain, every bite in the last hour of overcast comes sooner (0.8 wait), the bite reasons say the air hangs heavy, and the forecast board chalks the hour it starts | gameplay | S |
+| ~~GT261~~ | ~~Fish feed hard in the hour before the rain: on a day whose overcast turns to rain, every bite in the last hour of overcast comes sooner (0.8 wait), the bite reasons say the air hangs heavy, and the forecast board chalks the hour it starts~~ (#1007) | gameplay | S |
+| GT262 | Fight card bank tips name the fraying: "Point: turn every run; reeling while it drags over the rocks frays the line" and "Dock: turn every run, or it wraps the line round a piling and frays it", so the frayed line (GT260) is warned of before it happens | ui | S |
 
 ## Risks / open questions for the owner
 
