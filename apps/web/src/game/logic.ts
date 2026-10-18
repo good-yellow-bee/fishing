@@ -282,6 +282,21 @@ export function castTangles(twist: number, roll: number, mercy = false) {
   return !mercy && isTwisted(twist) && roll < TWIST_TANGLE;
 }
 
+/** A worm soaks pale in the water and loses its scent; after this many casts on one without landing a fish it is washed out. */
+export const WORM_SOAK_CASTS = 6;
+/** How much slower the bite comes on a washed-out worm. */
+export const WASHED_WAIT = 1.2;
+
+/** The worm's soak after a cast went out: each cast on a worm adds one, and any other lure starts it over (the next worm put on is a fresh one); a beginner's worm never washes out. */
+export function soakAfterCast(soak: number, lure: string | undefined, mercy = false) {
+  return !mercy && lure?.trim() && lureClass(lure).id === "worm" ? soak + 1 : 0;
+}
+
+/** Whether the worm has soaked long enough to lose its scent. */
+export function isWashedOut(soak: number) {
+  return soak >= WORM_SOAK_CASTS;
+}
+
 /** As a morning's fog burns off, the fish move up into the warming water to feed, so every bite comes a little sooner. */
 export const FOG_LIFT_WAIT = 0.85;
 
