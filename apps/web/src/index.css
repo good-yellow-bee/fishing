@@ -798,6 +798,16 @@ a:focus-visible {
   font-weight: 700;
 }
 
+/* A bank fished hard: its wary fish bite slow, so the sign fades back like the stance chip's note (the bank you stand on keeps its amber). */
+.walk-signs button[data-cold]:not(:disabled) {
+  color: var(--paper-dim);
+  opacity: 0.6;
+}
+
+html[data-contrast="high"] .walk-signs button[data-cold] {
+  opacity: 1;
+}
+
 .walkthrough {
   position: absolute;
   top: 102px;
