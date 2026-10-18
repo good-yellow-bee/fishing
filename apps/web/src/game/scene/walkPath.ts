@@ -168,6 +168,20 @@ const PASS_RADIUS = 0.3;
 const ARRIVE_RADIUS = 0.1;
 /** Start easing off this far from the last point. */
 const EASE_RADIUS = 1.1;
+/** A bend sharper than this (the cosine between the legs) is taken slowly. */
+const SHARP_BEND = 0.5;
+/** How fast the angler may come round a sharp bend, in m/s. */
+const BEND_SPEED = 1.2;
+/** How hard the angler slows into a sharp bend, in m/s², gentler than their legs can brake so they make the turn. */
+const BEND_BRAKE = 3.5;
+
+/** The fastest the angler can be going this far short of a corner and still make its bend: slowing for a sharp one, full speed round a gentle one. */
+function bendSpeed(x: number, z: number, corner: WalkPoint, after: WalkPoint, d: number) {
+  const out = Math.hypot(after.x - corner.x, after.z - corner.z);
+  if (d < 1e-6 || out < 1e-6) return Infinity;
+  const cos = ((corner.x - x) * (after.x - corner.x) + (corner.z - z) * (after.z - corner.z)) / (d * out);
+  return cos > SHARP_BEND ? Infinity : Math.sqrt(BEND_SPEED * BEND_SPEED + 2 * BEND_BRAKE * d);
+}
 
 /**
  * Walking velocity toward the route's next point, at most `maxSpeed`, easing
@@ -187,7 +201,7 @@ export function routeWish(x: number, z: number, route: WalkPoint[], maxSpeed: nu
       route.shift();
       continue;
     }
-    const speed = last ? maxSpeed * Math.max(0.18, Math.min(1, d / EASE_RADIUS)) : maxSpeed;
+    const speed = last ? maxSpeed * Math.max(0.18, Math.min(1, d / EASE_RADIUS)) : Math.min(maxSpeed, bendSpeed(x, z, next, route[1]!, d));
     out.x = ((next.x - x) / d) * speed;
     out.z = ((next.z - z) / d) * speed;
     return out;
