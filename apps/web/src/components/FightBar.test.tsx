@@ -429,6 +429,24 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("It darted the other way — switch sides!");
   });
 
+  it("calls a smallmouth's charge to reel, and says it can't be turned", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "smallmouth-bass")!);
+    const status = () => container!.querySelector(".fight-status")!.textContent;
+    const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);
+    sim.current.charge = true;
+    sim.current.surge = 1;
+    frame();
+    expect(status()).toBe("It's turning toward you — get ready to reel!");
+    sim.current.surge = 2;
+    frame();
+    expect(status()).toBe("REEL — it's charging straight at you!");
+    expect(shown()).toEqual(["charge"]);
+    expect(container!.querySelector(".fight-steer")!.textContent).toContain("A charge can't be turned — just reel");
+    sim.current.charge = false;
+    frame();
+    expect(status()).not.toBe("REEL — it's charging straight at you!");
+  });
+
   it("calls a carp's long first run", () => {
     mount({ peakTension: 0.3, maxLine: 1 });
     const status = () => container!.querySelector(".fight-status")!.textContent;

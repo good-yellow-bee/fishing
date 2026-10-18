@@ -751,6 +751,17 @@ describe("useFishingGame lost fight", () => {
     expect(message()).toMatch(/threw the hook\. It looked like a trophy\.$/);
   });
 
+  it("says a light hook dropped out of the slack line when a charge was left slack", () => {
+    const surface = mount();
+    const message = () => container!.querySelector("[data-testid=broke]")?.textContent;
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "smallmouth-bass")!);
+    vi.mocked(makeFight).mockImplementationOnce(() => ({ sim: { line: 0.5, tension: 0.2, surge: 2, stamina: 1, runSide: 1, lightHook: true, thrown: true }, performance: { peakTension: 0.3, maxLine: 0.5 }, step }));
+    step.mockReturnValueOnce("escaped");
+    castAndFight(surface, 1);
+    expect(message()).toMatch(/charged straight at you and the light hook dropped out of the slack line\./);
+    expect(hint()).toMatch(/^Hooked light — when it charges, reel fast to keep the line tight\./);
+  });
+
   it("says why the line broke and what to do next time", () => {
     const surface = mount();
 
