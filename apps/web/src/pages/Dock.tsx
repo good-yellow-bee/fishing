@@ -550,6 +550,16 @@ export function DockPage() {
     }
   };
   useEffect(() => setShareError(false), [game.outcome]);
+  // A landed fish was silent to a screen reader and left focus nowhere: the catch card's heading takes focus when the
+  // card comes up, so the fish's name is read and Tab goes on to Release and Keep fishing. Focus a player put on a
+  // button or panel stays there. A heading isn't a button, so Space still casts again from it.
+  const landedHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (game.outcome?.kind !== "landed") return;
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    landedHeading.current?.focus({ preventScroll: true });
+  }, [game.outcome]);
   const savePicture = () => {
     const outcome = game.outcome;
     if (outcome?.kind !== "landed") return;
@@ -1003,7 +1013,9 @@ export function DockPage() {
             )}
             <FishMark species={game.outcome.species} golden={landedGolden} />
             <span className="rarity-tag">{rarityLabel(game.outcome.species.rarity)}</span>
-            <h2>{t(game.outcome.species.name)}</h2>
+            <h2 ref={landedHeading} tabIndex={-1}>
+              {t(game.outcome.species.name)}
+            </h2>
             <p className="catch-lore">{t(game.outcome.species.lore)}</p>
             <p className="catch-lure">{t(lure)}</p>
             <p>{weightText(game.outcome.weight)} · {t(SPOT_LABELS[game.outcome.spot])}</p>
@@ -1118,6 +1130,10 @@ export function DockPage() {
           </div>
         )}
         <SoundCaptions />
+        {/* A missed or broken-off fish is said aloud too: the toast that shows it comes and goes, so its words go here. */}
+        <p className="sr-only" role="status">
+          {game.outcome && game.outcome.kind !== "landed" ? game.outcome.message : ""}
+        </p>
         {/* Mounted empty so screen readers announce the toast when it fills in. */}
         <div className="level-status" role="status">
           {effectsNotice && (
