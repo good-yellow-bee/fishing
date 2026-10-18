@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa18";
+export const NEWS_ID = "2026-10-18-field33";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "The Map's own sheet has a scale bar, each water on the Map names the lure that took most of its fish, and a sample water's page links to its place on the Map.",
   "On a phone held sideways the fight card now stays under the top bar and clear of the Reel button, even with the largest text, and the shack and Settings give their lists more room. The notice that effects went to Lite now waits until the fight is over instead of covering the tension bar.",
   "Home offers “Set a goal for the year” once the year has fish, the Days out calendar marks its busiest month, and the catches spreadsheet gives a night session's small-hours fish its outing's day.",
   "Little waves now lap in and out along the shore, washing furthest up the bank the wind blows onto, and the canoe and the dinghy leave a wake. On breezy days from spring to fall a child flies a kite out over the lake from the upwind bank. Campers have pitched a tent on the far bank: it glows with lantern light from dusk, and in the evening they sit out by their campfire. In fall pumpkins sit under the big tree by the shack, one carved into a jack-o'-lantern that glows after dark, and in winter someone skis along the far bank.",

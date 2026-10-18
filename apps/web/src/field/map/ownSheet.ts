@@ -1,4 +1,5 @@
 import type { LngLat } from "./places";
+import { kmBetween } from "../spotOrder";
 
 export const OWN_WIDTH = 1000;
 export const OWN_HEIGHT = 600;
@@ -29,6 +30,20 @@ export function projectIn(frame: Frame, point: LngLat): { x: number; y: number }
     x: ((point.lng - frame.west) / (frame.east - frame.west)) * OWN_WIDTH,
     y: ((frame.north - point.lat) / (frame.north - frame.south)) * OWN_HEIGHT,
   };
+}
+
+/**
+ * A scale bar for the sheet: a round distance (1, 2 or 5 of a power of ten, in km or miles) near a fifth of the frame's
+ * width, and how long it is in sheet units.
+ */
+export function scaleBar(frame: Frame, metric: boolean): { km: number; length: number } {
+  const mid = (frame.north + frame.south) / 2;
+  const acrossKm = kmBetween({ lat: mid, lng: frame.west }, { lat: mid, lng: frame.east });
+  const unitKm = metric ? 1 : 1.609344;
+  const want = acrossKm / unitKm / 5;
+  const power = 10 ** Math.floor(Math.log10(want));
+  const round = Math.max(0.1, [1, 2, 5, 10].map((step) => step * power).reduce((best, step) => (Math.abs(step - want) < Math.abs(best - want) ? step : best)));
+  return { km: round * unitKm, length: ((round * unitKm) / acrossKm) * OWN_WIDTH };
 }
 
 const STEPS = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20];
