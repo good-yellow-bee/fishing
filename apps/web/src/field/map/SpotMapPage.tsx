@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
-import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
+import { WATER_LABELS, localDate, lureTally, shiftDate, type Spot } from "@stillwater/shared";
 import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, tripWhen } from "../format";
 import { useLogbook } from "../LogbookState";
@@ -32,7 +32,7 @@ import {
   ringPath,
   type SamplePlace,
 } from "./places";
-import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
+import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar } from "./ownSheet";
 import { hasSampleWaters, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
@@ -244,6 +244,7 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
   const TICK_ROOM = 26;
   const TICK_WIDTH = 110;
   const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
+  const scale = scaleBar(frame, getUnits() === "metric");
   // The labels keep a size on screen while the sheet scales, so which ones meet depends on how wide it is drawn.
   const { sheet, pxPerUnit } = useSheetScale(OWN_WIDTH);
   const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit, labelSizeOnScreen());
@@ -277,6 +278,15 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
             </g>
           );
         })}
+        {/* Top right, clear of the grid's labels on the left and foot. */}
+        <g className="map-scale" transform={`translate(${OWN_WIDTH - 40 - scale.length} 40)`}>
+          <line x1="0" x2={scale.length} y1="0" y2="0" />
+          <line x1="0" x2="0" y1="-5" y2="5" />
+          <line x1={scale.length} x2={scale.length} y1="-5" y2="5" />
+          <text x={scale.length / 2} y="8" textAnchor="middle" dominantBaseline="hanging">
+            {t("about {distance}", { distance: distanceText(scale.km, getUnits()) })}
+          </text>
+        </g>
         <rect x="14" y="14" width={OWN_WIDTH - 28} height={OWN_HEIGHT - 28} className="map-frame" />
       </svg>
       <div className="spot-map-pins" aria-hidden="true">
@@ -331,10 +341,17 @@ export function SpotMapPage() {
   const upcoming = nextRealTrips(book, today);
   const lastOut = lastOutByWater(book, today);
   const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
+  const bestLure = (spotId: string) => {
+    const [top, next] = lureTally({ spots: [], trips: [], catches: book.catches.filter((entry) => entry.spotId === spotId) }, 2);
+    return top && top.count >= 2 && (!next || next.count < top.count) ? top.lure : null;
+  };
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
-    const line = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
+    const dated = row?.lastFishDay ? t("{fish}, last {day}", { fish, day: formatDay(row.lastFishDay) }) : fish;
+    // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
+    const best = bestLure(spotId);
+    const line = best ? `${dated} · ${t("best on {lure}", { lure: t(best) })}` : dated;
     const next = upcoming.find((trip) => trip.spotId === spotId);
     if (next) return `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}`;
     // A water left alone a week or more, by its last outing or fish: one that has had a rest.

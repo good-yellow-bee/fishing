@@ -36,7 +36,8 @@
 
 /* The sheet shrinks to a phone's width, and its grid labels with it: drawn larger so they still read. */
 @media (max-width: 640px) {
-  .map-tick {
+  .map-tick,
+  .spot-map .map-scale text {
     font-size: 24px;
   }
 }

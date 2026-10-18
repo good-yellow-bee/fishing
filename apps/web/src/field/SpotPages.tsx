@@ -392,7 +392,12 @@ function SpotView() {
             {" · "}
             <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
           </p>
-        ) : placeFor(spot.id) || spot.id === PLAY_LAKE_ID ? null : (
+        ) : placeFor(spot.id) ? (
+          // A sample water has its pin on the sample sheet: its row there, as an own water's place leads to its own.
+          <p className="meta spot-place">
+            <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
+          </p>
+        ) : spot.id === PLAY_LAKE_ID ? null : (
           // A sample water already has its pin on the map; any other water with no place is offered one.
           <p className="meta spot-place">
             {/* Opened from this page as its Edit is, so Save goes back to it rather than stacking a second copy. */}
