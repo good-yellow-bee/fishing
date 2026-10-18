@@ -31,6 +31,7 @@ import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
 import { DockLeaves } from "./DockLeaves";
 import { boatHeading } from "./boatSwing";
+import { releaseSwayingMaterial, swayUniforms, swayingMaterial } from "./treeSway";
 import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
 import { SunfishNests } from "./SunfishNests";
@@ -443,10 +444,10 @@ const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
   { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
 ];
 
-/** Shack trees, in world space: the group sits at the shack. */
+/** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
-  { url: MODELS.fat, position: [3.4, 0, 1.2], scale: 3.8, rot: 0 },
-  { url: MODELS.oak, position: [-3.2, 0, 1.6], scale: 3.2, rot: 0 },
+  { url: MODELS.fat, position: [3.4 + SHOP_X, 0, 1.2 + SHOP_Z], scale: 3.8, rot: 0 },
+  { url: MODELS.oak, position: [-3.2 + SHOP_X, 0, 1.6 + SHOP_Z], scale: 3.2, rot: 0 },
 ];
 
 /** What the camera must not sink into: the hills and every tree on the shore. */
@@ -455,7 +456,7 @@ export const CAMERA_TREES: TreeShape[] = [
   ...TREES,
   ...BACK_TREES,
   ...CREEK_TREES,
-  ...SHACK_TREES.map((tree) => ({ ...tree, position: [tree.position[0] + SHOP_X, 0, tree.position[2] + SHOP_Z] as Vec3 })),
+  ...SHACK_TREES,
 ].map((tree) => treeShape(tree.position, tree.scale));
 
 const CREEK_GRASS: Scatter[] = [
@@ -1777,9 +1778,6 @@ function Shack() {
       <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
       <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
       <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
-      {SHACK_TREES.map((tree) => (
-        <ToonModel key={tree.url} url={tree.url} position={tree.position} scale={tree.scale} sitOnGround />
-      ))}
     </group>
   );
 }
@@ -1860,7 +1858,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
       </mesh>
       <Rocks items={CREEK_ROCK_SPECS} />
       <Reeds count={6} origin={[-23.2, 0.03, -11.0]} wind={wind} />
-      <ScatterModels items={CREEK_TREES} />
+      <ScatterModels items={CREEK_TREES} sway />
       <ScatterModels items={CREEK_GRASS} />
     </group>
   );
@@ -1941,8 +1939,11 @@ function Reeds({ count, origin, wind = NO_WIND }: { count: number; origin: Vec3;
   ));
 }
 
-/** A scatter list drawn as instanced meshes: one draw per model part, however many copies stand around the lake. */
-function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?: boolean }) {
+/**
+ * A scatter list drawn as instanced meshes: one draw per model part, however many copies stand around the lake.
+ * With `sway`, each copy bends in the wind (treeSway.ts).
+ */
+function ScatterModels({ items, shadows = false, sway = false }: { items: Scatter[]; shadows?: boolean; sway?: boolean }) {
   const season = useContext(SeasonContext);
   const urls = useMemo(() => [...new Set(items.map((item) => item.url))], [items]);
   const models = useGLTF(urls);
@@ -1959,10 +1960,16 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
       shareMaterials(root);
       return { root, matrix: placement(item.position, item.rot, item.scale) };
     });
-    return { placed, meshes: batchPlaced(placed) };
-  }, [items, urls, models, shadows, season]);
+    const meshes = batchPlaced(placed);
+    // Swapped on the batch only: the copies keep the still originals, which they release below.
+    const swayed = sway ? meshes.filter((mesh) => !Array.isArray(mesh.material)) : [];
+    const stillMaterials = swayed.map((mesh) => mesh.material as THREE.Material);
+    swayed.forEach((mesh, i) => (mesh.material = swayingMaterial(stillMaterials[i]!)));
+    return { placed, meshes, stillMaterials };
+  }, [items, urls, models, shadows, season, sway]);
   useEffect(
     () => () => {
+      batches.stillMaterials.forEach(releaseSwayingMaterial);
       batches.placed.forEach(({ root }) => releaseSharedMaterials(root));
       batches.meshes.forEach((mesh) => mesh.dispose());
     },
@@ -1972,6 +1979,16 @@ function ScatterModels({ items, shadows = false }: { items: Scatter[]; shadows?:
 }
 
 const CALM = { x: 0, z: 0 };
+
+/** Feeds the swaying shore trees the day's wind and the clock; reduced motion holds them at their lean. */
+function TreeSwayClock({ wind }: { wind: { x: number; z: number } }) {
+  const still = useReducedMotion();
+  useFrame(({ clock }) => {
+    swayUniforms.uSwayTime.value = still ? 0 : clock.elapsedTime;
+    swayUniforms.uSwayWind.value.set(wind.x, wind.z);
+  });
+  return null;
+}
 
 export const LakeWorld = memo(function LakeWorld({
   spot,
@@ -2058,8 +2075,10 @@ export const LakeWorld = memo(function LakeWorld({
       {HILLS.map((hill) => (
         <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
       ))}
-      <ScatterModels items={BACK_TREES} />
-      <ScatterModels items={TREES} />
+      <TreeSwayClock wind={wind} />
+      <ScatterModels items={BACK_TREES} sway />
+      <ScatterModels items={TREES} sway />
+      <ScatterModels items={SHACK_TREES} shadows sway />
       <ScatterModels items={BUSHES} />
       <ScatterModels items={GRASS} />
       <ScatterModels items={NEAR_GRASS} />
