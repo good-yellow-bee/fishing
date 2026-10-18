@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field27";
+export const NEWS_ID = "2026-10-18-scene11";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "All winter a snowman in a red scarf stands in front of the shack. By day a woodpecker hitches up the owl's dead tree, drumming as it goes, and the fireflies now come out only on summer nights.",
   "A water's page links to its row on the Map, the Map's list says how far each pinned water is from the nearest other, and saving a water from the Map says so.",
   "Home says when the year's goal is reached, the Bests calendar marks today and counts each month's days out, and Escape closes the goal form.",
   "Moulted swan feathers drift on the water from summer into fall, and from dusk to dawn on dry days a campfire burns by the shack, its smoke leaning away on the wind. In fall, toadstools come up under the shore trees; the ducks now up-end to feed, tails to the sky, and red squirrels bound between the trees by the shack.",
