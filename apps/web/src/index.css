@@ -1086,6 +1086,25 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
   color: #f0dfbf;
 }
 
+.camera-help kbd {
+  white-space: nowrap;
+}
+
+/* Between the phone layout and a wide window the full strip runs off the left edge in Polish; tighten it. */
+@media (min-width: 801px) and (max-width: 960px) {
+  .camera-help {
+    gap: 5px;
+  }
+
+  .camera-help > span:first-child {
+    display: none;
+  }
+
+  .camera-help kbd {
+    padding: 3px 4px;
+  }
+}
+
 kbd {
   border: 1px solid rgba(220, 196, 150, 0.38);
   background: rgba(238, 218, 181, 0.1);
