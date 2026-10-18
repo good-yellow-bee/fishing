@@ -57,6 +57,24 @@ export function seasonGroundColor(hex: string, season: LakeSeason): string {
   return `#${base.lerp(target, tint.amount).getHexString()}`;
 }
 
+const WATER_TINT: Record<LakeSeason, { color: string; amount: number }> = {
+  spring: { color: "#3f7d64", amount: 0.3 },
+  summer: { color: "#000000", amount: 0 },
+  fall: { color: "#5c5a38", amount: 0.32 },
+  winter: { color: "#6a7f8e", amount: 0.5 },
+};
+
+/** Lake water: a greener spring, tea-stained in fall, cold steel in winter. The tint takes the base's brightness, so dusk and night stay dark. */
+export function seasonWaterColor(hex: string, season: LakeSeason): string {
+  const tint = WATER_TINT[season];
+  if (tint.amount === 0) return hex;
+  const base = new THREE.Color(hex);
+  const target = new THREE.Color(tint.color);
+  const light = (base.r + base.g + base.b) / (target.r + target.g + target.b);
+  target.multiplyScalar(light);
+  return `#${base.lerp(target, tint.amount).getHexString()}`;
+}
+
 /** Winter rims the lake with shore ice this wide, in meters. */
 export const SHORE_ICE_WIDTH = 1.3;
 
