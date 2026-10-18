@@ -449,6 +449,11 @@ export const PL_GAME: PlBook = {
   "The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets.":
     "Niskie słońce za plecami rzuca twój cień na wodę, a ryby go unikają. Spróbuj innego brzegu, aż słońce wzejdzie wyżej albo zajdzie.",
   "your shadow on the water": "cień na wodzie",
+  "The moon is passing overhead, and the fish come on the feed for an hour either side.": "Księżyc przechodzi nad głową, a ryby żerują przez godzinę przed i po.",
+  "The moon is passing underfoot, on the far side of the earth, and the fish come on the feed for an hour either side.":
+    "Księżyc przechodzi pod stopami, po drugiej stronie Ziemi, a ryby żerują przez godzinę przed i po.",
+  "moon overhead": "księżyc nad głową",
+  "moon underfoot": "księżyc pod stopami",
   "There's no moon tonight and the fish can barely see to feed, so the bites come slow.": "Dziś nie ma księżyca i ryby ledwo widzą żer, więc brania przychodzą powoli.",
   "The breeze chops the surface, and the fish feed bolder under it.": "Wiatr marszczy powierzchnię, a ryby pod nią żerują śmielej.",
   "The sun catches the lure's flash.": "Słońce odbija się w przynęcie i błyska.",

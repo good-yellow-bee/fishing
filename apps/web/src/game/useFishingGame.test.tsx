@@ -29,6 +29,10 @@ vi.mock("./sunCover", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./sunCover")>();
   return { ...actual, cloudShadeWaitMul: vi.fn(() => 1) };
 });
+vi.mock("./solunar", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./solunar")>();
+  return { ...actual, moonPassing: vi.fn(() => null) };
+});
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
   return { ...actual, castSnags: vi.fn(() => null) };
@@ -77,6 +81,7 @@ import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
+import { moonPassing } from "./solunar";
 import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
@@ -1855,6 +1860,17 @@ describe("level unlock integration", () => {
     expect(phase()).toBe("waiting:none");
     expect(hint()).toContain("A cloud slides over the sun, and the fish move up into the shallows to feed.");
     expect(vi.mocked(cloudShadeWaitMul).mock.lastCall?.[0]).toBe("dock");
+  });
+
+  it.each([
+    ["overhead", "The moon is passing overhead, and the fish come on the feed for an hour either side."],
+    ["underfoot", "The moon is passing underfoot, on the far side of the earth, and the fish come on the feed for an hour either side."],
+  ] as const)("says the moon is passing %s when the fish come on the feed for it", (pass, reason) => {
+    vi.mocked(moonPassing).mockReturnValueOnce(pass);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain(reason);
   });
 
   it.each([
