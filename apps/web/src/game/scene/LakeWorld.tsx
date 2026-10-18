@@ -183,6 +183,10 @@ import { NightAngler } from "./NightAngler";
 import { headlampOut } from "./headlampFishing";
 import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
+import { Jogger } from "./Jogger";
+import { joggerOut } from "./jogRun";
+import { Birdwatcher } from "./Birdwatcher";
+import { birderOut } from "./birdWatch";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2300,6 +2304,8 @@ export const LakeWorld = memo(function LakeWorld({
       {snowballOut(hour, sky, season) && <SnowballKids />}
       {headlampOut(hour, sky, season) && <NightAngler />}
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
+      {joggerOut(hour, sky, season) && <Jogger />}
+      {birderOut(hour, sky, season) && <Birdwatcher />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>

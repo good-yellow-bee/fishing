@@ -1218,6 +1218,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC93~~ | ~~News card scene20: disc tossers, angler under the brolly, snowball fight, leaf raker~~ (#1207) | scene | S |
 | ~~SC94~~ | ~~Night angler: at dusk and at night from spring to fall an angler sits on the middle of the far bank by a rod on its rests, a glowing green float out on the water and a headlamp beam following their looks between the float, the tackle box and the water~~ (#1210) | scene | S |
 | ~~SC95~~ | ~~Stone skimmer: on calm, dry days from spring to fall a child at the water's edge on the far bank stoops for flat stones and skims them sidearm, each skipping out in shrinking hops with a ring spreading at every touch~~ (#1210) | scene | S |
+| ~~SC96~~ | ~~Winter jogger: on winter days that are not snowing or foggy a jogger in a bobble hat runs the far bank end to end and back on the sand below the ski track~~ (#1214) | scene | S |
+| ~~SC97~~ | ~~Spring birdwatcher: at dawn and by day in spring someone on the far bank raises binoculars and slowly scans the lake, then lowers them to jot in a notebook~~ (#1214) | scene | S |
+| ~~SC98~~ | ~~News card scene21: night angler, stone skimmer, spring birdwatcher, winter jogger~~ (#1214) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
