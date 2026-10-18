@@ -1362,7 +1362,10 @@ function CatchView() {
   const kind = catchesOfSpecies(book, entry.species);
   // Its number among the fish its kind's page lists; a game fish among the game's.
   const onPage = kindOnPage(book, entry.species);
-  const eyebrowKind = onPage.some((other) => other.id === entry.id) ? onPage : kind.filter((other) => other.spotId === PLAY_LAKE_ID);
+  // A game fish counts among the game's, a sample fish beside the angler's own among the rest of the sample week.
+  const eyebrowKind = onPage.some((other) => other.id === entry.id)
+    ? onPage
+    : kind.filter((other) => (other.spotId === PLAY_LAKE_ID) === (entry.spotId === PLAY_LAKE_ID) && isSampleCatch(other.id) === isSampleCatch(entry.id));
   const kindNumber = eyebrowKind.length - eyebrowKind.findIndex((other) => other.id === entry.id);
   const counted = countedFish(kind);
   const isCounted = counted.some((other) => other.id === entry.id);

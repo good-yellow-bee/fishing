@@ -12,7 +12,7 @@ import { TallyBars } from "../TallyBars";
 import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
-import { bestFishDay, catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
+import { bestFishDay, bookFishDay, catchMonth, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
 import { YearGoal, readYearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
 import { SeasonRecapBox } from "./SeasonRecap";
@@ -23,7 +23,8 @@ import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
-import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "../playLake";
+import { PLAY_LAKE_ID } from "../playLake";
+import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
 import { SameKinds } from "./SameKinds";
 
@@ -88,16 +89,21 @@ export function BestsPage() {
   // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
   // Records are the angler's own: the game's lake, its rounds and its fish stay out of every tile, tally and calendar here,
   // and each search link leaves them out too, so a count and the list it opens agree.
-  const whole = { ...all, spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID), trips: all.trips.filter(offPlayLake), catches: all.catches.filter(offPlayLake) };
+  // And the sample week stays out once the angler has fish of their own, as Home counts them, so a best day, a tally
+  // or a streak is never one of its made-up days.
+  const whole = { ...countedBook(all), spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID) };
   const real = whole;
-  const tail = (term: string) => withoutPlayLake(all, term, all.catches);
-  // This year's count leaves the sample week out once the angler has fish of their own, as Home's does.
-  const counted = countedBook(all);
-  const days = daysOut(counted, today.slice(0, 4), today);
+  const tail = (term: string) => countedSearch(all, term, all.catches);
+  const days = daysOut(whole, today.slice(0, 4), today);
   const notYet = notYetThisYear(real.catches);
   const newWaters = newWatersThisYear(real.catches).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
-  const streak = outingStreak(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const streak = outingStreak(
+    real.trips,
+    (id) => wholeFishByTrip.get(id) ?? 0,
+    today,
+    real.catches.filter((entry) => !entry.tripId).map((entry) => bookFishDay(real, entry)),
+  );
   const weeks = weekStreak(real.trips, today);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
   const years = yearTally(whole.catches).map((row) => row.year);
@@ -105,7 +111,8 @@ export function BestsPage() {
   const year = asked && years.includes(asked) ? asked : null;
   // Everything else is worked out from the season picked, fish and outings alike.
   const book = year
-    ? { ...whole, catches: whole.catches.filter((entry) => catchMonth(entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
+    ? // A New Year's Eve night session stays whole: its small-hours fish count on its outing's day, as the calendar does.
+      { ...whole, catches: whole.catches.filter((entry) => bookFishDay(whole, entry).startsWith(`${year}-`)), trips: whole.trips.filter((trip) => trip.date.startsWith(`${year}-`)) }
     : whole;
   // A row's link opens the same fish it counted: within the season picked, when there is one.
   const linkFor = (term: string) => (year ? findWithLink(term, tail(year)) : findLink(tail(term)));
@@ -299,7 +306,7 @@ export function BestsPage() {
               <div className="section-head">
                 <h2>{t("This year's goal")}</h2>
               </div>
-              <YearGoal catches={counted.catches} />
+              <YearGoal catches={whole.catches} />
               {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
               {/* Last year's kinds still to show up this year, each opening its page. */}
               {notYet.length > 0 ? (
@@ -352,7 +359,7 @@ export function BestsPage() {
               ) : null}
               {/* The year so far as text for a message, once it has a fish. */}
               {whole.catches.some((entry) => catchMonth(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-                <CopySummary text={() => yearSummary(counted, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+                <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
               ) : null}
             </section>
           ) : null}

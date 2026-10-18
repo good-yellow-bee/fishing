@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   WATER_LABELS,
@@ -73,7 +73,10 @@ function LureRecord({ today }: { today: string }) {
   const fold = records.length > RECORD_ROWS;
   return (
     <>
-      <h2 className="subhead">{t("Lure record")}</h2>
+      {/* Where focus goes once the last lure line above is settled. */}
+      <h2 className="subhead" id="lure-record" tabIndex={-1}>
+        {t("Lure record")}
+      </h2>
       <ul className="species-waters lure-record">
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
@@ -142,6 +145,7 @@ function readKeptApart(): string[] {
 function LureTwins() {
   const { storedBook, changeBook } = useLogbook();
   const [kept, setKept] = useState(readKeptApart);
+  const box = useRef<HTMLUListElement>(null);
   // Either way round: the pair stays apart when the other spelling later takes more fish.
   const keyOf = (pair: { from: string; into: string }) => [pair.from.toLowerCase(), pair.into.toLowerCase()].sort().join("|");
   // Skipped inside the pairing, so a pair kept apart doesn't hide another real slip of either name.
@@ -154,7 +158,17 @@ function LureTwins() {
     (pair) => (t(pair.from) === pair.from) === (t(pair.into) === pair.into),
   );
   if (twins.length === 0) return null;
-  const keepApart = (pair: { from: string; into: string }) => {
+  // The line goes once settled: focus moves on to the next pair's first button, or to the lure record below.
+  const focusNext = (index: number) => {
+    const list = box.current;
+    setTimeout(() => {
+      const rows = list?.querySelectorAll<HTMLLIElement>("li") ?? [];
+      const next = (rows[index] ?? rows[index - 1])?.querySelector<HTMLButtonElement>("button");
+      if (next?.isConnected) next.focus();
+      else document.querySelector<HTMLElement>("#lure-record")?.focus();
+    }, 0);
+  };
+  const keepApart = (pair: { from: string; into: string }, index: number) => {
     const next = [...kept, keyOf(pair)];
     setKept(next);
     try {
@@ -162,10 +176,11 @@ function LureTwins() {
     } catch {
       // Storage full or blocked: hidden for this visit only.
     }
+    focusNext(index);
   };
   return (
-    <ul className="lure-twins">
-      {twins.map((pair) => (
+    <ul ref={box} className="lure-twins">
+      {twins.map((pair, index) => (
         <li key={pair.from} className="meta">
           {t("“{from}” looks like “{into}”.", { from: t(pair.from), into: t(pair.into) })}{" "}
           <button
@@ -173,12 +188,13 @@ function LureTwins() {
             className="text-button"
             onClick={() => {
               const result = renameInBook(storedBook, "lure", pair.from, pair.into);
-              if (result.ok) changeBook("rename", result.book);
+              if (!result.ok || !changeBook("rename", result.book)) return;
+              focusNext(index);
             }}
           >
             {t("Merge into {into}", { into: t(pair.into) })}
           </button>{" "}
-          <button type="button" className="text-button" onClick={() => keepApart(pair)}>
+          <button type="button" className="text-button" onClick={() => keepApart(pair, index)}>
             {t("They're different")}
           </button>
         </li>

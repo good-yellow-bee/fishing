@@ -10,6 +10,7 @@ import { useLogbook } from "./LogbookState";
 import { PagedCatches } from "./PagedCatches";
 import { catchMonth } from "./tripMonths";
 import { catchesOfSpecies, kindOnPage, speciesWaters } from "./speciesLink";
+import { isSampleCatch } from "./bookCopy";
 import { withoutPlayLake } from "./playLake";
 import { TallyBars } from "./TallyBars";
 import { exactTerm, findWithLink } from "./findLinks";
@@ -106,7 +107,11 @@ export function SpeciesPage() {
   const catches = kindOnPage(book, species);
   const name = catches[0]?.species ?? species;
   // Its searches leave the game's lake out when the page does, so each count opens the fish it counted.
-  const kindTerm = catches.length < every.length ? withoutPlayLake(book, exactTerm("species", t(name)), every) : exactTerm("species", t(name));
+  const shownIds = new Set(catches.map((entry) => entry.id));
+  const leftOut = every.filter((entry) => !shownIds.has(entry.id));
+  const kindTerm = [withoutPlayLake(book, exactTerm("species", t(name)), leftOut), leftOut.some((entry) => isSampleCatch(entry.id)) ? `-${t("sample|search word")}` : ""]
+    .filter(Boolean)
+    .join(" ");
   const titleOf = (tripId: string | null) => (tripId ? outingNameById(book, tripId) : null);
 
   if (catches.length === 0) {
