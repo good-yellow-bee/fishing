@@ -25,8 +25,10 @@ function flakeTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
-/** Soft flakes drifting over the lake and shore on a snowy winter day; they melt into the water unseen. */
-export function LakeSnow({ light }: { light: number }) {
+const NO_WIND = { x: 0, z: 0 };
+
+/** Soft flakes drifting over the lake and shore on a snowy winter day, carried down the day's wind; they melt into the water unseen. */
+export function LakeSnow({ light, wind = NO_WIND }: { light: number; wind?: { x: number; z: number } }) {
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(SNOW_COUNT * 3), 3));
@@ -70,7 +72,7 @@ export function LakeSnow({ light }: { light: number }) {
     const stride = settings.particles === "lite" ? 2 : 1;
     let slot = 0;
     for (let i = 0; i < SNOW_COUNT; i += stride, slot += 1) {
-      const flake = snowFlake(i, time);
+      const flake = snowFlake(i, time, wind);
       positions.setXYZ(slot, flake.x, flake.y, flake.z);
     }
     geometry.setDrawRange(0, slot);
