@@ -1224,8 +1224,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC99~~ | ~~Porch rocker: at dusk and at night from spring to fall someone rocks in a chair in front of the far cabin, a lantern flickering beside them, now and then lifting a mug to sip~~ (#1215) | scene | S |
 | ~~SC100~~ | ~~Sandpipers: at dawn in spring and fall a little flock works the far bank's waterline, each bird running a few quick steps, stopping to probe the sand with its bill and teetering its tail, the flock turning back at the ends of its stretch~~ (#1215) | scene | S |
 | ~~SC101~~ | ~~Winter eave lights: on winter evenings a string of red, green, yellow and blue bulbs droops in swags along the far cabin's front eave, the colours glowing up and fading in turn~~ (#1215) | scene | S |
-| SC102 | Coots: from spring to fall a pair of coots paddles by the lily bed at the lake's west end, nodding as they swim and diving now and then; in spring one charges the other across the water, pattering with wings half open and spray flying | scene | S |
-| SC103 | News card scene22: porch rocker, winter eave lights, sandpipers, coots | scene | S |
+| ~~SC102~~ | ~~Coots: from spring to fall a pair of coots paddles by the lily bed at the lake's west end, nodding as they swim and diving now and then; in spring one charges the other across the water, pattering with wings half open and spray flying~~ (#1217) | scene | S |
+| ~~SC103~~ | ~~News card scene22: porch rocker, winter eave lights, sandpipers, coots~~ (#1217) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
