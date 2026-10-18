@@ -2328,12 +2328,6 @@ html[data-input="pad"] .fight-bar .on-pad {
     width: 160px;
   }
 
-  /* Larger text is for the words: the walking stick keeps its size, as it does held sideways
-     (div. outweighs the text-size zoom rule further down). */
-  html[data-text-size] .scene-wrap > div.walk-stick {
-    zoom: 1;
-  }
-
   /* With larger text on a 667 px tall phone the hint, and the first-cast coach before it, covered the cast meter: the
      meter comes down beside the stick, narrow enough to clear it on a 320 px screen, and the coach drops its step chips. */
   html[data-text-size] .scene-wrap[data-walkthrough="1"] .walkthrough ol {
@@ -3052,10 +3046,10 @@ html[data-reduce-motion="1"] .hour-veil {
   }
 }
 
-/* On a tablet there is room beside the stick, so the news moves right of it instead of sitting under it (both grow with larger text). */
+/* On a tablet there is room beside the stick, so the news moves right of it instead of sitting under it. */
 @media (pointer: coarse) and (min-width: 521px) {
   html:not([data-hand="left"]) .lodge-tracks {
-    left: 136px;
+    left: calc(136px / var(--text-zoom, 1));
     max-width: min(42ch, calc(100vw / var(--text-zoom, 1) - 156px));
   }
 }
@@ -3317,6 +3311,12 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
     -webkit-touch-callout: none;
   }
 
+  /* Larger text is for the words: the stick keeps its size on any touch screen (div. outweighs the text-size zoom rule
+     further down). Grown, it ran up into the lure panel on a 600 px tall tablet. */
+  html[data-text-size] .scene-wrap > div.walk-stick {
+    zoom: 1;
+  }
+
   .walk-stick-knob {
     width: 44px;
     height: 44px;
@@ -3540,11 +3540,6 @@ html[data-contrast="high"] .sound-captions li {
     left: 10px;
     width: 92px;
     height: 92px;
-  }
-
-  /* Larger text is for the words: grown with them, the stick ran up into the lure panel on a 360 px tall screen. */
-  html[data-text-size] .scene-wrap > .walk-stick {
-    zoom: 1;
   }
 
   .hint {
