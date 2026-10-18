@@ -584,6 +584,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone, Settings and the keys card keep Back to the lake pinned at their foot, always in reach, and the keys card now opens at its title. With larger text the keys card fits the screen, the header's chips step aside during a fight so the fight card fits, and the catch card's buttons sit on a solid strip that hides the words behind them.":
+    "Na telefonie Opcje i karta klawiszy mają przycisk „Wróć nad jezioro” przypięty na dole, zawsze pod ręką, a karta klawiszy otwiera się od tytułu. Przy większym tekście karta klawiszy mieści się na ekranie, znaczki w nagłówku ustępują w czasie holu, żeby zmieściła się karta walki, a przyciski karty połowu leżą na pełnym pasku, który zasłania napisy pod spodem.",
   "After an update the game opens faster on a phone it has run on before, because the 3D engine and the app's other libraries stay saved on the phone. With larger text on a phone, the walking stick keeps its size instead of running into the lure picker, and the cast meter sits beside it, where the hint and the first-cast guide no longer cover it.":
     "Po aktualizacji gra otwiera się szybciej na telefonie, na którym już działała, bo silnik 3D i pozostałe biblioteki aplikacji zostają zapisane w telefonie. Przy większym tekście na telefonie drążek do chodzenia zachowuje swój rozmiar, zamiast wchodzić na wybór przynęty, a pasek rzutu stoi obok niego, gdzie podpowiedź i przewodnik pierwszego rzutu już go nie zasłaniają.",
   "A phone or computer set to increase contrast now starts the lake in high contrast, which Settings can turn off. In Windows high contrast mode the cast and fight meters, the strike timer and the Bests calendar and charts no longer vanish, and the page, tab or choice in use is marked.": "Telefon lub komputer z włączonym zwiększonym kontrastem uruchamia teraz jezioro w wysokim kontraście, który można wyłączyć w Ustawieniach. W trybie wysokiego kontrastu systemu Windows paski rzutu i holu, licznik zacięcia oraz kalendarz i wykresy w Rekordach już nie znikają, a bieżąca strona, karta lub wybór są wyróżnione.",
@@ -986,6 +988,8 @@ export const PL_GAME: PlBook = {
   Key: "Klawisz",
   Does: "Działanie",
   "Space / click": "Spacja / klik",
+  "P / Space": "P / Spacja",
+  "Arrows / + −": "Strzałki / + −",
   Mouse: "Mysz",
   "Hold to charge a cast, then strike and reel": "Przytrzymaj, by naładować rzut, potem zacinaj i zwijaj",
   "Aim the cast": "Celuj rzutem",

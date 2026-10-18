@@ -2540,6 +2540,38 @@ html[data-reduce-motion="1"] .walkthrough li {
   white-space: nowrap;
 }
 
+/* On a phone the three columns only fit when long keys ("Spacja / klik", "Prawa gałka") may break onto two lines;
+   kept on one, the "Does" column ran off the card's right edge with larger text. */
+@media (max-width: 520px) {
+  .keys-card kbd {
+    white-space: normal;
+  }
+
+  /* With larger text even that is too wide, so each row puts what the key does on a line of its own under the keys. */
+  html[data-text-size] .keys-card :is(table, thead, tbody) {
+    display: block;
+  }
+
+  html[data-text-size] .keys-card tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid rgba(215, 190, 142, 0.16);
+  }
+
+  html[data-text-size] .keys-card :is(td, th) {
+    border-bottom: 0;
+  }
+
+  html[data-text-size] .keys-card th:nth-child(3) {
+    display: none;
+  }
+
+  html[data-text-size] .keys-card td:nth-child(3) {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+}
+
 .settings-overlay {
   position: absolute;
   inset: 0;
