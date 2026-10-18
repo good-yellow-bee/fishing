@@ -89,3 +89,10 @@ describe("the field log's forms by keyboard", () => {
     expect(/\n  html:has\(\.form-save\) \{([^}]*)\}/.exec(phone)?.[1]).toContain("scroll-padding-bottom: calc(48px + 88px + env(safe-area-inset-bottom));");
   });
 });
+
+describe("a fish's page on a touch screen", () => {
+  it("parts the head's wrapped links and Copy a summary from the outing link below", () => {
+    expect(/\n  p\.meta\.stand \{([^}]*)\}/.exec(css)?.[1]).toContain("line-height: 2.2;");
+    expect(/\n  \.trip-again \+ \.trip-link \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 18px;");
+  });
+});

@@ -437,6 +437,17 @@ button.field-primary {
     margin: 16px 0;
   }
 
+  /* A page head's wrapped line of links (a fish's lure, water and time) ran 2 px between lines, the reaches crossing;
+     taller lines part them. */
+  p.meta.stand {
+    line-height: 2.2;
+  }
+
+  /* Copy a summary sat 5 px above a fish's outing link, each reaching into the gap. */
+  .trip-again + .trip-link {
+    margin-top: 18px;
+  }
+
   /* "Add the one you fished" under the Water picker stood 17 px tall on a phone held sideways. */
   .own-water a {
     display: inline-block;
