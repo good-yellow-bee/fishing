@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fx } from "../fx";
-import { settings } from "../settings";
 import { BOLT_POINTS, boltMirror, boltPath, type BoltPoint } from "./boltPath";
+import { useReducedMotion } from "./reducedMotion";
 import { flashLevel, strikeGap, thunderDelay } from "./storm";
 import { waterHeight } from "./water";
 
@@ -54,6 +54,8 @@ function setStrip(mesh: THREE.Mesh, points: readonly BoltPoint[], side: (i: numb
 
 /** A storm over the lake: now and then a bolt forks down over the far shore, the whole scene flashes, its image shows in the lake, and thunder rolls in after it. */
 export function Lightning() {
+  // The flash follows the phone's or computer's own reduce motion setting too, not only the game's.
+  const still = useReducedMotion();
   const light = useRef<THREE.AmbientLight>(null);
   const struckAt = useRef(-Infinity);
   const path = useRef<BoltPoint[]>([]);
@@ -88,7 +90,7 @@ export function Lightning() {
   useFrame((state) => {
     if (!light.current) return;
     // Reduce motion keeps the thunder and drops the flash.
-    const level = settings.reduceMotion ? 0 : flashLevel(performance.now() - struckAt.current);
+    const level = still ? 0 : flashLevel(performance.now() - struckAt.current);
     light.current.intensity = level * FLASH_PEAK;
     bolt.visible = level > 0;
     mirror.visible = false;

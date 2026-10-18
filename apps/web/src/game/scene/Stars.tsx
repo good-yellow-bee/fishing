@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
+import { useReducedMotion } from "./reducedMotion";
 import { STAR_COUNT, shootingStar, skyPointReflection, starAt, starReflection, type Star } from "./starField";
 import { waterHeight } from "./water";
 
@@ -19,6 +20,8 @@ const MIRROR_STREAK_DIM = 0.75;
 
 /** A clear night's stars, drawn as fixed-size dots so they stay pin points at any distance, their shimmer in the lake, and now and then a shooting star. */
 export function Stars({ opacity }: { opacity: number }) {
+  // No shooting stars under the phone's or computer's reduce motion setting, as under the game's.
+  const still = useReducedMotion();
   const stars = useMemo<Star[]>(() => Array.from({ length: STAR_COUNT }, (_, i) => starAt(i)), []);
   const mirror = useMemo(() => {
     const geo = new THREE.BufferGeometry();
@@ -101,7 +104,7 @@ export function Stars({ opacity }: { opacity: number }) {
     }
     spot.needsUpdate = true;
     tint.needsUpdate = true;
-    const shot = settings.reduceMotion ? null : shootingStar(t);
+    const shot = still ? null : shootingStar(t);
     streak.visible = shot !== null;
     mirrorStreak.visible = false;
     if (!shot) return;
