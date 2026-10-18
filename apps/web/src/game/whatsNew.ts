@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa16";
+export const NEWS_ID = "2026-10-18-scene15";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "At night the far cabin's lit windows shine on the lake as streaks of warm light. On breezy days a little sailing dinghy reaches back and forth across the lake, heeling to the wind, and a tyre swing hangs from the oak by the shack, rocking in the breeze and capped with snow in winter.",
   "The field log and the lake open faster on a phone: the first download is 20 KB smaller, and in Polish the language file is half its old size. The lake's hint bar and controls strip now mention the arrow keys for aiming. With reduce motion on, rain, snow and falling leaves hold still instead of sweeping across the screen.",
   "At dawn and dusk a snowshoe hare hops out to graze on the grass by the shack, brown in summer and white in winter. Wildflowers bloom round the shack from spring to fall, with bumblebees going from flower to flower on dry days, and a woodpile and chopping block stand by the campfire, snowed on in winter.",
   "An outing's page says how the water did the next time and links to the water on the Map, and the outing search understands “weekend” and “weekday”.",

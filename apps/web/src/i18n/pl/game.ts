@@ -697,6 +697,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "At night the far cabin's lit windows shine on the lake as streaks of warm light. On breezy days a little sailing dinghy reaches back and forth across the lake, heeling to the wind, and a tyre swing hangs from the oak by the shack, rocking in the breeze and capped with snow in winter.":
+    "Nocą oświetlone okna chaty po drugiej stronie jeziora odbijają się w wodzie ciepłymi smugami światła. W wietrzne dni po jeziorze kursuje w tę i z powrotem mała żaglówka, przechylona na wietrze, a z dębu przy szopie zwisa huśtawka z opony, która kołysze się na wietrze, a zimą przykrywa ją czapa śniegu.",
   "At dawn and dusk a snowshoe hare hops out to graze on the grass by the shack, brown in summer and white in winter. Wildflowers bloom round the shack from spring to fall, with bumblebees going from flower to flower on dry days, and a woodpile and chopping block stand by the campfire, snowed on in winter.":
     "O świcie i o zmierzchu na trawie przy szopie pasie się zając bielak, latem brązowy, a zimą biały. Od wiosny do jesieni wokół szopy kwitną polne kwiaty, a w suche dni trzmiele przelatują z kwiatka na kwiatek. Przy ognisku stoi stos drewna i pieniek do rąbania, zimą przysypane śniegiem.",
   "In winter a bird feeder goes up by the shack, and chickadees flit between it and the oak all day. When it rains, puddles gather on the grass in front of the shack with raindrops ringing them, and on dry days the washing hangs out on a line by the water, blowing in the wind.":
