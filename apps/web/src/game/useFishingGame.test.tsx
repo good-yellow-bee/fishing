@@ -1809,6 +1809,13 @@ describe("level unlock integration", () => {
     expect(hint()).toContain("The wind drives the baitfish onto the point, and the hunters follow them in.");
   });
 
+  it("says the breeze pushes the food onto a bank it blows onto", () => {
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, undefined, "light-north");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("The breeze blows onto this bank and pushes the food in, and the fish follow it.");
+  });
+
   it("says the dock lanterns draw minnows when the cast's wait comes sooner for them", () => {
     vi.mocked(lanternDockWaitMul).mockReturnValueOnce(LANTERN_DOCK_WAIT);
     const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
