@@ -177,6 +177,12 @@ export function HomePage() {
   const ownWaters = (ownAny ? withoutSample(book) : book).spots.filter((spot) => spot.id !== PLAY_LAKE_ID).length;
   // Today's outing counts once it has a fish, as the averages take it.
   const daysThisYear = daysOut(countedOwn, thisYear, today);
+  // The outings search that lists the ones counted: without the sample week's once they are left out, and the game's.
+  const leftOut = [
+    book.trips.some((trip) => isSampleOuting(trip) && !countedOwn.trips.includes(trip)) ? `-${t("sample|search word")}` : "",
+    book.trips.some((trip) => !offPlayLake(trip)) ? `-${t("game|search word")}` : "",
+  ].filter(Boolean);
+  const outingsLink = leftOut.length > 0 ? `/trips?${new URLSearchParams({ find: leftOut.join(" ") }).toString()}` : "/trips";
   const ownOutings = countedOwn.trips.filter((trip) => trip.date < today || (trip.date === today && (fishByTrip.get(trip.id) ?? 0) > 0)).length;
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
@@ -319,7 +325,8 @@ export function HomePage() {
           </strong>
           {ownOutings > 0 ? (
             <small>
-              <Link to="/trips">{tn(ownOutings, "{n} outing", "{n} outings")}</Link>
+              {/* Every year's, beside this year's days: said so, and opening those outings, not the sample week's or the game's. */}
+              <Link to={outingsLink}>{tn(ownOutings, "{n} outing in all", "{n} outings in all")}</Link>
               {/* Days on the water this year, as Bests counts them: a night's small hours on its outing's day. */}
               {daysThisYear > 0 ? (
                 <>

@@ -1,12 +1,17 @@
 import { shiftDate, type Logbook } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
+import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOuting } from "./bookCopy";
 
-export type DatePick = { label: "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
+export type DatePick = { label: "Last night" | "Today" | "Tomorrow" | "Saturday" | "Sunday" | "Next Saturday"; date: string };
 
-/** One-tap days for a new outing: today, tomorrow, and the coming Saturday when it is neither, else the one after. */
+/**
+ * One-tap days for a new outing: today, tomorrow, and the coming Saturday when it is neither, else the one after. In
+ * the small hours, last night first: a night session is dated by its evening.
+ */
 export function datePicks(now: Date): DatePick[] {
   const picks: DatePick[] = [
+    ...(now.getHours() < LATE_NIGHT_UNTIL ? [{ label: "Last night" as const, date: shiftDate(now, -1) }] : []),
     { label: "Today", date: shiftDate(now, 0) },
     { label: "Tomorrow", date: shiftDate(now, 1) },
   ];

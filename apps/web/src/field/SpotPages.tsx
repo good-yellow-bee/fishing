@@ -61,6 +61,7 @@ import { isSampleSpot, nextRealTrips } from "./bookCopy";
 import { canGoBack, pageBefore } from "./FieldShell";
 import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
+import { useTypedParam } from "./typedParam";
 import { CopyPlace } from "./CopyPlace";
 import { keepDraft, readKeptDraft } from "./catchDraft";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
@@ -154,32 +155,9 @@ export function SpotsPage() {
   const shownKind = kind !== "all" && types.includes(kind) ? kind : "all";
   // A long list narrows by name, accents and case aside; kept in the address like the kind, so Back keeps it.
   const finding = rows.length > FIND_WATER_FROM;
-  // What was typed, held here as well as in the address: read from the address alone, a quick key arrived before the
-  // address caught up and the box wrote the older text back, dropping letters and sending the caret to the end.
-  const linkedQuery = params.get(WATER_FIND) ?? "";
-  const [typedQuery, setTypedQuery] = useState(linkedQuery);
-  const typed = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    // The address catching up with the box is not a new search; Back or Forward to another one is.
-    if (typed.current.has(linkedQuery)) return;
-    typed.current = new Set();
-    setTypedQuery(linkedQuery);
-  }, [linkedQuery]);
+  const [typedQuery, setQuery] = useTypedParam(WATER_FIND);
   const query = finding ? typedQuery : "";
   const needle = foldText(query.trim()).toLowerCase();
-  const setQuery = (next: string) => {
-    typed.current.add(next.trim() ? next : "");
-    setTypedQuery(next);
-    setParams(
-      (current) => {
-        const out = new URLSearchParams(current);
-        if (next.trim()) out.set(WATER_FIND, next);
-        else out.delete(WATER_FIND);
-        return out;
-      },
-      { replace: true },
-    );
-  };
   const byName = (row: { spot: { name: string } }) => !needle || foldText(row.spot.name).toLowerCase().includes(needle);
   const shownRows = (shownKind === "all" ? rows : rows.filter((row) => row.spot.id !== PLAY_LAKE_ID && row.spot.waterType === shownKind)).filter(byName);
   // Waters of that name under another kind: the kind picked hides them, so say so and offer them.

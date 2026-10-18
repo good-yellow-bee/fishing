@@ -91,7 +91,8 @@ export function monthWord(text: string): number {
   // Asked once per fish in a search: worked out once per word.
   const known = monthWords.get(text);
   if (known !== undefined) return known;
-  const word = plain(text).replace(/^we? /, "");
+  // "w czerwcu", "in june", "during may".
+  const word = plain(text).replace(/^(?:we?|in|during) /, "");
   const month = word.includes(" ") ? -1 : monthOf(word);
   if (monthWords.size > 200) monthWords.clear();
   monthWords.set(text, month);

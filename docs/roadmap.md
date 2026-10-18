@@ -2051,3 +2051,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR526~~ | ~~Round 81 fixes: Find a water keeps every letter typed, a water deleted from its outing or fish goes Back past them, GPS waypoints and more map links read, a sample water counts the angler's own fish, and six more~~ (#1208) | field | S |
 | ~~BR527~~ | ~~Round 81 ideas: a water's last outing opens with its fish and lure, Copy the place, the best lure on Waters cards, waters fished lately first in pickers, and Home's Next tile opens the water~~ (#1211) | field | S |
 | ~~BR528~~ | ~~Gear keeps past outings' bags open across Back, with Fold all~~ (#1212) | field | S |
+| ~~BR529~~ | ~~Round 82 fixes: the outing search keeps every letter, a new book's outing form offers the angler's own water, Home's outings say in all, a small-hours outing is last night's, same-day outings see each other, and more search words~~ (#TBD) | field | S |

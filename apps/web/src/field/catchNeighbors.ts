@@ -25,8 +25,16 @@ export function tripNeighbors(book: Logbook, id: string, today = localDate(new D
   const self = book.trips.find((trip) => trip.id === id);
   const play = self?.spotId === PLAY_LAKE_ID;
   const hideSamplePlans = !isSampleOnly(book) && !(self && isSampleOuting(self));
+  // Two outings on one day go by their first fish (a dawn before a dusk), where both have one.
+  const firstFish = new Map<string, string>();
+  for (const entry of book.catches) if (entry.tripId && entry.caughtAt < (firstFish.get(entry.tripId) ?? "~")) firstFish.set(entry.tripId, entry.caughtAt);
+  const byFish = (a: Trip, b: Trip) => {
+    const x = firstFish.get(a.id);
+    const y = firstFish.get(b.id);
+    return x && y ? y.localeCompare(x) : 0;
+  };
   const rows = book.trips
     .filter((trip) => (trip.spotId === PLAY_LAKE_ID) === play && !(hideSamplePlans && isSampleOuting(trip) && trip.date >= today))
-    .sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+    .sort((a, b) => b.date.localeCompare(a.date) || byFish(a, b) || a.id.localeCompare(b.id));
   return neighborsIn(rows, id);
 }
