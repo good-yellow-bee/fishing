@@ -132,6 +132,8 @@ export type Fight = {
   lightHook?: boolean;
   /** What the spot's water does to the fight; open water when left out. */
   water?: FightWater;
+  /** Hooked tight to the lily pads, so it dives for the pad stems like a fish in the reeds' weeds. */
+  pads?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
 };
@@ -498,9 +500,11 @@ export function useFishingGame(
     const deep = late && (isLiveBait(lureRef?.current) || shinerTakenRef.current);
     const lightHook = late && !deep;
     const underpowered = !canLand(current, species);
-    const water = fightWater(spotRef.current);
+    // A fish hooked tight to the lily pads dives for the stems, so the fight there is a weed fight whatever the bank.
+    const pads = castPadsRef.current;
+    const water = pads ? "weeds" : fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
-    const next = { species, weight, underpowered, water, windy, lightHook };
+    const next = { species, weight, underpowered, water, windy, lightHook, pads };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");

@@ -246,7 +246,8 @@ export function FightBar({ fight, sim, performance, best = null, note = null }: 
             </span>
           </p>
           )}
-          {fight.water === "weeds" && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
+          {fight.water === "weeds" && !fight.pads && <p className="fight-water">{t("Reeds: turn every run, or it goes into the weeds")}</p>}
+          {fight.water === "weeds" && fight.pads && <p className="fight-water">{t("Lily pads: turn every run, or it dives into the pad stems")}</p>}
           {fight.water === "current" && <p className="fight-water">{t("Inlet: the current takes line while you rest, and helps a run downstream")}</p>}
           {fight.water === "deep" && <p className="fight-water">{t("Drop-off: runs dive and pull harder, but tire the fish faster")}</p>}
           {fight.water === "rocks" && <p className="fight-water">{t("Point: turn every run; reeling while it drags over the rocks frays the line")}</p>}

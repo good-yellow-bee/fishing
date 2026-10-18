@@ -1876,6 +1876,11 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/^Tight to the lily pads, where the bass and pike wait in ambush\. /);
+    // The fish it hooks dives for the pad stems, so the fight off the Point's rocks is a weed fight.
+    act(() => vi.advanceTimersByTime(2_201));
+    act(() => surface.dispatchEvent(pointer("pointerdown")));
+    expect(phase()).toBe("fight:none");
+    expect(vi.mocked(makeFight).mock.calls.at(-1)?.[5]).toBe("weeds");
     act(() => root!.unmount());
     container!.remove();
     const winter = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, "Popper", undefined, undefined, "winter");

@@ -92,6 +92,7 @@ export const PL_GAME: PlBook = {
   "The worm has soaked pale and lost its scent, so the bites come slow. Put a fresh one on.": "Robak namókł, zbladł i stracił zapach, więc brania są powolne. Załóż świeżego.",
   "live shiner on": "żywy złotawiec na haczyku",
   "cloud over the sun": "chmura zasłania słońce",
+  "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "The breeze blows onto this bank and pushes the food in, and the fish follow it.": "Wiatr wieje na ten brzeg i spycha tu pokarm, a ryby płyną za nim.",
