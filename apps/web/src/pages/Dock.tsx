@@ -67,6 +67,7 @@ import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
 import { bookForPlay, markReleasedInBook, saveLandedCatch, saveLandedPhoto } from "../field/keepCatch";
+import { rememberReleased } from "../game/releasedFish";
 import { readTackle } from "../field/gear/storage";
 import { useEffectsSteppedDown } from "../game/frameWatch";
 import { saveLogbook } from "../field/storage";
@@ -530,6 +531,8 @@ export function DockPage() {
       await catchSync.sync();
       await releaseCatch(outcome.id);
       setReleasedId(outcome.id);
+      // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
+      rememberReleased(outcome.species, outcome.weight, outcome.spot);
       try {
         markReleasedInBook(outcome.id);
       } catch {
