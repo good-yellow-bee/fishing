@@ -21,17 +21,22 @@ export function recordHere(day: readonly CatchEntry[], water: readonly CatchEntr
 }
 
 /** "Largest today: 28 in · This water's record: 34 in, Jun 12", each size opening its fish. */
-export function RecordHere({ largest, record, kind }: SizeHere) {
+export function RecordHere({ largest, record, kind, recordDay }: SizeHere & { recordDay?: string }) {
   const size = (entry: CatchEntry) => measureText(measureOf(entry, kind)!);
+  const amount = (entry: CatchEntry) => {
+    const measure = measureOf(entry, kind);
+    return measure?.kind === "length" ? measure.inches : measure?.kind === "weight" ? measure.pounds : 0;
+  };
   return (
     <p className="meta record-here">
       {t("Largest this outing:")} <Link to={`/catches/${largest.id}`}>{size(largest)}</Link>
-      {record.id === largest.id ? (
+      {/* A fish as large as the record shares it: the line doesn't point at another one as the record. */}
+      {record.id === largest.id || amount(largest) >= amount(record) ? (
         <> {t("(this water's record)")}</>
       ) : (
         <>
           {" · "}
-          {t("This water's record:")} <Link to={`/catches/${record.id}`}>{size(record)}</Link>, {formatDay(localDate(new Date(record.caughtAt)))}
+          {t("This water's record:")} <Link to={`/catches/${record.id}`}>{size(record)}</Link>, {formatDay(recordDay ?? localDate(new Date(record.caughtAt)))}
         </>
       )}
     </p>

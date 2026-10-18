@@ -28,6 +28,16 @@ export function topOuting(trips: readonly Trip[], fishOn: (tripId: string) => nu
 }
 
 /**
+ * The latest outing fished before a day: today's counts once it has a fish, a planned one never.
+ * "Last time here" on an outing and its form, so both name the same day.
+ */
+export function lastOutingBefore(trips: readonly Trip[], before: string, today: string, fishOn: (tripId: string) => number): Trip | undefined {
+  return trips
+    .filter((trip) => trip.date < before && (trip.date < today || (trip.date === today && fishOn(trip.id) > 0)))
+    .reduce<Trip | undefined>((last, trip) => (!last || trip.date > last.date ? trip : last), undefined);
+}
+
+/**
  * "The most fish of any outing on this water" when this outing beats every other one fished here.
  * Null until the water has three outings fished, or when another outing caught as many.
  */
