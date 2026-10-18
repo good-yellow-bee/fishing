@@ -1120,10 +1120,12 @@ export function DockPage() {
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
-            <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
-              {t("Back to the path")}
-            </button>
-            {error && <p className="warn">{error}</p>}
+            <div className="shop-foot">
+              {error && <p className="warn">{error}</p>}
+              <button className="panel-btn" type="button" onClick={() => setShopOpen(false)}>
+                {t("Back to the path")}
+              </button>
+            </div>
           </div>
         )}
       </div>
