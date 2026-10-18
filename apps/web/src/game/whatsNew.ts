@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field30";
+export const NEWS_ID = "2026-10-18-game13";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A worm cast six times without landing a fish now soaks pale and loses its scent, so bites on it come slower until you put a fresh one on with Rebait (or T). And the lake's water temperature now matters: on a day the water has warmed since yesterday the fish wake up to feed and bite sooner, on a day it has cooled they bite slower, and the shack's chalk board says which days, with the temperature.",
   "An outing's page says how the water did the next time and links to the water on the Map, and the outing search understands “weekend” and “weekday”.",
   "You can now fish with a keyboard alone: hold the arrow keys to move the aiming ring over the water, then cast with Space. In a fight Left and Right still steer. Buying an upgrade in the shack, claiming a request and releasing a fish keep your place on the keyboard, and a screen reader now hears the new rank, the claim and the release.",
   "In winter a bird feeder goes up by the shack, and chickadees flit between it and the oak all day. When it rains, puddles gather on the grass in front of the shack with raindrops ringing them, and on dry days the washing hangs out on a line by the water, blowing in the wind.",
