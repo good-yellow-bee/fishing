@@ -11,7 +11,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measuresText } from "../i18n/content";
-import { fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
+import { daysAheadLabel, fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -127,7 +127,7 @@ export function TripCard({
         <p className="meta">
           {/* The fish that got away too, so a hard day stands out in the list. */}
           {/* An untitled outing is already named after its water. */}
-          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
+          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>

@@ -35,29 +35,33 @@ function nextDay(ymd: string): string {
 
 /** One all-day calendar event for an outing, for any calendar app to import. */
 /** `at` is the water's own place, when the angler noted it: calendar apps can open it on a map. */
-export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace): string {
-  return tripsIcs([{ trip, place, at }], now);
+/** `more` are lines for the event's notes after the outing's own ("Works here: Spinner, Jig"), read the evening before. */
+export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace, more: readonly string[] = []): string {
+  return tripsIcs([{ trip, place, at, more }], now);
 }
 
 /** Several outings in one calendar file: every outing coming up, imported in one go. */
-export function tripsIcs(outings: readonly { trip: Trip; place: string | null; at?: SpotPlace }[], now: Date = new Date()): string {
+export function tripsIcs(outings: readonly { trip: Trip; place: string | null; at?: SpotPlace; more?: readonly string[] }[], now: Date = new Date()): string {
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Stillwater//Field log//EN",
-    ...outings.flatMap(({ trip, place, at }) => [
-      "BEGIN:VEVENT",
-      `UID:${trip.id}@stillwater`,
-      `DTSTAMP:${stamp}`,
-      `DTSTART;VALUE=DATE:${trip.date.replace(/-/g, "")}`,
-      `DTEND;VALUE=DATE:${nextDay(trip.date).replace(/-/g, "")}`,
-      `SUMMARY:${icsText(trip.title)}`,
-      ...(place ? [`LOCATION:${icsText(place)}`] : []),
-      ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
-      ...(trip.note ? [`DESCRIPTION:${icsText(trip.note)}`] : []),
-      "END:VEVENT",
-    ]),
+    ...outings.flatMap(({ trip, place, at, more = [] }) => {
+      const notes = [trip.note.trim(), ...more].filter(Boolean).join("\n");
+      return [
+        "BEGIN:VEVENT",
+        `UID:${trip.id}@stillwater`,
+        `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${trip.date.replace(/-/g, "")}`,
+        `DTEND;VALUE=DATE:${nextDay(trip.date).replace(/-/g, "")}`,
+        `SUMMARY:${icsText(trip.title)}`,
+        ...(place ? [`LOCATION:${icsText(place)}`] : []),
+        ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
+        ...(notes ? [`DESCRIPTION:${icsText(notes)}`] : []),
+        "END:VEVENT",
+      ];
+    }),
     "END:VCALENDAR",
   ];
   return `${lines.map(fold).join("\r\n")}\r\n`;

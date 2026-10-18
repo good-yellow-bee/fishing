@@ -170,6 +170,13 @@ const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> =
   night: ["dark", "noc", "nocą", "nocy"],
 };
 
+/** True when what was typed starts a word for a part of the day ("night", "dusk", "wieczorem"), from three letters up: the outing search asks the fish then. */
+export function isTimeWord(want: string, t: (text: string) => string): boolean {
+  const typed = normalize(want);
+  if (typed.length < 3) return false;
+  return BITE_TIMES.some((band) => [band.label, t(band.label), ...(TIME_WORDS[band.id] ?? [])].some((word) => normalize(word).startsWith(typed)));
+}
+
 /** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */
 function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
