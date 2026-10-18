@@ -927,6 +927,11 @@ export function DockPage() {
                   : t("Lodge record · was {weight} ({holder})", { weight: weightText(lodge.previous), holder: lodge.holder })}
               </p>
             )}
+            {game.outcome.note && (
+              <p className="catch-note" role="status">
+                {game.outcome.note}
+              </p>
+            )}
             <div className="catch-actions">
               {fieldSaved && (
                 <p className="catch-stamp quiet">{photoSaved ? t("Saved in the field log, with a photo") : t("Saved in the field log")}</p>

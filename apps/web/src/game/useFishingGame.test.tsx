@@ -104,6 +104,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="broke">{game.outcome?.kind === "broke" ? game.outcome.message : ""}</i>
       <i data-testid="second-take">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.secondTake) : ""}</i>
       <i data-testid="grabbed">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.grabbed) : ""}</i>
+      <i data-testid="landed-note">{game.outcome?.kind === "landed" ? (game.outcome.note ?? "") : ""}</i>
       <i data-testid="got-away">{game.outcome?.kind === "landed" ? String(game.outcome.notes?.gotAway) : ""}</i>
       <i data-testid="lurking">{String(game.lurking)}</i>
       <i data-testid="closing">{String(game.lurkerCloseInMs > 0)}</i>
@@ -229,6 +230,19 @@ describe("useFishingGame landed outcome", () => {
     expect(phase()).toBe("result:landed");
     expect(hint()?.includes("there's a big winter school here")).toBe(big);
     expect(hint()?.includes("there's a school here")).toBe(!big);
+    // The landed card covers the hint, so the school rides on the outcome for the card too.
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe(
+      big ? "Yellow perch: there's a big winter school here, and it stays a while. Cast again quickly!" : "Yellow perch: there's a school here, cast again quickly!",
+    );
+  });
+
+  it("leaves the landed note empty when the bank holds nothing new", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(phase()).toBe("result:landed");
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toBe("");
   });
 
   it("counts clean fights in a row, and starts again after a dirty landing or a lost fish", () => {
@@ -291,6 +305,7 @@ describe("useFishingGame lost fight", () => {
     castAndFight(surface, 1);
     expect(phase()).toBe("result:landed");
     expect(hint()).toMatch(/A pike followed it in to the bank! It's still about: cast here again\.$/);
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toMatch(/A pike followed it in to the bank! It's still about: cast here again\.$/);
     const waiting = vi.mocked(castForGotAway).mock.calls.length;
     act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
     vi.mocked(castForGotAway).mockImplementationOnce((lost) => ({ again: lost, next: null }));
