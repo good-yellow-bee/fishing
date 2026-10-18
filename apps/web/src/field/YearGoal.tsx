@@ -125,7 +125,16 @@ export function YearGoal({ book, now = new Date() }: { book: Logbook; now?: Date
 
   if (editing) {
     return (
-      <form className="year-goal-form" onSubmit={onSubmit}>
+      <form
+        className="year-goal-form"
+        onSubmit={onSubmit}
+        // Escape puts the form away as its Cancel does, with focus back on the goal's button.
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          close();
+        }}
+      >
         <label>
           {t("Fish to catch in {year}", { year })}
           <input
