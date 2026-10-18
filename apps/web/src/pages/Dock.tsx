@@ -739,6 +739,7 @@ export function DockPage() {
           moon={moon}
           wind={wind}
           hotspot={game.hotspot}
+          groundbait={game.groundbait}
           rising={rising}
           storm={storm}
           tracks={tracks}
