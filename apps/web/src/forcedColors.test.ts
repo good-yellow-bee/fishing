@@ -18,4 +18,11 @@ describe("high contrast themes", () => {
     expect(block).toContain("forced-color-adjust: none;");
     for (const part of [".day-grid .day-level-3", ".day-grid .day-blank", ".day-grid .day-planned", ".tally-bar > span"]) expect(block).toContain(part);
   });
+
+  it("borders the field log's fill-only buttons and marks the current page and picked choices", () => {
+    const block = forced(read("field/field.css"));
+    expect(block).toMatch(/\.field-primary \{\n    border: 1px solid ButtonText;/);
+    for (const part of [".field-rail-nav a.active", ".field-tab a.active", ".choice-row button.on", '.lure-tip[aria-pressed="true"]']) expect(block).toContain(part);
+    expect(block).toContain("background: Highlight;");
+  });
 });

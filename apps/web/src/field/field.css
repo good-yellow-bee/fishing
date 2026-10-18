@@ -1840,6 +1840,22 @@ button.field-primary:disabled {
   .tally-bar > span {
     background: Highlight;
   }
+
+  /* The save and start buttons were a fill with no border, so they read as plain words. */
+  .field-primary {
+    border: 1px solid ButtonText;
+  }
+
+  /* The page you are on, a picked choice and a tapped lure were told apart only by fill or colour. */
+  .field-rail-nav a.active,
+  .field-tab a.active,
+  .choice-row button.on,
+  .lure-tip[aria-pressed="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
 }
 
 /* A season against the one before: several short lines, so smaller than a single conditions line. */
