@@ -100,6 +100,7 @@ import { lakePictureFileName, requestLakeShot } from "../game/scene/lakeShot";
 import { lookDrag, lookZoom } from "../game/scene/photoLook";
 import { PHOTO_KEY_TURNS, usePhotoDrag } from "../game/usePhotoDrag";
 import { bestBeatText, weightText } from "../i18n/content";
+import { usePageTitle } from "../pageTitle";
 
 /** How often the page reads the clock for a new lake hour. */
 const HOUR_CHECK_MS = 30_000;
@@ -145,6 +146,7 @@ const EFFECTS_NOTICE_MS = 5000;
 
 export function DockPage() {
   useT();
+  usePageTitle(`${t("On the lake")} · Stillwater`);
   const [params] = useSearchParams();
   // One clock for the hour and the day's weather, so both turn over together.
   const [openedAt] = useState(() => new Date());

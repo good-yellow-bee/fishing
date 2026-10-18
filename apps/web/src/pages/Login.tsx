@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { errorText } from "../api";
 import { authClient } from "../auth-client";
 import { useT } from "../i18n";
+import { usePageTitle } from "../pageTitle";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const t = useT();
+  usePageTitle(`${t("Sign in")} · Stillwater`);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

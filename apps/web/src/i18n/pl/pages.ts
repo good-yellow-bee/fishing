@@ -29,6 +29,7 @@ export const PL_PAGES: PlBook = {
   "Loading the log…": "Wczytuję dziennik…",
   "Back to the dock": "Wróć na pomost",
   "Lodge board": "Tablica przystani",
+  "On the lake": "Nad jeziorem",
   "{name}’s catch log": "Dziennik połowów: {name}",
   "{n} lifetime points": ["{n} punkt łącznie", "{n} punkty łącznie", "{n} punktów łącznie"],
   "{n} recent fish": ["{n} ostatnia ryba", "{n} ostatnie ryby", "{n} ostatnich ryb"],
