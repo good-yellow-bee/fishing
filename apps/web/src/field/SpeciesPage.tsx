@@ -25,10 +25,10 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst, seasonLast } from "./seasonFirst";
-import { countedFish } from "./milestones";
+import { countedFish, nextKindMark, ownFish } from "./milestones";
 import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
-import { BiggestLinks } from "./BiggestHere";
+import { BiggestLinks, biggestOf } from "./BiggestHere";
 import { catchLink, type ListKey } from "./catchList";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
@@ -160,10 +160,12 @@ function SpeciesView() {
         </div>
       </header>
       <FishSum catches={catches} oneKind />
+      <KindMark catches={catches} />
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
       <SeasonFirst catches={catches} />
       <SeasonLast catches={catches} />
+      <BiggestThisYear catches={catches} species={species} name={name} />
       <NewWaters catches={catches} name={name} waters={waters} />
       {/* The water the kind came in, once two fish noted it: where to look for it. */}
       {/* The angler's own: the sample week's temperatures would widen it. */}
@@ -349,6 +351,31 @@ function NewWaters({ catches, name, waters }: { catches: readonly CatchEntry[]; 
           </Fragment>
         ))}
       </span>
+    </p>
+  );
+}
+
+/** "3 more to 25 of this kind": the next round number the kind's own fish reach, once it is a few fish away. */
+function KindMark({ catches }: { catches: readonly CatchEntry[] }) {
+  // Counted as the catch page's "25th of its kind" counts: the angler's own fish, not the sample week's or the game's.
+  const next = nextKindMark(catches.filter(ownFish).length);
+  return next ? <p className="meta kind-mark">{t("{n} more to {mark} of this kind", { n: next.left, mark: next.mark })}</p> : null;
+}
+
+/** "Biggest of 2026: 24 in · 5.1 lb": this year's best of the kind, once earlier years hold fish too (else it is the record above). */
+function BiggestThisYear({ catches, species, name }: { catches: readonly CatchEntry[]; species: string; name: string }) {
+  const { book } = useLogbook();
+  const year = localDate(new Date()).slice(0, 4);
+  const counted = countedFish(catches);
+  // By the day a fish counts on: a New Year's Eve night's small hours are the old year's.
+  const thisYear = counted.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
+  if (thisYear.length === 0 || thisYear.length === counted.length) return null;
+  const { longest, heaviest } = biggestOf(thisYear);
+  if (!longest && !heaviest) return null;
+  return (
+    <p className="meta year-biggest">
+      {t("Biggest of {year}:", { year })}{" "}
+      <BiggestLinks catches={thisYear} list={`species:${species}`} about={`${t(name)}, ${year}`} />
     </p>
   );
 }
