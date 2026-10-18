@@ -228,6 +228,15 @@ function OwnSheet({ pinned }: { pinned: { spot: Spot; place: SamplePlace }[] }) 
   );
 }
 
+/** From the map straight to a new outing on that water, named for screen readers as each row's own. */
+function PlanHere({ spot }: { spot: Spot }) {
+  return (
+    <Link className="map-plan" to={`/trips/new?spot=${spot.id}`} aria-label={t("Plan an outing on {water}", { water: spot.name })}>
+      {t("Plan one")}
+    </Link>
+  );
+}
+
 export function SpotMapPage() {
   const { book } = useLogbook();
   useT();
@@ -300,6 +309,7 @@ export function SpotMapPage() {
               <span>{t(WATER_LABELS[spot.waterType])}</span>
               <span>{fishLine(spot.id)}</span>
               <span>{formatCoord(place.lat, place.lng)}</span>
+              <PlanHere spot={spot} />
             </li>
           ))}
         </ul>
@@ -320,6 +330,7 @@ export function SpotMapPage() {
                     {formatCoord(place.lat, place.lng)}
                   </MapAnchor>
                 </span>
+                <PlanHere spot={spot} />
               </li>
             ))}
           </ul>

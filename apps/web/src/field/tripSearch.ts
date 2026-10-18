@@ -5,6 +5,9 @@ import { singularStems } from "./pluralWord";
 /** Words that ask for the outings already fished that landed nothing. */
 const NO_FISH = ["no fish", "blank", "bez ryb", "bez ryby", "pusty", "puste"];
 
+/** A size in a typed part: "50 cm", "2kg", ">20 in", "ponad 400 mm". */
+const SIZED = /\d\s?(?:lbs?|oz|kg|dag|g|in|cm|mm)(?=\s|$)/i;
+
 /** Lower case with single spaces, so typed words compare however they were spaced. */
 const plain = foldText;
 
@@ -62,13 +65,25 @@ function writeTripText(book: Logbook, trip: Trip, t: (text: string) => string): 
  * lost or a strike missed, or words that all appear in the outing's title, note, water, written-out day, or its fish's
  * kinds and lures ("october", "cedar dawn", "pike jig").
  */
-export function findTrips(book: Logbook, needle: string, fishOn: (tripId: string) => number, today: string, t: (text: string) => string, now = new Date()): Trip[] {
+export function findTrips(
+  book: Logbook,
+  needle: string,
+  fishOn: (tripId: string) => number,
+  today: string,
+  t: (text: string) => string,
+  now = new Date(),
+  fishTrips?: (part: string) => ReadonlySet<string>,
+): Trip[] {
   const parts = needle.split("+").map(plain).filter(Boolean);
   if (parts.length === 0) return [];
+  // "szczupak ponad 50 cm", "> 2 kg": a part with a size is a catch search, and finds the outings its fish came on.
+  const sized = new Map(fishTrips ? parts.filter(SIZED.test.bind(SIZED)).map((part) => [part, fishTrips(part)]) : []);
   // Each part's dates read once, not once per outing.
   // Outings can be ahead: "this weekend" on a Thursday is the coming one, and "tomorrow" is a day to find.
   const ranges = new Map(parts.map((part) => [part, dateWords(part, now, { ahead: true })]));
   const matches = (trip: Trip, text: string, part: string) => {
+    const bySize = sized.get(part);
+    if (bySize) return bySize.has(trip.id);
     if (NO_FISH.includes(part)) return trip.date < today && fishOn(trip.id) === 0;
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
