@@ -292,7 +292,7 @@ export function HomePage() {
                 <>
                   {" · "}
                   {/* And this year's, once the year holds more than the month, against the year's goal when there is one. */}
-                  <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows))}>{goal !== null ? t("{n} of {goal} this year", { n: yearFish, goal }) : t("{n} this year", { n: yearFish })}</Link>
+                  <Link to={findLink(countedSearch(book, t("this year|search word"), yearRows))}>{goal === null ? t("{n} this year", { n: yearFish }) : yearFish >= goal ? t("Goal reached: {n} of {goal}", { n: yearFish, goal }) : t("{n} of {goal} this year", { n: yearFish, goal })}</Link>
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}

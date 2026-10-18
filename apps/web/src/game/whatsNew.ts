@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene09";
+export const NEWS_ID = "2026-10-18-field26";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Home says when the year's goal is reached, the Bests calendar marks today and counts each month's days out, and Escape closes the goal form.",
   "In fall, sunken leaves settle on the shallow bed round the dock and lie there until spring. In spring, clumps of frogspawn float by the lily pads, and on a windy day the wind rakes the foam into long lanes running down the wind across the open water.",
   "Escape now closes the trip recap like the other panels (an old trip still needs Let it go). A refused sign-in is read out by a screen reader and drawn in a darker rust that is easier to read. On a phone an outing's Add to calendar and Print the packing list, and Gear's Pack for under a lure's biggest fish, sit far enough apart that a finger opens the one it meant.",
   "The book's file box downloads the outings as a spreadsheet too, and the catch form says how many fish an outing has so far and when the last came.",

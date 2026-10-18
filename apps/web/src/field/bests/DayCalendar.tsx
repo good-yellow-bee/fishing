@@ -77,6 +77,11 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
     .sort();
   const active = current && linked.includes(current) ? current : linked[0];
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
+  // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
+  const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < today))).length;
+  // Today's own day says so, so the season reads against the date.
+  const dayName = (day: string) => (day === today ? t("{day}, today", { day: formatDay(day) }) : formatDay(day));
+  const todayMark = (day: string) => (day === today ? ({ "aria-current": "date" } as const) : {});
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const from = (event.target as HTMLElement).dataset.day;
     if (!from) return;
@@ -103,7 +108,8 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
           <section key={month} className="day-month">
             <h3>
               {monthName(month)}
-              {/* The month's fish at a glance, counted as its days are. */}
+              {/* The month's days out and fish at a glance, counted as its days are. */}
+              {monthDays(month) > 0 ? <small className="day-month-days">{` · ${tn(monthDays(month), "{n} day out", "{n} days out")}`}</small> : null}
               {monthFish(month) > 0 ? <small className="day-month-fish">{` · ${tn(monthFish(month), "{n} fish", "{n} fish")}`}</small> : null}
             </h3>
             {/* Which column is which day, for the eye; each day's link already says its whole date. */}
@@ -122,32 +128,33 @@ export function DayCalendar({ book, year, today, tail = (term) => term }: { book
                 if (mark && mark.fish > 0) {
                   // A day whose fish include some from after midnight opens their outing, since a search by day
                   // would miss those; several outings' fish fall back to the day's search.
-                  const label = `${formatDay(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
+                  const label = `${dayName(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
-                    <li key={day} className={`day-fish day-level-${level(mark.fish)}`}>
-                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} aria-label={label} title={label} {...dayLink(day)} />
+                    <li key={day} className={`day-fish day-level-${level(mark.fish)}${day === today ? " day-today" : ""}`}>
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
                 if (mark && mark.trips.length > 0 && day < today) {
                   // The blank opens its outing, or the day's outings when there were several.
-                  const label = `${formatDay(day)}: ${t("an outing with no fish")}`;
+                  const label = `${dayName(day)}: ${t("an outing with no fish")}`;
                   return (
-                    <li key={day} className="day-blank">
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} />
+                    <li key={day} className={`day-blank${day === today ? " day-today" : ""}`}>
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
                 if (mark && mark.trips.length > 0) {
                   // An outing still ahead (or today's, before its first fish) opens its plan.
-                  const label = `${formatDay(day)}: ${t("an outing ahead")}`;
+                  const label = `${dayName(day)}: ${t("an outing ahead")}`;
                   return (
-                    <li key={day} className="day-planned">
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} />
+                    <li key={day} className={`day-planned${day === today ? " day-today" : ""}`}>
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?find=${day}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
-                return <li key={day} aria-hidden="true" />;
+                // A day with nothing on it still shows when it is today, for the eye; there is nothing to open.
+                return <li key={day} className={day === today ? "day-today" : undefined} aria-hidden="true" />;
               })}
             </ol>
           </section>

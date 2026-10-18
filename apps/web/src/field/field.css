@@ -1931,6 +1931,23 @@ html:has(.undo-bar) .field-main {
   box-shadow: inset 0 0 0 1px var(--field-muted);
 }
 
+/* Today, whatever is on it: a short bar along the foot of its square. */
+.day-grid li.day-today {
+  position: relative;
+}
+
+.day-grid li.day-today::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--field-ink);
+  pointer-events: none;
+}
+
 .day-grid li.day-fish a:focus-visible,
 .day-grid li.day-blank a:focus-visible,
 .day-grid li.day-planned a:focus-visible {
@@ -1978,6 +1995,10 @@ html:has(.undo-bar) .field-main {
 
   .day-grid li a:focus-visible {
     outline-color: CanvasText;
+  }
+
+  .day-grid li.day-today::after {
+    background: CanvasText;
   }
 
   .tally-bar > span {
@@ -2084,6 +2105,7 @@ html:has(.undo-bar) .field-main {
   margin: 0 0 14px;
 }
 
+.day-month-days,
 .day-month-fish {
   font-weight: 400;
   color: var(--field-muted);
