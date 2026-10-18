@@ -216,6 +216,9 @@ export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pik
 /** At most this many reasons for a sooner or slower bite are told on a cast, so the hint stays readable. */
 export const WAIT_REASONS = 2;
 
+/** At most this many reasons a hooked fish tires slower or sooner are told at the hookset, so the hint stays readable. */
+export const TIRE_REASONS = 2;
+
 /** How many pops, hops, lifts or strips draw the fish up sooner below level 13 (see lureWorkTapsForLevel). */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
@@ -486,7 +489,7 @@ export function useFishingGame(
       }
       // The strike's time is told, so the angler learns how quick a solid hook has to be.
       setHint(
-        again + heavy + cold + warm + run + nest + hunter + dim + upriver + stream + fed + murky + basking + spent + flood +
+        again + heavy + [cold, warm, run, nest, hunter, dim, upriver, stream, fed, murky, basking, spent, flood].filter(Boolean).slice(0, TIRE_REASONS).join("") +
         (!strike
           ? t("{line}. Ease off when it runs.", { line })
           : solid
