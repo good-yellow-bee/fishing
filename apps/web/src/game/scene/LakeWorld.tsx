@@ -444,10 +444,10 @@ const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
   { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
 ];
 
-/** Shack trees, in world space: the group sits at the shack. */
+/** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
-  { url: MODELS.fat, position: [3.4, 0, 1.2], scale: 3.8, rot: 0 },
-  { url: MODELS.oak, position: [-3.2, 0, 1.6], scale: 3.2, rot: 0 },
+  { url: MODELS.fat, position: [3.4 + SHOP_X, 0, 1.2 + SHOP_Z], scale: 3.8, rot: 0 },
+  { url: MODELS.oak, position: [-3.2 + SHOP_X, 0, 1.6 + SHOP_Z], scale: 3.2, rot: 0 },
 ];
 
 /** What the camera must not sink into: the hills and every tree on the shore. */
@@ -456,7 +456,7 @@ export const CAMERA_TREES: TreeShape[] = [
   ...TREES,
   ...BACK_TREES,
   ...CREEK_TREES,
-  ...SHACK_TREES.map((tree) => ({ ...tree, position: [tree.position[0] + SHOP_X, 0, tree.position[2] + SHOP_Z] as Vec3 })),
+  ...SHACK_TREES,
 ].map((tree) => treeShape(tree.position, tree.scale));
 
 const CREEK_GRASS: Scatter[] = [
@@ -1778,9 +1778,6 @@ function Shack() {
       <ToonModel url={MODELS.log} position={[0.1, 0.38, -0.7]} rotation={[0, 0.2, 0]} scale={1.3} />
       <ToonModel url={MODELS.paddle} position={[-1.15, 0.7, 0.1]} rotation={[0.2, 0.4, 1.2]} scale={1.4} />
       <ToonModel url={MODELS.bushDetailed} position={[1.8, 0, -1.1]} scale={1.4} shadows={false} sitOnGround />
-      {SHACK_TREES.map((tree) => (
-        <ToonModel key={tree.url} url={tree.url} position={tree.position} scale={tree.scale} sitOnGround />
-      ))}
     </group>
   );
 }
@@ -2081,6 +2078,7 @@ export const LakeWorld = memo(function LakeWorld({
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
+      <ScatterModels items={SHACK_TREES} shadows sway />
       <ScatterModels items={BUSHES} />
       <ScatterModels items={GRASS} />
       <ScatterModels items={NEAR_GRASS} />
