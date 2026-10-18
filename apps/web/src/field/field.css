@@ -378,6 +378,12 @@ button.field-primary {
     display: inline-block;
     padding-block: 4px;
   }
+
+  /* A one-digit count ("5" waters) was a 22 px-wide link. */
+  .stat-row strong a {
+    display: inline-block;
+    min-width: 32px;
+  }
 }
 
 .subhead,
@@ -1787,6 +1793,69 @@ button.field-primary:disabled {
 .day-grid li.day-planned a:focus-visible {
   outline: 2px solid var(--field-rust);
   outline-offset: 2px;
+}
+
+/* A high contrast theme (Windows) drops background colours and inset shadows, which emptied the days calendar and the tally bars: draw them in the theme's own colours. */
+@media (forced-colors: active) {
+  .day-grid li,
+  .tally-bar > span {
+    forced-color-adjust: none;
+  }
+
+  .day-grid li {
+    background: Canvas;
+    box-shadow: inset 0 0 0 1px GrayText;
+  }
+
+  .day-grid .day-lead {
+    box-shadow: none;
+  }
+
+  .day-grid .day-level-1 {
+    background: color-mix(in srgb, Highlight 35%, Canvas);
+  }
+
+  .day-grid .day-level-2 {
+    background: color-mix(in srgb, Highlight 65%, Canvas);
+  }
+
+  .day-grid .day-level-3 {
+    background: Highlight;
+  }
+
+  .day-grid .day-blank {
+    box-shadow: inset 0 0 0 2px CanvasText;
+  }
+
+  .day-grid .day-planned {
+    box-shadow: none;
+    outline: 1px dashed CanvasText;
+    outline-offset: -3px;
+  }
+
+  .day-grid li a:focus-visible {
+    outline-color: CanvasText;
+  }
+
+  .tally-bar > span {
+    background: Highlight;
+  }
+
+  /* The save and start buttons were a fill with no border, so they read as plain words. */
+  .field-primary {
+    border: 1px solid ButtonText;
+  }
+
+  /* The page you are on, a picked choice and a tapped lure were told apart only by fill or colour. */
+  .field-rail-nav a.active,
+  .field-tab a.active,
+  .choice-row button.on,
+  .lure-tip[aria-pressed="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
 }
 
 /* A season against the one before: several short lines, so smaller than a single conditions line. */
