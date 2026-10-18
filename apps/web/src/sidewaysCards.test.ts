@@ -23,3 +23,11 @@ describe("the first-cast coach on a phone held sideways", () => {
     expect(sideways).toMatch(/html\[data-text-size\] \.walkthrough ol \{\n    display: none;/);
   });
 });
+
+describe("the walking stick on a phone held sideways", () => {
+  it("keeps its size with larger text, and the hint starts beside it at any text size", () => {
+    expect(sideways).toMatch(/html\[data-text-size\] \.scene-wrap > \.walk-stick \{\n    zoom: 1;/);
+    expect(sideways).toMatch(/\n  \.hint \{[^}]*left: calc\(114px \/ var\(--text-zoom, 1\)\);/);
+    expect(sideways).toMatch(/html\[data-hand="left"\] \.hint \{\n    right: calc\(114px \/ var\(--text-zoom, 1\)\);/);
+  });
+});
