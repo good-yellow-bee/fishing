@@ -54,6 +54,8 @@ export type FightSim = {
   diving?: boolean;
   /** At the inlet, a resting fish the current is carrying off while the angler isn't reeling. */
   carried?: boolean;
+  /** Fought on a line the rocks or a piling scuffed in an earlier fight: it snaps at FRAYED_SNAP, short of full tension. */
+  frayed?: boolean;
 };
 /** -1 rod pulled left, 1 right, 0 straight. */
 export type Steer = -1 | 0 | 1;
@@ -147,7 +149,12 @@ export type FightPerformance = {
   fightSec?: number;
   /** At the reeds, the point or the dock, every run so far kept out of the weeds, off the rocks or clear of the pilings; at the inlet, every run downstream turned upstream. Unset once one wasn't. */
   clearOf?: "weeds" | "rocks" | "pilings" | "current";
+  /** The line was reeled over the rocks or wrapped round a piling, and is frayed until retied. */
+  scuffed?: boolean;
 };
+
+/** A frayed line snaps at this tension instead of the full 1, so the red band is half as wide. */
+export const FRAYED_SNAP = 0.9;
 
 /** Where FightBar turns the tension bar red. */
 export const RED_TENSION = 0.8;
@@ -451,6 +458,8 @@ export function makeFight(
   trophy = false,
   /** The inlet runs swollen with spring's melt or rain: its current takes slack line faster still. */
   flood = false,
+  /** The line is frayed from an earlier fight over the rocks or round a piling: it snaps sooner. */
+  frayed = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -470,7 +479,7 @@ export function makeFight(
 
   // Runs swing from side to side; the first way is the fish's own, not a dice roll, so seeded fights replay unchanged.
   const firstSide = Math.floor(weight * 10) % 2 === 0 ? 1 : -1;
-  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide };
+  const sim: FightSim = { line: 1, tension: 0.2, surge: 0, stamina: 1, runSide: firstSide, ...(frayed ? { frayed: true } : {}) };
   /** 0 fresh, 1 spent: how far the fish has tired. */
   const worn = () => 1 - sim.stamina;
   const performance: FightPerformance = { peakTension: sim.tension, maxLine: sim.line, turnedRuns: 0, bowedLeaps: 0, fightSec: 0 };
@@ -647,6 +656,8 @@ export function makeFight(
     sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
     sim.carried = water === "current" && sim.surge === 0 && !reeling && !sim.sulk && !sim.weeded;
     if (sim.rocky && reeling) rockedThisRun = true;
+    // Line reeled over the rocks or rubbing round a piling comes out of the fight frayed.
+    if ((sim.rocky && reeling) || sim.wrapped) performance.scuffed = true;
     if (reeling) {
       sim.tension += (tensionUpCalm + (sim.surge === 2 ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
@@ -685,7 +696,7 @@ export function makeFight(
     sim.tearing = tearSec > 0;
 
     if (sim.line <= 0) return "landed";
-    if (sim.tension >= 1) return "snapped";
+    if (sim.tension >= (frayed ? FRAYED_SNAP : 1)) return "snapped";
     if (tearSec >= tearAt) {
       sim.tornOut = true;
       return "escaped";
