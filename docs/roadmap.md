@@ -1090,6 +1090,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA45~~ | ~~On a phone up to 420 px wide with larger text, each tab in the field log's bottom bar was only as wide as its word, so MAP stood 23 px wide, under even the 24 px floor. Each tab is now at least 32 px wide on screen, and all seven still fit at 320 px in English (#1112)~~ | phone UX | S |
 | ~~PA46~~ | ~~The lake page had no heading at all, so a screen reader's list of headings came up empty there while every field log page had its title. The HUD now carries a hidden "On the lake" heading, the page's tab title, ahead of the Stillwater brand (probe headings.cjs) (#1115)~~ | phone UX | S |
 | ~~PA47~~ | ~~On the lake page the chip naming where you stand (and whether it is biting) and the controls help were both unnamed side notes, so a screen reader's landmark list read "complementary" twice with nothing to tell them apart. They are now named "Where you stand" and "Controls", in Polish too (probe landmarks.cjs) (#1117)~~ | phone UX | S |
+| ~~PA48~~ | ~~The keyboard focus ring is the lake's amber everywhere, which stood at 1.8-2:1 on the field log's cream paper and 1.5:1 on the sign-in card, under the 3:1 WCAG 1.4.11 asks. On the log's pages it is now the log's rust (5.5:1, and 6.9:1 in the dark theme), and on the sign-in card the card's deep rust (5.1:1); the dark bars and the lake keep the amber (probe focusring.cjs) (#1124)~~ | phone UX | S |
+| ~~PA49~~ | ~~The storm's lightning flash and the night's shooting stars stopped only for the game's own Reduce motion setting, so a player who asks their phone or computer to reduce motion still saw the whole lake flash white; both now follow the system setting too, as the rest of the lake already did (#1127)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1146,6 +1148,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
 | ~~SC50~~ | ~~Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes~~ (#1116) | scene | S |
 | ~~SC51~~ | ~~Far-bank cabin: a log cabin across the lake, windows lit from dusk, chimney smoking in fall and winter (and spring's cold ends of the day), snow on its roof in winter~~ (#1119) | scene | S |
+| ~~SC52~~ | ~~Shack cat: a ginger cat naps curled on the grass by the shack by day, lifting its head now and then, and sits facing the campfire while it burns; indoors in the rain~~ (#1122) | scene | S |
+| ~~SC53~~ | ~~News card scene12: canoeist, far-bank cabin, shack cat~~ (#1122) | scene | S |
+| ~~SC54~~ | ~~Winter bird feeder: a snowy-roofed feeder on a post by the shack in winter, with chickadees pecking at the seed and flitting to the oak and back by day~~ (#1126) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1430,7 +1435,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT277~~ | ~~News card 2026-10-18-game11 covers GT274 to GT276: "good now" after the rain and at the turning Inlet, skip casts off the dock, and live shiner bait~~ (#1096) | ui | S |
 | ~~GT278~~ | ~~The windward bank: a light breeze blowing squarely onto a bank pushes the warm surface water and its food there, so a cast there bites a little sooner (0.9 wait); a north wind blows onto the Dock, Reeds and Point, an east wind onto the Inlet and Reeds, a west wind onto the Drop-off, and a south wind onto no bank; the wait hint says so, and those banks' walk signs and the stance chip say "bites sooner now"~~ (#1102) | gameplay | S |
 | ~~GT279~~ | ~~The shack's chalk board names the banks a light breeze blows onto ("A light north breeze blows onto the Dock, Reeds and Point, and the fish follow the food in."), on a day whose wind holds; a south breeze, a breezy or strong day, or a sky that turns and changes the wind says nothing~~ (#1107) | ui | S |
-| GT280 | Lily pad cover: from spring to fall a cast landing within 1.6 m of a lily pad (the beds off the Reeds, Point and Drop-off) lands where the bass and pike wait in ambush, so the bite comes sooner (0.85 wait) and the wait hint says "Tight to the lily pads, where the bass and pike wait in ambush."; a quarter of such casts foul on the pad stems (a weed snag) unless the lure is a topwater, and the pads die back in winter | gameplay | S |
+| ~~GT280~~ | ~~Lily pad cover: from spring to fall a cast landing within 1.6 m of a lily pad (the beds off the Reeds, Point and Drop-off) lands where the bass and pike wait in ambush, so the bite comes sooner (0.85 wait) and the wait hint says "Tight to the lily pads, where the bass and pike wait in ambush."; a quarter of such casts foul on the pad stems (a weed snag) unless the lure is a topwater, and the pads die back in winter~~ (#1120) | gameplay | S |
+| GT281 | News card 2026-10-18-game12 covers GT278 to GT280: the windward bank, the chalk board naming it, and lily pad cover | ui | S |
 
 ## Risks / open questions for the owner
 

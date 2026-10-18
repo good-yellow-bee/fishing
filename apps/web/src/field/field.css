@@ -163,6 +163,12 @@ button.field-primary {
   padding: 28px 28px 48px;
 }
 
+/* The lake's amber focus ring stood under 2:1 on the log's cream paper (WCAG 1.4.11 asks 3:1): on the page it takes the
+   log's rust, 5.5:1 there and 6.9:1 on the dark theme's paper. The dark bars around the page keep the amber. */
+.field-main :is(a, button, summary):focus-visible {
+  outline-color: var(--field-rust);
+}
+
 .undo-bar {
   position: fixed;
   left: 50%;
