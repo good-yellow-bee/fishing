@@ -81,8 +81,17 @@ function pick<T extends string>(value: unknown, allowed: readonly T[], fallback:
   return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
+/** A system asking for more contrast (iOS Increase Contrast, macOS and Windows contrast settings) starts the game in high contrast. */
+export function systemWantsContrast() {
+  try {
+    return typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-contrast: more)").matches);
+  } catch {
+    return false;
+  }
+}
+
 /** Whatever was stored, as valid settings. Unknown or broken fields fall back to the defaults. */
-export function parseSettings(raw: string | null): Settings {
+export function parseSettings(raw: string | null, wantsContrast = systemWantsContrast()): Settings {
   let data: Record<string, unknown> = {};
   try {
     const parsed: unknown = raw ? JSON.parse(raw) : {};
@@ -108,7 +117,8 @@ export function parseSettings(raw: string | null): Settings {
     reduceMotion: typeof data.reduceMotion === "boolean" ? data.reduceMotion : d.reduceMotion,
     textSize: pick(data.textSize, ["normal", "large", "larger"], d.textSize),
     leftHanded: typeof data.leftHanded === "boolean" ? data.leftHanded : d.leftHanded,
-    highContrast: typeof data.highContrast === "boolean" ? data.highContrast : d.highContrast,
+    // Until the player picks, follow the system's contrast setting.
+    highContrast: typeof data.highContrast === "boolean" ? data.highContrast : wantsContrast,
     soundCaptions: typeof data.soundCaptions === "boolean" ? data.soundCaptions : d.soundCaptions,
     backgroundSound: typeof data.backgroundSound === "boolean" ? data.backgroundSound : d.backgroundSound,
     walkStick: typeof data.walkStick === "boolean" ? data.walkStick : d.walkStick,
@@ -122,7 +132,7 @@ function load() {
   try {
     return parseSettings(localStorage.getItem(SETTINGS_KEY));
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, highContrast: systemWantsContrast() };
   }
 }
 
