@@ -8,8 +8,8 @@ import { MIRROR_PX, MIRROR_SPAN_X, mirrorCanvasPoint } from "./mirrorImage";
 /** Fine enough for single fronds to show up close. */
 const FILM_SCALE = 4;
 const DUCKWEED = "#78ad3a";
-/** Lit by the sky like the pollen: bright by day, dull at dawn and dusk, barely there at night. */
-const HOUR_LIGHT: Record<LakeHour, number> = { dawn: 0.75, day: 1, dusk: 0.65, night: 0.22 };
+/** Lit by the sky: bright by day, dull at dawn and dusk, barely there at night. */
+const HOUR_LIGHT: Record<LakeHour, number> = { dawn: 0.6, day: 1, dusk: 0.45, night: 0.18 };
 
 function paintBeds(ctx: CanvasRenderingContext2D, wind: { x: number; z: number }) {
   const meter = (MIRROR_PX / MIRROR_SPAN_X) * FILM_SCALE;
