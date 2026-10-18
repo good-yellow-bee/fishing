@@ -556,6 +556,8 @@ describe("the fall turnover", () => {
       expect(turnoverWaitMul(day(1), "dock")).toBe(TURNOVER_WAIT);
       expect(turnoverWaitMul(day(1), "inlet")).toBe(TURNOVER_INLET_WAIT);
       expect(turnoverWaitMul(day(TURNOVER_DAYS), "dock")).toBe(1);
+      // A season picked by hand outside fall leaves the bite as it was.
+      expect(turnoverWaitMul(day(1), "dock", "spring")).toBe(1);
     }
     expect(isTurnover(new Date(2027, 6, 1))).toBe(false);
   });

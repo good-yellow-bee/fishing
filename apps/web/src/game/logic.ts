@@ -298,9 +298,9 @@ export function isTurnover(date: Date) {
   return days >= 0 && days < TURNOVER_DAYS;
 }
 
-/** How the turnover changes the wait: slower everywhere while it lasts, a little sooner in the inlet's fresh water, else 1. */
-export function turnoverWaitMul(now: Date, spot: string) {
-  if (!isTurnover(now)) return 1;
+/** How the turnover changes the wait: slower everywhere while it lasts, a little sooner in the inlet's fresh water, else 1 (and 1 outside fall, as when a season is picked by hand). */
+export function turnoverWaitMul(now: Date, spot: string, season: string | undefined = "fall") {
+  if (season !== "fall" || !isTurnover(now)) return 1;
   return spot === "inlet" ? TURNOVER_INLET_WAIT : TURNOVER_WAIT;
 }
 

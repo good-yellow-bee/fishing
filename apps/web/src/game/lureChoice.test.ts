@@ -97,7 +97,7 @@ describe("suitsBank", () => {
 });
 
 describe("suitsNow", () => {
-  const plain: LureConditions = { sky: "partly-cloudy", hour: "day", season: "spring", wind: "light-north", moon: 0.5, rising: false };
+  const plain: LureConditions = { sky: "partly-cloudy", hour: "day", season: "spring", wind: "light-north", moon: 0.5, rising: false, date: new Date(2026, 6, 15, 10) };
   it.each([
     ["#5 Mepps", { sky: "clear" }, true],
     ["#5 Mepps", { sky: "rain" }, true],
@@ -112,6 +112,11 @@ describe("suitsNow", () => {
     ["Spinnerbait", { season: "fall" }, true],
     ["Nightcrawler", { wind: "breezy" }, false],
     ["#5 Mepps", {}, false],
+    // The bright morning after the rain (a clear day after one that ended in rain): only a slow jig or worm still draws the sulking fish.
+    ["Green pumpkin tube", { sky: "clear", date: new Date(2027, 0, 7, 9) }, true],
+    ["Nightcrawler", { sky: "clear", date: new Date(2027, 0, 7, 9) }, true],
+    ["Pheasant tails", { sky: "clear", date: new Date(2027, 0, 7, 9) }, false],
+    ["Green pumpkin tube", { sky: "clear", date: new Date(2027, 0, 7, 13) }, false],
   ] as const)("says whether %s suits %o", (lure, change, suits) => {
     expect(suitsNow(lure, { ...plain, ...change })).toBe(suits);
   });
