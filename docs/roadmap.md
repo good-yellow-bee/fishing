@@ -1044,6 +1044,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | # | Title | Area | Size |
 |---|---|---|---|
 | ~~PA1~~ | ~~A phone held sideways at 740-800 px (most Androids) no longer gets the narrow-screen layout on top of its own: the shore signs stretched over the whole lake and the hint ran up the screen; the signs now stop above the power meter and start a second column when they run long (larger text, the inlet, the boat), the coach fits between the lure panel and the signs, and with larger text the hint gives way to the coach~~ (#968) | phone UX | S |
+| ~~PA2~~ | ~~On touch screens the header's links (Field log, Catch log, Board, Mute, Settings, Logout) and the coach's Skip stand at least 32 px tall and wide instead of 22, so a thumb lands on the one it means~~ (#970) | touch, access | S |
+| ~~PA3~~ | ~~The catch log's and lodge board's tables, which scroll sideways on their own on a phone, take keyboard focus (arrow keys scroll them) and are named by the page title for screen readers~~ (#970) | access | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 

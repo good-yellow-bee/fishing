@@ -72,7 +72,7 @@ export function BoardPage() {
         {" · "}
         <Link to="/log">{t("Catch log")}</Link>
       </p>
-      <h1>{t("Lodge board")}</h1>
+      <h1 id="board-title">{t("Lodge board")}</h1>
       <div className="board-tabs" role="tablist" aria-label={t("Board period")}>
         {(["all", "week"] as const).map((option) => (
           <button
@@ -123,7 +123,8 @@ export function BoardPage() {
           </div>
         </div>
       )}
-      <table>
+      {/* On a phone the table scrolls sideways on its own, so it takes focus for the arrow keys and is named by the page title. */}
+      <table tabIndex={0} aria-labelledby="board-title">
         <thead>
           <tr>
             <th>#</th>
