@@ -1156,7 +1156,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC55~~ | ~~Rain puddles: while it rains (not in winter) puddles gather on the grass by the shack, pricked by raindrop rings~~ (#1129) | scene | S |
 | ~~SC56~~ | ~~Washing line: a line on two posts by the water in front of the shack, with a shirt, a towel and socks pegged out by day from spring to fall when it is dry, blowing out on the wind~~ (#1133) | scene | S |
 | ~~SC57~~ | ~~News card scene13: bird feeder, rain puddles, washing line~~ (#1133) | scene | S |
-| SC58 | Snowshoe hare: at dawn and dusk a hare hops out from beside the oak west of the shack, grazes two patches of grass, sits up now and then to look round and hops home; brown from spring to fall, white in winter | scene | S |
+| ~~SC58~~ | ~~Snowshoe hare: at dawn and dusk a hare hops out from beside the oak west of the shack, grazes two patches of grass, sits up now and then to look round and hops home; brown from spring to fall, white in winter~~ (#1137) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
