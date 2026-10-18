@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene13";
+export const NEWS_ID = "2026-10-18-pa15";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "You can now fish with a keyboard alone: hold the arrow keys to move the aiming ring over the water, then cast with Space. In a fight Left and Right still steer. Buying an upgrade in the shack, claiming a request and releasing a fish keep your place on the keyboard, and a screen reader now hears the new rank, the claim and the release.",
   "In winter a bird feeder goes up by the shack, and chickadees flit between it and the oak all day. When it rains, puddles gather on the grass in front of the shack with raindrops ringing them, and on dry days the washing hangs out on a line by the water, blowing in the wind.",
   "A screen reader now hears how each cast ends: a landed fish's name is read and the next key goes to Release, and a missed bite or a snapped line is said aloud. If your phone or computer is set to reduce motion, storms no longer flash the lake and no shooting stars cross the night sky, even with the game's own setting off. And Join says up front that a password needs at least 8 characters.",
   "Waters has a Find a water box once the list is long, a water's and a kind's “Through the year” name the best month, and an old link to a merged water says where it went.",
