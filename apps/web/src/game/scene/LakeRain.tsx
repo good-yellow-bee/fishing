@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { settings } from "../settings";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { RAIN_COUNT, rainRipple, rainStreak } from "./skyWeather";
+import { waterHeight } from "./water";
 
 const STREAK_COLOR = "#d4e3ea";
 const RING_COLOR = "#e2eff3";
@@ -12,6 +14,7 @@ export function LakeRain({ light }: { light: number }) {
   const streaks = useRef<THREE.InstancedMesh>(null);
   const rings = useRef<THREE.InstancedMesh>(null);
   const scratch = useMemo(() => new THREE.Object3D(), []);
+  const still = useReducedMotion();
   const streakGeo = useMemo(() => new THREE.PlaneGeometry(0.035, 1), []);
   const ringGeo = useMemo(() => new THREE.RingGeometry(0.86, 1, 24), []);
   const streakMat = useMemo(
@@ -57,6 +60,8 @@ export function LakeRain({ light }: { light: number }) {
 
   useFrame(({ clock, camera }) => {
     const time = clock.elapsedTime;
+    // Reduced motion holds the shower as it was at one moment: streaks hang, rings stay one size on the moving water.
+    const at = still ? STILL_TIME : time;
     const streak = streaks.current;
     const ring = rings.current;
     if (!streak || !ring) return;
@@ -64,7 +69,7 @@ export function LakeRain({ light }: { light: number }) {
     const stride = settings.particles === "lite" ? 2 : 1;
     let slot = 0;
     for (let i = 0; i < RAIN_COUNT; i += stride, slot += 1) {
-      const drop = rainStreak(i, time);
+      const drop = rainStreak(i, at);
       if (drop) {
         const yaw = Math.atan2(camera.position.x - drop.x, camera.position.z - drop.z);
         scratch.position.set(drop.x, drop.y, drop.z);
@@ -78,9 +83,10 @@ export function LakeRain({ light }: { light: number }) {
       scratch.updateMatrix();
       streak.setMatrixAt(slot, scratch.matrix);
 
-      const splash = rainRipple(i, time);
+      const splash = rainRipple(i, at);
       if (splash) {
-        scratch.position.set(splash.x, splash.y, splash.z);
+        const swell = still ? waterHeight(splash.x, splash.z, time) - waterHeight(splash.x, splash.z, at) : 0;
+        scratch.position.set(splash.x, splash.y + swell, splash.z);
         scratch.rotation.set(-Math.PI / 2, 0, 0);
         scratch.scale.set(splash.radius, splash.radius, 1);
       } else {
