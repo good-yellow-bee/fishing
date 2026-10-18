@@ -42,32 +42,67 @@ export function gridLines(from: number, to: number): { values: number[]; digits:
   return { values, digits };
 }
 
-/** A label's room on screen, in pixels: a long name's width, and its two lines (the name and its fish). */
-const LABEL_WIDTH = 190;
-const LABEL_HEIGHT = 46;
-/** How far a moved label goes, in pixels, as spot-map.css moves it (62px down, 34px up, from 14px). */
-const LABEL_STEP = 48;
+/** A label's room on screen, in pixels: its two lines (the name and its fish; a phone shows the name alone), and at most this wide (spot-map.css). */
+export const LABEL_HEIGHT = 44;
+export const PHONE_LABEL_HEIGHT = 22;
+const LABEL_MAX_WIDTH = 180;
+/** A dot's room, in pixels: a label over another pin's dot would read as that water's name. */
+const DOT = 14;
+
+export type Box = { x0: number; y0: number; x1: number; y1: number };
+const meets = (a: Box, b: Box) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+/** How far a point is from a box, 0 inside it. */
+const gap = (box: Box, point: { x: number; y: number }) =>
+  Math.hypot(Math.max(box.x0 - point.x, 0, point.x - box.x1), Math.max(box.y0 - point.y, 0, point.y - box.y1));
 
 /**
- * Where each pin's label goes beside the earlier pins' labels (in order): 0 in its own place, 1 a line off (down, or
- * up near the foot of the sheet), 2 a line the other way, 3 none (the dot only; the list under the sheet still names
- * it). Labels keep their size on screen while the sheet scales, so `pxPerUnit` (the sheet's drawn width over
- * OWN_WIDTH) decides which meet: a phone's narrow sheet spreads labels that a wide one has room for.
+ * Where each pin's label goes (in order), as spot-map.css draws it beside a 44px pin: 0 in its own place (right of the
+ * dot, or left of it in the east half), 1 a line off (down, or up near the foot of the sheet), 2 a line the other way,
+ * 4 its own line on the other side of the dot, 3 none (the dot only; the list under the sheet still names it). A place
+ * is taken only when its label meets no label placed before, stays on the sheet, and is nearer its own dot than any
+ * other: a label over or beside another pin's dot reads as that water's name.
+ * Labels keep their size on screen while the sheet scales, so `pxPerUnit` (the sheet's drawn width over `width`)
+ * decides which meet: a phone's narrow sheet spreads labels that a wide one has room for. `taken` are other dots
+ * already on the sheet (in sheet units) and `labels` their labels as drawn (in pixels from the sheet's corner), such as
+ * the sample waters' hand-placed ones.
  */
-export function labelShifts(points: readonly { x: number; y: number }[], pxPerUnit: number): number[] {
-  const shifts: number[] = [];
-  const placed: { x: number; y: number }[] = [];
-  const offset = (point: { y: number }, shift: number) => {
-    const low = point.y > OWN_HEIGHT * 0.7;
-    if (shift === 0) return 0;
-    return (shift === 1) === low ? -LABEL_STEP : LABEL_STEP;
+export function labelShifts(
+  points: readonly { x: number; y: number }[],
+  pxPerUnit: number,
+  {
+    width = OWN_WIDTH,
+    height = OWN_HEIGHT,
+    labelWidth = LABEL_MAX_WIDTH,
+    labelHeight = LABEL_HEIGHT,
+    taken = [] as readonly { x: number; y: number }[],
+    labels = [] as readonly Box[],
+  } = {},
+): number[] {
+  const sheet = { w: width * pxPerUnit, h: height * pxPerUnit };
+  const dots = points.map((point) => ({ x: point.x * pxPerUnit, y: point.y * pxPerUnit }));
+  const placed: Box[] = [...labels];
+  const otherDots = [...dots, ...taken.map((point) => ({ x: point.x * pxPerUnit, y: point.y * pxPerUnit }))];
+  const box = (point: { x: number; y: number }, at: { x: number; y: number }, shift: number): Box => {
+    const low = point.y > height * 0.7;
+    // spot-map.css: top 14px from the pin's corner (22px up), 62px a line down, -34px a line up.
+    const top = shift === 0 || shift === 4 ? -8 : (shift === 1) === low ? -56 : 40;
+    const east = (point.x > width * 0.5) !== (shift === 4);
+    // left: 26px (4px right of the dot's centre), or right: 26px on the east side.
+    const x0 = east ? at.x - 4 - labelWidth : at.x + 4;
+    return { x0, y0: at.y + top, x1: x0 + labelWidth, y1: at.y + top + labelHeight };
   };
-  for (const point of points) {
-    const at = { x: point.x * pxPerUnit, y: point.y * pxPerUnit };
-    let shift = 0;
-    while (shift < 3 && placed.some((other) => Math.abs(other.x - at.x) < LABEL_WIDTH && Math.abs(other.y - (at.y + offset(point, shift))) < LABEL_HEIGHT)) shift++;
-    shifts.push(shift);
-    if (shift < 3) placed.push({ x: at.x, y: at.y + offset(point, shift) });
-  }
-  return shifts;
+  return points.map((point, i) => {
+    const at = dots[i]!;
+    for (const shift of [0, 1, 2, 4]) {
+      const room = box(point, at, shift);
+      const onSheet = room.y0 >= 0 && room.y1 <= sheet.h && room.x0 >= 0 && room.x1 <= sheet.w;
+      const own = gap(room, at);
+      const overDot = otherDots.some((dot, j) => j !== i && (gap(room, dot) <= own || meets(room, { x0: dot.x - DOT / 2, y0: dot.y - DOT / 2, x1: dot.x + DOT / 2, y1: dot.y + DOT / 2 })));
+      if (onSheet && !overDot && !placed.some((other) => meets(room, other))) {
+        placed.push(room);
+        return shift;
+      }
+    }
+    return 3;
+  });
 }

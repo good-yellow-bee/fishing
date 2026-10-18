@@ -101,18 +101,20 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?|knife(?! jigs?\b)|knives|chairs?|stools?|umbrellas?|brollys?|tape|measures?|scales|weights?|snaps|towels?|gloves?|(tackle |fly )?box(es)?|hats?|tents?|bite alarms?|first aid|cameras?|phones?)\b/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?|knife(?! jigs?\b)|knives|chairs?|stools?|umbrellas?|brollys?|tape|measures?|scales|snaps|towels?|gloves?|(tackle |fly )?box(es)?|hats?|tents?|bite alarms?|first aid|cameras?|phones?|clippers?|keep ?nets?|hook removers?|disgorgers?|scissors|(head )?torch(es)?|unhooking mats?|thermos(es)?|flasks?|bait (boat|needle)s?|bank sticks?)\b/i;
+/** Weights on their own ("Split weights"); a lure rigged with one ("Texas rig with bullet weight") is still a lure. */
+const WEIGHT = /^((bullet|split|drop|lead|egg)\s)?weights?\b/i;
 /**
  * Line names end with the line word ("Steel leader"), or start with it before a size ("Line 0.25 mm"); "In-line
- * spinner" does neither.
+ * spinner" does neither, and a lure rigged on one ("Frog on braid", "Shad on wire leader") is still a lure.
  */
-const LINE = /\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$|^(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s+[\d.,]/i;
+const LINE = /^(?!.*\b(on|with|to)\s).*\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$|^(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s+[\d.,]/i;
 
 /**
  * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.
  */
 const TACKLE_TOOL_PL =
-  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet|noz|krzes|parasol|miark|waga|wagi|agrafk|obciaz|recznik|rekawic|namiot|pudel)/;
+  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet|noz|krzes|parasol|miark|waga|wagi|agrafk|obciazeni|recznik|rekawic|namiot|pudel|siatk|wypychacz|termos|mata\b|maty\b|wiadr|kalosz|plecak|torb)/;
 /**
  * Polish names a line by its word wherever it sits ("Żyłka 0,25", "Zapasowy przypon"), but a lure rigged on one
  * ("Guma na przyponie") is still a lure.
@@ -121,7 +123,7 @@ const LINE_PL = /(^|[^a-z])(?<!(^|\s)(na|z|ze|do) )(zylk|plecionk|przypon|fluoro
 
 /** Anything not recognised as a tool or line counts as a lure, so lures the angler typed stay on the list. */
 export function isLureLabel(label: string): boolean {
-  return !TACKLE_TOOL.test(label) && !LINE.test(label) && !TACKLE_TOOL_PL.test(foldText(label)) && !LINE_PL.test(foldText(label));
+  return !TACKLE_TOOL.test(label) && !WEIGHT.test(label) && !LINE.test(label) && !TACKLE_TOOL_PL.test(foldText(label)) && !LINE_PL.test(foldText(label));
 }
 
 /** Packed lures, or the sample's lures when none are packed. */

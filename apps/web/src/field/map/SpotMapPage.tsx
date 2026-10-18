@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
@@ -32,7 +32,7 @@ import {
   ringPath,
   type SamplePlace,
 } from "./places";
-import { OWN_HEIGHT, OWN_WIDTH, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
+import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn } from "./ownSheet";
 import { hasSampleWaters, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
@@ -140,6 +140,43 @@ function fishTier(fish: number) {
   return fish === 0 ? 0 : fish < 5 ? 1 : fish < 20 ? 2 : 3;
 }
 
+/** How big an own water's label can be drawn, as spot-map.css has it: at most min(180px, 35vw) wide, one line on a phone. */
+function labelSizeOnScreen() {
+  if (typeof window === "undefined") return {};
+  const phone = window.matchMedia?.("(max-width: 640px)").matches ?? false;
+  return { labelWidth: Math.min(180, window.innerWidth * 0.35), labelHeight: phone ? PHONE_LABEL_HEIGHT : LABEL_HEIGHT };
+}
+
+/**
+ * The drawn sheet's width over its own units, as it scales with the page, and with `handLabels` the sample waters'
+ * labels as drawn (their places are set in spot-map.css and move on a phone), in pixels from the sheet's corner.
+ */
+function useSheetScale(units: number, handLabels = false) {
+  // A ref as state: a sheet drawn only once the book has loaded is measured then too.
+  const [box, sheet] = useState<HTMLDivElement | null>(null);
+  const [pxPerUnit, setPxPerUnit] = useState(0.9);
+  const [labels, setLabels] = useState<readonly Box[]>([]);
+  // After every render: a language switch or another book redraws the labels at new widths. Kept only when changed.
+  useLayoutEffect(() => {
+    if (!box || !handLabels) return;
+    const corner = box.getBoundingClientRect();
+    const drawn = [...box.querySelectorAll(".map-pin:not(.map-pin-own) .map-pin-label")].map((label) => {
+      const at = label.getBoundingClientRect();
+      return { x0: at.left - corner.left, y0: at.top - corner.top, x1: at.right - corner.left, y1: at.bottom - corner.top };
+    });
+    setLabels((was) => (JSON.stringify(was) === JSON.stringify(drawn) ? was : drawn));
+  });
+  useEffect(() => {
+    if (!box || typeof ResizeObserver === "undefined") return;
+    const measure = () => setPxPerUnit(box.getBoundingClientRect().width / units || 0.9);
+    measure();
+    const watch = new ResizeObserver(measure);
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, [box, units]);
+  return { sheet, pxPerUnit, labels };
+}
+
 function SpotPin({
   spot,
   place,
@@ -155,15 +192,17 @@ function SpotPin({
   point?: { x: number; y: number };
   width?: number;
   height?: number;
-  /** labelShifts' place for this pin's label: 0 its own, 1 a line off, 2 a line the other way, 3 none. */
+  /** labelShifts' place for this pin's label: 0 its own, 1 a line off, 2 a line the other way, 4 the other side, 3 none. */
   shift?: number;
 }) {
   // The sample waters' labels are placed by hand at their sample places; a place the angler set takes the general placement.
   // A pin just beside an earlier one moves its label a line down (or up, near the foot of the sheet), off the other label;
   // a third takes the other way, and past that only the dot shows.
   const low = point.y > height * 0.7;
-  const moved = shift === 0 ? "" : shift >= 3 ? " map-pin-bare" : (shift === 1) === low ? " map-pin-up" : " map-pin-down";
-  const own = spot.place ? ` map-pin-own${point.x > width * 0.5 ? " map-pin-east" : ""}${moved}` : "";
+  const moved = shift === 0 || shift === 4 ? "" : shift === 3 ? " map-pin-bare" : (shift === 1) === low ? " map-pin-up" : " map-pin-down";
+  // On the other side of its dot when both of its own lines were taken.
+  const east = point.x > width * 0.5 !== (shift === 4);
+  const own = spot.place ? ` map-pin-own${east ? " map-pin-east" : ""}${moved}` : "";
   return (
     <Link
       to={`/spots/${spot.id}`}
@@ -206,18 +245,8 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
   const TICK_WIDTH = 110;
   const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
   // The labels keep a size on screen while the sheet scales, so which ones meet depends on how wide it is drawn.
-  const sheet = useRef<HTMLDivElement>(null);
-  const [pxPerUnit, setPxPerUnit] = useState(0.9);
-  useEffect(() => {
-    const box = sheet.current;
-    if (!box || typeof ResizeObserver === "undefined") return;
-    const measure = () => setPxPerUnit(box.getBoundingClientRect().width / OWN_WIDTH || 0.9);
-    measure();
-    const watch = new ResizeObserver(measure);
-    watch.observe(box);
-    return () => watch.disconnect();
-  }, []);
-  const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit);
+  const { sheet, pxPerUnit } = useSheetScale(OWN_WIDTH);
+  const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit, labelSizeOnScreen());
   return (
     <div className="spot-map own-sheet" ref={sheet}>
       <svg className="spot-map-plate" viewBox={`0 0 ${OWN_WIDTH} ${OWN_HEIGHT}`} role="img" aria-label={t("Your own waters, north up")}>
@@ -314,6 +343,7 @@ export function SpotMapPage() {
     return rested >= 7 ? `${line} · ${tn(rested, "rested {n} day", "rested {n} days")}` : line;
   };
   const sampleSheet = hasSampleWaters(book);
+  const { sheet: sampleSheetBox, pxPerUnit: samplePxPerUnit, labels: sampleLabels } = useSheetScale(MAP_WIDTH, true);
   const plotted = spots.flatMap((spot) => {
     const place = sheetPlace(spot, sampleSheet);
     return place ? [{ spot, place }] : [];
@@ -322,6 +352,14 @@ export function SpotMapPage() {
   // Pinned off the sample sheet: drawn on a sheet of their own.
   const ownPinned = unplotted.flatMap((spot) => (spot.place ? [{ spot, place: { spotId: spot.id, lat: spot.place.lat, lng: spot.place.lng } }] : []));
   const unpinned = unplotted.filter((spot) => !spot.place);
+  // The angler's own pins on the sample sheet keep their labels off each other and off the sample waters' dots.
+  const ownOnSample = plotted.filter(({ spot }) => spot.place);
+  const sampleShifts = labelShifts(
+    ownOnSample.map(({ place }) => project(place)),
+    samplePxPerUnit,
+    { width: MAP_WIDTH, height: MAP_HEIGHT, ...labelSizeOnScreen(), taken: plotted.filter(({ spot }) => !spot.place).map(({ place }) => project(place)), labels: sampleLabels },
+  );
+  const sampleShift = new Map(ownOnSample.map(({ spot }, index) => [spot.id, sampleShifts[index]]));
 
   return (
     <div className="sheet">
@@ -349,11 +387,11 @@ export function SpotMapPage() {
           ) : null}
         </p>
       ) : plotted.length === 0 ? null : (
-        <div className="spot-map">
+        <div className="spot-map" ref={sampleSheetBox}>
           <MapPlate />
           <div className="spot-map-pins" aria-hidden="true">
             {plotted.map(({ spot, place }) => (
-              <SpotPin key={spot.id} spot={spot} place={place} fish={fishOf(spot.id)} />
+              <SpotPin key={spot.id} spot={spot} place={place} shift={sampleShift.get(spot.id)} fish={fishOf(spot.id)} />
             ))}
           </div>
         </div>
