@@ -170,6 +170,8 @@ import { GooseFamily } from "./GooseFamily";
 import { gooseFamilyOut } from "./gooseGraze";
 import { LeafPile } from "./LeafPile";
 import { leafJumpOut } from "./leafJump";
+import { Painter } from "./Painter";
+import { painterOut } from "./pleinAir";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2280,6 +2282,7 @@ export const LakeWorld = memo(function LakeWorld({
       {scullOut(hour, sky, season, wind) && <Sculler />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
+      {painterOut(hour, sky, season, wind) && <Painter />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
