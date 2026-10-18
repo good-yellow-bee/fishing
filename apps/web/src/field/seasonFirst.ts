@@ -23,3 +23,15 @@ export function seasonFirst(catches: readonly CatchEntry[], today: Date = new Da
   if (!now || !before) return null;
   return { entry: now.entry, year, earlier: calendarDay(before.at, year) - calendarDay(now.at, year) };
 }
+
+/** Last year's last fish of the kind, to say when its season ended then; null when last year gave none. */
+export function seasonLast(catches: readonly CatchEntry[], today: Date = new Date()): CatchEntry | null {
+  const year = today.getFullYear() - 1;
+  let last: CatchEntry | null = null;
+  for (const entry of catches) {
+    const at = new Date(entry.caughtAt);
+    if (Number.isNaN(at.getTime()) || at.getFullYear() !== year) continue;
+    if (!last || entry.caughtAt > last.caughtAt) last = entry;
+  }
+  return last;
+}
