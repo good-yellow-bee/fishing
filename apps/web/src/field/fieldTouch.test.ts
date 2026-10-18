@@ -33,7 +33,8 @@ describe("the field log on a touch screen", () => {
   it("parts a card's wrapped lines so neighbouring links don't take each other's taps", () => {
     expect(/\n  p\.meta \{([^}]*)\}/.exec(css)?.[1]).toContain("row-gap: 12px;");
     expect(/\(\.meta, \.trip-link\) \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 10px;");
-    expect(/\n  div\.book-file \{([^}]*)\}/.exec(css)?.[1]).toContain("row-gap: 16px;");
+    expect(/\n  div\.book-file,\n  p\.search-order \{([^}]*)\}/.exec(css)?.[1]).toContain("row-gap: 16px;");
+    expect(/\n  p\.fish-csv \{([^}]*)\}/.exec(css)?.[1]).toContain("margin: 16px 0;");
   });
 
   it("makes the Released it row and Rename or merge at least 32 px tall", () => {
