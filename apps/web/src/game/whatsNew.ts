@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game03";
+export const NEWS_ID = "2026-10-18-field02";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Logging a fish takes fewer fixes: a photo's own time is one tap away even after you set the time, “−1 day” moves it to yesterday, and in metric a weight typed in grams (“850”) offers to become 0.85 kg. A fish's photo can be saved or shared from its full view, an empty tackle list can copy any past outing's bag, and merging two waters says what will move before you tap.",
   "The lure picker now marks the lures that draw a bite sooner: “good here” for the bank you stand on, “good now” for the season, hour and weather (a spinner flashing on a clear day, a worm after dark, a jig in winter), and says why under the one you tie on. The shack's chalk board says when catfish and burbot fight harder in the rain and what a full or new moon does to the night bite.",
   "Outings can now be found by what they caught: type “pike” or “jig” in the Trips search, or “lost” and “missed” for the days a fish got away. Species and water pages can list their fish largest first, Bests counts the weeks in a row you went out, and Home's month and year counts open just your own fish.",
   "The field guide now says how each fish you have landed fights: its own habits, like a pike rolling at the net or a trout tail-walking, when it fights hard (a burbot after dark or in rain) and when it tires sooner (a walleye spent from spawning in spring). After a catch, the card also says when a school is feeding at that bank or a hunter followed your fish in.",

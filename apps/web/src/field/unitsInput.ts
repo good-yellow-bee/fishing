@@ -18,8 +18,11 @@ const NUM = String.raw`(\d+(?:[.,]\d+)?)`;
 const POUNDS_OUNCES = new RegExp(String.raw`^(?:${NUM}\s*(?:lbs?|#)\s*)?(?:${NUM}\s*(?:oz)?)?$`, "i");
 /** "18 1/4", "3/4", "18 1/4 in": inches as a tape is marked. */
 const INCH_FRACTION = new RegExp(String.raw`^(?:(\d+)\s+)?(\d+)\s*/\s*(\d+)\s*(?:in|inch|inches|")?$`, "i");
-/** A plain number with its unit written after it: "28 in", "3.2 lb", "71 cm", "1,4 kg". */
-const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|kg)$`, "i");
+/** A plain number with its unit written after it: "28 in", "3.2 lb", "71 cm", "1,4 kg", "850 g", "85 dag", "450 mm". */
+const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|mm|kg|dag|g)$`, "i");
+
+/** Metric units as parts of the book's centimetre or kilogram. */
+const METRIC_PARTS: Record<string, number> = { cm: 1, mm: 0.1, kg: 1, dag: 0.01, g: 0.001 };
 
 const num = (text: string | undefined) => (text ? Number(text.replace(",", ".")) : 0);
 
@@ -47,12 +50,12 @@ export function toBookAmount(text: string, kind: "length" | "weight", units: Uni
   const unit = WITH_UNIT.exec(clean);
   if (unit) {
     const written = unit[2]!.toLowerCase();
-    const isLength = written === "cm" || /^(in|inch|inches|")$/.test(written);
+    const isLength = written === "cm" || written === "mm" || /^(in|inch|inches|")$/.test(written);
     // A weight's unit on a length, or the other way round, is left for the form to refuse.
     if (isLength !== (kind === "length")) return text;
     const value = num(unit[1]);
-    if (written === "cm") return round(value / CM_PER_IN, 3);
-    if (written === "kg") return round(value / KG_PER_LB, 3);
+    const part = METRIC_PARTS[written];
+    if (part !== undefined) return round((value * part) / (isLength ? CM_PER_IN : KG_PER_LB), 3);
     return round(value, 3);
   }
   // Pounds and ounces in any units; a tape's fractions in inches, or with the inches written.
@@ -64,6 +67,20 @@ export function toBookAmount(text: string, kind: "length" | "weight", units: Uni
   if (value === null) return text;
   if (units === "imperial") return decimal(text);
   return round(kind === "length" ? value / CM_PER_IN : value / KG_PER_LB, 3);
+}
+
+/** The book's heaviest fish, in kilograms. */
+const MAX_KG = 80 * KG_PER_LB;
+
+/**
+ * A bare metric weight past any fish's kilograms ("850"), read as the grams a phone's number pad
+ * can't write the unit for: the kilograms to offer, or null when the number already reads right.
+ */
+export function gramsAsKilos(text: string): string | null {
+  const value = parse(text);
+  if (value === null || value <= MAX_KG) return null;
+  const kilos = value / 1000;
+  return kilos >= 0.05 && kilos <= MAX_KG ? round(kilos, 3) : null;
 }
 
 /** A stored amount as the player reads it, for editing. */

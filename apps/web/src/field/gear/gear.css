@@ -109,7 +109,8 @@
   color: var(--field-muted);
 }
 
-.tackle-add input {
+.tackle-add input,
+.tackle-add select {
   width: 100%;
   border: 1px solid var(--field-input-line);
   background: var(--field-input);

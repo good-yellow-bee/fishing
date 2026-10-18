@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Logbook } from "@stillwater/shared";
-import { mergeWaters } from "./waterMerge";
+import { mergeMoves, mergeWaters } from "./waterMerge";
 
 const book: Logbook = {
   spots: [
@@ -53,5 +53,14 @@ describe("merging a day out logged twice", () => {
     // The kept outing had only its water's name: the moved one's own title comes along.
     expect(next.trips.find((trip) => trip.id === "t3")).toMatchObject({ spotId: "b", title: "Dawn", note: "Fog early\nCalm", lost: 3, missed: 1 });
     expect(next.catches.filter((entry) => entry.tripId === "t3").map((entry) => entry.id).sort()).toEqual(["f1", "f3"]);
+  });
+});
+
+describe("what a merge would move", () => {
+  it("counts the outings and fish going over, and the outings joining one on their day", () => {
+    const twice = { ...book, trips: [...book.trips, { id: "t3", date: "2026-05-01", title: "", spotId: "b", note: "" }] } as Logbook;
+    expect(mergeMoves(book, "a", "b")).toEqual({ outings: book.trips.filter((trip) => trip.spotId === "a").length, fish: book.catches.filter((entry) => entry.spotId === "a").length, joined: 0 });
+    expect(mergeMoves(twice, "a", "b").joined).toBe(1);
+    expect(mergeMoves(book, "b", "a")).toEqual({ outings: 0, fish: 0, joined: 0 });
   });
 });

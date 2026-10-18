@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fromBookAmount, fromBookTemp, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
+import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 
 describe("metric entry in the field log", () => {
   it("leaves imperial entry as typed", () => {
@@ -31,6 +31,12 @@ describe("metric entry in the field log", () => {
     expect(toBookAmount("1,4 kg", "weight", "metric")).toBe("3.086");
     expect(toBookAmount("71 cm", "length", "imperial")).toBe("27.953");
     expect(toBookAmount("1.4 kg", "weight", "imperial")).toBe("3.086");
+    // Grams and decagrams as a kitchen or a Polish scale reads them, millimetres as a ruler.
+    expect(toBookAmount("1400 g", "weight", "metric")).toBe("3.086");
+    expect(toBookAmount("140 dag", "weight", "metric")).toBe("3.086");
+    expect(toBookAmount("850g", "weight", "imperial")).toBe("1.874");
+    expect(toBookAmount("710 mm", "length", "metric")).toBe("27.953");
+    expect(toBookAmount("850 g", "length", "metric")).toBe("850 g");
     expect(toBookAmount("3 lb", "weight", "metric")).toBe("3");
     expect(toBookAmount("28 in", "length", "metric")).toBe("28");
     expect(toBookAmount("2 lb 8 oz", "weight", "metric")).toBe("2.5");
@@ -63,5 +69,16 @@ describe("range messages in metric", () => {
     expect(unitsMessage("Length should sit between 1 and 120 inches.", "metric")).toBe("Length should sit between 3 and 304 centimetres.");
     expect(unitsMessage("Length should sit between 1 and 120 inches.", "imperial")).toBe("Length should sit between 1 and 120 inches.");
     expect(unitsMessage("Note the sky.", "metric")).toBe("Note the sky.");
+  });
+});
+
+describe("gramsAsKilos", () => {
+  it("offers kilograms for a number only grams can be", () => {
+    expect(gramsAsKilos("850")).toBe("0.85");
+    expect(gramsAsKilos("1250,5")).toBe("1.251");
+    expect(gramsAsKilos("12,5")).toBeNull();
+    expect(gramsAsKilos("36")).toBeNull();
+    expect(gramsAsKilos("40000")).toBeNull();
+    expect(gramsAsKilos("850 g")).toBeNull();
   });
 });
