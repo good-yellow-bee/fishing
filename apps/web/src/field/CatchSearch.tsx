@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigationType, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, useLang, useT } from "../i18n";
@@ -20,6 +20,8 @@ import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
 import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
+import { readSizePlus } from "./sizePlus";
+import { hasMovedInApp } from "./FieldShell";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
@@ -390,10 +392,8 @@ export function searchParts(book: Logbook, needle: string): string[] {
     // "do 25 cm", "up to 2 lb", "max. 2 kg": the bound itself included; "at least" and "min." read as "over", which includes it too.
     .replace(new RegExp(String.raw`(^|[\s+])(?:do|up to|at most|co najwyżej|co najwyzej|najwyżej|najwyzej|maksymalnie|maks\.?|maximum|max\.?)\s+` + sized, "gi"), "$1<=")
     .replace(new RegExp(String.raw`(^|[\s+])(?:under|below|less than|smaller than|shorter than|lighter than|colder than|poniżej|ponizej|mniej niż|mniej niz|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niż|(?:mniejsz|krótsz|krotsz|lżejsz|lzejsz|zimniejsz)[eya] niz)\s+` + sized, "gi"), "$1<");
-  // "30in+" or "2 kg+", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
-  text = text.replace(/(^|[\s+])((?:\d+\s?lbs?\s+)?\d+(?:[.,]\d+)?\s?(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]))\+(?=[\s+]|$)/gi, "$1>$2");
-  // "20+ in", the plus before the unit: the same.
-  text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\+\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$)/gi, "$1>$2 $3");
+  // "30in+" or "20+ in", as anglers say a 30-plus pike: the same as ">30in", not a "+" joining parts.
+  text = readSizePlus(text);
   // "25-30 in" or "1–2 kg": a size between the two, both ends included, as ">25 in + <=30 in"; "30-25 in" reads the same.
   text = text.replace(/(^|[\s+])(\d+(?:[.,]\d+)?)\s?[-–]\s?(\d+(?:[.,]\d+)?)\s?(lbs?|oz|kg|dag|g|in|cm|mm|°?[cf])(?=[\s+]|$)/gi, (_all, lead: string, a: string, b: string, unit: string) => {
     const [low, high] = Number(a.replace(",", ".")) <= Number(b.replace(",", ".")) ? [a, b] : [b, a];
@@ -500,10 +500,30 @@ export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: 
   return { keep, drop };
 }
 
+/**
+ * The parts to find and to leave out, with a name in the book that has a " - " of its own ("Rapala - silver",
+ * "Mille Lacs - north") typed as it reads kept whole, not taken as leaving out what follows its dash.
+ */
+export function leftOutParts(book: Logbook, needle: string): { keep: string[]; drop: string[] } {
+  const names = [...new Set([...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])])]
+    .filter((name) => /\s-\s/.test(name))
+    .sort((a, b) => b.length - a.length);
+  const held: string[] = [];
+  let text = needle;
+  for (const name of names) {
+    for (let at = text.toLowerCase().indexOf(name.toLowerCase()); at >= 0; at = text.toLowerCase().indexOf(name.toLowerCase())) {
+      text = `${text.slice(0, at)}\u0002${held.push(text.slice(at, at + name.length)) - 1}\u0002${text.slice(at + name.length)}`;
+    }
+  }
+  const back = (part: string) => part.replace(/\u0002(\d+)\u0002/g, (_, index: string) => held[Number(index)]!);
+  const { keep, drop } = splitLeftOut(searchParts(book, text));
+  return { keep: keep.map(back), drop: drop.map(back) };
+}
+
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 /** `pictured` says which fish have a photo kept, for "photo"; left out, none do. */
 export function findCatches(book: Logbook, needle: string, t: (text: string) => string, pictured: (id: string) => boolean = () => false): CatchEntry[] {
-  const { keep, drop } = splitLeftOut(searchParts(book, needle));
+  const { keep, drop } = leftOutParts(book, needle);
   if (drop.length === 0) return findKept(book, keep, t, pictured);
   // Only words to leave out ("-released"): every other fish in the book.
   let found = keep.length > 0 ? findKept(book, keep, t, pictured) : catchesNewestFirst(book);
@@ -583,6 +603,9 @@ export function CatchSearch() {
   // Everything typed here since the last link, so the address catching up with the box is not taken for a new link:
   // on a slow phone with a long book it can still be a few keys behind ("pi" arriving after "pik" was typed).
   const typed = useRef<Set<string>>(new Set());
+  const popped = useRef(false);
+  // Back or Forward, not a first visit to the address (which has no entry of the router's own to come back to).
+  popped.current = useNavigationType() === "POP" && hasMovedInApp();
   useEffect(() => {
     // Arriving from a link with a search typed in, even one followed from home itself: show the matches, not the top of home.
     const at = box.current;
@@ -595,6 +618,8 @@ export function CatchSearch() {
     if (typed.current.has(linked) || !at) return;
     typed.current = new Set();
     setQuery(linked);
+    // Back to a search: the browser puts the page back where it was, and focus is left alone as the shell leaves it.
+    if (popped.current) return;
     // The phone's sticky bar would cover the search box, so stop below it.
     const bar = document.querySelector<HTMLElement>(".field-mobile-bar");
     const below = bar && getComputedStyle(bar).position === "sticky" ? bar.offsetHeight : 0;
@@ -619,6 +644,9 @@ export function CatchSearch() {
   const needle = query.trim();
   // Typing stays quick in a long book: the results catch up a beat behind the keys.
   const settled = useDeferredValue(needle);
+  // One lure found, whatever a count's link leaves out beside it (the game's lake, the sample week): its rename box shows.
+  const kept = leftOutParts(book, settled).keep;
+  const onlyLure = kept.length === 1 && parseExactTerm(kept[0]!)?.field === "lure";
   const metric = getUnits() === "metric";
   // The Polish book arrives a beat after the first search; matching runs again once it is in.
   const polish = polishBook();
@@ -723,7 +751,7 @@ export function CatchSearch() {
           {/* "bez wyprawy" takes in the loose fish too: those can still be filed in one tap. */}
           {matches.length > 0 && (LOOSE_WORDS.has(normalize(settled)) || NO_OUTING_WORDS.has(normalize(settled))) ? <FileLoose /> : null}
           {/* Every fish on one lure: the place to fix that lure's name across the book. */}
-          {matches.length > 0 && parseExactTerm(settled)?.field === "lure" ? (
+          {matches.length > 0 && onlyLure ? (
             <RenameKind key={matches[0]!.lure} field="lure" name={matches[0]!.lure} />
           ) : null}
         </>

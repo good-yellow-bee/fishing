@@ -37,6 +37,12 @@ function FieldLinks() {
   );
 }
 
+/** Whether this visit has gone from one page to another yet: a Back can only come after one. */
+let movedInApp = false;
+export function hasMovedInApp(): boolean {
+  return movedInApp;
+}
+
 export function FieldShell({ children }: { children: ReactNode }) {
   const t = useT();
   const lang = useLang();
@@ -74,6 +80,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     if (lastPath.current === pathname) return;
     lastPath.current = pathname;
+    movedInApp = true;
     if (how !== "POP") window.scrollTo(0, 0);
   }, [pathname, how]);
 
