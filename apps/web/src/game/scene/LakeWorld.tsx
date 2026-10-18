@@ -107,6 +107,8 @@ import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { sunCaustics } from "./sunCaustics";
+import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
+import { bankMirrorStrength } from "./mirrorImage";
 import { DRAGONFLY_COUNT, dragonfliesOut, dragonfly } from "./dragonflies";
 import { duckFlush, duckReturn, lastSplash, stepDuck, type DuckState } from "./duckFlush";
 import { mistAmount } from "./mist";
@@ -406,6 +408,9 @@ const CREEK_TREES: Scatter[] = [
   { url: MODELS.oakDark, position: [-29.4, -0.08, -14.6], scale: 4.6, rot: 3.3 },
   { url: MODELS.pineDark, position: [-35.2, -0.08, -16.8], scale: 5, rot: 0.3 },
 ];
+
+/** Every shore tree, for the bank's mirror image on still water. */
+const MIRROR_TREES: MirrorTree[] = [...TREES, ...BACK_TREES, ...CREEK_TREES].map((tree) => ({ position: tree.position, scale: tree.scale, variant: plantVariant(tree.position) }));
 
 /** The three hills behind the far shore: centre and radii of each icosphere. */
 const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
@@ -1028,6 +1033,12 @@ function LakeSurface({
   rimColor.value.set(weather.sky[1]);
   const withRim = useMemo(() => (shader: { uniforms: Record<string, THREE.IUniform>; fragmentShader: string }) => addWaterRim(shader, rimColor), [rimColor]);
   const caustics = sunCaustics(weather, LAKE_HOUR_LOOK[hour].sun, season);
+  // The bank's mirror image is a repaint and one more layer over the lake: full effects only.
+  const mirror = useSettings().particles === "full" ? bankMirrorStrength(hour, sky, wind) : 0;
+  const mirrorHills = useMemo<MirrorHill[]>(
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: seasonGroundColor(hour === "night" ? hill.night : hill.day, season) })),
+    [hour, season],
+  );
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
   const cloudShade = cloudShadowStrength(hour, sky);
@@ -1105,6 +1116,7 @@ function LakeSurface({
       <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <meshBasicMaterial map={detailMap} transparent opacity={0.07} depthWrite={false} />
       </mesh>
+      {mirror > 0.02 && <BankMirror geometry={geometry} trees={MIRROR_TREES} hills={mirrorHills} season={season} hour={hour} strength={mirror} />}
       {cloudShade > 0 && (
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />

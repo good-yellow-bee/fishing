@@ -1051,6 +1051,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 |---|---|---|---|
 | ~~SC1~~ | ~~Sunlight under the water: the net of light on the shallows' sand takes the sun's colour (amber at dawn and dusk), needs the sun itself (none under overcast, rain or fog) and fades under the low winter sun~~ (#966) | scene | S |
 | ~~SC2~~ | ~~Water by season: colder, steel-blue water in winter, tea-tinted water in fall and a greener spring, so the lake no longer looks like July all year~~ (#967) | scene | S |
+| SC3 | The far bank in the mirror: on still water the shore trees and the hills behind them lie mirrored on the lake, broken into bands by the chop and fading toward your feet; clearest on a calm clear dawn or dusk, washed out in fog, gone in rain or a strong wind (full effects only) | scene | M |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
