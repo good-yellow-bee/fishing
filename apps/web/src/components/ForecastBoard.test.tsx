@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { dailyWind, forecast, hotBankForDay, moonName, moonPhase, SKY_LABELS, SPOT_LABELS, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { isTurnover, rainedYesterday, turnoverStart, waterSwing, waterTempFor } from "../game/logic";
+import { daytimeMoonPass } from "../game/solunar";
 import { ForecastBoard } from "./ForecastBoard";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -141,6 +142,19 @@ describe("ForecastBoard", () => {
     expect(host.querySelector("li:first-child")?.textContent).toContain(`The water cools to ${waterTempFor(cool)}°F, and the sluggish fish bite slow.`);
     act(() => root.render(<ForecastBoard now={days.find((day) => !waterSwing(day))!} />));
     expect(host.querySelector("li:first-child")?.textContent).not.toMatch(/The water (warms|cools)/);
+    act(() => root.unmount());
+  });
+
+  it("chalks the hour the moon passes overhead or underfoot by day", () => {
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    const host = document.createElement("div");
+    const root = createRoot(host);
+    const days = Array.from({ length: 30 }, (_, n) => new Date(2026, 9, 1 + n, 9));
+    for (const pass of ["overhead", "underfoot"] as const) {
+      const day = days.find((d) => daytimeMoonPass(d).pass === pass)!;
+      act(() => root.render(<ForecastBoard now={day} />));
+      expect(host.querySelector("li:first-child")?.textContent).toContain(`The moon passes ${pass} around ${daytimeMoonPass(day).hour}:00, and the fish feed for an hour either side.`);
+    }
     act(() => root.unmount());
   });
 

@@ -213,3 +213,10 @@ describe("the lure panel on a touch tablet", () => {
     expect(/@media \(pointer: coarse\) \{\n  \.walk-stick \{([^}]*)\}/.exec(css)?.[1]).toMatch(/bottom: 104px;[\s\S]*height: 104px;/);
   });
 });
+
+describe("the sign-in page and the catch log with larger text", () => {
+  it("take the window's height divided by the zoom they are drawn at", () => {
+    expect(/\n\.auth-shell \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: calc(100vh / var(--text-zoom, 1));");
+    expect(/\n\.log-page \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: calc(100vh / var(--text-zoom, 1));");
+  });
+});

@@ -142,9 +142,32 @@ describe("keyboard focus on the log's paper", () => {
 });
 
 describe("Home's count cards on a tablet with larger text", () => {
-  it("go two and one when a card would be under 150 px, and let a long count wrap inside its card", () => {
+  it("go two and one when a card would be under 150 px, and let a long count wrap as an inline link", () => {
     expect(/\n\.stat-row \{([^}]*)\}/.exec(css)?.[1]).toContain("grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));");
-    expect(css).toMatch(/\n\.stat-row small a \{\n  display: inline-block;\n\}/);
+    // Plain inline links on a desktop: an inline block loses the inline-link spacing exception (WCAG 2.5.8).
+    expect(css).not.toMatch(/\n\.stat-row small a \{/);
     expect(css).not.toMatch(/\.stat-row small a \{\n  white-space: nowrap;/);
+  });
+});
+
+describe("Home's columns and the card grids on a tablet-width window with larger text", () => {
+  it("stack Home's two columns when they no longer fit side by side at 1.15 to 0.85", () => {
+    expect(/\n\.home-grid \{([^}]*)\}/.exec(css)?.[1]).toContain("flex-wrap: wrap;");
+    expect(/\n\.home-grid > \* \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 1.15 1 345px;");
+    expect(/\n\.home-grid > :last-child \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 0.85 1 255px;");
+  });
+
+  it("keep Spots and Bests cards two across at most, one when a card would be under 220 px", () => {
+    expect(/\n\.card-grid \{\n  grid-template-columns: ([^;]*);/.exec(css)?.[1]).toBe("repeat(auto-fit, minmax(min(100%, max(220px, calc(50% - 5px))), 1fr))");
+    expect(css).not.toContain('\n.stat-row[data-cols="4"] {');
+  });
+});
+
+describe("the field log with larger text", () => {
+  it("divides every height or width taken from the window by the text zoom it is drawn at", () => {
+    const uses = css.match(/100d?v[hw][^;]*;/g) ?? [];
+    expect(uses.length).toBeGreaterThanOrEqual(10);
+    for (const use of uses) expect(use).toMatch(/^100d?v[hw] \/ var\(--text-zoom, 1\)/);
+    expect(/\n\.field-rail \{([^}]*)\}/.exec(css)?.[1]).toContain("height: calc(100dvh / var(--text-zoom, 1));");
   });
 });

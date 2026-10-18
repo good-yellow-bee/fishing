@@ -169,7 +169,16 @@ import { fillKind, type FillKind } from "./boatBilge";
 import { GooseFamily } from "./GooseFamily";
 import { gooseFamilyOut } from "./gooseGraze";
 import { LeafPile } from "./LeafPile";
+import { LeafRaker } from "./LeafRaker";
 import { leafJumpOut } from "./leafJump";
+import { Painter } from "./Painter";
+import { painterOut } from "./pleinAir";
+import { DiscTossers } from "./DiscTossers";
+import { discOut } from "./discToss";
+import { BrollyFisher } from "./BrollyFisher";
+import { brollyOut } from "./brollyFishing";
+import { SnowballKids } from "./SnowballKids";
+import { snowballOut } from "./snowballFight";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2280,6 +2289,11 @@ export const LakeWorld = memo(function LakeWorld({
       {scullOut(hour, sky, season, wind) && <Sculler />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
+      {leafJumpOut(hour, sky, season) && <LeafRaker />}
+      {painterOut(hour, sky, season, wind) && <Painter />}
+      {discOut(hour, sky, season, wind) && <DiscTossers />}
+      {brollyOut(hour, sky) && <BrollyFisher wind={wind} />}
+      {snowballOut(hour, sky, season) && <SnowballKids />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>

@@ -64,6 +64,7 @@ import { WalkStick } from "../components/WalkStick";
 import { WhatsNew } from "../components/WhatsNew";
 import { eveningRiseOn } from "../game/eveningRise";
 import { SHALLOW_BANKS, useCloudOverSun } from "../game/sunCover";
+import { useMoonPassing } from "../game/solunar";
 import { Walkthrough } from "../components/Walkthrough";
 import { bestPounds } from "../game/bestWeight";
 import { hookNoteMs } from "../game/hookNote";
@@ -172,6 +173,7 @@ export function DockPage() {
   const wind = useMemo(() => dailyWind(openedAt, sky), [openedAt, sky]);
   const rising = eveningRiseOn(hour, season, sky, wind.wind);
   const clouded = useCloudOverSun(sky, hour);
+  const moonPass = useMoonPassing();
   const storm = stormOn(sky, season, wind.wind);
   const lureNow = useMemo(() => ({ sky, hour, season, wind: wind.wind, moon: moonLight(moon), rising }), [sky, hour, season, wind.wind, moon, rising]);
   const [me, setMe] = useState<Me | null>(null);
@@ -879,6 +881,7 @@ export function DockPage() {
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
           {rising && <small className="stance-hot"> · {t("fish rising")}</small>}
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
+          {!rowing && moonPass && isFishingStance(game.stance) && <small className="stance-hot"> · {t(moonPass === "overhead" ? "moon overhead" : "moon underfoot")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
           {!rowing && !mercy && isFishingStance(game.stance) && longShadowWaitMul(game.stance, hour, sky) > 1 && <small className="stance-cold"> · {t("your shadow on the water")}</small>}
