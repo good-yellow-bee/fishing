@@ -71,3 +71,13 @@ describe("the keys card on a phone", () => {
     expect(phone).toMatch(/html\[data-text-size\] \.keys-card td:nth-child\(3\) \{\n    grid-column: 1 \/ -1;/);
   });
 });
+
+describe("the shop on a phone", () => {
+  it("is solid, keeps Back to the path pinned at its foot, and sits centred", () => {
+    expect(/\n\.shop-overlay \{([^}]*)\}/.exec(css)?.[1]).toContain("background: rgb(24, 29, 25);");
+    const foot = /\n\.shop-foot \{([^}]*)\}/.exec(css)?.[1];
+    expect(foot).toContain("position: sticky;");
+    expect(foot).toContain("background: inherit;");
+    expect(css).toMatch(/@media \(max-width: 520px\) \{\n  \/\*[^*]*\*\/\n  \.shop-overlay \{\n    right: calc\(4vw \/ var\(--text-zoom, 1\)\);/);
+  });
+});
