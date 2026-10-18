@@ -1161,6 +1161,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC57~~ | ~~News card scene13: bird feeder, rain puddles, washing line~~ (#1133) | scene | S |
 | ~~SC58~~ | ~~Snowshoe hare: at dawn and dusk a hare hops out from beside the oak west of the shack, grazes two patches of grass, sits up now and then to look round and hops home; brown from spring to fall, white in winter~~ (#1137) | scene | S |
 | ~~SC59~~ | ~~Wildflowers and bumblebees: patches of wildflowers on the grass by the shack, forget-me-nots and buttercups in spring, daisies, clover and vetch in summer, a few asters and goldenrod in fall, with bumblebees going flower to flower on dry spring and summer days~~ (#1139) | scene | S |
+| SC60 | Woodpile: split logs stacked between two stakes west of the campfire, with a chopping block and the axe left in it; stacked high in fall, burned down by summer, snowed on in winter | scene | S |
+| SC61 | News card scene14: snowshoe hare, wildflowers and bumblebees, woodpile | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
