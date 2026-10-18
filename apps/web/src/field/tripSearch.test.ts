@@ -36,6 +36,22 @@ describe("find an outing", () => {
     expect(find("pazdziernika")).toEqual(find("października"));
   });
 
+  it("finds outings by a month in any Polish form, and looks ahead for planned ones", () => {
+    expect(find("w październiku")).toEqual(["c", "a"]);
+    expect(find("we wrześniu")).toEqual(["b"]);
+    // Friday the 16th: next week and the 20th are the planned outing, this month runs to its end.
+    expect(find("next week")).toEqual(["c"]);
+    expect(find("w przyszłym tygodniu")).toEqual(["c"]);
+    expect(find("20 października")).toEqual(["c"]);
+    expect(find("this month")).toEqual(["c", "a"]);
+  });
+
+  it("finds an outing by the plural of a kind it caught", () => {
+    const caught = book.catches[0]!;
+    const word = caught.species.toLowerCase().split(" ").at(-1)!;
+    expect(find(`${word}s`)).toContain("a");
+  });
+
   it("finds past outings with no fish, and joins parts with +", () => {
     expect(find("no fish")).toEqual(["b"]);
     expect(find("bez ryb")).toEqual(["b"]);

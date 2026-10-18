@@ -7,9 +7,12 @@ const UNITS: Record<string, { kind: Measure["kind"]; toBase: number }> = {
   lbs: { kind: "weight", toBase: 1 },
   oz: { kind: "weight", toBase: 1 / 16 },
   kg: { kind: "weight", toBase: 1 / KG_PER_LB },
+  dag: { kind: "weight", toBase: 1 / (100 * KG_PER_LB) },
   g: { kind: "weight", toBase: 1 / (1000 * KG_PER_LB) },
   in: { kind: "length", toBase: 1 },
   cm: { kind: "length", toBase: 1 / CM_PER_IN },
+  // As the catch form takes them: "450 mm", "85 dag".
+  mm: { kind: "length", toBase: 1 / (10 * CM_PER_IN) },
 };
 
 export type SizeQuery = { kind: Measure["kind"]; over: boolean; amount: number; orEqual?: boolean };
