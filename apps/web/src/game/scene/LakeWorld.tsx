@@ -199,6 +199,8 @@ import { murmurationOut } from "./murmuration";
 import { Starlings } from "./Starlings";
 import { DockRobin } from "./DockRobin";
 import { robinOut } from "./robinVisit";
+import { DockSnail } from "./DockSnail";
+import { snailOut } from "./snailCrawl";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2324,6 +2326,7 @@ export const LakeWorld = memo(function LakeWorld({
       {cootsOut(hour, season) && <Coots squabbling={season === "spring"} />}
       {murmurationOut(hour, sky, season) && <Starlings />}
       {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
+      {snailOut(hour, sky, season) && <DockSnail />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
