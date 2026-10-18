@@ -47,4 +47,9 @@ describe("the field log on a touch screen", () => {
     const block = /\.map-index a\.map-plan::after,\n  \.map-index a\.map-coord-link::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -8px -4px;");
   });
+
+  it("reaches past each water's name in the Map's list", () => {
+    const block = /\.map-index a:not\(\.map-plan, \.map-coord-link\)::after \{([^}]*)\}/.exec(mapCss)?.[1];
+    expect(block).toContain("inset: -6px -3px;");
+  });
 });
