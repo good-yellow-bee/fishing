@@ -127,6 +127,8 @@ import { Woodpecker } from "./Woodpecker";
 import { woodpeckerOut } from "./woodpeckerDrum";
 import { Canoeist } from "./Canoeist";
 import { canoeOut } from "./canoeTrip";
+import { Cabin } from "./Cabin";
+import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
 import { JumpingFish } from "./JumpingFish";
 import { jumpsOn } from "./fishJump";
@@ -2207,6 +2209,7 @@ export const LakeWorld = memo(function LakeWorld({
       <OwlTree />
       {woodpeckerOut(hour) && <Woodpecker />}
       {canoeOut(hour, sky, season) && <Canoeist />}
+      <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}

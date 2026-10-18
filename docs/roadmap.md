@@ -1145,6 +1145,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC48~~ | ~~Fireflies only in summer: they no longer come out on every dry night of the year, just summer nights~~ (#1114) | scene | S |
 | ~~SC49~~ | ~~News card scene11: snowman, woodpecker, summer-only fireflies~~ (#1114) | scene | S |
 | ~~SC50~~ | ~~Canoeist: on dry days from spring to fall someone paddles a canoe slowly along the far shore and back, switching sides every few strokes~~ (#1116) | scene | S |
+| ~~SC51~~ | ~~Far-bank cabin: a log cabin across the lake, windows lit from dusk, chimney smoking in fall and winter (and spring's cold ends of the day), snow on its roof in winter~~ (#1119) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1950,3 +1951,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR508~~ | ~~Round 73 fixes: a merge's Undo keeps packing done since, the sample lure record goes with a first planned outing, Polish duplicates refused on a list, map labels spread or hide in a cluster, place cards' degrees read and short map links explained, the lure record counts every spelling~~ (#1109) | field | S |
 | ~~BR509~~ | ~~Round 73 ideas: "See it on the Map" from a water's page, the Map's list gives the distance to the nearest other pinned water, a save from the Map says so, news field27~~ (#1111) | field | S |
 | ~~BR510~~ | ~~Round 74 fixes: Bests keeps the goal and calendar with no fish, a night outing's day opens it only when it holds just that day's fish, size and month lines go by the outing's day, Released no longer runs into a wrapped line~~ (#1118) | field | S |
+| ~~BR511~~ | ~~Round 74 ideas: Bests reaches last season's recap in January, a season's recap and its copy name its best day, a year search with no fish says where the book starts~~ (#1121) | field | S |

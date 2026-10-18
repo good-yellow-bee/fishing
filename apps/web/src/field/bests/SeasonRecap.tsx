@@ -1,11 +1,12 @@
 import type { Logbook } from "@stillwater/shared";
-import { t, useT } from "../../i18n";
+import { t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { readYearGoal } from "../YearGoal";
 import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
-import { bookFishDay } from "../tripMonths";
+import { bestFishDay, bookFishDay } from "../tripMonths";
+import { formatDay } from "../format";
 
 /** "42, 8 more than 2025": a season's count against the one before, when the one before had any. */
 function against(count: number, before: number, year: string): string {
@@ -33,7 +34,11 @@ export function SeasonRecapBox({ book, year, today }: { book: Logbook; year: str
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
   ];
+  // The season's best day, a night session's small hours on its outing's day; worth a line once it had more than one fish.
+  const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
+  const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
   const firsts = [
+    ...bestDay,
     ...(recap.newKinds.length > 0 ? [t("New to the book: {kinds}", { kinds: recap.newKinds.map((name) => t(name)).join(", ") })] : []),
     ...(newWaters.length > 0 ? [t("New waters: {waters}", { waters: newWaters.join(", ") })] : []),
   ];

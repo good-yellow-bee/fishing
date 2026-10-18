@@ -289,8 +289,8 @@ export function BestsPage() {
         </div>
       </header>
 
-      {/* One season at a time, once the book spans more than one. */}
-      {years.length > 1 ? (
+      {/* One season at a time, once the book spans more than one, or its one season is past: a January still reaches last season's recap. */}
+      {years.length > 1 || (years.length === 1 && years[0] !== today.slice(0, 4)) ? (
         <p className="bests-scope" role="group" aria-label={t("Which seasons")}>
           <button type="button" className="text-button" aria-pressed={!year} onClick={() => pickYear(null)}>
             {t("All time")}
