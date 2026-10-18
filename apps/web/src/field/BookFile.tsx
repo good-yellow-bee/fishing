@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
+import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, localDate, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
-import { catchesCsv } from "./catchCsv";
+import { catchesCsv, sheetOutings, tripsCsv } from "./catchCsv";
 import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
 import { countedBook } from "./milestones";
 import { keepBookStorage } from "./keepStorage";
@@ -437,6 +437,19 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             }}
           >
             {t("Download catches as a spreadsheet")}
+          </button>
+        ) : null}
+        {/* The outings beside the fish, as the Trips page gives them: the angler's own, up to today. */}
+        {sheetOutings(book, localDate(new Date())).trips.length > 0 ? (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              downloadFile(tripsCsv(book, localDate(new Date())), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"));
+              setNotice({ tone: "ok", text: t("The outings were downloaded as a spreadsheet.") });
+            }}
+          >
+            {t("Download the outings as a spreadsheet")}
           </button>
         ) : null}
         <button ref={loadButton} type="button" className="text-button" onClick={() => fileRef.current?.click()}>
