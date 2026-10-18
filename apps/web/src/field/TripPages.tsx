@@ -1,4 +1,6 @@
 import { Fragment, useEffect, useMemo, useState, type FormEvent } from "react";
+import { hasMovedInApp } from "./FieldShell";
+import { savedState } from "./SavedNote";
 import { MapAnchor } from "./MapAnchor";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
@@ -43,7 +45,7 @@ import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
-import { bestOutingHere, outingAverage, outingMean } from "./outingAverage";
+import { bestOutingHere, lastOutingBefore, outingAverage, outingMean } from "./outingAverage";
 import { RecordHere, recordHere } from "./RecordHere";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
@@ -64,8 +66,9 @@ import { speciesLink } from "./speciesLink";
 import { datePicks, ownTitle, pastTitles } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
-import { bookFishDay } from "./tripMonths";
-import { likelyWater, spotsByLastFish } from "./spotOrder";
+import { bestFishDay, bookFishDay } from "./tripMonths";
+import { daysBetween, likelyWater, spotsByLastFish } from "./spotOrder";
+import { notesHere } from "./outingNotes";
 import { useStepKeys } from "./stepKeys";
 
 /** The moon an outing fishes under: that day's evening, as the lake's forecast reads it. */
@@ -145,7 +148,11 @@ export function TripsPage() {
         </Link>
       </header>
       {book.trips.length > 0 ? (
-        <section className="catch-search trip-search" aria-label={t("Find an outing")}>
+        <section className="catch-search trip-search" aria-labelledby="trip-search-head">
+          {/* A heading of its own, so the matches' month headings sit under it in the outline. */}
+          <h2 id="trip-search-head" className="sr-only">
+            {t("Find an outing")}
+          </h2>
           <label htmlFor="trip-search">{t("Find an outing")}</label>
           <input
             id="trip-search"
@@ -300,9 +307,11 @@ function TripView() {
   const tomorrow = shiftDate(new Date(), 1);
   const { newer, older } = tripNeighbors(book, trip.id);
   const fishByTrip = fishCountsByTrip(book);
-  const best = bestOutingHere(tripsForSpot(book, trip.spotId), (id) => fishByTrip.get(id) ?? 0, trip.id, today);
   // A day fished on a real water, against the other outings fished there, counted as the average is.
   const ownTrips = countedBook(book).trips.filter((other) => other.spotId === trip.spotId);
+  // The outings set beside this one: the angler's own on a real water, the game's on its lake.
+  const tripsHere = trip.spotId === PLAY_LAKE_ID ? tripsForSpot(book, trip.spotId) : ownTrips;
+  const best = bestOutingHere(tripsHere, (id) => fishByTrip.get(id) ?? 0, trip.id, today);
   const fished = trip.date < today || (trip.date === today && catches.length > 0);
   const meanHere = fished && trip.spotId !== PLAY_LAKE_ID && ownTrips.some((other) => other.id === trip.id) ? outingMean(ownTrips, (id) => fishByTrip.get(id) ?? 0, today, trip.id) : null;
   // The day's largest against the water's, from the fish counted for it: the angler's own once it has any.
@@ -310,9 +319,7 @@ function TripView() {
   const countedIds = new Set(countedHere.map((entry) => entry.id));
   const sizeHere = trip.spotId === PLAY_LAKE_ID ? null : recordHere(catches.filter((entry) => countedIds.has(entry.id)), countedHere);
   // The outing on this water before this one, to set the two side by side.
-  const lastHere = tripsForSpot(book, trip.spotId)
-    .filter((other) => other.date < trip.date && other.date <= today)
-    .sort((a, b) => b.date.localeCompare(a.date))[0];
+  const lastHere = lastOutingBefore(tripsHere, trip.date, today, (id) => fishByTrip.get(id) ?? 0);
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
   const loose = book.catches.filter(
@@ -320,6 +327,9 @@ function TripView() {
   );
   // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
   const play = trip.spotId === PLAY_LAKE_ID;
+  // The book's day with the most fish, when this outing holds all of it: the angler's best day so far.
+  const topDay = play || !fished ? null : bestFishDay(countedBook(book));
+  const bestDay = topDay && topDay.tripId === trip.id && topDay.count >= 2;
   const tackle = play ? null : (
     <TackleList
       tripId={trip.id}
@@ -360,12 +370,19 @@ function TripView() {
           {t("{fish}; your average here is {mean}", { fish: fishCountLabel(catches.length), mean: num(meanHere, meanHere > 0 && meanHere < 0.1 ? 2 : 1) })}
         </p>
       ) : null}
-      {sizeHere ? <RecordHere {...sizeHere} /> : null}
+      {bestDay ? (
+        <p className="meta best-day">
+          <Link to="/bests">{t("Your best day in the book so far")}</Link>
+        </p>
+      ) : null}
+      {sizeHere ? <RecordHere {...sizeHere} recordDay={bookFishDay(book, sizeHere.record)} /> : null}
       {lastHere ? (
         <p className="meta last-here">
           <Link to={`/trips/${lastHere.id}`}>
             {t("Last time here, {day}: {fish}", { day: formatDay(lastHere.date), fish: fishCountLabel(fishByTrip.get(lastHere.id) ?? 0) })}
           </Link>
+          {/* Before going back: how long the water has rested. */}
+          {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
         </p>
       ) : null}
       {/* Before going back: what was learned there last time, in the angler's own words. */}
@@ -408,8 +425,8 @@ function TripView() {
               {" "}
               <Link to={`/catches/${lastFishHere.id}`} className="last-fish-here">
                 {lastFishHere.lure.trim()
-                  ? t("Last fish here: {species} on {lure}, {day}", { species: t(lastFishHere.species), lure: t(lastFishHere.lure), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })
-                  : t("Last fish here: {species}, {day}", { species: t(lastFishHere.species), day: formatDay(localDate(new Date(lastFishHere.caughtAt))) })}
+                  ? t("Last fish here: {species} on {lure}, {day}", { species: t(lastFishHere.species), lure: t(lastFishHere.lure), day: formatDay(bookFishDay(book, lastFishHere)) })
+                  : t("Last fish here: {species}, {day}", { species: t(lastFishHere.species), day: formatDay(bookFishDay(book, lastFishHere)) })}
               </Link>
             </>
           ) : null}
@@ -524,7 +541,7 @@ function TripView() {
       )}
       {catches.length > 0 ? <CopySummary text={() => tripSummary(trip, spot?.name ?? null, catches, (id) => spotById(book, id)?.name ?? null)} file="stillwater-outing.txt" /> : null}
       {/* Planning ahead: what has worked on this water before. */}
-      {trip.date >= today && spot && !play ? <WaterTipsBox catches={catchesForSpot(book, spot.id)} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
+      {trip.date >= today && spot && !play ? <WaterTipsBox catches={countedFish(catchesForSpot(book, spot.id))} on={trip.date} within={exactTerm("water", spot.name)} /> : null}
       <TripWeather catches={catches} />
       {/* Once the day comes, the fish lead; before that, the bag does. */}
       {fishFirst ? fish : tackle}
@@ -567,6 +584,7 @@ function TripForm() {
   const existing = tripId ? tripById(book, tripId) : undefined;
   // "Go again" from a past outing: same water and title, and its tackle list comes along.
   const again = existing ? undefined : tripById(book, params.get("again") ?? "");
+  const cancelSpot = !existing && !params.has("loose") && book.spots.some((spot) => spot.id === params.get("spot") && spot.id !== PLAY_LAKE_ID) ? params.get("spot") : null;
   const { items, add } = useTackle();
   const againTackle = again ? itemsForTrip(items, again.id) : [];
   // Never the game's lake: its days are made by playing.
@@ -583,8 +601,25 @@ function TripForm() {
   const [date, setDate] = useState(existing?.date ?? presetDate);
   const [spotId, setSpotId] = useState(existing?.spotId ?? preset);
   // Planning a day on a water: how the last one there went.
-  const lastHere = existing ? undefined : recentTrips(book, localDate(new Date())).find((trip) => trip.spotId === spotId);
+  // The same outing "Last time here" names on the outing's page, before the day picked.
+  const lastHere = existing || !spotId
+    ? undefined
+    : lastOutingBefore(
+        spotId === PLAY_LAKE_ID ? tripsForSpot(book, spotId) : countedBook(book).trips.filter((trip) => trip.spotId === spotId),
+        /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : "9999",
+        localDate(new Date()),
+        (id) => catchesForTrip(book, id).length,
+      );
   const pickedSpot = spotById(book, spotId);
+  const notesBefore =
+    existing || !spotId || spotId === PLAY_LAKE_ID
+      ? []
+      : notesHere(
+          countedBook(book).trips.filter((trip) => trip.spotId === spotId && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || trip.date < date)),
+          localDate(new Date()),
+          2,
+          (id) => catchesForTrip(book, id).length,
+        );
   const peak = spotId && spotId !== PLAY_LAKE_ID ? peakTime(countedFish(catchesForSpot(book, spotId))) : null;
   // A second outing on the same water and day is usually a slip; say which one is already there.
   const sameDay = book.trips.find((trip) => trip.spotId === spotId && trip.date === date && trip.id !== existing?.id);
@@ -592,7 +627,7 @@ function TripForm() {
   const pastWeek = useMemo(() => {
     const [y, m, d] = date.split("-").map(Number);
     if (existing || !y || !m || !d) return [];
-    return thisWeekInPastYears(catchesForSpot(book, spotId), new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity);
+    return thisWeekInPastYears(countedFish(catchesForSpot(book, spotId)), new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity);
   }, [book, spotId, date, existing]);
   // Made from a fish logged without an outing: that day's fish (and its small hours') on this water with none go on the new one.
   const loose = useMemo(
@@ -649,7 +684,8 @@ function TripForm() {
     }
     for (const item of againTackle) add(result.id, item.label);
     kept.drop();
-    navigate(`/trips/${result.id}`);
+    // The form gives way to the outing it saved, so Back doesn't open it again, and the save is said.
+    navigate(`/trips/${result.id}`, { replace: true, ...savedState(existing ? "catchEdit" : "trip") });
   };
 
   if (tripId && !existing) {
@@ -682,7 +718,16 @@ function TripForm() {
           <p className="eyebrow">{existing ? t("Edit outing") : t("New outing")}</p>
           <h1 data-title={existing ? t("Editing {name}", { name: outingName(existing, book.spots) }) : undefined}>{existing ? outingName(existing, book.spots) : t("Add a trip")}</h1>
         </div>
-        <Link to={existing ? `/trips/${existing.id}` : "/trips"} onClick={kept.drop}>
+        {/* A new outing's Cancel goes back where it was started (a fish, the map, a water, the outing gone again); opened by a link from outside, to the outing or water it names. */}
+        <Link
+          to={existing ? `/trips/${existing.id}` : again ? `/trips/${again.id}` : cancelSpot ? `/spots/${cancelSpot}` : "/trips"}
+          onClick={(event) => {
+            kept.drop();
+            if (existing || !hasMovedInApp()) return;
+            event.preventDefault();
+            navigate(-1);
+          }}
+        >
           {t("Cancel")}
         </Link>
       </header>
@@ -734,6 +779,18 @@ function TripForm() {
                   day: formatDay(lastHere.date),
                   fish: fishCountLabel(catchesForTrip(book, lastHere.id).length),
                 })}
+              </small>
+            ) : null}
+            {/* Planning a day on a water: what was learned on the last days there, in the angler's own words. */}
+            {notesBefore.length > 0 ? (
+              <small className="field-hint notes-before">
+                {t("From your outing notes here:")}{" "}
+                {notesBefore.map(({ trip, text }, index) => (
+                  <Fragment key={trip.id}>
+                    {index > 0 ? " · " : null}
+                    {formatDay(trip.date)}: {t("“{query}”", { query: text })}
+                  </Fragment>
+                ))}
               </small>
             ) : null}
             {/* The light that day at the water picked, while the outing is planned around it. */}
