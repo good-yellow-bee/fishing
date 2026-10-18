@@ -81,6 +81,15 @@ describe("the keys card on a phone", () => {
   });
 });
 
+describe("Settings, the keys card and the trip recap on a short screen", () => {
+  it("sit 8 px from the edges and pin a tighter foot, so the list scrolls in a taller window", () => {
+    const short = css.slice(css.indexOf(SIDEWAYS));
+    expect(/\n  \.settings-overlay \{([^}]*)\}/.exec(short)?.[1]).toContain("padding: 8px;");
+    expect(/\n  \.settings-panel \{([^}]*)\}/.exec(short)?.[1]).toContain("max-height: calc(100dvh / var(--text-zoom, 1) - 16px);");
+    expect(/\n  \.settings-foot \{([^}]*)\}/.exec(short)?.[1]).toContain("padding: 6px 18px 8px;");
+  });
+});
+
 describe("the shop on a phone", () => {
   it("is solid, keeps Back to the path pinned at its foot, and sits centred", () => {
     expect(/\n\.shop-overlay \{([^}]*)\}/.exec(css)?.[1]).toContain("background: rgb(24, 29, 25);");
