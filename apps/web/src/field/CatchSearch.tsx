@@ -2,7 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
-import { getLang, getUnits, useLang, useT } from "../i18n";
+import { getLang, getUnits, loadPolish, polishBook, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -25,11 +25,10 @@ import { largestFirst } from "./largestFirst";
 import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
-import { PL } from "../i18n/pl";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
-  const line = PL[name];
+  const line = polishBook()[name];
   return typeof line === "string" ? line : name;
 }
 
@@ -574,6 +573,11 @@ export function CatchSearch() {
   const [params, setParams] = useSearchParams();
   // The search lives in the address too, so Back from a catch returns to the same matches.
   const [query, setQuery] = useState(() => params.get(FIND_PARAM) ?? "");
+  // Polish names match in any language, so an English reader's first search fetches the Polish book too.
+  const searching = query.trim() !== "";
+  useEffect(() => {
+    if (searching) loadPolish().catch(() => {});
+  }, [searching]);
   const box = useRef<HTMLElement>(null);
   const linked = params.get(FIND_PARAM) ?? "";
   // Everything typed here since the last link, so the address catching up with the box is not taken for a new link:

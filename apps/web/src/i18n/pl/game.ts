@@ -568,6 +568,7 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone held sideways, the walk signs line the right edge again instead of covering the lake, and the header's links and the guide's Skip are bigger to tap. The catch log and lodge board tables now scroll with the arrow keys, and the game starts a little faster.": "Na telefonie trzymanym poziomo drogowskazy znów stoją przy prawej krawędzi, zamiast zasłaniać jezioro, a linki w nagłówku i „Pomiń” w przewodniku łatwiej trafić palcem. Tabele dziennika połowów i tablicy przewijają się strzałkami, a gra uruchamia się nieco szybciej.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
