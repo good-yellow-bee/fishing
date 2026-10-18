@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { BoatWake } from "./BoatWake";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { sailAt } from "./sailingTrip";
@@ -68,6 +69,7 @@ export function Dinghy({ wind }: { wind: { x: number; z: number } }) {
   const sailor = useRef<THREE.Group>(null);
   const shapes = useMemo(() => ({ hull: hullShape(), main: mainsailShape(), sailor: sailorShape() }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
+  const course = useCallback((time: number) => sailAt(time, wind, still), [wind, still]);
   useEffect(
     () => () => {
       [shapes.hull, shapes.main, shapes.sailor, material].forEach((item) => item.dispose());
@@ -88,16 +90,19 @@ export function Dinghy({ wind }: { wind: { x: number; z: number } }) {
     if (sailor.current) sailor.current.position.x = pose.heel > 0 ? 0.42 : -0.42;
   });
   return (
-    <group ref={boat} name="dinghy">
-      <group ref={hull}>
-        <mesh geometry={shapes.hull} material={material} castShadow />
-        <group ref={boom} position={[0, MAST_FOOT, MAST_Z]}>
-          <mesh geometry={shapes.main} material={material} />
-        </group>
-        <group ref={sailor} position={[0.42, 0, -0.75]}>
-          <mesh geometry={shapes.sailor} material={material} />
+    <>
+      <group ref={boat} name="dinghy">
+        <group ref={hull}>
+          <mesh geometry={shapes.hull} material={material} castShadow />
+          <group ref={boom} position={[0, MAST_FOOT, MAST_Z]}>
+            <mesh geometry={shapes.main} material={material} />
+          </group>
+          <group ref={sailor} position={[0.42, 0, -0.75]}>
+            <mesh geometry={shapes.sailor} material={material} />
+          </group>
         </group>
       </group>
-    </group>
+      <BoatWake at={course} stern={1.1} still={still} />
+    </>
   );
 }
