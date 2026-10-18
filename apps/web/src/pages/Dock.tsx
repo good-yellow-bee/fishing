@@ -853,7 +853,7 @@ export function DockPage() {
           surfaceRef={game.surfaceRef}
         />
         <WhatsNew caughtTotal={caughtTotal} hidden={scenePhase !== "idle" || shopOpen} />
-        <aside className="stance-chip" data-stance={game.stance}>
+        <aside className="stance-chip" data-stance={game.stance} aria-label={t("Where you stand")}>
           {stanceLabel}
           {!rowing && game.stance === hotBank && <small className="stance-hot"> · {t("biting today")}</small>}
           {!rowing && isFishingStance(game.stance) && game.stance !== "open" && favoredNow(game.stance) && <small className="stance-hot"> · {t("bites sooner now")}</small>}
@@ -963,7 +963,7 @@ export function DockPage() {
           </nav>
         )}
         {padConnected ? (
-          <aside className="camera-help" data-camera-control data-pad>
+          <aside className="camera-help" data-camera-control data-pad aria-label={t("Controls")}>
             <span>{t("Controller")}</span>
             <kbd>{t("Left stick")}</kbd> {t("walk")}
             <kbd>{t("Right stick")}</kbd> {t("aim")}
@@ -972,7 +972,7 @@ export function DockPage() {
             <kbd>B</kbd> {t("close")}
           </aside>
         ) : touchScreen() ? (
-          <aside className="camera-help" data-camera-control data-touch>
+          <aside className="camera-help" data-camera-control data-touch aria-label={t("Controls")}>
             <span>{t("Shore")}</span>
             {prefs.walkStick && (
               <>
@@ -984,7 +984,7 @@ export function DockPage() {
             <kbd>{t("Two fingers")}</kbd> {t("look")}
           </aside>
         ) : (
-          <aside className="camera-help" data-camera-control>
+          <aside className="camera-help" data-camera-control aria-label={t("Controls")}>
             <span>{t("Shore")}</span>
             <kbd>WASD</kbd> {t("or")} <kbd>{t("Click shore")}</kbd> {t("walk")}
             <kbd>{t("Click water")}</kbd> {t("aim")}

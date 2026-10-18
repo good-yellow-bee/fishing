@@ -169,6 +169,8 @@ export const PL_GAME: PlBook = {
   "Row back": "Wróć łódką",
   "Row out": "Wypłyń łódką",
   Shore: "Brzeg",
+  Controls: "Sterowanie",
+  "Where you stand": "Gdzie stoisz",
   or: "lub",
   "Click shore": "Kliknij brzeg",
   walk: "idziesz",
