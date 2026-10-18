@@ -86,6 +86,8 @@ import { firefliesOut } from "./fireflies";
 import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
+import { Toadstools } from "./Toadstools";
+import { toadstoolsOut } from "./toadstoolPatches";
 import { campfireLit } from "./campfireSmoke";
 import { LanternMinnows } from "./LanternMinnows";
 import { minnowsOut } from "./minnowSwirl";
@@ -468,6 +470,9 @@ const SHACK_TREES: Scatter[] = [
   { url: MODELS.fat, position: [3.4 + SHOP_X, 0, 1.2 + SHOP_Z], scale: 3.8, rot: 0 },
   { url: MODELS.oak, position: [-3.2 + SHOP_X, 0, 1.6 + SHOP_Z], scale: 3.2, rot: 0 },
 ];
+
+/** The trees toadstools come up under in fall: the near shore and the two by the shack. */
+const TOADSTOOL_TREES = [...TREES, ...SHACK_TREES];
 
 /** What the camera must not sink into: the hills and every tree on the shore. */
 export const CAMERA_HILLS: HillShape[] = HILLS.map((hill) => ({ center: hill.position, radii: hill.scale }));
@@ -2122,6 +2127,7 @@ export const LakeWorld = memo(function LakeWorld({
       {whirligigsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Whirligigs />}
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
+      {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
       <ShorePath />
       <BankWalks />
       <Creek hour={hour} weather={weather} wind={wind} />
