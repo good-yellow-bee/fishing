@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game05";
+export const NEWS_ID = "2026-10-18-field08";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A kind's page now says how many days ago its newest fish came in, and each lure that took it names the day of its last fish. The Trips search counts the fish its outings brought, and a half-packed tackle list can copy just what is still to pack. Merging two spellings of a lure now renames it on your packed lists too.",
   "Groundbait now draws the feeders: over it, a golden shiner, bluegill, crappie, carp, catfish or whitefish may take the bait, and the catch card says when one came in to feed on it. The field guide marks which fish school and which come to groundbait. A bank fished eight casts in a row grows wary of the line, so the bites slow; the stance chip says “fished hard” before the slow cast, and a walk to another bank starts fresh.",
   "A water's place can now be pasted as a link from Google Maps, OpenStreetMap or Apple Maps, and the field log reads the pin from it. Planning an outing offers Sunday beside Saturday and shows sunrise and sunset at the water for the day picked.",
   "The catch form now says where the time sits against the sun at the water (“40 min after sunrise”), steps forward 15 minutes as well as back when writing up an outing fish by fish, and counts lost fish and missed strikes on the outing without leaving the form.",
