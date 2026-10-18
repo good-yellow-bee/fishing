@@ -1,4 +1,4 @@
-import { inLake, LAKE_HOURS, SKIES } from "@stillwater/shared";
+import { inLake, LAKE_HOURS, LAKE_SEASONS, SKIES } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import {
   FIREFLY_COUNT,
@@ -15,10 +15,12 @@ import { MIST_CLEAR_FAR, MIST_CLEAR_NEAR, MIST_COUNT, MIST_DRIFT, MIST_LAYERS, m
 const TIMES = [0, 1.7, 13.3, 61, 250.5, 1200];
 
 describe("fireflies", () => {
-  it("only come out on dry nights", () => {
+  it("only come out on dry summer nights", () => {
     for (const hour of LAKE_HOURS) {
       for (const sky of SKIES) {
-        expect(firefliesOut(hour, sky)).toBe(hour === "night" && sky !== "rain");
+        for (const season of LAKE_SEASONS) {
+          expect(firefliesOut(hour, sky, season)).toBe(hour === "night" && sky !== "rain" && season === "summer");
+        }
       }
     }
   });

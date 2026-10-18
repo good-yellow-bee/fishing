@@ -2190,7 +2190,7 @@ export const LakeWorld = memo(function LakeWorld({
         (season === "winter" ? <LakeSnow light={weather.rainLight} /> : <LakeRain light={weather.rainLight} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
-      {firefliesOut(hour, sky) && <Fireflies />}
+      {firefliesOut(hour, sky, season) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
       {loonOut(hour, season) && <Loon />}
       {otterOut(hour, season) && <Otter />}
