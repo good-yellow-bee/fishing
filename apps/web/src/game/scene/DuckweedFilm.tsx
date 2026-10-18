@@ -9,7 +9,7 @@ import { MIRROR_PX, MIRROR_SPAN_X, mirrorCanvasPoint } from "./mirrorImage";
 const FILM_SCALE = 4;
 const DUCKWEED = "#78ad3a";
 /** Lit by the sky: bright by day, dull at dawn and dusk, barely there at night. */
-const HOUR_LIGHT: Record<LakeHour, number> = { dawn: 0.6, day: 1, dusk: 0.45, night: 0.18 };
+const HOUR_LIGHT: Record<LakeHour, number> = { dawn: 0.6, day: 1, dusk: 0.45, night: 0.12 };
 
 function paintBeds(ctx: CanvasRenderingContext2D, wind: { x: number; z: number }) {
   const meter = (MIRROR_PX / MIRROR_SPAN_X) * FILM_SCALE;
