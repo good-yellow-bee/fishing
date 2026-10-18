@@ -22,7 +22,9 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   // The same switch the fish make (countedFish): once the angler has a fish or an outing of their own, the sample's go.
   const ownFish = book.catches.some((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID);
   const trips = ownTrips.length > 0 || ownFish ? ownTrips : book.trips;
-  const past = new Set(trips.filter((trip) => trip.date <= today).map((trip) => trip.id));
+  // Today's outing counts once it has a fish: packed this morning, it hasn't yet gone without one.
+  const withFish = new Set(book.catches.map((entry) => entry.tripId));
+  const past = new Set(trips.filter((trip) => trip.date < today || (trip.date === today && withFish.has(trip.id))).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   // The fish make the same switch as the bags: a sample fish never counts against an outing of the angler's own.
   const own = ownTrips.length > 0 || ownFish ? book.catches.filter((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID) : countedFish(book.catches);

@@ -123,7 +123,8 @@ export function TackleList({
   // After an outing, the same list can go back in the bag for the next one.
   const hideToggle =
     packed > 0 && packed < rows.length ? (
-      <button type="button" className="text-button tackle-hide" aria-pressed={hiding} onClick={() => setHidePacked(!hiding)}>
+      // Its words say what a tap does, so it carries no pressed state that would read against them.
+      <button type="button" className="text-button tackle-hide" onClick={() => setHidePacked(!hiding)}>
         {hiding ? t("Show packed ({n})", { n: packed }) : t("Hide packed")}
       </button>
     ) : null;

@@ -243,10 +243,12 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
 }
 
 /** From the map straight to a new outing on that water, named for screen readers as each row's own. */
+/** The water is added to the words shown, not put in their place, so a voice saying "Plan one" still finds it. */
 function PlanHere({ spot }: { spot: Spot }) {
   return (
-    <Link className="map-plan" to={`/trips/new?spot=${spot.id}`} aria-label={t("Plan an outing on {water}", { water: spot.name })}>
+    <Link className="map-plan" to={`/trips/new?spot=${spot.id}`}>
       {t("Plan one")}
+      <span className="sr-only">: {spot.name}</span>
     </Link>
   );
 }
@@ -363,7 +365,7 @@ export function SpotMapPage() {
           {unpinned.map((spot, index) => (
             <span key={spot.id}>
               {index > 0 ? ", " : null}
-              <Link to={`/spots/${spot.id}/edit#place`}>{spot.name}</Link>
+              <Link to={`/spots/${spot.id}/edit?then=map#place`}>{spot.name}</Link>
             </span>
           ))}
           . {t("Open one to note where it is.")}
