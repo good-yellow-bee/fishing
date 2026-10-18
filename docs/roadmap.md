@@ -1199,6 +1199,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC79~~ | ~~Woodcutter at the cabin: on fall and winter days someone in a check shirt splits firewood on a block beside the far cabin, raising the axe overhead and bringing it down so the halves fall apart, then tossing them on the stack against the wall~~ (#1186) | scene | S |
 | ~~SC80~~ | ~~Dawn sculler: on calm dawns from spring to fall a sculler rows a long racing shell along the far half of the lake, sliding and sweeping the oars with each stroke and leaving a wake, then spins it round to row back~~ (#1186) | scene | S |
 | ~~SC81~~ | ~~Dog walker in the rain: the dog walker now comes out on rainy days too, under an umbrella~~ (#1186) | scene | S |
+| ~~SC82~~ | ~~Rain and snow in the wind: on breezy and windy days the rain streaks slant down the wind, still landing on their rings, and the snow drives across at a slant~~ (#1190) | scene | S |
 | ~~SC83~~ | ~~News card scene18: woodcutter, dawn sculler, dog walker in the rain, rain and snow in the wind~~ (#1190) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
