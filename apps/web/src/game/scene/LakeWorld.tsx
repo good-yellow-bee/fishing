@@ -87,6 +87,8 @@ import { Heron } from "./Heron";
 import { Lanterns } from "./Lanterns";
 import { Campfire } from "./Campfire";
 import { Toadstools } from "./Toadstools";
+import { Squirrels } from "./Squirrels";
+import { squirrelRuns, squirrelsOut } from "./squirrelRun";
 import { toadstoolsOut } from "./toadstoolPatches";
 import { campfireLit } from "./campfireSmoke";
 import { LanternMinnows } from "./LanternMinnows";
@@ -471,6 +473,9 @@ const SHACK_TREES: Scatter[] = [
   { url: MODELS.fat, position: [3.4 + SHOP_X, 0, 1.2 + SHOP_Z], scale: 3.8, rot: 0 },
   { url: MODELS.oak, position: [-3.2 + SHOP_X, 0, 1.6 + SHOP_Z], scale: 3.2, rot: 0 },
 ];
+
+/** Where the squirrels run: between the two trees by the shack, and between two pairs of shore trees round the lake. */
+const SQUIRREL_RUNS = [[SHACK_TREES[1]!, SHACK_TREES[0]!] as const, ...squirrelRuns(TREES, 2)];
 
 /** The trees toadstools come up under in fall: the near shore and the two by the shack. */
 const TOADSTOOL_TREES = [...TREES, ...SHACK_TREES];
@@ -2135,6 +2140,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Shack />
       <Campfire lit={campfireLit(hour, sky)} hour={hour} wind={wind} />
       {toadstoolsOut(season) && <Toadstools trees={TOADSTOOL_TREES} />}
+      {squirrelsOut(hour, sky, season) && <Squirrels runs={SQUIRREL_RUNS} />}
       <ShorePath />
       <BankWalks />
       <Creek hour={hour} weather={weather} wind={wind} />

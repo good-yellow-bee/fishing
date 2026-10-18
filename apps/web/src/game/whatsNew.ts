@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-pa11";
+export const NEWS_ID = "2026-10-18-scene10";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Moulted swan feathers drift on the water from summer into fall, and from dusk to dawn on dry days a campfire burns by the shack, its smoke leaning away on the wind. In fall, toadstools come up under the shore trees; the ducks now up-end to feed, tails to the sky, and red squirrels bound between the trees by the shack.",
   "On a phone more links in the field log are easier to hit. Home's counts and outing links each fill a full-height band, the link under the Water picker is taller, a page you can't find offers its way back with room to tap, and on a fish's page the lure, water and time links and Copy a summary stand far enough from their neighbours that a finger opens the one it meant.",
   "The lure picker now marks a slow jig or worm “good now” on the bright morning after the rain, and while the lake turns over the Inlet's walk sign gets its dot. A cast off the Dock released low in the band skips the lure under the planks into the shade, so the bite comes sooner. And a golden shiner you land can go back out as live bait: “Use it as bait” on its card hooks it on, and the next cast draws the pike, bass and walleye that hunt it.",
   "In fall, sunken leaves settle on the shallow bed round the dock and lie there until spring. In spring, clumps of frogspawn float by the lily pads, and on a windy day the wind rakes the foam into long lanes running down the wind across the open water.",
