@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
   itemsForTrip,
-  localDate,
   packedCount,
   type CatchEntry,
   type Spot,
@@ -137,14 +136,14 @@ export function SpotCard({
   spot,
   fishCount,
   tripCount,
-  lastFishAt = null,
+  lastFishDay = null,
   restDays = null,
   nextOuting = null,
 }: {
   spot: Spot;
   fishCount: number;
   tripCount: number;
-  lastFishAt?: string | null;
+  lastFishDay?: string | null;
   /** Days since the water was last fished, when the list is ordered by that. */
   restDays?: number | null;
   /** The soonest planned outing here, already in words. */
@@ -162,7 +161,7 @@ export function SpotCard({
         {fishCountLabel(fishCount)}
         {" · "}
         {tn(tripCount, "{n} outing", "{n} outings")}
-        {lastFishAt ? ` · ${t("Last fish: {day}", { day: formatDay(localDate(new Date(lastFishAt))) })}` : ""}
+        {lastFishDay ? ` · ${t("Last fish: {day}", { day: formatDay(lastFishDay) })}` : ""}
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}

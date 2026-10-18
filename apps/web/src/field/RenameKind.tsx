@@ -34,9 +34,10 @@ export function RenameKind({ field, name }: { field: NameField; name: string }) 
       navigate(pageOf(field, result.name), { replace: true });
       return;
     }
-    if (!changeBook("rename", result.book)) return;
-    // The packed lists follow a lure's new name, so its record still finds its fish (the book's Undo leaves them so).
+    // The packed lists follow a lure's new name, so its record still finds its fish; Undo puts them back with the book.
     const lists = field === "lure" && tackle ? renamedTackle(tackle.items, name, result.name) : null;
+    const before = tackle?.items ?? [];
+    if (!changeBook("rename", result.book, lists ? () => tackle?.replaceTackle([...before]) : undefined)) return;
     if (lists) tackle?.replaceTackle(lists);
     navigate(pageOf(field, result.name), { replace: true });
   };

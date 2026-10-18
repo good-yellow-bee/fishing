@@ -1,4 +1,6 @@
 import { biteTimes, catchesForSpot, lakeSeason, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
+import { isSampleTrip } from "./bookCopy";
+import { countedFish, ownFish } from "./milestones";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
@@ -127,7 +129,10 @@ function leadingSeason(catches: readonly CatchEntry[]): LakeSeason | null {
 /** Lures worth packing for an outing still ahead: what has worked on its water. Nothing for a past outing. */
 export function packingTips(book: Logbook, trip: Trip, today: string): string[] {
   if (trip.date < today) return [];
-  return waterTips(catchesForSpot(book, trip.spotId))?.lures.map((row) => row.lure) ?? [];
+  // The angler's own fish for their own outing, as the water's page tips: the sample week's only for its own outings.
+  const here = catchesForSpot(book, trip.spotId);
+  const own = !isSampleTrip(trip.id) && book.catches.some(ownFish);
+  return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures.map((row) => row.lure) ?? [];
 }
 
 /** The kinds of fish a water has given, most first: one-tap picks for the species on the catch form. */

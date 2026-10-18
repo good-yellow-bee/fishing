@@ -1,26 +1,27 @@
-import { localDate, type Logbook, type Spot } from "@stillwater/shared";
+import { localDate, type CatchEntry, type Logbook, type Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 import { countedFish, ownFish } from "./milestones";
 import { isSampleSpot, isSampleTrip } from "./bookCopy";
 
-export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null };
+/** `lastFishDay`: the day the newest fish counts on, a night session's small hours on its outing's, as the calendar has it. */
+export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null; lastFishDay: string | null };
 
 /** Waters fished most recently first; waters with no fish yet keep the book's order after them. */
 export function spotsByLastFish(book: Logbook): SpotRow[] {
   // One pass over the fish for every water, rather than sorting the whole book once per water.
-  const tally = new Map<string, { fishCount: number; lastFishAt: string }>();
+  const tally = new Map<string, { fishCount: number; last: CatchEntry }>();
   for (const entry of book.catches) {
     const row = tally.get(entry.spotId);
-    if (!row) tally.set(entry.spotId, { fishCount: 1, lastFishAt: entry.caughtAt });
+    if (!row) tally.set(entry.spotId, { fishCount: 1, last: entry });
     else {
       row.fishCount += 1;
-      if (entry.caughtAt > row.lastFishAt) row.lastFishAt = entry.caughtAt;
+      if (entry.caughtAt > row.last.caughtAt) row.last = entry;
     }
   }
   const rows = book.spots.map((spot, index) => {
     const row = tally.get(spot.id);
-    return { spot, fishCount: row?.fishCount ?? 0, lastFishAt: row?.lastFishAt ?? null, index };
+    return { spot, fishCount: row?.fishCount ?? 0, lastFishAt: row?.last.caughtAt ?? null, lastFishDay: row ? bookFishDay(book, row.last) : null, index };
   });
   rows.sort((a, b) => {
     if (a.lastFishAt && b.lastFishAt) return b.lastFishAt.localeCompare(a.lastFishAt) || a.index - b.index;

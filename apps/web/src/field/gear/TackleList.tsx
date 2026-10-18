@@ -143,7 +143,8 @@ export function TackleList({
     ) : null;
 
   return (
-    <section ref={box} className="tackle-block" aria-label={name ?? heading ?? t("Tackle")}>
+    // A named group rather than a landmark: it scopes each list's buttons without a landmark per outing.
+    <section ref={box} className="tackle-block" role="group" aria-label={name ?? heading ?? t("Tackle")}>
       {heading ? (
         <div className="section-head">
           <h2>{heading}</h2>

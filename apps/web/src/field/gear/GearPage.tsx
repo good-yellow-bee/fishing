@@ -13,7 +13,8 @@ import {
   tripById,
   type Trip,
 } from "@stillwater/shared";
-import { fishCountLabel, formatCatchDay, formatDay, outingName, tripWhen } from "../format";
+import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
+import { bookFishDay } from "../tripMonths";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
@@ -79,7 +80,7 @@ function LureRecord({ today }: { today: string }) {
   const { book } = useLogbook();
   const { items, add } = useTackle();
   const records = pieceRecords(book, items, today);
-  const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure);
+  const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   const next = upcomingRealTrips(book, today)[0];
@@ -106,9 +107,9 @@ function LureRecord({ today }: { today: string }) {
               {/* How often it pays, once it has been out more than once. */}
               {row.fish > 0 && row.outings >= 2 ? ` · ${t("{n} fish an outing", { n: lureRate(row.fish, row.outings) })}` : null}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}
-              {row.lastAt ? (
+              {row.lastAt && row.lastDay ? (
                 <>
-                  <span className="lure-last">{t("last fish {day}", { day: formatCatchDay(row.lastAt) })}</span>
+                  <span className="lure-last">{t("last fish {day}", { day: formatDay(row.lastDay) })}</span>
                   {/* Packed since without a fish: a lure that has gone quiet. */}
                   {row.since && row.since >= 2 ? <span className="lure-last">{tn(row.since, "none on {n} outing since", "none on {n} outings since")}</span> : null}
                   {/* Its biggest fish, opening that fish. */}
@@ -146,6 +147,8 @@ function LureRecord({ today }: { today: string }) {
                     }}
                   >
                     {t("Pack for {outing}", { outing: outingName(next, book.spots) })}
+                    {/* Which lure, for a list of buttons that would otherwise all read the same. */}
+                    <span className="sr-only">: {t(row.label)}</span>
                   </button>
                 </span>
               ) : null}
@@ -245,9 +248,12 @@ function LureTwins() {
             className="text-button"
             onClick={() => {
               const result = renameInBook(storedBook, "lure", pair.from, pair.into);
-              if (!result.ok || !changeBook("rename", result.book)) return;
-              // The packed lists take the merged name too, or the lure record would call the old one a blank.
+              if (!result.ok) return;
+              // The packed lists take the merged name too, or the lure record would call the old one a blank; Undo puts
+              // them back with the book.
               const lists = renamedTackle(items, pair.from, result.name);
+              const before = items;
+              if (!changeBook("rename", result.book, lists ? () => replaceTackle([...before]) : undefined)) return;
               if (lists) replaceTackle(lists);
               focusNext(index);
             }}
