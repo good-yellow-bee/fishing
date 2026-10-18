@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, LAKE_CENTER_Z, SPOT_IDS, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { BANK_STANDS } from "./hotspot";
-import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -752,6 +752,41 @@ describe("a bank fished hard", () => {
     // Back at the dock its count picks up where the rest left it.
     expect(castUnderPressure(moved.next, "dock").next.dock).toBe(PRESSURE_CASTS);
     expect(castUnderPressure(castUnderPressure(moved.next, "dock").next, "dock").pressured).toBe(true);
+  });
+});
+
+describe("a new kind of lure at a bank fished hard", () => {
+  /** Casts at the dock with each lure in turn, carrying the counts and the lures shown, and says which casts met wary fish. */
+  const fish = (lures: (string | undefined)[]) => {
+    let pressure = {} as ReturnType<typeof castUnderPressure>["next"];
+    let shown = {} as ReturnType<typeof castNewLure>["shown"];
+    return lures.map((lure) => {
+      const cast = castUnderPressure(pressure, "dock");
+      const switched = castNewLure(shown, cast.next, "dock", lure, cast.pressured);
+      pressure = switched.pressure;
+      shown = switched.shown;
+      return cast.pressured && !switched.relieved;
+    });
+  };
+
+  it("catches the wary fish off guard and buys the bank a few casts", () => {
+    const worm = Array<string>(PRESSURE_CASTS).fill("Nightcrawlers");
+    const wary = fish([...worm, "Inline spinner", ...Array<string>(NEW_LURE_RELIEF).fill("Inline spinner")]);
+    expect(wary.slice(0, PRESSURE_CASTS + 1).some(Boolean)).toBe(false);
+    expect(wary.slice(PRESSURE_CASTS + 1, PRESSURE_CASTS + NEW_LURE_RELIEF).some(Boolean)).toBe(false);
+    expect(wary.at(-1)).toBe(true);
+  });
+
+  it("doesn't count a kind the bank already saw, so swapping back and forth is no help", () => {
+    const swaps = Array.from({ length: PRESSURE_CASTS + 2 }, (_, n) => (n % 2 ? "Inline spinner" : "Nightcrawlers"));
+    expect(fish(swaps).slice(PRESSURE_CASTS)).toEqual([true, true]);
+    // Two spinners are the same kind of lure to the fish.
+    expect(fish([...Array<string>(PRESSURE_CASTS).fill("Inline spinner"), "#5 Mepps"]).at(-1)).toBe(true);
+  });
+
+  it("forgets the lures a bank saw once it has rested fully", () => {
+    const shown = castNewLure({ dock: ["worm"], reeds: ["spinner"] }, { reeds: 3 }, "point", "Nightcrawlers", false).shown;
+    expect(shown).toEqual({ reeds: ["spinner"], point: ["worm"] });
   });
 });
 

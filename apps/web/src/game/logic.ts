@@ -742,6 +742,27 @@ export function castUnderPressure(pressure: Pressure, spot: SpotId): { pressured
   return { pressured: casts > PRESSURE_CASTS, next };
 }
 
+/** A kind of lure the wary fish at a bank haven't seen yet takes this many casts off its count. */
+export const NEW_LURE_RELIEF = 4;
+
+/** The kinds of lure each counted bank has seen this visit. */
+export type LuresShown = Partial<Record<SpotId, readonly string[]>>;
+
+/**
+ * Shows this cast's kind of lure to its bank. A kind the bank hasn't seen while its fish grew wary takes NEW_LURE_RELIEF casts
+ * off its count, so this cast isn't slowed; a bank that has rested fully forgets what it saw.
+ */
+export function castNewLure(shown: LuresShown, pressure: Pressure, spot: SpotId, lure: string | undefined, pressured: boolean): { relieved: boolean; pressure: Pressure; shown: LuresShown } {
+  const kind = lure?.trim() ? lureClass(lure).id : "plain";
+  const here = shown[spot] ?? [];
+  const relieved = pressured && !here.includes(kind);
+  const next: Pressure = relieved ? { ...pressure, [spot]: (pressure[spot] ?? 0) - NEW_LURE_RELIEF } : pressure;
+  const kept: LuresShown = {};
+  for (const bank of Object.keys(next) as SpotId[]) if (bank !== spot && shown[bank]) kept[bank] = shown[bank];
+  kept[spot] = here.includes(kind) ? here : [...here, kind];
+  return { relieved, pressure: next, shown: kept };
+}
+
 /** The banks whose next cast meets wary fish. */
 export function fishedHardBanks(pressure: Pressure): SpotId[] {
   return (Object.entries(pressure) as [SpotId, number][]).filter(([, casts]) => casts >= PRESSURE_CASTS).map(([bank]) => bank);
