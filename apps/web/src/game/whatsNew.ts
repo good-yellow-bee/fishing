@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-scene03";
+export const NEWS_ID = "2026-10-18-game09";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "Casting a spinner twists the line, and after a dozen spinner casts a twisted line now and then kinks into a wind knot until you retie it with the button by the walk signs or T. On a controller, X tosses the groundbait and the left trigger reties the line. On a clear morning after a day of rain the fish sulk deep until noon, so bites come slower except on a slow jig or worm, and the shack's chalk board warns of it.",
   "On a clear dawn, shafts of low sunlight now slant through the trees and the morning mist onto the lake. In spring a yellow film of pollen streaks the water with the breeze and piles up on the downwind bank, and in fall the fallen leaves raft up along that bank instead.",
   "Home counts your days on the water this year beside your outings. When loading a book file would replace fish or places this browser has and the file doesn't, the question offers to download this book first.",
   "A fish you let go from the catch card now stays in the lake: on a later day it may take your lure again at the same bank, a little heavier for its time away, and the card says when you let it go. As a foggy morning clears, the fish move up to feed and bite sooner for an hour, and the shack's chalk board says when. In a fight at the Point or the Dock, the card now warns that the rocks and pilings fray the line.",
