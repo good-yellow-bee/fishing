@@ -80,4 +80,36 @@ describe("useGamepad", () => {
     expect(look.zoom).toBeGreaterThan(1);
     expect(seen?.cursor).toBeNull();
   });
+
+  it("aims with the arrow keys when there is no controller, and leaves them alone when told to", () => {
+    Object.defineProperty(navigator, "getGamepads", { configurable: true, value: () => [] });
+    let aim = true;
+    function Aimer() {
+      seen = useGamepad(true, false, aim);
+      return null;
+    }
+    const moves: number[] = [];
+    const listen = (event: PointerEvent) => moves.push(event.clientX);
+    window.addEventListener("pointermove", listen);
+    act(() => root.render(<Aimer />));
+    step(16);
+    const press = new KeyboardEvent("keydown", { code: "ArrowRight", key: "ArrowRight", bubbles: true, cancelable: true });
+    window.dispatchEvent(press);
+    expect(press.defaultPrevented).toBe(true);
+    step(116);
+    expect(seen?.cursor?.x).toBeGreaterThan(window.innerWidth / 2);
+    expect(moves.length).toBe(1);
+    window.dispatchEvent(new KeyboardEvent("keyup", { code: "ArrowRight", key: "ArrowRight", bubbles: true }));
+    step(216);
+    expect(moves.length).toBe(1);
+    // In a fight the arrows steer instead: no cursor move, and the key is left for the game.
+    aim = false;
+    act(() => root.render(<Aimer />));
+    const steer = new KeyboardEvent("keydown", { code: "ArrowLeft", key: "ArrowLeft", bubbles: true, cancelable: true });
+    window.dispatchEvent(steer);
+    expect(steer.defaultPrevented).toBe(false);
+    step(316);
+    expect(moves.length).toBe(1);
+    window.removeEventListener("pointermove", listen);
+  });
 });

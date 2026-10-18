@@ -80,3 +80,18 @@ export function moveCursor(
     y: Math.min(box.height - 1, Math.max(0, at.y + step(lean.y))),
   };
 }
+
+/** The arrow keys a keyboard aims with when there is no mouse. */
+export const ARROW_KEYS: ReadonlySet<string> = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]);
+
+/**
+ * The arrow keys held, as a lean like the right stick's: a third of full speed at first for fine aim, rising to full
+ * after a second's hold so the far bank isn't a long wait.
+ */
+export function arrowLean(held: ReadonlySet<string>, heldFor: number): { x: number; y: number } {
+  const x = (held.has("ArrowRight") ? 1 : 0) - (held.has("ArrowLeft") ? 1 : 0);
+  const y = (held.has("ArrowDown") ? 1 : 0) - (held.has("ArrowUp") ? 1 : 0);
+  if (x === 0 && y === 0) return { x: 0, y: 0 };
+  const size = Math.min(1, 0.35 + Math.max(0, heldFor) * 0.65);
+  return { x: x * size, y: y * size };
+}
