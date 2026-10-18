@@ -74,7 +74,7 @@ import { useEffectsSteppedDown } from "../game/frameWatch";
 import { useEffectsNotice } from "../game/effectsNotice";
 import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
-import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, solidStrikeMs } from "../game/logic";
+import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
 import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
@@ -881,6 +881,7 @@ export function DockPage() {
           {!rowing && clouded && isFishingStance(game.stance) && SHALLOW_BANKS.has(game.stance) && <small className="stance-hot"> · {t("cloud over the sun")}</small>}
           {!rowing && game.groundbait?.spot === game.stance && <small className="stance-hot"> · {t("groundbait · {casts} left", { casts: game.groundbait.casts })}</small>}
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
+          {!rowing && !mercy && isFishingStance(game.stance) && longShadowWaitMul(game.stance, hour, sky) > 1 && <small className="stance-cold"> · {t("your shadow on the water")}</small>}
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
           {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}

@@ -291,7 +291,9 @@ button.field-primary {
 
 .stat-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Three across, or two and one when a card would be under 150 px (a tablet with larger text), where "Poranny patrol"
+     broke mid-word. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
   gap: 12px;
   margin: 8px 0 28px;
 }
@@ -329,14 +331,10 @@ button.field-primary {
   font-size: 12px;
 }
 
-/* Each count stays whole when the line wraps on a phone. */
+/* Each count stays whole when the line wraps, and wraps inside itself only when it is wider than its card: kept on
+   one line, "5 days out this year" and "Set a goal for 2026" pushed Home's Next card off a tablet's page with larger text. */
 .stat-row small a {
-  white-space: nowrap;
-}
-
-/* A long line of its own ("Last time: … · Jig and minnow ×1"): it wraps rather than widen the page. */
-.stat-row .next-last a {
-  white-space: normal;
+  display: inline-block;
 }
 
 .home-grid {

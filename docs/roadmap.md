@@ -1114,6 +1114,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA69~~ | ~~With larger text the walking stick grew with the words on a touch tablet, and on a 600 px tall one it ran up into the lure panel. The stick has no words, so it now keeps its size on every touch screen, as it already did on phones (#1188)~~ | phone UX | S |
 | ~~PA70~~ | ~~While the first-cast coach showed on a laptop or tablet, the bank chip beside it ("Dock · biting today · bites sooner now") ran on under the coach, worse with larger text. It now stops just short of the coach on one line, ending in an ellipsis when it runs long (#1191)~~ | phone UX | S |
 | ~~PA71~~ | ~~On a 600 px tall touch tablet with larger text, a lure panel showing both "suits it" notes ran down over the walking stick, so touches there landed on the panel. The panel now ends just above the stick and scrolls when its notes run long (#1193)~~ | phone UX | S |
+| ~~PA72~~ | ~~On a 1024 px tablet or laptop window with larger text, Home's three count cards kept counts like "5 days out this year" on one line, so the Next card was squeezed off the page and the page scrolled sideways. The cards now go two and one when a card would be under 150 px wide, and a long count wraps inside its card (#1197)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1202,6 +1203,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC81~~ | ~~Dog walker in the rain: the dog walker now comes out on rainy days too, under an umbrella~~ (#1186) | scene | S |
 | ~~SC82~~ | ~~Rain and snow in the wind: on breezy and windy days the rain streaks slant down the wind, still landing on their rings, and the snow drives across at a slant~~ (#1190) | scene | S |
 | ~~SC83~~ | ~~News card scene18: woodcutter, dawn sculler, dog walker in the rain, rain and snow in the wind~~ (#1190) | scene | S |
+| ~~SC84~~ | ~~Moored boats fill with the weather: the rowboats at their moorings hold a dome of snow in winter, a pool of rainwater in the rain and a scatter of fallen leaves in the fall~~ (#1196) | scene | S |
+| ~~SC85~~ | ~~Spring goose family: by day in spring a pair of Canada geese graze slowly along the far bank with five goslings, pecking at the grass, the parents' necks dipping as they feed~~ (#1196) | scene | S |
+| ~~SC86~~ | ~~Leaf-pile jumper: on dry fall days a child runs at a pile of raked leaves on the far bank, leaps in arms up, lies back in a burst of leaves, then climbs out and walks back for another go~~ (#1196) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1494,7 +1498,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT285~~ | ~~A cloud over the sun: on a clear or partly cloudy day, by day, a cloud covers the sun for a quarter of the 45-second spells (the same for everyone); while it does, the fish move up into the shallows, so a cast at the Dock, Reeds, Point or Inlet bites sooner (0.85 wait), the wait hint says so, and the stance chip says "cloud over the sun" there~~ (#1174) | gameplay | S |
 | ~~GT286~~ | ~~A fish hooked at the lily pads dives for the stems: a fish hooked on a cast tight to the pads (GT280) fights a weed fight whatever the bank, so an unturned run takes it into the stems (as in the Reeds) and the fight card says "Lily pads: turn every run, or it dives into the pad stems"~~ (#1178) | gameplay | S |
 | ~~GT287~~ | ~~A new kind of lure at a bank fished hard: once a bank's fish grow wary (GT251), a cast there with a kind of lure they haven't seen this visit catches them off guard, so it isn't slowed and the bank's count drops by 4 casts; the wait hint says "The wary fish here haven't seen this kind of lure yet, so they come to it.", the fished-hard hint adds "or another kind of lure", swapping back to a kind already shown does nothing, and a bank that rests fully forgets what it saw~~ (#1187) | gameplay | S |
-| GT288 | News card 2026-10-18-game14 covers GT285 to GT287: the cloud over the sun, the lily pad fight and a new kind of lure at a bank fished hard | ui | S |
+| ~~GT288~~ | ~~News card 2026-10-18-game14 covers GT285 to GT287: the cloud over the sun, the lily pad fight and a new kind of lure at a bank fished hard~~ (#1189) | ui | S |
+| GT289 | The angler's shadow under a low sun: at dawn the sun sits squarely behind the Drop-off and at dusk behind the Inlet, so under a clear or partly cloudy sky the angler's long shadow falls across the water and the fish there shy from it (1.15 wait), the cast says so and the stance chip reads "your shadow on the water"; a beginner is spared | gameplay | S |
 
 ## Risks / open questions for the owner
 
