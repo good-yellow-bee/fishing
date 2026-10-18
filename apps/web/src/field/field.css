@@ -471,7 +471,7 @@ button.field-primary {
 .photo-full img {
   display: block;
   max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 96px);
+  max-height: calc(100vh - 124px);
   object-fit: contain;
 }
 
@@ -487,6 +487,14 @@ button.field-primary {
 
 .photo-full-bar .text-button {
   color: #f3e6cc;
+}
+
+/* What fish it is, under the full-size picture: a caption, kept to its width. */
+.photo-full-caption {
+  max-width: calc(100vw - 32px);
+  margin: 8px 0 0;
+  color: #f3e6cc;
+  font-size: 14px;
 }
 
 .photo-full form {

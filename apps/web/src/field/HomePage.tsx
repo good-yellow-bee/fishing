@@ -17,9 +17,9 @@ import { t, tn, useT } from "../i18n";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, catchMonth } from "./tripMonths";
-import { countedBook, countedFish } from "./milestones";
+import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
-import { readYearGoal } from "./YearGoal";
+import { goalPace, readYearGoal } from "./YearGoal";
 import { ThemeChoice } from "./ThemeChoice";
 import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
@@ -140,6 +140,7 @@ export function HomePage() {
   const fishByTrip = fishCountsByTrip(book);
   // The counts are the angler's own: a round of the game moves none of them.
   const real = countedFish(book.catches);
+  const nextMark = nextBookMark(book.catches.filter(ownFish).length);
   const counted = new Set(real.map((entry) => entry.id));
   const kinds = speciesCounts(real).length;
   // A look back: what came out of the water this same week in earlier years.
@@ -151,6 +152,7 @@ export function HomePage() {
   const yearRows = book.catches.filter((entry) => catchMonth(entry).startsWith(`${thisYear}-`));
   const yearFish = yearRows.filter((entry) => counted.has(entry.id)).length;
   const goal = readYearGoal(thisYear);
+  const pace = goal !== null ? goalPace(yearFish, goal, now) : null;
   // Last year up to this same date, once last year has any fish: is this year on pace?
   const lastYear = String(Number(thisYear) - 1);
   const lastYearDays = real.map((entry) => localDate(new Date(entry.caughtAt))).filter((day) => day.startsWith(`${lastYear}-`));
@@ -283,6 +285,10 @@ export function HomePage() {
                 </>
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
+              {/* Where this year's pace ends it, against the goal, as the goal on Bests says it. */}
+              {pace ? `\u00a0· ${t("on pace for {n}", { n: pace.pace })}` : null}
+              {/* A round number a few fish off: the next one worth a cheer. */}
+              {nextMark ? `\u00a0· ${t("{n} more to {mark}", { n: nextMark.left, mark: nextMark.mark })}` : null}
             </small>
           ) : null}
         </div>

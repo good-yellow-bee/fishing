@@ -1641,7 +1641,12 @@ function CatchView() {
         ) : null}
       </EditDelete>
       {photo ? (
-        <PhotoFull src={photo} alt={t("Photo of {species}", { species: t(entry.species) })} name={`${t(entry.species)} ${caughtDay}`} />
+        <PhotoFull
+          src={photo}
+          alt={t("Photo of {species}", { species: t(entry.species) })}
+          name={`${t(entry.species)} ${caughtDay}`}
+          caption={[t(entry.species), measuresText(entry), formatDay(caughtDay), ...(spot ? [spot.name] : [])].join(" · ")}
+        />
       ) : null}
       <aside className="conditions" aria-label={t("Conditions")}>
         {entry.weather ? (
