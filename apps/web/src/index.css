@@ -3212,4 +3212,40 @@ html[data-contrast="high"] .sound-captions li {
     right: 114px;
     left: auto;
   }
+
+  /* The fight card sits low and tight, so it clears a header that wraps to two rows on a 740-800 px phone. */
+  .fight-bar {
+    bottom: 8px;
+    padding: 10px 16px 11px;
+  }
+
+  /* The catch card's name and fish ran off the top of the short screen: it stops under the header, scrolls, and keeps its buttons at its foot. */
+  .landed-card {
+    left: 8px;
+    bottom: 8px;
+    padding: 12px 18px;
+    max-height: calc(100% - var(--hud-bottom, 52px) - 14px);
+    overflow-y: auto;
+  }
+
+  .landed-card h2 {
+    font-size: 22px;
+  }
+
+  .landed-card .guide-fish {
+    width: 64px;
+    margin-bottom: 2px;
+  }
+
+  .landed-card .catch-actions {
+    position: sticky;
+    bottom: -12px;
+    margin: 0 -18px -12px;
+    padding: 8px 18px 10px;
+    background: rgba(239, 224, 194, 0.98);
+  }
+
+  .landed-card .catch-actions .panel-btn {
+    margin-top: 0;
+  }
 }
