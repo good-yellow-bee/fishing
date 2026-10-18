@@ -357,6 +357,29 @@ button.field-primary {
   text-underline-offset: 3px;
 }
 
+/* On a touch screen the underlined words reach 8 px past their line to a finger-sized target (33 px, not 17), moving nothing on the page. */
+@media (pointer: coarse) {
+  .section-head a,
+  .sheet-foot button,
+  .text-button {
+    position: relative;
+  }
+
+  .section-head a::after,
+  .sheet-foot button::after,
+  .text-button::after {
+    content: "";
+    position: absolute;
+    inset: -8px -4px;
+  }
+
+  /* Home's stacked count lines ("6 species", "Last time: …") sat 4 px apart: each link gets room of its own. */
+  .stat-row small a {
+    display: inline-block;
+    padding-block: 4px;
+  }
+}
+
 .subhead,
 .sheet h2.subhead {
   margin: 18px 0 10px;
