@@ -38,3 +38,8 @@ export function forgetRemovedPhotos(ids: readonly string[]) {
   const held = read();
   if (held.some((id) => back.has(id))) write(held.filter((id) => !back.has(id)));
 }
+
+/** The list as it was before a load that was undone: the photos removed then stay out of later merges again. */
+export function restoreRemovedPhotos(ids: readonly string[]) {
+  write([...ids]);
+}

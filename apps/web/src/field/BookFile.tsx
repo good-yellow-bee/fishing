@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { FIELD_ARCHIVE_KIND, FIELD_ARCHIVE_REFUSAL, FIELD_ARCHIVE_VERSION, catchesNewestFirst, foldText, fieldArchiveDocument, mergeFieldArchive, newFishIn, parseFieldArchiveText, type CatchPhotoMap, type FieldArchive, type Logbook } from "@stillwater/shared";
 import { commitFieldArchive } from "./archiveStore";
 import { catchesCsv } from "./catchCsv";
-import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt } from "./bookCopy";
+import { bookSignature, changedDaysSince, clearCopiedAt, copyNudge, hasSampleLeft, hasSampleWaters, isSampleCatch, isSampleOnly, isSampleSpot, isSampleTrip, ownCatches, readCopiedAt, readCopyMark, lowerCopiedAt, readCopyRecord, restoreCopyRecord, saveCopiedAt, withoutSample } from "./bookCopy";
 import { keepBookStorage } from "./keepStorage";
-import { forgetRemovedPhotos, readRemovedPhotos } from "./removedPhotos";
+import { forgetRemovedPhotos, readRemovedPhotos, restoreRemovedPhotos } from "./removedPhotos";
 import { forgetUnreadableBook, readUnreadableBook, salvageStored, setAsideCatchIds, unreadableHeldOnly } from "./storage";
 import { forgetUnreadableTackle, readUnreadableTackle } from "./gear/storage";
 import { useTackle } from "./gear/TackleState";
@@ -57,6 +57,11 @@ function withoutDeleted(file: FieldArchive): FieldArchive {
   return { ...file, book: { ...file.book, catches: file.book.catches.filter((entry) => !deleted.has(entry.id)) } };
 }
 
+/** The file without the sample week when this book holds none of it: left here by Replace or "Start my own book", it stays left. */
+function withoutSampleFor(file: FieldArchive, here: Logbook): FieldArchive {
+  return hasSampleLeft(here) ? file : { ...file, book: withoutSample(file.book) };
+}
+
 /** The first few fish by kind and day, then how many more. */
 function fishPreview(entries: readonly { species: string; caughtAt: string }[]): string {
   const shown = entries.slice(0, PREVIEW_FISH).map((entry) => `${t(entry.species)} ${formatCatchDay(entry.caughtAt)}`).join(", ");
@@ -68,7 +73,9 @@ const PREVIEW_FISH = 3;
 function bookSummary(book: Logbook): string {
   if (isSampleOnly(book) && book.catches.every((entry) => isSampleCatch(entry.id))) return t("only the sample week");
   const newest = newestAt(book);
-  return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
+  // The sample week's invented fish beside the angler's own aren't counted as theirs.
+  const own = book.catches.filter((entry) => !isSampleCatch(entry.id)).length;
+  return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(own > 0 ? own : book.catches.length), day: formatCatchDay(newest) }) : t("no fish");
 }
 
 /** Where the set-aside book's notice sits, for a note at the top of Home to lead to. */
@@ -158,7 +165,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   const [setAside, setSetAside] = useState(readUnreadableBook);
   const [tackleAside, setTackleAside] = useState(readUnreadableTackle);
   // What a loaded file replaced, while nothing has changed since: the load can be taken back.
-  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals; deleted: string[] } | null>(null);
+  const [beforeLoad, setBeforeLoad] = useState<{ archive: FieldArchive; loaded: FieldArchive; copiedAt: number | null; copyRecord: string | null; goals: YearGoals; deleted: string[]; removed: string[] } | null>(null);
   const canUndoLoad = beforeLoad !== null && storedBook === beforeLoad.loaded.book && items === beforeLoad.loaded.tackle;
 
   // The stored book, not the one on screen: a sample week saved in Polish would stay Polish after loading in English.
@@ -246,7 +253,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     if (ownCatches(next.book) > 0) void keepBookStorage();
     const here: FieldArchive = { book: storedBook, tackle: items, photos };
     const goalsHere = readYearGoals();
-    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()] });
+    setBeforeLoad({ archive: here, loaded: next, copiedAt, copyRecord: readCopyRecord(), goals: goalsHere, deleted: [...readDeletedFish()], removed: [...readRemovedPhotos()] });
     replaceBook(next.book, next.photos);
     replaceTackle(next.tackle);
     noteSnapshots(pendingSnapshots, next.photos);
@@ -299,7 +306,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   /** `withDeleted` takes back the fish deleted here too, when the file still has them. */
   const onAddNew = (withDeleted = false) => {
     if (!pending) return;
-    const trimmed = withDeleted ? pending : withoutDeleted(pending);
+    const trimmed = withDeleted ? withoutSampleFor(pending, storedBook) : withoutDeleted(withoutSampleFor(pending, storedBook));
     // A water merged away here since the file was made: its fish and outings go to the water it joined.
     const file = { ...trimmed, book: intoMergedWaters(trimmed.book, storedBook, readMergedWaters()) };
     const next = mergeFieldArchive({ book: storedBook, tackle: items, photos }, file, readDeletedFish(), readRemovedPhotos());
@@ -322,6 +329,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     restoreCopyRecord(beforeLoad.copyRecord);
     // The fish deleted before the load are kept out of later merges again.
     restoreDeletedFish(beforeLoad.deleted);
+    // So are the photos removed here on purpose.
+    restoreRemovedPhotos(beforeLoad.removed);
     setCopiedAt(beforeLoad.copiedAt);
     setCopyMark(readCopyMark());
     setBeforeLoad(null);
@@ -337,11 +346,13 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     storedBook.catches.some((entry) => !isSampleCatch(entry.id)) ||
     storedBook.spots.some((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)) ||
     storedBook.trips.some((trip) => !isSampleTrip(trip.id));
-  const adds = pending ? catchesNewestFirst({ ...pending.book, catches: newFishIn(storedBook, withoutDeleted(pending).book) }) : [];
+  // What the file brings this book: the sample week only while this book still has it.
+  const fromFile = pending ? withoutSampleFor(pending, storedBook) : null;
+  const adds = fromFile ? catchesNewestFirst({ ...fromFile.book, catches: newFishIn(storedBook, withoutDeleted(fromFile).book) }) : [];
   const addable = adds.length;
-  const kept = pending ? newFishIn(storedBook, pending.book).length - addable : 0;
+  const kept = fromFile ? newFishIn(storedBook, fromFile.book).length - addable : 0;
   // The file's waters and outings with no new fish of their own: one added or planned on another device.
-  const adding = pending && hasBook ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(pending), book: intoMergedWaters(withoutDeleted(pending).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
+  const adding = fromFile && hasBook ? mergeFieldArchive({ book: storedBook, tackle: [], photos: {} }, { ...withoutDeleted(fromFile), book: intoMergedWaters(withoutDeleted(fromFile).book, storedBook, readMergedWaters()), photos: {} }, readDeletedFish()) : null;
   const placesOnly = adding && addable === 0 ? adding.book.spots.length - storedBook.spots.length + adding.book.trips.length - storedBook.trips.length : 0;
   const removedHere = readRemovedPhotos();
   // Photos the file has for fish both books share and this one has none for: taken on the other phone after a swap.
