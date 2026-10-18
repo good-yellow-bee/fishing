@@ -104,7 +104,7 @@ export function idleHint(stance: StanceId | null, touch = touchScreen()) {
   if (stance && isFishingStance(stance)) {
     return touch
       ? t("Touch the water to aim. Hold to charge, lift in the moss band.")
-      : t("Click the water to aim. Hold to charge, release in the moss band.");
+      : t("Click the water or use the arrow keys to aim. Hold to charge, release in the moss band.");
   }
   return t("Walk to the water.");
 }
