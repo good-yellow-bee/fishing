@@ -115,9 +115,11 @@ describe("when a new catch starts", () => {
     const dawn = new Date(2026, 9, 16, 4, 30);
     const lastFish = new Date(2026, 9, 16, 4, 20).toISOString();
     expect(startTimeFor({ date: "2026-10-15" }, dawn, lastFish)).toBe(dawn);
-    // Written up the next morning, hours after the last fish: back on the outing's day.
+    // Written up the next morning, hours after the last fish: on from that fish, never before it.
     const morning = new Date(2026, 9, 16, 11, 0);
-    expect(startTimeFor({ date: "2026-10-15" }, morning, lastFish)).toEqual(new Date(2026, 9, 15, 11, 0));
+    expect(startTimeFor({ date: "2026-10-15" }, morning, lastFish)).toEqual(new Date(lastFish));
+    // A day session written up later: back on the outing's day at the clock time, once that is past its last fish.
+    expect(startTimeFor({ date: "2026-10-15" }, morning, new Date(2026, 9, 15, 9, 0).toISOString())).toEqual(new Date(2026, 9, 15, 11, 0));
   });
 });
 

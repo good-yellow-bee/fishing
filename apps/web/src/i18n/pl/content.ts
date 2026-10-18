@@ -287,7 +287,7 @@ export const PL_CONTENT: PlBook = {
   "That outing is not in the book.": "Tej wyprawy nie ma w dzienniku.",
   "That outing was on a different water.": "Ta wyprawa była na innej wodzie.",
   "Set the time you landed it.": "Ustaw godzinę połowu.",
-  "That time is still ahead of you.": "Ta godzina jeszcze przed tobą.",
+  "That time is still ahead of you.": "Ta godzina jeszcze przed Tobą.",
   "Keep the note to a few lines.": "Zmieść notatkę w kilku linijkach.",
   "Give the spot a short name.": "Nadaj łowisku krótką nazwę.",
   "Pick a water type.": "Wybierz rodzaj wody.",

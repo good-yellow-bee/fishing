@@ -85,7 +85,10 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
   if (since >= 0 && since < STILL_FISHING_MS) return now;
   if (now.getHours() < LATE_NIGHT_UNTIL && trip.date === localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12))) return now;
   const [y, m, d] = trip.date.split("-").map(Number) as [number, number, number];
-  return new Date(y, m - 1, d, now.getHours(), now.getMinutes());
+  const start = new Date(y, m - 1, d, now.getHours(), now.getMinutes());
+  // Never before the outing's last fish: a night written up next morning goes on from where it ended.
+  const last = lastFishAt ? new Date(lastFishAt) : null;
+  return last && last.getTime() > start.getTime() && last.getTime() <= now.getTime() ? last : start;
 }
 
 /** The outing planned on this water for this day, which a fish caught there that day most likely belongs to. */
