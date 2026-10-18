@@ -44,6 +44,8 @@ import { DUCKLING_COUNT, DUCKLING_PEEP_MIN, DUCKLING_PEEP_SPREAD, ducklingAt, du
 import { Striders } from "./Striders";
 import { ReedFluff } from "./ReedFluff";
 import { Gusts } from "./Gusts";
+import { Whitecaps } from "./Whitecaps";
+import { whitecapCount } from "./whitecapLife";
 import { PadFrog } from "./PadFrog";
 import { FROG_PADS, frogsOnPads } from "./padFrogs";
 import { gustsOut } from "./gustPatch";
@@ -2065,6 +2067,7 @@ export const LakeWorld = memo(function LakeWorld({
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
+      {whitecapCount(Math.hypot(wind.x, wind.z)) > 0 && <Whitecaps wind={wind} light={weather.rainLight} />}
       {lanternLevel(hour) > 0 && <Lanterns level={lanternLevel(hour)} />}
       {minnowsOut(hour) && <LanternMinnows />}
       {hotspot && <BubblingHotspot hotspot={hotspot} weather={weather} />}
