@@ -1,9 +1,10 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-game07";
+export const NEWS_ID = "2026-10-18-field16";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "A water's page now says how long ago it was last fished, and once it spans two seasons it counts its fish year by year, each year opening that season's fish there. The whole catch log can now be read largest first, as a search's matches already could.",
   "At the lake, a walk sign now dims a bank fished hard, so you can see where to move. A fight dragged over the Point's rocks or round a Dock piling frays the line, and a frayed line snaps sooner until you retie it with the button by the walk signs or T. In the overcast hour before the day's rain the fish feed hard, so every bite comes sooner, and the shack's chalk board says when that hour starts.",
   "Each kind on Bests now names the day of its last fish, and in a season's view a kind caught there for the first time carries a “New this season” stamp. A kind's page counts its fish year by year, each year opening that season's fish.",
   "After an update the game opens faster on a phone it has run on before, because the 3D engine and the app's other libraries stay saved on the phone. With larger text on a phone, the walking stick keeps its size instead of running into the lure picker, and the cast meter sits beside it, where the hint and the first-cast guide no longer cover it.",

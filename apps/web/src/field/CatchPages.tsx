@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { largestFirst } from "./largestFirst";
+import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   likelyLength,
@@ -184,6 +186,8 @@ export function CatchesPage() {
   // While a search is typed, its matches take the list's place.
   const [params] = useSearchParams();
   const searching = Boolean(params.get(FIND_PARAM)?.trim());
+  // The same "largest first" as a search's matches: the whole book's biggest fish, top down.
+  const [largest, setLargest] = useLargestOrder();
 
   return (
     <div className="sheet">
@@ -211,7 +215,8 @@ export function CatchesPage() {
               {/* The largest named is the angler's own, as Bests and the cards' records say. */}
               <FishSum catches={catches} best={countedFish(catches)} />
               <SpeciesChips catches={catches} />
-              <PagedCatches items={catches} monthOf={catchMonth} headLevel={2}>
+              {catches.length > 1 ? <MatchOrder largest={largest} onChange={setLargest} /> : null}
+              <PagedCatches key={String(largest)} items={largest ? largestFirst(catches) : catches} monthOf={largest ? undefined : catchMonth} headLevel={2}>
                 {(entry) => (
                   <CatchCard
                     key={entry.id}
