@@ -34,3 +34,20 @@ describe("larger text on a phone held upright", () => {
     expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-walkthrough="1"\] \.walkthrough ol \{\n    display: none;/);
   });
 });
+
+describe("a fight on a phone held upright with larger text", () => {
+  const from = css.indexOf("@media (max-width: 800px) and (min-height: 501px)");
+  const upright = css.slice(from, css.indexOf("@media (max-width: 520px)", from));
+
+  it("clears the header's status chips, the coach and the bank chip so the card ends above the thumb button", () => {
+    expect(upright).toContain('html[data-text-size] .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),');
+    expect(upright).toMatch(/html\[data-text-size\] \.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\n    display: none;/);
+    expect(upright).toMatch(/@media \(pointer: coarse\) and \(max-width: 800px\) and \(min-height: 501px\) \{\n  html\[data-text-size\] \.fight-bar \.fight-controls \{\n    display: none;/);
+  });
+});
+
+describe("the effects notice", () => {
+  it("takes its own width up to its cap instead of wrapping to half the screen", () => {
+    expect(/\n\.effects-toast \{([^}]*)\}/.exec(css)?.[1]).toContain("width: max-content;");
+  });
+});
