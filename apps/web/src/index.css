@@ -2055,6 +2055,16 @@ html[data-input="pad"] .fight-bar .on-pad {
     top: calc(var(--hud-bottom, 140px) + 212px);
   }
 
+  /* In a fight the card covers the coach's place under the header, so the coach drops below the card, above the thumb buttons, without its step chips. */
+  .scene-wrap[data-phase="fight"] .walkthrough {
+    top: auto;
+    bottom: 120px;
+  }
+
+  .scene-wrap[data-phase="fight"] .walkthrough ol {
+    display: none;
+  }
+
   /* With larger text there is no room for both under the header: the coach already says what the hint says. */
   html[data-text-size] .scene-wrap[data-walkthrough="1"] .hint {
     display: none;
