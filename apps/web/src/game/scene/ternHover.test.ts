@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLIMB_SEC, PLUNGE_SEC, TERN_COUNT, TERN_CYCLE, TERN_HEIGHT, TERN_RADIUS, ternPose, ternsOut } from "./ternHover";
+import { CLIMB_SEC, PLUNGE_SEC, TERN_COUNT, TERN_CYCLE, TERN_HEIGHT, TERN_RADIUS, TERN_STILL_TIME, ternPose, ternsOut } from "./ternHover";
 
 const PATCH = { x: 2, z: -3 };
 
@@ -36,6 +36,15 @@ describe("terns", () => {
     for (let time = 0; time < TERN_CYCLE * 2; time += 0.05) {
       const low = Array.from({ length: TERN_COUNT }, (_, k) => ternPose(k, time, PATCH)).filter((pose) => pose.y < 1);
       expect(low.length).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("hang up over the patch at the moment reduced motion holds them, none plunging or over a splash", () => {
+    for (let k = 0; k < TERN_COUNT; k += 1) {
+      const pose = ternPose(k, TERN_STILL_TIME, PATCH);
+      expect(pose.diving).toBe(false);
+      expect(pose.splash).toBe(-1);
+      expect(pose.y).toBeGreaterThan(TERN_HEIGHT - 0.4);
     }
   });
 });
