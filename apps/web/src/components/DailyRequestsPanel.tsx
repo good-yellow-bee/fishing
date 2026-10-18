@@ -67,8 +67,20 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
     };
   }, [board]);
 
+  // The row whose Claim was pressed: its button gives way to "Claimed", which takes the keyboard's focus so it doesn't
+  // fall out of the shack to the page.
+  const [justClaimed, setJustClaimed] = useState<string | null>(null);
+  useEffect(() => {
+    if (!justClaimed) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    document.getElementById(`claimed-${justClaimed}`)?.focus({ preventScroll: true });
+  }, [board, justClaimed]);
+
   const claim = async (day: string, id: string) => {
+    if (claiming !== null) return;
     setClaiming(id);
+    setJustClaimed(id);
     setError("");
     try {
       await claimDailyRequest(id, day);
@@ -112,12 +124,16 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
               </span>
               <span className="daily-request-reward">{t("+{reward} pts", { reward: row.reward })}</span>
               {row.claimed ? (
-                <span className="daily-request-claimed">{t("Claimed")}</span>
+                <span className="daily-request-claimed" id={`claimed-${row.id}`} tabIndex={-1}>
+                  {t("Claimed")}
+                </span>
               ) : (
                 <button
                   type="button"
                   aria-label={t("Claim {request}", { request: dailyRequestText(row) })}
-                  disabled={row.progress < row.count || claiming !== null}
+                  disabled={row.progress < row.count}
+                  // While another claim goes through the button only reads unavailable: disabling it would drop focus.
+                  aria-disabled={claiming !== null || undefined}
                   onClick={() => void claim(board.day, row.id)}
                 >
                   {t("Claim")}

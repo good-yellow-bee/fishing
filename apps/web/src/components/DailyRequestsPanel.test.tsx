@@ -90,6 +90,24 @@ describe("DailyRequestsPanel", () => {
     expect(rows()[0]!.button).toBeNull();
   });
 
+  it("keeps keyboard focus in the shack: on Claimed once paid, and on a button while a claim goes through", async () => {
+    let pay = () => {};
+    claimMock.mockReturnValue(new Promise((resolve) => (pay = () => resolve({ reward: 15 }))));
+    await mount("catch-1");
+    const claimButton = rows()[0]!.button!;
+    claimButton.focus();
+    await act(async () => claimButton.click());
+    // Still going through: the button only reads unavailable, so focus doesn't drop out of the panel.
+    expect(claimButton.disabled).toBe(false);
+    expect(claimButton.getAttribute("aria-disabled")).toBe("true");
+    expect(document.activeElement).toBe(claimButton);
+    await act(async () => claimButton.click());
+    expect(claimMock).toHaveBeenCalledTimes(1);
+    await act(async () => pay());
+    expect(document.activeElement?.textContent).toBe("Claimed");
+    expect(document.activeElement?.getAttribute("tabindex")).toBe("-1");
+  });
+
   it("keeps the row claimable and shows why when the claim fails", async () => {
     claimMock.mockRejectedValue(new ApiError("request incomplete", 409));
     await mount("catch-1");
