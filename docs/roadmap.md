@@ -1089,6 +1089,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC14~~ | ~~Duckweed in the still corners: in summer, ragged green beds of tiny fronds gather by the reeds, among the lilies and in two sheltered coves, thick in the middle and breaking up at the rim, nudged downwind by the breeze and riding the chop; fall thins them and winter and spring clear them~~ (#1033) | scene | S |
 | ~~SC15~~ | ~~Lilies that close: the water lilies' flowers open wide by day, half open at dawn, close toward dusk and stand shut through the night, half closing on a grey or rainy day, easing open and shut as the light turns~~ (#1037) | scene | S |
 | ~~SC16~~ | ~~News card scene04: the reeds in the wind, the summer duckweed and the closing lilies~~ (#1037) | scene | S |
+| ~~SC17~~ | ~~Frost on the dock: after a clear, cold night in fall (and more lightly in spring), the dawn finds the walkway's boards white with sparkling hoar frost, the angler's boot prints melted back to bare wood out along it~~ (#1040) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

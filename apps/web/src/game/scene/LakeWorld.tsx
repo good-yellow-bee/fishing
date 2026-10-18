@@ -30,7 +30,9 @@ import { dewGlintsOut } from "./dewGlints";
 import { dockLeavesOut } from "./plankLeaves";
 import { DewGrass } from "./DewGrass";
 import { DockLeaves } from "./DockLeaves";
+import { DockFrost } from "./DockFrost";
 import { DockSnow } from "./DockSnow";
+import { FROST_COLOR, FROST_PALE, dockFrost } from "./dockFrost";
 import { Icicles } from "./Icicles";
 import { Thermos } from "./Thermos";
 import { Moths } from "./Moths";
@@ -1728,21 +1730,25 @@ function PierPlanks({ color, boards }: { color: THREE.Color; boards: readonly nu
   );
 }
 
-function PierDeck({ shade }: { shade: number }) {
+function PierDeck({ shade, frost }: { shade: number; frost: number }) {
   return PIER_PLANK_BATCHES.map((boards, parity) => (
-    <PierPlanks key={parity} boards={boards} color={new THREE.Color(PIER_PLANK[parity]).multiplyScalar(shade)} />
+    <PierPlanks
+      key={parity}
+      boards={boards}
+      color={new THREE.Color(PIER_PLANK[parity]).multiplyScalar(shade).lerp(new THREE.Color(FROST_COLOR), frost * FROST_PALE)}
+    />
   ));
 }
 
-/** The pier and its planks; rain soaks the wood darker (`wet`). */
-function Dock({ wet }: { wet: boolean }) {
+/** The pier and its planks; rain soaks the wood darker (`wet`), and a frosty dawn pales the walkway (`frost`). */
+function Dock({ wet, frost }: { wet: boolean; frost: number }) {
   const shade = wet ? WET_SHADE : 1;
   return (
     <group>
       {BRIDGE_SPANS.map((z) => (
         <ToonModel key={z} url={MODELS.bridge} position={[0, 0, z]} rotation={[0, Math.PI / 2, 0]} scale={BRIDGE_SCALE} shade={shade} />
       ))}
-      <PierDeck shade={shade} />
+      <PierDeck shade={shade} frost={frost} />
       <ToonModel url={MODELS.platform} position={[0, 0, 7.9]} scale={1.55} shade={shade} />
       <ToonModel url={MODELS.log} position={[1.35, 0.12, 7.2]} rotation={[0, 0.5, 0]} scale={1.1} shade={shade} />
       <ToonModel url={MODELS.paddle} position={[-1, 0.18, 7.05]} rotation={[0.15, 0.6, 1.15]} scale={1.25} shade={shade} />
@@ -1980,7 +1986,8 @@ export const LakeWorld = memo(function LakeWorld({
   const mist = mistAmount(hour, sky);
   const stars = starOpacity(hour === "night", weather.sunOut, moonLight(moon));
   const road = moonRoad(hour === "night", weather.sunOut, moonLight(moon));
-  const shafts = useSettings().particles === "full" ? shaftStrength(hour, sky) : 0;
+  const frost = dockFrost(hour, season, sky);
+  const shafts =useSettings().particles === "full" ? shaftStrength(hour, sky) : 0;
   // Mist is the fog's own colour, lifted toward white so it reads against the water.
   const mistColor = useMemo(() => `#${new THREE.Color(weather.fog).lerp(new THREE.Color("#ffffff"), 0.35).getHexString()}`, [weather.fog]);
   const shore = useMemo(() => makeEdgeRingGeometry(1.8, 0.15), []);
@@ -2046,7 +2053,8 @@ export const LakeWorld = memo(function LakeWorld({
       <ScatterModels items={GRASS} />
       <ScatterModels items={NEAR_GRASS} />
       <Rocks items={LAKE_ROCKS} />
-      <Dock wet={dockWet(weather.rain, season)} />
+      <Dock wet={dockWet(weather.rain, season)} frost={frost} />
+      {frost > 0 && <DockFrost amount={frost} />}
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
       {dockSnowy(season) && <DockSnow />}
       {iciclesOut(season) && <Icicles />}
