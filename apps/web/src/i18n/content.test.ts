@@ -27,6 +27,7 @@ import {
 } from "@stillwater/shared";
 import { getUnits, reloadLang, setLang, setUnits } from ".";
 import { bestBeatText, dailyRequestText, lengthText, measureText, skillUnlockText, tempText, weatherText, weightText } from "./content";
+import { NEWS_ITEMS } from "../game/whatsNew";
 import { PL } from "./pl";
 
 const browser = new JSDOM("", { url: "http://localhost" });
@@ -80,6 +81,10 @@ describe("Polish game content", () => {
   it("has every lure class and sample piece of tackle", () => {
     expect(missing([...LURE_CLASSES.map((one) => one.label), lureClass("nothing known").label])).toEqual([]);
     expect(missing(sampleTackle().map((item) => item.label))).toEqual([]);
+  });
+
+  it("has every item on the news card", () => {
+    expect(missing(NEWS_ITEMS)).toEqual([]);
   });
 
   it("has the sample field log", () => {
