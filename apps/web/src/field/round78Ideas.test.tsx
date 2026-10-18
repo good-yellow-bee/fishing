@@ -1,10 +1,20 @@
 // @vitest-environment jsdom
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { busiestMonth } from "./bests/DayCalendar";
 import { catchesCsv } from "./catchCsv";
 import { YearGoal } from "./YearGoal";
+
+// Node 26 has a localStorage of its own that is undefined without a file, in place of jsdom's.
+function memoryStorage() {
+  const items = new Map<string, string>();
+  return {
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => void items.set(key, value),
+    removeItem: (key: string) => void items.delete(key),
+  };
+}
 
 const fish = (id: string, caughtAt: string, tripId: string | null = null) =>
   ({ id, species: "Zander", lure: "Jig", spotId: "home", tripId, caughtAt: new Date(caughtAt).toISOString(), measure: { kind: "length", inches: 20 }, note: "" }) as unknown as CatchEntry;
@@ -22,7 +32,7 @@ describe("round 78 ideas: the calendar marks its busiest month", () => {
 
 describe("round 78 ideas: the catches spreadsheet gives a night fish its outing's day", () => {
   it("fills Outing day only when it differs from the clock's", () => {
-    localStorage.clear();
+    vi.stubGlobal("localStorage", memoryStorage());
     const book = {
       spots: [{ id: "home", name: "Home", waterType: "lake", notes: "", bestConditions: "" }],
       trips: [{ id: "nye", date: "2025-12-31", spotId: "home", title: "NYE", note: "" }],
@@ -36,7 +46,7 @@ describe("round 78 ideas: the catches spreadsheet gives a night fish its outing'
 
 describe("round 78 ideas: Home's Set a goal opens the goal's form", () => {
   it("opens at once when the year has no goal", () => {
-    localStorage.clear();
+    vi.stubGlobal("localStorage", memoryStorage());
     const book = { spots: [], trips: [], catches: [] } as unknown as Logbook;
     expect(renderToStaticMarkup(<YearGoal book={book} openAtStart />)).toContain('name="goal"');
     expect(renderToStaticMarkup(<YearGoal book={book} />)).not.toContain('name="goal"');
