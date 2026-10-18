@@ -33,11 +33,11 @@ export function pileShape() {
 }
 
 /** The child's body above the hips, in a woolly hat, facing +z. */
-export function kidTorsoShape() {
+export function kidTorsoShape(jacket: string = JACKET, hat: string = HAT) {
   return mergePainted([
-    { geometry: new THREE.CylinderGeometry(0.1, 0.12, 0.36, 8), position: [0, 0.18, 0], color: JACKET },
+    { geometry: new THREE.CylinderGeometry(0.1, 0.12, 0.36, 8), position: [0, 0.18, 0], color: jacket },
     { geometry: new THREE.SphereGeometry(0.09, 10, 8), position: [0, 0.46, 0], color: SKIN },
-    { geometry: new THREE.SphereGeometry(0.095, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), position: [0, 0.48, 0], color: HAT },
+    { geometry: new THREE.SphereGeometry(0.095, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), position: [0, 0.48, 0], color: hat },
     { geometry: new THREE.SphereGeometry(0.035, 6, 4), position: [0, 0.58, 0], color: "#f3efe6" },
   ]);
 }
