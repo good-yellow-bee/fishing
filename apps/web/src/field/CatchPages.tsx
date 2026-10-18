@@ -42,7 +42,7 @@ import { catchesOfSpecies, kindOnPage, speciesLink } from "./speciesLink";
 import { saveShareCard, shareCardFileName } from "../game/shareCard";
 import { EditDelete } from "./EditDelete";
 import { PagedCatches } from "./PagedCatches";
-import { catchMonth } from "./tripMonths";
+import { bookFishDay, catchMonth } from "./tripMonths";
 import { byTime, countedFish, milestoneOf } from "./milestones";
 import { bookLures, closeSpecies, dayWeather, fullSpecies, LATE_NIGHT_UNTIL, fishOnOutingDay, farPastBest, kindMeasure, lastMeasureKind, lastReleased, looksLikeOtherMeasure, ownFirst, speciesBestSoFar, speciesCatches, startTimeFor, tripForFish, tripLure, tripWeather } from "./suggestions";
 import { sunMark, type SunMark } from "./sunLight";
@@ -70,7 +70,7 @@ import { savedState } from "./SavedNote";
 import { CopySummary } from "./CopySummary";
 import { catchSummary } from "./summaries";
 import { biggestOnOuting, biggestSince, forItsLength, longGap, sizeRank } from "./sizeRank";
-import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
+import { PLAY_LAKE_ID, withoutPlayLake } from "./playLake";
 import { useStepKeys } from "./stepKeys";
 
 function amountText(entry: CatchEntry, units: Units): string {
@@ -1271,7 +1271,10 @@ function CatchView() {
   // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
   const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
   const { newer, older } = list ? neighborsIn(list.rows, entry.id) : catchNeighbors(book, entry.id);
-  const listAt = list ? list.rows.findIndex((row) => row.id === entry.id) + 1 : 0;
+  const listIndex = list ? list.rows.findIndex((row) => row.id === entry.id) : -1;
+  // A past outing's page lists its fish first fish first: the count goes as the page reads.
+  const listTrip = list?.key.startsWith("trip:") ? tripById(book, list.key.slice(5)) : undefined;
+  const listAt = list ? (listTrip && listTrip.date < localDate(new Date()) ? list.rows.length - listIndex : listIndex + 1) : 0;
   const badge = catchBadge(book, entry);
   // Newest first, so the oldest fish of the kind is number one.
   const kind = catchesOfSpecies(book, entry.species);
@@ -1305,11 +1308,12 @@ function CatchView() {
   const lureTop = onLure.length > 1 ? personalBests({ spots: [], trips: [], catches: onLure }) : null;
   const lureBestFish = lureTop ? (entry.measure.kind === "weight" ? lureTop.heaviest : lureTop.longest) : null;
   const lureBest = lureBestFish && lureBestFish.id !== entry.id ? lureBestFish : null;
-  const caughtDay = localDate(new Date(entry.caughtAt));
+  // The day as the calendar and its search count it: a night session's small hours on its outing's day.
+  const caughtDay = bookFishDay(book, entry);
   // Where the fish's time sat against the sun at its water, for a water with a place.
   const place = spot ? (spot.place ?? placeFor(spot.id)) : undefined;
   const sun = place ? sunMark(entry.caughtAt, place) : null;
-  const sameDay = book.catches.filter((other) => localDate(new Date(other.caughtAt)) === caughtDay).length;
+  const sameDay = book.catches.filter((other) => bookFishDay(book, other) === caughtDay).length;
   const milestone = milestoneOf(book, entry);
   // The first of its kind at this water, once another has followed it there: the book's first says so already.
   const atWater = spot && isCounted ? counted.filter((other) => other.spotId === entry.spotId) : [];
@@ -1331,8 +1335,9 @@ function CatchView() {
     setPictureError(false);
     saveShareCard(text, photo ?? null, shareCardFileName(entry.species, caught)).catch(() => setPictureError(true));
   };
-  // Which best the badge is for: a fish both measured and weighed may hold either.
-  const bests = badge ? personalBests({ ...book, catches: book.catches.filter(offPlayLake) }) : null;
+  // Which best the badge is for: a fish both measured and weighed may hold either. Among the fish the badge was
+  // drawn from (countedFish), or a sample fish would hold the weight and the angler's own heaviest read as "longest".
+  const bests = badge ? personalBests({ ...book, catches: countedFish(book.catches) }) : null;
   const kindBests = bests?.species.find((row) => row.species.trim().toLowerCase() === entry.species.trim().toLowerCase());
   const heavy = (badge === "book" ? bests?.heaviest : kindBests?.heaviest)?.id === entry.id;
 

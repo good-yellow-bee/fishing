@@ -24,6 +24,7 @@ import { packingTips } from "../waterTips";
 import { nearTwinLures } from "../suggestions";
 import { renameInBook } from "../bookRename";
 import { PagedTrips } from "../PagedTrips";
+import { countedSearch } from "../countedSearch";
 import { t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake, upcomingOwnTrips, withoutPlayLake } from "../playLake";
@@ -77,7 +78,7 @@ function LureRecord({ today }: { today: string }) {
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
-            {row.lure ? <Link to={findLink(withoutPlayLake(book, exactTerm("lure", t(row.lure)), book.catches))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, exactTerm("lure", t(row.lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* On a line of its own: beside the counts it broke mid-phrase on a phone. */}

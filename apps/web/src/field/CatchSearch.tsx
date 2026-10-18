@@ -13,7 +13,7 @@ import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
-import { catchMonth, monthName } from "./tripMonths";
+import { bookFishDay, catchMonth, monthName } from "./tripMonths";
 import { noteText, outingNameById, toLocalInput } from "./format";
 import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
@@ -22,6 +22,7 @@ import { FIND_PARAM, parseExactTerm, type ExactField } from "./findLinks";
 import { parseSizeQuery, parseTempQuery, sizeMatches, tempMatches } from "./sizeQuery";
 import { largestFirst } from "./largestFirst";
 import { dateWords } from "./dateWords";
+import { isSampleCatch } from "./bookCopy";
 
 /** In the address beside the search, so Back from a fish keeps the order: "largest", or left out for newest first. */
 const ORDER_PARAM = "order";
@@ -98,6 +99,8 @@ const MEASURED_WORDS = new Set(["measured", "zmierzone", "zmierzona", "zmierzony
 export const LOOSE_WORDS = new Set(["loose", "unfiled", "luźne", "luzne"].map((word) => normalize(word)));
 /** Fish on no outing at all, as the Polish help offers them. */
 const NO_OUTING_WORDS = new Set(["no outing", "bez wyprawy"].map((word) => normalize(word)));
+/** "sample": the sample week's fish, so a link can leave them out where the count beside it does (countedSearch). */
+export const SAMPLE_WORDS = new Set(["sample", "przykładowe", "przykladowe"].map((word) => normalize(word)));
 /** Words for Saturdays and Sundays, in English and Polish. */
 const WEEKEND_WORDS = new Set(["weekend", "weekends", "weekendy"].map((word) => normalize(word)));
 
@@ -231,6 +234,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const trips = new Set(book.trips.map((trip) => trip.id));
     return catchesNewestFirst(book).filter((entry) => !entry.tripId || !trips.has(entry.tripId));
   }
+  if (SAMPLE_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => isSampleCatch(entry.id));
   if (LOOSE_WORDS.has(normalize(needle))) {
     const loose = looseOutings(book);
     return catchesNewestFirst(book).filter((entry) => loose.has(entry.id));
@@ -241,7 +245,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   }
   // "weekend": every fish caught on a Saturday or a Sunday.
   if (WEEKEND_WORDS.has(normalize(needle))) return catchesNewestFirst(book).filter((entry) => [0, 6].includes(new Date(entry.caughtAt).getDay()));
-  if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => localDate(new Date(entry.caughtAt)) === needle.trim());
+  // A day's fish as the calendar counts them: a night session's small hours on its outing's day.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(needle.trim())) return catchesNewestFirst(book).filter((entry) => bookFishDay(book, entry) === needle.trim());
   // "2026": the fish of that local year, not every note or title with the number in it.
   // A number the book has no fish in (a lure's "1100", a note's "1500 m") is searched as text instead.
   if (/^\d{4}$/.test(needle.trim())) {
@@ -293,8 +298,22 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   return catchesNewestFirst(book).filter((entry) => hit.has(entry.id));
 }
 
+/** A `field:"name"` term: its name is the book's own words, sizes, dashes and "+" included ("Kopyto 8 cm", "Mille Lacs - north"). */
+const QUOTED_TERM = /[a-z]+:"[^"]*"/gi;
+
+/** Each quoted term set aside behind a mark, so nothing reads inside it; `back` puts them in again. */
+function holdQuoted(text: string): { text: string; back: (part: string) => string } {
+  const held: string[] = [];
+  return {
+    text: text.replace(QUOTED_TERM, (term) => `\u0001${held.push(term) - 1}\u0001`),
+    back: (part) => part.replace(/\u0001(\d+)\u0001/g, (_, index: string) => held[Number(index)]!),
+  };
+}
+
 /** Splits a search on "+", but not inside a name in the book that has a "+" of its own ("Pond + creek") or after a size ("30in+"). */
 export function searchParts(book: Logbook, needle: string): string[] {
+  const quoted = holdQuoted(needle);
+  needle = quoted.text;
   const names = [...book.spots.map((spot) => spot.name), ...book.trips.map((trip) => trip.title), ...book.catches.flatMap((entry) => [entry.species, entry.lure])]
     .filter((name) => name.includes("+"))
     .sort((a, b) => b.length - a.length);
@@ -335,7 +354,7 @@ export function searchParts(book: Logbook, needle: string): string[] {
   }
   return text
     .split("+")
-    .map((part) => part.replace(/\u0000(\d+)\u0000/g, (_, index: string) => kept[Number(index)]!).trim())
+    .map((part) => quoted.back(part.replace(/\u0000(\d+)\u0000/g, (_, index: string) => kept[Number(index)]!)).trim())
     .filter(Boolean);
 }
 
@@ -402,11 +421,12 @@ export function splitLeftOut(parts: readonly string[]): { keep: string[]; drop: 
   const drop: string[] = [];
   // A "-" at the start, or after a space, that comes before a word or a size bound ("-<10 in"), not a number ("-5°C").
   const dash = /(?:^|\s)-\s*(?=[^\s\d.,<>-]|[<>]=?\s?\d)/;
-  for (const part of parts) {
-    const pieces = part.split(dash);
-    const first = pieces[0]!.trim();
-    if (first) keep.push(first);
-    for (const piece of pieces.slice(1)) if (piece.trim()) drop.push(piece.trim());
+  for (const whole of parts) {
+    // A dash inside a quoted name ("Rapala - silver") is part of the name.
+    const quoted = holdQuoted(whole);
+    const pieces = quoted.text.split(dash).map((piece) => quoted.back(piece).trim());
+    if (pieces[0]) keep.push(pieces[0]);
+    for (const piece of pieces.slice(1)) if (piece) drop.push(piece);
   }
   return { keep, drop };
 }

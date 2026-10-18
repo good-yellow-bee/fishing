@@ -1,5 +1,5 @@
 import type { CatchEntry, Logbook } from "@stillwater/shared";
-import { isSampleCatch } from "./bookCopy";
+import { isSampleCatch, isSampleTrip } from "./bookCopy";
 import { PLAY_LAKE_ID } from "./playLake";
 
 /** A fish the angler caught: not the sample week, not the game. */
@@ -13,6 +13,17 @@ export function countedFish(catches: readonly CatchEntry[]): CatchEntry[] {
   const real = catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID);
   const own = real.filter((entry) => !isSampleCatch(entry.id));
   return own.length > 0 ? own : real;
+}
+
+/**
+ * The book a year's count reads (the goal, days on the water, the year in text): the game's lake left out, and the
+ * sample week once the angler has fish of their own (its outings once they have an outing or a fish).
+ */
+export function countedBook(book: Logbook): Logbook {
+  const real = { ...book, trips: book.trips.filter((trip) => trip.spotId !== PLAY_LAKE_ID), catches: book.catches.filter((entry) => entry.spotId !== PLAY_LAKE_ID) };
+  const own = real.catches.some((entry) => !isSampleCatch(entry.id)) || real.trips.some((trip) => !isSampleTrip(trip.id));
+  // The fish exactly as Home counts them (countedFish); the sample's outings go with the first of the angler's own.
+  return { ...real, trips: own ? real.trips.filter((trip) => !isSampleTrip(trip.id)) : real.trips, catches: countedFish(real.catches) };
 }
 
 /** Round counts worth a line: the 50th fish, the 100th, and so on. */

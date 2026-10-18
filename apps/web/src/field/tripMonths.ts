@@ -84,6 +84,18 @@ export function fishDay(entry: Pick<CatchEntry, "caughtAt" | "tripId">, tripDays
   return { day: localDate(at), late: false };
 }
 
+const tripDaysCache = new WeakMap<Logbook, ReadonlyMap<string, string>>();
+
+/** The day a fish of the book counts on (fishDay), as the calendar and Bests count it: a night session's on its outing's. */
+export function bookFishDay(book: Logbook, entry: Pick<CatchEntry, "caughtAt" | "tripId">): string {
+  let days = tripDaysCache.get(book);
+  if (!days) {
+    days = new Map(book.trips.map((trip) => [trip.id, trip.date]));
+    tripDaysCache.set(book, days);
+  }
+  return fishDay(entry, days).day;
+}
+
 /** The days of `year` the book shows on the water: a fish logged, or an outing from before today. */
 export function daysOut(book: Logbook, year: string, today: string): number {
   const days = new Set<string>();
