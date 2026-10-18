@@ -96,6 +96,8 @@ import { geeseOut } from "./geeseSkein";
 import { Swans } from "./Swans";
 import { Cormorant } from "./Cormorant";
 import { Grebes } from "./Grebes";
+import { Feathers } from "./Feathers";
+import { feathersOut } from "./featherDrift";
 import { Terns } from "./Terns";
 import { ternsOut } from "./ternHover";
 import { grebesOut } from "./grebeRush";
@@ -2182,6 +2184,7 @@ export const LakeWorld = memo(function LakeWorld({
       {owlOut(hour, season) && <Owl />}
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
+      {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {petalsOut(season) && <FallingLeaves wind={wind} petals />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
