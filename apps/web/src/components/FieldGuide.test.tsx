@@ -42,6 +42,7 @@ describe("field guide card", () => {
       "Drop-off: small lure at dusk",
       "Draws on: Topwater (dawn, dusk), Spinner (dusk, dawn), Crankbait, Jig",
       "Bites: runs off with it, sliding the float away",
+      "Fights hard: guarding its nest at the Reeds or the Dock in spring, in the Inlet's current",
       "Runs in summer",
     ]);
     expect(bass.trophy).toBeNull();
@@ -77,7 +78,14 @@ describe("field guide card", () => {
   });
 
   it("says the clues are for a cast released in the band", () => {
-    expect(render([]).querySelector(".guide-note")?.textContent).toBe("Lure and time clues assume a cast released in the band.");
+    expect(render([]).querySelector(".guide-note")?.textContent).toBe("Lure and time clues assume a cast released in the band. Most fish tire sooner in winter's cold.");
+  });
+
+  it("says when a logged fish fights hard or tires sooner, and keeps it hidden until then", () => {
+    expect(cards([stat("burbot", 3)])("burbot").lines).toContain("Fights hard: in winter's cold, after dark, in rain");
+    expect(cards([stat("walleye", 3)])("walleye").lines).toContain("Tires sooner: in spring, after spawning");
+    expect(cards([])("burbot").text).not.toContain("Fights hard");
+    expect(cards([stat("golden-shiner", 0.2)])("golden-shiner").text).not.toMatch(/Fights hard|Tires sooner/);
   });
 
   it("shows each species' own shadow at its weight-range size without revealing its lore", () => {
