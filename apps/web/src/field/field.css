@@ -373,10 +373,12 @@ button.field-primary {
     inset: -8px -4px;
   }
 
-  /* Home's stacked count lines ("6 species", "Last time: …") sat 4 px apart: each link gets room of its own. */
+  /* Home's stacked count lines ("6 species", "Last time: …") sat 4 px apart: each link gets room of its own.
+     The margin parts the two halves of a line that wraps in a narrow card (a tablet's three columns), which touched. */
   .stat-row small a {
     display: inline-block;
     padding-block: 4px;
+    margin-block: 4px;
   }
 
   /* A one-digit count ("5" waters) was a 22 px-wide link. */

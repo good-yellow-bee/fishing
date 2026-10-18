@@ -33,6 +33,10 @@ import { DockLeaves } from "./DockLeaves";
 import { boatHeading } from "./boatSwing";
 import { Tadpoles } from "./Tadpoles";
 import { GrassSnake } from "./GrassSnake";
+import { SunfishNests } from "./SunfishNests";
+import { IceFloes } from "./IceFloes";
+import { floesOut } from "./iceFloes";
+import { nestsOut } from "./sunfishNests";
 import { snakeOut } from "./snakeSwim";
 import { tadpolesOut } from "./tadpoleSchools";
 import { DockFrost } from "./DockFrost";
@@ -113,7 +117,7 @@ import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, type B
 import { sharedLilyPetals } from "./lilyPetals";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
-import { leavesOut } from "./leafFall";
+import { leavesOut, petalsOut } from "./leafFall";
 import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
@@ -2084,6 +2088,8 @@ export const LakeWorld = memo(function LakeWorld({
         <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} open={lilyOpen(hour, sky)} />
       ))}
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
+      {nestsOut(season) && <SunfishNests />}
+      {floesOut(season) && <IceFloes wind={wind} />}
       {tadpolesOut(season, hour) && <Tadpoles />}
       {snakeOut(season, hour, sky) && <GrassSnake />}
       {BOATS.map((boat, i) => (
@@ -2132,6 +2138,7 @@ export const LakeWorld = memo(function LakeWorld({
       {jumpsOn(season) && <JumpingFish hour={hour} />}
       {swallowsOut(hour, sky, season, Math.hypot(wind.x, wind.z)) && <Swallows />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
+      {petalsOut(season) && <FallingLeaves wind={wind} petals />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}

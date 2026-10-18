@@ -91,8 +91,11 @@ export const PL_GAME: PlBook = {
   "fished hard": "mocno obłowione",
   "line frayed": "żyłka przetarta",
   "Retie": "Przewiąż",
-  "Retie a frayed or twisted line": "Przewiąż przetartą lub skręconą żyłkę",
+  "Retie the line or touch up a dull hook": "Przewiąż żyłkę albo podostrz tępy haczyk",
   "line twisted": "żyłka skręcona",
+  "hook dulled": "haczyk stępiony",
+  "Touch up the dull hook, so it sets solid again.": "Podostrz tępy haczyk, żeby znów pewnie zacinał.",
+  "You touch up the dull hook point and tie the lure on again. It sets solid again.": "Podostrzasz tępy grot haczyka i wiążesz przynętę na nowo. Znów pewnie zacina.",
   "Retie the twisted line, so it casts clean again.": "Przewiąż skręconą żyłkę, żeby znów rzucała czysto.",
   "A wind knot: the twisted line kinked on the cast.": "Supeł: skręcona żyłka zaplątała się przy rzucie.",
   "A spinner twists the line as it turns. Retie to take the twist out.": "Obrotówka skręca żyłkę, gdy się obraca. Przewiąż ją, by usunąć skręt.",
@@ -117,7 +120,7 @@ export const PL_GAME: PlBook = {
   "Snagged on the rocks. Tap {n} times to work it free.": "Zaczep o kamienie. Dotknij {n} razy, by go uwolnić.",
   "Working it free… {n} of {total}": "Uwalniam… {n} z {total}",
   "Free of the weed. Let it settle.": "Wolne od zielska. Niech się ułoży.",
-  "Off the rocks. Let it settle.": "Zeszło z kamieni. Niech się ułoży.",
+  "Off the rocks, but they blunted the hook point. Let it settle.": "Zeszło z kamieni, ale stępiły grot haczyka. Niech się ułoży.",
   "New on the lake": "Nowości nad jeziorem",
   "Got it": "Rozumiem",
   "A nibbling fish sends small rings out from the float.": "Skubiąca ryba posyła od spławika małe kręgi.",
@@ -502,6 +505,7 @@ export const PL_GAME: PlBook = {
   "Took it off your perch": "Wziął twojego okonia",
   "Hooked solid in {time} s! {line}. Ease off when it runs.": "Hak siedzi pewnie po {time} s! {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.": "Zacięte po {time} s (przy tym wietrze pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
+  "Hooked in {time} s (solid under {limit} s on the dull hook). {line}. Ease off when it runs.": "Zacięte po {time} s (tępym haczykiem pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "Hooked in {time} s (solid under {limit} s). {line}. Ease off when it runs.": "Zacięte po {time} s (pewnie poniżej {limit} s). {line}. Odpuść, gdy odjeżdża.",
   "NOW — strike!": "TERAZ — zatnij!",
   "WHAM — it hit! Strike!": "ŁUP — uderzyła! Zatnij!",
@@ -591,6 +595,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a touch screen the field log's links on every card (the fish, the lure, the water, the outing), Cancel, Released it and Rename or merge now take a finger-sized tap, and neighbouring links no longer steal each other's taps. On a tablet the lake's shore signs stand taller too.":
+    "Na ekranie dotykowym odnośniki na każdej karcie dziennika (ryba, przynęta, łowisko, wyprawa), „Anuluj”, „Wypuszczona” i „Zmień nazwę lub połącz” łatwiej trafić palcem, a sąsiednie odnośniki nie przejmują już sobie nawzajem stuknięć. Na tablecie tabliczki na brzegu są też wyższe.",
   "On a phone the shop keeps Back to the path pinned at its foot and sits centred, and the news card and photo mode's hint stay clear of the header and the buttons. With larger text the lake's header takes one row less, giving the water about 50 px back, and the trip recap's numbers no longer run into each other.":
     "Na telefonie szopa ma przycisk „Wróć na ścieżkę” przypięty na dole i stoi na środku, a karta nowości i podpowiedź trybu zdjęcia nie chowają się pod nagłówkiem ani pod przyciskami. Przy większym tekście nagłówek nad jeziorem zajmuje o jeden rząd mniej, oddając wodzie około 50 px, a liczby w podsumowaniu wyprawy nie nachodzą już na siebie.",
   "On a phone, Settings and the keys card keep Back to the lake pinned at their foot, always in reach, and the keys card now opens at its title. With larger text the keys card fits the screen, the header's chips step aside during a fight so the fight card fits, and the catch card's buttons sit on a solid strip that hides the words behind them.":
@@ -836,6 +842,8 @@ export const PL_GAME: PlBook = {
   "Out on the water at night or offline: “Fish saved” now says the fish’s day and time, “Save and log another” keeps the clock going past midnight, last night’s outing stays the likely water until dawn, and the map shows a note instead of a blank screen when it has never loaded. A fish dated off its outing’s day offers to move it there in one tap.": "Nocą albo bez internetu: „Ryba zapisana” podaje dzień i godzinę ryby, „Zapisz i następną” liczy czas dalej po północy, wczorajsza wyprawa zostaje podpowiadanym łowiskiem do świtu, a mapa pokazuje informację zamiast pustego ekranu, gdy nigdy się nie wczytała. Ryba z innego dnia niż jej wyprawa da się przenieść na ten dzień jednym dotknięciem.",
   "Swapping book files between two phones works better: a photo added on the other phone to a fish you both have now comes across, a water added twice under one name gets a “Merge them” link, and loading the same file again says nothing in it is new. Files with repeated or broken entries are tidied or refused instead of loaded as they are.": "Wymiana plików dziennika między dwoma telefonami działa lepiej: zdjęcie dodane na drugim telefonie do ryby, którą macie oboje, teraz przechodzi, łowisko dodane dwa razy pod jedną nazwą dostaje link „Połącz je”, a ponowne wczytanie tego samego pliku mówi, że nic w nim nie jest nowe. Pliki z powtórzonymi albo zepsutymi wpisami są porządkowane albo odrzucane zamiast wczytane jak leci.",
   "For planning the season: outing counts on Spots and Home leave out the ones still planned, which read “Planned” instead of “Nothing logged”, and the map list says when the next outing on each water is. A past outing with no note offers “Write up the day”, and a water added twice from a file opens straight on its merge box.": "Do planowania sezonu: liczby wypraw w Łowiskach i na Starcie pomijają te dopiero zaplanowane, które mają napis „Zaplanowana” zamiast „Nic nie zapisano”, a lista mapy mówi, kiedy następna wyprawa na każde łowisko. Miniona wyprawa bez notatki proponuje „Opisz ten dzień”, a łowisko dodane dwa razy z pliku otwiera się od razu na łączeniu.",
+  "In winter the walkway out to the dock lies under snow, with your trail of boot prints trodden into it, and plates of pancake ice drift in the shallows. In spring the shore trees drop blossom petals onto the water, and from late spring through summer sunfish fan pale nests in the sand either side of the dock, each with its guard hovering over it.":
+    "Zimą kładka na pomost leży pod śniegiem z wydeptanym śladem butów, a po płyciznach dryfują okrągłe kry lodu talerzowego. Wiosną drzewa na brzegu sypią na wodę płatki kwiatów, a od późnej wiosny przez całe lato bassy słoneczne wachlują w piasku po obu stronach pomostu jasne gniazda, nad którymi czuwają strażnicy.",
   "On a clear fall dawn the walkway out to the dock is white with frost, with your boot prints melted through it, and spring dawns bring a lighter one. The canoe and rowboat moored out on the lake swing round to face the wind. In spring schools of tadpoles wriggle in the warm shallows, and on summer days a grass snake swims out from the lily pads.":
     "Pogodnym jesiennym świtem kładka na pomost bieleje od szronu, a ślady butów odtajały w nim do gołego drewna; wiosenne świty przynoszą lżejszy szron. Kanadyjka i łódka zacumowane na jeziorze obracają się dziobem pod wiatr. Wiosną w ciepłych płyciznach wiją się ławice kijanek, a w letnie dni spod liści grzybieni wypływa zaskroniec.",
   "The reeds now lean with the day's wind and nod in its gusts. In summer green duckweed gathers in the lake's still corners, by the reeds and among the lily pads, and the water lilies close at dusk, stay shut through the night and half close on a grey or rainy day.":

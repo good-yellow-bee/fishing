@@ -247,7 +247,7 @@ export function DockPage() {
   shopOpenRef.current = shopOpen;
   // Read by the G key: tosses the groundbait whenever its button by the walk signs would.
   const groundbaitKey = useRef(() => {});
-  // Read by the T key: reties a frayed or twisted line whenever its button by the walk signs shows.
+  // Read by the T key: reties a frayed or twisted line, or touches up a dull hook, whenever its button by the walk signs shows.
   const retieKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
@@ -688,7 +688,7 @@ export function DockPage() {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
   };
   retieKey.current = () => {
-    if (!rowing && (game.frayed || game.twisted) && !shopOpen) game.retie();
+    if (!rowing && (game.frayed || game.twisted || game.dulled) && !shopOpen) game.retie();
   };
   /** A bank the season, hour and weather favor right now, and open at this level: its sign and the stance chip say so. */
   const favoredNow = (target: WalkTarget) =>
@@ -858,6 +858,7 @@ export function DockPage() {
           {!rowing && fishedHardAt(game.stance) && <small className="stance-cold"> · {t("fished hard")}</small>}
           {game.frayed && <small className="stance-cold"> · {t("line frayed")}</small>}
           {game.twisted && <small className="stance-cold"> · {t("line twisted")}</small>}
+          {game.dulled && <small className="stance-cold"> · {t("hook dulled")}</small>}
         </aside>
         <LureChoice
           choices={lureChoices}
@@ -913,11 +914,17 @@ export function DockPage() {
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
               </button>
             )}
-            {!rowing && (game.frayed || game.twisted) && (
+            {!rowing && (game.frayed || game.twisted || game.dulled) && (
               <button
                 className="panel-btn walk-retie"
                 type="button"
-                title={game.frayed ? t("Retie the frayed line, so it holds full strain again.") : t("Retie the twisted line, so it casts clean again.")}
+                title={
+                  game.frayed
+                    ? t("Retie the frayed line, so it holds full strain again.")
+                    : game.twisted
+                      ? t("Retie the twisted line, so it casts clean again.")
+                      : t("Touch up the dull hook, so it sets solid again.")
+                }
                 onClick={(event) => {
                   // Leave Space free for casting.
                   event.currentTarget.blur();

@@ -15,6 +15,7 @@ describe("the field log on a touch screen", () => {
   it("gives Home's stacked count links room of their own", () => {
     const block = /\.stat-row small a \{\n    display: inline-block;([^}]*)\}/.exec(css)?.[1];
     expect(block).toContain("padding-block: 4px;");
+    expect(block).toContain("margin-block: 4px;");
   });
 
   it("keeps a one-digit count link on Bests at least 32 px wide", () => {
@@ -45,5 +46,10 @@ describe("the field log on a touch screen", () => {
   it("reaches past the Map's Plan one and coordinate links into their row", () => {
     const block = /\.map-index a\.map-plan::after,\n  \.map-index a\.map-coord-link::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -8px -4px;");
+  });
+
+  it("reaches past each water's name in the Map's list", () => {
+    const block = /\.map-index a:not\(\.map-plan, \.map-coord-link\)::after \{([^}]*)\}/.exec(mapCss)?.[1];
+    expect(block).toContain("inset: -6px -3px;");
   });
 });

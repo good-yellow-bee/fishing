@@ -1070,6 +1070,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA25~~ | ~~With larger text the lake's header on a phone (520 px and under) wrapped to four rows: 215 px of a 375x667 screen and 266 px (47%) of a 320x568 one. The "Stillwater" wordmark's row now goes with larger text (normal text and desktop keep it), so the chips and links take three rows and the lake gets about 50 px back~~ (#1032) | phone UX | S |
 | ~~PA26~~ | ~~On a touch screen the field log's card links (the fish, lure, water and outing on every catch, trip and water card), the page head's Cancel and Field guide, the eyebrow's way back, the Released it row and Rename or merge stood 14-28 px tall. Each now reaches past its line to 32 px, moving nothing, and a card's wrapped lines part 12 px so the lure link above no longer gives up its lower edge to the water link below. A phone audit at 360x740 (English, and Polish with larger text) finds none left on the cards (#1045)~~ | phone UX | S |
 | ~~PA27~~ | ~~On a touch screen "Download these as a spreadsheet" (a kind of fish's page, an outing's page) sat 12 px between the sizes line and Copy a summary, all three reaching into the gaps, so its lower edge opened Copy a summary; and with larger text Newest first and Largest first wrapped 4 px apart. Both now part 16 px, so each keeps its 32 px reach (#1047)~~ | phone UX | S |
+| ~~PA28~~ | ~~On a tablet (1024x768 touch) the lake's shore signs kept the desk column down the right edge at 29 px tall, and on Home a count line that wrapped in a narrow card ("5 outings" over "5 days out this year") left its two links touching, which axe flags as a WCAG 2.5.8 target-size failure. The signs now stand 36 px on any touch screen (phones keep their own 44 and 36), and the count links part 8 px (#1052)~~ | phone UX | S |
+| ~~PA29~~ | ~~On a touch screen the Map's list of waters gave each water's name a 23 px tall link (the Plan one and coordinate links beside it already reached further). The name now reaches 6 px into its row's padding, to 35 px, moving nothing; the phone audit at 360x740 and 1024x768 finds nothing small left on the Map (#1056)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1097,6 +1099,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC20~~ | ~~Grass snake: on bright days in spring and summer a grass snake swims out from the lily pads into the lake in front of the dock, head up and yellow collar showing, its body waving side to side, then dives out of sight and later swims back~~ (#1046) | scene | S |
 | ~~SC21~~ | ~~News card scene05: the frosty walkway, the boats swinging to the wind, the spring tadpoles and the grass snake~~ (#1046) | scene | S |
 | ~~SC22~~ | ~~Snow on the walkway: in winter the walkway out to the dock lies under snow like the dock itself, with the angler's trail of boot prints trodden into it, and the rest of the walk's boards are paled with snow~~ (#1048) | scene | S |
+| ~~SC23~~ | ~~Sunfish nests: from late spring through summer, colonies of pale round nests are fanned in the sand of the shallows either side of the dock, each with its guard hovering over the bed and turning about it~~ (#1050) | scene | S |
+| ~~SC24~~ | ~~Pancake ice: in winter, round plates of pancake ice float in the shallows, drifting slowly with the wind and bobbing on the swell, clear of the dock~~ (#1053) | scene | S |
+| ~~SC25~~ | ~~Spring blossom: in spring the shore trees drop blossom petals, white and pink, that spin down onto the water and drift with the wind~~ (#1057) | scene | S |
+| ~~SC26~~ | ~~News card: the snowy walkway, pancake ice, spring blossom and sunfish nests~~ (#1057) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1370,7 +1376,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT266~~ | ~~A twisted line: each spinner cast turns the line, and after 12 spinner casts since the last knot the line is twisted (the stance chip says "line twisted" and the Retie button shows); a quarter of casts on it kink into a wind knot and go nowhere until Retie (or T) ties a fresh knot, and a break ties on a fresh line too; a beginner is spared~~ (#1027) | gameplay | M |
 | ~~GT267~~ | ~~Groundbait and retie on a controller: X tosses the groundbait (G) and the left trigger reties the line (T), and the keys card lists both~~ (#1030) | ui | S |
 | ~~GT268~~ | ~~The bright morning after the rain: on a clear day after a day that ended in rain, the fish sulk deep till noon, so bites come slower (1.15 wait) on any lure but a slow jig or worm; the bite reasons say so, the forecast board chalks it, and a beginner is spared~~ (#1035) | gameplay | S |
-| GT269 | News card 2026-10-18-game09 covers GT266 to GT268: a twisted line from spinner casts, groundbait and retie on a controller, and the bright morning after the rain | ui | S |
+| ~~GT269~~ | ~~News card 2026-10-18-game09 covers GT266 to GT268: a twisted line from spinner casts, groundbait and retie on a controller, and the bright morning after the rain~~ (#1039) | ui | S |
+| GT270 | A hook blunted on the rocks: working a lure free of the Point's rocks dulls its hook point, so a strike has half the usual time to set solid (the hookset says "on the dull hook"); the stance chip says "hook dulled", and the Retie button (or T, or LT) touches it up; a break ties on a fresh one | gameplay | S |
 
 ## Risks / open questions for the owner
 

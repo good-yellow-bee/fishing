@@ -385,6 +385,13 @@ export function useFishingGame(
     twistRef.current = next;
     setTwisted(isTwisted(next));
   };
+  /** Working a lure off the rocks blunts its hook point, so the strike has to be quicker to set solid until it is touched up. */
+  const dullRef = useRef(false);
+  const [dulled, setDulled] = useState(false);
+  const markDull = (next: boolean) => {
+    dullRef.current = next;
+    setDulled(next);
+  };
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
@@ -538,6 +545,12 @@ export function useFishingGame(
               ? t("Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.", { time: seconds(strike.elapsedMs), line })
             : deep
               ? t("It swallowed the bait: hooked deep in {time} s. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
+            : dullRef.current
+              ? t("Hooked in {time} s (solid under {limit} s on the dull hook). {line}. Ease off when it runs.", {
+                  time: seconds(strike.elapsedMs),
+                  limit: seconds(strike.solidMs),
+                  line,
+                })
             : fightWind(windRef.current)
               ? t("Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.", {
                   time: seconds(strike.elapsedMs),
@@ -559,7 +572,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current), windowMs: ms };
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current, dullRef.current), windowMs: ms };
     fx.splash();
     fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile, strike);
@@ -1018,7 +1031,9 @@ export function useFishingGame(
           break;
         }
         snagRef.current = null;
-        waitHintRef.current = snag.cover === "rocks" ? t("Off the rocks. Let it settle.") : t("Free of the weed. Let it settle.");
+        // Dragging the hook off the rocks blunts its point.
+        if (snag.cover === "rocks") markDull(true);
+        waitHintRef.current = snag.cover === "rocks" ? t("Off the rocks, but they blunted the hook point. Let it settle.") : t("Free of the weed. Let it settle.");
         setHint(waitHintRef.current);
         snag.arm();
         break;
@@ -1346,6 +1361,7 @@ export function useFishingGame(
             const snapped = sim.frayed ? t("{fish} snapped the frayed line, short of the usual strain.", { fish: t(current.species.name) }) : t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
             markFrayed(false);
             setTwist(0);
+            markDull(false);
             setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
             resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
           } else if (result === "escaped") {
@@ -1410,13 +1426,21 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
-  /** Tie the frayed or twisted end off and a fresh knot on, so the line holds full strain and casts clean again. */
+  /** Tie the frayed or twisted end off and a fresh knot on, and touch up a dull hook point, so the line holds full strain, casts clean and sets solid again. */
   const retie = useCallback(() => {
-    if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current))) return;
+    if (phaseRef.current !== "idle" || (!frayedRef.current && !isTwisted(twistRef.current) && !dullRef.current)) return;
     const wasFrayed = frayedRef.current;
+    const wasTwisted = isTwisted(twistRef.current);
     markFrayed(false);
     setTwist(0);
-    setHint(wasFrayed ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.") : t("You cut off the twisted line and tie the lure on again. It casts clean."));
+    markDull(false);
+    setHint(
+      wasFrayed
+        ? t("You cut off the frayed line and tie the lure on again. The line holds full strain.")
+        : wasTwisted
+          ? t("You cut off the twisted line and tie the lure on again. It casts clean.")
+          : t("You touch up the dull hook point and tie the lure on again. It sets solid again."),
+    );
   }, []);
 
   /** Toss a handful of groundbait off the bank the angler stands on: the next casts there bite sooner. */
@@ -1454,6 +1478,7 @@ export function useFishingGame(
     throwGroundbait,
     frayed,
     twisted,
+    dulled,
     retie,
     lurking,
     lurkerCloseInMs,

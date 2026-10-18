@@ -1,9 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-18-field22";
+export const NEWS_ID = "2026-10-18-scene06";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t(). */
 export const NEWS_ITEMS: readonly string[] = [
+  "In winter the walkway out to the dock lies under snow, with your trail of boot prints trodden into it, and plates of pancake ice drift in the shallows. In spring the shore trees drop blossom petals onto the water, and from late spring through summer sunfish fan pale nests in the sand either side of the dock, each with its guard hovering over it.",
+  "On a touch screen the field log's links on every card (the fish, the lure, the water, the outing), Cancel, Released it and Rename or merge now take a finger-sized tap, and neighbouring links no longer steal each other's taps. On a tablet the lake's shore signs stand taller too.",
   "A past season on Bests shows how its goal ended, in its box and its copied summary, and this year's goal says where last year stood by this date.",
   "On a clear fall dawn the walkway out to the dock is white with frost, with your boot prints melted through it, and spring dawns bring a lighter one. The canoe and rowboat moored out on the lake swing round to face the wind. In spring schools of tadpoles wriggle in the warm shallows, and on summer days a grass snake swims out from the lily pads.",
   "The lure record on Gear can be ordered by most fish, most fish an outing, or the newest fish, and keeps that order for your next visit.",
