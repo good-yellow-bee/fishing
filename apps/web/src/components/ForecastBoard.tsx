@@ -14,6 +14,15 @@ function nightMoon(date: Date) {
   return name === "full" || name === "new" ? name : null;
 }
 
+/** What the moon does to the bite that night, to chalk under its name. */
+const MOON_TIPS = {
+  full: "On a clear night a spinner or spoon flashes under it.",
+  new: "Too dark to see: bites come slower after dark.",
+} as const;
+
+/** Rain muddies the water, and catfish and burbot hunt by scent in it and fight harder (rainHunterTireMul). */
+const RAIN_TIP = "Catfish and burbot hunt by scent in the murk and fight harder.";
+
 /** Chalked on the shack wall: the next three days' sky and which fish it brings out. */
 export function ForecastBoard({ now = new Date() }: { now?: Date }) {
   useT();
@@ -33,7 +42,9 @@ export function ForecastBoard({ now = new Date() }: { now?: Date }) {
             )}
             <small>{t(skyBlurb(day.sky, lakeSeason(day.date)))}</small>
             <span className="forecast-bank">{t("Biting best at the {bank}", { bank: t(SPOT_LABELS[hotBankForDay(day.date)]) })}</span>
+            {(day.sky === "rain" || day.turn?.to === "rain") && <span className="forecast-tip">{t(RAIN_TIP)}</span>}
             {nightMoon(day.date) && <span className="forecast-moon">{t(MOON_LABELS[nightMoon(day.date)!])}</span>}
+            {nightMoon(day.date) && <span className="forecast-tip">{t(MOON_TIPS[nightMoon(day.date)!])}</span>}
           </li>
         ))}
       </ul>

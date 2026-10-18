@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canLand, LAKE_HOURS, luresPacked, SPOT_IDS, type Profile, type SpotId } from "@stillwater/shared";
 import { pickBite } from "./logic";
-import { defaultLure, lureBlurb, lureCanChange, nextLure, smallLuresFirst } from "./lureChoice";
+import { defaultLure, lureBlurb, lureCanChange, nextLure, smallLuresFirst, suitsBank, suitsNow, type LureConditions } from "./lureChoice";
 
 describe("lure choice", () => {
   it("can change while standing and stays tied once the cast is away", () => {
@@ -78,5 +78,41 @@ describe("nextLure", () => {
   it("keeps the lure when nothing else is packed, and starts the order for one that is not", () => {
     expect(nextLure([], "Spinner", 1)).toBe("Spinner");
     expect(nextLure(["Worm", "Spinner"], "Gone", 1)).toBe(smallLuresFirst(["Worm", "Spinner"])[0]);
+  });
+});
+
+describe("suitsBank", () => {
+  it.each([
+    ["#5 Mepps", "reeds", true],
+    ["#5 Mepps", "inlet", true],
+    ["#5 Mepps", "dock", false],
+    ["Nightcrawler", "dock", true],
+    ["Shad crank", "point", true],
+    ["Green pumpkin tube", "dropoff", true],
+    ["Bobber", "reeds", true],
+    ["Popper", "reeds", false],
+  ] as const)("says whether %s suits the %s", (lure, spot, suits) => {
+    expect(suitsBank(lure, spot)).toBe(suits);
+  });
+});
+
+describe("suitsNow", () => {
+  const plain: LureConditions = { sky: "partly-cloudy", hour: "day", season: "spring", wind: "light-north", moon: 0.5, rising: false };
+  it.each([
+    ["#5 Mepps", { sky: "clear" }, true],
+    ["#5 Mepps", { sky: "rain" }, true],
+    ["Kastmaster", { sky: "clear", hour: "night", moon: 1 }, true],
+    ["Kastmaster", { sky: "clear", hour: "night", moon: 0.5 }, false],
+    ["Nightcrawler", { hour: "night" }, true],
+    ["Popper", { hour: "night" }, true],
+    ["Popper", { hour: "night", wind: "strong" }, false],
+    ["Popper", { wind: "calm" }, true],
+    ["Pheasant tails", { rising: true }, true],
+    ["Green pumpkin tube", { season: "winter" }, true],
+    ["Spinnerbait", { season: "fall" }, true],
+    ["Nightcrawler", { wind: "breezy" }, false],
+    ["#5 Mepps", {}, false],
+  ] as const)("says whether %s suits %o", (lure, change, suits) => {
+    expect(suitsNow(lure, { ...plain, ...change })).toBe(suits);
   });
 });

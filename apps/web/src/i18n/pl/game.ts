@@ -551,6 +551,12 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "{lure} · good here": "{lure} · dobra tutaj",
+  "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
+  "{lure} · good now": "{lure} · dobra teraz",
+  "{lure} · good here and now": "{lure} · dobra tu i teraz",
+  "The lure picker now marks the lures that draw a bite sooner: “good here” for the bank you stand on, “good now” for the season, hour and weather (a spinner flashing on a clear day, a worm after dark, a jig in winter), and says why under the one you tie on. The shack's chalk board says when catfish and burbot fight harder in the rain and what a full or new moon does to the night bite.": "Wybór przynęty oznacza teraz przynęty, które szybciej przynoszą branie: „dobra tutaj” dla brzegu, na którym stoisz, „dobra teraz” dla pory roku, godziny i pogody (obrotówka błyskająca w pogodny dzień, robak po zmroku, jig zimą), a pod zawiązaną przynętą mówi dlaczego. Tablica w szopie podaje, kiedy sumiki i miętusy walczą mocniej w deszczu i co pełnia lub nów robi z nocnymi braniami.",
+  "The season, hour and weather suit it: the bites come sooner.": "Pora roku, godzina i pogoda jej sprzyjają: brania przychodzą szybciej.",
   "Fights hard: {when}": "Walczy mocno: {when}",
   "Tires sooner: {when}": "Męczy się szybciej: {when}",
   "Most fish tire sooner in winter's cold.": "Większość ryb męczy się szybciej w zimowym chłodzie.",
