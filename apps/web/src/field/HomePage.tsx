@@ -28,6 +28,7 @@ import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
+import { saveOutingIcs } from "./TripPages";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -110,6 +111,7 @@ const NEWS_SHOWN = 4;
 
 export function HomePage() {
   const { book, storedBook, photos, startBlank, dropSample } = useLogbook();
+  const tackleItems = useTackleItems();
   const heading = useRef<HTMLHeadingElement>(null);
   const [setAside, setSetAside] = useState(() => readUnreadableBook() !== null);
   // The news the game's dock shows, here too for an angler who only keeps the book: decided once per visit.
@@ -381,6 +383,14 @@ export function HomePage() {
           </small>
           {next && next !== lateOuting && next.date <= tomorrow ? <NextDayLine trip={next} spot={nextSpot} today={today} now={now} /> : null}
           {next ? <LastTimeLine book={book} trip={next} today={today} /> : null}
+          {/* A plan still ahead goes on the phone's calendar from here, as from its own page. */}
+          {next && next.date > today && next !== lateOuting && !isSampleOuting(next) ? (
+            <small className="next-log">
+              <button type="button" className="text-button" onClick={() => saveOutingIcs(book, next, tackleItems ?? [], today)}>
+                {t("Add to calendar")}
+              </button>
+            </small>
+          ) : null}
           {/* On the day, a fish goes straight onto this outing. */}
           {next && (next.date === today || next === lateOuting) ? (
             <small className="next-log">

@@ -120,7 +120,10 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const value = Number(draft.trim());
+    commit(draft);
+  };
+  const commit = (text: string) => {
+    const value = Number(text.trim());
     if (!Number.isInteger(value) || value < 1 || value > 10000) {
       setError(t("Give the goal as a whole number of fish, from 1 to 10000."));
       return;
@@ -169,6 +172,14 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
         {lastYearCount > 0 ? (
           <p className="meta year-goal-hint" id={hintId}>
             {tn(lastYearCount, "Last year: {n} fish", "Last year: {n} fish")}
+          </p>
+        ) : null}
+        {/* Most anglers set last year's number, or a little more: the one already on screen, saved in a tap. */}
+        {lastYearCount > 0 ? (
+          <p className="meta year-goal-same">
+            <button type="button" className="text-button" onClick={() => commit(String(lastYearCount))}>
+              {t("Same as last year ({n})", { n: lastYearCount })}
+            </button>
           </p>
         ) : null}
         {error ? (
