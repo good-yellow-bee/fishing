@@ -2308,3 +2308,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR569~~ | ~~Round 101 catch-page ideas: step through the water's fish, the wait since the fish before, That day's outing for an untitled one, lengths in feet and inches~~ (#1428) | field | S |
 | ~~BR570~~ | ~~Round 102 Home and export fixes: a lure or kind typed two ways reads once in sheets and copied texts, Home's last outing is the day's later one, Perch and Worm in Polish~~ (#1435) | field | S |
 | ~~BR571~~ | ~~Round 102 Home and export ideas: Copy the plan on Home, a Lures column in the outings sheet, last year's catches early in the year~~ (#1438) | field | S |
+| ~~BR572~~ | ~~Round 103 gear and map fixes: last evening's outing counts in the lure record once it has a fish, lures named as their fish were logged and in Polish, Pack for skips an outing under way, Back to the Map keeps its focus~~ (#1447) | field | S |
