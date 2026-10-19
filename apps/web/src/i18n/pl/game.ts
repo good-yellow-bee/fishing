@@ -97,6 +97,7 @@ export const PL_GAME: PlBook = {
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Over the duckweed, where the bass lurk in its shade for a lure on top.": "Nad rzęsą, gdzie bassy czają się w jej cieniu na przynętę z powierzchni.",
   "Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.": "W rzęsę: przynęta wraca obrośnięta zielskiem, a ryby się od niej odwracają.",
+  "Over the fry the kingfisher dives on, where the perch and bass hunt them too.": "Nad narybkiem, na który nurkuje zimorodek, gdzie polują na niego też okonie i bassy.",
   "Among the tadpoles in the warm shallows, where the fish come to gorge on them.": "Wśród kijanek na ciepłej płyciźnie, gdzie ryby przypływają się nimi objadać.",
   "Hopped over the crayfish by the pilings, where the smallmouth and catfish hunt them.": "Podskakuje nad rakami przy palach, gdzie polują na nie bassy małogębowe i sumiki.",
   "On the sunfish beds, where the perch and smallmouth come to raid the eggs.": "Na gniazdach bassów słonecznych, gdzie okonie i bassy małogębowe przypływają podkradać ikrę.",

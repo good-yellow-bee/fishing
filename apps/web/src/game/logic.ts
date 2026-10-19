@@ -766,6 +766,16 @@ export function tadpoleEater(spot: SpotId, lure: string | undefined, profile: Pi
   return drawnFrom(TADPOLE_EATERS, TADPOLE_EATER_SHARE, spot, lure, profile, hour, random);
 }
 
+/** The fish that hunt the fry shoal under the kingfisher's snag off the dock. */
+export const FRY_HUNTERS: ReadonlySet<string> = new Set(["perch", "smallmouth-bass", "largemouth-bass", "pike"]);
+/** Chance a bite over the kingfisher's fry is one of the fish hunting them. */
+export const FRY_HUNTER_SHARE = 0.35;
+
+/** A fish hunting the kingfisher's fry drawn to the cast for this bite, or none. */
+export function fryHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(FRY_HUNTERS, FRY_HUNTER_SHARE, spot, lure, profile, hour, random);
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 
