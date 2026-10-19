@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BIRD_COUNT, FEEDER_AT, TRAY_Y, chickadeeAt } from "./feederVisits";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, poseFromHolders } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -64,7 +64,7 @@ export function chickadeeShapes() {
 
 type BirdParts = { root: THREE.Group | null; head: THREE.Group | null; wings: (THREE.Group | null)[] };
 
-/** In winter, a bird feeder on a post by the shack, with chickadees coming and going (`birds`). */
+/** In winter, a bird feeder on a post by the shack, with chickadees coming and going (`birds`): four draws. */
 export function BirdFeeder({ birds }: { birds: boolean }) {
   const still = useReducedMotion();
   const feeder = useMemo(feederShape, []);
@@ -77,6 +77,10 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
     },
     [feeder, bird, material],
   );
+  const group = useRef<THREE.Group>(null);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const heads = useRef<THREE.InstancedMesh>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
   useFrame(({ clock }) => {
     if (!birds) return;
     const time = still ? 1 : clock.elapsedTime;
@@ -94,9 +98,15 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
         wing.rotation.set(0, side === 0 ? 1.4 * (1 - pose.flying) : Math.PI - 1.4 * (1 - pose.flying), beat);
       });
     });
+    const root = group.current;
+    if (!root) return;
+    root.updateMatrixWorld();
+    poseFromHolders(bodies.current, root, parts.map((part) => part.root));
+    poseFromHolders(heads.current, root, parts.map((part) => part.head));
+    poseFromHolders(wings.current, root, parts.flatMap((part) => part.wings));
   });
   return (
-    <group name="bird-feeder">
+    <group name="bird-feeder" ref={group}>
       <mesh geometry={feeder} material={material} position={[FEEDER_AT.x, 0, FEEDER_AT.z]} castShadow />
       {birds &&
         parts.map((part, i) => (
@@ -107,15 +117,12 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
             }}
             scale={BIRD_SCALE}
           >
-            <mesh geometry={bird.body} material={material} />
             <group
               ref={(node) => {
                 part.head = node;
               }}
               position={[0, 0.062, 0.03]}
-            >
-              <mesh geometry={bird.head} material={material} />
-            </group>
+            />
             {[0, 1].map((side) => (
               <group
                 key={side}
@@ -123,12 +130,18 @@ export function BirdFeeder({ birds }: { birds: boolean }) {
                   part.wings[side] = node;
                 }}
                 position={[side === 0 ? 0.02 : -0.02, 0.045, 0]}
-              >
-                <mesh geometry={bird.wing} material={material} />
-              </group>
+              />
             ))}
           </group>
         ))}
+      {birds && (
+        <>
+          {/* The birds' parts, posed from the groups above: one draw each for bodies, heads and wings. */}
+          <instancedMesh ref={bodies} args={[bird.body, material, BIRD_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={heads} args={[bird.head, material, BIRD_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={wings} args={[bird.wing, material, BIRD_COUNT * 2]} frustumCulled={false} />
+        </>
+      )}
     </group>
   );
 }
