@@ -58,6 +58,20 @@ describe("round 101: a lure or kind however it was typed", () => {
     const ids = (needle: string) => findCatches(book, needle, t).map((entry) => entry.id).sort();
     expect(ids(t("Spinner").toLowerCase())).toEqual(["a", "b", "c", "d"]);
     expect(ids(`species:"${t("Walleye")}"`)).toEqual(["c", "d"]);
+    setLang("en");
+    expect(ids(`species:"Sandacz amerykański"`)).toEqual(["c", "d"]);
+  });
+
+  it("leaves a water's own name as it was typed", () => {
+    const book: Logbook = {
+      spots: [
+        { id: "a", name: "Pond", waterType: "pond", notes: "", bestConditions: "" },
+        { id: "b", name: "Ponds", waterType: "pond", notes: "", bestConditions: "" },
+      ],
+      trips: [],
+      catches: [fish("x", { spotId: "a" }), fish("y", { spotId: "b" })],
+    };
+    expect(findCatches(book, `water:"Pond"`, t).map((entry) => entry.id)).toEqual(["x"]);
   });
 
   it("goes in the CSV under one name", () => {

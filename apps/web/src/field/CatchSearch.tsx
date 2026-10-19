@@ -303,10 +303,12 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const want = normalize(exact.name);
     // A lure goes by the piece Gear counts it as, so "Spinnerbait" opens the "Spinnerbaits" its record counted too.
     const piece = exact.field === "lure" ? shownPieceKey(exact.name) : null;
+    // A kind or lure however it was typed reads as the dictionary's: "walleye " is "Sandacz amerykański". Not a water's own name.
+    const bookNamed = exact.field === "species" || exact.field === "lure";
     const named = (name: string) =>
       normalize(name) === want ||
       normalize(t(name)) === want ||
-      normalize(t(bookSpelling(name))) === want ||
+      (bookNamed && (normalize(t(bookSpelling(name))) === want || normalize(inPolish(bookSpelling(name))) === want)) ||
       normalize(inPolish(name)) === want ||
       (piece !== null && shownPieceKey(name) === piece);
     return catchesNewestFirst(book).filter((entry) => {
