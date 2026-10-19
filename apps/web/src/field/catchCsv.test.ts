@@ -17,7 +17,7 @@ describe("the catches as a spreadsheet", () => {
   });
 
   it("writes a header and one row per fish, quoting cells that need it", () => {
-    const lines = catchesCsv(bookWith('Hit on the "pause", twice')).replace(/^﻿/, "").trimEnd().split("\r\n");
+    const lines = catchesCsv(bookWith('Hit on the "pause", twice')).replace(/^\uFEFF/, "").trimEnd().split("\r\n");
     expect(lines[0]).toBe("Date,Time,Outing day,Species,Length (in),Weight (lb),Lure or bait,Water,Trip,Sky,Wind,Water °F,Released,Note");
     expect(lines).toHaveLength(2);
     expect(lines[1]).toMatch(/^2026-09-30,06:40,,[^,]+,10,,/);
@@ -55,13 +55,13 @@ describe("the outings as a spreadsheet", () => {
     const [first] = book.trips;
     const counted = { ...book, trips: book.trips.map((trip) => (trip.id === first!.id ? { ...trip, lost: 2, missed: 3 } : trip)) };
     const lines = tripsCsv(counted, "2099-01-01").replace(/^\ufeff/, "").trimEnd().split("\r\n");
-    expect(lines[0]).toBe("Date,Trip,Water,Fish,Kinds,Lost fish,Missed strikes,Note");
+    expect(lines[0]).toBe("Date,Trip,Water,Fish,Kinds,Lures,Lost fish,Missed strikes,Note");
     expect(lines).toHaveLength(book.trips.length + 1);
     const dates = lines.slice(1).map((line) => line.slice(0, 10));
     expect(dates).toEqual([...dates].sort().reverse());
     const row = lines.find((line) => line.startsWith(`${first!.date},`))!;
     const fish = book.catches.filter((entry) => entry.tripId === first!.id).length;
-    // The kinds sit between the fish and the lost count, quoted when there are several.
-    expect(row).toMatch(new RegExp(`,${fish},(?:"[^"]*"|[^,]*),2,3,`));
+    // The kinds and lures sit between the fish and the lost count, quoted when there are several.
+    expect(row).toMatch(new RegExp(`,${fish},(?:"[^"]*"|[^,]*),(?:"[^"]*"|[^,]*),2,3,`));
   });
 });
