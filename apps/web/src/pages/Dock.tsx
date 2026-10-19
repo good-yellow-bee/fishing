@@ -300,6 +300,7 @@ export function DockPage() {
   const groundbaitKey = useRef(() => {});
   // Read by the T key: reties a frayed or twisted line, or touches up a dull hook, whenever its button by the walk signs shows.
   const retieKey = useRef(() => {});
+  const lampKey = useRef(() => {});
   const posted = useRef<string | null>(null);
   // The local day the fish landed on, kept so a later retry files it under the same day.
   const landedDay = useRef(localDate(new Date()));
@@ -733,6 +734,11 @@ export function DockPage() {
         retieKey.current();
         return;
       }
+      if (event.code === "KeyL" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        event.preventDefault();
+        lampKey.current();
+        return;
+      }
       if (event.code !== "KeyE" || event.repeat) return;
       if (game.stance !== "shop") return;
       event.preventDefault();
@@ -795,6 +801,9 @@ export function DockPage() {
   const rowing = boatState === "rowingOut" || boatState === "rowingBack";
   groundbaitKey.current = () => {
     if (fishing && !rowing && game.handfuls > 0 && !shopOpen) game.throwGroundbait();
+  };
+  lampKey.current = () => {
+    if (hour === "night" && !rowing && !shopOpen) game.toggleLamp();
   };
   retieKey.current = () => {
     if (!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && !shopOpen) game.retie();
@@ -1042,6 +1051,21 @@ export function DockPage() {
                 {/* A phone's sign row has no room for the long word, so it shows the short one; the label keeps the full name. */}
                 <span className="bait-full">{t("Groundbait")}</span>
                 <span className="bait-short" aria-hidden="true">{t("Bait")}</span>
+              </button>
+            )}
+            {hour === "night" && !rowing && (
+              <button
+                className="panel-btn"
+                type="button"
+                aria-pressed={game.lamp}
+                title={t("A headlamp shows the float plainly, so the strike holds longer, but its light on the water puts the fish off.")}
+                onClick={(event) => {
+                  // Leave Space free for casting.
+                  event.currentTarget.blur();
+                  game.toggleLamp();
+                }}
+              >
+                {t("Headlamp")}
               </button>
             )}
             {!rowing && (game.frayed || game.twisted || game.dulled || washedWorm) && (
