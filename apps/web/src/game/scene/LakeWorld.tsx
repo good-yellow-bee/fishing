@@ -217,6 +217,8 @@ import { LakeSmoke } from "./LakeSmoke";
 import { lakeSmokeOut } from "./lakeSteam";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
+import { Paddleboarder } from "./Paddleboarder";
+import { paddleOut } from "./paddleRoute";
 import { Cabin } from "./Cabin";
 import { cabinWindowsLit, chimneySmoking } from "./cabinLook";
 import { owlOut } from "./owlMotion";
@@ -2353,6 +2355,7 @@ export const LakeWorld = memo(function LakeWorld({
       {choppingOut(hour, sky, season) && <Woodcutter />}
       {scullOut(hour, sky, season, wind) && <Sculler />}
       {nightRowOut(hour, sky, season, wind) && <NightRower />}
+      {paddleOut(hour, sky, season, wind) && <Paddleboarder />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
       {leafJumpOut(hour, sky, season) && <LeafRaker />}

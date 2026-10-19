@@ -1243,6 +1243,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC115~~ | ~~Night row: on calm nights from spring to fall someone rows a wooden boat slowly round the near half of the lake, a lantern at the stern laying a wavering streak of light on the water~~ (#1234) | scene | S |
 | ~~SC116~~ | ~~Hail: now and then a spring or summer shower turns to hail for a short burst, pellets bouncing on the dock boards and lying there melting while each one out on the water kicks up a little white spout~~ (#1235) | scene | S |
 | ~~SC117~~ | ~~Leaf whirl: on dry fall days a little whirlwind now and then springs up on the far bank, spins a column of fallen leaves round and up as it wanders out over the water, then gives out and lets them flutter down onto the lake~~ (#1235) | scene | S |
+| SC118 | Paddleboarder: on calm, fine summer days someone stands paddling a paddleboard across the west of the lake and back with a little dog sitting up at the nose, swapping the paddle from side to side and turning the board round at each end | scene | S |
+| SC119 | News card scene25: hammock, night row, paddleboarder, hail, leaf whirl | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
