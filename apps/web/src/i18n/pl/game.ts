@@ -750,6 +750,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
+    "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
   "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.":
     "Dwie nowe odznaki przystani do zdobycia: Całe jezioro, za złowienie każdego gatunku ryby w jeziorze, i Łowca trofeów, za pięć gatunków o wadze trofeum. A w szopie można teraz kupić żywego złotawca za 50 punktów: trafia na haczyk na następny rzut i wabi drapieżniki, a złotawiec na haczyku zostaje tam także po przeładowaniu strony.",
   "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.":
