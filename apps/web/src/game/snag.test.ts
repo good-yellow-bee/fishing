@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REEDS_STAND } from "./scene/bankWalk";
 import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, POINT_PAD } from "@stillwater/shared";
-import { castSnags, CLEAN_DROP_ACCURACY, CLEAN_DROP_SNAG, inWeeds, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
+import { castSnags, CLEAN_DROP_ACCURACY, CLEAN_DROP_SNAG, inWeeds, onRockEdge, ROCK_EDGE_DEPTH, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
 import { waterDepth } from "./scene/water";
 import { LILY_SNAG_ODDS } from "./lilyCover";
 
@@ -77,5 +77,20 @@ describe("shore ice", () => {
     expect(onShoreIce(undefined, east.x, east.z)).toBe(false);
     expect(onShoreIce("winter", LAKE_RX * 0.8, LAKE_CENTER_Z)).toBe(false);
     expect(onShoreIce("winter", 0, LAKE_CENTER_Z)).toBe(false);
+  });
+
+  it("finds the rock edge just past the point's shallow rocks, and only at the point", () => {
+    let edge: { x: number; z: number } | null = null;
+    for (let step = 0; step < 200 && !edge; step += 1)
+      for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        const x = POINT_PAD.x + dx * step * 0.1;
+        const z = POINT_PAD.z + dz * step * 0.1;
+        const depth = waterDepth(x, z);
+        if (depth > ROCK_DEPTH && depth <= ROCK_EDGE_DEPTH) edge = { x, z };
+      }
+    expect(edge).not.toBeNull();
+    expect(onRockEdge("point", edge!.x, edge!.z)).toBe(true);
+    expect(onRocks("point", edge!.x, edge!.z)).toBe(false);
+    expect(onRockEdge("reeds", edge!.x, edge!.z)).toBe(false);
   });
 });
