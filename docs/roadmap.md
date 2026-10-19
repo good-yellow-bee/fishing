@@ -1135,6 +1135,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#1289)~~ | phone UX | S |
 | ~~PA91~~ | ~~A kind's first and newest fish on a touch screen ("First in the book Sat, Oct 3 · newest Sun, Oct 18") were 19 px links; each is now a 32 px band, plain inline links off touch (#1291)~~ | phone UX | S |
 | ~~PA92~~ | ~~A kind's waters on a touch screen with large text on a narrow phone: the count and sizes ("2 fish · 11.5 in · 0.4 lb") wrapped onto lines whose links' reaches overlapped, leaving "2 fish" 29 px; a wrapped line now drops 8 px, one line keeps its height (#1293)~~ | phone UX | S |
+| ~~PA93~~ | ~~The lodge board's All time and This week tabs work as tabs from the keyboard: one Tab stop, the arrow keys, Home and End move between them and pick, and the board is named as their panel (#1297)~~ | phone UX | S |
+| ~~PA94~~ | ~~Settings and the shack on a touch screen: each settings switch was a 24 px row and each volume slider 16 px; both now stand 32 px like the choices, and the shack's Strength, Accuracy and Patience buttons go from 27 to 32 px on touch (#1298)~~ | phone UX | S |
+| ~~PA95~~ | ~~The shack's sections (Line & nerve, Today's requests, The next three days) were h3s straight under the page's h1, so a screen reader's heading list skipped a level: the shack is now named by an unseen h2 that also labels its dialog (#1299)~~ | phone UX | S |
+| ~~PA96~~ | ~~The landed card's rarity tag (common, uncommon, rare, legendary) read 2.3-3.1 to 1 on its parchment, and the quiet stamp just under 4.5: each is inked darker in its own hue, 5 to 1 or more (#1300)~~ | phone UX | S |
+| ~~PA97~~ | ~~The badge toast's small Badge line read 4.4 to 1 on its parchment over a night lake: inked to the legendary tag's brass, 5.5 to 1 (#1301)~~ | phone UX | S |
+| ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#1304)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1599,7 +1605,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT303~~ | ~~News card 2026-10-19-game19 covers GT301 and GT302: more grabs and the kingfisher's fry~~ (#1274) | ui | S |
 | ~~GT304~~ | ~~The sunken log: all year a cast landing within 0.7 m of the half-sunk log off the west bank (the turtle's log, in the Point's water and the Reeds' at its far end) lands where the fish hold in its shade, so the bite comes sooner (0.85) and 35% of bites are a largemouth, bluegill, crappie or pike holding under it (as that bank can land them; not a beginner's first fish); the cast says so~~ (#1281) | gameplay | S |
 | ~~GT305~~ | ~~Bugs on the surface: a popper or fly landing among the water striders off the dock's left side (calm days outside winter) or the whirligig raft off its right (calm spring and summer days), as the scene shows them, lands where the fish are looking up for bugs, so the bite comes sooner (0.85) and 35% of bites are a crappie, shiner, smallmouth or rainbow sipping from the film (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1288) | gameplay | S |
-| GT306 | News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs | ui | S |
+| ~~GT306~~ | ~~News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs~~ (#1290) | ui | S |
+| ~~GT307~~ | ~~Pike teeth: a pike or muskie hooked deep on swallowed bait (a late strike on live bait) has its teeth on the line, and once the fight runs past 8 s they fray it, so it snaps at 0.9 like a line the rocks scuffed and stays frayed till retied; the hookset says so, the card calls it when it happens, a snap blames the teeth, and the fight card and field guide list "Sharp teeth"~~ (#1296) | gameplay | S |
+| GT308 | Minnows under the lanterns: after dark a jig, spinner, spoon, crankbait or streamer landing among the minnows milling in the dock lanterns' light (the scene's MINNOW_POOL, plus 0.3 m) lands where the hunters pick them off, so the bite comes sooner (0.85) and 35% of bites are a crappie, walleye, smallmouth or largemouth (as the dock can land them; not a beginner's first fish); the cast says so in place of the general lantern line | gameplay | S |
 
 ## Risks / open questions for the owner
 

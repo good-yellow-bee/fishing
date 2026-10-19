@@ -1,4 +1,4 @@
-import { BREACHERS, BROADSIDERS, CHARGERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, LEAPERS, LONG_RUNNERS, QUITTERS, ROLLERS, SCRAPPERS, SOFT_MOUTHS, STICKERS, TAIL_WALKERS } from "./fight";
+import { BREACHERS, BROADSIDERS, CHARGERS, COVER_DIVERS, DARTERS, HEAD_SHAKERS, LEAPERS, LONG_RUNNERS, QUITTERS, ROLLERS, SCRAPPERS, SOFT_MOUTHS, STICKERS, TAIL_WALKERS, TOOTHY } from "./fight";
 import { t } from "../i18n";
 
 /** A kind of fish's own fight habits in words, for the fight card and the field guide. */
@@ -17,6 +17,7 @@ export function habitLines(speciesId: string): string[] {
   if (DARTERS.has(speciesId)) lines.push(t("Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it"));
   if (COVER_DIVERS.has(speciesId)) lines.push(t("Cover-diver: at the reeds or the dock it buries itself in cover and stays put, so turn every run there"));
   if (LONG_RUNNERS.has(speciesId)) lines.push(t("Long runner: the first run is the long one, so let it go"));
+  if (TOOTHY.has(speciesId)) lines.push(t("Sharp teeth: when it swallows the bait, they fray the line if the fight runs long"));
   if (CHARGERS.has(speciesId)) lines.push(t("Charger: once a fight it runs straight at you, so reel fast to keep the line tight"));
   return lines;
 }
