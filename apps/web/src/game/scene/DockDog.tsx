@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { DOG_COCK, DOG_SPOT, DOG_YAW, dogGlance, dogMood, easeMood, dogAttention, tailSwing, type DogMood } from "./dogMood";
 import { BreathPuffs, type Mouth } from "./Breath";
 import { dogPuffAge } from "./breathPuff";
-import { DOG_SNOW_START, dogShake, dogSnowStep, shakeFlake, type DogSnow } from "./dogSnow";
+import { DOG_SNOW_START, dogShake, dogSnowShown, dogSnowStep, shakeFlake, type DogSnow } from "./dogSnow";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { mergePainted, type PaintedPart } from "./mergeParts";
@@ -118,9 +118,10 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const snow = useRef<DogSnow>(DOG_SNOW_START);
   const snowLayer = useRef<THREE.Mesh>(null);
-  const flakes = useRef<(THREE.Mesh | null)[]>([]);
+  const flakes = useRef<THREE.InstancedMesh>(null);
   const snowMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: SNOW_COLOR, gradientMap: toonRamp() }), []);
   const snowGeometry = useMemo(() => new THREE.SphereGeometry(1, 10, 6), []);
+  const flakeAt = useMemo(() => new THREE.Object3D(), []);
   useEffect(
     () => () => {
       snowMaterial.dispose();
@@ -177,22 +178,32 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
       head.current.rotation.z = still ? 0 : awake * (1 - mood.sit) * track.cock * DOG_COCK;
     }
     if (tail.current) tail.current.rotation.y = still ? 0 : tailSwing(time, mood.wag);
-    snow.current = dogSnowStep(snow.current, time, Math.min(delta, 0.1), snowfall, still);
-    const layer = snow.current.snow;
-    if (snowLayer.current) {
-      snowLayer.current.visible = layer > 0.02;
-      snowLayer.current.scale.set(0.11 * Math.min(1, layer * 2.5), 0.03 * layer, 0.2 * Math.min(1, layer * 2.5));
+    if (winter) {
+      // It shakes only lying down, not sat up for a bite.
+      snow.current = dogSnowStep(snow.current, time, Math.min(delta, 0.1), snowfall, mood.sit < 0.05, still);
+      const layer = dogSnowShown(snow.current, time);
+      if (snowLayer.current) {
+        snowLayer.current.visible = layer > 0.02;
+        snowLayer.current.scale.set(0.11 * Math.min(1, layer * 2.5), 0.03 * layer, 0.14 * Math.min(1, layer * 2.5));
+      }
+      // A shake rolls it about its spine, throwing its snow off in a burst of flakes.
+      if (root.current) root.current.rotation.z = still ? 0 : dogShake(snow.current, time) * 0.3;
+      const pile = flakes.current;
+      if (pile) {
+        let n = 0;
+        for (let i = 0; i < FLAKES; i++) {
+          const at = still ? null : shakeFlake(snow.current, i, time);
+          if (!at) continue;
+          flakeAt.position.set(at.x, at.y, at.z);
+          flakeAt.scale.setScalar(at.size);
+          flakeAt.updateMatrix();
+          pile.setMatrixAt(n, flakeAt.matrix);
+          n += 1;
+        }
+        pile.count = n;
+        pile.instanceMatrix.needsUpdate = true;
+      }
     }
-    // A shake rolls it about its spine, throwing its snow off in a burst of flakes.
-    if (root.current) root.current.rotation.z = still ? 0 : dogShake(snow.current, time) * 0.3;
-    flakes.current.forEach((flake, i) => {
-      if (!flake) return;
-      const at = still ? null : shakeFlake(snow.current, i, time);
-      flake.visible = at !== null;
-      if (!at) return;
-      flake.position.set(at.x, at.y, at.z);
-      flake.scale.setScalar(at.size);
-    });
   });
   useSkinnedFigure(root, material);
 
@@ -200,20 +211,8 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
     <>
       <group ref={root} name="dock-dog" position={[DOG_SPOT.x, DOG_SPOT.y, DOG_SPOT.z]} rotation={[0, DOG_YAW, 0]} scale={DOG_SCALE}>
       <mesh geometry={shapes.rear} material={material} castShadow />
-      {snowfall && <mesh ref={snowLayer} geometry={snowGeometry} material={snowMaterial} position={[0, 0.235, -0.02]} visible={false} />}
-      {snowfall &&
-        Array.from({ length: FLAKES }, (_, i) => (
-          <mesh
-            key={i}
-            geometry={snowGeometry}
-            material={snowMaterial}
-            visible={false}
-            ref={(flake) => {
-              flakes.current[i] = flake;
-            }}
-          />
-        ))}
-      <group ref={tail} position={[0, 0.15, -0.27]} rotation={[0.25, 0, 0]}>
+      {/* Over its hindquarters, clear of the chest that rises when it sits up. */}
+      {winter && <mesh ref={snowLayer} geometry={snowGeometry} material={snowMaterial} position={[0, 0.235, -0.08]} visible={false} />}      <group ref={tail} position={[0, 0.15, -0.27]} rotation={[0.25, 0, 0]}>
         <mesh geometry={shapes.tail} material={material} />
       </group>
       {/* Hinged at the hips, so the chest, legs and head rise together when it sits. */}
@@ -238,6 +237,12 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
       </group>
     </group>
       {winter && <BreathPuffs light={1} age={dogPuffAge} mouth={breathAt} size={PUFF_SIZE} />}
+      {/* The flakes it throws fly free of its roll, in metres about where it lies. */}
+      {winter && (
+        <group position={[DOG_SPOT.x, DOG_SPOT.y, DOG_SPOT.z]} rotation={[0, DOG_YAW, 0]}>
+          <instancedMesh ref={flakes} args={[snowGeometry, snowMaterial, FLAKES]} frustumCulled={false} />
+        </group>
+      )}
     </>
   );
 }

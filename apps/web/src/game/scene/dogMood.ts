@@ -1,4 +1,5 @@
 import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
+import { snowing } from "./capSnow";
 import type { ScenePhase } from "./types";
 
 /**
@@ -10,7 +11,7 @@ import type { ScenePhase } from "./types";
 
 /** Out by day in any season; it stays home in the rain, but not in winter's snow, which it loves. */
 export function dogOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
-  return hour === "day" && (sky !== "rain" || season === "winter");
+  return hour === "day" && (sky !== "rain" || snowing(sky, season));
 }
 
 /** Where it lies: on the left of the boards behind the angler, clear of the thermos on the right. */
