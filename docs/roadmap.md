@@ -1151,6 +1151,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
 | ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
 | ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
+| ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -2184,3 +2185,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR549~~ | ~~Round 91 ideas: lure record spreadsheet, nearest water and all-waters GPS file on the Map~~ (#1308) | field | S |
 | ~~BR550~~ | ~~Round 92 Bests, species and search fixes: one row per lure however spelled, season box Outings link, empty season text, size bands, copied dates and counts, heading level, Polish wording, tap reach~~ (#1322) | field | S |
 | ~~BR551~~ | ~~Round 92 ideas: fish an outing in the season box, each year's biggest in a one-kind search, "31.12" as a day~~ (#1324) | field | S |
+| ~~BR552~~ | ~~Round 93 waters fixes: one rule for a sample water's fish and outings, lure spellings grouped, nearest water only when close, last fished lure from this water, weekend split with loose fish, reading dates, heading level, tap gap, Polish wording~~ (#1327) | field | S |
+| ~~BR553~~ | ~~Round 93 ideas: warming or cooling on a water's card, today's sunrise and sunset on its page, its place in the copied summary~~ (#1328) | field | S |

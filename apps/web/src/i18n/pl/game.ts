@@ -768,6 +768,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "A water's card shows whether its water is warming or cooling. Its page gives today's sunrise and sunset there, and its copied summary carries the place and a map link.":
+    "Karta łowiska pokazuje, czy woda się ociepla, czy ochładza. Strona łowiska podaje dzisiejszy wschód i zachód słońca w tym miejscu, a skopiowane podsumowanie zawiera współrzędne i link do mapy.",
   "A season on Bests shows its fish an outing against the season before, and its outings open from the box. A search for one kind gives each year's biggest beside its count, and “31.12” finds that day.":
     "Sezon w zakładce Rekordy pokazuje ryby na wyprawę na tle poprzedniego, a jego wyprawy otwierają się z ramki. Wyszukiwanie jednego gatunku podaje największą rybę każdego roku obok liczby, a „31.12” znajduje ten dzień.",
   "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.":
