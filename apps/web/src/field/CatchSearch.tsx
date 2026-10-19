@@ -1019,13 +1019,15 @@ function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEnt
 function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const t = useT();
   const { book } = useLogbook();
-  const lure = leader(catches, (entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() || null);
+  // "Spinnerbait" and "Spinnerbaits" are one lure, as the exact lure search and Gear count them.
+  const lureKey = (entry: CatchEntry) => (entry.lure.trim() ? shownPieceKey(entry.lure.trim()) || null : null);
+  const lure = leader(catches, lureKey);
   const time = leader(catches, (entry) => {
     const at = new Date(entry.caughtAt);
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   const water = leader(catches, (entry) => entry.spotId);
-  const lureName = lure ? catches.find((entry) => entry.lure.trim().replace(/\s+/g, " ").toLowerCase() === lure.value)!.lure.trim() : "";
+  const lureName = lure ? catches.find((entry) => lureKey(entry) === lure.value)!.lure.trim() : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
     time ? t("Most at {time}.", { time: `${t(BITE_TIMES.find((row) => row.id === time.value)!.label)} (${time.count})` }) : null,

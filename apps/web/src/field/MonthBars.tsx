@@ -1,6 +1,6 @@
 import type { CatchEntry } from "@stillwater/shared";
 import { Link } from "react-router-dom";
-import { t } from "../i18n";
+import { getLang, t } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./findLinks";
 import { TallyBars } from "./TallyBars";
 import { catchMonth, monthName } from "./tripMonths";
@@ -19,6 +19,11 @@ export function monthOfYearTally(catches: readonly CatchEntry[], monthOf: (entry
 }
 
 /** The month's own name ("October", "Październik"); as an exact term the search reads it as every October in the book. */
+/** A month's name inside a sentence: Polish writes it in lower case ("Najlepszy miesiąc: wrzesień"), as a bar label doesn't. */
+function inSentence(word: string): string {
+  return getLang() === "pl" ? word.toLocaleLowerCase("pl") : word;
+}
+
 function monthWord(month: number): string {
   return monthName(`2026-${String(month).padStart(2, "0")}`).split(" ")[0]!;
 }
@@ -40,7 +45,7 @@ export function MonthBars({ catches, within, monthOf }: { catches: readonly Catc
       {/* The month it gives most, once one stands clear of the rest. */}
       {best ? (
         <p className="meta">
-          <Link to={link(exactTerm("month", monthWord(best.month)))}>{t("Best month: {month} ({count} of {total})", { month: monthWord(best.month), count: best.count, total })}</Link>
+          <Link to={link(exactTerm("month", monthWord(best.month)))}>{t("Best month: {month} ({count} of {total})", { month: inSentence(monthWord(best.month)), count: best.count, total })}</Link>
         </p>
       ) : null}
     </section>
