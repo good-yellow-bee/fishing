@@ -1619,37 +1619,35 @@ function SunGlitter({ discPos }: { discPos: Vec3 }) {
   ));
 }
 
-function Bird({ position, phase, flap }: { position: Vec3; phase: number; flap: number }) {
-  const left = useRef<THREE.Group>(null);
-  const right = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    const f = Math.sin(state.clock.elapsedTime * flap + phase) * 0.55 + 0.15;
-    if (left.current) left.current.rotation.z = f;
-    if (right.current) right.current.rotation.z = -f;
-  });
-  return (
-    <group position={position}>
-      <group ref={left}>
-        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
-      </group>
-      <group ref={right} scale={[-1, 1, 1]}>
-        <mesh geometry={WING_GEOMETRY} material={BIRD_MATERIAL} />
-      </group>
-    </group>
-  );
-}
-
+/** A flock crossing high over the lake, each bird a pair of beating wings; the whole flock is one instanced draw. */
 function BirdFlock({ y, z, speed, offset, dir, birds }: FlockProps) {
   const ref = useRef<THREE.Group>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
+  const scratch = useMemo(() => ({ place: new THREE.Object3D() }), []);
   useFrame((state) => {
-    if (!ref.current) return;
-    ref.current.position.x = dir * (((state.clock.elapsedTime * speed + offset) % 110) - 55);
+    const time = state.clock.elapsedTime;
+    if (ref.current) ref.current.position.x = dir * (((time * speed + offset) % 110) - 55);
+    const mesh = wings.current;
+    if (!mesh) return;
+    const { place } = scratch;
+    birds.forEach((position, i) => {
+      const f = Math.sin(time * (6.5 + (i % 3) * 0.7) + i * 1.9) * 0.55 + 0.15;
+      // The right wing is the left one mirrored; the material is double-sided, so the flip shows no seam.
+      [1, -1].forEach((side, w) => {
+        place.position.set(...position);
+        place.rotation.set(0, 0, side * f);
+        place.scale.set(side, 1, 1);
+        place.updateMatrix();
+        mesh.setMatrixAt(i * 2 + w, place.matrix);
+      });
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+    // Bound the flock once its birds are placed, so it is culled while out of view, as each wing was.
+    if (!mesh.boundingSphere || mesh.boundingSphere.radius < 1) mesh.computeBoundingSphere();
   });
   return (
     <group ref={ref} position={[0, y, z]} rotation={[0, Math.PI / 2, 0]}>
-      {birds.map((position, i) => (
-        <Bird key={i} position={position} phase={i * 1.9} flap={6.5 + (i % 3) * 0.7} />
-      ))}
+      <instancedMesh ref={wings} args={[WING_GEOMETRY, BIRD_MATERIAL, birds.length * 2]} />
     </group>
   );
 }
