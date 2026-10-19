@@ -21,10 +21,10 @@ describe("a phone held sideways", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
     expect(coach).toContain("left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
-    expect(coach).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(coach).toContain("right: min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - 16px - min(220px, calc(30vw / var(--text-zoom, 1))) - 240px));");
     expect(coach).toContain("max-width: 400px;");
     const news = [...sideways.matchAll(/\n  \.whats-new \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
-    expect(news).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(news).toContain("right: min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - 248px));");
     expect(news).toContain("max-width: 440px;");
     expect(news).toContain("transform: none;");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
