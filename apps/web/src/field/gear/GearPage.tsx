@@ -190,7 +190,7 @@ function LureRecord({ today }: { today: string }) {
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
             {/* With a water picked, its fish there. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.label)}</Link> : <span>{pieceName(row.label)}</span>}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" + "), atWater.catches.filter((entry) => onPiece(entry, row.lure!))))}>{pieceName(row.name)}</Link> : <span>{pieceName(row.name)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}
@@ -205,7 +205,7 @@ function LureRecord({ today }: { today: string }) {
                   {row.largest ? (
                     <span className="lure-last">
                       <Link to={`/catches/${row.largest.entry.id}`}>
-                        {t("Largest: {species}, {size}", { species: t(row.largest.entry.species), size: measureText(measureOf(row.largest.entry, row.largest.by)!) })}
+                        {t("Largest: {species}, {size}", { species: pieceName(row.largest.entry.species), size: measureText(measureOf(row.largest.entry, row.largest.by)!) })}
                       </Link>
                     </span>
                   ) : null}
@@ -237,7 +237,7 @@ function LureRecord({ today }: { today: string }) {
                   >
                     {t("Pack for {outing}", { outing: outingName(next, book.spots) })}
                     {/* Which lure, for a list of buttons that would otherwise all read the same. */}
-                    <span className="sr-only">: {pieceName(row.label)}</span>
+                    <span className="sr-only">: {pieceName(row.name)}</span>
                   </button>
                 </span>
               ) : null}
@@ -285,7 +285,7 @@ function LureRecord({ today }: { today: string }) {
       {/* Packed again and again and never a fish: a lure that may as well stay home, said where the folded list hides it. */}
       {blanks.length > 0 ? (
         <p className="meta never-took">
-          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${pieceName(row.label)} (${row.outings})`).join(", ") })}
+          {t("Packed for {n} or more outings without a fish: {lures}.", { n: NEVER_TOOK_OUTINGS, lures: blanks.map((row) => `${pieceName(row.name)} (${row.outings})`).join(", ") })}
         </p>
       ) : null}
       {/* Lures that took fish last year and none yet this year: worth a swim before the season ends. */}

@@ -16,7 +16,7 @@ export function lureRecordCsv(records: readonly PieceRecord[]): string {
   const separator = getLang() === "pl" ? ";" : ",";
   const header = [t("Lure or bait"), t("Fish"), t("Outings"), t("Fish an outing"), t("Last fish"), t("Largest")];
   const rows = records.map((row) => [
-    pieceName(row.label),
+    pieceName(row.name),
     String(row.fish),
     String(row.outings),
     rate(row.fish, row.outings),
