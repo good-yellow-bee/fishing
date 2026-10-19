@@ -246,7 +246,9 @@ export function DockPage() {
     };
   }, [padConnected]);
   // On a short screen the coach and the news card sit beside the shore signs, which take a second column with larger
-  // text: the scene keeps the signs' reach from its right edge, so the cards stop short of them.
+  // text: the scene keeps the signs' reach from its right edge, so the cards stop short of them. The lake mounts only once
+  // the profile is in, so that is a dependency too.
+  const lakeShown = me !== null;
   useEffect(() => {
     const wrap = game.surfaceRef.current;
     const signs = wrap?.querySelector<HTMLElement>(":scope > .walk-signs");
@@ -261,7 +263,7 @@ export function DockPage() {
     observer.observe(signs);
     observer.observe(wrap);
     return () => observer.disconnect();
-  }, [game.surfaceRef, scenePhase, shopOpen, photo]);
+  }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;

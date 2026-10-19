@@ -29,6 +29,8 @@ describe("a phone held sideways", () => {
     expect(news).toContain("transform: none;");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
     expect(dock).toContain('wrap.style.setProperty("--signs-room"');
+    // The lake mounts after the profile loads: an effect that ran only on the loading view left the signs' reach unset.
+    expect(dock).toContain("}, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);");
   });
 
   it("lets a phone's bottom row of shore signs scroll sideways when the last banks would run past the edge", () => {
