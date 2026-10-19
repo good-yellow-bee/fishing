@@ -1,7 +1,9 @@
 import { Fragment, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
-import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { pieceTally } from "../pieceTally";
+import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
 import { num, t, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
@@ -91,7 +93,7 @@ const YEAR_PARAM = "year";
 function KindLeaders({ book, species }: { book: Logbook; species: string }) {
   const key = species.trim().toLowerCase();
   const fish = book.catches.filter((entry) => entry.species.trim().toLowerCase() === key);
-  const [lure, nextLure] = lureTally({ ...book, catches: fish }, 2);
+  const [lure, nextLure] = pieceTally(fish, 2);
   const [water, nextWater] = speciesWaters(book, fish);
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
@@ -185,6 +187,8 @@ export function BestsPage() {
   // they count on, with every outing to file a night session's small hours under.
   const dayBook = year ? { ...whole, catches: whole.catches.filter((entry) => dayOf(entry).startsWith(`${year}-`)) } : book;
   const topDay = bestFishDay(dayBook);
+  // A picked season with no fish, in a book with fish in others: said of that season, not of the whole book.
+  const emptySeason = year && book.catches.length === 0 ? t("No fish in {year}.", { year }) : null;
   const kindsDay = mostKindsDay(dayBook);
   // When every fish of the best day came on one outing and that outing holds no others (a fish after the night's end,
   // or one in the next season), the tile opens that outing; else the day's search, which counts as the tile does.
@@ -331,7 +335,8 @@ export function BestsPage() {
           today={today}
           dayLink={(date) => findLink(tail(date))}
           fishLink={findLink(tail(year))}
-          daysLink={`/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}`}
+          // The season's outings already fished, as the outings page it opens counts them ("Outings: 6 · 1 planned").
+          outings={{ count: sheetOutings(whole, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
         />
       ) : null}
@@ -349,7 +354,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.longest ? t(bests.longest.species) : t("No length in the book")}</small>
+          <small>{bests.longest ? t(bests.longest.species) : (emptySeason ?? t("No length in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
@@ -362,7 +367,7 @@ export function BestsPage() {
               t("None")
             )}
           </strong>
-          <small>{bests.heaviest ? t(bests.heaviest.species) : t("No weight in the book")}</small>
+          <small>{bests.heaviest ? t(bests.heaviest.species) : (emptySeason ?? t("No weight in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>
@@ -394,7 +399,7 @@ export function BestsPage() {
         <div>
           <span className="eyebrow">{t("Best day")}</span>
           <strong>{topDay ? <DayTally count={topDay.count} date={topDay.date} tripId={topDayTrip} tail={tail} /> : t("None")}</strong>
-          <small>{topDay ? formatDay(topDay.date) : t("Nothing landed in the book yet.")}</small>
+          <small>{topDay ? formatDay(topDay.date) : (emptySeason ?? t("Nothing landed in the book yet."))}</small>
         </div>
       </section>
       {kindsDay ? (
@@ -413,8 +418,9 @@ export function BestsPage() {
 
       {book.catches.length === 0 ? (
         <>
-          {/* The tile above already says there is no fish: say why the sample week's are gone, when they are. */}
-          {all.catches.some((entry) => isSampleCatch(entry.id)) ? <p className="empty">{t("The sample week is left out now that you have an outing of your own.")}</p> : null}
+          {/* The tile above already says there is no fish: say why the sample week's are gone, when they are. Not for one
+              empty season of a book with fish in others. */}
+          {whole.catches.length === 0 && all.catches.some((entry) => isSampleCatch(entry.id)) ? <p className="empty">{t("The sample week is left out now that you have an outing of your own.")}</p> : null}
           {goalSection}
           {calendarSection}
         </>
@@ -548,7 +554,7 @@ export function BestsPage() {
               <h2>{t("Lures that worked")}</h2>
             </div>
             {/* Every lure that took a fish, the top five until asked for the rest. */}
-            <TallyBars key={year ?? ""} limit={5} rows={lureTally(book, Infinity).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
+            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>
