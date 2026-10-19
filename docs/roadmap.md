@@ -1132,7 +1132,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA87~~ | ~~Bests' days calendar on a touch screen: each month's heading linked its outings and fish as 12 px targets in 13 px type; each is now a 32 px band at least 32 px wide, plain inline links off touch (#1282)~~ | phone UX | S |
 | ~~PA88~~ | ~~A log form's note on a touch screen: the fish ("Open it") or outing a note before saving links to was a 15 px target in 13 px type; each is now a 32 px band, plain inline links off touch (#1284)~~ | phone UX | S |
 | ~~PA89~~ | ~~Small links off the lake on a touch screen: Sign in's "Make a profile" and Join's "Sign in", the catch log's and lodge board's way back to the dock, the trip recap's "Open the trip" and the field guide's "In your field log" were 15-19 px targets; each is now a 32 px band, plain inline links off touch (#1285)~~ | phone UX | S |
-| ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#?)~~ | phone UX | S |
+| ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#1289)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
