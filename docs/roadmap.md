@@ -1377,7 +1377,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC202~~ | ~~The dog in the snow: the dock dog now comes out on snowy winter days too (it stays home only in rain); snow builds on its back and now and then it gives itself a shake and throws it off in a burst of flakes~~ (#1456) | scene | S |
 | ~~SC203~~ | ~~Snowy robin: the dock robin comes in winter's snow too, perching on the snow-capped posts beside the dog~~ (#1458) | scene | S |
 | ~~SC204~~ | ~~News card scene47 covers SC202 and SC203~~ (#1458) | scene | S |
-| SC205 | Mallard on the dock: on rainy days from spring to fall a mallard drake now and then swims in and flaps up onto the boards behind the angler, waddles in, preens with its head right round to its back, shakes off the rain, then turns and goes back the way it came (rainy days had only the snail) | scene | S |
+| ~~SC205~~ | ~~Mallard on the dock: on rainy days from spring to fall a mallard drake now and then swims in and flaps up onto the boards behind the angler, waddles in, preens with its head right round to its back, shakes off the rain, then turns and goes back the way it came (rainy days had only the snail)~~ (#1460) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
