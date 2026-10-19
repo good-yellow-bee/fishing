@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
-import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance } from "./fight";
+import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
 import { bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
@@ -16,7 +16,7 @@ let fightPerformance: FightPerformance = { peakTension: 0.2, maxLine: 1 };
 let fightLine = 1;
 
 vi.mock("./fx", () => ({
-  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), lift: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
+  fx: { cast: vi.fn(), splash: vi.fn(), bite: vi.fn(), nibble: vi.fn(), plop: vi.fn(), rodBell: vi.fn(), snap: vi.fn(), land: vi.fn(), surge: vi.fn(), reel: vi.fn(), lift: vi.fn(), scrape: vi.fn(), haptic: vi.fn(), drag: { set: vi.fn(), stop: vi.fn() } },
 }));
 // The tests time bites to the usual wait; the day's hot bank is kept off the dock.
 vi.mock("@stillwater/shared", async (importOriginal) => {
@@ -957,6 +957,45 @@ describe("useFishingGame strike timing", () => {
     expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s\. .*Ease off when it runs\.$/);
     // A swallowed hook holds like a treble: it takes longer in the red to tear free.
     expect(vi.mocked(makeFight).mock.calls.at(-1)![8]).toBe(true);
+  });
+
+  it("warns that a pike which swallowed the bait has its teeth on the line, and says so when they fray it", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    expect(hint()).toMatch(/^It swallowed the bait: hooked deep in 1\.10 s, with its teeth on the line\. Land it quick\. .*Ease off when it runs\.$/);
+    // The swallowed hook goes to the fight, so the teeth can fray the line.
+    expect(vi.mocked(makeFight).mock.calls.at(-1)![13]).toBe(true);
+    const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+    sim.bitten = true;
+    sim.frayed = true;
+    step.mockReturnValueOnce("fighting");
+    act(() => frames.at(-1)!(now));
+    expect(hint()).toBe("Its teeth have frayed the line! It snaps sooner now, so land it quick.");
+    vi.mocked(makeFight).mock.results.at(-1)!.value.performance.bitten = true;
+    step.mockReturnValueOnce("landed");
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=landed-note]")?.textContent).toContain("Its teeth frayed your line: it snaps sooner until you retie it.");
+    expect(container!.querySelector("[data-testid=frayed]")?.textContent).toBe("true");
+  });
+
+  it("blames the teeth when a pike snaps the line they frayed", () => {
+    const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    cast(surface);
+    act(() => vi.advanceTimersByTime(2_201));
+    now += 1_100;
+    act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+    const sim = vi.mocked(makeFight).mock.results.at(-1)!.value.sim as FightSim;
+    sim.bitten = true;
+    sim.frayed = true;
+    step.mockReturnValueOnce("snapped");
+    act(() => frames.at(-1)!(now));
+    expect(container!.querySelector("[data-testid=broke]")?.textContent).toContain("The Northern pike's teeth wore through the line before you could land it.");
+    expect(hint()).toContain("Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.");
   });
 
   it.each([

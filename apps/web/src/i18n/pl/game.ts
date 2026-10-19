@@ -594,6 +594,12 @@ export const PL_GAME: PlBook = {
   "Soft mouth — ease off as soon as the bar turns red.": "Miękki pysk — odpuść, gdy tylko pasek zrobi się czerwony.",
   "The light hook pulled out of the {fish}.": "{fish} — płytko wbity haczyk wysunął się.",
   "Hooked light — strike sooner, and ease off as soon as the bar turns red.": "Płytko zacięte — zatnij szybciej i odpuść, gdy tylko pasek zrobi się czerwony.",
+  "It swallowed the bait: hooked deep in {time} s, with its teeth on the line. Land it quick. {line}. Ease off when it runs.":
+    "Ryba połknęła przynętę: zacięta głęboko po {time} s, a żyłka jest między zębami. Wyholuj ją szybko. {line}. Odpuść, gdy odjeżdża.",
+  "Its teeth have frayed the line! It snaps sooner now, so land it quick.": "Zęby przetarły żyłkę! Teraz pęknie szybciej, więc wyholuj rybę szybko.",
+  "Its teeth frayed your line: it snaps sooner until you retie it.": "Zęby ryby przetarły żyłkę: pęknie szybciej, dopóki jej nie przewiążesz.",
+  "The {fish}'s teeth wore through the line before you could land it.": "{fish} — zęby przetarły żyłkę, zanim ryba trafiła do podbieraka.",
+  "Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.": "Szczupak, gdy ma czas, połyka przynętę: zacinaj szybciej albo holuj krótko.",
   "It swallowed the bait: hooked deep in {time} s. {line}. Ease off when it runs.": "Ryba połknęła przynętę: zacięta głęboko po {time} s. {line}. Odpuść, gdy odjeżdża.",
   "Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.": "Płytko zacięte po {time} s, haczyk ledwo chwycił. Nie wchodź w czerwień. {line}.",
   "EASE OFF — the hook is tearing out!": "ODPUŚĆ — haczyk się wyrywa!",
@@ -618,6 +624,7 @@ export const PL_GAME: PlBook = {
   "Long runner: the first run is the long one, so let it go": "Długi odjazd: pierwszy odjazd jest najdłuższy, więc daj mu iść",
   "Charger: once a fight it runs straight at you, so reel fast to keep the line tight":
     "Szarżująca: raz w walce płynie prosto na ciebie, więc zwijaj szybko, żeby żyłka była napięta",
+  "Sharp teeth: when it swallows the bait, they fray the line if the fight runs long": "Ostre zęby: gdy ryba połknie przynętę, przetrą żyłkę, jeśli hol się przeciąga",
   "Soft mouth: reel in the red and the hook tears out": "Miękki pysk: zwijanie w czerwieni wyrywa haczyk",
   "Hooked light: reel in the red and the hook pulls out": "Płytko zacięte: zwijanie w czerwieni wysuwa haczyk",
   "The fishing loop hit a problem. You can cast again.": "Coś poszło nie tak z łowieniem. Możesz zarzucić ponownie.",

@@ -1599,7 +1599,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT303~~ | ~~News card 2026-10-19-game19 covers GT301 and GT302: more grabs and the kingfisher's fry~~ (#1274) | ui | S |
 | ~~GT304~~ | ~~The sunken log: all year a cast landing within 0.7 m of the half-sunk log off the west bank (the turtle's log, in the Point's water and the Reeds' at its far end) lands where the fish hold in its shade, so the bite comes sooner (0.85) and 35% of bites are a largemouth, bluegill, crappie or pike holding under it (as that bank can land them; not a beginner's first fish); the cast says so~~ (#1281) | gameplay | S |
 | ~~GT305~~ | ~~Bugs on the surface: a popper or fly landing among the water striders off the dock's left side (calm days outside winter) or the whirligig raft off its right (calm spring and summer days), as the scene shows them, lands where the fish are looking up for bugs, so the bite comes sooner (0.85) and 35% of bites are a crappie, shiner, smallmouth or rainbow sipping from the film (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1288) | gameplay | S |
-| GT306 | News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs | ui | S |
+| ~~GT306~~ | ~~News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs~~ (#1290) | ui | S |
+| GT307 | Pike teeth: a pike or muskie hooked deep on swallowed bait (a late strike on live bait) has its teeth on the line, and once the fight runs past 8 s they fray it, so it snaps at 0.9 like a line the rocks scuffed and stays frayed till retied; the hookset says so, the card calls it when it happens, a snap blames the teeth, and the fight card and field guide list "Sharp teeth" | gameplay | S |
 
 ## Risks / open questions for the owner
 
