@@ -393,7 +393,6 @@ export function overlapsOtherClaimedDay(userId: string, local: DayWindow): boole
   );
 }
 
-/** False when that day's request was already claimed; the primary key rules out paying twice. */
 /**
  * Pays a request's reward once; the claim that clears the day's board of `boardSize` requests also pays `boardBonus`.
  * Null when the request was already claimed, else the board bonus paid (0 when the board isn't clear yet).
