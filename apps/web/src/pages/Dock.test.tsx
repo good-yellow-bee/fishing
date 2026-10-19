@@ -582,6 +582,13 @@ describe("the shack's bait tin", () => {
     expect(buyGroundbait).not.toHaveBeenCalled();
   });
 
+  it("prices its bait a fifth cheaper from level 17", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)"]);
+  });
+
   it("sells a live shiner onto the hook, one at a time, and keeps it for a reload", async () => {
     vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
     vi.mocked(buyShiner).mockClear();

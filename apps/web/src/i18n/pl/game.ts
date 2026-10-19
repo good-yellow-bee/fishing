@@ -780,6 +780,7 @@ export const PL_GAME: PlBook = {
   "Soul of the lake": "Dusza jeziora",
   "One with the lake": "Jedność z jeziorem",
   "Voice of the lake": "Głos jeziora",
+  "Child of the lake": "Dziecko jeziora",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "Photo mode. Drag to look around, tap Save this view to keep a picture, or tap anywhere else to bring the panels back.":
