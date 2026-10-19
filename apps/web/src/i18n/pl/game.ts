@@ -770,8 +770,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
-  "Patience 7 keeps a fish that dropped the bait about, so a cast straight back has it take again more often, and Accuracy 7 drops your lure into the gaps, so a cast into the weeds, the lily pads or the rocks snags half as often. The shack's tackle box now says what rank 7 of each skill brings.":
-    "Cierpliwość 7 zatrzymuje rybę, która puściła przynętę, więc rzut od razu w to samo miejsce częściej kończy się braniem, a Celność 7 wpuszcza przynętę w prześwity, więc rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej. Skrzynka na sprzęt w szopie mówi teraz, co daje 7. stopień każdej umiejętności.",
+  "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.":
+    "Dwie kolejne przynęty można prowadzić w czasie czekania: stuknij, by zatrzymać woblera, tak że wypłynie przed płynącą za nim rybą, albo by mucha drgnęła jak żywy owad. Jak przy poppersie, jigu, błystce czy streamerze pierwsze stuknięcia przyspieszają branie, a zbyt wiele płoszy rybę.",
   "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.":
     "Na łódce plusk kotwicy płoszy ryby na kilka sekund, więc odczekaj chwilę przed rzutem. A przy silnym wietrze kadłub trzymany na linie kotwicy słabiej obraca się za rybą, więc odjazd zabiera więcej linki.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
