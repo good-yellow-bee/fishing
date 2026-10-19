@@ -369,6 +369,7 @@ export function SpotMapPage() {
   const today = localDate(new Date());
   const tomorrow = shiftDate(new Date(), 1);
   const upcoming = nextRealTrips(book, today);
+  const fishedTrips = new Set(book.catches.map((entry) => entry.tripId));
   // A water the angler has fished or been out on counts their own, as its card on Waters and its page do: a sample
   // water they have fished too says their fish, not the sample week's beside them. A water with nothing of theirs keeps what it has.
   const counted = countedBook(book);
@@ -387,8 +388,8 @@ export function SpotMapPage() {
     // What to pack for there: the lure that took the most of its fish, when two or more did and none ties it.
     const best = bestLure(spotId);
     const line = best ? `${dated} · ${t("best on {lure}", { lure: pieceName(best) })}` : dated;
-    // In the small hours, last evening's outing still going there: the one the angler is out on now.
-    const going = book.trips.find((trip) => trip.spotId === spotId && !isSampleOuting(trip) && stillGoing(book, trip));
+    // The outing the angler is out on now there: today's once it has a fish, or in the small hours last evening's still going.
+    const going = book.trips.find((trip) => trip.spotId === spotId && !isSampleOuting(trip) && ((trip.date === today && fishedTrips.has(trip.id)) || stillGoing(book, trip)));
     if (going)
       return (
         <>

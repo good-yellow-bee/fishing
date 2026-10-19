@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-game35";
+export const NEWS_ID = "2026-10-19-field60";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On Gear, each coming outing can copy its plan with what is still to pack, and the lure record says when a lure that never took a fish was last packed. On the Map, a water you have fished today says Out now.",
   "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.",
   "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.",
   "Home's Next box copies the plan for a message. The outings spreadsheet lists the lures each outing took, and from January to March the book file offers last year's catches as a sheet of their own. A lure typed two ways reads once in the spreadsheets and copied texts.",

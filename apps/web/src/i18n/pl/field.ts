@@ -145,6 +145,7 @@ export const PL_FIELD: PlBook = {
   "“{from}” looks like “{into}”.": "„{from}” wygląda jak „{into}”.",
   "Merge into {into}": "Połącz jako: {into}",
   "last fish {day}": "ostatnia ryba {day}",
+  "last packed {day}": "ostatnio spakowana {day}",
   "none on {n} outings since": ["od tamtej pory nic na {n} wyprawie", "od tamtej pory nic na {n} wyprawach", "od tamtej pory nic na {n} wyprawach"],
   "They're different": "To różne przynęty",
   "Rename": "Zmień nazwę",

@@ -13,7 +13,7 @@ import { pieceTally } from "../pieceTally";
  * weight when any was weighed, else by length, once it took two or more.
  */
 /** `label` is the piece as its list wrote it, what Pack adds; `name` as most of its fish were logged, what the record shows. */
-export type PieceRecord = { label: string; name: string; outings: number; fish: number; lure?: string; lastAt?: string; lastDay?: string; since?: number; largest?: { entry: CatchEntry; by: "weight" | "length" } };
+export type PieceRecord = { label: string; name: string; outings: number; lastPacked?: string; fish: number; lure?: string; lastAt?: string; lastDay?: string; since?: number; largest?: { entry: CatchEntry; by: "weight" | "length" } };
 
 /**
  * Each lure packed for outings up to `today`: how many lists it was on, and the fish in the book logged under any
@@ -75,7 +75,8 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       const largest = bests?.heaviest ? { entry: bests.heaviest, by: "weight" as const } : bests?.longest ? { entry: bests.longest, by: "length" as const } : undefined;
       // Every spelling's fish, as its last fish and its largest count them, so the row agrees with itself.
       // Shown as most of its fish were logged ("Spinner"), not as the first list wrote it ("spinners").
-      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}) };
+      const lastPacked = [...row.trips].map((id) => dateOf.get(id) ?? "").sort().at(-1);
+      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(lastPacked ? { lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));
 }
