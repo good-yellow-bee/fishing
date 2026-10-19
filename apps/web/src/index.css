@@ -510,6 +510,12 @@ a:focus-visible {
   outline-offset: 2px;
 }
 
+/* The amber ring read 1.6 to 1 on the parchment cards (the landed card, toasts, the fight card): a darker brass
+   there, 5 to 1 or more, so a keyboard player sees which button is next. */
+:is(.toast, .landed-card, .fight-bar, .strike-cue) :is(button, a):focus-visible {
+  outline-color: #6e4a10;
+}
+
 .spot-row button.active,
 .spot-row span.active {
   background: #a65d38;
