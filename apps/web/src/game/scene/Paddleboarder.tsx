@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { bladeDip, bladeReach, dogLook, paddleAt } from "./paddleRoute";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -100,10 +100,13 @@ export function Paddleboarder() {
   const dogHead = useRef<THREE.Group>(null);
   const shapes = useMemo(
     () => ({
-      board: paddleboardShape(),
+      // The board with the paddler's legs and the sitting dog, which ride it without moving: one draw.
+      board: mergeParts([
+        { geometry: paddleboardShape() },
+        { geometry: paddlerLegsShape(), position: [0, DECK_Y, FEET_Z] },
+        { geometry: boardDogShape(), position: [0, DECK_Y, DOG_Z] },
+      ]),
       torso: paddlerTorsoShape(),
-      legs: paddlerLegsShape(),
-      dog: boardDogShape(),
       dogHead: boardDogHeadShape(),
       shaft: mergePainted([{ geometry: new THREE.CylinderGeometry(0.016, 0.016, 1, 5), color: SHAFT }]),
       blade: mergePainted([{ geometry: new THREE.BoxGeometry(0.19, 0.42, 0.02), position: [0, -0.21, 0], color: BLADE }]),
@@ -158,7 +161,6 @@ export function Paddleboarder() {
   return (
     <group ref={board} name="paddleboarder">
       <mesh geometry={shapes.board} material={material} />
-      <mesh geometry={shapes.legs} material={material} position={[0, DECK_Y, FEET_Z]} />
       <group ref={torso} position={[0, HIP_Y, FEET_Z]}>
         <mesh geometry={shapes.torso} material={material} />
       </group>
@@ -167,11 +169,8 @@ export function Paddleboarder() {
       {arms.map((arm, i) => (
         <mesh key={i} ref={arm} geometry={shapes.arm} material={material} />
       ))}
-      <group position={[0, DECK_Y, DOG_Z]}>
-        <mesh geometry={shapes.dog} material={material} />
-        <group ref={dogHead} position={[0, 0.3, 0.12]}>
-          <mesh geometry={shapes.dogHead} material={material} />
-        </group>
+      <group ref={dogHead} position={[0, DECK_Y + 0.3, DOG_Z + 0.12]}>
+        <mesh geometry={shapes.dogHead} material={material} />
       </group>
     </group>
   );
