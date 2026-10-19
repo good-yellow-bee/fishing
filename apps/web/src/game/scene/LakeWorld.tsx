@@ -204,6 +204,7 @@ import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
+import { HillShadows } from "./HillShadows";
 import { BarnOwl } from "./BarnOwl";
 import { barnOwlOut } from "./owlQuarter";
 import { ValleyMist } from "./ValleyMist";
@@ -1180,6 +1181,9 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
+/** Cloud shadows lie a little darker on the lit hills than on the water, where the sky's reflection lightens them. */
+const HILL_SHADE = 1.3;
+
 function LakeSurface({
   spot,
   hour,
@@ -1308,6 +1312,12 @@ function LakeSurface({
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
         </mesh>
+      )}
+      {/* The same clouds' shadows slide on over the far hills; this group sits at the lake's middle. */}
+      {cloudShade > 0 && (
+        <group position={[0, 0, -LAKE_CENTER_Z]}>
+          <HillShadows map={cloudMap} opacity={cloudShade * HILL_SHADE} />
+        </group>
       )}
       <ShoreWash wind={wind} opacity={foamOpacity(hour, season)} />
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>

@@ -1274,6 +1274,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC146~~ | ~~Valley mist: on calm, clear dawns from spring to fall a long low bank of mist lies along the foot of the hills behind the far bank, the far trees' trunks fading into it, its puffs drifting slowly to and fro (one draw)~~ (#1260) | scene | S |
 | ~~SC147~~ | ~~News card scene31: the farmstead, the grazing cows and the dawn valley mist~~ (#1260) | scene | S |
 | ~~SC148~~ | ~~Barn owl: at dusk from summer into the fall a pale barn owl quarters low over the mown hay fields on the far hills, beating slowly along them, hovering on fluttering wings, dropping into the stubble and rising to beat on, then working back the other way (two draws)~~ (#1262) | scene | S |
+| SC149 | Cloud shadows on the hills: on clear days the passing clouds' shadows slide on over the hills behind the far bank, dimming the slopes, the hay fields and the pasture as they cross, in step with the shadows on the water (one draw) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
