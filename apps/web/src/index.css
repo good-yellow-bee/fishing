@@ -3312,6 +3312,18 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   color: #fbf3e2;
 }
 
+/* Off the lake, a few lines end on a small link: Sign in's and Join's "Make a profile" or "Sign in", the catch log's
+   and lodge board's way back to the dock, the trip recap's "Open the trip" and the field guide's "In your field log".
+   They were 15-19 px targets on a touch screen: each is now a 32 px band. */
+@media (pointer: coarse) {
+  :is(.auth-card .foot, .log-page > p:first-child, .trip-recap-filed, .guide-book) a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 7px;
+    box-sizing: border-box;
+  }
+}
+
 /* The walking stick: only on touch screens, above the hint on the thumb's side. */
 .walk-stick {
   display: none;
