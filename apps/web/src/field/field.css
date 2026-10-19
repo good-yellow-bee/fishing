@@ -507,9 +507,10 @@ button.field-primary {
     box-sizing: border-box;
   }
 
-  /* A page's one-link line ("Add a photo" on a fish, "Write up the day" and "Go again" on an outing) was a 19-20 px
-     target 12 px from the next line, too close for a reach: each link is now a 32 px band that moves its neighbours. */
-  :is(.add-photo, .trip-write-up, .trip-again) > a {
+  /* A page's one-link line ("Add a photo" on a fish, "Write up the day" and "Go again" on an outing, the way on from a
+     missing page or a merged water) was a 19-20 px target 12 px from the next line, too close for a reach: each link
+     is now a 32 px band that moves its neighbours. */
+  :is(.add-photo, .trip-write-up, .trip-again, .lone-link) > a {
     display: inline-block;
     min-height: 32px;
     padding-block: 6px;
