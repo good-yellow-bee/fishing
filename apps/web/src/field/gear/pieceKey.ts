@@ -1,4 +1,4 @@
-import { getLang, t, type Lang } from "../../i18n";
+import { getLang, polishBook, t, type Lang } from "../../i18n";
 
 /**
  * One tackle piece however it was written: "Spinnerbaits" and "spinnerbait" are the same piece, as are a list's
@@ -18,6 +18,30 @@ export function pieceKey(label: string): string {
  * there each word longer than three letters drops its last vowel: "nimfy" and "nimfa" both read "nimf".
  */
 export function shownPieceKey(label: string, lang: Lang = getLang()): string {
-  const key = pieceKey(t(label));
+  const key = pieceKey(t(bookSpelling(label)));
   return lang === "pl" ? key.split(" ").map((word) => (word.length > 3 ? word.replace(/[aąeęiouy]$/, "") : word)).join(" ") : key;
+}
+
+let spellings: { book: object; keys: Map<string, string> } | null = null;
+
+/**
+ * A piece as the dictionary spells it, so it reads the same however it was typed: "spoon " and "Spoons" are the book's
+ * "Spoon", "Wahadłówka" in Polish. A name the dictionary doesn't know comes back trimmed.
+ */
+export function bookSpelling(label: string): string {
+  const name = label.trim();
+  const book = polishBook();
+  if (spellings?.book !== book) {
+    const keys = new Map<string, string>();
+    for (const key of Object.keys(book)) if (!keys.has(key.toLowerCase())) keys.set(key.toLowerCase(), key);
+    spellings = { book, keys };
+  }
+  const lower = name.toLowerCase().replace(/\s+/g, " ");
+  return spellings.keys.get(lower) ?? (lower.endsWith("s") ? spellings.keys.get(lower.slice(0, -1)) : undefined) ?? name;
+}
+
+/** A piece's name in the reader's language, however it was typed: "spoon " reads "Wahadłówka" in Polish. */
+export function pieceName(label: string): string {
+  // English keeps the angler's own spelling: only a translation needs the dictionary's.
+  return getLang() === "pl" ? t(bookSpelling(label)) : t(label.trim());
 }

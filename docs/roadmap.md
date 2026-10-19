@@ -1325,6 +1325,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC163~~ | ~~Fewer draws: the four clouds share one baked three-puff shape (12 draws to 4)~~ (#1361) | scene | S |
 | ~~SC164~~ | ~~Rapeseed: in spring the field under the windmill on the far hills flowers bright yellow in drill rows (one draw), with news scene36~~ (#1362) | scene | S |
 | ~~SC165~~ | ~~Fewer draws: the meadow bumblebees draw their bodies and wings as two instanced meshes (12 draws to 2), and the fishing terns their bodies and each side's wings as three (9 to 3)~~ (#1363) | scene | S |
+| ~~SC166~~ | ~~Fewer draws: plain multi-part models (logs, lily pads, paths, the bridge, the canoe) bake their coloured parts into one vertex-coloured mesh each (a summer day 393 draws to 365)~~ (#1365) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -2225,3 +2226,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR557~~ | ~~Round 95 catch ideas: quick searches under Find a catch, a search's spreadsheet named after it, a fish's place on its outing~~ (#1346) | field | S |
 | ~~BR558~~ | ~~Round 96 fixes: Home lists the angler's own fish and outings, a night session keeps Log a catch, Yesterday vs Last night, loose fish in the outings sheet, one name per kind in the exports~~ (#1355) | field | S |
 | ~~BR559~~ | ~~Round 96 Home ideas: last out with Go again when nothing is planned, a goal's weekly need, this year's catches as a sheet, the fish in the last copy~~ (#1358) | field | S |
+| ~~BR560~~ | ~~Round 97 fixes: a lure matched however it was typed in Polish, Gear counts loose fish, keeps last evening's outing under Coming up and says Yesterday, Not yet this year by piece~~ (#1366) | field | S |

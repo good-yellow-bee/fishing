@@ -4,6 +4,7 @@ import { countedFish } from "../milestones";
 import { isSampleCatch, isSampleOuting } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { bookFishDay } from "../tripMonths";
+import { stillGoing } from "../tripDates";
 
 /**
  * `lure`: the name the fish were logged under, for opening them; `lastAt`: when the newest of them was caught, and
@@ -27,7 +28,8 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   const trips = ownAny ? ownTrips : book.trips;
   // Today's outing counts once it has a fish: packed this morning, it hasn't yet gone without one.
   const withFish = new Set(book.catches.map((entry) => entry.tripId));
-  const past = new Set(trips.filter((trip) => trip.date < today || (trip.date === today && withFish.has(trip.id))).map((trip) => trip.id));
+  // Not last evening's outing still going in the small hours: it may bring a fish yet.
+  const past = new Set(trips.filter((trip) => (trip.date < today && !stillGoing(book, trip)) || (trip.date === today && withFish.has(trip.id))).map((trip) => trip.id));
   const dateOf = new Map(book.trips.map((trip) => [trip.id, trip.date]));
   // The fish make the same switch as the bags: a sample fish never counts against an outing of the angler's own.
   const own = ownAny ? book.catches.filter((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID) : countedFish(book.catches);
