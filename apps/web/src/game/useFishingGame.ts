@@ -29,7 +29,7 @@ import {
   type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, liftsStickerInOne, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -151,6 +151,8 @@ export type Fight = {
   pads?: boolean;
   /** A breezy or strong day, when the wind bellies a slack line. */
   windy?: FightWind;
+  /** A catfish or sturgeon the angler's Strength lifts off the bottom in one pump. */
+  strongLift?: boolean;
 };
 
 /** Said after a lost fish's outcome when it was trophy-sized, so the one that got away is remembered as big. */
@@ -601,7 +603,7 @@ export function useFishingGame(
     const pads = castPadsRef.current;
     const water = pads ? "weeds" : fightWater(spotRef.current);
     const windy = fightWind(windRef.current);
-    const next = { species, weight, underpowered, water, windy, lightHook, pads };
+    const next = { species, weight, underpowered, water, windy, lightHook, pads, strongLift: liftsStickerInOne(species.id, current.strength) };
     fightRef.current = next;
     setFight(next);
     setPhaseBoth("fight");

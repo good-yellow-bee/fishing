@@ -14,7 +14,7 @@ const skills: SkillId[] = ["strength", "accuracy", "patience"];
 function skillNote(skill: SkillId): string {
   switch (skill) {
     case "strength":
-      return t("Land heavier species.");
+      return t("Land heavier species. From 7, one pump lifts a catfish or sturgeon.");
     case "accuracy":
       return t("Wider cast band and longer strike window.");
     case "patience":

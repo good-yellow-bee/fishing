@@ -1708,7 +1708,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT343~~ | ~~Claiming all of a day's requests clears the shack board and pays a 25-point bonus on top~~ (#1416) | gameplay | S |
 | ~~GT344~~ | ~~Letting a trophy-weight fish go pays 20 points on top (the server checks the stored catch, once per catch); the landed card's button says "Release · +20 pts"~~ (#1419) | gameplay | S |
 | ~~GT345~~ | ~~News card 2026-10-19-game32 covers GT343 and GT344: clearing the shack board pays a 25-point bonus, and letting a trophy go pays 20 points~~ (#1422) | ui | S |
-| GT346 | Level 18, Breath of the lake, at 68000 lifetime points: the shack board's requests pay a quarter more (the server pays the same, and the board shows the raised reward) | gameplay | S |
+| ~~GT346~~ | ~~Level 18, Breath of the lake, at 68000 lifetime points: the shack board's requests pay a quarter more (the server pays the same, and the board shows the raised reward)~~ (#1425) | gameplay | S |
+| GT347 | Strong arms lift a bottom-sticker: from Strength 7 one pump brings a sulking catfish or sturgeon off the bottom, not two; the shack's Strength line and the fight card's Bottom-sticker line say so | gameplay | S |
 
 ## Risks / open questions for the owner
 
