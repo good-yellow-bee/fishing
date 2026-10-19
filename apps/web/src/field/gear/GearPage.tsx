@@ -49,7 +49,8 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
   const { items } = useTackle();
   useT();
   const spot = spotById(book, trip.spotId);
-  const fished = catchesForTrip(book, trip.id).length > 0;
+  // Under way once anything bit, as the outing's own page takes it: a fish, a lost one or a missed strike.
+  const fished = catchesForTrip(book, trip.id).length > 0 || Boolean(trip.lost || trip.missed);
 
   return (
     <section className="tackle-trip">

@@ -37,12 +37,15 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
   const own = ownAny ? book.catches.filter((entry) => !isSampleCatch(entry.id) && entry.spotId !== PLAY_LAKE_ID) : countedFish(book.catches);
   // Pieces match as they read, as the outing's list matches them: "Rosówka" packed is the "Nightcrawler" the fish were logged under.
   const readKey = (label: string) => shownPieceKey(label);
-  const byPiece = new Map<string, { label: string; trips: Set<string> }>();
+  const byPiece = new Map<string, { label: string; trips: Set<string>; lastPacked: string }>();
   for (const item of items) {
     if (!past.has(item.tripId) || !isLureLabel(item.label)) continue;
     const key = readKey(item.label);
-    const row = byPiece.get(key) ?? { label: item.label.trim(), trips: new Set<string>() };
+    const row = byPiece.get(key) ?? { label: item.label.trim(), trips: new Set<string>(), lastPacked: "" };
     row.trips.add(item.tripId);
+    // Only a ticked one went in the bag.
+    const day = dateOf.get(item.tripId) ?? "";
+    if (item.packed && day > row.lastPacked) row.lastPacked = day;
     byPiece.set(key, row);
   }
   // The angler's own fish by piece, then by spelling, in one pass: a round of the game with the same lure neither adds
@@ -75,8 +78,7 @@ export function pieceRecords(book: Logbook, items: readonly TackleItem[], today:
       const largest = bests?.heaviest ? { entry: bests.heaviest, by: "weight" as const } : bests?.longest ? { entry: bests.longest, by: "length" as const } : undefined;
       // Every spelling's fish, as its last fish and its largest count them, so the row agrees with itself.
       // Shown as most of its fish were logged ("Spinner"), not as the first list wrote it ("spinners").
-      const lastPacked = [...row.trips].map((id) => dateOf.get(id) ?? "").sort().at(-1);
-      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(lastPacked ? { lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}) };
+      return { label: row.label, name: pieceTally(all, 1)[0]?.lure ?? row.label, outings: row.trips.size, ...(row.lastPacked ? { lastPacked: row.lastPacked } : {}), fish: all.length, ...(took[0] && lastAt ? { lure: took[0].lure, lastAt, lastDay, since } : {}), ...(largest ? { largest } : {}) };
     })
     .sort((a, b) => b.fish - a.fish || b.outings - a.outings || a.label.localeCompare(b.label));
 }

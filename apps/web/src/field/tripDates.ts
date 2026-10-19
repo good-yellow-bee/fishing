@@ -43,6 +43,15 @@ export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean
   return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
 }
 
+/**
+ * Whether the angler is out on this outing now: today's once it has a fish in the last twelve hours, or in the small
+ * hours last evening's still going. The Map and the water's page say "Out now" by it.
+ */
+export function outNow(book: Logbook, trip: Trip, now = new Date()): boolean {
+  if (stillGoing(book, trip, now)) return true;
+  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
+}
+
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
 function waterNamed(title: string, spots: Logbook["spots"]): boolean {
   const name = title.trim().toLocaleLowerCase();
