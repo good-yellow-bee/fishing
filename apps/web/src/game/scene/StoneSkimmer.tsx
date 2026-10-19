@@ -7,6 +7,7 @@ import { useReducedMotion } from "./reducedMotion";
 import { MAX_SKIPS, SKIMMER_AT, SKIMMER_YAW, skimRings, skimmerAt, stoneAt } from "./skimStones";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#e07b2e";
 const HAT = "#2f5f8a";
@@ -33,6 +34,7 @@ export function StoneSkimmer() {
     () => ({ torso: kidTorsoShape(JACKET, HAT), legs: mergeParts([1, -1].map((side) => ({ geometry: kidLimbShape(LEG, SHORTS), position: [side * 0.06, 0, 0] as const, rotation: [side * 0.12, 0, 0] as const }))), arm: kidLimbShape(0.32, JACKET), stone: new THREE.SphereGeometry(0.07, 8, 5), ring: new THREE.RingGeometry(0.8, 1, 32) }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const stoneMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: STONE, gradientMap: toonRamp() }), []);
   const ringMaterials = useMemo(
@@ -75,8 +77,10 @@ export function StoneSkimmer() {
       ringMaterials[i]!.opacity = 0.9 * (1 - one.age);
     });
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="stone-skimmer">
+    <group ref={figure} name="stone-skimmer">
       <group position={[SKIMMER_AT.x, 0, SKIMMER_AT.z]} rotation={[0, SKIMMER_YAW, 0]} scale={SCALE}>
         <group ref={body}>
           <group position={[0, HIP_Y, 0]}>

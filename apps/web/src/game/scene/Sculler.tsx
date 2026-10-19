@@ -7,6 +7,7 @@ import { useReducedMotion } from "./reducedMotion";
 import { bladeUp, oarSweep, scullAt, slideAt } from "./scullRow";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const HULL = "#f2efe6";
 const DECK = "#c8433a";
@@ -71,6 +72,7 @@ export function Sculler() {
   const rower = useRef<THREE.Group>(null);
   const oars = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const shapes = useMemo(() => ({ shell: shellShape(), rower: rowerShape(), oar: oarShape() }), []);
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   useEffect(
     () => () => {
@@ -108,8 +110,10 @@ export function Sculler() {
       (group.children[0] as THREE.Object3D).rotation.z = -side * drop;
     });
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="sculler">
+    <group ref={figure} name="sculler">
       <group ref={shell}>
         <mesh geometry={shapes.shell} material={material} />
         <group ref={rower} position={[0, 0.08, 0.2]}>

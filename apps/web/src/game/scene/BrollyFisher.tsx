@@ -7,6 +7,7 @@ import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#76854a";
 const TROUSERS = "#3b4033";
@@ -111,6 +112,7 @@ export function BrollyFisher({ wind }: { wind: { x: number; z: number } }) {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
@@ -143,8 +145,10 @@ export function BrollyFisher({ wind }: { wind: { x: number; z: number } }) {
     }
     points.needsUpdate = true;
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="brolly-fisher">
+    <group ref={figure} name="brolly-fisher">
       <group position={[SEAT_AT.x, 0, SEAT_AT.z]} rotation={[0, SEAT_YAW, 0]}>
         <mesh geometry={shapes.seat} material={material} castShadow />
         <group scale={SCALE}>

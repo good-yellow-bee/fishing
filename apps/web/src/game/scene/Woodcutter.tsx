@@ -5,6 +5,7 @@ import { mergePainted, mergeParts, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { BLOCK_AT, CUTTER_AT, CUTTER_YAW, STACK_AT, chopAt } from "./woodChopping";
+import { useSkinnedFigure } from "./skinFigure";
 
 const SHIRT_A = "#b03a2e";
 const SHIRT_B = "#2b2b2b";
@@ -127,6 +128,7 @@ export function Woodcutter() {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
@@ -153,8 +155,10 @@ export function Woodcutter() {
     });
     poseLimbs(halfMeshes.current, halves);
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="woodcutter">
+    <group ref={figure} name="woodcutter">
       <group ref={body} position={[CUTTER_AT.x, 0, CUTTER_AT.z]} rotation={[0, CUTTER_YAW, 0]} scale={SCALE}>
         <mesh geometry={shapes.legs} material={material} castShadow />
         <group ref={upper} position={[0, HIP_Y, 0]}>

@@ -5,6 +5,7 @@ import { joggerAt } from "./jogRun";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#e8c22a";
 const TIGHTS = "#22262e";
@@ -84,6 +85,8 @@ export function Jogger() {
       if (arms[i]!.current) arms[i]!.current.rotation.x = swing * 0.6 * pose.pace;
     });
   });
+  useSkinnedFigure(body, material);
+
   return (
     <group ref={body} name="jogger">
       <group scale={SCALE}>

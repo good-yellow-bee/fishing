@@ -8,6 +8,7 @@ import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#3c4a5e";
 const SKIN = "#d9a882";
@@ -101,6 +102,7 @@ export function NightAngler() {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.1), []);
   const fade = useMemo(() => beamFade(), []);
@@ -144,8 +146,10 @@ export function NightAngler() {
     }
     points.needsUpdate = true;
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="night-angler">
+    <group ref={figure} name="night-angler">
       <group position={[SEAT_AT.x, 0, SEAT_AT.z]} rotation={[0, SEAT_YAW, 0]}>
         <mesh geometry={shapes.rig} material={material} />
         <group scale={SCALE}>
