@@ -293,6 +293,10 @@ function movedHint(spot: SpotId) {
   return t("The bubbles moved to the {spot}.", { spot: t(SPOT_LABELS[spot]) });
 }
 
+function frenzyHint(spot: SpotId) {
+  return t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank: t(SPOT_LABELS[spot]) });
+}
+
 export function useFishingGame(
   profile: Profile | null,
   hour: LakeHour = lakeHour(),
@@ -543,6 +547,8 @@ export function useFishingGame(
   const [frenzy, setFrenzy] = useState(false);
   /** This cast landed in the bubbles while they boiled in a frenzy. */
   const castFrenzyRef = useRef(false);
+  /** A frenzy began while the line was out, so its start is told on the return to idle. */
+  const frenzyUnheardRef = useRef(false);
   const level = profile ? anglerLevel(profile.lifetimePoints) : null;
 
   const setPhaseBoth = (next: ScenePhase) => {
@@ -625,7 +631,9 @@ export function useFishingGame(
     setPhaseBoth(phase);
     const moved = phase === "idle" && movedUnheardRef.current ? hotspotRef.current : null;
     if (moved) movedUnheardRef.current = false;
-    setHint(moved ? movedHint(moved.spot) : message);
+    const frenzyNow = phase === "idle" && frenzyUnheardRef.current && frenzyOn(Date.now()) ? hotspotRef.current : null;
+    if (phase === "idle") frenzyUnheardRef.current = false;
+    setHint(moved ? movedHint(moved.spot) : frenzyNow ? frenzyHint(frenzyNow.spot) : message);
   }, []);
 
   const beginFight = useCallback((species: FishSpecies, weight: number, current: Profile, strike?: { elapsedMs: number; solidMs: number; windowMs: number }) => {
@@ -994,7 +1002,7 @@ export function useFishingGame(
     const lightFish = castMinnowRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !logFish && !sipper && !mercyNow ? lightHunter(spotRef.current, lureRef?.current, current, hour) : null;
     const riser = castMidgeRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !logFish && !sipper && !lightFish && !mercyNow ? midgeRiser(spotRef.current, lureRef?.current, current, hour) : null;
     const frenzyFish = castFrenzyRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? frenzyHunter(spotRef.current, lureRef?.current, current, hour) : null;
-    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : frenzyFish ? frenzyFish : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : lightFish ? lightFish : riser ? riser : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
+    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : lightFish ? lightFish : riser ? riser : frenzyFish ? frenzyFish : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
     fedRef.current = !!feeder && species === feeder;
     const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
@@ -1777,21 +1785,22 @@ export function useFishingGame(
     return () => window.clearTimeout(timer);
   }, [level]);
 
-  // The frenzy keeps the wall clock too, so the bubbles boil for everyone at once; its start and end are told when idle.
+  // The frenzy keeps the wall clock too, so the bubbles boil for everyone at once; its start is told when idle, or on the return to idle.
   const frenzyRef = useRef(false);
   useEffect(() => {
     if (level === null) return;
     let timer = 0;
     const check = () => {
       const now = Date.now();
-      const on = frenzyOn(now);
-      if (on !== frenzyRef.current && phaseRef.current === "idle" && hotspotRef.current) {
+      const slot = slotFrenzy(now);
+      const on = now >= slot.from && now < slot.to;
+      if (on !== frenzyRef.current && hotspotRef.current) {
         const bank = t(SPOT_LABELS[hotspotRef.current.spot]);
-        setHint(on ? t("A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!", { bank }) : t("The frenzy at the {bank} is over.", { bank }));
+        if (phaseRef.current === "idle") setHint(on ? frenzyHint(hotspotRef.current.spot) : t("The frenzy at the {bank} is over.", { bank }));
+        frenzyUnheardRef.current = on && phaseRef.current !== "idle";
       }
       frenzyRef.current = on;
       setFrenzy(on);
-      const slot = slotFrenzy(now);
       const next = now < slot.from ? slot.from : now < slot.to ? slot.to : slotFrenzy((Math.floor(now / FRENZY_SLOT_MS) + 1) * FRENZY_SLOT_MS).from;
       timer = window.setTimeout(check, next - now);
     };

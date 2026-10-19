@@ -822,11 +822,14 @@ export function DockPage() {
     target !== "shop" && (target !== "dropoff" || dropoffOpen) && (target !== "inlet" || inletOpen) && bankSuitsNow(target, lureNow);
   /** A bank whose next cast meets wary fish, unless groundbait there keeps them feeding: its sign is dimmed and the stance chip says so. */
   const fishedHardAt = (target: StanceId) => game.fishedHard.some((bank) => bank === target) && game.groundbait?.spot !== target;
-  /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
+  /** A bank whose bubbles boil in a feeding frenzy right now: its sign carries a star. */
   const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
+  /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
   const signNote = (target: WalkTarget, label: string) =>
     frenzyAt(target)
-      ? t("{bank}: feeding frenzy now", { bank: t(label) })
+      ? fishedHardAt(target)
+        ? t("{bank}: feeding frenzy now, but fished hard", { bank: t(label) })
+        : t("{bank}: feeding frenzy now", { bank: t(label) })
       : fishedHardAt(target)
       ? favoredNow(target)
         ? t("{bank}: bites sooner now, but fished hard", { bank: t(label) })

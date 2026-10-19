@@ -134,6 +134,7 @@ export const PL_GAME: PlBook = {
   "A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!": "Żerowanie! Łowisko: {bank}. Drobnica kotłuje się nad bąblami. Rzuć w nie!",
   "The frenzy at the {bank} is over.": "Koniec żerowania. Łowisko: {bank}.",
   "{bank}: feeding frenzy now": "{bank}: teraz żerowanie",
+  "{bank}: feeding frenzy now, but fished hard": "{bank}: teraz żerowanie, ale mocno obłowione",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
