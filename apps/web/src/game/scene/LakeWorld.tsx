@@ -2197,7 +2197,7 @@ function Reeds({ count, origin, wind = NO_WIND }: { count: number; origin: Vec3;
 }
 
 /**
- * A scatter list drawn as instanced meshes: one draw per model part, however many copies stand around the lake.
+ * A scatter list baked into merged meshes: one draw per material, however many copies of however many models stand around the lake.
  * With `sway`, each copy bends in the wind (treeSway.ts).
  */
 function ScatterModels({ items, shadows = false, sway = false }: { items: Scatter[]; shadows?: boolean; sway?: boolean }) {
@@ -2238,7 +2238,8 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
       batches.stillMaterials.forEach(releaseSwayingMaterial);
       batches.placed.forEach(({ root }) => !root.userData.baked && releaseSharedMaterials(root));
       batches.baked.forEach((shape) => shape && releaseBaked(shape));
-      batches.meshes.forEach((mesh) => mesh.dispose());
+      // Merged batches own their baked geometry; instanced ones share the model's.
+      batches.meshes.forEach((mesh) => (mesh instanceof THREE.InstancedMesh ? mesh.dispose() : mesh.geometry.dispose()));
     },
     [batches],
   );
