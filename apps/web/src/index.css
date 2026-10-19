@@ -3557,11 +3557,17 @@ html[data-contrast="high"] .sound-captions li {
     padding: 4px 3px;
   }
 
+  /* Short of the shore signs (the scene keeps their reach, --signs-room): a long note ("Dock · cloud over the sun")
+     ends in an ellipsis rather than run under them. */
   .stance-chip {
     top: calc(var(--hud-bottom, 52px) + 6px);
     left: 8px;
+    max-width: calc((100vw - var(--signs-room, 0px)) / var(--text-zoom, 1) - 24px);
+    overflow: hidden;
     padding: 4px 8px;
     font-size: 14px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .lure-choice {
