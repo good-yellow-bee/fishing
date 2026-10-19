@@ -1,6 +1,7 @@
 import { LAKE_CENTER_Z, LAKE_RX, LAKE_RZ } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
 import { CORMORANT_ROCK } from "./cormorantPerch";
+import { STILL_TIME } from "./reducedMotion";
 import { GREBE_A, GREBE_B, GREBE_DIVE_SEC, PAIR_GAP, RUSH_AT, RUSH_GAP, RUSH_SEC, grebePose, grebeUnder, grebesOut, grebesScared } from "./grebeRush";
 
 describe("grebes", () => {
@@ -62,5 +63,13 @@ describe("grebes", () => {
     expect(grebeUnder(-1)).toBe(0);
     expect(grebeUnder(GREBE_DIVE_SEC / 2)).toBe(1);
     expect(grebeUnder(GREBE_DIVE_SEC)).toBe(0);
+  });
+
+  it("float low on the water at the moment reduced motion holds them", () => {
+    for (const k of [0, 1] as const) {
+      const pose = grebePose(k, STILL_TIME);
+      expect(pose.rushing).toBe(false);
+      expect(pose.upright).toBe(0);
+    }
   });
 });
