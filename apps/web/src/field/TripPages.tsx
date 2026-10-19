@@ -64,13 +64,13 @@ import { useKeptForm } from "./keptForm";
 import { addedWater, forgetAddedWater } from "./addedWater";
 import { findCatches, isTimePhrase, isTimeWord } from "./CatchSearch";
 import { findTrips } from "./tripSearch";
-import { LATE_NIGHT_UNTIL, fishOnOutingDay } from "./suggestions";
+import { LATE_NIGHT_UNTIL, fishOnOutingDay, tripForFish } from "./suggestions";
 import { countedBook, countedFish, ownFish } from "./milestones";
 import { isSampleOnly, isSamplePlan, isSampleSpot, isSampleOuting, upcomingRealTrips } from "./bookCopy";
 import { looseFishDays, outingFish } from "./outingFish";
 import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
-import { kindNames, speciesLink } from "./speciesLink";
+import { kindKey, kindNames, mostWritten, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
 import { datePicks, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
 import "./search.css";
@@ -446,8 +446,17 @@ function TripView() {
   const ownHere = catches.filter((entry) => ownFish(entry) && entry.spotId === trip.spotId);
   const firstAt = ownHere.reduce((first, entry) => (entry.caughtAt < first ? entry.caughtAt : first), "9999");
   const before = catchesForSpot(book, trip.spotId).filter((entry) => ownFish(entry) && entry.tripId !== trip.id && entry.caughtAt < firstAt);
-  const known = new Set(before.map((entry) => entry.species.trim().toLowerCase()));
-  const newKinds = before.length > 0 ? [...new Set(ownHere.map((entry) => entry.species.trim()))].filter((name) => !known.has(name.toLowerCase())) : [];
+  const known = new Set(before.map((entry) => kindKey(entry.species)));
+  // Each new kind once, however it was typed, under the spelling most of its fish carry.
+  const fresh = new Map<string, Map<string, number>>();
+  for (const entry of ownHere) {
+    const key = kindKey(entry.species);
+    if (known.has(key)) continue;
+    const spellings = fresh.get(key) ?? new Map<string, number>();
+    spellings.set(entry.species.trim(), (spellings.get(entry.species.trim()) ?? 0) + 1);
+    fresh.set(key, spellings);
+  }
+  const newKinds = before.length > 0 ? [...fresh.values()].map(mostWritten) : [];
   const rush = busiestHour(catches.map((entry) => entry.caughtAt));
   const weighed = totalWeight(
     catches.map((entry) => {
@@ -485,9 +494,12 @@ function TripView() {
   const nextPlanned = nextHere && isPlanned(nextHere, today, fishOn(nextHere.id));
 
   // Fish from this water on the outing's day (or its small hours) that were logged without it.
-  const loose = book.catches.filter(
-    (entry) => entry.tripId === null && entry.spotId === trip.spotId && fishOnOutingDay(book, trip.spotId, toLocalInput(new Date(entry.caughtAt)), trip.date),
-  );
+  // Of a dawn and a dusk there, each fish goes to the one nearer its time, as its own page offers it.
+  const loose = book.catches.filter((entry) => {
+    if (entry.tripId !== null || entry.spotId !== trip.spotId) return false;
+    const local = toLocalInput(new Date(entry.caughtAt));
+    return fishOnOutingDay(book, trip.spotId, local, trip.date) && (tripForFish(book, trip.spotId, local)?.id ?? trip.id) === trip.id;
+  });
   // A day of the game on its lake: no fish to log by hand, nothing to plan or pack.
   const play = trip.spotId === PLAY_LAKE_ID;
   // The sample week's outings once the book holds the angler's own: a real fish logged on one would be filed on a made-up day.

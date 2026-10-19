@@ -138,6 +138,6 @@ export function tripsCsv(whole: Logbook, today: string): string {
   const rows = [...book.trips]
     .sort((a, b) => b.date.localeCompare(a.date))
     // An untitled outing goes by its water's name, as the list names it.
-    .map((trip) => [trip.date, outingName(trip, book.spots), spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
+    .map((trip) => [trip.date, outingName(trip, book.spots), spotById(book, trip.spotId)?.name.trim() ?? "", String(fish.get(trip.id) ?? 0), tallyOf(kinds, trip.id), tallyOf(lures, trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
   return sheet([header, ...rows], separator);
 }

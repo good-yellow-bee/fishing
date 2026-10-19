@@ -22,7 +22,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
-import { outingDay, stillGoing } from "./tripDates";
+import { outingDay, sameName, stillGoing } from "./tripDates";
 import { bookSpelling, pieceName } from "./gear/pieceKey";
 import { bookFishDay } from "./tripMonths";
 
@@ -141,7 +141,7 @@ export function TripCard({
         <p className="meta">
           {/* The fish that got away and the strikes missed too, so a hard day stands out in the list. */}
           {/* An untitled outing is already named after its water. */}
-          {[spotName === outingName(trip, book.spots) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
+          {[spotName && sameName(spotName, outingName(trip, book.spots)) ? null : spotName, waterType ? t(WATER_LABELS[waterType]) : null, tally, fishCount === 0 ? daysAheadLabel(trip.date, today) : null, trip.lost ? tn(trip.lost, "{n} lost", "{n} lost") : null, trip.missed ? tn(trip.missed, "{n} missed", "{n} missed") : null].filter(Boolean).join(" · ")}
         </p>
       </div>
     </Link>
