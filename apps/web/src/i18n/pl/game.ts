@@ -699,14 +699,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.":
+    "Na małym telefonie z większym tekstem nagłówek jeziora mieści teraz linki w dwóch rzędach, więc podpowiedź nad paskiem rzutu nie chowa się już pod drążkiem chodzenia, a długie słowo w plakietce brzegu łamie się w jej obrębie. Na stronie ryby łatwiej trafić w linijkę, która szuka ryb złowionych przy tej samej pogodzie.",
   "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.":
     "W wilgotne wieczory i noce, od wiosny do jesieni, za tobą powoli przeskakuje teraz przez pomost ropucha. Zimą oddech twojego psa paruje na mrozie, a rudzik zostaje na słupkach aż do zmierzchu, jako ostatni ptak, który idzie spać.",
   "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.":
     "Jesienią na twoją czapkę spada czasem kołyszący się liść, a wiosną płatek kwiatu, i zostaje tam aż do następnego rzutu, który go strąca. A gdy ryba skubie przy spławiku, twój pies się budzi, podnosi łeb i przechyla go, patrząc na spławik.",
   "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
     "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
-  "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
-    "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
