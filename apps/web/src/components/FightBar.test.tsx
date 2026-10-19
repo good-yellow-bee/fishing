@@ -378,7 +378,7 @@ describe("FightBar for screen readers", () => {
   it("says a strong angler lifts a bottom-sticker in one pump", () => {
     mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "catfish")!, null, null, 0, true);
     const lines = [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent);
-    expect(lines).toContain("Bottom-sticker: it takes two pumps to lift, but your Strength lifts it in one");
+    expect(lines).toContain("Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump");
   });
 
   it("names each fish's habit on the card, and only its own", () => {

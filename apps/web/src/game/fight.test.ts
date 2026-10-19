@@ -722,8 +722,10 @@ describe("sulking on the bottom", () => {
     const strong = makeFight(fish(id), 10, STRONG_LIFT_STRENGTH, () => 0);
     let now = untilSulk(strong);
     for (const end = now + SULK_PUMP_SEC * 1000 + 50; now < end; now += 50) strong.step(now, 0.05, false);
+    expect(strong.sim.sulk).toBe(true);
     strong.step(now, 0.05, true);
     expect(strong.sim.sulk).toBe(false);
+    expect(strong.sim.lifting).toBe(false);
     expect(liftsStickerInOne(id, STRONG_LIFT_STRENGTH)).toBe(true);
     expect(liftsStickerInOne(id, STRONG_LIFT_STRENGTH - 1)).toBe(false);
     expect(liftsStickerInOne("carp", 8)).toBe(false);
