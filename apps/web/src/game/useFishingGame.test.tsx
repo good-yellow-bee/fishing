@@ -462,6 +462,17 @@ describe("useFishingGame frayed line", () => {
 describe("useFishingGame lost fight", () => {
   const hint = () => container!.querySelector("[data-testid=hint]")?.textContent;
 
+  it("names the pike when it takes a perch, not the walleye that takes them out in the open", () => {
+    const surface = mount();
+    vi.mocked(grabberFor).mockReturnValueOnce(FISH.find((fish) => fish.id === "pike")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+    fightLine = 0.4;
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toMatch(/^pike\|/);
+    expect(hint()).toContain("A pike grabbed your perch!");
+  });
+
   it("lets a pike take the hooked fish halfway in, and fights the pike from there", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;
