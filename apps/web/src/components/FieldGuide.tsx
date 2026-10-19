@@ -14,6 +14,8 @@ import {
   type GuideEntry,
   type ShadowSize,
   type SpotId,
+  masteryTier,
+  nextMastery,
 } from "@stillwater/shared";
 import { Link } from "react-router-dom";
 import { bestHourFor, GROUNDBAIT_FEEDERS, lureSizeFor, rarityLabel, SCHOOLERS, type LureSize } from "../game/logic";
@@ -90,6 +92,17 @@ function drawsOn(speciesId: string): string {
     .join(", ");
 }
 
+
+/** Where the angler stands with a kind: its mastery tier and how many to the next. */
+function masteryLine(caught: number): string {
+  const tier = masteryTier(caught);
+  const next = nextMastery(caught);
+  if (!next) return t("Mastery: {tier}", { tier: t(tier!.label) });
+  return tier
+    ? t("Mastery: {tier} · {n} to {next}", { tier: t(tier.label), n: next.toGo, next: t(next.tier.label) })
+    : t("Mastery: {n} to {next}", { n: next.toGo, next: t(next.tier.label) });
+}
+
 function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }) {
   const { species } = entry;
   const known = entry.caught > 0;
@@ -108,6 +121,7 @@ function GuideCard({ entry, inBook = 0 }: { entry: GuideEntry; inBook?: number }
             {t("{caught} landed · PB {weight}", { caught: entry.caught, weight: weightText(entry.heaviest ?? 0) })}
           </p>
           <p>{t("Trophy ≥ {weight}", { weight: weightText(trophyWeight(species)) })}</p>
+          <p className="guide-mastery">{masteryLine(entry.caught)}</p>
         </>
       )}
       <p>{shadowLabel(shadowSize(species))}</p>
