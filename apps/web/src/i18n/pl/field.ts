@@ -457,8 +457,8 @@ export const PL_FIELD: PlBook = {
   "Install the app": "Zainstaluj aplikację",
   "Download catches as a spreadsheet": "Pobierz połowy jako arkusz",
   "Download these as a spreadsheet": "Pobierz te połowy jako arkusz",
-  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.":
-    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „{size}”), temperatury wody (np. „{temp}”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „rekord”, „pierwsze”, „duże”, „bez wyprawy”, „zważone” lub „zmierzone” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
+  "Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “note”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.":
+    "Spróbuj gatunku, łowiska, przynęty, miesiąca lub pory roku, pory dnia (np. „świt”), nieba (np. „pochmurno”), wiatru (np. „wietrznie”), rodzaju wody (np. „rzeka”), rozmiaru (np. „{size}”), temperatury wody (np. „{temp}”), słowa z notatki, dnia (np. „2026-10-12” lub „zeszły weekend”), roku (np. „2025”), słowa „zdjęcie”, „notatka”, „rekord”, „pierwsze”, „duże”, „bez wyprawy”, „zważone” lub „zmierzone” albo słowa „wypuszczona” lub „zabrana”. Połącz dwa znakiem „+”.",
   Trip: "Wyprawa",
   Photos: "Zdjęcia",
   "Photos ({count})": "Zdjęcia ({count})",
@@ -637,6 +637,9 @@ export const PL_FIELD: PlBook = {
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Busiest month": "Najczęściej nad wodą",
+  "Only my fish": "Tylko moje ryby",
+  "Same note as the last fish: “{note}”": "Ta sama notatka co przy poprzedniej rybie: „{note}”",
+  "{time} after the outing's first fish": "{time} po pierwszej rybie wyprawy",
   "Listed: {n} fish from the sample week or the game.": ["Na liście: {n} ryba z przykładowego tygodnia lub z gry.", "Na liście: {n} ryby z przykładowego tygodnia lub z gry.", "Na liście: {n} ryb z przykładowego tygodnia lub z gry."],
   "Every fish in the book with a picture, largest first.": "Każda ryba z dziennika, która ma zdjęcie, od największej.",
   "Kinds": "Gatunki",
