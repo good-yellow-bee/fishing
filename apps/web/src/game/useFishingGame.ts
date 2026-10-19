@@ -50,6 +50,7 @@ import { SURFACE_BUG_WAIT, amongSurfaceBugs, bugLike } from "./surfaceBugs";
 import { LANTERN_MINNOW_WAIT, amongLanternMinnows, minnowLike } from "./lanternMinnows";
 import { MIDGE_RISE_WAIT, midgeLike, underMidges } from "./midgeClouds";
 import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
+import { FAR_ROCK_WAIT, tightToFarRock } from "./farRock";
 import { castSnags, onRockEdge, onShoreIce, ROCK_EDGE_WAIT, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -356,6 +357,8 @@ export function useFishingGame(
   const castPadsRef = useRef(false);
   /** This cast landed on the point's rock edge, just past the shallow rocks. */
   const castEdgeRef = useRef(false);
+  /** This cast landed tight to the far rock out in the open water. */
+  const castFarRockRef = useRef(false);
   /** Whether this cast landed in one of the wind's foam lanes. */
   const castFoamRef = useRef(false);
   /** Whether the last cast landed on the sunfish beds either side of the dock, where the perch and smallmouth raid the eggs. */
@@ -590,6 +593,7 @@ export function useFishingGame(
     castSkipRef.current = false;
     castPadsRef.current = false;
     castEdgeRef.current = false;
+    castFarRockRef.current = false;
     castFoamRef.current = false;
     castBedRef.current = false;
     castCrayfishRef.current = false;
@@ -751,6 +755,7 @@ export function useFishingGame(
     if (castSkipRef.current) waitHintRef.current = `${t("Skipped it under the dock, into the shade.")} ${waitHintRef.current}`;
     if (castPadsRef.current) waitHintRef.current = `${t("Tight to the lily pads, where the bass and pike wait in ambush.")} ${waitHintRef.current}`;
     if (castEdgeRef.current) waitHintRef.current = `${t("Along the rock edge, where the point drops off and the bass hold.")} ${waitHintRef.current}`;
+    if (castFarRockRef.current) waitHintRef.current = `${t("Tight to the far rock, where the walleye hold in its shadow.")} ${waitHintRef.current}`;
     if (castFoamRef.current) waitHintRef.current = `${t("Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "topwater") waitHintRef.current = `${t("Over the duckweed, where the bass lurk in its shade for a lure on top.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "fouled" && !mercyRef.current) waitHintRef.current = `${t("Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.")} ${waitHintRef.current}`;
@@ -976,7 +981,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castEdgeRef.current ? ROCK_EDGE_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castBugRef.current ? SURFACE_BUG_WAIT : 1, castMinnowRef.current ? LANTERN_MINNOW_WAIT : 1, castMidgeRef.current ? MIDGE_RISE_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait, colourWait, anchorWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castEdgeRef.current ? ROCK_EDGE_WAIT : 1, castFarRockRef.current ? FAR_ROCK_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castBugRef.current ? SURFACE_BUG_WAIT : 1, castMinnowRef.current ? LANTERN_MINNOW_WAIT : 1, castMidgeRef.current ? MIDGE_RISE_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait, colourWait, anchorWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -1184,6 +1189,7 @@ export function useFishingGame(
     castSkipRef.current = isSkipCast(castPower, profile.accuracy, landing.spot, lureRef?.current);
     castPadsRef.current = aimed !== null && tightToPads(season, aimed.x, aimed.z);
     castEdgeRef.current = aimed !== null && onRockEdge(landing.spot, aimed.x, aimed.z);
+    castFarRockRef.current = aimed !== null && tightToFarRock(landing.spot, aimed.x, aimed.z);
     castFoamRef.current = aimed !== null && onFoamLane(windDriftRef.current, aimed.x, aimed.z);
     castBedRef.current = aimed !== null && onSunfishBed(season, aimed.x, aimed.z);
     castCrayfishRef.current = aimed !== null && onCrayfishBed(season, aimed.x, aimed.z) && isJig(lureRef?.current);
