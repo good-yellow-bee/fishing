@@ -606,9 +606,9 @@ export function openGlareWaitMul(spot: string, season: LakeSeason | undefined, h
 export const ANCHOR_SETTLE_MS = 15_000;
 export const ANCHOR_SPLASH_WAIT = 1.25;
 
-/** How the anchor's splash stretches the wait: slower for a cast within ANCHOR_SETTLE_MS of anchoring, else 1; null when not at anchor. */
-export function anchorSplashWaitMul(sinceAnchorMs: number | null) {
-  return sinceAnchorMs !== null && sinceAnchorMs < ANCHOR_SETTLE_MS ? ANCHOR_SPLASH_WAIT : 1;
+/** How the anchor's splash stretches the wait out on the boat: slower within ANCHOR_SETTLE_MS of anchoring, else 1. sinceAnchorMs is null when the boat isn't at anchor. */
+export function anchorSplashWaitMul(spot: string, sinceAnchorMs: number | null) {
+  return spot === "open" && sinceAnchorMs !== null && sinceAnchorMs < ANCHOR_SETTLE_MS ? ANCHOR_SPLASH_WAIT : 1;
 }
 
 /** With the sun low behind the angler their long shadow falls across the water, and the fish shy from it, so the bite comes slower. */

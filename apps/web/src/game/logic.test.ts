@@ -953,9 +953,10 @@ describe("lure colour", () => {
 
 describe("anchorSplashWaitMul", () => {
   it("slows a cast made soon after the anchor goes down, and only then", () => {
-    expect(anchorSplashWaitMul(0)).toBe(ANCHOR_SPLASH_WAIT);
-    expect(anchorSplashWaitMul(ANCHOR_SETTLE_MS - 1)).toBe(ANCHOR_SPLASH_WAIT);
-    expect(anchorSplashWaitMul(ANCHOR_SETTLE_MS)).toBe(1);
-    expect(anchorSplashWaitMul(null)).toBe(1);
+    expect(anchorSplashWaitMul("open", 0)).toBe(ANCHOR_SPLASH_WAIT);
+    expect(anchorSplashWaitMul("open", ANCHOR_SETTLE_MS - 1)).toBe(ANCHOR_SPLASH_WAIT);
+    expect(anchorSplashWaitMul("open", ANCHOR_SETTLE_MS)).toBe(1);
+    expect(anchorSplashWaitMul("open", null)).toBe(1);
+    expect(anchorSplashWaitMul("dock", 0)).toBe(1);
   });
 });

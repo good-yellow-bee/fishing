@@ -783,7 +783,6 @@ export function useFishingGame(
     // Under a clear summer midday sun the fish shun the bright open water.
     const glareWait = mercyRef.current ? 1 : openGlareWaitMul(spotRef.current, season, hour, sky);
     if (glareWait > 1) reasons.unshift(t("The midday glare drives the fish from the open water, so the bites come slow."));
-    const anchorWait = mercyRef.current || spotRef.current !== "open" ? 1 : anchorSplashWaitMul(boat.mode === "anchored" ? Date.now() - boat.anchoredAt : null);
     // On a moonless night the fish can barely see to feed.
     const darkWait = mercyRef.current ? 1 : darkNightWaitMul(hour, moon);
     if (darkWait > 1) reasons.unshift(t("There's no moon tonight and the fish can barely see to feed, so the bites come slow."));
@@ -900,7 +899,9 @@ export function useFishingGame(
     if (pressureWait > 1) reasons.unshift(t("This water has been fished hard and the fish are wary of the line, so the bites come slow. Try another bank or another kind of lure."));
     else if (switched.relieved && !bait.baited && !mercyRef.current) reasons.unshift(t("The wary fish here haven't seen this kind of lure yet, so they come to it."));
     // The visit's first cast at a bank meets fish that haven't seen a lure today; it is told last, so the bank's own reasons come first.
-    const fresh = castOnFreshWater(fishedRef.current, spotRef.current);
+    // The anchor's splash puts the fish down for a few seconds; a cast into it doesn't spend the fresh water's first look.
+    const anchorWait = anchorSplashWaitMul(spotRef.current, boat.mode === "anchored" ? Date.now() - boat.anchoredAt : null);
+    const fresh = anchorWait > 1 ? { fresh: false, next: fishedRef.current } : castOnFreshWater(fishedRef.current, spotRef.current);
     fishedRef.current = fresh.next;
     const freshWait = fresh.fresh ? FRESH_WAIT : 1;
     if (fresh.fresh) reasons.push(t("Fresh water: the fish here haven't seen a lure today."));
@@ -909,8 +910,6 @@ export function useFishingGame(
     if (washedWait > 1) reasons.unshift(t("The worm has soaked pale and lost its scent, so the bites come slow. Put a fresh one on."));
     // With the low sun behind the angler, their long shadow falls across the water and the fish shy from it.
     const shadowWait = mercyRef.current ? 1 : longShadowWaitMul(spotRef.current, hour, sky);
-    // Told late, like the other slow sides the angler can act on, so the two-reason cap keeps it.
-    if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     if (shadowWait > 1) reasons.unshift(t("The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets."));
     // A live shiner on the hook swims down and draws the bank's hunters; it goes out on this one cast, and is told first.
     const shiner = liveShinerRef.current;
@@ -919,6 +918,8 @@ export function useFishingGame(
       hookShiner(null);
       reasons.unshift(lively ? t("The lively shiner swims hard on the hook, and more of the hunters here come to it.") : t("The live shiner swims down off the hook, and the hunters here come to it."));
     }
+    // Told last, so the two-reason cap always keeps it: waiting a few seconds is the fix.
+    if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
