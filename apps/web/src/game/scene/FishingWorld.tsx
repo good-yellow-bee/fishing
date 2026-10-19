@@ -38,6 +38,7 @@ import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { robinOut } from "./robinVisit";
+import { scarfOut } from "./scarfKnit";
 import { PostOwl } from "./PostOwl";
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
@@ -2193,7 +2194,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {auroraOut(new Date(), hour, sky, season) && <Aurora />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
-      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} />
+      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} scarf={scarfOut(season)} windDrift={Math.hypot((wind ?? NO_WIND).x, (wind ?? NO_WIND).z)} />
       <LineAndBobber
         level={level}
         phase={phase}

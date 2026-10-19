@@ -1358,6 +1358,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC188~~ | ~~Little owl watches the moths: on nights when moths circle the lanterns, the owl on the post spends spells following one round the lantern beside it with its head, bobbing as it first fixes on it, its head eased so it never twitches~~ (#1420) | scene | S |
 | ~~SC189~~ | ~~News card scene43 covers SC186 to SC188~~ (#1420) | scene | S |
 | ~~SC190~~ | ~~Little owl takes fright: strike a fish while the little owl sits on its post and it beats off at once over the lake, back on its next visit (moved into the fishing scene so it sees the strike)~~ (#1423) | scene | S |
+| SC191 | Winter scarf: in winter the angler wraps up in a knitted red scarf with cream stripes to match the dock dog's jumper, its fringed ends hanging down the back and lifting and flapping in the wind | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
