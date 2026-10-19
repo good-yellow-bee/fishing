@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-game22";
+export const NEWS_ID = "2026-10-19-pa27";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a tablet, the panels under the dock's top bar move down when the bar wraps onto a second line, so nothing hides behind it. A catch's Edit and Delete are easier to tell apart with a finger, the Map shows its heading while it loads, and on a phone the Map list's Next outing link is easier to tap.",
   "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.",
   "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.",
   "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.",
@@ -12,8 +13,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "Settings' switches and volume sliders and the shack's Strength, Accuracy and Patience buttons are easier to tap on a phone. The lodge board's All time and This week tabs answer the arrow keys, a screen reader hears the shack's sections in order, and the landed card's rarity tag and the Badge line are darker and easier to read.",
   "On a phone, the last small links in the field log are easier to tap: the names on Bests' hour, moon, sky, wind, temperature and lure rows, a kind's first and newest fish, and a water's fish count with larger text.",
   "Waters can all go to a GPS in one file. The goal form offers last year's number in one tap. Home's next outing can go on your calendar, and the year's copied summary counts its outings. A night fish logged without its outing now counts on that night's day.",
-  "Off the Point, cast tight to the sunken log: the bass, bluegill, crappie and pike holding in its shade bite sooner, and many a bite is one of them. And from the dock on calm days, land a popper or a fly among the water striders and whirligig beetles, where the crappie, shiners, smallmouth and trout are looking up for bugs.",
-  "Catches now has Only my fish beside the sample week's count. A fish on an outing shows how long after the outing's first fish it came. A new fish can take the outing's last note in one tap, and “note” in Find a catch lists the fish you wrote up.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
