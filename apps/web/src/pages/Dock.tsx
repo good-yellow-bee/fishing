@@ -238,6 +238,23 @@ export function DockPage() {
       delete root.dataset.input;
     };
   }, [padConnected]);
+  // On a short screen the coach and the news card sit beside the shore signs, which take a second column with larger
+  // text: the scene keeps the signs' reach from its right edge, so the cards stop short of them.
+  useEffect(() => {
+    const wrap = game.surfaceRef.current;
+    const signs = wrap?.querySelector<HTMLElement>(":scope > .walk-signs");
+    if (!wrap || !signs) {
+      wrap?.style.removeProperty("--signs-room");
+      return;
+    }
+    const sync = () => wrap.style.setProperty("--signs-room", `${Math.ceil(wrap.getBoundingClientRect().right - signs.getBoundingClientRect().left)}px`);
+    sync();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(sync);
+    observer.observe(signs);
+    observer.observe(wrap);
+    return () => observer.disconnect();
+  }, [game.surfaceRef, scenePhase, shopOpen, photo]);
   // The landed fish's ID is its request ID, so this matches the roll the server makes.
   const landedGolden = game.outcome?.kind === "landed" && isGolden(game.outcome.id);
   if (lureCanChange(scenePhase)) tiedLure.current = chosenLure;
