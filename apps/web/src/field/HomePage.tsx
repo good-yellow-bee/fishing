@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type ReactNode } from "react";
 import { MapAnchor } from "./MapAnchor";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, lureTally, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, catchesForTrip, itemsForTrip, localDate, moonQuarterOf, packedCount, recentCatches, recentTrips, shiftDate, spotById, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { BookFile, SET_ASIDE_ID } from "./BookFile";
 import { readUnreadableBook } from "./storage";
 import { CatchSearch } from "./CatchSearch";
@@ -22,6 +22,8 @@ import { daysBetween } from "./spotOrder";
 import { speciesCounts } from "./speciesLink";
 import { findLink } from "./CatchSearch";
 import { bookFishDay, daysOut } from "./tripMonths";
+import { pieceTally } from "./pieceTally";
+import { pieceName } from "./gear/pieceKey";
 import { countedBook, countedFish, nextBookMark, ownFish } from "./milestones";
 import { FROM_LIST } from "./leaveDeleted";
 import { thisWeekInPastYears, yearsBack } from "./yearsAgo";
@@ -93,8 +95,9 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   if (!last) return null;
-  const fish = catchesForTrip(book, last.id);
-  const lure = lureTally({ ...book, catches: fish }, 1)[0];
+  // That water's fish of it, with those logged loose there that day, as the water's own page counts them.
+  const fish = book.catches.filter((entry) => entry.spotId === trip.spotId && (entry.tripId === last.id || (!entry.tripId && bookFishDay(book, entry) === last.date)));
+  const lure = pieceTally(fish, 1)[0];
   // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
   const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
@@ -102,7 +105,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
     <small className="next-last">
       <Link to={`/trips/${last.id}`} state={FROM_LIST}>
         {lure
-          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: lure.count > 1 ? `${t(lure.lure)} ×${lure.count}` : t(lure.lure) })
+          ? t("Last time: {day} · {fish} · {lure}", { day, fish: fishCountLabel(fish.length), lure: lure.count > 1 ? `${pieceName(lure.lure)} ×${lure.count}` : pieceName(lure.lure) })
           : t("Last time: {day} · {fish}", { day, fish: fishCountLabel(fish.length) })}
       </Link>
     </small>

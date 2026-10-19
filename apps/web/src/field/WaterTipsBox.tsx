@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, type CatchEntry } from "@stillwater/shared";
 import { inSentence } from "./MonthBars";
 import { pieceTally } from "./pieceTally";
+import { pieceName } from "./gear/pieceKey";
 import { getUnits, t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
 import { lureByTemp, readingBefore, waterTips, type WaterReading } from "./waterTips";
@@ -28,7 +29,7 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
   });
   // A tie names no lure: "most on" would be a coin toss.
   const [lure, second] = pieceTally(fish, 2);
-  const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
+  const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: pieceName(lure.lure) })}` : text;
   const water = waterThen(fish);
   return water ? `${withLure} ${water}` : withLure;
 }
@@ -128,7 +129,7 @@ export function WaterTipsBox({
         {tips.lures.map((row, index) => (
           <Fragment key={row.lure}>
             {index > 0 ? " · " : null}
-            <Link to={find(exactTerm("lure", t(row.lure)))}>{t(row.lure)}</Link> ({row.count})
+            <Link to={find(exactTerm("lure", t(row.lure)))}>{pieceName(row.lure)}</Link> ({row.count})
           </Fragment>
         ))}
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}
@@ -137,7 +138,7 @@ export function WaterTipsBox({
         {byTemp.length > 0 ? (
           <>
             <br />
-            {t("Lure by water temperature: {bands}", { bands: byTemp.map((row) => `${tempBandLabel(row.band)}: ${t(row.lure)}`).join(" · ") })}
+            {t("Lure by water temperature: {bands}", { bands: byTemp.map((row) => `${tempBandLabel(row.band)}: ${pieceName(row.lure)}`).join(" · ") })}
           </>
         ) : null}
         {tips.moon ? <TipLine text="Best moon: {moon}" name="moon" value={t(MOON_QUARTER_LABELS[tips.moon])} to={find(exactTerm("moon", t(MOON_QUARTER_LABELS[tips.moon])))} /> : null}
@@ -157,7 +158,7 @@ export function WaterTipsBox({
             {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: readingDay(tips.lastTemp) })}
             {trend ? ` ${trend}` : null}
             {/* The lure that led in the band the water was last in: what to tie on first. */}
-            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: t(lureNow) })}` : null}
+            {lureNow ? ` ${t("{lure} led at that temperature.", { lure: pieceName(lureNow) })}` : null}
           </>
         ) : null}
         {pastWeek.length > 0 ? (
