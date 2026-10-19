@@ -199,6 +199,8 @@ import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
 import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
+import { NightEyes } from "./NightEyes";
+import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
 import { birderOut } from "./birdWatch";
 import { PorchRocker } from "./PorchRocker";
@@ -2339,6 +2341,7 @@ export const LakeWorld = memo(function LakeWorld({
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
+      {eyesOut(hour, sky) && <NightEyes />}
       {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}
       {gossamerOut(hour, sky, season, wind) && <Gossamer />}
       {heronOut(hour, sky) && <Heron />}
