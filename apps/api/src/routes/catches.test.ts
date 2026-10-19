@@ -262,10 +262,23 @@ describe("POST /catches", () => {
     const release = () => app.request(`http://test/catches/${requestId}/release`, { method: "POST" });
     const first = await release();
     expect(first.status).toBe(200);
-    expect(await first.json()).toMatchObject({ released: true });
+    expect(await first.json()).toMatchObject({ released: true, bonus: 0 });
     expect((await release()).status).toBe(200);
     expect(getProfile(user.id)!.points).toBe(points);
     expect(badgeProgress(listBadgeFacts(user.id)).find((badge) => badge.id === "steward")).toMatchObject({ have: 1, earned: false });
+  });
+
+  it("pays the trophy release bonus once, for a trophy-weight fish let go", async () => {
+    const { getProfile } = await import("../db.ts");
+    const { TROPHY_RELEASE_BONUS } = await import("@stillwater/shared");
+    await post({ requestId, speciesId: "golden-shiner", weight: 0.4, spot: "dock" });
+    const before = getProfile(user.id)!;
+    const release = () => app.request(`http://test/catches/${requestId}/release`, { method: "POST" });
+    expect(await (await release()).json()).toMatchObject({ released: true, bonus: TROPHY_RELEASE_BONUS });
+    expect(await (await release()).json()).toMatchObject({ released: true, bonus: 0 });
+    const after = getProfile(user.id)!;
+    expect(after.points).toBe(before.points + TROPHY_RELEASE_BONUS);
+    expect(after.lifetime_points).toBe(before.lifetime_points + TROPHY_RELEASE_BONUS);
   });
 
   it("refuses to release a catch that is not saved, or a malformed ID", async () => {

@@ -1700,7 +1700,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT340~~ | ~~Taking a lodge record from another angler pays 1.5x points in place of the personal best's 1.25x (the server checks other anglers' heaviest of the kind), and the landed card's record stamp says "· 1.5× points"~~ (#1410) | gameplay | S |
 | ~~GT341~~ | ~~The first fish of a day that makes a run of 3 or more days in a row pays 1.5x points (the server reads the angler's catch days), stamped "First fish of day 3 in a row · 1.5× points"~~ (#1412) | gameplay | S |
 | ~~GT342~~ | ~~News card 2026-10-19-game31 covers GT339 to GT341: level 17, Child of the lake, with cheaper shack bait, the lodge record bonus and the day-run bonus~~ (#1414) | ui | S |
-| GT343 | Claiming all of a day's requests clears the shack board and pays a 25-point bonus on top | gameplay | S |
+| ~~GT343~~ | ~~Claiming all of a day's requests clears the shack board and pays a 25-point bonus on top~~ (#1416) | gameplay | S |
+| GT344 | Letting a trophy-weight fish go pays 20 points on top (the server checks the stored catch, once per fish); the landed card's button says "Release · +20 pts" | gameplay | S |
 
 ## Risks / open questions for the owner
 

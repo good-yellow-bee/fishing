@@ -42,10 +42,12 @@ import {
   moonLight,
   moonName,
   moonPhase,
+  isTrophyWeight,
   showsSolidMark,
   skyBlurb,
   skyLabel,
   weatherFromSearch,
+  TROPHY_RELEASE_BONUS,
   type CatchSubmission,
   type LakeHour,
   type LakeSeason,
@@ -557,6 +559,7 @@ export function DockPage() {
   const [releasedId, setReleasedId] = useState<string | null>(null);
   const [releasing, setReleasing] = useState(false);
   const [releaseError, setReleaseError] = useState(false);
+  const [releaseBonus, setReleaseBonus] = useState(0);
   const landedReleased = game.outcome?.kind === "landed" && releasedId === game.outcome.id;
   // Release gives way to "Released back into the lake": the note takes focus so a screen reader reads it and the keyboard
   // stays on the card. Space still casts again from it.
@@ -575,7 +578,8 @@ export function DockPage() {
     try {
       // A catch still in the queue goes up first, so the server has it to let go.
       await catchSync.sync();
-      await releaseCatch(outcome.id);
+      const { bonus } = await releaseCatch(outcome.id);
+      setReleaseBonus(bonus);
       setReleasedId(outcome.id);
       // The lake remembers the fish, so it may bite again at this bank another day, a little heavier.
       rememberReleased(outcome.species, outcome.weight, outcome.spot);
@@ -1150,11 +1154,17 @@ export function DockPage() {
               )}
               {landedReleased ? (
                 <p className="catch-stamp released" ref={releasedNote} tabIndex={-1}>
-                  {t("Released back into the lake")}
+                  {releaseBonus > 0
+                    ? t("Released back into the lake · +{bonus} pts for letting a trophy go", { bonus: releaseBonus })
+                    : t("Released back into the lake")}
                 </p>
               ) : (
                 <button className="panel-btn" type="button" onClick={() => void releaseFish()} aria-disabled={releasing || undefined}>
-                  {releasing ? t("Releasing…") : t("Release")}
+                  {releasing
+                    ? t("Releasing…")
+                    : isTrophyWeight(game.outcome.species, game.outcome.weight)
+                      ? t("Release · +{bonus} pts", { bonus: TROPHY_RELEASE_BONUS })
+                      : t("Release")}
                 </button>
               )}
               {releaseError && (

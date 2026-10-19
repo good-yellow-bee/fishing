@@ -58,6 +58,9 @@ export function trophyWeight(species: FishSpecies): number {
   return Math.ceil(raw * 10 - 1e-9) / 10;
 }
 
+/** Letting a trophy-weight fish go pays this on top of the points it already earned. */
+export const TROPHY_RELEASE_BONUS = 20;
+
 export function isTrophyWeight(species: FishSpecies, weight: number): boolean {
   return weight >= trophyWeight(species);
 }

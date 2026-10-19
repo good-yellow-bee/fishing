@@ -2,7 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
-import { isLakeHour, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
+import { fishById, isLakeHour, isTrophyWeight, TROPHY_RELEASE_BONUS, isLakeSeason, isSky, type BadgeFactRow, type BoardStat, type LodgeTrack, type SpeciesRecord, type SpotId } from "@stillwater/shared";
 
 const dir = dirname(fileURLToPath(import.meta.url));
 export const dataDir = join(dir, "../data");
@@ -361,9 +361,19 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 
 /** A catch the offline queue posts late counts on the day the server saved it, not the day it was landed. */
 /** Marks the angler's catch released; it keeps its points. Undefined when there is no such catch. */
-export function releaseCatch(userId: string, requestId: string): CatchRow | undefined {
-  db.prepare(`UPDATE catch SET released = 1 WHERE user_id = ? AND request_id = ?`).run(userId, requestId);
-  return findCatchByRequestId(userId, requestId);
+/** Lets a catch go once; the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS, a repeat pays 0. */
+export function releaseCatch(userId: string, requestId: string): { row: CatchRow; bonus: number } | undefined {
+  return db.transaction(() => {
+    const change = db.prepare(`UPDATE catch SET released = 1 WHERE user_id = ? AND request_id = ? AND released = 0`).run(userId, requestId);
+    const row = findCatchByRequestId(userId, requestId);
+    if (!row) return undefined;
+    const species = fishById(row.species_id);
+    const bonus = change.changes === 1 && species && isTrophyWeight(species, row.weight) ? TROPHY_RELEASE_BONUS : 0;
+    if (bonus) {
+      db.prepare(`UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`).run(bonus, bonus, userId);
+    }
+    return { row, bonus };
+  })();
 }
 
 export function listCatchesBetween(userId: string, from: string, to: string): CatchRow[] {

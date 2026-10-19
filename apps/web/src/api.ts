@@ -80,7 +80,7 @@ export function recordCatch(body: CatchSubmission) {
 
 /** Lets a saved catch go; it keeps its points. */
 export function releaseCatch(requestId: string) {
-  return request<{ id: string; released: true }>(`/api/catches/${encodeURIComponent(requestId)}/release`, { method: "POST" });
+  return request<{ id: string; released: true; bonus: number }>(`/api/catches/${encodeURIComponent(requestId)}/release`, { method: "POST" });
 }
 
 export function getBoard(period: BoardPeriod = "all") {

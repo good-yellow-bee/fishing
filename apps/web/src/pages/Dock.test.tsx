@@ -407,7 +407,7 @@ describe("letting a fish go", () => {
   it("remembers a let-go pike at its bank, so it may bite there again another day", async () => {
     const pike = fishById("pike")!;
     vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pike", points: 5, speciesId: pike.id, weight: 6 });
-    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-pike", released: true });
+    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-pike", released: true, bonus: 0 });
     landed.outcome = { kind: "landed", id: "catch-pike", species: pike, weight: 6, spot: "reeds", clean: false };
     const page = await openDock("/?hour=day&sky=clear");
     await act(async () => undefined);
@@ -419,7 +419,7 @@ describe("letting a fish go", () => {
   it("releases the landed fish from the card and drops it back in the scene", async () => {
     const perch = fishById("perch")!;
     vi.mocked(recordCatch).mockResolvedValue({ id: "catch-release", points: 1, speciesId: perch.id, weight: 0.6 });
-    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-release", released: true });
+    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-release", released: true, bonus: 0 });
     landed.outcome = { kind: "landed", id: "catch-release", species: perch, weight: 0.6, spot: "dock", clean: false };
     const page = await openDock("/?hour=day&sky=clear");
     await act(async () => undefined);
@@ -430,6 +430,18 @@ describe("letting a fish go", () => {
     expect(page.querySelector(".landed-card .catch-stamp.released")?.textContent).toBe("Released back into the lake");
     expect([...page.querySelectorAll(".landed-card button")].some((b) => b.textContent === "Release")).toBe(false);
     expect(scene.mock.lastCall?.[0].released).toBe(true);
+  });
+
+  it("offers and pays the trophy release bonus for a trophy-weight fish", async () => {
+    const perch = fishById("perch")!;
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-trophy", points: 30, speciesId: perch.id, weight: 1.2 });
+    vi.mocked(releaseCatch).mockResolvedValue({ id: "catch-trophy", released: true, bonus: 20 });
+    landed.outcome = { kind: "landed", id: "catch-trophy", species: perch, weight: 1.2, spot: "dock", clean: false };
+    const page = await openDock("/?hour=day&sky=clear");
+    await act(async () => undefined);
+    const release = [...page.querySelectorAll(".landed-card button")].find((b) => b.textContent === "Release · +20 pts") as HTMLButtonElement;
+    await act(async () => release.click());
+    expect(page.querySelector(".landed-card .catch-stamp.released")?.textContent).toBe("Released back into the lake · +20 pts for letting a trophy go");
   });
 
   it("keeps the fish and says so when the release fails", async () => {

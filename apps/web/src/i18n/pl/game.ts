@@ -241,6 +241,8 @@ export const PL_GAME: PlBook = {
   "Release": "Wypuść",
   "Releasing…": "Wypuszczanie…",
   "Released back into the lake": "Wypuszczona z powrotem do jeziora",
+  "Released back into the lake · +{bonus} pts for letting a trophy go": "Wypuszczona z powrotem do jeziora · +{bonus} pkt za wypuszczenie trofeum",
+  "Release · +{bonus} pts": "Wypuść · +{bonus} pkt",
   "The fish could not be released right now. It is kept; try again when you're online.": "Nie udało się teraz wypuścić ryby. Zostaje zatrzymana; spróbuj ponownie, gdy będziesz online.",
   "Try saving again": "Spróbuj zapisać jeszcze raz",
   "Field log": "Dziennik połowów",
