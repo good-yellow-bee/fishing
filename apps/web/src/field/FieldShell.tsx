@@ -145,12 +145,13 @@ export function FieldShell({ children }: { children: ReactNode }) {
     lastFocused.current = pathname;
     const main = document.querySelector<HTMLElement>(".field-main");
     const active = document.activeElement;
-    // Back from a fish to the list it was opened from: its card takes focus where the list is scrolled to, so the next
-    // Tab goes on down the list rather than jumping to the top.
-    if (how === "POP" && main && /^\/catches\/[^/]+$/.test(left)) {
-      // A list's card before a sum's "Heaviest" link to the same fish.
+    // Back from a fish, an outing or a water to the list it was opened from: its card takes focus where the list is
+    // scrolled to, so the next Tab goes on down the list rather than jumping to the top.
+    const from = /^\/(catches|trips|spots)\/([^/]+)$/.exec(left);
+    if (how === "POP" && main && from && (from[1] === "catches" || from[2] !== "new")) {
+      // A list's card before a sum's "Heaviest" link to the same fish; an outing or a water only from its card.
       const links = [...main.querySelectorAll<HTMLAnchorElement>("a[href]")].filter((link) => new URL(link.href).pathname === left);
-      const card = links.find((link) => link.closest(".catch-card, .photo-wall")) ?? links[0];
+      const card = links.find((link) => link.closest(".catch-card, .photo-wall, .trip-card, .spot-card")) ?? (from[1] === "catches" ? links[0] : undefined);
       if (card) {
         card.focus({ preventScroll: true });
         return;
