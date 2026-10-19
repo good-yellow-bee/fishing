@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { LOOK_MAX, OWL_LAMP, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, WATCH_EVERY_SEC, WATCH_FROM_SEC, WATCH_SEC, owlAt, owlLookAt, owlWatchLook, littleOwlOut } from "./littleOwl";
+import { LOOK_MAX, OWL_LAMP, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, WATCH_EVERY_SEC, WATCH_FROM_SEC, WATCH_SEC, owlAt, owlLookAt, owlVisit, owlWatchLook, littleOwlOut } from "./littleOwl";
 import { robinOut } from "./robinVisit";
 
 describe("little owl on the dock post", () => {
@@ -101,6 +101,20 @@ describe("little owl on the dock post", () => {
     // A strike while it is away, or with reduced motion, changes nothing.
     expect(owlAt(sitFrom + 2, false, false, false, sitFrom - 30)).toEqual(owlAt(sitFrom + 2));
     expect(owlAt(strike + 1, false, true, false, strike)).toEqual(owlAt(strike + 1, false, true));
+  });
+
+  it("struck at while it glides in, it beats off again as it lands; struck late in its sit, it still leaves in time", () => {
+    let arrive = -1;
+    for (let t = 0; t < VISIT_EVERY_SEC && arrive < 0; t += 0.05) if (owlAt(t).here) arrive = t;
+    let landed = -1;
+    for (let t = arrive; t < VISIT_EVERY_SEC && landed < 0; t += 0.05) if (owlAt(t).here && !owlAt(t).flying) landed = t;
+    const early = arrive + 0.5;
+    expect(owlAt(landed + 1, false, false, false, early).flying).toBe(1);
+    expect(owlAt(landed + 4, false, false, false, early).here).toBe(false);
+    const late = landed + SIT_SEC - 0.2;
+    expect(owlAt(late + 0.5, false, false, false, late).flap).toBe(1);
+    expect(owlAt(late + 4, false, false, false, late).here).toBe(false);
+    expect(owlVisit(late).index).toBe(owlVisit(landed).index);
   });
 
   it("sits still on its post with reduced motion, up on the snow cap in winter", () => {
