@@ -2501,3 +2501,21 @@ html:has(.form-save):has(.undo-bar) .field-main {
   margin: 6px 0 8px;
   padding-left: 20px;
 }
+
+/* Home's "Add to calendar" was a 15 px button whose reach ran 4 px into "Last time" above it: a 32 px band, as the
+   count links beside it are. "What's new" under the last outing card reaches only as far as the gap above it. */
+@media (pointer: coarse) {
+  .stat-row small .text-button {
+    min-height: 32px;
+    padding-block: 8px;
+    box-sizing: border-box;
+  }
+
+  .stat-row small .text-button::after {
+    inset: 0 -4px;
+  }
+
+  .news-again .text-button::after {
+    inset: -4px -4px -8px;
+  }
+}

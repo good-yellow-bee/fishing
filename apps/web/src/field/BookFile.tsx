@@ -19,6 +19,7 @@ import { noteSnapshots, snapshotsIn } from "./keepCatch";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
+import { outingDay } from "./tripDates";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
@@ -90,11 +91,13 @@ const PREVIEW_FISH = 3;
 
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
-  if (isSampleOnly(book) && book.catches.every((entry) => isSampleCatch(entry.id))) return t("only the sample week");
+  // The game's fish come along either way: a browser of only those and the sample week holds nothing of the angler's.
+  const offGame = book.catches.filter(offPlayLake);
+  if (isSampleOnly(book) && offGame.length > 0 && offGame.every((entry) => isSampleCatch(entry.id))) return t("only the sample week");
   // The sample week's invented fish and the game's beside the angler's own aren't counted as theirs, nor dated: they
   // come in on their own, and would hide that one book's own newest fish is older than the other's.
-  const own = book.catches.filter((entry) => !isSampleCatch(entry.id) && offPlayLake(entry));
-  const counted = own.length > 0 ? own : book.catches;
+  const own = offGame.filter((entry) => !isSampleCatch(entry.id));
+  const counted = own.length > 0 ? own : offGame;
   const newest = newestAt({ ...book, catches: counted });
   return newest ? t("{fish}, newest {day}", { fish: fishCountLabel(counted.length), day: formatCatchDay(newest) }) : t("no fish");
 }
@@ -364,9 +367,9 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
   // The sample week's invented ones are nothing to keep: a new phone with only the sample just takes the file.
   const hasBook =
-    storedBook.catches.some((entry) => !isSampleCatch(entry.id)) ||
+    storedBook.catches.some((entry) => !isSampleCatch(entry.id) && offPlayLake(entry)) ||
     storedBook.spots.some((spot) => spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)) ||
-    storedBook.trips.some((trip) => !isSampleOuting(trip));
+    storedBook.trips.some((trip) => !isSampleOuting(trip) && offPlayLake(trip));
   // What the file brings this book: the sample week only while this book still has it.
   const fromFile = pending ? withoutSampleFor(pending, storedBook) : null;
   const adds = fromFile ? catchesNewestFirst({ ...fromFile.book, catches: newFishIn(storedBook, withoutDeleted(fromFile).book) }) : [];
@@ -445,7 +448,8 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           </button>
         ) : null}
         {/* Only when the file would hold a fish: a book of game rounds alone has none of the angler's own to give. */}
-        {countedBook(book).catches.length > 0 ? (
+        {/* Not for the sample week alone: its invented fish are no sheet of the angler's. */}
+        {countedBook(book).catches.length > 0 && !isSampleOnly(storedBook) ? (
           <button
             type="button"
             className="text-button"
@@ -459,12 +463,13 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           </button>
         ) : null}
         {/* The outings beside the fish, as the Trips page gives them: the angler's own, up to today. */}
-        {sheetOutings(book, localDate(new Date())).trips.length > 0 ? (
+        {/* In the small hours, last evening's outing is still going, as the Trips page sheets it. */}
+        {sheetOutings(book, outingDay(localDate(new Date()))).trips.length > 0 && !isSampleOnly(storedBook) ? (
           <button
             type="button"
             className="text-button"
             onClick={() => {
-              downloadFile(tripsCsv(book, localDate(new Date())), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"));
+              downloadFile(tripsCsv(book, outingDay(localDate(new Date()))), "text/csv;charset=utf-8", datedName("stillwater-outings.csv"));
               setNotice({ tone: "ok", text: t("The outings were downloaded as a spreadsheet.") });
             }}
           >

@@ -14,7 +14,7 @@ describe("round 94 ideas: last evening's outing reads Last night in the small ho
     expect(tripWhen("2026-10-19", "2026-10-20", "2026-10-21")).toBe("Last night");
     expect(tripWhen("2026-10-20", "2026-10-20", "2026-10-21")).toBe("Today");
     setLang("pl");
-    expect(tripWhen("2026-10-19", "2026-10-20", "2026-10-21")).toBe("Wczoraj wieczorem");
+    expect(tripWhen("2026-10-19", "2026-10-20", "2026-10-21")).toBe("Zeszłej nocy");
     vi.setSystemTime(new Date(2026, 9, 20, 9));
     setLang("en");
     expect(tripWhen("2026-10-19", "2026-10-20", "2026-10-21")).not.toBe("Last night");

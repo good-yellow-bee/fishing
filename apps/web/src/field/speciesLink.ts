@@ -1,6 +1,7 @@
 import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
+import { t } from "../i18n";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -55,6 +56,27 @@ export function speciesWaters(book: Logbook, catches: readonly CatchEntry[]) {
 }
 
 /** The kinds among some fish, most first, then by name, keeping the book's name for each. */
+/**
+ * A kind's name as the book writes it most, in the reader's language: "zander", "Zander " and "Zander" are one kind, so
+ * a sheet or a copied text names it once, as "Sandacz" in Polish, not as three.
+ */
+export function kindNames(catches: readonly CatchEntry[]): (species: string) => string {
+  const spellings = new Map<string, Map<string, number>>();
+  for (const entry of catches) {
+    const name = entry.species.trim();
+    const key = name.toLowerCase();
+    const row = spellings.get(key) ?? new Map<string, number>();
+    row.set(name, (row.get(name) ?? 0) + 1);
+    spellings.set(key, row);
+  }
+  return (species) => {
+    const name = species.trim();
+    // The most-used spelling; a tie goes to one with a capital, as the kinds list writes them.
+    const best = [...(spellings.get(name.toLowerCase()) ?? new Map([[name, 1]]))].sort((a, b) => b[1] - a[1] || Number(/^\p{Lu}/u.test(b[0])) - Number(/^\p{Lu}/u.test(a[0])))[0]![0];
+    return t(best);
+  };
+}
+
 export function speciesCounts(catches: readonly CatchEntry[]) {
   const counts = new Map<string, { species: string; count: number }>();
   for (const entry of catches) {
