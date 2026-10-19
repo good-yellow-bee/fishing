@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PERCH_SPOTS, SWALLOW_COUNT, SWOOP_SEC, VISIT_EVERY_SEC, VISIT_SEC, ropeSwallowAt, ropeSwallowsOut } from "./swallowPerch";
+import { FLUSH_SEC, PERCH_SPOTS, SWALLOW_COUNT, SWOOP_SEC, VISIT_EVERY_SEC, VISIT_SEC, flushedOff, ropeSwallowAt, ropeSwallowsOut } from "./swallowPerch";
 
 describe("swallows on the mooring line", () => {
   it("come on fine days in spring and summer", () => {
@@ -47,5 +47,22 @@ describe("swallows on the mooring line", () => {
 
   it("sit still in a row with reduced motion", () => {
     for (let i = 0; i < SWALLOW_COUNT; i += 1) expect(ropeSwallowAt(i, 3, true)).toEqual(ropeSwallowAt(i, 300, true));
+  });
+
+  it("burst off together from where they sat when the boat is untied under them", () => {
+    for (let i = 0; i < SWALLOW_COUNT; i += 1) {
+      expect(flushedOff(i, 0)).toMatchObject({ here: true, x: 0, z: 0, flying: true });
+      expect(flushedOff(i, FLUSH_SEC).here).toBe(false);
+      expect(flushedOff(i, 0.1, true).here).toBe(false);
+      let last = flushedOff(i, 0);
+      for (let t = 0.01; t < FLUSH_SEC; t += 0.01) {
+        const pose = flushedOff(i, t);
+        expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.1);
+        last = pose;
+      }
+      expect(last.y).toBeGreaterThan(1);
+    }
+    // They fan apart rather than flying off in a line.
+    expect(flushedOff(0, FLUSH_SEC * 0.9).x).not.toBeCloseTo(flushedOff(2, FLUSH_SEC * 0.9).x, 1);
   });
 });
