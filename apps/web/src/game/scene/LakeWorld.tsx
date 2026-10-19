@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
-import { ArticulatedFish } from "./ArticulatedFish";
+import { PaintedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { StaticModels, type StaticModel } from "./StaticModels";
 import { LilyBed, type LilyAt } from "./LilyBed";
@@ -1512,7 +1512,7 @@ function SwimmingFish({ points, speed, phase, size, color, accent, species }: Fi
   return (
     <group ref={ref} scale={size}>
       <group ref={bank}>
-        <ArticulatedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} build={build} />
+        <PaintedFish color={color} accent={accent} phase={phase * 10} speed={0.85 + speed * 8} build={build} />
       </group>
       <group ref={ripple}>
         <mesh rotation={[-Math.PI / 2, 0, 0]}>

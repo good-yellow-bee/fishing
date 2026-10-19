@@ -1,8 +1,9 @@
-import { type ReactElement, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { type ReactElement, type RefObject, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as THREE from "three";
 import { markPlacements, PLAIN_BUILD, type FishBuild, type Mark } from "./fishBuild";
-import { mergeParts, type Part } from "./mergeParts";
+import { mergePainted, mergeParts, type Part } from "./mergeParts";
+import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
 
 export type FishDrive = { intensity: number; speed: number };
@@ -156,6 +157,8 @@ function fishShapes(build: FishBuild) {
             })),
           )
         : null,
+    middle: mergeParts([middlePart()]),
+    tail: mergeParts([tailPart()]),
     tailFins: mergeParts([
       { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [0.23, 0, -0.34], rotation: [0, -0.55, 0], scale: [0.5, 0.08, 0.42] },
       { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [-0.23, 0, -0.34], rotation: [0, 0.55, 0], scale: [0.5, 0.08, 0.42] },
@@ -165,6 +168,87 @@ function fishShapes(build: FishBuild) {
       { geometry: new THREE.SphereGeometry(0.5, 7, 4), position: [-0.38, -0.02, 0.03], rotation: [0, 0.35, 0], scale: [0.34, 0.06, 0.25] },
     ]),
   };
+}
+
+const EYE = "#101719";
+const BACK_FIN = "#465754";
+const BARBEL = "#3a332c";
+/** Where the middle hangs off the body and the tail off the middle: the joints the fish bends at. */
+const MIDDLE_AT = [0, 0, -0.45] as const;
+const TAIL_AT = [0, 0, -0.4] as const;
+/** The middle's swell and the tail's cone, about their joints. */
+const middlePart = () => ({ geometry: new THREE.SphereGeometry(0.34, 10, 7), position: [0, 0, -0.15] as const, scale: [0.85, 0.75, 1] as const });
+const tailPart = () => ({ geometry: new THREE.ConeGeometry(0.2, 0.5, 7), position: [0, 0, -0.14] as const, rotation: [Math.PI / 2, 0, 0] as const });
+
+/** Swings the middle and the tail in a travelling wave, `speed` and `intensity` read live from `drive` when given. */
+function useFishSwim(middle: RefObject<THREE.Group | null>, tail: RefObject<THREE.Group | null>, phase: number, speed: number, intensity: number, drive?: { readonly current: FishDrive }) {
+  useFrame((state) => {
+    const rate = drive?.current.speed ?? speed;
+    const amp = drive?.current.intensity ?? intensity;
+    const wave = state.clock.elapsedTime * rate * 7 + phase;
+    if (middle.current) middle.current.rotation.y = Math.sin(wave) * 0.2 * amp;
+    if (tail.current) tail.current.rotation.y = Math.sin(wave - 0.8) * 0.46 * amp;
+  });
+}
+
+/**
+ * A fish's parts painted in their colours and baked by the part that moves: the front (body, eyes, fins,
+ * marks and whiskers), the middle and the tail, each in the same place, size and colour as ArticulatedFish draws them.
+ */
+export function paintedFishShapes(build: FishBuild, color: string, accent: string) {
+  const shapes = fishShapes(build);
+  const marks = markPlacements(build.marks);
+  const markColor = build.marks === "flecks" ? PALE_MARK : DARK_MARK;
+  return {
+    front: mergePainted([
+      { geometry: shapes.body, color },
+      { geometry: shapes.eyes, color: EYE },
+      { geometry: shapes.backFins, color: BACK_FIN },
+      ...marks.map((mark) => ({ geometry: new THREE.SphereGeometry(1, 10, 6), position: mark.position, scale: mark.scale, color: markColor })),
+      ...(shapes.barbels ? [{ geometry: shapes.barbels, color: BARBEL }] : []),
+      { geometry: shapes.sideFins, color: accent },
+    ]),
+    middle: mergePainted([{ geometry: shapes.middle, color }]),
+    tail: mergePainted([
+      { geometry: shapes.tail, color },
+      { geometry: shapes.tailFins, color: accent },
+    ]),
+  };
+}
+
+/**
+ * The lake's swimming fish as ArticulatedFish draws it, in one draw: its parts painted into three shapes that
+ * one skinned mesh bends at the middle and the tail (skinFigure.ts). Not for the lit-through fight fish.
+ */
+export function PaintedFish({ color = "#c97945", accent = "#e9bc72", phase = 0, speed = 1, intensity = 1, build = PLAIN_BUILD }: Omit<Props, "drive" | "unlit">) {
+  const root = useRef<THREE.Group>(null);
+  const middle = useRef<THREE.Group>(null);
+  const tail = useRef<THREE.Group>(null);
+  useFishSwim(middle, tail, phase, speed, intensity);
+  // A new look comes with a new material, so the skinned mesh is baked again from the new shapes.
+  const { shapes, material } = useMemo(
+    () => ({ shapes: paintedFishShapes(build, color, accent), material: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }) }),
+    [build, color, accent],
+  );
+  useEffect(
+    () => () => {
+      Object.values(shapes).forEach((shape) => shape.dispose());
+      material.dispose();
+    },
+    [shapes, material],
+  );
+  useSkinnedFigure(root, material);
+  return (
+    <group ref={root} scale={[build.width, build.depth, build.length]}>
+      <mesh geometry={shapes.front} material={material} castShadow />
+      <group ref={middle} position={MIDDLE_AT}>
+        <mesh geometry={shapes.middle} material={material} castShadow />
+        <group ref={tail} position={TAIL_AT}>
+          <mesh geometry={shapes.tail} material={material} castShadow />
+        </group>
+      </group>
+    </group>
+  );
 }
 
 export function ArticulatedFish({
@@ -180,13 +264,7 @@ export function ArticulatedFish({
   const middle = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
-    const rate = drive?.current.speed ?? speed;
-    const amp = drive?.current.intensity ?? intensity;
-    const wave = state.clock.elapsedTime * rate * 7 + phase;
-    if (middle.current) middle.current.rotation.y = Math.sin(wave) * 0.2 * amp;
-    if (tail.current) tail.current.rotation.y = Math.sin(wave - 0.8) * 0.46 * amp;
-  });
+  useFishSwim(middle, tail, phase, speed, intensity, drive);
 
   const marks = useMemo(() => markPlacements(build.marks), [build.marks]);
 
@@ -197,14 +275,14 @@ export function ArticulatedFish({
   return (
     <group scale={[build.width, build.depth, build.length]}>
       <FishMesh castShadow unlit={unlit} shape={baked(shapes.body)} material={<FishMaterial color={color} unlit={unlit} />} />
-      <FishMesh unlit={unlit} shape={baked(shapes.eyes)} material={<meshBasicMaterial {...(unlit ? fightCoat("#101719") : { color: "#101719" })} />} />
-      <FishMesh unlit={unlit} shape={baked(shapes.backFins)} material={<FishMaterial color="#465754" unlit={unlit} />} />
+      <FishMesh unlit={unlit} shape={baked(shapes.eyes)} material={<meshBasicMaterial {...(unlit ? fightCoat(EYE) : { color: EYE })} />} />
+      <FishMesh unlit={unlit} shape={baked(shapes.backFins)} material={<FishMaterial color={BACK_FIN} unlit={unlit} />} />
       {marks.length > 0 && <FishMarks marks={marks} color={build.marks === "flecks" ? PALE_MARK : DARK_MARK} unlit={unlit} />}
-      {shapes.barbels && <FishMesh unlit={unlit} shape={baked(shapes.barbels)} material={<FishMaterial color="#3a332c" unlit={unlit} />} />}
-      <group ref={middle} position={[0, 0, -0.45]}>
-        <FishMesh position={[0, 0, -0.15]} scale={[0.85, 0.75, 1]} castShadow unlit={unlit} shape={<sphereGeometry args={[0.34, 10, 7]} />} material={<FishMaterial color={color} unlit={unlit} />} />
-        <group ref={tail} position={[0, 0, -0.4]}>
-          <FishMesh position={[0, 0, -0.14]} rotation={[Math.PI / 2, 0, 0]} castShadow unlit={unlit} shape={<coneGeometry args={[0.2, 0.5, 7]} />} material={<FishMaterial color={color} unlit={unlit} />} />
+      {shapes.barbels && <FishMesh unlit={unlit} shape={baked(shapes.barbels)} material={<FishMaterial color={BARBEL} unlit={unlit} />} />}
+      <group ref={middle} position={MIDDLE_AT}>
+        <FishMesh castShadow unlit={unlit} shape={baked(shapes.middle)} material={<FishMaterial color={color} unlit={unlit} />} />
+        <group ref={tail} position={TAIL_AT}>
+          <FishMesh castShadow unlit={unlit} shape={baked(shapes.tail)} material={<FishMaterial color={color} unlit={unlit} />} />
           <FishMesh unlit={unlit} shape={baked(shapes.tailFins)} material={<FishMaterial color={accent} unlit={unlit} />} />
         </group>
       </group>
