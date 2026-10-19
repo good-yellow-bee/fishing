@@ -124,6 +124,15 @@ function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): st
   ].filter(Boolean);
 }
 
+/** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
+export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
+  const spot = spotById(book, trip.spotId);
+  // An untitled outing goes by its water's name, as its heading does.
+  const named = { ...trip, title: outingName(trip, book.spots) };
+  const alarm = trip.date > today ? t("Pack for {outing} tomorrow", { outing: named.title }) : undefined;
+  downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), alarm), "text/calendar;charset=utf-8", tripIcsName(named));
+}
+
 export function TripsPage() {
   const { book } = useLogbook();
   const { items: tackleItems } = useTackle();
@@ -626,11 +635,7 @@ function TripView() {
           <button
             type="button"
             className="text-button"
-            onClick={() => {
-              // An untitled outing goes by its water's name, as its heading does.
-              const named = { ...trip, title: outingName(trip, book.spots) };
-              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), trip.date > today ? t("Pack for {outing} tomorrow", { outing: named.title }) : undefined), "text/calendar;charset=utf-8", tripIcsName(named));
-            }}
+            onClick={() => saveOutingIcs(book, trip, tackleItems, today)}
           >
             {t("Add to calendar")}
           </button>

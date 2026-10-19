@@ -64,7 +64,7 @@ import { bestLureAt } from "./waterLure";
 import { useTypedParam } from "./typedParam";
 import { CopyPlace } from "./CopyPlace";
 import { seasonWaters } from "./seasonWaters";
-import { downloadFile } from "./download";
+import { datedName, downloadFile } from "./download";
 import { fileSlug, gpxFor } from "./gpx";
 import { keepDraft, readKeptDraft } from "./catchDraft";
 import { editFromPage, leaveDeleted, leaveSaved } from "./leaveDeleted";
@@ -144,6 +144,8 @@ export function SpotsPage() {
   const ownRow = new Map(ownRows.map((row) => [row.spot.id, row]));
   const ownTrips = (id: string) => counted.trips.filter((trip) => trip.spotId === id);
   const season = seasonWaters(book, today);
+  const withPlace = book.spots.filter((spot) => spot.place && spot.id !== PLAY_LAKE_ID);
+  const placed = withPlace.some((spot) => !isSampleSpot(spot.id)) ? withPlace.filter((spot) => !isSampleSpot(spot.id)) : withPlace;
   const ownHere = (id: string) => id !== PLAY_LAKE_ID && ((ownRow.get(id)?.fishCount ?? 0) > 0 || ownTrips(id).length > 0);
   if (order === "rested") {
     rows.sort((a, b) => {
@@ -285,6 +287,14 @@ export function SpotsPage() {
             />
           ))}
         </div>
+        {/* Every water with a place in one file, for a new GPS or sounder: the sample week's only while there are no others. */}
+        {placed.length > 1 ? (
+          <p className="fish-csv">
+            <button type="button" className="text-button" onClick={() => downloadFile(gpxFor(placed), "application/gpx+xml", datedName("stillwater-waters.gpx"))}>
+              {t("Save all waters for a GPS (.gpx)")}
+            </button>
+          </p>
+        ) : null}
         </>
       )}
     </div>

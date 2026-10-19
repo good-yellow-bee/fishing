@@ -637,6 +637,8 @@ export const PL_FIELD: PlBook = {
   "{n} years ago": ["rok temu", "{n} lata temu", "{n} lat temu"],
   "Best day": "Najlepszy dzień",
   "Busiest month": "Najczęściej nad wodą",
+  "Save all waters for a GPS (.gpx)": "Zapisz wszystkie łowiska dla GPS (.gpx)",
+  "Same as last year ({n})": "Tyle samo co w zeszłym roku ({n})",
   "Fish on {n} days": ["Ryby z {n} dnia", "Ryby z {n} dni", "Ryby z {n} dni"],
   "Only my fish": "Tylko moje ryby",
   "Same note as the last fish: “{note}”": "Ta sama notatka co przy poprzedniej rybie: „{note}”",
