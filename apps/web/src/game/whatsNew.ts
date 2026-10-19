@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-field41";
+export const NEWS_ID = "2026-10-19-game17";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "From spring through summer, cast onto the sunfish nests either side of the dock: perch and smallmouth come to raid the eggs, so the bites come sooner and many are one of them. In summer and fall a popper over a duckweed mat draws the bass lurking in its shade, but any other lure comes back bearded with weed and the fish turn from it.",
   "A search for a day that only has a night's small-hours fish offers that outing's day instead, the calendar's month counts open those days and fish, Home recalls in early January how last year's goal ended, outings sent to the calendar remind you to pack the evening before, and the year's copied summary says where its pace ends it.",
   "On warm days someone reads in a striped hammock by the campers' tent, and on calm summer days someone paddles a paddleboard across the lake with a little dog sitting up at the nose. On calm nights someone rows slowly round the lake with a lantern glowing at the stern. Spring and summer showers now and then turn to hail that bounces on the dock, and on dry fall days a little whirlwind spins a column of leaves out over the water.",
   "On cold clear dawns in fall and winter wisps of steam rise off the lake and lean away on the breeze. On still summer dawns a hot-air balloon drifts over the far water, its burner roaring now and then, and dips its basket to touch the lake before climbing away. On winter days loads of snow slip off the trees across the lake in a puff of powder.",
@@ -21,7 +22,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "The moon now matters by day too: for an hour either side of it passing overhead or underfoot the fish come on the feed at every bank, and the shack's chalk board says when. And mind the low sun at your back: at dawn at the Drop-off and at dusk at the Inlet your long shadow falls across the water and the fish shy from it.",
   "The boats at their moorings now fill with the weather: snow in winter, rainwater in the rain and fallen leaves in the fall. In spring a pair of Canada geese graze the far bank with their goslings, on dry fall days a child takes running leaps into a pile of raked leaves, and on calm, clear days someone sets up an easel under a sun umbrella on the far bank and paints the hills.",
   "A kind's page says when its next round number is a few fish away (3 more to 25 of this kind), and its biggest of this year beside the all-time record.",
-  "A search with fish of several kinds or years splits them “By kind” and “By year”, each a tap to narrow it, and a season's best day on Bests opens its fish.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
