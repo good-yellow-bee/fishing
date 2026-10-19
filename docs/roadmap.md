@@ -1237,6 +1237,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC109~~ | ~~News card scene23: starling murmuration, winter gulls, dock robin, dock snail~~ (#1224) | scene | S |
 | ~~SC110~~ | ~~Lake steam: on cold clear or overcast dawns in fall and winter wisps of steam rise off the far water, curling and leaning with the breeze before they thin away~~ (#1228) | scene | S |
 | ~~SC111~~ | ~~Hot-air balloon: on still clear dawns in spring and summer a striped balloon drifts in over the trees, skims the far half of the lake, dips its basket to kiss the water mid-lake and climbs away over the other bank, its burner flaring now and then~~ (#1228) | scene | S |
+| SC112 | Snow off the trees: on winter dawns and days a load of snow now and then slips off a tree across the lake, a few lumps tumbling to the ground in a puff of powder that drifts off on the breeze | scene | S |
+| SC113 | News card scene24: lake steam, hot-air balloon, snow slipping off the trees | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
