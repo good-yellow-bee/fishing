@@ -750,10 +750,10 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.":
+    "Dwie nowe odznaki przystani do zdobycia: Całe jezioro, za złowienie każdego gatunku ryby w jeziorze, i Łowca trofeów, za pięć gatunków o wadze trofeum. A w szopie można teraz kupić żywego złotawca za 50 punktów: trafia na haczyk na następny rzut i wabi drapieżniki, a złotawiec na haczyku zostaje tam także po przeładowaniu strony.",
   "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.":
     "Pobicie własnego rekordu danego gatunku daje teraz 1,25× punktów, co widać na karcie połowu. A w szopie można kupić zanętę: 60 punktów za garść, do trzech w torbie, i czekają, aż ich użyjesz.",
-  "From level 16, Voice of the lake, at 47000 points, pulling the rod against a run cuts it short a quarter faster. And a run you turn swings the fish's head round: reel straight after it to win line faster for a moment.":
-    "Od poziomu 16, Głos jeziora (47000 punktów), ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%. A zawrócony odjazd obraca rybę łbem do ciebie: kręć zaraz po nim, a przez chwilę odzyskasz żyłkę szybciej.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
