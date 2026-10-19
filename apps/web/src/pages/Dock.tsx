@@ -215,9 +215,9 @@ export function DockPage() {
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
   const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind);
-  // The cast's left-out reasons, opened from its hint; each cast's hint starts closed.
-  const [reasonsOpen, setReasonsOpen] = useState(false);
-  useEffect(() => setReasonsOpen(false), [game.moreReasons]);
+  // The cast's left-out reasons, opened from its hint; each cast's list starts closed.
+  const [reasonsOpenFor, setReasonsOpenFor] = useState<readonly string[] | null>(null);
+  const reasonsOpen = reasonsOpenFor === game.moreReasons;
   const scenePhase = game.outcome ? "result" : game.phase;
   // The hint is hidden in a fight, so the fight card holds the hookset's message (or a mid-fight call) for a while instead.
   const [hookNote, setHookNote] = useState<string | null>(null);
@@ -919,12 +919,12 @@ export function DockPage() {
             <>
               {" "}
               {reasonsOpen ? (
-                <span className="hint-extra">{game.moreReasons.join(" ")}</span>
+                <span>{game.moreReasons.join(" ")}</span>
               ) : (
-                <button className="hint-more" type="button" onClick={(event) => {
+                <button className="hint-more" type="button" data-camera-control onClick={(event) => {
                   // Off the button, so Space strikes again rather than pressing it.
                   event.currentTarget.blur();
-                  setReasonsOpen(true);
+                  setReasonsOpenFor(game.moreReasons);
                 }}>
                   {tn(game.moreReasons.length, "{n} more reason", "{n} more reasons")}
                 </button>
