@@ -394,7 +394,11 @@ export function overlapsOtherClaimedDay(userId: string, local: DayWindow): boole
 }
 
 /** False when that day's request was already claimed; the primary key rules out paying twice. */
-export function claimDailyRequest(userId: string, local: DayWindow, dailyRequestId: string, reward: number): boolean {
+/**
+ * Pays a request's reward once; the claim that clears the day's board of `boardSize` requests also pays `boardBonus`.
+ * Null when the request was already claimed, else the board bonus paid (0 when the board isn't clear yet).
+ */
+export function claimDailyRequest(userId: string, local: DayWindow, dailyRequestId: string, reward: number, boardSize = Infinity, boardBonus = 0): number | null {
   return db.transaction(() => {
     const claim = db
       .prepare(
@@ -402,11 +406,13 @@ export function claimDailyRequest(userId: string, local: DayWindow, dailyRequest
          VALUES (?, ?, ?, ?, ?, ?)`,
       )
       .run(userId, local.day, dailyRequestId, local.from, local.to, new Date().toISOString());
-    if (claim.changes !== 1) return false;
+    if (claim.changes !== 1) return null;
+    const claims = db.prepare(`SELECT COUNT(*) as n FROM daily_request_claim WHERE user_id = ? AND day = ?`).get(userId, local.day) as { n: number };
+    const bonus = claims.n >= boardSize ? boardBonus : 0;
     db.prepare(
       `UPDATE profile SET points = points + ?, lifetime_points = lifetime_points + ? WHERE user_id = ?`,
-    ).run(reward, reward, userId);
-    return true;
+    ).run(reward + bonus, reward + bonus, userId);
+    return bonus;
   })();
 }
 
