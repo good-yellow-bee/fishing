@@ -8,6 +8,7 @@ import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { ToonModel } from "./ToonModel";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const ROWBOAT = "/models/boat-row-large.glb";
 const COAT = "#e8b923";
@@ -66,6 +67,7 @@ export function FogAngler() {
   const tip = useRef<THREE.Object3D>(null);
   const bob = useRef<THREE.Mesh>(null);
   const shapes = useMemo(() => ({ body: oilskinShape(), rod: rodShape(), float: floatShape() }), []);
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const line = useMemo(() => {
     const geometry = new THREE.BufferGeometry();
@@ -117,8 +119,10 @@ export function FogAngler() {
     }
     points.needsUpdate = true;
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="fog-angler">
+    <group ref={figure} name="fog-angler">
       <group ref={hull}>
         <ToonModel url={ROWBOAT} scale={0.66} shadows={false} />
         <group ref={sitter} position={[0, SEAT_Y, 0]}>

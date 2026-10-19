@@ -1336,6 +1336,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC172~~ | ~~Fewer draws: the evening bats draw as two instanced meshes, bodies and wings (18 draws to 2), and the thermos steam as one (7 to 1)~~ (#1379) | scene | S |
 | ~~SC173~~ | ~~Fewer draws: the winter feeder chickadees and the snowball kids draw their posed parts as instanced meshes (feeder 9 draws to 4, kids 19 to 8 mid-burst) through a new poseFromHolders helper~~ (#1381) | scene | S |
 | ~~SC174~~ | ~~Fewer draws: the spring goose family draws as four instanced meshes (14 draws to 4), the two swans and their wakes as four (10 to 4), and each campfire bakes its flame and core into one shape~~ (#1385) | scene | S |
+| SC175 | Fewer draws: seventeen far-bank figures (the jogger, skier, sledders, woodcutter, dog walker, paddleboarder, stone skimmer, anglers, rowers, painter and others) bake their posed limbs into one skinned mesh each, so each figure costs one draw however many limbs it swings | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

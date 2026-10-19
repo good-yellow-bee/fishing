@@ -5,6 +5,7 @@ import { mergePainted, mergeParts } from "./mergeParts";
 import { EASEL_REACH, PAINTER_AT, PAINTER_YAW, canvasFill, painterAt } from "./pleinAir";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const SMOCK = "#ece3cf";
 const DAUB_A = "#5b8fc7";
@@ -128,6 +129,7 @@ export function Painter() {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   // The picture's bands are instances of one square, each in its own paint: one draw.
   const paint = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", gradientMap: toonRamp() }), []);
@@ -163,8 +165,10 @@ export function Painter() {
     });
     bands.instanceMatrix.needsUpdate = true;
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="painter" position={[PAINTER_AT.x, 0, PAINTER_AT.z]} rotation={[0, PAINTER_YAW, 0]} scale={SCALE}>
+    <group ref={figure} name="painter" position={[PAINTER_AT.x, 0, PAINTER_AT.z]} rotation={[0, PAINTER_YAW, 0]} scale={SCALE}>
       <group ref={body}>
         <mesh geometry={shapes.body} material={material} castShadow />
         <group position={[0, HIP_Y, 0]}>

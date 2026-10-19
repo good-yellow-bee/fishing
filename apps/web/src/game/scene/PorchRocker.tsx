@@ -6,6 +6,7 @@ import { mergePainted } from "./mergeParts";
 import { CHAIR_AT, CHAIR_YAW, LANTERN_AT, lanternFlicker, rockerAt } from "./porchRocking";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const WOOD = "#8a6440";
 const CARDIGAN = "#6f4e6e";
@@ -89,6 +90,7 @@ export function PorchRocker() {
     () => ({ chair: rockingChairShape(), sitter: rockerSitterShape(), arm: mugArmShape(), lantern: porchLanternShape(), flame: new THREE.CylinderGeometry(0.035, 0.035, 0.14, 8) }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.1), []);
   const lights = useMemo(
@@ -114,8 +116,10 @@ export function PorchRocker() {
     lights.glow.opacity = 0.75 * flicker;
     glow.current?.scale.setScalar(1.3 * flicker);
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="porch-rocker">
+    <group ref={figure} name="porch-rocker">
       <group position={[CHAIR_AT.x, 0, CHAIR_AT.z]} rotation={[0, CHAIR_YAW, 0]} scale={SCALE}>
         <group ref={rocker}>
           <mesh geometry={shapes.chair} material={material} castShadow />

@@ -6,6 +6,7 @@ import { bladeDip, bladeReach, dogLook, paddleAt } from "./paddleRoute";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const DECK = "#2fa3a8";
 const STRIPE = "#f2efe6";
@@ -158,6 +159,8 @@ export function Paddleboarder() {
     });
     if (dogHead.current) dogHead.current.rotation.y = dogLook(time, still);
   });
+  useSkinnedFigure(board, material);
+
   return (
     <group ref={board} name="paddleboarder">
       <mesh geometry={shapes.board} material={material} />

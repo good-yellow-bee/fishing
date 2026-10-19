@@ -5,6 +5,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { skiAt } from "./skiTour";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#c23b3b";
 const TROUSERS = "#2e3d55";
@@ -102,6 +103,8 @@ export function Skier() {
       if (arm) arm.rotation.x = swing * (ARM_SWING / LEG_SWING) - 0.15 * pose.effort;
     });
   });
+  useSkinnedFigure(root, material);
+
   return (
     <group ref={root} name="skier">
       <group ref={upper} position={[0, HIP_Y, 0]}>

@@ -6,6 +6,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { SLEDDERS, SPRAY_PUFFS, SPRAY_SEC, runPoint, sledderAt, sprayPuff, type SledPose } from "./sledRun";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const SLED = "#c8302c";
 const RUNNER = "#5a3a26";
@@ -136,6 +137,7 @@ export function Sledders() {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const trackMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: TRACK, gradientMap: toonRamp(), side: THREE.DoubleSide, transparent: true, opacity: 0.4, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.2), []);
@@ -196,8 +198,10 @@ export function Sledders() {
       puffs.instanceMatrix.needsUpdate = true;
     }
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="sledders">
+    <group ref={figure} name="sledders">
       <mesh geometry={shapes.track} material={trackMaterial} />
       {OUTFITS.map((_, i) => (
         <group key={i}>
