@@ -1,6 +1,7 @@
 import type { Logbook } from "@stillwater/shared";
 import { bookFishDay } from "../tripMonths";
 import { countedFish } from "../milestones";
+import { kindKey } from "../speciesLink";
 
 /** The day (a night session's small hours on its outing's day, as the day search finds them) the book's fish came in the most kinds, once a day has two or more; a tie goes to the latest day. */
 export function mostKindsDay(book: Logbook): { date: string; kinds: number } | null {
@@ -9,7 +10,7 @@ export function mostKindsDay(book: Logbook): { date: string; kinds: number } | n
     const at = new Date(entry.caughtAt);
     if (Number.isNaN(at.getTime())) continue;
     const day = bookFishDay(book, entry);
-    days.set(day, (days.get(day) ?? new Set()).add(entry.species.trim().toLowerCase()));
+    days.set(day, (days.get(day) ?? new Set()).add(kindKey(entry.species)));
   }
   let best: { date: string; kinds: number } | null = null;
   for (const [date, kinds] of days) {

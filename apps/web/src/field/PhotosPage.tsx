@@ -105,7 +105,8 @@ export function PhotosPage() {
   const pictured = catchesWithPhotos(catchesNewestFirst(book), (id) => photoFor(id) !== null);
   const kinds = speciesCounts(pictured);
   // A kind picked that has since lost its last photo shows them all again.
-  const picked = kind && kinds.some((row) => kindKey(row.species) === kind) ? kind : null;
+  // An older link's "perches" picks the same kind as "perch".
+  const picked = kind && kinds.some((row) => kindKey(row.species) === kindKey(kind)) ? kindKey(kind) : null;
   const ofKind = picked ? pictured.filter((entry) => kindKey(entry.species) === picked) : pictured;
   // The waters with photos, most pictured first; a water picked that has none left shows them all again.
   const perWater = new Map<string, number>();

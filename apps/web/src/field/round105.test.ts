@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CatchEntry, Logbook } from "@stillwater/shared";
+import { personalBests, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { t } from "../i18n";
 import { findCatches } from "./CatchSearch";
 import { pieceTally } from "./pieceTally";
@@ -46,5 +46,12 @@ describe("round 105: one kind key everywhere", () => {
   it("renames every spelling of a kind", () => {
     const renamed = renameInBook({ spots: [], trips: [], catches: [fish("a", "Perch"), fish("b", "Perches")] }, "species", "Perch", "Yellow perch");
     expect(renamed.ok && renamed.book.catches.map((entry) => entry.species)).toEqual(["Yellow perch", "Yellow perch"]);
+  });
+});
+
+describe("round 105: a kind's record on Bests", () => {
+  it("counts every spelling the kind's page opens", () => {
+    const book: Logbook = { spots: [], trips: [], catches: [fish("a", "Silver perch"), fish("b", "Silver perch"), fish("c", "Silver perches")] };
+    expect(personalBests(book, kindKey).species.map((row) => row.count)).toEqual([3]);
   });
 });

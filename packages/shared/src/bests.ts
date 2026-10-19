@@ -45,17 +45,18 @@ function bestOf(catches: CatchEntry[], kind: Measure["kind"]): CatchEntry | null
   return best;
 }
 
-export function personalBests(book: Logbook): PersonalBests {
+/** `kindOf` says which names are one kind: by default the same letters in any case. */
+export function personalBests(book: Logbook, kindOf: (species: string) => string = (species) => species.trim().toLowerCase()): PersonalBests {
   const longest = bestOf(book.catches, "length");
   const heaviest = bestOf(book.catches, "weight");
   const largeSpecies = new Set(
-    [longest, heaviest].flatMap((entry) => (entry ? [entry.species.trim().toLowerCase()] : [])),
+    [longest, heaviest].flatMap((entry) => (entry ? [kindOf(entry.species)] : [])),
   );
 
   // "Rock bass" and "rock bass" are one fish: grouped under the name first written.
   const bySpecies = new Map<string, { name: string; rows: CatchEntry[] }>();
   for (const entry of book.catches) {
-    const key = entry.species.trim().toLowerCase();
+    const key = kindOf(entry.species);
     const group = bySpecies.get(key) ?? { name: entry.species, rows: [] };
     group.rows.push(entry);
     bySpecies.set(key, group);
@@ -67,7 +68,7 @@ export function personalBests(book: Logbook): PersonalBests {
       count: rows.length,
       longest: bestOf(rows, "length"),
       heaviest: bestOf(rows, "weight"),
-      large: largeSpecies.has(name.trim().toLowerCase()),
+      large: largeSpecies.has(kindOf(name)),
     }))
     .sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
 
