@@ -61,7 +61,7 @@ import { notesHere } from "./outingNotes";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { PLAY_LAKE_ID } from "./playLake";
-import { isSampleSpot, nextRealTrips } from "./bookCopy";
+import { isSampleOuting, isSampleSpot, nextRealTrips } from "./bookCopy";
 import { canGoBack, pageBefore } from "./FieldShell";
 import { noteAddedWater } from "./addedWater";
 import { bestLureAt } from "./waterLure";
@@ -148,6 +148,12 @@ export function SpotsPage() {
   // The order picked holds while its control shows: a list cut to two waters goes back to the last fish.
   const order: SpotOrder = rows.length > 2 ? storedOrder : "fish";
   const fishOnTrip = fishCountsByTrip(book);
+  // The outing the angler is out on at each water, as the water's page and the Map say it: of a dawn and a dusk, the later.
+  const newest = newestOutingFirst(book);
+  const outNowName = (spotId: string) => {
+    const going = book.trips.filter((trip) => trip.spotId === spotId && !isSampleOuting(trip) && outNow(book, trip)).sort(newest)[0];
+    return going ? outingName(going, book.spots) : null;
+  };
   if (order === "name") rows.sort((a, b) => a.spot.name.trim().localeCompare(b.spot.name.trim(), locale()));
   if (order === "most") rows.sort((a, b) => countOf(b) - countOf(a));
   // The water left alone longest first, to give a rested one a go; waters never fished after them.
@@ -324,6 +330,7 @@ export function SpotsPage() {
                   bestLure={bestLureAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   biggest={biggestAt(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id)}
                   waterTemp={recentTemp(ownHere(row.spot.id) ? countedCatches : book.catches, row.spot.id, today, (entry) => bookFishDay(book, entry))}
+                  outNow={outNowName(row.spot.id)}
                 />
               ))}
             </div>
@@ -436,6 +443,7 @@ function SpotView() {
   // The next outing planned here, as the Waters card names it; today's once it has a fish is under way, not ahead.
   const nextHere = nextRealTrips(book, today).find((trip) => trip.spotId === spot.id);
   const restHere = lastHere ? daysBetween(lastHere, today) : 0;
+  const firstHere = spot.id === PLAY_LAKE_ID ? undefined : summed.map((entry) => bookFishDay(book, entry)).sort()[0];
   // For the copied summary: the day it was last fished and what that day's outing gave, the first thing a mate asks.
   // Of a dawn and a dusk, the later, as Out now takes it.
   const lastHereTrip = lastHere ? countedTrips.filter((trip) => trip.date === lastHere).sort(newestOutingFirst(book))[0] : undefined;
@@ -519,6 +527,8 @@ function SpotView() {
             <LastHereLine rest={restHere} day={lastHere} trip={lastHereTrip} fish={fishOn} catches={catches} />
           </p>
         ) : null}
+        {/* How long the angler has known this water: its first fish, once another day has followed it. */}
+        {firstHere && firstHere !== lastHere ? <p className="meta first-here">{t("First fish here: {day}", { day: formatDay(firstHere) })}</p> : null}
         {outNowHere ? (
           <p className="meta out-now">
             <Link to={`/trips/${outNowHere.id}`}>{t("Out now: {outing}", { outing: outingName(outNowHere, book.spots) })}</Link>

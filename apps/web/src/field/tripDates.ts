@@ -49,7 +49,10 @@ export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean
  */
 export function outNow(book: Logbook, trip: Trip, now = new Date()): boolean {
   if (stillGoing(book, trip, now)) return true;
-  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
+  return trip.date === localDate(now) && catchesForTrip(book, trip.id).some((entry) => {
+    const since = now.getTime() - Date.parse(entry.caughtAt);
+    return since >= 0 && since < 12 * 3_600_000;
+  });
 }
 
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */

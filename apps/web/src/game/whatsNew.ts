@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-scene49";
+export const NEWS_ID = "2026-10-19-field62";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.",
   "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.",
