@@ -26,7 +26,7 @@ import {
   type Wind,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
-import { fightLines, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
+import { fightLines, TOOTHY, fightWater, fightWind, isCleanFight, isCloseCall, LEAPERS, makeFight, seasonTireMul, thrivesInCold, floodedInlet, warmTireMul, rainCooled, deepCooled, runTireMul, nestTireMul, nightTireMul, spentTireMul, twilightTireMul, springRunTireMul, currentTireMul, fallFeedTireMul, rainHunterTireMul, summerStrengthTireMul, SOFT_MOUTHS, SOLID_HOOK_STAMINA, steerSide, type FightPerformance, type FightRuntime, type FightSim, type FightWater, type FightWind, type Steer, type SurgeState } from "./fight";
 import { fightInput } from "./scene/fightMotion";
 import { settings } from "./settings";
 import { dragTone } from "./dragTone";
@@ -255,7 +255,8 @@ export const SECOND_TAKE_NIBBLE_MS = 300;
 export const FOLLOW_MS = 1200;
 
 /** Said once, when a fight first frays the line: what did it, and what to do. */
-function scuffNote(spot: SpotId) {
+function scuffNote(spot: SpotId, teeth = false) {
+  if (teeth) return t("Its teeth frayed your line: it snaps sooner until you retie it.");
   return spot === "dock"
     ? t("Rubbing round the piling frayed your line: it snaps sooner until you retie it.")
     : t("The rocks frayed your line: it snaps sooner until you retie it.");
@@ -553,7 +554,7 @@ export function useFishingGame(
         resetToIdle(current.strength < species.minStrength ? t("Line parted. Spend points on Strength.") : t("Line parted. Spend points on Accuracy."));
       }, 1400);
     } else {
-      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current);
+      const runtime = makeFight(species, weight, current.strength, Math.random, fishTireMulForLevel(anglerLevel(current.lifetimePoints)) * seasonTireMul(season, species.id) * warmTireMul(season, species.id, sky, spotRef.current) * runTireMul(season, species.id) * nestTireMul(season, species.id, spotRef.current) * nightTireMul(hourRef.current, species.id) * spentTireMul(season, species.id) * twilightTireMul(hourRef.current, species.id) * springRunTireMul(season, species.id, spotRef.current) * currentTireMul(species.id, spotRef.current) * fallFeedTireMul(season, species.id) * rainHunterTireMul(sky, species.id) * summerStrengthTireMul(season, species.id), water, windy, isTopwater(lureRef?.current), hasTrebles(lureRef?.current) || deep, seasonTireMul(season, species.id) > 1, isTrophyWeight(species, weight), floodedInlet(spotRef.current, season, sky), frayedRef.current, deep);
       runtimeRef.current = runtime;
       simRef.current = runtime.sim;
       performanceRef.current = runtime.performance;
@@ -605,6 +606,8 @@ export function useFishingGame(
             ? t("Hooked solid in {time} s! {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : lightHook
               ? t("Hooked light in {time} s, it only just caught. Keep it out of the red. {line}.", { time: seconds(strike.elapsedMs), line })
+            : deep && TOOTHY.has(species.id)
+              ? t("It swallowed the bait: hooked deep in {time} s, with its teeth on the line. Land it quick. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : deep
               ? t("It swallowed the bait: hooked deep in {time} s. {line}. Ease off when it runs.", { time: seconds(strike.elapsedMs), line })
             : dullRef.current
@@ -1316,6 +1319,7 @@ export function useFishingGame(
     let lastScrapeFx = 0;
     let wasWeeded = false;
     let wasWrapped = false;
+    let wasBitten = false;
     let wasShaking = false;
     let wasLifting = false;
     let prevSurge: SurgeState = 0;
@@ -1403,6 +1407,13 @@ export function useFishingGame(
             fx.haptic("scrape");
           }
           wasWrapped = !!sim.wrapped;
+          // A pike's teeth wear through to the line it swallowed: it grates once, and the card says so.
+          if (sim.bitten && !wasBitten) {
+            fx.scrape();
+            fx.haptic("scrape");
+            setHint(t("Its teeth have frayed the line! It snaps sooner now, so land it quick."));
+          }
+          wasBitten = !!sim.bitten;
           // A walleye shaking its head knocks up the rod.
           if (sim.shake && !wasShaking) {
             fx.headShake();
@@ -1447,8 +1458,9 @@ export function useFishingGame(
             const followed = follow && gotAwayRef.current?.follow ? `${followCall(follow.species)} ${t("It's still about: cast here again.")}${tempt()}` : "";
             // The landed card covers the hint, so what the bank holds now rides on the card too.
             const fed = fedRef.current ? t("{fish}: it came in to feed on the groundbait.", { fish: t(current.species.name) }) : "";
-            const scuffed = runtime.performance.scuffed && !frayedRef.current ? scuffNote(spotRef.current) : "";
-            if (runtime.performance.scuffed) markFrayed(true);
+            const frays = runtime.performance.scuffed || runtime.performance.bitten;
+            const scuffed = frays && !frayedRef.current ? scuffNote(spotRef.current, !runtime.performance.scuffed) : "";
+            if (frays) markFrayed(true);
             // The fish took the worm, so a fresh one goes on.
             setSoak(0);
             const recaught = recaughtRef.current;
@@ -1501,13 +1513,15 @@ export function useFishingGame(
             // How close it came, so a break near the net reads as nearly there rather than as a wasted fight.
             const reeledIn = Math.round((1 - sim.line) * 100);
             // A break gives the angler a fresh knot to tie on, so the line is sound again.
-            const snapped = sim.frayed ? t("{fish} snapped the frayed line, short of the usual strain.", { fish: t(current.species.name) }) : t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
+            const snapped = sim.bitten
+              ? t("The {fish}'s teeth wore through the line before you could land it.", { fish: t(current.species.name) })
+              : sim.frayed ? t("{fish} snapped the frayed line, short of the usual strain.", { fish: t(current.species.name) }) : t("{fish} snapped the line — too much tension.", { fish: t(current.species.name) });
             markFrayed(false);
             setTwist(0);
             markDull(false);
             setSoak(0);
             setOutcome({ kind: "broke", message: (reeledIn >= 10 ? `${snapped} ${t("It was {n}% of the way in.", { n: reeledIn })}` : snapped) + trophy });
-            resetToIdle(t("Too much tension — let go when the bar turns red or the fish is about to run.") + stillAbout());
+            resetToIdle((sim.bitten ? t("Given time, a pike or muskie swallows the bait: strike sooner, or land it quick.") : t("Too much tension — let go when the bar turns red or the fish is about to run.")) + stillAbout());
           } else if (result === "escaped") {
             fx.snap();
             fx.haptic("snap");
@@ -1516,8 +1530,9 @@ export function useFishingGame(
             spookRef.current = spotRef.current;
             schoolRef.current = null;
             gotAwayRef.current = gotAwayAfterLoss(current.species, current.weight, spotRef.current);
-            const trophy = lostTrophy(current.species, current.weight) + (runtime.performance.scuffed && !frayedRef.current ? ` ${scuffNote(spotRef.current)}` : "");
-            if (runtime.performance.scuffed) markFrayed(true);
+            const frays = runtime.performance.scuffed || runtime.performance.bitten;
+            const trophy = lostTrophy(current.species, current.weight) + (frays && !frayedRef.current ? ` ${scuffNote(spotRef.current, !runtime.performance.scuffed)}` : "");
+            if (frays) markFrayed(true);
             if (sim.tornOut && sim.lightHook && !SOFT_MOUTHS.has(current.species.id)) {
               setOutcome({ kind: "broke", message: t("The light hook pulled out of the {fish}.", { fish: t(current.species.name) }) + trophy });
               resetToIdle(t("Hooked light — strike sooner, and ease off as soon as the bar turns red.") + stillAbout());

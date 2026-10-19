@@ -56,6 +56,8 @@ export type FightSim = {
   carried?: boolean;
   /** Fought on a line the rocks or a piling scuffed in an earlier fight: it snaps at FRAYED_SNAP, short of full tension. */
   frayed?: boolean;
+  /** A pike that swallowed the bait has worn the line through to frayed with its teeth, mid-fight. */
+  bitten?: boolean;
   /** A smallmouth's or a rainbow's run straight at the angler, coming and while it lasts: the line goes slack unless it is reeled fast. */
   charge?: boolean;
   /** Hooked light, the fish charged and the slack line let the hook drop out: why it got away. */
@@ -163,12 +165,18 @@ export type FightPerformance = {
   clearOf?: "weeds" | "rocks" | "pilings" | "current";
   /** The line was reeled over the rocks or wrapped round a piling, and is frayed until retied. */
   scuffed?: boolean;
+  /** A pike's teeth frayed the line during this fight, and it stays frayed until retied. */
+  bitten?: boolean;
   /** A charge was left slack instead of reeled up: the clean bonus goes. */
   slackCharge?: boolean;
 };
 
 /** A frayed line snaps at this tension instead of the full 1, so the red band is half as wide. */
 export const FRAYED_SNAP = 0.9;
+/** Pike and muskie have rows of sharp teeth: hooked deep on swallowed bait, the line sits among them. */
+export const TOOTHY: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "ghost-pike"]);
+/** Seconds of fight before their teeth wear a line in the jaws to frayed: about two thirds of a usual fight. */
+export const TEETH_SEC = 8;
 
 /** Where FightBar turns the tension bar red. */
 export const RED_TENSION = 0.8;
@@ -474,6 +482,8 @@ export function makeFight(
   flood = false,
   /** The line is frayed from an earlier fight over the rocks or round a piling: it snaps sooner. */
   frayed = false,
+  /** Hooked deep on swallowed bait: a pike's teeth sit on the line and fray it if the fight runs long. */
+  swallowed = false,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -519,6 +529,7 @@ export function makeFight(
   const darter = DARTERS.has(species.id);
   const headShaker = HEAD_SHAKERS.has(species.id);
   const sticker = STICKERS.has(species.id);
+  const toothed = swallowed && TOOTHY.has(species.id);
   /** When the calm would have ended had a catfish not stuck to the bottom. */
   let calmEnd = 0;
   let shakeAt = Infinity;
@@ -713,6 +724,12 @@ export function makeFight(
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
     performance.maxLine = Math.max(performance.maxLine, sim.line);
     performance.fightSec = (performance.fightSec ?? 0) + dtSec;
+    // Fought too long, a pike chews the line it swallowed down to frayed.
+    if (toothed && !sim.frayed && performance.fightSec >= TEETH_SEC) {
+      sim.frayed = true;
+      sim.bitten = true;
+      performance.bitten = true;
+    }
 
     // Reeling a soft mouth, or a fish hooked light, in the red tears the hook hole wider until it pulls free.
     if ((softMouth || sim.lightHook) && reeling && sim.tension >= RED_TENSION) tearSec += dtSec;
@@ -729,7 +746,7 @@ export function makeFight(
         return "escaped";
       }
     }
-    if (sim.tension >= (frayed ? FRAYED_SNAP : 1)) return "snapped";
+    if (sim.tension >= (sim.frayed ? FRAYED_SNAP : 1)) return "snapped";
     if (tearSec >= tearAt) {
       sim.tornOut = true;
       return "escaped";

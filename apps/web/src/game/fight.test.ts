@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { FRAYED_SNAP, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
+import { FRAYED_SNAP, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -795,6 +795,45 @@ describe("a frayed line", () => {
     for (const runtime of [frayed, sound]) runtime.sim.tension = (FRAYED_SNAP + 1) / 2;
     expect(frayed.step(1, 0, false)).toBe("snapped");
     expect(sound.step(1, 0, false)).toBe("fighting");
+  });
+});
+
+describe("a pike's teeth", () => {
+  /** Plays a careful fight to the given second, or to its end. */
+  function playTo(runtime: FightRuntime, sec: number) {
+    let outcome: FightOutcome = "fighting";
+    for (let now = 0; outcome === "fighting" && now < sec * 1000; now += 50) {
+      outcome = runtime.step(now, 0.05, runtime.sim.surge !== 2 && runtime.sim.tension < 0.6);
+    }
+    return outcome;
+  }
+  const swallowed = (id: string) => makeFight(fish(id), 4, 3, seeded(5), 1, "open", undefined, false, true, false, false, false, false, true);
+
+  it("fray the line it swallowed once the fight runs past TEETH_SEC", () => {
+    const pike = swallowed("pike");
+    playTo(pike, TEETH_SEC - 1);
+    expect(pike.sim.frayed).toBeUndefined();
+    expect(playTo(pike, TEETH_SEC + 0.5)).toBe("fighting");
+    expect(pike.sim.frayed).toBe(true);
+    expect(pike.sim.bitten).toBe(true);
+    expect(pike.performance.bitten).toBe(true);
+    // From then on it snaps short of full tension.
+    pike.sim.tension = (FRAYED_SNAP + 1) / 2;
+    expect(pike.step((TEETH_SEC + 1) * 1000, 0, false)).toBe("snapped");
+  });
+
+  it("leave a lip-hooked pike's line, and a swallowing fish without teeth, sound", () => {
+    const lipped = makeFight(fish("pike"), 4, 3, seeded(5), 1, "open");
+    const perch = makeFight(fish("perch"), 0.8, 3, seeded(5), 1, "open", undefined, false, true, false, false, false, false, true);
+    for (const runtime of [lipped, perch]) {
+      playTo(runtime, TEETH_SEC + 2);
+      expect(runtime.sim.bitten).toBeUndefined();
+      expect(runtime.performance.bitten).toBeUndefined();
+    }
+  });
+
+  it("are the pike's and the muskies'", () => {
+    expect([...TOOTHY].sort()).toEqual(["ghost-pike", "pike", "tiger-muskie"]);
   });
 });
 
