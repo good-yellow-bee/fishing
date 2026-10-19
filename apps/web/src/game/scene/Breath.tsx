@@ -11,8 +11,22 @@ const PUFF_COLOR = "#eef3f6";
 const MOUTH_UP = 1.3;
 const MOUTH_AHEAD = 0.22;
 
-/** Small pale puffs of breath from the angler's face in the cold; `light` dims them at night. */
-export function Breath({ light }: { light: number }) {
+/** Where a mouth is in the world and which way it faces, on the ground plane, filled in each frame. */
+export type Mouth = { x: number; y: number; z: number; fx: number; fz: number };
+
+type PuffProps = {
+  /** Dims the puffs at night. */
+  light: number;
+  /** The puff's age at a time (breathPuff.ts), given lite effects' `every`. */
+  age: (time: number, every: number) => number;
+  /** Fills in the mouth for this frame. */
+  mouth: (out: Mouth) => void;
+  /** Their size against the angler's. */
+  size?: number;
+};
+
+/** Small pale puffs of breath from a mouth in the cold, blowing out the way it faces. */
+export function BreathPuffs({ light, age: ageAt, mouth, size = 1 }: PuffProps) {
   const still = useReducedMotion();
   const geometry = useMemo(() => new THREE.SphereGeometry(1, 8, 6), []);
   const material = useMemo(
@@ -20,6 +34,7 @@ export function Breath({ light }: { light: number }) {
     [],
   );
   const blobs = useRef<Array<THREE.Mesh | null>>([]);
+  const at = useMemo<Mouth>(() => ({ x: 0, y: 0, z: 0, fx: 0, fz: 1 }), []);
   useEffect(() => {
     material.color.set(PUFF_COLOR).multiplyScalar(Math.max(0.35, light));
   }, [light, material]);
@@ -31,20 +46,18 @@ export function Breath({ light }: { light: number }) {
     [geometry, material],
   );
   useFrame((state) => {
-    const age = still ? -1 : puffAge(state.clock.elapsedTime, settings.particles === "lite" ? 2 : 1);
-    const fx = Math.sin(anglerPose.yaw);
-    const fz = Math.cos(anglerPose.yaw);
-    const mouthX = anglerPose.x + fx * MOUTH_AHEAD;
-    const mouthZ = anglerPose.z + fz * MOUTH_AHEAD;
-    const mouthY = anglerPose.y + anglerPose.bob + MOUTH_UP;
+    const age = still ? -1 : ageAt(state.clock.elapsedTime, settings.particles === "lite" ? 2 : 1);
+    if (age >= 0) mouth(at);
     let peak = 0;
     blobs.current.forEach((mesh, i) => {
       if (!mesh) return;
       mesh.visible = age >= 0;
       if (age < 0) return;
       const blob = puffBlob(i, age);
-      mesh.position.set(mouthX + fx * blob.forward - fz * blob.side, mouthY + blob.up, mouthZ + fz * blob.forward + fx * blob.side);
-      mesh.scale.setScalar(blob.scale);
+      const forward = blob.forward * size;
+      const side = blob.side * size;
+      mesh.position.set(at.x + at.fx * forward - at.fz * side, at.y + blob.up * size, at.z + at.fz * forward + at.fx * side);
+      mesh.scale.setScalar(blob.scale * size);
       peak = Math.max(peak, blob.opacity);
     });
     material.opacity = peak * 0.45;
@@ -61,4 +74,17 @@ export function Breath({ light }: { light: number }) {
       }}
     />
   ));
+}
+
+function anglerMouth(out: Mouth) {
+  out.fx = Math.sin(anglerPose.yaw);
+  out.fz = Math.cos(anglerPose.yaw);
+  out.x = anglerPose.x + out.fx * MOUTH_AHEAD;
+  out.y = anglerPose.y + anglerPose.bob + MOUTH_UP;
+  out.z = anglerPose.z + out.fz * MOUTH_AHEAD;
+}
+
+/** Small pale puffs of breath from the angler's face in the cold; `light` dims them at night. */
+export function Breath({ light }: { light: number }) {
+  return <BreathPuffs light={light} age={puffAge} mouth={anglerMouth} />;
 }

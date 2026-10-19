@@ -42,8 +42,9 @@ describe("breath puffs", () => {
     };
     expect(count((t) => dogPuffAge(t))).toBeGreaterThan(count((t) => puffAge(t)) * 1.3);
     expect(count((t) => dogPuffAge(t, 2))).toBeLessThan(count((t) => dogPuffAge(t)));
-    let together = 0;
-    for (let t = 0; t < 60; t += 0.1) if (Math.abs(dogPuffAge(t) - puffAge(t)) < 0.05 && puffAge(t) >= 0) together += 1;
-    expect(together).toBeLessThan(60);
+    // Its first breath comes between the angler's, not with it, and lasts as long.
+    const firstDog = Array.from({ length: 400 }, (_, i) => i * 0.01).find((t) => dogPuffAge(t) >= 0 && dogPuffAge(t - 0.01) < 0)!;
+    expect(firstDog % BREATH_EVERY).toBeGreaterThan(0.5);
+    expect(dogPuffAge(firstDog + PUFF_SEC * 0.9)).toBeGreaterThan(0.85);
   });
 });
