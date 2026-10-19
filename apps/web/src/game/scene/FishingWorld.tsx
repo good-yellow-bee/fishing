@@ -41,6 +41,7 @@ import { DockRobin } from "./DockRobin";
 import { robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
+import { leavesOut } from "./leafFall";
 import { PostOwl } from "./PostOwl";
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
@@ -2198,7 +2199,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {auroraOut(new Date(), hour, sky, season) && <Aurora />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
-      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} scarf={knitsOut(season)} wind={wind ?? NO_WIND} />
+      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} scarf={knitsOut(season)} wind={wind ?? NO_WIND} leaf={leavesOut(season)} />
       <LineAndBobber
         level={level}
         phase={phase}
