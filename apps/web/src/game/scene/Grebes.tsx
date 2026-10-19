@@ -8,6 +8,7 @@ import { grebePose, grebesScared, grebeUnder } from "./grebeRush";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BACK = "#5d5246";
 const WHITE = "#efeae0";
@@ -50,6 +51,7 @@ export function grebeShapes() {
 /** A pair of grebes courting in spring: head shakes as they float, and now and then a rush across the water side by side; motion lives in grebeRush.ts. */
 export function Grebes() {
   const birds = useRef<(THREE.Group | null)[]>([]);
+  const figure = useRef<THREE.Group>(null);
   const bodies = useRef<(THREE.Group | null)[]>([]);
   const heads = useRef<(THREE.Group | null)[]>([]);
   const sprays = useRef<(THREE.Group | null)[]>([]);
@@ -123,8 +125,10 @@ export function Grebes() {
       }
     }
   });
+  useSkinnedFigure(figure, looks.painted);
+
   return (
-    <>
+    <group ref={figure}>
       {[0, 1].map((k) => (
         <group key={k} ref={(g) => void (birds.current[k] = g)} name="grebe" scale={SCALE}>
           <group ref={(g) => void (bodies.current[k] = g)}>
@@ -140,6 +144,6 @@ export function Grebes() {
           </group>
         </group>
       ))}
-    </>
+    </group>
   );
 }

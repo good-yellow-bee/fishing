@@ -5,6 +5,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { SANDPIPER_COUNT, sandpiperAt } from "./sandpiperRun";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BACK = "#8a7a62";
 const BELLY = "#f2eee4";
@@ -44,6 +45,7 @@ export function sandpiperLegsShape() {
 export function Sandpipers() {
   const still = useReducedMotion();
   const birds = useRef<(THREE.Group | null)[]>([]);
+  const figure = useRef<THREE.Group>(null);
   const bodies = useRef<(THREE.Group | null)[]>([]);
   const heads = useRef<(THREE.Group | null)[]>([]);
   const shapes = useMemo(() => ({ body: sandpiperBodyShape(), head: sandpiperHeadShape(), legs: sandpiperLegsShape() }), []);
@@ -73,8 +75,10 @@ export function Sandpipers() {
       if (head) head.rotation.x = pose.peck * 0.9;
     }
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="sandpipers">
+    <group ref={figure} name="sandpipers">
       {Array.from({ length: SANDPIPER_COUNT }, (_, i) => (
         <group key={i} ref={(g) => void (birds.current[i] = g)}>
           <group scale={BIRD_SCALE}>

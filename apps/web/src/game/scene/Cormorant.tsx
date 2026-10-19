@@ -6,6 +6,7 @@ import { mergePainted } from "./mergeParts";
 import { CORMORANT_ROCK, cormorantPose, cormorantStartle } from "./cormorantPerch";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BLACK = "#1d2120";
 const SHEEN = "#2c3a33";
@@ -74,6 +75,8 @@ export function Cormorant() {
       wing.rotation.set(0, side * (1 - spread.current) * 1.35, side * spread.current * 0.35);
     });
   });
+  useSkinnedFigure(bird, material);
+
   return (
     <group ref={bird} name="cormorant" position={[CORMORANT_ROCK.x, 0, CORMORANT_ROCK.z]} scale={SCALE}>
       <group ref={body}>

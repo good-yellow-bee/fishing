@@ -5,6 +5,7 @@ import { hareAt } from "./hareRounds";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const COATS = {
   brown: { fur: "#8b6b4a", pale: "#d8c6a8" },
@@ -82,6 +83,8 @@ export function Hare({ coat }: { coat: keyof typeof COATS }) {
     }
     if (head.current) head.current.rotation.x = pose.nibble * 0.75 - pose.upright * 0.2;
   });
+  useSkinnedFigure(root, material);
+
   return (
     <group ref={root} name="hare" scale={SCALE}>
       <mesh geometry={shapes.feet} material={material} />

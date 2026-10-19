@@ -7,6 +7,7 @@ import { useReducedMotion } from "./reducedMotion";
 import { sailAt } from "./sailingTrip";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const HULL = "#f2efe6";
 const STRIPE = "#2f5f8a";
@@ -89,6 +90,8 @@ export function Dinghy({ wind }: { wind: { x: number; z: number } }) {
     // The sailor sits out on the high side, against the heel.
     if (sailor.current) sailor.current.position.x = pose.heel > 0 ? 0.42 : -0.42;
   });
+  useSkinnedFigure(boat, material);
+
   return (
     <>
       <group ref={boat} name="dinghy">

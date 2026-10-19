@@ -6,6 +6,7 @@ import { mergePainted, mergeParts } from "./mergeParts";
 import { OWL_PERCH, OWL_TREE, hootBob, owlHead } from "./owlMotion";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const FEATHER = "#6b5a46";
 const FACE = "#b9a687";
@@ -92,6 +93,8 @@ export function Owl() {
     if (head.current) head.current.rotation.y = owlHead(time, still);
     if (body.current) body.current.position.y = OWL_PERCH.y - (still ? 0 : hootBob(time - hootAt.current));
   });
+
+  useSkinnedFigure(body, looks.painted);
 
   return (
     <group ref={body} name="owl" position={[OWL_PERCH.x, OWL_PERCH.y, OWL_PERCH.z]} scale={OWL_SCALE}>
