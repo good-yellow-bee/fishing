@@ -123,10 +123,11 @@ export function tripsCsv(whole: Logbook, today: string): string {
       tally.set(name, (tally.get(name) ?? 0) + 1);
       kinds.set(id, tally);
       const lure = lureName(entry.lure);
-      if (!lure) continue;
-      const used = lures.get(id) ?? new Map<string, number>();
-      used.set(lure, (used.get(lure) ?? 0) + 1);
-      lures.set(id, used);
+      if (lure) {
+        const used = lures.get(id) ?? new Map<string, number>();
+        used.set(lure, (used.get(lure) ?? 0) + 1);
+        lures.set(id, used);
+      }
     }
   }
   const tallyOf = (tallies: Map<string, Map<string, number>>, tripId: string) =>

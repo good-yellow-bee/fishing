@@ -157,7 +157,6 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
   return t("Last time here: {day} · {counts}", { day: formatDay(last.date), counts: counts.join(" · ") });
 }
 
-/** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
 /** A plan as text for a message: the day, the water, what works there and what is still to pack. */
 export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
   const spot = spotById(book, trip.spotId);
@@ -166,6 +165,7 @@ export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): 
   return [head, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
 }
 
+/** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
 export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
   const spot = spotById(book, trip.spotId);
   // An untitled outing goes by its water's name, as its heading does.

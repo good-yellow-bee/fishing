@@ -419,7 +419,8 @@ export function HomePage() {
             </small>
           ) : null}
           {/* The plan for a message, as its own page copies it: who is coming along needs the day, the water and the bag. */}
-          {next && next !== lateOuting && !isSampleOuting(next) ? (
+          {/* Until its first fish: an outing under way has nothing left to plan, as its page says. */}
+          {next && !isSampleOuting(next) && catchesForTrip(book, next.id).length === 0 ? (
             <CopySummary text={() => planText(book, next, tackleItems ?? [])} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />
           ) : null}
           {/* On the day, a fish goes straight onto this outing. */}

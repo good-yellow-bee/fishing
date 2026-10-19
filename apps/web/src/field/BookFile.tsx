@@ -90,6 +90,8 @@ function fishPreview(entries: readonly { species: string; caughtAt: string }[]):
   return entries.length > PREVIEW_FISH ? t("{list} and {n} more", { list: shown, n: entries.length - PREVIEW_FISH }) : shown;
 }
 const PREVIEW_FISH = 3;
+/** Last year's catches are offered as a sheet of their own until April (month index 3). */
+const LAST_YEAR_UNTIL_MONTH = 3;
 
 /** "12 fish, newest Oct 13", or "no fish". */
 function bookSummary(book: Logbook): string {
@@ -365,11 +367,13 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   };
 
   // This year's fish by their outing's day, as Bests and the goal count them: a New Year's Eve night's small hours are December's.
-  const thisYear = localDate(new Date()).slice(0, 4);
-  const thisYearFish = countedBook(book).catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
+  const now = new Date();
+  const ownFish = countedBook(book).catches;
+  const thisYear = localDate(now).slice(0, 4);
+  const thisYearFish = ownFish.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   // Last year's in the first months, when its returns fall due and this year's sheet holds little or nothing yet.
   const lastYear = String(Number(thisYear) - 1);
-  const lastYearFish = new Date().getMonth() < 3 ? countedBook(book).catches.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)) : [];
+  const lastYearFish = now.getMonth() < LAST_YEAR_UNTIL_MONTH ? ownFish.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)) : [];
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
   const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
@@ -462,13 +466,13 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
         ) : null}
         {/* Only when the file would hold a fish: a book of game rounds alone has none of the angler's own to give. */}
         {/* Not for the sample week alone: its invented fish are no sheet of the angler's. */}
-        {countedBook(book).catches.length > 0 && !isSampleOnly(storedBook) ? (
+        {ownFish.length > 0 && !isSampleOnly(storedBook) ? (
           <button
             type="button"
             className="text-button"
             onClick={() => {
               // The angler's own fish, as the pages count them: not the game's, nor the sample week beside fish of their own.
-              downloadFile(catchesCsv({ ...book, catches: countedBook(book).catches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"));
+              downloadFile(catchesCsv({ ...book, catches: ownFish }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"));
               setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
             }}
           >
@@ -476,7 +480,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
           </button>
         ) : null}
         {/* This year's alone, for a club's or a permit's return, once the book holds another year too. */}
-        {thisYearFish.length > 0 && thisYearFish.length < countedBook(book).catches.length && !isSampleOnly(storedBook) ? (
+        {thisYearFish.length > 0 && thisYearFish.length < ownFish.length && !isSampleOnly(storedBook) ? (
           <button
             type="button"
             className="text-button"
@@ -488,7 +492,7 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             {t("This year's catches ({year})", { year: thisYear })}
           </button>
         ) : null}
-        {lastYearFish.length > 0 && lastYearFish.length < countedBook(book).catches.length && !isSampleOnly(storedBook) ? (
+        {lastYearFish.length > 0 && !isSampleOnly(storedBook) ? (
           <button
             type="button"
             className="text-button"

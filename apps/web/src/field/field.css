@@ -333,6 +333,12 @@ button.field-primary {
   font-size: 12px;
 }
 
+/* Home's Copy the plan sits among the Next card's small lines, at their size. */
+.stat-row .trip-again {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
 
 /* Side by side at 1.15 to 0.85 while both fit, stacked when they don't: on a 900-1280 px window with larger text the
    right column squeezed a catch card's words into a 23 px column, one letter a line. */
@@ -2623,13 +2629,15 @@ html:has(.form-save):has(.undo-bar) .field-main {
 /* Home's "Add to calendar" was a 15 px button whose reach ran 4 px into "Last time" above it: a 32 px band, as the
    count links beside it are. "What's new" under the last outing card reaches only as far as the gap above it. */
 @media (pointer: coarse) {
-  .stat-row small .text-button {
+  .stat-row small .text-button,
+  .stat-row .trip-again .text-button {
     min-height: 32px;
     padding-block: 8px;
     box-sizing: border-box;
   }
 
-  .stat-row small .text-button::after {
+  .stat-row small .text-button::after,
+  .stat-row .trip-again .text-button::after {
     inset: 0 -4px;
   }
 
