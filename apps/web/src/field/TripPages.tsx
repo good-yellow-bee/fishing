@@ -48,7 +48,7 @@ import { datedName, downloadFile } from "./download";
 import { tripIcs, tripIcsName, tripsIcs } from "./tripIcs";
 import { tripSummary } from "./summaries";
 import { busiestHour, fishPace, sinceLastFish, totalWeight } from "./tripPace";
-import { bestOutingHere, lastOutingBefore, outingAverage, outingMean, outingStreak } from "./outingAverage";
+import { averageParts, bestOutingHere, lastOutingBefore, outingMean, outingStreak } from "./outingAverage";
 import { RecordHere, recordHere } from "./RecordHere";
 import { placeFor } from "./map/places";
 import { sunTimes } from "./sunTimes";
@@ -110,6 +110,20 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
   return text ? <p className="meta since-last">{text}</p> : null;
 }
 
+/** "1.2 fish an outing on average, 2 without a fish", the blank ones a link, in the order the language puts them. */
+function AverageWithBlank({ average, blank, to }: { average: string; blank: string; to: string }) {
+  const [before = "", after = ""] = t("{average}, {blank}", { average, blank: "\u0000" }).split("\u0000");
+  return (
+    <>
+      {before}
+      <Link to={to} onClick={() => requestAnimationFrame(() => document.getElementById("trip-search")?.focus())}>
+        {blank}
+      </Link>
+      {after}
+    </>
+  );
+}
+
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
 const TRIP_FIND = "find";
 
@@ -129,7 +143,18 @@ export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem
     t("Moon that night: {moon}", { moon: t(MOON_LABELS[moonName(moonPhase(new Date(`${trip.date}T22:00:00`)))]) }),
     works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
     toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
+    lastTimeNote(book, trip),
   ].filter(Boolean);
+}
+
+/** How the last outing on the water went, with what got away: a day of missed strikes is the reason to change hooks. */
+function lastTimeNote(book: Logbook, trip: Trip): string {
+  if (trip.spotId === PLAY_LAKE_ID) return "";
+  const fishHere = outingFish(book, true);
+  const last = lastOutingBefore(countedBook(book).trips.filter((other) => other.spotId === trip.spotId && other.id !== trip.id), trip.date, outingDay(localDate(new Date())), fishHere);
+  if (!last) return "";
+  const counts = [fishSum(fishHere(last.id)), ...(last.lost ? [tn(last.lost, "{n} lost", "{n} lost")] : []), ...(last.missed ? [tn(last.missed, "{n} missed", "{n} missed")] : [])];
+  return t("Last time here: {day} · {counts}", { day: formatDay(last.date), counts: counts.join(" · ") });
 }
 
 /** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
@@ -172,7 +197,7 @@ export function TripsPage() {
   // Counted as Bests counts them: the sample week's outings go with the angler's first own outing or fish.
   // A day's fish logged without its outing count for that day's outing on that water, as a water's page and Bests count them.
   const own = countedBook(book);
-  const average = outingAverage(own.trips, fishOn, fishedBy);
+  const average = averageParts(own.trips, fishOn, fishedBy);
   // A run of outings with a fish still going, once it is three long: worth keeping up.
   const streak = outingStreak(own.trips, fishOn, fishedBy, looseFishDays(book));
   const runNow = streak.going && streak.best >= 3 ? streak.best : 0;
@@ -190,7 +215,8 @@ export function TripsPage() {
   // The words the search reads best, one tap each: only those that would find an outing in this book.
   const quick = needle
     ? []
-    : QUICK_FINDS.map((word) => t(word)).filter((word) => findTrips(book, word, fishOn, today, t, new Date(), fishTrips, timeTrips).length > 0);
+    : // In the small hours, last evening's outing first: "today" has none yet.
+      [...(fishedBy < today ? ["last night|search word"] : []), ...QUICK_FINDS].map((word) => t(word)).filter((word) => findTrips(book, word, fishOn, today, t, new Date(), fishTrips, timeTrips).length > 0);
   // The plans among them said apart, as the month headings under the count say them.
   const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishOn(trip.id))).length;
   const foundLine = [
@@ -300,7 +326,16 @@ export function TripsPage() {
             </p>
           ) : null}
           <h2 className="subhead">{t("Recent")}</h2>
-          {average ? <p className="meta">{average}</p> : null}
+          {average ? (
+            <p className="meta">
+              {average.blank ? (
+                // The blank outings one tap away: the search finds just those the count counts.
+                <AverageWithBlank average={average.average} blank={average.blank} to={`/trips?${new URLSearchParams({ [TRIP_FIND]: `${t("no fish|search word")} ${onlyMine}`.trim() }).toString()}`} />
+              ) : (
+                average.average
+              )}
+            </p>
+          ) : null}
           {runNow > 0 ? <p className="meta outing-run">{tn(runNow, "A fish on each of your last {n} outings", "A fish on each of your last {n} outings")}</p> : null}
           {/* A blank spell still running, as Bests says it: the moment to change water or lure. */}
           {streak.dryNow > 1 && streak.best > 0 ? <p className="meta">{t("Outings since your last fish: {count}", { count: streak.dryNow })}</p> : null}
