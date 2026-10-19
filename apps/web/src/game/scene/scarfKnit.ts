@@ -10,8 +10,8 @@ import { mergePainted } from "./mergeParts";
 const WOOL = "#b8322c";
 const STRIPE = "#efe9df";
 
-/** Worn in winter. */
-export function scarfOut(season: LakeSeason) {
+/** Winter, when the angler wears the scarf and the dock dog its matching jumper. */
+export function knitsOut(season: LakeSeason) {
   return season === "winter";
 }
 
@@ -43,13 +43,19 @@ export const SCARF_ENDS: readonly { x: number; length: number; phase: number }[]
 
 /**
  * How far end `i` swings out from the back (`lift`, radians about x) and to the side (`swing`, about z)
- * at `time` in a wind drifting the water at `drift` m/s: hanging nearly still in a calm, streaming and
- * flapping on a strong day. `still` hangs it at rest.
+ * at `time`, in a wind drifting the water at `local` m/s turned into the torso's frame (+z its front):
+ * hanging nearly still in a calm; on a strong day streaming out behind when the wind is at the
+ * angler's face, off to the side across it, and flapping against the back when it blows from behind.
  */
-export function scarfSway(i: number, time: number, drift: number, still = false) {
+export function scarfSway(i: number, time: number, local: { x: number; z: number }) {
   const end = SCARF_ENDS[i]!;
-  const blow = Math.min(1, drift / WIND_DRIFT.strong);
-  if (still) return { lift: 0.08 + 0.5 * blow, swing: 0 };
+  const speed = Math.hypot(local.x, local.z);
+  const blow = Math.min(1, speed / WIND_DRIFT.strong);
+  const back = speed > 0 ? Math.max(0, -local.z / speed) : 0;
+  const side = speed > 0 ? local.x / speed : 0;
   const flap = Math.sin(time * (1.6 + 5 * blow) + end.phase) + 0.4 * Math.sin(time * (3.1 + 7 * blow) + end.phase * 2);
-  return { lift: 0.08 + 0.7 * blow + (0.05 + 0.18 * blow) * flap, swing: (0.06 + 0.2 * blow) * Math.sin(time * (1.1 + 3 * blow) + end.phase + 0.6) };
+  return {
+    lift: 0.08 + 0.75 * blow * back + (0.05 + 0.15 * blow) * flap,
+    swing: 0.6 * blow * side + (0.06 + 0.2 * blow) * Math.sin(time * (1.1 + 3 * blow) + end.phase + 0.6),
+  };
 }

@@ -20,14 +20,15 @@ import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } 
 import { Reel } from "./Reel";
 import { capSnow } from "./capSnow";
 import { rodBowAmount, rodBowOffset, rodTipAt } from "./rodBow";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { SCARF_ENDS, SCARF_KNOT, SCARF_NECK, scarfEndShape, scarfSway, scarfWrapShape } from "./scarfKnit";
 import { SIP_IN_HAND, sipView, sipWeight } from "./sipMotion";
 import { applyToon, disposeMaterials, toonRamp } from "./toon";
 import type { ScenePhase } from "./types";
-import { useReducedMotion } from "./reducedMotion";
 import { useSceneWrap } from "./useSceneWrap";
 
 const CAP_SNOW_COLOR = "#eef3f6";
+const NO_WIND = { x: 0, z: 0 };
 /** The rod's tip, straight, in the grip's space. */
 const ROD_TIP_Y = 0.94;
 
@@ -58,9 +59,9 @@ type Props = {
   snowfall?: boolean;
   /** A fish is nibbling, so the rod tip shivers. */
   nibble?: boolean;
-  /** Wrapped up in the winter scarf (scarfKnit.ts), its ends blowing in a wind drifting the water at `windDrift` m/s. */
+  /** Wrapped up in the winter scarf (scarfKnit.ts), its ends blowing in the day's `wind` (a drift on the water, m/s). */
   scarf?: boolean;
-  windDrift?: number;
+  wind?: { x: number; z: number };
 };
 
 useGLTF.preload("/models/character-male-c.glb");
@@ -105,7 +106,52 @@ function clipName(phase: ScenePhase, moving: boolean, fishing: boolean) {
   return "idle";
 }
 
-export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false, scarf = false, windDrift = 0 }: Props) {
+/** The winter scarf (scarfKnit.ts) on the `torso` bone: the wrap, and two ends turned each frame by the wind in the torso's frame. */
+function AnglerScarf({ torso, wind }: { torso: THREE.Object3D; wind: { x: number; z: number } }) {
+  const still = useReducedMotion();
+  const parts = useMemo(() => {
+    const material = new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() });
+    const wrap = new THREE.Mesh(scarfWrapShape(), material);
+    wrap.position.set(...SCARF_NECK);
+    const ends = SCARF_ENDS.map((end) => {
+      const pivot = new THREE.Group();
+      pivot.position.set(SCARF_KNOT[0] + end.x, SCARF_KNOT[1], SCARF_KNOT[2]);
+      pivot.add(new THREE.Mesh(scarfEndShape(end.length), material));
+      return pivot;
+    });
+    const all = new THREE.Group();
+    all.add(wrap, ...ends);
+    return { all, ends, material };
+  }, []);
+  useEffect(() => {
+    torso.add(parts.all);
+    return () => {
+      parts.all.removeFromParent();
+    };
+  }, [torso, parts]);
+  useEffect(
+    () => () => {
+      parts.all.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) obj.geometry.dispose();
+      });
+      parts.material.dispose();
+    },
+    [parts],
+  );
+  const scratch = useMemo(() => ({ turn: new THREE.Quaternion(), local: new THREE.Vector3() }), []);
+  useFrame((state) => {
+    torso.getWorldQuaternion(scratch.turn);
+    const local = scratch.local.set(wind.x, 0, wind.z).applyQuaternion(scratch.turn.invert());
+    const time = still ? STILL_TIME : state.clock.elapsedTime;
+    parts.ends.forEach((pivot, i) => {
+      const sway = scarfSway(i, time, local);
+      pivot.rotation.set(sway.lift, 0, sway.swing);
+    });
+  });
+  return null;
+}
+
+export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibble = false, scarf = false, wind = NO_WIND }: Props) {
   const gltf = useGLTF("/models/character-male-c.glb");
   const rodFile = useGLTF("/models/fishing-rod.glb");
   const root = useRef<THREE.Group>(null);
@@ -148,6 +194,11 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
   const headTilt = useRef(0);
   const leftArm = useMemo(() => character.getObjectByName("arm-left") ?? null, [character]);
   const head = useMemo(() => character.getObjectByName("head") ?? null, [character]);
+  const torso = useMemo(() => {
+    const bone = character.getObjectByName("torso");
+    if (!bone) throw new Error("The angler model has no torso bone to wear the scarf.");
+    return bone;
+  }, [character]);
   const cup = useMemo(() => {
     const mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.06, 10), new THREE.MeshToonMaterial({ color: CUP_COLOR, gradientMap: toonRamp() }));
     mesh.position.copy(LEFT_FIST);
@@ -194,34 +245,6 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
     [snowParts, snowMaterial],
   );
 
-  const still = useReducedMotion();
-  const scarfParts = useMemo(() => {
-    const material = new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() });
-    const torso = character.getObjectByName("torso");
-    const wrap = new THREE.Mesh(scarfWrapShape(), material);
-    wrap.position.set(...SCARF_NECK);
-    const ends = SCARF_ENDS.map((end) => {
-      const pivot = new THREE.Group();
-      pivot.position.set(SCARF_KNOT[0] + end.x, SCARF_KNOT[1], SCARF_KNOT[2]);
-      pivot.add(new THREE.Mesh(scarfEndShape(end.length), material));
-      return pivot;
-    });
-    const all = new THREE.Group();
-    all.add(wrap, ...ends);
-    torso?.add(all);
-    return { all, ends, material };
-  }, [character]);
-  useEffect(
-    () => () => {
-      scarfParts.all.removeFromParent();
-      scarfParts.all.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) obj.geometry.dispose();
-      });
-      scarfParts.material.dispose();
-    },
-    [scarfParts],
-  );
-
   const rod = useMemo(() => {
     const next = rodFile.scene.clone(true);
     applyToon(next);
@@ -247,13 +270,6 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
   const { actions } = useAnimations(gltf.animations, character);
 
   useFrame((state, delta) => {
-    scarfParts.all.visible = scarf;
-    if (scarf) {
-      scarfParts.ends.forEach((pivot, i) => {
-        const sway = scarfSway(i, state.clock.elapsedTime, windDrift, still);
-        pivot.rotation.set(sway.lift, 0, sway.swing);
-      });
-    }
     snowCover.current = capSnow(snowCover.current, delta, snowfall);
     for (const part of snowParts) {
       const [x, y, z] = part.userData.full as [number, number, number];
@@ -424,6 +440,7 @@ export function Angler({ phase, powerRef, rodTip, lookAt, snowfall = false, nibb
   return (
     <group ref={root} position={[anglerPose.x, anglerPose.y, anglerPose.z]} rotation={[0, anglerPose.yaw, 0]} scale={1.7}>
       <primitive object={character} />
+      {scarf && <AnglerScarf torso={torso} wind={wind} />}
       <group ref={grip} rotation={[1.05, 0.05, ROD_REST_Z]}>
         <primitive object={rod} scale={0.19} />
         <Reel />

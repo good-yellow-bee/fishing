@@ -38,7 +38,7 @@ import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { robinOut } from "./robinVisit";
-import { scarfOut } from "./scarfKnit";
+import { knitsOut } from "./scarfKnit";
 import { PostOwl } from "./PostOwl";
 import { littleOwlOut } from "./littleOwl";
 import { mothsOut } from "./mothOrbit";
@@ -2194,7 +2194,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       {auroraOut(new Date(), hour, sky, season) && <Aurora />}
       <WaterAim phase={phase} aim={aim} level={level} powerRef={powerRef} accuracy={accuracy} />
       {/* Same-priority frames run in tree order; the angler writes rodTip before the line reads it. */}
-      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} scarf={scarfOut(season)} windDrift={Math.hypot((wind ?? NO_WIND).x, (wind ?? NO_WIND).z)} />
+      <Angler phase={phase} powerRef={powerRef} rodTip={rodTip} lookAt={lookAt} snowfall={snowing(sky, season)} nibble={nibble} scarf={knitsOut(season)} wind={wind ?? NO_WIND} />
       <LineAndBobber
         level={level}
         phase={phase}
@@ -2212,7 +2212,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       {rodDragonflyOut(hour, sky, season) && <RodDragonfly rodTip={rodTip} phase={phase} nibble={nibble} />}
-      {dogOut(hour, sky) && <DockDog key={season} phase={phase} robin={robinOut(hour, sky)} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={season === "winter"} />}
+      {dogOut(hour, sky) && <DockDog key={season} phase={phase} robin={robinOut(hour, sky)} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} />}
       {littleOwlOut(hour, sky) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
