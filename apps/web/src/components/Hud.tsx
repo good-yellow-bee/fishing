@@ -57,6 +57,7 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
     sync();
     return () => observer.disconnect();
   }, []);
+  const skyNote = wind ? `${t(skyBlurb(sky, season))} ${t("Wind: {wind}.", { wind: t(WIND_LABELS[wind]) })}` : t(skyBlurb(sky, season));
   return (
     <header ref={header} className="hud" data-points={profile.points} data-strength={profile.strength} data-accuracy={profile.accuracy} data-patience={profile.patience} data-hour={hour} data-sky={sky}>
       {/* The lake page's one heading, for a screen reader's jump list; the brand below is its visible name. */}
@@ -67,6 +68,8 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
           {season ? t("Northern lake · {season}", { season: t(SEASON_LABELS[season]) }) : t("Northern lake")}
           {(moon === "full" || moon === "new") && ` · ${t(MOON_LABELS[moon])}`}
         </span>
+        {/* A tooltip shows only to a hovering mouse: a screen reader reads what the season and the sky mean here. */}
+        {season && <span className="sr-only">{` · ${t(SEASON_BLURB[season])}`}</span>}
         <strong>Stillwater</strong>
         <div className="hud-user">
           <span>{profile.displayName}</span>
@@ -76,10 +79,11 @@ export function Hud({ profile, hour, sky, season, onSettings, onPackUp, streak =
       </div>
       <div className="hud-stats">
         <span className="hour-chip">{t(LAKE_HOUR_LABELS[hour])}</span>
-        {/* Blurb in the tooltip only: inline, it wrapped the HUD over the stance chip on laptop widths. */}
-        <span className="sky-chip" title={wind ? `${t(skyBlurb(sky, season))} ${t("Wind: {wind}.", { wind: t(WIND_LABELS[wind]) })}` : t(skyBlurb(sky, season))}>
+        {/* Blurb in the tooltip, and read out to a screen reader: shown inline, it wrapped the HUD over the stance chip on laptop widths. */}
+        <span className="sky-chip" title={skyNote}>
           {t(skyLabel(sky, season))}
         </span>
+        <span className="sr-only">{` · ${skyNote}`}</span>
         <LevelChip progress={progress} />
         <span className="points-chip">{tn(profile.points, "{n} point", "{n} points|hud")}</span>
         <span className="skill-chip">
