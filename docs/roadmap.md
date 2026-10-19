@@ -1316,7 +1316,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC155~~ | ~~Paraglider: on fine, breezy days from spring to fall a paraglider soars the ridge of the far hills, beating along it, banking round at each end and rising and sinking a little in the lift (one draw)~~ (#1343) | scene | S |
 | ~~SC156~~ | ~~Hill bonfire: on dry fall evenings and nights a bonfire burns on the far hills between the hay fields, its glow standing up to face the lake and its smoke leaning away on the wind (the shack's campfire drawn larger)~~ (#1348) | scene | S |
 | ~~SC157~~ | ~~News card scene34: the paraglider and the hill bonfire~~ (#1348) | scene | S |
-| SC158 | Cap cloud: on grey and wet days low cloud hangs on the tops of the far hills in soft grey wreaths that drift slowly along the ridge with the wind, lower and thicker in the rain (one draw) | scene | S |
+| ~~SC158~~ | ~~Cap cloud: on grey and wet days low cloud hangs on the tops of the far hills in soft grey wreaths that drift slowly along the ridge with the wind, lower and thicker in the rain (one draw)~~ (#1352) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
