@@ -786,6 +786,16 @@ export function logHolder(spot: SpotId, lure: string | undefined, profile: Pick<
   return drawnFrom(LOG_HOLDERS, LOG_HOLDER_SHARE, spot, lure, profile, hour, random);
 }
 
+/** The fish off the dock that sip bugs from the surface film. */
+export const BUG_SIPPERS: ReadonlySet<string> = new Set(["crappie", "golden-shiner", "smallmouth-bass", "rainbow-trout"]);
+/** Chance a bite on a lure among the surface bugs is one of the fish looking up for them. */
+export const BUG_SIPPER_SHARE = 0.35;
+
+/** A fish looking up for the surface bugs drawn to the lure for this bite, or none. */
+export function bugSipper(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(BUG_SIPPERS, BUG_SIPPER_SHARE, spot, lure, profile, hour, random);
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 
