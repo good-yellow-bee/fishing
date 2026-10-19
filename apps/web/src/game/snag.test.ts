@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { REEDS_STAND } from "./scene/bankWalk";
 import { inLake, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, POINT_PAD } from "@stillwater/shared";
-import { castSnags, inWeeds, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
+import { castSnags, CLEAN_DROP_ACCURACY, CLEAN_DROP_SNAG, inWeeds, onRocks, onShoreIce, ROCK_DEPTH, ROCK_SNAG_ODDS, SNAG_ODDS } from "./snag";
 import { waterDepth } from "./scene/water";
 import { LILY_SNAG_ODDS } from "./lilyCover";
 
@@ -16,24 +16,26 @@ describe("snags", () => {
 
   it("catch some casts in the weed, never a new angler's mercy cast", () => {
     const { x, z } = REEDS_STAND;
-    expect(castSnags("reeds", x, z, false, SNAG_ODDS - 0.01)).toBe("weed");
-    expect(castSnags("reeds", x, z, false, SNAG_ODDS + 0.01)).toBeNull();
-    expect(castSnags("reeds", x, z, true, 0)).toBeNull();
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS - 0.01, 1)).toBe("weed");
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS + 0.01, 1)).toBeNull();
+    expect(castSnags("reeds", x, z, true, 0, 1)).toBeNull();
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY)).toBeNull();
   });
 
   it("let a topwater lure ride over the weed, while any other lure still fouls there", () => {
     const { x, z } = REEDS_STAND;
-    expect(castSnags("reeds", x, z, false, 0, "Topwater frog")).toBeNull();
-    expect(castSnags("reeds", x, z, false, 0, "Shallow crankbait")).toBe("weed");
-    expect(castSnags("reeds", x, z, false, 0, "Nightcrawler")).toBe("weed");
+    expect(castSnags("reeds", x, z, false, 0, 1, "Topwater frog")).toBeNull();
+    expect(castSnags("reeds", x, z, false, 0, 1, "Shallow crankbait")).toBe("weed");
+    expect(castSnags("reeds", x, z, false, 0, 1, "Nightcrawler")).toBe("weed");
   });
 
   it("foul some casts tight to the lily pads on their stems, but not a topwater, and none in winter when the pads are gone", () => {
-    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS - 0.01, "Nightcrawler", "summer")).toBe("weed");
-    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS + 0.01, "Nightcrawler", "summer")).toBeNull();
-    expect(castSnags("dock", -6.8, 4.8, false, 0, "Popper", "summer")).toBeNull();
-    expect(castSnags("dock", -6.8, 4.8, false, 0, "Nightcrawler", "winter")).toBeNull();
-    expect(castSnags("dock", -6.8, 4.8, true, 0, "Nightcrawler", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS - 0.01, 1, "Nightcrawler", "summer")).toBe("weed");
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS + 0.01, 1, "Nightcrawler", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY, "Nightcrawler", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, 0, 1, "Popper", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, 0, 1, "Nightcrawler", "winter")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, true, 0, 1, "Nightcrawler", "summer")).toBeNull();
   });
 
   it("lie on the point's rocks in its shallows, less often than the weed, never on a mercy cast", () => {
@@ -50,12 +52,16 @@ describe("snags", () => {
     const { x, z } = shallow!;
     expect(onRocks("reeds", x, z)).toBe(false);
     expect(ROCK_SNAG_ODDS).toBeLessThan(SNAG_ODDS);
-    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS - 0.01)).toBe("rocks");
-    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS + 0.01)).toBeNull();
-    expect(castSnags("point", x, z, true, 0)).toBeNull();
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS - 0.01, 1)).toBe("rocks");
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS + 0.01, 1)).toBeNull();
+    expect(castSnags("point", x, z, true, 0, 1)).toBeNull();
     // A crankbait's lip bumps it off the rocks; a topwater lure still hangs up on them.
-    expect(castSnags("point", x, z, false, 0, "Shallow crankbait")).toBeNull();
-    expect(castSnags("point", x, z, false, 0, "Topwater frog")).toBe("rocks");
+    expect(castSnags("point", x, z, false, 0, 1, "Shallow crankbait")).toBeNull();
+    expect(castSnags("point", x, z, false, 0, 1, "Topwater frog")).toBe("rocks");
+    // An accurate caster drops the lure into the gaps, so it snags half as often.
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS * CLEAN_DROP_SNAG - 0.01, CLEAN_DROP_ACCURACY)).toBe("rocks");
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY)).toBeNull();
+    expect(castSnags("point", x, z, false, ROCK_SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY - 1)).toBe("rocks");
   });
 });
 
