@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-pa21";
+export const NEWS_ID = "2026-10-19-field45";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A planned outing now has Copy the plan, which copies the day, the water, what works there and what is still to pack, to send to whoever is coming along. Trips adds Only my outings when the sample week or the game's rounds sit among your own, and says how many outings have gone by since your last fish. The outings spreadsheet now lists what each outing took.",
   "On a phone the shack's three-day forecast now shows one day a row, so its moon and weather tips read in full lines instead of a word or two at a time. With reduce motion on, the terns over the fish patch, the bank's squirrels and the spring grebes now hold still like the lake's other creatures.",
   "A water with a place now has Directions, which opens the route there on OpenStreetMap, and Save for a GPS, which saves it as a .gpx waypoint for a GPS, a sounder or a phone's map. Waters says how many waters you have fished this season and how many of them are new, and a new water's half-typed notes wait for you if the page closes before you save.",
   "In spring and summer, hop a jig over the crayfish creeping about the dock's pilings: the smallmouth and catfish that hunt them bite sooner, and many a bite is one of them. And on spring days cast among the tadpoles milling in the warm shallows, where the perch, bluegill and bass come to gorge on them.",

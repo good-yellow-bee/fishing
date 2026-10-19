@@ -1,7 +1,7 @@
 import { catchesNewestFirst, measuresOf, spotById, tripById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
-import { noteText } from "./format";
+import { noteText, outingName } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
 
@@ -91,11 +91,26 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
 export function tripsCsv(whole: Logbook, today: string): string {
   const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
-  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Lost fish"), t("Missed strikes"), t("Note")];
+  const header = [t("Date"), t("Trip"), t("Water"), t("Fish"), t("Kinds"), t("Lost fish"), t("Missed strikes"), t("Note")];
   const fish = new Map<string, number>();
-  for (const entry of book.catches) if (entry.tripId) fish.set(entry.tripId, (fish.get(entry.tripId) ?? 0) + 1);
+  // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
+  const kinds = new Map<string, Map<string, number>>();
+  for (const entry of book.catches) {
+    if (!entry.tripId) continue;
+    fish.set(entry.tripId, (fish.get(entry.tripId) ?? 0) + 1);
+    const tally = kinds.get(entry.tripId) ?? new Map<string, number>();
+    const name = t(entry.species.trim());
+    tally.set(name, (tally.get(name) ?? 0) + 1);
+    kinds.set(entry.tripId, tally);
+  }
+  const kindsOf = (tripId: string) =>
+    [...(kinds.get(tripId) ?? new Map<string, number>())]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([name, count]) => (count > 1 ? `${name} ×${count}` : name))
+      .join(", ");
   const rows = [...book.trips]
     .sort((a, b) => b.date.localeCompare(a.date))
-    .map((trip) => [trip.date, trip.title, spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
+    // An untitled outing goes by its water's name, as the list names it.
+    .map((trip) => [trip.date, outingName(trip, book.spots), spotById(book, trip.spotId)?.name ?? "", String(fish.get(trip.id) ?? 0), kindsOf(trip.id), String(trip.lost ?? 0), String(trip.missed ?? 0), noteText(trip.note)]);
   return sheet([header, ...rows], separator);
 }
