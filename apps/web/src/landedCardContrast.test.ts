@@ -30,4 +30,11 @@ describe("the landed card's small words", () => {
       expect(contrast(color!, PARCHMENT_AT_NIGHT), selector).toBeGreaterThanOrEqual(4.5);
     }
   });
+
+  it("ink the badge toast's Badge line at 4.5 to 1 or more on the same parchment", () => {
+    const rule = /\n\.badge-toast \.eyebrow \{([^}]*)\}/.exec(css)?.[1];
+    const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
+    expect(color).toBeDefined();
+    expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(4.5);
+  });
 });

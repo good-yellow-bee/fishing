@@ -2900,8 +2900,9 @@ html[data-reduce-motion="1"] .hour-veil {
 }
 
 /* Brass badges on the lodge wall: earned ones shine, the rest show how far along you are. */
+/* Brass ink dark enough for 11 px words on the parchment over a night lake (it was 4.4 to 1). */
 .badge-toast .eyebrow {
-  color: #7a5a2c;
+  color: #6e4a10;
 }
 
 .badge-toast h2 {
