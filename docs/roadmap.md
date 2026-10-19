@@ -1149,6 +1149,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA104~~ | ~~On a tablet or a 1024 px window the header wraps to two rows (106-117 px tall), and the stance chip, the first-cast coach and its Skip, the news card and the toasts sat under its foot: every panel hung under the header now drops by however far it wraps (#1315)~~ | phone UX | S |
 | ~~PA105~~ | ~~On a sideways tablet a catch's Edit and Delete stack 12 px apart, and Delete's reach cut Edit's tap band to 29 px: they part by 16 px and Edit reaches 7 px each way, 33 px (#1316)~~ | phone UX | S |
 | ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
+| ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
+| ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -2179,3 +2181,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR547~~ | ~~Round 90 ideas: all waters to a GPS in one file, a goal like last year's in a tap, Home's next outing to the calendar, outings in the year's copy~~ (#1294) | field | S |
 | ~~BR548~~ | ~~Round 91 gear and map fixes: lure links with a water, map fish counts, Polish packing notes, long names, offline map note, Unpack all tap band~~ (#1305) | field | S |
 | ~~BR549~~ | ~~Round 91 ideas: lure record spreadsheet, nearest water and all-waters GPS file on the Map~~ (#1308) | field | S |
+| ~~BR550~~ | ~~Round 92 Bests, species and search fixes: one row per lure however spelled, season box Outings link, empty season text, size bands, copied dates and counts, heading level, Polish wording, tap reach~~ (#1322) | field | S |
+| ~~BR551~~ | ~~Round 92 ideas: fish an outing in the season box, each year's biggest in a one-kind search, "31.12" as a day~~ (#1324) | field | S |

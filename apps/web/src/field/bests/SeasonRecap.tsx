@@ -1,6 +1,6 @@
 import type { Logbook } from "@stillwater/shared";
 import { Link } from "react-router-dom";
-import { t, tn, useT } from "../../i18n";
+import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { readYearGoal } from "../YearGoal";
@@ -41,14 +41,17 @@ export function seasonCopy(book: Logbook, year: string, today: string): string {
 }
 
 /** A picked season at a glance against the one before: fish, days out, kinds, and the kinds new to the book. */
-/** `fishLink` and `daysLink` open the season's fish and outings; `kindsId` is the heading of the page's kinds, jumped to. */
+/**
+ * `fishLink` opens the season's fish and `outings` its outings, counted as what the link opens; `kindsId` is the heading
+ * of the page's kinds, jumped to. Days out stay unlinked: two outings can share a day, and a day can be out without one.
+ */
 export function SeasonRecapBox({
   book,
   year,
   today,
   dayLink,
   fishLink,
-  daysLink,
+  outings,
   kindsId,
 }: {
   book: Logbook;
@@ -56,7 +59,7 @@ export function SeasonRecapBox({
   today: string;
   dayLink?: (date: string) => string;
   fishLink?: string;
-  daysLink?: string;
+  outings?: { count: number; to: string };
   kindsId?: string;
 }) {
   useT();
@@ -68,9 +71,25 @@ export function SeasonRecapBox({
   const fishLine = t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) });
   const daysLine = t("Days out: {count}", { count: against(recap.days, recap.daysBefore, before) });
   const kindsLine = t("Kinds: {count}", { count: against(recap.kinds, recap.kindsBefore, before) });
+  const outingsLine = outings && outings.count > 0 ? t("Outings: {count}", { count: outings.count }) : null;
+  // How the season fishes, not only how much: fish an outing, against the season before once both had a few.
+  const rate = (fish: number, count: number) => (fish / count).toLocaleString(locale(), { maximumFractionDigits: 1 });
+  const rateNow = recap.outings >= 2 ? rate(recap.outingFish, recap.outings) : null;
+  const rateBefore = recap.outingsBefore >= 2 ? rate(recap.outingFishBefore, recap.outingsBefore) : null;
+  const upFrom = recap.outingFish / Math.max(recap.outings, 1) > recap.outingFishBefore / Math.max(recap.outingsBefore, 1);
+  const rateLine =
+    rateNow === null
+      ? null
+      : rateBefore === null || rateBefore === rateNow
+        ? t("Fish an outing: {rate}", { rate: rateNow })
+        : upFrom
+          ? t("Fish an outing: {rate}, up from {before} in {year}", { rate: rateNow, before: rateBefore, year: before })
+          : t("Fish an outing: {rate}, down from {before} in {year}", { rate: rateNow, before: rateBefore, year: before });
   const lines = [
     fishLine,
     daysLine,
+    ...(outingsLine ? [outingsLine] : []),
+    ...(rateLine ? [rateLine] : []),
     kindsLine,
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
@@ -89,8 +108,8 @@ export function SeasonRecapBox({
             ) : line === fishLine && fishLink && recap.fish > 0 ? (
               // The season's counts open what they count: its fish, its outings, its kinds further down.
               <Link to={fishLink}>{line}</Link>
-            ) : line === daysLine && daysLink && recap.days > 0 ? (
-              <Link to={daysLink}>{line}</Link>
+            ) : outings && line === outingsLine ? (
+              <Link to={outings.to}>{line}</Link>
             ) : line === kindsLine && kindsId && recap.kinds > 0 ? (
               <a
                 href={`#${kindsId}`}

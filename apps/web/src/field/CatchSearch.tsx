@@ -1,8 +1,9 @@
 import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigationType, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, measureOf, personalBests, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, tn, useLang, useT } from "../i18n";
+import { inSentence } from "./MonthBars";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -10,6 +11,7 @@ import { bookBadges } from "./catchBadge";
 import { countedBook, countedFish } from "./milestones";
 import { countedSearch } from "./countedSearch";
 import { typicalSize } from "./sizeBands";
+import { measureText } from "../i18n/content";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
 import { datedName, downloadFile } from "./download";
@@ -915,7 +917,8 @@ export function CatchSearch() {
             </p>
           ) : null}
           {matches.length > 0 ? (
-            <CopySummary text={() => searchSummary(searchParts(book, settled), matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
+            // The angler's own fish, as the count above sums them: a pasted copy doesn't credit them with the sample's.
+            <CopySummary text={() => searchSummary(searchParts(book, settled), mine.length > 0 ? mine : matches, (id) => spotById(book, id)?.name ?? null, largest)} file="stillwater-search.txt" />
           ) : null}
           {matches.length > 1 ? (
             // "Which was my biggest pike at Cedar": the same matches, largest first.
@@ -983,16 +986,36 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   };
   const kinds = tally((entry) => entry.species).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
-  const line = (label: string, rows: [string, number][], term: (value: string) => string, name: (value: string) => string, of: (entry: CatchEntry, value: string) => boolean) =>
+  // One kind found: each year's biggest beside its count, by the measure most of them were taken in, so "are my pike
+  // getting bigger" reads off any search. Across kinds a biggest says nothing.
+  const byLength = matches.filter((entry) => measureOf(entry, "length")).length * 2 >= matches.length;
+  const bestIn = (year: string) => {
+    if (kinds.length !== 1) return null;
+    const bests = personalBests({ spots: [], trips: [], catches: matches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
+    const best = byLength ? bests.longest : bests.heaviest;
+    return best ? t("best {size}", { size: measureText(measureOf(best, byLength ? "length" : "weight")!) }) : null;
+  };
+  const line = (
+    label: string,
+    rows: [string, number][],
+    term: (value: string) => string,
+    name: (value: string) => string,
+    of: (entry: CatchEntry, value: string) => boolean,
+    note: (value: string) => string | null = () => null,
+  ) =>
     rows.length > 1 ? (
       <p className="meta match-split">
         {label}{" "}
         {rows.map(([value, count], index) => (
           <Fragment key={value}>
             {index > 0 ? " · " : null}
-            <Link to={narrow(term(value), all.filter((entry) => of(entry, value)))} aria-label={`${name(value)}: ${tn(count, "{n} fish", "{n} fish")}`}>
-              {`${name(value)} ${count}`}
-            </Link>
+            {/* A year's biggest stays with the year, not wrapped onto the next line on its own. */}
+            <span className={note(value) ? "split-item" : undefined}>
+              <Link to={narrow(term(value), all.filter((entry) => of(entry, value)))} aria-label={`${name(value)}: ${tn(count, "{n} fish", "{n} fish")}`}>
+                {`${name(value)} ${count}`}
+              </Link>
+              {note(value) ? ` (${note(value)})` : null}
+            </span>
           </Fragment>
         ))}
       </p>
@@ -1000,7 +1023,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   return (
     <>
       {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species === species)}
-      {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`))}
+      {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
     </>
   );
 }
@@ -1041,7 +1064,8 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
   const lureName = lure ? catches.find((entry) => lureKey(entry) === lure.value)!.lure.trim() : "";
   const lines = [
     lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
-    time ? t("Most at {time}.", { time: `${t(BITE_TIMES.find((row) => row.id === time.value)!.label)} (${time.count})` }) : null,
+    // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
+    time ? t("Most at {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
     water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;

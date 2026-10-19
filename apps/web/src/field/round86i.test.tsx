@@ -70,15 +70,16 @@ describe("round 86 ideas: the month-by-year table", () => {
 });
 
 describe("round 86 ideas: a season's recap opens what it counts", () => {
-  it("links the fish and days, and jumps to the kinds", () => {
+  it("links the fish and outings, and jumps to the kinds", () => {
     const book: Logbook = { spots, trips: [trip("a", "2025-06-03")], catches: [fish("1", "Pike", local(2025, 6, 3, 9), "a")] };
     const html = renderToStaticMarkup(
       <MemoryRouter>
-        <SeasonRecapBox book={book} year="2025" today="2026-10-19" fishLink="/catches?find=2025" daysLink="/trips?find=2025" kindsId="by-species" />
+        <SeasonRecapBox book={book} year="2025" today="2026-10-19" fishLink="/catches?find=2025" outings={{ count: 1, to: "/trips?find=2025" }} kindsId="by-species" />
       </MemoryRouter>,
     );
     expect(html).toContain('<a href="/catches?find=2025" data-discover="true">Fish: 1</a>');
-    expect(html).toContain('<a href="/trips?find=2025" data-discover="true">Days out: 1</a>');
+    expect(html).toContain("Days out: 1<");
+    expect(html).toContain('<a href="/trips?find=2025" data-discover="true">Outings: 1</a>');
     expect(html).toContain('<a href="#by-species">Kinds: 1</a>');
   });
 });

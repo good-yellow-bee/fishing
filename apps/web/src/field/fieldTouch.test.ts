@@ -79,6 +79,22 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("min-height: 32px;");
     expect(mapCss.slice(0, mapCss.indexOf("@media (pointer: coarse) {"))).not.toContain(".map-note a");
   });
+
+  it("makes Photos' no-photo links 32 px bands that don't reach into each other", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.photo-missing span a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(/\n  \.photo-missing span a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("content: none;");
+  });
+
+  it("makes a water's Next outing in the Map's list a 32 px band with room under it, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-index a\.map-next \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("margin-bottom: 6px;");
+  });
 });
 
 describe("the field log's tab bar on a 320 px phone", () => {

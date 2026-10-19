@@ -444,6 +444,19 @@ button.field-primary {
     inset: -4px -3px -6px;
   }
 
+  /* Photos' "Your heaviest/longest fish has no photo" links run on in one line that wraps, each reaching into the
+     other: each stands as a 32 px band of its own instead. */
+  .photo-missing span a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
+  .photo-missing span a::after {
+    content: none;
+  }
+
   /* When a card's line wraps (lure above water on a phone), the rows part far enough that their reach doesn't overlap. */
   p.meta {
     row-gap: 12px;
@@ -588,6 +601,11 @@ button.field-primary {
     min-height: 32px;
     padding-block: 6px;
     box-sizing: border-box;
+  }
+
+  /* The band is the reach: the meta reach past it took the line above's bottom 4 px once the two dates wrapped. */
+  .species-span a::after {
+    inset: 0 -3px;
   }
 
   /* A page head's wrapped line of links (a fish's lure, water and time) ran 2 px between lines, the reaches crossing;
@@ -1462,13 +1480,15 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
 .tally-bars li {
   display: grid;
-  grid-template-columns: minmax(0, 9em) minmax(0, 1fr) minmax(0, 6.5em);
+  /* The label column is never narrower than its longest word: Chromium has no Polish hyphenation, so a squeezed
+     "Październik" was cut bare mid-word. The bar gives way instead. */
+  grid-template-columns: minmax(min-content, 9em) minmax(0, 1fr) minmax(0, 6.5em);
   align-items: center;
   gap: 10px;
 }
 
 .tally-label {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   /* "Październik" in the narrow label column breaks at a syllable, in the page's language, before anywhere. */
   hyphens: auto;
 }
