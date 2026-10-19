@@ -1269,7 +1269,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC141~~ | ~~Fewer draws for the painter and the woodcutter: the painter's legs and palette arm in one shape, the easel and sun umbrella in another, and the picture's three bands as instances of one square (9 draws to 5); the woodcutter's chopping block and woodstack in one shape and the split halves as two instances (8 draws to 6)~~ (#1255) | scene | S |
 | ~~SC142~~ | ~~Hay fields: from summer into the fall two fields on the hills behind the far bank lie mown in pale stripes along the slope, fresh green-gold in summer and faded to straw in the fall, with round bales dotted across them (two draws)~~ (#1256) | scene | S |
 | ~~SC143~~ | ~~News card scene30: spring blossom, winter alpenglow on the snowy hills and the summer hay fields~~ (#1256) | scene | S |
-| SC144 | Farmstead: a white farmhouse and a red barn stand on the hills behind the far bank beside the hay fields, their roofs white under winter snow, the windows lit warm and the chimney smoking when the lakeside cabin's are | scene | S |
+| ~~SC144~~ | ~~Farmstead: a white farmhouse and a red barn stand on the hills behind the far bank beside the hay fields, their roofs white under winter snow, the windows lit warm and the chimney smoking when the lakeside cabin's are~~ (#1257) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
