@@ -114,6 +114,14 @@ describe("a fish's page on a touch screen", () => {
   });
 });
 
+describe("a sheet's Edit and Delete on a touch screen", () => {
+  it("stack far enough apart that Delete's reach leaves Edit a full band", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect([...touch.matchAll(/\n  \.sheet-actions \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("row-gap: 16px;"))).toBe(true);
+    expect([...touch.matchAll(/\n  \.sheet-head a:not\(\.field-primary\)::after \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("inset: -7px -3px;"))).toBe(true);
+  });
+});
+
 describe("a list's Show all on a touch screen", () => {
   it("stands far enough below the last row that its reach leaves that row's link alone", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
