@@ -120,6 +120,10 @@ describe("dock weather", () => {
     // Only the label sits in the HUD row; the blurb rides in the tooltip.
     expect(chip?.textContent).toBe("Fog");
     expect(chip?.getAttribute("title")).toMatch(new RegExp(`^${SKY_BLURB.fog} Wind: [A-Z][a-z ]+\\.$`));
+    // A tooltip never reaches a screen reader: the blurbs of the sky and the season are read out beside their chips.
+    expect(chip?.nextElementSibling?.className).toBe("sr-only");
+    expect(chip?.nextElementSibling?.textContent).toBe(` · ${chip?.getAttribute("title")}`);
+    expect(page.querySelector(".hud .eyebrow + .sr-only")?.textContent).toBe(" · Ice at the edges. Burbot and whitefish stir.");
     expect(fx.ambient.setConditions).toHaveBeenLastCalledWith("night", "fog", "winter");
   });
 
