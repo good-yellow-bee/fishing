@@ -302,3 +302,11 @@ describe("the lodge's catch log at any width", () => {
     expect(css).not.toContain("@media (max-width: 640px) {\n  .log-page table {");
   });
 });
+
+describe("high contrast", () => {
+  it("keeps a switched-on sign such as the Headlamp amber, as the shop and retie signs are", () => {
+    const keep = /html\[data-contrast="high"\] :is\(([^)]*\)[^)]*)\) \{\s*border-color: #ffc95c;/.exec(css)?.[1];
+    expect(keep).toContain('.walk-signs .panel-btn[aria-pressed="true"]');
+    expect(keep).toContain(".walk-signs .walk-retie");
+  });
+});
