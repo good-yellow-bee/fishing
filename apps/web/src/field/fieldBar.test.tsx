@@ -45,3 +45,51 @@ describe("the phone's sticky top bar", () => {
     expect(/\n\.month-head\[id\] \{([^}]*)\}/.exec(css)?.[1]).toContain("scroll-margin-top: 8px;");
   });
 });
+
+describe("the phone's bars at the bottom", () => {
+  it("scrolls a field tabbed to that they partly cover clear of them, and leaves other focus alone", async () => {
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      if (this.id === "low") return { top: 731, bottom: 811 } as DOMRect;
+      if (this.id === "below") return { top: 900, bottom: 940 } as DOMRect;
+      return { top: 400, bottom: 440 } as DOMRect;
+    });
+    vi.stubGlobal("innerHeight", 844);
+    document.documentElement.style.scrollPaddingBottom = "56px";
+    const scrolled: [string, ScrollIntoViewOptions | boolean | undefined][] = [];
+    Element.prototype.scrollIntoView = function (this: Element, how?: ScrollIntoViewOptions | boolean) {
+      scrolled.push([this.id, how]);
+    };
+    const box = document.createElement("div");
+    document.body.append(box);
+    const root = createRoot(box);
+    try {
+      await act(async () => {
+        root.render(
+          <MemoryRouter initialEntries={["/trips/new"]}>
+            <LogbookProvider>
+              <FieldShell>
+                <input id="high" />
+                <textarea id="low" />
+                <input id="below" />
+              </FieldShell>
+            </LogbookProvider>
+          </MemoryRouter>,
+        );
+      });
+      const tabTo = (id: string) => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+        document.getElementById(id)!.focus();
+      };
+      tabTo("high");
+      document.getElementById("low")!.focus({ preventScroll: true });
+      tabTo("below");
+      tabTo("low");
+      expect(scrolled).toEqual([["low", { block: "nearest" }]]);
+    } finally {
+      await act(async () => root.unmount());
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+      document.documentElement.style.scrollPaddingBottom = "";
+      vi.unstubAllGlobals();
+    }
+  });
+});

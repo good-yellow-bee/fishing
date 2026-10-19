@@ -136,6 +136,30 @@ export function FieldShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // The tab bar, save bar and Undo bar sit over the bottom of a phone screen, and the browser leaves a field they only
+  // partly cover where it is when tabbed to ("Note" on a new outing): the page scrolls it above the line the page's
+  // scroll-padding-bottom keeps clear of them (WCAG 2.4.11). Only a Tab does this, so a focus restored without scrolling stays put.
+  useEffect(() => {
+    let tabbed = false;
+    const onKey = (event: KeyboardEvent) => {
+      tabbed = event.key === "Tab";
+    };
+    const onFocus = (event: FocusEvent) => {
+      const target = event.target;
+      if (!tabbed || !(target instanceof Element)) return;
+      tabbed = false;
+      const clear = innerHeight - (parseFloat(getComputedStyle(document.documentElement).scrollPaddingBottom) || 0);
+      const box = target.getBoundingClientRect();
+      if (box.top < clear && box.bottom > clear) target.scrollIntoView({ block: "nearest" });
+    };
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("focusin", onFocus);
+    return () => {
+      document.removeEventListener("keydown", onKey, true);
+      document.removeEventListener("focusin", onFocus);
+    };
+  }, []);
+
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
   const how = useNavigationType();
   const navigate = useNavigate();
