@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PERCH_SPOTS, SWALLOW_COUNT, SWOOP_SEC, VISIT_EVERY_SEC, VISIT_SEC, ropeSwallowAt, ropeSwallowsOut } from "./ropeSwallows";
+import { PERCH_SPOTS, SWALLOW_COUNT, SWOOP_SEC, VISIT_EVERY_SEC, VISIT_SEC, ropeSwallowAt, ropeSwallowsOut } from "./swallowPerch";
 
 describe("swallows on the mooring line", () => {
   it("come on fine days in spring and summer", () => {

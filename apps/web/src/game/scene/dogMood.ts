@@ -72,3 +72,23 @@ export function dogGlance(time: number) {
   const slow = Math.sin(time * 0.37) + 0.6 * Math.sin(time * 0.91 + 1.3);
   return 0.4 * Math.max(-1, Math.min(1, slow * 0.9));
 }
+
+/** How far round it will turn its head to watch something, either way, in radians. */
+export const DOG_LOOK_MAX = 0.9;
+/** Past this far round, it does not bother looking. */
+const DOG_LOOK_LIMIT = 1.5;
+
+/**
+ * The head turn, relative to lying facing the water, that looks at the point (`x`, `z`), held to
+ * DOG_LOOK_MAX; null when the point is too far round behind it to bother.
+ */
+export function dogLookAt(x: number, z: number): number | null {
+  const raw = Math.atan2(x - DOG_SPOT.x, z - DOG_SPOT.z) - DOG_YAW;
+  const rel = Math.atan2(Math.sin(raw), Math.cos(raw));
+  return Math.abs(rel) > DOG_LOOK_LIMIT ? null : Math.max(-DOG_LOOK_MAX, Math.min(DOG_LOOK_MAX, rel));
+}
+
+/** Something worth watching lifts its head, unless it is sat up already for a bite. */
+export function watching(mood: DogMood): DogMood {
+  return { ...mood, headUp: Math.max(mood.headUp, 0.9) };
+}
