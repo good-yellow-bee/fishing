@@ -5,7 +5,7 @@ import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, 
 import { pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
-import { locale, num, t, tn, useT } from "../../i18n";
+import { num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay, outingNameById } from "../format";
 import { hookTally, hookText } from "../hookTally";
@@ -22,7 +22,7 @@ import { SeasonRecapBox, seasonCopy } from "./SeasonRecap";
 import { seasonRecap } from "./seasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
-import { newWatersThisYear, notYetThisYear } from "./notYet";
+import { inReadersOrder, newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
@@ -235,7 +235,7 @@ export function BestsPage() {
     return !!before && ((before.longest !== null && sizeOf(row.longest, "length") > sizeOf(before.longest, "length")) || (before.heaviest !== null && sizeOf(row.heaviest, "weight") > sizeOf(before.heaviest, "weight")));
   };
   // The newest fish of the angler's own and how long ago it came, for a dry spell measured in days.
-  const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) || (dayOf(entry) === dayOf(newest) && Date.parse(entry.caughtAt) > Date.parse(newest.caughtAt)) ? entry : newest), null);
+  const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
   const lastFishDay = lastFish ? dayOf(lastFish) : null;
   const sinceLastFish = lastFishDay ? daysBetween(lastFishDay, today) : 0;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
@@ -279,7 +279,7 @@ export function BestsPage() {
             <span>
               {t("Not yet this year:")}{" "}
               {/* In the order the reader's names sort in, not the stored English ones. */}
-              {[...notYet].sort((a, b) => kindName(a).localeCompare(kindName(b), locale())).map((name, index) => (
+              {inReadersOrder(notYet, kindName).map((name, index) => (
                 <Fragment key={name}>
                   {index > 0 ? ", " : null}
                   <Link to={`/species/${encodeURIComponent(name)}`}>{kindName(name)}</Link>
