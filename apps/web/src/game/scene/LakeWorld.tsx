@@ -203,6 +203,8 @@ import { DockSnail } from "./DockSnail";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
 import { WinterGulls } from "./WinterGulls";
+import { LakeSmoke } from "./LakeSmoke";
+import { lakeSmokeOut } from "./lakeSteam";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -2302,6 +2304,7 @@ export const LakeWorld = memo(function LakeWorld({
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
       {heronOut(hour, sky) && <Heron />}
