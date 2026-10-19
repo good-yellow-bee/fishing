@@ -806,6 +806,16 @@ export function lightHunter(spot: SpotId, lure: string | undefined, profile: Pic
   return drawnFrom(LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, spot, lure, profile, hour, random);
 }
 
+/** The fish off the dock and the point that rise to midges falling from the dusk clouds. */
+export const MIDGE_RISERS: ReadonlySet<string> = new Set(["bluegill", "crappie", "golden-shiner", "rainbow-trout"]);
+/** Chance a bite on a fly under the midges is one of the fish rising to them. */
+export const MIDGE_RISER_SHARE = 0.35;
+
+/** A fish rising to the midges drawn to the fly for this bite, or none. */
+export function midgeRiser(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(MIDGE_RISERS, MIDGE_RISER_SHARE, spot, lure, profile, hour, random);
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 

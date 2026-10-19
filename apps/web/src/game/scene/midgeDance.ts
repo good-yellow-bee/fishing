@@ -22,13 +22,13 @@ export const MIDGE_CLOUDS = [
 ];
 export const MIDGES_PER_CLOUD = 60;
 /** A cloud's half-width and half-height. */
-const SPREAD = 0.32;
+export const SPREAD = 0.32;
 const TALL = 0.45;
 /** How far a cloud bobs up and down, and how long one bob takes. */
 const BOB = 0.35;
 const BOB_SEC = 6;
 /** How far each metre a second of drift leans a cloud downwind. */
-const LEAN = 6;
+export const LEAN = 6;
 
 function hash(n: number) {
   const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
