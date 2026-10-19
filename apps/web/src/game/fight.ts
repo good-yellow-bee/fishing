@@ -260,6 +260,8 @@ export const WRAP_MS = 1200;
 export const WRAP_PULL = 0.5;
 /** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
 export const BOAT_RUN = 0.65;
+/** In a strong wind the hull lies pushed back on its anchor line and can't follow a run as well, so a run takes this share. */
+export const STRONG_WIND_BOAT_RUN = 0.85;
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
@@ -483,9 +485,9 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
   water: FightWater = "open",
-  /** A breezy or strong day: slack line drifts out faster between runs. */
+  /** A breezy or strong day: slack line drifts out faster between runs, and a strong one holds the anchored boat back on a run. */
   wind?: FightWind,
   /** Hooked on a topwater lure: a jumper is already at the top, so its first run is a leap. */
   topwater = false,
@@ -512,8 +514,8 @@ export function makeFight(
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
   const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT * (flood ? FLOOD_DRIFT : 1) : 1);
   const driftCalm = driftWater * (wind ? WIND_SLACK[wind] : 1);
-  // A run takes line by its own pull; the wind only shows on a resting line.
-  const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
+  // A run takes line by its own pull; the wind only shows on a resting line, and out on the boat, where a strong one holds the hull back from following the run.
+  const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? (wind === "strong" ? STRONG_WIND_BOAT_RUN : BOAT_RUN) : 1);
   const tensionUpCalm = Math.max(
     0.12,
     0.2 + t * 0.12 - (strength - 1) * 0.015 + (species.challenge === "tension" ? 0.08 : 0),
