@@ -723,6 +723,24 @@ export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "
   return hunters.at(-1) ?? null;
 }
 
+/** The fish that raid the sunfish beds by the dock for their eggs. */
+export const BED_RAIDERS: ReadonlySet<string> = new Set(["perch", "smallmouth-bass"]);
+/** Chance a bite on the sunfish beds is one of the raiders. */
+export const BED_RAIDER_SHARE = 0.35;
+
+/** A raider drawn to the sunfish beds for this bite, from the bank's own lure split and weighed as the bank draws them, only one the angler could land, or none. */
+export function bedRaider(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  if (random() >= BED_RAIDER_SHARE) return null;
+  const home = FISH.filter((fish) => fish.spots.includes(spot));
+  const raiders = poolForLure(home, lure).filter((fish) => BED_RAIDERS.has(fish.id) && canLand(profile, fish));
+  let roll = random() * raiders.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  for (const fish of raiders) {
+    roll -= appeal(fish, hour);
+    if (roll <= 0) return fish;
+  }
+  return raiders.at(-1) ?? null;
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 

@@ -1533,7 +1533,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT291~~ | ~~News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot~~ (#1203) | ui | S |
 | ~~GT292~~ | ~~A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit~~ (#1213) | gameplay | S |
 | ~~GT293~~ | ~~Foam lanes feed the fish: in a breeze strong enough to rake the scum into lanes, a lure landing within 0.7 m of one bites sooner (0.85 wait), because the wind gathers drowned insects there and the fish feed along it; the cast says so~~ (#1223) | gameplay | S |
-| ~~GT294~~ | ~~News card 2026-10-19-game16 covers GT292 and GT293: the charging smallmouth and rainbow, and foam lanes that feed the fish~~ | ui | S |
+| ~~GT294~~ | ~~News card 2026-10-19-game16 covers GT292 and GT293: the charging smallmouth and rainbow, and foam lanes that feed the fish~~ (#1225) | ui | S |
+| GT295 | Raiders on the sunfish beds: in spring and summer a cast landing on the sunfish nests either side of the dock lands where the perch and smallmouth come to raid the eggs, so the bite comes sooner (0.85 wait) and about a third of its bites are one of those raiders the angler could land (not for a beginner's first fish); the cast says so | gameplay | S |
 
 ## Risks / open questions for the owner
 

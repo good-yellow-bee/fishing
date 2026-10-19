@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, LAKE_CENTER_Z, SPOT_IDS, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { BANK_STANDS } from "./hotspot";
-import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -710,6 +710,23 @@ describe("a live shiner on the hook", () => {
       expect(shinerHunter("reeds", { strength: 3, accuracy: 5 }, "day", rolls(0, roll))?.id).toBe("largemouth-bass");
     }
     expect(shinerHunter("inlet", { strength: 1, accuracy: 1 }, "day", rolls(0, 0.5))).toBeNull();
+  });
+
+  it("draws a raider of the sunfish beds only on the share's roll, from the bank's own", () => {
+    expect(bedRaider("dock", undefined, strong, "day", rolls(BED_RAIDER_SHARE))).toBeNull();
+    for (let roll = 0; roll < 1; roll += 0.1) {
+      const fish = bedRaider("dock", undefined, strong, "day", rolls(0, roll));
+      expect(fish && BED_RAIDERS.has(fish.id)).toBe(true);
+    }
+    // No perch or smallmouth live off the Point, so nothing raids there.
+    expect(bedRaider("point", undefined, strong, "day", rolls(0, 0.5))).toBeNull();
+  });
+
+  it("draws only a raider the angler could land", () => {
+    // The smallmouth needs Strength 2, so a beginner meets the perch.
+    for (let roll = 0; roll < 1; roll += 0.1) {
+      expect(bedRaider("dock", undefined, { strength: 1, accuracy: 1 }, "day", rolls(0, roll))?.id).toBe("perch");
+    }
   });
 });
 
