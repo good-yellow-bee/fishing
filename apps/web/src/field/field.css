@@ -489,6 +489,15 @@ button.field-primary {
     text-align: center;
   }
 
+  /* A catch's conditions box links the sky, the wind, the water temperature and the moon on 27 px lines in large type,
+     each a 25 px target: each linked word is now a 32 px band. */
+  .catch-conditions > p:not(.meta) a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 2px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
