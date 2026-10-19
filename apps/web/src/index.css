@@ -1138,6 +1138,7 @@ kbd {
   font: inherit;
 }
 
+/* Every word on the card is inked 4.5 to 1 or more on its parchment over a night lake: the fight is read at a glance. */
 .fight-bar {
   position: absolute;
   left: 50%;
@@ -1190,15 +1191,15 @@ kbd {
   float: right;
   letter-spacing: 0.04em;
   font-weight: 600;
-  color: #6b5a44;
+  color: #5c4b36;
 }
 
 .fight-bar .fight-stamina[data-stamina="tiring"] {
-  color: #8a6420;
+  color: #6e4a10;
 }
 
 .fight-bar .fight-stamina[data-stamina="spent"] {
-  color: #4d6b3f;
+  color: #3d5c31;
 }
 
 /* Line given back past the hookset: striped red from the right, so it reads without colour. */
@@ -1206,7 +1207,7 @@ kbd {
   float: right;
   letter-spacing: 0.04em;
   font-weight: 700;
-  color: #b85c38;
+  color: #8f3a22;
 }
 
 .fight-bar .overrun {
@@ -1268,23 +1269,23 @@ kbd {
 }
 
 .fight-bar[data-surge="1"] .fight-status {
-  color: #a3752c;
+  color: #6e4a10;
 }
 
 .fight-bar[data-surge="2"] .fight-status {
-  color: var(--rust);
+  color: #8f3a22;
 }
 
 .fight-bar .fight-steer {
   margin: 6px 0 0;
   font-size: 11px;
   text-align: center;
-  color: #6b5a44;
+  color: #5c4b36;
 }
 
 .fight-bar .fight-steer[data-call="left"],
 .fight-bar .fight-steer[data-call="right"] {
-  color: #8a6420;
+  color: #6e4a10;
   font-weight: 600;
 }
 
@@ -1295,7 +1296,7 @@ kbd {
 }
 
 .fight-bar .fight-steer[data-call="turning"] {
-  color: #4d6b3f;
+  color: #3d5c31;
   font-weight: 600;
 }
 
@@ -1336,14 +1337,14 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
 
 .fight-bar .fight-best {
   margin: 2px 0 6px;
-  color: #a8771f;
+  color: #6e4a10;
   font-size: 12px;
   font-weight: 700;
 }
 
 .fight-bar .fight-water {
   margin: 6px 0 0;
-  color: #4f6b52;
+  color: #3f5a42;
   font-size: 11px;
   text-align: center;
 }
@@ -1353,7 +1354,7 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
   width: fit-content;
   padding: 2px 8px;
   border: 1px solid #a8771f;
-  color: #7a5212;
+  color: #6e4a10;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1362,7 +1363,7 @@ html[data-reduce-motion="1"] .fight-bar .fight-note {
 
 .fight-bar .fight-clean.lost {
   border-color: rgba(102, 81, 57, 0.35);
-  color: #8a7d68;
+  color: #645440;
   font-weight: 400;
   text-decoration: line-through;
 }
@@ -1411,7 +1412,7 @@ html[data-input="pad"] .fight-bar .on-pad {
 }
 
 .fight-bar .warn {
-  color: var(--rust);
+  color: #8f3a22;
 }
 
 .fight-bar.surging {

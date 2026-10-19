@@ -1144,6 +1144,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA99~~ | ~~The news card on an upright phone ends above the banks' row instead of covering its top (#1307)~~ | phone UX | S |
 | ~~PA100~~ | ~~A claimed daily request's Claimed reads clearly through its dimmed row (#1309)~~ | phone UX | S |
 | ~~PA101~~ | ~~The trip recap's heaviest fish names its kind inside the stat list, so a screen reader reads the list whole (#1311)~~ | phone UX | S |
+| ~~PA102~~ | ~~The fight card's coloured lines (heavier than your best, too heavy for your line, line given back, the surge call, tiring and spent, steer and turning calls, the water, the clean-fight stamp) read 2.7-4.1 to 1 on its parchment: each is inked darker in its own hue, 4.5 to 1 or more (#1312)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
