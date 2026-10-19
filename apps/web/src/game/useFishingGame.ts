@@ -53,7 +53,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, gotAwayAfterLoss, type G
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, COLD_WORK_WAIT, tooQuickForCold, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -329,6 +329,8 @@ export function useFishingGame(
   const followRef = useRef<{ species: FishSpecies; weight: number } | null>(null);
   /** The last cast landed in the middle of the sweet band. */
   const castPerfectRef = useRef(false);
+  /** The lure landed far out, where the stretching line soaks up the strike. */
+  const castLongRef = useRef(false);
   /** This cast skipped under the dock's planks. */
   const castSkipRef = useRef(false);
   /** This cast landed tight to a lily pad bed, where the bass and pike lie in ambush. */
@@ -638,6 +640,12 @@ export function useFishingGame(
                   limit: seconds(strike.solidMs),
                   line,
                 })
+            : castLongRef.current
+              ? t("Hooked in {time} s (solid under {limit} s this far out, where the line stretches). {line}. Ease off when it runs.", {
+                  time: seconds(strike.elapsedMs),
+                  limit: seconds(strike.solidMs),
+                  line,
+                })
             : fightWind(windRef.current)
               ? t("Hooked in {time} s (solid under {limit} s in this wind). {line}. Ease off when it runs.", {
                   time: seconds(strike.elapsedMs),
@@ -660,7 +668,7 @@ export function useFishingGame(
     if (!bitten) return;
     window.clearTimeout(timers.current.hook);
     const { at, ms } = biteWindowRef.current;
-    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current, dullRef.current), windowMs: ms };
+    const strike = { elapsedMs: Math.max(0, performance.now() - at), solidMs: solidStrikeMs(ms, fightWind(windRef.current), lureRef?.current, dullRef.current, castLongRef.current), windowMs: ms };
     fx.splash();
     fx.haptic("strike");
     beginFight(bitten.species, bitten.weight, profile, strike);
@@ -1100,6 +1108,8 @@ export function useFishingGame(
     castRiseRef.current = risingRef.current && aimed !== null && isRiseCast(landing.spot, aimed.x, aimed.z, Date.now());
     castSnagRef.current = aimed !== null ? castSnags(landing.spot, aimed.x, aimed.z, mercyRef.current, Math.random(), lureRef?.current, season) : null;
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
+    // A beginner's easy fish sets as solid however far out it took.
+    castLongRef.current = aimed !== null && angler !== null && !mercyRef.current && isLongCast(angler.x, angler.z, aimed.x, aimed.z, level, stanceNow === "open");
     castSkipRef.current = isSkipCast(castPower, profile.accuracy, landing.spot, lureRef?.current);
     castPadsRef.current = aimed !== null && tightToPads(season, aimed.x, aimed.z);
     castFoamRef.current = aimed !== null && onFoamLane(windDriftRef.current, aimed.x, aimed.z);
