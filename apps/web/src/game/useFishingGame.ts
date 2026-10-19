@@ -55,7 +55,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, gotAwayAfterLoss, type G
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { loadBag, saveBag } from "./groundbaitBag";
+import { loadBag, loadShiner, saveBag, saveShiner, type HookedShiner } from "./groundbaitBag";
 import { BACKLASH_POWER, COLD_WORK_WAIT, tooQuickForCold, isLongCast, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, colourSuits, colourWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
@@ -484,11 +484,19 @@ export function useFishingGame(
   };
   /** This cast went out on a washed-out worm, so its bite comes slower. */
   const castWashedRef = useRef(false);
-  /** A landed golden shiner hooked back on as live bait, for the next cast. */
-  const liveShinerRef = useRef(false);
+  /** A shiner left on the hook before a reload, landed or bought. */
+  const [keptShiner] = useState(loadShiner);
+  /** A landed golden shiner hooked back on as live bait, or one bought at the shack, for the next cast. */
+  const liveShinerRef = useRef(keptShiner !== null);
   /** The shiner on the hook was landed in a clean fight, so it swims hard and draws more of the hunters. */
-  const livelyShinerRef = useRef(false);
-  const [liveShiner, setLiveShiner] = useState(false);
+  const livelyShinerRef = useRef(keptShiner === "lively");
+  const [liveShiner, setLiveShiner] = useState(keptShiner !== null);
+  const hookShiner = (next: HookedShiner) => {
+    liveShinerRef.current = next !== null;
+    livelyShinerRef.current = next === "lively";
+    setLiveShiner(next !== null);
+    saveShiner(next);
+  };
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
   const [fishedHard, setFishedHard] = useState<readonly SpotId[]>([]);
@@ -902,9 +910,7 @@ export function useFishingGame(
     const shiner = liveShinerRef.current;
     const lively = shiner && livelyShinerRef.current;
     if (shiner) {
-      liveShinerRef.current = false;
-      livelyShinerRef.current = false;
-      setLiveShiner(false);
+      hookShiner(null);
       reasons.unshift(lively ? t("The lively shiner swims hard on the hook, and more of the hunters here come to it.") : t("The live shiner swims down off the hook, and the hunters here come to it."));
     }
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
@@ -1746,6 +1752,13 @@ export function useFishingGame(
   /** A handful bought at the shack goes in the bag, which carries no more than GROUNDBAIT_CARRY. */
   const addHandful = useCallback(() => setHandfuls((left) => Math.min(GROUNDBAIT_CARRY, left + 1)), []);
 
+  /** A live shiner bought at the shack goes on the hook for the next cast, unless one is on it already. */
+  const addShiner = () => {
+    if (liveShinerRef.current) return;
+    hookShiner("live");
+    setHint(t("You hook the shop's shiner on as live bait. Cast it out to the hunters."));
+  };
+
   const dismissResult = () => {
     setOutcome(null);
     resetToIdle(idleHint(stanceRef.current));
@@ -1754,10 +1767,8 @@ export function useFishingGame(
   /** Hook the landed golden shiner back on as live bait, so the next cast carries it out to the bank's hunters. */
   const baitShiner = () => {
     if (outcome?.kind !== "landed" || !canBaitShiner(outcome.species.id)) return;
-    liveShinerRef.current = true;
     // Landed clean, it isn't worn out, so it swims hard on the hook.
-    livelyShinerRef.current = !!outcome.clean;
-    setLiveShiner(true);
+    hookShiner(outcome.clean ? "lively" : "live");
     setOutcome(null);
     resetToIdle(outcome.clean ? t("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.") : t("You hook the shiner on as live bait. Cast it out to the hunters."));
   };
@@ -1780,6 +1791,7 @@ export function useFishingGame(
     fishedHard,
     throwGroundbait,
     addHandful,
+    addShiner,
     frayed,
     twisted,
     dulled,

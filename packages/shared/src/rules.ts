@@ -105,6 +105,14 @@ export function validateGroundbaitBuy(profile: Profile): PurchaseResult {
   return { ok: true, cost: GROUNDBAIT_PRICE };
 }
 
+/** A live shiner from the shack's bucket costs this many points; it goes on the hook for one cast, one at a time. */
+export const SHINER_PRICE = 50;
+
+export function validateShinerBuy(profile: Profile): PurchaseResult {
+  if (profile.points < SHINER_PRICE) return { ok: false, error: "not enough points", status: 409 };
+  return { ok: true, cost: SHINER_PRICE };
+}
+
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {
   const trophyBoost = level >= 8 ? 0.1 : 0;
   const t = Math.min(1, Math.max(0, random() + patience * 0.015 + trophyBoost));

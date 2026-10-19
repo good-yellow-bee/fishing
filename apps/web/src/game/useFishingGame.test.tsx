@@ -184,6 +184,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
       <button type="button" onClick={game.retie}>retie</button>
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
+      <button type="button" onClick={game.addShiner}>buy shiner</button>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
       <i data-testid="frayed">{String(game.frayed)}</i>
       <i data-testid="twisted">{String(game.twisted)}</i>
@@ -396,6 +397,22 @@ describe("useFishingGame live shiner", () => {
     // A roll of 0.7 misses a plain live shiner's 60% but lands in a lively one's 80%.
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
     random.mockRestore();
+  });
+
+  it("keeps a shiner on the hook across a reload, sends it out on the next cast, and hooks on a bought one", () => {
+    localStorage.setItem("stillwater.shiner.v1", "live");
+    const surface = mount();
+    expect(liveShiner()).toBe("true");
+    cast(surface);
+    expect(liveShiner()).toBe("false");
+    expect(hint()).toMatch(/^The live shiner swims down off the hook/);
+    expect(localStorage.getItem("stillwater.shiner.v1")).toBeNull();
+    act(() => vi.advanceTimersByTime(60_000));
+    const buy = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "buy shiner") as HTMLButtonElement).click());
+    buy();
+    expect(liveShiner()).toBe("true");
+    expect(localStorage.getItem("stillwater.shiner.v1")).toBe("live");
+    localStorage.removeItem("stillwater.shiner.v1");
   });
 
   it("leaves any other landed fish on the card", () => {

@@ -106,6 +106,10 @@ export function buyGroundbait() {
   return request<{ profile: Profile }>("/api/groundbait", { method: "POST" });
 }
 
+export function buyShiner() {
+  return request<{ profile: Profile }>("/api/shiner", { method: "POST" });
+}
+
 /** The local day as the instants it starts and ends, which stay right where clocks jump at midnight. */
 export function dayQuery(day: string) {
   const [year, month, date] = day.split("-").map(Number);
