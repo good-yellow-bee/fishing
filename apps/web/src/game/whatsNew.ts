@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-game16";
+export const NEWS_ID = "2026-10-19-scene24";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On cold clear dawns in fall and winter wisps of steam rise off the lake and lean away on the breeze. On still summer dawns a hot-air balloon drifts over the far water, its burner roaring now and then, and dips its basket to touch the lake before climbing away. On winter days loads of snow slip off the trees across the lake in a puff of powder.",
   "Smallmouth bass and rainbow trout now charge: once a fight one may turn and run straight at you, and the fight card shouts REEL, so wind fast to keep the line tight, or a light hook drops out of the slack. And on a breezy day, cast into the foam lanes the wind rakes across the water: it gathers drowned insects there, and the fish feeding along them bite sooner.",
   "At dusk in fall a great flock of starlings wheels over the far shore, its mirror crossing the still lake, and in winter black-headed gulls stand on the ice floes, now and then wheeling out over the water. By day a robin drops in on the dock's front posts, and in the rain or on a dewy morning a snail glides across the planks behind you.",
   "Outings can be found by the time of day of their fish (\"night\", \"dawn\"), an outing names the others on its water that day, planned ones say how many days are left, and the calendar file lists what works on the water and what is still to pack.",
