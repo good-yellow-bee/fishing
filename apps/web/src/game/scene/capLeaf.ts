@@ -1,14 +1,12 @@
-import { visitAt } from "./visitClock";
-
 /**
  * A fall leaf on the angler's cap: every so often one comes spinning down out of the trees and
  * settles on the cap, and there it rides until your next cast shakes it off the brim. Then, a while
- * later, another may come down. Pure in time and the last cast; positions are in the head bone's frame.
+ * later, another may come down. A small state stepped each frame; positions are in the head bone's frame.
  */
 
 type Point = { x: number; y: number; z: number };
 
-/** A leaf comes down this often, the first a little after you arrive, and takes this long to fall. */
+/** A new leaf comes this long after the last one went, the first a little after you arrive, and takes this long to fall. */
 export const CAP_LEAF_EVERY_SEC = 45;
 const FIRST_SEC = 12;
 export const CAP_LEAF_FALL_SEC = 3.6;
@@ -56,21 +54,46 @@ function sliding(away: number): CapLeafPose {
   };
 }
 
+export type CapLeafState =
+  | { mode: "away"; nextAt: number }
+  | { mode: "falling"; since: number; shaken: boolean }
+  | { mode: "resting" }
+  | { mode: "sliding"; since: number };
+
+/** Before the first leaf: it comes a little after you arrive. */
+export const CAP_LEAF_START: CapLeafState = { mode: "away", nextAt: FIRST_SEC };
+
 /**
- * The leaf at `time`, given the angler's last cast at `castAt` (-Infinity before any). A cast while it
- * is still falling lets it land first. Each cast clears the cap, and the next leaf comes in the next round.
- * `still` sets it straight down on the cap, and a cast simply takes it away.
+ * The leaf's state moved on to `time`; `threw` when the angler has just thrown a cast. A throw while it
+ * falls lets it land first, then shakes it off; a throw while it rests shakes it off; the next leaf comes
+ * a round after the last one has gone.
  */
-export function capLeafAt(time: number, castAt = -Infinity, still = false): CapLeafPose {
-  const now = visitAt(time, FIRST_SEC, CAP_LEAF_EVERY_SEC);
-  if (now.index < 0) return GONE;
-  const cast = visitAt(castAt, FIRST_SEC, CAP_LEAF_EVERY_SEC);
-  if (cast.index === now.index) {
-    const off = Math.max(cast.into, CAP_LEAF_FALL_SEC);
-    if (now.into >= off) return still ? GONE : sliding(now.into - off);
-    return still ? RESTING : falling(now.into);
+export function capLeafStep(state: CapLeafState, time: number, threw: boolean): CapLeafState {
+  switch (state.mode) {
+    case "away":
+      return time >= state.nextAt ? capLeafStep({ mode: "falling", since: state.nextAt, shaken: false }, time, threw) : state;
+    case "falling": {
+      const shaken = state.shaken || threw;
+      if (time - state.since < CAP_LEAF_FALL_SEC) return shaken === state.shaken ? state : { ...state, shaken };
+      return shaken ? { mode: "sliding", since: state.since + CAP_LEAF_FALL_SEC } : { mode: "resting" };
+    }
+    case "resting":
+      return threw ? { mode: "sliding", since: time } : state;
+    case "sliding":
+      return time - state.since >= CAP_LEAF_SLIDE_SEC ? { mode: "away", nextAt: state.since + CAP_LEAF_SLIDE_SEC + CAP_LEAF_EVERY_SEC } : state;
   }
-  // No cast this round: a fresh leaf comes down the round after the last cast, and stays.
-  const fresh = castAt === -Infinity ? now.index === 0 : now.index === cast.index + 1;
-  return fresh && !still ? falling(now.into) : RESTING;
+}
+
+/** The leaf at `time` in `state`. `still` sets it straight down on the cap, and a shake simply takes it away. */
+export function capLeafAt(state: CapLeafState, time: number, still = false): CapLeafPose {
+  switch (state.mode) {
+    case "away":
+      return GONE;
+    case "falling":
+      return still ? RESTING : falling(time - state.since);
+    case "resting":
+      return RESTING;
+    case "sliding":
+      return still ? GONE : sliding(time - state.since);
+  }
 }

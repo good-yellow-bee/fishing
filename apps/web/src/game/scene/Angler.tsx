@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { useAnimations, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneSkinned } from "three/addons/utils/SkeletonUtils.js";
@@ -18,7 +18,7 @@ import { missBodyLean, missRodPitch, missRodRoll, missView } from "./missMotion"
 import { anglerPose, shortestYaw } from "./pose";
 import { nibbleShiver, waitBodyLean, waitRodPitch, waitTwitchActive, waitView } from "./waitMotion";
 import { Reel } from "./Reel";
-import { capLeafAt } from "./capLeaf";
+import { CAP_LEAF_START, capLeafAt, capLeafStep, type CapLeafState } from "./capLeaf";
 import { capSnow } from "./capSnow";
 import { rodBowAmount, rodBowOffset, rodTipAt } from "./rodBow";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
@@ -156,19 +156,18 @@ function AnglerScarf({ torso, wind }: { torso: THREE.Object3D; wind: { x: number
   return null;
 }
 
-/** A fall leaf riding on the cap, on the `head` bone (capLeaf.ts); each cast shakes it off. */
+/** A fall leaf riding on the cap, on the `head` bone (capLeaf.ts); each throw of a cast shakes it off. */
 function CapLeaf({ head, phase }: { head: THREE.Object3D; phase: ScenePhase }) {
   const still = useReducedMotion();
-  const clock = useThree((state) => state.clock);
-  const castAt = useRef(-Infinity);
-  useEffect(() => {
-    if (phase === "casting") castAt.current = clock.elapsedTime;
-  }, [phase, clock]);
+  const state = useRef<CapLeafState>(CAP_LEAF_START);
+  const lastPhase = useRef(phase);
   const leaf = useMemo(() => {
     const mesh = new THREE.Mesh(
       leafGeometry(),
       new THREE.MeshToonMaterial({ color: LEAF_COLORS[1], gradientMap: toonRamp(), side: THREE.DoubleSide }),
     );
+    // A little smaller than the falling leaves, to sit on the cap without hanging off it.
+    mesh.scale.setScalar(0.8);
     mesh.visible = false;
     return mesh;
   }, []);
@@ -185,8 +184,12 @@ function CapLeaf({ head, phase }: { head: THREE.Object3D; phase: ScenePhase }) {
     },
     [leaf],
   );
-  useFrame(({ clock: frameClock }) => {
-    const pose = capLeafAt(frameClock.elapsedTime, castAt.current, still);
+  useFrame(({ clock }) => {
+    // The throw is the wind-up let go, as the line goes out.
+    const threw = lastPhase.current === "casting" && phase === "waiting";
+    lastPhase.current = phase;
+    state.current = capLeafStep(state.current, clock.elapsedTime, threw);
+    const pose = capLeafAt(state.current, clock.elapsedTime, still);
     leaf.visible = pose.here;
     if (!pose.here) return;
     leaf.position.set(pose.x, pose.y, pose.z);
