@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { EASEL_REACH, PAINTER_AT, PAINTER_YAW, canvasFill, painterAt } from "./pleinAir";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
@@ -105,9 +105,9 @@ export function umbrellaShape() {
   ]);
 }
 
-/** A band of the picture, a unit wide with its left edge at the origin, so scaling x paints it in from the left. */
-function bandGeometry(height: number) {
-  return new THREE.PlaneGeometry(1, height).translate(0.5, 0, 0);
+/** A band of the picture, a unit square with its left edge at the origin, so scaling x paints it in from the left. */
+function bandGeometry() {
+  return new THREE.PlaneGeometry(1, 1).translate(0.5, 0, 0);
 }
 
 /** A painter at an easel on the far bank on a calm, clear day, the picture filling in as they work (pleinAir.ts). */
@@ -116,27 +116,35 @@ export function Painter() {
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
   const brush = useRef<THREE.Group>(null);
-  const bands = [useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null), useRef<THREE.Mesh>(null)];
   const shapes = useMemo(
     () => ({
+      // The legs and the palette arm stay put on the body: one draw.
+      body: mergeParts([{ geometry: painterLegsShape() }, { geometry: paletteArmShape(), position: [0.19, HIP_Y + SHOULDER_Y, 0], rotation: [0, 0.5, 0] }]),
       torso: painterTorsoShape(),
-      legs: painterLegsShape(),
       brush: brushArmShape(),
-      palette: paletteArmShape(),
-      easel: easelShape(),
-      umbrella: umbrellaShape(),
-      bands: BANDS.map((band) => bandGeometry((band.to - band.from) * (CANVAS_H - 0.04))),
+      // The easel and the umbrella beside it never move: one draw.
+      stand: mergeParts([{ geometry: easelShape(), position: [0, 0, EASEL_REACH / SCALE] }, { geometry: umbrellaShape(), position: [0.55 / SCALE, 0, 0], rotation: [0, 0, 0.2] }]),
+      band: bandGeometry(),
     }),
     [],
   );
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
-  const paints = useMemo(() => BANDS.map((band) => new THREE.MeshToonMaterial({ color: band.color, gradientMap: toonRamp() })), []);
+  // The picture's bands are instances of one square, each in its own paint: one draw.
+  const paint = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", gradientMap: toonRamp() }), []);
+  const bands = useMemo(() => {
+    const mesh = new THREE.InstancedMesh(shapes.band, paint, BANDS.length);
+    BANDS.forEach((band, i) => mesh.setColorAt(i, new THREE.Color(band.color)));
+    mesh.frustumCulled = false;
+    return mesh;
+  }, [shapes, paint]);
   useEffect(
     () => () => {
-      [shapes.torso, shapes.legs, shapes.brush, shapes.palette, shapes.easel, shapes.umbrella, ...shapes.bands, material, ...paints].forEach((item) => item.dispose());
+      [...Object.values(shapes), material, paint].forEach((item) => item.dispose());
+      bands.dispose();
     },
-    [shapes, material, paints],
+    [shapes, material, paint, bands],
   );
+  const band = useMemo(() => new THREE.Object3D(), []);
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
     const pose = painterAt(time, still);
@@ -145,19 +153,20 @@ export function Painter() {
     // The brush arm lifts forward to the canvas, reaching right in on each dab.
     if (brush.current) brush.current.rotation.x = -(0.6 + pose.dab * 0.45) * (1 - Math.min(1, pose.back / 0.3) * 0.6);
     const fill = canvasFill(time, still);
-    BANDS.forEach((band, i) => {
-      const mesh = bands[i]!.current;
-      const amount = fill[band.key];
-      if (!mesh) return;
-      mesh.visible = amount > 0.001;
-      mesh.scale.x = Math.max(0.001, amount) * (CANVAS_W - 0.04);
+    BANDS.forEach((item, i) => {
+      const amount = fill[item.key];
+      band.position.set(-(CANVAS_W - 0.04) / 2, ((item.from + item.to) / 2 - 0.5) * (CANVAS_H - 0.04), 0);
+      // An unpainted band shrinks to nothing.
+      band.scale.set(amount > 0.001 ? amount * (CANVAS_W - 0.04) : 1e-5, (item.to - item.from) * (CANVAS_H - 0.04), 1);
+      band.updateMatrix();
+      bands.setMatrixAt(i, band.matrix);
     });
+    bands.instanceMatrix.needsUpdate = true;
   });
-  const canvasZ = EASEL_REACH / SCALE;
   return (
     <group name="painter" position={[PAINTER_AT.x, 0, PAINTER_AT.z]} rotation={[0, PAINTER_YAW, 0]} scale={SCALE}>
       <group ref={body}>
-        <mesh geometry={shapes.legs} material={material} castShadow />
+        <mesh geometry={shapes.body} material={material} castShadow />
         <group position={[0, HIP_Y, 0]}>
           <group ref={head}>
             <mesh geometry={shapes.torso} material={material} castShadow />
@@ -166,27 +175,13 @@ export function Painter() {
           <group ref={brush} position={[-0.19, SHOULDER_Y, 0]}>
             <mesh geometry={shapes.brush} material={material} />
           </group>
-          <group position={[0.19, SHOULDER_Y, 0]} rotation={[0, 0.5, 0]}>
-            <mesh geometry={shapes.palette} material={material} />
-          </group>
         </group>
       </group>
-      <group position={[0, 0, canvasZ]}>
-        <mesh geometry={shapes.easel} material={material} castShadow />
-        {/* The picture, painted on the canvas's face toward the painter. */}
-        <group position={[0, CANVAS_Y, -0.016]} rotation={[CANVAS_LEAN, Math.PI, 0]}>
-          {BANDS.map((band, i) => (
-            <mesh
-              key={band.key}
-              ref={bands[i]}
-              geometry={shapes.bands[i]}
-              material={paints[i]}
-              position={[-(CANVAS_W - 0.04) / 2, ((band.from + band.to) / 2 - 0.5) * (CANVAS_H - 0.04), 0]}
-            />
-          ))}
-        </group>
+      <mesh geometry={shapes.stand} material={material} castShadow />
+      {/* The picture, painted on the canvas's face toward the painter. */}
+      <group position={[0, CANVAS_Y, EASEL_REACH / SCALE - 0.016]} rotation={[CANVAS_LEAN, Math.PI, 0]}>
+        <primitive object={bands} />
       </group>
-      <mesh geometry={shapes.umbrella} material={material} position={[0.55 / SCALE, 0, 0]} rotation={[0, 0, 0.2]} castShadow />
     </group>
   );
 }

@@ -1,8 +1,8 @@
-import { type RefObject, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { dogAt, walkerAt } from "./dogWalk";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -97,17 +97,6 @@ export function dogLegShape() {
 /** The dog's tail, from its root, curving up and back. */
 export function dogTailShape() {
   return mergePainted([{ geometry: new THREE.CylinderGeometry(0.015, 0.03, 0.2, 5), position: [0, 0.08, -0.06], rotation: [-0.7, 0, 0], color: COAT }]);
-}
-
-/** Copies each pose group's local transform into one instance of `mesh`, so a set of limbs costs one draw. */
-function poseLimbs(mesh: THREE.InstancedMesh | null, groups: readonly RefObject<THREE.Group | null>[]) {
-  if (!mesh) return;
-  groups.forEach((group, i) => {
-    if (!group.current) return;
-    group.current.updateMatrix();
-    mesh.setMatrixAt(i, group.current.matrix);
-  });
-  mesh.instanceMatrix.needsUpdate = true;
 }
 
 /** Someone walking their dog along the far bank, the dog running on ahead, nosing about and running on again. In the rain they carry an umbrella. */

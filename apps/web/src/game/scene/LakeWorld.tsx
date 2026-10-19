@@ -1211,8 +1211,8 @@ function LakeSurface({
   const pollen = pollenAmount(season, sky);
   const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
-    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season) })),
-    [hour, season],
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season, sky) })),
+    [hour, season, sky],
   );
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
@@ -2256,7 +2256,7 @@ export const LakeWorld = memo(function LakeWorld({
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season)} />
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />

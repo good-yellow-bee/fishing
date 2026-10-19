@@ -1265,6 +1265,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC137~~ | ~~Spindrift: on breezy and windy winter mornings and days the wind lifts loose snow off the far hills and streams it along their faces in long white wisps, and skims it low along the far shore, racing downwind~~ (#1252) | scene | S |
 | ~~SC138~~ | ~~News card scene29: sun breaks on overcast days and winter spindrift~~ (#1252) | scene | S |
 | ~~SC139~~ | ~~Spring blossom on the trees: in spring about one broadleaf in five on the shore flowers, wild cherry white or crab apple pink, keeping its light and shade, and its reflection on still water flowers too~~ (#1252) | scene | S |
+| ~~SC140~~ | ~~Alpenglow: on clear and partly cloudy winter mornings and evenings the snowy hills behind the far bank glow rose at dawn and a deeper pink at sunset; under cloud they only dim to a cold grey~~ (#1255) | scene | S |
+| ~~SC141~~ | ~~Fewer draws for the painter and the woodcutter: the painter's legs and palette arm in one shape, the easel and sun umbrella in another, and the picture's three bands as instances of one square (9 draws to 5); the woodcutter's chopping block and woodstack in one shape and the split halves as two instances (8 draws to 6)~~ (#1255) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
