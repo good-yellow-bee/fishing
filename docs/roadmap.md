@@ -1334,6 +1334,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC170~~ | ~~Fewer draws: the disc tossers' still bodies bake into one shape (7 draws to 4), the swimmer's arms draw as one instanced mesh, and the washing line's posts and rope bake together~~ (#1376) | scene | S |
 | ~~SC171~~ | ~~Storks: a nest on the barn's ridge on the far hills, and from spring through summer a pair of white storks in it, clattering their bills and stretching their wings (five draws), with news scene38 for them and the orchard~~ (#1378) | scene | S |
 | ~~SC172~~ | ~~Fewer draws: the evening bats draw as two instanced meshes, bodies and wings (18 draws to 2), and the thermos steam as one (7 to 1)~~ (#1379) | scene | S |
+| SC173 | Fewer draws: the winter feeder chickadees and the snowball kids draw their posed parts as instanced meshes (feeder 9 draws to 4, kids 19 to 8 mid-burst) through a new poseFromHolders helper | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

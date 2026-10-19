@@ -58,3 +58,26 @@ export function poseLimbs(mesh: THREE.InstancedMesh | null, groups: readonly Ref
   });
   mesh.instanceMatrix.needsUpdate = true;
 }
+
+const toRoot = new THREE.Matrix4();
+const placed = new THREE.Matrix4();
+const HIDDEN = new THREE.Matrix4().makeScale(0, 0, 0);
+
+function shownUnder(holder: THREE.Object3D, root: THREE.Object3D) {
+  for (let node: THREE.Object3D | null = holder; node && node !== root; node = node.parent) if (!node.visible) return false;
+  return true;
+}
+
+/**
+ * Copies where each pose holder (an empty group posed as the part would be) sits under `root` into one
+ * instance of `mesh`, a child of `root`, so a set of posed parts costs one draw. A holder hidden, or under a
+ * hidden group, is scaled to nothing. Call `root.updateMatrixWorld()` once after posing, before this.
+ */
+export function poseFromHolders(mesh: THREE.InstancedMesh | null, root: THREE.Object3D | null, holders: readonly (THREE.Object3D | null)[]) {
+  if (!mesh || !root) return;
+  toRoot.copy(root.matrixWorld).invert();
+  holders.forEach((holder, i) => {
+    mesh.setMatrixAt(i, holder && shownUnder(holder, root) ? placed.multiplyMatrices(toRoot, holder.matrixWorld) : HIDDEN);
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+}
