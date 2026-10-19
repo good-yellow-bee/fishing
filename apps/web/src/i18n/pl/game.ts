@@ -774,8 +774,8 @@ export const PL_GAME: PlBook = {
   "Turning it!": "Zawracasz ją!",
   "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.":
     "Dwie kolejne przynęty można prowadzić w czasie czekania: stuknij, by zatrzymać woblera, tak że wypłynie przed płynącą za nim rybą, albo by mucha drgnęła jak żywy owad. Jak przy poppersie, jigu, błystce czy streamerze pierwsze stuknięcia przyspieszają branie, a zbyt wiele płoszy rybę.",
-  "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.":
-    "Na łódce plusk kotwicy płoszy ryby na kilka sekund, więc odczekaj chwilę przed rzutem. A przy silnym wietrze kadłub trzymany na linie kotwicy słabiej obraca się za rybą, więc odjazd zabiera więcej linki.",
+  "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.":
+    "Na Cyplu rzuć tuż za płytkie kamienie, na krawędź, gdzie woda opada w głąb: trzymają się tam bassy, więc branie przychodzi szybciej, a kamienie nie zaczepią przynęty. A sandacz złapany na otwartej wodzie schodzi teraz przy odjazdach w głąb, ciągnie mocniej, ale szybciej się męczy.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",

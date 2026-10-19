@@ -1744,7 +1744,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT356~~ | ~~Twitch a fly: a tap while a fly waits twitches it like a live insect, drawing the bite sooner for the first few taps like the other lure work, and the hint says "Twitch! …"~~ (#1452) | gameplay | S |
 | ~~GT357~~ | ~~News card 2026-10-19-game36 covers GT355 and GT356: pause a crankbait and twitch a fly while they wait~~ (#1454) | ui | S |
 | ~~GT358~~ | ~~The point's rock edge: a cast landing just past the point's shallow rocks, where the water drops off (past the rocks' depth, to 0.55 on the lake's 0-1 depth scale), bites 0.85x sooner without the rocks' snag, and the wait hint says "Along the rock edge…"~~ (#1464) | gameplay | S |
-| GT359 | The walleye dives: in open water (from the boat) its runs bore down as they do off the drop-off (harder pull, faster tiring, the scene's dive), and the fight card and field guide say "Diver: …" | gameplay | S |
+| ~~GT359~~ | ~~The walleye dives: in open water (from the boat) its runs bore down as they do off the drop-off (harder pull, faster tiring, the scene's dive), and the fight card and field guide say "Diver: …"~~ (#1466) | gameplay | S |
+| GT360 | News card 2026-10-19-game37 covers GT358 and GT359: the point's rock edge and the walleye's dive in open water | ui | S |
 
 ## Risks / open questions for the owner
 
