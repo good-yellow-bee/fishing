@@ -2168,3 +2168,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR546~~ | ~~Round 90 Home and export fixes: loose night fish on the evening's day, one-fish calendar ring, Replace keeps the game, sheet outing names, past alarms, goal without the sample week~~ (#1292) | field | S |
 | ~~BR547~~ | ~~Round 90 ideas: all waters to a GPS in one file, a goal like last year's in a tap, Home's next outing to the calendar, outings in the year's copy~~ (#1294) | field | S |
 | ~~BR548~~ | ~~Round 91 gear and map fixes: lure links with a water, map fish counts, Polish packing notes, long names, offline map note, Unpack all tap band~~ (#1305) | field | S |
+| ~~BR549~~ | ~~Round 91 ideas: lure record spreadsheet, nearest water and all-waters GPS file on the Map~~ (#1308) | field | S |
