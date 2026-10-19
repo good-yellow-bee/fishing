@@ -1373,6 +1373,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC199~~ | ~~Toad on the dock: on wet dawns, dusks and nights from spring to fall a toad hauls itself up over the boards behind the angler, crosses in short hops with long sits, throat pumping and eyes blinking, and drops off the far edge (rainy evenings had only the snail)~~ (#1448) | scene | S |
 | ~~SC200~~ | ~~Winter robin at dusk: in winter the dock robin keeps visiting the posts on into dusk, in the lanterns' light, the last bird to roost (winter dusk had nothing about the dock)~~ (#1453) | scene | S |
 | ~~SC201~~ | ~~News card scene46 covers SC198 to SC200~~ (#1453) | scene | S |
+| SC202 | The dog in the snow: the dock dog now comes out on snowy winter days too (it stays home only in rain); snow builds on its back and now and then it gives itself a shake and throws it off in a burst of flakes | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
