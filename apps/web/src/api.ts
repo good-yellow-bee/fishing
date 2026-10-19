@@ -1,5 +1,6 @@
 import {
   localDate,
+  type WeeklyChallenge,
   type BoardView,
   type BadgeProgress,
   type BoardPeriod,
@@ -32,6 +33,8 @@ export type Me = {
 export type DailyRequestRow = DailyRequest & { progress: number; claimed: boolean };
 
 export type DailyBoard = { day: string; requests: DailyRequestRow[] };
+export type WeeklyChallengeRow = WeeklyChallenge & { progress: number; claimed: boolean };
+export type WeeklyBoard = { week: string; weekFish: string; challenges: WeeklyChallengeRow[] };
 
 export class ApiError extends Error {
   readonly status: number;
@@ -120,6 +123,15 @@ export function dayQuery(day: string) {
 
 export function getDailyRequests(day = localDate(new Date())) {
   return request<DailyBoard>(`/api/daily-requests?${dayQuery(day)}`);
+}
+
+export function getWeeklyChallenges(day = localDate(new Date())) {
+  return request<WeeklyBoard>(`/api/weekly-challenges?day=${day}`);
+}
+
+/** Takes a day of the week the board was read for, so a claim just after Sunday midnight still finds its week. */
+export function claimWeeklyChallenge(id: string, day: string) {
+  return request<{ reward: number }>(`/api/weekly-challenges/${encodeURIComponent(id)}/claim?day=${day}`, { method: "POST" });
 }
 
 /** Takes the day the board was read for, so a claim just after midnight still finds its request. */

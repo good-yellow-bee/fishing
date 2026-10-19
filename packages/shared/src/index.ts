@@ -19,6 +19,7 @@ export * from "./lodge.ts";
 export * from "./season.ts";
 export * from "./weeklyFish.ts";
 export * from "./mastery.ts";
+export * from "./weeklyChallenges.ts";
 export * from "./golden.ts";
 export * from "./streak.ts";
 export * from "./snow.ts";
