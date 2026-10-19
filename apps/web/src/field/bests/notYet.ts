@@ -5,12 +5,16 @@ import { countedFish } from "../milestones";
  * The kinds caught last year that haven't come in yet this year, by their name as last logged, alphabetical. `nameOf`
  * groups by something else, such as the lure.
  */
-/** `dayOf` dates a fish ("2026-01-01"): a page that files a night fish under its outing's day passes its own. */
+/**
+ * `dayOf` dates a fish ("2026-01-01"): a page that files a night fish under its outing's day passes its own. `keyOf`
+ * says which names are one: a lure's "Spinnerbaits" and "Spinnerbait" are, as the lure record takes them.
+ */
 export function notYetThisYear(
   catches: readonly CatchEntry[],
   today: Date = new Date(),
   nameOf: (entry: CatchEntry) => string = (entry) => entry.species,
   dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
+  keyOf: (name: string) => string = (name) => name.toLowerCase(),
 ): string[] {
   const year = today.getFullYear();
   const lastYear = new Map<string, string>();
@@ -19,7 +23,7 @@ export function notYetThisYear(
     const at = Number(dayOf(entry).slice(0, 4));
     const name = nameOf(entry).trim();
     if (!name) continue;
-    const kind = name.toLowerCase();
+    const kind = keyOf(name);
     if (at === year) thisYear.add(kind);
     else if (at === year - 1) lastYear.set(kind, name);
   }

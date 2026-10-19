@@ -5,7 +5,7 @@ import { fishCountLabel, formatDay, messageText, outingName } from "../format";
 import { useTackle } from "./TackleState";
 import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
-import { pieceKey, shownPieceKey } from "./pieceKey";
+import { pieceKey, pieceName, shownPieceKey } from "./pieceKey";
 import { isSampleOuting, isSampleTrip } from "../bookCopy";
 import { LATE_NIGHT_UNTIL } from "../suggestions";
 import "./gear.css";
@@ -69,7 +69,8 @@ export function TackleList({
     return trip ? `${t("Tackle for {trip}", { trip: outingName(trip, spots) })}, ${formatDay(trip.date)}` : (name ?? heading ?? t("Tackle"));
   };
   const onList = new Set(rows.map((item) => readKey(item.label)));
-  const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
+  // One tip per piece: "Spoon" and "spoon " from two fish are one lure to pack.
+  const missing = suggest.filter((lure, index) => !onList.has(readKey(lure)) && suggest.findIndex((other) => readKey(other) === readKey(lure)) === index);
   const tipKeys = new Set(suggest.map((lure) => readKey(lure)));
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
@@ -237,9 +238,9 @@ export function TackleList({
                     }
                   }}
                 />
-                <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
+                <span className={item.packed ? "is-packed" : undefined}>{pieceName(item.label)}</span>
                 {/* Its kind, unless it is named just that: "Jig · Jig" said the name twice. */}
-                {isLureLabel(item.label) && shownPieceKey(t(lureClass(item.label).label)) !== shownPieceKey(t(item.label)) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
+                {isLureLabel(item.label) && shownPieceKey(t(lureClass(item.label).label)) !== shownPieceKey(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
                 {took.get(readKey(item.label)) ? (
                   <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span>
                 ) : tipKeys.has(readKey(item.label)) ? (
@@ -254,7 +255,7 @@ export function TackleList({
                   remove(item.id);
                   focusAfter(index);
                 }}
-                aria-label={t("Take {piece} off the list", { piece: t(item.label) })}
+                aria-label={t("Take {piece} off the list", { piece: pieceName(item.label) })}
               >
                 ×
               </button>
@@ -263,7 +264,7 @@ export function TackleList({
         </ul>
       )}
       {/* A day fished and done: the lures taken along that took nothing, to leave home or try another way. */}
-      {idle.length > 0 ? <p className="meta tackle-idle">{t("Packed, no fish on: {lures}", { lures: idle.map((item) => t(item.label)).join(", ") })}</p> : null}
+      {idle.length > 0 ? <p className="meta tackle-idle">{t("Packed, no fish on: {lures}", { lures: idle.map((item) => pieceName(item.label)).join(", ") })}</p> : null}
       {rows.length > 0 ? (
         <CopySummary
           text={() => packingText(listTitle(), rows)}
@@ -292,7 +293,7 @@ export function TackleList({
                 setError(message ?? "");
                 if (!message) focusAfter();
               }}>
-              {t("+ {lure}", { lure: t(lure) })}
+              {t("+ {lure}", { lure: pieceName(lure) })}
             </button>
           ))}
           {/* A fresh list takes them all in one tap, rather than one tap each with the tips scrolling away. */}
