@@ -5,7 +5,7 @@ import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, 
 import { pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
 import { CatchCard } from "../cards";
-import { num, t, tn, useT } from "../../i18n";
+import { locale, num, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { fishCountLabel, formatDay, outingNameById } from "../format";
 import { hookTally, hookText } from "../hookTally";
@@ -76,12 +76,12 @@ function DayTally({ count, date, tripId, tail }: { count: number; date: string; 
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
-function waterFishLine(catches: readonly CatchEntry[]): string {
+function waterFishLine(catches: readonly CatchEntry[], kindName: (species: string) => string): string {
   const fish = fishCountLabel(catches.length);
   const [top, next] = speciesCounts(catches);
   if (!top || catches.length < 2) return fish;
-  if (!next) return t("{fish}, all {species}", { fish, species: t(top.species) });
-  return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
+  if (!next) return t("{fish}, all {species}", { fish, species: kindName(top.species) });
+  return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: kindName(top.species) }) : fish;
 }
 
 /** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
@@ -235,7 +235,7 @@ export function BestsPage() {
     return !!before && ((before.longest !== null && sizeOf(row.longest, "length") > sizeOf(before.longest, "length")) || (before.heaviest !== null && sizeOf(row.heaviest, "weight") > sizeOf(before.heaviest, "weight")));
   };
   // The newest fish of the angler's own and how long ago it came, for a dry spell measured in days.
-  const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) ? entry : newest), null);
+  const lastFish = countedFish(whole.catches).reduce<CatchEntry | null>((newest, entry) => (!newest || dayOf(entry) > dayOf(newest) || (dayOf(entry) === dayOf(newest) && Date.parse(entry.caughtAt) > Date.parse(newest.caughtAt)) ? entry : newest), null);
   const lastFishDay = lastFish ? dayOf(lastFish) : null;
   const sinceLastFish = lastFishDay ? daysBetween(lastFishDay, today) : 0;
   const nameOf = (spotId: string) => spotById(book, spotId)?.name ?? t("Unknown water");
@@ -278,7 +278,8 @@ export function BestsPage() {
           <p className="meta not-yet">
             <span>
               {t("Not yet this year:")}{" "}
-              {notYet.map((name, index) => (
+              {/* In the order the reader's names sort in, not the stored English ones. */}
+              {[...notYet].sort((a, b) => kindName(a).localeCompare(kindName(b), locale())).map((name, index) => (
                 <Fragment key={name}>
                   {index > 0 ? ", " : null}
                   <Link to={`/species/${encodeURIComponent(name)}`}>{kindName(name)}</Link>
@@ -614,7 +615,7 @@ export function BestsPage() {
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
-                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
+                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
                   {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
                   {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
