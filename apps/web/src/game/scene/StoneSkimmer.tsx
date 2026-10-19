@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { kidLimbShape, kidTorsoShape } from "./LeafPile";
+import { mergeParts, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { MAX_SKIPS, SKIMMER_AT, SKIMMER_YAW, skimRings, skimmerAt, stoneAt } from "./skimStones";
 import { toonRamp } from "./toon";
@@ -25,10 +26,11 @@ export function StoneSkimmer() {
   const torso = useRef<THREE.Group>(null);
   const throwArm = useRef<THREE.Group>(null);
   const otherArm = useRef<THREE.Group>(null);
+  const armMeshes = useRef<THREE.InstancedMesh>(null);
   const stone = useRef<THREE.Mesh>(null);
   const rings = useRef<(THREE.Mesh | null)[]>([]);
   const shapes = useMemo(
-    () => ({ torso: kidTorsoShape(JACKET, HAT), leg: kidLimbShape(LEG, SHORTS), arm: kidLimbShape(0.32, JACKET), stone: new THREE.SphereGeometry(0.07, 8, 5), ring: new THREE.RingGeometry(0.8, 1, 32) }),
+    () => ({ torso: kidTorsoShape(JACKET, HAT), legs: mergeParts([1, -1].map((side) => ({ geometry: kidLimbShape(LEG, SHORTS), position: [side * 0.06, 0, 0] as const, rotation: [side * 0.12, 0, 0] as const }))), arm: kidLimbShape(0.32, JACKET), stone: new THREE.SphereGeometry(0.07, 8, 5), ring: new THREE.RingGeometry(0.8, 1, 32) }),
     [],
   );
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -56,6 +58,7 @@ export function StoneSkimmer() {
     }
     // The other hand reaches down for the stone as they stoop.
     if (otherArm.current) otherArm.current.rotation.x = -pose.stoop * 0.9;
+    poseLimbs(armMeshes.current, [throwArm, otherArm]);
     const point = stoneAt(time, still);
     if (stone.current) {
       stone.current.visible = point !== null;
@@ -80,18 +83,12 @@ export function StoneSkimmer() {
             <group ref={torso}>
               <mesh geometry={shapes.torso} material={material} castShadow />
               {/* The throwing arm on the right (-x, facing +z). */}
-              <group ref={throwArm} position={[-0.13, 0.32, 0]}>
-                <mesh geometry={shapes.arm} material={material} />
-              </group>
-              <group ref={otherArm} position={[0.13, 0.32, 0]}>
-                <mesh geometry={shapes.arm} material={material} />
-              </group>
+              <group ref={throwArm} position={[-0.13, 0.32, 0]} />
+              <group ref={otherArm} position={[0.13, 0.32, 0]} />
+              {/* Both arms in one draw, posed from the two groups above. */}
+              <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
             </group>
-            {[1, -1].map((side) => (
-              <group key={side} position={[side * 0.06, 0, 0]} rotation={[side * 0.12, 0, 0]}>
-                <mesh geometry={shapes.leg} material={material} />
-              </group>
-            ))}
+            <mesh geometry={shapes.legs} material={material} />
           </group>
         </group>
       </group>
