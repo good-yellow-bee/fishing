@@ -118,6 +118,8 @@ export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
 
 /** Walleye shake their heads between runs: reel through a shake and the line goes into the red. */
 export const HEAD_SHAKERS: ReadonlySet<string> = new Set(["walleye"]);
+/** In open water a walleye bores down on its runs, as any fish does off the drop-off; over the rocks or in the current it doesn't. */
+export const DIVERS: ReadonlySet<string> = new Set(["walleye"]);
 export const SHAKE_MS = 600;
 /** A shake gives about a reaction time to let go before a tight line goes into the red. */
 export const SHAKE_GRACE_SEC = 0.3;
@@ -485,7 +487,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive (a walleye's do in open water too); off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
   water: FightWater = "open",
   /** A breezy or strong day: slack line drifts out faster between runs, and a strong one holds the anchored boat back on a run. */
   wind?: FightWind,
@@ -509,6 +511,7 @@ export function makeFight(
   turnCut = 1,
 ): FightRuntime {
   const weedy = water === "weeds";
+  const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
@@ -716,10 +719,10 @@ export function makeFight(
     withRunFrom = pullingWith ? (withRunFrom ?? nowMs) : null;
     sim.withRun = withRunFrom !== null && nowMs - withRunFrom >= WITH_RUN_GRACE_SEC * 1000;
     const escalation = species.challenge === "surge" ? Math.min(0.25, completedSurges * 0.05) : 0;
-    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (water === "deep" ? DEEP_PULL : 1);
+    const eff = (pattern.strength * surgeScale + escalation) * SURGE_PULL * (1 - worn() * (1 - SPENT_PULL)) * (deepRuns ? DEEP_PULL : 1);
     const rocky = water === "rocks" && turnable && !sim.turning && !sim.roll && !sim.charge;
     sim.rocky = rocky && sim.surge === 2 && !sim.jump;
-    sim.diving = water === "deep" && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge;
+    sim.diving = deepRuns && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge;
     sim.downstream = water === "current" && turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && !sim.turning && sim.runSide === DOWNSTREAM_SIDE;
     // Charging straight at the angler the fish pulls nothing: the line only goes slack.
     const charging = sim.charge === true && sim.surge === 2;
@@ -752,7 +755,7 @@ export function makeFight(
     }
     if (nowMs < graceUntil) sim.tension = Math.min(sim.tension, GRACE_TENSION);
     // Bigger fish have more fight in them.
-    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (water === "deep" ? DEEP_TIRE : 1) * (charging ? CHARGE_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
+    const tire = sim.weeded ? -REST : sim.surge === 2 ? TIRE_RUN * (deepRuns ? DEEP_TIRE : 1) * (charging ? CHARGE_TIRE : 1) + (sim.turning ? TIRE_TURN : 0) : reeling ? TIRE_REEL : -REST;
     sim.stamina = Math.min(1, Math.max(0, sim.stamina - (tire > 0 ? tire * tireMul * tireHabit : tire) * dtSec));
     sim.line = Math.min(1.3, Math.max(0, sim.line));
     performance.peakTension = Math.max(performance.peakTension, sim.tension);
