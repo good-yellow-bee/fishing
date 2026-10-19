@@ -823,8 +823,9 @@ a:focus-visible {
   }
 }
 
+/* A lighter moss than the border: the claimed row is dimmed to 0.7, and plain moss read 3 to 1 on the shack. */
 .daily-request-claimed {
-  color: var(--moss);
+  color: #9ac487;
   font-size: 11px;
   letter-spacing: 0.14em;
   text-align: center;
