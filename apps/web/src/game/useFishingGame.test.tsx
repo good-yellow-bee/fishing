@@ -1096,6 +1096,22 @@ describe("useFishingGame strike timing", () => {
     expect(Number(far![1])).toBeCloseTo(Number(near![1]) * LONG_CAST_SOLID, 1);
   });
 
+  it("sets a solid hook over more of the bite from level 15", () => {
+    const limitAt = (lifetimePoints: number) => {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints });
+      cast(surface);
+      act(() => vi.advanceTimersByTime(2_201));
+      now += 900;
+      act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
+      const limit = (hint() ?? "").match(/^Hooked in 0\.90 s \(solid under (\d\.\d\d) s\)\. /);
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return Number(limit?.[1]);
+    };
+    expect(limitAt(38000)).toBeCloseTo(limitAt(30000) * 1.2, 1);
+  });
+
   it("says a low cast off the dock skipped under the planks, and tells the skip roll the bank and lure", () => {
     vi.mocked(isSkipCast).mockReturnValueOnce(true);
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler");

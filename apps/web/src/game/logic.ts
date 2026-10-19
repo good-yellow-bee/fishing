@@ -31,6 +31,7 @@ import {
   CAST_RANGE,
   BOAT_CAST_RANGE,
   castRangeMultiplier,
+  solidShareForLevel,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -207,7 +208,7 @@ export function hookWindowMs(accuracy: number, mercy = false, level = 1) {
   return Math.round((1000 + accuracy * 100) * hookWindowMulForLevel(level)) + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
-/** A strike in this first share of the hook window sets the hook solid. */
+/** A strike in this first share of the hook window sets the hook solid (more from level 15, see solidShareForLevel). */
 export const SOLID_STRIKE_SHARE = 0.4;
 
 /** On a breezy or strong day the wind's bow in the line soaks up the strike, so a solid hook needs a quicker one. */
@@ -216,10 +217,10 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 /** A jig's single stout hook drives home on a strike, so it sets solid over a longer share of the window. */
 export const JIG_SOLID = 1.25;
 
-/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false) {
+/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out, at this level. */
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
+  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
 }
 
 /** A lure landing past this share of the angler's reach is a long cast. */
