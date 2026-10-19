@@ -46,9 +46,22 @@ export function flameShape() {
 /**
  * The fire pit by the shack: a ring of stones round a few charred sticks, always there, and from
  * dusk to dawn (`lit`) a flickering fire whose smoke rises and leans away on the day's wind.
- * `at` sets another fire pit elsewhere, such as the campers' on the far bank.
+ * `at` sets another fire pit elsewhere, such as the campers' on the far bank. `upright` stands the glow
+ * up to face the lake, for a fire seen side-on across the water rather than from above.
  */
-export function Campfire({ lit, hour, wind = NO_WIND, at = FIRE_AT }: { lit: boolean; hour: SmokeHour; wind?: { x: number; z: number }; at?: { x: number; z: number } }) {
+export function Campfire({
+  lit,
+  hour,
+  wind = NO_WIND,
+  at = FIRE_AT,
+  upright = false,
+}: {
+  lit: boolean;
+  hour: SmokeHour;
+  wind?: { x: number; z: number };
+  at?: { x: number; z: number };
+  upright?: boolean;
+}) {
   const still = useReducedMotion();
   const flames = useRef<THREE.Group>(null);
   const glow = useRef<THREE.Mesh>(null);
@@ -96,7 +109,7 @@ export function Campfire({ lit, hour, wind = NO_WIND, at = FIRE_AT }: { lit: boo
               <coneGeometry args={[0.07, 0.18, 6]} />
             </mesh>
           </group>
-          <mesh ref={glow} material={glowMaterial} position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={5}>
+          <mesh ref={glow} material={glowMaterial} position={[0, upright ? 0.15 : 0.03, 0]} rotation={[upright ? 0 : -Math.PI / 2, 0, 0]} renderOrder={5}>
             <planeGeometry args={[1, 1]} />
           </mesh>
           <SmokePlume hour={hour} wind={wind} />
