@@ -1,6 +1,6 @@
 import { Fragment, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
+import { kindNames, speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
 import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { pieceTally } from "../pieceTally";
 import { sheetOutings } from "../catchCsv";
@@ -29,9 +29,12 @@ import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID } from "../playLake";
 import { countedSearch } from "../countedSearch";
 import { countedBook, countedFish } from "../milestones";
-import { isSampleCatch, isSampleOuting, withoutSample } from "../bookCopy";
+import { isSampleCatch, isSampleOnly, isSampleOuting, withoutSample } from "../bookCopy";
 import { SameKinds } from "./SameKinds";
 import { tripDaySearch } from "../tripSearch";
+import { outingDay } from "../tripDates";
+import { outingFish } from "../outingFish";
+import { pieceName } from "../gear/pieceKey";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -97,7 +100,7 @@ function KindLeaders({ book, species }: { book: Logbook; species: string }) {
   const [water, nextWater] = speciesWaters(book, fish);
   // A tie has no leader, as the catch search's own "Most on" line takes it.
   const parts = [
-    lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: t(lure.lure), count: lure.count }) : null,
+    lure && lure.count >= 2 && lure.count > (nextLure?.count ?? 0) ? t("Most on {lure} ({count})", { lure: pieceName(lure.lure), count: lure.count }) : null,
     water && water.name && water.count >= 2 && water.count > (nextWater?.count ?? 0) ? t("Most from {water} ({count})", { water: water.name, count: water.count }) : null,
   ].filter(Boolean);
   return parts.length > 0 ? <p className="meta kind-leaders">{parts.join(" · ")}</p> : null;
@@ -121,6 +124,8 @@ export function BestsPage() {
     );
   }, []);
   const today = localDate(new Date());
+  // Last evening's outing is still going in the small hours: not yet a blank, as Trips and Home take it.
+  const fishedBy = outingDay(today);
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
   // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
   // Records are the angler's own: the game's lake, its rounds and its fish stay out of every tile, tally and calendar here,
@@ -137,24 +142,28 @@ export function BestsPage() {
   const whole = { ...counted, spots: all.spots.filter((spot) => spot.id !== PLAY_LAKE_ID && (kept.has(spot.id) || used.has(spot.id))) };
   const real = whole;
   const tail = (term: string) => countedSearch(all, term, all.catches);
-  const days = daysOut(whole, today.slice(0, 4), today);
+  const days = daysOut(whole, today.slice(0, 4), fishedBy);
   // A night session's small hours on its outing's day, as the calendar and the goal count them.
   const dayOf = (entry: CatchEntry) => bookFishDay(whole, entry);
   const monthOf = (entry: CatchEntry) => dayOf(entry).slice(0, 7);
   const notYet = notYetThisYear(real.catches, new Date(), undefined, dayOf);
   const newWaters = newWatersThisYear(real.catches, new Date(), dayOf).flatMap((id) => whole.spots.filter((spot) => spot.id === id));
   const wholeFishByTrip = fishCountsByTrip(whole);
+  // An outing's fish with those logged loose on its water that day, as Trips and the outings link count them.
+  const fishOn = outingFish(whole);
+  // Each kind under the name the book gives it most, in the reader's language: "zander " reads "Sandacz" in Polish.
+  const kindName = kindNames(countedFish(whole.catches));
   const streak = outingStreak(
     real.trips,
-    (id) => wholeFishByTrip.get(id) ?? 0,
-    today,
+    fishOn,
+    fishedBy,
     real.catches.filter((entry) => !entry.tripId).map((entry) => bookFishDay(real, entry)),
   );
-  const weeks = weekStreak(real.trips, today, (id) => wholeFishByTrip.get(id) ?? 0);
-  const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
+  const weeks = weekStreak(real.trips, fishedBy, fishOn);
+  const split = weekendSplit(real.trips, fishOn, fishedBy);
   const fishYears = yearTally(whole.catches, monthOf).map((row) => row.year);
   // A season with days out but no fish yet can be picked too: its recap says so, and Home's goal line links it.
-  const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < today).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
+  const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < fishedBy).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;
   // Everything else is worked out from the season picked, fish and outings alike.
@@ -236,6 +245,8 @@ export function BestsPage() {
         {/* Drawn afresh at New Year, so the new year's count never meets last year's goal. */}
         {/* The goal is the angler's own: with nothing of theirs yet, the sample week's invented fish don't fill it. */}
         <YearGoal key={today.slice(0, 4)} book={ownAny ? whole : withoutSample(whole)} openAtStart={params.get(GOAL_PARAM) === "set"} />
+        {/* The days and runs below are the sample's, as the page shows them: say why its fish leave the goal empty. */}
+        {isSampleOnly(all) ? <p className="meta">{t("The sample week's fish don't count toward a goal.")}</p> : null}
         {days > 0 ? <p className="meta">{t("Days on the water in {year}: {count}", { year: today.slice(0, 4), count: days })}</p> : null}
         {/* Last year's kinds still to show up this year, each opening its page. */}
         {notYet.length > 0 ? (
@@ -245,7 +256,7 @@ export function BestsPage() {
               {notYet.map((name, index) => (
                 <Fragment key={name}>
                   {index > 0 ? ", " : null}
-                  <Link to={`/species/${encodeURIComponent(name)}`}>{t(name)}</Link>
+                  <Link to={`/species/${encodeURIComponent(name)}`}>{kindName(name)}</Link>
                 </Fragment>
               ))}
             </span>
@@ -259,7 +270,7 @@ export function BestsPage() {
               {newWaters.map((spot, index) => (
                 <Fragment key={spot.id}>
                   {index > 0 ? ", " : null}
-                  <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
+                  <Link to={`/spots/${spot.id}`}>{spot.name.trim()}</Link>
                 </Fragment>
               ))}
             </span>
@@ -299,7 +310,7 @@ export function BestsPage() {
           <h2>{t("Days out in {year}", { year: year ?? today.slice(0, 4) })}</h2>
         </div>
         <p className="meta">{t("A stronger shade means more fish; a thick outline was an outing with none, a thin one is an outing ahead.")}</p>
-        <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} tail={tail} tripTail={(day) => tripDaySearch(all, day, new Set(whole.trips.map((trip) => trip.id)), t)} />
+        <DayCalendar book={whole} year={year ?? today.slice(0, 4)} today={today} fishedBy={fishedBy} tail={tail} tripTail={(day) => tripDaySearch(all, day, new Set(whole.trips.map((trip) => trip.id)), t)} />
       </section>
     ) : null;
 
@@ -336,7 +347,7 @@ export function BestsPage() {
           dayLink={(date) => findLink(tail(date))}
           fishLink={findLink(tail(year))}
           // The season's outings already fished, as the outings page it opens counts them ("Outings: 6 · 1 planned").
-          outings={{ count: sheetOutings(whole, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
+          outings={{ count: sheetOutings(whole, fishedBy).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length, to: `/trips?${new URLSearchParams({ find: tripDaySearch(all, year, new Set(whole.trips.map((trip) => trip.id)), t) }).toString()}` }}
           kindsId="by-species"
         />
       ) : null}
@@ -347,27 +358,27 @@ export function BestsPage() {
           <strong>
             {/* Named whole for a list of links, where "20 in" alone says nothing. */}
             {bests.longest ? (
-              <Link to={`/catches/${bests.longest.id}`} aria-label={t("Longest: {species}, {size}", { species: t(bests.longest.species), size: measureText(measureOf(bests.longest, "length")!) })}>
+              <Link to={`/catches/${bests.longest.id}`} aria-label={t("Longest: {species}, {size}", { species: kindName(bests.longest.species), size: measureText(measureOf(bests.longest, "length")!) })}>
                 {measureText(measureOf(bests.longest, "length")!)}
               </Link>
             ) : (
               t("None")
             )}
           </strong>
-          <small>{bests.longest ? t(bests.longest.species) : (emptySeason ?? t("No length in the book"))}</small>
+          <small>{bests.longest ? kindName(bests.longest.species) : (emptySeason ?? t("No length in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
           <strong>
             {bests.heaviest ? (
-              <Link to={`/catches/${bests.heaviest.id}`} aria-label={t("Heaviest: {species}, {size}", { species: t(bests.heaviest.species), size: measureText(measureOf(bests.heaviest, "weight")!) })}>
+              <Link to={`/catches/${bests.heaviest.id}`} aria-label={t("Heaviest: {species}, {size}", { species: kindName(bests.heaviest.species), size: measureText(measureOf(bests.heaviest, "weight")!) })}>
                 {measureText(measureOf(bests.heaviest, "weight")!)}
               </Link>
             ) : (
               t("None")
             )}
           </strong>
-          <small>{bests.heaviest ? t(bests.heaviest.species) : (emptySeason ?? t("No weight in the book"))}</small>
+          <small>{bests.heaviest ? kindName(bests.heaviest.species) : (emptySeason ?? t("No weight in the book"))}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>
@@ -467,7 +478,7 @@ export function BestsPage() {
                     <div className="spot-card-top">
                       <h3>
                         {/* In a picked season, the kind's fish of that season, as counted here. */}
-                        <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{t(row.species)}</Link>
+                        <Link to={year ? linkFor(exactTerm("species", t(row.species))) : speciesLink(row.species)}>{kindName(row.species)}</Link>
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                       {/* A kind the season brought into the book for the first time. */}
@@ -554,7 +565,7 @@ export function BestsPage() {
               <h2>{t("Lures that worked")}</h2>
             </div>
             {/* Every lure that took a fish, the top five until asked for the rest. */}
-            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: t(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
+            <TallyBars key={year ?? ""} limit={5} rows={pieceTally(book.catches, Infinity).map((row) => ({ key: row.lure, label: pieceName(row.lure), count: row.count, to: linkFor(exactTerm("lure", t(row.lure))) }))} />
           </section>
 
           <section>

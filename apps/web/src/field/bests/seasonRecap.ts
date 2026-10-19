@@ -2,6 +2,8 @@ import type { Logbook } from "@stillwater/shared";
 import { bookFishDay, daysOut } from "../tripMonths";
 import { countedFish } from "../milestones";
 import { sheetOutings } from "../catchCsv";
+import { outingDay } from "../tripDates";
+import { outingFish } from "../outingFish";
 
 /** One season's totals beside the season before, and the kinds it brought into the book for the first time. */
 export type SeasonRecap = {
@@ -26,6 +28,8 @@ export type SeasonRecap = {
 
 export function seasonRecap(book: Logbook, year: string, today: string): SeasonRecap {
   const before = String(Number(year) - 1);
+  // Last evening's outing, still going in the small hours, is no finished blank yet, as Trips and Home take it.
+  const fishedBy = outingDay(today);
   // Each fish on the day it counts on, a night session's small hours on its outing's, as the days out, the goal and the
   // copied summary count it.
   const dayOf = (entry: Logbook["catches"][number]) => bookFishDay(book, entry);
@@ -44,13 +48,14 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
   const first = new Map<string, { name: string; at: string }>();
   for (const entry of [...countedFish(book.catches)].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))) {
     const key = entry.species.trim().toLowerCase();
-    if (!first.has(key)) first.set(key, { name: entry.species, at: dayOf(entry) });
+    if (!first.has(key)) first.set(key, { name: entry.species.trim(), at: dayOf(entry) });
   }
-  // The outings counted as the season box's Outings line and the outings page count them, and what they landed.
+  // The outings counted as the season box's Outings line and the outings page count them, and what they landed, with
+  // the fish logged loose on an outing's water that day, as Trips counts them.
+  const fishOn = outingFish(book);
   const outingsIn = (season: string) => {
-    const trips = sheetOutings(season === before ? cut : book, today).trips.filter((trip) => trip.date.startsWith(`${season}-`));
-    const ids = new Set(trips.map((trip) => trip.id));
-    return { count: trips.length, fish: book.catches.filter((entry) => entry.tripId !== null && ids.has(entry.tripId)).length };
+    const trips = sheetOutings(season === before ? cut : book, fishedBy).trips.filter((trip) => trip.date.startsWith(`${season}-`));
+    return { count: trips.length, fish: trips.reduce((sum, trip) => sum + fishOn(trip.id), 0) };
   };
   const outings = outingsIn(year);
   const outingsBefore = outingsIn(before);
@@ -63,8 +68,8 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
     outingFishBefore: outingsBefore.fish,
     fish: of(year).length,
     fishBefore: of(before).length,
-    days: daysOut(book, year, today),
-    daysBefore: daysOut(cut, before, today),
+    days: daysOut(book, year, fishedBy),
+    daysBefore: daysOut(cut, before, fishedBy),
     kinds: kinds(year),
     kindsBefore: kinds(before),
     beforeUntil,

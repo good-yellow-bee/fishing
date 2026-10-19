@@ -2,6 +2,7 @@ import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/s
 import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
 import { t } from "../i18n";
+import { bookSpelling } from "./gear/pieceKey";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -73,7 +74,8 @@ export function kindNames(catches: readonly CatchEntry[]): (species: string) => 
     const name = species.trim();
     // The most-used spelling; a tie goes to one with a capital, as the kinds list writes them.
     const best = [...(spellings.get(name.toLowerCase()) ?? new Map([[name, 1]]))].sort((a, b) => b[1] - a[1] || Number(/^\p{Lu}/u.test(b[0])) - Number(/^\p{Lu}/u.test(a[0])))[0]![0];
-    return t(best);
+    // As the dictionary spells it, so a kind only ever typed "zander" still reads "Sandacz" in Polish.
+    return t(bookSpelling(best));
   };
 }
 
