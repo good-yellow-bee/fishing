@@ -10,7 +10,7 @@ type Vec3 = [number, number, number];
 const SHAFT_BRIGHTNESS = 0.42;
 
 /** A shaft of light in mist: soft at the sides, coming in over the bank and thinning toward the water. */
-function shaftTexture() {
+export function shaftTexture() {
   const w = 32;
   const h = 128;
   const canvas = document.createElement("canvas");

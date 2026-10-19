@@ -171,6 +171,7 @@ import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
+import { FAR_HILLS, hillColor } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
 import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
@@ -199,6 +200,12 @@ import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
 import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
+import { sleddersOut } from "./sledRun";
+import { HayBales } from "./HayBales";
+import { balesOut } from "./hayField";
+import { Sledders } from "./Sledders";
+import { spindriftOut } from "./blowingSnow";
+import { Spindrift } from "./Spindrift";
 import { NightEyes } from "./NightEyes";
 import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
@@ -263,6 +270,8 @@ import { reedStem, reedTilt } from "./reedSway";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
+import { SunBreak } from "./SunBreak";
+import { sunBreakOut } from "./sunGap";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
 import { FoamLanes } from "./FoamLanes";
@@ -578,12 +587,7 @@ const CREEK_TREES: Scatter[] = [
 /** Every shore tree, for the bank's mirror image on still water. */
 const MIRROR_TREES: MirrorTree[] = [...TREES, ...BACK_TREES, ...CREEK_TREES].map((tree) => ({ position: tree.position, scale: tree.scale, variant: plantVariant(tree.position) }));
 
-/** The three hills behind the far shore: centre and radii of each icosphere. */
-const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
-  { position: [-28, 4.5, -26], scale: [17, 7, 10], day: "#587a5f", night: "#3d5a44" },
-  { position: [-5, 5.2, -30], scale: [20, 8, 10], day: "#628468", night: "#456348" },
-  { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
-];
+const HILLS = FAR_HILLS;
 
 /** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
@@ -1209,8 +1213,8 @@ function LakeSurface({
   const pollen = pollenAmount(season, sky);
   const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
-    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: seasonGroundColor(hour === "night" ? hill.night : hill.day, season) })),
-    [hour, season],
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season, sky) })),
+    [hour, season, sky],
   );
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
@@ -2254,8 +2258,9 @@ export const LakeWorld = memo(function LakeWorld({
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
+      {balesOut(season) && <HayBales season={season} hour={hour} />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
@@ -2340,6 +2345,7 @@ export const LakeWorld = memo(function LakeWorld({
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
+      {sunBreakOut(hour, sky) && <SunBreak discPos={look.discPos} wind={wind} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
       {eyesOut(hour, sky) && <NightEyes />}
       {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}
@@ -2386,6 +2392,8 @@ export const LakeWorld = memo(function LakeWorld({
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
       {joggerOut(hour, sky, season) && <Jogger />}
       {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
+      {sleddersOut(hour, sky, season) && <Sledders />}
+      {spindriftOut(hour, sky, season, wind) && <Spindrift wind={wind} />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}

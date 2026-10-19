@@ -728,17 +728,42 @@ export const BED_RAIDERS: ReadonlySet<string> = new Set(["perch", "smallmouth-ba
 /** Chance a bite on the sunfish beds is one of the raiders. */
 export const BED_RAIDER_SHARE = 0.35;
 
-/** A raider drawn to the sunfish beds for this bite, from the bank's own lure split and weighed as the bank draws them, only one the angler could land, or none. */
-export function bedRaider(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
-  if (random() >= BED_RAIDER_SHARE) return null;
+/** One of a set of fish drawn to the cast on the share's roll, from the bank's own lure split and weighed as the bank draws them, only one the angler could land, or none. */
+function drawnFrom(ids: ReadonlySet<string>, share: number, spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random: () => number): FishSpecies | null {
+  if (random() >= share) return null;
   const home = FISH.filter((fish) => fish.spots.includes(spot));
-  const raiders = poolForLure(home, lure).filter((fish) => BED_RAIDERS.has(fish.id) && canLand(profile, fish));
-  let roll = random() * raiders.reduce((sum, fish) => sum + appeal(fish, hour), 0);
-  for (const fish of raiders) {
+  const drawn = poolForLure(home, lure).filter((fish) => ids.has(fish.id) && canLand(profile, fish));
+  let roll = random() * drawn.reduce((sum, fish) => sum + appeal(fish, hour), 0);
+  for (const fish of drawn) {
     roll -= appeal(fish, hour);
     if (roll <= 0) return fish;
   }
-  return raiders.at(-1) ?? null;
+  return drawn.at(-1) ?? null;
+}
+
+/** A raider drawn to the sunfish beds for this bite, or none. */
+export function bedRaider(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(BED_RAIDERS, BED_RAIDER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish that hunt the crayfish round the dock's pilings. */
+export const CRAYFISH_HUNTERS: ReadonlySet<string> = new Set(["smallmouth-bass", "catfish"]);
+/** Chance a bite on a jig over the crayfish bed is one of their hunters. */
+export const CRAYFISH_HUNTER_SHARE = 0.35;
+
+/** A crayfish hunter drawn to a jig over the bed for this bite, or none. */
+export function crayfishHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, spot, lure, profile, hour, random);
+}
+
+/** The fish that gorge on spring's tadpoles in the warm shallows. */
+export const TADPOLE_EATERS: ReadonlySet<string> = new Set(["perch", "bluegill", "largemouth-bass", "smallmouth-bass"]);
+/** Chance a bite among the tadpoles is one of the fish feeding on them. */
+export const TADPOLE_EATER_SHARE = 0.35;
+
+/** A fish feeding on the tadpoles drawn to the cast for this bite, or none. */
+export function tadpoleEater(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(TADPOLE_EATERS, TADPOLE_EATER_SHARE, spot, lure, profile, hour, random);
 }
 
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */

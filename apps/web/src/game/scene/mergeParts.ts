@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
@@ -45,4 +46,15 @@ export function mergePainted(parts: readonly PaintedPart[]): THREE.BufferGeometr
       return { ...placement, geometry: flat };
     }),
   );
+}
+
+/** Copies each pose group's local transform into one instance of `mesh`, so a set of limbs costs one draw. */
+export function poseLimbs(mesh: THREE.InstancedMesh | null, groups: readonly RefObject<THREE.Group | null>[]) {
+  if (!mesh) return;
+  groups.forEach((group, i) => {
+    if (!group.current) return;
+    group.current.updateMatrix();
+    mesh.setMatrixAt(i, group.current.matrix);
+  });
+  mesh.instanceMatrix.needsUpdate = true;
 }

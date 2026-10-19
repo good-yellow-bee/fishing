@@ -1256,6 +1256,19 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC128~~ | ~~Night eyeshine: on nights without fog a pair of eyes, a deer's or a fox's, now and then shines green-gold at the edge of the far bank, holds a while, blinks and is gone~~ (#1245) | scene | S |
 | ~~SC129~~ | ~~Paddleboard route: the paddleboarder's run ends further west so the board stays well clear of the swans' loop~~ (#1245) | scene | S |
 | ~~SC130~~ | ~~News card scene27: rain squall, winter crows, night eyeshine~~ (#1245) | scene | S |
+| ~~SC131~~ | ~~Fewer draws for the night angler and the dog walker: the angler's still parts in one shape (7 draws to 2), the walker's legs, arms and the dog's legs as instances (8 draws to 3)~~ (#1248) | scene | S |
+| ~~SC132~~ | ~~Winter sledders: on winter days two children take turns sledging down a packed run on the hill behind the far bank, rushing down in a spray of snow, coasting to a stop and trudging back up pulling their sleds~~ (#1248) | scene | S |
+| ~~SC133~~ | ~~Snowy winter hills: in winter the hills behind the far bank lie white under unbroken snow, cool blue-grey in the shade and dark at night, instead of the olive of the trodden shore~~ (#1249) | scene | S |
+| ~~SC134~~ | ~~News card scene28: snowy winter hills and the sledders~~ (#1249) | scene | S |
+| ~~SC135~~ | ~~Sun breaks: on overcast days a gap now and then opens in the grey, and a patch of sunlight slides across the far half of the lake with the wind, faint beams slanting down to it, until the cloud closes over~~ (#1251) | scene | S |
+| ~~SC136~~ | ~~Fewer draws for the brolly fisher and the birdwatcher: the brolly fisher's seat and rod rests in one shape (3 draws to 1), the birdwatcher's legs and body in one (2 to 1)~~ (#1251) | scene | S |
+| ~~SC137~~ | ~~Spindrift: on breezy and windy winter mornings and days the wind lifts loose snow off the far hills and streams it along their faces in long white wisps, and skims it low along the far shore, racing downwind~~ (#1252) | scene | S |
+| ~~SC138~~ | ~~News card scene29: sun breaks on overcast days and winter spindrift~~ (#1252) | scene | S |
+| ~~SC139~~ | ~~Spring blossom on the trees: in spring about one broadleaf in five on the shore flowers, wild cherry white or crab apple pink, keeping its light and shade, and its reflection on still water flowers too~~ (#1252) | scene | S |
+| ~~SC140~~ | ~~Alpenglow: on clear and partly cloudy winter mornings and evenings the snowy hills behind the far bank glow rose at dawn and a deeper pink at sunset; under cloud they only dim to a cold grey~~ (#1255) | scene | S |
+| ~~SC141~~ | ~~Fewer draws for the painter and the woodcutter: the painter's legs and palette arm in one shape, the easel and sun umbrella in another, and the picture's three bands as instances of one square (9 draws to 5); the woodcutter's chopping block and woodstack in one shape and the split halves as two instances (8 draws to 6)~~ (#1255) | scene | S |
+| ~~SC142~~ | ~~Hay fields: from summer into the fall two fields on the hills behind the far bank lie mown in pale stripes along the slope, fresh green-gold in summer and faded to straw in the fall, with round bales dotted across them (two draws)~~ (#1256) | scene | S |
+| ~~SC143~~ | ~~News card scene30: spring blossom, winter alpenglow on the snowy hills and the summer hay fields~~ (#1256) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1556,7 +1569,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT293~~ | ~~Foam lanes feed the fish: in a breeze strong enough to rake the scum into lanes, a lure landing within 0.7 m of one bites sooner (0.85 wait), because the wind gathers drowned insects there and the fish feed along it; the cast says so~~ (#1223) | gameplay | S |
 | ~~GT294~~ | ~~News card 2026-10-19-game16 covers GT292 and GT293: the charging smallmouth and rainbow, and foam lanes that feed the fish~~ (#1225) | ui | S |
 | ~~GT295~~ | ~~Raiders on the sunfish beds: in spring and summer a cast landing on the sunfish nests either side of the dock lands where the perch and smallmouth come to raid the eggs, so the bite comes sooner (0.85 wait) and about a third of its bites are one of those raiders the angler could land (not for a beginner's first fish); the cast says so~~ (#1230) | gameplay | S |
-| GT296 | Duckweed mats: in summer and fall a cast landing in the thick of a duckweed bed (as the scene draws it, pushed downwind; not among the lily pads, which decide there) fishes two ways: a popper rides over the mat and draws the bass lurking in its shade (0.85 wait), and any other lure comes through bearded with weed so the fish turn from it (1.2 wait, a beginner spared); the cast says which | gameplay | S |
+| ~~GT296~~ | ~~Duckweed mats: in summer and fall a cast landing in the thick of a duckweed bed (as the scene draws it, pushed downwind; not among the lily pads, which decide there) fishes two ways: a popper rides over the mat and draws the bass lurking in its shade (0.85 wait), and any other lure comes through bearded with weed so the fish turn from it (1.2 wait, a beginner spared); the cast says which~~ (#1242) | gameplay | S |
+| ~~GT297~~ | ~~News card 2026-10-19-game17 covers GT295 and GT296: raiders on the sunfish beds and duckweed mats~~ (#1244) | ui | S |
+| ~~GT298~~ | ~~A jig over the crayfish: from spring to fall a jig landing within 0.8 m of a crayfish's home on the bed round the dock's pilings hops along like one of them, so the bite comes sooner (0.85 wait) and about a third of its bites are a smallmouth or catfish the angler could land (not for a beginner's first fish); the cast says so~~ (#1250) | gameplay | S |
+| GT299 | Tadpole shallows: in spring by daylight a cast landing among a school of tadpoles (off the Dock, below the Point, by the Reeds and the Drop-off, as far as the school wanders) lands where the fish come to gorge on them, so the bite comes sooner (0.85 wait) and about a third of its bites are a perch, bluegill or bass from that bank the angler could land (not for a beginner's first fish); the cast says so | gameplay | S |
 
 ## Risks / open questions for the owner
 

@@ -6,6 +6,11 @@ export type PlantKind = "evergreen" | "leafy" | "grass";
 
 const hsl = { h: 0, s: 0, l: 0 };
 const SNOW = new THREE.Color("#e8eef2");
+/** Broadleaves whose `variant` is at least this flower in spring, the top of them pink. */
+export const BLOSSOM_FROM = 0.8;
+const PINK_FROM = 0.9;
+const WHITE_BLOSSOM = "#f3eee8";
+const PINK_BLOSSOM = "#f0c6d4";
 
 /** Green or teal enough to be foliage, so trunks, stems and rocks keep their colour. */
 export function isLeafColor(color: THREE.Color) {
@@ -22,6 +27,9 @@ export function seasonPlantColor(source: THREE.Color, season: LakeSeason, kind: 
   if (season === "summer" || !isLeafColor(source)) return color;
   color.getHSL(hsl);
   if (season === "spring") {
+    // A few broadleaves are in flower, wild cherry white or crab apple pink, among the fresh green.
+    // The model's lighter and darker leaf shades stay lighter and darker in flower.
+    if (kind === "leafy" && variant >= BLOSSOM_FROM) return color.set(variant >= PINK_FROM ? PINK_BLOSSOM : WHITE_BLOSSOM).offsetHSL(0, 0, (hsl.l - 0.45) * 0.4);
     // Fresh growth: a step toward yellow-green and a touch lighter.
     color.setHSL(hsl.h - 0.03, Math.min(1, hsl.s * 1.1), Math.min(0.8, hsl.l + 0.05));
   } else if (season === "fall") {
