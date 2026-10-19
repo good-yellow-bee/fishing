@@ -14,7 +14,8 @@ import { typicalSize } from "./sizeBands";
 import { measureText } from "../i18n/content";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
-import { datedName, downloadFile } from "./download";
+import { downloadFile } from "./download";
+import { csvName } from "./FishCsv";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
@@ -606,6 +607,9 @@ export function leftOutParts(book: Logbook, needle: string): { keep: string[]; d
 
 /** One search, or several joined with "+" ("Northern pike + Overcast"): then only the fish every part finds. */
 /** `pictured` says which fish have a photo kept, for "photo"; left out, none do. */
+/** Words Find a catch reads that no fish's own text holds, offered under the empty box. */
+const QUICK_FINDS = ["this year|search word", "record|search word", "big|search word", "released|search word", "photo|search word", "night|search word"];
+
 /** "released" and "kept" in both languages and the forms Polish gives them, read whole. */
 const RELEASED_WORDS = new Set(["released", "release", "wypuszczona", "wypuszczone", "wypuszczony", "wypuszczonych"].map(normalize));
 const KEPT_WORDS = new Set(["kept", "zabrana", "zabrane", "zabrany", "zabranych"].map(normalize));
@@ -808,6 +812,10 @@ export function CatchSearch() {
   const mineIds = useMemo(() => new Set(mine.map((entry) => entry.id)), [mine]);
   // Found only the sample week's or the game's fish, once those no longer count: said, so they aren't read as the angler's.
   const othersOnly = mine.length === 0 && matches.length > 0;
+  const quick = useMemo(
+    () => (needle ? [] : QUICK_FINDS.map((word) => t(word)).filter((word) => findCatches(book, word, t, (id) => photoFor(id) !== null).length > 0)),
+    [needle, book, t, lang, photoFor],
+  );
 
   return (
     <section
@@ -854,6 +862,24 @@ export function CatchSearch() {
             </Fragment>
           ))}
         </p>
+      ) : null}
+      {/* The box empty: the words the search reads best, one tap each, those that would find a fish in this book. */}
+      {quick.length > 1 ? (
+        <div className="lure-tips catch-quick" role="group" aria-label={t("Quick searches")}>
+          {quick.map((word) => (
+            <button
+              key={word}
+              type="button"
+              className="lure-tip"
+              onClick={() => {
+                search(word);
+                input.current?.focus();
+              }}
+            >
+              {word}
+            </button>
+          ))}
+        </div>
       ) : null}
       {/* Only the count is read out; the cards themselves are not a live region. It stays mounted, so each new count is heard. */}
       <div role="status" className={settled ? (matches.length === 0 ? "empty" : "search-count") : undefined}>
@@ -919,7 +945,7 @@ export function CatchSearch() {
                 type="button"
                 className="text-button"
                 // The angler's own fish, as the count and the copy hold them: a sheet sent on doesn't carry the sample's.
-                onClick={() => downloadFile(catchesCsv({ ...book, catches: mine.length > 0 ? mine : matches }), "text/csv;charset=utf-8", datedName("stillwater-catches.csv"))}
+                onClick={() => downloadFile(catchesCsv({ ...book, catches: mine.length > 0 ? mine : matches }), "text/csv;charset=utf-8", csvName(settled))}
               >
                 {t("Download these as a spreadsheet")}
               </button>

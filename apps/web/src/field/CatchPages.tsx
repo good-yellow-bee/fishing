@@ -1601,6 +1601,8 @@ function CatchView() {
   const spot = spotById(book, entry.spotId);
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
+  // Its place on the outing, first fish first: when in the session it came. Two in the same minute go by id.
+  const tripPlace = trip ? book.catches.filter((other) => other.tripId === trip.id && byTime(other, entry) < 0).length + 1 : 0;
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
   const looseTrip = trip ? undefined : tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
   const photo = photoFor(entry.id);
@@ -1929,7 +1931,7 @@ function CatchView() {
       {trip ? (
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
-          {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
+          {tripFish > 1 ? ` · ${t("fish {n} of {total}", { n: tripPlace, total: tripFish })}` : null}
           {tripFish > 1 && intoOuting(book, entry) ? ` · ${intoOuting(book, entry)}` : null}
         </p>
       ) : looseTrip ? (
