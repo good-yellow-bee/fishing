@@ -450,7 +450,9 @@ export const PL_GAME: PlBook = {
   "Too quick for the cold water: the slow fish turn from it. Give it a slow count before the next one.":
     "Za szybko jak na zimną wodę: ospałe ryby odwracają się od przynęty. Policz powoli przed następnym ruchem.",
   "Let it hang between strips.": "Daj mu zawisnąć między ściągnięciami.",
+  "Keep it coming between pauses.": "Między pauzami zwijaj dalej.",
   "Strip! The streamer darts off like a fleeing fish. Let it hang…": "Ściągnij! Streamer rzuca się do ucieczki jak spłoszona rybka. Daj mu zawisnąć…",
+  "Pause! The crankbait stops and floats up, and a following fish turns on it. Reel on…": "Pauza! Wobler staje i wypływa w górę, a płynąca za nim ryba zawraca do niego. Zwijaj dalej…",
   "Let it fall between lifts.": "Daj jej opaść między podniesieniami.",
   "Lift! The spoon flashes and flutters back down. Let it fall…": "Podnieś! Wahadłówka błyska i opada, trzepocząc. Daj jej opaść…",
   "Hop! The jig lifts off the bottom and flutters down. Let it fall…": "Podbicie! Jig odrywa się od dna i opada, trzepocząc. Daj mu opaść…",
