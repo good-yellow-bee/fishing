@@ -149,6 +149,8 @@ import { canoeOut } from "./canoeTrip";
 import { Skier } from "./Skier";
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
+import { ShedSnow } from "./ShedSnow";
+import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
 import { balloonOut } from "./balloonDrift";
 import { kiteOut } from "./kiteFlight";
@@ -2356,6 +2358,7 @@ export const LakeWorld = memo(function LakeWorld({
       {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}
+      {snowShedOut(hour, sky, season) && <ShedSnow trees={TREES} wind={wind} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
