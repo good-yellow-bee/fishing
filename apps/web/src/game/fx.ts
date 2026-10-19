@@ -666,7 +666,9 @@ export const fx = {
   },
   /** A spooked deer's snort from the far bank: two short, breathy blasts. Quiet until the lake's sounds have started. */
   snort() {
-    if (!this.enabled || !lapSrc) return;
+    if (!lapSrc) return;
+    captionSound("deerSnort");
+    if (!this.enabled) return;
     noiseBurst("bandpass", 1100, 380, 0.16, 0.03, 0, natureBus());
     noiseBurst("bandpass", 950, 340, 0.12, 0.018, 0.24, natureBus());
   },
@@ -704,7 +706,9 @@ export const fx = {
   },
   /** A duckling or two peeping: thin, high, rising notes. Quiet until the lake's sounds have started. */
   peep() {
-    if (!this.enabled || !lapSrc) return;
+    if (!lapSrc) return;
+    captionSound("ducklings");
+    if (!this.enabled) return;
     const notes = 1 + Math.floor(Math.random() * 3);
     for (let n = 0; n < notes; n += 1) {
       const base = 3000 + Math.random() * 500;

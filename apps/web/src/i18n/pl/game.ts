@@ -28,6 +28,8 @@ export const PL_GAME: PlBook = {
   "Vibration (a phone buzzes and a controller rumbles on bites, runs and the catch)": "Wibracje (telefon wibruje, a kontroler drży przy braniach, odjazdach i złowieniu)",
   "Terns call over the water": "Rybitwy krzyczą nad wodą",
   "Grebes patter and call across the water": "Perkozy pluskają i nawołują, pędząc po wodzie",
+  "A deer snorts on the far bank": "Sarna parska na drugim brzegu",
+  "Ducklings peep": "Kaczątka piszczą",
   "On spring and summer days, a pair of swans glides the far water, now and then tipping under to feed.": "Wiosną i latem za dnia para łabędzi sunie po dalekiej wodzie, co jakiś czas zanurzając głowę, by się pożywić.",
   "Cast too close and the nearer swan raises its wings and hisses at you.": "Rzuć za blisko, a bliższy łabędź uniesie skrzydła i syknie na ciebie.",
   "A bird plunges into the lake": "Ptak wpada do jeziora",
@@ -596,6 +598,11 @@ export const PL_GAME: PlBook = {
   "Overpowered. Release in the band.": "Za mocno. Puść w pasku.",
   "Keep the ring on the water. Release in the moss band.": "Trzymaj kółko na wodzie. Puść w zielonym pasku.",
   "Too early. Wait for the bobber to go under, then strike.": "Za wcześnie. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
+  "Too early: the tug moved the bait, and the fish backs off a moment. Wait for the bobber to go under, then strike.":
+    "Za wcześnie: szarpnięcie poruszyło przynętę i ryba na chwilę się cofa. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
+  "That was only a nibble, and the tug puts the fish off a moment. Wait for the bobber to go under, then strike.":
+    "To było tylko skubnięcie, a szarpnięcie na chwilę płoszy rybę. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
+  "Worked again so soon, it puts the fish off a moment.": "Poruszana znowu tak szybko, na chwilę płoszy rybę.",
   "You yanked the bait away from it, so the fish backed off. Let it settle and wait for the real dip.": "Szarpnięcie wyrwało rybie przynętę i ryba się cofnęła. Daj jej chwilę i czekaj na prawdziwe zanurzenie.",
   "That was only a nibble. Wait for the bobber to go under, then strike.": "To było tylko skubnięcie. Poczekaj, aż spławik zanurkuje, i wtedy zatnij.",
   "Cast cancelled. Click the water or hold Space to try again.": "Rzut anulowany. Kliknij wodę lub przytrzymaj Spację, by spróbować znowu.",
@@ -663,10 +670,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
-  "On a tablet, the panels under the dock's top bar move down when the bar wraps onto a second line, so nothing hides behind it. A catch's Edit and Delete are easier to tell apart with a finger, the Map shows its heading while it loads, and on a phone the Map list's Next outing link is easier to tap.":
-    "Na tablecie panele pod górnym paskiem przystani przesuwają się w dół, gdy pasek zawija się do drugiego wiersza, więc nic się pod nim nie chowa. Przyciski Edytuj i Usuń przy rybie łatwiej rozróżnić palcem, Mapa pokazuje nagłówek już podczas wczytywania, a na telefonie link Następna wyprawa na liście Mapy łatwiej trafić.",
-  "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.":
-    "Kolorowe wiersze na karcie holu, od ostrzeżenia o zrywie po znaczek czystego holu, oraz kilka słów o rybie na karcie złowionej ryby są ciemniejsze i czytelniejsze. W Szopie przycisk Odbierz przy zleceniu łatwiej trafić na telefonie, a napis Odebrane łatwiej odczytać. Karta nowości nie zasłania już na telefonie przycisków łowisk, a czytnik ekranu odczytuje w podsumowaniu wyprawy najcięższą rybę w całości.",
+  "With Sound captions on, a deer snorting on the far bank and ducklings peeping now get words on screen too, even with sound off. A keyboard player sees a clear ring on the catch card's and the toasts' buttons, and on a phone the Photos links for a fish without a photo and the Map list's Copy the place are easier to tap.":
+    "Z włączonymi napisami do dźwięków parskająca na drugim brzegu sarna i piszczące kaczątka też mają teraz swoje słowa na ekranie, nawet przy wyłączonym dźwięku. Grający klawiaturą widzi wyraźną obwódkę na przyciskach karty złowionej ryby i powiadomień, a na telefonie linki Zdjęć do ryby bez zdjęcia i przycisk Skopiuj współrzędne na liście Mapy łatwiej trafić.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -729,6 +734,7 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
   "Golden fish · 2× points": "Złota ryba · 2× punktów",
@@ -757,14 +763,10 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "At level 15, One with the lake, a strike in the first 48% of the bite sets the hook solid, not 40%. Far out the line stretches, so a long cast needs a quicker strike for a solid hook. And in winter, work a jig, spoon, popper or streamer slowly: touched again too soon, it puts the cold fish off.":
+    "Na poziomie 15, Jedność z jeziorem, zacięcie w pierwszych 48% brania osadza haczyk pewnie, a nie w 40%. Daleko od brzegu żyłka się rozciąga, więc po dalekim rzucie trzeba zaciąć szybciej, by haczyk siadł pewnie. A zimą prowadź jiga, wahadłówkę, popper czy streamer powoli: przynęta poruszona zbyt szybko odstrasza zmarznięte ryby.",
   "When a fish drops your bait before the strike, it was never hooked: cast straight back to the same spot and it may take again. And a sturgeon sulking on the bottom now takes two pumps to lift, like a catfish.":
     "Gdy ryba wypuści przynętę przed zacięciem, nie była zahaczona: zarzuć od razu w to samo miejsce, a może wziąć ponownie. A jesiotr zalegający na dnie potrzebuje teraz dwóch pompek, by go poderwać, tak jak sum.",
-  "Where a bigger fish hunts the small ones, stop reeling a hooked one for a moment and let it flutter: the pike, bass or walleye hunting there may take it. And a golden shiner landed in a clean fight goes back out as lively live bait that draws more of the hunters.":
-    "Tam, gdzie większa ryba poluje na małe, przestań na chwilę zwijać zaciętą rybkę i daj jej się potrzepotać: polujący tam szczupak, bass albo sandacz może ją chwycić. A złotawiec wyholowany czysto wraca na haczyk jako żwawa żywa przynęta, która przyciąga więcej drapieżników.",
-  "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.":
-    "Na poziomie 14, Dusza jeziora, żyłka wytrzymuje chwilę dłużej w czerwieni: pęka przy 105% napięcia, a nie przy 100%. A z pomostu w cichy letni zmierzch kładź suchą muchę pod jedną z chmar tańczących muszek, gdzie bassy niebieskoskrzele, wielkooczki, złotawce i pstrągi tęczowe podnoszą się do muszek, które spadają na wodę.",
-  "Strike a pike sooner on a worm or a live shiner: given time it swallows the bait, and if the fight then runs long its teeth fray the line, so it snaps sooner until you retie. And after dark off the dock, cast a jig, spinner or spoon among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them.":
-    "Zacinaj szczupaka szybciej na rosówkę albo żywą rybkę: gdy ma czas, połyka przynętę, a jeśli hol się potem przeciąga, jego zęby przecierają żyłkę, więc pęka szybciej, dopóki jej nie przewiążesz. A po zmroku z pomostu zarzucaj jiga, obrotówkę albo błystkę wśród rybek w świetle latarni, gdzie polują na nie wielkooczki, sandacze i bassy.",
   "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.":
     "Gdy w jasny dzień chmura zasłoni słońce, ryby podpływają na płyciznę żerować, więc na Pomoście, w Trzcinach, na Cyplu i przy Ujściu brania przychodzą szybciej, póki chmura nie odpłynie. Ryba zacięta przy grzybieniach walczy teraz jak w zielsku i nurkuje między łodygi, więc zawracaj każdy odjazd. A gdy łowisko jest mocno obłowione, rodzaj przynęty, którego ostrożne ryby jeszcze nie widziały, zaskakuje je.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.":
@@ -777,6 +779,10 @@ export const PL_GAME: PlBook = {
     "Podczas deszczu co jakiś czas przez jezioro przechodzi silniejsza nawałnica, szara kurtyna deszczu, pod którą woda aż się gotuje. W zimowe dni na drugim brzegu żerują wrony, które zrywają się i zataczają pętlę nad wodą, gdy ktoś przebiega obok, a nocą na skraju drugiego brzegu czasem błyszczy para oczu.",
   "On still summer evenings little clouds of midges dance and glint over the water in front of the dock, and on fine fall mornings long silk threads from tiny spiders drift across the lake, catching the sun. Now and then a shoal of fry bursts out of the open water as something hunts them from below, and on bitter, clear winter mornings the air over the lake sparkles with diamond dust.":
     "W bezwietrzne letnie wieczory nad wodą przed pomostem tańczą i połyskują chmurki muszek, a w pogodne jesienne poranki nad jeziorem płyną długie nici babiego lata, łapiąc słońce. Co jakiś czas z otwartej wody wyskakuje ławica narybku, gdy coś poluje na nią od spodu, a w mroźne, pogodne zimowe poranki powietrze nad jeziorem iskrzy się lodowym pyłem.",
+  "On grey and rainy days low cloud now hangs on the tops of the hills behind the far bank, drifting slowly along the ridge with the wind. On calm summer days two bright blue damselflies settle on the dock posts beside you, dart out to hover over the water, and come back.":
+    "W szare i deszczowe dni na szczytach wzgórz za drugim brzegiem wiszą teraz niskie chmury, które powoli suną z wiatrem wzdłuż grzbietu. W bezwietrzne letnie dni dwie jaskrawoniebieskie łątki siadają na słupkach pomostu tuż obok, wylatują nad wodę, zawisają w powietrzu i wracają.",
+  "On fine, breezy days from spring to fall a paraglider soars along the ridge of the hills behind the far bank, banking round at each end. On fall evenings a bonfire burns on those hills between the hay fields, glowing in the dark with its smoke leaning away on the wind.":
+    "W pogodne, wietrzne dni od wiosny do jesieni nad grzbietem wzgórz za drugim brzegiem szybuje paralotnia, zawracając łagodnym łukiem na każdym końcu. W jesienne wieczory na tych wzgórzach między polami płonie ognisko, które świeci w ciemności, a jego dym odpływa z wiatrem.",
   "An old windmill now stands on the hills behind the far bank, its sails turning with the day's wind and standing still when it drops. By day in spring and fall a little flock of sheep grazes the hay field on those hills, and in spring their lambs skip along after them.":
     "Na wzgórzach za drugim brzegiem stoi teraz stary wiatrak, którego skrzydła obracają się z wiatrem i zamierają, gdy wiatr ucicha. Wiosną i jesienią za dnia na polu na tych wzgórzach pasie się małe stado owiec, a wiosną podskakują za nimi jagnięta.",
   "On summer and fall evenings a pale barn owl hunts low over the hay fields on the far hills, hovering and dropping into the stubble. On summer days a little red tractor works the field, and on clear days the shadows of passing clouds slide over the hills as well as the water.":
@@ -793,12 +799,6 @@ export const PL_GAME: PlBook = {
     "„Znajdź połów” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie, a arkusz z wyszukiwania nosi jego nazwę. Strona ryby podaje jej miejsce na wyprawie, na przykład ryba 3 z 5.",
   "Find an outing offers its best words as one-tap searches. In the small hours last evening's outing reads Last night, outing cards count missed strikes, and a water's tackle tips go on the list all at once.":
     "„Znajdź wyprawę” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie. Po północy wczorajsza wyprawa nazywa się Wczoraj wieczorem, karty wypraw liczą puste brania, a podpowiedzi sprzętu z łowiska trafiają na listę naraz.",
-  "A water's card shows whether its water is warming or cooling. Its page gives today's sunrise and sunset there, and its copied summary carries the place and a map link.":
-    "Karta łowiska pokazuje, czy woda się ociepla, czy ochładza. Strona łowiska podaje dzisiejszy wschód i zachód słońca w tym miejscu, a skopiowane podsumowanie zawiera współrzędne i link do mapy.",
-  "A season on Bests shows its fish an outing against the season before, and its outings open from the box. A search for one kind gives each year's biggest beside its count, and “31.12” finds that day.":
-    "Sezon w zakładce Rekordy pokazuje ryby na wyprawę na tle poprzedniego, a jego wyprawy otwierają się z ramki. Wyszukiwanie jednego gatunku podaje największą rybę każdego roku obok liczby, a „31.12” znajduje ten dzień.",
-  "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.":
-    "Bilans przynęt można pobrać jako arkusz, dla wybranego łowiska albo wszystkich. Mapa znajduje najbliższe łowisko i zapisuje wszystkie łowiska dla GPS w jednym pliku.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",

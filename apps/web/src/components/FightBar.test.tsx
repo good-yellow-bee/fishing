@@ -462,7 +462,7 @@ describe("FightBar for screen readers", () => {
     expect(status()).not.toBe("Let it run — the first run is the longest!");
   });
 
-  it("says which way to pull the rod against a run, cheers a turn, and says a leap or a roll can't be turned", () => {
+  it("says which way to pull the rod against a run, cheers a turn, warns of a pull the wrong way, and says a leap or a roll can't be turned", () => {
     mount({ peakTension: 0.3, maxLine: 1 }, false, trout);
     const shown = () => [...container!.querySelectorAll<HTMLElement>(".fight-steer [data-for]")].filter((part) => !part.hidden).map((part) => part.dataset.for);
     frame();
@@ -480,6 +480,11 @@ describe("FightBar for screen readers", () => {
     frame();
     expect(shown()).toEqual(["turning"]);
     sim.current.turning = false;
+    sim.current.withRun = true;
+    frame();
+    expect(shown()).toEqual(["with"]);
+    expect(container!.querySelector(".fight-steer")!.textContent).toContain("Wrong way: pulling with the run gives it line — pull the other side");
+    sim.current.withRun = false;
     sim.current.jump = true;
     frame();
     expect(shown()).toEqual(["leap"]);

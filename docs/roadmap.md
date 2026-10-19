@@ -1153,6 +1153,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
 | ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
 | ~~PA110~~ | ~~The amber focus ring read 1.6 to 1 on the parchment cards, so a keyboard player could barely see which of the landed card's or a toast's buttons was next: a darker brass ring there, 5 to 1 or more (#1339)~~ | phone UX | S |
+| ~~PA111~~ | ~~With Sound captions on, a deer snorting on the far bank and the ducklings peeping played with no words on screen, so a player who can't hear them missed both: they now caption like the loon and the beaver, also with sound off (#1349)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1313,6 +1314,11 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC153~~ | ~~Sheep: by day in spring and fall a little flock grazes the western hay field on the far hills, drifting slowly along the slope between the bales, with lambs skipping after their mothers in spring (one draw)~~ (#1342) | scene | S |
 | ~~SC154~~ | ~~News card scene33: the windmill and the sheep~~ (#1342) | scene | S |
 | ~~SC155~~ | ~~Paraglider: on fine, breezy days from spring to fall a paraglider soars the ridge of the far hills, beating along it, banking round at each end and rising and sinking a little in the lift (one draw)~~ (#1343) | scene | S |
+| ~~SC156~~ | ~~Hill bonfire: on dry fall evenings and nights a bonfire burns on the far hills between the hay fields, its glow standing up to face the lake and its smoke leaning away on the wind (the shack's campfire drawn larger)~~ (#1348) | scene | S |
+| ~~SC157~~ | ~~News card scene34: the paraglider and the hill bonfire~~ (#1348) | scene | S |
+| ~~SC158~~ | ~~Cap cloud: on grey and wet days low cloud hangs on the tops of the far hills in soft grey wreaths that drift slowly along the ridge with the wind, lower and thicker in the rain (one draw)~~ (#1352) | scene | S |
+| ~~SC159~~ | ~~Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws)~~ (#1353) | scene | S |
+| ~~SC160~~ | ~~News card scene35: the cap cloud on the hills and the damselflies~~ (#1353) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1638,7 +1644,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT318~~ | ~~News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom~~ (#1335) | ui | S |
 | ~~GT319~~ | ~~Work it slow in the cold: in winter a hop, lift, pop or strip less than 1 s after the lure lands or after the last one is too quick for the slow fish, so what is left of the wait stretches 1.25x instead of shrinking (the touch still counts toward the few that help); a slow count between touches works as before, and a beginner is spared~~ (#1338) | gameplay | S |
 | ~~GT320~~ | ~~Long cast stretch: a lure landing past 3/4 of the angler's reach (the boat's longer reach counted) is a long cast, where the line out stretches and soaks up the strike, so the solid-hook time is 0.8x; the hookset says "this far out, where the line stretches", and a beginner is spared~~ (#1340) | gameplay | S |
-| GT321 | Level 15 (38000 lifetime points, "One with the lake"): a strike in the first 48% of the bite sets the hook solid, not 40%, on the hookset line and the Strike card's solid mark alike | gameplay | S |
+| ~~GT321~~ | ~~Level 15 (38000 lifetime points, "One with the lake"): a strike in the first 48% of the bite sets the hook solid, not 40%, on the hookset line and the Strike card's solid mark alike~~ (#1344) | gameplay | S |
+| ~~GT322~~ | ~~News card 2026-10-19-game25 covers GT319, GT320 and GT321: work a lure slowly in winter, a long cast needs a quicker strike, and level 15~~ (#1347) | ui | S |
+| ~~GT323~~ | ~~A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared~~ (#1351) | gameplay | S |
+| GT324 | Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free | gameplay | S |
 
 ## Risks / open questions for the owner
 
