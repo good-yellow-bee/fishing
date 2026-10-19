@@ -498,6 +498,15 @@ button.field-primary {
     box-sizing: border-box;
   }
 
+  /* An empty list's line ends on a link to fill it ("No upcoming outings. Plan one", "Log a catch", "Add a spot"), an
+     18-22 px target: it is now a 32 px band. */
+  .empty a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
