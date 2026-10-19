@@ -672,6 +672,10 @@ const NEAR_GRASS: Scatter[] = [
   { url: MODELS.bushLarge, position: [2.1, -0.02, 16.6], scale: 1.35, rot: 3.2 },
 ];
 
+/** The swaying trees of the near and far shores and the creek, and the ground cover round the lake and the creek, each drawn as one list so like materials bake together. */
+const SHORE_TREES: Scatter[] = [...BACK_TREES, ...TREES, ...CREEK_TREES];
+const GROUND_COVER: Scatter[] = [...BUSHES, ...GRASS, ...NEAR_GRASS, ...CREEK_GRASS];
+
 // The pads' places are shared with the casts that land tight to them (lilyCover.ts).
 const LILIES: Lily[] = LILY_PADS_AT.map((pad) => ({ url: pad.large ? MODELS.lilyLarge : MODELS.lilySmall, position: [pad.x, 0.04, pad.z], scale: pad.scale }));
 
@@ -1419,6 +1423,8 @@ const LAKE_ROCKS: RockSpec[] = [
 ];
 
 const CREEK_ROCK_SPECS: RockSpec[] = CREEK_ROCKS.map((rock) => ({ position: [rock.x, rock.scale[1] * 0.45, rock.z], scale: rock.scale, rotation: rock.rot }));
+/** Every rock round the lake, the drop-off's and the creek's: one shape, so all of them are one draw. */
+const ALL_ROCKS: RockSpec[] = [...LAKE_ROCKS, ...DROPOFF_ROCKS, ...CREEK_ROCK_SPECS];
 
 /** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
 function LilyFlower({ bloom, color, open }: { bloom: Exclude<Bloom, null>; color: string; open: number }) {
@@ -2030,7 +2036,6 @@ function ShorePath() {
   return (
     <group>
       <StaticModels items={SHORE_PATH_MODELS} />
-      <Rocks items={DROPOFF_ROCKS} />
     </group>
   );
 }
@@ -2095,10 +2100,7 @@ function Creek({ hour, weather, wind }: { hour: LakeHour; weather: WeatherLook; 
       <mesh geometry={water} position={[0, -0.012, 0]} receiveShadow>
         <meshToonMaterial color={seasonWaterColor(weather.water, season)} map={flow} gradientMap={toonRamp()} transparent opacity={0.9} depthWrite={false} />
       </mesh>
-      <Rocks items={CREEK_ROCK_SPECS} />
       <Reeds count={6} origin={[-23.2, 0.03, -11.0]} wind={wind} />
-      <ScatterModels items={CREEK_TREES} sway />
-      <ScatterModels items={CREEK_GRASS} />
     </group>
   );
 }
@@ -2374,13 +2376,10 @@ export const LakeWorld = memo(function LakeWorld({
       {tractorOut(hour, sky, season) && <Tractor />}
       {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
-      <ScatterModels items={BACK_TREES} sway />
-      <ScatterModels items={TREES} sway />
+      <ScatterModels items={SHORE_TREES} sway />
       <ScatterModels items={SHACK_TREES} shadows sway />
-      <ScatterModels items={BUSHES} />
-      <ScatterModels items={GRASS} />
-      <ScatterModels items={NEAR_GRASS} />
-      <Rocks items={LAKE_ROCKS} />
+      <ScatterModels items={GROUND_COVER} />
+      <Rocks items={ALL_ROCKS} />
       <Dock wet={dockWet(weather.rain, season)} pale={walkwayPale(season, frost)} />
       {frost > 0 && <DockFrost amount={frost} />}
       {dockWet(weather.rain, season) && <DockRain light={weather.rainLight} />}
