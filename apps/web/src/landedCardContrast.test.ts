@@ -38,3 +38,22 @@ describe("the landed card's small words", () => {
     expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+// The shack panel behind the board, as axe measures it.
+const SHACK = "#181d19";
+
+function blend(hex: string, under: string, alpha: number) {
+  return `#${[1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * alpha + parseInt(under.slice(i, i + 2), 16) * (1 - alpha)).toString(16).padStart(2, "0")).join("")}`;
+}
+
+describe("the shack board's Claimed", () => {
+  it("reads at 4.5 to 1 or more through its dimmed row", () => {
+    const row = /\n\.daily-requests li\[data-claimed="1"\] \{([^}]*)\}/.exec(css)?.[1];
+    const alpha = Number(/\n  opacity: ([0-9.]+);/.exec(row ?? "")?.[1]);
+    const rule = /\n\.daily-request-claimed \{([^}]*)\}/.exec(css)?.[1];
+    const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
+    expect(alpha).toBeGreaterThan(0);
+    expect(color).toBeDefined();
+    expect(contrast(blend(color!, SHACK, alpha), SHACK)).toBeGreaterThanOrEqual(4.5);
+  });
+});
