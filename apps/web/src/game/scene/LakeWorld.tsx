@@ -23,6 +23,8 @@ import { BRIDGE_SCALE, BRIDGE_SPANS, PIER_BOARDS, PIER_PLANK, PIER_THICK, PIER_T
 import type { Hotspot } from "../hotspot";
 import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
+import { HailShower } from "./HailShower";
+import { hailOut } from "./hailBurst";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
@@ -149,6 +151,10 @@ import { canoeOut } from "./canoeTrip";
 import { Skier } from "./Skier";
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
+import { NightRower } from "./NightRower";
+import { nightRowOut } from "./nightRow";
+import { Hammock } from "./Hammock";
+import { hammockOut, hammockTrees } from "./hammockSway";
 import { ShedSnow } from "./ShedSnow";
 import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
@@ -231,6 +237,8 @@ import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
 import { leavesOut, petalsOut } from "./leafFall";
+import { LeafWhirl } from "./LeafWhirl";
+import { leafWhirlOut } from "./leafEddy";
 import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
@@ -568,6 +576,9 @@ const SHACK_TREES: Scatter[] = [
 ];
 
 /** Where the squirrels run: between the two trees by the shack, and between two pairs of shore trees round the lake. */
+/** The two trees across the lake the hammock hangs between. */
+const HAMMOCK_TREES = hammockTrees(TREES);
+
 const SQUIRREL_RUNS = [[SHACK_TREES[1]!, SHACK_TREES[0]!] as const, ...squirrelRuns(TREES, 2)];
 
 /** The trees toadstools come up under in fall: the near shore and the two by the shack. */
@@ -2307,6 +2318,7 @@ export const LakeWorld = memo(function LakeWorld({
         Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
+      {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
@@ -2333,12 +2345,14 @@ export const LakeWorld = memo(function LakeWorld({
       {skiingOut(hour, sky, season) && <Skier />}
       {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
+      {HAMMOCK_TREES && hammockOut(hour, sky, season) && <Hammock trees={HAMMOCK_TREES} />}
       {balloonOut(hour, sky, season, wind) && <HotAirBalloon wind={wind} />}
       {fogAnglerOut(hour, sky) && <FogAngler />}
       {dogWalkOut(hour, season) && <DogWalker rain={sky === "rain"} />}
       {swimmingOut(hour, sky, season) && <Swimmer />}
       {choppingOut(hour, sky, season) && <Woodcutter />}
       {scullOut(hour, sky, season, wind) && <Sculler />}
+      {nightRowOut(hour, sky, season, wind) && <NightRower />}
       {gooseFamilyOut(hour, season) && <GooseFamily />}
       {leafJumpOut(hour, sky, season) && <LeafPile />}
       {leafJumpOut(hour, sky, season) && <LeafRaker />}
@@ -2375,6 +2389,7 @@ export const LakeWorld = memo(function LakeWorld({
       {feathersOut(season) && <Feathers wind={wind} />}
       {leavesOut(season) && <FallingLeaves wind={wind} />}
       {petalsOut(season) && <FallingLeaves wind={wind} petals />}
+      {leafWhirlOut(hour, sky, season) && <LeafWhirl />}
       {leavesOut(season) && <LeafRaft wind={wind} />}
       {fluffOut(season, sky) && <ReedFluff wind={wind} light={weather.rainLight} />}
       {gustsOut(Math.hypot(wind.x, wind.z)) && <Gusts wind={wind} />}
