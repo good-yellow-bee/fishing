@@ -86,12 +86,12 @@ catchRoutes.post("/catches", async (c) => {
   });
 });
 
-// Letting the fish go is a choice made on the landed card, after the catch is saved; asking twice is harmless.
+// Letting the fish go is a choice made on the landed card, after the catch is saved; asking twice is harmless and pays nothing more.
 catchRoutes.post("/catches/:requestId/release", (c) => {
   const user = c.get("user") as SessionUser;
   const requestId = c.req.param("requestId");
   if (!requestIdPattern.test(requestId)) return c.json({ error: "invalid request ID" }, 400);
-  const row = releaseCatch(user.id, requestId);
-  if (!row) return c.json({ error: "catch not found" }, 404);
-  return c.json({ id: row.id, released: true });
+  const released = releaseCatch(user.id, requestId);
+  if (!released) return c.json({ error: "catch not found" }, 404);
+  return c.json({ id: released.row.id, released: true, bonus: released.bonus });
 });
