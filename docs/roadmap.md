@@ -1378,8 +1378,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC203~~ | ~~Snowy robin: the dock robin comes in winter's snow too, perching on the snow-capped posts beside the dog~~ (#1458) | scene | S |
 | ~~SC204~~ | ~~News card scene47 covers SC202 and SC203~~ (#1458) | scene | S |
 | ~~SC205~~ | ~~Mallard on the dock: on rainy days from spring to fall a mallard drake now and then swims in and flaps up onto the boards behind the angler, waddles in, preens with its head right round to its back, shakes off the rain, then turns and goes back the way it came (rainy days had only the snail)~~ (#1460) | scene | S |
-| SC206 | Lanterns in the murk: at night in fog and rain the dock and bank lanterns' halos swell and brighten, the light scattering in the wet air | scene | S |
-| SC207 | News card scene48 covers SC205 and SC206 | scene | S |
+| ~~SC206~~ | ~~Lanterns in the murk: at night in fog and rain the dock and bank lanterns' halos swell and brighten, the light scattering in the wet air~~ (#1462) | scene | S |
+| ~~SC207~~ | ~~News card scene48 covers SC205 and SC206~~ (#1462) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
