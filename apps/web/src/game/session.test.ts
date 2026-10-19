@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { JSDOM } from "jsdom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { loadSession, parseSession, saveSession, sessionSummary, sessionTitle, startSession, withSessionFish, type SessionFish } from "./session";
+import { bookSeasonNote, bookSessionTitle, isPlayLine, loadSession, parseSession, saveSession, sessionSummary, sessionTitle, shownPlayLine, startSession, withSessionFish, type SessionFish } from "./session";
+import { setLang } from "../i18n";
 
 const browser = new JSDOM("", { url: "http://localhost" });
 afterAll(() => browser.window.close());
@@ -36,6 +37,23 @@ describe("day on the water", () => {
     const draft = withSessionFish(startSession(new Date(2026, 9, 11, 17), "overcast"), fish());
     expect(sessionTitle(draft)).toBe("Dusk at the dock · overcast");
     expect(sessionTitle(startSession(new Date(), "fog"))).toBe("A day on the lake · fog");
+  });
+
+  it("keeps the outing's title and note in English for the book, and shows them in the reader's language", () => {
+    const draft = withSessionFish(startSession(new Date(2026, 9, 11, 17), "overcast"), fish());
+    setLang("pl");
+    try {
+      expect(bookSessionTitle(draft)).toBe("Dusk at the dock · overcast");
+      expect(bookSeasonNote("fall")).toBe("Season: Fall");
+      expect(shownPlayLine("Dusk at the dock · overcast")).toBe(sessionTitle(draft));
+      expect(shownPlayLine("Dusk at the dock · overcast")).not.toBe("Dusk at the dock · overcast");
+      expect(shownPlayLine("Season: Fall")).not.toBe("Season: Fall");
+      expect(shownPlayLine("My own outing")).toBe("My own outing");
+    } finally {
+      setLang("en");
+    }
+    expect(isPlayLine("Dusk at the dock · overcast")).toBe(true);
+    expect(isPlayLine("Dusk at the dock")).toBe(false);
   });
 
   it("keeps the draft per angler and refuses a broken one", () => {

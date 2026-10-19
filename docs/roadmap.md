@@ -1750,7 +1750,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT358~~ | ~~The point's rock edge: a cast landing just past the point's shallow rocks, where the water drops off (past the rocks' depth, to 0.55 on the lake's 0-1 depth scale), bites 0.85x sooner without the rocks' snag, and the wait hint says "Along the rock edge…"~~ (#1464) | gameplay | S |
 | ~~GT359~~ | ~~The walleye dives: in open water (from the boat) its runs bore down as they do off the drop-off (harder pull, faster tiring, the scene's dive), and the fight card and field guide say "Diver: …"~~ (#1466) | gameplay | S |
 | ~~GT360~~ | ~~News card 2026-10-19-game37 covers GT358 and GT359: the point's rock edge and the walleye's dive in open water~~ (#1469) | ui | S |
-| GT361 | More reasons: when a cast has more reasons for a sooner or slower bite than the hint's two, the hint ends with "2 more reasons", which opens the rest in the hint (and steps aside so Space still strikes) | gameplay | S |
+| ~~GT361~~ | ~~More reasons: when a cast has more reasons for a sooner or slower bite than the hint's two, the hint ends with "2 more reasons", which opens the rest in the hint (and steps aside so Space still strikes)~~ (#1472) | gameplay | S |
+| GT362 | A packed-up game outing keeps its title and season note in English in the field log and shows them in the reader's language, so switching language switches them (and an edit that keeps them keeps them in English), like the sample week's lines | gameplay | S |
 
 ## Risks / open questions for the owner
 

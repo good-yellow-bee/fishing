@@ -86,7 +86,7 @@ import { saveLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { canBaitShiner, GROUNDBAIT_CASTS, hookWindowMs, isMercy, longShadowWaitMul, solidStrikeMs } from "../game/logic";
 import { useBadgeToast } from "../game/useBadgeToast";
-import { loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
+import { bookSeasonNote, bookSessionTitle, loadSession, saveSession, sessionTitle, startSession, withSessionFish, type SessionDraft } from "../game/session";
 import { TripRecap } from "../components/TripRecap";
 import { useLodgeTracks } from "../game/useLodgeTracks";
 import { trackLabel } from "../game/scene/shoreTracks";
@@ -380,7 +380,8 @@ export function DockPage() {
     const title = sessionTitle(session);
     try {
       const book = bookForPlay();
-      saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title, catchIds: session.fish.map((fish) => fish.id), note: t("Season: {season}", { season: t(SEASON_LABELS[season]) }) }));
+      // The book keeps the outing's own lines in English, so they follow the reader's language when shown.
+      saveLogbook(keepPlayTrip(book, { id: session.id, date: session.date, title: bookSessionTitle(session), catchIds: session.fish.map((fish) => fish.id), note: bookSeasonNote(season) }));
       setFiledTrip({ id: session.id, title });
       setSession(null);
     } catch {
