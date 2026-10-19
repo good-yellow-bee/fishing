@@ -1,4 +1,4 @@
-import type { LakeHour, Sky } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 import { DOCK_POST_CAPS } from "./snowyDock";
 import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
 
@@ -6,7 +6,7 @@ import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
  * A robin that drops in on the dock: it flies in low over the water to the front-left post, cocks
  * its head this way and that and flicks its tail, flits across to the front-right post for a
  * while, and flies off again over the lake. It comes every minute or so, from dawn through the
- * day, in every season but not in the rain. A strike on the dock startles it off early. Pure in time.
+ * day in every season, and into dusk in winter, but not in the rain. A strike on the dock startles it off early. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
@@ -31,9 +31,9 @@ export const VISIT_SEC = IN_SEC + LEFT_SEC + FLIT_SEC + RIGHT_SEC + OUT_SEC;
 /** It first comes a little after you arrive. */
 const FIRST_SEC = 8;
 
-/** About from dawn through the day, in every season, but not in the rain. */
-export function robinOut(hour: LakeHour, sky: Sky | undefined) {
-  return (hour === "dawn" || hour === "day") && sky !== "rain";
+/** About from dawn through the day, in every season, and on into dusk in winter, the last bird to roost; but not in the rain. */
+export function robinOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
+  return (hour === "dawn" || hour === "day" || (hour === "dusk" && season === "winter")) && sky !== "rain";
 }
 
 function smooth(t: number) {

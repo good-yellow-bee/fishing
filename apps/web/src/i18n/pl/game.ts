@@ -699,14 +699,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.":
+    "W wilgotne wieczory i noce, od wiosny do jesieni, za tobą powoli przeskakuje teraz przez pomost ropucha. Zimą oddech twojego psa paruje na mrozie, a rudzik zostaje na słupkach aż do zmierzchu, jako ostatni ptak, który idzie spać.",
   "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.":
     "Jesienią na twoją czapkę spada czasem kołyszący się liść, a wiosną płatek kwiatu, i zostaje tam aż do następnego rzutu, który go strąca. A gdy ryba skubie przy spławiku, twój pies się budzi, podnosi łeb i przechyla go, patrząc na spławik.",
   "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
     "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
   "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
     "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
-  "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
-    "W bezdeszczowe noce pójdźka nadlatuje teraz nisko nad wodą i siada na słupku obok latarni. Kiwa głową, obraca ją aż do tyłu, poza zimą śledzi ćmy krążące wokół latarni i znów odlatuje. A jaskółki z liny cumowniczej łódki zrywają się teraz razem, gdy ją odwiązujesz.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
