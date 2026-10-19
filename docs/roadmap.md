@@ -1312,6 +1312,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC152~~ | ~~Windmill: an old tower mill stands on the skyline of the hills above the eastern hay field; its four sails turn with the day's wind, faster as it freshens, and stand still on a calm day (one draw for the tower, one for the sails; its cap is white under winter snow)~~ (#1341) | scene | S |
 | ~~SC153~~ | ~~Sheep: by day in spring and fall a little flock grazes the western hay field on the far hills, drifting slowly along the slope between the bales, with lambs skipping after their mothers in spring (one draw)~~ (#1342) | scene | S |
 | ~~SC154~~ | ~~News card scene33: the windmill and the sheep~~ (#1342) | scene | S |
+| ~~SC155~~ | ~~Paraglider: on fine, breezy days from spring to fall a paraglider soars the ridge of the far hills, beating along it, banking round at each end and rising and sinking a little in the lift (one draw)~~ (#1343) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -2203,3 +2204,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR553~~ | ~~Round 93 ideas: warming or cooling on a water's card, today's sunrise and sunset on its page, its place in the copied summary~~ (#1328) | field | S |
 | ~~BR554~~ | ~~Round 94 outing fixes: an evening outing still going after midnight, sample plans past their day, weekday words in Find an outing, lure spellings, loose fish on cards, focus, touch and wording~~ (#1336) | field | S |
 | ~~BR555~~ | ~~Round 94 outing ideas: quick searches under Find an outing, Last night for an outing still going, missed strikes on cards, all of a water's tackle tips at once~~ (#1337) | field | S |
+| ~~BR556~~ | ~~Round 95 catch fixes: own counts for the lure at a water and a search's spreadsheet, Only my fish on a sample-only book, one kind however written, largest first on one scale, step focus, form touch, released/kept in Polish, wording~~ (#1345) | field | S |

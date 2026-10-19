@@ -2,6 +2,7 @@ import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from "re
 import { locale, t, tn } from "../i18n";
 import { fishCountLabel } from "./format";
 import { monthName } from "./tripMonths";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /** Catch lists draw this many cards at a time; every landing in the game adds one, so a keen angler's lists run long. */
 export const CATCH_PAGE = 50;
@@ -164,12 +165,17 @@ export function PagedCatches<T>({
   const { visible, more } = catchPage(items, shown, start);
   const monthCounts = new Map<string, number>();
   const monthOthers = new Map<string, number>();
+  // How many of those were the game's, to say a month of only the game's (or only the sample week's) as such.
+  const monthGame = new Map<string, number>();
   const firstOf = new Map<string, number>();
   if (monthOf)
     items.forEach((item, index) => {
       const month = monthOf(item);
       if (!counted || counted(item)) monthCounts.set(month, (monthCounts.get(month) ?? 0) + 1);
-      else monthOthers.set(month, (monthOthers.get(month) ?? 0) + 1);
+      else {
+        monthOthers.set(month, (monthOthers.get(month) ?? 0) + 1);
+        if ((item as { spotId?: string }).spotId === PLAY_LAKE_ID) monthGame.set(month, (monthGame.get(month) ?? 0) + 1);
+      }
       if (!firstOf.has(month)) firstOf.set(month, index);
     });
   const marks = jumpMarks([...firstOf.keys()], items.length);
@@ -220,7 +226,7 @@ export function PagedCatches<T>({
               <Fragment key={start + index}>
                 {head ? (
                   <Head className="month-head" id={headId(month)} tabIndex={-1}>
-                    {monthName(month)} · {monthHeadCount(monthCounts.get(month) ?? 0, monthOthers.get(month) ?? 0)}
+                    {monthName(month)} · {monthHeadCount(monthCounts.get(month) ?? 0, monthOthers.get(month) ?? 0, monthGame.get(month) ?? 0)}
                   </Head>
                 ) : null}
                 {children(item)}
@@ -241,7 +247,21 @@ export function PagedCatches<T>({
 }
 
 /** A month heading's count: the angler's own fish, then the sample week's and the game's apart; only those when none are own. */
-function monthHeadCount(own: number, others: number): string {
-  if (own === 0 && others > 0) return tn(others, "{n} from the sample week or the game", "{n} from the sample week or the game");
-  return `${fishCountLabel(own)}${others > 0 ? ` · ${tn(others, "+{n} from the sample week or the game", "+{n} from the sample week or the game")}` : ""}`;
+/** `game` of the others are the game's; the rest are the sample week's. */
+function monthHeadCount(own: number, others: number, game: number): string {
+  const from = game === others ? "game" : game === 0 ? "sample" : "both";
+  if (own === 0 && others > 0) {
+    return from === "game"
+      ? tn(others, "{n} from the game", "{n} from the game")
+      : from === "sample"
+        ? tn(others, "{n} from the sample week", "{n} from the sample week")
+        : tn(others, "{n} from the sample week or the game", "{n} from the sample week or the game");
+  }
+  const rest =
+    from === "game"
+      ? tn(others, "+{n} from the game", "+{n} from the game")
+      : from === "sample"
+        ? tn(others, "+{n} from the sample week", "+{n} from the sample week")
+        : tn(others, "+{n} from the sample week or the game", "+{n} from the sample week or the game");
+  return `${fishCountLabel(own)}${others > 0 ? ` · ${rest}` : ""}`;
 }

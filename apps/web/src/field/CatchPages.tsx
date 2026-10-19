@@ -185,6 +185,12 @@ function bookName(typed: string, names: readonly string[]): string {
   return names.find((name) => t(name).toLowerCase() === clean) ?? typed;
 }
 
+/** After a step link that keeps the same fish on screen: back to the top, with the page's heading taking focus. */
+function stepFocus() {
+  window.scrollTo(0, 0);
+  focusPageHeading({ preventScroll: true });
+}
+
 export function CatchesPage() {
   const { book, photos } = useLogbook();
   useT();
@@ -234,9 +240,20 @@ export function CatchesPage() {
               {counted.length > 0 ? <FishSum catches={counted} /> : null}
               {counted.length > 0 && counted.length < catches.length ? (
                 <p className="meta">
-                  {tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}{" "}
+                  {/* Said as what they are: only the game's, only the sample week's, or some of each. */}
+                  {notMine.every((entry) => !offPlayLake(entry))
+                    ? tn(notMine.length, "Also listed: {n} fish from the game.", "Also listed: {n} fish from the game.")
+                    : notMine.every((entry) => isSampleCatch(entry.id))
+                      ? tn(notMine.length, "Also listed: {n} fish from the sample week.", "Also listed: {n} fish from the sample week.")
+                      : tn(notMine.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}
                   {/* One tap leaves them out of the list, as Trips' "Only my outings" does, without deleting the sample week. */}
-                  <Link to={`/catches?${new URLSearchParams({ [FIND_PARAM]: onlyMine }).toString()}`}>{t("Only my fish")}</Link>
+                  {/* Not in a book of only the sample week: "mine" would open the made-up week. */}
+                  {isSampleOnly(book) ? null : (
+                    <>
+                      {" "}
+                      <Link to={`/catches?${new URLSearchParams({ [FIND_PARAM]: onlyMine }).toString()}`}>{t("Only my fish")}</Link>
+                    </>
+                  )}
                 </p>
               ) : counted.length === 0 ? (
                 <p className="meta">
@@ -1632,11 +1649,14 @@ function CatchView() {
   // The others of its kind that round to the same size, through the one-size search.
   // Counted among the angler's own fish only, as the year line is: the link leaves the game's lake out too.
   const countedIds = new Set(counted.map((other) => other.id));
-  const sizeSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)}${noSample}`] as const;
+  const sizeSearch = [exactTerm("species", t(entry.species.trim())), `${withoutPlayLake(book, sameSizeSearch(entry.measure, getUnits() === "metric"), kind)}${noSample}`] as const;
   const sameSize = isCounted && counted.length > 1 ? findCatches(book, `${sizeSearch[0]} + ${sizeSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
   // The fish this lure has taken at this water, this one among them: whether it is the water's lure.
   const lureHere = spot && entry.lure.trim() ? ([exactTerm("lure", t(entry.lure)), exactTerm("water", spot.name)] as const) : null;
-  const lureHereCount = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null).length : 0;
+  const lureHereRows = lureHere ? findCatches(book, `${lureHere[0]} + ${lureHere[1]}`, t, (id) => photoFor(id) !== null) : [];
+  // On the angler's own fish, counted as the book counts them and opened the same way: no sample fish in either.
+  const lureHereSearch = lureHere && isCounted ? countedSearch(book, `${lureHere[0]} + ${lureHere[1]}`, lureHereRows, "book") : null;
+  const lureHereCount = lureHereSearch ? findCatches(book, lureHereSearch, t, (id) => photoFor(id) !== null).length : lureHereRows.length;
   // A bigger one of its kind on the same lure: what this lure can do.
   const lureKey = entry.lure.trim().toLowerCase();
   const onLure = isCounted && lureKey ? counted.filter((other) => other.lure.trim().toLowerCase() === lureKey && measureOf(other, entry.measure.kind)) : [];
@@ -1669,7 +1689,7 @@ function CatchView() {
   // A night fish's small hours count in its outing's year, as the search reads a year.
   const caughtYear = caughtDay.slice(0, 4);
   // Said only on the angler's own fish, leaving the game's lake out; counted as the link opens them, so the two agree.
-  const yearSearch = [exactTerm("species", t(entry.species)), `${withoutPlayLake(book, caughtYear, kind.filter((other) => bookFishDay(book, other).startsWith(`${caughtYear}-`)))}${noSample}`] as const;
+  const yearSearch = [exactTerm("species", t(entry.species.trim())), `${withoutPlayLake(book, caughtYear, kind.filter((other) => bookFishDay(book, other).startsWith(`${caughtYear}-`)))}${noSample}`] as const;
   // The same day of an earlier year, the latest one the angler was out and caught: what the water gave then.
   const onThisDay = isCounted ? sameDayBefore(book, caughtDay, bookCounted, t("sample|search word")) : null;
   const yearCount = isCounted ? findCatches(book, `${yearSearch[0]} + ${yearSearch[1]}`, t, (id) => photoFor(id) !== null).filter((other) => countedIds.has(other.id)).length : 0;
@@ -1691,7 +1711,7 @@ function CatchView() {
     // Dated by its outing's day, as the page and the photo's own file name date it: a night's small hours are that night's.
     const caught = new Date(`${bookFishDay(book, entry)}T12:00:00`);
     const text = {
-      title: t(entry.species),
+      title: t(entry.species.trim()),
       detail: [measuresText(entry), spot?.name].filter(Boolean).join(" · "),
       conditions: entry.weather ? weatherText(entry.weather) : t(entry.lure),
       date: caught.toLocaleDateString(locale(), { year: "numeric", month: "long", day: "numeric" }),
@@ -1724,17 +1744,17 @@ function CatchView() {
               onPage.some((other) => other.id === entry.id) || !spot
                 ? speciesLink(entry.species)
                 : entry.spotId === PLAY_LAKE_ID
-                  ? findWithLink(exactTerm("water", spot.name), exactTerm("species", t(entry.species)))
-                  : findWithLink(exactTerm("species", t(entry.species)), t("sample|search word"))
+                  ? findWithLink(exactTerm("water", spot.name), exactTerm("species", t(entry.species.trim())))
+                  : findWithLink(exactTerm("species", t(entry.species.trim())), t("sample|search word"))
             }
           >
             {eyebrowKind.length > 1
-              ? t("{species}: {n} of {total}", { species: t(entry.species), n: kindNumber, total: eyebrowKind.length })
-              : t("All {species}", { species: t(entry.species) })}
+              ? t("{species}: {n} of {total}", { species: t(entry.species.trim()), n: kindNumber, total: eyebrowKind.length })
+              : t("All {species}", { species: t(entry.species.trim()) })}
           </Link>
         </p>
         {/* The tab says which fish of the kind this is: its size and day. */}
-        <h1 data-title={`${t(entry.species)}, ${measuresText(entry)} · ${formatCatchDay(entry.caughtAt)}`}>{t(entry.species)}</h1>
+        <h1 data-title={`${t(entry.species.trim())}, ${measuresText(entry)} · ${formatCatchDay(entry.caughtAt)}`}>{t(entry.species.trim())}</h1>
         <p className="meta stand">
           <span>{measuresText(entry)}</span>
           {" · "}
@@ -1782,7 +1802,7 @@ function CatchView() {
         ) : null}
         {gap ? (
           <p className="meta long-gap">
-            <Link to={`/catches/${gap.before.id}`}>{t("The first {species} in {n} days", { species: t(entry.species), n: gap.days })}</Link>
+            <Link to={`/catches/${gap.before.id}`}>{t("The first {species} in {n} days", { species: t(entry.species.trim()), n: gap.days })}</Link>
           </p>
         ) : null}
         {build ? (
@@ -1792,19 +1812,19 @@ function CatchView() {
         ) : null}
         {since ? (
           <p className="meta biggest-since">
-            <Link to={`/catches/${since.id}`}>{t("The biggest {species} since {day}", { species: t(entry.species), day: formatDay(bookFishDay(book, since)) })}</Link>
+            <Link to={`/catches/${since.id}`}>{t("The biggest {species} since {day}", { species: t(entry.species.trim()), day: formatDay(bookFishDay(book, since)) })}</Link>
           </p>
         ) : null}
         {sameSize > 1 ? (
           <p className="meta same-size">
-            <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species), count: sameSize })}</Link>
+            <Link to={findWithLink(...sizeSearch)}>{t("{species} of this size: {count}", { species: t(entry.species.trim()), count: sameSize })}</Link>
           </p>
         ) : null}
         {lureBest ? (
           <p className="meta lure-best">
             <Link to={`/catches/${lureBest.id}`}>
               {t("Biggest {species} on {lure}: {size}, {day}", {
-                species: t(entry.species),
+                species: t(entry.species.trim()),
                 lure: t(entry.lure),
                 size: measureText(measureOf(lureBest, entry.measure.kind)!),
                 day: formatDay(bookFishDay(book, lureBest)),
@@ -1814,12 +1834,12 @@ function CatchView() {
         ) : null}
         {lureHere && lureHereCount > 1 ? (
           <p className="meta lure-here">
-            <Link to={findWithLink(...lureHere)}>{t("On {lure} at {water}: {count}", { lure: t(entry.lure), water: spot!.name, count: fishCountLabel(lureHereCount) })}</Link>
+            <Link to={lureHereSearch ? findLink(lureHereSearch) : findWithLink(...lureHere)}>{t("On {lure} at {water}: {count}", { lure: t(entry.lure), water: spot!.name, count: fishCountLabel(lureHereCount) })}</Link>
           </p>
         ) : null}
         {firstHere ? (
           <p className="meta first-here">
-            <Link to={findWithLink(exactTerm("water", spot!.name), `${exactTerm("species", t(entry.species))}${noSample}`)}>{t("First {species} here.", { species: t(entry.species) })}</Link>
+            <Link to={findWithLink(exactTerm("water", spot!.name), `${exactTerm("species", t(entry.species.trim()))}${noSample}`)}>{t("First {species} here.", { species: t(entry.species.trim()) })}</Link>
           </p>
         ) : null}
         {onThisDay ? (
@@ -1829,7 +1849,7 @@ function CatchView() {
         ) : null}
         {yearCount > 1 ? (
           <p className="meta kind-year">
-            <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: t(entry.species), year: caughtYear, count: yearCount })}</Link>
+            <Link to={findWithLink(...yearSearch)}>{t("{species} in {year}: {count}", { species: t(entry.species.trim()), year: caughtYear, count: yearCount })}</Link>
           </p>
         ) : null}
         {milestone ? (
@@ -1837,8 +1857,8 @@ function CatchView() {
             {milestone.of === "book" ? (
               t("Your fish no. {n}.", { n: milestone.n })
             ) : (
-              <Link to={`/species/${encodeURIComponent(entry.species)}`}>
-                {milestone.n === 1 ? t("Your first {species}.", { species: t(entry.species) }) : t("{species} no. {n}.", { species: t(entry.species), n: milestone.n })}
+              <Link to={`/species/${encodeURIComponent(entry.species.trim())}`}>
+                {milestone.n === 1 ? t("Your first {species}.", { species: t(entry.species.trim()) }) : t("{species} no. {n}.", { species: t(entry.species.trim()), n: milestone.n })}
               </Link>
             )}
           </p>
@@ -1859,8 +1879,8 @@ function CatchView() {
         <PhotoFull
           key={entry.id}
           src={photo}
-          alt={t("Photo of {species}", { species: t(entry.species) })}
-          name={`${t(entry.species)} ${caughtDay}`}
+          alt={t("Photo of {species}", { species: t(entry.species.trim()) })}
+          name={`${t(entry.species.trim())} ${caughtDay}`}
           caption={photoCaption(entry)}
           photos={listPhotos}
           at={listPhotos.findIndex((row) => row.id === entry.id)}
@@ -1978,14 +1998,15 @@ function CatchView() {
       {/* Its kind's list is the one its page shows, which leaves a game or sample fish out: offered only when this one is in it. */}
       {onPage.length > 1 && onPage.some((other) => other.id === entry.id) && !/^species(-largest)?:/.test(list?.key ?? "") ? (
         <p className="catch-list-at">
-          {/* The same fish, so it takes this page's place, and the top of the page takes the focus the link had. */}
+          {/* The same fish, so it takes this page's place, and the top of the page takes the focus the link had, scrolled
+              back into view so the ring isn't left above it. */}
           <Link
             to={catchLink(entry.id, `species:${entry.species}`)}
             replace
             state={location.state}
-            onClick={() => requestAnimationFrame(() => focusPageHeading({ preventScroll: true }))}
+            onClick={() => requestAnimationFrame(stepFocus)}
           >
-            {t("Step through {species} only", { species: t(entry.species) })}
+            {t("Step through {species} only", { species: t(entry.species.trim()) })}
           </Link>
         </p>
       ) : null}
@@ -1996,7 +2017,7 @@ function CatchView() {
             to={catchLink(entry.id, `trip:${trip.id}`)}
             replace
             state={location.state}
-            onClick={() => requestAnimationFrame(() => focusPageHeading({ preventScroll: true }))}
+            onClick={() => requestAnimationFrame(stepFocus)}
           >
             {t("Step through this outing's fish")}
           </Link>

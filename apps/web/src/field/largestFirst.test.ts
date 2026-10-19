@@ -16,7 +16,7 @@ const fish = (id: string, measure: CatchEntry["measure"], alsoMeasure?: CatchEnt
 });
 
 describe("largestFirst", () => {
-  it("puts weighed fish first by weight, then measured ones by length, ties in the order given", () => {
+  it("ranks weighed fish by weight and measured ones by the weight their length suggests, ties in the order given", () => {
     const list = [
       fish("long", { kind: "length", inches: 30 }),
       fish("light", { kind: "weight", pounds: 1.2 }),
@@ -24,6 +24,17 @@ describe("largestFirst", () => {
       fish("heavy", { kind: "length", inches: 20 }, { kind: "weight", pounds: 4 }),
       fish("short-b", { kind: "length", inches: 12 }),
     ];
-    expect(largestFirst(list).map((entry) => entry.id)).toEqual(["heavy", "light", "long", "short-a", "short-b"]);
+    expect(largestFirst(list).map((entry) => entry.id)).toEqual(["long", "heavy", "light", "short-a", "short-b"]);
+  });
+
+  it("goes by the kind's own measured and weighed fish where it has two", () => {
+    const list = [
+      fish("a", { kind: "length", inches: 10 }, { kind: "weight", pounds: 0.25 }),
+      fish("b", { kind: "length", inches: 20 }, { kind: "weight", pounds: 2 }),
+      fish("measured", { kind: "length", inches: 24 }),
+      fish("weighed", { kind: "weight", pounds: 3 }),
+    ];
+    // 24 in by these two is about 3.5 lb: ahead of the 3 lb one.
+    expect(largestFirst(list).map((entry) => entry.id)).toEqual(["measured", "weighed", "b", "a"]);
   });
 });

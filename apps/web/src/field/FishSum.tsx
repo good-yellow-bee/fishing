@@ -43,7 +43,7 @@ export function FishSum({ catches, oneKind = false, best = catches, list }: { ca
           <Link to={catchLink(largest.id, list)} state={list ? FROM_LIST : undefined}>
             {oneKind
               ? t("Largest: {size}", { size })
-              : t("Largest: {species}, {size}", { species: t(largest.species), size })}
+              : t("Largest: {species}, {size}", { species: t(largest.species.trim()), size })}
           </Link>
         </>
       ) : null}
@@ -58,10 +58,10 @@ function BestLink({ entry, kind, oneKind, list }: { entry: CatchEntry; kind: "we
     kind === "weight"
       ? oneKind
         ? t("Heaviest: {size}", { size })
-        : t("Heaviest: {species}, {size}", { species: t(entry.species), size })
+        : t("Heaviest: {species}, {size}", { species: t(entry.species.trim()), size })
       : oneKind
         ? t("Longest: {size}", { size })
-        : t("Longest: {species}, {size}", { species: t(entry.species), size });
+        : t("Longest: {species}, {size}", { species: t(entry.species.trim()), size });
   return (
     <Link to={catchLink(entry.id, list)} state={list ? FROM_LIST : undefined}>
       {label}

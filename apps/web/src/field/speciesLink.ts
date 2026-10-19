@@ -59,7 +59,7 @@ export function speciesCounts(catches: readonly CatchEntry[]) {
   const counts = new Map<string, { species: string; count: number }>();
   for (const entry of catches) {
     const key = entry.species.trim().toLowerCase();
-    const row = counts.get(key) ?? { species: entry.species, count: 0 };
+    const row = counts.get(key) ?? { species: entry.species.trim(), count: 0 };
     row.count += 1;
     counts.set(key, row);
   }
