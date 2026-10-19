@@ -18,6 +18,9 @@ const NUM = String.raw`(\d+(?:[.,]\d+)?)`;
 const POUNDS_OUNCES = new RegExp(String.raw`^(?:${NUM}\s*(?:lbs?|#)\s*)?(?:${NUM}\s*(?:oz)?)?$`, "i");
 /** "18 1/4", "3/4", "18 1/4 in": inches as a tape is marked. */
 const INCH_FRACTION = new RegExp(String.raw`^(?:(\d+)\s+)?(\d+)\s*/\s*(\d+)\s*(?:in|inch|inches|")?$`, "i");
+/** "1 ft 2 in", "2' 3\"", "2 ft": a long fish in feet and inches. */
+// A phone's smart punctuation writes the marks curly: 2’ 3” and 2′ 3″ too.
+const FEET_INCHES = new RegExp(String.raw`^(\d+)\s*(?:ft|feet|foot|['’′])\s*(?:${NUM}\s*(?:in|inch|inches|["”″])?)?$`, "i");
 /** A plain number with its unit written after it: "28 in", "3.2 lb", "71 cm", "1,4 kg", "850 g", "85 dag", "450 mm". */
 const WITH_UNIT = new RegExp(String.raw`^${NUM}\s*(in|inch|inches|"|lbs?|#|cm|mm|kg|dag|g)$`, "i");
 
@@ -46,6 +49,9 @@ export function imperialAmount(text: string, kind: "length" | "weight"): number 
 /** What the player typed, in the book's inches or pounds; text that isn't a number passes through for the form to refuse. */
 export function toBookAmount(text: string, kind: "length" | "weight", units: Units) {
   const clean = text.trim();
+  // Feet are written out, so they read the same in any units; the inches after them stay under a foot.
+  const feet = kind === "length" ? FEET_INCHES.exec(clean) : null;
+  if (feet && num(feet[2]) < 12) return round(num(feet[1]) * 12 + num(feet[2]), 3);
   // A unit written after the number wins over the units picked in Settings: "71 cm" is 71 cm either way.
   const unit = WITH_UNIT.exec(clean);
   if (unit) {

@@ -57,6 +57,7 @@ import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
 import { pieceKey, pieceName } from "./gear/pieceKey";
+import { ownTitle } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -1560,6 +1561,20 @@ export function intoOuting(book: Logbook, entry: CatchEntry): string | null {
   return t("{time} after the outing's first fish", { time: spanText(minutes) });
 }
 
+/**
+ * "40 min after the one before": the wait since the outing's fish before this one, which shows a hot spell. Null when
+ * that one was the outing's first (intoOuting says it), the same minute, or a day or more apart.
+ */
+export function afterOneBefore(book: Logbook, entry: CatchEntry): string | null {
+  if (!entry.tripId) return null;
+  const earlier = book.catches.filter((other) => other.tripId === entry.tripId && byTime(other, entry) < 0);
+  if (earlier.length < 2) return null;
+  const before = Math.max(...earlier.map((other) => Date.parse(other.caughtAt)));
+  const minutes = Math.round((Date.parse(entry.caughtAt) - before) / 60_000);
+  if (!Number.isFinite(minutes) || minutes < 1 || minutes >= 24 * 60) return null;
+  return t("{time} after the one before", { time: spanText(minutes) });
+}
+
 /** "40 min after sunrise", "1 h 5 min before sunset", "At sunrise", or "In daylight" / "After dark" away from both. */
 function sunMarkText(mark: SunMark): string {
   if (!mark.edge) return mark.light === "day" ? t("In daylight") : t("After dark");
@@ -1603,6 +1618,8 @@ function CatchView() {
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
   // Its place on the outing, first fish first: when in the session it came. Two in the same minute go by id.
+  const intoTrip = intoOuting(book, entry);
+  const sinceBefore = afterOneBefore(book, entry);
   const tripPlace = trip ? book.catches.filter((other) => other.tripId === trip.id && byTime(other, entry) < 0).length + 1 : 0;
   // A fish logged on its own while an outing was on this water that day: offer to file it there.
   const looseTrip = trip ? undefined : tripForFish(book, entry.spotId, toLocalInput(new Date(entry.caughtAt)));
@@ -1931,9 +1948,19 @@ function CatchView() {
       <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
-          {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
+          {/* An untitled outing on this fish's water, named just above: "That day's outing" rather than the name twice. */}
+          {ownTitle(trip, book.spots) || trip.spotId !== entry.spotId ? (
+            <>
+              {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
+            </>
+          ) : (
+            <Link id="catch-outing" to={`/trips/${trip.id}`}>
+              {trip.date < localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
+            </Link>
+          )}
           {tripFish > 1 ? ` · ${t("fish {n} of {total}", { n: tripPlace, total: tripFish })}` : null}
-          {tripFish > 1 && intoOuting(book, entry) ? ` · ${intoOuting(book, entry)}` : null}
+          {tripFish > 1 && intoTrip ? ` · ${intoTrip}` : null}
+          {sinceBefore ? ` · ${sinceBefore}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
@@ -2010,6 +2037,19 @@ function CatchView() {
             onClick={() => requestAnimationFrame(stepFocus)}
           >
             {t("Step through {species} only", { species: pieceName(entry.species) })}
+          </Link>
+        </p>
+      ) : null}
+      {/* Its water's fish, the third way an angler looks back: what else that water gave. */}
+      {spot && offPlayLake(entry) && !/^water(-largest)?:/.test(list?.key ?? "") && catchesForSpot(book, spot.id).length > 1 ? (
+        <p className="catch-list-at">
+          <Link
+            to={catchLink(entry.id, `water:${spot.id}`)}
+            replace
+            state={location.state}
+            onClick={() => requestAnimationFrame(stepFocus)}
+          >
+            {t("Step through this water's fish")}
           </Link>
         </p>
       ) : null}
