@@ -701,6 +701,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
+    "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
     "W deszczowe dni na pomost za tobą wychodzi czasem kaczor krzyżówki, który czyści pióra i otrząsa się z deszczu. A we mgle i w deszczu latarnie na pomoście świecą nocą szerszym, cieplejszym blaskiem.",
   "On snowy winter days your dog now comes out on the dock too, and when the snow piles up on its back it gives itself a shake. The robin comes to the snowy posts as well.":

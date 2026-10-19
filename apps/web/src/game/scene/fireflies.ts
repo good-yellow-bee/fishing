@@ -1,10 +1,11 @@
 import type { LakeHour, LakeSeason, Sky as WeatherSky } from "@stillwater/shared";
 
-/** Middles of the reed beds LakeWorld plants: the west shallows, the east point and the creek mouth. */
+/** Middles of the reed beds LakeWorld plants: the west shallows, the east point and the creek mouth; and a few over the water by the dock, where you see them close. */
 export const REED_BEDS: { x: number; z: number; flies: number }[] = [
   { x: -12.4, z: 1.2, flies: 16 },
   { x: 12.0, z: -10.0, flies: 10 },
   { x: -22.6, z: -11.2, flies: 10 },
+  { x: -2.8, z: 4.6, flies: 7 },
 ];
 
 /** Meters a firefly's home may sit from its bed, and how far it wanders from home. */
