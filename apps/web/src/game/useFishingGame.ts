@@ -38,6 +38,7 @@ import { cloudShadeWaitMul } from "./sunCover";
 import { MOON_FEED_WAIT, moonPassing } from "./solunar";
 import { FOAM_LANE_WAIT, onFoamLane } from "./foamFeed";
 import { SUNFISH_BED_WAIT, onSunfishBed } from "./sunfishBeds";
+import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -325,6 +326,8 @@ export function useFishingGame(
   const castFoamRef = useRef(false);
   /** Whether the last cast landed on the sunfish beds either side of the dock, where the perch and smallmouth raid the eggs. */
   const castBedRef = useRef(false);
+  /** How the last cast fished the duckweed: a popper riding over a mat, a lure bearded with it, or neither. */
+  const castWeedRef = useRef<"topwater" | "fouled" | null>(null);
   /** This cast went in over the groundbait, so a school landed from it stays to feed. */
   const castBaitedRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -499,6 +502,7 @@ export function useFishingGame(
     castPadsRef.current = false;
     castFoamRef.current = false;
     castBedRef.current = false;
+    castWeedRef.current = null;
     secondTakeRef.current = false;
     powerRef.current = 0;
     clearFight();
@@ -633,6 +637,8 @@ export function useFishingGame(
     if (castSkipRef.current) waitHintRef.current = `${t("Skipped it under the dock, into the shade.")} ${waitHintRef.current}`;
     if (castPadsRef.current) waitHintRef.current = `${t("Tight to the lily pads, where the bass and pike wait in ambush.")} ${waitHintRef.current}`;
     if (castFoamRef.current) waitHintRef.current = `${t("Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.")} ${waitHintRef.current}`;
+    if (castWeedRef.current === "topwater") waitHintRef.current = `${t("Over the duckweed, where the bass lurk in its shade for a lure on top.")} ${waitHintRef.current}`;
+    if (castWeedRef.current === "fouled" && !mercyRef.current) waitHintRef.current = `${t("Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.")} ${waitHintRef.current}`;
     if (castBedRef.current) waitHintRef.current = `${t("On the sunfish beds, where the perch and smallmouth come to raid the eggs.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
@@ -828,7 +834,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -1031,6 +1037,8 @@ export function useFishingGame(
     castPadsRef.current = aimed !== null && tightToPads(season, aimed.x, aimed.z);
     castFoamRef.current = aimed !== null && onFoamLane(windDriftRef.current, aimed.x, aimed.z);
     castBedRef.current = aimed !== null && onSunfishBed(season, aimed.x, aimed.z);
+    // Among the lily pads the pads decide how the lure fishes, so the duckweed counts only out in its still coves.
+    castWeedRef.current = duckweedCast(aimed !== null && !castPadsRef.current && inDuckweed(season, windDriftRef.current, aimed.x, aimed.z), isTopwater(lureRef?.current));
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, season, startWait]);

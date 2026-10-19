@@ -95,6 +95,8 @@ export const PL_GAME: PlBook = {
   "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
+  "Over the duckweed, where the bass lurk in its shade for a lure on top.": "Nad rzęsą, gdzie bassy czają się w jej cieniu na przynętę z powierzchni.",
+  "Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.": "W rzęsę: przynęta wraca obrośnięta zielskiem, a ryby się od niej odwracają.",
   "On the sunfish beds, where the perch and smallmouth come to raid the eggs.": "Na gniazdach bassów słonecznych, gdzie okonie i bassy małogębowe przypływają podkradać ikrę.",
   "Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.": "Prosto w pas piany, gdzie wiatr zbiera utopione owady, a ryby żerują wzdłuż niego.",
   "The breeze blows onto this bank and pushes the food in, and the fish follow it.": "Wiatr wieje na ten brzeg i spycha tu pokarm, a ryby płyną za nim.",
