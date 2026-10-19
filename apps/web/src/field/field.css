@@ -1125,6 +1125,12 @@ button.field-primary:disabled {
   scroll-margin-bottom: 120px;
 }
 
+/* Tabbing back up to a field, or jumping to a heading, stops below the phone's sticky top bar rather than under it
+   (WCAG 2.4.11): the shell keeps --field-bar-h at the bar's height, 0 where the bar is hidden. */
+html:has(.field-mobile-bar) {
+  scroll-padding-top: var(--field-bar-h, 0px);
+}
+
 /* Tabbing to a field near the bottom scrolls it clear of the sticky save buttons rather than leave it under them
    (WCAG 2.4.11). */
 html:has(.form-save) {
@@ -1857,9 +1863,9 @@ html:has(.form-save):has(.undo-bar) .field-main {
   margin: 8px 0 -2px;
 }
 
-/* A month jumped to lands clear of the phone's top bar. */
+/* A month jumped to lands a little below the phone's top bar, which the page's top padding below already clears. */
 .month-head[id] {
-  scroll-margin-top: 88px;
+  scroll-margin-top: 8px;
 }
 
 /* The narrowest phones wrap the top bar onto a second line. */
