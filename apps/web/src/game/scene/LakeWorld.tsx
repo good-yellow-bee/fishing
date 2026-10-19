@@ -1,4 +1,4 @@
-import { createContext, memo, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { createContext, memo, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -1809,30 +1809,39 @@ export function bankPlankMatrix(board: BankBoard, index: number) {
   );
 }
 
-/** Places and colours every bank board in one instanced mesh. */
-export function placeBankPlanks(mesh: THREE.InstancedMesh) {
+/** Places and colours `count` planks in one instanced mesh, then refits its bounds around them. */
+export function placePlanks(mesh: THREE.InstancedMesh, count: number, matrixFor: (index: number) => THREE.Matrix4, colorFor: (index: number, into: THREE.Color) => THREE.Color) {
   const tint = new THREE.Color();
-  BANK_BOARDS.forEach((board, index) => {
-    mesh.setMatrixAt(index, bankPlankMatrix(board, index));
-    mesh.setColorAt(index, tint.set(bankPlankColor(board, index)));
-  });
+  for (let index = 0; index < count; index += 1) {
+    mesh.setMatrixAt(index, matrixFor(index));
+    mesh.setColorAt(index, colorFor(index, tint));
+  }
   mesh.instanceMatrix.needsUpdate = true;
-  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+  mesh.instanceColor!.needsUpdate = true;
   // Culling and shadow passes cache the first bounds three computes, which may predate these matrices.
   mesh.computeBoundingBox();
   mesh.computeBoundingSphere();
 }
 
-function BankPlanks() {
+const bankMatrix = (index: number) => bankPlankMatrix(BANK_BOARDS[index]!, index);
+const bankColor = (index: number, into: THREE.Color) => into.set(bankPlankColor(BANK_BOARDS[index]!, index));
+
+/** Places and colours every bank board in one instanced mesh. */
+export function placeBankPlanks(mesh: THREE.InstancedMesh) {
+  placePlanks(mesh, BANK_BOARDS.length, bankMatrix, bankColor);
+}
+
+/** Unit boxes for `count` planks, each placed and coloured by `place`, which runs again when it changes. */
+function PlankMesh({ count, place }: { count: number; place: (mesh: THREE.InstancedMesh) => void }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
 
   useLayoutEffect(() => {
-    if (mesh.current) placeBankPlanks(mesh.current);
-  }, []);
+    if (mesh.current) place(mesh.current);
+  }, [place]);
 
   // R3F disposes child geometry and material on unmount; an effect cleanup would also fire on StrictMode's dev replay.
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, BANK_BOARDS.length]} castShadow receiveShadow>
+    <instancedMesh ref={mesh} args={[undefined, undefined, count]} castShadow receiveShadow>
       <boxGeometry />
       <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
     </instancedMesh>
@@ -1857,7 +1866,7 @@ function BankPosts() {
 function BankWalks() {
   return (
     <group>
-      <BankPlanks />
+      <PlankMesh count={BANK_BOARDS.length} place={placeBankPlanks} />
       <BankPosts />
     </group>
   );
@@ -1873,39 +1882,22 @@ export function pierPlankMatrix(index: number) {
   );
 }
 
+const FROST = new THREE.Color(FROST_COLOR);
+
 /** Each pier board's colour: the two plank colours alternating, soaked darker by `shade` and paled by frost or snow (`pale`). */
 export function pierPlankColor(index: number, shade: number, pale: number, into = new THREE.Color()) {
   return into.set(PIER_PLANK[index % 2]!).multiplyScalar(shade).lerp(FROST, pale);
 }
-const FROST = new THREE.Color(FROST_COLOR);
+
+/** Places every pier board in one instanced mesh, each coloured for `shade` and `pale`. */
+export function placePierPlanks(mesh: THREE.InstancedMesh, shade: number, pale: number) {
+  placePlanks(mesh, PIER_BOARDS.length, pierPlankMatrix, (index, into) => pierPlankColor(index, shade, pale, into));
+}
 
 /** Every pier board in one instanced mesh, each in its own colour. */
 function PierDeck({ shade, pale }: { shade: number; pale: number }) {
-  const mesh = useRef<THREE.InstancedMesh>(null);
-
-  useLayoutEffect(() => {
-    const deck = mesh.current;
-    if (!deck) return;
-    PIER_BOARDS.forEach((_, index) => deck.setMatrixAt(index, pierPlankMatrix(index)));
-    deck.instanceMatrix.needsUpdate = true;
-    deck.computeBoundingBox();
-    deck.computeBoundingSphere();
-  }, []);
-
-  useLayoutEffect(() => {
-    const deck = mesh.current;
-    if (!deck) return;
-    const tint = new THREE.Color();
-    PIER_BOARDS.forEach((_, index) => deck.setColorAt(index, pierPlankColor(index, shade, pale, tint)));
-    if (deck.instanceColor) deck.instanceColor.needsUpdate = true;
-  }, [shade, pale]);
-
-  return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, PIER_BOARDS.length]} castShadow receiveShadow>
-      <boxGeometry />
-      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
-    </instancedMesh>
-  );
+  const place = useCallback((mesh: THREE.InstancedMesh) => placePierPlanks(mesh, shade, pale), [shade, pale]);
+  return <PlankMesh count={PIER_BOARDS.length} place={place} />;
 }
 
 /** The pier's still timbers: its bridge spans, the landing platform, a log and a paddle, soaked darker by `shade`. */

@@ -9,7 +9,7 @@ import {
   BANK_WALK_PLANK,
   type BankBoard,
 } from "./bankWalk.ts";
-import { bankPlankColor, bankPlankMatrix, pierPlankColor, pierPlankMatrix, placeBankPlanks } from "./LakeWorld.tsx";
+import { bankPlankMatrix, pierPlankColor, pierPlankMatrix, placeBankPlanks, placePierPlanks } from "./LakeWorld.tsx";
 import { PIER_BOARDS, PIER_THICK, PIER_TOP } from "./pierDeck.ts";
 
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1);
@@ -40,15 +40,16 @@ describe("bank plank instancing", () => {
     });
   });
 
-  it("draws every board in one mesh, each in its old colour", () => {
+  it("draws every board in one mesh, the stands' and the walks' each in their two colours, alternating board by board", () => {
     const mesh = new THREE.InstancedMesh(UNIT_BOX, undefined, BANK_BOARDS.length);
     placeBankPlanks(mesh);
     const colour = new THREE.Color();
-    BANK_BOARDS.forEach((board, index) => {
-      expect(bankPlankColor(board, index)).toBe((board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK)[index % 2]);
-      mesh.getColorAt(index, colour);
-      expect(colour.getHex()).toBe(new THREE.Color(bankPlankColor(board, index)).getHex());
-    });
+    const hexes = BANK_BOARDS.map((_, index) => mesh.getColorAt(index, colour).getHex());
+    const palette = (kind: string) => (kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK).map((c) => new THREE.Color(c).getHex());
+    BANK_BOARDS.forEach((board, index) => expect(palette(board.kind)).toContain(hexes[index]));
+    for (let index = 1; index < BANK_BOARDS.length; index += 1) {
+      if (BANK_BOARDS[index]!.kind === BANK_BOARDS[index - 1]!.kind) expect(hexes[index]).not.toBe(hexes[index - 1]);
+    }
   });
 
   it("refits culling bounds around the placed planks", () => {
@@ -83,7 +84,17 @@ describe("pier deck", () => {
     expect(dry[0]!.equals(dry[1]!)).toBe(false);
     expect(pierPlankColor(2, 1, 0).equals(dry[0]!)).toBe(true);
     expect(pierPlankColor(0, 0.7, 0).r).toBeLessThan(dry[0]!.r);
-    const frosted = pierPlankColor(0, 1, 1);
-    expect(pierPlankColor(1, 1, 1).equals(frosted)).toBe(true);
+    expect(pierPlankColor(1, 1, 1).getHex()).toBe(pierPlankColor(0, 1, 1).getHex());
+  });
+
+  it("places every pier board in one mesh, coloured for the weather, with its bounds refitted", () => {
+    const mesh = new THREE.InstancedMesh(UNIT_BOX, undefined, PIER_BOARDS.length);
+    mesh.computeBoundingSphere();
+    placePierPlanks(mesh, 0.7, 0.3);
+    const colour = new THREE.Color();
+    PIER_BOARDS.forEach((_, index) => {
+      expect(mesh.getColorAt(index, colour).getHex()).toBe(pierPlankColor(index, 0.7, 0.3).getHex());
+      for (const corner of corners(UNIT_BOX, pierPlankMatrix(index))) expect(mesh.boundingSphere!.distanceToPoint(corner)).toBeLessThan(1e-6);
+    });
   });
 });
