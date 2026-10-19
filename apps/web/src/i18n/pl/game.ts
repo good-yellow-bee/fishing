@@ -700,6 +700,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
+    "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
     "W deszczowe dni na pomost za tobą wychodzi czasem kaczor krzyżówki, który czyści pióra i otrząsa się z deszczu. A we mgle i w deszczu latarnie na pomoście świecą nocą szerszym, cieplejszym blaskiem.",
   "On snowy winter days your dog now comes out on the dock too, and when the snow piles up on its back it gives itself a shake. The robin comes to the snowy posts as well.":
@@ -773,8 +775,6 @@ export const PL_GAME: PlBook = {
   "Turning it!": "Zawracasz ją!",
   "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.":
     "Dwie kolejne przynęty można prowadzić w czasie czekania: stuknij, by zatrzymać woblera, tak że wypłynie przed płynącą za nim rybą, albo by mucha drgnęła jak żywy owad. Jak przy poppersie, jigu, błystce czy streamerze pierwsze stuknięcia przyspieszają branie, a zbyt wiele płoszy rybę.",
-  "Out on the boat, the anchor's splash puts the fish down for a few seconds, so give it a moment before you cast. And in a strong wind the anchored hull is held back on its line and follows a run less, so a run takes more line.":
-    "Na łódce plusk kotwicy płoszy ryby na kilka sekund, więc odczekaj chwilę przed rzutem. A przy silnym wietrze kadłub trzymany na linie kotwicy słabiej obraca się za rybą, więc odjazd zabiera więcej linki.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
