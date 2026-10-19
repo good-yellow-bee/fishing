@@ -1712,7 +1712,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT345~~ | ~~News card 2026-10-19-game32 covers GT343 and GT344: clearing the shack board pays a 25-point bonus, and letting a trophy go pays 20 points~~ (#1422) | ui | S |
 | ~~GT346~~ | ~~Level 18, Breath of the lake, at 68000 lifetime points: the shack board's requests pay a quarter more (the server pays the same, and the board shows the raised reward)~~ (#1425) | gameplay | S |
 | ~~GT347~~ | ~~Strong arms lift a bottom-sticker: from Strength 7 one pump brings a sulking catfish or sturgeon off the bottom, not two; the shack's Strength line and the fight card's Bottom-sticker line say so~~ (#1429) | gameplay | S |
-| GT348 | News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump | ui | S |
+| ~~GT348~~ | ~~News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump~~ (#1430) | ui | S |
+| GT349 | A patient angler waits a dropped fish out: from Patience 7 a fish that dropped the bait before the strike takes again on a cast straight back 60% of the time, not 40%; the shack's Patience line and the miss line say so | gameplay | S |
 
 ## Risks / open questions for the owner
 

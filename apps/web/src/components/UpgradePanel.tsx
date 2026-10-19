@@ -2,6 +2,7 @@ import { useState } from "react";
 import { skillCost, SKILL_LABELS, nextSkillRank, type SkillId, type Profile } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { STRONG_LIFT_STRENGTH } from "../game/fight";
+import { PATIENT_DROP_RANK } from "../game/gotAway";
 import { skillUnlockText } from "../i18n/content";
 
 type Props = {
@@ -19,7 +20,7 @@ function skillNote(skill: SkillId): string {
     case "accuracy":
       return t("Wider cast band and longer strike window.");
     case "patience":
-      return t("Shorter waits, heavier fish.");
+      return t("Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.", { rank: PATIENT_DROP_RANK });
   }
 }
 

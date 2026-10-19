@@ -375,7 +375,7 @@ export const PL_GAME: PlBook = {
   // Shop
   "Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.": "Wyholuj cięższe gatunki. Od {rank} jedna pompka podrywa suma lub jesiotra.",
   "Wider cast band and longer strike window.": "Szerszy pasek rzutu i dłuższy czas na zacięcie.",
-  "Shorter waits, heavier fish.": "Krótsze czekanie, cięższe ryby.",
+  "Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.": "Krótsze czekanie, cięższe ryby. Od {rank} ryba, która puści przynętę, częściej bierze znowu.",
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",
   " → {next} ({cost} pts)": " → {next} ({cost} pkt)",
@@ -539,6 +539,7 @@ export const PL_GAME: PlBook = {
   "It's the one that got away!": "To ta, która się zerwała!",
   "It's the one that dropped your bait!": "To ta, która wypuściła twoją przynętę!",
   "It wasn't hooked, so it may take again: cast straight back here.": "Nie zacięła się, więc może wziąć znowu: zarzuć od razu w to samo miejsce.",
+  "It wasn't hooked, and your Patience keeps it about: cast straight back here, it will likely take again.": "Nie zacięła się, a twoja Cierpliwość ją zatrzymuje: zarzuć od razu w to samo miejsce, pewnie weźmie znowu.",
   "A largemouth bass followed it in to the bank!": "Bass wielkogębowy odprowadził ją aż do brzegu!",
   "A walleye followed it up to the boat!": "Sandacz odprowadził ją aż pod łódź!",
   "A pike followed it in to the bank!": "Szczupak odprowadził ją aż do brzegu!",

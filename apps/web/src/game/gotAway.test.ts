@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, DROPPED_ODDS, gotAwayAfterDrop, gotAwayAfterLoss } from "./gotAway";
+import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, DROPPED_ODDS, gotAwayAfterDrop, gotAwayAfterLoss, PATIENT_DROP_RANK, PATIENT_DROPPED_ODDS } from "./gotAway";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const perch = FISH.find((fish) => fish.id === "perch")!;
@@ -43,5 +43,12 @@ describe("the one that got away", () => {
     // A big lure doesn't tempt back a fish that only let go of the bait.
     expect(castForGotAway(dropped, "dock", DROPPED_ODDS, true)).toEqual({ again: null, next: null });
     expect(castForGotAway(dropped, "reeds", 0)).toEqual({ again: null, next: null });
+  });
+
+  it("brings a dropped fish back more often for a patient angler", () => {
+    const dropped = gotAwayAfterDrop(perch, 0.4, "dock");
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, false, PATIENT_DROP_RANK - 1).again).toBeNull();
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, false, PATIENT_DROP_RANK).again).toEqual(dropped);
+    expect(castForGotAway(dropped, "dock", PATIENT_DROPPED_ODDS, false, PATIENT_DROP_RANK).again).toBeNull();
   });
 });
