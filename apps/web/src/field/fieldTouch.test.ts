@@ -71,6 +71,14 @@ describe("the field log on a touch screen", () => {
     const block = /\.map-index a:not\(\.map-plan, \.map-coord-link, \.map-next\)::after \{([^}]*)\}/.exec(mapCss)?.[1];
     expect(block).toContain("inset: -6px -3px;");
   });
+
+  it("makes each water in the Map's not-on-a-map-yet line a 32 px band, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-note a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(mapCss.slice(0, mapCss.indexOf("@media (pointer: coarse) {"))).not.toContain(".map-note a");
+  });
 });
 
 describe("the field log's tab bar on a 320 px phone", () => {

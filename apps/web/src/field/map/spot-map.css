@@ -358,6 +358,14 @@
     position: absolute;
     inset: -6px -3px;
   }
+
+  /* The waters with no place yet are named in a running line, 19 px links that wrap: each is now a 32 px band. */
+  .map-note a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 6px;
+    box-sizing: border-box;
+  }
 }
 
 .map-note {
