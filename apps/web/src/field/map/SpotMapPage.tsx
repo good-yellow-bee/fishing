@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigationType } from "react-router-dom";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
 import { bestLureAt } from "../waterLure";
@@ -33,7 +33,7 @@ import {
   ringPath,
   type SamplePlace,
 } from "./places";
-import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar } from "./ownSheet";
+import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar, scaleSpot } from "./ownSheet";
 import { hasSampleWaters, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
@@ -246,9 +246,12 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
   const TICK_WIDTH = 110;
   const points = pinned.map((pin) => ({ ...pin, point: projectIn(frame, pin.place) }));
   const scale = scaleBar(frame, getUnits() === "metric");
+  // In a corner no pin lands in, and no label is placed over it.
+  const bar = scaleSpot(points.map(({ point }) => point), scale.length);
   // The labels keep a size on screen while the sheet scales, so which ones meet depends on how wide it is drawn.
   const { sheet, pxPerUnit } = useSheetScale(OWN_WIDTH);
-  const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit, labelSizeOnScreen());
+  const barBox = { x0: bar.box.x0 * pxPerUnit, y0: bar.box.y0 * pxPerUnit, x1: bar.box.x1 * pxPerUnit, y1: bar.box.y1 * pxPerUnit };
+  const shifts = labelShifts(points.map(({ point }) => point), pxPerUnit, { ...labelSizeOnScreen(), labels: [barBox] });
   return (
     <div className="spot-map own-sheet" ref={sheet}>
       <svg className="spot-map-plate" viewBox={`0 0 ${OWN_WIDTH} ${OWN_HEIGHT}`} role="img" aria-label={t("Your own waters, north up")}>
@@ -279,8 +282,8 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
             </g>
           );
         })}
-        {/* Top right, clear of the grid's labels on the left and foot. */}
-        <g className="map-scale" transform={`translate(${OWN_WIDTH - 40 - scale.length} 40)`}>
+        {/* Clear of the grid's labels on the left and foot, and of the pins. */}
+        <g className="map-scale" transform={`translate(${bar.x} ${bar.y})`}>
           <line x1="0" x2={scale.length} y1="0" y2="0" />
           <line x1="0" x2="0" y1="-5" y2="5" />
           <line x1={scale.length} x2={scale.length} y1="-5" y2="5" />
@@ -301,9 +304,12 @@ function OwnSheet({ pinned, fishOf }: { pinned: { spot: Spot; place: SamplePlace
 
 /** From the map straight to a new outing on that water, named for screen readers as each row's own. */
 /** The water is added to the words shown, not put in their place, so a voice saying "Plan one" still finds it. */
+/** The water whose "Plan one" was followed, for this visit: Back (or Cancel) from the form finds that link again. */
+let plannedFrom: string | null = null;
+
 function PlanHere({ spot }: { spot: Spot }) {
   return (
-    <Link className="map-plan" to={`/trips/new?spot=${spot.id}`}>
+    <Link className="map-plan" to={`/trips/new?spot=${spot.id}`} onClick={() => (plannedFrom = spot.id)}>
       {t("Plan one")}
       <span className="sr-only">: {spot.name}</span>
     </Link>
@@ -316,7 +322,16 @@ export function SpotMapPage() {
   // A first visit loads the page after the shell has moved focus, so it landed on the page itself; Back from a water's
   // form leaves it nowhere. Either way, on to the heading.
   const { hash } = useLocation();
+  const navigation = useNavigationType();
   useEffect(() => {
+    // Back from the outing form opened by a row's "Plan one": that link, where the page was left.
+    const from = plannedFrom;
+    plannedFrom = null;
+    const plan = from && navigation === "POP" ? document.getElementById(`water-${from}`)?.querySelector<HTMLElement>(".map-plan") : null;
+    if (plan) {
+      plan.focus({ preventScroll: true });
+      return;
+    }
     // Sent here for one water ("See it on the Map"): its row in the list, in view and focused.
     const row = hash.startsWith("#water-") ? document.getElementById(hash.slice(1)) : null;
     if (row) {
@@ -326,7 +341,7 @@ export function SpotMapPage() {
     }
     const active = document.activeElement;
     if (!active || active === document.body || active.matches(".field-main")) focusPageHeading({ preventScroll: true });
-  }, [hash]);
+  }, [hash, navigation]);
   // The lists under each sheet go by the water fished most recently, as the Waters page does.
   // Not the game's lake: it has no place on a real map.
   // Ordered by the angler's own fish, as the Waters page is, so a sample week dated later doesn't put its waters on top.
@@ -342,7 +357,8 @@ export function SpotMapPage() {
   const upcoming = nextRealTrips(book, today);
   const lastOut = lastOutByWater(book, today);
   const fishOf = (spotId: string) => rows.find((each) => each.spot.id === spotId)?.fishCount ?? 0;
-  const bestLure = (spotId: string) => bestLureAt(book.catches, spotId);
+  // From the fish the Waters page counts: the sample week's go with the angler's first own fish.
+  const bestLure = (spotId: string) => bestLureAt(countedFish(book.catches), spotId);
   const fishLine = (spotId: string) => {
     const row = rows.find((each) => each.spot.id === spotId);
     const fish = fishCountLabel(row?.fishCount ?? 0);
@@ -423,7 +439,16 @@ export function SpotMapPage() {
               <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
               <span>{t(WATER_LABELS[spot.waterType])}</span>
               <span>{fishLine(spot.id)}</span>
-              <span>{formatCoord(place.lat, place.lng)}</span>
+              {/* The angler's own water opens on a real map, as on its own sheet; the sample's places are made up. */}
+              <span>
+                {spot.place ? (
+                  <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
+                    {formatCoord(place.lat, place.lng)}
+                  </MapAnchor>
+                ) : (
+                  formatCoord(place.lat, place.lng)
+                )}
+              </span>
               <PlanHere spot={spot} />
             </li>
           ))}

@@ -134,6 +134,15 @@ describe("tackle", () => {
     }
   });
 
+  it("knows the kit that goes in the bag beside the lures (round 85)", () => {
+    for (const tool of ["Wire trace", "Leader material", "Tackle bag", "Snacks", "Bug spray", "Insect repellent", "Ice auger", "Boots", "Permit", "Oars", "Echo sounder", "Fish finder", "Life jacket", "Spare spools", "Sznur muchowy", "Kanapki", "Krem z filtrem", "Echosonda", "Kapok", "Kotwica", "Wiosła"]) {
+      expect(isLureLabel(tool), tool).toBe(false);
+    }
+    for (const lure of ["Shad on wire trace", "Kotwiczka 4", "Spinnerbait", "Popper", "Frog on braid", "Size 6 hooks", "Haczyki nr 6"]) {
+      expect(isLureLabel(lure), lure).toBe(true);
+    }
+  });
+
   it("asks for a short name", () => {
     expect(parseTackleLabel("  spare leader  ")).toEqual({ ok: true, value: "spare leader" });
     expect(parseTackleLabel(" ")).toMatchObject({ ok: false });
@@ -166,6 +175,17 @@ describe("lure classes", () => {
     expect(lureClass("Green pumpkin tubes").id).toBe("jig");
     expect(lureClass("Crayfish crankbait").id).toBe("crank");
     expect(lureClass("Mystery lure").id).toBe("plain");
+  });
+
+  it("reads Polish lure names by their stems (round 85)", () => {
+    expect(lureClass("Rosówka").id).toBe(lureClass("Nightcrawler").id);
+    expect(lureClass("Wahadłówka").id).toBe("spoon");
+    expect(lureClass("Błystka").id).toBe("spoon");
+    expect(lureClass("Obrotówka").id).toBe("spinner");
+    expect(lureClass("Nimfa obciążona").id).toBe("fly");
+    expect(lureClass("Guma na przyponie").id).toBe("jig");
+    expect(lureClass("Żabka").id).toBe("popper");
+    expect(lureClass("Spławik").id).toBe("bobber");
   });
 
   it("pulls only at the hours a class works", () => {
