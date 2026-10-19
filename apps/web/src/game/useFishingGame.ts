@@ -239,7 +239,7 @@ export function isCrank(lure: string | undefined) {
   return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "crank";
 }
 
-/** Whether the lure is a fly, which a tap twitches on the surface film like a struggling insect. */
+/** Whether the lure is a fly, which a tap twitches like a live insect. */
 export function isFly(lure: string | undefined) {
   return lure !== undefined && lure.trim() !== "" && lureClass(lure).id === "fly";
 }
@@ -1269,7 +1269,7 @@ export function useFishingGame(
             setHint(t("Strip! The streamer darts off like a fleeing fish. Let it hang…"));
           } else if (pop.work === "twitch") {
             fx.plop();
-            setHint(t("Twitch! The fly skitters on the film like a struggling insect. Let it drift…"));
+            setHint(t("Twitch! The fly darts like a live insect. Let it drift…"));
           } else if (pop.work === "pause") {
             // Stopping the reel makes no sound of its own.
             setHint(t("Pause! The crankbait stops and floats up, and a following fish turns on it. Reel on…"));

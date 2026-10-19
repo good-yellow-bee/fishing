@@ -1883,7 +1883,7 @@ describe("level unlock integration", () => {
       act(() => vi.advanceTimersByTime(300));
       for (let twitch = 0; twitch < twitches; twitch++) {
         act(() => surface.dispatchEvent(pointer("pointerdown", 2 + twitch)));
-        expect(hint()).toBe(twitch < TOPWATER_POPS ? "Twitch! The fly skitters on the film like a struggling insect. Let it drift…" : "Let it drift between twitches. Worked again so soon, it puts the fish off a moment.");
+        expect(hint()).toBe(twitch < TOPWATER_POPS ? "Twitch! The fly darts like a live insect. Let it drift…" : "Let it drift between twitches. Worked again so soon, it puts the fish off a moment.");
         act(() => window.dispatchEvent(pointer("pointerup", 2 + twitch)));
       }
       let waited = 300;
