@@ -1870,9 +1870,9 @@ describe("level unlock integration", () => {
       return waited;
     };
     const sat = untilBite(0);
-    const pauseped = untilBite(TOPWATER_POPS);
-    expect(pauseped).toBeLessThan(sat * 0.6);
-    expect(untilBite(TOPWATER_POPS + 1)).toBe(pauseped + FALSE_STRIKE_MS);
+    const paused = untilBite(TOPWATER_POPS);
+    expect(paused).toBeLessThan(sat * 0.6);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(paused + FALSE_STRIKE_MS);
   });
 
   it("lets a level 13 angler lift a spoon a third time to bring the fish sooner", () => {

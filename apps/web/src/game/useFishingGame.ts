@@ -248,7 +248,7 @@ export const WAIT_REASONS = 2;
 /** At most this many reasons a hooked fish tires slower or sooner are told at the hookset, so the hint stays readable. */
 export const TIRE_REASONS = 2;
 
-/** How many pops, hops, lifts or strips draw the fish up sooner below level 13 (see lureWorkTapsForLevel). */
+/** How many pops, hops, lifts, strips or pauses draw the fish up sooner below level 13 (see lureWorkTapsForLevel). */
 export const TOPWATER_POPS = 2;
 /** Each pop leaves this share of the wait still to go. */
 export const TOPWATER_POP_LEFT = 0.6;
@@ -1263,7 +1263,7 @@ export function useFishingGame(
             fx.reel();
             setHint(t("Strip! The streamer darts off like a fleeing fish. Let it hang…"));
           } else if (pop.work === "pause") {
-            fx.reel();
+            // Stopping the reel makes no sound of its own.
             setHint(t("Pause! The crankbait stops and floats up, and a following fish turns on it. Reel on…"));
           } else {
             fx.plop();
