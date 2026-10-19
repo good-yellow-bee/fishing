@@ -1,5 +1,7 @@
 import { MOON_LABELS, WATER_LABELS, localDate, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { pieceTally } from "./pieceTally";
+import { formatCoord } from "./map/places";
+import { osmLink } from "./osmLink";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
 import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
@@ -62,6 +64,8 @@ export function spotSummary(
     .join(", ");
   return [
     `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
+    // Where it is, for "meet me here": the numbers and a map that opens on any phone.
+    ...(spot.place ? [`${formatCoord(spot.place.lat, spot.place.lng)} · ${osmLink(spot.place.lat, spot.place.lng)}`] : []),
     `${tn(outings, "{n} outing", "{n} outings")} · ${fishCountLabel(catches.length)}`,
     ...(average ? [average] : []),
     ...(best ? [`${t("Best outing here:")} ${outingName(best.trip, [spot])} · ${formatDatedDay(new Date(`${best.trip.date}T12:00:00`))}, ${fishCountLabel(best.fish)}`] : []),

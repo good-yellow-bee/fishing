@@ -155,7 +155,7 @@ export function SpotCard({
   /** The soonest planned outing here, already in words. */
   nextOuting?: string | null;
   /** The water's last temperature noted with a fish, while it is recent enough to go by. */
-  waterTemp?: { fahrenheit: number; day: string } | null;
+  waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
 }) {
   const t = useT();
   return (
@@ -174,7 +174,16 @@ export function SpotCard({
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
-      {waterTemp ? <p className="meta water-temp">{t("Water {temp} on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })}</p> : null}
+      {waterTemp ? (
+        <p className="meta water-temp">
+          {/* Which way it is going matters as much as the number in spring and fall. */}
+          {waterTemp.trend === "warming"
+            ? t("Water {temp}, warming, on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })
+            : waterTemp.trend === "cooling"
+              ? t("Water {temp}, cooling, on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })
+              : t("Water {temp} on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })}
+        </p>
+      ) : null}
     </Link>
   );
 }
