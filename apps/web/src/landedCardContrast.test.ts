@@ -39,6 +39,18 @@ describe("the landed card's small words", () => {
   });
 });
 
+describe("the fight card's words", () => {
+  it("ink every coloured line at 4.5 to 1 or more on its parchment", () => {
+    const rules = [...css.matchAll(/\n(\.fight-bar[^{]*) \{([^}]*)\}/g)];
+    const inked = rules.flatMap(([, selector, body]) => {
+      const color = /\n  color: (#[0-9a-f]{6});/.exec(body!)?.[1];
+      return color ? [{ selector: selector!, color }] : [];
+    });
+    expect(inked.length).toBeGreaterThan(10);
+    for (const { selector, color } of inked) expect(contrast(color, PARCHMENT_AT_NIGHT), selector).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 // The shack panel behind the board, as axe measures it.
 const SHACK = "#181d19";
 
