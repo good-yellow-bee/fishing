@@ -50,7 +50,7 @@ export function TripRecap({ draft, leftover, filed, onFile, onClose }: Props) {
           <div>
             <dt>{t("Heaviest")}</dt>
             <dd>{summary.heaviest ? weightText(summary.heaviest.weight) : "—"}</dd>
-            {summary.heaviest && <small>{t(summary.heaviest.speciesName)}</small>}
+            {summary.heaviest && <dd className="trip-recap-of">{t(summary.heaviest.speciesName)}</dd>}
           </div>
           <div>
             <dt>{t("Clean fights")}</dt>

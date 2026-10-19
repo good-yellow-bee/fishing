@@ -97,6 +97,7 @@ export const PL_GAME: PlBook = {
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Over the duckweed, where the bass lurk in its shade for a lure on top.": "Nad rzęsą, gdzie bassy czają się w jej cieniu na przynętę z powierzchni.",
   "Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.": "W rzęsę: przynęta wraca obrośnięta zielskiem, a ryby się od niej odwracają.",
+  "Under a cloud of dancing midges, where the fish rise to the ones that fall to the water.": "Pod chmarą tańczących muszek, gdzie ryby podnoszą się do tych, które spadają na wodę.",
   "Among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them.": "Wśród rybek w świetle latarni, gdzie polują na nie wielkooczki, sandacze i bassy.",
   "Among the bugs skating on the surface, where the fish are looking up for them.": "Wśród owadów sunących po powierzchni, gdzie ryby wypatrują ich w górze.",
   "Tight to the sunken log, where the fish hold in its shade.": "Tuż przy zatopionym pniu, gdzie ryby trzymają się w jego cieniu.",
@@ -641,14 +642,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a tablet, the panels under the dock's top bar move down when the bar wraps onto a second line, so nothing hides behind it. A catch's Edit and Delete are easier to tell apart with a finger, the Map shows its heading while it loads, and on a phone the Map list's Next outing link is easier to tap.":
+    "Na tablecie panele pod górnym paskiem przystani przesuwają się w dół, gdy pasek zawija się do drugiego wiersza, więc nic się pod nim nie chowa. Przyciski Edytuj i Usuń przy rybie łatwiej rozróżnić palcem, Mapa pokazuje nagłówek już podczas wczytywania, a na telefonie link Następna wyprawa na liście Mapy łatwiej trafić.",
+  "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.":
+    "Kolorowe wiersze na karcie holu, od ostrzeżenia o zrywie po znaczek czystego holu, oraz kilka słów o rybie na karcie złowionej ryby są ciemniejsze i czytelniejsze. W Szopie przycisk Odbierz przy zleceniu łatwiej trafić na telefonie, a napis Odebrane łatwiej odczytać. Karta nowości nie zasłania już na telefonie przycisków łowisk, a czytnik ekranu odczytuje w podsumowaniu wyprawy najcięższą rybę w całości.",
   "Settings' switches and volume sliders and the shack's Strength, Accuracy and Patience buttons are easier to tap on a phone. The lodge board's All time and This week tabs answer the arrow keys, a screen reader hears the shack's sections in order, and the landed card's rarity tag and the Badge line are darker and easier to read.":
     "Przełączniki i suwaki głośności w Ustawieniach oraz przyciski Siła, Celność i Cierpliwość w Szopie łatwiej trafić na telefonie. Zakładki Od początku i Ten tydzień na Tablicy przystani reagują na strzałki, czytnik ekranu podaje części Szopy po kolei, a znacznik rzadkości na karcie ryby i napis Odznaka są ciemniejsze i czytelniejsze.",
   "On a phone, the last small links in the field log are easier to tap: the names on Bests' hour, moon, sky, wind, temperature and lure rows, a kind's first and newest fish, and a water's fish count with larger text.":
     "Na telefonie ostatnie małe odnośniki w dzienniku łatwiej trafić: nazwy w wierszach godzin, księżyca, nieba, wiatru, temperatury i przynęt w Rekordach, pierwsza i najnowsza ryba gatunku oraz liczba ryb z łowiska przy większym tekście.",
-  "More small links are easier to tap on a phone: Plan one and Log a catch under an empty list, Add a photo, Write up the day and Go again, the Map's waters with no place yet, Bests' month counts, a form's Open it, and Sign in, Back to the dock and the trip recap's Open the trip.":
-    "Kolejne małe odnośniki łatwiej trafić na telefonie: Zaplanuj i Zapisz połów pod pustą listą, Dodaj zdjęcie, Opisz ten dzień i Jedź jeszcze raz, łowiska na Mapie bez miejsca, liczby miesięcy w Rekordach, Otwórz ją w formularzu oraz Zaloguj się, Wróć na pomost i Otwórz wyprawę w podsumowaniu.",
-  "On a phone, the small links in the field log are now easier to tap: the counts in Bests' month-by-year table and its season box, the lures and words in a water's tips, and a catch's sky, wind, water temperature and moon each reach a full finger's width.":
-    "Na telefonie małe odnośniki w dzienniku łatwiej teraz trafić palcem: liczby w tabeli miesięcy i lat w Rekordach i w podsumowaniu sezonu, przynęty i słowa we wskazówkach dla łowiska oraz niebo, wiatr, temperatura wody i księżyc przy rybie mają teraz pełną szerokość palca.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -730,6 +731,7 @@ export const PL_GAME: PlBook = {
   "Lake elder": "Nestor jeziora",
   "Spirit of the lake": "Duch jeziora",
   "Heart of the lake": "Serce jeziora",
+  "Soul of the lake": "Dusza jeziora",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "Photo mode. Drag to look around, tap Save this view to keep a picture, or tap anywhere else to bring the panels back.":
@@ -737,12 +739,10 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.":
+    "Na poziomie 14, Dusza jeziora, żyłka wytrzymuje chwilę dłużej w czerwieni: pęka przy 105% napięcia, a nie przy 100%. A z pomostu w cichy letni zmierzch kładź suchą muchę pod jedną z chmar tańczących muszek, gdzie bassy niebieskoskrzele, wielkooczki, złotawce i pstrągi tęczowe podnoszą się do muszek, które spadają na wodę.",
   "Strike a pike sooner on a worm or a live shiner: given time it swallows the bait, and if the fight then runs long its teeth fray the line, so it snaps sooner until you retie. And after dark off the dock, cast a jig, spinner or spoon among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them.":
     "Zacinaj szczupaka szybciej na rosówkę albo żywą rybkę: gdy ma czas, połyka przynętę, a jeśli hol się potem przeciąga, jego zęby przecierają żyłkę, więc pęka szybciej, dopóki jej nie przewiążesz. A po zmroku z pomostu zarzucaj jiga, obrotówkę albo błystkę wśród rybek w świetle latarni, gdzie polują na nie wielkooczki, sandacze i bassy.",
-  "Off the Point, cast tight to the sunken log: the bass, bluegill, crappie and pike holding in its shade bite sooner, and many a bite is one of them. And from the dock on calm days, land a popper or a fly among the water striders and whirligig beetles, where the crappie, shiners, smallmouth and trout are looking up for bugs.":
-    "Przy Cyplu zarzucaj tuż przy zatopionym pniu: bassy, bassy niebieskoskrzele, wielkooczki i szczupaki, które trzymają się w jego cieniu, biorą szybciej, a wiele brań to właśnie one. A z pomostu w spokojne dni kładź popper albo muchę wśród nartników i krętaków, gdzie wielkooczki, złotawce, bassy małogębowe i pstrągi wypatrują owadów w górze.",
-  "Watch for the bigger fish hunting the small ones: a smallmouth may hit a crappie you're reeling in under the dock, and a pike a perch off the Drop-off, and then the fight starts again with the hunter. And from the dock, cast out under the kingfisher's snag: the perch and bass hunt the same fry it dives on, so the bites come sooner and many are one of them.":
-    "Uważaj na większe ryby polujące na małe: bass małogębowy może chwycić wielkooczkę, którą holujesz pod pomostem, a szczupak okonia przy Uskoku, i wtedy hol zaczyna się od nowa z drapieżnikiem. A z pomostu rzucaj pod gałąź zimorodka: okonie i bassy polują na ten sam narybek, na który on nurkuje, więc brania przychodzą szybciej i wiele z nich to właśnie one.",
   "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.":
     "Gdy w jasny dzień chmura zasłoni słońce, ryby podpływają na płyciznę żerować, więc na Pomoście, w Trzcinach, na Cyplu i przy Ujściu brania przychodzą szybciej, póki chmura nie odpłynie. Ryba zacięta przy grzybieniach walczy teraz jak w zielsku i nurkuje między łodygi, więc zawracaj każdy odjazd. A gdy łowisko jest mocno obłowione, rodzaj przynęty, którego ostrożne ryby jeszcze nie widziały, zaskakuje je.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.":
@@ -757,8 +757,6 @@ export const PL_GAME: PlBook = {
     "Bilans przynęt można pobrać jako arkusz, dla wybranego łowiska albo wszystkich. Mapa znajduje najbliższe łowisko i zapisuje wszystkie łowiska dla GPS w jednym pliku.",
   "Waters can all go to a GPS in one file. The goal form offers last year's number in one tap. Home's next outing can go on your calendar, and the year's copied summary counts its outings. A night fish logged without its outing now counts on that night's day.":
     "Wszystkie łowiska można zapisać dla GPS w jednym pliku. Formularz celu podsuwa jednym dotknięciem liczbę z zeszłego roku. Następną wyprawę ze strony głównej można dodać do kalendarza, a skopiowane podsumowanie roku liczy wyprawy. Nocna ryba zapisana bez wyprawy liczy się teraz na dzień tej nocy.",
-  "Catches now has Only my fish beside the sample week's count. A fish on an outing shows how long after the outing's first fish it came. A new fish can take the outing's last note in one tap, and “note” in Find a catch lists the fish you wrote up.":
-    "Połowy mają teraz link Tylko moje ryby obok liczby ryb z przykładowego tygodnia. Ryba z wyprawy pokazuje, ile czasu minęło od pierwszej ryby tej wyprawy. Nowa ryba może jednym dotknięciem przejąć ostatnią notatkę z wyprawy, a słowo „notatka” w wyszukiwarce pokazuje ryby z notatką.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",

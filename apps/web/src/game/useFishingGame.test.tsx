@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
+import { bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -48,6 +48,10 @@ vi.mock("./duckweedCast", async (importOriginal) => {
 vi.mock("./crayfishJig", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./crayfishJig")>();
   return { ...actual, onCrayfishBed: vi.fn(() => false) };
+});
+vi.mock("./midgeClouds", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./midgeClouds")>();
+  return { ...actual, underMidges: vi.fn(() => false) };
 });
 vi.mock("./lanternMinnows", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./lanternMinnows")>();
@@ -99,7 +103,7 @@ vi.mock("./logic", async (importOriginal) => {
   // Feeders over the groundbait and fresh water are tested on their own; elsewhere they leave the drawn fish and the wait as they were.
   // Skip casts off the dock are tested on their own; elsewhere a cast in the band's low end lands as it always did.
   // The day's water warming or cooling is tested on its own; elsewhere the water holds steady whatever the test's date.
-  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), bedRaider: vi.fn(() => null), crayfishHunter: vi.fn(() => null), tadpoleEater: vi.fn(() => null), fryHunter: vi.fn(() => null), logHolder: vi.fn(() => null), bugSipper: vi.fn(() => null), lightHunter: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), longShadowWaitMul: vi.fn(actual.longShadowWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs), waterSwingWaitMul: vi.fn(() => 1) };
+  return { ...actual, isSkipCast: vi.fn(() => false), pickBite: vi.fn(actual.pickBite), groundbaitFeeder: vi.fn(() => null), bedRaider: vi.fn(() => null), crayfishHunter: vi.fn(() => null), tadpoleEater: vi.fn(() => null), fryHunter: vi.fn(() => null), logHolder: vi.fn(() => null), bugSipper: vi.fn(() => null), lightHunter: vi.fn(() => null), midgeRiser: vi.fn(() => null), castOnFreshWater: vi.fn((fished: ReadonlySet<string>) => ({ fresh: false, next: fished })), twistAfterCast: vi.fn(actual.twistAfterCast), soakAfterCast: vi.fn(actual.soakAfterCast), castIntoSpooked: vi.fn(() => false), springShallowsWaitMul: vi.fn(actual.springShallowsWaitMul), rainInletWaitMul: vi.fn(actual.rainInletWaitMul), winterSunWaitMul: vi.fn(actual.winterSunWaitMul), windPointWaitMul: vi.fn(actual.windPointWaitMul), lanternDockWaitMul: vi.fn(actual.lanternDockWaitMul), openGlareWaitMul: vi.fn(actual.openGlareWaitMul), longShadowWaitMul: vi.fn(actual.longShadowWaitMul), darkNightWaitMul: vi.fn(actual.darkNightWaitMul), spoonOpenWaitMul: vi.fn(actual.spoonOpenWaitMul), spinnerReedWaitMul: vi.fn(actual.spinnerReedWaitMul), floatReedWaitMul: vi.fn(actual.floatReedWaitMul), streamerLedgeWaitMul: vi.fn(actual.streamerLedgeWaitMul), wormInletWaitMul: vi.fn(actual.wormInletWaitMul), spinnerInletWaitMul: vi.fn(actual.spinnerInletWaitMul), crankPilingWaitMul: vi.fn(actual.crankPilingWaitMul), waitMs: vi.fn(actual.waitMs), waterSwingWaitMul: vi.fn(() => 1) };
 });
 vi.mock("./fight", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./fight")>();
@@ -127,6 +131,7 @@ import { overKingfisherFry } from "./kingfisherFry";
 import { tightToLog } from "./sunkenLog";
 import { amongSurfaceBugs } from "./surfaceBugs";
 import { amongLanternMinnows } from "./lanternMinnows";
+import { underMidges } from "./midgeClouds";
 import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
@@ -465,6 +470,20 @@ describe("useFishingGame frayed line", () => {
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 1);
     expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("false");
+  });
+
+  it("holds the line a moment past the red from level 14", () => {
+    const strain = () => vi.mocked(makeFight).mock.calls.at(-1)?.[14];
+    let surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 23000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(strain()).toBe(1);
+    act(() => root!.unmount());
+    container!.remove();
+    surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 30000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 2);
+    expect(strain()).toBe(1.05);
   });
 
   it("ties on a fresh line after a break", () => {
@@ -2041,6 +2060,46 @@ describe("level unlock integration", () => {
     expect(hint()).toMatch(/^Among the bugs skating on the surface, where the fish are looking up for them\. /);
     expect(bugSipper).toHaveBeenCalledWith("dock", "Popper", expect.objectContaining({ lifetimePoints: 700 }), "day");
     expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^crappie\|/);
+  });
+
+  it("says a fly under the dusk midges draws the fish rising to them, and lets one take the bite", () => {
+    vi.mocked(underMidges).mockReturnValueOnce(true);
+    vi.mocked(midgeRiser).mockReturnValueOnce(FISH.find((fish) => fish.id === "bluegill")!);
+    vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "golden-shiner")!);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Elk hair caddis");
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toContain("Under a cloud of dancing midges, where the fish rise to the ones that fall to the water. ");
+    expect(vi.mocked(underMidges).mock.lastCall?.[0]).toBe("dusk");
+    expect(midgeRiser).toHaveBeenCalledWith("dock", "Elk hair caddis", expect.objectContaining({ lifetimePoints: 700 }), "dusk");
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^bluegill\|/);
+  });
+
+  it("tells a fly among the surface bugs under a midge cloud as the bugs, once", () => {
+    vi.mocked(underMidges).mockReturnValue(true);
+    vi.mocked(amongSurfaceBugs).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Elk hair caddis");
+      cast(surface);
+      expect(hint()).toContain("Among the bugs skating on the surface");
+      expect(hint()).not.toMatch(/dancing midges/);
+      expect(midgeRiser).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(underMidges).mockReturnValue(false);
+      vi.mocked(amongSurfaceBugs).mockReturnValue(false);
+    }
+  });
+
+  it("keeps the midges' line off a lure that isn't a fly", () => {
+    vi.mocked(underMidges).mockReturnValue(true);
+    try {
+      const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "dusk", false, "Popper");
+      cast(surface);
+      expect(hint()).not.toMatch(/dancing midges/);
+      expect(midgeRiser).not.toHaveBeenCalled();
+    } finally {
+      vi.mocked(underMidges).mockReturnValue(false);
+    }
   });
 
   it("says a jig among the lanterns' minnows draws the fish hunting them, and lets one take the bite", () => {

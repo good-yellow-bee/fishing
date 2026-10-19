@@ -798,6 +798,18 @@ describe("a frayed line", () => {
   });
 });
 
+describe("a line held past the red at level 14", () => {
+  it("snaps at its own strain, while a frayed line still snaps at FRAYED_SNAP", () => {
+    const usual = makeFight(fish("perch"), 0.8, 2, () => 0, 1, "open");
+    const held = makeFight(fish("perch"), 0.8, 2, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1.05);
+    const heldFrayed = makeFight(fish("perch"), 0.8, 2, () => 0, 1, "open", undefined, false, false, false, false, false, true, false, 1.05);
+    for (const runtime of [usual, held, heldFrayed]) runtime.sim.tension = 1.02;
+    expect(usual.step(1, 0, false)).toBe("snapped");
+    expect(held.step(1, 0, false)).toBe("fighting");
+    expect(heldFrayed.step(1, 0, false)).toBe("snapped");
+  });
+});
+
 describe("a pike's teeth", () => {
   /** Plays a careful fight to the given second, or to its end. */
   function playTo(runtime: FightRuntime, sec: number) {

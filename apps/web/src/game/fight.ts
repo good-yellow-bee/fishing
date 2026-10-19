@@ -484,6 +484,8 @@ export function makeFight(
   frayed = false,
   /** Hooked deep on swallowed bait: a pike's teeth sit on the line and fray it if the fight runs long. */
   swallowed = false,
+  /** The strain a sound line snaps at: 1, or a little past it at level 14. A frayed line still snaps at FRAYED_SNAP. */
+  snapAt = 1,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -746,7 +748,7 @@ export function makeFight(
         return "escaped";
       }
     }
-    if (sim.tension >= (sim.frayed ? FRAYED_SNAP : 1)) return "snapped";
+    if (sim.tension >= (sim.frayed ? FRAYED_SNAP : snapAt)) return "snapped";
     if (tearSec >= tearAt) {
       sim.tornOut = true;
       return "escaped";

@@ -1143,6 +1143,13 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#1304)~~ | phone UX | S |
 | ~~PA99~~ | ~~The news card on an upright phone ends above the banks' row instead of covering its top (#1307)~~ | phone UX | S |
 | ~~PA100~~ | ~~A claimed daily request's Claimed reads clearly through its dimmed row (#1309)~~ | phone UX | S |
+| ~~PA101~~ | ~~The trip recap's heaviest fish names its kind inside the stat list, so a screen reader reads the list whole (#1311)~~ | phone UX | S |
+| ~~PA102~~ | ~~The fight card's coloured lines (heavier than your best, too heavy for your line, line given back, the surge call, tiring and spent, steer and turning calls, the water, the clean-fight stamp) read 2.7-4.1 to 1 on its parchment: each is inked darker in its own hue, 4.5 to 1 or more (#1312)~~ | phone UX | S |
+| ~~PA103~~ | ~~The landed card's lore line about the fish read 4 to 1 on its parchment over a night lake: inked to the quiet stamp's brown, 5 to 1 (#1313)~~ | phone UX | S |
+| ~~PA104~~ | ~~On a tablet or a 1024 px window the header wraps to two rows (106-117 px tall), and the stance chip, the first-cast coach and its Skip, the news card and the toasts sat under its foot: every panel hung under the header now drops by however far it wraps (#1315)~~ | phone UX | S |
+| ~~PA105~~ | ~~On a sideways tablet a catch's Edit and Delete stack 12 px apart, and Delete's reach cut Edit's tap band to 29 px: they part by 16 px and Edit reaches 7 px each way, 33 px (#1316)~~ | phone UX | S |
+| ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
+| ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1610,7 +1617,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT306~~ | ~~News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs~~ (#1290) | ui | S |
 | ~~GT307~~ | ~~Pike teeth: a pike or muskie hooked deep on swallowed bait (a late strike on live bait) has its teeth on the line, and once the fight runs past 8 s they fray it, so it snaps at 0.9 like a line the rocks scuffed and stays frayed till retied; the hookset says so, the card calls it when it happens, a snap blames the teeth, and the fight card and field guide list "Sharp teeth"~~ (#1296) | gameplay | S |
 | ~~GT308~~ | ~~Minnows under the lanterns: after dark a jig, spinner, spoon, crankbait or streamer landing among the minnows milling in the dock lanterns' light (the scene's MINNOW_POOL, plus 0.3 m) lands where the hunters pick them off, so the bite comes sooner (0.85) and 35% of bites are a crappie, walleye, smallmouth or largemouth (as the dock can land them; not a beginner's first fish); the cast says so in place of the general lantern line~~ (#1303) | gameplay | S |
-| GT309 | News card 2026-10-19-game21 covers GT307 and GT308: pike teeth and the minnows under the lanterns | ui | S |
+| ~~GT309~~ | ~~News card 2026-10-19-game21 covers GT307 and GT308: pike teeth and the minnows under the lanterns~~ (#1306) | ui | S |
+| ~~GT310~~ | ~~Level 14 (30000 lifetime points, "Soul of the lake"): a sound line holds a moment past the red and snaps at 105% strain instead of 100%; a frayed line still snaps at 90%~~ (#1310) | gameplay | S |
+| ~~GT311~~ | ~~Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs~~ (#1317) | gameplay | S |
+| GT312 | News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk | ui | S |
 
 ## Risks / open questions for the owner
 

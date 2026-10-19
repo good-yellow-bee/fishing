@@ -79,6 +79,14 @@ describe("the field log on a touch screen", () => {
     expect(block).toContain("min-height: 32px;");
     expect(mapCss.slice(0, mapCss.indexOf("@media (pointer: coarse) {"))).not.toContain(".map-note a");
   });
+
+  it("makes a water's Next outing in the Map's list a 32 px band with room under it, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-index a\.map-next \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("margin-bottom: 6px;");
+  });
 });
 
 describe("the field log's tab bar on a 320 px phone", () => {
@@ -111,6 +119,14 @@ describe("a fish's page on a touch screen", () => {
   it("parts the head's wrapped links and Copy a summary from the outing link below", () => {
     expect(/\n  p\.meta\.stand \{([^}]*)\}/.exec(css)?.[1]).toContain("line-height: 2.2;");
     expect(/\n  \.trip-again \+ \.trip-link \{([^}]*)\}/.exec(css)?.[1]).toContain("margin-top: 18px;");
+  });
+});
+
+describe("a sheet's Edit and Delete on a touch screen", () => {
+  it("stack far enough apart that Delete's reach leaves Edit a full band", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect([...touch.matchAll(/\n  \.sheet-actions \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("row-gap: 16px;"))).toBe(true);
+    expect([...touch.matchAll(/\n  \.sheet-head a:not\(\.field-primary\)::after \{([^}]*)\}/g)].some((rule) => rule[1]!.includes("inset: -7px -3px;"))).toBe(true);
   });
 });
 

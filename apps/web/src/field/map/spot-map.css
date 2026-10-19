@@ -359,6 +359,16 @@
     inset: -6px -3px;
   }
 
+  /* "Next outing" sits inside a row's 13 px fish line, which wraps: it stands as a 32 px band of its own, with room
+     under it for the coordinates' reach. */
+  .map-index a.map-next {
+    display: inline-block;
+    min-height: 32px;
+    margin-bottom: 6px;
+    padding-block: 7px;
+    box-sizing: border-box;
+  }
+
   /* The waters with no place yet are named in a running line, 19 px links that wrap: each is now a 32 px band. */
   .map-note a {
     display: inline-block;

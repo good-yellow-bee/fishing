@@ -22,3 +22,16 @@ export function MapOffline() {
     </div>
   );
 }
+
+/** While the map's code loads: the page's heading is there at once, and a screen reader hears that the map is coming. */
+export function MapLoading() {
+  useT();
+  return (
+    <div className="sheet">
+      <h1>{t("Map")}</h1>
+      <p className="lede" role="status">
+        {t("Fog lifting…")}
+      </p>
+    </div>
+  );
+}

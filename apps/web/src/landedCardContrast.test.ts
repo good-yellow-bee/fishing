@@ -20,8 +20,8 @@ function contrast(a: string, b: string) {
 const PARCHMENT_AT_NIGHT = "#e3d5b8";
 
 describe("the landed card's small words", () => {
-  it("ink each rarity tag and the quiet stamp at 4.5 to 1 or more on the parchment", () => {
-    const selectors = [".rarity-common .rarity-tag", ".rarity-uncommon .rarity-tag", ".rarity-rare .rarity-tag", ".rarity-legendary .rarity-tag", " .catch-stamp.quiet"];
+  it("ink each rarity tag, the quiet stamp and the fish's lore at 4.5 to 1 or more on the parchment", () => {
+    const selectors = [".rarity-common .rarity-tag", ".rarity-uncommon .rarity-tag", ".rarity-rare .rarity-tag", ".rarity-legendary .rarity-tag", " .catch-stamp.quiet", " .catch-lore"];
     for (const selector of selectors) {
       const escaped = selector.replace(/[.]/g, "\\.");
       const rule = new RegExp(`\\n\\.landed-card${escaped} \\{([^}]*)\\}`).exec(css)?.[1];
@@ -36,6 +36,18 @@ describe("the landed card's small words", () => {
     const color = /\n  color: (#[0-9a-f]{6});/.exec(rule ?? "")?.[1];
     expect(color).toBeDefined();
     expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe("the fight card's words", () => {
+  it("ink every coloured line at 4.5 to 1 or more on its parchment", () => {
+    const rules = [...css.matchAll(/\n(\.fight-bar[^{]*) \{([^}]*)\}/g)];
+    const inked = rules.flatMap(([, selector, body]) => {
+      const color = /\n  color: (#[0-9a-f]{6});/.exec(body!)?.[1];
+      return color ? [{ selector: selector!, color }] : [];
+    });
+    expect(inked.length).toBeGreaterThan(10);
+    for (const { selector, color } of inked) expect(contrast(color, PARCHMENT_AT_NIGHT), selector).toBeGreaterThanOrEqual(4.5);
   });
 });
 

@@ -427,6 +427,16 @@ button.field-primary {
     inset: -6px -3px;
   }
 
+  /* A sheet's Edit and Delete stack when the head is narrow (a tablet's side column): 16 px apart, Delete's reach no
+     longer cuts 2 px off Edit's, and Edit reaches 7 px each way, a full 33 px band. */
+  .sheet-actions {
+    row-gap: 16px;
+  }
+
+  .sheet-head a:not(.field-primary)::after {
+    inset: -7px -3px;
+  }
+
   /* Less reach upward, where the fish's name sits close above. */
   .meta a::after {
     content: "";
