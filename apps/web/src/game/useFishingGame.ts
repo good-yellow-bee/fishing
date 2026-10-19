@@ -755,7 +755,7 @@ export function useFishingGame(
     if (castSkipRef.current) waitHintRef.current = `${t("Skipped it under the dock, into the shade.")} ${waitHintRef.current}`;
     if (castPadsRef.current) waitHintRef.current = `${t("Tight to the lily pads, where the bass and pike wait in ambush.")} ${waitHintRef.current}`;
     if (castEdgeRef.current) waitHintRef.current = `${t("Along the rock edge, where the point drops off and the bass hold.")} ${waitHintRef.current}`;
-    if (castFarRockRef.current) waitHintRef.current = `${t("Tight to the far rock, where the smallmouth hold in its shadow.")} ${waitHintRef.current}`;
+    if (castFarRockRef.current) waitHintRef.current = `${t("Tight to the far rock, where the walleye hold in its shadow.")} ${waitHintRef.current}`;
     if (castFoamRef.current) waitHintRef.current = `${t("Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "topwater") waitHintRef.current = `${t("Over the duckweed, where the bass lurk in its shade for a lure on top.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "fouled" && !mercyRef.current) waitHintRef.current = `${t("Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.")} ${waitHintRef.current}`;

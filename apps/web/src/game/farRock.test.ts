@@ -9,5 +9,8 @@ describe("the far rock", () => {
     expect(tightToFarRock("open", ...at(FAR_ROCK_RADIUS / 2))).toBe(false);
     expect(tightToFarRock("open", ...at(FAR_ROCK_REACH + 0.1))).toBe(false);
     expect(tightToFarRock("dock", ...at(1))).toBe(false);
+    expect(tightToFarRock("open", ...at(FAR_ROCK_RADIUS))).toBe(false);
+    expect(tightToFarRock("open", ...at(FAR_ROCK_REACH))).toBe(true);
+    expect(tightToFarRock("open", CORMORANT_ROCK.x, CORMORANT_ROCK.z - 1.2)).toBe(true);
   });
 });

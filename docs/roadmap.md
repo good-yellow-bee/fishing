@@ -1756,7 +1756,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT361~~ | ~~More reasons: when a cast has more reasons for a sooner or slower bite than the hint's two, the hint ends with "2 more reasons", which opens the rest in the hint (and steps aside so Space still strikes)~~ (#1472) | gameplay | S |
 | ~~GT362~~ | ~~A packed-up game outing keeps its title and season note in English in the field log and shows them in the reader's language, so switching language switches them (and an edit that keeps them keeps them in English), like the sample week's lines~~ (#1475) | gameplay | S |
 | ~~GT363~~ | ~~News card 2026-10-20-game38 covers GT361 and GT362: the hint's more reasons, and game outings' titles in the reader's language~~ (#1478) | ui | S |
-| GT364 | The far rock: a cast from the boat landing tight to the rock out in the open water (where the cormorant dries its wings), not on it, bites 0.85x sooner, and the wait hint says "Tight to the far rock…" | gameplay | S |
+| GT364 | The far rock: a cast from the boat landing tight to the rock out in the open water (where the cormorant dries its wings), not on it, bites 0.85x sooner, and the wait hint says "Tight to the far rock…" (the walleye hold there) | gameplay | S |
 
 ## Risks / open questions for the owner
 
