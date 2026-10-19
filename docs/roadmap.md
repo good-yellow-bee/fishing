@@ -1245,6 +1245,14 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC117~~ | ~~Leaf whirl: on dry fall days a little whirlwind now and then springs up on the far bank, spins a column of fallen leaves round and up as it wanders out over the water, then gives out and lets them flutter down onto the lake~~ (#1235) | scene | S |
 | ~~SC118~~ | ~~Paddleboarder: on calm, fine summer days someone stands paddling a paddleboard across the west of the lake and back with a little dog sitting up at the nose, swapping the paddle from side to side and turning the board round at each end~~ (#1237) | scene | S |
 | ~~SC119~~ | ~~News card scene25: hammock, night row, paddleboarder, hail, leaf whirl~~ (#1237) | scene | S |
+| ~~SC120~~ | ~~Dancing midges: on still dry evenings in late spring and summer little clouds of midges hang over the water in front of the dock, darting about and bobbing slowly, glinting gold in the low sun~~ (#1239) | scene | S |
+| ~~SC121~~ | ~~Gossamer: on fine, still fall mornings and days long silk threads from ballooning spiders float across the water in front of the dock, slowly rippling, a glint of sun running along each now and then~~ (#1239) | scene | S |
+| ~~SC122~~ | ~~Fry burst: now and then from spring to fall something hunting under the open water bursts into a shoal of fry, which spray out of the surface in a fan and patter back down in a scatter of tiny rings round a heavy swirl, always well clear of the dock~~ (#1240) | scene | S |
+| ~~SC123~~ | ~~Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then~~ (#1240) | scene | S |
+| ~~SC124~~ | ~~Fewer draws: the lanterns' caps, glass and halos go from 25 draws to 3 at dusk and night, and the paddleboard's legs and dog ride in the board's draw~~ (#1241) | scene | S |
+| ~~SC125~~ | ~~News card scene26: dancing midges, gossamer, fry burst, diamond dust~~ (#1241) | scene | S |
+| ~~SC126~~ | ~~Rain squall: now and then in a spring to fall shower a heavier squall sweeps across the far half of the lake as a grey curtain of rain, the water boiling with rings beneath it~~ (#1243) | scene | S |
+| ~~SC127~~ | ~~Winter crows: on winter mornings and days a few crows strut and peck on the snowy far shore, cawing now and then, and burst up into a loop over the water when the jogger comes running by, dropping back once they are past~~ (#1243) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1544,7 +1552,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT292~~ | ~~A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit~~ (#1213) | gameplay | S |
 | ~~GT293~~ | ~~Foam lanes feed the fish: in a breeze strong enough to rake the scum into lanes, a lure landing within 0.7 m of one bites sooner (0.85 wait), because the wind gathers drowned insects there and the fish feed along it; the cast says so~~ (#1223) | gameplay | S |
 | ~~GT294~~ | ~~News card 2026-10-19-game16 covers GT292 and GT293: the charging smallmouth and rainbow, and foam lanes that feed the fish~~ (#1225) | ui | S |
-| GT295 | Raiders on the sunfish beds: in spring and summer a cast landing on the sunfish nests either side of the dock lands where the perch and smallmouth come to raid the eggs, so the bite comes sooner (0.85 wait) and about a third of its bites are one of those raiders the angler could land (not for a beginner's first fish); the cast says so | gameplay | S |
+| ~~GT295~~ | ~~Raiders on the sunfish beds: in spring and summer a cast landing on the sunfish nests either side of the dock lands where the perch and smallmouth come to raid the eggs, so the bite comes sooner (0.85 wait) and about a third of its bites are one of those raiders the angler could land (not for a beginner's first fish); the cast says so~~ (#1230) | gameplay | S |
+| GT296 | Duckweed mats: in summer and fall a cast landing in the thick of a duckweed bed (as the scene draws it, pushed downwind; not among the lily pads, which decide there) fishes two ways: a popper rides over the mat and draws the bass lurking in its shade (0.85 wait), and any other lure comes through bearded with weed so the fish turn from it (1.2 wait, a beginner spared); the cast says which | gameplay | S |
 
 ## Risks / open questions for the owner
 

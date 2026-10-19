@@ -41,6 +41,10 @@ vi.mock("./sunfishBeds", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./sunfishBeds")>();
   return { ...actual, onSunfishBed: vi.fn(() => false) };
 });
+vi.mock("./duckweedCast", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./duckweedCast")>();
+  return { ...actual, inDuckweed: vi.fn(() => false) };
+});
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
   return { ...actual, castSnags: vi.fn(() => null) };
@@ -92,6 +96,7 @@ import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
 import { moonPassing } from "./solunar";
 import { onFoamLane } from "./foamFeed";
 import { onSunfishBed } from "./sunfishBeds";
+import { inDuckweed } from "./duckweedCast";
 import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
@@ -1911,6 +1916,17 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toMatch(/^Right in a foam lane, where the wind gathers drowned insects and the fish feed along it\. /);
+  });
+
+  it.each([
+    ["Popper", /^Over the duckweed, where the bass lurk in its shade for a lure on top\. /],
+    ["Spinner", /^Into the duckweed: the lure comes through bearded with weed, and the fish turn from it\. /],
+  ])("says how a %s cast into the duckweed fishes", (lure, line) => {
+    vi.mocked(inDuckweed).mockReturnValueOnce(true);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 }, "day", false, lure);
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(line);
   });
 
   it("says a cast onto the sunfish beds draws the raiders, and lets one take the bite", () => {

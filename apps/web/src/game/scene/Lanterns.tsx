@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { LANTERN_COLOR, LANTERN_LIGHTS, LANTERN_REACH, LANTERNS, lanternFlicker } from "./lanternLight";
+import { mergeParts, type Part } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -10,11 +11,28 @@ import { toonRamp } from "./toon";
 const LIGHT_INTENSITY = 5;
 const HALO_SIZE = 0.9;
 
-/** Lanterns lit at `level` (0..1); mounted only from dusk. */
+/** Every lantern's dark cap and base, and the shack lantern's pole, as one shape; and every lantern's lit glass as another. */
+export function lanternShapes() {
+  const frames: Part[] = LANTERNS.flatMap((l) => [
+    { geometry: new THREE.BoxGeometry(0.13, 0.03, 0.13), position: [l.x, l.y + 0.1, l.z] as const },
+    { geometry: new THREE.BoxGeometry(0.12, 0.03, 0.12), position: [l.x, l.y - 0.09, l.z] as const },
+  ]);
+  // The shack lantern hangs from a short pole.
+  const shack = LANTERNS[2]!;
+  frames.push({ geometry: new THREE.CylinderGeometry(0.03, 0.04, shack.y + 0.1, 6), position: [shack.x, shack.y / 2, shack.z] });
+  return {
+    frames: mergeParts(frames),
+    glass: mergeParts(LANTERNS.map((l) => ({ geometry: new THREE.BoxGeometry(0.09, 0.15, 0.09), position: [l.x, l.y, l.z] as const }))),
+  };
+}
+
+/** Lanterns lit at `level` (0..1); mounted only from dusk. Three draws in all: the frames, the glass and the halos. */
 export function Lanterns({ level }: { level: number }) {
   const still = useReducedMotion();
   const lights = useRef<(THREE.PointLight | null)[]>([]);
-  const halos = useRef<(THREE.Mesh | null)[]>([]);
+  const halos = useRef<THREE.InstancedMesh>(null);
+  const shapes = useMemo(() => ({ ...lanternShapes(), halo: new THREE.PlaneGeometry(1, 1) }), []);
+  const scratch = useMemo(() => new THREE.Object3D(), []);
   const texture = useMemo(() => makeSoftSpotTexture(0.15), []);
   const halo = useMemo(
     () =>
@@ -37,8 +55,9 @@ export function Lanterns({ level }: { level: number }) {
       halo.dispose();
       glass.dispose();
       frame.dispose();
+      Object.values(shapes).forEach((shape) => shape.dispose());
     },
-    [texture, halo, glass, frame],
+    [texture, halo, glass, frame, shapes],
   );
 
   useFrame(({ clock, camera }) => {
@@ -46,11 +65,17 @@ export function Lanterns({ level }: { level: number }) {
     lights.current.forEach((light, i) => {
       if (light) light.intensity = LIGHT_INTENSITY * level * lanternFlicker(time, i + 1, still);
     });
-    halos.current.forEach((mesh, i) => {
-      if (!mesh) return;
-      mesh.quaternion.copy(camera.quaternion);
-      mesh.scale.setScalar(HALO_SIZE * (0.6 + 0.4 * level) * lanternFlicker(time, LANTERNS[i]!.seed, still));
-    });
+    const glow = halos.current;
+    if (glow) {
+      LANTERNS.forEach((lantern, i) => {
+        scratch.position.set(lantern.x, lantern.y, lantern.z);
+        scratch.quaternion.copy(camera.quaternion);
+        scratch.scale.setScalar(HALO_SIZE * (0.6 + 0.4 * level) * lanternFlicker(time, lantern.seed, still));
+        scratch.updateMatrix();
+        glow.setMatrixAt(i, scratch.matrix);
+      });
+      glow.instanceMatrix.needsUpdate = true;
+    }
     halo.opacity = 0.55 * level;
   });
 
@@ -69,33 +94,9 @@ export function Lanterns({ level }: { level: number }) {
           intensity={0}
         />
       ))}
-      {LANTERNS.map((lantern, i) => (
-        <group key={i} position={[lantern.x, lantern.y, lantern.z]}>
-          {/* A dark cap and base around a lit glass box. */}
-          <mesh material={frame} position={[0, 0.1, 0]}>
-            <boxGeometry args={[0.13, 0.03, 0.13]} />
-          </mesh>
-          <mesh material={glass}>
-            <boxGeometry args={[0.09, 0.15, 0.09]} />
-          </mesh>
-          <mesh material={frame} position={[0, -0.09, 0]}>
-            <boxGeometry args={[0.12, 0.03, 0.12]} />
-          </mesh>
-          <mesh
-            ref={(mesh) => {
-              halos.current[i] = mesh;
-            }}
-            material={halo}
-            renderOrder={6}
-          >
-            <planeGeometry args={[1, 1]} />
-          </mesh>
-        </group>
-      ))}
-      {/* The shack lantern hangs from a short pole. */}
-      <mesh material={frame} position={[LANTERNS[2]!.x, LANTERNS[2]!.y / 2, LANTERNS[2]!.z]}>
-        <cylinderGeometry args={[0.03, 0.04, LANTERNS[2]!.y + 0.1, 6]} />
-      </mesh>
+      <mesh geometry={shapes.frames} material={frame} />
+      <mesh geometry={shapes.glass} material={glass} />
+      <instancedMesh ref={halos} args={[shapes.halo, halo, LANTERNS.length]} frustumCulled={false} renderOrder={6} />
     </group>
   );
 }
