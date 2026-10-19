@@ -12,7 +12,9 @@ describe("fight notes", () => {
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 3 })).toBe("Turned 3 runs");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, cleanRun: 1 })).toBeNull();
     expect(fightNotesText({ perfectCast: true, hookedSolid: false, turnedRuns: 0, closeCall: true })).toBe("Close call · Perfect cast");
-    expect(fightNotesText({ perfectCast: false, hookedSolid: true, turnedRuns: 0, cleanRun: 3 })).toBe("Hooked solid · 3 clean fights in a row");
+    expect(fightNotesText({ perfectCast: false, hookedSolid: true, turnedRuns: 0, cleanRun: 2 })).toBe("Hooked solid · 2 clean fights in a row");
+    // From the third the run earns points, and the clean stamp says so instead.
+    expect(fightNotesText({ perfectCast: false, hookedSolid: true, turnedRuns: 0, cleanRun: 3 })).toBe("Hooked solid");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 2, fightSec: 23.6 })).toBe("Turned 2 runs · Landed in 24 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 0, fightSec: 0.2 })).toBe("Landed in 1 s");
     expect(fightNotesText({ perfectCast: false, hookedSolid: false, turnedRuns: 1, bowedLeaps: 2 })).toBe("Turned 1 run · Bowed to 2 leaps");

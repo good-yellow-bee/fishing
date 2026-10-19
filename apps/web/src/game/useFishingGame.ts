@@ -1775,6 +1775,8 @@ export function useFishingGame(
     strikeWindowMs,
     hotspot,
     sim: simRef,
+    /** Clean fights landed in a row this session before the one on now. */
+    cleanRun: cleanRunRef.current,
     performance: performanceRef,
     powerRef,
     lastCastRef,

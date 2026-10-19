@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, fishById } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, fishById } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -112,6 +112,23 @@ describe("POST /catches", () => {
     await expect(response.json()).resolves.toMatchObject({ points });
     expect(db.prepare(`SELECT clean, points FROM catch`).get()).toEqual({ clean: 1, points });
     expect(db.prepare(`SELECT points FROM profile WHERE user_id = ?`).get(user.id)).toEqual({ points });
+  });
+
+  it("adds the clean-run bonus to the third clean fight in a row", async () => {
+    const points = catchPoints(fishById("golden-shiner")!, 0.3, true, CLEAN_RUN_BONUS);
+    const response = await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", clean: true, cleanRun: 3 });
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ points });
+    expect(db.prepare(`SELECT points FROM catch`).get()).toEqual({ points });
+  });
+
+  it("rejects a clean run that is not a whole number", async () => {
+    for (const cleanRun of [-1, 1.5, "3"]) {
+      const response = await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", clean: true, cleanRun });
+      expect(response.status).toBe(400);
+    }
+    expect(db.prepare(`SELECT COUNT(*) as count FROM catch`).get()).toEqual({ count: 0 });
   });
 
   it("rejects a retry that changes the clean flag", async () => {
