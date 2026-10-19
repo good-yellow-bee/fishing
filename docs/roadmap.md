@@ -1142,6 +1142,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA97~~ | ~~The badge toast's small Badge line read 4.4 to 1 on its parchment over a night lake: inked to the legendary tag's brass, 5.5 to 1 (#1301)~~ | phone UX | S |
 | ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#1304)~~ | phone UX | S |
 | ~~PA99~~ | ~~The news card on an upright phone ends above the banks' row instead of covering its top (#1307)~~ | phone UX | S |
+| ~~PA100~~ | ~~A claimed daily request's Claimed reads clearly through its dimmed row (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
