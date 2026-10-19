@@ -25,7 +25,7 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst, seasonLast } from "./seasonFirst";
-import { countedFish, nextKindMark, ownFish } from "./milestones";
+import { countedBook, countedFish, nextKindMark, ownFish } from "./milestones";
 import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks, biggestOf } from "./BiggestHere";
@@ -136,6 +136,8 @@ function SpeciesView() {
     );
   }
 
+  const counted = new Set(countedBook(book).catches.map((entry) => entry.id));
+  const notCounted = !catches.some((entry) => counted.has(entry.id));
   const waters = speciesWaters(book, catches);
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
@@ -160,6 +162,8 @@ function SpeciesView() {
         </div>
       </header>
       <FishSum catches={catches} oneKind list={`species:${species}`} />
+      {/* Only the sample week's or the game's, once Home and Bests leave those out: said, so they aren't read as the angler's. */}
+      {notCounted ? <p className="meta">{t("These are all from the sample week or the game.")}</p> : null}
       <KindMark catches={catches} />
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
