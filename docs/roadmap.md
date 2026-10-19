@@ -1731,7 +1731,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT353~~ | ~~A strong wind holds the anchored boat back: out on the boat in a strong wind a run takes 0.85 of the line it would from the bank, not 0.65, and the fight card's Boat line says so~~ (#1444) | gameplay | S |
 | ~~GT354~~ | ~~News card 2026-10-19-game35 covers GT352 and GT353: the anchor's splash puts the fish down, and a strong wind holds the anchored boat back~~ (#1446) | ui | S |
 | ~~GT355~~ | ~~Pause a crankbait: a tap while a crankbait waits pauses it so it floats up in front of a following fish, drawing the bite sooner for the first few taps like a hop, lift or strip, and the hint says "Pause! …"~~ (#1449) | gameplay | S |
-| GT356 | Twitch a fly: a tap while a fly waits twitches it like a live insect, drawing the bite sooner for the first few taps like the other lure work, and the hint says "Twitch! …" | gameplay | S |
+| ~~GT356~~ | ~~Twitch a fly: a tap while a fly waits twitches it like a live insect, drawing the bite sooner for the first few taps like the other lure work, and the hint says "Twitch! …"~~ (#1452) | gameplay | S |
+| GT357 | News card 2026-10-19-game36 covers GT355 and GT356: pause a crankbait and twitch a fly while they wait | ui | S |
 
 ## Risks / open questions for the owner
 
