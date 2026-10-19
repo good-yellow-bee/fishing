@@ -1,5 +1,9 @@
 import { useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { t, useT } from "../i18n";
+
+/** Another fish's photo in the same list, to look through full size without leaving this one. */
+export type ListPhoto = { id: string; src: string; alt: string; name: string; caption: string; to: string };
 
 const EXTENSIONS: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
@@ -15,9 +19,19 @@ export function photoFileName(src: string, name: string): string {
 
 /** A fish's photo on its page, opening full size over the page on a tap; Escape or Close puts it away. */
 /** `caption` says under the full-size picture what fish it is, as its page heads it. */
-export function PhotoFull({ src, alt, name, caption }: { src: string; alt: string; name: string; caption?: string }) {
+/** `photos` are the pictured fish of the list it was opened from, this one among them, to step through in the dialog. */
+export function PhotoFull({ src: ownSrc, alt: ownAlt, name: ownName, caption: ownCaption, photos = [], at = -1 }: { src: string; alt: string; name: string; caption?: string; photos?: readonly ListPhoto[]; at?: number }) {
   useT();
+  const location = useLocation();
   const dialog = useRef<HTMLDialogElement>(null);
+  const stepping = at >= 0 && photos.length > 1;
+  const [shown, setShown] = useState(at);
+  const other = stepping && shown !== at ? photos[shown] : undefined;
+  const src = other?.src ?? ownSrc;
+  const alt = other?.alt ?? ownAlt;
+  const name = other?.name ?? ownName;
+  const caption = other?.caption ?? ownCaption;
+  const step = (by: number) => setShown((now) => Math.min(photos.length - 1, Math.max(0, now + by)));
   const fileName = photoFileName(src, name);
   // A phone's share sheet sends the photo on to a chat or the camera roll; a desktop browser saves it.
   const [canShare] = useState(() => {
@@ -39,8 +53,17 @@ export function PhotoFull({ src, alt, name, caption }: { src: string; alt: strin
   };
   return (
     <figure className="catch-photo">
-      <button type="button" className="photo-open" onClick={() => dialog.current?.showModal()} aria-label={t("Open the photo full size")}>
-        <img src={src} alt={alt} />
+      <button
+        type="button"
+        className="photo-open"
+        onClick={() => {
+          // Opened again, it starts on this fish's own photo.
+          setShown(at);
+          dialog.current?.showModal();
+        }}
+        aria-label={t("Open the photo full size")}
+      >
+        <img src={ownSrc} alt={ownAlt} />
       </button>
       <dialog
         ref={dialog}
@@ -50,9 +73,33 @@ export function PhotoFull({ src, alt, name, caption }: { src: string; alt: strin
           // A tap on the dark around the photo closes it too.
           if (event.target === event.currentTarget) event.currentTarget.close();
         }}
+        onKeyDown={(event) => {
+          // The arrow keys step through the list's photos, as the buttons do.
+          if (!stepping || event.altKey || event.ctrlKey || event.metaKey) return;
+          if (event.key === "ArrowLeft") step(-1);
+          else if (event.key === "ArrowRight") step(1);
+        }}
       >
         <img src={src} alt={alt} />
         {caption ? <p className="photo-full-caption">{caption}</p> : null}
+        {stepping ? (
+          <div className="photo-full-bar">
+            <button type="button" className="text-button" disabled={shown <= 0} onClick={() => step(-1)}>
+              {t("Previous photo")}
+            </button>
+            <span className="meta" aria-live="polite">
+              {t("{at} of {count}", { at: shown + 1, count: photos.length })}
+            </span>
+            <button type="button" className="text-button" disabled={shown >= photos.length - 1} onClick={() => step(1)}>
+              {t("Next photo")}
+            </button>
+            {other ? (
+              <Link className="text-button" to={other.to} state={location.state} onClick={() => dialog.current?.close()}>
+                {t("Open this fish")}
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
         <div className="photo-full-bar">
           <a className="text-button" href={src} download={fileName}>
             {t("Save photo")}
