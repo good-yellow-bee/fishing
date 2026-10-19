@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { PLAYERS, discAt, tosserAt } from "./discToss";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -53,23 +53,31 @@ export function tosserArmShape(kit: (typeof KITS)[number]) {
   ]);
 }
 
+/** Both players' legs and bodies, standing where they play, as one shape: they never move but for the throwing arm. */
+export function tossersShape() {
+  return mergeParts(
+    PLAYERS.flatMap((player, i) => [
+      { geometry: tosserLegsShape(KITS[i]!), position: [player.x, 0, player.z] as const, rotation: [0, player.yaw, 0] as const, scale: SCALE },
+      { geometry: tosserTorsoShape(KITS[i]!, i === 1), position: [player.x, HIP_Y * SCALE, player.z] as const, rotation: [0, player.yaw, 0] as const, scale: SCALE },
+    ]),
+  );
+}
+
 /** Two people tossing a flying disc back and forth on the far bank on summer days (discToss.ts). */
 export function DiscTossers() {
   const still = useReducedMotion();
   const arms = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const disc = useRef<THREE.Mesh>(null);
-  const shapes = useMemo(
-    () => KITS.map((kit, i) => ({ torso: tosserTorsoShape(kit, i === 1), legs: tosserLegsShape(kit), arm: tosserArmShape(kit) })),
-    [],
-  );
+  const bodies = useMemo(tossersShape, []);
+  const shapes = useMemo(() => KITS.map((kit) => ({ arm: tosserArmShape(kit) })), []);
   const discShape = useMemo(() => new THREE.CylinderGeometry(0.15, 0.13, 0.03, 14), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const discMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: DISC, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
-      [...shapes.flatMap((set) => [set.torso, set.legs, set.arm]), discShape, material, discMaterial].forEach((item) => item.dispose());
+      [bodies, ...shapes.map((set) => set.arm), discShape, material, discMaterial].forEach((item) => item.dispose());
     },
-    [shapes, discShape, material, discMaterial],
+    [bodies, shapes, discShape, material, discMaterial],
   );
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
@@ -90,11 +98,10 @@ export function DiscTossers() {
   });
   return (
     <group name="disc-tossers">
+      <mesh geometry={bodies} material={material} castShadow />
       {PLAYERS.map((player, i) => (
         <group key={i} position={[player.x, 0, player.z]} rotation={[0, player.yaw, 0]} scale={SCALE}>
-          <mesh geometry={shapes[i]!.legs} material={material} castShadow />
           <group position={[0, HIP_Y, 0]}>
-            <mesh geometry={shapes[i]!.torso} material={material} castShadow />
             {/* The right arm, on -x facing +z. */}
             <group ref={arms[i]} position={[-0.18, SHOULDER_Y, 0]} rotation-order="YXZ">
               <mesh geometry={shapes[i]!.arm} material={material} />

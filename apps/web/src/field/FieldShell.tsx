@@ -118,6 +118,24 @@ export function FieldShell({ children }: { children: ReactNode }) {
     [],
   );
 
+  // The phone's top bar stays over the page as it scrolls: the page keeps a field tabbed to, or a heading jumped to,
+  // clear of it by its real height, which grows as the bar wraps on a narrow phone with larger text (WCAG 2.4.11).
+  const bar = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const root = document.documentElement;
+    const shown = bar.current;
+    if (!shown) return;
+    const measure = () => root.style.setProperty("--field-bar-h", `${Math.ceil(shown.getBoundingClientRect().height)}px`);
+    measure();
+    if (typeof ResizeObserver === "undefined") return () => root.style.removeProperty("--field-bar-h");
+    const watch = new ResizeObserver(measure);
+    watch.observe(shown);
+    return () => {
+      watch.disconnect();
+      root.style.removeProperty("--field-bar-h");
+    };
+  }, []);
+
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
   const how = useNavigationType();
   const navigate = useNavigate();
@@ -235,7 +253,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
         </NavLink>
       </aside>
       <div className="field-stage">
-        <header className="field-mobile-bar">
+        <header className="field-mobile-bar" ref={bar}>
           <NavLink to="/" className="field-brand" end>
             <FishMark />
             <span>

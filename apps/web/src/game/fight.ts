@@ -20,6 +20,8 @@ export type FightSim = {
   turning?: boolean;
   /** The rod pulled the same way a run is heading: it only gives the fish line. */
   withRun?: boolean;
+  /** A run the angler turned has swung the fish's head round: for a moment after it, reeling wins line faster. */
+  headTurned?: boolean;
   /** The run it makes on seeing the net, while that run lasts. */
   lastRun?: boolean;
   /** A trophy's second run at the net, after the first last run. */
@@ -203,6 +205,9 @@ const TIRE_TURN = 0.06;
 export const WITH_RUN_DRIFT = 1.4;
 export const WITH_RUN_REEL = 0.6;
 export const WITH_RUN_GRACE_SEC = 0.25;
+/** After a run the angler turned, the fish faces the rod this long, and line reeled meanwhile comes in this much faster. */
+export const TURNED_HEAD_MS = 1000;
+export const TURNED_HEAD_REEL = 1.3;
 
 /** Under this the fish is tiring; under the other it is played out. */
 export const TIRING_STAMINA = 0.6;
@@ -492,6 +497,8 @@ export function makeFight(
   swallowed = false,
   /** The strain a sound line snaps at: 1, or a little past it at level 14. A frayed line still snaps at FRAYED_SNAP. */
   snapAt = 1,
+  /** How much faster a turn cuts a run short: 1, or a quarter faster from level 16. */
+  turnCut = 1,
 ): FightRuntime {
   const weedy = water === "weeds";
   const pattern = PATTERNS[species.challenge];
@@ -523,6 +530,7 @@ export function makeFight(
   /** A trophy-sized fish sees the net twice. */
   let lastRunsLeft = isTrophyWeight(species, weight) ? 2 : 1;
   let turnedThisRun = false;
+  let headTurnedUntil = 0;
   let withRunFrom: number | null = null;
   let heldThroughLeap = false;
   const leaper = LEAPERS.has(species.id) && !cold;
@@ -634,7 +642,10 @@ export function makeFight(
         sim.lastRun = false;
         sim.encore = false;
         completedSurges += 1;
-        if (turnedThisRun) performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
+        if (turnedThisRun) {
+          performance.turnedRuns = (performance.turnedRuns ?? 0) + 1;
+          headTurnedUntil = nowMs + TURNED_HEAD_MS;
+        }
         turnedThisRun = false;
         // A bottom feeder with fight left digs in after every second run.
         if (sulker && completedSurges % 2 === 0 && sim.stamina > SPENT_STAMINA && !lastRunDone) {
@@ -672,6 +683,8 @@ export function makeFight(
       }
     }
     if (!sim.sulk) sim.lifting = false;
+    // A turned run leaves the fish facing the rod for a moment, unless it digs in on the bottom.
+    sim.headTurned = sim.surge === 0 && nowMs < headTurnedUntil && !sim.sulk;
 
     const wasShaking = sim.shake === true;
     sim.shake = sim.surge === 0 && nowMs >= shakeAt && nowMs < shakeAt + SHAKE_MS;
@@ -687,7 +700,7 @@ export function makeFight(
     }
     // A leap goes up, not sideways, so only a run can be turned.
     sim.turning = turnable && sim.surge === 2 && !sim.jump && !sim.roll && !sim.charge && steer === -sim.runSide;
-    if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * dtSec * 1000;
+    if (sim.turning && nextAt !== null) nextAt -= TURN_CUT * turnCut * dtSec * 1000;
     if (sim.turning) turnedThisRun = true;
     if (sim.turning && sim.darted) followedDart = true;
     // Pulled the way the run heads, past a moment to see it and switch, the rod only gives the fish line.
@@ -710,7 +723,7 @@ export function makeFight(
       sim.tension += (tensionUpCalm + (sim.surge === 2 && !charging ? eff * (rocky ? ROCK_PULL : 1) : 0) + (sim.wrapped ? WRAP_PULL : 0)) * dtSec;
       // Line under real pressure comes in faster, for an angler brave enough to reel in the amber.
       const pressure = sim.tension >= TIGHT_TENSION && sim.tension < RED_TENSION ? PRESSURE_REEL : 1;
-      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * dtSec;
+      sim.line -= reelRate * pressure * (1 + worn() * (SPENT_REEL - 1)) * (sim.surge === 2 ? pattern.reelSurge : 1) * (sim.sulk ? SULK_REEL : 1) * (sim.weeded ? WEED_REEL : 1) * (sim.wrapped ? 0 : 1) * (broadsider && sim.stamina >= TIRING_STAMINA ? BROADSIDE_REEL : 1) * (charging ? CHARGE_REEL / pattern.reelSurge : 1) * (sim.withRun ? WITH_RUN_REEL : 1) * (sim.headTurned ? TURNED_HEAD_REEL : 1) * dtSec;
     } else {
       sim.tension = Math.max(0, sim.tension - tensionDecay * dtSec);
       // A sulking fish sits where it is: no line goes out.

@@ -17,6 +17,20 @@ describe("a phone held sideways", () => {
     expect(block).toContain("max-height: calc((100dvh - var(--hud-bottom, 52px)) / var(--text-zoom, 1) - 72px);");
   });
 
+  it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
+    const sideways = css.slice(css.indexOf(SIDEWAYS));
+    const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
+    expect(coach).toContain("left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
+    expect(coach).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(coach).toContain("max-width: 400px;");
+    const news = [...sideways.matchAll(/\n  \.whats-new \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
+    expect(news).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(news).toContain("max-width: 440px;");
+    expect(news).toContain("transform: none;");
+    const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
+    expect(dock).toContain('wrap.style.setProperty("--signs-room"');
+  });
+
   it("lets a phone's bottom row of shore signs scroll sideways when the last banks would run past the edge", () => {
     const narrow = css.slice(css.indexOf("/* One thumb row along the bottom"));
     const block = /\.walk-signs \{([^}]*)\}/.exec(narrow)?.[1];

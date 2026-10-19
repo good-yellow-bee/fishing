@@ -459,6 +459,10 @@ export const PL_GAME: PlBook = {
   "The spinner's blade flickers along the reed edge, past the hunters lying in ambush.": "Skrzydełko obrotówki migocze wzdłuż ściany Trzcin, tuż obok drapieżników czających się w zasadzce.",
   "In the dark the fish hunt by sound, and they hear the topwater.": "Po ciemku ryby polują na słuch i słyszą przynętę powierzchniową.",
   "The fish can't see far, but they feel the spinner's blade thump.": "Ryby słabo widzą, ale czują pulsowanie skrzydełka obrotówki.",
+  "The bright lure shows up in the murk.": "Jaskrawą przynętę dobrze widać w mętnej wodzie.",
+  "The bright lure shows up in the low light.": "Jaskrawą przynętę dobrze widać w słabym świetle.",
+  "In the clear daylight the natural colours look like the real thing.": "W jasnym świetle dnia naturalne kolory wyglądają jak prawdziwy pokarm.",
+  "The dark lure stands out against the night sky above it.": "Ciemna przynęta odcina się od nocnego nieba nad nią.",
   "The fly matches what they're rising to.": "Mucha wygląda jak to, co zbierają z powierzchni.",
   "Worms crawl out after dark, and the fish are looking for one.": "Po zmroku robaki wychodzą na wierzch, a ryby ich wypatrują.",
   "The crankbait bangs off the rocks.": "Wobler obija się o kamienie.",
@@ -736,6 +740,9 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "From level 16, Voice of the lake, at 47000 points, pulling the rod against a run cuts it short a quarter faster. And a run you turn swings the fish's head round: reel straight after it to win line faster for a moment.":
+    "Od poziomu 16, Głos jeziora (47000 punktów), ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%. A zawrócony odjazd obraca rybę łbem do ciebie: kręć zaraz po nim, a przez chwilę odzyskasz żyłkę szybciej.",
+  "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
   "Fish of the week · 1.5× points": "Ryba tygodnia · 1,5× punktów",
@@ -758,6 +765,7 @@ export const PL_GAME: PlBook = {
   "Heart of the lake": "Serce jeziora",
   "Soul of the lake": "Dusza jeziora",
   "One with the lake": "Jedność z jeziorem",
+  "Voice of the lake": "Głos jeziora",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "Photo mode. Drag to look around, tap Save this view to keep a picture, or tap anywhere else to bring the panels back.":
@@ -765,9 +773,10 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
-  "At level 15, One with the lake, a strike in the first 48% of the bite sets the hook solid, not 40%. Far out the line stretches, so a long cast needs a quicker strike for a solid hook. And in winter, work a jig, spoon, popper or streamer slowly: touched again too soon, it puts the cold fish off.":
-    "Na poziomie 15, Jedność z jeziorem, zacięcie w pierwszych 48% brania osadza haczyk pewnie, a nie w 40%. Daleko od brzegu żyłka się rozciąga, więc po dalekim rzucie trzeba zaciąć szybciej, by haczyk siadł pewnie. A zimą prowadź jiga, wahadłówkę, popper czy streamer powoli: przynęta poruszona zbyt szybko odstrasza zmarznięte ryby.",
-  "A strike at nothing now tugs the bait and puts the fish off a moment, so mashing the strike only holds the bite back: wait for the bobber to go under. And in a fight, pulling the rod the same way a run heads only gives the fish line, so watch which way it runs and pull the other side.": "Zacięcie w próżnię szarpie teraz przynętę i na chwilę płoszy rybę, więc walenie w zacięcie tylko opóźnia branie: czekaj, aż spławik zanurkuje. A w holu ciągnięcie wędki w tę samą stronę, w którą ryba odjeżdża, tylko oddaje jej żyłkę, więc patrz, dokąd płynie, i ciągnij w drugą stronę.",
+  "An orchard now grows below the farm on the far hills: white and pink blossom in spring, gold leaves and red apples in the fall, bare in winter. From spring through summer a pair of white storks stands in a nest on the barn roof, clattering their bills now and then.":
+    "Pod farmą na wzgórzach za jeziorem rośnie teraz sad: wiosną kwitnie na biało i różowo, jesienią ma złote liście i czerwone jabłka, a zimą stoi nagi. Od wiosny do końca lata na dachu stodoły w gnieździe stoi para bocianów, które co jakiś czas klekoczą.",
+  "Three clean fights in a row now pay: from the third, each clean catch earns 1.2× more points. And a lure's colour counts: a bright one like chartreuse shows up in rain, fog or the low light, a natural one like green pumpkin in clear daylight, and a black one at night, and the lure list marks it good now.":
+    "Trzy czyste hole z rzędu teraz się opłacają: od trzeciego każdy czysty połów daje 1,2× więcej punktów. Liczy się też kolor przynęty: jaskrawą, jak chartreuse, dobrze widać w deszczu, mgle i słabym świetle, naturalną, jak green pumpkin, w jasny dzień, a czarną nocą, i lista przynęt oznacza ją jako dobrą teraz.",
   "When a cloud slides over the sun on a bright day, the fish move up into the shallows to feed, so the Dock, the Reeds, the Point and the Inlet bite sooner while it lasts. A fish hooked out by the lily pads now fights like one in the weeds and dives for the pad stems, so turn every run. And when a bank is fished hard, a kind of lure its wary fish haven't seen yet catches them off guard.":
     "Gdy w jasny dzień chmura zasłoni słońce, ryby podpływają na płyciznę żerować, więc na Pomoście, w Trzcinach, na Cyplu i przy Ujściu brania przychodzą szybciej, póki chmura nie odpłynie. Ryba zacięta przy grzybieniach walczy teraz jak w zielsku i nurkuje między łodygi, więc zawracaj każdy odjazd. A gdy łowisko jest mocno obłowione, rodzaj przynęty, którego ostrożne ryby jeszcze nie widziały, zaskakuje je.",
   "On dry summer days a hummingbird zips in to the wildflowers by the shack and hovers at them one by one, and on clear summer days someone swims breaststroke in the shallows off the far bank, their towel on the sand. From spring to fall someone walks the far bank with a dog that runs on ahead and stops to sniff. On foggy days a lone angler in a yellow oilskin fishes from a rowboat anchored out on the lake.":
@@ -796,6 +805,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "A little steam train now runs along the foot of the hills behind the far bank, puffing out of one tunnel and into the other, then back the other way a while later. After dark its carriage windows glow as it goes.":
+    "U stóp wzgórz za jeziorem kursuje teraz mała ciuchcia: wyjeżdża z jednego tunelu, sapiąc parą, i znika w drugim, a po chwili wraca w drugą stronę. Po zmroku jej okna świecą w drodze.",
   "An outing's tackle list offers Undo after Unpack all or taking a piece off. On the Map, a water's next outing says how much of its bag is packed, and in the small hours the water you are on says Out now. Gear's best lures to pack put those of the outing's own water first.":
     "Lista sprzętu wyprawy pozwala cofnąć „Rozpakuj wszystko” i zdjęcie elementu z listy. Na mapie następna wyprawa łowiska mówi, ile sprzętu jest już spakowane, a po północy łowisko, na którym trwa wyprawa, ma dopisek „Teraz na wodzie”. Najlepsze przynęty do spakowania na stronie Sprzęt idą najpierw z łowiska tej wyprawy.",
   "In spring the field under the windmill on the hills behind the far bank flowers bright yellow with rapeseed, in close rows along the slope, and its colour fades with the evening light.":

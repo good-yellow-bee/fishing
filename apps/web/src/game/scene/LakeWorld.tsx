@@ -5,7 +5,8 @@ import * as THREE from "three";
 import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTER_Z, LAKE_RX, LAKE_RZ, lakeEdge, moonLight, type LakeHour, type LakeSeason, type Sky as WeatherSky, type SpotId } from "@stillwater/shared";
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
-import { applyToon, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
+import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
+import { bakeToon, lookOf, releaseBaked } from "./toonBake";
 import { batchPlaced, placement } from "./scatterBatch";
 import { mergeParts } from "./mergeParts";
 import {
@@ -216,6 +217,10 @@ import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
 import { Rapeseed } from "./Rapeseed";
+import { Railway } from "./Railway";
+import { Orchard } from "./Orchard";
+import { BarnStorks } from "./BarnStorks";
+import { trainOut } from "./trainLine";
 import { rapeseedOut } from "./rapeseedField";
 import { sheepOut } from "./sheepFlock";
 import { ValleyMist } from "./ValleyMist";
@@ -2184,15 +2189,24 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
   const models = useGLTF(urls);
   const batches = useMemo(() => {
     const byUrl = new Map(urls.map((url, i) => [url, models[i]!.scene]));
+    // Copies that look alike share one baked shape, so they still batch into one instanced mesh.
+    const baked = new Map<string, THREE.Group | null>();
     const placed = items.map((item) => {
       // Prepared exactly as ToonModel prepares a single copy.
-      const root = byUrl.get(item.url)!.clone(true);
-      applyToon(root, shadows);
+      const copy = byUrl.get(item.url)!.clone(true);
+      applyToon(copy, shadows);
       const kind = PLANT_KIND[item.url];
-      if (kind) tintPlant(root, season, kind, plantVariant(item.position));
+      if (kind) tintPlant(copy, season, kind, plantVariant(item.position));
+      const look = `${item.url}|${lookOf(copy)}`;
+      let shape = baked.get(look);
+      if (shape === undefined) {
+        shape = bakeToon(copy, shadows);
+        baked.set(look, shape);
+      } else if (shape) disposeMaterials(copy);
+      const root = shape ? shape.clone() : copy;
       const box = new THREE.Box3().setFromObject(root);
       root.position.y -= box.min.y;
-      shareMaterials(root);
+      if (!shape) shareMaterials(root);
       return { root, matrix: placement(item.position, item.rot, item.scale) };
     });
     const meshes = batchPlaced(placed);
@@ -2200,12 +2214,13 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
     const swayed = sway ? meshes.filter((mesh) => !Array.isArray(mesh.material)) : [];
     const stillMaterials = swayed.map((mesh) => mesh.material as THREE.Material);
     swayed.forEach((mesh, i) => (mesh.material = swayingMaterial(stillMaterials[i]!)));
-    return { placed, meshes, stillMaterials };
+    return { placed, meshes, stillMaterials, baked: [...baked.values()] };
   }, [items, urls, models, shadows, season, sway]);
   useEffect(
     () => () => {
       batches.stillMaterials.forEach(releaseSwayingMaterial);
-      batches.placed.forEach(({ root }) => releaseSharedMaterials(root));
+      batches.placed.forEach(({ root }) => !root.userData.baked && releaseSharedMaterials(root));
+      batches.baked.forEach((shape) => shape && releaseBaked(shape));
       batches.meshes.forEach((mesh) => mesh.dispose());
     },
     [batches],
@@ -2313,7 +2328,10 @@ export const LakeWorld = memo(function LakeWorld({
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
+      <Orchard season={season} hour={hour} />
+      <BarnStorks season={season} />
       <Windmill season={season} wind={wind} />
+      {trainOut(sky) && <Railway hour={hour} wind={wind} />}
       {paragliderOut(hour, sky, season, wind) && <Paraglider />}
       {bonfireOut(hour, sky, season) && <HillBonfire hour={hour} wind={wind} />}
       {cowsOut(hour, sky, season) && <Cows />}

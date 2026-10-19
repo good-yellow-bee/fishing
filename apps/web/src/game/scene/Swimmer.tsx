@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BoatWake } from "./BoatWake";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { TOWEL_AT, swimmerAt } from "./swimLane";
 import { toonRamp } from "./toon";
@@ -50,6 +50,7 @@ export function Swimmer() {
   const still = useReducedMotion();
   const body = useRef<THREE.Group>(null);
   const arms = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
+  const armMeshes = useRef<THREE.InstancedMesh>(null);
   const ripple = useRef<THREE.Mesh>(null);
   const shapes = useMemo(() => ({ body: swimmerShape(), arm: swimArmShape(), towel: towelShape(), ring: new THREE.RingGeometry(0.85, 1, 24) }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -78,6 +79,7 @@ export function Swimmer() {
       arm.rotation.y = side * sweep;
       arm.scale.z = 1 - 0.55 * tuck;
     });
+    poseLimbs(armMeshes.current, arms);
     // A ring spreads from the swimmer with each pull, fading as it goes.
     if (ripple.current) {
       const k = pose.going ? pose.stroke : (time * 0.6) % 1;
@@ -91,10 +93,10 @@ export function Swimmer() {
       <group ref={body} scale={SCALE}>
         <mesh geometry={shapes.body} material={material} />
         {[1, -1].map((side, i) => (
-          <group key={side} ref={arms[i]} position={[side * 0.12, -0.03, 0.05]}>
-            <mesh geometry={shapes.arm} material={material} />
-          </group>
+          <group key={side} ref={arms[i]} position={[side * 0.12, -0.03, 0.05]} />
         ))}
+        {/* Both arms in one draw, posed from the two groups above. */}
+        <instancedMesh ref={armMeshes} args={[shapes.arm, material, 2]} frustumCulled={false} />
       </group>
       <mesh ref={ripple} geometry={shapes.ring} material={rippleMaterial} rotation={[-Math.PI / 2, 0, 0]} renderOrder={4} />
       <BoatWake at={course} stern={0.4} still={still} size={0.4} />

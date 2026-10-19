@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
-import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lineSnapForLevel, solidShareForLevel, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
+import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lineSnapForLevel, solidShareForLevel, turnCutMulForLevel, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
 
 describe("level unlock boundaries", () => {
@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to One with the lake", () => {
+  it("gives every level its own title, Greenhorn to Voice of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("One with the lake");
+    expect(titles.at(-1)).toBe("Voice of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("One with the lake");
+    expect(anglerTitle(99)).toBe("Voice of the lake");
   });
 });
 
@@ -159,5 +159,16 @@ describe("level 15", () => {
     expect(anglerTitle(15)).toBe("One with the lake");
     expect(solidShareForLevel(14)).toBe(0.4);
     expect(solidShareForLevel(15)).toBe(0.48);
+  });
+});
+
+describe("level 16", () => {
+  it("opens at 47000 lifetime points with its unlock and title, and turns runs short faster", () => {
+    expect(anglerLevel(46999)).toBe(15);
+    expect(anglerLevel(47000)).toBe(16);
+    expect(levelUnlock(16)).toMatch(/25%/);
+    expect(anglerTitle(16)).toBe("Voice of the lake");
+    expect(turnCutMulForLevel(15)).toBe(1);
+    expect(turnCutMulForLevel(16)).toBe(1.25);
   });
 });

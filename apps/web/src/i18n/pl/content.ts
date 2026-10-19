@@ -163,6 +163,7 @@ export const PL_CONTENT: PlBook = {
   "The gold perfect-cast mark is wider.": "Złoty znacznik idealnego rzutu jest szerszy.",
   "Your line holds a moment past the red: it snaps at 105% strain, not 100%.": "Żyłka wytrzymuje chwilę dłużej w czerwieni: pęka przy 105% napięcia, a nie przy 100%.",
   "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.": "Pewne zacięcie trwa dłużej: zacięcie w pierwszych 48% brania osadza haczyk pewnie, a nie w 40%.",
+  "Pulling the rod against a run cuts it short 25% faster.": "Ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%.",
   "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia i ściągnięcia) przyspiesza branie trzy razy, a nie dwa.",
 
   // Badges (badges.ts)

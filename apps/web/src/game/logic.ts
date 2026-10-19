@@ -32,6 +32,7 @@ import {
   BOAT_CAST_RANGE,
   castRangeMultiplier,
   solidShareForLevel,
+  foldText,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -415,6 +416,50 @@ export const SPINNER_THUMP_WAIT = 0.85;
 /** How murky light stretches the wait on a spinner: sooner in rain or fog, else 1. */
 export function spinnerThumpWaitMul(lure: string | undefined, sky: string | undefined) {
   return (sky === "rain" || sky === "fog") && lure?.trim() && lureClass(lure).id === "spinner" ? SPINNER_THUMP_WAIT : 1;
+}
+
+/** A lure's colour as its label names it: bright and loud, natural like the real food, or dark. */
+export type LureColour = "bright" | "natural" | "dark";
+
+/** Colour words, English and Polish, read without accents. */
+const LURE_COLOURS: readonly (readonly [LureColour, RegExp])[] = [
+  ["bright", /chartreuse|fire ?tiger|orange|pink|yellow|white|\bred\b|\bglow\b|fluo|neon|pomarancz|rozow|zolt|bial|czerwon/],
+  ["natural", /pumpkin|watermelon|brown|olive|natural|silver|\bshad\b|perch|crayfish|\bcraw\b|zielon|brazow|oliwk|srebrn|naturaln|okon|\brak/],
+  ["dark", /black|purple|june ?bug|czarn|fiolet/],
+];
+
+/** The colour a lure's label names first, so a black-and-chartreuse jig reads dark; null when it names none. */
+export function lureColour(label: string | undefined): LureColour | null {
+  if (!label?.trim()) return null;
+  const folded = foldText(label);
+  let found: LureColour | null = null;
+  let at = Infinity;
+  for (const [colour, words] of LURE_COLOURS) {
+    const match = words.exec(folded);
+    if (match && match.index < at) {
+      found = colour;
+      at = match.index;
+    }
+  }
+  return found;
+}
+
+/** A lure whose colour suits the light draws the bite sooner: bright in murk or the low light, natural in clear daylight, dark at night. */
+export const COLOUR_WAIT = 0.9;
+
+/** Which light a lure's colour suits right now, or null. Rain, fog and overcast are the murk; dawn and dusk the low light. */
+export function colourSuits(label: string | undefined, sky: string | undefined, hour: LakeHour): LureColour | null {
+  const colour = lureColour(label);
+  if (colour === "dark") return hour === "night" ? colour : null;
+  if (hour === "night") return null;
+  if (colour === "bright") return sky === "rain" || sky === "fog" || sky === "overcast" || hour === "dawn" || hour === "dusk" ? colour : null;
+  if (colour === "natural") return sky === "clear" && hour === "day" ? colour : null;
+  return null;
+}
+
+/** How the light stretches the wait on a coloured lure: sooner when its colour suits it, else 1. */
+export function colourWaitMul(label: string | undefined, sky: string | undefined, hour: LakeHour) {
+  return colourSuits(label, sky, hour) ? COLOUR_WAIT : 1;
 }
 
 /** After dark the fish hunt by sound and look up at the lit surface, so a topwater lure's gurgle draws the bite sooner. */
