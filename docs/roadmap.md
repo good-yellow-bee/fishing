@@ -1251,8 +1251,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC123~~ | ~~Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then~~ (#1240) | scene | S |
 | ~~SC124~~ | ~~Fewer draws: the lanterns' caps, glass and halos go from 25 draws to 3 at dusk and night, and the paddleboard's legs and dog ride in the board's draw~~ (#1241) | scene | S |
 | ~~SC125~~ | ~~News card scene26: dancing midges, gossamer, fry burst, diamond dust~~ (#1241) | scene | S |
-| SC126 | Rain squall: now and then in a spring to fall shower a heavier squall sweeps across the far half of the lake as a grey curtain of rain, the water boiling with rings beneath it | scene | S |
-| SC127 | Winter crows: on winter mornings and days a few crows strut and peck on the snowy far shore, cawing now and then, and burst up into a loop over the water when the jogger comes running by, dropping back once they are past | scene | S |
+| ~~SC126~~ | ~~Rain squall: now and then in a spring to fall shower a heavier squall sweeps across the far half of the lake as a grey curtain of rain, the water boiling with rings beneath it~~ (#1243) | scene | S |
+| ~~SC127~~ | ~~Winter crows: on winter mornings and days a few crows strut and peck on the snowy far shore, cawing now and then, and burst up into a loop over the water when the jogger comes running by, dropping back once they are past~~ (#1243) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
