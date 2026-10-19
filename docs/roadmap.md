@@ -1251,6 +1251,13 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC123~~ | ~~Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then~~ (#1240) | scene | S |
 | ~~SC124~~ | ~~Fewer draws: the lanterns' caps, glass and halos go from 25 draws to 3 at dusk and night, and the paddleboard's legs and dog ride in the board's draw~~ (#1241) | scene | S |
 | ~~SC125~~ | ~~News card scene26: dancing midges, gossamer, fry burst, diamond dust~~ (#1241) | scene | S |
+| ~~SC126~~ | ~~Rain squall: now and then in a spring to fall shower a heavier squall sweeps across the far half of the lake as a grey curtain of rain, the water boiling with rings beneath it~~ (#1243) | scene | S |
+| ~~SC127~~ | ~~Winter crows: on winter mornings and days a few crows strut and peck on the snowy far shore, cawing now and then, and burst up into a loop over the water when the jogger comes running by, dropping back once they are past~~ (#1243) | scene | S |
+| ~~SC128~~ | ~~Night eyeshine: on nights without fog a pair of eyes, a deer's or a fox's, now and then shines green-gold at the edge of the far bank, holds a while, blinks and is gone~~ (#1245) | scene | S |
+| ~~SC129~~ | ~~Paddleboard route: the paddleboarder's run ends further west so the board stays well clear of the swans' loop~~ (#1245) | scene | S |
+| ~~SC130~~ | ~~News card scene27: rain squall, winter crows, night eyeshine~~ (#1245) | scene | S |
+| ~~SC131~~ | ~~Fewer draws for the night angler and the dog walker: the angler's still parts in one shape (7 draws to 2), the walker's legs, arms and the dog's legs as instances (8 draws to 3)~~ (#1248) | scene | S |
+| ~~SC132~~ | ~~Winter sledders: on winter days two children take turns sledging down a packed run on the hill behind the far bank, rushing down in a spray of snow, coasting to a stop and trudging back up pulling their sleds~~ (#1248) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -2097,3 +2104,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR533~~ | ~~Round 82 leftovers: an outing's year is checked, Go again opens on the first free day, sample outings have no lost/missed counters, a night summary dates its small-hours fish~~ (#1233) | field | S |
 | ~~BR534~~ | ~~Round 84 fixes: the Undo bar keeps focus clear by its real height, Set a goal brings the box into view once, Restore sample keeps the game's fish, an in-place Undo pressed elsewhere comes forward, calendar notes in the all-outings file, Bests outing links go back there, goal count read with its button, one season copy~~ (#1236) | field | S |
 | ~~BR535~~ | ~~Round 84 ideas: a day's small-hours fish point to their outing's day, calendar month counts open their days and fish, Home recalls last year's goal in early January, calendar files remind the evening before, the year copy gives its pace~~ (#1238) | field | S |
+| ~~BR536~~ | ~~Round 85 fixes: Gear leaves the sample week's lures and outings out once the angler has their own, the own map's scale bar keeps clear of the pins, more kit is told from lures, Polish lures get their tags, a night outing's list waits for the night to end, the Map's best lure counts the angler's fish, Pack the best comes back, sample outings link their pin, Plan one keeps focus on Back, a search shown largest first copies that way, Home's rest during a night~~ (#1246) | field | S |
+| ~~BR537~~ | ~~Round 85 ideas: the lure record for one water, "took fish here" on a packed lure, the Map's Next outing opens it, Copy the place on own map rows~~ (#1247) | field | S |

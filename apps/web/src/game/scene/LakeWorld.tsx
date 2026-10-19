@@ -25,6 +25,8 @@ import { BubblingHotspot } from "./BubblingHotspot";
 import { LakeRain } from "./LakeRain";
 import { HailShower } from "./HailShower";
 import { hailOut } from "./hailBurst";
+import { RainCurtain } from "./RainCurtain";
+import { squallOut } from "./rainSquall";
 import { LakeSnow } from "./LakeSnow";
 import { MoonRoad } from "./MoonRoad";
 import { DockRain } from "./DockRain";
@@ -169,6 +171,7 @@ import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
+import { FAR_HILLS } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
 import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
@@ -195,6 +198,12 @@ import { StoneSkimmer } from "./StoneSkimmer";
 import { skimOut } from "./skimStones";
 import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
+import { Crows } from "./Crows";
+import { crowsOut } from "./crowFlush";
+import { sleddersOut } from "./sledRun";
+import { Sledders } from "./Sledders";
+import { NightEyes } from "./NightEyes";
+import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
 import { birderOut } from "./birdWatch";
 import { PorchRocker } from "./PorchRocker";
@@ -572,12 +581,7 @@ const CREEK_TREES: Scatter[] = [
 /** Every shore tree, for the bank's mirror image on still water. */
 const MIRROR_TREES: MirrorTree[] = [...TREES, ...BACK_TREES, ...CREEK_TREES].map((tree) => ({ position: tree.position, scale: tree.scale, variant: plantVariant(tree.position) }));
 
-/** The three hills behind the far shore: centre and radii of each icosphere. */
-const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
-  { position: [-28, 4.5, -26], scale: [17, 7, 10], day: "#587a5f", night: "#3d5a44" },
-  { position: [-5, 5.2, -30], scale: [20, 8, 10], day: "#628468", night: "#456348" },
-  { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
-];
+const HILLS = FAR_HILLS;
 
 /** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
@@ -2329,11 +2333,13 @@ export const LakeWorld = memo(function LakeWorld({
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
+      {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
+      {eyesOut(hour, sky) && <NightEyes />}
       {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}
       {gossamerOut(hour, sky, season, wind) && <Gossamer />}
       {heronOut(hour, sky) && <Heron />}
@@ -2377,6 +2383,8 @@ export const LakeWorld = memo(function LakeWorld({
       {headlampOut(hour, sky, season) && <NightAngler />}
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
       {joggerOut(hour, sky, season) && <Jogger />}
+      {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
+      {sleddersOut(hour, sky, season) && <Sledders />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}

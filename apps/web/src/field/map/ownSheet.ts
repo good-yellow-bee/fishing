@@ -121,3 +121,27 @@ export function labelShifts(
     return 3;
   });
 }
+
+/**
+ * Where the scale bar goes (its left end, in sheet units) and the room it takes: the top right, else the bottom right
+ * above the longitude labels, else the top left right of the latitude labels, else the bottom left, whichever first
+ * holds no pin. Its words sit under the bar at up to a phone's 24-unit size, and may run wider than a short bar.
+ */
+export function scaleSpot(points: readonly { x: number; y: number }[], length: number): { x: number; y: number; box: Box } {
+  const words = Math.max(length, 190);
+  const room = (x: number, y: number): Box => ({ x0: x + length / 2 - words / 2 - 20, y0: y - 20, x1: x + length / 2 + words / 2 + 20, y1: y + 56 });
+  const right = OWN_WIDTH - 40 - length;
+  const left = 150;
+  const corners = [
+    { x: right, y: 40 },
+    { x: right, y: OWN_HEIGHT - 110 },
+    { x: left, y: 40 },
+    { x: left, y: OWN_HEIGHT - 110 },
+  ];
+  const clear = corners.find(({ x, y }) => {
+    const box = room(x, y);
+    return !points.some((point) => point.x >= box.x0 && point.x <= box.x1 && point.y >= box.y0 && point.y <= box.y1);
+  });
+  const at = clear ?? corners[0]!;
+  return { ...at, box: room(at.x, at.y) };
+}

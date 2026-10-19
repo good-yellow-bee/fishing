@@ -7,6 +7,7 @@ import { packingText } from "./packingText";
 import { CopySummary } from "../CopySummary";
 import { pieceKey, shownPieceKey } from "./pieceKey";
 import { isSampleOuting, isSampleTrip } from "../bookCopy";
+import { LATE_NIGHT_UNTIL } from "../suggestions";
 import "./gear.css";
 
 /**
@@ -69,10 +70,14 @@ export function TackleList({
   };
   const onList = new Set(rows.map((item) => readKey(item.label)));
   const missing = suggest.filter((lure) => !onList.has(readKey(lure)));
+  const tipKeys = new Set(suggest.map((lure) => readKey(lure)));
   const took = new Map<string, number>();
   for (const entry of caught) took.set(readKey(entry.lure), (took.get(readKey(entry.lure)) ?? 0) + 1);
   const outing = trips.find((row) => row.id === tripId);
-  const idle = outing && caught.length > 0 && outing.date < localDate(new Date()) ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
+  // Done once its day is over: in the small hours, last night's outing is still going.
+  const now = new Date();
+  const doneBefore = now.getHours() < LATE_NIGHT_UNTIL ? localDate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12)) : localDate(now);
+  const idle = outing && caught.length > 0 && outing.date < doneBefore ? rows.filter((item) => item.packed && isLureLabel(item.label) && !took.has(readKey(item.label))) : [];
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
   // While packing, the pieces already in the bag can step aside.
@@ -234,7 +239,12 @@ export function TackleList({
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
                 {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
-                {took.get(readKey(item.label)) ? <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span> : null}
+                {took.get(readKey(item.label)) ? (
+                  <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span>
+                ) : tipKeys.has(readKey(item.label)) ? (
+                  // Already packed, and among what took fish on this water: one to keep in the bag.
+                  <span className="tackle-caught">{t("took fish here")}</span>
+                ) : null}
               </label>
               <button
                 type="button"

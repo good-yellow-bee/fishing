@@ -91,8 +91,8 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   if (!last) return null;
   const fish = catchesForTrip(book, last.id);
   const lure = lureTally({ ...book, catches: fish }, 1)[0];
-  // How long the water has rested, as the outing's own page says it.
-  const rest = daysBetween(last.date, today);
+  // How long the water has rested, as the outing's own page says it: during a night session, to the outing's own day.
+  const rest = daysBetween(last.date, trip.date < today ? trip.date : today);
   const day = rest >= 2 ? `${formatDay(last.date)} · ${tn(rest, "{n} day ago", "{n} days ago")}` : formatDay(last.date);
   return (
     <small className="next-last">
