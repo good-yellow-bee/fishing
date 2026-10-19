@@ -33,6 +33,10 @@ vi.mock("./solunar", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./solunar")>();
   return { ...actual, moonPassing: vi.fn(() => null) };
 });
+vi.mock("./foamFeed", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./foamFeed")>();
+  return { ...actual, onFoamLane: vi.fn(() => false) };
+});
 vi.mock("./snag", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./snag")>();
   return { ...actual, castSnags: vi.fn(() => null) };
@@ -82,6 +86,7 @@ import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
 import { moonPassing } from "./solunar";
+import { onFoamLane } from "./foamFeed";
 import { followerFor, grabberFor } from "./grab";
 import { castForGotAway } from "./gotAway";
 
@@ -1893,6 +1898,14 @@ describe("level unlock integration", () => {
     cast(surface);
     expect(phase()).toBe("waiting:none");
     expect(hint()).toContain(reason);
+  });
+
+  it("says a cast landing in a foam lane draws the fish feeding along it", () => {
+    vi.mocked(onFoamLane).mockReturnValueOnce(true);
+    const surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 700 });
+    cast(surface);
+    expect(phase()).toBe("waiting:none");
+    expect(hint()).toMatch(/^Right in a foam lane, where the wind gathers drowned insects and the fish feed along it\. /);
   });
 
   it("says a cast tight to the lily pads lands where the bass and pike wait, but not once the pads die back in winter", () => {
