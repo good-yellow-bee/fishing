@@ -135,6 +135,17 @@ describe("Bests' days calendar on a touch screen", () => {
   });
 });
 
+describe("Bests' month-by-year table on a touch screen", () => {
+  it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    expect(/\n  \.month-year td a \{([^}]*)\}/.exec(touch)?.[1]).toContain("position: relative;");
+    expect(/\n  \.month-year td a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("inset: -4px;");
+    // The reach adds to the 24 px link and its 4 px cell padding above and below.
+    expect(/\n\.month-year td a \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 24px;");
+    expect(/\n\.month-year td \{([^}]*)\}/.exec(css.replace(".month-year th,\n.month-year td {", ".month-year td {"))?.[1]).toContain("padding: 4px 12px 4px 0;");
+  });
+});
+
 describe("keyboard focus on the log's paper", () => {
   it("draws the focus ring in the log's rust, not the lake's amber (WCAG 1.4.11)", () => {
     expect(/\n\.field-main :is\(a, button, summary\):focus-visible \{([^}]*)\}/.exec(css)?.[1]).toContain("outline-color: var(--field-rust);");

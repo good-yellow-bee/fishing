@@ -457,6 +457,18 @@ button.field-primary {
     aspect-ratio: 1;
   }
 
+  /* Bests' month-by-year table: each count (and each year's total) was a 24 px link with 8 px between rows; its reach
+     now fills its cell's height, meeting the next row's in a 32 px band, moving nothing. */
+  .month-year td a {
+    position: relative;
+  }
+
+  .month-year td a::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
