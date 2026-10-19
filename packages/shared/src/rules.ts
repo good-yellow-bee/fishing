@@ -3,6 +3,7 @@ import { weeklyBonus } from "./weeklyFish.ts";
 import { GOLDEN_BONUS, isGolden } from "./golden.ts";
 import { anglerLevel, canUseSpot, MAX_SKILL, SKILL_LABELS, skillCost } from "./progression.ts";
 import { dayRunBonus } from "./streak.ts";
+import { masteryBonus } from "./mastery.ts";
 import type { CatchRequest, FishSpecies, Profile, SkillId, SpotId } from "./types.ts";
 
 /** `bonus` multiplies the whole catch, e.g. WEEKLY_FISH_BONUS for the fish of the week. */
@@ -81,7 +82,8 @@ export type CatchResult = CatchOk | CatchErr;
 /** `requestId`, when given, rolls for a golden fish. */
 /**
  * `priorBest` is the heaviest of this species the angler landed before, for the personal best bonus; `othersBest` the heaviest any other angler landed, for the lodge record bonus;
- * `catchDays` the local days the angler's earlier catches came in on, for the day-run bonus.
+ * `catchDays` the local days the angler's earlier catches came in on, for the day-run bonus; `priorCaught` how many of the
+ * kind the angler had landed, for the master bonus.
  */
 export function validateCatch(
   profile: Profile,
@@ -90,6 +92,7 @@ export function validateCatch(
   priorBest: number | null = null,
   othersBest: number | null = null,
   catchDays: readonly string[] = [],
+  priorCaught = 0,
 ): CatchResult {
   const species = fishById(request.speciesId);
   if (!species) return { ok: false, error: "unknown species", status: 400 };
@@ -106,7 +109,7 @@ export function validateCatch(
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day)), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * bestBonus(request.weight, priorBest, othersBest) * dayRunBonus(catchDays, request.day) * masteryBonus(priorCaught)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };

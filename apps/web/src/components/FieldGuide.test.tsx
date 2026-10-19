@@ -37,6 +37,7 @@ describe("field guide card", () => {
       fishById("smallmouth-bass")!.lore,
       "2 landed · PB 2.4 lb",
       "Trophy ≥ 3.6 lb",
+      "Mastery: 3 to Known",
       "Medium shadow",
       "Dock: big lure at dusk",
       "Drop-off: small lure at dusk",

@@ -11,6 +11,8 @@ import {
   PB_BONUS,
   CLEAN_RUN_FROM,
   catchStamp,
+  masteryBonus,
+  tierReachedBy,
   dailyConditions,
   fieldLogBestBeat,
   isFishingStance,
@@ -324,6 +326,12 @@ export function DockPage() {
     if (game.outcome?.kind !== "landed") return null;
     return catchStamp(statsRef.current, game.outcome.species.id, game.outcome.weight);
   }, [game.outcome]);
+  /** How many of the landed kind the angler had before this one, for the mastery tiers. */
+  const priorCaught = useMemo(() => {
+    const outcome = game.outcome;
+    return outcome?.kind === "landed" ? (statsRef.current.find((row) => row.speciesId === outcome.species.id)?.caught ?? 0) : 0;
+  }, [game.outcome]);
+  const tierReached = tierReachedBy(priorCaught);
   const daysRef = useRef(me?.recentDays ?? []);
   daysRef.current = me?.recentDays ?? [];
   /** The run of days this landed fish keeps going as the day's first, from DAY_RUN_FROM; 0 when it pays no day-run bonus. */
@@ -1166,7 +1174,7 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1) * masteryBonus(priorCaught),
                 ),
               })}
             </p>
@@ -1182,6 +1190,16 @@ export function DockPage() {
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {dayRun > 0 && <p className="catch-stamp">{t("First fish of day {n} in a row · 1.5× points", { n: dayRun })}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
+            {tierReached && (
+              <p className="catch-stamp">
+                {tierReached.id === "known"
+                  ? t("Known fish: {fish} · {n} landed", { fish: t(game.outcome.species.name), n: priorCaught + 1 })
+                  : tierReached.id === "skilled"
+                    ? t("Skilled: {fish} · {n} landed", { fish: t(game.outcome.species.name), n: priorCaught + 1 })
+                    : t("Mastered: {fish} · 1.1× points from the next one", { fish: t(game.outcome.species.name) })}
+              </p>
+            )}
+            {masteryBonus(priorCaught) > 1 && <p className="catch-stamp">{t("Mastered kind · 1.1× points")}</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">
                 {lodgeTaken ? t("Personal best · was {weight}", { weight: weightText(stamp.previous) }) : t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}
