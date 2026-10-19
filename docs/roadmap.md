@@ -1618,7 +1618,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT308~~ | ~~Minnows under the lanterns: after dark a jig, spinner, spoon, crankbait or streamer landing among the minnows milling in the dock lanterns' light (the scene's MINNOW_POOL, plus 0.3 m) lands where the hunters pick them off, so the bite comes sooner (0.85) and 35% of bites are a crappie, walleye, smallmouth or largemouth (as the dock can land them; not a beginner's first fish); the cast says so in place of the general lantern line~~ (#1303) | gameplay | S |
 | ~~GT309~~ | ~~News card 2026-10-19-game21 covers GT307 and GT308: pike teeth and the minnows under the lanterns~~ (#1306) | ui | S |
 | ~~GT310~~ | ~~Level 14 (30000 lifetime points, "Soul of the lake"): a sound line holds a moment past the red and snaps at 105% strain instead of 100%; a frayed line still snaps at 90%~~ (#1310) | gameplay | S |
-| GT311 | Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs | gameplay | S |
+| ~~GT311~~ | ~~Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs~~ (#1317) | gameplay | S |
+| GT312 | News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk | ui | S |
 
 ## Risks / open questions for the owner
 
