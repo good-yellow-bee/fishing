@@ -204,6 +204,11 @@ import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
+import { HillShadows } from "./HillShadows";
+import { BarnOwl } from "./BarnOwl";
+import { barnOwlOut } from "./owlQuarter";
+import { ValleyMist } from "./ValleyMist";
+import { valleyMistOut } from "./valleyMist";
 import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
 import { Sledders } from "./Sledders";
@@ -1176,6 +1181,9 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   );
 }
 
+/** Cloud shadows lie a little darker on the lit hills than on the water, where the sky's reflection lightens them. */
+const HILL_SHADE = 1.3;
+
 function LakeSurface({
   spot,
   hour,
@@ -1304,6 +1312,12 @@ function LakeSurface({
         <mesh geometry={geometry} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
           <meshBasicMaterial color="#0b1a22" alphaMap={cloudMap} transparent opacity={cloudShade} depthWrite={false} />
         </mesh>
+      )}
+      {/* The same clouds' shadows slide on over the far hills; this group sits at the lake's middle. */}
+      {cloudShade > 0 && (
+        <group position={[0, 0, -LAKE_CENTER_Z]}>
+          <HillShadows map={cloudMap} opacity={cloudShade * HILL_SHADE} />
+        </group>
       )}
       <ShoreWash wind={wind} opacity={foamOpacity(hour, season)} />
       <mesh position={[-5, 0.035, 1]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 0.55, 1]}>
@@ -2266,6 +2280,7 @@ export const LakeWorld = memo(function LakeWorld({
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
       {cowsOut(hour, sky, season) && <Cows />}
+      {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
@@ -2347,6 +2362,7 @@ export const LakeWorld = memo(function LakeWorld({
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
       {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {valleyMistOut(hour, sky, season, wind) && <ValleyMist color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}

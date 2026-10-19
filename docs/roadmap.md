@@ -1271,6 +1271,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC143~~ | ~~News card scene30: spring blossom, winter alpenglow on the snowy hills and the summer hay fields~~ (#1256) | scene | S |
 | ~~SC144~~ | ~~Farmstead: a white farmhouse and a red barn stand on the hills behind the far bank beside the hay fields, their roofs white under winter snow, the windows lit warm and the chimney smoking when the lakeside cabin's are~~ (#1257) | scene | S |
 | ~~SC145~~ | ~~Grazing cows: by day from spring to fall three black-and-white cows graze the pasture on the hills between the farmstead and the hay fields, each ambling a few steps along the slope, cropping the grass head down, and ambling back (two draws)~~ (#1259) | scene | S |
+| ~~SC146~~ | ~~Valley mist: on calm, clear dawns from spring to fall a long low bank of mist lies along the foot of the hills behind the far bank, the far trees' trunks fading into it, its puffs drifting slowly to and fro (one draw)~~ (#1260) | scene | S |
+| ~~SC147~~ | ~~News card scene31: the farmstead, the grazing cows and the dawn valley mist~~ (#1260) | scene | S |
+| ~~SC148~~ | ~~Barn owl: at dusk from summer into the fall a pale barn owl quarters low over the mown hay fields on the far hills, beating slowly along them, hovering on fluttering wings, dropping into the stubble and rising to beat on, then working back the other way (two draws)~~ (#1262) | scene | S |
+| ~~SC149~~ | ~~Cloud shadows on the hills: on clear days the passing clouds' shadows slide on over the hills behind the far bank, dimming the slopes, the hay fields and the pasture as they cross, in step with the shadows on the water (one draw)~~ (#1263) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1574,7 +1578,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT296~~ | ~~Duckweed mats: in summer and fall a cast landing in the thick of a duckweed bed (as the scene draws it, pushed downwind; not among the lily pads, which decide there) fishes two ways: a popper rides over the mat and draws the bass lurking in its shade (0.85 wait), and any other lure comes through bearded with weed so the fish turn from it (1.2 wait, a beginner spared); the cast says which~~ (#1242) | gameplay | S |
 | ~~GT297~~ | ~~News card 2026-10-19-game17 covers GT295 and GT296: raiders on the sunfish beds and duckweed mats~~ (#1244) | ui | S |
 | ~~GT298~~ | ~~A jig over the crayfish: from spring to fall a jig landing within 0.8 m of a crayfish's home on the bed round the dock's pilings hops along like one of them, so the bite comes sooner (0.85 wait) and about a third of its bites are a smallmouth or catfish the angler could land (not for a beginner's first fish); the cast says so~~ (#1250) | gameplay | S |
-| GT299 | Tadpole shallows: in spring by daylight a cast landing among a school of tadpoles (off the Dock, below the Point, by the Reeds and the Drop-off, as far as the school wanders) lands where the fish come to gorge on them, so the bite comes sooner (0.85 wait) and about a third of its bites are a perch, bluegill or bass from that bank the angler could land (not for a beginner's first fish); the cast says so | gameplay | S |
+| ~~GT299~~ | ~~Tadpole shallows: in spring by daylight a cast landing among a school of tadpoles (off the Dock, below the Point, by the Reeds and the Drop-off, as far as the school wanders) lands where the fish come to gorge on them, so the bite comes sooner (0.85 wait) and about a third of its bites are a perch, bluegill or bass from that bank the angler could land (not for a beginner's first fish); the cast says so~~ (#1253) | gameplay | S |
+| ~~GT300~~ | ~~News card 2026-10-19-game18 covers GT298 and GT299: a jig over the crayfish and the tadpole shallows~~ (#1254) | ui | S |
 
 ## Risks / open questions for the owner
 
