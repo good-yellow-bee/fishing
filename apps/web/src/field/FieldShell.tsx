@@ -53,6 +53,18 @@ export function pageBefore(): string | null {
   return idx === null ? pageBelow : (pagesAt.get(idx - 1) ?? null);
 }
 
+/** A link followed from a page, by its history entry: which of the page's links to that address it was, for Back. */
+const followedAt = new Map<number, { to: string; nth: number }>();
+/** An address as path and search, however a link or the router wrote it. */
+function addressOf(href: string): string {
+  const url = new URL(href, window.location.origin);
+  return url.pathname + url.search;
+}
+/** The page's links to an address, in the order they stand. */
+function linksTo(main: HTMLElement, to: string): HTMLAnchorElement[] {
+  return [...main.querySelectorAll<HTMLAnchorElement>("a[href]")].filter((link) => addressOf(link.href) === to);
+}
+
 /** Whether this visit has gone from one page to another yet: a Back can only come after one. */
 let movedInApp = false;
 export function hasMovedInApp(): boolean {
@@ -156,8 +168,25 @@ export function FieldShell({ children }: { children: ReactNode }) {
   // After a link, the new page's heading takes focus, so a screen reader reads where it landed
   // and the keyboard carries on from the top of the page. A page can name another place with
   // data-focus-target; a field the page focused itself is left alone.
-  const lastFocused = useRef(pathname);
+  // Which link a page was left by, for the Back above: a click on a link (or Enter on one) in the page.
   useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const main = document.querySelector<HTMLElement>(".field-main");
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
+      const idx = historyIdx();
+      if (!main || !link || !main.contains(link) || idx === null) return;
+      const to = addressOf(link.href);
+      followedAt.set(idx, { to, nth: linksTo(main, to).indexOf(link) });
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, []);
+  const lastFocused = useRef(pathname);
+  // The page left with its search: Bests' rows open "/?find=…" searches that differ only there.
+  const lastShown = useRef(pathname + search);
+  useEffect(() => {
+    const leftShown = lastShown.current;
+    lastShown.current = pathname + search;
     if (lastFocused.current === pathname) return;
     const left = lastFocused.current;
     lastFocused.current = pathname;
@@ -175,12 +204,25 @@ export function FieldShell({ children }: { children: ReactNode }) {
         return;
       }
     }
+    // Back to any other link that opened the page left, as Bests' rows, calendar days and kinds do: the very link
+    // followed when this entry knows it, so focus lands where the page was scrolled to rather than on a heading far above.
+    if (how === "POP" && main && !(active && main.contains(active) && active !== main)) {
+      const target = addressOf(leftShown);
+      const links = linksTo(main, target);
+      const idx = historyIdx();
+      const followed = idx === null ? undefined : followedAt.get(idx);
+      const back = followed?.to === target ? (links[followed.nth] ?? links[0]) : links.length === 1 ? links[0] : undefined;
+      if (back) {
+        back.focus({ preventScroll: true });
+        return;
+      }
+    }
     // Back and Forward leave focus where a page put it (a search's box); what held it went with the old page, so
     // otherwise it would fall to the document and the keyboard would start again from the top of the app.
     if (how === "POP" && main && active && active !== main && main.contains(active)) return;
     if (!main || (active && main.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName))) return;
     focusPageHeading({ preventScroll: true });
-  }, [pathname, how]);
+  }, [pathname, search, how]);
 
   return (
     <div className="field" data-theme={theme === "device" ? undefined : theme}>

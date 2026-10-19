@@ -11,6 +11,8 @@ import { splitLeftOut } from "./CatchSearch";
 import { kindNames, speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
+import { outingDay } from "./tripDates";
+import { pieceName } from "./gear/pieceKey";
 
 /**
  * An outing as plain text to paste into a message: the day, the water, then each fish in the order it came.
@@ -62,7 +64,7 @@ export function spotSummary(
   best: { trip: Trip; fish: number } | null,
 ): string {
   const lures = pieceTally(catches, 3)
-    .map((row) => `${t(row.lure)} (${row.count})`)
+    .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
@@ -100,7 +102,7 @@ export function speciesSummary(
   const newest = catches[0];
   const named = waters.filter((row) => row.name).map((row) => `${row.name} (${row.count})`);
   const lures = pieceTally(catches, 3)
-    .map((row) => `${t(row.lure)} (${row.count})`)
+    .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     t(species.trim()),
@@ -120,9 +122,10 @@ export function speciesSummary(
  */
 export function yearSummary(book: Logbook, year: string, today: string, goal: number | null): string {
   const catches = book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
-  const days = daysOut(book, year, today);
+  // Last evening's outing, still going in the small hours, is no finished day out yet, as the page counts it.
+  const days = daysOut(book, year, outingDay(today));
   // The outings fished that year, as the outings sheet lists them: the number anglers set season against season.
-  const outings = sheetOutings(book, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
+  const outings = sheetOutings(book, outingDay(today)).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
   const bests = personalBests({ ...book, catches });
   // One kind written two ways under the name the book gives it most: "Zander", not "Zander ".
   const kindName = kindNames(catches);
@@ -137,7 +140,7 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
   const [y, m, d] = today.split("-").map(Number) as [number, number, number];
   const pace = goal !== null && today.startsWith(`${year}-`) ? goalPace(catches.length, goal, new Date(y, m - 1, d)) : null;
   const lures = pieceTally(catches, 3)
-    .map((row) => `${t(row.lure)} (${row.count})`)
+    .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
     t("{year} in the book", { year }),

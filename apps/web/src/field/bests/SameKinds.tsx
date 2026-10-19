@@ -4,10 +4,12 @@ import { useLogbook } from "../LogbookState";
 import { renameInBook } from "../bookRename";
 import { countedFish } from "../milestones";
 import { kindPairs } from "./kindPairs";
+import { bookSpelling } from "../gear/pieceKey";
 
 /** A stored name as Polish writes it, whatever the reader's language: "European perch" and "Okoń" meet there. */
 const inPolish = (name: string) => {
-  const line = polishBook()[name];
+  // As the dictionary spells it: "zander " typed by hand meets "Sandacz" too.
+  const line = polishBook()[bookSpelling(name)];
   return typeof line === "string" ? line : name;
 };
 
@@ -22,7 +24,7 @@ export function SameKinds() {
   }, []);
   const box = useRef<HTMLElement>(null);
   // The fish the counts below hold: a sample fish under the other name is no slip of the angler's.
-  const pairs = kindPairs(countedFish(storedBook.catches), t, inPolish);
+  const pairs = kindPairs(countedFish(storedBook.catches), (name) => t(bookSpelling(name)), inPolish);
   if (pairs.length === 0) return null;
   return (
     <section ref={box} className="same-kinds" aria-label={t("Same kind, two names")}>

@@ -1529,6 +1529,8 @@ html:has(.form-save):has(.undo-bar) .field-main {
 }
 
 .tally-label {
+  /* The floor above keeps a long word whole, up to this: a 40-letter lure name wraps rather than pushing the page sideways. */
+  max-width: min(9em, 45vw);
   overflow-wrap: break-word;
   /* "Październik" in the narrow label column breaks at a syllable, in the page's language, before anywhere. */
   hyphens: auto;

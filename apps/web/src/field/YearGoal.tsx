@@ -175,7 +175,8 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
           </p>
         ) : null}
         {/* Most anglers set last year's number, or a little more: the one already on screen, saved in a tap. */}
-        {lastYearCount > 0 ? (
+        {/* Only while last year is still ahead: a goal already reached is no goal to set. */}
+        {lastYearCount > count ? (
           <p className="meta year-goal-same">
             <button type="button" className="text-button" onClick={() => commit(String(lastYearCount))}>
               {t("Same as last year ({n})", { n: lastYearCount })}
@@ -244,7 +245,7 @@ export function YearGoal({ book, now = new Date(), openAtStart = false }: { book
         </p>
       ) : null}
       {/* Where last year stood on this day, once it had a fish by then. */}
-      {lastYearByNow > 0 && count < goal ? <p className="meta goal-last-year">{t("{n} by this date last year", { n: lastYearByNow })}</p> : null}
+      {lastYearByNow > 0 && count < goal ? <p className="meta goal-last-year">{t("By this date last year: {n}", { n: lastYearByNow })}</p> : null}
     </div>
   );
 }

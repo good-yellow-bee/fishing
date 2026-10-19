@@ -77,12 +77,15 @@ export function DayCalendar({
   book,
   year,
   today,
+  fishedBy = today,
   tail = (term) => term,
   tripTail = (day) => day,
 }: {
   book: Logbook;
   year: string;
   today: string;
+  /** The last day whose outings are done: yesterday in the small hours, while last evening's outing is still going. */
+  fishedBy?: string;
   tail?: (term: string) => string;
   tripTail?: (day: string) => string;
 }) {
@@ -100,10 +103,10 @@ export function DayCalendar({
   const active = current && linked.includes(current) ? current : linked[0];
   const monthFish = (month: string) => [...marks.entries()].reduce((sum, [day, mark]) => (day.startsWith(`${month}-`) ? sum + mark.fish : sum), 0);
   // The month's days out, as the shaded and outlined days show them: a fish, or an outing already past.
-  const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < today))).length;
+  const monthDays = (month: string) => [...marks.entries()].filter(([day, mark]) => day.startsWith(`${month}-`) && (mark.fish > 0 || (mark.trips.length > 0 && day < fishedBy))).length;
   // The month's outings already fished, as its trip search counts them ("Outings: 4 · 1 planned").
   const monthTrips = (month: string) =>
-    new Set([...marks.entries()].flatMap(([day, mark]) => (day.startsWith(`${month}-`) && (day < today || (day === today && mark.fish > 0)) ? mark.trips : []))).size;
+    new Set([...marks.entries()].flatMap(([day, mark]) => (day.startsWith(`${month}-`) && (day < fishedBy || (day <= today && mark.fish > 0)) ? mark.trips : []))).size;
   // The month with the most days out, once one leads the others.
   const busiest = busiestMonth(months.map((month) => [month, monthDays(month)] as const));
   // Today's own day says so, so the season reads against the date.
@@ -179,7 +182,7 @@ export function DayCalendar({
                     </li>
                   );
                 }
-                if (mark && mark.trips.length > 0 && day < today) {
+                if (mark && mark.trips.length > 0 && day < fishedBy) {
                   // The blank opens its outing, or the day's outings when there were several.
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing with no fish", "{n} outings with no fish")}`;
                   return (

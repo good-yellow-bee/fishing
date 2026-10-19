@@ -1,5 +1,6 @@
 import type { Logbook } from "@stillwater/shared";
 import { t } from "../i18n";
+import { outingFish } from "./outingFish";
 
 export type HookTally = { outings: number; landed: number; lost: number; missed: number };
 
@@ -10,10 +11,11 @@ export type HookTally = { outings: number; landed: number; lost: number; missed:
 export function hookTally(book: Logbook, spotId?: string): HookTally | null {
   const counted = book.trips.filter((trip) => (trip.lost || trip.missed) && (spotId === undefined || trip.spotId === spotId));
   if (counted.length === 0) return null;
-  const ids = new Set(counted.map((trip) => trip.id));
+  // With the fish logged loose on an outing's water that day, as the outing's own count has them.
+  const fishOn = outingFish(book);
   return {
     outings: counted.length,
-    landed: book.catches.filter((entry) => entry.tripId && ids.has(entry.tripId)).length,
+    landed: counted.reduce((sum, trip) => sum + fishOn(trip.id), 0),
     lost: counted.reduce((sum, trip) => sum + (trip.lost ?? 0), 0),
     missed: counted.reduce((sum, trip) => sum + (trip.missed ?? 0), 0),
   };

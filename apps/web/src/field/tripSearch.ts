@@ -137,7 +137,9 @@ export function findTrips(
     if (LOST.includes(part)) return (trip.lost ?? 0) > 0;
     if (MISSED.includes(part)) return (trip.missed ?? 0) > 0;
     if (PLANNED.includes(part)) return isPlanned(trip, today, fishOn(trip.id));
+    // The game's rounds stay out, as Bests leaves them out of the split these words open.
     if (WEEKEND.includes(part) || WEEKDAY.includes(part)) {
+      if (!offPlayLake(trip)) return false;
       const weekend = [0, 6].includes(new Date(`${trip.date}T12:00:00`).getDay());
       return WEEKEND.includes(part) ? weekend : !weekend;
     }
