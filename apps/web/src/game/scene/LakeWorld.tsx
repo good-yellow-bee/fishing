@@ -211,11 +211,15 @@ import { BarnOwl } from "./BarnOwl";
 import { barnOwlOut } from "./owlQuarter";
 import { Windmill } from "./Windmill";
 import { Paraglider } from "./Paraglider";
+import { HillBonfire } from "./HillBonfire";
+import { bonfireOut } from "./bonfireSite";
 import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
 import { sheepOut } from "./sheepFlock";
 import { ValleyMist } from "./ValleyMist";
 import { valleyMistOut } from "./valleyMist";
+import { HillCloud } from "./HillCloud";
+import { capCloudAmount, capCloudOut } from "./capCloud";
 import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
 import { Sledders } from "./Sledders";
@@ -237,6 +241,8 @@ import { murmurationOut } from "./murmuration";
 import { Starlings } from "./Starlings";
 import { DockRobin } from "./DockRobin";
 import { robinOut } from "./robinVisit";
+import { Damselflies } from "./Damselflies";
+import { damselfliesOut } from "./damselPerch";
 import { DockSnail } from "./DockSnail";
 import { snailOut } from "./snailCrawl";
 import { gullsOut } from "./gullFloes";
@@ -2288,6 +2294,7 @@ export const LakeWorld = memo(function LakeWorld({
       <Farmstead season={season} hour={hour} wind={wind} />
       <Windmill season={season} wind={wind} />
       {paragliderOut(hour, sky, season, wind) && <Paraglider />}
+      {bonfireOut(hour, sky, season) && <HillBonfire hour={hour} wind={wind} />}
       {cowsOut(hour, sky, season) && <Cows />}
       {sheepOut(hour, sky, season) && <Sheep season={season} />}
       {tractorOut(hour, sky, season) && <Tractor />}
@@ -2374,6 +2381,7 @@ export const LakeWorld = memo(function LakeWorld({
       {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
       {valleyMistOut(hour, sky, season, wind) && <ValleyMist color={mistColor} />}
+      {capCloudOut(hour, sky, season) && <HillCloud color={mistColor} amount={capCloudAmount(sky)} wind={wind} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
@@ -2433,6 +2441,7 @@ export const LakeWorld = memo(function LakeWorld({
       {cootsOut(hour, season) && <Coots squabbling={season === "spring"} />}
       {murmurationOut(hour, sky, season) && <Starlings />}
       {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
+      {damselfliesOut(hour, sky, season, wind) && <Damselflies />}
       {snailOut(hour, sky, season) && <DockSnail />}
       {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}
       {snowShedOut(hour, sky, season) && <ShedSnow trees={TREES} wind={wind} />}
