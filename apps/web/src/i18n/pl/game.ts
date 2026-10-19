@@ -802,6 +802,12 @@ export const PL_GAME: PlBook = {
     "Lista sprzętu wyprawy pozwala cofnąć „Rozpakuj wszystko” i zdjęcie elementu z listy. Na mapie następna wyprawa łowiska mówi, ile sprzętu jest już spakowane, a po północy łowisko, na którym trwa wyprawa, ma dopisek „Teraz na wodzie”. Najlepsze przynęty do spakowania na stronie Sprzęt idą najpierw z łowiska tej wyprawy.",
   "In spring the field under the windmill on the hills behind the far bank flowers bright yellow with rapeseed, in close rows along the slope, and its colour fades with the evening light.":
     "Wiosną pole pod wiatrakiem na wzgórzach za jeziorem kwitnie jaskrawożółtym rzepakiem, w gęstych rzędach wzdłuż zbocza, a jego barwa przygasa wraz z wieczornym światłem.",
+  "Home's What's new keeps to the field log. With nothing planned, Home's Next says when you were last out, with Go again, and behind a year's goal it says how many fish a week it needs. The book file gives this year's catches as a sheet of their own, and its last copy says how many fish it held.":
+    "„Co nowego” na stronie głównej mówi już tylko o dzienniku. Gdy nic nie jest zaplanowane, strona główna podaje ostatni dzień nad wodą z odnośnikiem „Jedź jeszcze raz”, a gdy cel roku jest zagrożony, mówi, ile ryb tygodniowo potrzeba. Plik dziennika daje połowy z tego roku jako osobny arkusz, a ostatnia kopia mówi, ile ryb zawierała.",
+  "Find a catch offers its best words as one-tap searches, and a search's spreadsheet is named after it. A fish's page says its place on the outing, such as fish 3 of 5.":
+    "„Znajdź połów” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie, a arkusz z wyszukiwania nosi jego nazwę. Strona ryby podaje jej miejsce na wyprawie, na przykład ryba 3 z 5.",
+  "Find an outing offers its best words as one-tap searches. In the small hours last evening's outing reads Last night, outing cards count missed strikes, and a water's tackle tips go on the list all at once.":
+    "„Znajdź wyprawę” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie. Po północy wczorajsza wyprawa nazywa się Wczoraj wieczorem, karty wypraw liczą puste brania, a podpowiedzi sprzętu z łowiska trafiają na listę naraz.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",
