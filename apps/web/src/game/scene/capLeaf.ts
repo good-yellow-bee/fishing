@@ -1,5 +1,5 @@
 /**
- * A fall leaf on the angler's cap: every so often one comes spinning down out of the trees and
+ * A fall leaf on the angler's cap, or in spring a blossom petal: every so often one comes spinning down out of the trees and
  * settles on the cap, and there it rides until your next cast shakes it off the brim. Then, a while
  * later, another may come down. A small state stepped each frame; positions are in the head bone's frame.
  */
