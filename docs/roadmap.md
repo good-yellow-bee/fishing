@@ -1130,6 +1130,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA85~~ | ~~The way on from a missing page ("Back to the book") and a merged water ("Open ...") on a touch screen: 19 px links, now 32 px bands like the other one-link lines (#1279)~~ | phone UX | S |
 | ~~PA86~~ | ~~The Map's "Not on a map yet" line on a touch screen: each water with no place noted was a 19 px link in a wrapping line; each is now a 32 px band, plain inline links off touch (#1280)~~ | phone UX | S |
 | ~~PA87~~ | ~~Bests' days calendar on a touch screen: each month's heading linked its outings and fish as 12 px targets in 13 px type; each is now a 32 px band at least 32 px wide, plain inline links off touch (#1282)~~ | phone UX | S |
+| ~~PA88~~ | ~~A log form's note on a touch screen: the fish ("Open it") or outing a note before saving links to was a 15 px target in 13 px type; each is now a 32 px band, plain inline links off touch (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
