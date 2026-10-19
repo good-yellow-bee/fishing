@@ -69,3 +69,15 @@ describe("the shack board's Claimed", () => {
     expect(contrast(blend(color!, SHACK, alpha), SHACK)).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+describe("the focus ring on the parchment cards", () => {
+  it("rings a focused button on the landed card, a toast and the fight card at 3 to 1 or more", () => {
+    const match = /\n:is\(([^)]*)\) :is\(button, a\):focus-visible \{([^}]*)\}/.exec(css);
+    expect(match?.[1]).toContain(".landed-card");
+    expect(match?.[1]).toContain(".toast");
+    expect(match?.[1]).toContain(".fight-bar");
+    const color = /\n  outline-color: (#[0-9a-f]{6});/.exec(match?.[2] ?? "")?.[1];
+    expect(color).toBeDefined();
+    expect(contrast(color!, PARCHMENT_AT_NIGHT)).toBeGreaterThanOrEqual(3);
+  });
+});
