@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { CHEER_SEC, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, tailSwing, watching } from "./dogMood";
+import { CHEER_SEC, DOG_COCK, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, noticing, tailSwing, watching } from "./dogMood";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { MOUSE_FROM } from "./mouseScurry";
@@ -85,5 +85,16 @@ describe("dock dog", () => {
   it("wakes to watch, but a watch does not stand it down from sitting", () => {
     expect(watching({ sit: 0, headUp: 0, wag: 0 }).headUp).toBeGreaterThan(0.5);
     expect(watching({ sit: 1, headUp: 1, wag: 1 })).toEqual({ sit: 1, headUp: 1, wag: 1 });
+  });
+
+  it("wakes with its head right up and a hopeful wag when a nibble catches its ear", () => {
+    const asleep = dogMood("waiting", DOZE_WAIT_SEC + 1);
+    expect(asleep.headUp).toBe(0);
+    const heard = noticing(asleep);
+    expect(heard.headUp).toBe(1);
+    expect(heard.wag).toBeGreaterThan(0);
+    expect(heard.sit).toBe(0);
+    expect(DOG_COCK).toBeGreaterThan(0.1);
+    expect(DOG_COCK).toBeLessThan(0.6);
   });
 });

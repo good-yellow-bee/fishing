@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { DOG_SPOT, DOG_YAW, dogGlance, dogLookAt, dogMood, easeMood, tailSwing, watching, type DogMood } from "./dogMood";
+import { DOG_COCK, DOG_SPOT, DOG_YAW, dogGlance, dogLookAt, dogMood, easeMood, noticing, tailSwing, watching, type DogMood } from "./dogMood";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { mergePainted, type PaintedPart } from "./mergeParts";
@@ -89,12 +89,14 @@ type Props = {
   robin?: Readonly<{ current: number }> | null;
   /** The breeze the paper boat drifts on while one is out, null when not. The dog watches it go by. */
   paperWind?: number | null;
+  /** A fish is nibbling at the float: it wakes, cocks its head and watches the float. */
+  nibble?: boolean;
   /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
   winter?: boolean;
 };
 
-/** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, dozes, and sits up wagging for a bite (dogMood.ts). */
-export function DockDog({ phase, robin = null, paperWind = null, winter = false }: Props) {
+/** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, cocks its head at a nibble, dozes, and sits up wagging for a bite (dogMood.ts). */
+export function DockDog({ phase, robin = null, paperWind = null, winter = false, nibble = false }: Props) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const front = useRef<THREE.Group>(null);
@@ -109,7 +111,7 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false 
     },
     [shapes, material],
   );
-  const state = useRef<{ phase: ScenePhase; since: number; mood: DogMood | null; look: number }>({ phase, since: 0, mood: null, look: 0 });
+  const state = useRef<{ phase: ScenePhase; since: number; mood: DogMood | null; look: number; cock: number }>({ phase, since: 0, mood: null, look: 0, cock: 0 });
 
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
@@ -121,9 +123,11 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false 
     // The robin on the posts first, then a paper boat going by.
     const bird = robin && !still ? robinAt(time, false, false, robin.current) : null;
     const boat = paperWind !== null && !still ? paperBoatAt(time, paperWind) : null;
-    const seen = bird?.here ? dogLookAt(bird.x, bird.z) : boat?.here ? dogLookAt(boat.x, boat.z) : null;
+    // A nibble at the float beats the robin and the paper boat: it looks straight out at the float.
+    const heard = nibble && phase === "waiting";
+    const seen = heard ? 0 : bird?.here ? dogLookAt(bird.x, bird.z) : boat?.here ? dogLookAt(boat.x, boat.z) : null;
     const calm = dogMood(phase, time - track.since);
-    const target = seen !== null && calm.sit === 0 ? watching(calm) : calm;
+    const target = calm.sit > 0 ? calm : heard ? noticing(calm) : seen !== null ? watching(calm) : calm;
     const mood = (track.mood = still || !track.mood ? target : easeMood(track.mood, target, Math.min(delta, 0.1)));
     // The chest rises about the hips as it sits up; the front legs swing from lying forward to straight down.
     if (front.current) front.current.rotation.x = -mood.sit * SIT_TILT;
@@ -136,6 +140,8 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false 
       const turn = seen ?? dogGlance(time);
       track.look += (turn - track.look) * (1 - Math.exp(-4 * Math.min(delta, 0.1)));
       head.current.rotation.y = still ? 0 : awake * (1 - mood.sit) * track.look;
+      track.cock += ((heard ? 1 : 0) - track.cock) * (1 - Math.exp(-5 * Math.min(delta, 0.1)));
+      head.current.rotation.z = still ? 0 : awake * (1 - mood.sit) * track.cock * DOG_COCK;
     }
     if (tail.current) tail.current.rotation.y = still ? 0 : tailSwing(time, mood.wag);
   });

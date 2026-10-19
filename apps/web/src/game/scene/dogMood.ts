@@ -88,6 +88,14 @@ export function dogLookAt(x: number, z: number): number | null {
   return Math.abs(rel) > DOG_LOOK_LIMIT ? null : Math.max(-DOG_LOOK_MAX, Math.min(DOG_LOOK_MAX, rel));
 }
 
+/** How far it cocks its head to one side, radians, when a nibble at the float catches its ear. */
+export const DOG_COCK = 0.35;
+
+/** A nibble at the float wakes it: head right up and a small hopeful wag, its eyes on the float. */
+export function noticing(mood: DogMood): DogMood {
+  return { ...mood, headUp: 1, wag: Math.max(mood.wag, 0.25) };
+}
+
 /** Something worth watching lifts its head, unless it is sat up already for a bite. */
 export function watching(mood: DogMood): DogMood {
   return { ...mood, headUp: Math.max(mood.headUp, 0.9) };

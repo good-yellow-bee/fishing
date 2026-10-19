@@ -694,6 +694,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "In fall a leaf now and then comes seesawing down onto your cap, and in spring a blossom petal, riding there until your next cast shakes it off. And when a fish nibbles at your float, your dog wakes, lifts its head and cocks it at the float.":
+    "Jesienią na twoją czapkę spada czasem kołyszący się liść, a wiosną płatek kwiatu, i zostaje tam aż do następnego rzutu, który go strąca. A gdy ryba skubie przy spławiku, twój pies się budzi, podnosi łeb i przechyla go, patrząc na spławik.",
   "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
     "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
   "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
@@ -766,8 +768,6 @@ export const PL_GAME: PlBook = {
   "Turning it!": "Zawracasz ją!",
   "Patience 7 keeps a fish that dropped the bait about, so a cast straight back has it take again more often, and Accuracy 7 drops your lure into the gaps, so a cast into the weeds, the lily pads or the rocks snags half as often. The shack's tackle box now says what rank 7 of each skill brings.":
     "Cierpliwość 7 zatrzymuje rybę, która puściła przynętę, więc rzut od razu w to samo miejsce częściej kończy się braniem, a Celność 7 wpuszcza przynętę w prześwity, więc rzut w zielsko, grzybienie lub kamienie zaczepia się o połowę rzadziej. Skrzynka na sprzęt w szopie mówi teraz, co daje 7. stopień każdej umiejętności.",
-  "On fine spring and summer days a little paper boat now and then drifts slowly past in front of the dock. Your dog turns to watch it go by, and the robin on the posts too, and in winter it wears a red knitted jumper.":
-    "W pogodne wiosenne i letnie dni przed pomostem przepływa czasem powoli mała papierowa łódka. Twój pies odwraca głowę, żeby popatrzeć, jak płynie, a także na rudzika na słupkach, a zimą nosi czerwony sweter z dzianiny.",
   "Level 18, Breath of the lake, waits at 68000 points, and from there the shack board's requests pay a quarter more. And from Strength 7 one pump lifts a sulking catfish or sturgeon off the bottom, not two.":
     "Poziom 18, Oddech jeziora, czeka przy 68000 punktów, a od niego prośby z tablicy w szopie płacą o jedną czwartą więcej. A od Siły 7 jedna pompka podrywa z dna zalegającego suma lub jesiotra, nie dwie.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
