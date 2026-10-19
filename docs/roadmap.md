@@ -2226,4 +2226,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR558~~ | ~~Round 96 fixes: Home lists the angler's own fish and outings, a night session keeps Log a catch, Yesterday vs Last night, loose fish in the outings sheet, one name per kind in the exports~~ (#1355) | field | S |
 | ~~BR559~~ | ~~Round 96 Home ideas: last out with Go again when nothing is planned, a goal's weekly need, this year's catches as a sheet, the fish in the last copy~~ (#1358) | field | S |
 | ~~BR560~~ | ~~Round 97 fixes: a lure matched however it was typed in Polish, Gear counts loose fish, keeps last evening's outing under Coming up and says Yesterday, Not yet this year by piece~~ (#1366) | field | S |
-| ~~BR561~~ | ~~Round 97 gear ideas: Undo after Unpack all and ×, packing progress and Out now on the Map, best lures of the outing's own water first~~ (#TBD) | field | S |
+| ~~BR561~~ | ~~Round 97 gear ideas: Undo after Unpack all and ×, packing progress and Out now on the Map, best lures of the outing's own water first~~ (#1368) | field | S |
