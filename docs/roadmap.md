@@ -1121,6 +1121,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA76~~ | ~~Shack's three-day board puts one day a row on a phone instead of three 70-95 px columns wrapping the tips a word a line; three across in the 420 px panel at any text size, never two and one (#1216)~~ | phone UX | S |
 | ~~PA77~~ | ~~Reduce motion holds the terns over the fish patch (no twice-a-second wingbeats or plunges; they still slide to a new patch) and the bank's squirrels at one moment, like the other creatures that already did (#1221)~~ | phone UX | S |
 | ~~PA78~~ | ~~Reduce motion keeps the spring grebes floating at one moment: no head shaking and no rush across the water with its spray; a close cast still sends them under (#1226)~~ | phone UX | S |
+| ~~PA79~~ | ~~Bests' month-by-year table on a touch screen: each count and year total was a 24 px link with 8 px between rows; its reach now fills the cell, a 32 px band meeting the next row's, moving nothing (#1268)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
