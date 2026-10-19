@@ -223,7 +223,8 @@ export function TripsPage() {
                 onClick={() => {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
-                    return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems) };
+                    const title = outingName(trip, book.spots);
+                    return { trip: { ...trip, title }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems), alarm: t("Pack for {outing} tomorrow", { outing: title }) };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -583,7 +584,7 @@ function TripView() {
             onClick={() => {
               // An untitled outing goes by its water's name, as its heading does.
               const named = { ...trip, title: outingName(trip, book.spots) };
-              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems)), "text/calendar;charset=utf-8", tripIcsName(named));
+              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems), t("Pack for {outing} tomorrow", { outing: named.title })), "text/calendar;charset=utf-8", tripIcsName(named));
             }}
           >
             {t("Add to calendar")}

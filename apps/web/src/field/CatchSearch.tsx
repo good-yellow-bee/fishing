@@ -1,6 +1,6 @@
 import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigationType, useSearchParams } from "react-router-dom";
-import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
+import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, localDate, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
 import { getLang, getUnits, loadPolish, polishBook, tn, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
@@ -15,7 +15,7 @@ import { datedName, downloadFile } from "./download";
 import { FishSum } from "./FishSum";
 import { PagedCatches } from "./PagedCatches";
 import { bookFishDay, monthName } from "./tripMonths";
-import { noteText, outingNameById, toLocalInput } from "./format";
+import { formatDay, noteText, outingNameById, toLocalInput } from "./format";
 import { tripForFish } from "./suggestions";
 import { useLogbook } from "./LogbookState";
 import "./search.css";
@@ -659,6 +659,14 @@ function FileLoose() {
   );
 }
 
+/** For a day typed as "2026-10-11": its after-midnight fish that count on the outing's day before, and that day. */
+export function smallHoursOn(book: Logbook, needle: string): { count: number; day: string } | null {
+  const day = needle.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  const moved = book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === day && bookFishDay(book, entry) !== day);
+  return moved.length > 0 ? { count: moved.length, day: bookFishDay(book, moved[0]!) } : null;
+}
+
 /** Why nothing matched: a bare year with no fish in it says so, and where the book starts when it is before that. */
 export function emptyText(book: Logbook, needle: string, t: ReturnType<typeof useT>): string {
   const year = needle.trim();
@@ -771,6 +779,8 @@ export function CatchSearch() {
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
   const onCatches = useLocation().pathname.startsWith("/catches");
   const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
+  // A day searched whose fish all count on the night before: where they went.
+  const nightDay = useMemo(() => smallHoursOn(book, settled), [book, settled]);
   // The angler's own among them, decided for the whole book as /catches decides it.
   const mine = useMemo(() => {
     const own = new Set(countedFish(book.catches).map((entry) => entry.id));
@@ -829,7 +839,21 @@ export function CatchSearch() {
             ) : null}
           </>
         ) : (
-          <p>{matches.length === 0 ? emptyText(book, settled, t) : t("Matches: {count}", { count: matches.length })}</p>
+          <p>
+            {matches.length === 0 && nightDay ? (
+              // A day typed off a photo's clock: its small hours went to the evening before, as a night session's do.
+              <>
+                {t("Nothing on {day} itself: fish caught after midnight ({n}) count on their outing's day, {outingDay}.", { day: formatDay(settled), n: nightDay.count, outingDay: formatDay(nightDay.day) })}{" "}
+                <button type="button" className="text-button" onClick={() => search(nightDay.day)}>
+                  {t("Show {day}", { day: formatDay(nightDay.day) })}
+                </button>
+              </>
+            ) : matches.length === 0 ? (
+              emptyText(book, settled, t)
+            ) : (
+              t("Matches: {count}", { count: matches.length })
+            )}
+          </p>
         )}
       </div>
       {settled ? (

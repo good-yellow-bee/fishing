@@ -36,18 +36,19 @@ function nextDay(ymd: string): string {
 /** One all-day calendar event for an outing, for any calendar app to import. */
 /** `at` is the water's own place, when the angler noted it: calendar apps can open it on a map. */
 /** `more` are lines for the event's notes after the outing's own ("Works here: Spinner, Jig"), read the evening before. */
-export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace, more: readonly string[] = []): string {
-  return tripsIcs([{ trip, place, at, more }], now);
+/** `alarm` is a reminder the calendar shows at six the evening before ("Pack for Pike morning tomorrow"). */
+export function tripIcs(trip: Trip, place: string | null, now: Date = new Date(), at?: SpotPlace, more: readonly string[] = [], alarm?: string): string {
+  return tripsIcs([{ trip, place, at, more, alarm }], now);
 }
 
 /** Several outings in one calendar file: every outing coming up, imported in one go. */
-export function tripsIcs(outings: readonly { trip: Trip; place: string | null; at?: SpotPlace; more?: readonly string[] }[], now: Date = new Date()): string {
+export function tripsIcs(outings: readonly { trip: Trip; place: string | null; at?: SpotPlace; more?: readonly string[]; alarm?: string }[], now: Date = new Date()): string {
   const stamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Stillwater//Field log//EN",
-    ...outings.flatMap(({ trip, place, at, more = [] }) => {
+    ...outings.flatMap(({ trip, place, at, more = [], alarm }) => {
       const notes = [trip.note.trim(), ...more].filter(Boolean).join("\n");
       return [
         "BEGIN:VEVENT",
@@ -59,6 +60,8 @@ export function tripsIcs(outings: readonly { trip: Trip; place: string | null; a
         ...(place ? [`LOCATION:${icsText(place)}`] : []),
         ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
         ...(notes ? [`DESCRIPTION:${icsText(notes)}`] : []),
+        // Six hours before the all-day event's midnight start: 18:00 the evening before, in the calendar's own zone.
+        ...(alarm ? ["BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT6H", `DESCRIPTION:${icsText(alarm)}`, "END:VALARM"] : []),
         "END:VEVENT",
       ];
     }),
