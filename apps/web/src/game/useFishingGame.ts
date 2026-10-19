@@ -1358,7 +1358,7 @@ export function useFishingGame(
             beginFight(taken.species, taken.weight, grab.profile);
             // The pike is where the shiner was, not back at the far end of the line.
             if (runtimeRef.current) runtimeRef.current.sim.line = sim.line;
-            setHint(grabCall(current.species.id, fightLines(taken.species.challenge)[0]));
+            setHint(grabCall(current.species.id, taken.species.id, fightLines(taken.species.challenge)[0]));
             return;
           }
           if (surface) {

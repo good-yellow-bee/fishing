@@ -6,11 +6,16 @@ export const GRAB_ODDS = 0.25;
 /** The hit comes once the small fish is reeled this far in: half the line left. */
 export const GRAB_LINE = 0.5;
 
-/** Who hunts whom, and where: a pike in the reeds takes a shiner, a largemouth off the point a bluegill, a walleye in open water a perch. */
+/**
+ * Who hunts whom, and where: a pike in the reeds takes a shiner, a largemouth off the point a bluegill, a walleye in open
+ * water a perch, a smallmouth under the dock a crappie, and a pike off the drop-off a perch.
+ */
 export const GRABS: readonly { prey: string; spot: SpotId; predator: string }[] = [
   { prey: "golden-shiner", spot: "reeds", predator: "pike" },
   { prey: "bluegill", spot: "point", predator: "largemouth-bass" },
   { prey: "perch", spot: "open", predator: "walleye" },
+  { prey: "crappie", spot: "dock", predator: "smallmouth-bass" },
+  { prey: "perch", spot: "dropoff", predator: "pike" },
 ];
 
 /** Share of small fish landed there unhit that the hunter followed in to the bank without taking. */
@@ -39,12 +44,15 @@ export function followerFor(preyId: string, spot: SpotId, profile: Pick<Profile,
 export function followCall(predator: FishSpecies): string {
   if (predator.id === "largemouth-bass") return t("A largemouth bass followed it in to the bank!");
   if (predator.id === "walleye") return t("A walleye followed it up to the boat!");
+  if (predator.id === "smallmouth-bass") return t("A smallmouth bass followed it in to the dock!");
   return t("A pike followed it in to the bank!");
 }
 
-/** The call when the grab comes, with the new fish's fight line. */
-export function grabCall(preyId: string, line: string): string {
+/** The call when the grab comes, naming the hunter and the fish it took, with the new fish's fight line. */
+export function grabCall(preyId: string, predatorId: string, line: string): string {
   if (preyId === "bluegill") return t("A largemouth bass grabbed your bluegill! {line}. Ease off when it runs.", { line });
+  if (preyId === "crappie") return t("A smallmouth bass grabbed your crappie! {line}. Ease off when it runs.", { line });
+  if (preyId === "perch" && predatorId === "pike") return t("A pike grabbed your perch! {line}. Ease off when it runs.", { line });
   if (preyId === "perch") return t("A walleye grabbed your perch! {line}. Ease off when it runs.", { line });
   return t("A pike grabbed your shiner! {line}. Ease off when it runs.", { line });
 }
@@ -53,5 +61,6 @@ export function grabCall(preyId: string, line: string): string {
 export function grabNote(preyId: string): string {
   if (preyId === "bluegill") return t("Took it off your bluegill");
   if (preyId === "perch") return t("Took it off your perch");
+  if (preyId === "crappie") return t("Took it off your crappie");
   return t("Took it off your shiner");
 }
