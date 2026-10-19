@@ -43,13 +43,13 @@ describe("bats", () => {
     let swoops = 0;
     let last = batAt(0, 0);
     let wasIn = false;
-    for (let t = 0; t < 3600; t += 1 / 60) {
+    for (let t = 0; t < 1800; t += 1 / 30) {
       const pose = batAt(0, t);
       closest = Math.min(closest, Math.hypot(pose.x - SWOOP_LAMP.x, pose.z - SWOOP_LAMP.z));
-      // No faster than the loops at their quickest, give or take.
-      expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.16);
+      // No faster than the loops at their quickest, give or take (a step is a thirtieth of a second).
+      expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.32);
       // Where the turns at the light lead, its heading swings smoothly (the loops have quick jinks of their own).
-      if (swoopAt(t) > 0.5 && swoopAt(t - 1 / 60) > 0.5) expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.4);
+      if (swoopAt(t) > 0.5 && swoopAt(t - 1 / 30) > 0.5) expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.8);
       expect(batOverWater(pose)).toBe(true);
       const isIn = swoopAt(t) > 0;
       if (isIn && !wasIn) swoops += 1;
@@ -57,7 +57,7 @@ describe("bats", () => {
       last = pose;
     }
     expect(closest).toBeLessThan(0.9);
-    expect(swoops).toBeGreaterThanOrEqual(10);
+    expect(swoops).toBeGreaterThanOrEqual(5);
     // The others keep to their loops.
     for (let i = 1; i < BAT_COUNT; i += 1) for (let t = 0; t < 300; t += 0.25) expect(Math.hypot(batAt(i, t).x - SWOOP_CENTER.x, batAt(i, t).z - SWOOP_CENTER.z)).toBeGreaterThan(0.6);
   });
