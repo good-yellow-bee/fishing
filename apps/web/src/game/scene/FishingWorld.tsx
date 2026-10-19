@@ -33,6 +33,8 @@ import { Angler } from "./Angler";
 import { RiseRings } from "./RiseRings";
 import { Mayflies } from "./Mayflies";
 import { RodBell } from "./RodBell";
+import { RodDragonfly } from "./RodDragonfly";
+import { rodDragonflyOut } from "./rodDragonfly";
 import { Windsock } from "./Windsock";
 import { Lightning } from "./Lightning";
 import { Rainbow } from "./Rainbow";
@@ -2200,6 +2202,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
         topwater={topwater}
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
+      {rodDragonflyOut(hour, sky, season) && <RodDragonfly rodTip={rodTip} phase={phase} nibble={nibble} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />
       {species && <FishShadow level={level} phase={phase} weight={weight} bobber={bobberWorld} speciesId={species.id} />}
