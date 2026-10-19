@@ -1,7 +1,7 @@
 import { catchesNewestFirst, measuresOf, spotById, SKY_LABELS, WIND_LABELS, type Logbook } from "@stillwater/shared";
 import { getLang, getUnits, num, t } from "../i18n";
 import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
-import { pieceName } from "./gear/pieceKey";
+import { lureNames } from "./pieceTally";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
@@ -48,6 +48,7 @@ export function catchesCsv(book: Logbook): string {
   ];
   // One kind written two ways is one kind, under the name the book gives it most.
   const kindName = kindNames(book.catches);
+  const lureName = lureNames(book.catches);
   const rows = catchesNewestFirst(book).map((entry) => {
     const at = new Date(entry.caughtAt);
     const { weather } = entry;
@@ -61,7 +62,7 @@ export function catchesCsv(book: Logbook): string {
       kindName(entry.species),
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
-      pieceName(entry.lure),
+      lureName(entry.lure),
       spotById(book, entry.spotId)?.name ?? "",
       // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
       entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",

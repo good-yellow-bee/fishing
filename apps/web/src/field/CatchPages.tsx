@@ -1945,7 +1945,7 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
-      <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
+      <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip && (ownTitle(trip, book.spots) || trip.spotId !== entry.spotId) ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
           {/* An untitled outing on this fish's water, named just above: "That day's outing" rather than the name twice. */}

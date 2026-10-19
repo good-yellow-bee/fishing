@@ -1,5 +1,5 @@
 import type { CatchEntry, LureTally } from "@stillwater/shared";
-import { shownPieceKey } from "./gear/pieceKey";
+import { pieceName, shownPieceKey } from "./gear/pieceKey";
 
 /**
  * The lures that took the most fish, most first, grouped as the exact lure search and Gear group them: "Spinnerbait"
@@ -22,6 +22,15 @@ export function pieceTally(catches: readonly CatchEntry[], limit = 5): LureTally
     .map((group) => ({ lure: [...group.spellings].reduce((best, row) => (row[1] > best[1] || (row[1] === best[1] && capital(row[0]) && !capital(best[0])) ? row : best))[0], count: group.count }))
     .sort((a, b) => b.count - a.count || a.lure.localeCompare(b.lure))
     .slice(0, limit);
+}
+
+/**
+ * A lure's name as the book writes it most, in the reader's language: "Spinner" and "spinner " are one piece, so a sheet
+ * or a copied text names it once, as `kindNames` does for kinds.
+ */
+export function lureNames(catches: readonly CatchEntry[]): (lure: string) => string {
+  const spelled = new Map(pieceTally(catches, Infinity).map((row) => [shownPieceKey(row.lure), row.lure]));
+  return (lure) => (lure.trim() ? pieceName(spelled.get(shownPieceKey(lure.trim())) ?? lure) : "");
 }
 
 function capital(name: string): boolean {
