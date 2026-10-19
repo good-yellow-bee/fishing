@@ -11,7 +11,7 @@ import { splitLeftOut } from "./CatchSearch";
 import { kindNames, speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
-import { outingDay } from "./tripDates";
+import { outingDay, plainName, sameName } from "./tripDates";
 import { pieceName } from "./gear/pieceKey";
 
 /**
@@ -21,7 +21,8 @@ import { pieceName } from "./gear/pieceKey";
 export function tripSummary(trip: Trip, spotName: string | null, catches: readonly CatchEntry[], waterOf: (spotId: string) => string | null = () => null): string {
   // An outing saved without a title, which keeps its water's name for one, starts at its day.
   const title = trip.title.trim();
-  const head = [spotName && title.toLowerCase() === spotName.trim().toLowerCase() ? "" : title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(spotName ? [spotName] : [])].filter(Boolean).join(" · ");
+  const water = spotName === null ? null : plainName(spotName);
+  const head = [water && sameName(title, water) ? "" : title, formatDatedDay(new Date(`${trip.date}T12:00:00`)), ...(water ? [water] : [])].filter(Boolean).join(" · ");
   const kindName = kindNames(catches);
   const lureName = lureNames(catches);
   const fish = [...catches]

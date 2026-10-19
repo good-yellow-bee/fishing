@@ -67,8 +67,17 @@ export function outNowAt(book: Logbook, spotId: string, now = new Date()): Trip 
 
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
 function waterNamed(title: string, spots: Logbook["spots"]): boolean {
-  const name = title.trim().toLocaleLowerCase();
-  return spots.some((spot) => spot.name.trim().toLocaleLowerCase() === name);
+  return spots.some((spot) => sameName(spot.name, title));
+}
+
+/** Whether two names read the same, whatever their case or spacing: an older book can hold "  Pine   Pond ". */
+export function sameName(a: string, b: string): boolean {
+  return plainName(a).toLocaleLowerCase() === plainName(b).toLocaleLowerCase();
+}
+
+/** A name as it reads, its stray spaces gone: "  Pine   Pond " is "Pine Pond". */
+export function plainName(name: string): string {
+  return name.trim().replace(/\s+/g, " ");
 }
 
 /** The title the player gave an outing, for its form: "" for one saved under its water's name, so a new water renames it. */
