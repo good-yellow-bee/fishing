@@ -485,9 +485,9 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
   water: FightWater = "open",
-  /** A breezy or strong day: slack line drifts out faster between runs. */
+  /** A breezy or strong day: slack line drifts out faster between runs, and a strong one holds the anchored boat back on a run. */
   wind?: FightWind,
   /** Hooked on a topwater lure: a jumper is already at the top, so its first run is a leap. */
   topwater = false,
@@ -514,7 +514,7 @@ export function makeFight(
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);
   const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT * (flood ? FLOOD_DRIFT : 1) : 1);
   const driftCalm = driftWater * (wind ? WIND_SLACK[wind] : 1);
-  // A run takes line by its own pull; the wind only shows on a resting line.
+  // A run takes line by its own pull; the wind only shows on a resting line, and out on the boat, where a strong one holds the hull back from following the run.
   const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? (wind === "strong" ? STRONG_WIND_BOAT_RUN : BOAT_RUN) : 1);
   const tensionUpCalm = Math.max(
     0.12,

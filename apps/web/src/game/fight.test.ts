@@ -829,7 +829,7 @@ describe("the inlet's current", () => {
 });
 
 describe("a run from the boat", () => {
-  const runLine = (water: "open" | "boat", wind?: "strong") => {
+  const runLine = (water: "open" | "boat", wind?: "breezy" | "strong") => {
     const f = makeFight(fish("pike"), 6, 3, () => 0, 1, water, wind);
     let now = 0;
     while (f.sim.surge !== 2) f.step((now += 50), 0.05, false);
@@ -845,6 +845,8 @@ describe("a run from the boat", () => {
 
   it("takes out more of it in a strong wind, when the hull can't follow as well", () => {
     expect(runLine("boat", "strong").run).toBeCloseTo(runLine("open", "strong").run * STRONG_WIND_BOAT_RUN);
+    expect(runLine("boat", "strong").run).toBeGreaterThan(runLine("boat").run);
+    expect(runLine("boat", "breezy").run).toBeCloseTo(runLine("open", "breezy").run * BOAT_RUN);
   });
 
   it("leaves line drifting between runs as it is from the bank", () => {
