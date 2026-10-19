@@ -28,6 +28,10 @@ import {
   skyAt,
   skyTurnForDay,
   weatherForDay,
+  CAST_RANGE,
+  BOAT_CAST_RANGE,
+  castRangeMultiplier,
+  solidShareForLevel,
 } from "@stillwater/shared";
 import { locale, t } from "../i18n";
 
@@ -204,7 +208,7 @@ export function hookWindowMs(accuracy: number, mercy = false, level = 1) {
   return Math.round((1000 + accuracy * 100) * hookWindowMulForLevel(level)) + (mercy ? MERCY_HOOK_BONUS_MS : 0);
 }
 
-/** A strike in this first share of the hook window sets the hook solid. */
+/** A strike in this first share of the hook window sets the hook solid (more from level 15, see solidShareForLevel). */
 export const SOLID_STRIKE_SHARE = 0.4;
 
 /** On a breezy or strong day the wind's bow in the line soaks up the strike, so a solid hook needs a quicker one. */
@@ -213,10 +217,21 @@ export const WIND_STRIKE = { breezy: 0.85, strong: 0.7 } as const;
 /** A jig's single stout hook drives home on a strike, so it sets solid over a longer share of the window. */
 export const JIG_SOLID = 1.25;
 
-/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure. */
-export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false) {
+/** How quick a strike must be, in ms, to set the hook solid in a window this long, in this wind, on this lure, with a dull point, this far out, at this level. */
+export function solidStrikeMs(windowMs: number, windy?: keyof typeof WIND_STRIKE, lure?: string, dull = false, long = false, level = 1) {
   const jig = !!lure?.trim() && lureClass(lure).id === "jig";
-  return windowMs * SOLID_STRIKE_SHARE * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1);
+  return windowMs * solidShareForLevel(level) * (windy ? WIND_STRIKE[windy] : 1) * (jig ? JIG_SOLID : 1) * (dull ? DULL_SOLID : 1) * (long ? LONG_CAST_SOLID : 1);
+}
+
+/** A lure landing past this share of the angler's reach is a long cast. */
+export const LONG_CAST_SHARE = 0.75;
+/** On a long cast the line out stretches and soaks up the strike, so a solid hook needs a quicker one. */
+export const LONG_CAST_SOLID = 0.8;
+
+/** Whether a lure landing at (toX, toZ) from (fromX, fromZ) lies past LONG_CAST_SHARE of this angler's reach, from the bank or the boat. */
+export function isLongCast(fromX: number, fromZ: number, toX: number, toZ: number, level: number, boat = false) {
+  const reach = CAST_RANGE * castRangeMultiplier(level) * (boat ? BOAT_CAST_RANGE : 1);
+  return Math.hypot(toX - fromX, toZ - fromZ) > reach * LONG_CAST_SHARE;
 }
 
 /** A hook point blunted on the rocks needs a quicker strike to drive home: its share of the usual solid-strike time, until it is touched up. */
@@ -442,6 +457,16 @@ export const JIG_WINTER_WAIT = 0.85;
 /** How the season stretches the wait on a jig: sooner in winter, else 1. */
 export function jigWinterWaitMul(lure: string | undefined, season: LakeSeason | undefined) {
   return season === "winter" && lure?.trim() && lureClass(lure).id === "jig" ? JIG_WINTER_WAIT : 1;
+}
+
+/** In winter the cold fish are slow: a hop, lift, pop or strip within this long of the lure landing or the last one comes too quick for them. */
+export const COLD_WORK_GAP_MS = 1000;
+/** Working the lure too quick in the cold puts the fish off: what is left of the wait stretches this much. */
+export const COLD_WORK_WAIT = 1.25;
+
+/** Whether this touch of the lure comes too quick for the cold fish: in winter, sooner than COLD_WORK_GAP_MS after the last. */
+export function tooQuickForCold(season: LakeSeason | undefined, sinceLastMs: number) {
+  return season === "winter" && sinceLastMs < COLD_WORK_GAP_MS;
 }
 
 /** In spring the reeds' shallows warm first, and the fish crowd in there, so any cast to the reeds draws the bite sooner. */

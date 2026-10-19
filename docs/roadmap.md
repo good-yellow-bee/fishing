@@ -1152,6 +1152,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
 | ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
 | ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
+| ~~PA110~~ | ~~The amber focus ring read 1.6 to 1 on the parchment cards, so a keyboard player could barely see which of the landed card's or a toast's buttons was next: a darker brass ring there, 5 to 1 or more (#1339)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1306,6 +1307,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC147~~ | ~~News card scene31: the farmstead, the grazing cows and the dawn valley mist~~ (#1260) | scene | S |
 | ~~SC148~~ | ~~Barn owl: at dusk from summer into the fall a pale barn owl quarters low over the mown hay fields on the far hills, beating slowly along them, hovering on fluttering wings, dropping into the stubble and rising to beat on, then working back the other way (two draws)~~ (#1262) | scene | S |
 | ~~SC149~~ | ~~Cloud shadows on the hills: on clear days the passing clouds' shadows slide on over the hills behind the far bank, dimming the slopes, the hay fields and the pasture as they cross, in step with the shadows on the water (one draw)~~ (#1263) | scene | S |
+| ~~SC150~~ | ~~Tractor: on dry summer days a little red tractor works the western hay field on the far hills, driving slowly along it between the rows of bales and swinging round at each end (one draw)~~ (#1265) | scene | S |
+| ~~SC151~~ | ~~News card scene32: the barn owl, the tractor and the cloud shadows on the hills~~ (#1265) | scene | S |
+| ~~SC152~~ | ~~Windmill: an old tower mill stands on the skyline of the hills above the eastern hay field; its four sails turn with the day's wind, faster as it freshens, and stand still on a calm day (one draw for the tower, one for the sails; its cap is white under winter snow)~~ (#1341) | scene | S |
+| ~~SC153~~ | ~~Sheep: by day in spring and fall a little flock grazes the western hay field on the far hills, drifting slowly along the slope between the bales, with lambs skipping after their mothers in spring (one draw)~~ (#1342) | scene | S |
+| ~~SC154~~ | ~~News card scene33: the windmill and the sheep~~ (#1342) | scene | S |
+| ~~SC155~~ | ~~Paraglider: on fine, breezy days from spring to fall a paraglider soars the ridge of the far hills, beating along it, banking round at each end and rising and sinking a little in the lift (one draw)~~ (#1343) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1628,7 +1635,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT315~~ | ~~News card 2026-10-19-game23 covers GT313 and GT314: letting a small fish flutter for its hunter, and the lively shiner~~ (#1332) | ui | S |
 | ~~GT316~~ | ~~It takes again: a fish that drops the bait before the strike (too slow) was never pricked, so on the very next cast at that bank it takes again 40% of the time, common fish too; the miss says to cast straight back, the hookset names it, and a bigger lost fish already about keeps its place~~ (#1333) | gameplay | S |
 | ~~GT317~~ | ~~Sturgeon stick to the bottom: like a catfish, a sulking sturgeon takes two pumps to lift, not one, and the fight card and field guide say "Bottom-sticker"~~ (#1334) | gameplay | S |
-| GT318 | News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom | ui | S |
+| ~~GT318~~ | ~~News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom~~ (#1335) | ui | S |
+| ~~GT319~~ | ~~Work it slow in the cold: in winter a hop, lift, pop or strip less than 1 s after the lure lands or after the last one is too quick for the slow fish, so what is left of the wait stretches 1.25x instead of shrinking (the touch still counts toward the few that help); a slow count between touches works as before, and a beginner is spared~~ (#1338) | gameplay | S |
+| ~~GT320~~ | ~~Long cast stretch: a lure landing past 3/4 of the angler's reach (the boat's longer reach counted) is a long cast, where the line out stretches and soaks up the strike, so the solid-hook time is 0.8x; the hookset says "this far out, where the line stretches", and a beginner is spared~~ (#1340) | gameplay | S |
+| GT321 | Level 15 (38000 lifetime points, "One with the lake"): a strike in the first 48% of the bite sets the hook solid, not 40%, on the hookset line and the Strike card's solid mark alike | gameplay | S |
 
 ## Risks / open questions for the owner
 

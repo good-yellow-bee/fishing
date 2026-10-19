@@ -6,7 +6,7 @@ export const INLET_LEVEL = 6;
 export const OPEN_LEVEL = 7;
 export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet", "open"];
 
-export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000, 30000];
+export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000, 30000, 38000];
 
 export function anglerLevel(lifetimePoints: number): number {
   let level = 1;
@@ -52,6 +52,7 @@ export const ANGLER_TITLES = [
   "Spirit of the lake",
   "Heart of the lake",
   "Soul of the lake",
+  "One with the lake",
 ] as const;
 
 export function anglerTitle(level: number): string {
@@ -84,6 +85,7 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   12: "The gold perfect-cast mark is wider.",
   13: "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.",
   14: "Your line holds a moment past the red: it snaps at 105% strain, not 100%.",
+  15: "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.",
 };
 
 export function levelUnlock(level: number): string | null {
@@ -111,6 +113,11 @@ export function fishTireMulForLevel(level: number): number {
 /** The strain a sound line snaps at, as a share of the tension bar: from level 14 it holds a moment past the red. */
 export function lineSnapForLevel(level: number): number {
   return level >= 14 ? 1.05 : 1;
+}
+
+/** The share of the hook window a strike sets the hook solid in: from level 15 the first 48%, not 40%. */
+export function solidShareForLevel(level: number): number {
+  return level >= 15 ? 0.48 : 0.4;
 }
 
 /** How much more often rare and legendary fish are drawn at this level, within what the angler can land. */
