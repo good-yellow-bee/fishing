@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
 import { mouseOut } from "./mouseScurry";
+import { LOOP_SEC, snailAt } from "./snailCrawl";
 import { TOAD_FROM, TOAD_TO, TOAD_Y, VISIT_EVERY_SEC, VISIT_SEC, toadAt, toadOut } from "./toadHop";
 
 describe("toad on the dock", () => {
@@ -29,7 +30,8 @@ describe("toad on the dock", () => {
       }
       last = pose;
     }
-    expect(minX).toBeCloseTo(TOAD_FROM.x, 2);
+    expect(minX).toBeLessThan(TOAD_FROM.x);
+    expect(minX).toBeGreaterThan(TOAD_FROM.x - 0.2);
     expect(maxX).toBeGreaterThan(TOAD_TO.x);
     expect(seen).toBeGreaterThan(VISIT_SEC * 1.9);
     expect(seen).toBeLessThan(VISIT_SEC * 2 + 0.1);
@@ -56,5 +58,31 @@ describe("toad on the dock", () => {
     expect(sat.here).toBe(true);
     expect(sat.x).toBeGreaterThan(TOAD_FROM.x);
     expect(sat.x).toBeLessThan(TOAD_TO.x);
+  });
+
+  it("keeps clear of the snail's loop, which is out in the same rain", () => {
+    for (let t = 0; t < LOOP_SEC; t += 0.5) {
+      const snail = snailAt(t);
+      for (let k = 0; k <= 1; k += 0.05) {
+        const x = TOAD_FROM.x + (TOAD_TO.x - TOAD_FROM.x) * k;
+        const z = TOAD_FROM.z + (TOAD_TO.z - TOAD_FROM.z) * k;
+        expect(Math.hypot(snail.x - x, snail.z - z)).toBeGreaterThan(0.2);
+      }
+    }
+  });
+
+  it("blinks in most of its sits, and its throat and legs never pop", () => {
+    let last = toadAt(0);
+    let blinkStarts = 0;
+    for (let t = 0; t < VISIT_EVERY_SEC; t += 1 / 60) {
+      const pose = toadAt(t);
+      if (pose.here && last.here) {
+        expect(Math.abs(pose.throat - last.throat)).toBeLessThan(0.2);
+        expect(Math.abs(pose.kick - last.kick)).toBeLessThan(0.2);
+      }
+      if (pose.blink && !last.blink) blinkStarts += 1;
+      last = pose;
+    }
+    expect(blinkStarts).toBeGreaterThanOrEqual(5);
   });
 });

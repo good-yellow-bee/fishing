@@ -5,7 +5,7 @@ import { visitAt } from "./visitClock";
  * A toad on the dock on wet evenings: every so often one hauls itself up over the left edge of the
  * boards behind the angler, crosses them in short, unhurried hops with long sits between, its throat
  * pulsing as it sits and its eyes blinking, and drops off the far edge back into the wet. From spring
- * to fall, at dawn, dusk and night while it rains. Pure in time.
+ * to fall, at dawn, dusk and night while it rains. Pure in time since it came out.
  */
 
 type Spot = { x: number; z: number };
@@ -15,12 +15,13 @@ export function toadOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason
   return season !== "winter" && sky === "rain" && hour !== "day";
 }
 
-/** Its way across the boards, behind the snail's loop and the mouse's run. */
-export const TOAD_FROM: Spot = { x: DOCK_PLANKS.minX, z: DOCK_STAND_Z + 1.18 };
-export const TOAD_TO: Spot = { x: DOCK_PLANKS.maxX, z: DOCK_STAND_Z + 1.1 };
+/** Its way across the boards, between the angler's heels and the snail's loop. */
+export const TOAD_FROM: Spot = { x: DOCK_PLANKS.minX, z: DOCK_STAND_Z + 0.45 };
+export const TOAD_TO: Spot = { x: DOCK_PLANKS.maxX, z: DOCK_STAND_Z + 0.4 };
 export const TOAD_Y = DOCK_PLANKS.top;
-/** How far below the boards' edge it is while climbing up or after dropping off. */
+/** How far below the boards' edge it is while climbing up or after dropping off, and out beside them. */
 const UNDER = 0.14;
+const BESIDE = 0.12;
 
 export const VISIT_EVERY_SEC = 70;
 const FIRST_SEC = 6;
@@ -54,7 +55,7 @@ function along(k: number): Spot {
   return { x: TOAD_FROM.x + (TOAD_TO.x - TOAD_FROM.x) * k, z: TOAD_FROM.z + (TOAD_TO.z - TOAD_FROM.z) * k };
 }
 
-/** The toad `time` seconds in. `still` sits it in the middle of the boards. */
+/** The toad `time` seconds after it came out (so it never appears mid-crossing). `still` sits it in the middle of the boards. */
 export function toadAt(time: number, still = false): ToadPose {
   if (still) return { ...along(0.5), here: true, y: TOAD_Y, yaw: YAW, kick: 0, throat: 0, blink: 0 };
   const { index, into } = visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
@@ -62,7 +63,7 @@ export function toadAt(time: number, still = false): ToadPose {
   if (into < CLIMB_SEC) {
     // Up over the edge, front feet first.
     const k = into / CLIMB_SEC;
-    return { ...along(0), here: true, y: TOAD_Y - UNDER * (1 - k * k), yaw: YAW, kick: k < 0.8 ? 0.4 : 0, throat: 0, blink: 0 };
+    return { ...along(0), x: TOAD_FROM.x - BESIDE * (1 - k), here: true, y: TOAD_Y - UNDER * (1 - k * k), yaw: YAW, kick: 0.4 * Math.sin(Math.PI * k), throat: 0, blink: 0 };
   }
   let t = into - CLIMB_SEC;
   for (let hop = 0; hop < HOPS; hop += 1) {
@@ -76,12 +77,13 @@ export function toadAt(time: number, still = false): ToadPose {
     const sit = SITS[hop];
     if (sit === undefined) break;
     if (t < sit) {
-      // Sat, its throat pumping and now and then a slow blink.
-      return { ...along(to), here: true, y: TOAD_Y, yaw: YAW, kick: 0, throat: 0.5 + 0.5 * Math.sin(t * 9), blink: t % 2.7 > 2.45 ? 1 : 0 };
+      // Sat, its throat pumping, settling in and out of it, and now and then a slow blink.
+      const settle = Math.min(1, t / 0.3, (sit - t) / 0.3);
+      return { ...along(to), here: true, y: TOAD_Y, yaw: YAW, kick: 0, throat: settle * (0.5 - 0.5 * Math.cos(t * 9)), blink: t % 2.2 > 0.85 && t % 2.2 < 1.05 ? 1 : 0 };
     }
     t -= sit;
   }
   // Over the far edge and down.
   const k = Math.min(1, t / DROP_SEC);
-  return { ...along(1), x: TOAD_TO.x + 0.12 * k, here: true, y: TOAD_Y + 0.03 * Math.sin(Math.PI * Math.min(1, k * 2)) - UNDER * k * k, yaw: YAW, kick: k < 0.5 ? 1 : 0, throat: 0, blink: 0 };
+  return { ...along(1), x: TOAD_TO.x + BESIDE * k, here: true, y: TOAD_Y + 0.03 * Math.sin(Math.PI * Math.min(1, k * 2)) - UNDER * k * k, yaw: YAW, kick: Math.sin(Math.PI * Math.min(1, k * 2)), throat: 0, blink: 0 };
 }

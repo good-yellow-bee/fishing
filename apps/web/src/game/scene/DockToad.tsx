@@ -72,14 +72,16 @@ export function DockToad() {
     },
     [shapes, material, throatMaterial],
   );
+  const outAt = useRef<number | null>(null);
   useFrame(({ clock }) => {
-    const pose = toadAt(clock.elapsedTime, still);
+    outAt.current ??= clock.elapsedTime;
+    const pose = toadAt(clock.elapsedTime - outAt.current, still);
     const toad = root.current;
     if (!toad) return;
     toad.visible = pose.here;
     if (!pose.here) return;
     toad.position.set(pose.x, pose.y, pose.z);
-    // Tipped nose-up as it pushes off, level again as it lands.
+    // Tipped nose-up about its own sideways axis as it pushes off, level again as it lands.
     toad.rotation.set(-pose.kick * 0.35, pose.yaw, 0);
     for (const leg of legs.current) if (leg) leg.rotation.x = -pose.kick * 1.1;
     if (throat.current) throat.current.scale.set(0.012, 0.006 + pose.throat * 0.007, 0.012);
@@ -88,7 +90,7 @@ export function DockToad() {
   useSkinnedFigure(root, material);
 
   return (
-    <group ref={root} name="dock-toad" visible={false}>
+    <group ref={root} name="dock-toad" visible={false} rotation={[0, 0, 0, "YXZ"]}>
       <group scale={TOAD_SCALE}>
         <mesh geometry={shapes.body} material={material} castShadow />
         <group position={[0, 0.022, 0.044]}>
@@ -105,7 +107,7 @@ export function DockToad() {
               legs.current[i] = leg;
             }}
             position={[side * 0.03, 0.012, -0.03]}
-            rotation={[0, side * 0.5, 0]}
+            rotation={[0, side * 0.5, 0, "YXZ"]}
           >
             <mesh geometry={side < 0 ? shapes.left : shapes.right} material={material} />
           </group>
