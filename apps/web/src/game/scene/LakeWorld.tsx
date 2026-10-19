@@ -204,6 +204,8 @@ import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
+import { BarnOwl } from "./BarnOwl";
+import { barnOwlOut } from "./owlQuarter";
 import { ValleyMist } from "./ValleyMist";
 import { valleyMistOut } from "./valleyMist";
 import { cowsOut } from "./cowGraze";
@@ -2268,6 +2270,7 @@ export const LakeWorld = memo(function LakeWorld({
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
       {cowsOut(hour, sky, season) && <Cows />}
+      {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
