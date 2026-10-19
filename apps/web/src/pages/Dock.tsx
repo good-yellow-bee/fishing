@@ -1176,7 +1176,11 @@ export function DockPage() {
           )}
         </div>
         {shopOpen && (
-          <div className="shop-overlay" role="dialog" aria-modal="true" aria-label={t("The shack")} ref={shopPanel} tabIndex={-1}>
+          <div className="shop-overlay" role="dialog" aria-modal="true" aria-labelledby="shop-title" ref={shopPanel} tabIndex={-1}>
+            {/* The shack's sections are h3s: its own name, unseen, is the h2 between them and the page's h1. */}
+            <h2 id="shop-title" className="sr-only">
+              {t("The shack")}
+            </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
