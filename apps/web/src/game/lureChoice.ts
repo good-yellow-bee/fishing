@@ -1,6 +1,7 @@
 import { lureClass, type LakeHour, type LakeSeason, type SpotId } from "@stillwater/shared";
 import { t } from "../i18n";
 import {
+  colourWaitMul,
   crankPilingWaitMul,
   crankRockWaitMul,
   fallBigLureWaitMul,
@@ -85,7 +86,8 @@ export type LureConditions = { sky: string; hour: LakeHour; season: LakeSeason; 
 
 /**
  * Whether the season, hour and weather draw the bite sooner on this lure right now: a spinner or spoon flashing on a clear day,
- * a worm or popper after dark, a spinner thumping in murky water, a fly on the rise, a big lure in fall, a jig in winter.
+ * a worm or popper after dark, a spinner thumping in murky water, a fly on the rise, a big lure in fall, a jig in winter,
+ * a lure whose colour suits the light.
  * A breezy chop helps every lure but a popper alike, so it marks none. On the bright morning after the rain, the slow jig or worm the
  * sulking fish still take is marked too, though it only escapes the slow bite every other lure has.
  */
@@ -101,6 +103,7 @@ export function suitsNow(lure: string, now: LureConditions): boolean {
     spinnerThumpWaitMul(lure, now.sky) *
     flyHatchWaitMul(lure, now.rising) *
     fallBigLureWaitMul(lure, now.season) *
-    jigWinterWaitMul(lure, now.season);
+    jigWinterWaitMul(lure, now.season) *
+    colourWaitMul(lure, now.sky, now.hour);
   return wait < 1;
 }
