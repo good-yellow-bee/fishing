@@ -2342,8 +2342,10 @@ html[data-input="pad"] .fight-bar .on-pad {
     display: none;
   }
 
+  /* 90 px under the header, below the bank chip and lure panel, or further down when the chip wraps taller ("Dock ·
+     biting today · bites sooner now · groundbait · 5 left"); the scene keeps its height. The coach stays put over it. */
   .hint {
-    top: calc(var(--hud-bottom, 140px) + 90px);
+    top: calc(var(--hud-bottom, 140px) + max(90px, calc(var(--stance-h, 0px) + 16px)));
     right: 8px;
     bottom: auto;
     left: 8px;
@@ -2367,9 +2369,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: auto;
   }
 
+  /* Over the hint, which can come down this far under a tall bank chip: the meter is what a cast is read from. */
   .power-meter {
     right: 12px;
     bottom: 226px;
+    z-index: 3;
     width: 160px;
   }
 
