@@ -36,7 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -137,6 +137,21 @@ describe("catch rules", () => {
     expect(personalBestBonus(0.9, 0.8)).toBe(1.25);
     expect(personalBestBonus(0.7, 0.8)).toBe(1);
     expect(personalBestBonus(0.7, undefined)).toBe(1);
+  });
+
+  it("pays the lodge record bonus, not the personal best one, for a fish that takes the record from another angler", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
+    const at = new Date("2026-07-15T12:00:00Z");
+    expect(validateCatch(starter, request, at, 0.6, 0.7)).toMatchObject({ points: catchPoints(perch, 0.8, false, LODGE_RECORD_BONUS) });
+    // The first of a kind can take the record too.
+    expect(validateCatch(starter, request, at, null, 0.7)).toMatchObject({ points: catchPoints(perch, 0.8, false, LODGE_RECORD_BONUS) });
+    // A record the angler already holds is only beaten for a personal best.
+    expect(validateCatch(starter, request, at, 0.75, 0.7)).toMatchObject({ points: catchPoints(perch, 0.8, false, PB_BONUS) });
+    expect(validateCatch(starter, request, at, 0.6, 0.9)).toMatchObject({ points: catchPoints(perch, 0.8, false, PB_BONUS) });
+    expect(lodgeRecordBonus(0.8, 0.6, 0.8)).toBe(1);
+    expect(lodgeRecordBonus(0.8, 0.6, null)).toBe(1);
+    expect(lodgeRecordBonus(0.8, 0.7, 0.7)).toBe(1.5);
   });
 
   it("blocks landing when strength is short", () => {

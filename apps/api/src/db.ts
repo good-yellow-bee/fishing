@@ -197,6 +197,14 @@ export function heaviestCatch(userId: string, speciesId: string): number | null 
   return row?.heaviest ?? null;
 }
 
+/** The heaviest of a species any other angler has landed, or null when nobody else has. */
+export function othersHeaviestCatch(userId: string, speciesId: string): number | null {
+  const row = db.prepare(`SELECT MAX(weight) as heaviest FROM catch WHERE user_id != ? AND species_id = ?`).get(userId, speciesId) as
+    | { heaviest: number | null }
+    | undefined;
+  return row?.heaviest ?? null;
+}
+
 export function listSpeciesStats(userId: string) {
   const rows = db
     .prepare(

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, CLEAN_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -121,6 +121,19 @@ describe("POST /catches", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({ points });
     expect(db.prepare(`SELECT points FROM catch`).get()).toEqual({ points });
+  });
+
+  it("adds the lodge record bonus to a fish that takes the record from another angler, and only the personal best one after", async () => {
+    const shiner = fishById("golden-shiner")!;
+    db.prepare(`INSERT INTO "user" (id, name, email, emailVerified, createdAt, updatedAt) VALUES (?, ?, ?, 0, ?, ?)`).run("mara", "Mara", "mara@example.test", new Date().toISOString(), new Date().toISOString());
+    createProfile("mara", "Mara");
+    db.prepare(`INSERT INTO catch (id, user_id, species_id, weight, points, spot, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`).run("mara-shiner", "mara", "golden-shiner", 0.3, 3, "dock", new Date(Date.now() - 60_000).toISOString());
+    const bonus = (id: string) => weeklyBonus(shiner.id) * (isGolden(id) ? GOLDEN_BONUS : 1);
+    const taken = await post({ requestId, speciesId: "golden-shiner", weight: 0.35, spot: "dock" });
+    await expect(taken.json()).resolves.toMatchObject({ points: catchPoints(shiner, 0.35, false, LODGE_RECORD_BONUS * bonus(requestId)) });
+    const nextId = "2e0a0c08-7e6d-4ee2-8718-4a938773b7e2";
+    const beaten = await post({ requestId: nextId, speciesId: "golden-shiner", weight: 0.4, spot: "dock" });
+    await expect(beaten.json()).resolves.toMatchObject({ points: catchPoints(shiner, 0.4, false, PB_BONUS * bonus(nextId)) });
   });
 
   it("adds the personal best bonus to a fish heavier than the angler's best of its kind", async () => {

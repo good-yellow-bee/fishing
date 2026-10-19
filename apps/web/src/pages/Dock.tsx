@@ -7,6 +7,7 @@ import {
   INLET_LEVEL,
   catchPoints,
   cleanRunBonus,
+  LODGE_RECORD_BONUS,
   PB_BONUS,
   CLEAN_RUN_FROM,
   catchStamp,
@@ -369,6 +370,8 @@ export function DockPage() {
     if (game.outcome?.kind !== "landed" || !recordsRef.current || !userId) return null;
     return lodgeStamp(recordsRef.current, game.outcome.species.id, game.outcome.weight, userId);
   }, [game.outcome, userId]);
+  /** This catch took the lodge record from another angler, which pays more than a personal best. */
+  const lodgeTaken = lodge?.kind === "record" && !lodge.yours;
 
   const refresh = useCallback(() => {
     return getMe().then(setMe);
@@ -1092,7 +1095,7 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (stamp?.kind === "pb" ? PB_BONUS : 1),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1),
                 ),
               })}
             </p>
@@ -1108,7 +1111,9 @@ export function DockPage() {
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
-              <p className="catch-stamp">{t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}</p>
+              <p className="catch-stamp">
+                {lodgeTaken ? t("Personal best · was {weight}", { weight: weightText(stamp.previous) }) : t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}
+              </p>
             )}
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
@@ -1119,7 +1124,7 @@ export function DockPage() {
               <p className="catch-stamp">
                 {lodge.yours
                   ? t("Lodge record · beat your {weight}", { weight: weightText(lodge.previous) })
-                  : t("Lodge record · was {weight} ({holder})", { weight: weightText(lodge.previous), holder: lodge.holder })}
+                  : t("Lodge record · was {weight} ({holder}) · 1.5× points", { weight: weightText(lodge.previous), holder: lodge.holder })}
               </p>
             )}
             {game.outcome.note && (
