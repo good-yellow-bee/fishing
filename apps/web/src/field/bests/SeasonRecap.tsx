@@ -4,6 +4,7 @@ import { locale, t, tn, useT } from "../../i18n";
 import { CopySummary } from "../CopySummary";
 import { yearSummary } from "../summaries";
 import { readYearGoal } from "../YearGoal";
+import { isSampleOnly } from "../bookCopy";
 import { seasonRecap } from "./seasonRecap";
 import { newWatersThisYear } from "./notYet";
 import { bestFishDay, bookFishDay } from "../tripMonths";
@@ -36,7 +37,8 @@ function seasonFirsts(book: Logbook, year: string, today: string) {
 
 /** "{year} in the book" as copied, the same from All time and from the season picked, with its goal and its firsts. */
 export function seasonCopy(book: Logbook, year: string, today: string): string {
-  const goal = readYearGoal(year);
+  // The goal is the angler's own: the sample week's invented fish don't fill it, as Home and the goal box say.
+  const goal = isSampleOnly(book) ? null : readYearGoal(year);
   return [yearSummary(book, year, today, goal), ...seasonFirsts(book, year, today).firsts].join("\n");
 }
 

@@ -71,7 +71,7 @@ import { looseFishDays, outingFish } from "./outingFish";
 import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { speciesLink } from "./speciesLink";
-import { datePicks, outingDay, ownTitle, pastTitles } from "./tripDates";
+import { datePicks, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -613,7 +613,7 @@ function TripView() {
         <p className="eyebrow">
           <Link to="/trips">{t("Trips")}</Link>
           {" · "}
-          {tripWhen(trip.date, today, tomorrow)}
+          {tripWhen(trip.date, today, tomorrow, stillGoing(book, trip))}
           {daysAheadLabel(trip.date, today) ? ` · ${daysAheadLabel(trip.date, today)}` : null}
         </p>
         {/* The tab tells untitled outings on one water apart by their day. */}

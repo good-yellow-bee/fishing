@@ -1,4 +1,4 @@
-import { localDate, shiftDate, type Logbook } from "@stillwater/shared";
+import { catchesForTrip, localDate, shiftDate, type Logbook, type Trip } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOuting } from "./bookCopy";
@@ -31,6 +31,16 @@ export function datePicks(now: Date): DatePick[] {
  */
 export function outingDay(today: string, now = new Date()): string {
   return today === localDate(now) && now.getHours() < LATE_NIGHT_UNTIL ? shiftDate(now, -1) : today;
+}
+
+/**
+ * Whether last evening's outing is still out on the water in the small hours: dated yesterday, before 04:00, with no
+ * fish yet or one in the last twelve hours. A morning outing yesterday ended long ago, so it reads "Yesterday".
+ */
+export function stillGoing(book: Logbook, trip: Trip, now = new Date()): boolean {
+  if (now.getHours() >= LATE_NIGHT_UNTIL || trip.date !== shiftDate(now, -1)) return false;
+  const fish = catchesForTrip(book, trip.id);
+  return fish.length === 0 || fish.some((entry) => now.getTime() - Date.parse(entry.caughtAt) < 12 * 3_600_000);
 }
 
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */

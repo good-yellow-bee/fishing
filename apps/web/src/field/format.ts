@@ -82,10 +82,11 @@ export function daysAheadLabel(ymd: string, today: string): string {
   return ahead >= 2 ? tn(ahead, "in {n} day", "in {n} days") : "";
 }
 
-export function tripWhen(ymd: string, today: string, tomorrow: string): string {
+/** `going`: whether yesterday's outing is still out in the small hours (`stillGoing`); one that ended reads "Yesterday". */
+export function tripWhen(ymd: string, today: string, tomorrow: string, going = true): string {
   if (ymd === today) return t("Today");
   // In the small hours, last evening's outing is still going: "Last night", as the outing form's pick names it.
-  if (ymd === outingDay(today)) return t("Last night");
+  if (ymd === outingDay(today)) return going ? t("Last night") : t("Yesterday");
   if (ymd === tomorrow) return t("Tomorrow");
   return formatDay(ymd);
 }

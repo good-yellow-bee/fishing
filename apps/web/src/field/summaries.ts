@@ -8,7 +8,7 @@ import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, o
 import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
-import { speciesCounts, speciesWaters } from "./speciesLink";
+import { kindNames, speciesCounts, speciesWaters } from "./speciesLink";
 import { goalPace } from "./YearGoal";
 import { sheetOutings } from "./catchCsv";
 
@@ -29,7 +29,7 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
       // Past New Year it carries its year, as the outing's day above does.
       const shown = day.slice(0, 4) === trip.date.slice(0, 4) ? formatDay(day) : formatDatedDay(new Date(`${day}T12:00:00`));
       const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${shown}, ${formatTimeOfDay(entry.caughtAt)}`;
-      const parts = [`${when} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
+      const parts = [`${when} ${t(entry.species.trim())}`, measuresText(entry), t(entry.lure.trim()), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
   const counts = [
@@ -41,7 +41,7 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
 
 /** One fish as plain text: what it was, its size and lure, then when and where, and its note. */
 export function catchSummary(entry: CatchEntry, spotName: string | null, outing: string | null = null): string {
-  const what = [t(entry.species), measuresText(entry), t(entry.lure), ...(entry.released ? [t("Released")] : [])].join(", ");
+  const what = [t(entry.species.trim()), measuresText(entry), t(entry.lure.trim()), ...(entry.released ? [t("Released")] : [])].join(", ");
   const when = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)}`, ...(spotName ? [spotName] : [])].join(" · ");
   // The conditions as the page shows them, so a pasted fish reads whole: the weather, the moon and its outing.
   const at = new Date(entry.caughtAt);
@@ -103,7 +103,7 @@ export function speciesSummary(
     .map((row) => `${t(row.lure)} (${row.count})`)
     .join(", ");
   return [
-    t(species),
+    t(species.trim()),
     [fishCountLabel(catches.length), ...(released > 0 ? [tn(released, "{n} released", "{n} released")] : [])].join(" · "),
     ...(sizes.length > 0 ? [sizes.join(" · ")] : []),
     ...(first && newest && catches.length > 1
@@ -124,9 +124,11 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
   // The outings fished that year, as the outings sheet lists them: the number anglers set season against season.
   const outings = sheetOutings(book, today).trips.filter((trip) => trip.date.startsWith(`${year}-`)).length;
   const bests = personalBests({ ...book, catches });
+  // One kind written two ways under the name the book gives it most: "Zander", not "Zander ".
+  const kindName = kindNames(catches);
   const best = (entry: CatchEntry | null | undefined, kind: "length" | "weight") =>
     entry
-      ? [t(kind === "length" ? "Longest: {species}, {size}" : "Heaviest: {species}, {size}", { species: t(entry.species), size: measureText(measureOf(entry, kind)!) })]
+      ? [t(kind === "length" ? "Longest: {species}, {size}" : "Heaviest: {species}, {size}", { species: kindName(entry.species), size: measureText(measureOf(entry, kind)!) })]
       : [];
   const waters = speciesWaters(book, catches)
     .filter((row) => row.name)
@@ -143,7 +145,8 @@ export function yearSummary(book: Logbook, year: string, today: string, goal: nu
     ...(days > 0 ? [t("Days on the water in {year}: {count}", { year, count: days })] : []),
     ...(outings > 0 ? [t("Outings: {count}", { count: outings })] : []),
     ...(goal !== null
-      ? [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }) : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
+      ? // A line of the copied text, as the open goal's is: without the box's full stop.
+        [catches.length >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: catches.length, goal, year }).replace(/\.$/, "") : t("{count} of {goal} fish in {year}", { count: catches.length, goal, year })]
       : []),
     // A year still under way, short of its goal: where its pace ends it, as the goal on Bests says.
     ...(pace ? [t("On pace for {pace} by the year's end", { pace: pace.pace })] : []),
@@ -177,7 +180,7 @@ export function searchSummary(parts: readonly string[], matches: readonly CatchE
     .map((entry) => {
       const water = waterOf(entry.spotId);
       // With its time, so a night session's small hours read as such under the day search that found them.
-      const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
+      const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${t(entry.species.trim())}`, measuresText(entry), t(entry.lure.trim()), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${bits.join(", ")}`;
     });
   return [searchLabel(parts), largest ? `${fishCountLabel(matches.length)} · ${t("Largest first")}` : fishCountLabel(matches.length), ...fish].join("\n");

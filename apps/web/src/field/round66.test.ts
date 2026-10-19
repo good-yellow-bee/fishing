@@ -39,7 +39,7 @@ describe("round 66: a year's count", () => {
   });
 
   it("says the goal is reached once the count gets there", () => {
-    expect(yearSummary(book, "2026", "2027-01-20", 3)).toContain("Goal reached: 3 of 3 fish in 2026.");
+    expect(yearSummary(book, "2026", "2027-01-20", 3)).toContain("Goal reached: 3 of 3 fish in 2026\n");
     expect(yearSummary(book, "2026", "2027-01-20", 4)).toContain("3 of 4 fish in 2026");
   });
 });

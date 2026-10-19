@@ -37,6 +37,7 @@ import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
 import { EditDelete } from "./EditDelete";
 import { fishCountLabel, formatDay, formatTimeOfDay, messageText, outingName, outingNameById, tripWhen } from "./format";
+import { stillGoing } from "./tripDates";
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
@@ -560,7 +561,7 @@ function SpotView() {
       {top ? (
         <p className="meta stand">
           {/* The best day here, opening that outing. */}
-          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${outingName(top, book.spots)} · ${tripWhen(top.date, today, tomorrow)}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
+          {t("Best outing here:")} <Link to={`/trips/${top.id}`}>{`${outingName(top, book.spots)} · ${tripWhen(top.date, today, tomorrow, stillGoing(book, top))}`}</Link>, {fishCountLabel(fishByTrip.get(top.id) ?? 0)}
         </p>
       ) : null}
       {/* What the angler wrote after recent days here, each opening its outing. */}

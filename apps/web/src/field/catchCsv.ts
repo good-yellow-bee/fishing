@@ -4,6 +4,7 @@ import { CM_PER_IN, KG_PER_LB } from "../i18n/content";
 import { noteText, outingName, outingNameById } from "./format";
 import { countedBook } from "./milestones";
 import { bookFishDay } from "./tripMonths";
+import { kindNames } from "./speciesLink";
 
 /**
  * One cell, quoted when it holds the separator, a quote or a line break. Text a spreadsheet would read as a formula
@@ -44,6 +45,8 @@ export function catchesCsv(book: Logbook): string {
     t("Released"),
     t("Note"),
   ];
+  // One kind written two ways is one kind, under the name the book gives it most.
+  const kindName = kindNames(book.catches);
   const rows = catchesNewestFirst(book).map((entry) => {
     const at = new Date(entry.caughtAt);
     const { weather } = entry;
@@ -54,10 +57,10 @@ export function catchesCsv(book: Logbook): string {
       `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`,
       `${pad(at.getHours())}:${pad(at.getMinutes())}`,
       bookFishDay(book, entry) === `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}` ? "" : bookFishDay(book, entry),
-      t(entry.species),
+      kindName(entry.species),
       length ? num(metric ? length.inches * CM_PER_IN : length.inches) : "",
       weight ? num(metric ? weight.pounds * KG_PER_LB : weight.pounds, 2) : "",
-      t(entry.lure),
+      t(entry.lure.trim()),
       spotById(book, entry.spotId)?.name ?? "",
       // An untitled outing by its water, as the outings sheet names it, so the two sheets join on it.
       entry.tripId ? (outingNameById(book, entry.tripId) ?? "") : "",
@@ -88,7 +91,10 @@ export function sheetOutings(book: Logbook, today: string): Logbook {
   return { ...counted, trips: counted.trips.filter((trip) => trip.date < today || (trip.date === today && fished.has(trip.id))) };
 }
 
-/** The outings as a spreadsheet file, newest first: the day, the water, the fish landed, and the fish lost and strikes missed. */
+/**
+ * The outings as a spreadsheet file, newest first: the day, the water, the fish landed, and the fish lost and strikes missed.
+ * A fish logged without an outing counts for that day's outing on its water, as the Trips page and Bests count it.
+ */
 export function tripsCsv(whole: Logbook, today: string): string {
   const book = sheetOutings(whole, today);
   const separator = getLang() === "pl" ? ";" : ",";
@@ -96,13 +102,20 @@ export function tripsCsv(whole: Logbook, today: string): string {
   const fish = new Map<string, number>();
   // What each outing took, most first, in the sheet's language: "Zander ×2, Northern pike".
   const kinds = new Map<string, Map<string, number>>();
+  const kindName = kindNames(book.catches);
+  const onDay = new Map<string, string[]>();
+  for (const trip of book.trips) onDay.set(`${trip.date} ${trip.spotId}`, [...(onDay.get(`${trip.date} ${trip.spotId}`) ?? []), trip.id]);
+  const tripIds = new Set(book.trips.map((trip) => trip.id));
   for (const entry of book.catches) {
-    if (!entry.tripId) continue;
-    fish.set(entry.tripId, (fish.get(entry.tripId) ?? 0) + 1);
-    const tally = kinds.get(entry.tripId) ?? new Map<string, number>();
-    const name = t(entry.species.trim());
-    tally.set(name, (tally.get(name) ?? 0) + 1);
-    kinds.set(entry.tripId, tally);
+    const ids = entry.tripId ? [entry.tripId] : (onDay.get(`${bookFishDay(book, entry)} ${entry.spotId}`) ?? []);
+    for (const id of ids) {
+      if (!tripIds.has(id)) continue;
+      fish.set(id, (fish.get(id) ?? 0) + 1);
+      const tally = kinds.get(id) ?? new Map<string, number>();
+      const name = kindName(entry.species);
+      tally.set(name, (tally.get(name) ?? 0) + 1);
+      kinds.set(id, tally);
+    }
   }
   const kindsOf = (tripId: string) =>
     [...(kinds.get(tripId) ?? new Map<string, number>())]
