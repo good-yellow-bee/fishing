@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { mallardAt } from "./mallardWaddle";
+import { mallardAt, mallardVisit } from "./mallardWaddle";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
+import type { ScenePhase } from "./types";
 
 const GREY = "#a9a49a";
 const BREAST = "#7a3e2a";
@@ -52,9 +53,10 @@ export function mallardWingShape(side: number) {
   ]);
 }
 
-/** A mallard drake that now and then swims in and flaps up onto the dock on rainy days, preens, shakes, and goes back the way it came (mallardWaddle.ts). */
-export function DockMallard() {
+/** A mallard drake that now and then swims in and flaps up onto the dock on rainy days, preens, shakes, and goes back the way it came, or bursts off at a strike (mallardWaddle.ts). */
+export function DockMallard({ phase, atDock }: { phase: ScenePhase; atDock: boolean }) {
   const still = useReducedMotion();
+  const clock = useThree((state) => state.clock);
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -67,11 +69,18 @@ export function DockMallard() {
     },
     [shapes, material],
   );
+  // Its own clock starts when it comes out; a strike is kept on that clock, the first one of each visit.
   const outAt = useRef<number | null>(null);
-  useFrame(({ clock }) => {
-    const time = clock.elapsedTime;
+  const startledAt = useRef(-Infinity);
+  useEffect(() => {
+    if (phase !== "fight" || !atDock || outAt.current === null) return;
+    const time = clock.elapsedTime - outAt.current;
+    if (mallardVisit(startledAt.current).index !== mallardVisit(time).index) startledAt.current = time;
+  }, [phase, atDock, clock]);
+  useFrame(({ clock: frame }) => {
+    const time = frame.elapsedTime;
     outAt.current ??= time;
-    const pose = mallardAt(time - outAt.current, still);
+    const pose = mallardAt(time - outAt.current, still, startledAt.current);
     const duck = root.current;
     if (!duck) return;
     duck.visible = pose.here;
