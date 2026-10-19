@@ -1245,8 +1245,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC117~~ | ~~Leaf whirl: on dry fall days a little whirlwind now and then springs up on the far bank, spins a column of fallen leaves round and up as it wanders out over the water, then gives out and lets them flutter down onto the lake~~ (#1235) | scene | S |
 | ~~SC118~~ | ~~Paddleboarder: on calm, fine summer days someone stands paddling a paddleboard across the west of the lake and back with a little dog sitting up at the nose, swapping the paddle from side to side and turning the board round at each end~~ (#1237) | scene | S |
 | ~~SC119~~ | ~~News card scene25: hammock, night row, paddleboarder, hail, leaf whirl~~ (#1237) | scene | S |
-| SC120 | Dancing midges: on still dry evenings in late spring and summer little clouds of midges hang over the water in front of the dock, darting about and bobbing slowly, glinting gold in the low sun | scene | S |
-| SC121 | Gossamer: on fine, still fall mornings and days long silk threads from ballooning spiders float across the water in front of the dock, slowly rippling, a glint of sun running along each now and then | scene | S |
+| ~~SC120~~ | ~~Dancing midges: on still dry evenings in late spring and summer little clouds of midges hang over the water in front of the dock, darting about and bobbing slowly, glinting gold in the low sun~~ (#1239) | scene | S |
+| ~~SC121~~ | ~~Gossamer: on fine, still fall mornings and days long silk threads from ballooning spiders float across the water in front of the dock, slowly rippling, a glint of sun running along each now and then~~ (#1239) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
