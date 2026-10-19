@@ -804,6 +804,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "NOW — net it!": "TERAZ — do podbieraka!",
+  "At the net — let go, then strike as its head comes up!": "Przy podbieraku — puść, a potem zatnij, gdy podniesie łeb!",
   "At night, press L or the Headlamp button to light the water: your float shows plainly, so you have longer to strike, but the light puts the fish off and the bite comes slower. And out on the boat, a cast tight to the far rock where the cormorant dries its wings finds the walleye that hold in its shadow.":
     "W nocy wciśnij L albo przycisk Czołówka, by oświetlić wodę: spławik widać wyraźnie, więc masz więcej czasu na zacięcie, ale światło płoszy ryby i branie przychodzi wolniej. A z łódki rzut tuż przy dalekiej skale, na której kormoran suszy skrzydła, trafia na sandacze trzymające się w jej cieniu.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH, type FishSpecies } from "@stillwater/shared";
-import { DIVERS, FRAYED_SNAP, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL } from "./fight";
+import { DIVERS, FRAYED_SNAP, NET_BOLT_LINE, NET_HEAD_EVERY_MS, NET_HEAD_MS, netsFish, liftsStickerInOne, STRONG_LIFT_STRENGTH, TEETH_SEC, TOOTHY, CHARGERS, CHARGE_SLACK_SEC, BREACHERS, BROADSIDE_REEL, BROADSIDERS, QUIT_TIRE, QUITTERS, SCRAPPER_TIRE, SCRAPPERS, isCleanFight, isCloseCall, LAST_RUN_LINE, makeFight, SULK_MS, SULK_PUMP_SEC, SULK_REEL, PRESSURE_REEL, RED_TENSION, RUN_OUT_LINE, SPENT_STAMINA, staminaState, steerSide, TIGHT_TENSION, TIRING_STAMINA, tensionZone, WEED_MS, WEED_REEL, CURRENT_DRIFT, FLOOD_DRIFT, floodedInlet, BOAT_RUN, STRONG_WIND_BOAT_RUN, WIND_SLACK, WINTER_TIRE, seasonTireMul, thrivesInCold, COLD_LOVERS, SUMMER_TIRE, COLDWATER, warmTireMul, rainCooled, deepCooled, FALL_RUN_TIRE, FALL_RUNNERS, runTireMul, SPRING_RUN_TIRE, SPRING_RUNNERS, springRunTireMul, CURRENT_FIGHTER_TIRE, CURRENT_FIGHTERS, currentTireMul, FALL_FEED_TIRE, FALL_FEEDERS, fallFeedTireMul, RAIN_HUNTER_TIRE, SCENT_HUNTERS, rainHunterTireMul, SUMMER_STRENGTH_TIRE, WARM_LOVERS, summerStrengthTireMul, NEST_TIRE, NEST_GUARDERS, nestTireMul, NIGHT_HUNTER_TIRE, NIGHT_HUNTERS, nightTireMul, SPAWN_SPENT_TIRE, EARLY_SPAWNERS, spentTireMul, TWILIGHT_HUNTER_TIRE, TWILIGHT_HUNTERS, twilightTireMul, ROLL_MS, JUMP_GRACE_SEC, FIRST_RUN_LONGER, TEAR_SEC, PAPER_TEAR_SEC, TREBLE_HOLD, fightWind, fightWater, type FightOutcome, type FightRuntime, type FightSim, type Steer, WRAP_MS, WRAP_PULL, DOWNSTREAM_RUN, DOWNSTREAM_SIDE, JUMP_MS, TAIL_WALK, COVER_HOLD, SHAKE_MS, SHAKE_GRACE_SEC, WITH_RUN_DRIFT, WITH_RUN_GRACE_SEC, WITH_RUN_REEL, TURNED_HEAD_MS, TURNED_HEAD_REEL } from "./fight";
 
 function fish(id: string) {
   const found = FISH.find((candidate) => candidate.id === id);
@@ -1704,5 +1704,46 @@ describe("charges", () => {
     expect(outcome).toBe("escaped");
     expect(runtime.sim.thrown).toBe(true);
     expect(CHARGE_SLACK_SEC).toBeGreaterThan(0);
+  });
+});
+
+describe("netting the fish", () => {
+  const toNet = () => {
+    const runtime = makeFight(fish("pike"), 4, 8, () => 0, 1, "open", undefined, false, false, false, false, false, false, false, 1, 1, true);
+    runtime.sim.line = 0.01;
+    runtime.sim.stamina = 0;
+    let now = 0;
+    for (; !runtime.sim.netting && now < 10_000; now += 50) runtime.step(now, 0.05, true);
+    return { runtime, now };
+  };
+
+  it("holds a spent fish at the net instead of landing it as the line comes in", () => {
+    const { runtime } = toNet();
+    expect(runtime.sim.netting).toBe(true);
+    expect(runtime.sim.line).toBe(0);
+  });
+
+  it("nets it on a fresh strike as its head comes up, and sends it off on a short bolt on a strike with its head down", () => {
+    const { runtime, now } = toNet();
+    runtime.step(now + 10, 0.01, false);
+    expect(runtime.sim.netHead).toBe(false);
+    expect(runtime.step(now + 20, 0.01, true)).toBe("fighting");
+    expect(runtime.sim.netting).toBe(false);
+    expect(runtime.sim.line).toBe(NET_BOLT_LINE);
+    expect(runtime.performance.netMisses).toBe(1);
+
+    const again = toNet();
+    const up = again.now + NET_HEAD_EVERY_MS - NET_HEAD_MS + 50;
+    // Still holding the reel from bringing it in: only a fresh strike counts.
+    expect(again.runtime.step(up, 0.01, true)).toBe("fighting");
+    again.runtime.step(up + 10, 0.01, false);
+    expect(again.runtime.sim.netHead).toBe(true);
+    expect(again.runtime.step(up + 20, 0.01, true)).toBe("landed");
+  });
+
+  it("nets everything but a panfish masher, and never a beginner's easy fish", () => {
+    expect(netsFish(fish("pike"), false)).toBe(true);
+    expect(netsFish(fish("perch"), false)).toBe(fish("perch").challenge !== "mash");
+    expect(netsFish(fish("pike"), true)).toBe(false);
   });
 });
