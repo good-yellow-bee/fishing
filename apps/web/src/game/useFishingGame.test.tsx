@@ -362,6 +362,8 @@ describe("useFishingGame live shiner", () => {
 
   it("hooks a landed shiner on as bait, and the next cast draws the bank's hunter to it once", () => {
     const surface = mount();
+    // A fight that went into the red leaves the shiner worn, not lively.
+    fightPerformance = { peakTension: 0.9, maxLine: 1 };
     vi.mocked(pickBite).mockReturnValueOnce(shiner);
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 1);
@@ -378,6 +380,22 @@ describe("useFishingGame live shiner", () => {
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(hint()).toMatch(/^It took the live shiner! /);
+  });
+
+  it("sends a shiner landed clean out lively, drawing more of the hunters", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=clean]")?.textContent).toBe("true");
+    baitShiner();
+    expect(hint()).toBe("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.");
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.7);
+    cast(surface);
+    expect(hint()).toMatch(/^The lively shiner swims hard on the hook, and more of the hunters here come to it\./);
+    // A roll of 0.7 misses a plain live shiner's 60% but lands in a lively one's 80%.
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
+    random.mockRestore();
   });
 
   it("leaves any other landed fish on the card", () => {
@@ -656,6 +674,30 @@ describe("useFishingGame lost fight", () => {
     now += 16;
     act(() => frames.at(-1)!(now));
     expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("true");
+  });
+
+  it("keeps a fish that dropped the bait about for the next cast, and names it when it takes again", () => {
+    const surface = mount();
+    const crappie = FISH.find((fish) => fish.id === "crappie")!;
+    vi.mocked(pickBite).mockReturnValueOnce(crappie);
+    cast(surface);
+    for (let waited = 0; phase() !== "result:miss" && waited < 25_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).toMatch(/It wasn't hooked, so it may take again: cast straight back here\.$/);
+    const missed = vi.mocked(castForGotAway).mock.calls.length;
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    const waiting = vi.mocked(castForGotAway).mock.calls[missed]?.[0];
+    expect(waiting).toMatchObject({ spot: "dock", species: { id: "crappie" }, casts: 1, dropped: true });
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toBe(`crappie|${waiting!.weight}`);
+    expect(hint()).toMatch(/^It's the one that dropped your bait! /);
+    step.mockReturnValueOnce("landed");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    // It didn't get away from a fight, so the landed card doesn't call it that.
+    expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("false");
   });
 
   it("calls a trophy-sized fish heavy on the hook, with a thud on the rod", () => {
@@ -1926,7 +1968,7 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("The float lifts and lies flat — strike!");
     for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(phase()).toBe("result:miss");
-    expect(hint()).toBe("Strike the moment the float lifts.");
+    expect(hint()).toBe("Strike the moment the float lifts. It wasn't hooked, so it may take again: cast straight back here.");
   });
 
   it("calls a walleye's light take and gives it longer before it drops the bait", () => {

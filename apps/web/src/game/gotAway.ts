@@ -6,18 +6,28 @@ export const AGAIN_ODDS = 0.3;
 export const BIG_LURE_AGAIN_ODDS = 0.5;
 /** Casts, anywhere, before the lost fish moves off for good. */
 export const AGAIN_CASTS = 5;
+/** A fish that dropped the bait before the strike was never pricked, so a cast straight back often has it take again. */
+export const DROPPED_ODDS = 0.4;
 
-/** follow marks a hunter that followed a landed small fish in, rather than a fish that broke off. */
-export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number; follow?: boolean };
+/**
+ * follow marks a hunter that followed a landed small fish in, rather than a fish that broke off;
+ * dropped marks a fish that let go of the bait before the strike, waiting only for the very next cast.
+ */
+export type GotAway = { spot: SpotId; species: FishSpecies; weight: number; casts: number; follow?: boolean; dropped?: boolean };
 
 /** The fish that broke off, waiting to bite again at its bank; small common fish are never remembered. */
 export function gotAwayAfterLoss(species: FishSpecies, weight: number, spot: SpotId): GotAway | null {
   return species.rarity === "common" ? null : { spot, species, weight, casts: AGAIN_CASTS };
 }
 
+/** The fish that dropped the bait, still about its bank for the next cast only; any fish, common ones too. */
+export function gotAwayAfterDrop(species: FishSpecies, weight: number, spot: SpotId): GotAway {
+  return { spot, species, weight, casts: 1, dropped: true };
+}
+
 /** Whether this cast brings the fish that got away back, and what is still waiting after it. */
 export function castForGotAway(lost: GotAway | null, spot: SpotId, roll: number, bigLure = false): { again: GotAway | null; next: GotAway | null } {
   if (!lost) return { again: null, next: null };
-  if (lost.spot === spot && roll < (bigLure ? BIG_LURE_AGAIN_ODDS : AGAIN_ODDS)) return { again: lost, next: null };
+  if (lost.spot === spot && roll < (lost.dropped ? DROPPED_ODDS : bigLure ? BIG_LURE_AGAIN_ODDS : AGAIN_ODDS)) return { again: lost, next: null };
   return { again: null, next: lost.casts > 1 ? { ...lost, casts: lost.casts - 1 } : null };
 }

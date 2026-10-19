@@ -369,6 +369,16 @@
     box-sizing: border-box;
   }
 
+  /* A water's coordinates and its Copy the place: when the two wrap (a sideways phone's narrow column), the button
+     drops a full 16 px below, so neither one's reach cuts into the other's. */
+  .map-index .map-place {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.3em;
+    row-gap: 16px;
+  }
+
   /* The waters with no place yet are named in a running line, 19 px links that wrap: each is now a 32 px band. */
   .map-note a {
     display: inline-block;

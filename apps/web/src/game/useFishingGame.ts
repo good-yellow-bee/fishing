@@ -49,7 +49,7 @@ import { MIDGE_RISE_WAIT, midgeLike, underMidges } from "./midgeClouds";
 import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
+import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
@@ -317,6 +317,8 @@ export function useFishingGame(
   const againRef = useRef(false);
   /** The fish on now is the hunter that followed a small fish in. */
   const followedRef = useRef(false);
+  /** The fish biting now is the one that dropped the bait on the last cast. */
+  const droppedRef = useRef(false);
   /** The fish on now is one let go at this bank on an earlier day, come back grown. */
   const recaughtRef = useRef<Recaught | null>(null);
   /** The bite came from a feeder the groundbait drew in, for the landed card to say so. */
@@ -450,6 +452,8 @@ export function useFishingGame(
   const castWashedRef = useRef(false);
   /** A landed golden shiner hooked back on as live bait, for the next cast. */
   const liveShinerRef = useRef(false);
+  /** The shiner on the hook was landed in a clean fight, so it swims hard and draws more of the hunters. */
+  const livelyShinerRef = useRef(false);
   const [liveShiner, setLiveShiner] = useState(false);
   const [groundbait, setGroundbait] = useState<Groundbait | null>(null);
   /** The bank whose next cast meets wary fish, for the stance chip to say so before the cast. */
@@ -588,7 +592,7 @@ export function useFishingGame(
       // A late strike only just catches, so the hook can pull out like a soft mouth's.
       runtime.sim.lightHook = lightHook;
       const line = fightLines(species.challenge)[0];
-      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
+      const again = !strike ? "" : againRef.current ? `${followedRef.current ? t("It's the one that followed your fish in!") : droppedRef.current ? t("It's the one that dropped your bait!") : t("It's the one that got away!")} ` : recaughtRef.current ? `${t("It's a fish you let go here before!")} ` : shinerTakenRef.current ? `${t("It took the live shiner!")} ` : "";
       // A trophy-sized fish is felt on the rod the moment it's hooked.
       const heavy = isTrophyWeight(species, weight) ? `${t("It feels heavy — could be a trophy!")} ${t("A fish this big makes a long first run.")} ` : "";
       // Cold water makes a fish sluggish, and the angler feels it at once.
@@ -848,10 +852,12 @@ export function useFishingGame(
     if (shadowWait > 1) reasons.unshift(t("The low sun behind you throws your shadow across the water, and the fish shy from it. Try another bank till the sun climbs or sets."));
     // A live shiner on the hook swims down and draws the bank's hunters; it goes out on this one cast, and is told first.
     const shiner = liveShinerRef.current;
+    const lively = shiner && livelyShinerRef.current;
     if (shiner) {
       liveShinerRef.current = false;
+      livelyShinerRef.current = false;
       setLiveShiner(false);
-      reasons.unshift(t("The live shiner swims down off the hook, and the hunters here come to it."));
+      reasons.unshift(lively ? t("The lively shiner swims hard on the hook, and more of the hunters here come to it.") : t("The live shiner swims down off the hook, and the hunters here come to it."));
     }
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
@@ -864,13 +870,14 @@ export function useFishingGame(
     gotAwayRef.current = lost.next;
     againRef.current = lost.again !== null;
     followedRef.current = !!lost.again?.follow;
+    droppedRef.current = !!lost.again?.dropped;
     // A fish let go at this bank on an earlier day may come back to the line, a little heavier; a beginner's first fish stays an easy one.
     const released = lost.again || mercyNow ? null : castForReleased(loadReleased(), spotRef.current, Date.now(), Math.random());
     if (released?.fish) saveReleased(released.next);
     recaughtRef.current = released?.fish ?? null;
     // Over the groundbait the feeders crowd in, so some bites are theirs; a beginner's first fish stays an easy one.
     const feeder = bait.baited && !mercyNow ? groundbaitFeeder(spotRef.current, lureRef?.current, short, hour) : null;
-    const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour) : null;
+    const hunter = shiner && !lost.again && !recaughtRef.current && !mercyNow ? shinerHunter(spotRef.current, current, hour, Math.random, lively) : null;
     shinerTakenRef.current = !!hunter;
     // On the sunfish beds some bites are the perch and smallmouth come to raid the eggs; a beginner's first fish stays an easy one.
     const raider = castBedRef.current && !lost.again && !recaughtRef.current && !hunter && !mercyNow ? bedRaider(spotRef.current, lureRef?.current, current, hour) : null;
@@ -995,8 +1002,11 @@ export function useFishingGame(
             // The missed fish stays in the outcome so the turn-away shows the same fish.
             // How long it held on, so the angler learns the window they have.
             setOutcome({ kind: "miss", message: t("Too slow. The fish dropped the bait after {time} s.", { time: seconds(windowMs) }), fish: bitten });
+            // It was never pricked, so it may take again on a cast straight back, unless a bigger lost fish is already about.
+            const dropped = !gotAwayRef.current;
+            if (dropped) gotAwayRef.current = gotAwayAfterDrop(bitten.species, bitten.weight, spotRef.current);
             // Hold result so the miss spring and the turn play out.
-            resetToIdle(style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under."), "result");
+            resetToIdle((style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under.")) + (dropped ? ` ${t("It wasn't hooked, so it may take again: cast straight back here.")}` : ""), "result");
           }, windowMs);
         };
         openWindow();
@@ -1520,7 +1530,7 @@ export function useFishingGame(
                 lightHook: runtime.sim.lightHook,
                 secondTake: secondTakeRef.current,
                 grabbed: grabbedRef.current,
-                gotAway: againRef.current && !followedRef.current,
+                gotAway: againRef.current && !followedRef.current && !droppedRef.current,
                 followedIn: againRef.current && followedRef.current,
                 recaught: !!recaught,
                 turnedRuns: runtime.performance.turnedRuns ?? 0,
@@ -1665,9 +1675,11 @@ export function useFishingGame(
   const baitShiner = () => {
     if (outcome?.kind !== "landed" || !canBaitShiner(outcome.species.id)) return;
     liveShinerRef.current = true;
+    // Landed clean, it isn't worn out, so it swims hard on the hook.
+    livelyShinerRef.current = !!outcome.clean;
     setLiveShiner(true);
     setOutcome(null);
-    resetToIdle(t("You hook the shiner on as live bait. Cast it out to the hunters."));
+    resetToIdle(outcome.clean ? t("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.") : t("You hook the shiner on as live bait. Cast it out to the hunters."));
   };
 
   return {

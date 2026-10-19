@@ -1100,7 +1100,7 @@ export function DockPage() {
               </button>
               {/* A shiner goes back out on the hook as live bait, for the pike and bass that hunt it. */}
               {!landedReleased && canBaitShiner(game.outcome.species.id) && (
-                <button className="panel-btn" type="button" onClick={game.baitShiner} title={t("Hook it on as live bait: the next cast draws the hunters here.")}>
+                <button className="panel-btn" type="button" onClick={game.baitShiner} title={game.outcome.clean ? t("Hook it on as live bait: landed clean, it's lively and draws more of the hunters here.") : t("Hook it on as live bait: the next cast draws the hunters here. A shiner landed in a clean fight is livelier.")}>
                   {t("Use it as bait")}
                 </button>
               )}

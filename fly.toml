@@ -1,0 +1,34 @@
+app = "stillwater-game"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  STILLWATER_DB_PATH = "/data/stillwater.sqlite"
+  BETTER_AUTH_URL = "https://stillwater-game.fly.dev"
+
+# SQLite lives on this volume, so the app stays on one machine.
+[[mounts]]
+  source = "stillwater_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    grace_period = "15s"
+    interval = "30s"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

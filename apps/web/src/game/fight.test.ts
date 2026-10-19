@@ -616,8 +616,8 @@ describe("sulking on the bottom", () => {
     expect(waited.sim.sulk).toBe(false);
   });
 
-  it("takes two pumps to lift a catfish off the bottom", () => {
-    const catfish = makeFight(fish("catfish"), 10, 3, () => 0);
+  it.each(["catfish", "sturgeon"])("takes two pumps to lift a %s off the bottom", (id) => {
+    const catfish = makeFight(fish(id), 10, 5, () => 0);
     let now = untilSulk(catfish);
     const pump = () => {
       for (const end = now + SULK_PUMP_SEC * 1000 + 50; now < end; now += 50) catfish.step(now, 0.05, false);

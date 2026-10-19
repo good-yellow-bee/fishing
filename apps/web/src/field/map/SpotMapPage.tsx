@@ -501,7 +501,7 @@ export function SpotMapPage() {
                   <Link to={`/spots/${spot.id}`}>{spot.name}</Link>
                   <span>{t(WATER_LABELS[spot.waterType])}</span>
                   <span>{fishLine(spot.id)}</span>
-                  <span>
+                  <span className="map-place">
                     <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
                       {formatCoord(place.lat, place.lng)}
                     </MapAnchor>{" "}

@@ -366,7 +366,7 @@ describe("FightBar for screen readers", () => {
       return [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent).filter((line) => /^(Jumper|Tail-walker|Breacher|Roller|Scrapper|Circler|Quitter|Bottom-sticker|Head-shaker|Darter|Cover-diver|Long runner|Soft mouth|Sharp teeth):/.test(line ?? ""));
     };
     expect(habit("rainbow-trout")).toEqual(["Jumper: every second run is a leap, so let go when it comes up", "Tail-walker: its first leap dances across the top, so keep bowing till it's down"]);
-    expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up"]);
+    expect(habit("sturgeon")).toEqual(["Breacher: its first run is a leap, so let go when it comes up", "Bottom-sticker: when it sulks it takes two pumps to lift, not one"]);
     expect(habit("pike")).toEqual(["Roller: at the net it rolls on the line instead of running", "Sharp teeth: when it swallows the bait, they fray the line if the fight runs long"]);
     expect(habit("carp")).toEqual(["Long runner: the first run is the long one, so let it go"]);
     expect(habit("crappie")).toEqual(["Soft mouth: reel in the red and the hook tears out"]);

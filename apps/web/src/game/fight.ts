@@ -118,8 +118,8 @@ export const SHAKE_MS = 600;
 /** A shake gives about a reaction time to let go before a tight line goes into the red. */
 export const SHAKE_GRACE_SEC = 0.3;
 
-/** Catfish stick to the bottom: a sulking catfish takes two pumps to lift, not one. */
-export const STICKERS: ReadonlySet<string> = new Set(["catfish"]);
+/** Catfish and sturgeon stick to the bottom: a sulking one takes two pumps to lift, not one. */
+export const STICKERS: ReadonlySet<string> = new Set(["catfish", "sturgeon"]);
 
 /** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
 export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);

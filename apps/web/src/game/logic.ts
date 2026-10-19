@@ -710,10 +710,12 @@ export function canBaitShiner(speciesId: string) {
 export const SHINER_HUNTERS: ReadonlySet<string> = new Set(["pike", "tiger-muskie", "largemouth-bass", "smallmouth-bass", "walleye"]);
 /** Chance a bite on a live shiner is one of the bank's hunters. */
 export const LIVE_SHINER_SHARE = 0.6;
+/** A shiner landed in a clean fight goes back out lively and swims hard on the hook, so more of the bites are hunters. */
+export const LIVELY_SHINER_SHARE = 0.8;
 
 /** A hunter drawn to the live shiner for this bite, from the bank's own and weighed as the bank draws them, only one the angler could land, or none. */
-export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
-  if (random() >= LIVE_SHINER_SHARE) return null;
+export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random, lively = false): FishSpecies | null {
+  if (random() >= (lively ? LIVELY_SHINER_SHARE : LIVE_SHINER_SHARE)) return null;
   const hunters = FISH.filter((fish) => fish.spots.includes(spot) && SHINER_HUNTERS.has(fish.id) && canLand(profile, fish));
   let roll = random() * hunters.reduce((sum, fish) => sum + appeal(fish, hour), 0);
   for (const fish of hunters) {

@@ -110,7 +110,14 @@ export const PL_GAME: PlBook = {
   "The water has warmed since yesterday, and the fish wake up to feed.": "Woda ociepliła się od wczoraj, a ryby budzą się do żerowania.",
   "The water has cooled since yesterday, and the sluggish fish bite slow.": "Woda ochłodziła się od wczoraj, a ospałe ryby biorą powoli.",
   "Use it as bait": "Użyj go jako przynęty",
-  "Hook it on as live bait: the next cast draws the hunters here.": "Załóż go na haczyk jako żywą przynętę: następny rzut przyciągnie tutejsze drapieżniki.",
+  "Hook it on as live bait: the next cast draws the hunters here. A shiner landed in a clean fight is livelier.":
+    "Załóż go na haczyk jako żywą przynętę: następny rzut przyciągnie tutejsze drapieżniki. Złotawiec wyholowany czysto jest żwawszy.",
+  "Hook it on as live bait: landed clean, it's lively and draws more of the hunters here.":
+    "Załóż go na haczyk jako żywą przynętę: wyholowany czysto jest żwawy i przyciąga więcej tutejszych drapieżników.",
+  "You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.":
+    "Zakładasz żwawego złotawca na haczyk jako żywą przynętę: wyholowany czysto, mocno pływa i przyciąga więcej drapieżników. Zarzuć go.",
+  "The lively shiner swims hard on the hook, and more of the hunters here come to it.":
+    "Żwawy złotawiec mocno pracuje na haczyku, a do niego płynie więcej tutejszych drapieżników.",
   "You hook the shiner on as live bait. Cast it out to the hunters.": "Zakładasz złotawca na haczyk jako żywą przynętę. Zarzuć go do drapieżników.",
   "The live shiner swims down off the hook, and the hunters here come to it.": "Żywy złotawiec schodzi z haczykiem w głąb, a tutejsze drapieżniki płyną do niego.",
   "It took the live shiner!": "Wziął żywego złotawca!",
@@ -504,6 +511,8 @@ export const PL_GAME: PlBook = {
   "A smallmouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.":
     "Poluje tu na nie bass małogębowy: przestań zwijać i daj rybce chwilę się potrzepotać, a bass może ją chwycić.",
   "It's the one that got away!": "To ta, która się zerwała!",
+  "It's the one that dropped your bait!": "To ta, która wypuściła twoją przynętę!",
+  "It wasn't hooked, so it may take again: cast straight back here.": "Nie zacięła się, więc może wziąć znowu: zarzuć od razu w to samo miejsce.",
   "A largemouth bass followed it in to the bank!": "Bass wielkogębowy odprowadził ją aż do brzegu!",
   "A walleye followed it up to the boat!": "Sandacz odprowadził ją aż pod łódź!",
   "A pike followed it in to the bank!": "Szczupak odprowadził ją aż do brzegu!",
@@ -654,10 +663,6 @@ export const PL_GAME: PlBook = {
     "Na tablecie panele pod górnym paskiem przystani przesuwają się w dół, gdy pasek zawija się do drugiego wiersza, więc nic się pod nim nie chowa. Przyciski Edytuj i Usuń przy rybie łatwiej rozróżnić palcem, Mapa pokazuje nagłówek już podczas wczytywania, a na telefonie link Następna wyprawa na liście Mapy łatwiej trafić.",
   "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.":
     "Kolorowe wiersze na karcie holu, od ostrzeżenia o zrywie po znaczek czystego holu, oraz kilka słów o rybie na karcie złowionej ryby są ciemniejsze i czytelniejsze. W Szopie przycisk Odbierz przy zleceniu łatwiej trafić na telefonie, a napis Odebrane łatwiej odczytać. Karta nowości nie zasłania już na telefonie przycisków łowisk, a czytnik ekranu odczytuje w podsumowaniu wyprawy najcięższą rybę w całości.",
-  "Settings' switches and volume sliders and the shack's Strength, Accuracy and Patience buttons are easier to tap on a phone. The lodge board's All time and This week tabs answer the arrow keys, a screen reader hears the shack's sections in order, and the landed card's rarity tag and the Badge line are darker and easier to read.":
-    "Przełączniki i suwaki głośności w Ustawieniach oraz przyciski Siła, Celność i Cierpliwość w Szopie łatwiej trafić na telefonie. Zakładki Od początku i Ten tydzień na Tablicy przystani reagują na strzałki, czytnik ekranu podaje części Szopy po kolei, a znacznik rzadkości na karcie ryby i napis Odznaka są ciemniejsze i czytelniejsze.",
-  "On a phone, the last small links in the field log are easier to tap: the names on Bests' hour, moon, sky, wind, temperature and lure rows, a kind's first and newest fish, and a water's fish count with larger text.":
-    "Na telefonie ostatnie małe odnośniki w dzienniku łatwiej trafić: nazwy w wierszach godzin, księżyca, nieba, wiatru, temperatury i przynęt w Rekordach, pierwsza i najnowsza ryba gatunku oraz liczba ryb z łowiska przy większym tekście.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -747,6 +752,10 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "When a fish drops your bait before the strike, it was never hooked: cast straight back to the same spot and it may take again. And a sturgeon sulking on the bottom now takes two pumps to lift, like a catfish.":
+    "Gdy ryba wypuści przynętę przed zacięciem, nie była zahaczona: zarzuć od razu w to samo miejsce, a może wziąć ponownie. A jesiotr zalegający na dnie potrzebuje teraz dwóch pompek, by go poderwać, tak jak sum.",
+  "Where a bigger fish hunts the small ones, stop reeling a hooked one for a moment and let it flutter: the pike, bass or walleye hunting there may take it. And a golden shiner landed in a clean fight goes back out as lively live bait that draws more of the hunters.":
+    "Tam, gdzie większa ryba poluje na małe, przestań na chwilę zwijać zaciętą rybkę i daj jej się potrzepotać: polujący tam szczupak, bass albo sandacz może ją chwycić. A złotawiec wyholowany czysto wraca na haczyk jako żwawa żywa przynęta, która przyciąga więcej drapieżników.",
   "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.":
     "Na poziomie 14, Dusza jeziora, żyłka wytrzymuje chwilę dłużej w czerwieni: pęka przy 105% napięcia, a nie przy 100%. A z pomostu w cichy letni zmierzch kładź suchą muchę pod jedną z chmar tańczących muszek, gdzie bassy niebieskoskrzele, wielkooczki, złotawce i pstrągi tęczowe podnoszą się do muszek, które spadają na wodę.",
   "Strike a pike sooner on a worm or a live shiner: given time it swallows the bait, and if the fight then runs long its teeth fray the line, so it snaps sooner until you retie. And after dark off the dock, cast a jig, spinner or spoon among the minnows in the lanterns' light, where the crappie, walleye and bass hunt them.":
@@ -767,8 +776,6 @@ export const PL_GAME: PlBook = {
     "Sezon w zakładce Rekordy pokazuje ryby na wyprawę na tle poprzedniego, a jego wyprawy otwierają się z ramki. Wyszukiwanie jednego gatunku podaje największą rybę każdego roku obok liczby, a „31.12” znajduje ten dzień.",
   "The lure record can be downloaded as a spreadsheet, for the water picked or all of them. The Map finds the water nearest you, and saves all your waters for a GPS in one file.":
     "Bilans przynęt można pobrać jako arkusz, dla wybranego łowiska albo wszystkich. Mapa znajduje najbliższe łowisko i zapisuje wszystkie łowiska dla GPS w jednym pliku.",
-  "Waters can all go to a GPS in one file. The goal form offers last year's number in one tap. Home's next outing can go on your calendar, and the year's copied summary counts its outings. A night fish logged without its outing now counts on that night's day.":
-    "Wszystkie łowiska można zapisać dla GPS w jednym pliku. Formularz celu podsuwa jednym dotknięciem liczbę z zeszłego roku. Następną wyprawę ze strony głównej można dodać do kalendarza, a skopiowane podsumowanie roku liczy wyprawy. Nocna ryba zapisana bez wyprawy liczy się teraz na dzień tej nocy.",
   "Keep the lake's sounds playing in another tab or app": "Graj odgłosy jeziora, gdy gra jest w innej karcie lub aplikacji",
   "Frame rate": "Płynność",
   Smooth: "Płynnie",

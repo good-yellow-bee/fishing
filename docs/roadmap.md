@@ -1151,6 +1151,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
 | ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#1320)~~ | phone UX | S |
 | ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
+| ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1622,7 +1623,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT310~~ | ~~Level 14 (30000 lifetime points, "Soul of the lake"): a sound line holds a moment past the red and snaps at 105% strain instead of 100%; a frayed line still snaps at 90%~~ (#1310) | gameplay | S |
 | ~~GT311~~ | ~~Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs~~ (#1317) | gameplay | S |
 | ~~GT312~~ | ~~News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk~~ (#1319) | ui | S |
-| GT313 | Let it flutter: a small fish hooked where a bigger one hunts it (the grab pairs) and left unreeled for 1.2 s of its calm spells out past the halfway mark (a pump of the reel starts the pause again; easing off for a run is no pause) draws the hunter in, a further 25% of them on top of the usual grab; the hookset tells the tip | gameplay | S |
+| ~~GT313~~ | ~~Let it flutter: a small fish hooked where a bigger one hunts it (the grab pairs) and left unreeled for 1.2 s of its calm spells out past the halfway mark (a pump of the reel starts the pause again; easing off for a run is no pause) draws the hunter in, a further 25% of them on top of the usual grab; the hookset tells the tip~~ (#1326) | gameplay | S |
+| ~~GT314~~ | ~~Lively shiner: a golden shiner landed in a clean fight goes back out as lively live bait, so 80% of the bites on it are the bank's hunters instead of 60%; the bait button, the hook-on line and the wait line say so, and a shiner landed through the red says a clean one is livelier~~ (#1330) | gameplay | S |
+| ~~GT315~~ | ~~News card 2026-10-19-game23 covers GT313 and GT314: letting a small fish flutter for its hunter, and the lively shiner~~ (#1332) | ui | S |
+| ~~GT316~~ | ~~It takes again: a fish that drops the bait before the strike (too slow) was never pricked, so on the very next cast at that bank it takes again 40% of the time, common fish too; the miss says to cast straight back, the hookset names it, and a bigger lost fish already about keeps its place~~ (#1333) | gameplay | S |
+| ~~GT317~~ | ~~Sturgeon stick to the bottom: like a catfish, a sulking sturgeon takes two pumps to lift, not one, and the fight card and field guide say "Bottom-sticker"~~ (#1334) | gameplay | S |
+| GT318 | News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom | ui | S |
 
 ## Risks / open questions for the owner
 
