@@ -1669,7 +1669,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT328~~ | ~~The lure picker marks a lure whose colour suits the light as good now, with the season, hour and weather line under it, like the other lures the conditions favour~~ (#1371) | gameplay | S |
 | ~~GT329~~ | ~~News card 2026-10-19-game27 covers GT326 to GT328: a run of clean fights pays, and a lure's colour suits the light, marked in the lure list~~ (#1374) | ui | S |
 | ~~GT330~~ | ~~Level 16, Voice of the lake, at 47000 lifetime points: pulling the rod against a run cuts it short 25% faster~~ (#1377) | gameplay | S |
-| GT331 | A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line" | gameplay | S |
+| ~~GT331~~ | ~~A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line"~~ (#1380) | gameplay | S |
+| GT332 | News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line | ui | S |
 
 ## Risks / open questions for the owner
 
