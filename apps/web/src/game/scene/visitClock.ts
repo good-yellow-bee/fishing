@@ -13,3 +13,9 @@ export function turnBetween(from: number, to: number, k: number) {
 
 /** How long a startled bird takes to swing round toward where it flies, seconds. */
 export const STARTLE_TURN_SEC = 0.25;
+
+/** Smoothstep: 0 to 1 over `k` 0 to 1, easing in and out. */
+export function smoothstep(k: number) {
+  const c = Math.min(1, Math.max(0, k));
+  return c * c * (3 - 2 * c);
+}

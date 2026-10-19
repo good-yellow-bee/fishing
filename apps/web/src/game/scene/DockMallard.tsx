@@ -12,7 +12,8 @@ const BREAST = "#7a3e2a";
 const GREEN = "#1f5a3a";
 const COLLAR = "#efece4";
 const TAIL = "#22201c";
-const BILL = "#d8b83c";
+/** The lake ducks' bill colour (duckShapes.ts). */
+const BILL = "#d8a13c";
 const FOOT = "#e08a2c";
 const SPECULUM = "#3b4fa8";
 const EYE = "#111";
@@ -43,23 +44,23 @@ export function mallardHeadShape() {
   ]);
 }
 
-/** One folded wing along its side, lifting out from the shoulder along +x as it flaps, its blue patch showing. */
-export function mallardWingShape() {
+/** One wing folded flat along its flank on `side` (+1 right, -1 left), hinged at the shoulder; it swings out and up to flap, its blue patch showing. */
+export function mallardWingShape(side: number) {
   return mergePainted([
-    { geometry: new THREE.SphereGeometry(1, 8, 6), position: [0.07, 0, -0.03], scale: [0.08, 0.012, 0.11], color: GREY },
-    { geometry: new THREE.BoxGeometry(0.05, 0.004, 0.03), position: [0.07, 0.01, -0.04], color: SPECULUM },
+    { geometry: new THREE.SphereGeometry(1, 8, 6), position: [side * 0.012, -0.03, -0.03], scale: [0.014, 0.045, 0.1], color: GREY },
+    { geometry: new THREE.BoxGeometry(0.006, 0.02, 0.035), position: [side * 0.026, -0.035, -0.05], color: SPECULUM },
   ]);
 }
 
-/** A mallard drake that flaps up onto the dock now and then on rainy days, preens, shakes and flaps off (mallardWaddle.ts). */
+/** A mallard drake that now and then swims in and flaps up onto the dock on rainy days, preens, shakes, and goes back the way it came (mallardWaddle.ts). */
 export function DockMallard() {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
   const wings = useRef<(THREE.Group | null)[]>([]);
-  const shapes = useMemo(() => ({ body: mallardBodyShape(), head: mallardHeadShape(), wing: mallardWingShape() }), []);
-  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
+  const shapes = useMemo(() => ({ body: mallardBodyShape(), head: mallardHeadShape(), right: mallardWingShape(1), left: mallardWingShape(-1) }), []);
+  const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
       [...Object.values(shapes), material].forEach((item) => item.dispose());
@@ -83,9 +84,9 @@ export function DockMallard() {
       // Preening, its head swings round over its shoulder and down into its back.
       head.current.rotation.set(pose.preen * 0.9 + pose.shake * 0.2, pose.preen * 2.6, 0, "YXZ");
     }
-    // The left wing is the right one turned half round, so the same lift raises both.
-    const lift = pose.flap * (0.6 + 0.6 * Math.sin(time * 26));
-    wings.current.forEach((wing, i) => wing?.rotation.set(0, i === 0 ? 0 : Math.PI, lift));
+    // Each wing swings out from its flank and up about the shoulder.
+    const lift = pose.flap * (1.2 + 0.6 * Math.sin(time * 26));
+    wings.current.forEach((wing, i) => wing?.rotation.set(0, 0, (i === 0 ? 1 : -1) * lift));
   });
   useSkinnedFigure(root, material);
 
@@ -103,10 +104,9 @@ export function DockMallard() {
               ref={(wing) => {
                 wings.current[i] = wing;
               }}
-              position={[side * 0.06, 0.17, 0]}
-              rotation={[0, side > 0 ? 0 : Math.PI, 0]}
+              position={[side * 0.08, 0.17, 0]}
             >
-              <mesh geometry={shapes.wing} material={material} />
+              <mesh geometry={side > 0 ? shapes.right : shapes.left} material={material} />
             </group>
           ))}
         </group>
