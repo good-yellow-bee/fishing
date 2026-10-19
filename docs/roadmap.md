@@ -1341,7 +1341,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC175~~ | ~~Fewer draws: seventeen far-bank figures (the jogger, skier, sledders, woodcutter, dog walker, paddleboarder, stone skimmer, anglers, rowers, painter and others) bake their posed limbs into one skinned mesh each, so each figure costs one draw however many limbs it swings~~ (#1387) | scene | S |
 | ~~SC176~~ | ~~Fewer draws: fourteen lake birds and animals (the moose, osprey, heron, hare, cormorant, dock robin, sandpipers, winter gulls, grebes, loon, owl, woodpecker, the disc tossers and the dinghy) bake their posed parts into one skinned mesh each~~ (#1388) | scene | S |
 | ~~SC177~~ | ~~Swan pedalo: on calm, fine summer days two people pedal a white swan pedal boat in a slow loop on the east water, its paddle wheel turning and a wake behind it (one draw for the boat and riders), taking the water the dinghy sails on breezy days~~ (#1391) | scene | S |
-| SC178 | Dock mouse: on evenings and nights from spring to fall a field mouse now and then climbs onto the dock behind the angler, scurries across in dashes, sits up to nibble a crumb and darts off over the edge (one draw), with news scene39 for it and the pedalo | scene | S |
+| ~~SC178~~ | ~~Dock mouse: on evenings and nights from spring to fall a field mouse now and then climbs onto the dock behind the angler, scurries across in dashes, sits up to nibble a crumb and darts off over the edge (one draw), with news scene39 for it and the pedalo~~ (#1396) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
