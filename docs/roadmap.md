@@ -1260,6 +1260,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC132~~ | ~~Winter sledders: on winter days two children take turns sledging down a packed run on the hill behind the far bank, rushing down in a spray of snow, coasting to a stop and trudging back up pulling their sleds~~ (#1248) | scene | S |
 | ~~SC133~~ | ~~Snowy winter hills: in winter the hills behind the far bank lie white under unbroken snow, cool blue-grey in the shade and dark at night, instead of the olive of the trodden shore~~ (#1249) | scene | S |
 | ~~SC134~~ | ~~News card scene28: snowy winter hills and the sledders~~ (#1249) | scene | S |
+| SC135 | Sun breaks: on overcast days a gap now and then opens in the grey, and a patch of sunlight slides across the far half of the lake with the wind, faint beams slanting down to it, until the cloud closes over | scene | S |
+| SC136 | Fewer draws for the brolly fisher and the birdwatcher: the brolly fisher's seat and rod rests in one shape (3 draws to 1), the birdwatcher's legs and body in one (2 to 1) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

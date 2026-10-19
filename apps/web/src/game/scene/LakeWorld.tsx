@@ -266,6 +266,8 @@ import { reedStem, reedTilt } from "./reedSway";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
+import { SunBreak } from "./SunBreak";
+import { sunBreakOut } from "./sunGap";
 import { shaftStrength } from "./shaftLight";
 import { PollenFilm } from "./PollenFilm";
 import { FoamLanes } from "./FoamLanes";
@@ -2338,6 +2340,7 @@ export const LakeWorld = memo(function LakeWorld({
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
+      {sunBreakOut(hour, sky) && <SunBreak discPos={look.discPos} wind={wind} />}
       {firefliesOut(hour, sky, season) && <Fireflies />}
       {eyesOut(hour, sky) && <NightEyes />}
       {midgesOut(hour, sky, season, wind) && <MidgeCloud wind={wind} />}

@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { FLOAT_AT, ROD_BASE, ROD_LENGTH, ROD_LIFT, SEAT_AT, SEAT_YAW, brollyAt, brollyTilt, rodTip } from "./brollyFishing";
 import { floatShape } from "./FogAngler";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -97,12 +97,15 @@ export function BrollyFisher({ wind }: { wind: { x: number; z: number } }) {
   const bob = useRef<THREE.Mesh>(null);
   const shapes = useMemo(
     () => ({
-      sitter: brollySitterShape(),
+      // The sitter on their chair and the two rod rests, which never move: one draw.
+      seat: mergeParts([
+        { geometry: brollySitterShape(), scale: SCALE },
+        { geometry: rodRestShape(ROD_BASE.y), position: [0, 0, BUTT_AHEAD] },
+        { geometry: rodRestShape(ROD_BASE.y + FRONT_REST * Math.tan(ROD_LIFT)), position: [0, 0, BUTT_AHEAD + FRONT_REST] },
+      ]),
       torso: brollyTorsoShape(),
       arm: cupArmShape(),
       rod: brollyRodShape(),
-      backRest: rodRestShape(ROD_BASE.y),
-      frontRest: rodRestShape(ROD_BASE.y + FRONT_REST * Math.tan(ROD_LIFT)),
       brolly: brollyShape(),
       float: floatShape(),
     }),
@@ -143,8 +146,8 @@ export function BrollyFisher({ wind }: { wind: { x: number; z: number } }) {
   return (
     <group name="brolly-fisher">
       <group position={[SEAT_AT.x, 0, SEAT_AT.z]} rotation={[0, SEAT_YAW, 0]}>
+        <mesh geometry={shapes.seat} material={material} castShadow />
         <group scale={SCALE}>
-          <mesh geometry={shapes.sitter} material={material} castShadow />
           <group ref={torso} position={[0, SEAT_Y, -0.02]}>
             <mesh geometry={shapes.torso} material={material} castShadow />
             <group ref={arm} position={SHOULDER}>
@@ -152,8 +155,6 @@ export function BrollyFisher({ wind }: { wind: { x: number; z: number } }) {
             </group>
           </group>
         </group>
-        <mesh geometry={shapes.backRest} material={material} position={[0, 0, BUTT_AHEAD]} />
-        <mesh geometry={shapes.frontRest} material={material} position={[0, 0, BUTT_AHEAD + FRONT_REST]} />
         <group ref={rod} position={[0, ROD_BASE.y, BUTT_AHEAD]}>
           <mesh geometry={shapes.rod} material={material} />
         </group>
