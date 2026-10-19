@@ -663,8 +663,6 @@ export const PL_GAME: PlBook = {
     "Na tablecie panele pod górnym paskiem przystani przesuwają się w dół, gdy pasek zawija się do drugiego wiersza, więc nic się pod nim nie chowa. Przyciski Edytuj i Usuń przy rybie łatwiej rozróżnić palcem, Mapa pokazuje nagłówek już podczas wczytywania, a na telefonie link Następna wyprawa na liście Mapy łatwiej trafić.",
   "The fight card's coloured lines, from the surge call to the clean-fight stamp, and the landed card's few words about the fish are darker and easier to read. In the shack, a request's Claim button is easier to tap on a phone and its Claimed label is easier to read. The news card no longer covers the bank buttons on a phone, and a screen reader reads the trip recap's heaviest fish whole.":
     "Kolorowe wiersze na karcie holu, od ostrzeżenia o zrywie po znaczek czystego holu, oraz kilka słów o rybie na karcie złowionej ryby są ciemniejsze i czytelniejsze. W Szopie przycisk Odbierz przy zleceniu łatwiej trafić na telefonie, a napis Odebrane łatwiej odczytać. Karta nowości nie zasłania już na telefonie przycisków łowisk, a czytnik ekranu odczytuje w podsumowaniu wyprawy najcięższą rybę w całości.",
-  "Settings' switches and volume sliders and the shack's Strength, Accuracy and Patience buttons are easier to tap on a phone. The lodge board's All time and This week tabs answer the arrow keys, a screen reader hears the shack's sections in order, and the landed card's rarity tag and the Badge line are darker and easier to read.":
-    "Przełączniki i suwaki głośności w Ustawieniach oraz przyciski Siła, Celność i Cierpliwość w Szopie łatwiej trafić na telefonie. Zakładki Od początku i Ten tydzień na Tablicy przystani reagują na strzałki, czytnik ekranu podaje części Szopy po kolei, a znacznik rzadkości na karcie ryby i napis Odznaka są ciemniejsze i czytelniejsze.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -754,6 +752,8 @@ export const PL_GAME: PlBook = {
   "In photo mode: turn and zoom the view": "W trybie zdjęcia: obracaj i przybliżaj widok",
   "Save this view": "Zapisz ten widok",
   "Change the lure": "Zmień przynętę",
+  "When a fish drops your bait before the strike, it was never hooked: cast straight back to the same spot and it may take again. And a sturgeon sulking on the bottom now takes two pumps to lift, like a catfish.":
+    "Gdy ryba wypuści przynętę przed zacięciem, nie była zahaczona: zarzuć od razu w to samo miejsce, a może wziąć ponownie. A jesiotr zalegający na dnie potrzebuje teraz dwóch pompek, by go poderwać, tak jak sum.",
   "Where a bigger fish hunts the small ones, stop reeling a hooked one for a moment and let it flutter: the pike, bass or walleye hunting there may take it. And a golden shiner landed in a clean fight goes back out as lively live bait that draws more of the hunters.":
     "Tam, gdzie większa ryba poluje na małe, przestań na chwilę zwijać zaciętą rybkę i daj jej się potrzepotać: polujący tam szczupak, bass albo sandacz może ją chwycić. A złotawiec wyholowany czysto wraca na haczyk jako żwawa żywa przynęta, która przyciąga więcej drapieżników.",
   "At level 14, Soul of the lake, your line holds a moment past the red: it snaps at 105% strain, not 100%. And off the dock on a still summer dusk, drop a dry fly under one of the dancing midge clouds, where the bluegill, crappie, shiners and rainbow trout rise to the midges that fall.":
