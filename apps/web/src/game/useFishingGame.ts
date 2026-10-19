@@ -36,6 +36,7 @@ import { isRiseCast } from "./eveningRise";
 import { LILY_COVER_WAIT, tightToPads } from "./lilyCover";
 import { cloudShadeWaitMul } from "./sunCover";
 import { MOON_FEED_WAIT, moonPassing } from "./solunar";
+import { FOAM_LANE_WAIT, onFoamLane } from "./foamFeed";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
@@ -275,11 +276,15 @@ export function useFishingGame(
   rising = false,
   /** The day's wind; a breezy or strong one bellies a slack line in a fight. */
   wind?: Wind,
+  /** The day's wind as the scene's drift, which combs foam lanes across the open water on a breezy or strong day. */
+  windDrift?: { x: number; z: number },
 ) {
   const risingRef = useRef(rising);
   risingRef.current = rising;
   const windRef = useRef(wind);
   windRef.current = wind;
+  const windDriftRef = useRef(windDrift);
+  windDriftRef.current = windDrift;
   const hourRef = useRef(hour);
   hourRef.current = hour;
   const castRiseRef = useRef(false);
@@ -315,6 +320,8 @@ export function useFishingGame(
   const castSkipRef = useRef(false);
   /** This cast landed tight to a lily pad bed, where the bass and pike lie in ambush. */
   const castPadsRef = useRef(false);
+  /** Whether this cast landed in one of the wind's foam lanes. */
+  const castFoamRef = useRef(false);
   /** This cast went in over the groundbait, so a school landed from it stays to feed. */
   const castBaitedRef = useRef(false);
   /** The hook went in solid on a quick strike. */
@@ -487,6 +494,7 @@ export function useFishingGame(
     castPerfectRef.current = false;
     castSkipRef.current = false;
     castPadsRef.current = false;
+    castFoamRef.current = false;
     secondTakeRef.current = false;
     powerRef.current = 0;
     clearFight();
@@ -620,6 +628,7 @@ export function useFishingGame(
     if (castPerfectRef.current) waitHintRef.current = `${t("Perfect cast.")} ${waitHintRef.current}`;
     if (castSkipRef.current) waitHintRef.current = `${t("Skipped it under the dock, into the shade.")} ${waitHintRef.current}`;
     if (castPadsRef.current) waitHintRef.current = `${t("Tight to the lily pads, where the bass and pike wait in ambush.")} ${waitHintRef.current}`;
+    if (castFoamRef.current) waitHintRef.current = `${t("Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.")} ${waitHintRef.current}`;
     const school = castIntoSchool(schoolRef.current, spotRef.current);
     schoolRef.current = school.next;
     // A beginner still on their first catches is spared the spooked wait, and rain on the water covers the lost fish's splash.
@@ -812,7 +821,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -1013,6 +1022,7 @@ export function useFishingGame(
     castPerfectRef.current = isPerfectCast(castPower, profile.accuracy, level);
     castSkipRef.current = isSkipCast(castPower, profile.accuracy, landing.spot, lureRef?.current);
     castPadsRef.current = aimed !== null && tightToPads(season, aimed.x, aimed.z);
+    castFoamRef.current = aimed !== null && onFoamLane(windDriftRef.current, aimed.x, aimed.z);
     secondTakeRef.current = false;
     startWait(profile, castPower < sweetBand(profile.accuracy).min);
   }, [profile, resetToIdle, season, startWait]);

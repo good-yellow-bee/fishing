@@ -13,6 +13,8 @@ export const TERN_RADIUS = 1.7;
 export const TERN_CYCLE = 9;
 export const PLUNGE_SEC = 0.45;
 export const CLIMB_SEC = 0.9;
+/** The moment terns hang at for reduced motion: all three circling, none in a plunge or over its splash. */
+export const TERN_STILL_TIME = 1;
 /** How low the plunge comes, just touching the water. */
 const TOUCH_Y = 0.08;
 

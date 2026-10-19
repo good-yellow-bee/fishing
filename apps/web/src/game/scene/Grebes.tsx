@@ -5,6 +5,7 @@ import { fx } from "../fx";
 import { lastSplash } from "./duckFlush";
 import { mergePainted } from "./mergeParts";
 import { grebePose, grebesScared, grebeUnder } from "./grebeRush";
+import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -70,6 +71,8 @@ export function Grebes() {
   );
   const dove = useRef({ at: Number.NEGATIVE_INFINITY, heard: Number.NEGATIVE_INFINITY });
   const rushing = useRef(false);
+  // Reduced motion keeps the pair floating at one moment: no head shaking and no rush across the water. A close cast still sends them under.
+  const still = useReducedMotion();
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
     // Each splash is looked at once; a close one sends the pair under together.
@@ -83,20 +86,21 @@ export function Grebes() {
       }
     }
     const under = grebeUnder(time - d.at);
+    const at = still ? STILL_TIME : time;
     // The pattering and calls start with each rush.
-    const rush = grebePose(0, time).rushing && under === 0;
+    const rush = grebePose(0, at).rushing && under === 0;
     if (rush && !rushing.current) fx.grebeRush();
     rushing.current = rush;
     for (const k of [0, 1] as const) {
       const bird = birds.current[k];
       if (!bird) continue;
-      const pose = grebePose(k, time);
+      const pose = grebePose(k, at);
       // Turn smoothly toward the pose's heading rather than snapping round.
       const last = yaws.current[k] ?? pose.yaw;
       const turn = Math.atan2(Math.sin(pose.yaw - last), Math.cos(pose.yaw - last));
       const yaw = last + turn * Math.min(1, delta * (pose.rushing ? 12 : 2.5));
       yaws.current[k] = yaw;
-      const surface = waterHeight(pose.x, pose.z, time);
+      const surface = waterHeight(pose.x, pose.z, at);
       bird.visible = under < 1;
       bird.position.set(pose.x, surface - 0.05 + pose.upright * 0.12 - under * 0.3, pose.z);
       bird.rotation.set(under * 0.8, yaw, 0, "YXZ");
@@ -113,7 +117,7 @@ export function Grebes() {
       if (spray) {
         spray.visible = pose.rushing && under === 0;
         spray.children.forEach((drop, i) => {
-          const hop = (time * 6 + i * 0.27) % 1;
+          const hop = (at * 6 + i * 0.27) % 1;
           drop.position.y = 0.03 + Math.sin(hop * Math.PI) * 0.12;
         });
       }

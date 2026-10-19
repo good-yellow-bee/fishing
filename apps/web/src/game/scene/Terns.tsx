@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { TERN_COUNT, ternPose } from "./ternHover";
+import { TERN_COUNT, TERN_STILL_TIME, ternPose } from "./ternHover";
 import { pitchTurn } from "./bodyPitch";
 import { mergePainted, mergeParts } from "./mergeParts";
+import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
 
@@ -46,6 +47,8 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
   const wings = useRef<(THREE.Group | null)[][]>(Array.from({ length: TERN_COUNT }, () => []));
   const splashes = useRef<(THREE.Mesh | null)[]>([]);
   const shapes = useMemo(ternShapes, []);
+  // Reduced motion hangs them over the patch, wings out: no 2-a-second beats or plunges. They still slide to a new patch.
+  const still = useReducedMotion();
   const looks = useMemo(
     () => ({
       painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
@@ -62,7 +65,7 @@ export function Terns({ center }: { center: { x: number; z: number } }) {
   // Where they are working now; it slides over to a new patch rather than jumping.
   const working = useRef<{ x: number; z: number } | null>(null);
   useFrame(({ clock }, delta) => {
-    const time = clock.elapsedTime;
+    const time = still ? TERN_STILL_TIME : clock.elapsedTime;
     const at = (working.current ??= { ...center });
     const dx = center.x - at.x;
     const dz = center.z - at.z;

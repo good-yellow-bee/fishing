@@ -1119,6 +1119,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA74~~ | ~~PA72 made Home's count links inline blocks so a long count could wrap inside its card, but on a desktop that took them out of the inline-link spacing exception, and Home went from 2 to 5 targets under 24 px apart. They are plain inline links again; the cards' wrapping (PA72) still keeps every count on the page (#1205)~~ | phone UX | S |
 | ~~PA75~~ | ~~The field log is drawn larger by zoom with larger text, so its heights and widths taken from the window came out 15-30 % too big: the side menu ran past the window's foot and out of reach of its own scroll (Gear and Bests could not be reached on a short window or a tablet with the keyboard up), a full-size photo grew past the top and foot of the screen and took Close with it, the Undo bar could grow wider than a phone, and the sign-in card sat below the middle of a page that scrolled past its end. All are now divided by the zoom (#1206)~~ | phone UX | S |
 | ~~PA76~~ | ~~Shack's three-day board puts one day a row on a phone instead of three 70-95 px columns wrapping the tips a word a line; three across in the 420 px panel at any text size, never two and one (#1216)~~ | phone UX | S |
+| ~~PA77~~ | ~~Reduce motion holds the terns over the fish patch (no twice-a-second wingbeats or plunges; they still slide to a new patch) and the bank's squirrels at one moment, like the other creatures that already did (#1221)~~ | phone UX | S |
+| ~~PA78~~ | ~~Reduce motion keeps the spring grebes floating at one moment: no head shaking and no rush across the water with its spray; a close cast still sends them under (#1226)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1227,6 +1229,12 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC101~~ | ~~Winter eave lights: on winter evenings a string of red, green, yellow and blue bulbs droops in swags along the far cabin's front eave, the colours glowing up and fading in turn~~ (#1215) | scene | S |
 | ~~SC102~~ | ~~Coots: from spring to fall a pair of coots paddles by the lily bed at the lake's west end, nodding as they swim and diving now and then; in spring one charges the other across the water, pattering with wings half open and spray flying~~ (#1217) | scene | S |
 | ~~SC103~~ | ~~News card scene22: porch rocker, winter eave lights, sandpipers, coots~~ (#1217) | scene | S |
+| ~~SC104~~ | ~~Starling murmuration: at dusk in fall a great flock of starlings wheels high over the far shore, stretching, folding and turning as one, its mirror crossing the still lake~~ (#1219) | scene | S |
+| ~~SC105~~ | ~~Dock robin: every minute or so by day a robin flies in over the water to the dock's front-left post, cocks its head and flicks its tail, flits to the front-right post and flies off again; on the snow caps in winter~~ (#1219) | scene | S |
+| ~~SC106~~ | ~~Dock snail: in the rain and on dewy mornings from spring to fall a snail glides a slow loop on the planks behind the angler, eye stalks swaying, a wet trail behind it~~ (#1222) | scene | S |
+| ~~SC107~~ | ~~Reed clumps in one draw each: the three reed beds draw their stems as one instanced mesh per clump, still swaying stem by stem in the wind~~ (#1222) | scene | S |
+| ~~SC108~~ | ~~Winter gulls: at dawn and by day in winter black-headed gulls stand on the broadest ice floes on the far side, facing into the wind as they drift, and now and then one wheels once low over the water and lands back on its floe~~ (#1224) | scene | S |
+| ~~SC109~~ | ~~News card scene23: starling murmuration, winter gulls, dock robin, dock snail~~ (#1224) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1523,7 +1531,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT289~~ | ~~The angler's shadow under a low sun: at dawn the sun sits squarely behind the Drop-off and at dusk behind the Inlet, so under a clear or partly cloudy sky the angler's long shadow falls across the water and the fish there shy from it (1.15 wait), the cast says so and the stance chip reads "your shadow on the water"; a beginner is spared~~ (#1198) | gameplay | S |
 | ~~GT290~~ | ~~The moon overhead and underfoot: for an hour either side of the moon passing overhead (noon at new moon, midnight at full, about 50 minutes later each day) or underfoot 12 hours on, the fish come on the feed and every cast bites sooner (0.85 wait); the cast says so, the stance chip reads "moon overhead" or "moon underfoot", and the chalk board gives each day's daytime passing~~ (#1202) | gameplay | S |
 | ~~GT291~~ | ~~News card 2026-10-18-game15 covers GT289 and GT290: the angler's shadow under a low sun and the moon overhead and underfoot~~ (#1203) | ui | S |
-| GT292 | A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit | gameplay | S |
+| ~~GT292~~ | ~~A fish that charges: once a fight, on a run from its third on that isn't a leap or its last, a smallmouth bass or a rainbow trout runs straight at the angler; the fight card calls "REEL — it's charging straight at you!", the charge pulls no line and can't be turned, reeling takes line in fast, and left slack it costs the clean bonus, or the fish if it was hooked light; the field guide names the habit~~ (#1213) | gameplay | S |
+| ~~GT293~~ | ~~Foam lanes feed the fish: in a breeze strong enough to rake the scum into lanes, a lure landing within 0.7 m of one bites sooner (0.85 wait), because the wind gathers drowned insects there and the fish feed along it; the cast says so~~ (#1223) | gameplay | S |
+| ~~GT294~~ | ~~News card 2026-10-19-game16 covers GT292 and GT293: the charging smallmouth and rainbow, and foam lanes that feed the fish~~ | ui | S |
 
 ## Risks / open questions for the owner
 

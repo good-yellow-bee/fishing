@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
-import { REED_MAX_LEAN, reedTilt } from "./reedSway";
+import { REED_MAX_LEAN, reedStem, reedTilt } from "./reedSway";
 
 /** Where a 1 m stem's top ends up under a tilt. */
 function top(tilt: { x: number; z: number }) {
@@ -39,5 +39,17 @@ describe("reeds in the wind", () => {
     expect(reedTilt(wind, 3, 0.4, true)).toEqual(reedTilt(wind, 9, 2.1, true));
     const calm = reedTilt({ x: 0, z: 0 }, 5, 1, true);
     expect(Math.hypot(calm.x, calm.z)).toBe(0);
+  });
+});
+
+describe("reed clumps", () => {
+  it("stand in rows of four going back from the clump's root, each its own size and beat", () => {
+    const origin = [-13.2, 0.03, 1.8] as const;
+    expect(reedStem(origin, 0)).toMatchObject({ x: -13.2, y: 0.03, z: 1.8, yaw: 0, scale: 1.45 });
+    const fifth = reedStem(origin, 5);
+    expect(fifth.x).toBeCloseTo(-12.68);
+    expect(fifth.z).toBeCloseTo(1.36);
+    expect(fifth.scale).toBeCloseTo(1.77);
+    expect(reedStem(origin, 1).phase).not.toBe(reedStem(origin, 2).phase);
   });
 });

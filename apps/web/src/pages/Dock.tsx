@@ -205,7 +205,7 @@ export function DockPage() {
   const tiedLure = useRef(chosenLure);
   const caughtTotal = me?.speciesStats.reduce((sum, stat) => sum + stat.caught, 0) ?? 0;
   const mercy = isMercy(caughtTotal);
-  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind);
+  const game = useFishingGame(me?.profile ?? null, hour, tiedLure, sky, mercy, season, moonLight(moon), rising, wind.wind, wind);
   const scenePhase = game.outcome ? "result" : game.phase;
   // The hint is hidden in a fight, so the fight card holds the hookset's message (or a mid-fight call) for a while instead.
   const [hookNote, setHookNote] = useState<string | null>(null);

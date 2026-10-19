@@ -25,4 +25,20 @@ describe("reduce motion on the lake", () => {
       expect(text, name).toMatch(/still \? STILL_TIME : /);
     }
   });
+
+  it("holds the terns over the fish patch and the bank's squirrels at one moment under it", () => {
+    const terns = scene.find((file) => file.name === "Terns.tsx")?.text ?? "";
+    expect(terns).toContain("useReducedMotion()");
+    expect(terns).toMatch(/still \? TERN_STILL_TIME : clock\.elapsedTime/);
+    const squirrels = scene.find((file) => file.name === "Squirrels.tsx")?.text ?? "";
+    expect(squirrels).toContain("useReducedMotion()");
+    expect(squirrels).toMatch(/still \? STILL_TIME : clock\.elapsedTime/);
+  });
+
+  it("keeps the spring grebes floating at one moment under it, never rushing across the water", () => {
+    const grebes = scene.find((file) => file.name === "Grebes.tsx")?.text ?? "";
+    expect(grebes).toContain("useReducedMotion()");
+    expect(grebes).toContain("const at = still ? STILL_TIME : time;");
+    expect(grebes).not.toMatch(/grebePose\([^)]*, time\)/);
+  });
 });

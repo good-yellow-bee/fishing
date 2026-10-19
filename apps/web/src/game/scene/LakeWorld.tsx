@@ -195,6 +195,14 @@ import { EaveLights } from "./EaveLights";
 import { eaveLightsOn } from "./festiveBulbs";
 import { Coots } from "./Coots";
 import { cootsOut } from "./cootSquabble";
+import { murmurationOut } from "./murmuration";
+import { Starlings } from "./Starlings";
+import { DockRobin } from "./DockRobin";
+import { robinOut } from "./robinVisit";
+import { DockSnail } from "./DockSnail";
+import { snailOut } from "./snailCrawl";
+import { gullsOut } from "./gullFloes";
+import { WinterGulls } from "./WinterGulls";
 import { Sculler } from "./Sculler";
 import { scullOut } from "./scullRow";
 import { Cabin } from "./Cabin";
@@ -221,7 +229,7 @@ import { otterOut } from "./otterMotion";
 import { lanternLevel } from "./lanternLight";
 import { heronOut } from "./heronMotion";
 import { useReducedMotion } from "./reducedMotion";
-import { reedTilt } from "./reedSway";
+import { reedStem, reedTilt } from "./reedSway";
 import { sunCaustics } from "./sunCaustics";
 import { BankMirror, type MirrorHill, type MirrorTree } from "./BankMirror";
 import { LightShafts } from "./LightShafts";
@@ -2026,37 +2034,57 @@ function AnchorBuoy() {
 
 const NO_WIND = { x: 0, z: 0 };
 
-/** A clump of reeds, each leaning and nodding with the wind on its own beat (reedSway.ts). */
+/**
+ * A clump of reeds, each leaning and nodding with the wind on its own beat (reedSway.ts). The stems
+ * share one instanced mesh per part of the reed model, so a clump is one draw however many it holds.
+ */
 function Reeds({ count, origin, wind = NO_WIND }: { count: number; origin: Vec3; wind?: { x: number; z: number } }) {
   const season = useContext(SeasonContext);
   const still = useReducedMotion();
-  const stems = useRef<(THREE.Group | null)[]>([]);
-  const keyPrefix = origin.join("-");
+  const { scene } = useGLTF(MODELS.reed);
+  // The clump is rebuilt only when where it stands changes, not on every render's fresh origin array.
+  const [ox, oy, oz] = origin;
+  const clump = useMemo(() => {
+    // Prepared as ToonModel prepares a single copy.
+    const root = scene.clone(true);
+    applyToon(root, false);
+    tintPlant(root, season, "grass", 0);
+    shareMaterials(root);
+    root.updateMatrixWorld(true);
+    const parts: { mesh: THREE.InstancedMesh; local: THREE.Matrix4 }[] = [];
+    root.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh) || !obj.visible) return;
+      const mesh = new THREE.InstancedMesh(obj.geometry, obj.material, count);
+      mesh.name = obj.name;
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      parts.push({ mesh, local: obj.matrixWorld.clone() });
+    });
+    const stems = Array.from({ length: count }, (_, i) => reedStem([ox, oy, oz], i));
+    return { root, parts, stems };
+  }, [scene, season, count, ox, oy, oz]);
+  useEffect(
+    () => () => {
+      releaseSharedMaterials(clump.root);
+      clump.parts.forEach(({ mesh }) => mesh.dispose());
+    },
+    [clump],
+  );
+  const pose = useMemo(() => ({ base: new THREE.Matrix4(), turn: new THREE.Matrix4(), at: new THREE.Matrix4(), tilt: new THREE.Euler(), q: new THREE.Quaternion(), p: new THREE.Vector3(), s: new THREE.Vector3() }), []);
   useFrame(({ clock }) => {
-    stems.current.forEach((stem, i) => {
-      if (!stem) return;
-      const tilt = reedTilt(wind, clock.elapsedTime, i * 1.9 + origin[0], still);
-      stem.rotation.set(tilt.x, 0, tilt.z);
+    clump.stems.forEach((stem, i) => {
+      const tilt = reedTilt(wind, clock.elapsedTime, stem.phase, still);
+      // Tipped about its foot, then turned and sized about its own axis, as the stem's group and model nest.
+      pose.base.compose(pose.p.set(stem.x, stem.y, stem.z), pose.q.setFromEuler(pose.tilt.set(tilt.x, 0, tilt.z)), pose.s.set(1, 1, 1));
+      pose.turn.compose(pose.p.set(0, 0, 0), pose.q.setFromEuler(pose.tilt.set(0, stem.yaw, 0)), pose.s.setScalar(stem.scale));
+      pose.base.multiply(pose.turn);
+      clump.parts.forEach(({ mesh, local }) => mesh.setMatrixAt(i, pose.at.multiplyMatrices(pose.base, local)));
+    });
+    clump.parts.forEach(({ mesh }) => {
+      mesh.instanceMatrix.needsUpdate = true;
+      if (!mesh.boundingSphere) mesh.computeBoundingSphere();
     });
   });
-  return Array.from({ length: count }, (_, i) => (
-    <group
-      key={`${keyPrefix}-${i}`}
-      ref={(stem) => {
-        stems.current[i] = stem;
-      }}
-      position={[origin[0] + (i % 4) * 0.52, origin[1], origin[2] - Math.floor(i / 4) * 0.44]}
-    >
-      <ToonModel
-        url={MODELS.reed}
-        position={[0, 0, 0]}
-        rotation={[0, i * 0.73, 0]}
-        scale={1.45 + (i % 3) * 0.16}
-        shadows={false}
-        plant={{ season, kind: "grass", variant: 0 }}
-      />
-    </group>
-  ));
+  return clump.parts.map(({ mesh }) => <primitive key={mesh.uuid} object={mesh} />);
 }
 
 /**
@@ -2318,6 +2346,10 @@ export const LakeWorld = memo(function LakeWorld({
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
       {eaveLightsOn(hour, season) && <EaveLights />}
       {cootsOut(hour, season) && <Coots squabbling={season === "spring"} />}
+      {murmurationOut(hour, sky, season) && <Starlings />}
+      {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} />}
+      {snailOut(hour, sky, season) && <DockSnail />}
+      {gullsOut(hour, sky, season) && <WinterGulls wind={wind} />}
       <Cabin season={season} hour={hour} lit={cabinWindowsLit(hour)} smoking={chimneySmoking(hour, season)} wind={wind} />
       {tentPitched(season) && (
         <>
