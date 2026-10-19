@@ -469,6 +469,26 @@ button.field-primary {
     inset: -4px;
   }
 
+  /* Bests' season box stacks up to four count links ("Fish: 42", "Days out: 12", "Kinds: 6", "Best day: …") 22 px
+     apart, each a 16-18 px target: each is now a full 32 px band, touching the next, as Home's count lines are. */
+  .season-recap p a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
+  /* A water's tips box links a word on most lines ("Most fish at: dawn", "Best weather: overcast", the lures) on
+     24 px lines, each an 18-20 px target: each linked word is now a 32 px band, the same as the season box's lines, and a short one ("Jig") 32 px wide. */
+  .water-tips p a {
+    display: inline-block;
+    min-width: 32px;
+    min-height: 32px;
+    padding-block: 4px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;

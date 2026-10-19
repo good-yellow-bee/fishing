@@ -45,3 +45,14 @@ describe("round 88: a calendar reminder only for an outing still to come", () =>
     expect(tripsIcs([{ trip: trip("a", "2026-10-20"), place: null, alarm: "Pack" }], now)).toContain("VALARM");
   });
 });
+
+describe("round 88 ideas: the outings sheet says what each outing took", () => {
+  it("lists the kinds most first, and names an untitled outing by its water", async () => {
+    const { tripsCsv } = await import("./catchCsv");
+    const fish = (id: string, species: string, tripId: string) =>
+      ({ id, species, measure: { kind: "length", inches: 20 }, lure: "Jig", spotId: "own-lake", tripId, caughtAt: new Date(2026, 9, 10, 9).toISOString(), note: "", weather: null }) as never;
+    const book = { spots: [{ id: "own-lake", name: "Own Lake", waterType: "lake", notes: "", bestConditions: "" }], trips: [trip("a", "2026-10-10")], catches: [fish("1", "Zander", "a"), fish("2", "Northern pike", "a"), fish("3", "Zander", "a")] } as never;
+    const lines = tripsCsv(book, "2026-10-19").replace(/^﻿/, "").trimEnd().split("\r\n");
+    expect(lines[1]).toBe('2026-10-10,Own Lake,Own Lake,3,"Zander ×2, Northern pike",0,0,');
+  });
+});
