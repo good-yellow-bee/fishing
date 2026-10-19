@@ -10,7 +10,7 @@ import {
   type WaterType,
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
-import { measuresText } from "../i18n/content";
+import { measuresText, tempText } from "../i18n/content";
 import { daysAheadLabel, fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
@@ -142,6 +142,7 @@ export function SpotCard({
   restDays = null,
   nextOuting = null,
   bestLure = null,
+  waterTemp = null,
 }: {
   spot: Spot;
   fishCount: number;
@@ -153,6 +154,8 @@ export function SpotCard({
   restDays?: number | null;
   /** The soonest planned outing here, already in words. */
   nextOuting?: string | null;
+  /** The water's last temperature noted with a fish, while it is recent enough to go by. */
+  waterTemp?: { fahrenheit: number; day: string } | null;
 }) {
   const t = useT();
   return (
@@ -171,6 +174,7 @@ export function SpotCard({
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
+      {waterTemp ? <p className="meta water-temp">{t("Water {temp} on {day}", { temp: tempText(waterTemp.fahrenheit), day: formatDay(waterTemp.day) })}</p> : null}
     </Link>
   );
 }

@@ -1,4 +1,4 @@
-import { foldText, type SpotPlace, type Trip } from "@stillwater/shared";
+import { foldText, localDate, type SpotPlace, type Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
@@ -61,7 +61,8 @@ export function tripsIcs(outings: readonly { trip: Trip; place: string | null; a
         ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
         ...(notes ? [`DESCRIPTION:${icsText(notes)}`] : []),
         // Six hours before the all-day event's midnight start: 18:00 the evening before, in the calendar's own zone.
-        ...(alarm ? ["BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT6H", `DESCRIPTION:${icsText(alarm)}`, "END:VALARM"] : []),
+        // Only for an outing still to come: today's would ring yesterday evening, which some calendars fire on import.
+        ...(alarm && trip.date > localDate(now) ? ["BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT6H", `DESCRIPTION:${icsText(alarm)}`, "END:VALARM"] : []),
         "END:VEVENT",
       ];
     }),

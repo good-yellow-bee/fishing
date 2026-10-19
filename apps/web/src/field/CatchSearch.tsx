@@ -164,10 +164,10 @@ const TIME_WORDS: Partial<Record<(typeof BITE_TIMES)[number]["id"], string[]>> =
   // Not "wschód" or "zachód": they are the east and west of a wind as well ("ze wschodu").
   // The Polish "at dawn", "in the evening" and "at night" forms too ("o świcie", "wieczorem", "nocą", "w nocy").
   dawn: ["sunrise", "first light", "daybreak", "świt", "świcie", "brzask"],
-  morning: ["rankiem"],
+  morning: ["rankiem", "rano"],
   midday: ["noon", "południe"],
   afternoon: ["popołudniu"],
-  evening: ["dusk", "sunset", "zmierzch", "zmrok", "wieczorem"],
+  evening: ["dusk", "sunset", "zmierzch", "zmierzchu", "zmrok", "zmroku", "wieczorem"],
   night: ["dark", "noc", "nocą", "nocy"],
 };
 
@@ -199,6 +199,11 @@ export function isTimeWord(want: string, t: (text: string) => string): boolean {
   const typed = normalize(want);
   if (typed.length < 3) return false;
   return BITE_TIMES.some((band) => [band.label, t(band.label), ...(TIME_WORDS[band.id] ?? [])].some((word) => normalize(word).startsWith(typed)));
+}
+
+/** True when what was typed is a part of the day said as a phrase ("w nocy", "o świcie", "at dawn"), as the fish search reads it. */
+export function isTimePhrase(want: string, t: (text: string) => string): boolean {
+  return wholeTimeWord(normalize(want), t) !== null;
 }
 
 /** The part of the day a whole search names ("night", "at dusk", "o świcie", "wieczór"), in either language, or null. */

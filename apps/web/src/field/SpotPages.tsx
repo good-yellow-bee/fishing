@@ -41,7 +41,7 @@ import { fishCountLabel, formatDay, messageText, outingName, outingNameById, tri
 import { useLogbook } from "./LogbookState";
 import { locale, num, t, tn, useT } from "../i18n";
 import { tempText } from "../i18n/content";
-import { tempThroughYear } from "./waterTips";
+import { lastReading, tempThroughYear } from "./waterTips";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { useKeptForm } from "./keptForm";
 import { ChoiceRow } from "./ChoiceRow";
@@ -92,6 +92,17 @@ function readSpotOrder(): SpotOrder {
 const FIND_WATER_FROM = 8;
 /** In the address: the name the list is narrowed to. */
 const WATER_FIND = "q";
+
+/** How long a water's last temperature is worth showing on its card: after a month it says little about the water now. */
+const TEMP_FRESH_DAYS = 30;
+
+/** A water's last temperature noted with a fish, and its day, while that day is within TEMP_FRESH_DAYS of today. */
+export function recentTemp(catches: readonly CatchEntry[], spotId: string, today: string): { fahrenheit: number; day: string } | null {
+  const last = lastReading(catches.filter((entry) => entry.spotId === spotId));
+  if (!last) return null;
+  const day = localDate(new Date(last.at));
+  return day <= today && daysBetween(day, today) <= TEMP_FRESH_DAYS ? { fahrenheit: last.fahrenheit, day } : null;
+}
 
 export function SpotsPage() {
   const { book } = useLogbook();
@@ -270,6 +281,7 @@ export function SpotsPage() {
               nextOuting={nextOutingLine(upcoming.find((trip) => trip.spotId === row.spot.id), today, tomorrow)}
               // The angler's own fish, once there are any; the game's lake its own.
               bestLure={bestLureAt(row.spot.id === PLAY_LAKE_ID ? book.catches : countedCatches, row.spot.id)}
+              waterTemp={recentTemp(row.spot.id === PLAY_LAKE_ID ? book.catches : countedCatches, row.spot.id, today)}
             />
           ))}
         </div>
@@ -332,8 +344,8 @@ function SpotView() {
   const summed = spot.id === PLAY_LAKE_ID ? catches : countedFish(catches);
   // The outings as the fish are counted: the sample week's left out once the book has the angler's own.
   const countedTrips = spot.id === PLAY_LAKE_ID ? trips : counted.trips.filter((trip) => trip.spotId === spot.id);
+  const countedTripIds = new Set(countedTrips.map((trip) => trip.id));
   const hooks = hookTally(counted, spot.id);
-  const average = outingAverage(countedTrips, (id) => fishByTrip.get(id) ?? 0, today);
   // The best outing among the angler's own here, as an outing's page names it.
   const top = topOuting(countedTrips, (id) => fishByTrip.get(id) ?? 0, today);
   // A blank spell still running here, once the water has given a fish: whether to try elsewhere.
@@ -341,6 +353,8 @@ function SpotView() {
   const looseByDay = new Map<string, number>();
   for (const entry of summed) if (!entry.tripId) looseByDay.set(localDate(new Date(entry.caughtAt)), (looseByDay.get(localDate(new Date(entry.caughtAt))) ?? 0) + 1);
   const dayOf = new Map(countedTrips.map((trip) => [trip.id, trip.date]));
+  // A day's fish logged without its outing count for that day's outing, as the run below and Trips count them.
+  const average = outingAverage(countedTrips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today);
   const streak = outingStreak(countedTrips, (id) => (fishByTrip.get(id) ?? 0) + (looseByDay.get(dayOf.get(id) ?? "") ?? 0), today, looseByDay.keys());
   const split = weekendSplit(countedTrips, (id) => fishByTrip.get(id) ?? 0, today);
   // Last year's kinds here still to come back, and the day this water gave the most kinds: as Bests says them for the book.
@@ -533,7 +547,7 @@ function SpotView() {
       {trips.length === 0 ? (
         <p className="empty">{t("No outings on this water yet.")}</p>
       ) : (
-        <PagedTrips trips={trips} fishOn={(id) => fishByTrip.get(id) ?? 0} stack>
+        <PagedTrips trips={trips} fishOn={(id) => fishByTrip.get(id) ?? 0} counted={spot.id === PLAY_LAKE_ID ? undefined : (trip) => countedTripIds.has(trip.id)} stack>
           {(trip) => (
             <TripCard
               level={4}

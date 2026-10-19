@@ -15,11 +15,14 @@ export function PagedTrips({
   fishOn,
   children,
   stack = false,
+  counted,
 }: {
   trips: readonly Trip[];
   fishOn: (tripId: string) => number;
   children: (trip: Trip) => ReactNode;
   stack?: boolean;
+  /** Which outings the month headings count as the angler's own; the rest are said apart. */
+  counted?: (trip: Trip) => boolean;
 }) {
   const { shown, showMore, box } = useShowMore("trips");
   const { visible, more } = catchPage(trips, shown);
@@ -30,7 +33,7 @@ export function PagedTrips({
       {tripsByMonth(visible).map((group) => (
         // Unnamed, so a season's months aren't a landmark each; the month's heading says which it is.
         <section key={group.month}>
-          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} />
+          <TripMonthHead month={group.month} trips={wholeMonths.get(group.month) ?? group.trips} fishOn={fishOn} counted={counted} />
           {stack ? <div className="stack">{group.trips.map(children)}</div> : group.trips.map(children)}
         </section>
       ))}
