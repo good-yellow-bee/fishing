@@ -705,7 +705,7 @@ export const PL_GAME: PlBook = {
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.":
-    "Na telefonie podpowiedź na jeziorze stoi teraz pod plakietką brzegu, gdy plakietka ma dużo do powiedzenia, a nie pod nią schowana. Na telefonie trzymanym poziomo długa notka o brzegu kończy się wielokropkiem przed tabliczkami, a z większym tekstem na niskim ekranie przynęta przesuwa się w górę obok plakietki brzegu, z dala od drążka chodzenia.",
+    "Na telefonie podpowiedź na jeziorze stoi teraz pod plakietką brzegu, gdy plakietka ma dużo do powiedzenia, zamiast chować się pod nią. Na telefonie trzymanym poziomo długa notka o brzegu kończy się wielokropkiem przed tabliczkami, a z większym tekstem na niskim ekranie przynęta przesuwa się w górę obok plakietki brzegu, z dala od drążka chodzenia.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.":
     "W letnie wieczory nietoperz czasem wlatuje polować na ćmy przy latarni na pomoście. A w śnieżne zimowe noce na zaśnieżony słupek przylatuje też pójdźka.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
