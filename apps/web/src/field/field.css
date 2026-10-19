@@ -1373,6 +1373,8 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
   .form-save .field-primary {
     flex: 0 0 auto;
+    /* Wider than the bar ("Zapisz w dzienniku" at 280 px with larger text), its words wrap rather than spill off it. */
+    max-width: 100%;
   }
 
   .form-save .text-button {
@@ -1508,6 +1510,87 @@ html:has(.form-save):has(.undo-bar) .field-main {
   .measure {
     min-height: 56px;
     font-size: 18px;
+  }
+}
+
+/* With too little room beside it, a card's measure (and photo) or date column left the text a 75 px strip, a word a
+   line: a 280 px phone, 360 px with larger text, or a photo card under about 390 px of room. The card stacks there,
+   the measure, photo or date on top and the text full width below. Zoomed text has less room, so its widths are larger. */
+@media (max-width: 329px) {
+  :is(.trip-card, .catch-card:not(.has-photo)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catch-card:not(.has-photo) .measure {
+    justify-self: start;
+    min-width: 76px;
+  }
+}
+
+@media (max-width: 389px) {
+  .catch-card.has-photo {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .catch-card.has-photo > div {
+    grid-column: 1 / -1;
+  }
+
+  .catch-card.has-photo .measure {
+    justify-self: start;
+    min-width: min(76px, 100%);
+  }
+}
+
+@media (max-width: 379px) {
+  html[data-text-size="large"] :is(.trip-card, .catch-card:not(.has-photo)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-text-size="large"] .catch-card:not(.has-photo) .measure {
+    justify-self: start;
+    min-width: 76px;
+  }
+}
+
+@media (max-width: 449px) {
+  html[data-text-size="large"] .catch-card.has-photo {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  html[data-text-size="large"] .catch-card.has-photo > div {
+    grid-column: 1 / -1;
+  }
+
+  html[data-text-size="large"] .catch-card.has-photo .measure {
+    justify-self: start;
+    min-width: min(76px, 100%);
+  }
+}
+
+@media (max-width: 429px) {
+  html[data-text-size="larger"] :is(.trip-card, .catch-card:not(.has-photo)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  html[data-text-size="larger"] .catch-card:not(.has-photo) .measure {
+    justify-self: start;
+    min-width: 76px;
+  }
+}
+
+@media (max-width: 507px) {
+  html[data-text-size="larger"] .catch-card.has-photo {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  html[data-text-size="larger"] .catch-card.has-photo > div {
+    grid-column: 1 / -1;
+  }
+
+  html[data-text-size="larger"] .catch-card.has-photo .measure {
+    justify-self: start;
+    min-width: min(76px, 100%);
   }
 }
 
