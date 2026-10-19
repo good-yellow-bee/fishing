@@ -2975,12 +2975,11 @@ html[data-reduce-motion="1"] .hour-veil {
   color: #d9b56a;
 }
 
-/* On a phone the catch table scrolls on its own instead of pushing the page sideways. */
-@media (max-width: 640px) {
-  .log-page table {
-    display: block;
-    overflow-x: auto;
-  }
+/* The catch table scrolls on its own instead of pushing the page sideways: on a phone, and up to 920 px wide too with
+   larger text or a reader's own text spacing (at 641 px it ran 72 px past the window even at normal text). */
+.log-page table {
+  display: block;
+  overflow-x: auto;
 }
 
 .log-page table:focus-visible {
