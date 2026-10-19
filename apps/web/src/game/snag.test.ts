@@ -19,6 +19,7 @@ describe("snags", () => {
     expect(castSnags("reeds", x, z, false, SNAG_ODDS - 0.01, 1)).toBe("weed");
     expect(castSnags("reeds", x, z, false, SNAG_ODDS + 0.01, 1)).toBeNull();
     expect(castSnags("reeds", x, z, true, 0, 1)).toBeNull();
+    expect(castSnags("reeds", x, z, false, SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY)).toBeNull();
   });
 
   it("let a topwater lure ride over the weed, while any other lure still fouls there", () => {
@@ -31,6 +32,7 @@ describe("snags", () => {
   it("foul some casts tight to the lily pads on their stems, but not a topwater, and none in winter when the pads are gone", () => {
     expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS - 0.01, 1, "Nightcrawler", "summer")).toBe("weed");
     expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS + 0.01, 1, "Nightcrawler", "summer")).toBeNull();
+    expect(castSnags("dock", -6.8, 4.8, false, LILY_SNAG_ODDS * CLEAN_DROP_SNAG + 0.01, CLEAN_DROP_ACCURACY, "Nightcrawler", "summer")).toBeNull();
     expect(castSnags("dock", -6.8, 4.8, false, 0, 1, "Popper", "summer")).toBeNull();
     expect(castSnags("dock", -6.8, 4.8, false, 0, 1, "Nightcrawler", "winter")).toBeNull();
     expect(castSnags("dock", -6.8, 4.8, true, 0, 1, "Nightcrawler", "summer")).toBeNull();

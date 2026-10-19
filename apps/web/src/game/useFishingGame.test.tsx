@@ -1220,9 +1220,10 @@ describe("useFishingGame strike timing", () => {
     expect(hasTrebles(lure)).toBe(trebles);
   });
 
-  it("tells the snag roll which lure was cast", () => {
+  it("tells the snag roll which lure was cast, and the angler's Accuracy", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Topwater frog");
     cast(surface);
+    expect(vi.mocked(castSnags).mock.lastCall?.[5]).toBe(profile.accuracy);
     expect(vi.mocked(castSnags).mock.lastCall?.[6]).toBe("Topwater frog");
   });
 
