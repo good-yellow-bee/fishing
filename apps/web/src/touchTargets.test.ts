@@ -25,8 +25,8 @@ describe("the settings and the shack on a touch screen", () => {
     expect(/\n\.settings-volume input \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 32px;");
   });
 
-  it("stands the shack's skill buttons 32 px tall on touch screens", () => {
-    const block = /@media \(pointer: coarse\) \{\n  \.upgrade-row button \{([^}]*)\}/.exec(read("index.css"))?.[1];
+  it("stands the shack's skill buttons and the requests' Claim 32 px tall on touch screens", () => {
+    const block = /@media \(pointer: coarse\) \{\n  \.upgrade-row button,\n  \.daily-requests li button \{([^}]*)\}/.exec(read("index.css"))?.[1];
     expect(block).toContain("min-height: 32px;");
   });
 });
