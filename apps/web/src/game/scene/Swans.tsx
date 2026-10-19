@@ -16,7 +16,26 @@ const WAKE = "#dcebe7";
 const WAKE_SPREAD = 0.3;
 const WAKE_LENGTH = 2.6;
 
-type SwanParts = { body: THREE.BufferGeometry; wing: THREE.BufferGeometry; neck: THREE.BufferGeometry; white: THREE.Material; painted: THREE.Material };
+type SwanParts = {
+  body: THREE.BufferGeometry;
+  wing: THREE.BufferGeometry;
+  neck: THREE.BufferGeometry;
+  wake: THREE.BufferGeometry;
+  white: THREE.Material;
+  painted: THREE.Material;
+  foam: THREE.Material;
+};
+
+/** The wake's two arms, spreading back from just ahead of the swan, in one shape. */
+export function wakeShape() {
+  return mergeParts(
+    [-1, 1].map((side) => ({
+      geometry: new THREE.PlaneGeometry(0.22, WAKE_LENGTH),
+      position: [side * Math.sin(WAKE_SPREAD) * (WAKE_LENGTH / 2), 0, 0.3 - Math.cos(WAKE_SPREAD) * (WAKE_LENGTH / 2)] as const,
+      rotation: [-Math.PI / 2, 0, side * WAKE_SPREAD] as const,
+    })),
+  );
+}
 
 /** The body and tail never move apart, nor do the neck, head, beak and knob, so each is baked into one shape. */
 export function swanShapes(): Pick<SwanParts, "body" | "wing" | "neck"> {
@@ -73,6 +92,8 @@ export function Swans() {
   const parts = useMemo<SwanParts>(
     () => ({
       ...swanShapes(),
+      wake: wakeShape(),
+      foam: new THREE.MeshBasicMaterial({ color: WAKE, transparent: true, opacity: 0.28, depthWrite: false }),
       white: new THREE.MeshToonMaterial({ color: WHITE, gradientMap: toonRamp() }),
       painted: new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }),
     }),
@@ -127,17 +148,7 @@ export function Swans() {
             <SwanBody parts={parts} neck={(g) => void (necks.current[k] = g)} wing={(side, g) => void (wings.current[k]![side] = g)} />
           </group>
           <group ref={(g) => void (wakes.current[k] = g)}>
-            {[-1, 1].map((side) => (
-              <mesh
-                key={side}
-                position={[side * Math.sin(WAKE_SPREAD) * (WAKE_LENGTH / 2), 0, 0.3 - Math.cos(WAKE_SPREAD) * (WAKE_LENGTH / 2)]}
-                rotation={[-Math.PI / 2, 0, side * WAKE_SPREAD]}
-                renderOrder={4}
-              >
-                <planeGeometry args={[0.22, WAKE_LENGTH]} />
-                <meshBasicMaterial color={WAKE} transparent opacity={0.28} depthWrite={false} />
-              </mesh>
-            ))}
+            <mesh geometry={parts.wake} material={parts.foam} renderOrder={4} />
           </group>
         </group>
       ))}
