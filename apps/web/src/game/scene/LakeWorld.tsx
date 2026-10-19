@@ -7,7 +7,7 @@ import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
-import { batchPlaced, placement } from "./scatterBatch";
+import { SWAY_FOOT, batchPlaced, placement } from "./scatterBatch";
 import { mergeParts } from "./mergeParts";
 import {
   BANK_BOARDS,
@@ -2206,7 +2206,7 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
   const models = useGLTF(urls);
   const batches = useMemo(() => {
     const byUrl = new Map(urls.map((url, i) => [url, models[i]!.scene]));
-    // Copies that look alike share one baked shape, so they still batch into one instanced mesh.
+    // Copies that look alike share one baked shape, prepared once.
     const baked = new Map<string, THREE.Group | null>();
     const placed = items.map((item) => {
       // Prepared exactly as ToonModel prepares a single copy.
@@ -2226,9 +2226,9 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
       if (!shape) shareMaterials(root);
       return { root, matrix: placement(item.position, item.rot, item.scale) };
     });
-    const meshes = batchPlaced(placed);
-    // Swapped on the batch only: the copies keep the still originals, which they release below.
-    const swayed = sway ? meshes.filter((mesh) => !Array.isArray(mesh.material)) : [];
+    const meshes = batchPlaced(placed, sway);
+    // Swapped on the batch only: the copies keep the still originals, which they release below. Only batches that carry their trees' feet sway.
+    const swayed = meshes.filter((mesh) => mesh.geometry.getAttribute(SWAY_FOOT));
     const stillMaterials = swayed.map((mesh) => mesh.material as THREE.Material);
     swayed.forEach((mesh, i) => (mesh.material = swayingMaterial(stillMaterials[i]!)));
     return { placed, meshes, stillMaterials, baked: [...baked.values()] };

@@ -35,6 +35,9 @@ export const swayUniforms = {
 
 const SWAY_GLSL = /* glsl */ `
 {
+  #ifdef USE_INSTANCING
+  vec3 swayFoot = instanceMatrix[3].xyz;
+  #endif
   float swayK = max(0.0, mvPosition.y - swayFoot.y) / ${SWAY_REF_HEIGHT.toFixed(1)};
   swayK *= swayK;
   float swaySpeed = length(uSwayWind);
@@ -49,8 +52,9 @@ mvPosition = modelViewMatrix * mvPosition;`;
 const swaying = new Map<THREE.Material, { copy: THREE.Material; users: number }>();
 
 /**
- * A copy of `material` whose vertices sway as `treeSway` says, for a merged scatter batch whose
- * vertices are already in the world; each vertex's swayFoot (scatterBatch.ts) is its tree's foot. One copy per
+ * A copy of `material` whose vertices sway as `treeSway` says, once they are placed in the world: in a
+ * merged scatter batch each vertex's swayFoot (scatterBatch.ts) is its tree's foot, in an instanced one
+ * the instance's own origin is. One copy per
  * material, shared by every batch that wears it, as the original is shared by other scenery
  * that must stay still. Let go of it with releaseSwayingMaterial.
  */
@@ -63,7 +67,7 @@ export function swayingMaterial(material: THREE.Material) {
   const copy = material.clone();
   copy.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, swayUniforms);
-    shader.vertexShader = `uniform float uSwayTime;\nuniform vec2 uSwayWind;\nattribute vec3 swayFoot;\n${shader.vertexShader.replace(
+    shader.vertexShader = `uniform float uSwayTime;\nuniform vec2 uSwayWind;\n#ifndef USE_INSTANCING\nattribute vec3 swayFoot;\n#endif\n${shader.vertexShader.replace(
       "#include <project_vertex>",
       THREE.ShaderChunk.project_vertex.replace("mvPosition = modelViewMatrix * mvPosition;", SWAY_GLSL),
     )}`;
