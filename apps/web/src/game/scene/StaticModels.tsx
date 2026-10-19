@@ -1,20 +1,43 @@
 import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { batchPlaced } from "./scatterBatch";
+import { batchPlaced, disposeBatch } from "./scatterBatch";
 import { prepareToon, releaseToonCopy, type ToonLook } from "./ToonModel";
 
-/** One still model placed in the scene, prepared as ToonModel prepares it. */
-export type StaticModel = ToonLook & {
+/** One still model placed in the scene, prepared as ToonModel prepares it (no season tint: the list is built once). */
+export type StaticModel = Omit<ToonLook, "plant"> & {
   url: string;
   position: readonly [number, number, number];
   rotation?: readonly [number, number, number];
-  scale?: number;
+  scale?: number | readonly [number, number, number];
 };
 
 /** Where a still model stands: its position, its turn and its size. */
 export function staticPlacement({ position, rotation = [0, 0, 0], scale = 1 }: StaticModel) {
-  return new THREE.Matrix4().compose(new THREE.Vector3(...position), new THREE.Quaternion().setFromEuler(new THREE.Euler(...rotation)), new THREE.Vector3(scale, scale, scale));
+  const size = typeof scale === "number" ? new THREE.Vector3(scale, scale, scale) : new THREE.Vector3(...scale);
+  return new THREE.Matrix4().compose(new THREE.Vector3(...position), new THREE.Quaternion().setFromEuler(new THREE.Euler(...rotation)), size);
+}
+
+/** Bakes `items` from their loaded `scenes` (by url): one prepared copy per look, placed as often as it is listed. */
+export function bakeStatic(items: readonly StaticModel[], scenes: ReadonlyMap<string, THREE.Object3D>) {
+  const copies = new Map<string, THREE.Object3D>();
+  const placed = items.map((item) => {
+    const look = `${item.url}|${item.shadows ?? true}|${item.sitOnGround ?? false}|${item.shade ?? 1}`;
+    let root = copies.get(look);
+    if (!root) {
+      root = prepareToon(scenes.get(item.url)!, item);
+      copies.set(look, root);
+    }
+    return { root, matrix: staticPlacement(item) };
+  });
+  const meshes = batchPlaced(placed);
+  // Baked copies' shapes are copied into the batch and can go now; the rest share their materials with it until it goes.
+  const kept = [...copies.values()].filter((root) => {
+    if (!root.userData.baked) return true;
+    releaseToonCopy(root);
+    return false;
+  });
+  return { meshes, kept };
 }
 
 /**
@@ -24,15 +47,11 @@ export function staticPlacement({ position, rotation = [0, 0, 0], scale = 1 }: S
 export function StaticModels({ items }: { items: readonly StaticModel[] }) {
   const urls = useMemo(() => [...new Set(items.map((item) => item.url))], [items]);
   const models = useGLTF(urls);
-  const batch = useMemo(() => {
-    const byUrl = new Map(urls.map((url, i) => [url, models[i]!.scene]));
-    const placed = items.map((item) => ({ root: prepareToon(byUrl.get(item.url)!, item), matrix: staticPlacement(item) }));
-    return { placed, meshes: batchPlaced(placed) };
-  }, [items, urls, models]);
+  const batch = useMemo(() => bakeStatic(items, new Map(urls.map((url, i) => [url, models[i]!.scene]))), [items, urls, models]);
   useEffect(
     () => () => {
-      batch.placed.forEach(({ root }) => releaseToonCopy(root));
-      batch.meshes.forEach((mesh) => (mesh instanceof THREE.InstancedMesh ? mesh.dispose() : mesh.geometry.dispose()));
+      batch.kept.forEach(releaseToonCopy);
+      disposeBatch(batch.meshes);
     },
     [batch],
   );

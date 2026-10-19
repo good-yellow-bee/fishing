@@ -108,6 +108,11 @@ export function batchPlaced(placed: readonly Placed[], sway = false): THREE.Mesh
   return meshes;
 }
 
+/** Frees what batchPlaced made: merged meshes own their geometry, instanced ones share the model's. */
+export function disposeBatch(meshes: readonly THREE.Mesh[]) {
+  meshes.forEach((mesh) => (mesh instanceof THREE.InstancedMesh ? mesh.dispose() : mesh.geometry.dispose()));
+}
+
 /** A copy's placement from position, a turn about Y, and scale. */
 export function placement(position: readonly [number, number, number], rotY: number, scale: number) {
   return new THREE.Matrix4().compose(

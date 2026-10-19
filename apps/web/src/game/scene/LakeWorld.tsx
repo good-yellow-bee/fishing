@@ -8,7 +8,7 @@ import { ToonModel } from "./ToonModel";
 import { StaticModels, type StaticModel } from "./StaticModels";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
-import { SWAY_FOOT, batchPlaced, placement } from "./scatterBatch";
+import { SWAY_FOOT, batchPlaced, disposeBatch, placement } from "./scatterBatch";
 import { mergeParts } from "./mergeParts";
 import {
   BANK_BOARDS,
@@ -2256,8 +2256,7 @@ function ScatterModels({ items, shadows = false, sway = false }: { items: Scatte
       batches.stillMaterials.forEach(releaseSwayingMaterial);
       batches.placed.forEach(({ root }) => !root.userData.baked && releaseSharedMaterials(root));
       batches.baked.forEach((shape) => shape && releaseBaked(shape));
-      // Merged batches own their baked geometry; instanced ones share the model's.
-      batches.meshes.forEach((mesh) => (mesh instanceof THREE.InstancedMesh ? mesh.dispose() : mesh.geometry.dispose()));
+      disposeBatch(batches.meshes);
     },
     [batches],
   );
