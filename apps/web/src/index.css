@@ -148,6 +148,10 @@ a {
   height: 100dvh;
   overflow: hidden;
   background: #17211f;
+  /* How far the header runs past its one-row foot (94 px): on a tablet its 32 px touch links wrap it to two rows, and the
+     panels hung under it (the stance chip, the coach, the news card, the lure, the banks, the toasts) drop by as much
+     instead of sitting under it. Zero until the header wraps; Hud.tsx measures --hud-bottom. */
+  --hud-drop: max(0px, var(--hud-bottom, 94px) - 94px);
 }
 
 /* Photo mode: only the lake stays; a clear button over it brings the panels back. */
@@ -589,7 +593,7 @@ a:focus-visible {
 .stance-chip {
   position: absolute;
   left: 24px;
-  top: 102px;
+  top: calc(102px + var(--hud-drop, 0px));
   z-index: 3;
   padding: 8px 12px;
   border: 1px solid rgba(220, 196, 150, 0.38);
@@ -615,7 +619,7 @@ a:focus-visible {
 .lure-choice {
   position: absolute;
   left: 24px;
-  top: 154px;
+  top: calc(154px + var(--hud-drop, 0px));
   z-index: 4;
   display: grid;
   gap: 5px;
@@ -632,7 +636,7 @@ a:focus-visible {
    since with larger text and both "suits it" lines it ran down over the stick on a 600 px tall screen. */
 @media (pointer: coarse) and (min-width: 801px) and (min-height: 501px) {
   html:not([data-hand="left"]) .lure-choice {
-    max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px);
+    max-height: calc((100dvh - 216px) / var(--text-zoom, 1) - 154px - var(--hud-drop, 0px));
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -840,7 +844,7 @@ a:focus-visible {
 
 .walk-signs {
   position: absolute;
-  top: 146px;
+  top: calc(146px + var(--hud-drop, 0px));
   right: 24px;
   z-index: 3;
   display: grid;
@@ -895,7 +899,7 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
 
 .walkthrough {
   position: absolute;
-  top: 102px;
+  top: calc(102px + var(--hud-drop, 0px));
   left: 50%;
   z-index: 4;
   transform: translateX(-50%);
@@ -913,7 +917,7 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
 
 .whats-new {
   position: absolute;
-  top: 102px;
+  top: calc(102px + var(--hud-drop, 0px));
   left: 50%;
   z-index: 5;
   transform: translateX(-50%);
@@ -921,7 +925,7 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
   gap: 8px;
   width: min(440px, calc(88vw / var(--text-zoom, 1)));
   /* In the card's own zoomed pixels, so with larger text it still ends 38 px above the screen's foot. */
-  max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px);
+  max-height: calc((100dvh - 38px) / var(--text-zoom, 1) - 102px - var(--hud-drop, 0px));
   overflow-y: auto;
   padding: 12px 16px 14px;
   border: 1px solid var(--amber);
@@ -1091,7 +1095,7 @@ html[data-contrast="high"] .walk-signs button[data-cold] {
 
 .camera-help {
   position: absolute;
-  top: 102px;
+  top: calc(102px + var(--hud-drop, 0px));
   right: 24px;
   display: flex;
   align-items: center;
@@ -1585,7 +1589,7 @@ html[data-input="pad"] .fight-bar .on-pad {
 }
 
 .toast {
-  top: 112px;
+  top: calc(112px + var(--hud-drop, 0px));
   transform: translate(-50%, 0);
   animation: toast-drop 180ms ease-out;
 }
