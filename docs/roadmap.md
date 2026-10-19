@@ -1149,6 +1149,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA104~~ | ~~On a tablet or a 1024 px window the header wraps to two rows (106-117 px tall), and the stance chip, the first-cast coach and its Skip, the news card and the toasts sat under its foot: every panel hung under the header now drops by however far it wraps (#1315)~~ | phone UX | S |
 | ~~PA105~~ | ~~On a sideways tablet a catch's Edit and Delete stack 12 px apart, and Delete's reach cut Edit's tap band to 29 px: they part by 16 px and Edit reaches 7 px each way, 33 px (#1316)~~ | phone UX | S |
 | ~~PA106~~ | ~~The map page shows its heading and a "Fog lifting…" status while its code loads, instead of an empty page (#1318)~~ | phone UX | S |
+| ~~PA107~~ | ~~On a phone the Map list's "Next outing" link was a wrapped 13 px line that the coordinates' reach cut to 9-16 px: it stands 32 px tall with room under it (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
