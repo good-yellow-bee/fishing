@@ -18,6 +18,16 @@ describe("touch targets", () => {
   });
 });
 
+describe("small links off the lake on a touch screen", () => {
+  it("makes Sign in's and Join's, the logs' way back, the recap's and the field guide's links 32 px bands", () => {
+    const css = read("index.css");
+    const block = /@media \(pointer: coarse\) \{\n  :is\(\.auth-card \.foot, \.log-page > p:first-child, \.trip-recap-filed, \.guide-book\) a \{([^}]*)\}/.exec(css)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+  });
+});
+
 describe("tables that scroll sideways on a phone", () => {
   it.each([
     ["pages/Log.tsx", "log-title"],
