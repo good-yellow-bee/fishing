@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
-import { robinAt } from "./robinVisit";
+import { inLake, onDockPlanks } from "@stillwater/shared";
+import { anglerPose } from "./pose";
+import { HOP_START, hopAt, hopStep, type HopState } from "./robinHop";
+import { robinAt, type RobinPose } from "./robinVisit";
 import { toonRamp } from "./toon";
 import { useSkinnedFigure } from "./skinFigure";
 
@@ -39,9 +42,8 @@ export function robinTailShape() {
   return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: BROWN }]);
 }
 
-/** A robin dropping in on the dock's front posts, startled off early by a strike (robinVisit.ts). */
-export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Readonly<{ current: number }> }) {
-  const still = useReducedMotion();
+/** A robin's figure, posed each frame by `poseAt` (a RobinPose at the clock's time): one skinned draw and its wings. */
+function RobinBird({ name, poseAt }: { name: string; poseAt: (time: number) => RobinPose }) {
   const bird = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
   const tail = useRef<THREE.Group>(null);
@@ -59,7 +61,7 @@ export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Rea
   );
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
-    const pose = robinAt(time, snow, still, startledAt.current);
+    const pose = poseAt(time);
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;
@@ -80,7 +82,7 @@ export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Rea
   useSkinnedFigure(bird, materials.painted);
 
   return (
-    <group ref={bird} name="dock-robin" visible={false}>
+    <group ref={bird} name={name} visible={false}>
       <group scale={SCALE}>
         <mesh geometry={shapes.body} material={materials.painted} castShadow />
         <group ref={head} position={[0, 0.088, 0.012]}>
@@ -99,4 +101,27 @@ export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Rea
       </group>
     </group>
   );
+}
+
+/** A robin dropping in on the dock's front posts, startled off early by a strike (robinVisit.ts). */
+export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Readonly<{ current: number }> }) {
+  const still = useReducedMotion();
+  const poseAt = useCallback((time: number) => robinAt(time, snow, still, startledAt.current), [snow, still, startledAt]);
+  return <RobinBird name="dock-robin" poseAt={poseAt} />;
+}
+
+/** The robin coming to the angler's feet while they fish from the bank by day (robinHop.ts). */
+export function GroundRobin() {
+  const still = useReducedMotion();
+  const state = useRef<HopState>(HOP_START);
+  const poseAt = useCallback(
+    (time: number) => {
+      // Only on dry ground off the dock: not on the boards, and not out in the boat.
+      const ashore = !onDockPlanks(anglerPose.x, anglerPose.z) && !inLake(anglerPose.x, anglerPose.z);
+      state.current = hopStep(state.current, time, anglerPose, ashore);
+      return hopAt(state.current, time, still);
+    },
+    [still],
+  );
+  return <RobinBird name="ground-robin" poseAt={poseAt} />;
 }
