@@ -171,7 +171,7 @@ import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
-import { FAR_HILLS } from "./farHills";
+import { FAR_HILLS, hillColor } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
 import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
@@ -1207,7 +1207,7 @@ function LakeSurface({
   const pollen = pollenAmount(season, sky);
   const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
-    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: seasonGroundColor(hour === "night" ? hill.night : hill.day, season) })),
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season) })),
     [hour, season],
   );
   const scroll = surfaceScroll(wind);
@@ -2252,7 +2252,7 @@ export const LakeWorld = memo(function LakeWorld({
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={ground(hour === "night" ? hill.night : hill.day)} />
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season)} />
       ))}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />

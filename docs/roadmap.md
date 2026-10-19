@@ -1258,6 +1258,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC130~~ | ~~News card scene27: rain squall, winter crows, night eyeshine~~ (#1245) | scene | S |
 | ~~SC131~~ | ~~Fewer draws for the night angler and the dog walker: the angler's still parts in one shape (7 draws to 2), the walker's legs, arms and the dog's legs as instances (8 draws to 3)~~ (#1248) | scene | S |
 | ~~SC132~~ | ~~Winter sledders: on winter days two children take turns sledging down a packed run on the hill behind the far bank, rushing down in a spray of snow, coasting to a stop and trudging back up pulling their sleds~~ (#1248) | scene | S |
+| ~~SC133~~ | ~~Snowy winter hills: in winter the hills behind the far bank lie white under unbroken snow, cool blue-grey in the shade and dark at night, instead of the olive of the trodden shore~~ (#1249) | scene | S |
+| ~~SC134~~ | ~~News card scene28: snowy winter hills and the sledders~~ (#1249) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

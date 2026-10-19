@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-game17";
+export const NEWS_ID = "2026-10-19-scene28";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.",
   "From spring through summer, cast onto the sunfish nests either side of the dock: perch and smallmouth come to raid the eggs, so the bites come sooner and many are one of them. In summer and fall a popper over a duckweed mat draws the bass lurking in its shade, but any other lure comes back bearded with weed and the fish turn from it.",
   "Gear's lure record can show one water at a time, a packed lure that took fish on that water before says so on the list, the Map's \"Next outing\" opens that outing, and each of your own waters on the Map can copy its place.",
   "Now and then a heavier squall sweeps across the lake in a shower, a grey curtain of rain with the water boiling beneath it. On winter days crows feed on the far shore and fly up in a loop over the water when the jogger runs by, and at night a pair of eyes sometimes shines at the edge of the far bank.",
