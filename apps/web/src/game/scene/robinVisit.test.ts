@@ -11,7 +11,9 @@ describe("dock robin", () => {
     expect(robinOut("day", "rain", "spring")).toBe(false);
     // In winter it is the last bird to roost, still about at dusk; never at night.
     expect(robinOut("dusk", "clear", "winter")).toBe(true);
-    expect(robinOut("dusk", "rain", "winter")).toBe(false);
+    // Winter's precipitation is snow, and it comes in that.
+    expect(robinOut("day", "rain", "winter")).toBe(true);
+    expect(robinOut("dusk", "rain", "winter")).toBe(true);
     expect(robinOut("night", "clear", "winter")).toBe(false);
   });
 
