@@ -469,6 +469,15 @@ button.field-primary {
     inset: -4px;
   }
 
+  /* Bests' season box stacks up to four count links ("Fish: 42", "Days out: 12", "Kinds: 6", "Best day: …") 22 px
+     apart, each a 16-18 px target: each is now a full 32 px band, touching the next, as Home's count lines are. */
+  .season-recap p a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;

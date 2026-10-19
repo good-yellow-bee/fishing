@@ -135,6 +135,18 @@ describe("Bests' days calendar on a touch screen", () => {
   });
 });
 
+describe("Bests' season box on a touch screen", () => {
+  it("gives each stacked count link a 32 px band of its own, and leaves desktop's plain inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.season-recap p a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    // Off a touch screen they stay inline links, which keep axe's inline-text exception (see Home's count links).
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toMatch(/\n\.season-recap p a \{/);
+  });
+});
+
 describe("Bests' month-by-year table on a touch screen", () => {
   it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
