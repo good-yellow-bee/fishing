@@ -249,6 +249,8 @@ export const TOPWATER_COMEBACK_MS = 1400;
 export const BAIT_YANK_WAIT = 1.5;
 /** A second finger this soon after a yank makes it a camera pinch, and the yank is taken back. */
 const PINCH_UNDO_MS = 600;
+/** A strike at nothing tugs the bait, and the fish backs off: the bite comes this much later each time, so mashing never finds it. */
+export const FALSE_STRIKE_MS = 400;
 
 /** How long a bottom feeder that dropped the bait takes to come back for its second take. */
 export const SECOND_TAKE_MS = 1800;
@@ -368,6 +370,31 @@ export function useFishingGame(
   const yankRef = useRef<{ dueAt: number; take: () => void } | null>(null);
   // The yank just made, so a camera pinch whose first finger looked like a strike can take it back.
   const yankedRef = useRef<{ dueAt: number; take: () => void; at: number } | null>(null);
+  /** The bite the wait is building to, and when, so a strike at nothing can push it back. */
+  const biteDueRef = useRef<{ dueAt: number; take: () => void } | null>(null);
+  /** When the last strike at nothing came, so a camera pinch's first finger can take it back. */
+  const falseStrikeAtRef = useRef<number | null>(null);
+  const scheduleBite = (take: () => void, ms: number) => {
+    window.clearTimeout(timers.current.wait);
+    timers.current.wait = window.setTimeout(take, ms);
+    biteDueRef.current = { dueAt: performance.now() + ms, take };
+  };
+  /** Moves the coming bite by `ms`, keeping the lure work's and the yank's own clocks in step. */
+  const shiftBite = (ms: number) => {
+    const due = biteDueRef.current;
+    if (!due) return;
+    scheduleBite(due.take, Math.max(0, due.dueAt - performance.now() + ms));
+    const dueAt = biteDueRef.current!.dueAt;
+    if (popRef.current) popRef.current.dueAt = dueAt;
+    if (yankRef.current) yankRef.current.dueAt = dueAt;
+  };
+  /** A strike at nothing: the fish backs off a moment, though a beginner's easy fish doesn't mind. */
+  const strikeAtNothing = () => {
+    if (!biteDueRef.current || mercyRef.current) return false;
+    shiftBite(FALSE_STRIKE_MS);
+    falseStrikeAtRef.current = performance.now();
+    return true;
+  };
   const popRef = useRef<{ dueAt: number; take: () => void; pops: number; work: "pop" | "hop" | "lift" | "strip"; taps: number; lastAt: number; season: LakeSeason | undefined } | null>(null);
   /** Clean fights landed in a row this session; a dirty landing or a lost fish starts it again. */
   const cleanRunRef = useRef(0);
@@ -481,6 +508,8 @@ export function useFishingGame(
     popRef.current = null;
     yankRef.current = null;
     yankedRef.current = null;
+    biteDueRef.current = null;
+    falseStrikeAtRef.current = null;
     window.clearTimeout(timers.current.hook);
     window.clearTimeout(timers.current.snap);
     timers.current.nibbles?.forEach((id) => window.clearTimeout(id));
@@ -976,7 +1005,7 @@ export function useFishingGame(
               setHint(t("It dropped the bait but it's still there. Watch for a second take…"));
               // The float twitches as it noses back, so the eye knows where to look.
               nibbleAt(SECOND_TAKE_MS * 0.45, SECOND_TAKE_NIBBLE_MS);
-              timers.current.wait = window.setTimeout(() => {
+              scheduleBite(() => {
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
               }, SECOND_TAKE_MS);
@@ -988,7 +1017,7 @@ export function useFishingGame(
               secondTakeRef.current = true;
               setPhaseBoth("waiting");
               setHint(t("It missed the topwater. Let it sit, it may come back…"));
-              timers.current.wait = window.setTimeout(() => {
+              scheduleBite(() => {
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
               }, TOPWATER_COMEBACK_MS);
@@ -1001,7 +1030,7 @@ export function useFishingGame(
               secondTakeRef.current = true;
               setPhaseBoth("waiting");
               setHint(follower ? t("It swirled away, but a muskie follows. Watch for it to hit again…") : t("It missed, but the streamer keeps it chasing. Watch for it to hit again…"));
-              timers.current.wait = window.setTimeout(() => {
+              scheduleBite(() => {
                 if (phaseRef.current !== "waiting") return;
                 timers.current.shown = whenShown(takeBait);
               }, FOLLOW_MS);
@@ -1023,7 +1052,7 @@ export function useFishingGame(
         if (phaseRef.current !== "waiting") return;
         timers.current.shown = whenShown(takeBait);
       };
-      timers.current.wait = window.setTimeout(bringOn, wait);
+      scheduleBite(bringOn, wait);
       // A sitting topwater can be popped, a jig on the bottom hopped, a spoon lifted and a streamer stripped, to draw the fish sooner.
       const work = topwater ? "pop" : isJig(lureRef?.current) ? "hop" : isSpoon(lureRef?.current) ? "lift" : isStreamer(lureRef?.current) ? "strip" : null;
       // In winter the slow fish want it worked slow; a beginner's easy fish don't mind.
@@ -1175,7 +1204,9 @@ export function useFishingGame(
         if (!snag && pop) {
           // Popping a topwater, hopping a jig, lifting a spoon or stripping a streamer draws the fish sooner, but only the first few times; then it wants to sit.
           if (pop.pops >= pop.taps) {
-            setHint(pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : pop.work === "strip" ? t("Let it hang between strips.") : t("Let it sit between pops."));
+            const rest = pop.work === "hop" ? t("Let it fall between hops.") : pop.work === "lift" ? t("Let it fall between lifts.") : pop.work === "strip" ? t("Let it hang between strips.") : t("Let it sit between pops.");
+            // Worked past the few touches that help, it only puts the fish off.
+            setHint(strikeAtNothing() ? `${rest} ${t("Worked again so soon, it puts the fish off a moment.")}` : rest);
             break;
           }
           pop.pops += 1;
@@ -1184,16 +1215,14 @@ export function useFishingGame(
           if (tooQuickForCold(pop.season, sinceLast)) {
             // Worked too quick for the cold, the slow fish turn from it and the bite comes later.
             const later = Math.max(0, pop.dueAt - performance.now()) * COLD_WORK_WAIT;
-            window.clearTimeout(timers.current.wait);
-            timers.current.wait = window.setTimeout(pop.take, later);
+            scheduleBite(pop.take, later);
             pop.dueAt = performance.now() + later;
             fx.reel();
             setHint(t("Too quick for the cold water: the slow fish turn from it. Give it a slow count before the next one."));
             break;
           }
           const sooner = Math.max(0, pop.dueAt - performance.now()) * TOPWATER_POP_LEFT;
-          window.clearTimeout(timers.current.wait);
-          timers.current.wait = window.setTimeout(pop.take, sooner);
+          scheduleBite(pop.take, sooner);
           pop.dueAt = performance.now() + sooner;
           if (pop.work === "hop") {
             fx.reel();
@@ -1219,12 +1248,21 @@ export function useFishingGame(
             yankRef.current = null;
             yankedRef.current = { ...yank, at: performance.now() };
             const later = Math.max(0, yank.dueAt - performance.now()) * BAIT_YANK_WAIT;
-            window.clearTimeout(timers.current.wait);
-            timers.current.wait = window.setTimeout(yank.take, later);
+            scheduleBite(yank.take, later);
             setHint(t("You yanked the bait away from it, so the fish backed off. Let it settle and wait for the real dip."));
             break;
           }
-          setHint(atNibble ? t("That was only a nibble. Wait for the bobber to go under, then strike.") : t("Too early. Wait for the bobber to go under, then strike."));
+          // The tug of a strike at nothing moves the bait, and the fish backs off a moment.
+          const backed = strikeAtNothing();
+          setHint(
+            atNibble
+              ? backed
+                ? t("That was only a nibble, and the tug puts the fish off a moment. Wait for the bobber to go under, then strike.")
+                : t("That was only a nibble. Wait for the bobber to go under, then strike.")
+              : backed
+                ? t("Too early: the tug moved the bait, and the fish backs off a moment. Wait for the bobber to go under, then strike.")
+                : t("Too early. Wait for the bobber to go under, then strike."),
+          );
           break;
         }
         snag.taps += 1;
@@ -1312,13 +1350,18 @@ export function useFishingGame(
         // The first finger of a camera pinch was not a strike, so take back its "too early" hint.
         if (phaseRef.current === "waiting") {
           setHint(waitHintRef.current);
+          const falseAt = falseStrikeAtRef.current;
+          if (falseAt !== null && performance.now() - falseAt < PINCH_UNDO_MS) {
+            // Nor was it a strike at nothing, so the fish never backed off.
+            falseStrikeAtRef.current = null;
+            shiftBite(-FALSE_STRIKE_MS);
+          }
           const yanked = yankedRef.current;
           if (yanked && performance.now() - yanked.at < PINCH_UNDO_MS) {
             // Nor did it yank the bait, so the bite comes when it was due.
             yankedRef.current = null;
             yankRef.current = { dueAt: yanked.dueAt, take: yanked.take };
-            window.clearTimeout(timers.current.wait);
-            timers.current.wait = window.setTimeout(yanked.take, Math.max(0, yanked.dueAt - performance.now()));
+            scheduleBite(yanked.take, Math.max(0, yanked.dueAt - performance.now()));
           }
         }
         return;

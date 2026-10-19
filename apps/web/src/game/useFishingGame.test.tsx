@@ -117,7 +117,7 @@ vi.mock("./fight", async (importOriginal) => {
 });
 
 import { updateSettings } from "./settings";
-import { carriesBait, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
+import { carriesBait, FALSE_STRIKE_MS, FOLLOW_MS, hasTrebles, isLiveBait, RECAST_GUARD_MS, SECOND_TAKE_MS, SECOND_TAKE_NIBBLE_MS, TOPWATER_COMEBACK_MS, TOPWATER_COMEBACK_ODDS, TIRE_REASONS, TOPWATER_POPS, useFishingGame, WAIT_REASONS } from "./useFishingGame";
 import { fx } from "./fx";
 import { castSnags, SNAG_AT_MS, SNAG_TAPS } from "./snag";
 import { CLOUD_SHADE_WAIT, cloudShadeWaitMul } from "./sunCover";
@@ -1731,7 +1731,7 @@ describe("level unlock integration", () => {
       act(() => vi.advanceTimersByTime(300));
       for (let pop = 0; pop < pops; pop++) {
         act(() => surface.dispatchEvent(pointer("pointerdown", 2 + pop)));
-        expect(hint()).toBe(pop < TOPWATER_POPS ? "Pop! The lure spits and gurgles. Let it sit…" : "Let it sit between pops.");
+        expect(hint()).toBe(pop < TOPWATER_POPS ? "Pop! The lure spits and gurgles. Let it sit…" : "Let it sit between pops. Worked again so soon, it puts the fish off a moment.");
         act(() => window.dispatchEvent(pointer("pointerup", 2 + pop)));
       }
       let waited = 300;
@@ -1744,8 +1744,8 @@ describe("level unlock integration", () => {
     const sat = untilBite(0);
     const popped = untilBite(TOPWATER_POPS);
     expect(popped).toBeLessThan(sat * 0.6);
-    // A third pop does nothing more.
-    expect(untilBite(TOPWATER_POPS + 1)).toBe(popped);
+    // A third pop only puts the fish off a moment.
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(popped + FALSE_STRIKE_MS);
   });
 
   it("brings a fish up sooner when a jig on the bottom is hopped, for the first two hops", () => {
@@ -1756,7 +1756,7 @@ describe("level unlock integration", () => {
       act(() => vi.advanceTimersByTime(300));
       for (let hop = 0; hop < hops; hop++) {
         act(() => surface.dispatchEvent(pointer("pointerdown", 2 + hop)));
-        expect(hint()).toBe(hop < TOPWATER_POPS ? "Hop! The jig lifts off the bottom and flutters down. Let it fall…" : "Let it fall between hops.");
+        expect(hint()).toBe(hop < TOPWATER_POPS ? "Hop! The jig lifts off the bottom and flutters down. Let it fall…" : "Let it fall between hops. Worked again so soon, it puts the fish off a moment.");
         act(() => window.dispatchEvent(pointer("pointerup", 2 + hop)));
       }
       let waited = 300;
@@ -1769,7 +1769,7 @@ describe("level unlock integration", () => {
     const sat = untilBite(0);
     const hopped = untilBite(TOPWATER_POPS);
     expect(hopped).toBeLessThan(sat * 0.6);
-    expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped + FALSE_STRIKE_MS);
   });
 
   it("puts the slow winter fish off when the jig is hopped too quick, but not when each hop gets a slow count", () => {
@@ -1816,7 +1816,7 @@ describe("level unlock integration", () => {
       act(() => vi.advanceTimersByTime(300));
       for (let strip = 0; strip < strips; strip++) {
         act(() => surface.dispatchEvent(pointer("pointerdown", 2 + strip)));
-        expect(hint()).toBe(strip < TOPWATER_POPS ? "Strip! The streamer darts off like a fleeing fish. Let it hang…" : "Let it hang between strips.");
+        expect(hint()).toBe(strip < TOPWATER_POPS ? "Strip! The streamer darts off like a fleeing fish. Let it hang…" : "Let it hang between strips. Worked again so soon, it puts the fish off a moment.");
         act(() => window.dispatchEvent(pointer("pointerup", 2 + strip)));
       }
       let waited = 300;
@@ -1829,7 +1829,7 @@ describe("level unlock integration", () => {
     const sat = untilBite(0);
     const stripped = untilBite(TOPWATER_POPS);
     expect(stripped).toBeLessThan(sat * 0.6);
-    expect(untilBite(TOPWATER_POPS + 1)).toBe(stripped);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(stripped + FALSE_STRIKE_MS);
   });
 
   it("lets a level 13 angler lift a spoon a third time to bring the fish sooner", () => {
@@ -1850,7 +1850,7 @@ describe("level unlock integration", () => {
       container!.remove();
       return { waited, said };
     };
-    expect(untilBite(3, 17000).said).toBe("Let it fall between lifts.");
+    expect(untilBite(3, 17000).said).toBe("Let it fall between lifts. Worked again so soon, it puts the fish off a moment.");
     expect(untilBite(3, 23000).said).toBe("Lift! The spoon flashes and flutters back down. Let it fall…");
     expect(untilBite(3, 23000).waited).toBeLessThan(untilBite(2, 23000).waited);
   });
@@ -1863,7 +1863,7 @@ describe("level unlock integration", () => {
       act(() => vi.advanceTimersByTime(300));
       for (let hop = 0; hop < hops; hop++) {
         act(() => surface.dispatchEvent(pointer("pointerdown", 2 + hop)));
-        expect(hint()).toBe(hop < TOPWATER_POPS ? "Lift! The spoon flashes and flutters back down. Let it fall…" : "Let it fall between lifts.");
+        expect(hint()).toBe(hop < TOPWATER_POPS ? "Lift! The spoon flashes and flutters back down. Let it fall…" : "Let it fall between lifts. Worked again so soon, it puts the fish off a moment.");
         act(() => window.dispatchEvent(pointer("pointerup", 2 + hop)));
       }
       let waited = 300;
@@ -1876,7 +1876,7 @@ describe("level unlock integration", () => {
     const sat = untilBite(0);
     const hopped = untilBite(TOPWATER_POPS);
     expect(hopped).toBeLessThan(sat * 0.6);
-    expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
+    expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped + FALSE_STRIKE_MS);
   });
 
   it("leaves a sinking lure's early strike as too early", () => {
@@ -1933,6 +1933,34 @@ describe("level unlock integration", () => {
     expect(secondTake()).toBe("false");
   });
 
+  it("puts the fish off a moment with each strike at nothing, so mashing the strike never finds the bite", () => {
+    const untilBite = (strikes: number, every = 100) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Inline spinner");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+      cast(surface);
+      let waited = 0;
+      for (let strike = 0; strike < strikes; strike++) {
+        act(() => vi.advanceTimersByTime(every));
+        now += every;
+        waited += every;
+        expect(phase()).toBe("waiting:none");
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + strike)));
+        expect(hint()).toMatch(/the fish (backs off|off) a moment/);
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + strike)));
+      }
+      for (; phase() !== "hookset:none" && waited < 60_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0);
+    expect(untilBite(1)).toBe(sat + FALSE_STRIKE_MS);
+    // Mashing for twice as long as the wait never meets the bite; it comes once the strikes stop.
+    const strikes = Math.ceil((2 * sat) / 100);
+    expect(untilBite(strikes)).toBe(sat + strikes * FALSE_STRIKE_MS);
+  });
+
   it("says a strike at a nibble was only a nibble, and a strike at a still float was too early", () => {
     const surface = mount();
     vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "carp")!);
@@ -1943,11 +1971,11 @@ describe("level unlock integration", () => {
     for (let waited = 0; surface.dataset.nibble !== "1" && waited < SECOND_TAKE_MS; waited += 10) act(() => vi.advanceTimersByTime(10));
     expect(surface.dataset.nibble).toBe("1");
     act(() => surface.dispatchEvent(pointer("pointerdown", 7)));
-    expect(hint()).toBe("That was only a nibble. Wait for the bobber to go under, then strike.");
+    expect(hint()).toBe("That was only a nibble, and the tug puts the fish off a moment. Wait for the bobber to go under, then strike.");
     act(() => window.dispatchEvent(pointer("pointerup", 7)));
     act(() => vi.advanceTimersByTime(SECOND_TAKE_NIBBLE_MS));
     act(() => surface.dispatchEvent(pointer("pointerdown", 8)));
-    expect(hint()).toBe("Too early. Wait for the bobber to go under, then strike.");
+    expect(hint()).toBe("Too early: the tug moved the bait, and the fish backs off a moment. Wait for the bobber to go under, then strike.");
   });
 
   it("never lets a golden shiner strip a hard lure, which carries no bait", () => {
