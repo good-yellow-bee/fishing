@@ -1319,6 +1319,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC158~~ | ~~Cap cloud: on grey and wet days low cloud hangs on the tops of the far hills in soft grey wreaths that drift slowly along the ridge with the wind, lower and thicker in the rain (one draw)~~ (#1352) | scene | S |
 | ~~SC159~~ | ~~Damselflies: on calm summer days two bright blue damselflies keep to the dock, one each side, settling on the posts beside the angler with wings folded, darting out to hover low over the water and flitting back (two draws)~~ (#1353) | scene | S |
 | ~~SC160~~ | ~~News card scene35: the cap cloud on the hills and the damselflies~~ (#1353) | scene | S |
+| ~~SC161~~ | ~~Fewer draws: the seven dragonflies over the reed beds draw as one instanced body mesh and one wing mesh (21 draws to 2), and the stone skimmer's arms share one instanced draw and its legs bake into one shape (5 limb draws to 2)~~ (#1356) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1647,7 +1648,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT321~~ | ~~Level 15 (38000 lifetime points, "One with the lake"): a strike in the first 48% of the bite sets the hook solid, not 40%, on the hookset line and the Strike card's solid mark alike~~ (#1344) | gameplay | S |
 | ~~GT322~~ | ~~News card 2026-10-19-game25 covers GT319, GT320 and GT321: work a lure slowly in winter, a long cast needs a quicker strike, and level 15~~ (#1347) | ui | S |
 | ~~GT323~~ | ~~A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared~~ (#1351) | gameplay | S |
-| GT324 | Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free | gameplay | S |
+| ~~GT324~~ | ~~Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free~~ (#1354) | gameplay | S |
+| GT325 | News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line | ui | S |
 
 ## Risks / open questions for the owner
 

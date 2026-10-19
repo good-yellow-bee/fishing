@@ -1780,39 +1780,61 @@ function Duck({ points, speed, phase, body, head, brood = false }: DuckProps) {
   );
 }
 
-/** One dragonfly hunting a reed bed: hovers, darts to the next spot; motion lives in dragonflies.ts. */
-function Dragonfly({ index }: { index: number }) {
-  const ref = useRef<THREE.Group>(null);
+/** A dragonfly's two pairs of wings, spread flat over its back, in one shape. */
+function dragonflyWingShape() {
+  return mergeParts([
+    { geometry: new THREE.PlaneGeometry(0.42, 0.09).rotateX(-Math.PI / 2), position: [0, 0.03, 0.06] },
+    { geometry: new THREE.PlaneGeometry(0.34, 0.08).rotateX(-Math.PI / 2), position: [0, 0.03, -0.05] },
+  ]);
+}
+
+/**
+ * The dragonflies hunting the reed beds: each hovers and darts to the next spot (dragonflies.ts).
+ * Their bodies are one instanced draw and their wings another.
+ */
+function Dragonflies() {
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
   const still = useReducedMotion();
+  const shapes = useMemo(() => ({ body: new THREE.CapsuleGeometry(0.02, 0.3, 3, 6).rotateX(Math.PI / 2), wing: dragonflyWingShape() }), []);
+  const bodyMaterial = useMemo(() => new THREE.MeshToonMaterial({ color: "#3d6f78", gradientMap: toonRamp() }), []);
   const wingMaterial = useMemo(
     () => new THREE.MeshBasicMaterial({ color: "#e6f1f2", transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
     [],
   );
-  useEffect(() => () => wingMaterial.dispose(), [wingMaterial]);
+  useEffect(
+    () => () => {
+      [shapes.body, shapes.wing, bodyMaterial, wingMaterial].forEach((item) => item.dispose());
+    },
+    [shapes, bodyMaterial, wingMaterial],
+  );
+  const scratch = useMemo(() => ({ place: new THREE.Object3D(), yaws: new Array<number | null>(DRAGONFLY_COUNT).fill(null) }), []);
   useFrame((state, delta) => {
-    const group = ref.current;
-    if (!group) return;
+    const body = bodies.current;
+    const wing = wings.current;
+    if (!body || !wing) return;
     const time = state.clock.elapsedTime;
-    const pose = dragonfly(index, time, still);
-    group.position.set(pose.x, pose.y, pose.z);
-    // Turn fast but not instantly, so a dart starts with a visible snap of the body.
-    const turn = Math.atan2(Math.sin(pose.yaw - group.rotation.y), Math.cos(pose.yaw - group.rotation.y));
-    group.rotation.y += turn * (1 - Math.exp(-25 * delta));
-    wingMaterial.opacity = 0.18 + (Math.sin(time * 34 + index) * 0.5 + 0.5) * 0.16;
+    const { place, yaws } = scratch;
+    for (let i = 0; i < DRAGONFLY_COUNT; i += 1) {
+      const pose = dragonfly(i, time, still);
+      // Turn fast but not instantly, so a dart starts with a visible snap of the body.
+      const yaw = yaws[i] ?? pose.yaw;
+      const turn = Math.atan2(Math.sin(pose.yaw - yaw), Math.cos(pose.yaw - yaw));
+      yaws[i] = yaw + turn * (1 - Math.exp(-25 * delta));
+      place.position.set(pose.x, pose.y, pose.z);
+      place.rotation.set(0, yaws[i]!, 0);
+      place.updateMatrix();
+      body.setMatrixAt(i, place.matrix);
+      wing.setMatrixAt(i, place.matrix);
+    }
+    body.instanceMatrix.needsUpdate = true;
+    wing.instanceMatrix.needsUpdate = true;
+    wingMaterial.opacity = 0.18 + (Math.sin(time * 34) * 0.5 + 0.5) * 0.16;
   });
   return (
-    <group ref={ref}>
-      {/* Body along +z, the way the pose's yaw faces. */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} castShadow={false}>
-        <capsuleGeometry args={[0.02, 0.3, 3, 6]} />
-        <meshToonMaterial color="#3d6f78" gradientMap={toonRamp()} />
-      </mesh>
-      <mesh material={wingMaterial} position={[0, 0.03, 0.06]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.42, 0.09]} />
-      </mesh>
-      <mesh material={wingMaterial} position={[0, 0.03, -0.05]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.34, 0.08]} />
-      </mesh>
+    <group name="dragonflies">
+      <instancedMesh ref={bodies} args={[shapes.body, bodyMaterial, DRAGONFLY_COUNT]} frustumCulled={false} castShadow={false} />
+      <instancedMesh ref={wings} args={[shapes.wing, wingMaterial, DRAGONFLY_COUNT]} frustumCulled={false} castShadow={false} />
     </group>
   );
 }
@@ -2373,8 +2395,7 @@ export const LakeWorld = memo(function LakeWorld({
       {DUCKS.map((duck, i) => (
         <Duck key={i} {...duck} />
       ))}
-      {dragonfliesOut(hour, sky, season) &&
-        Array.from({ length: DRAGONFLY_COUNT }, (_, i) => <Dragonfly key={i} index={i} />)}
+      {dragonfliesOut(hour, sky, season) && <Dragonflies />}
       {weather.rain &&
         (season === "winter" ? <LakeSnow light={weather.rainLight} wind={wind} /> : <LakeRain light={weather.rainLight} wind={wind} />)}
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
