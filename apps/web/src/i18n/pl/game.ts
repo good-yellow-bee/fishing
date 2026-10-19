@@ -79,6 +79,11 @@ export const PL_GAME: PlBook = {
   "A handful ({cost} pts)": "Garść ({cost} pkt)",
   "Your bag is full: {max} handfuls.": "Torba jest pełna: {max} garści.",
   "Keeps the fish feeding at a bank for {casts} casts. In your bag: {n} of {max}.": "Zatrzymuje żerujące ryby na łowisku przez {casts} rzutów. W torbie: {n} z {max}.",
+  "Groundbait and shiners": "Zanęta i złotawce",
+  "A live shiner ({cost} pts)": "Żywy złotawiec ({cost} pkt)",
+  "A live shiner is on your hook already.": "Żywy złotawiec jest już na haczyku.",
+  "Goes on your hook for the next cast and draws the hunters at the bank.": "Trafia na haczyk na następny rzut i wabi drapieżniki z łowiska.",
+  "You hook the shop's shiner on as live bait. Cast it out to the hunters.": "Zakładasz kupionego złotawca na haczyk jako żywą przynętę. Zarzuć go do drapieżników.",
   "purchase failed": "Zakup nie powiódł się",
   "Bait": "Zanęta",
   "Toss a handful of groundbait here: the next {casts} casts bite sooner.": "Rzuć tu garść zanęty: przez kolejne rzuty ({casts}) brania przyjdą szybciej.",
@@ -681,8 +686,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
-  "With Sound captions on, a deer snorting on the far bank and ducklings peeping now get words on screen too, even with sound off. A keyboard player sees a clear ring on the catch card's and the toasts' buttons, and on a phone the Photos links for a fish without a photo and the Map list's Copy the place are easier to tap.":
-    "Z włączonymi napisami do dźwięków parskająca na drugim brzegu sarna i piszczące kaczątka też mają teraz swoje słowa na ekranie, nawet przy wyłączonym dźwięku. Grający klawiaturą widzi wyraźną obwódkę na przyciskach karty złowionej ryby i powiadomień, a na telefonie linki Zdjęć do ryby bez zdjęcia i przycisk Skopiuj współrzędne na liście Mapy łatwiej trafić.",
+  "On a narrow phone or with larger text, outing and catch cards now put the date, size and photo above the words instead of squeezing them into a strip, and the lodge board's fish of the week does the same. Keyboard focus in the field log stops below the phone's top bar, the catch form's time and nearest-water buttons are easier to tap, and on a phone held sideways the coach and the news card stay off the shore signs.":
+    "Na wąskim telefonie lub z większym tekstem karty wypraw i połowów pokazują teraz datę, wymiar i zdjęcie nad tekstem, zamiast ściskać go w wąski pasek; tak samo ryba tygodnia na tablicy przystani. Fokus klawiatury w dzienniku zatrzymuje się pod górnym paskiem telefonu, przyciski czasu i najbliższego łowiska w formularzu połowu łatwiej trafić, a na telefonie trzymanym poziomo podpowiedzi i karta Co nowego nie zasłaniają tabliczek na brzegu.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -745,10 +750,12 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
+    "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
+  "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.":
+    "Dwie nowe odznaki przystani do zdobycia: Całe jezioro, za złowienie każdego gatunku ryby w jeziorze, i Łowca trofeów, za pięć gatunków o wadze trofeum. A w szopie można teraz kupić żywego złotawca za 50 punktów: trafia na haczyk na następny rzut i wabi drapieżniki, a złotawiec na haczyku zostaje tam także po przeładowaniu strony.",
   "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.":
     "Pobicie własnego rekordu danego gatunku daje teraz 1,25× punktów, co widać na karcie połowu. A w szopie można kupić zanętę: 60 punktów za garść, do trzech w torbie, i czekają, aż ich użyjesz.",
-  "From level 16, Voice of the lake, at 47000 points, pulling the rod against a run cuts it short a quarter faster. And a run you turn swings the fish's head round: reel straight after it to win line faster for a moment.":
-    "Od poziomu 16, Głos jeziora (47000 punktów), ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%. A zawrócony odjazd obraca rybę łbem do ciebie: kręć zaraz po nim, a przez chwilę odzyskasz żyłkę szybciej.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
@@ -773,6 +780,7 @@ export const PL_GAME: PlBook = {
   "Soul of the lake": "Dusza jeziora",
   "One with the lake": "Jedność z jeziorem",
   "Voice of the lake": "Głos jeziora",
+  "Child of the lake": "Dziecko jeziora",
   "Photo mode. Drag to look around, P or Space to save a picture, H or tap to bring the panels back.":
     "Tryb zdjęcia. Przeciągnij, by się rozejrzeć, P albo spacja zapisuje zdjęcie, H albo stuknięcie przywraca panele.",
   "Photo mode. Drag to look around, tap Save this view to keep a picture, or tap anywhere else to bring the panels back.":
@@ -794,22 +802,14 @@ export const PL_GAME: PlBook = {
     "Podczas deszczu co jakiś czas przez jezioro przechodzi silniejsza nawałnica, szara kurtyna deszczu, pod którą woda aż się gotuje. W zimowe dni na drugim brzegu żerują wrony, które zrywają się i zataczają pętlę nad wodą, gdy ktoś przebiega obok, a nocą na skraju drugiego brzegu czasem błyszczy para oczu.",
   "On still summer evenings little clouds of midges dance and glint over the water in front of the dock, and on fine fall mornings long silk threads from tiny spiders drift across the lake, catching the sun. Now and then a shoal of fry bursts out of the open water as something hunts them from below, and on bitter, clear winter mornings the air over the lake sparkles with diamond dust.":
     "W bezwietrzne letnie wieczory nad wodą przed pomostem tańczą i połyskują chmurki muszek, a w pogodne jesienne poranki nad jeziorem płyną długie nici babiego lata, łapiąc słońce. Co jakiś czas z otwartej wody wyskakuje ławica narybku, gdy coś poluje na nią od spodu, a w mroźne, pogodne zimowe poranki powietrze nad jeziorem iskrzy się lodowym pyłem.",
-  "On grey and rainy days low cloud now hangs on the tops of the hills behind the far bank, drifting slowly along the ridge with the wind. On calm summer days two bright blue damselflies settle on the dock posts beside you, dart out to hover over the water, and come back.":
-    "W szare i deszczowe dni na szczytach wzgórz za drugim brzegiem wiszą teraz niskie chmury, które powoli suną z wiatrem wzdłuż grzbietu. W bezwietrzne letnie dni dwie jaskrawoniebieskie łątki siadają na słupkach pomostu tuż obok, wylatują nad wodę, zawisają w powietrzu i wracają.",
-  "On fine, breezy days from spring to fall a paraglider soars along the ridge of the hills behind the far bank, banking round at each end. On fall evenings a bonfire burns on those hills between the hay fields, glowing in the dark with its smoke leaning away on the wind.":
-    "W pogodne, wietrzne dni od wiosny do jesieni nad grzbietem wzgórz za drugim brzegiem szybuje paralotnia, zawracając łagodnym łukiem na każdym końcu. W jesienne wieczory na tych wzgórzach między polami płonie ognisko, które świeci w ciemności, a jego dym odpływa z wiatrem.",
-  "An old windmill now stands on the hills behind the far bank, its sails turning with the day's wind and standing still when it drops. By day in spring and fall a little flock of sheep grazes the hay field on those hills, and in spring their lambs skip along after them.":
-    "Na wzgórzach za drugim brzegiem stoi teraz stary wiatrak, którego skrzydła obracają się z wiatrem i zamierają, gdy wiatr ucicha. Wiosną i jesienią za dnia na polu na tych wzgórzach pasie się małe stado owiec, a wiosną podskakują za nimi jagnięta.",
-  "On summer and fall evenings a pale barn owl hunts low over the hay fields on the far hills, hovering and dropping into the stubble. On summer days a little red tractor works the field, and on clear days the shadows of passing clouds slide over the hills as well as the water.":
-    "W letnie i jesienne wieczory nad polami na wzgórzach za jeziorem nisko poluje jasna płomykówka, zawisa w powietrzu i spada w ściernisko. W letnie dni na polu pracuje mały czerwony traktor, a w pogodne dni cienie przepływających chmur suną po wzgórzach tak samo jak po wodzie.",
-  "A farmhouse and a red barn now stand on the hills behind the far bank: their windows glow in the evening, the chimney smokes on cold days, and from spring to fall three cows graze the pasture beside them. On calm, clear mornings a low bank of mist lies along the foot of the hills.":
-    "Na wzgórzach za drugim brzegiem stoją teraz dom i czerwona stodoła: wieczorem świecą się ich okna, w chłodne dni z komina leci dym, a od wiosny do jesieni obok pasą się trzy krowy. W bezwietrzne, pogodne poranki u stóp wzgórz leży niski pas mgły.",
   "In spring a few of the shore trees flower white or pink. On clear winter mornings and evenings the snowy hills behind the far bank glow pink in the low sun. From summer into the fall two hay fields on those hills lie mown in pale stripes, with round bales dotted across them.":
     "Wiosną kilka drzew na brzegu kwitnie na biało lub różowo. W pogodne zimowe poranki i wieczory ośnieżone wzgórza za drugim brzegiem żarzą się na różowo w nisko stojącym słońcu. Od lata do jesieni dwa pola na tych wzgórzach leżą skoszone w jasne pasy, a po nich rozsiane są okrągłe bele siana.",
   "On grey, overcast days a gap now and then opens in the cloud, and a patch of sunlight slides across the lake with faint beams slanting down to it. On blowy winter days the wind lifts the snow off the hills behind the far bank and streams it along them in long white wisps.":
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "On calm, sunny summer days two people pedal a white swan pedal boat slowly round the water off to the right, its paddle wheel churning behind. And on evenings and nights from spring to fall a little field mouse sometimes scurries across the dock behind you, sits up to nibble a crumb, and darts off over the edge.":
+    "W spokojne, słoneczne letnie dni dwoje ludzi pedałuje białym rowerem wodnym w kształcie łabędzia, powoli okrążając wodę po prawej, a za nim kręci się koło łopatkowe. A wieczorami i nocą od wiosny do jesieni mała mysz polna czasem przebiega po pomoście za tobą, siada, żeby skubnąć okruszek, i znika za krawędzią.",
   "On Waters, each card names the water's best fish and says when it has rested a week or more. A water's copied summary says when it was last fished, and a water fished only blank can be copied too.": "W łowiskach każda karta podaje największą rybę łowiska i mówi, kiedy odpoczywa tydzień lub dłużej. Skopiowane podsumowanie łowiska mówi, kiedy ostatnio tam łowiono, a łowisko bez żadnej ryby też można skopiować.",
   "On Bests, a water's card names its biggest fish, the record tiles say the day, and a season marks each kind that set a new best and names its best lure. The year's goal box says how many days since your last fish, and the goal form offers a goal that beats last year.": "W rekordach karta łowiska podaje największą rybę, kafelki rekordów mówią, którego dnia padły, a sezon oznacza każdy gatunek z nowym rekordem i podaje najlepszą przynętę. Ramka celu na rok mówi, ile dni minęło od ostatniej ryby, a formularz celu proponuje cel lepszy niż w zeszłym roku.",
   "A little steam train now runs along the foot of the hills behind the far bank, puffing out of one tunnel and into the other, then back the other way a while later. After dark its carriage windows glow as it goes.":

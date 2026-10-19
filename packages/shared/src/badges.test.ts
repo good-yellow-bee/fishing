@@ -32,6 +32,12 @@ describe("lodge badges", () => {
     ["early-bird", [row({ hour: "dawn", count: 6 }), row({ hour: "dawn", spot: "point", count: 4 })], [row({ hour: "dawn", count: 9 }), row({ hour: "day", count: 40 })]],
     ["steward", [row({ released: true, count: 6 }), row({ released: true, spot: "reeds", count: 4 })], [row({ released: true, count: 9 }), row({ count: 50 })]],
     ["full-book", FIRST_BOOK.map((id) => row({ speciesId: id })), FISH.filter((fish) => fish.id !== FIRST_BOOK[0]).map((fish) => row({ speciesId: fish.id }))],
+    ["whole-lake", FISH.map((fish) => row({ speciesId: fish.id })), [...FISH.slice(1).map((fish) => row({ speciesId: fish.id, count: 3 })), row({ speciesId: "not-a-fish" })]],
+    [
+      "trophy-hunter",
+      FISH.slice(0, 5).map((fish) => row({ speciesId: fish.id, heaviest: trophyWeight(fish) })),
+      [...FISH.slice(0, 4).map((fish) => row({ speciesId: fish.id, heaviest: trophyWeight(fish), count: 9 })), row({ speciesId: FISH[4]!.id, heaviest: trophyWeight(FISH[4]!) - 0.1 })],
+    ],
   ])("%s: earned on the first history, not on the near miss", (id, hit, miss) => {
     expect(earned(hit)).toContain(id);
     expect(earned(miss)).not.toContain(id);

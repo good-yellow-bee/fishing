@@ -1159,6 +1159,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA114~~ | ~~On a phone held sideways with larger text the shore signs take a second column, and the news card and the first-visit coach, centred on the screen, lay over Reeds, Drop-off and Shack (in Polish the coach cut Pomost and Cypel to 28 px): the coach the player follows covered the signs it points to. The lake now keeps the signs' width, and both cards stop 8 px short of them; the news card may still lie over the lure panel, as on a tablet (#1375)~~ | phone UX | S |
 | ~~PA115~~ | ~~Stack trip and catch cards (date, measure and photo above the text) on a narrow phone or with larger text, where the text was a word a line, and wrap the catch form's save button rather than spill it off a 280 px screen (#1389)~~ | phone UX | S |
 | ~~PA116~~ | ~~On the lodge board at 280 to 360 px with larger text, the fish of the week's name and bonus stood in a 100 px strip beside its mark, a word a line ("Fish / of / the / week:"); the mark now goes above them when they would get under 8em beside it (#1392)~~ | phone UX | S |
+| ~~PA117~~ | ~~On a tablet or a sideways phone the Map list gave each water's fish line (last fish, rest, next outing) 40 to 75 px beside an own water's distance, a word a line ("Next / outing / :"), and broke Reservoir mid-word. The fish line now has as much room as the place, the distance goes under the place, and under 520 px of list (larger text, the rail beside it) a water's details stack under its name, as on a phone (#1403)~~ | phone UX | S |
+| ~~PA118~~ | ~~The lodge's catch log only scrolled its table on its own below 641 px: from 641 to 720 px it pushed the whole page 33 to 72 px sideways, and with larger text or a reader's own text spacing (WCAG 1.4.12) up to 920 px. The table now scrolls on its own at every width; a desktop table still fills its 820 px (#1404)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1341,6 +1343,10 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC175~~ | ~~Fewer draws: seventeen far-bank figures (the jogger, skier, sledders, woodcutter, dog walker, paddleboarder, stone skimmer, anglers, rowers, painter and others) bake their posed limbs into one skinned mesh each, so each figure costs one draw however many limbs it swings~~ (#1387) | scene | S |
 | ~~SC176~~ | ~~Fewer draws: fourteen lake birds and animals (the moose, osprey, heron, hare, cormorant, dock robin, sandpipers, winter gulls, grebes, loon, owl, woodpecker, the disc tossers and the dinghy) bake their posed parts into one skinned mesh each~~ (#1388) | scene | S |
 | ~~SC177~~ | ~~Swan pedalo: on calm, fine summer days two people pedal a white swan pedal boat in a slow loop on the east water, its paddle wheel turning and a wake behind it (one draw for the boat and riders), taking the water the dinghy sails on breezy days~~ (#1391) | scene | S |
+| ~~SC178~~ | ~~Dock mouse: on evenings and nights from spring to fall a field mouse now and then climbs onto the dock behind the angler, scurries across in dashes, sits up to nibble a crumb and darts off over the edge (one draw), with news scene39 for it and the pedalo~~ (#1396) | scene | S |
+| ~~SC179~~ | ~~Mooring lines: while the rowboat lies tied up by the pier, a bow line and a stern line run to the pier posts, sagging and drawing tighter as the hull rides the chop, gone once it is untied (one draw)~~ (#1399) | scene | S |
+| ~~SC180~~ | ~~Dragonfly on the rod tip: on dry summer days, once the line has sat quiet for a while, a blue dragonfly flies in and settles on the rod tip, flicking its wings now and then, and darts off on a nibble, the strike or reeling in (two draws), with news scene40 for it and the mooring lines~~ (#1401) | scene | S |
+| ~~SC181~~ | ~~Dock dog: by day, unless it rains, a golden dog lies on the dock behind the angler facing the water; it watches a fresh cast, dozes head on paws when nothing happens, sits up with its tail going through a bite and the fight, and wags hard over the result (one draw)~~ (#1406) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1680,7 +1686,11 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT332~~ | ~~News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line~~ (#1382) | ui | S |
 | ~~GT333~~ | ~~A personal best pays: a fish heavier than the angler's own best of its kind earns 1.25x points (the server checks it against the angler's catches; the first of a kind beats nothing), and the landed card's stamp says "Personal best · was 0.6 lb · 1.25× points"~~ (#1384) | gameplay | S |
 | ~~GT334~~ | ~~The shack's bait tin sells a handful of groundbait for 60 points (the server takes them), up to 3 in the bag; bought handfuls stay in the bag across a reload, and a free handful still comes with each visit~~ (#1390) | gameplay | S |
-| GT335 | News card 2026-10-19-game29 covers GT333 and GT334: a personal best pays 1.25x points, and the shack sells groundbait | ui | S |
+| ~~GT335~~ | ~~News card 2026-10-19-game29 covers GT333 and GT334: a personal best pays 1.25x points, and the shack sells groundbait~~ (#1395) | ui | S |
+| ~~GT336~~ | ~~Two long-run lodge badges: Whole lake (land every kind of fish in the lake, all 18) and Trophy hunter (land five kinds at trophy weight)~~ (#1398) | gameplay | S |
+| ~~GT337~~ | ~~The shack sells a live shiner for 50 points (the server takes them): it goes on the hook for the next cast, one at a time, and a shiner on the hook, bought or landed, stays on across a reload~~ (#1400) | gameplay | S |
+| ~~GT338~~ | ~~News card 2026-10-19-game30 covers GT336 and GT337: the Whole lake and Trophy hunter badges, and the shack's live shiner~~ (#1402) | ui | S |
+| GT339 | Level 17, Child of the lake, at 57000 lifetime points: the shack sells groundbait and live shiners a fifth cheaper (48 and 40 points; the server charges the same) | gameplay | S |
 
 ## Risks / open questions for the owner
 

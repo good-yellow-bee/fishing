@@ -164,6 +164,7 @@ export const PL_CONTENT: PlBook = {
   "Your line holds a moment past the red: it snaps at 105% strain, not 100%.": "Żyłka wytrzymuje chwilę dłużej w czerwieni: pęka przy 105% napięcia, a nie przy 100%.",
   "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.": "Pewne zacięcie trwa dłużej: zacięcie w pierwszych 48% brania osadza haczyk pewnie, a nie w 40%.",
   "Pulling the rod against a run cuts it short 25% faster.": "Ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%.",
+  "The shack sells you groundbait and live shiners a fifth cheaper.": "W szopie kupujesz zanętę i żywe złotawce o jedną piątą taniej.",
   "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia i ściągnięcia) przyspiesza branie trzy razy, a nie dwa.",
 
   // Badges (badges.ts)
@@ -185,6 +186,10 @@ export const PL_CONTENT: PlBook = {
   "Land a golden fish.": "Złów złotą rybę.",
   "Steward": "Opiekun jeziora",
   "Release ten fish back into the lake.": "Wypuść dziesięć ryb z powrotem do jeziora.",
+  "Whole lake": "Całe jezioro",
+  "Land every kind of fish in the lake.": "Złów każdy gatunek ryby w jeziorze.",
+  "Trophy hunter": "Łowca trofeów",
+  "Land five kinds of fish at trophy weight.": "Złów pięć gatunków ryb o wadze trofeum.",
   "Regular": "Stały bywalec",
   "Land a fish seven days in a row.": "Złów rybę siedem dni z rzędu.",
   "Early bird": "Ranny ptaszek",

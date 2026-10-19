@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
-import { buyGroundbait, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { sessionKey, startSession } from "../game/session";
@@ -22,6 +22,7 @@ vi.mock("../api", async (importOriginal) => ({
   recordCatch: vi.fn(),
   releaseCatch: vi.fn(),
   buyGroundbait: vi.fn(),
+  buyShiner: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
 vi.mock("../game/useFishingGame", async (importOriginal) => {
@@ -579,6 +580,33 @@ describe("the shack's bait tin", () => {
     expect(buy.getAttribute("aria-disabled")).toBe("true");
     await act(async () => buy.click());
     expect(buyGroundbait).not.toHaveBeenCalled();
+  });
+
+  it("prices its bait a fifth cheaper from level 17", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, level: 17, profile: { ...me.profile, points: 500, lifetimePoints: 57_000 } });
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    expect([...page.querySelectorAll(".bait-shop button")].map((button) => button.textContent)).toEqual(["A handful (48 pts)", "A live shiner (40 pts)"]);
+  });
+
+  it("sells a live shiner onto the hook, one at a time, and keeps it for a reload", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
+    vi.mocked(buyShiner).mockClear();
+    vi.mocked(buyShiner).mockResolvedValue({ profile: { ...me.profile, points: 450 } });
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const buy = [...page.querySelectorAll<HTMLButtonElement>(".bait-shop button")][1]!;
+    const note = page.querySelector("#shiner-shop-note")!;
+    expect(buy.textContent).toBe("A live shiner (50 pts)");
+    expect(note.textContent).toBe("Goes on your hook for the next cast and draws the hunters at the bank.");
+    await act(async () => buy.click());
+    expect(buyShiner).toHaveBeenCalledTimes(1);
+    expect(note.textContent).toBe("A live shiner is on your hook already.");
+    expect(buy.getAttribute("aria-disabled")).toBe("true");
+    await act(async () => buy.click());
+    expect(buyShiner).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem("stillwater.shiner.v1")).toBe("live");
+    localStorage.removeItem("stillwater.shiner.v1");
   });
 });
 

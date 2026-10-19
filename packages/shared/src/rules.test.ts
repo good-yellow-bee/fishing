@@ -36,7 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, PB_BONUS, personalBestBonus, validateGroundbaitBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -587,5 +587,26 @@ describe("validateGroundbaitBuy", () => {
     const profile = { userId: "u", displayName: "A", points: GROUNDBAIT_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
     expect(validateGroundbaitBuy(profile)).toEqual({ ok: true, cost: GROUNDBAIT_PRICE });
     expect(validateGroundbaitBuy({ ...profile, points: GROUNDBAIT_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+  });
+});
+
+describe("shackPrice", () => {
+  it("takes a fifth off the shack's bait from level 17, on the server's own sums", () => {
+    expect(SHACK_DISCOUNT_LEVEL).toBe(17);
+    expect(shackPrice(GROUNDBAIT_PRICE, 56_999)).toBe(60);
+    expect(shackPrice(GROUNDBAIT_PRICE, 57_000)).toBe(48);
+    expect(shackPrice(SHINER_PRICE, 57_000)).toBe(40);
+    const elder = { userId: "u", displayName: "A", points: 48, lifetimePoints: 57_000, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateGroundbaitBuy(elder)).toEqual({ ok: true, cost: 48 });
+    expect(validateShinerBuy({ ...elder, points: 39 })).toMatchObject({ ok: false, status: 409 });
+    expect(validateShinerBuy({ ...elder, points: 40 })).toEqual({ ok: true, cost: 40 });
+  });
+});
+
+describe("validateShinerBuy", () => {
+  it("sells a live shiner for its price, and not to an angler short of points", () => {
+    const profile = { userId: "u", displayName: "A", points: SHINER_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateShinerBuy(profile)).toEqual({ ok: true, cost: SHINER_PRICE });
+    expect(validateShinerBuy({ ...profile, points: SHINER_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
   });
 });
