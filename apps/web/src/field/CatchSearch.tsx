@@ -33,7 +33,7 @@ import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
-import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
+import { bookSpelling, pieceKey, pieceName, shownPieceKey } from "./gear/pieceKey";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
@@ -308,7 +308,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const named = (name: string) =>
       normalize(name) === want ||
       normalize(t(name)) === want ||
-      (bookNamed && (normalize(t(bookSpelling(name))) === want || normalize(inPolish(bookSpelling(name))) === want)) ||
+      (bookNamed && (pieceKey(name) === pieceKey(exact.name) || normalize(t(bookSpelling(name))) === want || normalize(inPolish(bookSpelling(name))) === want)) ||
       normalize(inPolish(name)) === want ||
       (piece !== null && shownPieceKey(name) === piece);
     return catchesNewestFirst(book).filter((entry) => {

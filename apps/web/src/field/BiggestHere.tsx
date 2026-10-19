@@ -5,6 +5,7 @@ import { measureText } from "../i18n/content";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { speciesCounts, speciesLink } from "./speciesLink";
+import { pieceKey, pieceName } from "./gear/pieceKey";
 
 /** The longest and the heaviest of some fish, either null when none was measured that way. */
 export function biggestOf(catches: readonly CatchEntry[]): { longest: CatchEntry | null; heaviest: CatchEntry | null } {
@@ -48,12 +49,12 @@ export function BiggestHere({ catches, spotId, kindLink = speciesLink }: { catch
       </div>
       <ul className="species-waters">
         {kinds.map(({ species }) => {
-          const key = species.trim().toLowerCase();
+          const key = pieceKey(species);
           return (
             <li key={key}>
-              <Link to={kindLink(species)}>{t(species)}</Link>
+              <Link to={kindLink(species)}>{pieceName(species)}</Link>
               <span className="meta sizes">
-                <BiggestLinks catches={catches.filter((entry) => entry.species.trim().toLowerCase() === key)} list={`water:${spotId}`} about={t(species)} />
+                <BiggestLinks catches={catches.filter((entry) => pieceKey(entry.species) === key)} list={`water:${spotId}`} about={pieceName(species)} />
               </span>
             </li>
           );

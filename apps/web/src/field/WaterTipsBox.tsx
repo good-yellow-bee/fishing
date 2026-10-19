@@ -129,7 +129,7 @@ export function WaterTipsBox({
         {tips.lures.map((row, index) => (
           <Fragment key={row.lure}>
             {index > 0 ? " · " : null}
-            <Link to={find(exactTerm("lure", t(row.lure)))}>{pieceName(row.lure)}</Link> ({row.count})
+            <Link to={find(exactTerm("lure", pieceName(row.lure)))}>{pieceName(row.lure)}</Link>{"\u00a0"}({row.count})
           </Fragment>
         ))}
         {tips.time ? <TipLine text="Most fish at: {time}" name="time" value={t(tips.time.label)} to={find(exactTerm("time", t(tips.time.label)))} /> : null}

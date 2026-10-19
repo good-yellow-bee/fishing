@@ -1,5 +1,6 @@
 import type { CatchEntry, LureTally } from "@stillwater/shared";
 import { pieceName, shownPieceKey } from "./gear/pieceKey";
+import { mostWritten } from "./speciesLink";
 
 /**
  * The lures that took the most fish, most first, grouped as the exact lure search and Gear group them: "Spinnerbait"
@@ -18,8 +19,9 @@ export function pieceTally(catches: readonly CatchEntry[], limit = 5): LureTally
     groups.set(key, group);
   }
   return [...groups.values()]
-    // A tie of spellings goes to one with a capital, as the kinds list writes them: "Jig", not "jig".
-    .map((group) => ({ lure: [...group.spellings].reduce((best, row) => (row[1] > best[1] || (row[1] === best[1] && capital(row[0]) && !capital(best[0])) ? row : best))[0], count: group.count }))
+    // A tie of spellings goes to one with a capital ("Jig", not "jig"), then to the first in the alphabet, so a list in
+    // any order names it the same: "Spinner" on the card and the page.
+    .map((group) => ({ lure: mostWritten(group.spellings), count: group.count }))
     .sort((a, b) => b.count - a.count || a.lure.localeCompare(b.lure))
     .slice(0, limit);
 }
@@ -31,10 +33,6 @@ export function pieceTally(catches: readonly CatchEntry[], limit = 5): LureTally
 export function lureNames(catches: readonly CatchEntry[]): (lure: string) => string {
   const spelled = new Map(pieceTally(catches, Infinity).map((row) => [shownPieceKey(row.lure), row.lure]));
   return (lure) => (lure.trim() ? pieceName(spelled.get(shownPieceKey(lure.trim())) ?? lure) : "");
-}
-
-function capital(name: string): boolean {
-  return /^\p{Lu}/u.test(name);
 }
 
 /** Whether a fish was taken on the piece `lure` names, however it was spelled. */

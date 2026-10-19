@@ -2,7 +2,7 @@ import { catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/s
 import { offPlayLake } from "./playLake";
 import { isSampleCatch } from "./bookCopy";
 import { t } from "../i18n";
-import { bookSpelling } from "./gear/pieceKey";
+import { bookSpelling, pieceKey } from "./gear/pieceKey";
 
 /** The page for one kind of fish, by the name the book keeps it under. */
 export function speciesLink(species: string) {
@@ -11,8 +11,8 @@ export function speciesLink(species: string) {
 
 /** That kind's fish, newest first; the name matches whatever its case. */
 export function catchesOfSpecies(book: Logbook, species: string): CatchEntry[] {
-  const key = species.trim().toLowerCase();
-  return catchesNewestFirst(book).filter((entry) => entry.species.trim().toLowerCase() === key);
+  const key = pieceKey(species);
+  return catchesNewestFirst(book).filter((entry) => pieceKey(entry.species) === key);
 }
 
 /**
@@ -79,13 +79,22 @@ export function kindNames(catches: readonly CatchEntry[]): (species: string) => 
   };
 }
 
+/** Each kind's fish, a kind however it was typed ("Perch", "perch ", "Perches"), under the spelling most of them carry. */
 export function speciesCounts(catches: readonly CatchEntry[]) {
-  const counts = new Map<string, { species: string; count: number }>();
+  const counts = new Map<string, { spellings: Map<string, number>; count: number }>();
   for (const entry of catches) {
-    const key = entry.species.trim().toLowerCase();
-    const row = counts.get(key) ?? { species: entry.species.trim(), count: 0 };
+    const name = entry.species.trim();
+    const row = counts.get(pieceKey(name)) ?? { spellings: new Map<string, number>(), count: 0 };
     row.count += 1;
-    counts.set(key, row);
+    row.spellings.set(name, (row.spellings.get(name) ?? 0) + 1);
+    counts.set(pieceKey(name), row);
   }
-  return [...counts.values()].sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
+  return [...counts.values()]
+    .map((row) => ({ species: mostWritten(row.spellings), count: row.count }))
+    .sort((a, b) => b.count - a.count || a.species.localeCompare(b.species));
+}
+
+/** The spelling most used; a tie goes to one with a capital, then to the first in the alphabet. */
+export function mostWritten(spellings: ReadonlyMap<string, number>): string {
+  return [...spellings].sort((a, b) => b[1] - a[1] || Number(/^\p{Lu}/u.test(b[0])) - Number(/^\p{Lu}/u.test(a[0])) || a[0].localeCompare(b[0]))[0]![0];
 }
