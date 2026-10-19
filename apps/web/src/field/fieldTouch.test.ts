@@ -202,6 +202,18 @@ describe("a page's one-link lines on a touch screen", () => {
   });
 });
 
+describe("a month's heading in Bests' days calendar on a touch screen", () => {
+  it("makes its outings and fish links 32 px bands, and leaves desktop's inline links alone", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.day-month h3 a \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("min-width: 32px;");
+    expect(block).toContain("display: inline-block;");
+    expect(block).toContain("min-height: 32px;");
+    expect(block).toContain("box-sizing: border-box;");
+    expect(css.slice(0, css.indexOf("@media (pointer: coarse) {"))).not.toContain(".day-month h3 a");
+  });
+});
+
 describe("Bests' month-by-year table on a touch screen", () => {
   it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
