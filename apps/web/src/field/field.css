@@ -712,6 +712,12 @@ button.field-primary {
   p.species-chips a {
     padding-block: 5px;
   }
+
+  /* An outing link that wraps ("Below the / mill" at 280 px with larger text) ends left of where it starts, which
+     leaves its ::after reach no width: 2 px of padding gives each of its lines a 32 px band of its own. */
+  .trip-link a {
+    padding-block: 2px;
+  }
 }
 
 .subhead,
