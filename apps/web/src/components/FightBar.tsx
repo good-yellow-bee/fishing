@@ -140,7 +140,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
           );
         }
         // Which way to pull the rod: said once a run is coming, and cheered while it is being turned. A leap or a roll can't be turned.
-        const steerCall = state.surge === 0 ? "calm" : state.roll ? "roll" : state.jump ? "leap" : state.charge ? "charge" : state.turning ? "turning" : state.withRun ? "with" : state.runSide > 0 ? "left" : "right";
+        const steerCall = state.surge === 0 ? (state.headTurned ? "head" : "calm") : state.roll ? "roll" : state.jump ? "leap" : state.charge ? "charge" : state.turning ? "turning" : state.withRun ? "with" : state.runSide > 0 ? "left" : "right";
         if (steerLine.current && steerLine.current.dataset.call !== steerCall) {
           steerLine.current.dataset.call = steerCall;
           for (const part of steerLine.current.querySelectorAll<HTMLElement>("[data-for]")) part.hidden = part.dataset.for !== steerCall;
@@ -246,6 +246,9 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
             </span>
             <span data-for="turning" hidden>
               {t("Turning it!")}
+            </span>
+            <span data-for="head" hidden>
+              {t("Its head is turned — reel now to win line")}
             </span>
             <span data-for="with" hidden>
               {t("Wrong way: pulling with the run gives it line — pull the other side")}

@@ -513,6 +513,10 @@ describe("FightBar for screen readers", () => {
     sim.current.roll = false;
     frame();
     expect(shown()).toEqual(["calm"]);
+    sim.current.headTurned = true;
+    frame();
+    expect(shown()).toEqual(["head"]);
+    expect(container!.querySelector(".fight-steer")!.textContent).toContain("Its head is turned — reel now to win line");
   });
 
   it("has controller words beside the key and screen ones", () => {
