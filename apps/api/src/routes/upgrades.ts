@@ -1,5 +1,5 @@
-import { Hono } from "hono";
-import { validateGroundbaitBuy, validateUpgrade, type SkillId } from "@stillwater/shared";
+import { Hono, type Context } from "hono";
+import { validateGroundbaitBuy, validateShinerBuy, validateUpgrade, type SkillId } from "@stillwater/shared";
 import { applyUpgrade, getProfile, spendPoints, toProfile } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -32,13 +32,13 @@ upgradeRoutes.post("/upgrades", async (c) => {
   return c.json({ profile: updated ? toProfile(updated) : profile });
 });
 
-// A handful of groundbait from the shack: the server takes the points, and the bag that holds it lives in the game.
-upgradeRoutes.post("/groundbait", (c) => {
+// A handful of groundbait or a live shiner from the shack: the server takes the points, and what was bought lives in the game.
+const shackSale = (validate: typeof validateGroundbaitBuy) => (c: Context) => {
   const user = c.get("user") as SessionUser;
   const row = getProfile(user.id);
   if (!row) return c.json({ error: "profile missing" }, 404);
   const profile = toProfile(row);
-  const result = validateGroundbaitBuy(profile);
+  const result = validate(profile);
   if (!result.ok) return c.json({ error: result.error }, result.status);
   try {
     spendPoints(user.id, result.cost);
@@ -47,4 +47,6 @@ upgradeRoutes.post("/groundbait", (c) => {
   }
   const updated = getProfile(user.id);
   return c.json({ profile: updated ? toProfile(updated) : profile });
-});
+};
+upgradeRoutes.post("/groundbait", shackSale(validateGroundbaitBuy));
+upgradeRoutes.post("/shiner", shackSale(validateShinerBuy));

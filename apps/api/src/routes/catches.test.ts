@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, CLEAN_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, PB_BONUS, weeklyBonus } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -291,6 +291,17 @@ describe("POST /catches", () => {
     expect(second.status).toBe(409);
     await expect(second.json()).resolves.toEqual({ error: "not enough points" });
     expect(db.prepare(`SELECT points FROM profile WHERE user_id = ?`).get(user.id)).toEqual({ points: 10 });
+  });
+
+  it("sells a live shiner for its points, and refuses an angler short of them", async () => {
+    db.prepare(`UPDATE profile SET points = ? WHERE user_id = ?`).run(SHINER_PRICE + 10, user.id);
+    const buy = () => app.request("http://test/shiner", { method: "POST" });
+    const first = await buy();
+    expect(first.status).toBe(200);
+    await expect(first.json()).resolves.toMatchObject({ profile: { points: 10 } });
+    const second = await buy();
+    expect(second.status).toBe(409);
+    await expect(second.json()).resolves.toEqual({ error: "not enough points" });
   });
 
   it("returns 400 for malformed upgrade JSON", async () => {

@@ -50,7 +50,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyGroundbait, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyShiner, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
@@ -735,6 +735,20 @@ export function DockPage() {
     }
   };
 
+  const onBuyShiner = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await buyShiner();
+      game.addShiner();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
   }
@@ -1223,7 +1237,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
-            <BaitShop points={me.profile.points} handfuls={game.handfuls} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} />
+            <BaitShop points={me.profile.points} handfuls={game.handfuls} shinerOn={game.liveShiner} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} onBuyShiner={onBuyShiner} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <div className="shop-foot">

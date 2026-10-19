@@ -33,6 +33,7 @@ app.use("/api/catches/*", requireSession);
 app.use("/api/daily-requests/*", requireSession);
 app.use("/api/upgrades", requireSession);
 app.use("/api/groundbait", requireSession);
+app.use("/api/shiner", requireSession);
 app.use("/api/board", requireSession);
 app.use("/api/board/*", requireSession);
 app.use("/api/lodge/*", requireSession);
