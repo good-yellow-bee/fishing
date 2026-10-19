@@ -6,6 +6,8 @@ import {
   DROPOFF_LEVEL,
   INLET_LEVEL,
   catchPoints,
+  cleanRunBonus,
+  CLEAN_RUN_FROM,
   catchStamp,
   dailyConditions,
   fieldLogBestBeat,
@@ -364,7 +366,7 @@ export function DockPage() {
   const retryServerSave = () => {
     const outcome = game.outcome;
     if (outcome?.kind === "landed" && posted.current !== outcome.id) {
-      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, hour, sky, season, day: landedDay.current });
+      void saveOutcome(outcome.id, { requestId: outcome.id, speciesId: outcome.species.id, weight: outcome.weight, spot: outcome.spot, clean: outcome.clean, cleanRun: outcome.notes?.cleanRun, hour, sky, season, day: landedDay.current });
       return;
     }
     void catchSync.sync();
@@ -617,12 +619,12 @@ export function DockPage() {
       setReleaseError(false);
       return;
     }
-    const { id, species, weight, spot: catchSpot, clean } = game.outcome;
+    const { id, species, weight, spot: catchSpot, clean, notes } = game.outcome;
     if (posted.current === id) return;
     landedDay.current = localDate(new Date());
     saveFieldLog();
     if (!userId) return;
-    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, hour, sky, season, day: landedDay.current });
+    void saveOutcome(id, { requestId: id, speciesId: species.id, weight, spot: catchSpot, clean, cleanRun: notes?.cleanRun, hour, sky, season, day: landedDay.current });
   }, [game.outcome, saveFieldLog, saveOutcome, userId, hour, sky, season]);
 
   useEffect(() => {
@@ -1020,7 +1022,7 @@ export function DockPage() {
             <kbd>{t("Right drag")}</kbd> {t("look")}
           </aside>
         )}
-        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} best={fightBest} note={hookNote} />}
+        {game.fight && !game.outcome && <FightBar fight={game.fight} sim={game.sim} performance={game.performance} best={fightBest} note={hookNote} cleanRun={game.cleanRun} />}
         {game.outcome?.kind === "landed" && (
           <div className={`landed-card rarity-${game.outcome.species.rarity}${landedGolden ? " golden" : ""}`}>
             {fieldBeat && (
@@ -1043,13 +1045,19 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun),
                 ),
               })}
             </p>
             {landedGolden && <p className="catch-stamp golden">{t("Golden fish · 2× points")}</p>}
             {weeklyBonus(game.outcome.species.id) > 1 && <p className="catch-stamp">{t("Fish of the week · 1.5× points")}</p>}
-            {game.outcome.clean && <p className="catch-stamp">{t("Clean fight")}</p>}
+            {game.outcome.clean && (
+              <p className="catch-stamp">
+                {(game.outcome.notes?.cleanRun ?? 0) >= CLEAN_RUN_FROM
+                  ? t("Clean fight · {n} in a row · 1.2× points", { n: game.outcome.notes!.cleanRun! })
+                  : t("Clean fight")}
+              </p>
+            )}
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (

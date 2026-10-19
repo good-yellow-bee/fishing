@@ -1648,7 +1648,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT322~~ | ~~News card 2026-10-19-game25 covers GT319, GT320 and GT321: work a lure slowly in winter, a long cast needs a quicker strike, and level 15~~ (#1347) | ui | S |
 | ~~GT323~~ | ~~A strike at nothing tugs the bait: striking in the wait at a still float, at a nibble once the yank is spent, or working a lure past its few helpful touches puts the fish off, so the bite comes 0.4 s later each time and mashing the strike never meets it; the hint says so, a camera pinch's first finger takes it back, and a beginner is spared~~ (#1351) | gameplay | S |
 | ~~GT324~~ | ~~Pulling the rod the wrong way: a turnable run with the rod pulled the same way it heads, past a quarter second to see it and switch, takes line 1.4x as fast, or comes in at 0.6x while reeling; the steer line says "Wrong way", so holding one side through a whole fight no longer turns every other run for free~~ (#1354) | gameplay | S |
-| GT325 | News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line | ui | S |
+| ~~GT325~~ | ~~News card 2026-10-19-game26 covers GT323 and GT324: a strike at nothing puts the fish off, and pulling the rod the same way a run heads gives it line~~ (#1357) | ui | S |
+| GT326 | A run of clean fights pays: from the third clean fight landed in a row this session, each clean catch earns 1.2x more points on top of the clean bonus (the server checks it); the fight card says "3 in a row: 1.2× more" while it is still clean, and the landed card's clean stamp says "Clean fight · 3 in a row · 1.2× points" | gameplay | S |
 
 ## Risks / open questions for the owner
 

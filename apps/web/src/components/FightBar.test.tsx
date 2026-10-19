@@ -15,7 +15,7 @@ let frames: FrameRequestCallback[] = [];
 
 let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
-function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null, note: string | null = null) {
+function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null, note: string | null = null, cleanRun = 0) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
@@ -24,7 +24,7 @@ function mount(performance: FightPerformance | null, underpowered = false, speci
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} note={note} />));
+  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} note={note} cleanRun={cleanRun} />));
   return record;
 }
 
@@ -107,6 +107,21 @@ describe("FightBar clean-fight chip", () => {
     frame();
     expect(chip.textContent).toMatch(/lost/i);
     expect(chip.classList.contains("lost")).toBe(true);
+  });
+
+  it("says a third clean fight in a row earns more, until the bonus is lost", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, perch, null, null, 1);
+    frame();
+    expect(container!.querySelector(".fight-clean")!.textContent).toBe("Clean fight · 1.5× points");
+    act(() => root!.unmount());
+    container!.remove();
+    const again = mount({ peakTension: 0.3, maxLine: 1 }, false, perch, null, null, 2);
+    frame();
+    const chip = container!.querySelector(".fight-clean")!;
+    expect(chip.textContent).toBe("Clean fight · 1.5× points · 3 in a row: 1.2× more");
+    again.current = { peakTension: 0.85, maxLine: 1 };
+    frame();
+    expect(chip.textContent).toBe("Clean bonus lost");
   });
 
   it("strikes the bonus when the fish nearly runs out the line", () => {
