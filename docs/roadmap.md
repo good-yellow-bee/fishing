@@ -1678,7 +1678,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT331~~ | ~~A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line"~~ (#1380) | gameplay | S |
 | ~~GT332~~ | ~~News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line~~ (#1382) | ui | S |
 | ~~GT333~~ | ~~A personal best pays: a fish heavier than the angler's own best of its kind earns 1.25x points (the server checks it against the angler's catches; the first of a kind beats nothing), and the landed card's stamp says "Personal best · was 0.6 lb · 1.25× points"~~ (#1384) | gameplay | S |
-| GT334 | The shack's bait tin sells a handful of groundbait for 60 points (the server takes them), up to 3 in the bag; bought handfuls stay in the bag across a reload, and a free handful still comes with each visit | gameplay | S |
+| ~~GT334~~ | ~~The shack's bait tin sells a handful of groundbait for 60 points (the server takes them), up to 3 in the bag; bought handfuls stay in the bag across a reload, and a free handful still comes with each visit~~ (#1390) | gameplay | S |
+| GT335 | News card 2026-10-19-game29 covers GT333 and GT334: a personal best pays 1.25x points, and the shack sells groundbait | ui | S |
 
 ## Risks / open questions for the owner
 
