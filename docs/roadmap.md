@@ -2150,3 +2150,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR543~~ | ~~Round 88 ideas: Copy the plan on a planned outing, Only my outings and outings since the last fish on Trips, a kinds column and outing names in the outings spreadsheet~~ (#1272) | field | S |
 | ~~BR544~~ | ~~Round 89 catch-page fixes: own fish counted as Home counts them, month headings, edits across time zones, year check, metric tenths, photo view focus~~ (#1283) | field | S |
 | ~~BR545~~ | ~~Round 89 catch-page ideas: Only my fish, the outing's last note in a tap, note as a search word, time after the outing's first fish~~ (#1286) | field | S |
+| ~~BR546~~ | ~~Round 90 Home and export fixes: loose night fish on the evening's day, one-fish calendar ring, Replace keeps the game, sheet outing names, past alarms, goal without the sample week~~ (#TBD) | field | S |

@@ -1,4 +1,4 @@
-import { foldText, localDate, type SpotPlace, type Trip } from "@stillwater/shared";
+import { foldText, type SpotPlace, type Trip } from "@stillwater/shared";
 
 /** Calendar text escapes backslashes, commas, semicolons and line breaks. */
 function icsText(value: string): string {
@@ -61,14 +61,20 @@ export function tripsIcs(outings: readonly { trip: Trip; place: string | null; a
         ...(at ? [`GEO:${at.lat};${at.lng}`] : []),
         ...(notes ? [`DESCRIPTION:${icsText(notes)}`] : []),
         // Six hours before the all-day event's midnight start: 18:00 the evening before, in the calendar's own zone.
-        // Only for an outing still to come: today's would ring yesterday evening, which some calendars fire on import.
-        ...(alarm && trip.date > localDate(now) ? ["BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT6H", `DESCRIPTION:${icsText(alarm)}`, "END:VALARM"] : []),
+        // Only while that evening is still to come: one already past would ring on import, as some calendars fire it.
+        ...(alarm && alarmAhead(trip.date, now) ? ["BEGIN:VALARM", "ACTION:DISPLAY", "TRIGGER:-PT6H", `DESCRIPTION:${icsText(alarm)}`, "END:VALARM"] : []),
         "END:VEVENT",
       ];
     }),
     "END:VCALENDAR",
   ];
   return `${lines.map(fold).join("\r\n")}\r\n`;
+}
+
+/** Whether 18:00 the evening before `date`, local time, is still ahead of `now`. */
+function alarmAhead(date: string, now: Date): boolean {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  return new Date(y, m - 1, d - 1, 18).getTime() > now.getTime();
 }
 
 export function tripIcsName(trip: Trip): string {
