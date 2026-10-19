@@ -410,7 +410,7 @@ describe("FightBar for screen readers", () => {
       "Jumper: every second run is a leap, so let go when it comes up",
       "Darter: halfway through a run it cuts back the other way, so switch sides to keep turning it",
     ]);
-    expect(habit("walleye")).toEqual(["Head-shaker: between runs it shakes its head, so ease off a moment when it does", "Diver: wherever it's hooked, its runs bore down deep, pulling harder but tiring it faster"]);
+    expect(habit("walleye")).toEqual(["Head-shaker: between runs it shakes its head, so ease off a moment when it does", "Diver: in open water its runs bore down deep, pulling harder but tiring it faster"]);
     expect(habit("catfish")).toEqual(["Bottom-sticker: when it sulks it takes two pumps to lift, not one"]);
     expect(habit("perch")).toEqual(["Quitter: it fights hard for a moment, then gives up fast"]);
     expect(habit("golden-shiner")).toEqual([]);

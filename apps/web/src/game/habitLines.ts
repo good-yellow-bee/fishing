@@ -14,7 +14,7 @@ export function habitLines(speciesId: string, strongLift = false): string[] {
   if (BROADSIDERS.has(speciesId)) lines.push(t("Circler: it turns its flat side and circles, so it comes in slowly till it tires"));
   if (QUITTERS.has(speciesId)) lines.push(t("Quitter: it fights hard for a moment, then gives up fast"));
   if (HEAD_SHAKERS.has(speciesId)) lines.push(t("Head-shaker: between runs it shakes its head, so ease off a moment when it does"));
-  if (DIVERS.has(speciesId)) lines.push(t("Diver: wherever it's hooked, its runs bore down deep, pulling harder but tiring it faster"));
+  if (DIVERS.has(speciesId)) lines.push(t("Diver: in open water its runs bore down deep, pulling harder but tiring it faster"));
   if (STICKERS.has(speciesId)) {
     lines.push(strongLift ? t("Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump") : t("Bottom-sticker: when it sulks it takes two pumps to lift, not one"));
   }

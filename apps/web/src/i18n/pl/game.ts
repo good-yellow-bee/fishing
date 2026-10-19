@@ -674,7 +674,7 @@ export const PL_GAME: PlBook = {
   "It darted the other way — switch sides!": "Skręciła w drugą stronę — zmień stronę!",
   "Head-shaker: between runs it shakes its head, so ease off a moment when it does":
     "Szarpak: między odjazdami potrząsa głową, więc wtedy na chwilę odpuść",
-  "Diver: wherever it's hooked, its runs bore down deep, pulling harder but tiring it faster": "Nurek: gdziekolwiek złapany, przy odjazdach schodzi w głąb, ciągnie mocniej, ale szybciej się męczy",
+  "Diver: in open water its runs bore down deep, pulling harder but tiring it faster": "Nurek: na otwartej wodzie przy odjazdach schodzi w głąb, ciągnie mocniej, ale szybciej się męczy",
   "It's shaking its head — ease off a moment!": "Potrząsa głową — odpuść na chwilę!",
   "Bottom-sticker: when it sulks it takes two pumps to lift, not one": "Przyssawka: gdy zalega na dnie, trzeba dwóch pompek, by ją poderwać, nie jednej",
   "Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump": "Przyssawka: trzyma się dna, ale twoja Siła podrywa ją jedną pompką",

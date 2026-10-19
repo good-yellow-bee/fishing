@@ -118,7 +118,7 @@ export const DARTERS: ReadonlySet<string> = new Set(["brook-trout"]);
 
 /** Walleye shake their heads between runs: reel through a shake and the line goes into the red. */
 export const HEAD_SHAKERS: ReadonlySet<string> = new Set(["walleye"]);
-/** A walleye bores down on its runs wherever it is hooked, as any fish does off the drop-off. */
+/** In open water a walleye bores down on its runs, as any fish does off the drop-off; over the rocks or in the current it doesn't. */
 export const DIVERS: ReadonlySet<string> = new Set(["walleye"]);
 export const SHAKE_MS = 600;
 /** A shake gives about a reaction time to let go before a tight line goes into the red. */
@@ -487,7 +487,7 @@ export function makeFight(
   random: () => number = Math.random,
   /** Above 1, the fish tires faster (a level 9 unlock); resting is unchanged. */
   tireMul = 1,
-  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive; off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
+  /** What the water does to the fight: at the reeds an unturned run ends in the weeds; at the inlet the current takes slack line and helps a run downstream; at the drop-off runs dive (a walleye's do in open water too); off the point an unturned run drags the line over the rocks; at the dock an unturned run wraps the line round a piling; out on the boat runs take less line, if less in a strong wind. */
   water: FightWater = "open",
   /** A breezy or strong day: slack line drifts out faster between runs, and a strong one holds the anchored boat back on a run. */
   wind?: FightWind,
@@ -511,7 +511,7 @@ export function makeFight(
   turnCut = 1,
 ): FightRuntime {
   const weedy = water === "weeds";
-  const deepRuns = water === "deep" || DIVERS.has(species.id);
+  const deepRuns = water === "deep" || (DIVERS.has(species.id) && (water === "open" || water === "boat"));
   const pattern = PATTERNS[species.challenge];
   const t = difficulty01(species, weight);
   const reelRate = Math.max(0.07, 0.14 + strength * 0.005 - t * 0.02);

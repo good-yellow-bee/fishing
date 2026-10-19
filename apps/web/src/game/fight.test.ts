@@ -890,13 +890,18 @@ describe("runs at the drop-off", () => {
     expect(pullOpen.sim.diving).toBe(false);
   });
 
-  it("lets a walleye dive on its runs on any water", () => {
-    const walleye = makeFight(fish("walleye"), 4, 3, () => 0);
-    let now = 0;
-    for (; walleye.sim.surge !== 2 && now < 30_000; now += 50) walleye.step(now, 0.05, false);
-    walleye.step(now, 0.05, false);
+  it("lets a walleye dive on its runs in open water, not over the rocks or in the current", () => {
+    const divesOn = (water: "boat" | "rocks" | "current") => {
+      const walleye = makeFight(fish("walleye"), 4, 3, () => 0, 1, water);
+      let now = 0;
+      for (; walleye.sim.surge !== 2 && now < 30_000; now += 50) walleye.step(now, 0.05, false);
+      walleye.step(now, 0.05, false);
+      return walleye.sim.diving;
+    };
     expect(DIVERS.has("walleye")).toBe(true);
-    expect(walleye.sim.diving).toBe(true);
+    expect(divesOn("boat")).toBe(true);
+    expect(divesOn("rocks")).toBe(false);
+    expect(divesOn("current")).toBe(false);
   });
 });
 
