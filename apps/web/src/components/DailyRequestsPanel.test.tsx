@@ -54,7 +54,7 @@ function rows() {
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   getMock.mockResolvedValue(board);
-  claimMock.mockResolvedValue({ reward: 15 });
+  claimMock.mockResolvedValue({ reward: 15, boardBonus: 0 });
 });
 
 afterEach(() => {
@@ -90,9 +90,21 @@ describe("DailyRequestsPanel", () => {
     expect(rows()[0]!.button).toBeNull();
   });
 
+  it("offers the board bonus for claiming every request and says when the board is cleared", async () => {
+    getMock.mockResolvedValue({ ...board, requests: board.requests.map((row) => ({ ...row, progress: row.count })) });
+    await mount("catch-1");
+    const note = () => container!.querySelector(".daily-requests-note")?.textContent;
+    expect(note()).toBe("Claim all 3 for a +25 pts bonus.");
+
+    await act(async () => rows()[0]!.button!.click());
+    await act(async () => rows()[1]!.button!.click());
+
+    expect(note()).toBe("Board cleared · +25 pts bonus");
+  });
+
   it("keeps keyboard focus in the shack: on Claimed once paid, and on a button while a claim goes through", async () => {
     let pay = () => {};
-    claimMock.mockReturnValue(new Promise((resolve) => (pay = () => resolve({ reward: 15 }))));
+    claimMock.mockReturnValue(new Promise((resolve) => (pay = () => resolve({ reward: 15, boardBonus: 0 }))));
     await mount("catch-1");
     const claimButton = rows()[0]!.button!;
     claimButton.focus();
@@ -152,7 +164,7 @@ describe("DailyRequestsPanel", () => {
   it("leaves the next day's board alone when an earlier day's claim lands late", async () => {
     await mount("catch-1");
     let finish!: () => void;
-    claimMock.mockImplementationOnce(() => new Promise((resolve) => { finish = () => resolve({ reward: 15 }); }));
+    claimMock.mockImplementationOnce(() => new Promise((resolve) => { finish = () => resolve({ reward: 15, boardBonus: 0 }); }));
     await act(async () => rows()[0]!.button!.click());
     getMock.mockResolvedValue({ ...board, day: "2026-03-15" });
     await mount("catch-2");

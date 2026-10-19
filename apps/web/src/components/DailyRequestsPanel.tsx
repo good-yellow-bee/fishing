@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { localDate } from "@stillwater/shared";
+import { BOARD_BONUS, localDate } from "@stillwater/shared";
 import { ApiError, claimDailyRequest, errorText, getDailyRequests, type DailyBoard } from "../api";
 import { t, useT } from "../i18n";
 import { dailyRequestText } from "../i18n/content";
@@ -144,6 +144,13 @@ export function DailyRequestsPanel({ catchKey, onClaimed }: Props) {
         </ul>
       ) : (
         !error && <p className="daily-requests-note">{t("Reading the board…")}</p>
+      )}
+      {board && board.requests.length > 0 && (
+        <p className="daily-requests-note">
+          {board.requests.every((row) => row.claimed)
+            ? t("Board cleared · +{bonus} pts bonus", { bonus: BOARD_BONUS })
+            : t("Claim all {n} for a +{bonus} pts bonus.", { n: board.requests.length, bonus: BOARD_BONUS })}
+        </p>
       )}
       {error && (
         <p className="warn" role="alert">

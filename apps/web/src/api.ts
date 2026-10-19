@@ -124,7 +124,7 @@ export function getDailyRequests(day = localDate(new Date())) {
 
 /** Takes the day the board was read for, so a claim just after midnight still finds its request. */
 export function claimDailyRequest(id: string, day: string) {
-  return request<{ reward: number }>(`/api/daily-requests/${encodeURIComponent(id)}/claim?${dayQuery(day)}`, {
+  return request<{ reward: number; boardBonus: number }>(`/api/daily-requests/${encodeURIComponent(id)}/claim?${dayQuery(day)}`, {
     method: "POST",
   });
 }

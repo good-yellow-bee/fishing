@@ -15,6 +15,9 @@ export type DailyRequest = {
 
 export type DailyCatch = { speciesId: string; spot: string; weight: number };
 
+/** Claiming the last of a day's requests clears the board, which pays this on top of its reward. */
+export const BOARD_BONUS = 25;
+
 /** Strength 1 fish on open banks, so a new angler can always finish two requests. */
 const STARTER_REQUESTS: readonly DailyRequest[] = [
   { id: "shiner-dock", speciesId: "golden-shiner", spot: "dock", count: 3, reward: 15 },

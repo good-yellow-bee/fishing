@@ -389,6 +389,8 @@ export const PL_GAME: PlBook = {
   Claim: "Odbierz",
   "Reading the board…": "Czytam tablicę…",
   "Read the board again": "Przeczytaj tablicę jeszcze raz",
+  "Claim all {n} for a +{bonus} pts bonus.": "Odbierz wszystkie {n}, a dostaniesz +{bonus} pkt premii.",
+  "Board cleared · +{bonus} pts bonus": "Tablica wyczyszczona · +{bonus} pkt premii",
   Today: "Dziś",
   Tomorrow: "Jutro",
   "Three-day forecast": "Prognoza na trzy dni",

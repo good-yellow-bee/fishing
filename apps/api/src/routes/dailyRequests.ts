@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { dailyRequestProgress, dailyRequestsForDay } from "@stillwater/shared";
+import { BOARD_BONUS, dailyRequestProgress, dailyRequestsForDay } from "@stillwater/shared";
 import { claimDailyRequest, listCatchesBetween, listDailyClaims, overlapsOtherClaimedDay, toCatch } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
@@ -47,13 +47,13 @@ dailyRequestRoutes.post("/daily-requests/:id/claim", (c) => {
   const user = c.get("user") as SessionUser;
   const local = localDay(c.req.query());
   if (!local) return c.json({ error: "invalid day" }, 400);
-  const request = dailyRequestsForDay(local.day).find((row) => row.id === c.req.param("id"));
+  const board = dailyRequestsForDay(local.day);
+  const request = board.find((row) => row.id === c.req.param("id"));
   if (!request) return c.json({ error: "unknown daily request" }, 404);
   const catches = listCatchesBetween(user.id, local.from, local.to).map(toCatch);
   if (dailyRequestProgress(request, catches) < request.count) return c.json({ error: "request incomplete" }, 409);
   if (overlapsOtherClaimedDay(user.id, local)) return c.json({ error: "those hours already count for another day" }, 409);
-  if (!claimDailyRequest(user.id, local, request.id, request.reward)) {
-    return c.json({ error: "request already claimed" }, 409);
-  }
-  return c.json({ reward: request.reward });
+  const boardBonus = claimDailyRequest(user.id, local, request.id, request.reward, board.length, BOARD_BONUS);
+  if (boardBonus === null) return c.json({ error: "request already claimed" }, 409);
+  return c.json({ reward: request.reward, boardBonus });
 });

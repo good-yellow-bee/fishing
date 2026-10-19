@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Hono } from "hono";
-import { dailyRequestsForDay, type DailyRequest } from "@stillwater/shared";
+import { BOARD_BONUS, dailyRequestsForDay, type DailyRequest } from "@stillwater/shared";
 import type { SessionUser } from "../session.ts";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-daily-"));
@@ -199,11 +199,26 @@ describe("POST /api/daily-requests/:id/claim", () => {
     const second = await claim(bankRequest.id);
 
     expect(first.status).toBe(200);
-    await expect(first.json()).resolves.toEqual({ reward: bankRequest.reward });
+    await expect(first.json()).resolves.toEqual({ reward: bankRequest.reward, boardBonus: 0 });
     expect(profile()).toEqual({ points: 10 + bankRequest.reward, lifetime_points: 60 + bankRequest.reward });
     expect(second.status).toBe(409);
     await expect(second.json()).resolves.toEqual({ error: "request already claimed" });
     expect(profile()).toEqual({ points: 10 + bankRequest.reward, lifetime_points: 60 + bankRequest.reward });
+  });
+
+  it("pays the board bonus on top of the last of the day's requests", async () => {
+    for (const request of board) complete(request);
+
+    const bodies = [];
+    for (const request of board) {
+      const response = await claim(request.id);
+      expect(response.status).toBe(200);
+      bodies.push(await response.json());
+    }
+
+    expect(bodies.map((body) => body.boardBonus)).toEqual([...board.slice(1).map(() => 0), BOARD_BONUS]);
+    const rewards = board.reduce((sum, request) => sum + request.reward, 0);
+    expect(profile()).toEqual({ points: 10 + rewards + BOARD_BONUS, lifetime_points: 60 + rewards + BOARD_BONUS });
   });
 
   it("refuses another day key whose window covers catches a claimed day already counted", async () => {
