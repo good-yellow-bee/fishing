@@ -1,8 +1,18 @@
-import { localDate, type CatchEntry, type Logbook, type Spot } from "@stillwater/shared";
+import { foldText, localDate, type CatchEntry, type Logbook, type Spot } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { bookFishDay } from "./tripMonths";
 import { countedFish, ownFish } from "./milestones";
 import { isSampleSpot, isSampleOuting } from "./bookCopy";
+
+/** A water's name as a search reads it: "Śniardwy" and "sniardwy " are one name, so their links open both waters' fish. */
+export function foldName(name: string): string {
+  return foldText(name.trim().replace(/\s+/g, " ")).toLowerCase();
+}
+
+/** Two waters a search can't tell apart by name. */
+export function twinName(a: string, b: string): boolean {
+  return foldName(a) === foldName(b);
+}
 
 /** `lastFishDay`: the day the newest fish counts on, a night session's small hours on its outing's, as the calendar has it. */
 export type SpotRow = { spot: Spot; fishCount: number; lastFishAt: string | null; lastFishDay: string | null };
