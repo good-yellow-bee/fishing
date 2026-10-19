@@ -360,8 +360,7 @@ export function recordCatch(row: CatchRow): RecordCatchResult {
 }
 
 /** A catch the offline queue posts late counts on the day the server saved it, not the day it was landed. */
-/** Marks the angler's catch released; it keeps its points. Undefined when there is no such catch. */
-/** Lets a catch go once; the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS, a repeat pays 0. */
+/** Marks the angler's catch released; it keeps its points, and the first release of a trophy-weight fish pays TROPHY_RELEASE_BONUS. Undefined when there is no such catch. */
 export function releaseCatch(userId: string, requestId: string): { row: CatchRow; bonus: number } | undefined {
   return db.transaction(() => {
     const change = db.prepare(`UPDATE catch SET released = 1 WHERE user_id = ? AND request_id = ? AND released = 0`).run(userId, requestId);
