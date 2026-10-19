@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-field57";
+export const NEWS_ID = "2026-10-19-scene41";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "By day, unless it rains, a golden dog now lies on the dock behind you. It watches a fresh cast, dozes off when nothing bites, and sits up with its tail going when a fish takes. And on fine spring and summer days swallows sometimes come and sit in a row on the moored rowboat's rope.",
   "On Trips, last evening's outing still going after midnight says Out now, with a last night quick search, and the average's count of outings without a fish opens them. A copied plan says how the last outing on that water went, lost fish and missed strikes included, and Home names the last outing's lure only when it led.",
   "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.",
   "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.",

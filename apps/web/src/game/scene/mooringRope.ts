@@ -58,6 +58,15 @@ export function ropePoint(from: Point, to: Point, length: number, t: number): Po
   return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t - 4 * sag * t * (1 - t), z: from.z + (to.z - from.z) * t };
 }
 
+/** The ropes as last laid: whether they are up, and where each hull tie then was, for anything that sits on them. */
+export const liveRopes = { up: false, ties: HULL_TIES.map(() => new THREE.Vector3()) };
+
+/** The point `t` (0 at the post, 1 at the hull) along live rope `r`, as last laid. */
+export function liveRopePoint(r: number, t: number): Point {
+  const end = liveRopes.ties[r]!;
+  return ropePoint(POST_TIES[r]!, end, ROPE_LENGTHS[r]!, t);
+}
+
 const tie = new THREE.Vector3();
 const a = new THREE.Vector3();
 const b = new THREE.Vector3();
@@ -73,9 +82,11 @@ const folded = new THREE.Matrix4().makeScale(0, 0, 0);
  */
 export function poseMooringRopes(mesh: THREE.InstancedMesh | null, hull: THREE.Object3D, moored: boolean) {
   if (!mesh) return;
+  liveRopes.up = moored;
   POST_TIES.forEach((post, r) => {
     const end = HULL_TIES[r]!;
     tie.set(end.x, end.y, end.z).applyMatrix4(hull.matrixWorld);
+    liveRopes.ties[r]!.copy(tie);
     for (let k = 0; k < SEGMENTS; k += 1) {
       const index = r * SEGMENTS + k;
       if (!moored) {
