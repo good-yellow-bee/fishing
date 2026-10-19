@@ -15,7 +15,8 @@ describe("pieceRecords", () => {
     const records = pieceRecords(book, items, "2026-12-31");
     const fish = book.catches.filter((entry) => entry.lure.toLowerCase() === lure.toLowerCase()).length;
     const newest = book.catches.filter((entry) => entry.lure.toLowerCase() === lure.toLowerCase()).sort((a, b) => b.caughtAt.localeCompare(a.caughtAt))[0]!;
-    expect(records[0]).toMatchObject({ label: `${lure}s`, outings: 1, fish, lure, lastAt: newest.caughtAt, since: 0 });
+    // Named as its fish were logged, not as the list wrote it.
+    expect(records[0]).toMatchObject({ label: lure, outings: 1, fish, lure, lastAt: newest.caughtAt, since: 0 });
     // Its biggest fish: by weight when any was weighed.
     const onLure = book.catches.filter((entry) => entry.lure.toLowerCase() === lure.toLowerCase());
     expect(records[0]!.largest?.entry.id).toBe(fish >= 2 ? personalBests({ spots: [], trips: [], catches: onLure }).heaviest?.id ?? personalBests({ spots: [], trips: [], catches: onLure }).longest?.id : undefined);
@@ -76,5 +77,18 @@ describe("pieceRecords", () => {
     const book = sampleLogbook(new Date(2026, 9, 15));
     const items: TackleItem[] = [{ id: "a", tripId: book.trips[0]!.id, label: "Spoon", packed: true }];
     expect(pieceRecords(book, items, "1999-01-01")).toEqual([]);
+  });
+});
+
+describe("pieceRecords in the small hours", () => {
+  it("counts last evening's outing still going once it has a fish", () => {
+    const now = new Date();
+    const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 12);
+    const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const trip = { id: "night", date: ymd(yesterday), spotId: "own", title: "", note: "" };
+    const caughtAt = new Date(now.getTime() - 30 * 60_000).toISOString();
+    const book = { spots: [], trips: [trip], catches: [{ id: "f", species: "Pike", measure: { kind: "length" as const, inches: 30 }, lure: "Spinner", spotId: "own", tripId: "night", caughtAt, note: "", weather: null }] };
+    const records = pieceRecords(book, [{ id: "a", tripId: "night", label: "Spinner", packed: true }], ymd(now));
+    expect(records[0]).toMatchObject({ outings: 1, fish: 1 });
   });
 });

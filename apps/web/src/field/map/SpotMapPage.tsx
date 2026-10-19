@@ -334,19 +334,23 @@ export function SpotMapPage() {
   const navigate = useNavigate();
   useEffect(() => {
     // Back from the outing form opened by a row's "Plan one": that link, where the page was left.
-    const from = plannedFrom;
-    plannedFrom = null;
-    const plan = from && navigation === "POP" ? document.getElementById(`water-${from}`)?.querySelector<HTMLElement>(".map-plan") : null;
+    const plan = plannedFrom && navigation === "POP" ? document.getElementById(`water-${plannedFrom}`)?.querySelector<HTMLElement>(".map-plan") : null;
+    // A frame later: the browser's own jump to the #water- fragment blurs whatever was focused before it. Let go of the
+    // row only then, so an effect run twice still finds it.
     if (plan) {
-      plan.focus({ preventScroll: true });
-      return;
+      const frame = requestAnimationFrame(() => {
+        plannedFrom = null;
+        plan.focus({ preventScroll: true });
+      });
+      return () => cancelAnimationFrame(frame);
     }
+    plannedFrom = null;
     // Sent here for one water ("See it on the Map"): its row in the list, in view and focused.
     const row = hash.startsWith("#water-") ? document.getElementById(hash.slice(1)) : null;
     if (row) {
       row.scrollIntoView({ block: "center" });
-      row.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
-      return;
+      const frame = requestAnimationFrame(() => row.querySelector<HTMLElement>("a")?.focus({ preventScroll: true }));
+      return () => cancelAnimationFrame(frame);
     }
     const active = document.activeElement;
     if (!active || active === document.body || active.matches(".field-main")) focusPageHeading({ preventScroll: true });
