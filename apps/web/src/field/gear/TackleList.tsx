@@ -295,6 +295,20 @@ export function TackleList({
               {t("+ {lure}", { lure: t(lure) })}
             </button>
           ))}
+          {/* A fresh list takes them all in one tap, rather than one tap each with the tips scrolling away. */}
+          {missing.length > 1 ? (
+            <button
+              type="button"
+              className="lure-tip"
+              onClick={() => {
+                const message = missing.map((lure) => add(tripId, lure)).find(Boolean);
+                setError(message ?? "");
+                focusAfter();
+              }}
+            >
+              {t("+ All {n}", { n: missing.length })}
+            </button>
+          ) : null}
         </p>
       ) : null}
       <form className="tackle-add" onSubmit={onSubmit}>

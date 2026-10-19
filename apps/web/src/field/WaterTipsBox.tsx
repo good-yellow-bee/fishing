@@ -94,10 +94,9 @@ export function WaterTipsBox({
   const find = (text: string) => (within ? findWithLink(within, text) : findLink(text));
   const [y, m, d] = (on ?? "").split("-").map(Number);
   const dayMoon = on ? moonQuarterOf(new Date(y!, m! - 1, d!, 12)) : null;
-  // "today" or "tomorrow" when it is, as outing cards say it.
-  const soon = on === localDate(new Date()) || on === shiftDate(new Date(), 1);
-  // "today" or "tomorrow" mid-sentence, in lower case; a date keeps its own.
-  const onDay = on ? (soon ? tripWhen(on, localDate(new Date()), shiftDate(new Date(), 1)).toLocaleLowerCase() : tripWhen(on, localDate(new Date()), shiftDate(new Date(), 1))) : "";
+  // "today", "tomorrow" or "last night" when it is, as outing cards say it, in lower case mid-sentence; a date keeps its own.
+  const when = on ? tripWhen(on, localDate(new Date()), shiftDate(new Date(), 1)) : "";
+  const onDay = on && when !== formatDay(on) ? when.toLocaleLowerCase() : when;
   const sun = place ? nearSunCount(catches, place) : null;
   const byTemp = lureByTemp(catches);
   // As the reading is shown: 59.7°F reads "60°F", so it takes the 60s band's lure, not the 50s'.
