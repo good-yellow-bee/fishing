@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { LAKE_SEASONS } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { isLeafColor, seasonGroundColor, seasonPlantColor, seasonWaterColor, shoreIce } from "./seasonLook.ts";
+import { BLOSSOM_FROM, isLeafColor, seasonGroundColor, seasonPlantColor, seasonWaterColor, shoreIce } from "./seasonLook.ts";
 
 const LEAF = new THREE.Color("#4d8a3e");
 const TRUNK = new THREE.Color("#7a5236");
@@ -80,5 +80,23 @@ describe("season water", () => {
 
   it("keeps a night lake dark", () => {
     expect(luma(seasonWaterColor("#1a3a48", "winter"))).toBeCloseTo(luma("#1a3a48"), 1);
+  });
+});
+
+describe("spring blossom", () => {
+  it("flowers a few broadleaves white or pink in spring, keeping their shading, and only then", () => {
+    const leaf = new THREE.Color("#4f9a4a");
+    const dark = new THREE.Color("#2f6a34");
+    const white = seasonPlantColor(leaf, "spring", "leafy", 0.85);
+    const pink = seasonPlantColor(leaf, "spring", "leafy", 0.95);
+    expect(white.r).toBeGreaterThan(0.7);
+    expect(white.g).toBeGreaterThan(0.7);
+    expect(pink.r).toBeGreaterThan(pink.g + 0.1);
+    expect(seasonPlantColor(dark, "spring", "leafy", 0.85).getHSL({ h: 0, s: 0, l: 0 }).l).toBeLessThan(white.getHSL({ h: 0, s: 0, l: 0 }).l);
+    expect(seasonPlantColor(leaf, "spring", "leafy", BLOSSOM_FROM - 0.01).g).toBeGreaterThan(seasonPlantColor(leaf, "spring", "leafy", BLOSSOM_FROM - 0.01).r);
+    expect(seasonPlantColor(leaf, "spring", "evergreen", 0.95).g).toBeGreaterThan(seasonPlantColor(leaf, "spring", "evergreen", 0.95).r);
+    expect(seasonPlantColor(leaf, "summer", "leafy", 0.95).equals(leaf)).toBe(true);
+    const trunk = new THREE.Color("#7a5230");
+    expect(seasonPlantColor(trunk, "spring", "leafy", 0.95).equals(trunk)).toBe(true);
   });
 });
