@@ -1363,6 +1363,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC191~~ | ~~Winter scarf: in winter the angler wraps up in a knitted red scarf with cream stripes to match the dock dog's jumper, its fringed ends hanging down the back and lifting and flapping in the wind~~ (#1427) | scene | S |
 | ~~SC192~~ | ~~Robin takes fright: strike a fish from the dock while the robin sits on the posts and it flies off at once from where it sat, back on its next visit; the dog's head follows it off (robin moved into the fishing scene, one strike hook shared with the little owl)~~ (#1432) | scene | S |
 | ~~SC193~~ | ~~News card scene44 covers SC190 to SC192~~ (#1432) | scene | S |
+| ~~SC194~~ | ~~Leaf on the cap: in fall a leaf now and then comes seesawing down out of the trees and settles on the back of the angler's cap, riding there until your next cast shakes it off the brim~~ (#1437) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
