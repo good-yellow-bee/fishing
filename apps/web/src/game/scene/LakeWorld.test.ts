@@ -9,7 +9,8 @@ import {
   BANK_WALK_PLANK,
   type BankBoard,
 } from "./bankWalk.ts";
-import { bankPlankMatrix, pierPlankColor, pierPlankMatrix, placeBankPlanks, placePierPlanks } from "./LakeWorld.tsx";
+import { bankPlankMatrix, pierPlankColor, pierPlankMatrix, placeBankPlanks, placeHills, placePierPlanks } from "./LakeWorld.tsx";
+import { FAR_HILLS, hillColor } from "./farHills.ts";
 import { PIER_BOARDS, PIER_THICK, PIER_TOP } from "./pierDeck.ts";
 
 const UNIT_BOX = new THREE.BoxGeometry(1, 1, 1);
@@ -95,6 +96,21 @@ describe("pier deck", () => {
     PIER_BOARDS.forEach((_, index) => {
       expect(mesh.getColorAt(index, colour).getHex()).toBe(pierPlankColor(index, 0.7, 0.3).getHex());
       for (const corner of corners(UNIT_BOX, pierPlankMatrix(index))) expect(mesh.boundingSphere!.distanceToPoint(corner)).toBeLessThan(1e-6);
+    });
+  });
+});
+
+describe("far hills", () => {
+  it("places every hill in one mesh where its own mesh stood, in its colour for the hour, season and sky", () => {
+    const mesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 2), undefined, FAR_HILLS.length);
+    placeHills(mesh, "dusk", "winter", "clear");
+    const at = new THREE.Matrix4();
+    const colour = new THREE.Color();
+    FAR_HILLS.forEach((hill, i) => {
+      mesh.getMatrixAt(i, at);
+      expect(new THREE.Vector3().setFromMatrixPosition(at).toArray().map((v) => +v.toFixed(5))).toEqual(hill.position);
+      expect(new THREE.Vector3().setFromMatrixScale(at).toArray().map((v) => +v.toFixed(5))).toEqual(hill.scale);
+      expect(mesh.getColorAt(i, colour).getHex()).toBe(new THREE.Color(hillColor(hill, "dusk", "winter", "clear")).getHex());
     });
   });
 });
