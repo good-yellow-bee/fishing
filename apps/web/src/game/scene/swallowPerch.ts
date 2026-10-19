@@ -109,3 +109,29 @@ export function ropeSwallowAt(i: number, time: number, still = false): RopeSwall
     look: 0,
   };
 }
+
+/** How long they take to clear off when the boat is untied under them. */
+export const FLUSH_SEC = 1.3;
+
+/**
+ * Swallow `i` flushed off the rope `since` seconds after the boat was untied, as an offset from where
+ * it last sat: all three burst up and away over the water at once, fanning apart. Gone at once with `still`.
+ */
+export function flushedOff(i: number, since: number, still = false): RopeSwallowPose {
+  const along = PERCH_SPOTS[i]!;
+  const k = smooth(since / FLUSH_SEC);
+  const spread = (i - (SWALLOW_COUNT - 1) / 2) * 0.9;
+  const to = { x: OFF.x + spread, y: OFF.y, z: OFF.z - spread * 0.5 };
+  return {
+    here: !still && since >= 0 && since < FLUSH_SEC,
+    along,
+    x: to.x * k,
+    y: to.y * k + 0.2 * Math.sin(Math.PI * Math.min(1, since / 0.4)) * (1 - k),
+    z: to.z * k,
+    yaw: Math.atan2(to.x, to.z),
+    flap: Math.sin(since * 40),
+    flying: true,
+    bob: 0,
+    look: 0,
+  };
+}
