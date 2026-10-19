@@ -1,5 +1,6 @@
 import { SPOT_LABELS } from "@stillwater/shared";
 import { getLang, locale, t, tn } from "../i18n";
+import { outingDay } from "./tripDates";
 
 /** Formatters per language, built on first use so a language change takes effect. */
 const formats = new Map<string, { format(date: Date): string }>();
@@ -83,6 +84,8 @@ export function daysAheadLabel(ymd: string, today: string): string {
 
 export function tripWhen(ymd: string, today: string, tomorrow: string): string {
   if (ymd === today) return t("Today");
+  // In the small hours, last evening's outing is still going: "Last night", as the outing form's pick names it.
+  if (ymd === outingDay(today)) return t("Last night");
   if (ymd === tomorrow) return t("Tomorrow");
   return formatDay(ymd);
 }

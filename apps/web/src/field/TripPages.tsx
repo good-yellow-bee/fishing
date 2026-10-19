@@ -112,6 +112,9 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
 const TRIP_FIND = "find";
 
+/** Words Find an outing reads that no outing's own text would hold, offered under the box until something is typed. */
+const QUICK_FINDS = ["this year|search word", "weekend|search word", "night|search word", "no fish|search word", "lost|search word", "planned|search word"];
+
 /** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
 export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
   // Grouped as the page's "What works here" box groups them: one lure written two ways is one.
@@ -182,6 +185,10 @@ export function TripsPage() {
   // "w nocy" and "at dawn" as well as "noc" and "dawn": the outings with a fish then, as Find a fish reads the phrase.
   const timeTrips = (part: string) => (isTimeWord(part, t) || isTimePhrase(part, t) ? fishTrips(part) : null);
   const found = needle ? findTrips(book, needle, fishOn, today, t, new Date(), fishTrips, timeTrips) : [];
+  // The words the search reads best, one tap each: only those that would find an outing in this book.
+  const quick = needle
+    ? []
+    : QUICK_FINDS.map((word) => t(word)).filter((word) => findTrips(book, word, fishOn, today, t, new Date(), fishTrips, timeTrips).length > 0);
   // The plans among them said apart, as the month headings under the count say them.
   const foundPlanned = found.filter((trip) => isPlanned(trip, today, fishOn(trip.id))).length;
   const foundLine = [
@@ -231,6 +238,24 @@ export function TripsPage() {
             autoComplete="off"
             onChange={(event) => setQuery(event.target.value)}
           />
+          {quick.length > 1 ? (
+            <div className="lure-tips trip-quick" role="group" aria-label={t("Quick searches")}>
+              {quick.map((word) => (
+                <button
+                  key={word}
+                  type="button"
+                  className="lure-tip"
+                  onClick={() => {
+                    setQuery(word);
+                    // The chips go once the box holds a word: focus stays with the search, by its matches.
+                    requestAnimationFrame(() => document.getElementById("trip-search")?.focus());
+                  }}
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div role="status" className={needle ? (found.length === 0 ? "empty" : "search-count") : undefined}>
             {needle ? <p>{found.length === 0 ? t("No outing matches that.") : foundLine}</p> : null}
           </div>
