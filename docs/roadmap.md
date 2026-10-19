@@ -1346,6 +1346,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC178~~ | ~~Dock mouse: on evenings and nights from spring to fall a field mouse now and then climbs onto the dock behind the angler, scurries across in dashes, sits up to nibble a crumb and darts off over the edge (one draw), with news scene39 for it and the pedalo~~ (#1396) | scene | S |
 | ~~SC179~~ | ~~Mooring lines: while the rowboat lies tied up by the pier, a bow line and a stern line run to the pier posts, sagging and drawing tighter as the hull rides the chop, gone once it is untied (one draw)~~ (#1399) | scene | S |
 | ~~SC180~~ | ~~Dragonfly on the rod tip: on dry summer days, once the line has sat quiet for a while, a blue dragonfly flies in and settles on the rod tip, flicking its wings now and then, and darts off on a nibble, the strike or reeling in (two draws), with news scene40 for it and the mooring lines~~ (#1401) | scene | S |
+| SC181 | Dock dog: by day, unless it rains, a golden dog lies on the dock behind the angler facing the water; it watches a fresh cast, dozes head on paws when nothing happens, sits up with its tail going through a bite and the fight, and wags hard over the result (one draw) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
