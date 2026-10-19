@@ -1762,7 +1762,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT362~~ | ~~A packed-up game outing keeps its title and season note in English in the field log and shows them in the reader's language, so switching language switches them (and an edit that keeps them keeps them in English), like the sample week's lines~~ (#1475) | gameplay | S |
 | ~~GT363~~ | ~~News card 2026-10-20-game38 covers GT361 and GT362: the hint's more reasons, and game outings' titles in the reader's language~~ (#1478) | ui | S |
 | ~~GT364~~ | ~~The far rock: a cast from the boat landing tight to the rock out in the open water (where the cormorant dries its wings), not on it, bites 0.85x sooner, and the wait hint says "Tight to the far rock…" (the walleye hold there)~~ (#1484) | gameplay | S |
-| GT365 | A headlamp at night: L or the Headlamp button lights the water, so the float shows plainly and the strike window holds 1.2x longer, but the light puts the fish off and the bite comes 1.15x slower; the wait hint says so, and the keys card lists L | gameplay | S |
+| ~~GT365~~ | ~~A headlamp at night: L or the Headlamp button lights the water, so the float shows plainly and the strike window holds 1.2x longer, but the light puts the fish off and the bite comes 1.15x slower; the wait hint says so, and the keys card lists L~~ (#1488) | gameplay | S |
+| GT366 | News card 2026-10-20-game39 covers GT364 and GT365: the far rock and the headlamp at night | ui | S |
 
 ## Risks / open questions for the owner
 

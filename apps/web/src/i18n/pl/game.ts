@@ -780,8 +780,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
-  "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.":
-    "Na Cyplu rzuć tuż za płytkie kamienie, na krawędź, gdzie woda opada w głąb: trzymają się tam bassy, więc branie przychodzi szybciej, a kamienie nie zaczepią przynęty. A sandacz złapany na otwartej wodzie schodzi teraz przy odjazdach w głąb, ciągnie mocniej, ale szybciej się męczy.",
+  "At night, press L or the Headlamp button to light the water: your float shows plainly, so you have longer to strike, but the light puts the fish off and the bite comes slower. And out on the boat, a cast tight to the far rock where the cormorant dries its wings finds the walleye that hold in its shadow.":
+    "W nocy wciśnij L albo przycisk Czołówka, by oświetlić wodę: spławik widać wyraźnie, więc masz więcej czasu na zacięcie, ale światło płoszy ryby i branie przychodzi wolniej. A z łódki rzut tuż przy dalekiej skale, na której kormoran suszy skrzydła, trafia na sandacze trzymające się w jej cieniu.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",

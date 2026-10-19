@@ -1,16 +1,16 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-pa33";
+export const NEWS_ID = "2026-10-20-game39";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "At night, press L or the Headlamp button to light the water: your float shows plainly, so you have longer to strike, but the light puts the fish off and the bite comes slower. And out on the boat, a cast tight to the far rock where the cormorant dries its wings finds the walleye that hold in its shadow.",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.",
   "When a cast has more reasons for a quick or slow bite than the hint can fit, the hint ends with \"2 more reasons\": tap it to read the rest. And the outings you pack up from the lake now show their titles and season notes in whichever language you read the field log in.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.",
-  "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.",
   "On Bests, the longest and heaviest tiles say how long a record has stood, and the month-by-month table names the best month the book has ever had. Not yet this year counts a kind once however it was typed, in your language's order.",
   "On Gear, each coming outing can copy its plan with what is still to pack, and the lure record says when a lure that never took a fish was last packed. On the Map, a water you have fished today says Out now.",
