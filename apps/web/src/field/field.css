@@ -468,6 +468,12 @@ button.field-primary {
     inset: -4px -3px -6px;
   }
 
+  /* "Fish in these conditions" reads in plain type under the weather: its line is 2 px shorter, so it reaches 2 px
+     further down, where the weather box has room before its next heading. */
+  .meta.same-conditions a::after {
+    bottom: -8px;
+  }
+
   /* An outing's last link line ("Next time here", "First time at this water") reaches 6 px down: the kind and lure
      chips under it start clear of that reach. */
   .meta + .species-chips {
