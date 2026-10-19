@@ -57,6 +57,14 @@ pnpm test        # shared lake / catch / board rules
 pnpm typecheck
 ```
 
+Or run both in Docker, with no local Node:
+
+```bash
+docker compose up --build
+```
+
+The game is at [http://localhost:5173](http://localhost:5173) as above. SQLite lives in the `api-data` volume; `docker compose down -v` wipes it. Rebuild after pulling.
+
 Force a lake hour while developing: `http://localhost:5173/?hour=dawn` (`day`, `dusk`, `night`).
 
 ## Layout
@@ -69,7 +77,34 @@ packages/shared     Lake geometry, fish, hours, progression (source of truth)
 
 Vite proxies `/api` to the API. Catch validation and upgrades run on the server against the same shared rules as the client.
 
-Dev auth defaults (`BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`) are fine on localhost. Change the secret before exposing the API; with `NODE_ENV=production` the API won't start without one.
+Dev auth defaults (`BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`) are fine on localhost. With `NODE_ENV=production` the API won't start without both, and it also serves the built client from `apps/web/dist`.
+
+## Deploy to Fly.io
+
+The root `Dockerfile` builds a production image: one Node process serving the API at `/api` and the game everywhere else. `fly.toml` runs it as one machine in `fra` with SQLite on a volume at `/data`.
+
+Once, with [flyctl](https://fly.io/docs/flyctl/install/) signed in (change `app` and `BETTER_AUTH_URL` in `fly.toml` if the name is taken):
+
+```bash
+fly apps create stillwater-game
+fly volumes create stillwater_data --region fra --size 1
+fly secrets set BETTER_AUTH_SECRET=$(openssl rand -hex 32)
+```
+
+Then, for every release:
+
+```bash
+fly deploy --ha=false
+```
+
+Keep one machine: SQLite on a volume can't be shared, so `--ha=false` stops the first deploy from starting a second one, and don't `fly scale count` above 1.
+
+Try the production image locally (`BETTER_AUTH_URL` must be `http://` here, or the browser drops the secure session cookie):
+
+```bash
+docker build -t stillwater .
+docker run --rm -p 8080:8080 -v stillwater-data:/data -e STILLWATER_DB_PATH=/data/stillwater.sqlite -e BETTER_AUTH_URL=http://localhost:8080 -e BETTER_AUTH_SECRET=$(openssl rand -hex 32) stillwater
+```
 
 ## Credits
 
