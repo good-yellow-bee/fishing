@@ -511,6 +511,8 @@ export const PL_GAME: PlBook = {
   "A smallmouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.":
     "Poluje tu na nie bass małogębowy: przestań zwijać i daj rybce chwilę się potrzepotać, a bass może ją chwycić.",
   "It's the one that got away!": "To ta, która się zerwała!",
+  "It's the one that dropped your bait!": "To ta, która wypuściła twoją przynętę!",
+  "It wasn't hooked, so it may take again: cast straight back here.": "Nie zacięła się, więc może wziąć znowu: zarzuć od razu w to samo miejsce.",
   "A largemouth bass followed it in to the bank!": "Bass wielkogębowy odprowadził ją aż do brzegu!",
   "A walleye followed it up to the boat!": "Sandacz odprowadził ją aż pod łódź!",
   "A pike followed it in to the bank!": "Szczupak odprowadził ją aż do brzegu!",
