@@ -37,7 +37,8 @@ export function bookSpelling(label: string): string {
     spellings = { book, keys };
   }
   const lower = name.toLowerCase().replace(/\s+/g, " ");
-  return spellings.keys.get(lower) ?? (lower.endsWith("s") ? spellings.keys.get(lower.slice(0, -1)) : undefined) ?? name;
+  // A plural as pieceKey takes it ("Perches" is "perch"), else with only its final "s" gone.
+  return spellings.keys.get(lower) ?? spellings.keys.get(pieceKey(lower)) ?? (lower.endsWith("s") ? spellings.keys.get(lower.slice(0, -1)) : undefined) ?? name;
 }
 
 /** A piece's name in the reader's language, however it was typed: "spoon " reads "Wahadłówka" in Polish. */

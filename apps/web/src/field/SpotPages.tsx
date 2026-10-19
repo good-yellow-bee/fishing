@@ -32,7 +32,7 @@ import { daysBetween, lastOutByWater, spotsByLastFish, twinName } from "./spotOr
 import { bookFishDay, yearTally } from "./tripMonths";
 import { PagedTrips } from "./PagedTrips";
 import { outingAverage, outingStreak, topOuting, weekendSplit } from "./outingAverage";
-import { notYetThisYear } from "./bests/notYet";
+import { inReadersOrder, notYetThisYear } from "./bests/notYet";
 import { mostKindsDay } from "./bests/mostKinds";
 import { CopySummary } from "./CopySummary";
 import { spotSummary } from "./summaries";
@@ -658,10 +658,10 @@ function SpotView() {
         <p className="meta not-yet">
           <span>
             {t("Not yet this year:")}{" "}
-            {notYet.map((name, index) => (
+            {inReadersOrder(notYet, pieceName).map((name, index) => (
               <Fragment key={name}>
                 {index > 0 ? ", " : null}
-                <Link to={findWithLink(here, exactTerm("species", t(name)))}>{t(name)}</Link>
+                <Link to={findWithLink(here, exactTerm("species", pieceName(name)))}>{pieceName(name)}</Link>
               </Fragment>
             ))}
           </span>

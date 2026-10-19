@@ -22,7 +22,7 @@ import { SeasonRecapBox, seasonCopy } from "./SeasonRecap";
 import { seasonRecap } from "./seasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
-import { newWatersThisYear, notYetThisYear } from "./notYet";
+import { inReadersOrder, newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
 import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
@@ -76,12 +76,12 @@ function DayTally({ count, date, tripId, tail }: { count: number; date: string; 
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
-function waterFishLine(catches: readonly CatchEntry[]): string {
+function waterFishLine(catches: readonly CatchEntry[], kindName: (species: string) => string): string {
   const fish = fishCountLabel(catches.length);
   const [top, next] = speciesCounts(catches);
   if (!top || catches.length < 2) return fish;
-  if (!next) return t("{fish}, all {species}", { fish, species: t(top.species) });
-  return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: t(top.species) }) : fish;
+  if (!next) return t("{fish}, all {species}", { fish, species: kindName(top.species) });
+  return top.count > next.count ? t("{fish}, mostly {species}", { fish, species: kindName(top.species) }) : fish;
 }
 
 /** "Last fish: Sat, Oct 10" under a water, from its newest fish, on the day it counts on (a night fish on its outing's). */
@@ -278,7 +278,8 @@ export function BestsPage() {
           <p className="meta not-yet">
             <span>
               {t("Not yet this year:")}{" "}
-              {notYet.map((name, index) => (
+              {/* In the order the reader's names sort in, not the stored English ones. */}
+              {inReadersOrder(notYet, kindName).map((name, index) => (
                 <Fragment key={name}>
                   {index > 0 ? ", " : null}
                   <Link to={`/species/${encodeURIComponent(name)}`}>{kindName(name)}</Link>
@@ -614,7 +615,7 @@ export function BestsPage() {
                   <div className="spot-card-top">
                     <h3>{water.name === "Unknown water" ? t(water.name) : water.name}</h3>
                   </div>
-                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [])}</p>
+                  <p className="meta">{waterFishLine(bySpot.get(water.spotId) ?? [], kindName)}</p>
                   {/* When it last gave one: a water gone quiet is worth a visit, or a rest. */}
                   {lastFishLine(whole, bySpot.get(water.spotId) ?? [])}
                   {waterBestLine(book, bySpot.get(water.spotId) ?? [], kindName)}
