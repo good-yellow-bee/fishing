@@ -218,6 +218,7 @@ import { paragliderOut } from "./paraglideRidge";
 import { Sheep } from "./Sheep";
 import { Rapeseed } from "./Rapeseed";
 import { Railway } from "./Railway";
+import { Orchard } from "./Orchard";
 import { trainOut } from "./trainLine";
 import { rapeseedOut } from "./rapeseedField";
 import { sheepOut } from "./sheepFlock";
@@ -2326,6 +2327,7 @@ export const LakeWorld = memo(function LakeWorld({
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
+      <Orchard season={season} hour={hour} />
       <Windmill season={season} wind={wind} />
       {trainOut(sky) && <Railway hour={hour} wind={wind} />}
       {paragliderOut(hour, sky, season, wind) && <Paraglider />}
