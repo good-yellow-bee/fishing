@@ -1264,6 +1264,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC136~~ | ~~Fewer draws for the brolly fisher and the birdwatcher: the brolly fisher's seat and rod rests in one shape (3 draws to 1), the birdwatcher's legs and body in one (2 to 1)~~ (#1251) | scene | S |
 | ~~SC137~~ | ~~Spindrift: on breezy and windy winter mornings and days the wind lifts loose snow off the far hills and streams it along their faces in long white wisps, and skims it low along the far shore, racing downwind~~ (#1252) | scene | S |
 | ~~SC138~~ | ~~News card scene29: sun breaks on overcast days and winter spindrift~~ (#1252) | scene | S |
+| ~~SC139~~ | ~~Spring blossom on the trees: in spring about one broadleaf in five on the shore flowers, wild cherry white or crab apple pink, keeping its light and shade, and its reflection on still water flowers too~~ (#1252) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
