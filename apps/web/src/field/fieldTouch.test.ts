@@ -247,6 +247,16 @@ describe("a kind's first and newest dates on a touch screen", () => {
   });
 });
 
+describe("a kind's water's sizes on a touch screen", () => {
+  it("drops a wrapped line of count and sizes 8 px so the links' reaches don't overlap", () => {
+    const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.species-waters li > span\.meta\.sizes \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("display: flex;");
+    expect(block).toContain("flex-wrap: wrap;");
+    expect(block).toContain("row-gap: 8px;");
+  });
+});
+
 describe("Bests' month-by-year table on a touch screen", () => {
   it("reaches each 24 px count 4 px out to its cell's edges, a 32 px band meeting the next row's", () => {
     const touch = css.slice(css.indexOf("@media (pointer: coarse) {"));
