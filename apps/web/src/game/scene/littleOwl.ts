@@ -9,7 +9,8 @@ import { DOCK_POST_CAPS } from "./snowyDock";
  * light. There it bobs its head up and down the way little owls do when something takes their
  * interest, swivels its head right round to look behind it and back, and blinks, before dropping
  * off the post and gliding away low over the lake. When moths are about the lantern beside it, it
- * spends spells following one round with its head. Any season, not in the rain. Pure in time.
+ * spends spells following one round with its head. A strike on the dock startles it off its post early.
+ * Any season, not in the rain. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
@@ -94,17 +95,23 @@ export function owlWatchLook(sit: number, time: number) {
   return (near ? null : owlLookAt(moth.x, moth.z)) ?? owlLookAt(OWL_LAMP.x, OWL_LAMP.z)!;
 }
 
+/** Which visit `time` falls in, counting from 0, and how far into it; a negative visit before the first. */
+export function owlVisit(time: number) {
+  const t = time - FIRST_SEC;
+  const index = Math.floor(t / VISIT_EVERY_SEC);
+  return { index, into: t - index * VISIT_EVERY_SEC };
+}
+
 /**
  * The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post;
- * `moths` when moths circle the lanterns (mothOrbit.ts).
+ * `moths` when moths circle the lanterns (mothOrbit.ts); `startledAt`, when the angler last struck.
  */
-export function owlAt(time: number, snow = false, still = false, moths = false): OwlPose {
+export function owlAt(time: number, snow = false, still = false, moths = false, startledAt = -Infinity): OwlPose {
   const post = { x: OWL_POST.x, y: OWL_POST.y + (snow ? SNOW_CAP : 0), z: OWL_POST.z };
   const sat: OwlPose = { ...post, here: true, yaw: PERCH_YAW, flying: 0, flap: 0, look: 0, bob: 0, blink: 0 };
   if (still) return sat;
-  const t = time - FIRST_SEC;
-  const into = ((t % VISIT_EVERY_SEC) + VISIT_EVERY_SEC) % VISIT_EVERY_SEC;
-  if (t < 0 || into >= VISIT_SEC) return { ...sat, here: false };
+  const { index, into } = owlVisit(time);
+  if (index < 0 || into >= VISIT_SEC) return { ...sat, here: false };
   const heading = (a: Point, b: Point) => Math.atan2(b.x - a.x, b.z - a.z);
   if (into < IN_SEC) {
     const p = smooth(into / IN_SEC);
@@ -113,6 +120,14 @@ export function owlAt(time: number, snow = false, still = false, moths = false):
     return { ...glide(FROM, post, p, 0.5), here: true, yaw: p > 0.94 ? PERCH_YAW : heading(FROM, post), flying: 1, flap, look: 0, bob: 0, blink: 0 };
   }
   const sit = into - IN_SEC;
+  // Startled while it sat, or while it glided in, as it lands: it beats off its post at once, and is gone until its next visit.
+  const strike = owlVisit(startledAt);
+  const startle = strike.index === index ? Math.max(0, strike.into - IN_SEC) : Infinity;
+  if (startle < SIT_SEC && sit >= startle) {
+    const away = sit - startle;
+    if (away >= OUT_SEC) return { ...sat, here: false };
+    return { ...glide(post, TO, smooth(away / OUT_SEC), 0.3), here: true, yaw: heading(post, TO), flying: 1, flap: 1, look: 0, bob: 0, blink: 0 };
+  }
   if (sit < SIT_SEC) {
     // Slow swivels right round and back, with still spells between; a run of bobs when something catches its eye.
     const swivel = Math.sin(sit * 0.45) * Math.sin(sit * 0.17 + 0.6);

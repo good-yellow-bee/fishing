@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { memo, useEffect, useMemo, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { owlAt } from "./littleOwl";
+import { owlAt, owlVisit } from "./littleOwl";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
+import type { ScenePhase } from "./types";
 
 const PLUMAGE = "#7b6650";
 const SPOT = "#e6dac4";
@@ -70,9 +71,17 @@ export function owlWingShape(side: number) {
   ]);
 }
 
-/** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off (littleOwl.ts). */
-export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
+/** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off, or beats off early when you strike from the dock (littleOwl.ts). */
+export const PostOwl = memo(function PostOwl({ snow, moths, phase, atDock }: { snow: boolean; moths: boolean; phase: ScenePhase; atDock: boolean }) {
   const still = useReducedMotion();
+  const clock = useThree((state) => state.clock);
+  const startledAt = useRef(-Infinity);
+  useEffect(() => {
+    if (phase !== "fight" || !atDock) return;
+    // The first strike of a visit sends it off; later ones in the same visit find it gone.
+    const time = clock.elapsedTime;
+    if (owlVisit(startledAt.current).index !== owlVisit(time).index) startledAt.current = time;
+  }, [phase, atDock, clock]);
   const bird = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -92,7 +101,7 @@ export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
   );
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
-    const pose = owlAt(time, snow, still, moths);
+    const pose = owlAt(time, snow, still, moths, startledAt.current);
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;
@@ -149,4 +158,4 @@ export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
       </group>
     </group>
   );
-}
+});

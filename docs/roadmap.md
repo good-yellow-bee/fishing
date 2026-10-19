@@ -1357,6 +1357,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC187~~ | ~~Little owl: on nights without rain a little owl glides in low and silent over the water to the dock's front-left post, beside the lantern, bobs its head, swivels it right round and blinks its big yellow eyes, then drops off and glides away (one draw, still on the post with reduced motion)~~ (#1417) | scene | S |
 | ~~SC188~~ | ~~Little owl watches the moths: on nights when moths circle the lanterns, the owl on the post spends spells following one round the lantern beside it with its head, bobbing as it first fixes on it, its head eased so it never twitches~~ (#1420) | scene | S |
 | ~~SC189~~ | ~~News card scene43 covers SC186 to SC188~~ (#1420) | scene | S |
+| ~~SC190~~ | ~~Little owl takes fright: strike a fish while the little owl sits on its post and it beats off at once over the lake, back on its next visit (moved into the fishing scene so it sees the strike)~~ (#1423) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
