@@ -1,4 +1,6 @@
-import { DOCK_STAND_Z, inLake, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
+import { DOCK_PLANKS, DOCK_STAND_Z, inLake, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
+import { MOTH_LAMPS } from "./mothOrbit";
+import { smoothstep } from "./visitClock";
 
 /** Bats hunt over the water from dusk into the night in summer, and on dry spring evenings too; rain keeps them roosting. */
 export function batsOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason): boolean {
@@ -46,12 +48,41 @@ function place(bat: (typeof BATS)[number], t: number) {
   };
 }
 
+/** Now and then the first bat breaks off to hawk the moths round the dock's right-hand lantern: this often, and for this long. */
+export const SWOOP_EVERY_SEC = 26;
+export const SWOOP_SEC = 3.2;
+const SWOOP_FIRST_SEC = 9;
+/** The lantern it hawks round, the lantern on the right of the dock's end, and how wide and high it circles there. */
+const corner = (lamp: { x: number; z: number }) => Math.hypot(lamp.x - DOCK_PLANKS.maxX, lamp.z - DOCK_PLANKS.minZ);
+export const SWOOP_LAMP = MOTH_LAMPS.reduce((a, b) => (corner(b) < corner(a) ? b : a));
+const SWOOP_RADIUS = 0.45;
+const SWOOP_Y = BAT_LOW + 0.15;
+
+/** How far the first bat has broken off its loop for the lantern at `t`, 0 to 1: in, a few tight turns round the light, and out. */
+export function swoopAt(t: number) {
+  const since = t - SWOOP_FIRST_SEC;
+  if (since < 0) return 0;
+  const into = since % SWOOP_EVERY_SEC;
+  if (into >= SWOOP_SEC) return 0;
+  return Math.min(smoothstep(into / 0.9), smoothstep((SWOOP_SEC - into) / 0.9));
+}
+
+function flight(index: number, bat: (typeof BATS)[number], t: number) {
+  const loop = place(bat, t);
+  const swoop = index === 0 ? swoopAt(t) : 0;
+  if (swoop === 0) return loop;
+  const turn = t * 4.5;
+  const light = { x: SWOOP_LAMP.x + Math.cos(turn) * SWOOP_RADIUS, y: SWOOP_Y + 0.1 * Math.sin(turn * 2), z: SWOOP_LAMP.z - 0.2 + Math.sin(turn) * SWOOP_RADIUS };
+  return { x: loop.x + (light.x - loop.x) * swoop, y: loop.y + (light.y - loop.y) * swoop, z: loop.z + (light.z - loop.z) * swoop };
+}
+
 /** Bat `index` at `time`, heading the way it flies. `still` holds it gliding with wings out, for reduced motion. */
 export function batAt(index: number, time: number, still = false): BatPose {
-  const bat = BATS[((index % BAT_COUNT) + BAT_COUNT) % BAT_COUNT]!;
+  const i = ((index % BAT_COUNT) + BAT_COUNT) % BAT_COUNT;
+  const bat = BATS[i]!;
   const t = still ? 0 : time;
-  const here = place(bat, t);
-  const ahead = place(bat, t + 0.05);
+  const here = flight(i, bat, t);
+  const ahead = flight(i, bat, t + 0.05);
   const flap = still ? 0 : Math.sin((time + bat.phase) * BAT_FLAP_HZ * Math.PI * 2);
   return { ...here, yaw: Math.atan2(ahead.x - here.x, ahead.z - here.z), flap };
 }
