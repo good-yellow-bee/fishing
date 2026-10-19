@@ -50,7 +50,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
@@ -59,6 +59,7 @@ import { Hud } from "../components/Hud";
 import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
+import { BaitShop } from "../components/BaitShop";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { SoundCaptions } from "../components/SoundCaptions";
 import { KeysCard } from "../components/KeysCard";
@@ -720,6 +721,20 @@ export function DockPage() {
     }
   };
 
+  const onBuyBait = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await buyGroundbait();
+      game.addHandful();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
   }
@@ -1208,6 +1223,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
+            <BaitShop points={me.profile.points} handfuls={game.handfuls} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <div className="shop-foot">

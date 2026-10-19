@@ -36,7 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, cleanRunBonus, PB_BONUS, personalBestBonus, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, PB_BONUS, personalBestBonus, validateGroundbaitBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -581,3 +581,11 @@ describe("inlet bank", () => {
   });
 });
 
+
+describe("validateGroundbaitBuy", () => {
+  it("sells a handful for its price, and not to an angler short of points", () => {
+    const profile = { userId: "u", displayName: "A", points: GROUNDBAIT_PRICE, lifetimePoints: 500, strength: 1, accuracy: 1, patience: 1 };
+    expect(validateGroundbaitBuy(profile)).toEqual({ ok: true, cost: GROUNDBAIT_PRICE });
+    expect(validateGroundbaitBuy({ ...profile, points: GROUNDBAIT_PRICE - 1 })).toMatchObject({ ok: false, error: "not enough points", status: 409 });
+  });
+});

@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
-import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
+import { buyGroundbait, getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
 import { sessionKey, startSession } from "../game/session";
@@ -21,6 +21,7 @@ vi.mock("../api", async (importOriginal) => ({
   getLodgeTracks: vi.fn(async () => []),
   recordCatch: vi.fn(),
   releaseCatch: vi.fn(),
+  buyGroundbait: vi.fn(),
 }));
 // The real game loop, with a landed fish slipped in so the page saves it without playing a fight.
 vi.mock("../game/useFishingGame", async (importOriginal) => {
@@ -545,6 +546,39 @@ describe("touch play", () => {
     const headings = [...shop.querySelectorAll("h2, h3")].map((h) => h.tagName);
     expect(headings[0]).toBe("H2");
     expect(headings.slice(1).every((tag) => tag === "H3")).toBe(true);
+  });
+});
+
+describe("the shack's bait tin", () => {
+  it("sells a handful of groundbait into the bag, up to what it carries, and keeps it for a reload", async () => {
+    vi.mocked(getMe).mockResolvedValue({ ...me, profile: { ...me.profile, points: 500 } });
+    vi.mocked(buyGroundbait).mockClear();
+    vi.mocked(buyGroundbait).mockResolvedValue({ profile: { ...me.profile, points: 440 } });
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const tin = page.querySelector(".bait-shop")!;
+    const buy = tin.querySelector("button")!;
+    expect(buy.textContent).toBe("A handful (60 pts)");
+    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 1 of 3.");
+    await act(async () => buy.click());
+    expect(buyGroundbait).toHaveBeenCalledTimes(1);
+    expect(tin.querySelector("p")!.textContent).toBe("Keeps the fish feeding at a bank for 5 casts. In your bag: 2 of 3.");
+    await act(async () => buy.click());
+    expect(tin.querySelector("p")!.textContent).toBe("Your bag is full: 3 handfuls.");
+    expect(buy.getAttribute("aria-disabled")).toBe("true");
+    await act(async () => buy.click());
+    expect(buyGroundbait).toHaveBeenCalledTimes(2);
+    expect(localStorage.getItem("stillwater.groundbait.v1")).toBe("3");
+  });
+
+  it("will not sell to an angler short of points", async () => {
+    vi.mocked(buyGroundbait).mockClear();
+    const page = await openDock("/?hour=day&sky=clear");
+    act(() => page.querySelector<HTMLButtonElement>(".walk-shop")!.click());
+    const buy = page.querySelector<HTMLButtonElement>(".bait-shop button")!;
+    expect(buy.getAttribute("aria-disabled")).toBe("true");
+    await act(async () => buy.click());
+    expect(buyGroundbait).not.toHaveBeenCalled();
   });
 });
 
