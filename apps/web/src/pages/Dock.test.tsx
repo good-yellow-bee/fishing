@@ -12,7 +12,7 @@ import { sessionKey, startSession } from "../game/session";
 import type { Outcome } from "../game/useFishingGame";
 
 const scene = vi.fn<(props: { hour: LakeHour; sky: Sky; species?: FishSpecies | null; weight?: number; tracks?: readonly LodgeTrack[]; released?: boolean }) => void>();
-const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null }));
+const landed = vi.hoisted(() => ({ outcome: null as Outcome | null, fishedHard: null as SpotId[] | null, waiting: null as { hint: string; more: string[] } | null }));
 
 vi.mock("../api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../api")>()),
@@ -31,7 +31,7 @@ vi.mock("../game/useFishingGame", async (importOriginal) => {
     ...real,
     useFishingGame: (...args: Parameters<typeof real.useFishingGame>) => {
       const game = real.useFishingGame(...args);
-      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}) };
+      return { ...game, ...(landed.outcome ? { outcome: landed.outcome } : {}), ...(landed.fishedHard ? { fishedHard: landed.fishedHard } : {}), ...(landed.waiting ? { phase: "waiting" as const, hint: landed.waiting.hint, moreReasons: landed.waiting.more } : {}) };
     },
   };
 });
@@ -81,6 +81,7 @@ afterEach(() => {
   container = null;
   landed.outcome = null;
   landed.fishedHard = null;
+  landed.waiting = null;
   browser.window.localStorage.clear();
   scene.mockClear();
   vi.mocked(fx.ambient.setConditions).mockClear();
@@ -157,6 +158,18 @@ describe("dock weather", () => {
     const summer = await openDock("/?hour=day&sky=clear&season=summer");
     const summerSigns = [...summer.querySelectorAll(".walk-signs button")].filter((button) => button.querySelector(".sign-now")).map((button) => button.textContent);
     expect(summerSigns).toEqual(["Dock •"]);
+  });
+
+  it("opens a cast's left-out reasons from its hint, and steps the focus off the button", async () => {
+    landed.waiting = { hint: "Fresh water.", more: ["Glassy water, made for a topwater.", "The chop hides the topwater."] };
+    const page = await openDock("/?hour=day&sky=clear");
+    const more = page.querySelector<HTMLButtonElement>(".hint .hint-more")!;
+    expect(more.textContent).toBe("2 more reasons");
+    more.focus();
+    await act(async () => more.click());
+    expect(page.querySelector(".hint")?.textContent).toBe("Fresh water. Glassy water, made for a topwater. The chop hides the topwater.");
+    expect(page.querySelector(".hint .hint-more")).toBeNull();
+    expect(document.activeElement).not.toBe(more);
   });
 
   it("dims the walk signs of the banks fished hard, and says so to a screen reader", async () => {
