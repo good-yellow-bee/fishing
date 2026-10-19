@@ -546,6 +546,15 @@ button.field-primary {
     box-sizing: border-box;
   }
 
+  /* A kind's water's count and sizes ("2 fish · 11.5 in · 0.4 lb") wrap with large text on a narrow phone, and the
+     lines' reaches overlapped: the wrapped line now drops 8 px, and one line keeps its height. */
+  .species-waters li > span.meta.sizes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    row-gap: 8px;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;

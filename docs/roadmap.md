@@ -1134,6 +1134,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA89~~ | ~~Small links off the lake on a touch screen: Sign in's "Make a profile" and Join's "Sign in", the catch log's and lodge board's way back to the dock, the trip recap's "Open the trip" and the field guide's "In your field log" were 15-19 px targets; each is now a 32 px band, plain inline links off touch (#1285)~~ | phone UX | S |
 | ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#1289)~~ | phone UX | S |
 | ~~PA91~~ | ~~A kind's first and newest fish on a touch screen ("First in the book Sat, Oct 3 · newest Sun, Oct 18") were 19 px links; each is now a 32 px band, plain inline links off touch (#1291)~~ | phone UX | S |
+| ~~PA92~~ | ~~A kind's waters on a touch screen with large text on a narrow phone: the count and sizes ("2 fish · 11.5 in · 0.4 lb") wrapped onto lines whose links' reaches overlapped, leaving "2 fish" 29 px; a wrapped line now drops 8 px, one line keeps its height (#1293)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1597,7 +1598,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT302~~ | ~~The kingfisher's fry: from dawn to dusk outside winter, rain and fog, a cast landing within reach of the kingfisher's dives under its snag off the dock lands over the fry it hunts, so the bite comes sooner (0.85) and 35% of bites are a perch, smallmouth, largemouth or pike hunting the same shoal (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1271) | gameplay | S |
 | ~~GT303~~ | ~~News card 2026-10-19-game19 covers GT301 and GT302: more grabs and the kingfisher's fry~~ (#1274) | ui | S |
 | ~~GT304~~ | ~~The sunken log: all year a cast landing within 0.7 m of the half-sunk log off the west bank (the turtle's log, in the Point's water and the Reeds' at its far end) lands where the fish hold in its shade, so the bite comes sooner (0.85) and 35% of bites are a largemouth, bluegill, crappie or pike holding under it (as that bank can land them; not a beginner's first fish); the cast says so~~ (#1281) | gameplay | S |
-| GT305 | Bugs on the surface: a popper or fly landing among the water striders off the dock's left side (calm days outside winter) or the whirligig raft off its right (calm spring and summer days), as the scene shows them, lands where the fish are looking up for bugs, so the bite comes sooner (0.85) and 35% of bites are a crappie, shiner, smallmouth or rainbow sipping from the film (as the dock can land them; not a beginner's first fish); the cast says so | gameplay | S |
+| ~~GT305~~ | ~~Bugs on the surface: a popper or fly landing among the water striders off the dock's left side (calm days outside winter) or the whirligig raft off its right (calm spring and summer days), as the scene shows them, lands where the fish are looking up for bugs, so the bite comes sooner (0.85) and 35% of bites are a crappie, shiner, smallmouth or rainbow sipping from the film (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1288) | gameplay | S |
+| GT306 | News card 2026-10-19-game20 covers GT304 and GT305: the sunken log and the surface bugs | ui | S |
 
 ## Risks / open questions for the owner
 
