@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { LANTERN_LIGHTS, LANTERNS, lanternFlicker, lanternLevel } from "./lanternLight";
+import { LANTERN_LIGHTS, LANTERNS, lanternFlicker, lanternLevel, lanternMurk } from "./lanternLight";
 
 describe("lanterns", () => {
   it("burn only from dusk, brightest at night", () => {
@@ -27,5 +27,12 @@ describe("lanterns", () => {
     expect(dock.z).toBeGreaterThanOrEqual(DOCK_PLANKS.minZ);
     expect(dock.z).toBeLessThanOrEqual(DOCK_PLANKS.maxZ);
     expect(LANTERNS.filter((lantern) => !lantern.casts).length).toBeGreaterThan(0);
+  });
+
+  it("spreads the glow in wet air: most in fog, some in rain, none on a clear night", () => {
+    expect(lanternMurk("clear")).toBe(0);
+    expect(lanternMurk("rain")).toBeGreaterThan(0);
+    expect(lanternMurk("fog")).toBeGreaterThan(lanternMurk("rain"));
+    expect(lanternMurk("fog")).toBeLessThanOrEqual(1);
   });
 });
