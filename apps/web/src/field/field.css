@@ -537,6 +537,15 @@ button.field-primary {
     box-sizing: border-box;
   }
 
+  /* A tally's rows (Bests' hours, moons, skies, winds, temperatures and lures; a kind's and a water's) name each row
+     with a link, a 20 px target 8 px from the next row's: each is now a 32 px band. */
+  .tally-label a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 6px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
@@ -551,6 +560,15 @@ button.field-primary {
   /* "Download these as a spreadsheet" sat 12 px between the sizes line and Copy a summary, both reaching into the gap. */
   p.fish-csv {
     margin: 16px 0;
+  }
+
+  /* A kind's first and newest fish ("First in the book Sat, Oct 3 · newest Sun, Oct 18") were 19 px links: each is
+     now a 32 px band. */
+  .species-span a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 6px;
+    box-sizing: border-box;
   }
 
   /* A page head's wrapped line of links (a fish's lure, water and time) ran 2 px between lines, the reaches crossing;

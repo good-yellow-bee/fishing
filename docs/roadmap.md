@@ -1132,6 +1132,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA87~~ | ~~Bests' days calendar on a touch screen: each month's heading linked its outings and fish as 12 px targets in 13 px type; each is now a 32 px band at least 32 px wide, plain inline links off touch (#1282)~~ | phone UX | S |
 | ~~PA88~~ | ~~A log form's note on a touch screen: the fish ("Open it") or outing a note before saving links to was a 15 px target in 13 px type; each is now a 32 px band, plain inline links off touch (#1284)~~ | phone UX | S |
 | ~~PA89~~ | ~~Small links off the lake on a touch screen: Sign in's "Make a profile" and Join's "Sign in", the catch log's and lodge board's way back to the dock, the trip recap's "Open the trip" and the field guide's "In your field log" were 15-19 px targets; each is now a 32 px band, plain inline links off touch (#1285)~~ | phone UX | S |
+| ~~PA90~~ | ~~A tally's rows on a touch screen: Bests' hours, moons, skies, winds, temperatures and lures, and a kind's and a water's, named each row with a 20 px link 8 px from the next; each is now a 32 px band, plain inline links off touch (#1289)~~ | phone UX | S |
+| ~~PA91~~ | ~~A kind's first and newest fish on a touch screen ("First in the book Sat, Oct 3 · newest Sun, Oct 18") were 19 px links; each is now a 32 px band, plain inline links off touch (#1291)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -2150,3 +2152,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR542~~ | ~~Round 88 fixes: Find an outing reads time phrases (w nocy, o świcie, at dawn), Back from an outing or water focuses its card, Recent's month headings count the angler's own outings and say the sample week's and game's apart, loose fish count in Trips' and a water's average and run, today's outing under way drops its plan tools and past alarm, a plan's note copies no blank day; Waters cards show a recent water temperature~~ (#1269) | field | S |
 | ~~BR543~~ | ~~Round 88 ideas: Copy the plan on a planned outing, Only my outings and outings since the last fish on Trips, a kinds column and outing names in the outings spreadsheet~~ (#1272) | field | S |
 | ~~BR544~~ | ~~Round 89 catch-page fixes: own fish counted as Home counts them, month headings, edits across time zones, year check, metric tenths, photo view focus~~ (#1283) | field | S |
+| ~~BR545~~ | ~~Round 89 catch-page ideas: Only my fish, the outing's last note in a tap, note as a search word, time after the outing's first fish~~ (#1286) | field | S |

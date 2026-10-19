@@ -387,6 +387,8 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
+  // "note" whole: the fish written up with a note, in either language; "-note" the ones left bare.
+  if (["note", "notes", "notatka", "notatki", normalize(t("Note"))].includes(want)) return catchesNewestFirst(book).filter((entry) => entry.note.trim() !== "");
   // "night", "w nocy", "rain" whole: just the fish then or in it, not a Nightcrawler at noon or a Rainbow trout.
   const band = wholeTimeWord(want, t);
   if (band) return catchesNewestFirst(book).filter((entry) => whenOf(entry)?.bite === band);
@@ -897,7 +899,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 && !nightDay ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “note”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
