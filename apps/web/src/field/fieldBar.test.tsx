@@ -76,5 +76,6 @@ describe("the phone's fixed tab bar", () => {
     document.getElementById("low")!.focus();
     expect(scrolled).toEqual(["low"]);
     await act(async () => root.unmount());
+    delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
   });
 });
