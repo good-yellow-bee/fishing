@@ -163,6 +163,10 @@ export function dateWords(text: string, now = new Date(), { ahead = false }: { a
   const dotted = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(text.trim());
   const slashed = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(text.trim());
   if (dotted) return dayIn(Number(dotted[2]) - 1, Number(dotted[1]), Number(dotted[3]));
+  // Day and month alone, as Polish writes a day ("31.12", "5.10."): the month in two digits, so a "1.5" in a lure's
+  // name or a note stays a word.
+  const dayMonth = /^(\d{1,2})\.(\d{2})\.?$/.exec(text.trim());
+  if (dayMonth) return dayIn(Number(dayMonth[2]) - 1, Number(dayMonth[1]), null);
   if (slashed) {
     // Month first, as English writes it, unless the first can't be a month.
     const [month, day] = Number(slashed[1]) > 12 ? [Number(slashed[2]), Number(slashed[1])] : [Number(slashed[1]), Number(slashed[2])];
