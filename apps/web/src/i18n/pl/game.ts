@@ -745,6 +745,7 @@ export const PL_GAME: PlBook = {
   "Breezy: a slack line drifts out faster": "Wietrznie: luźna linka szybciej odpływa",
   "Strong wind: a slack line drifts out much faster": "Silny wiatr: luźna linka odpływa dużo szybciej",
   "Boat: it swings to follow a run, so runs take less line": "Łódka: obraca się za rybą, więc odjazd zabiera mniej linki",
+  "Boat: the strong wind holds the hull back on its anchor line, so it follows a run less and runs take more line": "Łódka: silny wiatr odpycha kadłub na linie kotwicy, więc słabiej obraca się za rybą i odjazd zabiera więcej linki",
   "Point: turn every run; reeling while it drags over the rocks frays the line": "Cypel: zawracaj każdy odjazd; zwijanie, gdy ryba ciągnie żyłkę po kamieniach, przeciera ją",
   "Running out of line!": "Kończy się żyłka!",
   "Turn a run: hold ← A or → D the other way": "Zawróć odjazd: przytrzymaj ← A albo → D w drugą stronę",

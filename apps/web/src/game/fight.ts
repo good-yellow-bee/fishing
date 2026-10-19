@@ -260,6 +260,8 @@ export const WRAP_MS = 1200;
 export const WRAP_PULL = 0.5;
 /** Out on the boat it swings to follow a run, so a run takes out only this share of the line it would from the bank. */
 export const BOAT_RUN = 0.65;
+/** In a strong wind the hull lies pushed back on its anchor line and can't follow a run as well, so a run takes this share. */
+export const STRONG_WIND_BOAT_RUN = 0.85;
 /** In winter's cold water a hooked fish is sluggish: it tires this much faster on a run or against the reel. */
 export const WINTER_TIRE = 1.25;
 
@@ -513,7 +515,7 @@ export function makeFight(
   const driftWater = (0.012 + t * 0.015) * (water === "current" ? CURRENT_DRIFT * (flood ? FLOOD_DRIFT : 1) : 1);
   const driftCalm = driftWater * (wind ? WIND_SLACK[wind] : 1);
   // A run takes line by its own pull; the wind only shows on a resting line.
-  const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? BOAT_RUN : 1);
+  const driftSurge = driftWater * (species.challenge === "tension" ? 1.35 : 2) * (water === "boat" ? (wind === "strong" ? STRONG_WIND_BOAT_RUN : BOAT_RUN) : 1);
   const tensionUpCalm = Math.max(
     0.12,
     0.2 + t * 0.12 - (strength - 1) * 0.015 + (species.challenge === "tension" ? 0.08 : 0),

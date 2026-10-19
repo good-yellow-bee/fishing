@@ -244,6 +244,8 @@ describe("FightBar for screen readers", () => {
     expect(water("deep")).toMatch(/dive/);
     expect(water("rocks")).toMatch(/rocks/);
     expect(water("boat")).toMatch(/swings to follow a run/);
+    act(() => root!.render(<FightBar fight={{ species: perch, weight: 0.8, underpowered: false, water: "boat", windy: "strong" }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
+    expect([...container!.querySelectorAll(".fight-water")].map((line) => line.textContent)).toContain("Boat: the strong wind holds the hull back on its anchor line, so it follows a run less and runs take more line");
     // A dock perch can't be turned, so the pilings go unmentioned for it.
     expect(water("pilings")).toBeNull();
   });
