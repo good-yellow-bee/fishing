@@ -6,6 +6,7 @@ import { DROPOFF_PAD, OPEN_PAD, POINT_PAD, REEDS_PAD, SHOP_X, SHOP_Z, LAKE_CENTE
 import { ArticulatedFish } from "./ArticulatedFish";
 import { ToonModel } from "./ToonModel";
 import { StaticModels, type StaticModel } from "./StaticModels";
+import { LilyBed } from "./LilyBed";
 import { applyToon, disposeMaterials, releaseSharedMaterials, shareMaterials, toonRamp } from "./toon";
 import { bakeToon, lookOf, releaseBaked } from "./toonBake";
 import { SWAY_FOOT, batchPlaced, disposeBatch, placement } from "./scatterBatch";
@@ -293,8 +294,7 @@ import { Beaver } from "./Beaver";
 import { Butterflies } from "./Butterflies";
 import { butterfliesOut } from "./butterflyFlit";
 import { beaverOut } from "./beaverSwim";
-import { LILY_HEART, LILY_PETALS, easeLily, lilyBloom, lilyCup, lilyOpen, lilyPads, type Bloom } from "./lilyBloom";
-import { sharedLilyPetals } from "./lilyPetals";
+import { lilyOpen } from "./lilyBloom";
 import { LILY_PADS_AT } from "../lilyCover";
 import { FallingLeaves } from "./FallingLeaves";
 import { LeafRaft } from "./LeafRaft";
@@ -1426,71 +1426,6 @@ const CREEK_ROCK_SPECS: RockSpec[] = CREEK_ROCKS.map((rock) => ({ position: [roc
 /** Every rock round the lake, the drop-off's and the creek's: one shape, so all of them are one draw. */
 const ALL_ROCKS: RockSpec[] = [...LAKE_ROCKS, ...DROPOFF_ROCKS, ...CREEK_ROCK_SPECS];
 
-/** A lily flower (or, in spring, a bud) sitting on its pad, about the size of a fist. */
-function LilyFlower({ bloom, color, open }: { bloom: Exclude<Bloom, null>; color: string; open: number }) {
-  const cup = useRef<THREE.Group>(null);
-  const still = useReducedMotion();
-  const shown = useRef(open);
-  useFrame((_, delta) => {
-    const flower = cup.current;
-    if (!flower) return;
-    // The flower eases open and shut as the hour and the weather turn.
-    shown.current = still ? open : easeLily(shown.current, open, delta);
-    const shape = lilyCup(shown.current);
-    flower.scale.set(shape.spread, shape.rise, shape.spread);
-  });
-  if (bloom === "bud") {
-    return (
-      <mesh position={[0, 0.07, 0]} scale={[0.045, 0.08, 0.045]}>
-        <sphereGeometry args={[1, 8, 6]} />
-        <meshToonMaterial color="#9fb86a" gradientMap={toonRamp()} />
-      </mesh>
-    );
-  }
-  return (
-    <group position={[0, 0.03, 0]}>
-      <group ref={cup}>
-        <mesh geometry={sharedLilyPetals()}>
-          <meshToonMaterial color={color} gradientMap={toonRamp()} />
-        </mesh>
-      </group>
-      <mesh position={[0, 0.04, 0]} scale={[0.03, 0.022, 0.03]}>
-        <sphereGeometry args={[1, 8, 6]} />
-        <meshToonMaterial color={LILY_HEART} gradientMap={toonRamp()} />
-      </mesh>
-    </group>
-  );
-}
-
-function FloatingLily({ url, position, scale, index, open }: Lily & { index: number; open: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const season = useContext(SeasonContext);
-  const bloom = lilyBloom(season);
-  const pads = lilyPads(season);
-  useFrame((state) => {
-    const lily = ref.current;
-    if (!lily) return;
-    const t = state.clock.elapsedTime;
-    const y = waterHeight(position[0], position[2], t);
-    const sample = 0.5;
-    lily.position.set(position[0], position[1] + y, position[2]);
-    lily.rotation.x = THREE.MathUtils.clamp((waterHeight(position[0], position[2] + sample, t) - y) * 1.3, -0.28, 0.28);
-    lily.rotation.z = THREE.MathUtils.clamp((y - waterHeight(position[0] + sample, position[2], t)) * 1.3, -0.28, 0.28);
-  });
-  if (!pads) return null;
-  return (
-    <group ref={ref} position={position}>
-      <ToonModel url={url} scale={scale * pads.grow} shadows={false} plant={{ season, kind: "grass", variant: 0.5 }} />
-      {bloom && (
-        // Drawn a little large so the flowers read from the bank.
-        <group position={[0.12 * scale, 0, 0.08 * scale]} scale={scale * 1.8}>
-          <LilyFlower bloom={bloom} color={LILY_PETALS[index % LILY_PETALS.length]!} open={open} />
-        </group>
-      )}
-    </group>
-  );
-}
-
 function Boat({ url, position, heading, delay, scale, wind, fill }: BoatProps & { wind: { x: number; z: number }; fill: FillKind | null }) {
   const ref = useRef<THREE.Group>(null);
   const still = useReducedMotion();
@@ -2415,9 +2350,7 @@ export const LakeWorld = memo(function LakeWorld({
       <AnchorBuoy />
       <Reeds count={14} origin={[-13.2, 0.03, 1.8]} wind={wind} />
       <Reeds count={6} origin={[11.4, 0.03, -9.7]} wind={wind} />
-      {LILIES.map((lily, i) => (
-        <FloatingLily key={`${lily.url}-${i}`} {...lily} index={i} open={lilyOpen(hour, sky)} />
-      ))}
+      <LilyBed lilies={LILIES} season={season} open={lilyOpen(hour, sky)} />
       {frogsOnPads(hour, season) && FROG_PADS.map((_, i) => <PadFrog key={i} index={i} />)}
       {nestsOut(season) && <SunfishNests />}
       {floesOut(season) && <IceFloes wind={wind} />}
