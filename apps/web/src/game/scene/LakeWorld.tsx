@@ -201,6 +201,11 @@ import { joggerOut } from "./jogRun";
 import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
 import { sleddersOut } from "./sledRun";
+import { HayBales } from "./HayBales";
+import { Farmstead } from "./Farmstead";
+import { Cows } from "./Cows";
+import { cowsOut } from "./cowGraze";
+import { balesOut } from "./hayField";
 import { Sledders } from "./Sledders";
 import { spindriftOut } from "./blowingSnow";
 import { Spindrift } from "./Spindrift";
@@ -1211,8 +1216,8 @@ function LakeSurface({
   const pollen = pollenAmount(season, sky);
   const duckweed = duckweedAmount(season);
   const mirrorHills = useMemo<MirrorHill[]>(
-    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season) })),
-    [hour, season],
+    () => HILLS.map((hill) => ({ position: hill.position, scale: hill.scale, color: hillColor(hill, hour, season, sky) })),
+    [hour, season, sky],
   );
   const scroll = surfaceScroll(wind);
   const clouds = cloudScroll(wind);
@@ -2256,8 +2261,11 @@ export const LakeWorld = memo(function LakeWorld({
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
       {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season)} />
+        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
       ))}
+      {balesOut(season) && <HayBales season={season} hour={hour} />}
+      <Farmstead season={season} hour={hour} wind={wind} />
+      {cowsOut(hour, sky, season) && <Cows />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />

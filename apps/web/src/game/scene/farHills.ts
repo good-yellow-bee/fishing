@@ -1,4 +1,4 @@
-import type { LakeHour, LakeSeason } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
 import { seasonGroundColor } from "./seasonLook";
 
 /** The three hills behind the far shore: centre and radii of each icosphere, and their day and night greens. */
@@ -20,9 +20,23 @@ export function hillFront(x: number, y: number): number | null {
 
 /** Snow lies deep and unbroken on the open hills in winter, whiter than the trodden shore; blue-grey under the night sky. */
 const HILL_SNOW = { day: "#bcc8d0", night: "#4f5c68" };
+/**
+ * Alpenglow: under an open sky the low sun turns the snowy hills rose at dawn and a deeper,
+ * duskier pink at sunset (the evening light warms it further); under cloud they only dim to a cold grey.
+ */
+const HILL_GLOW = { dawn: "#e0b4bf", dusk: "#d4aab6", dull: "#98a4ae" };
 
-/** A hill's colour for the hour and season. */
-export function hillColor(hill: (typeof FAR_HILLS)[number], hour: LakeHour, season: LakeSeason) {
-  if (season === "winter") return hour === "night" ? HILL_SNOW.night : HILL_SNOW.day;
+/** Whether the sky is open enough at dawn or dusk for the low sun to light the snow. */
+export function alpenglowOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
+  return season === "winter" && (hour === "dawn" || hour === "dusk") && (sky === undefined || sky === "clear" || sky === "partly-cloudy");
+}
+
+/** A hill's colour for the hour, season and sky. */
+export function hillColor(hill: (typeof FAR_HILLS)[number], hour: LakeHour, season: LakeSeason, sky?: Sky) {
+  if (season === "winter") {
+    if (hour === "night") return HILL_SNOW.night;
+    if (hour === "day") return HILL_SNOW.day;
+    return alpenglowOut(hour, sky, season) ? HILL_GLOW[hour] : HILL_GLOW.dull;
+  }
   return seasonGroundColor(hour === "night" ? hill.night : hill.day, season);
 }

@@ -6,6 +6,7 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "In spring and summer, hop a jig over the crayfish creeping about the dock's pilings: the smallmouth and catfish that hunt them bite sooner, and many a bite is one of them. And on spring days cast among the tadpoles milling in the warm shallows, where the perch, bluegill and bass come to gorge on them.",
+  "In spring a few of the shore trees flower white or pink. On clear winter mornings and evenings the snowy hills behind the far bank glow pink in the low sun. From summer into the fall two hay fields on those hills lie mown in pale stripes, with round bales dotted across them.",
   "On grey, overcast days a gap now and then opens in the cloud, and a patch of sunlight slides across the lake with faint beams slanting down to it. On blowy winter days the wind lifts the snow off the hills behind the far bank and streams it along them in long white wisps.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.",
   "From spring through summer, cast onto the sunfish nests either side of the dock: perch and smallmouth come to raid the eggs, so the bites come sooner and many are one of them. In summer and fall a popper over a duckweed mat draws the bass lurking in its shade, but any other lure comes back bearded with weed and the fish turn from it.",
@@ -25,7 +26,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "Past outings' bags opened on Gear stay open when you come Back from an outing, and \"Fold all\" closes them in one tap.",
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.",
   "On dry summer days two people toss a flying disc back and forth on the far bank, and in winter two children have a snowball fight there, ducking the throws. On rainy days an angler sits it out on the far bank under a big green umbrella tipped into the wind, and in the fall a grown-up rakes the leaves back onto the pile the child keeps jumping into.",
-  "The moon now matters by day too: for an hour either side of it passing overhead or underfoot the fish come on the feed at every bank, and the shack's chalk board says when. And mind the low sun at your back: at dawn at the Drop-off and at dusk at the Inlet your long shadow falls across the water and the fish shy from it.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
