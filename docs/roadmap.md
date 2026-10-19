@@ -1399,6 +1399,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC218~~ | ~~Fewer draws: the bank stands' and walks' planks (four colour batches) and the pier's planks (two) are each one instanced mesh with per-plank colours, the pier's still soaking in rain and paling under frost and snow; about 8 fewer draws in every scene, no visible change~~ (#1492) | scene | S |
 | ~~SC219~~ | ~~Fewer draws: the three far hills are one instanced mesh, each hill keeping its colour for the hour, season and sky; 2 to 4 fewer draws, no visible change~~ (#1496) | scene | S |
 | ~~SC220~~ | ~~Fewer draws: each swimming lake fish (body, eyes, fins, marks, whiskers, middle, tail, about nine draws) is one skinned mesh of painted parts bending at the middle and the tail as before; about 39 fewer draws in every scene; the same look and swim, eyes now toon-shaded~~ (#1499) | scene | S |
+| SC221 | Fewer draws: the washing line and its washing, the coots and the squirrels each bake into one skinned mesh (the dog's way), so each is one draw while it moves as before; up to 6 fewer draws while they are out, no visible change | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
