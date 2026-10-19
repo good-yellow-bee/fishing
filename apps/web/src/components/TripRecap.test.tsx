@@ -47,3 +47,22 @@ describe("the trip recap by keyboard", () => {
     expect(render(true)).not.toHaveBeenCalled();
   });
 });
+
+describe("the trip recap's stats", () => {
+  it("hold only terms and answers, with the heaviest fish's kind as a second answer", () => {
+    host = document.createElement("div");
+    document.body.append(host);
+    root = createRoot(host);
+    const fish = { id: "c1", speciesId: "perch", speciesName: "Perch", weight: 0.8, spot: "dock" as const, hour: "day" as const, first: false, clean: true };
+    act(() =>
+      root!.render(
+        <MemoryRouter>
+          <TripRecap draft={{ id: "s1", date: "2026-10-18", sky: "clear", fish: [fish] }} leftover={false} filed={null} onFile={() => {}} onClose={() => {}} />
+        </MemoryRouter>,
+      ),
+    );
+    const groups = [...host.querySelectorAll(".trip-recap-stats > div")];
+    expect(groups.flatMap((group) => [...group.children].map((child) => child.tagName)).every((tag) => tag === "DT" || tag === "DD")).toBe(true);
+    expect(host.querySelector(".trip-recap-of")?.textContent).toBe("Perch");
+  });
+});

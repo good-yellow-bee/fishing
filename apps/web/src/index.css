@@ -3219,8 +3219,11 @@ html[data-reduce-motion="1"] .hour-veil {
   font-size: 22px;
 }
 
-.trip-recap-stats small {
+/* The heaviest fish's kind, a second answer under its weight: a <small> there broke the list for screen readers. */
+.trip-recap-stats dd.trip-recap-of {
+  margin: 0;
   color: #aa9d86;
+  font-family: inherit;
   font-size: 11px;
 }
 
