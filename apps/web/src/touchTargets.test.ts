@@ -18,6 +18,19 @@ describe("touch targets", () => {
   });
 });
 
+describe("the settings and the shack on a touch screen", () => {
+  it("stands each settings switch and volume slider 32 px tall", () => {
+    const css = read("index.css");
+    expect(/\n\.settings-check \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 32px;");
+    expect(/\n\.settings-volume input \{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 32px;");
+  });
+
+  it("stands the shack's skill buttons 32 px tall on touch screens", () => {
+    const block = /@media \(pointer: coarse\) \{\n  \.upgrade-row button \{([^}]*)\}/.exec(read("index.css"))?.[1];
+    expect(block).toContain("min-height: 32px;");
+  });
+});
+
 describe("small links off the lake on a touch screen", () => {
   it("makes Sign in's and Join's, the logs' way back, the recap's and the field guide's links 32 px bands", () => {
     const css = read("index.css");
