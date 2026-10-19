@@ -1381,8 +1381,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC206~~ | ~~Lanterns in the murk: at night in fog and rain the dock and bank lanterns' halos swell and brighten, the light scattering in the wet air~~ (#1462) | scene | S |
 | ~~SC207~~ | ~~News card scene48 covers SC205 and SC206~~ (#1462) | scene | S |
 | ~~SC208~~ | ~~Mallard takes fright: strike a fish from the dock while the mallard is on the boards and it bursts up off them and away over the lake, back on a later visit; struck at while it swims in, it goes as soon as it lands (moved into the fishing scene)~~ (#1465) | scene | S |
-| SC209 | Fireflies by the dock: on summer nights a few fireflies drift and blink over the water just left of the dock, where you see them close, not only over the far reed beds | scene | S |
-| SC210 | News card scene49 covers SC208 and SC209 | scene | S |
+| ~~SC209~~ | ~~Fireflies by the dock: on summer nights a few fireflies drift and blink over the water just left of the dock, where you see them close, not only over the far reed beds~~ (#1468) | scene | S |
+| ~~SC210~~ | ~~News card scene49 covers SC208 and SC209~~ (#1468) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
