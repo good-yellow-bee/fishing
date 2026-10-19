@@ -4,7 +4,7 @@ import { authClient } from "./auth-client";
 import { useT } from "./i18n";
 import { useRootSettings } from "./game/settings";
 import { warmLake } from "./warmLake";
-import { MapOffline } from "./field/map/MapOffline";
+import { MapLoading, MapOffline } from "./field/map/MapOffline";
 import { BestsPage } from "./field/bests/BestsPage";
 import { SpeciesPage } from "./field/SpeciesPage";
 import { NotFoundPage } from "./field/NotFoundPage";
@@ -99,7 +99,7 @@ export function App() {
         <Route
           path="/map"
           element={
-            <Suspense fallback={null}>
+            <Suspense fallback={<MapLoading />}>
               <SpotMapPage />
             </Suspense>
           }
