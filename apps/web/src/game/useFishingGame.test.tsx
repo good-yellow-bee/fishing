@@ -676,6 +676,30 @@ describe("useFishingGame lost fight", () => {
     expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("true");
   });
 
+  it("keeps a fish that dropped the bait about for the next cast, and names it when it takes again", () => {
+    const surface = mount();
+    const crappie = FISH.find((fish) => fish.id === "crappie")!;
+    vi.mocked(pickBite).mockReturnValueOnce(crappie);
+    cast(surface);
+    for (let waited = 0; phase() !== "result:miss" && waited < 25_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+    expect(phase()).toBe("result:miss");
+    expect(hint()).toMatch(/It wasn't hooked, so it may take again: cast straight back here\.$/);
+    const missed = vi.mocked(castForGotAway).mock.calls.length;
+    act(() => (container!.querySelector("button:not([data-thumb-strike]):not([data-steer])") as HTMLButtonElement).click());
+    vi.mocked(castForGotAway).mockImplementationOnce((waiting) => ({ again: waiting, next: null }));
+    step.mockReturnValueOnce("fighting");
+    castAndFight(surface, 2);
+    const waiting = vi.mocked(castForGotAway).mock.calls[missed]?.[0];
+    expect(waiting).toMatchObject({ spot: "dock", species: { id: "crappie" }, casts: 1, dropped: true });
+    expect(container!.querySelector("[data-testid=fight]")?.textContent).toBe(`crappie|${waiting!.weight}`);
+    expect(hint()).toMatch(/^It's the one that dropped your bait! /);
+    step.mockReturnValueOnce("landed");
+    now += 16;
+    act(() => frames.at(-1)!(now));
+    // It didn't get away from a fight, so the landed card doesn't call it that.
+    expect(container!.querySelector("[data-testid=got-away]")?.textContent).toBe("false");
+  });
+
   it("calls a trophy-sized fish heavy on the hook, with a thud on the rod", () => {
     const surface = mount();
     const pike = FISH.find((fish) => fish.id === "pike")!;
@@ -1944,7 +1968,7 @@ describe("level unlock integration", () => {
     expect(hint()).toBe("The float lifts and lies flat — strike!");
     for (let waited = 0; phase() !== "result:miss" && waited < 5_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(phase()).toBe("result:miss");
-    expect(hint()).toBe("Strike the moment the float lifts.");
+    expect(hint()).toBe("Strike the moment the float lifts. It wasn't hooked, so it may take again: cast straight back here.");
   });
 
   it("calls a walleye's light take and gives it longer before it drops the bait", () => {

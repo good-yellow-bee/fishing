@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FISH } from "@stillwater/shared";
-import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, gotAwayAfterLoss } from "./gotAway";
+import { AGAIN_CASTS, AGAIN_ODDS, BIG_LURE_AGAIN_ODDS, castForGotAway, DROPPED_ODDS, gotAwayAfterDrop, gotAwayAfterLoss } from "./gotAway";
 
 const pike = FISH.find((fish) => fish.id === "pike")!;
 const perch = FISH.find((fish) => fish.id === "perch")!;
@@ -33,5 +33,15 @@ describe("the one that got away", () => {
     }
     expect(castForGotAway(lost, "reeds", 0.99)).toEqual({ again: null, next: null });
     expect(castForGotAway(null, "reeds", 0)).toEqual({ again: null, next: null });
+  });
+
+  it("keeps a fish that dropped the bait, common ones too, for the next cast only", () => {
+    const dropped = gotAwayAfterDrop(perch, 0.4, "dock");
+    expect(dropped).toEqual({ spot: "dock", species: perch, weight: 0.4, casts: 1, dropped: true });
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS - 0.01)).toEqual({ again: dropped, next: null });
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS)).toEqual({ again: null, next: null });
+    // A big lure doesn't tempt back a fish that only let go of the bait.
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, true)).toEqual({ again: null, next: null });
+    expect(castForGotAway(dropped, "reeds", 0)).toEqual({ again: null, next: null });
   });
 });
