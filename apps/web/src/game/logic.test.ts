@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CAST_RANGE, castRangeMultiplier, FISH, LAKE_CENTER_Z, SPOT_IDS, skyAt, skyTurnForDay, weatherForDay } from "@stillwater/shared";
 import { BANK_STANDS } from "./hotspot";
-import { isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
+import { COLOUR_WAIT, colourSuits, colourWaitMul, lureColour, isLongCast, LONG_CAST_SHARE, LONG_CAST_SOLID, MIDGE_RISERS, MIDGE_RISER_SHARE, midgeRiser, LIGHT_HUNTERS, LIGHT_HUNTER_SHARE, lightHunter, BUG_SIPPERS, BUG_SIPPER_SHARE, bugSipper, LOG_HOLDERS, LOG_HOLDER_SHARE, logHolder, FRY_HUNTERS, FRY_HUNTER_SHARE, fryHunter, castIntoSchool, castIntoSpooked, castOverGroundbait, castOnFreshWater, FRESH_WAIT, castUnderPressure, castNewLure, NEW_LURE_RELIEF, fishedHardBanks, PRESSURE_CASTS, PRESSURE_REST, GROUNDBAIT_CASTS, GROUNDBAIT_FEEDERS, GROUNDBAIT_FEEDER_SHARE, groundbaitFeeder, GROUNDBAIT_WAIT, canBaitShiner, LIVE_SHINER_SHARE, LIVELY_SHINER_SHARE, SHINER_HUNTERS, shinerHunter, BED_RAIDERS, BED_RAIDER_SHARE, bedRaider, CRAYFISH_HUNTERS, CRAYFISH_HUNTER_SHARE, crayfishHunter, TADPOLE_EATERS, TADPOLE_EATER_SHARE, tadpoleEater, CHOP_WAIT, chopWaitMul, STORM_WAIT, stormWaitMul, PRE_RAIN_WAIT, preRainWaitMul, TWIST_CASTS, TWIST_TANGLE, twistAfterCast, isTwisted, castTangles, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, isWashedOut, FOG_LIFT_WAIT, fogLiftWaitMul, WATER_SWING_F, WARMING_WAIT, COOLING_WAIT, waterSwing, waterSwingWaitMul, waterTempFor, POST_FRONT_WAIT, POST_FRONT_UNTIL, postFrontWaitMul, rainedYesterday, TURNOVER_DAYS, TURNOVER_SPAN, TURNOVER_WAIT, TURNOVER_INLET_WAIT, isTurnover, turnoverStart, turnoverWaitMul, CRANK_ROCK_WAIT, crankRockWaitMul, DULL_SOLID, isSkipCast, SKIP_CAST_SHARE, TOPWATER_NIGHT_WAIT, topwaterNightWaitMul, stackWaitMs, WAIT_FLOOR_MS, SPINNER_THUMP_WAIT, spinnerThumpWaitMul, FLY_HATCH_WAIT, flyHatchWaitMul, WORM_NIGHT_WAIT, wormNightWaitMul, JIG_SOLID, SPOOK_WAIT, hookWindowMs, isLightHook, isPerfectCast, LIGHT_HOOK_SHARE, isSolidStrike, SCHOOL_CASTS, SCHOOL_SAME, SCHOOL_WAIT, SCHOOLERS, schoolAfterLanding, GROUNDBAIT_SCHOOL_CASTS, TWILIGHT_SCHOOL_CASTS, WINTER_SCHOOL_CASTS, WINTER_SCHOOLERS, isWinterSchool, solidStrikeMs, WIND_STRIKE, perfectCastBand, PERFECT_CAST_WAIT, sweetBand, FLY_DRIFT_WAIT, flyDriftWaitMul, JIG_LEDGE_WAIT, jigWaitMul, JIG_WINTER_WAIT, jigWinterWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, RAIN_INLET_WAIT, rainInletWaitMul, FALL_BIG_LURE_WAIT, fallBigLureWaitMul, SUMMER_DEEP_WAIT, summerDeepWaitMul, DOCK_SHADE_WAIT, dockShadeWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WIND_POINT_WAIT, windPointWaitMul, WINDWARD_WAIT, WINDWARD_BANKS, windwardWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, DARK_NIGHT_WAIT, NEW_MOON, darkNightWaitMul, WORM_PILING_WAIT, wormPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, FLASH_SUN_WAIT, FULL_MOON_FLASH, flashWaitMul, TOPWATER_WAIT, topwaterWaitMul, waitMs } from "./logic";
 
 describe("hook window", () => {
   it("leaves a starter over a second to react, and widens with Accuracy", () => {
@@ -915,5 +915,38 @@ describe("fresh water", () => {
     expect(castOnFreshWater(first.next, "dock").fresh).toBe(false);
     expect(castOnFreshWater(first.next, "reeds")).toEqual({ fresh: true, next: new Set(["dock", "reeds"]) });
     expect(FRESH_WAIT).toBeLessThan(1);
+  });
+});
+
+describe("lure colour", () => {
+  it("reads the first colour a label names, in English or Polish, and none when it names none", () => {
+    expect(lureColour("Chartreuse spinnerbait")).toBe("bright");
+    expect(lureColour("Firetiger crank")).toBe("bright");
+    expect(lureColour("Green pumpkin tubes")).toBe("natural");
+    expect(lureColour("Crayfish crank")).toBe("natural");
+    expect(lureColour("Silver spoon")).toBe("natural");
+    expect(lureColour("Black and chartreuse jig")).toBe("dark");
+    expect(lureColour("Chartreuse and black jig")).toBe("bright");
+    expect(lureColour("Czarny twister")).toBe("dark");
+    expect(lureColour("Żółta obrotówka")).toBe("bright");
+    expect(lureColour("Srebrna błystka")).toBe("natural");
+    expect(lureColour("Nightcrawlers")).toBeNull();
+    expect(lureColour("#5 Mepps")).toBeNull();
+    expect(lureColour(undefined)).toBeNull();
+  });
+
+  it("suits bright to murk and the low light, natural to clear daylight, and dark to the night", () => {
+    expect(colourSuits("Chartreuse jig", "rain", "day")).toBe("bright");
+    expect(colourSuits("Chartreuse jig", "overcast", "day")).toBe("bright");
+    expect(colourSuits("Chartreuse jig", "clear", "dawn")).toBe("bright");
+    expect(colourSuits("Chartreuse jig", "clear", "day")).toBeNull();
+    expect(colourSuits("Chartreuse jig", "rain", "night")).toBeNull();
+    expect(colourSuits("Green pumpkin tube", "clear", "day")).toBe("natural");
+    expect(colourSuits("Green pumpkin tube", "partly-cloudy", "day")).toBeNull();
+    expect(colourSuits("Green pumpkin tube", "clear", "dusk")).toBeNull();
+    expect(colourSuits("Black jig", "clear", "night")).toBe("dark");
+    expect(colourSuits("Black jig", "clear", "day")).toBeNull();
+    expect(colourWaitMul("Black jig", "fog", "night")).toBe(COLOUR_WAIT);
+    expect(colourWaitMul("#5 Mepps", "rain", "day")).toBe(1);
   });
 });

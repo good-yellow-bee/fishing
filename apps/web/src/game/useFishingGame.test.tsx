@@ -2132,6 +2132,26 @@ describe("level unlock integration", () => {
     expect((hint() ?? "").startsWith("The sun catches the lure's flash. ")).toBe(flash);
   });
 
+  it.each([
+    ["Chartreuse jig", "rain", "day", "The bright lure shows up in the murk. "],
+    ["Chartreuse jig", "clear", "dawn", "The bright lure shows up in the low light. "],
+    ["Green pumpkin tube", "clear", "day", "In the clear daylight the natural colours look like the real thing. "],
+    ["Black jig", "clear", "night", "The dark lure stands out against the night sky above it. "],
+    ["Chartreuse jig", "clear", "day", null],
+    ["Black jig", "rain", "day", null],
+  ] as const)("says a %s suits the light under a %s sky by %s", (lure, sky, hour, said) => {
+    const surface = mount(DOCK_BUBBLES.at, profile, hour, false, lure, undefined, sky);
+    cast(surface);
+    // The wait hint shows as the lure lands, before a quick night nibble can ring the bell.
+    let told = "";
+    for (let waited = 0; waited < 1400 && !told; waited += 50) {
+      act(() => vi.advanceTimersByTime(50));
+      if (phase()?.startsWith("waiting")) told = hint() ?? "";
+    }
+    if (said) expect(told).toContain(said);
+    else expect(told).not.toMatch(/bright lure|natural colours|dark lure/);
+  });
+
   it("says nothing of the wind for a lure that sinks", () => {
     const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Nightcrawler", "strong");
     cast(surface);
