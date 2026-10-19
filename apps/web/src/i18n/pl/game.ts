@@ -28,6 +28,8 @@ export const PL_GAME: PlBook = {
   "Vibration (a phone buzzes and a controller rumbles on bites, runs and the catch)": "Wibracje (telefon wibruje, a kontroler drży przy braniach, odjazdach i złowieniu)",
   "Terns call over the water": "Rybitwy krzyczą nad wodą",
   "Grebes patter and call across the water": "Perkozy pluskają i nawołują, pędząc po wodzie",
+  "A deer snorts on the far bank": "Sarna parska na drugim brzegu",
+  "Ducklings peep": "Kaczątka piszczą",
   "On spring and summer days, a pair of swans glides the far water, now and then tipping under to feed.": "Wiosną i latem za dnia para łabędzi sunie po dalekiej wodzie, co jakiś czas zanurzając głowę, by się pożywić.",
   "Cast too close and the nearer swan raises its wings and hisses at you.": "Rzuć za blisko, a bliższy łabędź uniesie skrzydła i syknie na ciebie.",
   "A bird plunges into the lake": "Ptak wpada do jeziora",
