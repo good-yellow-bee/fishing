@@ -3581,6 +3581,32 @@ html[data-contrast="high"] .sound-captions li {
     display: none;
   }
 
+  /* With large or larger text a short sideways screen has no room for the bank chip, the lure and the walk stick down the
+     left edge: at 300 px tall the stick covered the lure's lower 26-55 px. The lure goes up into the chip's row without
+     its heading (the list keeps its name for a screen reader), and the chip sits to its right, short of the shore signs;
+     the first-cast coach takes that spot while it shows. */
+  html[data-text-size] .lure-choice {
+    top: calc(var(--hud-bottom, 52px) + 6px);
+  }
+
+  html[data-text-size] .lure-choice > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  html[data-text-size] .stance-chip {
+    left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));
+    max-width: calc((100vw - var(--signs-room, 0px)) / var(--text-zoom, 1) - 24px - min(220px, calc(30vw / var(--text-zoom, 1))));
+  }
+
+  html[data-text-size] .scene-wrap[data-walkthrough="1"] .stance-chip {
+    display: none;
+  }
+
   /* Down the right edge, stopping above the power meter; more signs than fit (larger text, the inlet, the boat) start a second column. */
   .walk-signs {
     top: calc(var(--hud-bottom, 52px) + 6px);
