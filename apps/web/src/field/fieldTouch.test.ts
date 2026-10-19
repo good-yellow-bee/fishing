@@ -88,6 +88,13 @@ describe("the field log on a touch screen", () => {
     expect(/\n  \.photo-missing span a::after \{([^}]*)\}/.exec(touch)?.[1]).toContain("content: none;");
   });
 
+  it("drops a water's Copy the place 16 px below its coordinates when the two wrap, on touch only", () => {
+    const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
+    const block = /\n  \.map-index \.map-place \{([^}]*)\}/.exec(touch)?.[1];
+    expect(block).toContain("flex-wrap: wrap;");
+    expect(block).toContain("row-gap: 16px;");
+  });
+
   it("makes a water's Next outing in the Map's list a 32 px band with room under it, on touch only", () => {
     const touch = mapCss.slice(mapCss.indexOf("@media (pointer: coarse) {"));
     const block = /\n  \.map-index a\.map-next \{([^}]*)\}/.exec(touch)?.[1];
