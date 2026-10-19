@@ -28,51 +28,52 @@ function makeWing() {
   return geometry;
 }
 
-function Bat({ index, wing, material }: { index: number; wing: THREE.BufferGeometry; material: THREE.Material }) {
-  const ref = useRef<THREE.Group>(null);
-  const left = useRef<THREE.Mesh>(null);
-  const right = useRef<THREE.Mesh>(null);
-  const still = useReducedMotion();
-  useFrame((state) => {
-    const group = ref.current;
-    if (!group) return;
-    // Lite effects keep the first half of the colony.
-    group.visible = settings.particles !== "lite" || index < BAT_COUNT / 2;
-    if (!group.visible) return;
-    const pose = batAt(index, state.clock.elapsedTime, still);
-    group.position.set(pose.x, pose.y, pose.z);
-    group.rotation.y = pose.yaw;
-    const swing = pose.flap * FLAP_SWING;
-    if (right.current) right.current.rotation.z = swing;
-    if (left.current) left.current.rotation.z = -swing;
-  });
-  return (
-    <group ref={ref}>
-      <mesh material={material} scale={[0.05, 0.05, 0.09]}>
-        <sphereGeometry args={[1, 8, 6]} />
-      </mesh>
-      <mesh ref={right} geometry={wing} material={material} />
-      <mesh ref={left} geometry={wing} material={material} scale={[-1, 1, 1]} />
-    </group>
-  );
-}
-
-/** A few bats flickering low over the water in front of the dock; motion lives in batFlight.ts. */
+/** A few bats flickering low over the water in front of the dock; motion lives in batFlight.ts. Bodies and wings are one instanced mesh apiece: two draws. */
 export function Bats() {
+  const still = useReducedMotion();
   const wing = useMemo(makeWing, []);
+  const body = useMemo(() => new THREE.SphereGeometry(1, 8, 6).scale(0.05, 0.05, 0.09), []);
   const material = useMemo(() => new THREE.MeshBasicMaterial({ color: BAT_COLOR, side: THREE.DoubleSide }), []);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
+  const scratch = useMemo(() => ({ root: new THREE.Matrix4(), part: new THREE.Matrix4(), turn: new THREE.Euler(), quat: new THREE.Quaternion(), at: new THREE.Vector3(), one: new THREE.Vector3(1, 1, 1), mirror: new THREE.Vector3(-1, 1, 1), hidden: new THREE.Matrix4().makeScale(0, 0, 0) }), []);
   useEffect(
     () => () => {
-      wing.dispose();
-      material.dispose();
+      [wing, body, material].forEach((item) => item.dispose());
     },
-    [wing, material],
+    [wing, body, material],
   );
+  useFrame((state) => {
+    const [bodyMesh, wingMesh] = [bodies.current, wings.current];
+    if (!bodyMesh || !wingMesh) return;
+    for (let index = 0; index < BAT_COUNT; index += 1) {
+      // Lite effects keep the first half of the colony.
+      if (settings.particles === "lite" && index >= BAT_COUNT / 2) {
+        bodyMesh.setMatrixAt(index, scratch.hidden);
+        wingMesh.setMatrixAt(index * 2, scratch.hidden);
+        wingMesh.setMatrixAt(index * 2 + 1, scratch.hidden);
+        continue;
+      }
+      const pose = batAt(index, state.clock.elapsedTime, still);
+      scratch.turn.set(0, pose.yaw, 0);
+      scratch.root.compose(scratch.at.set(pose.x, pose.y, pose.z), scratch.quat.setFromEuler(scratch.turn), scratch.one);
+      bodyMesh.setMatrixAt(index, scratch.root);
+      const swing = pose.flap * FLAP_SWING;
+      // The right wing as drawn, the left its mirror, each swung about the body's line.
+      [1, -1].forEach((side, w) => {
+        scratch.turn.set(0, 0, side * swing);
+        scratch.part.compose(scratch.at.set(0, 0, 0), scratch.quat.setFromEuler(scratch.turn), side === 1 ? scratch.one : scratch.mirror);
+        wingMesh.setMatrixAt(index * 2 + w, scratch.part.premultiply(scratch.root));
+      });
+    }
+    bodyMesh.instanceMatrix.needsUpdate = true;
+    wingMesh.instanceMatrix.needsUpdate = true;
+  });
   return (
     <>
-      {Array.from({ length: BAT_COUNT }, (_, i) => (
-        <Bat key={i} index={i} wing={wing} material={material} />
-      ))}
+      {/* The bats flit about the lake, so they are never culled by a stale bound. */}
+      <instancedMesh ref={bodies} args={[body, material, BAT_COUNT]} frustumCulled={false} />
+      <instancedMesh ref={wings} args={[wing, material, BAT_COUNT * 2]} frustumCulled={false} />
     </>
   );
 }

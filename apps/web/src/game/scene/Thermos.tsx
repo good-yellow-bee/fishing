@@ -38,7 +38,8 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
   );
   const shapes = useMemo(thermosShapes, []);
   const painted = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
-  const blobs = useRef<Array<THREE.Mesh | null>>([]);
+  const blobs = useRef<THREE.InstancedMesh>(null);
+  const place = useMemo(() => ({ at: new THREE.Object3D(), hidden: new THREE.Matrix4().makeScale(0, 0, 0) }), []);
   const cup = useRef<THREE.Group>(null);
   useEffect(() => {
     material.color.set(STEAM).multiplyScalar(Math.max(0.35, light));
@@ -58,15 +59,21 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
     const count = settings.particles === "lite" ? Math.ceil(STEAM_BLOBS / 2) : STEAM_BLOBS;
     // The cup leaves the planks while the angler has it up for a sip.
     if (cup.current) cup.current.visible = !sipView.holding;
-    blobs.current.forEach((mesh, i) => {
-      if (!mesh) return;
-      mesh.visible = steaming && i < count && !sipView.holding;
-      if (!mesh.visible) return;
+    const steam = blobs.current;
+    if (!steam) return;
+    for (let i = 0; i < STEAM_BLOBS; i += 1) {
+      if (!steaming || i >= count || sipView.holding) {
+        steam.setMatrixAt(i, place.hidden);
+        continue;
+      }
       const blob = steamBlob(i, t);
-      mesh.position.set(CUP_SPOT.x + blob.x, CUP_SPOT.y + CUP_HEIGHT + blob.y, CUP_SPOT.z + blob.z);
+      place.at.position.set(CUP_SPOT.x + blob.x, CUP_SPOT.y + CUP_HEIGHT + blob.y, CUP_SPOT.z + blob.z);
       // One shared material, so each blob fades by shrinking as it thins.
-      mesh.scale.setScalar(blob.scale * (0.4 + 0.6 * blob.opacity));
-    });
+      place.at.scale.setScalar(blob.scale * (0.4 + 0.6 * blob.opacity));
+      place.at.updateMatrix();
+      steam.setMatrixAt(i, place.at.matrix);
+    }
+    steam.instanceMatrix.needsUpdate = true;
   });
   return (
     <group name="thermos">
@@ -74,18 +81,8 @@ export function Thermos({ steaming, light }: { steaming: boolean; light: number 
       <group ref={cup}>
         <mesh position={[CUP_SPOT.x, CUP_SPOT.y, CUP_SPOT.z]} geometry={shapes.cup} material={painted} castShadow />
       </group>
-      {Array.from({ length: STEAM_BLOBS }, (_, i) => (
-        <mesh
-          key={i}
-          geometry={geometry}
-          material={material}
-          visible={false}
-          renderOrder={5}
-          ref={(mesh) => {
-            blobs.current[i] = mesh;
-          }}
-        />
-      ))}
+      {/* Every wisp of steam in one draw, never culled by a bound taken before it rose. */}
+      <instancedMesh ref={blobs} args={[geometry, material, STEAM_BLOBS]} renderOrder={5} frustumCulled={false} />
     </group>
   );
 }
