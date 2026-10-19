@@ -5,10 +5,14 @@ import { DOCK_POST_CAPS } from "./snowyDock";
 
 describe("dock robin", () => {
   it("comes by from dawn through the day, but not in the rain", () => {
-    expect(robinOut("dawn", "clear")).toBe(true);
-    expect(robinOut("day", "overcast")).toBe(true);
-    expect(robinOut("dusk", "clear")).toBe(false);
-    expect(robinOut("day", "rain")).toBe(false);
+    expect(robinOut("dawn", "clear", "summer")).toBe(true);
+    expect(robinOut("day", "overcast", "fall")).toBe(true);
+    expect(robinOut("dusk", "clear", "summer")).toBe(false);
+    expect(robinOut("day", "rain", "spring")).toBe(false);
+    // In winter it is the last bird to roost, still about at dusk; never at night.
+    expect(robinOut("dusk", "clear", "winter")).toBe(true);
+    expect(robinOut("dusk", "rain", "winter")).toBe(false);
+    expect(robinOut("night", "clear", "winter")).toBe(false);
   });
 
   it("perches on the two front posts, in front of the angler, and on their snow in winter", () => {
