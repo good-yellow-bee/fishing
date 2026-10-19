@@ -3568,10 +3568,12 @@ html[data-contrast="high"] .sound-captions li {
 
   /* Between the lure panel on the left and the shore signs on the right, at any text size: with larger text the signs
      take a second column, which the coach and the news card covered. The scene keeps --signs-room at the signs' reach
-     from its right edge, in screen pixels. */
+     from its right edge, in screen pixels. Where the signs leave less than 240 px (568 x 320 with larger text), the card
+     keeps 240 px and lies over them, as it did before. */
   .walkthrough {
-    left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));
-    right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);
+    --coach-left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));
+    left: var(--coach-left);
+    right: max(8px, min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - var(--coach-left) - 240px)));
     width: auto;
     max-width: 400px;
     margin-inline: auto;
@@ -3581,7 +3583,7 @@ html[data-contrast="high"] .sound-captions li {
   /* The news card may lie over the lure panel, but not over the signs. */
   .whats-new {
     left: 8px;
-    right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);
+    right: max(8px, min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - 248px)));
     width: auto;
     max-width: 440px;
     margin-left: auto;

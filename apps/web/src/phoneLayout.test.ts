@@ -20,15 +20,17 @@ describe("a phone held sideways", () => {
   it("keeps the coach and the news card off the signs, which take a second column with larger text", () => {
     const sideways = css.slice(css.indexOf(SIDEWAYS));
     const coach = [...sideways.matchAll(/\n  \.walkthrough \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
-    expect(coach).toContain("left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
-    expect(coach).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(coach).toContain("--coach-left: calc(16px + min(220px, calc(30vw / var(--text-zoom, 1))));");
+    expect(coach).toContain("right: max(8px, min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - var(--coach-left) - 240px)));");
     expect(coach).toContain("max-width: 400px;");
     const news = [...sideways.matchAll(/\n  \.whats-new \{([^}]*)\}/g)].map((m) => m[1]).find((b) => b.includes("--signs-room"));
-    expect(news).toContain("right: calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px);");
+    expect(news).toContain("right: max(8px, min(calc(var(--signs-room, 0px) / var(--text-zoom, 1) + 8px), calc(100vw / var(--text-zoom, 1) - 248px)));");
     expect(news).toContain("max-width: 440px;");
     expect(news).toContain("transform: none;");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
     expect(dock).toContain('wrap.style.setProperty("--signs-room"');
+    // The lake mounts after the profile loads: an effect that ran only on the loading view left the signs' reach unset.
+    expect(dock).toContain("}, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);");
   });
 
   it("lets a phone's bottom row of shore signs scroll sideways when the last banks would run past the edge", () => {
