@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { setLang } from "../i18n";
 import { FISH } from "@stillwater/shared";
-import { FOLLOW_ODDS, followCall, followerFor, GRAB_ODDS, grabberFor, grabCall, grabNote } from "./grab";
+import { FLUTTER_ODDS, flutterGrabberFor, flutterTip, FOLLOW_ODDS, followCall, followerFor, GRAB_ODDS, grabberFor, grabCall, grabNote } from "./grab";
 
 const strong = { strength: 10, accuracy: 10 };
 
@@ -40,6 +40,32 @@ describe("grabberFor", () => {
     expect(grabberFor("golden-shiner", "reeds", { strength: 1, accuracy: 1 }, false, 0)).toBeNull();
     expect(grabberFor("perch", "open", { strength: 2, accuracy: 1 }, false, 0)).toBeNull();
     expect(grabberFor("bluegill", "point", { strength: 2, accuracy: 1 }, false, 0)?.id).toBe("largemouth-bass");
+  });
+});
+
+describe("flutterGrabberFor", () => {
+  it("sends a share of the hunters for a small fish left to flutter, at the same banks as the grabs", () => {
+    expect(flutterGrabberFor("golden-shiner", "reeds", strong, false, FLUTTER_ODDS - 0.01)?.id).toBe("pike");
+    expect(flutterGrabberFor("crappie", "dock", strong, false, 0)?.id).toBe("smallmouth-bass");
+    expect(flutterGrabberFor("golden-shiner", "reeds", strong, false, FLUTTER_ODDS)).toBeNull();
+    expect(flutterGrabberFor("golden-shiner", "dock", strong, false, 0)).toBeNull();
+  });
+
+  it("spares a new angler and one too weak for the hunter", () => {
+    expect(flutterGrabberFor("golden-shiner", "reeds", strong, true, 0)).toBeNull();
+    expect(flutterGrabberFor("golden-shiner", "reeds", { strength: 1, accuracy: 1 }, false, 0)).toBeNull();
+  });
+
+  it("tips the angler off only where a hunter they could land is about, in Polish too", () => {
+    expect(flutterTip("golden-shiner", "reeds", strong, false)).toBe("A pike hunts them here: stop reeling and let it flutter a moment, and the pike may take it.");
+    expect(flutterTip("bluegill", "point", strong, false)).toBe("A largemouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.");
+    expect(flutterTip("perch", "open", strong, false)).toBe("A walleye hunts them here: stop reeling and let it flutter a moment, and the walleye may take it.");
+    expect(flutterTip("crappie", "dock", strong, false)).toBe("A smallmouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.");
+    expect(flutterTip("golden-shiner", "dock", strong, false)).toBe("");
+    expect(flutterTip("golden-shiner", "reeds", strong, true)).toBe("");
+    expect(flutterTip("golden-shiner", "reeds", { strength: 1, accuracy: 1 }, false)).toBe("");
+    setLang("pl");
+    expect(flutterTip("golden-shiner", "reeds", strong, false)).toBe("Poluje tu na nie szczupak: przestań zwijać i daj rybce chwilę się potrzepotać, a szczupak może ją chwycić.");
   });
 });
 

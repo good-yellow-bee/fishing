@@ -18,6 +18,11 @@ export const GRABS: readonly { prey: string; spot: SpotId; predator: string }[] 
   { prey: "perch", spot: "dropoff", predator: "pike" },
 ];
 
+/** Share of the small fish not hit on the way in that the hunter takes after all once the angler lets it flutter. */
+export const FLUTTER_ODDS = 0.25;
+/** Seconds of calm the small fish has to flutter on a line left unreeled, out past the halfway mark, before the hunter comes for it. */
+export const FLUTTER_SEC = 1.2;
+
 /** Share of small fish landed there unhit that the hunter followed in to the bank without taking. */
 export const FOLLOW_ODDS = 0.25;
 
@@ -32,6 +37,22 @@ function hunterOf(preyId: string, spot: SpotId, profile: Pick<Profile, "strength
 export function grabberFor(preyId: string, spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, mercy: boolean, roll: number): FishSpecies | null {
   if (mercy || roll >= GRAB_ODDS) return null;
   return hunterOf(preyId, spot, profile);
+}
+
+/** The hunter that comes for a small fish left to flutter on the line, or null; rolled apart from the grab, for a fish that wasn't grabbed. */
+export function flutterGrabberFor(preyId: string, spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, mercy: boolean, roll: number): FishSpecies | null {
+  if (mercy || roll >= FLUTTER_ODDS) return null;
+  return hunterOf(preyId, spot, profile);
+}
+
+/** The hookset tip on a small fish hooked where a bigger one hunts it, or "": never on a new angler's easy first fish. */
+export function flutterTip(preyId: string, spot: SpotId, profile: Pick<Profile, "strength" | "accuracy">, mercy: boolean): string {
+  const hunter = mercy ? null : hunterOf(preyId, spot, profile);
+  if (!hunter) return "";
+  if (hunter.id === "largemouth-bass") return t("A largemouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.");
+  if (hunter.id === "walleye") return t("A walleye hunts them here: stop reeling and let it flutter a moment, and the walleye may take it.");
+  if (hunter.id === "smallmouth-bass") return t("A smallmouth bass hunts them here: stop reeling and let it flutter a moment, and the bass may take it.");
+  return t("A pike hunts them here: stop reeling and let it flutter a moment, and the pike may take it.");
 }
 
 /** The fish that follows a small fish in without grabbing it, or null; rolled apart from the grab, for a fish that wasn't grabbed. */
