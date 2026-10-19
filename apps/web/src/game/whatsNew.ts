@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-20-game39";
+export const NEWS_ID = "2026-10-20-pa34";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On a smaller phone the fight card now hangs just under the lake's header instead of rising over it, and the header's chips step aside until the fish is in. And while you wait for a bite, the hint's \"2 more reasons\" is much easier to tap.",
   "At night, press L or the Headlamp button to light the water: your float shows plainly, so you have longer to strike, but the light puts the fish off and the bite comes slower. And out on the boat, a cast tight to the far rock where the cormorant dries its wings finds the walleye that hold in its shadow.",
   "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.",
   "When a cast has more reasons for a quick or slow bite than the hint can fit, the hint ends with \"2 more reasons\": tap it to read the rest. And the outings you pack up from the lake now show their titles and season notes in whichever language you read the field log in.",
