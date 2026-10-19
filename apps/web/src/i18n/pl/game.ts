@@ -702,6 +702,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.":
+    "W letnie wieczory nietoperz czasem wlatuje polować na ćmy przy latarni na pomoście. A w śnieżne zimowe noce na zaśnieżony słupek przylatuje też pójdźka.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
     "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
@@ -710,8 +712,6 @@ export const PL_GAME: PlBook = {
     "W śnieżne zimowe dni twój pies też wychodzi teraz na pomost, a gdy śnieg nasypie mu się na grzbiet, otrząsa się. Na zaśnieżone słupki przylatuje też rudzik.",
   "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.":
     "Na małym telefonie z większym tekstem nagłówek jeziora mieści teraz linki w dwóch rzędach, więc podpowiedź nad paskiem rzutu nie chowa się już pod drążkiem chodzenia, a długie słowo w plakietce brzegu łamie się w jej obrębie. Na stronie ryby łatwiej trafić w linijkę, która szuka ryb złowionych przy tej samej pogodzie.",
-  "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.":
-    "W wilgotne wieczory i noce, od wiosny do jesieni, za tobą powoli przeskakuje teraz przez pomost ropucha. Zimą oddech twojego psa paruje na mrozie, a rudzik zostaje na słupkach aż do zmierzchu, jako ostatni ptak, który idzie spać.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
@@ -775,8 +775,6 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
-  "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.":
-    "Dwie kolejne przynęty można prowadzić w czasie czekania: stuknij, by zatrzymać woblera, tak że wypłynie przed płynącą za nim rybą, albo by mucha drgnęła jak żywy owad. Jak przy poppersie, jigu, błystce czy streamerze pierwsze stuknięcia przyspieszają branie, a zbyt wiele płoszy rybę.",
   "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.":
     "Na Cyplu rzuć tuż za płytkie kamienie, na krawędź, gdzie woda opada w głąb: trzymają się tam bassy, więc branie przychodzi szybciej, a kamienie nie zaczepią przynęty. A sandacz złapany na otwartej wodzie schodzi teraz przy odjazdach w głąb, ciągnie mocniej, ale szybciej się męczy.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",

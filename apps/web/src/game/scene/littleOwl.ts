@@ -1,4 +1,5 @@
-import type { LakeHour, Sky } from "@stillwater/shared";
+import type { LakeHour, LakeSeason, Sky } from "@stillwater/shared";
+import { snowing } from "./capSnow";
 import { MOTH_LAMPS, MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
 import { SNOW_CAP } from "./robinVisit";
 import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
@@ -11,14 +12,14 @@ import { DOCK_POST_CAPS } from "./snowyDock";
  * interest, swivels its head right round to look behind it and back, and blinks, before dropping
  * off the post and gliding away low over the lake. When moths are about the lantern beside it, it
  * spends spells following one round with its head. A strike on the dock startles it off its post early.
- * Any season, not in the rain. Pure in time.
+ * Any season, not in the rain, though it comes in the snow. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
 
-/** Out at night, in every season, but not in the rain. */
-export function littleOwlOut(hour: LakeHour, sky: Sky | undefined) {
-  return hour === "night" && sky !== "rain";
+/** Out at night, in every season; not in the rain, but it comes in winter's snow. */
+export function littleOwlOut(hour: LakeHour, sky: Sky | undefined, season: LakeSeason) {
+  return hour === "night" && (sky !== "rain" || snowing(sky, season));
 }
 
 /** The front-left post, the one nearest the lake on the angler's left. */
