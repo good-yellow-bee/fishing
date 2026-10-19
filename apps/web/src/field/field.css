@@ -2462,6 +2462,14 @@ html:has(.form-save):has(.undo-bar) .field-main {
   font-size: 13px;
 }
 
+/* On a touch screen, a line of links straight above ("Best month: …") kept no gap: the order button's reach took its
+   bottom 8 px. A gap gives each its own band. */
+@media (pointer: coarse) {
+  p.search-order {
+    margin-top: 12px;
+  }
+}
+
 /* The order in use reads as plain text; the other is the link to switch. */
 .search-order [aria-pressed="true"] {
   color: var(--field-ink);

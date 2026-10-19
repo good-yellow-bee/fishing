@@ -1,11 +1,14 @@
-import { biteTimes, catchesForSpot, lakeSeason, localDate, lureTally, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
+import { biteTimes, catchesForSpot, lakeSeason, localDate, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
+import { pieceTally } from "./pieceTally";
+import { shownPieceKey } from "./gear/pieceKey";
 import { isSampleOuting } from "./bookCopy";
 import { countedFish, ownFish } from "./milestones";
 
 /** Below this many fish a water's "what works" line would be guesswork. */
 export const TIPS_FROM = 3;
 
-export type WaterReading = { fahrenheit: number; at: string };
+/** `id`: the fish it was noted with, for the day that fish counts on (a night's small hours on its outing's). */
+export type WaterReading = { fahrenheit: number; at: string; id?: string };
 
 export type WaterTips = {
   lures: LureTally[];
@@ -22,7 +25,7 @@ export type WaterTips = {
 export function waterTips(catches: readonly CatchEntry[]): WaterTips | null {
   if (catches.length < TIPS_FROM) return null;
   const book = { spots: [], trips: [], catches: [...catches] };
-  const lures = lureTally(book, 3);
+  const lures = pieceTally(catches, 3);
   // The time of day most fish came at, when at least two did and no other time ties it.
   const [top, next] = [...biteTimes(book)].sort((a, b) => b.count - a.count);
   const time: BiteTime | null = top && top.count >= 2 && (!next || next.count < top.count) ? top : null;
@@ -42,7 +45,7 @@ export function lastReading(catches: readonly CatchEntry[]): WaterReading | null
   for (const entry of catches) {
     const fahrenheit = entry.weather?.waterTempF;
     if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(Date.parse(entry.caughtAt))) continue;
-    if (!last || Date.parse(entry.caughtAt) > Date.parse(last.at)) last = { fahrenheit, at: entry.caughtAt };
+    if (!last || Date.parse(entry.caughtAt) > Date.parse(last.at)) last = { fahrenheit, at: entry.caughtAt, id: entry.id };
   }
   return last;
 }
@@ -57,11 +60,11 @@ export function lureByTemp(catches: readonly CatchEntry[]): { band: WaterTempTal
       const temp = entry.weather?.waterTempF;
       return temp !== undefined && Number.isFinite(temp) && (band.from === null || temp >= band.from) && (band.to === null || temp < band.to);
     });
-    const [top, next] = lureTally({ spots: [], trips: [], catches: inBand }, 2);
+    const [top, next] = pieceTally(inBand, 2);
     return top && top.count >= 2 && (!next || next.count < top.count) ? [{ band, lure: top.lure }] : [];
   });
   // The same lure leading every band says nothing about temperature.
-  return rows.length >= 2 && new Set(rows.map((row) => row.lure.trim().toLowerCase())).size >= 2 ? rows : [];
+  return rows.length >= 2 && new Set(rows.map((row) => shownPieceKey(row.lure))).size >= 2 ? rows : [];
 }
 
 /** How far back an earlier reading still says which way the water is going. */
@@ -82,7 +85,7 @@ export function readingBefore(catches: readonly CatchEntry[], last: WaterReading
     const at = Date.parse(entry.caughtAt);
     if (fahrenheit === undefined || !Number.isFinite(fahrenheit) || Number.isNaN(at)) continue;
     if (at >= lastDay || lastDay - at > TREND_DAYS * 86_400_000 || !differs(fahrenheit)) continue;
-    if (!before || at > Date.parse(before.at)) before = { fahrenheit, at: entry.caughtAt };
+    if (!before || at > Date.parse(before.at)) before = { fahrenheit, at: entry.caughtAt, id: entry.id };
   }
   return before;
 }
@@ -155,7 +158,7 @@ export function speciesLures(catches: readonly CatchEntry[], species: string, li
   const want = species.trim().toLowerCase();
   if (!want) return [];
   const kind = catches.filter((entry) => entry.species.trim().toLowerCase() === want);
-  return lureTally({ spots: [], trips: [], catches: kind }, limit).map((row) => row.lure);
+  return pieceTally(kind, limit).map((row) => row.lure);
 }
 
 /**
