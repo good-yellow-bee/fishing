@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ambientProfile, BELL_PARTIALS, BELL_PITCH, BELL_STRIKES, drumKnocks, fx, onLoonCall, onOwlHoot } from "./fx";
+import { onSoundCaption } from "./soundCaptions";
 
 const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, setTargetAtTime() {} });
 const node = () => ({ connect: <T,>(next: T) => next, disconnect() {} });
@@ -398,5 +399,17 @@ describe("deer and ducklings", () => {
     fx.snort();
     fx.enabled = true;
     expect(tones).toHaveLength(0);
+  });
+
+  it("caption the snort and the peeping even with sound off, for a player who can't hear them", () => {
+    const heard: string[] = [];
+    const off = onSoundCaption((kind) => heard.push(kind));
+    fx.ambient.start();
+    fx.enabled = false;
+    fx.snort();
+    fx.peep();
+    fx.enabled = true;
+    off();
+    expect(heard).toEqual(["deerSnort", "ducklings"]);
   });
 });

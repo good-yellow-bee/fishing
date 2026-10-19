@@ -28,6 +28,8 @@ export const PL_GAME: PlBook = {
   "Vibration (a phone buzzes and a controller rumbles on bites, runs and the catch)": "Wibracje (telefon wibruje, a kontroler drży przy braniach, odjazdach i złowieniu)",
   "Terns call over the water": "Rybitwy krzyczą nad wodą",
   "Grebes patter and call across the water": "Perkozy pluskają i nawołują, pędząc po wodzie",
+  "A deer snorts on the far bank": "Sarna parska na drugim brzegu",
+  "Ducklings peep": "Kaczątka piszczą",
   "On spring and summer days, a pair of swans glides the far water, now and then tipping under to feed.": "Wiosną i latem za dnia para łabędzi sunie po dalekiej wodzie, co jakiś czas zanurzając głowę, by się pożywić.",
   "Cast too close and the nearer swan raises its wings and hisses at you.": "Rzuć za blisko, a bliższy łabędź uniesie skrzydła i syknie na ciebie.",
   "A bird plunges into the lake": "Ptak wpada do jeziora",
@@ -789,6 +791,8 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
+  "Find a catch offers its best words as one-tap searches, and a search's spreadsheet is named after it. A fish's page says its place on the outing, such as fish 3 of 5.":
+    "„Znajdź połów” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie, a arkusz z wyszukiwania nosi jego nazwę. Strona ryby podaje jej miejsce na wyprawie, na przykład ryba 3 z 5.",
   "Find an outing offers its best words as one-tap searches. In the small hours last evening's outing reads Last night, outing cards count missed strikes, and a water's tackle tips go on the list all at once.":
     "„Znajdź wyprawę” podsuwa najlepsze słowa jako wyszukiwania na jedno dotknięcie. Po północy wczorajsza wyprawa nazywa się Wczoraj wieczorem, karty wypraw liczą puste brania, a podpowiedzi sprzętu z łowiska trafiają na listę naraz.",
   "A water's card shows whether its water is warming or cooling. Its page gives today's sunrise and sunset there, and its copied summary carries the place and a map link.":
