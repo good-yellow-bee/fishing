@@ -1764,7 +1764,11 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT363~~ | ~~News card 2026-10-20-game38 covers GT361 and GT362: the hint's more reasons, and game outings' titles in the reader's language~~ (#1478) | ui | S |
 | ~~GT364~~ | ~~The far rock: a cast from the boat landing tight to the rock out in the open water (where the cormorant dries its wings), not on it, bites 0.85x sooner, and the wait hint says "Tight to the far rock…" (the walleye hold there)~~ (#1484) | gameplay | S |
 | ~~GT365~~ | ~~A headlamp at night: L or the Headlamp button lights the water, so the float shows plainly and the strike window holds 1.2x longer, but the light puts the fish off and the bite comes 1.15x slower; the wait hint says so, and the keys card lists L~~ (#1488) | gameplay | S |
-| GT366 | News card 2026-10-20-game39 covers GT364 and GT365: the far rock and the headlamp at night | ui | S |
+| ~~GT366~~ | ~~News card 2026-10-20-game39 covers GT364 and GT365: the far rock and the headlamp at night~~ (#1490) | ui | S |
+| GT367 | Species mastery: every kind climbs tiers as the angler lands it (Known at 5, Skilled at 15, Master at 40); the field guide shows each kind's tier and how many to the next, the landed card stamps a new tier, and a Master kind pays 1.1x points (the server counts the angler's catches of it) | gameplay | M |
+| GT368 | Weekly challenges: three week-long goals (Monday to Sunday, local days) on the shack board under the day's requests, such as five of the week's fish, fish from four banks, or a trophy of any kind, checked by the server from the week's catches and paying 60-120 points once each | gameplay | M |
+| GT369 | Feeding frenzy: now and then (one 90 s slot in every 20 minutes of the wall clock) the bubbling hotspot boils with baitfish: its bank's sign is marked, casts into it bite twice as fast with the hunters crowding in, and the hint calls the frenzy's start and end | gameplay | M |
+| GT370 | Netting the fish: once a fish (not a panfish masher, not a new angler's easy fish) is spent at the boat or bank, it surfaces and the angler must strike again as its head comes up to net it; a mistimed net makes it bolt for one short run and the angler tries again | gameplay | M |
 
 ## Risks / open questions for the owner
 
