@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BREATH_EVERY, PUFF_BLOBS, PUFF_SEC, breathOut, puffAge, puffBlob } from "./breathPuff";
+import { BREATH_EVERY, PUFF_BLOBS, PUFF_SEC, breathOut, dogPuffAge, puffAge, puffBlob } from "./breathPuff";
 
 describe("breath puffs", () => {
   it("show at dawn and in winter only", () => {
@@ -27,5 +27,24 @@ describe("breath puffs", () => {
       expect(puffBlob(i, 1).opacity).toBe(0);
       expect(puffBlob(i, 0.3).opacity).toBeGreaterThan(0.5);
     }
+  });
+
+  it("gives the dog quicker breaths than the angler, out of step with them", () => {
+    const count = (age: (t: number) => number) => {
+      let puffs = 0;
+      let last = -1;
+      for (let t = 0; t < 60; t += 0.02) {
+        const a = age(t);
+        if (a >= 0 && last < 0) puffs += 1;
+        last = a;
+      }
+      return puffs;
+    };
+    expect(count((t) => dogPuffAge(t))).toBeGreaterThan(count((t) => puffAge(t)) * 1.3);
+    expect(count((t) => dogPuffAge(t, 2))).toBeLessThan(count((t) => dogPuffAge(t)));
+    // Its first breath comes between the angler's, not with it, and lasts as long.
+    const firstDog = Array.from({ length: 400 }, (_, i) => i * 0.01).find((t) => dogPuffAge(t) >= 0 && dogPuffAge(t - 0.01) < 0)!;
+    expect(firstDog % BREATH_EVERY).toBeGreaterThan(0.5);
+    expect(dogPuffAge(firstDog + PUFF_SEC * 0.9)).toBeGreaterThan(0.85);
   });
 });

@@ -16,11 +16,20 @@ function unit(n: number) {
   return s - Math.floor(s);
 }
 
-/** Age 0..1 through the current puff at `t`, or -1 between puffs. Lite effects (`every` 2) skip every other breath. */
-export function puffAge(t: number, every = 1) {
-  const period = BREATH_EVERY * every;
+/** Age 0..1 through the current puff at `t` for a breath every `gap` seconds, or -1 between puffs. Lite effects (`every` 2) skip every other breath. */
+export function puffAge(t: number, every = 1, gap = BREATH_EVERY) {
+  const period = gap * every;
   const since = t - Math.floor(t / period) * period;
   return since < PUFF_SEC ? since / PUFF_SEC : -1;
+}
+
+/** The dock dog breathes quicker than the angler, out of step with it. */
+const DOG_BREATH_EVERY = 2.3;
+const DOG_BREATH_LAG = 1.1;
+
+/** Age 0..1 through the dog's current puff at `t`, or -1 between puffs: puffs as long as the angler's, coming more often. */
+export function dogPuffAge(t: number, every = 1) {
+  return puffAge(t + DOG_BREATH_LAG, every, DOG_BREATH_EVERY);
 }
 
 export type PuffBlob = { forward: number; up: number; side: number; scale: number; opacity: number };

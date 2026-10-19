@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { DOG_COCK, DOG_SPOT, DOG_YAW, dogGlance, dogMood, easeMood, dogAttention, tailSwing, type DogMood } from "./dogMood";
+import { BreathPuffs, type Mouth } from "./Breath";
+import { dogPuffAge } from "./breathPuff";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { mergePainted, type PaintedPart } from "./mergeParts";
@@ -17,6 +19,9 @@ const NOSE = "#2a1e18";
 const COLLAR = "#b8352c";
 const JUMPER = "#b8322c";
 const STRIPE = "#efe9df";
+/** The tip of its nose, ahead along the head's +z, where its breath comes from; and its puffs against the angler's. */
+const NOSE_Z = 0.22;
+const PUFF_SIZE = 0.6;
 /** A shade larger than life, to stand beside the chunky angler. */
 const DOG_SCALE = 1.2;
 /** How far its chest rises about the hips when it sits up. */
@@ -91,7 +96,7 @@ type Props = {
   paperWind?: number | null;
   /** Where the float is while a fish nibbles at it, else null: it wakes, cocks its head and watches the float. */
   nibble?: Readonly<{ x: number; z: number }> | null;
-  /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
+  /** In winter it wears a knitted jumper, and its breath shows (breathPuff.ts). Its shape is baked once, so give the dog a fresh key when this changes. */
   winter?: boolean;
 };
 
@@ -105,6 +110,19 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
   const tail = useRef<THREE.Group>(null);
   const shapes = useMemo(() => ({ rear: dogRearShape(winter), chest: dogChestShape(winter), leg: dogLegShape(), head: dogHeadShape(), tail: dogTailShape() }), [winter]);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const nose = useRef<THREE.Object3D>(null);
+  const breathAt = useMemo(() => {
+    const ahead = new THREE.Vector3();
+    return (out: Mouth) => {
+      if (!nose.current) return;
+      nose.current.getWorldPosition(ahead);
+      [out.x, out.y, out.z] = [ahead.x, ahead.y, ahead.z];
+      nose.current.getWorldDirection(ahead);
+      const flat = Math.hypot(ahead.x, ahead.z) || 1;
+      out.fx = ahead.x / flat;
+      out.fz = ahead.z / flat;
+    };
+  }, []);
   useEffect(
     () => () => {
       [...Object.values(shapes), material].forEach((item) => item.dispose());
@@ -145,7 +163,8 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
   useSkinnedFigure(root, material);
 
   return (
-    <group ref={root} name="dock-dog" position={[DOG_SPOT.x, DOG_SPOT.y, DOG_SPOT.z]} rotation={[0, DOG_YAW, 0]} scale={DOG_SCALE}>
+    <>
+      <group ref={root} name="dock-dog" position={[DOG_SPOT.x, DOG_SPOT.y, DOG_SPOT.z]} rotation={[0, DOG_YAW, 0]} scale={DOG_SCALE}>
       <mesh geometry={shapes.rear} material={material} castShadow />
       <group ref={tail} position={[0, 0.15, -0.27]} rotation={[0.25, 0, 0]}>
         <mesh geometry={shapes.tail} material={material} />
@@ -167,8 +186,11 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
         {/* Turned, then nodded, then cocked about its own muzzle, so the cock stays a clean tilt. */}
         <group ref={head} position={[0, 0.12, 0.4]} rotation={[0, 0, 0, "YXZ"]}>
           <mesh geometry={shapes.head} material={material} castShadow />
+          <object3D ref={nose} position={[0, 0, NOSE_Z]} />
         </group>
       </group>
     </group>
+      {winter && <BreathPuffs light={1} age={dogPuffAge} mouth={breathAt} size={PUFF_SIZE} />}
+    </>
   );
 }
