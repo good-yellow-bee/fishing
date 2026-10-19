@@ -1309,6 +1309,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC149~~ | ~~Cloud shadows on the hills: on clear days the passing clouds' shadows slide on over the hills behind the far bank, dimming the slopes, the hay fields and the pasture as they cross, in step with the shadows on the water (one draw)~~ (#1263) | scene | S |
 | ~~SC150~~ | ~~Tractor: on dry summer days a little red tractor works the western hay field on the far hills, driving slowly along it between the rows of bales and swinging round at each end (one draw)~~ (#1265) | scene | S |
 | ~~SC151~~ | ~~News card scene32: the barn owl, the tractor and the cloud shadows on the hills~~ (#1265) | scene | S |
+| ~~SC152~~ | ~~Windmill: an old tower mill stands on the skyline of the hills above the eastern hay field; its four sails turn with the day's wind, faster as it freshens, and stand still on a calm day (one draw for the tower, one for the sails; its cap is white under winter snow)~~ (#1341) | scene | S |
+| ~~SC153~~ | ~~Sheep: by day in spring and fall a little flock grazes the western hay field on the far hills, drifting slowly along the slope between the bales, with lambs skipping after their mothers in spring (one draw)~~ (#1342) | scene | S |
+| ~~SC154~~ | ~~News card scene33: the windmill and the sheep~~ (#1342) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

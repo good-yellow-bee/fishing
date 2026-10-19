@@ -209,6 +209,9 @@ import { tractorOut } from "./tractorRun";
 import { HillShadows } from "./HillShadows";
 import { BarnOwl } from "./BarnOwl";
 import { barnOwlOut } from "./owlQuarter";
+import { Windmill } from "./Windmill";
+import { Sheep } from "./Sheep";
+import { sheepOut } from "./sheepFlock";
 import { ValleyMist } from "./ValleyMist";
 import { valleyMistOut } from "./valleyMist";
 import { cowsOut } from "./cowGraze";
@@ -2281,7 +2284,9 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
+      <Windmill season={season} wind={wind} />
       {cowsOut(hour, sky, season) && <Cows />}
+      {sheepOut(hour, sky, season) && <Sheep season={season} />}
       {tractorOut(hour, sky, season) && <Tractor />}
       {barnOwlOut(hour, sky, season) && <BarnOwl />}
       <TreeSwayClock wind={wind} />
