@@ -1364,12 +1364,30 @@ function LakeSurface({
   );
 }
 
-function Hill({ position, scale, color }: { position: Vec3; scale: Vec3; color: string }) {
+/** Places the far hills in one instanced mesh, each in its colour for the hour, season and sky. */
+export function placeHills(mesh: THREE.InstancedMesh, hour: LakeHour, season: LakeSeason, sky: WeatherSky) {
+  const at = new THREE.Matrix4();
+  const tint = new THREE.Color();
+  HILLS.forEach((hill, i) => {
+    mesh.setMatrixAt(i, at.compose(new THREE.Vector3(...hill.position), new THREE.Quaternion(), new THREE.Vector3(...hill.scale)));
+    mesh.setColorAt(i, tint.set(hillColor(hill, hour, season, sky)));
+  });
+  mesh.instanceMatrix.needsUpdate = true;
+  mesh.instanceColor!.needsUpdate = true;
+  mesh.computeBoundingSphere();
+}
+
+/** The far hills: one shape, so all of them are one draw, each coloured for the hour, the season and the sky. */
+function Hills({ hour, season, sky }: { hour: LakeHour; season: LakeSeason; sky: WeatherSky }) {
+  const mesh = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    if (mesh.current) placeHills(mesh.current, hour, season, sky);
+  }, [hour, season, sky]);
   return (
-    <mesh position={position} scale={scale} castShadow={false}>
+    <instancedMesh ref={mesh} args={[undefined, undefined, HILLS.length]} castShadow={false}>
       <icosahedronGeometry args={[1, 2]} />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
-    </mesh>
+      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
+    </instancedMesh>
   );
 }
 
@@ -2279,9 +2297,7 @@ export const LakeWorld = memo(function LakeWorld({
       </mesh>
       <LakeSurface spot={spot} hour={hour} sky={sky} season={season} weather={weather} wind={wind} />
 
-      {HILLS.map((hill) => (
-        <Hill key={hill.position.join()} position={hill.position} scale={hill.scale} color={hillColor(hill, hour, season, sky)} />
-      ))}
+      <Hills hour={hour} season={season} sky={sky} />
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       {rapeseedOut(season) && <Rapeseed hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
