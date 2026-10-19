@@ -730,6 +730,8 @@ export const PL_FIELD: PlBook = {
   "{at} of {count}": "{at} z {count}",
   "Open this fish": "Otwórz tę rybę",
   "Step through this outing's fish": "Przeglądaj tylko ryby z tej wyprawy",
+  "Step through this water's fish": "Przeglądaj tylko ryby z tego łowiska",
+  "{time} after the one before": "{time} po poprzedniej",
   "Fish without a photo: {n}": "Ryby bez zdjęcia: {n}",
   "Recent:": "Ostatnio:",
   "Also here that day:": "Tego dnia tutaj także:",
