@@ -1673,7 +1673,8 @@ html[data-input="pad"] .fight-bar .on-pad {
 .landed-card .catch-lore {
   max-width: 32ch;
   margin: 0 auto 12px;
-  color: #6f6352;
+  /* The quiet stamp's ink: the lighter brown read 4 to 1 on the parchment over a night lake. */
+  color: #5f5444;
   font-size: 13px;
   line-height: 1.4;
 }
