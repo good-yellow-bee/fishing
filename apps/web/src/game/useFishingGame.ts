@@ -48,7 +48,7 @@ import { LANTERN_MINNOW_WAIT, amongLanternMinnows, minnowLike } from "./lanternM
 import { MIDGE_RISE_WAIT, midgeLike, underMidges } from "./midgeClouds";
 import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
-import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
+import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
 import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
@@ -352,6 +352,9 @@ export function useFishingGame(
   const hookedSolidRef = useRef(false);
   /** A pike waiting to hit the shiner on the line, and the angler it was rolled for. */
   const grabRef = useRef<{ predator: FishSpecies; profile: Profile } | null>(null);
+  /** The hunter that comes for the small fish on the line once it has fluttered long enough, and how long it has so far. */
+  const flutterRef = useRef<{ predator: FishSpecies; profile: Profile } | null>(null);
+  const flutterSecRef = useRef(0);
   /** The small fish the one on the line took, by id. */
   const grabbedRef = useRef<string | undefined>(undefined);
   /** This fish came back for a second take after dropping the bait. */
@@ -483,6 +486,8 @@ export function useFishingGame(
 
   const clearFight = () => {
     grabRef.current = null;
+    flutterRef.current = null;
+    flutterSecRef.current = 0;
     grabbedRef.current = undefined;
     biteRef.current = null;
     setBite(null);
@@ -572,6 +577,10 @@ export function useFishingGame(
         grabbedRef.current = undefined;
         const predator = grabberFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
         grabRef.current = predator ? { predator, profile: current } : null;
+        // Missed that, the hunter may still come for it if the angler lets it flutter.
+        const flutterer = predator ? null : flutterGrabberFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
+        flutterRef.current = flutterer ? { predator: flutterer, profile: current } : null;
+        flutterSecRef.current = 0;
         const follower = predator ? null : followerFor(species.id, spotRef.current, current, mercyRef.current, Math.random());
         followRef.current = follower ? makeCatch(follower, current.patience, anglerLevel(current.lifetimePoints)) : null;
       }
@@ -600,6 +609,8 @@ export function useFishingGame(
       const nest = nestTireMul(season, species.id, spotRef.current) >= 1 ? "" : `${t("It's guarding its nest, so it fights harder and tires slower.")} `;
       // A catfish or burbot is out hunting after dark, at its strongest.
       const hunter = nightTireMul(hourRef.current, species.id) >= 1 ? "" : `${t("It's out hunting after dark and fights at full strength, so it tires slower.")} `;
+      // On a small fish where a bigger one hunts it, say how to draw the hunter.
+      const flutter = strike ? flutterTip(species.id, spotRef.current, current, mercyRef.current) : "";
       if (heavy) {
         fx.lift();
         fx.haptic("lift");
@@ -633,7 +644,8 @@ export function useFishingGame(
                   time: seconds(strike.elapsedMs),
                   limit: seconds(strike.solidMs),
                   line,
-                })),
+                })) +
+        (flutter ? ` ${flutter}` : ""),
       );
     }
   }, [resetToIdle, season, sky]);
@@ -1379,6 +1391,16 @@ export function useFishingGame(
           fightInput.steer = steer;
           const result = runtime.step(now, dt, reeling, steer);
           const sim = runtime.sim;
+          // Left to flutter on a slack line out past halfway, the small fish draws the hunter in. Only its calm spells count,
+          // since easing off for a run is no pause, and a pump of the reel starts the pause again.
+          if (flutterRef.current && result === "fighting") {
+            if (reeling) flutterSecRef.current = 0;
+            else if (sim.surge === 0 && sim.line > GRAB_LINE) flutterSecRef.current += dt;
+            if (flutterSecRef.current >= FLUTTER_SEC) {
+              grabRef.current = flutterRef.current;
+              flutterRef.current = null;
+            }
+          }
           // Halfway in, a bigger fish hits the small one: the fight starts again with it.
           const grab = grabRef.current;
           if (grab && result === "fighting" && sim.line <= GRAB_LINE) {
