@@ -165,6 +165,7 @@ export const PL_CONTENT: PlBook = {
   "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.": "Pewne zacięcie trwa dłużej: zacięcie w pierwszych 48% brania osadza haczyk pewnie, a nie w 40%.",
   "Pulling the rod against a run cuts it short 25% faster.": "Ciągnięcie wędki przeciw odjazdowi skraca go szybciej o 25%.",
   "The shack sells you groundbait and live shiners a fifth cheaper.": "W szopie kupujesz zanętę i żywe złotawce o jedną piątą taniej.",
+  "The shack board's requests pay a quarter more.": "Prośby z tablicy w szopie płacą o jedną czwartą więcej.",
   "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.": "Praca przynętą (pyknięcia, podbicia, podniesienia i ściągnięcia) przyspiesza branie trzy razy, a nie dwa.",
 
   // Badges (badges.ts)
