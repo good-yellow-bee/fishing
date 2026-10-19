@@ -1628,7 +1628,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT315~~ | ~~News card 2026-10-19-game23 covers GT313 and GT314: letting a small fish flutter for its hunter, and the lively shiner~~ (#1332) | ui | S |
 | ~~GT316~~ | ~~It takes again: a fish that drops the bait before the strike (too slow) was never pricked, so on the very next cast at that bank it takes again 40% of the time, common fish too; the miss says to cast straight back, the hookset names it, and a bigger lost fish already about keeps its place~~ (#1333) | gameplay | S |
 | ~~GT317~~ | ~~Sturgeon stick to the bottom: like a catfish, a sulking sturgeon takes two pumps to lift, not one, and the fight card and field guide say "Bottom-sticker"~~ (#1334) | gameplay | S |
-| GT318 | News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom | ui | S |
+| ~~GT318~~ | ~~News card 2026-10-19-game24 covers GT316 and GT317: a fish that dropped the bait takes again on a cast straight back, and the sturgeon sticks to the bottom~~ (#1335) | ui | S |
+| GT319 | Work it slow in the cold: in winter a hop, lift, pop or strip less than 1 s after the lure lands or after the last one is too quick for the slow fish, so what is left of the wait stretches 1.25x instead of shrinking (the touch still counts toward the few that help); a slow count between touches works as before, and a beginner is spared | gameplay | S |
 
 ## Risks / open questions for the owner
 

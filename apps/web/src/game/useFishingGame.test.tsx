@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
+import { bedRaider, COLD_WORK_GAP_MS, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -1731,6 +1731,43 @@ describe("level unlock integration", () => {
     const hopped = untilBite(TOPWATER_POPS);
     expect(hopped).toBeLessThan(sat * 0.6);
     expect(untilBite(TOPWATER_POPS + 1)).toBe(hopped);
+  });
+
+  it("puts the slow winter fish off when the jig is hopped too quick, but not when each hop gets a slow count", () => {
+    const untilBite = (hops: number, gap: number) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "day", false, "Green pumpkin tube", undefined, undefined, "winter");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "perch")!);
+      // A long wait, so two slow hops fit before the bite.
+      const random = vi.spyOn(Math, "random").mockReturnValue(0.99);
+      cast(surface);
+      // The gap between hops is timed by the page clock, so from here it runs on the fake one.
+      const [real, fake] = [performance.now(), Date.now()];
+      const now = vi.spyOn(performance, "now").mockImplementation(() => real + Date.now() - fake);
+      act(() => vi.advanceTimersByTime(300));
+      let waited = 300;
+      for (let hop = 0; hop < hops; hop++) {
+        act(() => vi.advanceTimersByTime(gap));
+        waited += gap;
+        expect(phase()).toBe("waiting:none");
+        act(() => surface.dispatchEvent(pointer("pointerdown", 2 + hop)));
+        expect(hint()).toBe(
+          gap < COLD_WORK_GAP_MS
+            ? "Too quick for the cold water: the slow fish turn from it. Give it a slow count before the next one."
+            : "Hop! The jig lifts off the bottom and flutters down. Let it fall…",
+        );
+        act(() => window.dispatchEvent(pointer("pointerup", 2 + hop)));
+      }
+      for (; phase() !== "hookset:none" && waited < 30_000; waited += 10) act(() => vi.advanceTimersByTime(10));
+      random.mockRestore();
+      now.mockRestore();
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return waited;
+    };
+    const sat = untilBite(0, 0);
+    expect(untilBite(TOPWATER_POPS, 0)).toBeGreaterThan(sat * 1.2);
+    expect(untilBite(TOPWATER_POPS, COLD_WORK_GAP_MS + 500)).toBeLessThan(sat * 0.8);
   });
 
   it("brings a fish up sooner when a streamer is stripped, for the first two strips", () => {
