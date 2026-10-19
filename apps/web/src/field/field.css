@@ -1117,6 +1117,10 @@ html:has(.form-save):has(.undo-bar) .field-main {
 }
 
 .choice-row button {
+  /* A long water name wraps inside its button rather than pushing the page sideways. */
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   background: transparent;
   border: 1px solid var(--field-input-line);
   color: var(--field-ink);
