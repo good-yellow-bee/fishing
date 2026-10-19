@@ -192,6 +192,12 @@ export function CatchesPage() {
   // The angler's own as Home and Bests count them: the sample week goes with their first fish or outing.
   const ownIds = new Set(countedBook(book).catches.map((entry) => entry.id));
   const counted = catches.filter((entry) => ownIds.has(entry.id));
+  // The words that leave out the fish listed but not counted as the angler's own.
+  const notMine = catches.filter((entry) => !ownIds.has(entry.id));
+  const onlyMine = [
+    ...(notMine.some((entry) => isSampleCatch(entry.id)) ? [`-${t("sample|search word")}`] : []),
+    ...(notMine.some((entry) => !offPlayLake(entry)) ? [`-${t("game|search word")}`] : []),
+  ].join(" ");
   const photoCount = catches.filter((entry) => photos[entry.id]).length;
   // While a search is typed, its matches take the list's place.
   const [params] = useSearchParams();
@@ -227,7 +233,11 @@ export function CatchesPage() {
               {/* With only the game's fish, none are the angler's own: the list says so rather than summing them as theirs. */}
               {counted.length > 0 ? <FishSum catches={counted} /> : null}
               {counted.length > 0 && counted.length < catches.length ? (
-                <p className="meta">{tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+                <p className="meta">
+                  {tn(catches.length - counted.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}{" "}
+                  {/* One tap leaves them out of the list, as Trips' "Only my outings" does, without deleting the sample week. */}
+                  <Link to={`/catches?${new URLSearchParams({ [FIND_PARAM]: onlyMine }).toString()}`}>{t("Only my fish")}</Link>
+                </p>
               ) : counted.length === 0 ? (
                 <p className="meta">
                   {catches.some((entry) => isSampleCatch(entry.id))
@@ -623,6 +633,12 @@ function CatchForm() {
   const canLocate = !existing && canFindNearest(book);
 
   const pickedTrip = tripId ? tripById(book, tripId) : undefined;
+  // The note on the latest fish of this outing, offered to a new fish on it.
+  const lastNote = useMemo(() => {
+    if (existing || !tripId) return "";
+    const onTrip = book.catches.filter((entry) => entry.tripId === tripId && entry.note.trim());
+    return onTrip.reduce<CatchEntry | null>((last, entry) => (!last || entry.caughtAt > last.caughtAt ? entry : last), null)?.note.trim() ?? "";
+  }, [book, existing, tripId]);
   // An edit that leaves the time and the outing as they were keeps the stored instant: a phone in another time zone
   // reads it on another day, but the fish was on its outing's day where it was landed.
   const timeKept = Boolean(existing && caughtAt === toLocalInput(new Date(existing.caughtAt)) && tripId === (existing.tripId ?? ""));
@@ -1404,6 +1420,21 @@ function CatchForm() {
               placeholder={t("Where it hit, and what you would repeat.")}
             />
           </label>
+          {/* A run of fish off one weed edge: the outing's last note comes back in a tap, as its weather does. */}
+          {lastNote && !note.trim() ? (
+            <p className="wide form-note lure-tips">
+              <button
+                type="button"
+                className="lure-tip"
+                onClick={() => {
+                  setNote(lastNote);
+                  focusSoon('textarea[name="note"]');
+                }}
+              >
+                {t("Same note as the last fish: “{note}”", { note: lastNote.length > 60 ? `${lastNote.slice(0, 59).trimEnd()}…` : lastNote })}
+              </button>
+            </p>
+          ) : null}
 
           <div className="wide photo-field">
             <label>
@@ -1492,14 +1523,31 @@ function CatchForm() {
   );
 }
 
+/** "40 min", "2 h", "1 h 5 min". */
+function spanText(away: number): string {
+  const hours = Math.floor(away / 60);
+  const minutes = away % 60;
+  return hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{n} h", { n: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+}
+
+/**
+ * How far into its outing a fish came, "2 h 10 min after the outing's first fish": when the bite window opened and how
+ * long it ran. Null for the outing's first fish, one within the same minute, or a fish filed a day or more apart.
+ */
+export function intoOuting(book: Logbook, entry: CatchEntry): string | null {
+  if (!entry.tripId) return null;
+  const first = book.catches.reduce((min, other) => (other.tripId === entry.tripId ? Math.min(min, Date.parse(other.caughtAt)) : min), Infinity);
+  const minutes = Math.round((Date.parse(entry.caughtAt) - first) / 60_000);
+  if (!Number.isFinite(minutes) || minutes < 1 || minutes >= 24 * 60) return null;
+  return t("{time} after the outing's first fish", { time: spanText(minutes) });
+}
+
 /** "40 min after sunrise", "1 h 5 min before sunset", "At sunrise", or "In daylight" / "After dark" away from both. */
 function sunMarkText(mark: SunMark): string {
   if (!mark.edge) return mark.light === "day" ? t("In daylight") : t("After dark");
   const away = Math.abs(mark.minutes);
   if (away < 3) return mark.edge === "rise" ? t("At sunrise") : t("At sunset");
-  const hours = Math.floor(away / 60);
-  const minutes = away % 60;
-  const time = hours === 0 ? t("{n} min", { n: minutes }) : minutes === 0 ? t("{n} h", { n: hours }) : t("{h} h {n} min", { h: hours, n: minutes });
+  const time = spanText(away);
   if (mark.edge === "rise") return mark.minutes < 0 ? t("{time} before sunrise", { time }) : t("{time} after sunrise", { time });
   return mark.minutes < 0 ? t("{time} before sunset", { time }) : t("{time} after sunset", { time });
 }
@@ -1862,6 +1910,7 @@ function CatchView() {
         <p className="trip-link">
           {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
           {tripFish > 1 ? ` · ${fishCountLabel(tripFish)}` : null}
+          {tripFish > 1 && intoOuting(book, entry) ? ` · ${intoOuting(book, entry)}` : null}
         </p>
       ) : looseTrip ? (
         <p className="trip-link">
