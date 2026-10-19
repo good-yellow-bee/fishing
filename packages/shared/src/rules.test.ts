@@ -36,6 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
+import { DAY_RUN_BONUS } from "./streak.ts";
 import { canLand, catchPoints, cleanRunBonus, GROUNDBAIT_PRICE, LODGE_RECORD_BONUS, lodgeRecordBonus, PB_BONUS, personalBestBonus, SHACK_DISCOUNT_LEVEL, shackPrice, SHINER_PRICE, validateGroundbaitBuy, validateShinerBuy, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
@@ -152,6 +153,15 @@ describe("catch rules", () => {
     expect(lodgeRecordBonus(0.8, 0.6, 0.8)).toBe(1);
     expect(lodgeRecordBonus(0.8, 0.6, null)).toBe(1);
     expect(lodgeRecordBonus(0.8, 0.7, 0.7)).toBe(1.5);
+  });
+
+  it("adds the day-run bonus to the first fish of the third day in a row", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const, day: "2026-07-15" };
+    const at = new Date("2026-07-15T12:00:00Z");
+    expect(validateCatch(starter, request, at, null, null, ["2026-07-13", "2026-07-14"])).toMatchObject({ points: catchPoints(perch, 0.8, false, DAY_RUN_BONUS) });
+    expect(validateCatch(starter, request, at, null, null, ["2026-07-13", "2026-07-14", "2026-07-15"])).toMatchObject({ points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, { ...request, day: undefined }, at, null, null, ["2026-07-13", "2026-07-14"])).toMatchObject({ points: catchPoints(perch, 0.8) });
   });
 
   it("blocks landing when strength is short", () => {

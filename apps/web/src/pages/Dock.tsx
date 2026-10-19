@@ -31,6 +31,8 @@ import {
   keepPlayTrip,
   localDate,
   streakDays,
+  dayRunForFirstFish,
+  DAY_RUN_BONUS,
   STANCE_LABELS,
   SPOT_LABELS,
   skyAt,
@@ -299,6 +301,10 @@ export function DockPage() {
     if (game.outcome?.kind !== "landed") return null;
     return catchStamp(statsRef.current, game.outcome.species.id, game.outcome.weight);
   }, [game.outcome]);
+  const daysRef = useRef(me?.recentDays ?? []);
+  daysRef.current = me?.recentDays ?? [];
+  /** The run of days this landed fish keeps going as the day's first, from DAY_RUN_FROM; 0 when it pays no day-run bonus. */
+  const dayRun = useMemo(() => (game.outcome?.kind === "landed" ? dayRunForFirstFish(daysRef.current, localDate(new Date())) : 0), [game.outcome]);
   // Read before the catch is saved, so a new record can name the one it beat; read again after each save.
   const [records, setRecords] = useState<SpeciesRecord[] | null>(null);
   const recordsRef = useRef(records);
@@ -1095,7 +1101,7 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (lodgeTaken ? LODGE_RECORD_BONUS : stamp?.kind === "pb" ? PB_BONUS : 1) * (dayRun > 0 ? DAY_RUN_BONUS : 1),
                 ),
               })}
             </p>
@@ -1109,6 +1115,7 @@ export function DockPage() {
               </p>
             )}
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
+            {dayRun > 0 && <p className="catch-stamp">{t("First fish of day {n} in a row · 1.5× points", { n: dayRun })}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
               <p className="catch-stamp">

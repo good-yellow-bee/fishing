@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, isLocalDay, streakDays } from "./streak.ts";
+import { DAY_RUN_BONUS, dayRunBonus, dayRunForFirstFish, daysBetween, isLocalDay, streakDays } from "./streak.ts";
 
 describe("days on the water", () => {
   it("reads only real calendar days", () => {
@@ -29,5 +29,19 @@ describe("days on the water", () => {
   it("is empty with no fish, and skips days that aren't days", () => {
     expect(streakDays([], "2026-10-14")).toEqual({ current: 0, longest: 0 });
     expect(streakDays(["nope", "2026-10-14"], "2026-10-14")).toEqual({ current: 1, longest: 1 });
+  });
+});
+
+describe("the first fish of a day on a run", () => {
+  it("pays from the third day in a row, only for the day's first fish", () => {
+    expect(dayRunForFirstFish(["2026-10-17", "2026-10-18"], "2026-10-19")).toBe(3);
+    expect(dayRunBonus(["2026-10-17", "2026-10-18"], "2026-10-19")).toBe(DAY_RUN_BONUS);
+    expect(dayRunForFirstFish(["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18"], "2026-10-19")).toBe(6);
+    // Two days is not yet a run, a missed day starts again, and a second fish today gets nothing.
+    expect(dayRunForFirstFish(["2026-10-18"], "2026-10-19")).toBe(0);
+    expect(dayRunForFirstFish(["2026-10-16", "2026-10-17"], "2026-10-19")).toBe(0);
+    expect(dayRunForFirstFish(["2026-10-17", "2026-10-18", "2026-10-19"], "2026-10-19")).toBe(0);
+    expect(dayRunBonus(["2026-10-17", "2026-10-18"], undefined)).toBe(1);
+    expect(dayRunBonus(["2026-10-17", "2026-10-18"], "junk")).toBe(1);
   });
 });

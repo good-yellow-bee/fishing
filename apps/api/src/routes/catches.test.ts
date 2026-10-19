@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Hono } from "hono";
-import { catchPoints, CLEAN_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
+import { catchPoints, CLEAN_RUN_BONUS, DAY_RUN_BONUS, fishById, GOLDEN_BONUS, GROUNDBAIT_PRICE, isGolden, LODGE_RECORD_BONUS, PB_BONUS, SHINER_PRICE, weeklyBonus } from "@stillwater/shared";
 
 const testDir = mkdtempSync(join(tmpdir(), "stillwater-api-"));
 process.env.STILLWATER_DB_PATH = join(testDir, "stillwater.sqlite");
@@ -134,6 +134,19 @@ describe("POST /catches", () => {
     const nextId = "2e0a0c08-7e6d-4ee2-8718-4a938773b7e2";
     const beaten = await post({ requestId: nextId, speciesId: "golden-shiner", weight: 0.4, spot: "dock" });
     await expect(beaten.json()).resolves.toMatchObject({ points: catchPoints(shiner, 0.4, false, PB_BONUS * bonus(nextId)) });
+  });
+
+  it("adds the day-run bonus to the first fish of the third day in a row, and not to the day's next", async () => {
+    const bluegill = fishById("bluegill")!;
+    const bonus = (id: string) => weeklyBonus(bluegill.id) * (isGolden(id) ? GOLDEN_BONUS : 1);
+    await post({ requestId, speciesId: "golden-shiner", weight: 0.3, spot: "dock", day: "2026-07-13" });
+    await post({ requestId: "2e0a0c08-7e6d-4ee2-8718-4a938773b7e2", speciesId: "golden-shiner", weight: 0.3, spot: "dock", day: "2026-07-14" });
+    const firstId = "3e0a0c08-7e6d-4ee2-8718-4a938773b7e3";
+    const first = await post({ requestId: firstId, speciesId: "bluegill", weight: 0.5, spot: "point", day: "2026-07-15" });
+    await expect(first.json()).resolves.toMatchObject({ points: catchPoints(bluegill, 0.5, false, DAY_RUN_BONUS * bonus(firstId)) });
+    const nextId = "4e0a0c08-7e6d-4ee2-8718-4a938773b7e4";
+    const next = await post({ requestId: nextId, speciesId: "bluegill", weight: 0.5, spot: "point", day: "2026-07-15" });
+    await expect(next.json()).resolves.toMatchObject({ points: catchPoints(bluegill, 0.5, false, bonus(nextId)) });
   });
 
   it("adds the personal best bonus to a fish heavier than the angler's best of its kind", async () => {

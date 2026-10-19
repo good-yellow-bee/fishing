@@ -35,3 +35,22 @@ export function streakDays(days: readonly string[], today: string) {
   const current = gap === 0 || gap === 1 ? run : 0;
   return { current, longest };
 }
+
+/** From this many days in a row with a fish, counting today, the first fish of the day earns DAY_RUN_BONUS. */
+export const DAY_RUN_FROM = 3;
+export const DAY_RUN_BONUS = 1.5;
+
+/**
+ * The run of days a catch on `day` would make, when it is the first fish of that day and the run reaches DAY_RUN_FROM;
+ * 0 otherwise. `days` are the local days the angler's earlier catches came in on.
+ */
+export function dayRunForFirstFish(days: readonly string[], day: string | undefined): number {
+  if (!isLocalDay(day) || days.includes(day)) return 0;
+  const run = streakDays([...days, day], day).current;
+  return run >= DAY_RUN_FROM ? run : 0;
+}
+
+/** The bonus for the first fish of a day that keeps a run of DAY_RUN_FROM or more days going. */
+export function dayRunBonus(days: readonly string[], day: string | undefined): number {
+  return dayRunForFirstFish(days, day) > 0 ? DAY_RUN_BONUS : 1;
+}
