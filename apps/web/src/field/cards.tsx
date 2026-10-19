@@ -158,6 +158,7 @@ export function SpotCard({
   bestLure = null,
   waterTemp = null,
   biggest = null,
+  outNow = null,
 }: {
   spot: Spot;
   fishCount: number;
@@ -173,6 +174,8 @@ export function SpotCard({
   waterTemp?: { fahrenheit: number; day: string; trend?: "warming" | "cooling" } | null;
   /** The water's best fish and the measure it is best by. */
   biggest?: { entry: CatchEntry; kind: "length" | "weight" } | null;
+  /** The outing the angler is out on there now, by name. */
+  outNow?: string | null;
 }) {
   const t = useT();
   return (
@@ -192,6 +195,8 @@ export function SpotCard({
       </p>
       {restDays !== null ? <p className="meta">{restDays === 0 ? t("Fished here today") : restDays === 1 ? t("Last fished here yesterday") : tn(restDays, "Last fished here {n} day ago", "Last fished here {n} days ago")}</p> : null}
       {biggest ? <p className="meta">{t("Best here: {species}, {size}", { species: t(bookSpelling(biggest.entry.species)), size: measureText(measureOf(biggest.entry, biggest.kind)!) })}</p> : null}
+      {/* Plain words: the whole card is the link. */}
+      {outNow ? <p className="meta out-now">{t("Out now: {outing}", { outing: outNow })}</p> : null}
       {nextOuting ? <p className="meta next-outing">{nextOuting}</p> : null}
       {waterTemp ? (
         <p className="meta water-temp">

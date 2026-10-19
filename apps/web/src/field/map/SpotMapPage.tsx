@@ -7,8 +7,7 @@ import { bestLureAt } from "../waterLure";
 import { getUnits, t, tn, useT } from "../../i18n";
 import { fishCountLabel, formatDay, outingName, tripWhen } from "../format";
 import { useTackleItems } from "../gear/TackleState";
-import { outNow } from "../tripDates";
-import { newestOutingFirst } from "../catchNeighbors";
+import { outNowAt } from "../tripDates";
 import { inSentence } from "../MonthBars";
 import { useLogbook } from "../LogbookState";
 import {
@@ -39,7 +38,7 @@ import {
   type SamplePlace,
 } from "./places";
 import { LABEL_HEIGHT, OWN_HEIGHT, type Box, OWN_WIDTH, PHONE_LABEL_HEIGHT, fitFrame, gridLines, labelShifts, projectIn, scaleBar, scaleSpot } from "./ownSheet";
-import { hasSampleWaters, isSampleOuting, isSampleSpot, nextRealTrips } from "../bookCopy";
+import { hasSampleWaters, isSampleSpot, nextRealTrips } from "../bookCopy";
 import { PLAY_LAKE_ID } from "../playLake";
 import { daysBetween, kmBetween, lastOutByWater, spotsByLastFish } from "../spotOrder";
 import { NearestWater, canFindNearest, distanceText } from "../NearestWater";
@@ -389,7 +388,7 @@ export function SpotMapPage() {
     const best = bestLure(spotId);
     const line = best ? `${dated} · ${t("best on {lure}", { lure: pieceName(best) })}` : dated;
     // The outing the angler is out on now there; of a dawn and a dusk, the later.
-    const going = book.trips.filter((trip) => trip.spotId === spotId && !isSampleOuting(trip) && outNow(book, trip)).sort(newestOutingFirst(book))[0];
+    const going = outNowAt(book, spotId);
     if (going)
       return (
         <>

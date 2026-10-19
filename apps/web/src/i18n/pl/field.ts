@@ -644,6 +644,7 @@ export const PL_FIELD: PlBook = {
   "Out now": "Teraz na wodzie",
   "No fish logged yet tonight.": "Tej nocy jeszcze nic nie zapisano.",
   "Last fished here: {day}": "Ostatnio łowione tu: {day}",
+  "First fish here: {day}": "Pierwsza ryba tutaj: {day}",
   "From the sample week ({n})": "Z przykładowego tygodnia ({n})",
   "The game's lake": "Jezioro z gry",
   "The game's lake is called that too; your water is kept apart from it.": "Jezioro z gry też tak się nazywa; to łowisko jest liczone osobno.",
