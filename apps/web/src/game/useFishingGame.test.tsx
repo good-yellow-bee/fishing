@@ -467,6 +467,20 @@ describe("useFishingGame frayed line", () => {
     expect(container!.querySelector("[data-testid=washed]")?.textContent).toBe("false");
   });
 
+  it("holds the line a moment past the red from level 14", () => {
+    const strain = () => vi.mocked(makeFight).mock.calls.at(-1)?.[14];
+    let surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 23000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(strain()).toBe(1);
+    act(() => root!.unmount());
+    container!.remove();
+    surface = mount(DOCK_BUBBLES.at, { ...profile, lifetimePoints: 30000 });
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 2);
+    expect(strain()).toBe(1.05);
+  });
+
   it("ties on a fresh line after a break", () => {
     const surface = mount();
     fightPerformance = { peakTension: 0.5, maxLine: 1, scuffed: true };
