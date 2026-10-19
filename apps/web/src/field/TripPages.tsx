@@ -158,6 +158,12 @@ function lastTimeNote(book: Logbook, trip: Trip): string {
 }
 
 /** One outing as a calendar file, with its notes, and the evening-before alarm for an outing still to come. */
+/** A plan as text for a message: the day, the water, what works there and what is still to pack. */
+export function planText(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string {
+  const spot = spotById(book, trip.spotId);
+  return [`${outingName(trip, book.spots)} · ${formatDay(trip.date)} · ${spot?.name ?? t("Unknown water")}`, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n");
+}
+
 export function saveOutingIcs(book: Logbook, trip: Trip, tackleItems: TackleItem[], today: string) {
   const spot = spotById(book, trip.spotId);
   // An untitled outing goes by its water's name, as its heading does.
@@ -738,7 +744,7 @@ function TripView() {
         ) : null}
           {/* Plans are made with someone: the day, the water, what works there and what is still to pack, for a message. */}
           <CopySummary
-            text={() => [`${outingName(trip, book.spots)} · ${formatDay(trip.date)} · ${spot?.name ?? t("Unknown water")}`, ...calendarNotes(book, trip, tackleItems), trip.note.trim()].filter(Boolean).join("\n")}
+            text={() => planText(book, trip, tackleItems)}
             file="stillwater-plan.txt"
             label={t("Copy the plan")}
             copied={t("Plan copied.")}

@@ -367,6 +367,9 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
   // This year's fish by their outing's day, as Bests and the goal count them: a New Year's Eve night's small hours are December's.
   const thisYear = localDate(new Date()).slice(0, 4);
   const thisYearFish = countedBook(book).catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
+  // Last year's in the first months, when its returns fall due and this year's sheet holds little or nothing yet.
+  const lastYear = String(Number(thisYear) - 1);
+  const lastYearFish = new Date().getMonth() < 3 ? countedBook(book).catches.filter((entry) => bookFishDay(book, entry).startsWith(`${lastYear}-`)) : [];
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
   const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
@@ -483,6 +486,18 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             }}
           >
             {t("This year's catches ({year})", { year: thisYear })}
+          </button>
+        ) : null}
+        {lastYearFish.length > 0 && lastYearFish.length < countedBook(book).catches.length && !isSampleOnly(storedBook) ? (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              downloadFile(catchesCsv({ ...book, catches: lastYearFish }), "text/csv;charset=utf-8", `stillwater-catches-${lastYear}.csv`);
+              setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
+            }}
+          >
+            {t("Last year's catches ({year})", { year: lastYear })}
           </button>
         ) : null}
         {/* The outings beside the fish, as the Trips page gives them: the angler's own, up to today. */}

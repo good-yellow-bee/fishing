@@ -34,7 +34,8 @@ import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
 import { newestOutingFirst } from "./catchNeighbors";
-import { saveOutingIcs } from "./TripPages";
+import { planText, saveOutingIcs } from "./TripPages";
+import { CopySummary } from "./CopySummary";
 
 function deskLine(now: Date): string {
   const hour = now.getHours();
@@ -416,6 +417,10 @@ export function HomePage() {
                 {t("Add to calendar")}
               </button>
             </small>
+          ) : null}
+          {/* The plan for a message, as its own page copies it: who is coming along needs the day, the water and the bag. */}
+          {next && next !== lateOuting && !isSampleOuting(next) ? (
+            <CopySummary text={() => planText(book, next, tackleItems ?? [])} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />
           ) : null}
           {/* On the day, a fish goes straight onto this outing. */}
           {next && (next.date === today || next === lateOuting) ? (
