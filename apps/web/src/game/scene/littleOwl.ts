@@ -1,6 +1,7 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
 import { MOTH_LAMPS, MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
 import { SNOW_CAP } from "./robinVisit";
+import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
 import { DOCK_POST_CAPS } from "./snowyDock";
 
 /**
@@ -96,11 +97,8 @@ export function owlWatchLook(sit: number, time: number) {
 }
 
 /** Which visit `time` falls in, counting from 0, and how far into it; a negative visit before the first. */
-export function owlVisit(time: number) {
-  const t = time - FIRST_SEC;
-  const index = Math.floor(t / VISIT_EVERY_SEC);
-  return { index, into: t - index * VISIT_EVERY_SEC };
-}
+export const owlVisit = (time: number) => visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+export const owlVisitIndex = (time: number) => owlVisit(time).index;
 
 /**
  * The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post;
@@ -126,7 +124,19 @@ export function owlAt(time: number, snow = false, still = false, moths = false, 
   if (startle < SIT_SEC && sit >= startle) {
     const away = sit - startle;
     if (away >= OUT_SEC) return { ...sat, here: false };
-    return { ...glide(post, TO, smooth(away / OUT_SEC), 0.3), here: true, yaw: heading(post, TO), flying: 1, flap: 1, look: 0, bob: 0, blink: 0 };
+    // A quick swing round toward where it flies, its head coming back straight.
+    const turn = away / STARTLE_TURN_SEC;
+    const was = owlAt(time - away, snow, false, moths);
+    return {
+      ...glide(post, TO, smooth(away / OUT_SEC), 0.3),
+      here: true,
+      yaw: turnBetween(PERCH_YAW, heading(post, TO), turn),
+      flying: 1,
+      flap: 1,
+      look: was.look * Math.max(0, 1 - turn),
+      bob: 0,
+      blink: 0,
+    };
   }
   if (sit < SIT_SEC) {
     // Slow swivels right round and back, with still spells between; a run of bobs when something catches its eye.

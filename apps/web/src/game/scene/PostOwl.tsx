@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { owlAt, owlVisit } from "./littleOwl";
+import { owlAt, owlVisitIndex } from "./littleOwl";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
@@ -71,8 +71,6 @@ export function owlWingShape(side: number) {
     ...[0.04, 0.08, 0.11].map((x) => ({ geometry: new THREE.SphereGeometry(0.006, 5, 3), position: [side * x, 0.005, -0.012] as const, scale: [1, 0.4, 1] as const, color: SPOT })),
   ]);
 }
-
-const owlVisitIndex = (time: number) => owlVisit(time).index;
 
 /** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off, or beats off early when you strike from the dock (littleOwl.ts). */
 export const PostOwl = memo(function PostOwl({ snow, moths, phase, atDock }: { snow: boolean; moths: boolean; phase: ScenePhase; atDock: boolean }) {

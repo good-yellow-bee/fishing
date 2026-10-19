@@ -85,8 +85,9 @@ export function dogTailShape() {
 
 type Props = {
   phase: ScenePhase;
-  /** When the dock robin is about, when a strike last startled it (useStrikeStartle), else null; and the breeze the paper boat drifts on when one is out (null when not): it watches them. */
+  /** While the dock robin is about, the time a strike last startled it (useStrikeStartle); null when it is not. The dog watches it. */
   robin?: Readonly<{ current: number }> | null;
+  /** The breeze the paper boat drifts on while one is out, null when not. The dog watches it go by. */
   paperWind?: number | null;
   /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
   winter?: boolean;

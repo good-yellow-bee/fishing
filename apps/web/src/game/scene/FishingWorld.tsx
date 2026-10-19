@@ -38,7 +38,7 @@ import { DockDog } from "./DockDog";
 import { dogOut } from "./dogMood";
 import { paperBoatOut } from "./paperDrift";
 import { DockRobin } from "./DockRobin";
-import { robinOut, robinVisit } from "./robinVisit";
+import { robinOut, robinVisitIndex } from "./robinVisit";
 import { useStrikeStartle } from "./useStrikeStartle";
 import { knitsOut } from "./scarfKnit";
 import { PostOwl } from "./PostOwl";
@@ -219,7 +219,6 @@ function fightEndedLanded() {
 }
 
 const NO_WIND = { x: 0, z: 0 };
-const robinVisitIndex = (time: number) => robinVisit(time).index;
 
 const landedFrom = new THREE.Vector3();
 const landedFish = new THREE.Vector3();
@@ -2164,6 +2163,7 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
   const take = species !== null ? takeStyle(species.id, topwater) : null;
   const rodTip = useMemo(() => new THREE.Vector3(DOCK_STAND_X + 0.4, DOCK_PLANKS.top + 2.1, DOCK_STAND_Z - 1.2), []);
   const lookAt = useMemo(() => new THREE.Vector3(DOCK_STAND_X, 0, DOCK_STAND_Z - 8), []);
+  const robinAbout = robinOut(hour, sky);
   const robinStartledAt = useStrikeStartle(phase, spot === "dock", robinVisitIndex);
   // Dropping anchor, look on over the bow, not back at the pier; tied up again, look out from the pier.
   useEffect(
@@ -2216,8 +2216,8 @@ function Scene({ level, phase, spot, sim, nibble, schooled = false, lurking = fa
       />
       <RodBell rodTip={rodTip} phase={phase} nibble={nibble} night={hour === "night"} />
       {rodDragonflyOut(hour, sky, season) && <RodDragonfly rodTip={rodTip} phase={phase} nibble={nibble} />}
-      {robinOut(hour, sky) && <DockRobin snow={dockSnowy(season)} startledAt={robinStartledAt} />}
-      {dogOut(hour, sky) && <DockDog key={season} phase={phase} robin={robinOut(hour, sky) ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} />}
+      {robinAbout && <DockRobin snow={dockSnowy(season)} startledAt={robinStartledAt} />}
+      {dogOut(hour, sky) && <DockDog key={season} phase={phase} robin={robinAbout ? robinStartledAt : null} paperWind={paperBoatOut(hour, sky, season) ? (wind ?? NO_WIND).x : null} winter={knitsOut(season)} />}
       {littleOwlOut(hour, sky) && <PostOwl snow={dockSnowy(season)} moths={mothsOut(hour, season)} phase={phase} atDock={spot === "dock"} />}
       <SchoolShadows phase={phase} schooled={schooled} bobber={bobberWorld} />
       <LurkerShadow phase={phase} lurking={lurking} closeInMs={lurkerCloseInMs} bobber={bobberWorld} />

@@ -1,5 +1,6 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
 import { DOCK_POST_CAPS } from "./snowyDock";
+import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
 
 /**
  * A robin that drops in on the dock: it flies in low over the water to the front-left post, cocks
@@ -61,11 +62,8 @@ export type RobinPose = Point & {
 const PERCH_YAW = 0;
 
 /** Which visit `time` falls in, counting from 0, and how far into it; a negative visit before the first. */
-export function robinVisit(time: number) {
-  const t = time - FIRST_SEC;
-  const index = Math.floor(t / VISIT_EVERY_SEC);
-  return { index, into: t - index * VISIT_EVERY_SEC };
-}
+export const robinVisit = (time: number) => visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+export const robinVisitIndex = (time: number) => robinVisit(time).index;
 
 /**
  * The robin `time` seconds in. `snow` lifts it onto the posts' snow caps; `still` keeps it perched on the left post;
@@ -91,7 +89,9 @@ export function robinAt(time: number, snow = false, still = false, startledAt = 
     if (away >= OUT_SEC) return { ...left, here: false, yaw: PERCH_YAW, flying: 0, look: 0, flick: 0 };
     const from = robinAt(time - away, snow);
     const p = smooth(away / OUT_SEC);
-    return { ...lerp(from, TO, p, 0.4), here: true, yaw: heading(from, TO), flying: 1, look: 0, flick: 0 };
+    // A quick swing round toward where it flies, its head coming back straight.
+    const turn = away / STARTLE_TURN_SEC;
+    return { ...lerp(from, TO, p, 0.4), here: true, yaw: turnBetween(from.yaw, heading(from, TO), turn), flying: 1, look: from.look * Math.max(0, 1 - turn), flick: 0 };
   }
   // Head cocked this way and that in quick turns, with still moments between; the tail flicks now and then.
   const look = 0.7 * Math.sin(Math.round(into / 0.9) * 2.3) * (into > onLeft && into < off ? 1 : 0);
