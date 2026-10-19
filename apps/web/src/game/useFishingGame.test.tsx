@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { DOCK_STAND_X, DOCK_STAND_Z, FISH, SPOT_LABELS, type LakeHour, type LakeSeason, type Profile, type Sky, type Wind } from "@stillwater/shared";
 import { floodedInlet, makeFight, springRunTireMul, SPRING_RUN_TIRE, currentTireMul, CURRENT_FIGHTER_TIRE, type FightOutcome, type FightPerformance, type FightSim } from "./fight";
 import { HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt } from "./hotspot";
-import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT } from "./logic";
+import { bedRaider, COLD_WORK_GAP_MS, LONG_CAST_SOLID, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, lightHunter, midgeRiser, castIntoSpooked, isSkipCast, castOnFreshWater, TWIST_CASTS, twistAfterCast, WORM_SOAK_CASTS, WASHED_WAIT, soakAfterCast, PRESSURE_CASTS, GROUNDBAIT_CASTS, groundbaitFeeder, GROUNDBAIT_HANDFULS, pickBite, RAIN_INLET_WAIT, rainInletWaitMul, SPRING_SHALLOWS_WAIT, springShallowsWaitMul, waitMs, SPINNER_REED_WAIT, spinnerReedWaitMul, FLOAT_REED_WAIT, floatReedWaitMul, STREAMER_LEDGE_WAIT, streamerLedgeWaitMul, WORM_INLET_WAIT, wormInletWaitMul, SPINNER_INLET_WAIT, spinnerInletWaitMul, CRANK_PILING_WAIT, crankPilingWaitMul, SPOON_OPEN_WAIT, spoonOpenWaitMul, DARK_NIGHT_WAIT, darkNightWaitMul, OPEN_GLARE_WAIT, openGlareWaitMul, LONG_SHADOW_WAIT, longShadowWaitMul, WIND_POINT_WAIT, windPointWaitMul, LANTERN_DOCK_WAIT, lanternDockWaitMul, WINTER_SUN_WAIT, winterSunWaitMul, WARMING_WAIT, COOLING_WAIT, waterSwingWaitMul, anchorSplashWaitMul, ANCHOR_SPLASH_WAIT, LAMP_WINDOW } from "./logic";
 import { LIGHT_HOLD, stealsBait } from "./nibblePlan";
 import { castForReleased } from "./releasedFish";
 
@@ -183,6 +183,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <button type="button" onClick={game.dismissResult}>dismiss</button>
       <button type="button" onClick={game.throwGroundbait}>groundbait</button>
       <button type="button" onClick={game.retie}>retie</button>
+      <button type="button" onClick={game.toggleLamp}>lamp</button>
       <button type="button" onClick={game.baitShiner}>bait shiner</button>
       <button type="button" onClick={game.addShiner}>buy shiner</button>
       <i data-testid="live-shiner">{String(game.liveShiner)}</i>
@@ -2095,6 +2096,27 @@ describe("level unlock integration", () => {
     for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
     expect(phase()).toBe("hookset:none");
     expect(hint()).toBe("It's running off with it — strike!");
+  });
+
+  it("lets a headlamp at night show the float, holding the strike longer, while its light slows the bite", () => {
+    const windowWith = (lamp: boolean) => {
+      const surface = mount(DOCK_BUBBLES.at, profile, "night");
+      vi.mocked(pickBite).mockReturnValueOnce(FISH.find((fish) => fish.id === "bluegill")!);
+      if (lamp) act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "lamp") as HTMLButtonElement).click());
+      cast(surface);
+      const told = hint();
+      for (let waited = 0; !phase()?.startsWith("hookset") && waited < 20_000; waited += 100) act(() => vi.advanceTimersByTime(100));
+      const ms = Number(container!.querySelector("[data-testid=strike-window]")?.textContent);
+      act(() => root!.unmount());
+      root = null;
+      container!.remove();
+      return { told, ms };
+    };
+    const dark = windowWith(false);
+    const lit = windowWith(true);
+    expect(lit.told).toContain("Your headlamp shows the float plainly, but its light on the water puts the fish off.");
+    expect(dark.told).not.toContain("headlamp");
+    expect(lit.ms).toBe(Math.round(dark.ms * LAMP_WINDOW));
   });
 
   it("calls a perch gulping the bait and gives it longer before it lets go", () => {

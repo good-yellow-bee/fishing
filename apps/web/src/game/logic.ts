@@ -625,6 +625,16 @@ export function longShadowWaitMul(spot: string, hour: LakeHour, sky: string | un
 /** On a night with the moon this thin (its lit share) or less, it is too dark for the fish to see to feed. */
 export const NEW_MOON = 0.1;
 
+/** At night a headlamp shows the float plainly, so the strike window holds this much longer... */
+export const LAMP_WINDOW = 1.2;
+/** ...but its light on the water puts the fish off, so the bite comes this much slower. */
+export const LAMP_WAIT = 1.15;
+
+/** Whether the headlamp is lit on the water: switched on, and only at night. */
+export function lampLit(on: boolean, hour: LakeHour) {
+  return on && hour === "night";
+}
+
 /** On a moonless night the fish can barely see to feed, so the bite comes slower. */
 export const DARK_NIGHT_WAIT = 1.1;
 

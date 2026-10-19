@@ -109,6 +109,11 @@ export const PL_GAME: PlBook = {
   "{n} more reasons": ["jeszcze {n} powód", "jeszcze {n} powody", "jeszcze {n} powodów"],
   "When a cast has more reasons for a quick or slow bite than the hint can fit, the hint ends with \"2 more reasons\": tap it to read the rest. And the outings you pack up from the lake now show their titles and season notes in whichever language you read the field log in.":
     "Gdy rzut ma więcej powodów szybkiego lub wolnego brania, niż mieści podpowiedź, kończy się ona napisem „jeszcze 2 powody”: stuknij, by przeczytać resztę. A wyprawy zwinięte nad jeziorem pokazują teraz tytuły i notki o porze roku w języku, w którym czytasz dziennik połowów.",
+  "Your headlamp shows the float plainly, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, ale jej światło na wodzie płoszy ryby.",
+  "A headlamp shows the float plainly, so the strike holds longer, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, więc na zacięcie jest więcej czasu, ale jej światło na wodzie płoszy ryby.",
+  "Headlamp on": "Włącz czołówkę",
+  "Headlamp off": "Wyłącz czołówkę",
+  "At night: switch the headlamp on or off": "W nocy: włącz lub wyłącz czołówkę",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
