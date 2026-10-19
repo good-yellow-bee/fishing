@@ -264,7 +264,7 @@ export function DockPage() {
     observer.observe(wrap);
     return () => observer.disconnect();
   }, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);
-  // On an upright phone the coach and the hint hang under the bank chip, which wraps tall in its narrow column when it
+  // On an upright phone the hint hangs under the bank chip, which wraps tall in its narrow column when it
   // says several things ("Dock · biting today · bites sooner now · groundbait · 5 left"): the scene keeps its height.
   useEffect(() => {
     const wrap = game.surfaceRef.current;

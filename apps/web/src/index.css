@@ -2298,14 +2298,8 @@ html[data-input="pad"] .fight-bar .on-pad {
     display: none;
   }
 
-  /* The coach and the hint start 90 px under the header, below the bank chip and lure panel, or further down when the
-     chip wraps taller ("Dock · biting today · bites sooner now · groundbait · 5 left"); the scene keeps its height. */
-  .scene-wrap {
-    --chips-end: max(90px, calc(var(--stance-h, 0px) + 16px));
-  }
-
   .walkthrough {
-    top: calc(var(--hud-bottom, 140px) + var(--chips-end));
+    top: calc(var(--hud-bottom, 140px) + 90px);
     right: 8px;
     left: 8px;
     width: auto;
@@ -2330,7 +2324,7 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 
   .scene-wrap[data-walkthrough="1"] .hint {
-    top: calc(var(--hud-bottom, 140px) + var(--chips-end) + 122px);
+    top: calc(var(--hud-bottom, 140px) + 212px);
   }
 
   /* In a fight the card covers the coach's place under the header, so the coach drops below the card, above the thumb buttons, without its step chips. */
@@ -2348,8 +2342,10 @@ html[data-input="pad"] .fight-bar .on-pad {
     display: none;
   }
 
+  /* 90 px under the header, below the bank chip and lure panel, or further down when the chip wraps taller ("Dock ·
+     biting today · bites sooner now · groundbait · 5 left"); the scene keeps its height. The coach stays put over it. */
   .hint {
-    top: calc(var(--hud-bottom, 140px) + var(--chips-end));
+    top: calc(var(--hud-bottom, 140px) + max(90px, calc(var(--stance-h, 0px) + 16px)));
     right: 8px;
     bottom: auto;
     left: 8px;

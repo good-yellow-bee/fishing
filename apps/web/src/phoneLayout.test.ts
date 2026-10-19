@@ -33,12 +33,9 @@ describe("a phone held sideways", () => {
     expect(dock).toContain("}, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);");
   });
 
-  it("hangs the coach and the hint below a bank chip that wraps taller than the lure panel, under the cast meter", () => {
+  it("hangs the hint below a bank chip that wraps taller than the lure panel, under the cast meter", () => {
     const upright = css.slice(css.indexOf("@media (max-width: 800px) and (min-height: 501px) {"));
-    expect(/\n  \.scene-wrap \{([^}]*)\}/.exec(upright)?.[1]).toContain("--chips-end: max(90px, calc(var(--stance-h, 0px) + 16px));");
-    expect(/\n  \.hint \{([^}]*)\}/.exec(upright)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + var(--chips-end));");
-    expect(/\n  \.walkthrough \{([^}]*)\}/.exec(upright)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + var(--chips-end));");
-    expect(/\n  \.scene-wrap\[data-walkthrough="1"\] \.hint \{([^}]*)\}/.exec(upright)?.[1]).toContain("var(--chips-end) + 122px");
+    expect(/\n  \.hint \{([^}]*)\}/.exec(upright)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + max(90px, calc(var(--stance-h, 0px) + 16px)));");
     expect(/\n  \.power-meter \{([^}]*)\}/.exec(upright)?.[1]).toContain("z-index: 3;");
     const dock = readFileSync(`${import.meta.dirname}/pages/Dock.tsx`, "utf8");
     expect(dock).toContain('wrap.style.setProperty("--stance-h"');
