@@ -136,6 +136,20 @@ export function FieldShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // The tab bar is fixed over the bottom of a phone screen, and the browser leaves a field it only partly covers where it
+  // is when tabbed to ("Note" on a new outing): the page scrolls it clear, by its scroll margin (WCAG 2.4.11).
+  const tabBar = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const onFocus = (event: FocusEvent) => {
+      const tabs = tabBar.current?.getBoundingClientRect();
+      const target = event.target;
+      if (!tabs?.height || !(target instanceof HTMLElement) || tabBar.current?.contains(target)) return;
+      if (target.getBoundingClientRect().bottom > tabs.top) target.scrollIntoView({ block: "nearest" });
+    };
+    document.addEventListener("focusin", onFocus);
+    return () => document.removeEventListener("focusin", onFocus);
+  }, []);
+
   // A link to another page opens at its top; Back and Forward keep where the browser left it.
   const how = useNavigationType();
   const navigate = useNavigate();
@@ -280,7 +294,7 @@ export function FieldShell({ children }: { children: ReactNode }) {
         </main>
         <SavedNote />
       </div>
-      <nav className="field-tab" aria-label={t("Log")}>
+      <nav className="field-tab" ref={tabBar} aria-label={t("Log")}>
         <FieldLinks />
       </nav>
     </div>
