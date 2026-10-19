@@ -7,6 +7,7 @@ import { moosePose, stepMoose, type MooseState } from "./mooseWade";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const COAT = "#3b2a1f";
 const DARK = "#241912";
@@ -105,6 +106,8 @@ export function Moose({ antlers }: { antlers: boolean }) {
       ringMaterial.current.opacity = (1 - pose.ring) * 0.6;
     }
   });
+
+  useSkinnedFigure(root, painted);
 
   return (
     <>

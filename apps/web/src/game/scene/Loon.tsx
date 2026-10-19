@@ -7,6 +7,7 @@ import { loonCallLift, loonPose, soundPlace } from "./loonMotion";
 import { mergePainted } from "./mergeParts";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BODY = "#1b1f22";
 const HEAD = "#16241f";
@@ -82,6 +83,8 @@ export function Loon() {
       fx.ambient.setLoonPlace(place.pan, place.gain);
     }
   });
+
+  useSkinnedFigure(group, painted);
 
   return (
     <>

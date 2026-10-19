@@ -7,6 +7,7 @@ import { heronFlight, heronLanding, heronWade, stepHeron, type HeronPose, type H
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 /** Feet sit this far under the surface while wading. */
 const WADE_DEPTH = -0.12;
@@ -114,6 +115,8 @@ export function Heron() {
       rightWing.current.rotation.z = -flap;
     }
   });
+
+  useSkinnedFigure(root, mats.painted);
 
   return (
     <>

@@ -5,6 +5,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { woodpeckerAt } from "./woodpeckerDrum";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BLACK = "#1b1b1e";
 const WHITE = "#f1efe9";
@@ -80,6 +81,8 @@ export function Woodpecker() {
       wing.rotation.z = (side === 0 ? 1 : -1) * (0.3 + pose.flap * 1.1);
     });
   });
+
+  useSkinnedFigure(bird, looks.painted);
 
   return (
     // Facing west into the trunk, so the dock sees it side-on.

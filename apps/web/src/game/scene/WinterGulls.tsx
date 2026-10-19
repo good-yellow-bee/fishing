@@ -6,6 +6,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const WHITE = "#f4f5f2";
 const MANTLE = "#a9b2b8";
@@ -42,6 +43,7 @@ export function WinterGulls({ wind }: { wind: { x: number; z: number } }) {
   const still = useReducedMotion();
   const floes = useMemo(() => gullFloes(), []);
   const gulls = useRef<(THREE.Group | null)[]>([]);
+  const figure = useRef<THREE.Group>(null);
   const wings = useRef<(THREE.Group | null)[]>([]);
   const shapes = useMemo(() => ({ body: gullBodyShape(), wing: gullWingShape() }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -71,8 +73,10 @@ export function WinterGulls({ wind }: { wind: { x: number; z: number } }) {
       }
     });
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="winter-gulls">
+    <group ref={figure} name="winter-gulls">
       {Array.from({ length: GULL_COUNT }, (_, i) => (
         <group key={i} ref={(g) => void (gulls.current[i] = g)}>
           <group scale={SCALE}>

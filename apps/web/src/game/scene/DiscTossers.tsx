@@ -5,6 +5,7 @@ import { PLAYERS, discAt, tosserAt } from "./discToss";
 import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const SKIN = "#e2b48c";
 const SHOES = "#f2f0ea";
@@ -68,6 +69,7 @@ export function DiscTossers() {
   const still = useReducedMotion();
   const arms = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const disc = useRef<THREE.Mesh>(null);
+  const figure = useRef<THREE.Group>(null);
   const bodies = useMemo(tossersShape, []);
   const shapes = useMemo(() => KITS.map((kit) => ({ arm: tosserArmShape(kit) })), []);
   const discShape = useMemo(() => new THREE.CylinderGeometry(0.15, 0.13, 0.03, 14), []);
@@ -96,8 +98,10 @@ export function DiscTossers() {
       disc.current.rotation.set(point.flying ? 0.12 : 0.9, point.spin, 0);
     }
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="disc-tossers">
+    <group ref={figure} name="disc-tossers">
       <mesh geometry={bodies} material={material} castShadow />
       {PLAYERS.map((player, i) => (
         <group key={i} position={[player.x, 0, player.z]} rotation={[0, player.yaw, 0]} scale={SCALE}>
