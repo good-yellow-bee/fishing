@@ -1,6 +1,6 @@
 import { CAST_RANGE, inLake, resolveCast, SPOT_IDS, spotAt, stanceAt, walkableAt } from "@stillwater/shared";
 import { describe, expect, it } from "vitest";
-import { BANK_STANDS, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, isHotspotCast } from "./hotspot";
+import { BANK_STANDS, FRENZY_MS, FRENZY_SLOT_MS, frenzyOn, HOTSPOT_PERIOD_MS, HOTSPOT_RADIUS, hotspotAt, isHotspotCast, slotFrenzy } from "./hotspot";
 
 const START = Date.UTC(2026, 9, 8, 12);
 const PERIODS = 600;
@@ -94,5 +94,23 @@ describe("bubbling hotspot", () => {
     const elsewhere = SPOT_IDS.find((spot) => spot !== hotspot.spot)!;
     expect(isHotspotCast(hotspot, hotspot.x, hotspot.z, elsewhere)).toBe(false);
     expect(isHotspotCast(null, hotspot.x, hotspot.z, hotspot.spot)).toBe(false);
+  });
+});
+
+describe("the feeding frenzy", () => {
+  it("boils once in every slot, inside one bubble period, for everyone at once", () => {
+    for (let slot = 100; slot < 140; slot++) {
+      const start = slot * FRENZY_SLOT_MS;
+      const frenzy = slotFrenzy(start + 1);
+      expect(frenzy.from).toBeGreaterThanOrEqual(start);
+      expect(frenzy.to).toBeLessThanOrEqual(start + FRENZY_SLOT_MS);
+      expect(frenzy.to - frenzy.from).toBe(FRENZY_MS);
+      // Inside one bubble period, so the patch never moves mid-frenzy.
+      expect(Math.floor(frenzy.from / HOTSPOT_PERIOD_MS)).toBe(Math.floor((frenzy.to - 1) / HOTSPOT_PERIOD_MS));
+      expect(slotFrenzy(start + FRENZY_SLOT_MS - 1)).toEqual(frenzy);
+      expect(frenzyOn(frenzy.from)).toBe(true);
+      expect(frenzyOn(frenzy.to)).toBe(false);
+      expect(frenzyOn(frenzy.from - 1)).toBe(false);
+    }
   });
 });

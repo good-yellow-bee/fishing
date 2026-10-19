@@ -130,6 +130,11 @@ export const PL_GAME: PlBook = {
   "Goals run Monday to Sunday.": "Wyzwania trwają od poniedziałku do niedzieli.",
   "Every kind of fish now climbs mastery tiers as you land it, Known at 5, Skilled at 15 and Master at 40: the field guide shows how far you are, and a mastered kind pays 1.1× points. And the shack board adds three challenges that run all week, Monday to Sunday, for bigger rewards.":
     "Każdy gatunek ryby wspina się teraz po poziomach opanowania, gdy go łowisz: Znajomość przy 5, Wprawa przy 15 i Mistrzostwo przy 40. Atlas ryb pokazuje, jak daleko to zaszło, a opanowany gatunek daje 1,1× punktów. A tablica w szopie dodaje trzy wyzwania na cały tydzień, od poniedziałku do niedzieli, z większymi nagrodami.",
+  "Into the frenzy! The baitfish boil and the hunters are slashing through them.": "W sam środek żerowania! Drobnica się kotłuje, a drapieżniki tną przez nią.",
+  "A feeding frenzy at the {bank}: baitfish boil over the bubbles. Cast into them!": "Żerowanie! Łowisko: {bank}. Drobnica kotłuje się nad bąblami. Rzuć w nie!",
+  "The frenzy at the {bank} is over.": "Koniec żerowania. Łowisko: {bank}.",
+  "{bank}: feeding frenzy now": "{bank}: teraz żerowanie",
+  "{bank}: feeding frenzy now, but fished hard": "{bank}: teraz żerowanie, ale mocno obłowione",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",

@@ -814,6 +814,17 @@ export function shinerHunter(spot: SpotId, profile: Pick<Profile, "strength" | "
   return hunters.at(-1) ?? null;
 }
 
+/** In a feeding frenzy the bite on the bubbles comes this much sooner again... */
+export const FRENZY_WAIT = 0.5;
+/** ...and this share of those bites are the hunters crowding in on the baitfish. */
+export const FRENZY_HUNTER_SHARE = 0.5;
+export const FRENZY_HUNTERS: ReadonlySet<string> = new Set(["pike", "smallmouth-bass", "largemouth-bass", "walleye", "perch", "tiger-muskie", "rainbow-trout"]);
+
+/** A hunter drawn into the frenzy for this bite, or none. */
+export function frenzyHunter(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(FRENZY_HUNTERS, FRENZY_HUNTER_SHARE, spot, lure, profile, hour, random);
+}
+
 /** The fish that raid the sunfish beds by the dock for their eggs. */
 export const BED_RAIDERS: ReadonlySet<string> = new Set(["perch", "smallmouth-bass"]);
 /** Chance a bite on the sunfish beds is one of the raiders. */
