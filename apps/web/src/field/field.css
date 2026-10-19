@@ -489,6 +489,33 @@ button.field-primary {
     text-align: center;
   }
 
+  /* A catch's conditions box links the sky, the wind, the water temperature and the moon on 27 px lines in large type,
+     each a 25 px target: each linked word is now a 32 px band. */
+  .catch-conditions > p:not(.meta) a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 2px;
+    box-sizing: border-box;
+  }
+
+  /* An empty list's line ends on a link to fill it ("No upcoming outings. Plan one", "Log a catch", "Add a spot"), an
+     18-22 px target: it is now a 32 px band. */
+  .empty a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 5px;
+    box-sizing: border-box;
+  }
+
+  /* A page's one-link line ("Add a photo" on a fish, "Write up the day" and "Go again" on an outing) was a 19-20 px
+     target 12 px from the next line, too close for a reach: each link is now a 32 px band that moves its neighbours. */
+  :is(.add-photo, .trip-write-up, .trip-again) > a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 6px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
