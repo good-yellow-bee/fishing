@@ -249,6 +249,7 @@ export const STREAMER_CHASERS: ReadonlySet<string> = new Set(["pike", "ghost-pik
 
 /** At most this many reasons for a sooner or slower bite are told on a cast, so the hint stays readable. */
 export const WAIT_REASONS = 2;
+const NO_REASONS: readonly string[] = [];
 
 /** At most this many reasons a hooked fish tires slower or sooner are told at the hookset, so the hint stays readable. */
 export const TIRE_REASONS = 2;
@@ -520,6 +521,8 @@ export function useFishingGame(
   /** How long this bite's fish holds the bait, so the strike cue runs out when it lets go. */
   const [strikeWindowMs, setStrikeWindowMs] = useState(0);
   const [hint, setHint] = useState(() => t("Walk to the water."));
+  /** The reasons past WAIT_REASONS the cast's hint left out, with the hint they belong to. */
+  const [moreReasons, setMoreReasons] = useState<{ hint: string; more: readonly string[] }>({ hint: "", more: NO_REASONS });
   const [stance, setStance] = useState<StanceId>("shop");
   const [shopTap, setShopTap] = useState(0);
   const [hotspot, setHotspot] = useState<Hotspot | null>(null);
@@ -936,6 +939,7 @@ export function useFishingGame(
     if (anchorWait > 1) reasons.unshift(t("The anchor's splash put the fish down, so the bites come slow: give it a few seconds before you cast."));
     waitHintRef.current = [...reasons.slice(0, WAIT_REASONS), waitHintRef.current].join(" ");
     setHint(waitHintRef.current);
+    setMoreReasons({ hint: waitHintRef.current, more: reasons.slice(WAIT_REASONS) });
     // Roll the fish as the lure sits, so the one rising under the bobber is the one that bites.
     const mercyNow = mercyRef.current;
     const drawn = pickBite(spotRef.current, current, short, Math.random, hour, lureRef?.current, sky, castHotspotRef.current, mercyNow, season, moon);
@@ -1812,6 +1816,8 @@ export function useFishingGame(
     bite,
     outcome,
     hint,
+    /** Reasons the hint left out, while the hint is still the cast's own. */
+    moreReasons: moreReasons.hint === hint ? moreReasons.more : NO_REASONS,
     nibble,
     schooled,
     handfuls,

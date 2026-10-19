@@ -566,6 +566,18 @@ a:focus-visible {
   pointer-events: none;
 }
 
+.hint-more {
+  pointer-events: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e1b86e;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+
 /* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
 .scene-wrap[data-phase="fight"] .hint {
   display: none;

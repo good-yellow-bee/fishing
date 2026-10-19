@@ -193,6 +193,7 @@ function Harness({ current = profile, hour = "day", rising = false, lure, wind, 
       <i data-testid="fished-hard">{game.fishedHard.join(",")}</i>
       <i data-testid="groundbait">{game.handfuls}|{game.groundbait ? `${game.groundbait.spot}:${game.groundbait.casts}` : ""}</i>
       <p data-testid="hint">{game.hint}</p>
+      <p data-testid="more-reasons">{game.moreReasons.join(" | ")}</p>
       <b data-testid="bite">{game.bite ? `${game.bite.species.id}|${game.bite.weight}` : ""}</b>
       <b data-testid="fight">{game.fight ? `${game.fight.species.id}|${game.fight.weight}` : ""}</b>
       <i data-testid="miss-message">{game.outcome?.kind === "miss" ? game.outcome.message : ""}</i>
@@ -2683,6 +2684,8 @@ describe("level unlock integration", () => {
     expect(WAIT_REASONS).toBe(2);
     expect(hint()).toMatch(/^The cold water slows the fish, but they still chase a slow jig\. The shallows by the reeds warm first in spring, and the fish crowd in\. /);
     expect(hint()).not.toContain("The jig hops down the ledge.");
+    // The reasons left out wait behind the hint's "more reasons" button.
+    expect(container!.querySelector("[data-testid=more-reasons]")?.textContent).toContain("The jig hops down the ledge.");
   });
 
   it.each([[350, "idle:none"], [700, "casting:none"]] as const)("uses the level range at %i lifetime points", (points, expected) => {
