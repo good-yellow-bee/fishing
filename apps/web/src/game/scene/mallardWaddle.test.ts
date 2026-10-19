@@ -100,10 +100,10 @@ describe("mallard on the dock", () => {
       expect(mallardAt(strike + VISIT_EVERY_SEC, false, strike)).toEqual(mallardAt(strike + VISIT_EVERY_SEC));
     });
 
-    it("struck at while still swimming in, it lands and goes at once", () => {
+    it("struck at as it comes up onto the boards, it lands and goes at once", () => {
       const landed = firstOnBoards();
-      const strike = landed - 2;
-      expect(mallardAt(strike + 1, false, strike)).toEqual(mallardAt(strike + 1));
+      const strike = landed - 0.5;
+      expect(mallardAt(strike + 0.3, false, strike)).toEqual(mallardAt(strike + 0.3));
       expect(mallardAt(landed + 0.3, false, strike).flap).toBe(1);
       expect(mallardAt(landed + 3, false, strike).here).toBe(false);
     });
@@ -118,14 +118,29 @@ describe("mallard on the dock", () => {
       expect(mallardAt(landed + 5, false, landed + 5 - VISIT_EVERY_SEC)).toEqual(mallardAt(landed + 5));
     });
 
-    it("flies off without jumps", () => {
-      const strike = firstOnBoards() + 8;
-      let last = mallardAt(strike, false, strike);
+    it("flies off without jumps, swinging round and bringing its head in smoothly even mid-preen", () => {
+      let preening = -1;
+      for (let t = firstOnBoards(); t < VISIT_EVERY_SEC && preening < 0; t += 1 / 60) if (mallardAt(t).preen > 0.8) preening = t;
+      const strike = preening + 1;
+      let last = mallardAt(strike - 1 / 60, false, strike);
       for (let t = strike; t < strike + 1.6; t += 1 / 60) {
         const pose = mallardAt(t, false, strike);
-        if (pose.here && last.here) expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.1);
+        if (pose.here && last.here) {
+          expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.1);
+          expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.25);
+          expect(Math.abs(pose.preen - last.preen)).toBeLessThan(0.25);
+          expect(Math.abs(pose.flap - last.flap)).toBeLessThan(0.25);
+          // Away over its own side of the dock, not across the angler.
+          expect(pose.x).toBeLessThan(MALLARD_STOP.x + 0.01);
+        }
         last = pose;
       }
+    });
+
+    it("pays no mind to a strike while it is still far out on the water", () => {
+      const landed = firstOnBoards();
+      const early = landed - 3.5;
+      expect(mallardAt(landed + 1, false, early)).toEqual(mallardAt(landed + 1));
     });
   });
 });
