@@ -1388,7 +1388,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC211~~ | ~~Bat at the lantern: on summer evenings and nights, when its loop brings it near, one of the bats now and then breaks off to hawk the moths just off the dock's right-hand lantern, a few tight turns in the light over the water, and eases back out~~ (#1470) | scene | S |
 | ~~SC212~~ | ~~Snowy owl nights: the little owl now comes to the dock post on snowy winter nights too, sitting on the post's snow cap by the lantern (it stayed away whenever it rained, which in winter is snow)~~ (#1473) | scene | S |
 | ~~SC213~~ | ~~News card scene50 covers SC211 and SC212~~ (#1473) | scene | S |
-| SC214 | Fewer draws: the shore trees and creek grass are baked into one merged mesh per material instead of one instanced mesh per model part, each vertex carrying its tree's foot so they still sway; about 12 fewer draws in every scene, no visible change | scene | S |
+| ~~SC214~~ | ~~Fewer draws: the shore trees and creek grass are baked into one merged mesh per material instead of one instanced mesh per model part, each vertex carrying its tree's foot so they still sway; about 12 fewer draws in every scene, no visible change~~ (#1477) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
