@@ -62,7 +62,11 @@ function LargeFish({
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
 function DayTally({ count, date, tripId, tail }: { count: number; date: string; tripId: string | null; tail: (term: string) => string }) {
-  return <Link to={tripId ? `/trips/${tripId}` : findLink(tail(date))} state={tripId ? FROM_LIST : undefined}>{fishCountLabel(count)}</Link>;
+  return (
+    <Link to={tripId ? `/trips/${tripId}` : findLink(tail(date))} state={tripId ? FROM_LIST : undefined} aria-label={t("Best day: {day} · {fish}", { day: formatDay(date), fish: fishCountLabel(count) })}>
+      {fishCountLabel(count)}
+    </Link>
+  );
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
@@ -146,7 +150,9 @@ export function BestsPage() {
   );
   const weeks = weekStreak(real.trips, today, (id) => wholeFishByTrip.get(id) ?? 0);
   const split = weekendSplit(real.trips, (id) => wholeFishByTrip.get(id) ?? 0, today);
-  const years = yearTally(whole.catches, monthOf).map((row) => row.year);
+  const fishYears = yearTally(whole.catches, monthOf).map((row) => row.year);
+  // A season with days out but no fish yet can be picked too: its recap says so, and Home's goal line links it.
+  const years = [...new Set([...fishYears, ...whole.trips.filter((trip) => trip.date < today).map((trip) => trip.date.slice(0, 4))])].sort((a, b) => b.localeCompare(a));
   const asked = params.get(YEAR_PARAM);
   const year = asked && years.includes(asked) ? asked : null;
   // Everything else is worked out from the season picked, fish and outings alike.
@@ -323,20 +329,51 @@ export function BestsPage() {
         <div>
           <span className="eyebrow">{t("Longest")}</span>
           <strong>
-            {bests.longest ? <Link to={`/catches/${bests.longest.id}`}>{measureText(measureOf(bests.longest, "length")!)}</Link> : t("None")}
+            {/* Named whole for a list of links, where "20 in" alone says nothing. */}
+            {bests.longest ? (
+              <Link to={`/catches/${bests.longest.id}`} aria-label={t("Longest: {species}, {size}", { species: t(bests.longest.species), size: measureText(measureOf(bests.longest, "length")!) })}>
+                {measureText(measureOf(bests.longest, "length")!)}
+              </Link>
+            ) : (
+              t("None")
+            )}
           </strong>
           <small>{bests.longest ? t(bests.longest.species) : t("No length in the book")}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Heaviest")}</span>
           <strong>
-            {bests.heaviest ? <Link to={`/catches/${bests.heaviest.id}`}>{measureText(measureOf(bests.heaviest, "weight")!)}</Link> : t("None")}
+            {bests.heaviest ? (
+              <Link to={`/catches/${bests.heaviest.id}`} aria-label={t("Heaviest: {species}, {size}", { species: t(bests.heaviest.species), size: measureText(measureOf(bests.heaviest, "weight")!) })}>
+                {measureText(measureOf(bests.heaviest, "weight")!)}
+              </Link>
+            ) : (
+              t("None")
+            )}
           </strong>
           <small>{bests.heaviest ? t(bests.heaviest.species) : t("No weight in the book")}</small>
         </div>
         <div>
           <span className="eyebrow">{t("Waters with fish")}</span>
-          <strong>{book.spots.length > 0 ? <Link to="/spots" aria-label={t("Waters with fish: {count}", { count: bests.watersWithFish })}>{bests.watersWithFish}</Link> : bests.watersWithFish}</strong>
+          <strong>
+            {/* To this page's own list of them, in the season picked: the Waters page would list every water. */}
+            {bests.watersWithFish > 0 ? (
+              <a
+                href="#waters-with-fish"
+                aria-label={t("Waters with fish: {count}", { count: bests.watersWithFish })}
+                onClick={(event) => {
+                  event.preventDefault();
+                  const heading = document.getElementById("waters-with-fish");
+                  heading?.scrollIntoView({ block: "start" });
+                  heading?.focus({ preventScroll: true });
+                }}
+              >
+                {bests.watersWithFish}
+              </a>
+            ) : (
+              bests.watersWithFish
+            )}
+          </strong>
           <small>
             {book.spots.length === 0
               ? t("No waters in the book")
@@ -442,7 +479,7 @@ export function BestsPage() {
 
           {calendarSection}
 
-          {!year && years.length > 1 ? (
+          {!year && fishYears.length > 1 ? (
             <section>
               <div className="section-head">
                 <h2>{t("By year")}</h2>
@@ -505,7 +542,9 @@ export function BestsPage() {
 
           <section>
             <div className="section-head">
-              <h2>{t("Waters with fish")}</h2>
+              <h2 id="waters-with-fish" tabIndex={-1}>
+                {t("Waters with fish")}
+              </h2>
             </div>
             <div className="card-grid">
               {bests.waters.map((water) => (

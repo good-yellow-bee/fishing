@@ -835,15 +835,21 @@ button.field-primary:disabled {
 
 .spot-card-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  column-gap: 10px;
 }
 
-/* The name gives way, so the stamp keeps its place at the right even on a narrow phone with larger text. */
+/* The name keeps room for a word or two; past that the stamps drop under it rather than cut it letter by letter. */
 .spot-card-top > :first-child {
-  flex: 1 1 auto;
+  flex: 1 1 9ch;
   min-width: 0;
+}
+
+/* A long one-word kind in a card's fish line wraps rather than widen the page. */
+.spot-card > .meta {
+  overflow-wrap: anywhere;
 }
 
 .spot-card-top > .stamp {
@@ -1335,6 +1341,8 @@ html:has(.form-save):has(.undo-bar) .field-main {
 
 .tally-label {
   overflow-wrap: anywhere;
+  /* "Październik" in the narrow label column breaks at a syllable, in the page's language, before anywhere. */
+  hyphens: auto;
 }
 
 .tally-note {
