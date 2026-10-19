@@ -17,6 +17,8 @@ import { bookFishDay } from "../tripMonths";
 import { useLogbook } from "../LogbookState";
 import { TackleList } from "./TackleList";
 import { useTackle } from "./TackleState";
+import { CopySummary } from "../CopySummary";
+import { planText } from "../TripPages";
 import { renamedTackle } from "./renamedTackle";
 import { undoneTackle } from "./undoneTackle";
 import { pieceRecords, type PieceRecord } from "./pieceRecord";
@@ -44,8 +46,11 @@ import { onPiece } from "../pieceTally";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
   const { book } = useLogbook();
+  const { items } = useTackle();
   useT();
   const spot = spotById(book, trip.spotId);
+  // Under way once anything bit, as the outing's own page takes it: a fish, a lost one or a missed strike.
+  const fished = catchesForTrip(book, trip.id).length > 0 || Boolean(trip.lost || trip.missed);
 
   return (
     <section className="tackle-trip">
@@ -68,6 +73,8 @@ function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomo
         // Today's outing may already have fish, counted against the pieces as on the outing's page.
         caught={trip.date <= today ? catchesForTrip(book, trip.id) : undefined}
       />
+      {/* The plan and what is still to pack, for whoever is coming along: until the outing's first fish, as Home offers it. */}
+      {fished ? null : <CopySummary text={() => planText(book, trip, items)} file="stillwater-plan.txt" label={t("Copy the plan")} copied={t("Plan copied.")} saved={t("Plan saved as a file.")} />}
     </section>
   );
 }
@@ -211,6 +218,8 @@ function LureRecord({ today }: { today: string }) {
                   ) : null}
                 </>
               ) : null}
+              {/* A lure that never took a fish: when it last went out, so an old one can come off the list. */}
+              {!row.lastAt && row.lastPacked ? <span className="lure-last">{t("last packed {day}", { day: formatDay(row.lastPacked) })}</span> : null}
               {next && justPacked === row.label && onNext.has(shownPieceKey(row.label)) ? (
                 <span
                   className="lure-last"
