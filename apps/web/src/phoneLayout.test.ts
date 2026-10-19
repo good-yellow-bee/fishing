@@ -49,6 +49,12 @@ describe("a phone held sideways", () => {
     expect(dock).toContain('wrap.style.setProperty("--stance-h"');
   });
 
+  it("hangs the fight card from the header on a short upright phone, with the chips stepping aside", () => {
+    const short = css.slice(css.indexOf("@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {"));
+    expect(/\n  \.fight-bar \{([^}]*)\}/.exec(short)?.[1]).toContain("top: calc(var(--hud-bottom, 140px) + 8px);");
+    expect(short).toMatch(/\.scene-wrap\[data-phase="fight"\] :is\(\.walkthrough, \.stance-chip\) \{\s*display: none;/);
+  });
+
   it("fits a narrow phone's header links into two rows with larger text, each link keeping its 32 px", () => {
     const narrow = css.slice(css.indexOf("@media (max-width: 359px) and (min-height: 501px) {"));
     expect(/html\[data-text-size\] \.hud-stats \{([^}]*)\}/.exec(narrow)?.[1]).toContain("row-gap: 0;");
