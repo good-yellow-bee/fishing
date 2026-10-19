@@ -2327,3 +2327,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR573~~ | ~~Round 103 gear and map ideas: Copy the plan under Coming up, last packed for a lure that never took a fish, Out now on the Map for a water fished today~~ (#1451) | field | S |
 | ~~BR574~~ | ~~Round 104 Bests fixes: a water's card names its kind as the kinds list does, Not yet this year sorted and counted as kinds read, a kind typed with -es meets its dictionary name~~ (#1459) | field | S |
 | ~~BR575~~ | ~~Round 104 Bests ideas: how long a record has stood on the tiles, the best month ever above the month table~~ (#1461) | field | S |
+| ~~BR576~~ | ~~Round 105 waters fixes: a kind however it was typed is one chip and one page, a lure named the same whatever the order of its fish, the day's later outing last fished, water names with stray spaces~~ (#1467) | field | S |
