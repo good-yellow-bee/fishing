@@ -42,6 +42,7 @@ import { CRAYFISH_JIG_WAIT, onCrayfishBed } from "./crayfishJig";
 import { TADPOLE_WAIT, amongTadpoles } from "./tadpoleShallows";
 import { KINGFISHER_FRY_WAIT, overKingfisherFry } from "./kingfisherFry";
 import { SUNKEN_LOG_WAIT, tightToLog } from "./sunkenLog";
+import { SURFACE_BUG_WAIT, amongSurfaceBugs, bugLike } from "./surfaceBugs";
 import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
@@ -49,7 +50,7 @@ import { AGAIN_CASTS, castForGotAway, gotAwayAfterLoss, type GotAway } from "./g
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
-import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
+import { BACKLASH_POWER, castIntoSchool, castOverGroundbait, GROUNDBAIT_CASTS, GROUNDBAIT_HANDFULS, GROUNDBAIT_WAIT, groundbaitFeeder, canBaitShiner, shinerHunter, bedRaider, crayfishHunter, tadpoleEater, fryHunter, logHolder, bugSipper, type Groundbait, castIntoSpooked, castUnderPressure, castNewLure, type LuresShown, castOnFreshWater, FRESH_WAIT, fishedHardBanks, type Pressure, PRESSURE_WAIT, chopWaitMul, crankPilingWaitMul, crankRockWaitMul, darkNightWaitMul, dockShadeWaitMul, fallBigLureWaitMul, favorsLargeFish, floatReedWaitMul, flashWaitMul, flyHatchWaitMul, flyDriftWaitMul, hookWindowMs, isLightHook, isPerfectCast, isSkipCast, SKIP_CAST_WAIT, jigWaitMul, lanternDockWaitMul, jigWinterWaitMul, makeCatch, openGlareWaitMul, longShadowWaitMul, pickBite, rainInletWaitMul, SCHOOL_SAME, SCHOOL_WAIT, schoolAfterLanding, isWinterSchool, SLAP_POWER, solidStrikeMs, spinnerInletWaitMul, spinnerReedWaitMul, spinnerThumpWaitMul, spoonOpenWaitMul, stormWaitMul, preRainWaitMul, fogLiftWaitMul, postFrontWaitMul, turnoverWaitMul, waterSwingWaitMul, castTangles, isTwisted, twistAfterCast, isWashedOut, soakAfterCast, WASHED_WAIT, springShallowsWaitMul, streamerLedgeWaitMul, summerDeepWaitMul, winterSunWaitMul, windPointWaitMul, windwardWaitMul, SPOOK_WAIT, stackWaitMs, sweetBand, topwaterNightWaitMul, topwaterWaitMul, waitMs, wormInletWaitMul, wormNightWaitMul, wormPilingWaitMul, type School } from "./logic";
 import { localId } from "./localId";
 import { FOLLOWERS, takeStyle, GULP_HOLD, LIGHT_HOLD, nibblePlan, SNATCH_HOLD, stealsBait, type BiteStyle } from "./nibblePlan";
 import type { ScenePhase } from "./scene/types";
@@ -336,6 +337,7 @@ export function useFishingGame(
   const castTadpoleRef = useRef(false);
   const castFryRef = useRef(false);
   const castLogRef = useRef(false);
+  const castBugRef = useRef(false);
   /** How the last cast fished the duckweed: a popper riding over a mat, a lure bearded with it, or neither. */
   const castWeedRef = useRef<"topwater" | "fouled" | null>(null);
   /** This cast went in over the groundbait, so a school landed from it stays to feed. */
@@ -516,6 +518,7 @@ export function useFishingGame(
     castTadpoleRef.current = false;
     castFryRef.current = false;
     castLogRef.current = false;
+    castBugRef.current = false;
     castWeedRef.current = null;
     secondTakeRef.current = false;
     powerRef.current = 0;
@@ -645,7 +648,7 @@ export function useFishingGame(
     const short = shortCast && !fogClose;
     const shortHint = () => (fogClose ? t("Short cast, but in the fog the shy fish come in close.") : shortCastHint());
     // On the beds, the crayfish or the tadpoles the fish come in to the prey however close it lies, so the short-cast line isn't told there.
-    const shortTold = shortCast && !castBedRef.current && !castCrayfishRef.current && !castTadpoleRef.current && !castFryRef.current;
+    const shortTold = shortCast && !castBedRef.current && !castCrayfishRef.current && !castTadpoleRef.current && !castFryRef.current && !castBugRef.current;
     waitHintRef.current = shortTold ? shortHint() : waitHint();
     if (castHotspotRef.current) waitHintRef.current = shortTold ? `${shortHint()} ${hotspotWaitHint()}` : hotspotWaitHint();
     else if (castRiseRef.current) waitHintRef.current = `${t("Right on a rise.")} ${waitHintRef.current}`;
@@ -655,6 +658,7 @@ export function useFishingGame(
     if (castFoamRef.current) waitHintRef.current = `${t("Right in a foam lane, where the wind gathers drowned insects and the fish feed along it.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "topwater") waitHintRef.current = `${t("Over the duckweed, where the bass lurk in its shade for a lure on top.")} ${waitHintRef.current}`;
     if (castWeedRef.current === "fouled" && !mercyRef.current) waitHintRef.current = `${t("Into the duckweed: the lure comes through bearded with weed, and the fish turn from it.")} ${waitHintRef.current}`;
+    if (castBugRef.current) waitHintRef.current = `${t("Among the bugs skating on the surface, where the fish are looking up for them.")} ${waitHintRef.current}`;
     if (castLogRef.current) waitHintRef.current = `${t("Tight to the sunken log, where the fish hold in its shade.")} ${waitHintRef.current}`;
     if (castFryRef.current) waitHintRef.current = `${t("Over the fry the kingfisher dives on, where the perch and bass hunt them too.")} ${waitHintRef.current}`;
     if (castTadpoleRef.current) waitHintRef.current = `${t("Among the tadpoles in the warm shallows, where the fish come to gorge on them.")} ${waitHintRef.current}`;
@@ -851,7 +855,8 @@ export function useFishingGame(
     const gorger = castTadpoleRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !mercyNow ? tadpoleEater(spotRef.current, lureRef?.current, current, hour) : null;
     const fryChaser = castFryRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !mercyNow ? fryHunter(spotRef.current, lureRef?.current, current, hour) : null;
     const logFish = castLogRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !mercyNow ? logHolder(spotRef.current, lureRef?.current, current, hour) : null;
-    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
+    const sipper = castBugRef.current && !lost.again && !recaughtRef.current && !hunter && !raider && !crayHunter && !gorger && !fryChaser && !logFish && !mercyNow ? bugSipper(spotRef.current, lureRef?.current, current, hour) : null;
+    const species = lost.again ? lost.again.species : recaughtRef.current ? recaughtRef.current.species : hunter ? hunter : raider ? raider : crayHunter ? crayHunter : gorger ? gorger : fryChaser ? fryChaser : logFish ? logFish : sipper ? sipper : schoolFish && Math.random() < SCHOOL_SAME ? schoolFish : (feeder ?? drawn);
     fedRef.current = !!feeder && species === feeder;
     const bitten = lost.again ? { species, weight: lost.again.weight } : recaughtRef.current ? { species, weight: recaughtRef.current.weight } : makeCatch(species, current.patience, anglerLevel(current.lifetimePoints));
     biteRef.current = bitten;
@@ -859,7 +864,7 @@ export function useFishingGame(
     const hotBank = hotBankForDay(new Date()) === spotRef.current;
     const unschooledWait = waitMs(current.patience, hour, castHotspotRef.current, anglerLevel(current.lifetimePoints), mercyNow, hotBank, castRiseRef.current, castPerfectRef.current);
     // However many bonuses stack, the bite never comes before the floor, so a nibble still fits.
-    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
+    const wait = stackWaitMs(unschooledWait, castSkipRef.current ? SKIP_CAST_WAIT : 1, castPadsRef.current ? LILY_COVER_WAIT : 1, castFoamRef.current ? FOAM_LANE_WAIT : 1, castBedRef.current ? SUNFISH_BED_WAIT : 1, castCrayfishRef.current ? CRAYFISH_JIG_WAIT : 1, castTadpoleRef.current ? TADPOLE_WAIT : 1, castFryRef.current ? KINGFISHER_FRY_WAIT : 1, castLogRef.current ? SUNKEN_LOG_WAIT : 1, castBugRef.current ? SURFACE_BUG_WAIT : 1, castWeedRef.current === "topwater" ? DUCKWEED_TOPWATER_WAIT : castWeedRef.current === "fouled" && !mercyNow ? DUCKWEED_FOUL_WAIT : 1, schoolFish ? SCHOOL_WAIT : 1, bait.baited ? GROUNDBAIT_WAIT : 1, spooked ? SPOOK_WAIT : 1, washedWait, pressureWait, freshWait, topwaterWait, chopWait, stormWait, rainComingWait, fogLiftWait, frontWait, turnoverWait, swingWait, glareWait, shadowWait, darkWait, nightTopwaterWait, flashWait, jigWait, winterWait, shallowsWait, inletWait, fallWait, heatWait, shadeWait, lanternWait, sunWait, blowWait, windwardWait, cloudWait, moonWait, driftWait, rockWait, pilingWait, spoonWait, reedWait, floatWait, streamerWait, washWait, flowWait, knockWait, nightWait, hatchWait, thumpWait);
     // When the fish still about this bank is the one biting, its shadow closes in on the float over the wait.
     setLurkerCloseInMs(lost.again ? wait : 0);
     // A topwater lure is hit at the top, so every fish takes it without a nibble.
@@ -1066,6 +1071,7 @@ export function useFishingGame(
     castTadpoleRef.current = aimed !== null && amongTadpoles(season, hourRef.current, aimed.x, aimed.z);
     castFryRef.current = aimed !== null && overKingfisherFry(season, hourRef.current, sky, aimed.x, aimed.z);
     castLogRef.current = aimed !== null && tightToLog(aimed.x, aimed.z);
+    castBugRef.current = aimed !== null && bugLike(lureRef?.current) && amongSurfaceBugs(season, hourRef.current, sky, windDriftRef.current, aimed.x, aimed.z);
     // Among the lily pads the pads decide how the lure fishes, so the duckweed counts only out in its still coves.
     castWeedRef.current = duckweedCast(aimed !== null && !castPadsRef.current && inDuckweed(season, windDriftRef.current, aimed.x, aimed.z), isTopwater(lureRef?.current));
     secondTakeRef.current = false;
