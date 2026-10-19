@@ -36,7 +36,7 @@ import {
   walkableAt,
 } from "./lake.ts";
 import { anglerLevel, canUseSpot, INLET_LEVEL, skillCost, SPOT_IDS } from "./progression.ts";
-import { canLand, catchPoints, cleanRunBonus, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
+import { canLand, catchPoints, cleanRunBonus, PB_BONUS, personalBestBonus, CLEAN_RUN_BONUS, CLEAN_RUN_FROM, legendaryCanBite, skillUnlock, validateCatch, validateUpgrade, weightInRange } from "./rules.ts";
 import type { Profile } from "./types.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
@@ -124,6 +124,19 @@ describe("catch rules", () => {
     expect(cleanRunBonus(true, 9)).toBe(1.2);
     expect(cleanRunBonus(true, undefined)).toBe(1);
     expect(cleanRunBonus(undefined, 4)).toBe(1);
+  });
+
+  it("adds the personal best bonus to a fish heavier than the angler's best of its kind, and not to the first of a kind", () => {
+    const perch = fishById("perch")!;
+    const request = { speciesId: "perch", weight: 0.8, spot: "dock" as const };
+    const at = new Date("2026-07-15T12:00:00Z");
+    expect(validateCatch(starter, request, at, 0.6)).toMatchObject({ points: catchPoints(perch, 0.8, false, PB_BONUS) });
+    expect(validateCatch(starter, request, at, 0.8)).toMatchObject({ points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, request, at, null)).toMatchObject({ points: catchPoints(perch, 0.8) });
+    expect(validateCatch(starter, request, at)).toMatchObject({ points: catchPoints(perch, 0.8) });
+    expect(personalBestBonus(0.9, 0.8)).toBe(1.25);
+    expect(personalBestBonus(0.7, 0.8)).toBe(1);
+    expect(personalBestBonus(0.7, undefined)).toBe(1);
   });
 
   it("blocks landing when strength is short", () => {

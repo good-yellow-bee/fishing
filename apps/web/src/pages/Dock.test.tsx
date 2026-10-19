@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
+import { badgeProgress, catchPoints, CLEAN_RUN_BONUS, GOLDEN_BONUS, PB_BONUS, isGolden, weeklyBonus, dailyConditions, skyTurnForDay, fishById, lakeHour, lakeSeason, SKY_BLURB, weatherForDay, type FishSpecies, type LakeHour, type LodgeTrack, type Sky, type SpotId } from "@stillwater/shared";
 import { getLodgeTracks, getMe, getSpeciesRecords, recordCatch, releaseCatch, type Me } from "../api";
 import { readStoredLogbook } from "../field/storage";
 import { fx } from "../game/fx";
@@ -324,6 +324,31 @@ describe("a run of clean fights", () => {
     const points = catchPoints(perch, 0.8, true, CLEAN_RUN_BONUS * (isGolden("catch-clean-run") ? GOLDEN_BONUS : 1));
     expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
     expect(vi.mocked(recordCatch).mock.lastCall?.[0]).toMatchObject({ requestId: "catch-clean-run", clean: true, cleanRun: 3 });
+  });
+});
+
+describe("a personal best", () => {
+  it("stamps a fish heavier than the angler's best of its kind with its bonus and counts it in the points", async () => {
+    const at = new Date(2026, 6, 15, 14, 0);
+    vi.useFakeTimers({ toFake: ["Date"], now: at });
+    const perch = fishById("perch")!;
+    expect(weeklyBonus(perch.id, at)).toBe(1);
+    vi.mocked(getMe).mockResolvedValue({ ...me, speciesStats: [{ speciesId: "perch", caught: 2, heaviest: 0.6, lastAt: "2026-07-10T12:00:00.000Z" }] });
+    vi.mocked(recordCatch).mockResolvedValue({ id: "catch-pb", points: 1, speciesId: perch.id, weight: 0.8 });
+    // The angler's book is loaded before the fish comes in, as it is on the water.
+    const page = await openDock("/");
+    landed.outcome = { kind: "landed", id: "catch-pb", species: perch, weight: 0.8, spot: "dock", clean: false };
+    await act(async () => {
+      root!.render(
+        <MemoryRouter initialEntries={["/"]}>
+          <DockPage />
+        </MemoryRouter>,
+      );
+    });
+    const stamps = [...page.querySelectorAll(".landed-card .catch-stamp")].map((p) => p.textContent);
+    expect(stamps).toContain("Personal best · was 0.6 lb · 1.25× points");
+    const points = catchPoints(perch, 0.8, false, PB_BONUS * (isGolden("catch-pb") ? GOLDEN_BONUS : 1));
+    expect(page.querySelector(".landed-card")!.textContent).toContain(`+${points} pts`);
   });
 });
 

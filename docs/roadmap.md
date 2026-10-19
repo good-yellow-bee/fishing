@@ -1670,7 +1670,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT329~~ | ~~News card 2026-10-19-game27 covers GT326 to GT328: a run of clean fights pays, and a lure's colour suits the light, marked in the lure list~~ (#1374) | ui | S |
 | ~~GT330~~ | ~~Level 16, Voice of the lake, at 47000 lifetime points: pulling the rod against a run cuts it short 25% faster~~ (#1377) | gameplay | S |
 | ~~GT331~~ | ~~A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line"~~ (#1380) | gameplay | S |
-| GT332 | News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line | ui | S |
+| ~~GT332~~ | ~~News card 2026-10-19-game28 covers GT330 and GT331: level 16, Voice of the lake, turns runs short faster, and a turned run swings the fish's head round for a burst of line~~ (#1382) | ui | S |
+| GT333 | A personal best pays: a fish heavier than the angler's own best of its kind earns 1.25x points (the server checks it against the angler's catches; the first of a kind beats nothing), and the landed card's stamp says "Personal best · was 0.6 lb · 1.25× points" | gameplay | S |
 
 ## Risks / open questions for the owner
 

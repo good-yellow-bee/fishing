@@ -7,6 +7,7 @@ import {
   INLET_LEVEL,
   catchPoints,
   cleanRunBonus,
+  PB_BONUS,
   CLEAN_RUN_FROM,
   catchStamp,
   dailyConditions,
@@ -1062,7 +1063,7 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (stamp?.kind === "pb" ? PB_BONUS : 1),
                 ),
               })}
             </p>
@@ -1078,7 +1079,7 @@ export function DockPage() {
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
-              <p className="catch-stamp">{t("Personal best · was {weight}", { weight: weightText(stamp.previous) })}</p>
+              <p className="catch-stamp">{t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}</p>
             )}
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
