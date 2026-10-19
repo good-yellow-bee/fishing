@@ -1329,6 +1329,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC166~~ | ~~Fewer draws: plain multi-part models (logs, lily pads, paths, the bridge, the canoe) bake their coloured parts into one vertex-coloured mesh each (a summer day 393 draws to 365)~~ (#1365) | scene | S |
 | ~~SC167~~ | ~~Fewer draws: the shore and creek trees bake their parts into one shape per look, so each tree kind draws once per ring instead of once per part (a summer day 365 draws to 349)~~ (#1367) | scene | S |
 | ~~SC168~~ | ~~Railway: a little steam train runs along the foot of the far hills between two tunnel mouths, puffing steam, its carriage windows lit after dark (five draws), with news scene37~~ (#1370) | scene | S |
+| ~~SC169~~ | ~~Orchard: two rows of little fruit trees below the farm on the far hills, white and pink blossom in spring, green in summer, gold with red apples in the fall, bare in winter (one draw)~~ (#1373) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
