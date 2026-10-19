@@ -101,25 +101,25 @@ export function packedCount(items: TackleItem[]): number {
 }
 
 /** Gear that is never tied on, singular or plural. */
-const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?|knife(?! jigs?\b)|knives|chairs?|stools?|umbrellas?|brollys?|tape|measures?|scales|snaps|towels?|gloves?|(tackle |fly )?box(es)?|hats?|tents?|bite alarms?|first aid|cameras?|phones?|clippers?|keep ?nets?|hook removers?|disgorgers?|scissors|(head )?torch(es)?|unhooking mats?|thermos(es)?|flasks?|bait (boat|needle)s?|bank sticks?)\b/i;
+const TACKLE_TOOL = /\b(pliers|nets?|(sun)?glasses|jaw spreaders?|forceps|hemostats?|nippers?|floatant|headlamps?|lamps?|rods?|reels?|waders?|licen[cs]es?|jackets?|coolers?|sunscreen|buckets?|stringers?|sinkers?|swivels?|split shots?|knife(?! jigs?\b)|knives|chairs?|stools?|umbrellas?|brollys?|tape|measures?|scales|snaps|towels?|gloves?|(tackle |fly )?box(es)?|hats?|tents?|bite alarms?|first aid|cameras?|phones?|clippers?|keep ?nets?|hook removers?|disgorgers?|scissors|(head )?torch(es)?|unhooking mats?|thermos(es)?|flasks?|bait (boat|needle)s?|bank sticks?|bags?|snacks?|bug spray|(insect )?repellent|(ice )?augers?|boots?|permits?|power banks?|anchors?|oars?|(fish|echo) ?(finder|sounder)s?|life ?jackets?|pfds?|spools?|beads|crimps|priests?)\b/i;
 /** Weights on their own ("Split weights"); a lure rigged with one ("Texas rig with bullet weight") is still a lure. */
 const WEIGHT = /^((bullet|split|drop|lead|egg)\s)?weights?\b/i;
 /**
  * Line names end with the line word ("Steel leader"), or start with it before a size ("Line 0.25 mm"); "In-line
  * spinner" does neither, and a lure rigged on one ("Frog on braid", "Shad on wire leader") is still a lure.
  */
-const LINE = /^(?!.*\b(on|with|to)\s).*\b(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$|^(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s+[\d.,]/i;
+const LINE = /^(?!.*\b(on|with|to)\s).*\b(lines?|leaders?|leader material|traces?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s*$|^(lines?|leaders?|tippets?|fluoro(carbon)?|braid|mono(filament)?)\s+[\d.,]/i;
 
 /**
  * The same in Polish, by word stem so any ending counts ("Podbierak", "Szczypce", "Nożyczki"), read without accents.
  */
 const TACKLE_TOOL_PL =
-  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet|noz|krzes|parasol|miark|waga|wagi|agrafk|obciazeni|recznik|rekawic|namiot|pudel|siatk|wypychacz|termos|mata\b|maty\b|wiadr|kalosz|plecak|torb)/;
+  /(^|[^a-z])(podbierak|szczypc|obcinacz|nozyczk|wedk|wedzisk|kolowrot|wodery|spodniobut|latark|czolowk|okular|rozwieracz|kleszczyk|peang|ciezar|kretlik|zanet|noz|krzes|parasol|miark|waga|wagi|agrafk|obciazeni|recznik|rekawic|namiot|pudel|siatk|wypychacz|termos|mata\b|maty\b|wiadr|kalosz|plecak|torb|sznur|krem|kanapk|przekask|kotwic(?!zk)|wiosl|echosond|kamizelk|kapok|czapk|kubek|kawa|swider|buty|odstraszacz|repelent|spray|zezwoleni)/;
 /**
  * Polish names a line by its word wherever it sits ("Żyłka 0,25", "Zapasowy przypon"), but a lure rigged on one
  * ("Guma na przyponie") is still a lure.
  */
-const LINE_PL = /(^|[^a-z])(?<!(^|\s)(na|z|ze|do) )(zylk|plecionk|przypon|fluorocarbon)/;
+const LINE_PL = /(^|[^a-z])(?<!(^|\s)(na|z|ze|do) )(zylk|plecionk|przypon|fluorocarbon|linka|linki|link\b)/;
 
 /** Anything not recognised as a tool or line counts as a lure, so lures the angler typed stay on the list. */
 export function isLureLabel(label: string): boolean {
@@ -188,7 +188,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "popper",
     label: "Topwater",
-    match: /popper|buzzbait|\bfrogs?\b|topwater/i,
+    match: /popper|buzzbait|\bfrogs?\b|topwater|\bzab[aky]|powierzchn/i,
     size: "small",
     species: { "smallmouth-bass": 1.8, "largemouth-bass": 1.8, bluegill: 1.4, pike: 1.3 },
     hours: { dawn: 1, dusk: 1 },
@@ -196,7 +196,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "worm",
     label: "Live bait",
-    match: /worm|crawler|leech|minnow/i,
+    match: /worm|crawler|leech|minnow|rosow|robak|czerw|pinki|ochotk|dzdzownic/i,
     size: "small",
     species: { catfish: 1.9, carp: 1.4, perch: 1.4, walleye: 1.4 },
     hours: { night: 1, dusk: 0.6, dawn: 0.4, day: 0.25 },
@@ -204,14 +204,14 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "bobber",
     label: "Float rig",
-    match: /bobber|\bfloats?\b|size\s*\d+/i,
+    match: /bobber|\bfloats?\b|size\s*\d+|splawik|haczyk/i,
     size: "small",
     species: { perch: 1.5, bluegill: 1.5, "golden-shiner": 1.4, crappie: 1.5 },
   },
   {
     id: "fly",
     label: "Fly",
-    match: /pheasant|caddis|nymph|midge|hare'?s ear|\bfly\b|\bflies\b/i,
+    match: /pheasant|caddis|nymph|midge|hare'?s ear|\bfly\b|\bflies\b|\bnimf|\bmuch[aey]?\b|\bmuszk/i,
     size: "small",
     species: { "brook-trout": 1.8, "rainbow-trout": 1.8, "lake-whitefish": 1.4 },
     hours: { dawn: 1, dusk: 0.8, day: 0.5 },
@@ -226,7 +226,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "spinner",
     label: "Spinner",
-    match: /spinner|mepps|in-?line/i,
+    match: /spinner|mepps|in-?line|obrotow/i,
     size: "large",
     species: { pike: 1.5, "smallmouth-bass": 1.6, "largemouth-bass": 1.5 },
     hours: { dusk: 1, dawn: 0.8, day: 0.6, night: 0.3 },
@@ -234,7 +234,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "spoon",
     label: "Spoon",
-    match: /spoon|dardevle|daredevil|kastmaster/i,
+    match: /spoon|dardevle|daredevil|kastmaster|wahadl|blystk/i,
     size: "large",
     species: { pike: 1.6, salmon: 1.6, "tiger-muskie": 1.3, "ghost-pike": 1.3 },
   },
@@ -248,7 +248,7 @@ export const LURE_CLASSES: readonly LureClass[] = [
   {
     id: "jig",
     label: "Jig",
-    match: /tube|\bjigs?\b|\bgrubs?\b|kopyt|ripper|twister/i,
+    match: /tube|\bjigs?\b|\bgrubs?\b|kopyt|ripper|twister|glowk|jigow|\bgum(a|y|ki|ek)?\b/i,
     size: "large",
     species: { "smallmouth-bass": 1.8, burbot: 1.5, walleye: 1.6 },
   },
@@ -257,8 +257,17 @@ export const LURE_CLASSES: readonly LureClass[] = [
 const PLAIN: LureClass = { id: "plain", label: "Small lure", match: /$^/, size: "small" };
 
 /** A lure's class by its label. Every word the old size rule read as big has a class, so anything unnamed stays small. */
+const lureClassCache = new Map<string, LureClass>();
+
 export function lureClass(label: string): LureClass {
-  return LURE_CLASSES.find((one) => one.match.test(label)) ?? PLAIN;
+  // The game asks for every cast, so each label is read once.
+  const known = lureClassCache.get(label);
+  if (known) return known;
+  // Read without accents as well, so the Polish stems match "Obrotówka" and "Błystka".
+  const folded = foldText(label);
+  const found = LURE_CLASSES.find((one) => one.match.test(label) || one.match.test(folded)) ?? PLAIN;
+  lureClassCache.set(label, found);
+  return found;
 }
 
 /** How hard a lure pulls one species at this hour, on top of its plain draw: 0 means no pull. */

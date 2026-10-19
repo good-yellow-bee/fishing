@@ -33,7 +33,7 @@ import { countedSearch } from "../countedSearch";
 import { locale, t, tn, useT } from "../../i18n";
 import { measureText } from "../../i18n/content";
 import { offPlayLake } from "../playLake";
-import { ownFish } from "../milestones";
+import { countedBook, ownFish } from "../milestones";
 import { upcomingRealTrips } from "../bookCopy";
 
 function TripTackle({ trip, today, tomorrow }: { trip: Trip; today: string; tomorrow: string }) {
@@ -115,7 +115,8 @@ function LureRecord({ today }: { today: string }) {
   // The order picked holds while its control shows.
   const found = pieceRecords(book, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
-  const quiet = notYetThisYear(book.catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
+  // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
+  const quiet = notYetThisYear(countedBook(book).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   const next = upcomingRealTrips(book, today)[0];
@@ -176,7 +177,7 @@ function LureRecord({ today }: { today: string }) {
                   ) : null}
                 </>
               ) : null}
-              {next && justPacked === row.label ? (
+              {next && justPacked === row.label && onNext.has(shownPieceKey(row.label)) ? (
                 <span
                   className="lure-last"
                   tabIndex={-1}
@@ -210,7 +211,8 @@ function LureRecord({ today }: { today: string }) {
           </li>
         ))}
       </ul>
-      {next && packedBest ? (
+      {/* Said while those lures are still on the list; once one comes off, the button offers the best again. */}
+      {next && packedBest && packedBest.every((label) => onNext.has(shownPieceKey(label))) ? (
         <p
           className="meta packed-best"
           tabIndex={-1}
@@ -447,8 +449,10 @@ export function GearPage() {
 
   const upcoming = upcomingRealTrips(book, today);
   // Real days out: a game day has nothing in the bag.
-  const recent = recentTrips(book, today).filter(offPlayLake);
-  const fishByTrip = fishCountsByTrip(book);
+  // And not the sample week's once the angler has outings of their own, as Coming up and the record leave them out.
+  const counted = countedBook(book);
+  const recent = recentTrips(counted, today).filter(offPlayLake);
+  const fishByTrip = fishCountsByTrip(counted);
 
   return (
     <div className="sheet">

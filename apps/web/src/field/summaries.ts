@@ -153,14 +153,14 @@ function searchLabel(parts: readonly string[]): string {
  * The fish a search found, as plain text: what was searched, how many, then each fish oldest first
  * with its day, kind, size, lure and water.
  */
-export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null): string {
-  const fish = [...matches]
-    .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
+/** `largest`: the list was shown largest first, so the copy keeps that order and says so. */
+export function searchSummary(parts: readonly string[], matches: readonly CatchEntry[], waterOf: (spotId: string) => string | null, largest = false): string {
+  const fish = (largest ? [...matches] : [...matches].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt)))
     .map((entry) => {
       const water = waterOf(entry.spotId);
       // With its time, so a night session's small hours read as such under the day search that found them.
       const bits = [`${formatDatedDay(new Date(entry.caughtAt))} ${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(water ? [water] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${bits.join(", ")}`;
     });
-  return [searchLabel(parts), fishCountLabel(matches.length), ...fish].join("\n");
+  return [searchLabel(parts), largest ? `${fishCountLabel(matches.length)} · ${t("Largest first")}` : fishCountLabel(matches.length), ...fish].join("\n");
 }

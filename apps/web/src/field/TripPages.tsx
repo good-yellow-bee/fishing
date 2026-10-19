@@ -558,6 +558,12 @@ function TripView() {
                     </>
                   )}
                 </span>
+              ) : !play && placeFor(spot.id) ? (
+                // A sample water: no real place to open, but a pin on the field log's own sheet, as its page links it.
+                <span className="map-link">
+                  {" · "}
+                  <Link to={`/map#water-${spot.id}`}>{t("See it on the Map")}</Link>
+                </span>
               ) : null}
             </>
           ) : null}
