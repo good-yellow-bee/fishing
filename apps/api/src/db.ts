@@ -388,9 +388,12 @@ export function releaseCatch(userId: string, requestId: string): { row: CatchRow
   })();
 }
 
-/** The angler's catches filed under any of these local days. */
-export function listCatchesOnDays(userId: string, days: readonly string[]): CatchRow[] {
-  return db.prepare(`SELECT * FROM catch WHERE user_id = ? AND day IN (${days.map(() => "?").join(", ")})`).all(userId, ...days) as CatchRow[];
+/** The angler's catches filed under any of these local days and saved no earlier than `savedFrom`, so a fish posted
+ * late can't be filed back into an earlier week. */
+export function listCatchesOnDays(userId: string, days: readonly string[], savedFrom: string): CatchRow[] {
+  return db
+    .prepare(`SELECT * FROM catch WHERE user_id = ? AND created_at >= ? AND day IN (${days.map(() => "?").join(", ")})`)
+    .all(userId, savedFrom, ...days) as CatchRow[];
 }
 
 export function listWeeklyClaims(userId: string, week: string): string[] {

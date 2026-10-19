@@ -14,7 +14,9 @@ import {
   type FieldLogBestBeat,
   type Measure,
   type Profile,
-  type SkillId, type WeeklyChallenge } from "@stillwater/shared";
+  type SkillId,
+  type WeeklyChallenge,
+} from "@stillwater/shared";
 import { getUnits, num, t } from ".";
 
 /**

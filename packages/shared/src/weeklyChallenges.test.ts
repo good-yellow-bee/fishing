@@ -32,4 +32,10 @@ describe("weekly challenges", () => {
     expect(weeklyProgress(goal("trophy", 1), catches, "2026-10-19")).toBe(1);
     expect(weeklyProgress(goal("clean", 1), catches, "2026-10-19")).toBe(1);
   });
+
+  it("asks a new angler only for the banks their level opens", () => {
+    const monday = ["2026-10-19", "2026-10-26", "2026-11-02", "2026-11-09", "2026-11-16"].find((day) => weeklyChallengesFor(day).some((row) => row.kind === "banks"))!;
+    expect(weeklyChallengesFor(monday, 1).find((row) => row.kind === "banks")?.goal).toBe(3);
+    expect(weeklyChallengesFor(monday, 20).find((row) => row.kind === "banks")?.goal).toBe(4);
+  });
 });

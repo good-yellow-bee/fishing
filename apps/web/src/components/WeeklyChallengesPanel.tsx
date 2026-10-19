@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { localDate } from "@stillwater/shared";
-import { claimWeeklyChallenge, errorText, getWeeklyChallenges, type WeeklyBoard } from "../api";
+import { ApiError, claimWeeklyChallenge, errorText, getWeeklyChallenges, type WeeklyBoard } from "../api";
 import { t, useT } from "../i18n";
 import { weeklyChallengeText } from "../i18n/content";
 
@@ -17,6 +17,8 @@ export function WeeklyChallengesPanel({ catchKey, onClaimed }: Props) {
   const [asked, setAsked] = useState("");
   const [claiming, setClaiming] = useState<string | null>(null);
   const [error, setError] = useState("");
+  // Set before the claim goes out, so a second quick tap never sends another.
+  const inFlight = useRef(false);
 
   useEffect(() => {
     let live = true;
@@ -36,17 +38,24 @@ export function WeeklyChallengesPanel({ catchKey, onClaimed }: Props) {
     };
   }, [catchKey]);
 
+  const markClaimed = (id: string) =>
+    setBoard((current) => current && { ...current, challenges: current.challenges.map((row) => (row.id === id ? { ...row, claimed: true } : row)) });
+
   const claim = async (id: string) => {
-    if (claiming) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setClaiming(id);
     setError("");
     try {
       await claimWeeklyChallenge(id, asked);
-      setBoard((current) => current && { ...current, challenges: current.challenges.map((row) => (row.id === id ? { ...row, claimed: true } : row)) });
+      markClaimed(id);
       await onClaimed();
     } catch (err) {
-      setError(errorText((err as Error).message));
+      // Claimed already, say from another tab: the board just catches up.
+      if (err instanceof ApiError && err.status === 409 && err.message === "challenge already claimed") markClaimed(id);
+      else setError(errorText((err as Error).message));
     }
+    inFlight.current = false;
     setClaiming(null);
   };
 

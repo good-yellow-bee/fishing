@@ -1,6 +1,7 @@
 import { weekStart } from "./board.ts";
 import { fishById } from "./fish.ts";
 import { isTrophyWeight } from "./guide.ts";
+import { canUseSpot, SPOT_IDS } from "./progression.ts";
 import { weeklyFish } from "./weeklyFish.ts";
 
 /** One week-long goal on the shack board; `kind` says what counts toward `goal`. */
@@ -41,19 +42,25 @@ export function weekFishFor(monday: string) {
   return weeklyFish(new Date(`${monday}T12:00:00.000Z`));
 }
 
-/** The week's goals: the same three for every angler that week, picked by its Monday with no stored state. */
-export function weeklyChallengesFor(monday: string): WeeklyChallenge[] {
+/** The week's goals: the same three for every angler that week, picked by its Monday with no stored state; the banks goal
+ * asks only for as many banks as the angler's level opens. */
+export function weeklyChallengesFor(monday: string, level = Infinity): WeeklyChallenge[] {
   const weeks = Math.round(Date.parse(`${monday}T12:00:00.000Z`) / (7 * 86_400_000));
   const skip = ((weeks % CHALLENGES.length) + CHALLENGES.length) % CHALLENGES.length;
-  return Array.from({ length: WEEKLY_CHALLENGE_COUNT }, (_, i) => CHALLENGES[(skip + i * 2) % CHALLENGES.length]!);
+  const open = SPOT_IDS.filter((spot) => canUseSpot(spot, level)).length;
+  return Array.from({ length: WEEKLY_CHALLENGE_COUNT }, (_, i) => CHALLENGES[(skip + i * 2) % CHALLENGES.length]!).map((challenge) =>
+    challenge.kind === "banks" ? { ...challenge, goal: Math.min(challenge.goal, open) } : challenge,
+  );
 }
 
 /** How far the week's catches go toward a goal, up to the goal. */
 export function weeklyProgress(challenge: WeeklyChallenge, catches: readonly WeeklyCatch[], monday: string): number {
   const count = (() => {
     switch (challenge.kind) {
-      case "weeklyFish":
-        return catches.filter((row) => row.speciesId === weekFishFor(monday).id).length;
+      case "weeklyFish": {
+        const fish = weekFishFor(monday).id;
+        return catches.filter((row) => row.speciesId === fish).length;
+      }
       case "banks":
         return new Set(catches.map((row) => row.spot)).size;
       case "kinds":
