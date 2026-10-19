@@ -47,6 +47,22 @@ export function UndoBar() {
     return () => window.removeEventListener("keydown", onKey);
   });
 
+  // The page keeps focus clear of the bar by its real height, which grows as its words wrap on a narrow phone.
+  useEffect(() => {
+    const root = document.documentElement;
+    const shown = document.querySelector<HTMLElement>(".undo-bar");
+    if (!shown) {
+      root.style.removeProperty("--undo-bar-h");
+      return;
+    }
+    const measure = () => root.style.setProperty("--undo-bar-h", `${Math.ceil(shown.getBoundingClientRect().height)}px`);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const watch = new ResizeObserver(measure);
+    watch.observe(shown);
+    return () => watch.disconnect();
+  });
+
   // The live region stays in the page so the line is read out when it appears.
   if (saveError) {
     return (

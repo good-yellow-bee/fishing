@@ -4,6 +4,7 @@ import type { Logbook } from "@stillwater/shared";
 import { locale, t, tn, useT } from "../../i18n";
 import { formatDay } from "../format";
 import { findLink } from "../findLinks";
+import { FROM_LIST } from "../leaveDeleted";
 import { monthName } from "../tripMonths";
 import { dayMarks, markedMonths } from "./dayMarks";
 
@@ -155,7 +156,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.fish, "{n} fish", "{n} fish")}`;
                   return (
                     <li key={day} className={`day-fish day-level-${level(mark.fish)}${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.lateTrip ? `/trips/${mark.lateTrip}` : findLink(tail(day))} state={mark.lateTrip ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
@@ -164,7 +165,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing with no fish", "{n} outings with no fish")}`;
                   return (
                     <li key={day} className={`day-blank${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} state={mark.trips.length === 1 ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }
@@ -173,7 +174,7 @@ export function DayCalendar({
                   const label = `${dayName(day)}: ${tn(mark.trips.length, "an outing ahead", "{n} outings ahead")}`;
                   return (
                     <li key={day} className={`day-planned${day === today ? " day-today" : ""}`}>
-                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
+                      <Link to={mark.trips.length === 1 ? `/trips/${mark.trips[0]}` : `/trips?${new URLSearchParams({ find: tripTail(day) }).toString()}`} state={mark.trips.length === 1 ? FROM_LIST : undefined} aria-label={label} title={label} {...dayLink(day)} {...todayMark(day)} />
                     </li>
                   );
                 }

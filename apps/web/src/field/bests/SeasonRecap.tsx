@@ -18,6 +18,28 @@ function against(count: number, before: number, year: string): string {
     : t("{count}, {n} fewer than {year}", { count, n: before - count, year });
 }
 
+/** A season's best day (worth a line once it had more than one fish) and what was new to the book in it. */
+function seasonFirsts(book: Logbook, year: string, today: string) {
+  // A night session's small hours count on its outing's day.
+  const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
+  const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
+  // The waters that gave their first fish that season.
+  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => spot.name));
+  const recap = seasonRecap(book, year, today);
+  const firsts = [
+    ...bestDay,
+    ...(recap.newKinds.length > 0 ? [t("New to the book: {kinds}", { kinds: recap.newKinds.map((name) => t(name)).join(", ") })] : []),
+    ...(newWaters.length > 0 ? [t("New waters: {waters}", { waters: newWaters.join(", ") })] : []),
+  ];
+  return { top, bestDay, firsts };
+}
+
+/** "{year} in the book" as copied, the same from All time and from the season picked, with its goal and its firsts. */
+export function seasonCopy(book: Logbook, year: string, today: string): string {
+  const goal = readYearGoal(year);
+  return [yearSummary(book, year, today, goal), ...seasonFirsts(book, year, today).firsts].join("\n");
+}
+
 /** A picked season at a glance against the one before: fish, days out, kinds, and the kinds new to the book. */
 export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; year: string; today: string; dayLink?: (date: string) => string }) {
   useT();
@@ -25,8 +47,6 @@ export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; 
   const goal = year < today.slice(0, 4) ? readYearGoal(year) : null;
   if (recap.fish === 0 && recap.days === 0) return null;
   // A season still going is set against the one before up to the same day.
-  // The waters that gave their first fish that season.
-  const newWaters = newWatersThisYear(book.catches, new Date(Number(year), 6, 1), (entry) => bookFishDay(book, entry)).flatMap((id) => book.spots.filter((spot) => spot.id === id).map((spot) => spot.name));
   const before = recap.beforeUntil ? t("{year} by this date", { year: recap.before }) : recap.before;
   const lines = [
     t("Fish: {count}", { count: against(recap.fish, recap.fishBefore, before) }),
@@ -35,14 +55,7 @@ export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; 
     // A past season's goal, how it ended; this year's has its own box below.
     ...(goal !== null ? [recap.fish >= goal ? t("Goal reached: {count} of {goal} fish in {year}.", { count: recap.fish, goal, year }) : t("{count} of {goal} fish in {year}", { count: recap.fish, goal, year })] : []),
   ];
-  // The season's best day, a night session's small hours on its outing's day; worth a line once it had more than one fish.
-  const top = bestFishDay({ ...book, catches: book.catches.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`)) });
-  const bestDay = top && top.count > 1 ? [t("Best day: {day} · {fish}", { day: formatDay(top.date), fish: tn(top.count, "{n} fish", "{n} fish") })] : [];
-  const firsts = [
-    ...bestDay,
-    ...(recap.newKinds.length > 0 ? [t("New to the book: {kinds}", { kinds: recap.newKinds.map((name) => t(name)).join(", ") })] : []),
-    ...(newWaters.length > 0 ? [t("New waters: {waters}", { waters: newWaters.join(", ") })] : []),
-  ];
+  const { top, bestDay, firsts } = seasonFirsts(book, year, today);
   return (
     <aside className="conditions season-recap" aria-label={t("{year} in the book", { year })}>
       <span className="eyebrow">{t("{year} in the book", { year })}</span>
@@ -56,7 +69,7 @@ export function SeasonRecapBox({ book, year, today, dayLink }: { book: Logbook; 
         ))}
       </p>
       {/* The copy carries this season's goal too, which its own box below shows on the page. */}
-      <CopySummary text={() => [yearSummary(book, year, today, goal ?? (year === today.slice(0, 4) ? readYearGoal(year) : null)), ...firsts].join("\n")} file="stillwater-season.txt" />
+      <CopySummary text={() => seasonCopy(book, year, today)} file="stillwater-season.txt" />
     </aside>
   );
 }
