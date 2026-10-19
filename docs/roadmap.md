@@ -1256,6 +1256,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC128~~ | ~~Night eyeshine: on nights without fog a pair of eyes, a deer's or a fox's, now and then shines green-gold at the edge of the far bank, holds a while, blinks and is gone~~ (#1245) | scene | S |
 | ~~SC129~~ | ~~Paddleboard route: the paddleboarder's run ends further west so the board stays well clear of the swans' loop~~ (#1245) | scene | S |
 | ~~SC130~~ | ~~News card scene27: rain squall, winter crows, night eyeshine~~ (#1245) | scene | S |
+| ~~SC131~~ | ~~Fewer draws for the night angler and the dog walker: the angler's still parts in one shape (7 draws to 2), the walker's legs, arms and the dog's legs as instances (8 draws to 3)~~ (#1248) | scene | S |
+| ~~SC132~~ | ~~Winter sledders: on winter days two children take turns sledging down a packed run on the hill behind the far bank, rushing down in a spray of snow, coasting to a stop and trudging back up pulling their sleds~~ (#1248) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

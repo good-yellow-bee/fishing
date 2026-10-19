@@ -171,6 +171,7 @@ import { hummingbirdOut } from "./hummingbirdVisits";
 import { FogAngler } from "./FogAngler";
 import { fogAnglerOut } from "./fogFishing";
 import { DogWalker } from "./DogWalker";
+import { FAR_HILLS } from "./farHills";
 import { dogWalkOut } from "./dogWalk";
 import { Swimmer } from "./Swimmer";
 import { swimmingOut } from "./swimLane";
@@ -199,6 +200,8 @@ import { Jogger } from "./Jogger";
 import { joggerOut } from "./jogRun";
 import { Crows } from "./Crows";
 import { crowsOut } from "./crowFlush";
+import { sleddersOut } from "./sledRun";
+import { Sledders } from "./Sledders";
 import { NightEyes } from "./NightEyes";
 import { eyesOut } from "./eyeShine";
 import { Birdwatcher } from "./Birdwatcher";
@@ -578,12 +581,7 @@ const CREEK_TREES: Scatter[] = [
 /** Every shore tree, for the bank's mirror image on still water. */
 const MIRROR_TREES: MirrorTree[] = [...TREES, ...BACK_TREES, ...CREEK_TREES].map((tree) => ({ position: tree.position, scale: tree.scale, variant: plantVariant(tree.position) }));
 
-/** The three hills behind the far shore: centre and radii of each icosphere. */
-const HILLS: { position: Vec3; scale: Vec3; day: string; night: string }[] = [
-  { position: [-28, 4.5, -26], scale: [17, 7, 10], day: "#587a5f", night: "#3d5a44" },
-  { position: [-5, 5.2, -30], scale: [20, 8, 10], day: "#628468", night: "#456348" },
-  { position: [20, 4.6, -27], scale: [18, 7, 11], day: "#547459", night: "#385640" },
-];
+const HILLS = FAR_HILLS;
 
 /** The two trees by the shack, placed about it. */
 const SHACK_TREES: Scatter[] = [
@@ -2386,6 +2384,7 @@ export const LakeWorld = memo(function LakeWorld({
       {skimOut(hour, sky, season, wind) && <StoneSkimmer />}
       {joggerOut(hour, sky, season) && <Jogger />}
       {crowsOut(hour, sky, season) && <Crows jogging={joggerOut(hour, sky, season)} />}
+      {sleddersOut(hour, sky, season) && <Sledders />}
       {birderOut(hour, sky, season) && <Birdwatcher />}
       {porchOut(hour, sky, season) && <PorchRocker />}
       {sandpipersOut(hour, sky, season) && <Sandpipers />}
