@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { LOOK_MAX, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, owlAt, littleOwlOut } from "./littleOwl";
+import { LOOK_MAX, OWL_LAMP, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, WATCH_EVERY_SEC, WATCH_FROM_SEC, WATCH_SEC, owlAt, owlLookAt, owlWatchLook, littleOwlOut } from "./littleOwl";
 import { robinOut } from "./robinVisit";
 
 describe("little owl on the dock post", () => {
@@ -55,6 +55,34 @@ describe("little owl on the dock post", () => {
     expect(maxLook).toBeLessThanOrEqual(LOOK_MAX);
     expect(bobs).toBeGreaterThan(0);
     expect(blinks).toBeGreaterThan(0);
+  });
+
+  it("with moths about, follows the moths round its own lantern for spells, looking back at the lantern when one goes behind it", () => {
+    expect(Math.hypot(OWL_LAMP.x - OWL_POST.x, OWL_LAMP.z - OWL_POST.z)).toBeLessThan(0.3);
+    const lamp = owlLookAt(OWL_LAMP.x, OWL_LAMP.z)!;
+    let following = 0;
+    let last: number | null = null;
+    for (let sit = 0; sit < SIT_SEC; sit += 1 / 60) {
+      const look = owlWatchLook(sit, 100 + sit);
+      const spell = sit % WATCH_EVERY_SEC;
+      expect(look !== null).toBe(spell >= WATCH_FROM_SEC && spell < WATCH_FROM_SEC + WATCH_SEC);
+      if (look === null) {
+        last = null;
+        continue;
+      }
+      expect(Math.abs(look)).toBeLessThanOrEqual(LOOK_MAX);
+      if (look !== lamp) following += 1;
+      // Never a flip from one shoulder right round to the other.
+      if (last !== null) expect(Math.abs(look - last)).toBeLessThan(LOOK_MAX * 1.5);
+      last = look;
+    }
+    expect(following).toBeGreaterThan(60 * WATCH_SEC);
+  });
+
+  it("watches the moths only when they are out", () => {
+    let differs = 0;
+    for (let t = 0; t < VISIT_EVERY_SEC; t += 0.05) if (owlAt(t, false, false, true).look !== owlAt(t).look) differs += 1;
+    expect(differs).toBeGreaterThan(0);
   });
 
   it("sits still on its post with reduced motion, up on the snow cap in winter", () => {
