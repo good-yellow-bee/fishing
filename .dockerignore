@@ -6,3 +6,4 @@ apps/api/data/*.sqlite*
 test-results
 claude-memory
 .git
+.env*

@@ -21,8 +21,9 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   secret: secret ?? "stillwater-dev-secret-change-me-32ch",
   trustedOrigins,
-  // Fly's proxy sets this to the visitor's address, so sign-in rate limits count per visitor, not for everyone at once.
-  advanced: { ipAddress: { ipAddressHeaders: ["fly-client-ip"] } },
+  // On Fly (which sets FLY_APP_NAME) the proxy puts the visitor's address here, so sign-in rate limits count per visitor.
+  // Elsewhere the header is the client's own word, so it is left alone.
+  ...(process.env.FLY_APP_NAME && { advanced: { ipAddress: { ipAddressHeaders: ["fly-client-ip"] } } }),
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

@@ -94,10 +94,10 @@ fly secrets set BETTER_AUTH_SECRET=$(openssl rand -hex 32)
 Then, for every release:
 
 ```bash
-fly deploy
+fly deploy --ha=false
 ```
 
-Keep one machine: SQLite on a volume can't be shared, so don't `fly scale count` above 1.
+Keep one machine: SQLite on a volume can't be shared, so `--ha=false` stops the first deploy from starting a second one, and don't `fly scale count` above 1.
 
 Try the production image locally (`BETTER_AUTH_URL` must be `http://` here, or the browser drops the secure session cookie):
 
