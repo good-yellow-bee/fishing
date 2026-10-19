@@ -1,4 +1,4 @@
-import { fishById } from "./fish.ts";
+import { FISH, fishById } from "./fish.ts";
 import { isTrophyWeight } from "./guide.ts";
 import type { LakeHour } from "./hour.ts";
 import type { LakeSeason } from "./season.ts";
@@ -29,7 +29,7 @@ export type BadgeFactRow = {
 /** What the grouped facts can't carry: the longest run of consecutive local days with a fish. */
 export type BadgeHistory = { longestStreak: number };
 
-export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird";
+export type BadgeId = "four-banks" | "night-owl" | "rain-pike" | "clean-sweep" | "trophy" | "full-book" | "four-seasons" | "gold" | "steward" | "regular" | "early-bird" | "whole-lake" | "trophy-hunter";
 
 export type Badge = {
   id: BadgeId;
@@ -149,6 +149,27 @@ export const BADGES: readonly Badge[] = [
     blurb: "Land ten fish at dawn.",
     need: 10,
     have: (facts) => count(facts, (row) => row.hour === "dawn"),
+  },
+  {
+    id: "whole-lake",
+    label: "Whole lake",
+    blurb: "Land every kind of fish in the lake.",
+    need: FISH.length,
+    have: (facts) => distinct(facts.filter((row) => fishById(row.speciesId) !== undefined), (row) => row.speciesId),
+  },
+  {
+    id: "trophy-hunter",
+    label: "Trophy hunter",
+    blurb: "Land five kinds of fish at trophy weight.",
+    need: 5,
+    have: (facts) =>
+      distinct(
+        facts.filter((row) => {
+          const species = fishById(row.speciesId);
+          return species !== undefined && isTrophyWeight(species, row.heaviest);
+        }),
+        (row) => row.speciesId,
+      ),
   },
 ];
 
