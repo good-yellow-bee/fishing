@@ -362,6 +362,8 @@ describe("useFishingGame live shiner", () => {
 
   it("hooks a landed shiner on as bait, and the next cast draws the bank's hunter to it once", () => {
     const surface = mount();
+    // A fight that went into the red leaves the shiner worn, not lively.
+    fightPerformance = { peakTension: 0.9, maxLine: 1 };
     vi.mocked(pickBite).mockReturnValueOnce(shiner);
     step.mockReturnValueOnce("landed");
     castAndFight(surface, 1);
@@ -378,6 +380,22 @@ describe("useFishingGame live shiner", () => {
     act(() => vi.advanceTimersByTime(2_201));
     act(() => surface.dispatchEvent(pointer("pointerdown", 2)));
     expect(hint()).toMatch(/^It took the live shiner! /);
+  });
+
+  it("sends a shiner landed clean out lively, drawing more of the hunters", () => {
+    const surface = mount();
+    vi.mocked(pickBite).mockReturnValueOnce(shiner);
+    step.mockReturnValueOnce("landed");
+    castAndFight(surface, 1);
+    expect(container!.querySelector("[data-testid=clean]")?.textContent).toBe("true");
+    baitShiner();
+    expect(hint()).toBe("You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.");
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.7);
+    cast(surface);
+    expect(hint()).toMatch(/^The lively shiner swims hard on the hook, and more of the hunters here come to it\./);
+    // A roll of 0.7 misses a plain live shiner's 60% but lands in a lively one's 80%.
+    expect(container!.querySelector("[data-testid=bite]")?.textContent).toMatch(/^smallmouth-bass\|/);
+    random.mockRestore();
   });
 
   it("leaves any other landed fish on the card", () => {

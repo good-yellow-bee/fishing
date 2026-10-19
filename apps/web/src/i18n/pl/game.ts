@@ -110,7 +110,14 @@ export const PL_GAME: PlBook = {
   "The water has warmed since yesterday, and the fish wake up to feed.": "Woda ociepliła się od wczoraj, a ryby budzą się do żerowania.",
   "The water has cooled since yesterday, and the sluggish fish bite slow.": "Woda ochłodziła się od wczoraj, a ospałe ryby biorą powoli.",
   "Use it as bait": "Użyj go jako przynęty",
-  "Hook it on as live bait: the next cast draws the hunters here.": "Załóż go na haczyk jako żywą przynętę: następny rzut przyciągnie tutejsze drapieżniki.",
+  "Hook it on as live bait: the next cast draws the hunters here. A shiner landed in a clean fight is livelier.":
+    "Załóż go na haczyk jako żywą przynętę: następny rzut przyciągnie tutejsze drapieżniki. Złotawiec wyholowany czysto jest żwawszy.",
+  "Hook it on as live bait: landed clean, it's lively and draws more of the hunters here.":
+    "Załóż go na haczyk jako żywą przynętę: wyholowany czysto jest żwawy i przyciąga więcej tutejszych drapieżników.",
+  "You hook the lively shiner on as live bait: landed clean, it swims hard and draws more of the hunters. Cast it out.":
+    "Zakładasz żwawego złotawca na haczyk jako żywą przynętę: wyholowany czysto, mocno pływa i przyciąga więcej drapieżników. Zarzuć go.",
+  "The lively shiner swims hard on the hook, and more of the hunters here come to it.":
+    "Żwawy złotawiec mocno pracuje na haczyku, a do niego płynie więcej tutejszych drapieżników.",
   "You hook the shiner on as live bait. Cast it out to the hunters.": "Zakładasz złotawca na haczyk jako żywą przynętę. Zarzuć go do drapieżników.",
   "The live shiner swims down off the hook, and the hunters here come to it.": "Żywy złotawiec schodzi z haczykiem w głąb, a tutejsze drapieżniki płyną do niego.",
   "It took the live shiner!": "Wziął żywego złotawca!",
