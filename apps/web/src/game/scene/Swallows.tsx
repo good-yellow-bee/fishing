@@ -13,8 +13,8 @@ const SWALLOW_SCALE = 2.4;
 /** Radians the wings swing through a beat. */
 const FLAP_SWING = 0.6;
 
-/** One swept-back wing reaching out along +x from the shoulder, front edge toward +z. */
-function makeWing() {
+/** One swept-back wing reaching out along +x from the shoulder, front edge toward +z. Also folded on the swallows at rest on the mooring line. */
+export function makeWing() {
   const shape = new THREE.Shape();
   shape.moveTo(0, 0.03);
   shape.lineTo(0.16, -0.05);

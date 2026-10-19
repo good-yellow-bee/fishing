@@ -1347,6 +1347,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC179~~ | ~~Mooring lines: while the rowboat lies tied up by the pier, a bow line and a stern line run to the pier posts, sagging and drawing tighter as the hull rides the chop, gone once it is untied (one draw)~~ (#1399) | scene | S |
 | ~~SC180~~ | ~~Dragonfly on the rod tip: on dry summer days, once the line has sat quiet for a while, a blue dragonfly flies in and settles on the rod tip, flicking its wings now and then, and darts off on a nibble, the strike or reeling in (two draws), with news scene40 for it and the mooring lines~~ (#1401) | scene | S |
 | ~~SC181~~ | ~~Dock dog: by day, unless it rains, a golden dog lies on the dock behind the angler facing the water; it watches a fresh cast, dozes head on paws when nothing happens, sits up with its tail going through a bite and the fight, and wags hard over the result (one draw)~~ (#1406) | scene | S |
+| SC182 | Swallows on the mooring line: on fine spring and summer days three swallows now and then swoop in one after another and perch in a row on the moored rowboat's bow line, riding its sway, bobbing their tails and glancing about, then flick off over the water (two draws), with news scene41 for them and the dock dog | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 

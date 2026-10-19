@@ -750,6 +750,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "By day, unless it rains, a golden dog now lies on the dock behind you. It watches a fresh cast, dozes off when nothing bites, and sits up with its tail going when a fish takes. And on fine spring and summer days swallows sometimes come and sit in a row on the moored rowboat's rope.":
+    "Za dnia, gdy nie pada, na pomoście za tobą leży teraz złoty pies. Patrzy na świeży rzut, zasypia, gdy nic nie bierze, i siada, merdając ogonem, gdy ryba chwyci. A w pogodne wiosenne i letnie dni na cumie przycumowanej łódki przysiadają czasem rzędem jaskółki.",
   "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
     "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
   "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.":
