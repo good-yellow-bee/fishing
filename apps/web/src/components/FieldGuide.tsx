@@ -92,12 +92,12 @@ function drawsOn(speciesId: string): string {
     .join(", ");
 }
 
-
 /** Where the angler stands with a kind: its mastery tier and how many to the next. */
 function masteryLine(caught: number): string {
   const tier = masteryTier(caught);
   const next = nextMastery(caught);
-  if (!next) return t("Mastery: {tier}", { tier: t(tier!.label) });
+  if (tier && !next) return t("Mastery: {tier}", { tier: t(tier.label) });
+  if (!next) return "";
   return tier
     ? t("Mastery: {tier} · {n} to {next}", { tier: t(tier.label), n: next.toGo, next: t(next.tier.label) })
     : t("Mastery: {n} to {next}", { n: next.toGo, next: t(next.tier.label) });

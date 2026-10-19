@@ -189,12 +189,12 @@ export function findCatchByRequestId(userId: string, requestId: string): CatchRo
     .get(userId, requestId) as CatchRow | undefined;
 }
 
-/** The heaviest of a species this angler has landed, or null before the first. */
 /** How many fish of a kind the angler has landed, for the mastery tiers. */
 export function countCatches(userId: string, speciesId: string): number {
   return (db.prepare(`SELECT COUNT(*) as n FROM catch WHERE user_id = ? AND species_id = ?`).get(userId, speciesId) as { n: number }).n;
 }
 
+/** The heaviest of a species this angler has landed, or null before the first. */
 export function heaviestCatch(userId: string, speciesId: string): number | null {
   const row = db.prepare(`SELECT MAX(weight) as heaviest FROM catch WHERE user_id = ? AND species_id = ?`).get(userId, speciesId) as
     | { heaviest: number | null }
