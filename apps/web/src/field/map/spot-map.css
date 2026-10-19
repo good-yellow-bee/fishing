@@ -290,11 +290,16 @@
   margin: 16px 0 0;
   padding: 0;
   list-style: none;
+  container-type: inline-size;
 }
 
 .map-index li {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.6fr) minmax(0, 0.5fr) minmax(0, 1.4fr) auto;
+  /* The fish line (last fish, rest, next outing) is the row's longest: at 0.5fr, beside an own water's "3.1 mi from …"
+     in an auto column, a tablet gave it 50 px, a word a line. The distance now goes under the place, and Plan one
+     fills the first row's last column. */
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.6fr) minmax(0, 1.4fr) minmax(0, 1.4fr) auto;
+  grid-auto-flow: dense;
   gap: 10px;
   align-items: baseline;
   padding: 8px 0;
@@ -307,6 +312,23 @@
 .map-index li > * {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.map-index li > .map-nearest {
+  grid-column: 4;
+}
+
+/* Under 520 px of list (a phone, or a tablet or sideways phone with larger text, the rail beside it) the row's columns
+   gave the fish line under 125 px: each water's details stack under its name instead. */
+@container (max-width: 520px) {
+  .map-index li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .map-index li > .map-nearest {
+    grid-column: auto;
+  }
 }
 
 .map-index a {
@@ -424,11 +446,6 @@
 
   .map-pin-spot-mill .map-pin-label {
     top: 12px;
-  }
-
-  .map-index li {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
   }
 }
 

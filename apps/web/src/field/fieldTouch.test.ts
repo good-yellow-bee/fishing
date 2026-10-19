@@ -371,3 +371,16 @@ describe("trip and catch cards on a narrow phone", () => {
     expect(/\n  \.form-save \.field-primary \{([^}]*)\}/.exec(css)?.[1]).toContain("max-width: 100%;");
   });
 });
+
+describe("the Map list on a tablet or a sideways phone", () => {
+  it("gives the fish line as much room as the place, puts the distance under the place, and stacks under 520 px of list", () => {
+    expect(/\n\.map-index \{([^}]*)\}/.exec(mapCss)?.[1]).toContain("container-type: inline-size;");
+    const row = /\n\.map-index li \{([^}]*)\}/.exec(mapCss)?.[1];
+    expect(row).toContain("grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.6fr) minmax(0, 1.4fr) minmax(0, 1.4fr) auto;");
+    expect(row).toContain("grid-auto-flow: dense;");
+    expect(/\n\.map-index li > \.map-nearest \{([^}]*)\}/.exec(mapCss)?.[1]).toContain("grid-column: 4;");
+    const narrow = mapCss.slice(mapCss.indexOf("@container (max-width: 520px) {"));
+    expect(/^@container \(max-width: 520px\) \{\n  \.map-index li \{\n    grid-template-columns: minmax\(0, 1fr\);/.test(narrow)).toBe(true);
+    expect(narrow.slice(0, narrow.indexOf("\n}\n"))).toContain(".map-index li > .map-nearest {\n    grid-column: auto;");
+  });
+});
