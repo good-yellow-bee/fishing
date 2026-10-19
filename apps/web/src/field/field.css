@@ -528,6 +528,15 @@ button.field-primary {
     text-align: center;
   }
 
+  /* A log form's note before saving ("A bass was already logged here at 6:40. Open it", "You already have an outing on
+     this water that day: ...") links in 13 px type, 15 px targets: each link is now a 32 px band. */
+  .form-note a {
+    display: inline-block;
+    min-height: 32px;
+    padding-block: 7px;
+    box-sizing: border-box;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
