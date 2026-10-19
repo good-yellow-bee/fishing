@@ -111,9 +111,10 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
 const TRIP_FIND = "find";
 
 /** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
-function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
+export function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
   const works = lureTally({ ...book, catches: countedFish(catchesForSpot(book, trip.spotId)) }, 3).map((row) => t(row.lure));
-  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
+  // In the reader's language, as the list on the page and "Copy the list" name them.
+  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => t(item.label));
   // When to leave: the day's light at the water, and the moon that night, as the outing's page gives them.
   const spot = spotById(book, trip.spotId);
   return [

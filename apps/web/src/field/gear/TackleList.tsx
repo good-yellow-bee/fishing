@@ -238,7 +238,8 @@ export function TackleList({
                   }}
                 />
                 <span className={item.packed ? "is-packed" : undefined}>{t(item.label)}</span>
-                {isLureLabel(item.label) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
+                {/* Its kind, unless it is named just that: "Jig · Jig" said the name twice. */}
+                {isLureLabel(item.label) && shownPieceKey(t(lureClass(item.label).label)) !== shownPieceKey(t(item.label)) && <span className="lure-tag">{t(lureClass(item.label).label)}</span>}
                 {took.get(readKey(item.label)) ? (
                   <span className="tackle-caught">{fishCountLabel(took.get(readKey(item.label))!)}</span>
                 ) : tipKeys.has(readKey(item.label)) ? (
