@@ -3389,8 +3389,8 @@ html[data-contrast="high"] :is(
   backdrop-filter: none;
 }
 
-/* The states the panels above would flatten keep their amber. */
-html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop, .walk-signs .walk-retie) {
+/* The states the panels above would flatten keep their amber, a switched-on Headlamp among them. */
+html[data-contrast="high"] :is(.walk-signs .panel-btn:disabled, .walk-signs .walk-shop, .walk-signs .walk-retie, .walk-signs .panel-btn[aria-pressed="true"]) {
   border-color: #ffc95c;
   color: #ffc95c;
 }
