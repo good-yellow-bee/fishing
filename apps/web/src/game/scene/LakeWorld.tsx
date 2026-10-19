@@ -1793,24 +1793,12 @@ function Dragonflies() {
   );
 }
 
-type BankPlank = { board: BankBoard; index: number };
-
-function bankPlankBatches() {
-  const batches = new Map<string, BankPlank[]>();
-  BANK_BOARDS.forEach((board, index) => {
-    const colors = board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK;
-    const color = colors[index % 2];
-    const batch = batches.get(color);
-    const plank = { board, index };
-    if (batch) batch.push(plank);
-    else batches.set(color, [plank]);
-  });
-  return [...batches].map(([color, planks]) => ({ color, planks }));
+/** Each bank board's colour: a stand's or a walk's, alternating board by board as they always have. */
+export function bankPlankColor(board: BankBoard, index: number) {
+  return (board.kind === "stand" ? BANK_STAND_PLANK : BANK_WALK_PLANK)[index % 2]!;
 }
 
-export const BANK_PLANK_BATCHES = bankPlankBatches();
-
-/** Matrix for one board; unit geometry keeps all planks in four draw calls. */
+/** Matrix for one board; unit geometry keeps every plank in one draw call. */
 export function bankPlankMatrix(board: BankBoard, index: number) {
   const stand = board.kind === "stand";
   const y = BANK_TOP - BANK_THICK / 2 + (stand ? BANK_STAND_LIFT : 0) + (index % 2) * 0.001;
@@ -1821,26 +1809,32 @@ export function bankPlankMatrix(board: BankBoard, index: number) {
   );
 }
 
-export function placeBankPlanks(mesh: THREE.InstancedMesh, planks: readonly BankPlank[]) {
-  planks.forEach(({ board, index }, instance) => mesh.setMatrixAt(instance, bankPlankMatrix(board, index)));
+/** Places and colours every bank board in one instanced mesh. */
+export function placeBankPlanks(mesh: THREE.InstancedMesh) {
+  const tint = new THREE.Color();
+  BANK_BOARDS.forEach((board, index) => {
+    mesh.setMatrixAt(index, bankPlankMatrix(board, index));
+    mesh.setColorAt(index, tint.set(bankPlankColor(board, index)));
+  });
   mesh.instanceMatrix.needsUpdate = true;
+  if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   // Culling and shadow passes cache the first bounds three computes, which may predate these matrices.
   mesh.computeBoundingBox();
   mesh.computeBoundingSphere();
 }
 
-function BankPlanks({ color, planks }: { color: string; planks: readonly BankPlank[] }) {
+function BankPlanks() {
   const mesh = useRef<THREE.InstancedMesh>(null);
 
   useLayoutEffect(() => {
-    if (mesh.current) placeBankPlanks(mesh.current, planks);
-  }, [planks]);
+    if (mesh.current) placeBankPlanks(mesh.current);
+  }, []);
 
   // R3F disposes child geometry and material on unmount; an effect cleanup would also fire on StrictMode's dev replay.
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, planks.length]} castShadow receiveShadow>
+    <instancedMesh ref={mesh} args={[undefined, undefined, BANK_BOARDS.length]} castShadow receiveShadow>
       <boxGeometry />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
+      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
     </instancedMesh>
   );
 }
@@ -1863,15 +1857,13 @@ function BankPosts() {
 function BankWalks() {
   return (
     <group>
-      {BANK_PLANK_BATCHES.map(({ color, planks }) => (
-        <BankPlanks key={color} color={color} planks={planks} />
-      ))}
+      <BankPlanks />
       <BankPosts />
     </group>
   );
 }
 
-/** Matrix for one pier board; unit geometry keeps the deck in two draw calls, one per plank colour. */
+/** Matrix for one pier board; unit geometry keeps the deck in one draw call. */
 export function pierPlankMatrix(index: number) {
   const board = PIER_BOARDS[index]!;
   return new THREE.Matrix4().compose(
@@ -1881,37 +1873,39 @@ export function pierPlankMatrix(index: number) {
   );
 }
 
-/** Board indices for each of the two plank colours, alternating as they always have. */
-export const PIER_PLANK_BATCHES = [0, 1].map((parity) => PIER_BOARDS.map((_, i) => i).filter((i) => i % 2 === parity));
+/** Each pier board's colour: the two plank colours alternating, soaked darker by `shade` and paled by frost or snow (`pale`). */
+export function pierPlankColor(index: number, shade: number, pale: number, into = new THREE.Color()) {
+  return into.set(PIER_PLANK[index % 2]!).multiplyScalar(shade).lerp(FROST, pale);
+}
+const FROST = new THREE.Color(FROST_COLOR);
 
-function PierPlanks({ color, boards }: { color: THREE.Color; boards: readonly number[] }) {
+/** Every pier board in one instanced mesh, each in its own colour. */
+function PierDeck({ shade, pale }: { shade: number; pale: number }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
 
   useLayoutEffect(() => {
     const deck = mesh.current;
     if (!deck) return;
-    boards.forEach((index, instance) => deck.setMatrixAt(instance, pierPlankMatrix(index)));
+    PIER_BOARDS.forEach((_, index) => deck.setMatrixAt(index, pierPlankMatrix(index)));
     deck.instanceMatrix.needsUpdate = true;
     deck.computeBoundingBox();
     deck.computeBoundingSphere();
-  }, [boards]);
+  }, []);
+
+  useLayoutEffect(() => {
+    const deck = mesh.current;
+    if (!deck) return;
+    const tint = new THREE.Color();
+    PIER_BOARDS.forEach((_, index) => deck.setColorAt(index, pierPlankColor(index, shade, pale, tint)));
+    if (deck.instanceColor) deck.instanceColor.needsUpdate = true;
+  }, [shade, pale]);
 
   return (
-    <instancedMesh ref={mesh} args={[undefined, undefined, boards.length]} castShadow receiveShadow>
+    <instancedMesh ref={mesh} args={[undefined, undefined, PIER_BOARDS.length]} castShadow receiveShadow>
       <boxGeometry />
-      <meshToonMaterial color={color} gradientMap={toonRamp()} />
+      <meshToonMaterial color="#ffffff" gradientMap={toonRamp()} />
     </instancedMesh>
   );
-}
-
-function PierDeck({ shade, pale }: { shade: number; pale: number }) {
-  return PIER_PLANK_BATCHES.map((boards, parity) => (
-    <PierPlanks
-      key={parity}
-      boards={boards}
-      color={new THREE.Color(PIER_PLANK[parity]).multiplyScalar(shade).lerp(new THREE.Color(FROST_COLOR), pale)}
-    />
-  ));
 }
 
 /** The pier's still timbers: its bridge spans, the landing platform, a log and a paddle, soaked darker by `shade`. */

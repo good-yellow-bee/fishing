@@ -1394,6 +1394,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC215~~ | ~~Fewer draws: the pier's timbers, the shack's ground and the shore boardwalk and logs (about 15 still models drawn one each) are baked together per material with a new StaticModels list; about 11 fewer draws in every scene, no visible change~~ (#1483) | scene | S |
 | ~~SC216~~ | ~~Fewer draws: the shore and creek trees draw as one swaying list, the bushes and grass round the lake and creek as one list, and every rock as one instanced mesh, so like materials bake together across lists; about 7 fewer draws in every scene, no visible change~~ (#1485) | scene | S |
 | ~~SC217~~ | ~~Fewer draws: every lily pad and its flower or bud draws as instanced meshes riding the swell (a LilyBed), instead of a model and two flower meshes per pad; about 11 fewer draws from spring to fall, no visible change~~ (#1489) | scene | S |
+| SC218 | Fewer draws: the bank stands' and walks' planks (four colour batches) and the pier's planks (two) are each one instanced mesh with per-plank colours, the pier's still soaking in rain and paling under frost and snow; about 8 fewer draws in every scene, no visible change | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
