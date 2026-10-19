@@ -1862,9 +1862,14 @@ html:has(.form-save):has(.undo-bar) .field-main {
   margin-top: -8px;
 }
 
-.conditions .eyebrow + p + .eyebrow {
+.conditions p + .eyebrow {
   display: block;
   margin-top: 12px;
+}
+
+/* The count under the weather reads as a plain line, not in the conditions' headline type. */
+.conditions p.same-conditions {
+  font: inherit;
 }
 
 .moon-line {

@@ -91,9 +91,15 @@ export function startTimeFor(trip: Pick<Trip, "date"> | undefined, now: Date = n
   return last && last.getTime() > start.getTime() && last.getTime() <= now.getTime() ? last : start;
 }
 
-/** The outing planned on this water for this day, which a fish caught there that day most likely belongs to. */
-export function tripOnDay(book: Logbook, spotId: string, ymd: string): Trip | undefined {
-  return book.trips.find((trip) => trip.spotId === spotId && trip.date === ymd);
+/**
+ * The outing planned on this water for this day, which a fish caught there that day most likely belongs to. With a
+ * dawn and a dusk there, a fish caught `at` goes to the one whose fish came nearest that time.
+ */
+export function tripOnDay(book: Logbook, spotId: string, ymd: string, at?: number): Trip | undefined {
+  const trips = book.trips.filter((trip) => trip.spotId === spotId && trip.date === ymd);
+  if (trips.length < 2 || at === undefined) return trips[0];
+  const gap = (trip: Trip) => Math.min(...book.catches.filter((entry) => entry.tripId === trip.id).map((entry) => Math.abs(Date.parse(entry.caughtAt) - at)));
+  return trips.reduce((best, trip) => (gap(trip) < gap(best) ? trip : best));
 }
 
 /** A fish this soon after the outing's last one is the same session going on, whatever the clock says. */
@@ -129,15 +135,15 @@ export function tripForFish(book: Logbook, spotId: string, local: string): Trip 
   // A fish the angler logs is their own: never filed on one of the sample week's invented outings.
   book = { ...book, trips: book.trips.filter((trip) => !isSampleOuting(trip)) };
   const ymd = local.slice(0, 10);
-  const sameDay = tripOnDay(book, spotId, ymd);
   const hour = Number(local.slice(11, 13));
-  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return sameDay;
   const [y, m, d] = ymd.split("-").map(Number) as [number, number, number];
-  const eve = tripOnDay(book, spotId, localDate(new Date(y, m - 1, d - 1, 12)));
+  const at = new Date(y, m - 1, d, hour || 0, Number(local.slice(14, 16)) || 0).getTime();
+  const sameDay = tripOnDay(book, spotId, ymd, at);
+  if (local.length < 13 || !(hour < LATE_NIGHT_UNTIL)) return sameDay;
+  const eve = tripOnDay(book, spotId, localDate(new Date(y, m - 1, d - 1, 12)), at);
   if (!sameDay) return eve;
   // The next day planned too: the evening's session still going (a fish on it these last hours, none yet on the
   // day's own outing) keeps the fish, as a night out does.
-  const at = new Date(y, m - 1, d, hour, Number(local.slice(14, 16)) || 0).getTime();
   const fishOn = (trip: Trip) => book.catches.filter((entry) => entry.tripId === trip.id && Date.parse(entry.caughtAt) <= at);
   const going = eve !== undefined && fishOn(eve).some((entry) => at - Date.parse(entry.caughtAt) < STILL_FISHING_MS);
   return going && fishOn(sameDay).length === 0 ? eve : sameDay;

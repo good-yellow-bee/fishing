@@ -29,13 +29,16 @@ function amount(measure: Measure): number {
   return measure.kind === "length" ? measure.inches : measure.pounds;
 }
 
-/** The fish with the largest measure of this kind, counting a fish's other measure when it was both measured and weighed. */
+/**
+ * The fish with the largest measure of this kind, counting a fish's other measure when it was both measured and weighed.
+ * Of fish the same size, the one caught first: it set the mark, whatever order the book stored them in.
+ */
 function bestOf(catches: CatchEntry[], kind: Measure["kind"]): CatchEntry | null {
   let best: CatchEntry | null = null;
   let most = -Infinity;
   for (const entry of catches) {
     const measure = measureOf(entry, kind);
-    if (!measure || amount(measure) <= most) continue;
+    if (!measure || amount(measure) < most || (amount(measure) === most && Date.parse(entry.caughtAt) >= Date.parse(best!.caughtAt))) continue;
     best = entry;
     most = amount(measure);
   }

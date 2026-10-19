@@ -34,6 +34,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { largestFirst } from "./largestFirst";
 import { MatchOrder, useLargestOrder } from "./MatchOrder";
 import { spreadRows } from "./spreadRows";
+import { outingDay } from "./tripDates";
 
 /** One kind of fish across the whole book: how many, how big, on what, and where. */
 /** How many of the kind's newest photos show here; the rest are a search away. */
@@ -392,7 +393,7 @@ function KindMark({ catches }: { catches: readonly CatchEntry[] }) {
 /** "Biggest of 2026: 24 in · 5.1 lb": this year's best of the kind, once earlier years hold fish too (else it is the record above). */
 function BiggestThisYear({ catches, species, name }: { catches: readonly CatchEntry[]; species: string; name: string }) {
   const { book } = useLogbook();
-  const year = localDate(new Date()).slice(0, 4);
+  const year = outingDay(localDate(new Date())).slice(0, 4);
   const counted = countedFish(catches);
   // By the day a fish counts on: a New Year's Eve night's small hours are the old year's.
   const thisYear = counted.filter((entry) => bookFishDay(book, entry).startsWith(`${year}-`));
@@ -459,7 +460,7 @@ function SpeciesSpan({ first, last }: { first: CatchEntry; last: CatchEntry }) {
   const firstDay = <Link to={`/catches/${first.id}`}>{formatDay(bookFishDay(book, first))}</Link>;
   const lastDay = <Link to={`/catches/${last.id}`}>{formatDay(bookFishDay(book, last))}</Link>;
   // How long since the newest, once it is more than a day: whether the kind has gone quiet.
-  const since = daysBetween(bookFishDay(book, last), localDate(new Date()));
+  const since = daysBetween(bookFishDay(book, last), outingDay(localDate(new Date())));
   return (
     <p className="meta species-span">
       {t("First in the book")} {firstDay} · {t("newest")} {lastDay}

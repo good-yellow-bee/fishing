@@ -33,7 +33,7 @@ import { MatchOrder, ORDER_PARAM, useLargestOrder } from "./MatchOrder";
 import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
-import { shownPieceKey } from "./gear/pieceKey";
+import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
@@ -304,7 +304,11 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     // A lure goes by the piece Gear counts it as, so "Spinnerbait" opens the "Spinnerbaits" its record counted too.
     const piece = exact.field === "lure" ? shownPieceKey(exact.name) : null;
     const named = (name: string) =>
-      normalize(name) === want || normalize(t(name)) === want || normalize(inPolish(name)) === want || (piece !== null && shownPieceKey(name) === piece);
+      normalize(name) === want ||
+      normalize(t(name)) === want ||
+      normalize(t(bookSpelling(name))) === want ||
+      normalize(inPolish(name)) === want ||
+      (piece !== null && shownPieceKey(name) === piece);
     return catchesNewestFirst(book).filter((entry) => {
       const name = exactName(book, entry, exact.field);
       return name !== null && named(name);
@@ -409,7 +413,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
-    if (translated && (normalize(t(entry.species)).includes(want) || normalize(t(entry.lure)).includes(want))) hit.add(entry.id);
+    if (translated && (normalize(t(bookSpelling(entry.species))).includes(want) || normalize(t(bookSpelling(entry.lure))).includes(want))) hit.add(entry.id);
     else if (
       speciesPlural(entry, want, t) ||
       monthHas(book, entry, want) ||
@@ -935,7 +939,7 @@ export function CatchSearch() {
           ) : null}
           {matches.length === 0 && !nightDay ? (
             <p className="search-tip">
-              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “note”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
+              {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “note”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1\u00a0kg" : ">2\u00a0lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
             </p>
           ) : null}
@@ -999,7 +1003,7 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
   return { value: top[0], count: top[1] };
 }
 
-/** What the found fish have in common, where one clearly leads: "Most on Jig (5). Most at Dawn (4). Most from Cedar Lake (6)." */
+/** What the found fish have in common, where one clearly leads: "Most on Jig (5). Best time of day: Dawn (4). Most from Cedar Lake (6)." */
 /**
  * The matches split by kind and by year, once they hold more than one: "By kind: Northern pike 3 · Zander 2", "By year:
  * 2026 5 · 2025 3". Each narrows the search to that kind or year.
@@ -1069,7 +1073,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     ) : null;
   return (
     <>
-      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species.trim().toLowerCase() === species.toLowerCase())}
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", pieceName(species)), (species) => pieceName(species), (entry, species) => entry.species.trim().toLowerCase() === species.toLowerCase())}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
     </>
   );
@@ -1108,11 +1112,11 @@ function TopLure({ catches }: { catches: readonly CatchEntry[] }) {
     return Number.isNaN(at.getTime()) ? null : biteTimeOf(at.getHours());
   });
   const water = leader(catches, (entry) => entry.spotId);
-  const lureName = lure ? catches.find((entry) => lureKey(entry) === lure.value)!.lure.trim() : "";
+  const lureName = lure ? pieceName(catches.find((entry) => lureKey(entry) === lure.value)!.lure) : "";
   const lines = [
-    lure ? t("Most on {lure}.", { lure: `${t(lureName)} (${lure.count})` }) : null,
+    lure ? t("Most on {lure}.", { lure: `${lureName} (${lure.count})` }) : null,
     // Polish writes the part of the day in lower case inside a sentence: "Najczęściej o tej porze: świt (2)."
-    time ? t("Most at {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
+    time ? t("Best time of day: {time}.", { time: `${inSentence(t(BITE_TIMES.find((row) => row.id === time.value)!.label))} (${time.count})` }) : null,
     water ? t("Most from {water}.", { water: `${spotById(book, water.value)?.name ?? ""} (${water.count})` }) : null,
   ].filter(Boolean);
   return lines.length > 0 ? <p className="meta top-lure">{lines.join(" ")}</p> : null;

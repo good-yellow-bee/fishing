@@ -56,12 +56,12 @@ export const CatchCard = memo(function CatchCard({
       <p className={`measure measure-${entry.measure.kind}`}>{measuresText(entry)}</p>
       <div>
         <Head>
-          <Link to={catchLink(entry.id, list)} state={FROM_LIST}>{t(entry.species)}</Link>
+          <Link to={catchLink(entry.id, list)} state={FROM_LIST}>{pieceName(entry.species)}</Link>
           {badge ? <span className="card-badge">{badge === "book" ? t("Book record") : t("Best of its kind")}</span> : null}
         </Head>
         <p className="meta">
           {/* Every fish taken on this lure, as on the catch page. */}
-          <Link to={findLink(exactTerm("lure", t(entry.lure)))}>{t(entry.lure)}</Link>
+          <Link to={findLink(exactTerm("lure", pieceName(entry.lure)))}>{pieceName(entry.lure)}</Link>
           <span aria-hidden="true">·</span>
           {spotName !== null ? (
             <>
