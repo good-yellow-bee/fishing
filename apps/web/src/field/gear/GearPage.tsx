@@ -112,11 +112,23 @@ function LureRecord({ today }: { today: string }) {
       // Storage blocked: the order holds for this visit.
     }
   };
+  // One water's record: a pike lake and a trout stream want different bags. Offered among the waters the angler packed
+  // for, once there are two; the sample's only while the book has nothing of the angler's own, as the record counts.
+  const counted = countedBook(book);
+  const packedFor = new Set(items.map((item) => item.tripId));
+  const bookAt = (spotId: string) => ({ ...book, trips: book.trips.filter((trip) => trip.spotId === spotId), catches: book.catches.filter((entry) => entry.spotId === spotId) });
+  // Only a water with a record of its own: one picked never empties the record and takes its choice with it.
+  const waters = counted.spots.filter(
+    (spot) => counted.trips.some((trip) => trip.spotId === spot.id && trip.date <= today && packedFor.has(trip.id)) && pieceRecords(bookAt(spot.id), items, today).length > 0,
+  );
+  const [waterId, setWaterId] = useState("all");
+  const water = waters.find((spot) => spot.id === waterId) ?? null;
+  const atWater = water ? bookAt(water.id) : book;
   // The order picked holds while its control shows.
-  const found = pieceRecords(book, items, today);
+  const found = pieceRecords(atWater, items, today);
   const records = orderedRecords(found, found.length > 2 ? order : "most");
   // The book the record counts: the sample week's made-up lures go with the first outing of the angler's own.
-  const quiet = notYetThisYear(countedBook(book).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
+  const quiet = notYetThisYear(countedBook(atWater).catches, new Date(), (entry) => entry.lure, (entry) => bookFishDay(book, entry));
   const [all, setAll] = useState(false);
   // A lure that took fish goes straight into the next outing's bag, unless it is already there.
   const next = upcomingRealTrips(book, today)[0];
@@ -137,6 +149,17 @@ function LureRecord({ today }: { today: string }) {
       <h2 className="subhead" id="lure-record" tabIndex={-1}>
         {t("Lure record")}
       </h2>
+      {waters.length >= 2 ? (
+        <div className="spot-order">
+          <ChoiceRow<string>
+            wrap
+            label={t("Water")}
+            value={water ? water.id : "all"}
+            options={[{ id: "all", label: t("All waters") }, ...waters.map((spot) => ({ id: spot.id, label: spot.name }))]}
+            onChange={setWaterId}
+          />
+        </div>
+      ) : null}
       {records.length > 2 ? (
         <div className="spot-order">
           <ChoiceRow<LureOrder>
@@ -156,7 +179,8 @@ function LureRecord({ today }: { today: string }) {
         {(all ? records : records.slice(0, RECORD_ROWS)).map((row) => (
           <li key={row.label}>
             {/* A lure that took fish opens them in the catch search. */}
-            {row.lure ? <Link to={findLink(countedSearch(book, exactTerm("lure", t(row.lure)), book.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
+            {/* With a water picked, its fish there. */}
+            {row.lure ? <Link to={findLink(countedSearch(book, [exactTerm("lure", t(row.lure)), ...(water ? [exactTerm("water", water.name)] : [])].join(" "), atWater.catches.filter((entry) => entry.lure.trim().toLowerCase() === row.lure!.trim().toLowerCase())))}>{t(row.label)}</Link> : <span>{t(row.label)}</span>}
             <span className="meta">
               {fishCountLabel(row.fish)} · {tn(row.outings, "{n} outing", "{n} outings")}
               {/* How often it pays, once it has been out more than once. */}

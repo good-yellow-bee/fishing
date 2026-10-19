@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { Link, useLocation, useNavigationType } from "react-router-dom";
+import { CopyPlace } from "../CopyPlace";
 import { MapAnchor } from "../MapAnchor";
 import { WATER_LABELS, localDate, shiftDate, type Spot } from "@stillwater/shared";
 import { bestLureAt } from "../waterLure";
@@ -367,7 +368,14 @@ export function SpotMapPage() {
     const best = bestLure(spotId);
     const line = best ? `${dated} · ${t("best on {lure}", { lure: t(best) })}` : dated;
     const next = upcoming.find((trip) => trip.spotId === spotId);
-    if (next) return `${line} · ${t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}`;
+    // The plan itself, one tap away: its list is where the bag gets packed.
+    if (next)
+      return (
+        <>
+          {`${line} · `}
+          <Link className="map-next" to={`/trips/${next.id}`}>{t("Next outing: {when}", { when: tripWhen(next.date, today, tomorrow) })}</Link>
+        </>
+      );
     // A water left alone a week or more, by its last outing or fish: one that has had a rest.
     const out = lastOut.get(spotId);
     const rested = out ? daysBetween(out, today) : 0;
@@ -475,7 +483,9 @@ export function SpotMapPage() {
                   <span>
                     <MapAnchor className="map-coord-link" lat={place.lat} lng={place.lng}>
                       {formatCoord(place.lat, place.lng)}
-                    </MapAnchor>
+                    </MapAnchor>{" "}
+                    {/* For the car's navigation or a sounder, without opening the water first. */}
+                    <CopyPlace lat={place.lat} lng={place.lng} name={spot.name} />
                   </span>
                   {nearest ? <span className="map-nearest">{t("{distance} from {water}", { distance: distanceText(nearest.km, getUnits()), water: nearest.name })}</span> : null}
                   <PlanHere spot={spot} />
