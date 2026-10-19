@@ -1249,6 +1249,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC121~~ | ~~Gossamer: on fine, still fall mornings and days long silk threads from ballooning spiders float across the water in front of the dock, slowly rippling, a glint of sun running along each now and then~~ (#1239) | scene | S |
 | ~~SC122~~ | ~~Fry burst: now and then from spring to fall something hunting under the open water bursts into a shoal of fry, which spray out of the surface in a fan and patter back down in a scatter of tiny rings round a heavy swirl, always well clear of the dock~~ (#1240) | scene | S |
 | ~~SC123~~ | ~~Diamond dust: on bitter, clear, still winter mornings and days tiny ice crystals hang and sink slowly in the air over the lake in front of the dock, each flashing like a spark now and then~~ (#1240) | scene | S |
+| ~~SC124~~ | ~~Fewer draws: the lanterns' caps, glass and halos go from 25 draws to 3 at dusk and night, and the paddleboard's legs and dog ride in the board's draw~~ (#1241) | scene | S |
+| ~~SC125~~ | ~~News card scene26: dancing midges, gossamer, fry burst, diamond dust~~ (#1241) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
