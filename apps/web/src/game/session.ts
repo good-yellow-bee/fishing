@@ -108,9 +108,13 @@ export function bookSessionTitle(draft: SessionDraft): string {
   return titleOf(summary.hour, summary.bank, draft.sky, asWritten);
 }
 
+function seasonNoteOf(season: LakeSeason, say: Say): string {
+  return say("Season: {season}", { season: say(SEASON_LABELS[season]) });
+}
+
 /** The outing note the field log keeps for a season on the lake, in English. */
 export function bookSeasonNote(season: LakeSeason): string {
-  return asWritten("Season: {season}", { season: SEASON_LABELS[season] });
+  return seasonNoteOf(season, asWritten);
 }
 
 /** Every line a game outing writes into the book in English, with how to say it in the reader's language. */
@@ -119,7 +123,7 @@ const PLAY_LINES: ReadonlyMap<string, () => string> = (() => {
   for (const hour of [null, ...LAKE_HOURS])
     for (const bank of [null, ...SPOT_IDS])
       for (const sky of SKIES) lines.set(titleOf(hour, bank, sky, asWritten), () => titleOf(hour, bank, sky, t));
-  for (const season of LAKE_SEASONS) lines.set(bookSeasonNote(season), () => t("Season: {season}", { season: t(SEASON_LABELS[season]) }));
+  for (const season of LAKE_SEASONS) lines.set(bookSeasonNote(season), () => seasonNoteOf(season, t));
   return lines;
 })();
 

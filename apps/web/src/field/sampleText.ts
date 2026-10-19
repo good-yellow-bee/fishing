@@ -37,9 +37,10 @@ export function localizeSample(book: Logbook): Logbook {
 /**
  * Text from a form, as the book keeps it: a sample line the form showed (in the reader's language) and saved unchanged
  * goes back to the English it is stored in, so switching language still switches it. Anything else, including the
- * angler's own words that happen to read like a sample line, is kept as typed.
+ * angler's own words that happen to read like a sample line, is kept as typed. On the game's lake (playLake) a game outing's
+ * own title or note goes back to its English the same way.
  */
-export function bookLine(text: string, stored: string): string {
-  if (isPlayLine(stored) && shownPlayLine(stored) === text) return stored;
+export function bookLine(text: string, stored: string, playLake = false): string {
+  if (playLake && isPlayLine(stored) && shownPlayLine(stored) === text) return stored;
   return SAMPLE_LINES.has(stored) && t(stored) === text ? stored : text;
 }
