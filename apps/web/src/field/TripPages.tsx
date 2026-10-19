@@ -366,7 +366,8 @@ function TripView() {
       </div>
       <FishSum catches={catches} list={`trip:${trip.id}`} />
       {/* Kept on the water, from the outing's day on: the fish that got away and the strikes that missed. */}
-      {trip.date <= today && !play ? <TripCounts trip={trip} landed={catches.length} /> : null}
+      {/* Not on the sample week's made-up outings beside the angler's own: a tap there would change a story, not a day. */}
+      {trip.date <= today && !play && !(isSampleOuting(trip) && !isSampleOnly(book)) ? <TripCounts trip={trip} landed={catches.length} /> : null}
       {/* Out there now: how long it has been quiet, to help decide when to move. */}
       {/* An evening outing still going in the small hours counts too; a fish over 12 hours old says nothing. */}
       {catches[0] && (trip.date === today || (trip.date === shiftDate(new Date(), -1) && new Date().getHours() < LATE_NIGHT_UNTIL)) ? (
@@ -659,7 +660,13 @@ function TripForm() {
       book.catches.some((entry) => !entry.tripId && entry.spotId === guess && fishOnOutingDay(book, guess, toLocalInput(new Date(entry.caughtAt)), lastEvening)),
   );
   // Never the game's lake: its days are made by playing.
-  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : localDate(new Date());
+  // "Go again" opens on the first day ahead with no outing on that water yet, not on today's outing there.
+  const againDate = again
+    ? datePicks(new Date())
+        .map((pick) => pick.date)
+        .find((day) => day >= localDate(new Date()) && !countedBook(book).trips.some((trip) => trip.spotId === again.spotId && trip.date === day))
+    : undefined;
+  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(params.get("date") ?? "") ? (params.get("date") as string) : nightOuting ? lastEvening : (againDate ?? localDate(new Date()));
   // Unasked, not a water that already has an outing that day: the next one fished, if any is free.
   // The sample week's made-up plans don't count once the book has the angler's own, as Coming up leaves them out.
   const busy = (spotId: string) => countedBook(book).trips.some((trip) => trip.spotId === spotId && trip.date === presetDate);

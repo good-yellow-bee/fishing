@@ -1,7 +1,7 @@
-import { MOON_LABELS, WATER_LABELS, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
+import { MOON_LABELS, WATER_LABELS, localDate, lureTally, moonName, moonPhase, measureOf, personalBests, type CatchEntry, type Logbook, type Spot, type Trip } from "@stillwater/shared";
 import { t, tn } from "../i18n";
 import { measureText, measuresText, weatherText } from "../i18n/content";
-import { fishCountLabel, formatDatedDay, formatTimeOfDay, noteText, outingName } from "./format";
+import { fishCountLabel, formatDatedDay, formatDay, formatTimeOfDay, noteText, outingName } from "./format";
 import { bookFishDay, daysOut } from "./tripMonths";
 import { parseExactTerm } from "./findLinks";
 import { splitLeftOut } from "./CatchSearch";
@@ -19,7 +19,10 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
     .sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))
     .map((entry) => {
       const elsewhere = entry.spotId !== trip.spotId ? waterOf(entry.spotId) : null;
-      const parts = [`${formatTimeOfDay(entry.caughtAt)} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
+      // A night session's fish after midnight say their own day, so the list doesn't seem to run back to the evening.
+      const day = localDate(new Date(entry.caughtAt));
+      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${formatDay(day)}, ${formatTimeOfDay(entry.caughtAt)}`;
+      const parts = [`${when} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });
   const counts = [

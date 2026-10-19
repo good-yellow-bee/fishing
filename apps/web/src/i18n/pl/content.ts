@@ -303,6 +303,7 @@ export const PL_CONTENT: PlBook = {
   "Shorten the notes a little.": "Skróć trochę notatki.",
   "Keep the best conditions to one line.": "Zmieść najlepsze warunki w jednej linijce.",
   "Pick a date.": "Wybierz datę.",
+  "Check the year.": "Sprawdź rok.",
   "Pick a spot.": "Wybierz łowisko.",
   "Shorten the title.": "Skróć tytuł.",
   "Shorten the note a little.": "Skróć trochę notatkę.",
