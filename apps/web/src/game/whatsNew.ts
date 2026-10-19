@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-scene41";
+export const NEWS_ID = "2026-10-19-game31";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Level 17, Child of the lake, waits at 57000 points, and from there the shack sells you groundbait and live shiners a fifth cheaper. Take a lodge record from another angler and the catch earns 1.5× points, and so does your first fish of a day that makes three or more days in a row.",
   "By day, unless it rains, a golden dog now lies on the dock behind you. It watches a fresh cast, dozes off when nothing bites, and sits up with its tail going when a fish takes. And on fine spring and summer days swallows sometimes come and sit in a row on the moored rowboat's rope.",
   "On Trips, last evening's outing still going after midnight says Out now, with a last night quick search, and the average's count of outings without a fish opens them. A copied plan says how the last outing on that water went, lost fish and missed strikes included, and Home names the last outing's lure only when it led.",
   "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.",
@@ -12,7 +13,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On a narrow phone or with larger text, outing and catch cards now put the date, size and photo above the words instead of squeezing them into a strip, and the lodge board's fish of the week does the same. Keyboard focus in the field log stops below the phone's top bar, the catch form's time and nearest-water buttons are easier to tap, and on a phone held sideways the coach and the news card stay off the shore signs.",
   "On calm, sunny summer days two people pedal a white swan pedal boat slowly round the water off to the right, its paddle wheel churning behind. And on evenings and nights from spring to fall a little field mouse sometimes scurries across the dock behind you, sits up to nibble a crumb, and darts off over the edge.",
   "On Waters, each card names the water's best fish and says when it has rested a week or more. A water's copied summary says when it was last fished, and a water fished only blank can be copied too.",
-  "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.",
   "On Bests, a water's card names its biggest fish, the record tiles say the day, and a season marks each kind that set a new best and names its best lure. The year's goal box says how many days since your last fish, and the goal form offers a goal that beats last year.",
   "An orchard now grows below the farm on the far hills: white and pink blossom in spring, gold leaves and red apples in the fall, bare in winter. From spring through summer a pair of white storks stands in a nest on the barn roof, clattering their bills now and then.",
   "A little steam train now runs along the foot of the hills behind the far bank, puffing out of one tunnel and into the other, then back the other way a while later. After dark its carriage windows glow as it goes.",

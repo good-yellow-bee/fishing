@@ -1697,7 +1697,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT338~~ | ~~News card 2026-10-19-game30 covers GT336 and GT337: the Whole lake and Trophy hunter badges, and the shack's live shiner~~ (#1402) | ui | S |
 | ~~GT339~~ | ~~Level 17, Child of the lake, at 57000 lifetime points: the shack sells groundbait and live shiners a fifth cheaper (48 and 40 points; the server charges the same)~~ (#1405) | gameplay | S |
 | ~~GT340~~ | ~~Taking a lodge record from another angler pays 1.5x points in place of the personal best's 1.25x (the server checks other anglers' heaviest of the kind), and the landed card's record stamp says "· 1.5× points"~~ (#1410) | gameplay | S |
-| GT341 | The first fish of a day that makes a run of 3 or more days in a row pays 1.5x points (the server reads the angler's catch days), stamped "First fish of day 3 in a row · 1.5× points" | gameplay | S |
+| ~~GT341~~ | ~~The first fish of a day that makes a run of 3 or more days in a row pays 1.5x points (the server reads the angler's catch days), stamped "First fish of day 3 in a row · 1.5× points"~~ (#1412) | gameplay | S |
+| GT342 | News card 2026-10-19-game31 covers GT339 to GT341: level 17, Child of the lake, with cheaper shack bait, the lodge record bonus and the day-run bonus | ui | S |
 
 ## Risks / open questions for the owner
 
