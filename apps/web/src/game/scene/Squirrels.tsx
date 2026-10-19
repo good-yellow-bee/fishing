@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { mergePainted } from "./mergeParts";
 import { STILL_TIME, useReducedMotion } from "./reducedMotion";
 import { squirrelAt, type Tree } from "./squirrelRun";
+import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
 
 const FUR = "#a4502a";
@@ -43,6 +44,8 @@ export function Squirrels({ runs }: { runs: readonly (readonly [Tree, Tree])[] }
   const shapes = useMemo(squirrelShapes, []);
   const fur = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const animals = useRef<(THREE.Group | null)[]>([]);
+  const root = useRef<THREE.Group>(null);
+  useSkinnedFigure(root, fur);
   const torsos = useRef<(THREE.Group | null)[]>([]);
   const tails = useRef<(THREE.Group | null)[]>([]);
   // Reduced motion holds each squirrel where it is at one moment, with no bounding run or tail flick.
@@ -73,7 +76,7 @@ export function Squirrels({ runs }: { runs: readonly (readonly [Tree, Tree])[] }
   });
 
   return (
-    <group name="squirrels">
+    <group name="squirrels" ref={root}>
       {runs.map((_, k) => (
         <group key={k} ref={(g) => void (animals.current[k] = g)} scale={SCALE} visible={false}>
           <group ref={(g) => void (torsos.current[k] = g)} position={[0, 0.03, -0.06]}>
