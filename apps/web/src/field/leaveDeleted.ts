@@ -44,24 +44,31 @@ function wentWithIt(page: string | null): boolean {
 
 /** Whether the delete made from `from` went Back to its list. */
 export function leftBackTo(from: string): boolean {
-  return leftBackFrom === from;
+  return samePage(leftBackFrom, from);
 }
 
 /** Whether the angler has gone on to another page since the delete made on `from` landed: Undo then leaves `here` be. */
 export function movedOnSince(from: string, here: string): boolean {
-  return deletedOn === from && !samePage(landedOn, here);
+  return samePage(deletedOn, from) && !samePage(landedOn, here);
 }
 
-function samePage(a: string | null, b: string): boolean {
+/** Whether two addresses are the same page, however their queries are written: the Undo writes a space "+", the address bar "%20". */
+export function samePage(a: string | null, b: string): boolean {
   if (a === null) return false;
-  const plain = (page: string) => {
-    try {
-      return decodeURI(page);
-    } catch {
-      return page;
-    }
-  };
-  return plain(a) === plain(b);
+  return pageKey(a) === pageKey(b);
+}
+
+function pageKey(page: string): string {
+  const at = page.indexOf("?");
+  const path = at < 0 ? page : page.slice(0, at);
+  const query = at < 0 ? "" : new URLSearchParams(page.slice(at + 1)).toString();
+  let plain = path;
+  try {
+    plain = decodeURI(path);
+  } catch {
+    // Kept as written.
+  }
+  return query ? `${plain}?${query}` : plain;
 }
 
 function openedFromList(state: unknown): boolean {

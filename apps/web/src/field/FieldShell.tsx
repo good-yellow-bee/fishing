@@ -141,9 +141,21 @@ export function FieldShell({ children }: { children: ReactNode }) {
   const lastFocused = useRef(pathname);
   useEffect(() => {
     if (lastFocused.current === pathname) return;
+    const left = lastFocused.current;
     lastFocused.current = pathname;
     const main = document.querySelector<HTMLElement>(".field-main");
     const active = document.activeElement;
+    // Back from a fish to the list it was opened from: its card takes focus where the list is scrolled to, so the next
+    // Tab goes on down the list rather than jumping to the top.
+    if (how === "POP" && main && /^\/catches\/[^/]+$/.test(left)) {
+      // A list's card before a sum's "Heaviest" link to the same fish.
+      const links = [...main.querySelectorAll<HTMLAnchorElement>("a[href]")].filter((link) => new URL(link.href).pathname === left);
+      const card = links.find((link) => link.closest(".catch-card, .photo-wall")) ?? links[0];
+      if (card) {
+        card.focus({ preventScroll: true });
+        return;
+      }
+    }
     // Back and Forward leave focus where a page put it (a search's box); what held it went with the old page, so
     // otherwise it would fall to the document and the keyboard would start again from the top of the app.
     if (how === "POP" && main && active && active !== main && main.contains(active)) return;

@@ -252,7 +252,7 @@ export function HomePage() {
         <div className="kept-draft" role="status">
           <p>
             {kept.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: kept.species.trim() })
+              ? t("A fish you started logging was not saved: {species}.", { species: t(kept.species.trim()) })
               : t("A fish you started logging was not saved.")}
           </p>
           <Link to={`/catches/new?${RESUME_PARAM}=1`} className="field-primary inline">
