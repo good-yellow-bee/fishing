@@ -1684,7 +1684,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT334~~ | ~~The shack's bait tin sells a handful of groundbait for 60 points (the server takes them), up to 3 in the bag; bought handfuls stay in the bag across a reload, and a free handful still comes with each visit~~ (#1390) | gameplay | S |
 | ~~GT335~~ | ~~News card 2026-10-19-game29 covers GT333 and GT334: a personal best pays 1.25x points, and the shack sells groundbait~~ (#1395) | ui | S |
 | ~~GT336~~ | ~~Two long-run lodge badges: Whole lake (land every kind of fish in the lake, all 18) and Trophy hunter (land five kinds at trophy weight)~~ (#1398) | gameplay | S |
-| GT337 | The shack sells a live shiner for 50 points (the server takes them): it goes on the hook for the next cast, one at a time, and a shiner on the hook, bought or landed, stays on across a reload | gameplay | S |
+| ~~GT337~~ | ~~The shack sells a live shiner for 50 points (the server takes them): it goes on the hook for the next cast, one at a time, and a shiner on the hook, bought or landed, stays on across a reload~~ (#1400) | gameplay | S |
+| GT338 | News card 2026-10-19-game30 covers GT336 and GT337: the Whole lake and Trophy hunter badges, and the shack's live shiner | ui | S |
 
 ## Risks / open questions for the owner
 
