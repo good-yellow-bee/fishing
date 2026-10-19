@@ -765,8 +765,8 @@ export const PL_GAME: PlBook = {
     "Odbierz wszystkie prośby z tablicy w szopie danego dnia, a ostatnia wypłaci dodatkowe 25 punktów. A wypuść rybę o wadze trofeum z karty połowu, a dostaniesz jeszcze 20 punktów: przycisk Wypuść to pokazuje.",
   "On fine spring and summer days a little paper boat now and then drifts slowly past in front of the dock. Your dog turns to watch it go by, and the robin on the posts too, and in winter it wears a red knitted jumper.":
     "W pogodne wiosenne i letnie dni przed pomostem przepływa czasem powoli mała papierowa łódka. Twój pies odwraca głowę, żeby popatrzeć, jak płynie, a także na rudzika na słupkach, a zimą nosi czerwony sweter z dzianiny.",
-  "Level 17, Child of the lake, waits at 57000 points, and from there the shack sells you groundbait and live shiners a fifth cheaper. Take a lodge record from another angler and the catch earns 1.5× points, and so does your first fish of a day that makes three or more days in a row.":
-    "Poziom 17, Dziecko jeziora, czeka przy 57000 punktów, a szopa sprzedaje na nim zanętę i żywe złotawce o jedną piątą taniej. Odebranie rekordu przystani innemu wędkarzowi daje 1,5× punktów, tak samo jak pierwsza ryba dnia, który jest trzecim lub dalszym dniem z rzędu.",
+  "Level 18, Breath of the lake, waits at 68000 points, and from there the shack board's requests pay a quarter more. And from Strength 7 one pump lifts a sulking catfish or sturgeon off the bottom, not two.":
+    "Poziom 18, Oddech jeziora, czeka przy 68000 punktów, a od niego prośby z tablicy w szopie płacą o jedną czwartą więcej. A od Siły 7 jedna pompka podrywa z dna zalegającego suma lub jesiotra, nie dwie.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
