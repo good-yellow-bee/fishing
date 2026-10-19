@@ -31,6 +31,17 @@ export function leaveDeleted(navigate: NavigateFunction, state: unknown, fallbac
   } else navigate(fallback, { replace: true });
 }
 
+/**
+ * A change made in place, on the page it leaves the angler on (a blank start, the sample week removed, a merge): an
+ * Undo pressed on another page since comes forward from there rather than in that page's place. A delete that then
+ * leaves its page says where it went instead.
+ */
+export function noteChangedOn(page: string) {
+  leftBackFrom = null;
+  deletedOn = page;
+  landedOn = page;
+}
+
 /** Whether a page is an outing's, a fish's or a water's that is no longer in the book. */
 function wentWithIt(page: string | null): boolean {
   const id = /^\/(?:trips|catches|spots)\/([^/?#]+)/.exec(page ?? "")?.[1];

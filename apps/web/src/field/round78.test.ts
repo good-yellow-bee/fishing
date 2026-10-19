@@ -52,7 +52,8 @@ describe("round 78: Undo pressed on another page since leaves that page in histo
 
 describe("round 78: the Undo bar raised over a form's save buttons", () => {
   it("has focus and the form's end scroll clear of it", () => {
-    expect(css).toMatch(/html:has\(\.form-save\):has\(\.undo-bar\) \{\s*scroll-padding-bottom: calc\(92px \+ 80px\);/);
-    expect(css).toMatch(/ {2}html:has\(\.form-save\):has\(\.undo-bar\) \{\s*scroll-padding-bottom: calc\(150px \+ 80px \+ env\(safe-area-inset-bottom\)\);/);
+    // Round 84: by the bar's measured height, 80px until it is measured.
+    expect(css).toMatch(/html:has\(\.form-save\):has\(\.undo-bar\) \{\s*scroll-padding-bottom: calc\(92px \+ var\(--undo-bar-h, 80px\)\);/);
+    expect(css).toMatch(/ {2}html:has\(\.form-save\):has\(\.undo-bar\) \{\s*scroll-padding-bottom: calc\(150px \+ var\(--undo-bar-h, 80px\) \+ 8px \+ env\(safe-area-inset-bottom\)\);/);
   });
 });

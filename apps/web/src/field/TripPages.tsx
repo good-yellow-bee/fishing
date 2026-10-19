@@ -24,7 +24,9 @@ import {
   lureTally,
   tripsForSpot,
   type CatchEntry,
+  type Logbook,
   type Spot,
+  type TackleItem,
   type Trip,
 } from "@stillwater/shared";
 import { CatchCard, TripCard } from "./cards";
@@ -108,8 +110,19 @@ function SinceLast({ caughtAt }: { caughtAt: string }) {
 /** The search for outings, kept in the address so Back from an outing returns to the same matches. */
 const TRIP_FIND = "find";
 
+/** Read the evening before, when the bag is packed: what has worked on the outing's water, and what isn't in it yet. */
+function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
+  const works = lureTally({ ...book, catches: countedFish(catchesForSpot(book, trip.spotId)) }, 3).map((row) => t(row.lure));
+  const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
+  return [
+    works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
+    toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
+  ].filter(Boolean);
+}
+
 export function TripsPage() {
   const { book } = useLogbook();
+  const { items: tackleItems } = useTackle();
   useT();
   const [query, setQuery] = useTypedParam(TRIP_FIND);
   const today = localDate(new Date());
@@ -210,7 +223,7 @@ export function TripsPage() {
                 onClick={() => {
                   const outings = toCalendar.map((trip) => {
                     const spot = spotById(book, trip.spotId);
-                    return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place };
+                    return { trip: { ...trip, title: outingName(trip, book.spots) }, place: spot?.name ?? null, at: spot?.place, more: calendarNotes(book, trip, tackleItems) };
                   });
                   downloadFile(tripsIcs(outings), "text/calendar;charset=utf-8", datedName("stillwater-coming-up.ics"));
                 }}
@@ -570,14 +583,7 @@ function TripView() {
             onClick={() => {
               // An untitled outing goes by its water's name, as its heading does.
               const named = { ...trip, title: outingName(trip, book.spots) };
-              // Read the evening before, when the bag is packed: what has worked here, and what isn't in it yet.
-              const works = spot ? lureTally({ ...book, catches: countedFish(catchesForSpot(book, spot.id)) }, 3).map((row) => t(row.lure)) : [];
-              const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
-              const more = [
-                works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
-                toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
-              ].filter(Boolean);
-              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, more), "text/calendar;charset=utf-8", tripIcsName(named));
+              downloadFile(tripIcs(named, spot?.name ?? null, new Date(), spot?.place, calendarNotes(book, trip, tackleItems)), "text/calendar;charset=utf-8", tripIcsName(named));
             }}
           >
             {t("Add to calendar")}

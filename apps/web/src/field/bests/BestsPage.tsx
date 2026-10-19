@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { speciesCounts, speciesLink, speciesWaters } from "../speciesLink";
 import { biteTimes, catchesNewestFirst, fishCountsByTrip, localDate, measureOf, lureTally, moonTally, personalBests, seasonTally, skyTally, spotById, type CatchEntry, type Logbook } from "@stillwater/shared";
@@ -13,15 +13,15 @@ import { WeatherBars } from "../WeatherBars";
 import { exactTerm, findLink } from "../CatchSearch";
 import { findWithLink } from "../findLinks";
 import { bestFishDay, bookFishDay, daysOut, monthName, monthTally, yearTally } from "../tripMonths";
-import { GOAL_PARAM, YearGoal, readYearGoal } from "../YearGoal";
+import { GOAL_PARAM, YearGoal } from "../YearGoal";
 import { DayCalendar } from "./DayCalendar";
-import { SeasonRecapBox } from "./SeasonRecap";
+import { FROM_LIST } from "../leaveDeleted";
+import { SeasonRecapBox, seasonCopy } from "./SeasonRecap";
 import { seasonRecap } from "./seasonRecap";
 import { dayMarks } from "./dayMarks";
 import { mostKindsDay } from "./mostKinds";
 import { newWatersThisYear, notYetThisYear } from "./notYet";
 import { CopySummary } from "../CopySummary";
-import { yearSummary } from "../summaries";
 import { outingStreak, weekStreak, weekendSplit } from "../outingAverage";
 import { MonthYearTable } from "./MonthYearTable";
 import { PLAY_LAKE_ID } from "../playLake";
@@ -62,7 +62,7 @@ function LargeFish({
 
 /** The best day's count: its outing when all its fish were on one, else that day's fish in the search. */
 function DayTally({ count, date, tripId, tail }: { count: number; date: string; tripId: string | null; tail: (term: string) => string }) {
-  return <Link to={tripId ? `/trips/${tripId}` : findLink(tail(date))}>{fishCountLabel(count)}</Link>;
+  return <Link to={tripId ? `/trips/${tripId}` : findLink(tail(date))} state={tripId ? FROM_LIST : undefined}>{fishCountLabel(count)}</Link>;
 }
 
 /** A water's fish count, and which kind it gives most when one kind leads. */
@@ -101,6 +101,19 @@ export function BestsPage() {
   const { book: all } = useLogbook();
   useT();
   const [params, setParams] = useSearchParams();
+  // "?goal=set" opens the goal form once, on arrival from Home: taken out of the address, Back and Forward to Bests
+  // land on its heading like any page rather than opening the form again.
+  useEffect(() => {
+    if (!params.has(GOAL_PARAM)) return;
+    setParams(
+      (current) => {
+        const out = new URLSearchParams(current);
+        out.delete(GOAL_PARAM);
+        return out;
+      },
+      { replace: true },
+    );
+  }, []);
   const today = localDate(new Date());
   // The goal, days out and streak are about this year and the run of outings, so they read the whole book.
   // Real days on the water: a round on the game's lake neither counts as a day out nor ends a blank spell.
@@ -265,7 +278,7 @@ export function BestsPage() {
         {/* The year so far as text for a message, once it has a fish. */}
         {/* With this season picked, its recap below copies the year, goal and all: one Copy, not two. */}
         {!year && whole.catches.some((entry) => dayOf(entry).startsWith(`${today.slice(0, 4)}-`)) ? (
-          <CopySummary text={() => yearSummary(whole, today.slice(0, 4), today, readYearGoal(today.slice(0, 4)))} file="stillwater-year.txt" />
+          <CopySummary text={() => seasonCopy(whole, today.slice(0, 4), today)} file="stillwater-year.txt" />
         ) : null}
       </section>
     ) : null;
