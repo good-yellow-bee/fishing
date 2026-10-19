@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-field43";
+export const NEWS_ID = "2026-10-19-scene31";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "A farmhouse and a red barn now stand on the hills behind the far bank: their windows glow in the evening, the chimney smokes on cold days, and from spring to fall three cows graze the pasture beside them. On calm, clear mornings a low bank of mist lies along the foot of the hills.",
   "A picked season's recap on Bests now opens what it counts: its fish, its outings, and its kinds further down. Bests' month-by-year table adds a total for each year with its best month in bold, a catch search with several fish says how many days and outings they came on, and a species page says how many outings at each water took one.",
   "In spring a few of the shore trees flower white or pink. On clear winter mornings and evenings the snowy hills behind the far bank glow pink in the low sun. From summer into the fall two hay fields on those hills lie mown in pale stripes, with round bales dotted across them.",
   "On grey, overcast days a gap now and then opens in the cloud, and a patch of sunlight slides across the lake with faint beams slanting down to it. On blowy winter days the wind lifts the snow off the hills behind the far bank and streams it along them in long white wisps.",

@@ -204,6 +204,8 @@ import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
 import { Cows } from "./Cows";
+import { ValleyMist } from "./ValleyMist";
+import { valleyMistOut } from "./valleyMist";
 import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
 import { Sledders } from "./Sledders";
@@ -2347,6 +2349,7 @@ export const LakeWorld = memo(function LakeWorld({
       {hailOut(weather.rain, season) && <HailShower light={weather.rainLight} />}
       {squallOut(weather.rain, season) && <RainCurtain light={weather.rainLight} />}
       {mist > 0 && <LakeMist amount={mist} color={mistColor} />}
+      {valleyMistOut(hour, sky, season, wind) && <ValleyMist color={mistColor} />}
       {lakeSmokeOut(hour, sky, season) && <LakeSmoke wind={wind} color={mistColor} />}
       {diamondDustOut(hour, sky, season, wind) && <DiamondDust wind={wind} />}
       {shafts > 0 && <LightShafts discPos={look.discPos} color={look.sun} strength={shafts} />}
