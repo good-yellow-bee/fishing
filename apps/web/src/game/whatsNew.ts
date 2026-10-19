@@ -6,6 +6,8 @@ export const NEWS_KEY = "stillwater.news.v1";
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
   "In spring and summer, hop a jig over the crayfish creeping about the dock's pilings: the smallmouth and catfish that hunt them bite sooner, and many a bite is one of them. And on spring days cast among the tadpoles milling in the warm shallows, where the perch, bluegill and bass come to gorge on them.",
+  "A farmhouse and a red barn now stand on the hills behind the far bank: their windows glow in the evening, the chimney smokes on cold days, and from spring to fall three cows graze the pasture beside them. On calm, clear mornings a low bank of mist lies along the foot of the hills.",
+  "A picked season's recap on Bests now opens what it counts: its fish, its outings, and its kinds further down. Bests' month-by-year table adds a total for each year with its best month in bold, a catch search with several fish says how many days and outings they came on, and a species page says how many outings at each water took one.",
   "In spring a few of the shore trees flower white or pink. On clear winter mornings and evenings the snowy hills behind the far bank glow pink in the low sun. From summer into the fall two hay fields on those hills lie mown in pale stripes, with round bales dotted across them.",
   "On grey, overcast days a gap now and then opens in the cloud, and a patch of sunlight slides across the lake with faint beams slanting down to it. On blowy winter days the wind lifts the snow off the hills behind the far bank and streams it along them in long white wisps.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.",
@@ -25,7 +27,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "At dusk and at night an angler sits out on the far bank with a glowing float on the water, their headlamp's beam following where they look. On calm days a child skims stones from the water's edge, a ring spreading at every skip. In spring a birdwatcher scans the lake through binoculars from the far bank, and on winter days a jogger in a bobble hat runs the shore below the ski track.",
   "Past outings' bags opened on Gear stay open when you come Back from an outing, and \"Fold all\" closes them in one tap.",
   "A water's page opens its last outing with what it gave, and copies its place for a sounder; Waters cards name the best lure, and long water pickers start with the ones fished lately.",
-  "On dry summer days two people toss a flying disc back and forth on the far bank, and in winter two children have a snowball fight there, ducking the throws. On rainy days an angler sits it out on the far bank under a big green umbrella tipped into the wind, and in the fall a grown-up rakes the leaves back onto the pile the child keeps jumping into.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */

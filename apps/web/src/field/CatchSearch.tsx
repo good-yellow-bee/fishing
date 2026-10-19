@@ -7,7 +7,8 @@ import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
 import { bookBadges } from "./catchBadge";
-import { countedFish } from "./milestones";
+import { countedBook, countedFish } from "./milestones";
+import { countedSearch } from "./countedSearch";
 import { typicalSize } from "./sizeBands";
 import { searchSummary } from "./summaries";
 import { catchesCsv } from "./catchCsv";
@@ -660,11 +661,14 @@ function FileLoose() {
 }
 
 /** For a day typed as "2026-10-11": its after-midnight fish that count on the outing's day before, and that day. */
-export function smallHoursOn(book: Logbook, needle: string): { count: number; day: string } | null {
-  const day = needle.trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+export function smallHoursOn(book: Logbook, needle: string, now = new Date()): { count: number; day: string; on: string } | null {
+  // A day however the search reads one: "Oct 11", "11 października", or as typed off a photo's clock.
+  const typed = needle.trim();
+  const days = /^\d{4}-\d{2}-\d{2}$/.test(typed) ? { from: typed, to: typed } : dateWords(needle, now);
+  if (!days || days.from !== days.to) return null;
+  const day = days.from;
   const moved = book.catches.filter((entry) => localDate(new Date(entry.caughtAt)) === day && bookFishDay(book, entry) !== day);
-  return moved.length > 0 ? { count: moved.length, day: bookFishDay(book, moved[0]!) } : null;
+  return moved.length > 0 ? { count: moved.length, day: bookFishDay(book, moved[0]!), on: day } : null;
 }
 
 /** Why nothing matched: a bare year with no fish in it says so, and where the book starts when it is before that. */
@@ -782,10 +786,13 @@ export function CatchSearch() {
   // A day searched whose fish all count on the night before: where they went.
   const nightDay = useMemo(() => smallHoursOn(book, settled), [book, settled]);
   // The angler's own among them, decided for the whole book as /catches decides it.
+  // As Home and Bests count them: the sample week goes with the angler's first outing, even one only planned.
   const mine = useMemo(() => {
-    const own = new Set(countedFish(book.catches).map((entry) => entry.id));
+    const own = new Set(countedBook(book).catches.map((entry) => entry.id));
     return matches.filter((entry) => own.has(entry.id));
   }, [book, matches]);
+  // Found only the sample week's or the game's fish, once those no longer count: said, so they aren't read as the angler's.
+  const othersOnly = mine.length === 0 && matches.length > 0;
 
   return (
     <section
@@ -818,7 +825,15 @@ export function CatchSearch() {
           {recent.map((text, index) => (
             <Fragment key={text}>
               {index > 0 ? " · " : null}
-              <button type="button" className="text-button" onClick={() => search(text)}>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => {
+                  search(text);
+                  // The button goes with the empty box: on to the box, where the new count is read.
+                  input.current?.focus();
+                }}
+              >
                 {text}
               </button>
             </Fragment>
@@ -833,9 +848,12 @@ export function CatchSearch() {
             {/* Summed as /catches sums the book: the angler's own, with the sample week's and the game's said apart. */}
             {/* A search that finds only those ("sample", "game") sums what it found. */}
             <FishSum catches={mine.length > 0 ? mine : matches} />
+            <FishDays book={book} catches={mine.length > 0 ? mine : matches} />
             <TopLure catches={mine.length > 0 ? mine : matches} />
             {mine.length > 0 && mine.length < matches.length ? (
               <p className="meta">{tn(matches.length - mine.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+            ) : othersOnly ? (
+              <p className="meta">{t("These are all from the sample week or the game.")}</p>
             ) : null}
           </>
         ) : (
@@ -843,8 +861,15 @@ export function CatchSearch() {
             {matches.length === 0 && nightDay ? (
               // A day typed off a photo's clock: its small hours went to the evening before, as a night session's do.
               <>
-                {t("Nothing on {day} itself: fish caught after midnight ({n}) count on their outing's day, {outingDay}.", { day: formatDay(settled), n: nightDay.count, outingDay: formatDay(nightDay.day) })}{" "}
-                <button type="button" className="text-button" onClick={() => search(nightDay.day)}>
+                {t("Nothing on {day} itself: fish caught after midnight ({n}) count on their outing's day, {outingDay}.", { day: formatDay(nightDay.on), n: nightDay.count, outingDay: formatDay(nightDay.day) })}{" "}
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    search(nightDay.day);
+                    input.current?.focus();
+                  }}
+                >
                   {t("Show {day}", { day: formatDay(nightDay.day) })}
                 </button>
               </>
@@ -858,12 +883,13 @@ export function CatchSearch() {
       </div>
       {settled ? (
         <>
-          {matches.length > 1 ? <MatchSplits matches={matches} search={settled} /> : null}
+          {/* Split as the count above sums: the angler's own, when there are any. */}
+          {matches.length > 1 ? <MatchSplits matches={mine.length > 0 ? mine : matches} all={matches} search={settled} largest={largest} /> : null}
           {(matches.length === 0 && /(^|[\s+])([<>]\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s?[-–]\s?\d+(?:[.,]\d+)?)(?=[\s+]|$)/.test(settled)) || /(^|\s)\d+(?:[.,]\d+)?\+(?=\s*$|\s+\+|\s+(?!(?:lbs?|oz|kg|dag|g|in|cm|mm|°?[cf]|″|")(?:\s|$)))/i.test(settled) ? (
             // ">30" finds nothing without saying what it measures; "pike 30+" finds every pike, the number unread.
             <p className="search-tip">{t("Add a unit to a size, as in “{size}”.", { size: metric ? ">70 cm" : ">30 in" })}</p>
           ) : null}
-          {matches.length === 0 ? (
+          {matches.length === 0 && !nightDay ? (
             <p className="search-tip">
               {t("Try a species, a water, a lure, a month or season, a time of day such as “dawn”, a sky such as “overcast”, a wind such as “breezy”, a kind of water such as “river”, a size such as “{size}”, a water temperature such as “{temp}”, a word from a note, a day such as “2026-10-12” or “last weekend”, a year such as “2025”, “photo”, “record”, “first”, “big”, “loose”, “weighed” or “measured”, or “released” or “kept”. Join two with “+”.", { size: metric ? ">1 kg" : ">2 lb", temp: metric ? ">15°C" : ">60°F" })}{" "}
               {t("Put “-” before a word to leave those fish out.")}
@@ -930,11 +956,16 @@ function leader<T>(catches: readonly CatchEntry[], of: (entry: CatchEntry) => T 
  * The matches split by kind and by year, once they hold more than one: "By kind: Northern pike 3 · Zander 2", "By year:
  * 2026 5 · 2025 3". Each narrows the search to that kind or year.
  */
-function MatchSplits({ matches, search }: { matches: readonly CatchEntry[]; search: string }) {
+/**
+ * `matches`: the fish counted (the angler's own among those found); `all`: everything found, so each narrowed search
+ * leaves out the sample week's and the game's as the count did. The order shown goes with it.
+ */
+function MatchSplits({ matches, all, search, largest }: { matches: readonly CatchEntry[]; all: readonly CatchEntry[]; search: string; largest: boolean }) {
   const t = useT();
   const { book } = useLogbook();
   const { pathname } = useLocation();
-  const narrow = (term: string) => `${pathname}?${new URLSearchParams({ [FIND_PARAM]: `${search} + ${term}` }).toString()}`;
+  const narrow = (term: string, rows: readonly CatchEntry[]) =>
+    `${pathname}?${new URLSearchParams({ [FIND_PARAM]: countedSearch(book, `${search} + ${term}`, rows, "book"), ...(largest ? { [ORDER_PARAM]: "largest" } : {}) }).toString()}`;
   const tally = (key: (entry: CatchEntry) => string) => {
     const counts = new Map<string, number>();
     for (const entry of matches) counts.set(key(entry), (counts.get(key(entry)) ?? 0) + 1);
@@ -942,23 +973,46 @@ function MatchSplits({ matches, search }: { matches: readonly CatchEntry[]; sear
   };
   const kinds = tally((entry) => entry.species).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   const years = tally((entry) => bookFishDay(book, entry).slice(0, 4)).sort((a, b) => b[0].localeCompare(a[0]));
-  const line = (label: string, rows: [string, number][], term: (value: string) => string, name: (value: string) => string) =>
+  const line = (label: string, rows: [string, number][], term: (value: string) => string, name: (value: string) => string, of: (entry: CatchEntry, value: string) => boolean) =>
     rows.length > 1 ? (
       <p className="meta match-split">
         {label}{" "}
         {rows.map(([value, count], index) => (
           <Fragment key={value}>
             {index > 0 ? " · " : null}
-            <Link to={narrow(term(value))}>{`${name(value)} ${count}`}</Link>
+            <Link to={narrow(term(value), all.filter((entry) => of(entry, value)))} aria-label={`${name(value)}: ${tn(count, "{n} fish", "{n} fish")}`}>
+              {`${name(value)} ${count}`}
+            </Link>
           </Fragment>
         ))}
       </p>
     ) : null;
   return (
     <>
-      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species))}
-      {line(t("By year:"), years, (year) => year, (year) => year)}
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", t(species)), (species) => t(species), (entry, species) => entry.species === species)}
+      {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`))}
     </>
+  );
+}
+
+/** "3 days out · 2 outings": how many days and outings a search's fish came on, once that is more than one. */
+export function fishDays(book: Logbook, catches: readonly CatchEntry[]): { days: number; outings: number } {
+  const trips = new Set(book.trips.map((trip) => trip.id));
+  return {
+    // A night session's small hours count on its outing's day, as the calendar counts them.
+    days: new Set(catches.map((entry) => bookFishDay(book, entry))).size,
+    outings: new Set(catches.flatMap((entry) => (entry.tripId && trips.has(entry.tripId) ? [entry.tripId] : []))).size,
+  };
+}
+
+function FishDays({ book, catches }: { book: Logbook; catches: readonly CatchEntry[] }) {
+  const { days, outings } = fishDays(book, catches);
+  if (days < 2 && outings < 2) return null;
+  return (
+    <p className="meta fish-days">
+      {tn(days, "{n} day out", "{n} days out")}
+      {outings > 0 ? `\u00a0· ${tn(outings, "{n} outing", "{n} outings")}` : ""}
+    </p>
   );
 }
 

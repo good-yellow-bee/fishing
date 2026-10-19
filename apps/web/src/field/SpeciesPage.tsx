@@ -25,7 +25,7 @@ import { CopySummary } from "./CopySummary";
 import { speciesSummary } from "./summaries";
 import { RenameKind } from "./RenameKind";
 import { seasonFirst, seasonLast } from "./seasonFirst";
-import { countedFish, nextKindMark, ownFish } from "./milestones";
+import { countedBook, countedFish, nextKindMark, ownFish } from "./milestones";
 import { newWatersThisYear } from "./bests/notYet";
 import { sizeBands, typicalByYear, typicalSize } from "./sizeBands";
 import { BiggestLinks, biggestOf } from "./BiggestHere";
@@ -103,6 +103,24 @@ function sizeChange(first: { year: string; size: Measure }, last: { year: string
     : t("Down {size} since {year}.", { size: gainText(last.size, first.size), year: first.year });
 }
 
+/**
+ * Per water, how many of its past outings took a fish of the kind, against all its outings had ("on 2 of 5 outings"),
+ * once the water had two. `book` is the counted book, so the sample week's and the game's outings stay out.
+ */
+export function kindRates(book: Logbook, catches: readonly CatchEntry[], today: string): Map<string, { count: number; total: number }> {
+  const fished = new Set(book.catches.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
+  const took = new Set(catches.flatMap((entry) => (entry.tripId ? [entry.tripId] : [])));
+  const rates = new Map<string, { count: number; total: number }>();
+  // An outing had: one already past, or today's once it has a fish; a plan still ahead is no outing yet.
+  for (const trip of book.trips.filter((each) => each.date < today || fished.has(each.id))) {
+    const rate = rates.get(trip.spotId) ?? { count: 0, total: 0 };
+    rate.total += 1;
+    if (took.has(trip.id)) rate.count += 1;
+    rates.set(trip.spotId, rate);
+  }
+  return new Map([...rates].filter(([, rate]) => rate.total > 1 && rate.count > 0));
+}
+
 export function SpeciesPage() {
   const { species = "" } = useParams();
   // Keyed by the kind, so a rename that lands on the merged kind's page starts it fresh.
@@ -136,7 +154,11 @@ function SpeciesView() {
     );
   }
 
+  const own = countedBook(book);
+  const counted = new Set(own.catches.map((entry) => entry.id));
+  const notCounted = !catches.some((entry) => counted.has(entry.id));
   const waters = speciesWaters(book, catches);
+  const rates = kindRates(own, catches, localDate(new Date()));
   /** Only worth a chart once the kind has come in more than one season. */
   const seasons = seasonTally({ ...book, catches });
   // By the day a fish counts on, as the year search each bar opens reads it.
@@ -160,6 +182,8 @@ function SpeciesView() {
         </div>
       </header>
       <FishSum catches={catches} oneKind list={`species:${species}`} />
+      {/* Only the sample week's or the game's, once Home and Bests leave those out: said, so they aren't read as the angler's. */}
+      {notCounted ? <p className="meta">{t("These are all from the sample week or the game.")}</p> : null}
       <KindMark catches={catches} />
       <FishCsv catches={catches} name={t(name)} />
       {catches.length > 1 ? <SpeciesSpan first={catches[catches.length - 1]!} last={catches[0]!} /> : null}
@@ -187,6 +211,8 @@ function SpeciesView() {
             <span className="meta sizes">
               {/* The count opens just those fish, through the catch search. */}
               {water.name ? <Link to={findWithLink(kindTerm, exactTerm("water", water.name))}>{fishCountLabel(water.count)}</Link> : fishCountLabel(water.count)}
+              {/* How often an outing there took one: where the kind is reliable, not just where it came once. */}
+              {rates.has(water.spotId) ? `\u00a0· ${t("on {count} of {total} outings", rates.get(water.spotId)!)}` : ""}
               {/* Beside each water, its biggest of the kind, once there is more than one water to set side by side. */}
               {waters.length > 1 ? (
                 <>
