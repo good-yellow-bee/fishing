@@ -3402,9 +3402,10 @@ html[data-contrast="high"] :is(.daily-requests-note, .hud .eyebrow, .settings-no
   }
 }
 
-/* The shack's Strength, Accuracy and Patience buttons were 27 px on a phone: 32 on a touch screen. */
+/* The shack's Strength, Accuracy and Patience buttons were 27 px on a phone, and a request's Claim 30: 32 on a touch screen. */
 @media (pointer: coarse) {
-  .upgrade-row button {
+  .upgrade-row button,
+  .daily-requests li button {
     min-height: 32px;
   }
 }

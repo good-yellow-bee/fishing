@@ -1140,6 +1140,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA95~~ | ~~The shack's sections (Line & nerve, Today's requests, The next three days) were h3s straight under the page's h1, so a screen reader's heading list skipped a level: the shack is now named by an unseen h2 that also labels its dialog (#1299)~~ | phone UX | S |
 | ~~PA96~~ | ~~The landed card's rarity tag (common, uncommon, rare, legendary) read 2.3-3.1 to 1 on its parchment, and the quiet stamp just under 4.5: each is inked darker in its own hue, 5 to 1 or more (#1300)~~ | phone UX | S |
 | ~~PA97~~ | ~~The badge toast's small Badge line read 4.4 to 1 on its parchment over a night lake: inked to the legendary tag's brass, 5.5 to 1 (#1301)~~ | phone UX | S |
+| ~~PA98~~ | ~~The shack's daily request Claim buttons stand 32 px tall on a touch screen (#?)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
