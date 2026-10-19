@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { LINE_FROM, LINE_TO, LINE_Y, WASHING, garmentSwing, linePoint, type Garment } from "./washingLine";
@@ -66,12 +66,13 @@ export function garmentShape({ kind, color, width: w, height: h }: Garment) {
 /** A washing line by the shack, with the washing pegged out on it and blowing on the wind when it is out (`washing`). */
 export function Clothesline({ washing, wind }: { washing: boolean; wind: { x: number; z: number } }) {
   const still = useReducedMotion();
-  const shapes = useMemo(() => ({ posts: postsShape(), rope: ropeShape(), garments: WASHING.map(garmentShape) }), []);
+  // The posts and the rope never move, so they bake into one shape: one draw.
+  const shapes = useMemo(() => ({ frame: mergeParts([{ geometry: postsShape() }, { geometry: ropeShape() }]), garments: WASHING.map(garmentShape) }), []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const hangers = useMemo<(THREE.Group | null)[]>(() => WASHING.map(() => null), []);
   useEffect(
     () => () => {
-      [shapes.posts, shapes.rope, ...shapes.garments, material].forEach((item) => item.dispose());
+      [shapes.frame, ...shapes.garments, material].forEach((item) => item.dispose());
     },
     [shapes, material],
   );
@@ -83,8 +84,7 @@ export function Clothesline({ washing, wind }: { washing: boolean; wind: { x: nu
   });
   return (
     <group name="clothesline">
-      <mesh geometry={shapes.posts} material={material} castShadow />
-      <mesh geometry={shapes.rope} material={material} />
+      <mesh geometry={shapes.frame} material={material} castShadow />
       {washing &&
         WASHING.map((garment, i) => {
           const at = linePoint(garment.at);
