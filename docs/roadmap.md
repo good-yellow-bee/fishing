@@ -1324,7 +1324,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC162~~ | ~~Fewer draws: each high bird flock over the lake draws its wings as one instanced mesh (14 wing draws to 2, still culled out of view), and each swan's two wake arms bake into one shape (4 draws to 2)~~ (#1360) | scene | S |
 | ~~SC163~~ | ~~Fewer draws: the four clouds share one baked three-puff shape (12 draws to 4)~~ (#1361) | scene | S |
 | ~~SC164~~ | ~~Rapeseed: in spring the field under the windmill on the far hills flowers bright yellow in drill rows (one draw), with news scene36~~ (#1362) | scene | S |
-| SC165 | Fewer draws: the meadow bumblebees draw their bodies and wings as two instanced meshes (12 draws to 2), and the fishing terns their bodies and each side's wings as three (9 to 3) | scene | S |
+| ~~SC165~~ | ~~Fewer draws: the meadow bumblebees draw their bodies and wings as two instanced meshes (12 draws to 2), and the fishing terns their bodies and each side's wings as three (9 to 3)~~ (#1363) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
