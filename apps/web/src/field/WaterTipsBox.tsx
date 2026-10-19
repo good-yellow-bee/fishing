@@ -1,11 +1,15 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, lureTally, type CatchEntry } from "@stillwater/shared";
+import { MOON_QUARTER_LABELS, SEASON_LABELS, localDate, moonQuarterOf, shiftDate, SKY_LABELS, WIND_LABELS, type CatchEntry } from "@stillwater/shared";
+import { inSentence } from "./MonthBars";
+import { pieceTally } from "./pieceTally";
 import { getUnits, t, useT } from "../i18n";
 import { exactTerm, findLink, findWithLink } from "./CatchSearch";
-import { lureByTemp, readingBefore, waterTips } from "./waterTips";
+import { lureByTemp, readingBefore, waterTips, type WaterReading } from "./waterTips";
 import { SAME_TIME_DAYS, thisWeekInPastYears } from "./yearsAgo";
-import { fishCountLabel, formatCatchDay, tripWhen } from "./format";
+import { fishCountLabel, formatCatchDay, formatDay, tripWhen } from "./format";
+import { useLogbook } from "./LogbookState";
+import { bookFishDay } from "./tripMonths";
 import { tempText } from "../i18n/content";
 import { tempBandLabel, tempBandSearch } from "./WeatherBars";
 import { nearSunCount } from "./sunLight";
@@ -23,7 +27,7 @@ export function sameTimeText(fish: readonly CatchEntry[]): string {
       .join(", "),
   });
   // A tie names no lure: "most on" would be a coin toss.
-  const [lure, second] = lureTally({ spots: [], trips: [], catches: [...fish] }, 2);
+  const [lure, second] = pieceTally(fish, 2);
   const withLure = lure && lure.count >= 2 && (!second || lure.count > second.count) ? `${text} ${t("Most on {lure}.", { lure: t(lure.lure) })}` : text;
   const water = waterThen(fish);
   return water ? `${withLure} ${water}` : withLure;
@@ -55,7 +59,8 @@ function TipLine({ text, name, value, to }: { text: string; name: string; value:
     <>
       <br />
       {before}
-      <Link to={to}>{value}</Link>
+      {/* Polish writes a label in lower case inside a sentence: "Najwięcej ryb: rano". */}
+      <Link to={to}>{inSentence(value)}</Link>
       {after}
     </>
   );
@@ -81,6 +86,7 @@ export function WaterTipsBox({
   place?: { lat: number; lng: number };
 }) {
   useT();
+  const { book } = useLogbook();
   const heading = label ?? t("What works here");
   const tips = waterTips(catches);
   if (!tips) return null;
@@ -100,14 +106,20 @@ export function WaterTipsBox({
     on && lastF !== undefined
       ? byTemp.find(({ band }) => (band.from === null || lastF >= band.from) && (band.to === null || lastF < band.to))?.lure
       : undefined;
+  // A reading dated by its fish's day, as the year's temperature line on the page dates it: a night's small hours on
+  // its outing's day, not the clock's.
+  const readingDay = (reading: WaterReading) => {
+    const entry = reading.id ? book.catches.find((found) => found.id === reading.id) : undefined;
+    return entry ? formatDay(bookFishDay(book, entry)) : formatCatchDay(reading.at);
+  };
   // Against the reading before it: a change too small to show as a whole degree says nothing.
   const before = on && tips.lastTemp ? readingBefore(catches, tips.lastTemp, (fahrenheit) => tempText(fahrenheit) !== tempText(tips.lastTemp!.fahrenheit)) : null;
   const [beforeText, lastText] = before && tips.lastTemp ? [tempText(before.fahrenheit), tempText(tips.lastTemp.fahrenheit)] : ["", ""];
   const trend =
     before && tips.lastTemp && beforeText !== lastText
       ? tips.lastTemp.fahrenheit > before.fahrenheit
-        ? t("Warming from {temp} on {day}.", { temp: beforeText, day: formatCatchDay(before.at) })
-        : t("Cooling from {temp} on {day}.", { temp: beforeText, day: formatCatchDay(before.at) })
+        ? t("Warming from {temp} on {day}.", { temp: beforeText, day: readingDay(before) })
+        : t("Cooling from {temp} on {day}.", { temp: beforeText, day: readingDay(before) })
       : null;
   const pastWeek = y && m && d ? thisWeekInPastYears(catches, new Date(y, m - 1, d, 12), SAME_TIME_DAYS, Infinity) : [];
   return (
@@ -143,7 +155,7 @@ export function WaterTipsBox({
         {on && tips.lastTemp ? (
           <>
             <br />
-            {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: formatCatchDay(tips.lastTemp.at) })}
+            {t("Last water temperature noted: {temp} on {day}.", { temp: tempText(tips.lastTemp.fahrenheit), day: readingDay(tips.lastTemp) })}
             {trend ? ` ${trend}` : null}
             {/* The lure that led in the band the water was last in: what to tie on first. */}
             {lureNow ? ` ${t("{lure} led at that temperature.", { lure: t(lureNow) })}` : null}

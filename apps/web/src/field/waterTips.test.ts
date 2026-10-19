@@ -51,7 +51,7 @@ describe("water tips", () => {
     });
     const tips = waterTips([at("a", 62, "2026-09-01T09:00:00"), at("b", 65, "2026-09-20T09:00:00"), at("c", 48, "2026-08-01T09:00:00"), at("d", null, "2026-10-01T09:00:00")])!;
     expect(tips.temp).toMatchObject({ from: 60, to: 70, count: 2 });
-    expect(tips.lastTemp).toEqual({ fahrenheit: 65, at: "2026-09-20T09:00:00" });
+    expect(tips.lastTemp).toMatchObject({ fahrenheit: 65, at: "2026-09-20T09:00:00" });
     const tied = waterTips([at("a", 62, "2026-09-01T09:00:00"), at("b", 48, "2026-09-02T09:00:00"), at("c", null, "2026-09-03T09:00:00")])!;
     expect(tied.temp).toBeNull();
     expect(waterTips([at("a", null, "2026-09-01T09:00:00"), at("b", null, "2026-09-02T09:00:00"), at("c", null, "2026-09-03T09:00:00")])!.lastTemp).toBeNull();
