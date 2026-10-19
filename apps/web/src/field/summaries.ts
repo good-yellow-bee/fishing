@@ -40,6 +40,8 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
   const counts = [
     ...(trip.lost ? [`${t("Lost fish")}: ${trip.lost}`] : []),
     ...(trip.missed ? [`${t("Missed strikes")}: ${trip.missed}`] : []),
+    // As the outing's page says it: how many of the fish hooked came in.
+    ...(trip.lost && catches.length > 0 ? [t("Landed {landed} of {hooked} hooked.", { landed: catches.length, hooked: catches.length + trip.lost })] : []),
   ];
   // "0 fish" above a lost fish's line; "Nothing logged" only for a day with nothing at all to say.
   return [head, counts.length ? fishSum(catches.length) : fishCountLabel(catches.length), ...(counts.length ? [counts.join(" · ")] : []), ...fish, ...(trip.note.trim() ? ["", trip.note.trim()] : [])].join("\n");

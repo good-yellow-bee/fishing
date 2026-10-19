@@ -73,7 +73,7 @@ import { pieceTally } from "./pieceTally";
 import { WaterOptions } from "./WaterOptions";
 import { kindKey, kindNames, speciesCounts, speciesLink } from "./speciesLink";
 import { pieceName } from "./gear/pieceKey";
-import { datePicks, outingDay, ownTitle, pastTitles, stillGoing } from "./tripDates";
+import { datePicks, outingDay, ownTitle, pastTitles, plainName, stillGoing } from "./tripDates";
 import "./search.css";
 import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { bestFishDay, bookFishDay } from "./tripMonths";
@@ -550,6 +550,12 @@ function TripView() {
           </Link>
           {/* Before going back: how long the water has rested. */}
           {trip.date >= today && daysBetween(lastHere.date, today) >= 2 ? ` · ${tn(daysBetween(lastHere.date, today), "{n} day ago", "{n} days ago")}` : null}
+        </p>
+      ) : null}
+      {/* Every outing on this water, as Find an outing gives them: how the water has done, outing by outing. */}
+      {spot && !play && tripsHere.length >= 3 ? (
+        <p className="meta all-here">
+          <Link to={`/trips?${new URLSearchParams({ [TRIP_FIND]: plainName(spot.name) }).toString()}`}>{t("Every outing here ({n})", { n: tripsHere.length })}</Link>
         </p>
       ) : null}
       {/* A dawn and a dusk on one water and day: each says the other, with what it gave. */}
