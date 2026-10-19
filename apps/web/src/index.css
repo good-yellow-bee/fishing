@@ -2342,8 +2342,9 @@ html[data-input="pad"] .fight-bar .on-pad {
     display: none;
   }
 
+  /* Below the bank chip too, when it wraps taller than the lure panel beside it. */
   .hint {
-    top: calc(var(--hud-bottom, 140px) + 90px);
+    top: max(calc(var(--hud-bottom, 140px) + 90px), calc(var(--stance-bottom, 0px) + 8px));
     right: 8px;
     bottom: auto;
     left: 8px;
