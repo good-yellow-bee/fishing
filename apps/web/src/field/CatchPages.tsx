@@ -57,7 +57,6 @@ import { speciesLures, waterSpecies, waterTips } from "./waterTips";
 import { fromBookAmount, fromBookTemp, gramsAsKilos, toBookAmount, toBookTemp, unitsMessage } from "./unitsInput";
 import { getUnits, locale, t, tn, useLang, useT, type Units } from "../i18n";
 import { pieceKey, pieceName } from "./gear/pieceKey";
-import { outingDay } from "./tripDates";
 import { FORM_ERROR_ID, clearInvalid, markInvalid } from "./formErrors";
 import { ChoiceRow } from "./ChoiceRow";
 import { lengthText, measureText, measuresText, tempText, weatherText, weightText } from "../i18n/content";
@@ -824,7 +823,7 @@ function CatchForm() {
       // Not a fish from minutes ago, before midnight on tonight's session: the next one comes now, not at 23:58 again.
       // A small-hours fish on last night's outing is that outing's day: a write-up the next morning carries its time too.
       const fishDay = (tripId ? tripById(book, tripId)?.date : undefined) ?? caughtAt.slice(0, 10);
-      const writtenUp = fishDay < outingDay(toLocalInput(new Date()).slice(0, 10)) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
+      const writtenUp = fishDay < toLocalInput(new Date()).slice(0, 10) && Date.now() - new Date(caughtAt).getTime() > 60 * 60_000;
       const earlier = writtenUp ? caughtAt : undefined;
       // In this form's place: a run of fish leaves one form in history, not one per fish.
       navigate(anotherCatchLink({ spotId, tripId: tripId || null, species: draft.species, lure: draft.lure, measure: { kind: measureKind } }, earlier), {
@@ -1610,7 +1609,7 @@ function CatchView() {
   const photo = photoFor(entry.id);
   // Opened from a list (a search, a kind, an outing, a water): the steps keep to it, and lead back to it.
   const list = catchList(book, params.get(LIST_PARAM), entry.id, t, (id) => photoFor(id) !== null);
-  const photoCaption = (fish: CatchEntry) => [t(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [spotById(book, fish.spotId)!.name] : [])].join(" · ");
+  const photoCaption = (fish: CatchEntry) => [pieceName(fish.species), measuresText(fish), formatDay(bookFishDay(book, fish)), ...(spotById(book, fish.spotId) ? [spotById(book, fish.spotId)!.name] : [])].join(" · ");
   // Opened from a list, the full-size view steps through the list's other photos too.
   const listPhotos: ListPhoto[] = (list?.rows ?? []).flatMap((fish) => {
     const src = photoFor(fish.id);

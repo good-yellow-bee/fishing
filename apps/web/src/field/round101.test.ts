@@ -36,6 +36,12 @@ describe("round 101: a dawn and a dusk on one water", () => {
     expect(tripForFish(book, "own", "2026-08-20T20:35")?.id).toBe("dusk");
     expect(tripForFish(book, "own", "2026-08-20T06:10")?.id).toBe("dawn");
   });
+
+  it("gives a dusk with no fish yet its first one, hours after the dawn's", () => {
+    const fresh = { ...book, catches: book.catches.filter((entry) => entry.tripId === "dawn") };
+    expect(tripForFish(fresh, "own", "2026-08-20T20:30")?.id).toBe("dusk");
+    expect(tripForFish(fresh, "own", "2026-08-20T06:30")?.id).toBe("dawn");
+  });
 });
 
 describe("round 101: a lure or kind however it was typed", () => {
