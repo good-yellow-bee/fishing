@@ -1624,7 +1624,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT311~~ | ~~Midges at dusk: on a still late-spring or summer dusk a dry fly landing under one of the dancing midge clouds (the scene's MIDGE_CLOUDS, leaned by the wind, plus 0.4 m) lands where the fish rise to the ones that fall, so the bite comes sooner (0.85) and 35% of bites are a bluegill, crappie, golden shiner or rainbow trout; a fly that is also among the surface bugs is told once, as the bugs~~ (#1317) | gameplay | S |
 | ~~GT312~~ | ~~News card 2026-10-19-game22 covers GT310 and GT311: level 14 and the midge clouds at dusk~~ (#1319) | ui | S |
 | ~~GT313~~ | ~~Let it flutter: a small fish hooked where a bigger one hunts it (the grab pairs) and left unreeled for 1.2 s of its calm spells out past the halfway mark (a pump of the reel starts the pause again; easing off for a run is no pause) draws the hunter in, a further 25% of them on top of the usual grab; the hookset tells the tip~~ (#1326) | gameplay | S |
-| GT314 | Lively shiner: a golden shiner landed in a clean fight goes back out as lively live bait, so 80% of the bites on it are the bank's hunters instead of 60%; the bait button, the hook-on line and the wait line say so, and a shiner landed through the red says a clean one is livelier | gameplay | S |
+| ~~GT314~~ | ~~Lively shiner: a golden shiner landed in a clean fight goes back out as lively live bait, so 80% of the bites on it are the bank's hunters instead of 60%; the bait button, the hook-on line and the wait line say so, and a shiner landed through the red says a clean one is livelier~~ (#1330) | gameplay | S |
+| GT315 | News card 2026-10-19-game23 covers GT313 and GT314: letting a small fish flutter for its hunter, and the lively shiner | ui | S |
 
 ## Risks / open questions for the owner
 
