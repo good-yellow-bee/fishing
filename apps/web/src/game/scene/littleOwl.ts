@@ -1,5 +1,5 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
-import { MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
+import { MOTH_LAMPS, MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
 import { SNOW_CAP } from "./robinVisit";
 import { DOCK_POST_CAPS } from "./snowyDock";
 
@@ -69,15 +69,34 @@ export const WATCH_EVERY_SEC = 9;
 export const WATCH_FROM_SEC = 3;
 export const WATCH_SEC = 5;
 
-/** The head turn, off its perching yaw and held to LOOK_MAX, that looks at the point (`x`, `z`) from the post. */
+/** The lantern on its own post, whose moths it watches. */
+export const OWL_LAMP = MOTH_LAMPS.reduce((a, b) => (Math.hypot(a.x - OWL_POST.x, a.z - OWL_POST.z) < Math.hypot(b.x - OWL_POST.x, b.z - OWL_POST.z) ? a : b));
+const LAMP_MOTH = MOTH_LAMPS.indexOf(OWL_LAMP) * MOTHS_PER_LANTERN;
+/** Closer than this a moth is on top of it, too close to follow. */
+const TOO_CLOSE = 0.1;
+
+/** The head turn, off its perching yaw, that looks at the point (`x`, `z`) from the post; null past LOOK_MAX. */
 export function owlLookAt(x: number, z: number) {
   const raw = Math.atan2(x - OWL_POST.x, z - OWL_POST.z) - PERCH_YAW;
-  return Math.max(-LOOK_MAX, Math.min(LOOK_MAX, Math.atan2(Math.sin(raw), Math.cos(raw))));
+  const rel = Math.atan2(Math.sin(raw), Math.cos(raw));
+  return Math.abs(rel) > LOOK_MAX ? null : rel;
+}
+
+/**
+ * Its look `sit` seconds onto the post during a spell watching a moth round its lantern, or null outside one.
+ * When the moth swings behind it or right up to it, it looks back at the lantern for it to come round again.
+ */
+export function owlWatchLook(sit: number, time: number) {
+  const spell = sit % WATCH_EVERY_SEC;
+  if (spell < WATCH_FROM_SEC || spell >= WATCH_FROM_SEC + WATCH_SEC) return null;
+  const moth = mothAt(LAMP_MOTH + (Math.floor(sit / WATCH_EVERY_SEC) % MOTHS_PER_LANTERN), time);
+  const near = Math.hypot(moth.x - OWL_POST.x, moth.z - OWL_POST.z) < TOO_CLOSE;
+  return (near ? null : owlLookAt(moth.x, moth.z)) ?? owlLookAt(OWL_LAMP.x, OWL_LAMP.z)!;
 }
 
 /**
  * The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post;
- * `moths` when moths circle the lanterns (mothOrbit.ts), the first of which is the one on its post.
+ * `moths` when moths circle the lanterns (mothOrbit.ts).
  */
 export function owlAt(time: number, snow = false, still = false, moths = false): OwlPose {
   const post = { x: OWL_POST.x, y: OWL_POST.y + (snow ? SNOW_CAP : 0), z: OWL_POST.z };
@@ -100,12 +119,11 @@ export function owlAt(time: number, snow = false, still = false, moths = false):
     const look = LOOK_MAX * Math.max(-1, Math.min(1, swivel * 1.6));
     const bobbing = sit % 7 < 1.6 ? Math.max(0, Math.sin((sit % 7) * Math.PI * 2.5)) : 0;
     const blink = sit % 5.3 < 0.18 ? 1 : 0;
-    const spell = sit % WATCH_EVERY_SEC;
-    if (moths && spell >= WATCH_FROM_SEC && spell < WATCH_FROM_SEC + WATCH_SEC) {
-      // Its head follows the moth round; a bob or two as it first fixes on it.
-      const moth = mothAt(Math.floor(sit / WATCH_EVERY_SEC) % MOTHS_PER_LANTERN, time);
-      const fix = spell - WATCH_FROM_SEC;
-      return { ...sat, look: owlLookAt(moth.x, moth.z), bob: fix < 0.8 ? Math.max(0, Math.sin(fix * Math.PI * 2.5)) : 0, blink };
+    const watch = moths ? owlWatchLook(sit, time) : null;
+    if (watch !== null) {
+      // A bob or two as it first fixes on the moth.
+      const fix = (sit % WATCH_EVERY_SEC) - WATCH_FROM_SEC;
+      return { ...sat, look: watch, bob: fix < 0.8 ? Math.max(0, Math.sin(fix * Math.PI * 2.5)) : 0, blink };
     }
     return { ...sat, look, bob: bobbing, blink };
   }

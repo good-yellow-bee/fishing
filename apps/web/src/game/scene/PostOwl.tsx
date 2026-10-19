@@ -96,7 +96,11 @@ export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;
-    if (!pose.here) return;
+    if (!pose.here) {
+      // Each visit starts with its head straight.
+      if (head.current) head.current.rotation.y = 0;
+      return;
+    }
     group.position.set(pose.x, pose.y, pose.z);
     group.rotation.y = pose.yaw;
     // Level and outstretched as it glides; it dips forward with each bob on the post.
