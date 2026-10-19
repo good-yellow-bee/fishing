@@ -1,9 +1,11 @@
-import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, SHINER_PRICE } from "@stillwater/shared";
+import { GROUNDBAIT_CARRY, GROUNDBAIT_PRICE, shackPrice, SHINER_PRICE } from "@stillwater/shared";
 import { t, useT } from "../i18n";
 import { GROUNDBAIT_CASTS } from "../game/logic";
 
 type Props = {
   points: number;
+  /** From level 17 the shack's prices drop a fifth. */
+  lifetimePoints: number;
   /** Handfuls of groundbait in the bag now. */
   handfuls: number;
   /** A live shiner is on the hook already, landed or bought. */
@@ -14,12 +16,14 @@ type Props = {
 };
 
 /** The shack's bait tin: points buy a handful of groundbait, up to what the bag carries, or a live shiner for the hook. */
-export function BaitShop({ points, handfuls, shinerOn, busy, onBuy, onBuyShiner }: Props) {
+export function BaitShop({ points, lifetimePoints, handfuls, shinerOn, busy, onBuy, onBuyShiner }: Props) {
   useT();
   const full = handfuls >= GROUNDBAIT_CARRY;
   // aria-disabled, as on the skills: a disabled button would drop keyboard focus the moment a purchase starts.
-  const off = busy || full || points < GROUNDBAIT_PRICE;
-  const shinerOff = busy || shinerOn || points < SHINER_PRICE;
+  const groundbaitCost = shackPrice(GROUNDBAIT_PRICE, lifetimePoints);
+  const shinerCost = shackPrice(SHINER_PRICE, lifetimePoints);
+  const off = busy || full || points < groundbaitCost;
+  const shinerOff = busy || shinerOn || points < shinerCost;
   return (
     <section className="bait-shop">
       <div className="panel-heading">
@@ -36,7 +40,7 @@ export function BaitShop({ points, handfuls, shinerOn, busy, onBuy, onBuyShiner 
               if (!off) onBuy();
             }}
           >
-            {t("A handful ({cost} pts)", { cost: GROUNDBAIT_PRICE })}
+            {t("A handful ({cost} pts)", { cost: groundbaitCost })}
           </button>
           <p id="bait-shop-note">
             {full
@@ -53,7 +57,7 @@ export function BaitShop({ points, handfuls, shinerOn, busy, onBuy, onBuyShiner 
               if (!shinerOff) onBuyShiner();
             }}
           >
-            {t("A live shiner ({cost} pts)", { cost: SHINER_PRICE })}
+            {t("A live shiner ({cost} pts)", { cost: shinerCost })}
           </button>
           <p id="shiner-shop-note">
             {shinerOn ? t("A live shiner is on your hook already.") : t("Goes on your hook for the next cast and draws the hunters at the bank.")}

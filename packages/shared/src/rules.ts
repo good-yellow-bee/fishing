@@ -100,17 +100,29 @@ export const GROUNDBAIT_CARRY = 3;
 export type PurchaseOk = { ok: true; cost: number };
 export type PurchaseResult = PurchaseOk | UpgradeErr;
 
+/** From this level the shack sells its bait a fifth cheaper. */
+export const SHACK_DISCOUNT_LEVEL = 17;
+
+/** What a shack item costs this angler: its price, or a fifth off it from SHACK_DISCOUNT_LEVEL. */
+export function shackPrice(price: number, lifetimePoints: number): number {
+  return anglerLevel(lifetimePoints) >= SHACK_DISCOUNT_LEVEL ? Math.round(price * 0.8) : price;
+}
+
+function shackSale(profile: Profile, price: number): PurchaseResult {
+  const cost = shackPrice(price, profile.lifetimePoints);
+  if (profile.points < cost) return { ok: false, error: "not enough points", status: 409 };
+  return { ok: true, cost };
+}
+
 export function validateGroundbaitBuy(profile: Profile): PurchaseResult {
-  if (profile.points < GROUNDBAIT_PRICE) return { ok: false, error: "not enough points", status: 409 };
-  return { ok: true, cost: GROUNDBAIT_PRICE };
+  return shackSale(profile, GROUNDBAIT_PRICE);
 }
 
 /** A live shiner from the shack's bucket costs this many points; it goes on the hook for one cast, one at a time. */
 export const SHINER_PRICE = 50;
 
 export function validateShinerBuy(profile: Profile): PurchaseResult {
-  if (profile.points < SHINER_PRICE) return { ok: false, error: "not enough points", status: 409 };
-  return { ok: true, cost: SHINER_PRICE };
+  return shackSale(profile, SHINER_PRICE);
 }
 
 export function rollWeight(species: FishSpecies, patience: number, random = Math.random, level = 1): number {

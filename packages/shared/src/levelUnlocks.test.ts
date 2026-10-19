@@ -56,16 +56,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Voice of the lake", () => {
+  it("gives every level its own title, Greenhorn to Child of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Voice of the lake");
+    expect(titles.at(-1)).toBe("Child of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Voice of the lake");
+    expect(anglerTitle(99)).toBe("Child of the lake");
   });
 });
 
@@ -170,5 +170,14 @@ describe("level 16", () => {
     expect(anglerTitle(16)).toBe("Voice of the lake");
     expect(turnCutMulForLevel(15)).toBe(1);
     expect(turnCutMulForLevel(16)).toBe(1.25);
+  });
+});
+
+describe("level 17", () => {
+  it("opens at 57000 lifetime points with its unlock and title", () => {
+    expect(anglerLevel(56999)).toBe(16);
+    expect(anglerLevel(57000)).toBe(17);
+    expect(levelUnlock(17)).toBe("The shack sells you groundbait and live shiners a fifth cheaper.");
+    expect(anglerTitle(17)).toBe("Child of the lake");
   });
 });
