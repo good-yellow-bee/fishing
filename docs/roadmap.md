@@ -1667,7 +1667,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT327~~ | ~~Lure colour: a lure whose label names a colour (English or Polish) bites 0.9x sooner when the colour suits the light: bright (chartreuse, firetiger, orange, white…) in rain, fog, overcast or the low light of dawn and dusk; natural (green pumpkin, crayfish, silver…) in clear daylight; dark (black, purple) at night; the wait hint says which~~ (#1369) | gameplay | S |
 | ~~GT328~~ | ~~The lure picker marks a lure whose colour suits the light as good now, with the season, hour and weather line under it, like the other lures the conditions favour~~ (#1371) | gameplay | S |
 | ~~GT329~~ | ~~News card 2026-10-19-game27 covers GT326 to GT328: a run of clean fights pays, and a lure's colour suits the light, marked in the lure list~~ (#1374) | ui | S |
-| GT330 | Level 16, Voice of the lake, at 47000 lifetime points: pulling the rod against a run cuts it short 25% faster | gameplay | S |
+| ~~GT330~~ | ~~Level 16, Voice of the lake, at 47000 lifetime points: pulling the rod against a run cuts it short 25% faster~~ (#1377) | gameplay | S |
+| GT331 | A turned run swings the fish's head round: for 1 s after a run the angler turned, reeling wins line 1.3x faster, and the steer line says "Its head is turned — reel now to win line" | gameplay | S |
 
 ## Risks / open questions for the owner
 
