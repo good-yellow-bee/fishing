@@ -360,6 +360,17 @@ function SpotView() {
   useT();
   const navigate = useNavigate();
   const location = useLocation();
+  // Sent from an outing's "Every outing on this water": to the list, after the page's own scroll to the top has run.
+  const toOutings = location.hash === "#outings";
+  useEffect(() => {
+    if (!toOutings) return;
+    const frame = requestAnimationFrame(() => {
+      const heading = document.getElementById("outings");
+      heading?.scrollIntoView({ block: "start" });
+      heading?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [toOutings]);
   const { spotId = "" } = useParams();
   const spot = spotById(book, spotId);
   const today = localDate(new Date());
@@ -598,7 +609,9 @@ function SpotView() {
       ) : null}
 
       <div className="section-head">
-        <h2>{t("Outings")}</h2>
+        <h2 id="outings" tabIndex={-1}>
+          {t("Outings")}
+        </h2>
         {spot.id === PLAY_LAKE_ID ? null : <Link to={`/trips/new?spot=${spot.id}`}>{t("Plan one")}</Link>}
       </div>
       {average ? <p className="meta">{average}</p> : null}

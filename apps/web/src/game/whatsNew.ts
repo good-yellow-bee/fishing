@@ -5,7 +5,7 @@ export const NEWS_KEY = "stillwater.news.v1";
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
-  "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed. On an outing, a fish logged on its own goes to the nearer of a dawn and a dusk.",
+  "An outing's page opens every outing on its water in one tap, and a copied outing says how many of the fish hooked were landed.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.",
