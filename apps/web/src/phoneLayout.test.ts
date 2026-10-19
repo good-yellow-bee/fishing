@@ -33,6 +33,13 @@ describe("a phone held sideways", () => {
     expect(dock).toContain("}, [game.surfaceRef, scenePhase, shopOpen, photo, lakeShown]);");
   });
 
+  it("fits a narrow phone's header links into two rows with larger text, each link keeping its 32 px", () => {
+    const narrow = css.slice(css.indexOf("@media (max-width: 359px) and (min-height: 501px) {"));
+    expect(/html\[data-text-size\] \.hud-stats \{([^}]*)\}/.exec(narrow)?.[1]).toContain("row-gap: 0;");
+    expect(/html\[data-text-size\] \.hud \.hud-link \{([^}]*)\}/.exec(narrow)?.[1]).toContain("letter-spacing: 0;");
+    expect(/\n  \.hud \.hud-link,\n[^{]*\{([^}]*)\}/.exec(css)?.[1]).toContain("min-height: 32px;");
+  });
+
   it("lets a phone's bottom row of shore signs scroll sideways when the last banks would run past the edge", () => {
     const narrow = css.slice(css.indexOf("/* One thumb row along the bottom"));
     const block = /\.walk-signs \{([^}]*)\}/.exec(narrow)?.[1];
