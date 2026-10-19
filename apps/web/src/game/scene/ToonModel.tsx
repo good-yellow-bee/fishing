@@ -19,6 +19,32 @@ type Props = {
   shade?: number;
 };
 
+/** How a model is prepared: toon-lit, tinted and shaded as asked, its plain parts baked into one where it can. */
+export type ToonLook = { shadows?: boolean; sitOnGround?: boolean; plant?: Props["plant"]; shade?: number };
+
+/** A prepared copy of a loaded model `scene`; let it go with releaseToonCopy. */
+export function prepareToon(scene: THREE.Object3D, { shadows = true, sitOnGround = false, plant, shade = 1 }: ToonLook) {
+  const copy = scene.clone(true);
+  applyToon(copy, shadows);
+  if (plant) tintPlant(copy, plant.season, plant.kind, plant.variant);
+  if (shade !== 1) shadeColours(copy, shade);
+  // A model of several plain coloured parts draws as one; anything else keeps its parts.
+  const next = bakeToon(copy, shadows) ?? copy;
+  if (sitOnGround) {
+    const box = new THREE.Box3().setFromObject(next);
+    next.position.y -= box.min.y;
+  }
+  // Tinted and shaded first, so copies share only when they truly look alike.
+  if (next === copy) shareMaterials(next);
+  return next;
+}
+
+/** Lets go of a copy from prepareToon. */
+export function releaseToonCopy(copy: THREE.Object3D) {
+  if (copy.userData.baked) releaseBaked(copy);
+  else releaseSharedMaterials(copy);
+}
+
 export function ToonModel({
   url,
   position,
@@ -30,23 +56,12 @@ export function ToonModel({
   shade = 1,
 }: Props) {
   const { scene } = useGLTF(url);
-  const cloned = useMemo(() => {
-    const copy = scene.clone(true);
-    applyToon(copy, shadows);
-    if (plant) tintPlant(copy, plant.season, plant.kind, plant.variant);
-    if (shade !== 1) shadeColours(copy, shade);
-    // A model of several plain coloured parts draws as one; anything else keeps its parts.
-    const next = bakeToon(copy, shadows) ?? copy;
-    if (sitOnGround) {
-      const box = new THREE.Box3().setFromObject(next);
-      next.position.y -= box.min.y;
-    }
-    // Tinted and shaded first, so copies share only when they truly look alike.
-    if (next === copy) shareMaterials(next);
-    return next;
-  }, [scene, shadows, sitOnGround, plant?.season, plant?.kind, plant?.variant, shade]);
+  const cloned = useMemo(
+    () => prepareToon(scene, { shadows, sitOnGround, plant, shade }),
+    [scene, shadows, sitOnGround, plant?.season, plant?.kind, plant?.variant, shade],
+  );
 
-  useEffect(() => () => (cloned.userData.baked ? releaseBaked(cloned) : releaseSharedMaterials(cloned)), [cloned]);
+  useEffect(() => () => releaseToonCopy(cloned), [cloned]);
 
   return (
     <group position={position} rotation={rotation} scale={scale}>
