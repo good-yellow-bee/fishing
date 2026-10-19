@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { makeSoftSpotTexture } from "./Atmosphere";
 import { FIRE_AT, flicker } from "./campfireSmoke";
-import { mergeParts, mergePainted } from "./mergeParts";
+import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { SmokePlume, type SmokeHour } from "./SmokePlume";
 import { toonRamp } from "./toon";
@@ -13,6 +13,8 @@ const STONES = 9;
 const RING = 0.34;
 const STONE = "#8a8780";
 const WOOD = "#3b2c22";
+const FLAME = "#ff9a3c";
+const CORE = "#ffe08a";
 
 /** The ring of stones and the charred sticks in it, in one painted shape so the pit costs one draw. */
 export function firePitShape() {
@@ -36,11 +38,12 @@ export function firePitShape() {
   ]);
 }
 
-/** The flame's outer tongues, in one shape. */
+/** The flame: its pale hot core first, so the outer tongues drawn after blend over it, then the tongues, in one painted shape. */
 export function flameShape() {
-  return mergeParts([
-    { geometry: new THREE.ConeGeometry(0.15, 0.36, 7), position: [0, 0.17, 0] },
-    ...[0, 2.1, 4.2].map((a) => ({ geometry: new THREE.ConeGeometry(0.07, 0.22, 6), position: [Math.cos(a) * 0.08, 0.11, Math.sin(a) * 0.08] as const })),
+  return mergePainted([
+    { geometry: new THREE.ConeGeometry(0.07, 0.18, 6), position: [0, 0.1, 0], color: CORE },
+    { geometry: new THREE.ConeGeometry(0.15, 0.36, 7), position: [0, 0.17, 0], color: FLAME },
+    ...[0, 2.1, 4.2].map((a) => ({ geometry: new THREE.ConeGeometry(0.07, 0.22, 6), position: [Math.cos(a) * 0.08, 0.11, Math.sin(a) * 0.08] as const, color: FLAME })),
   ]);
 }
 /**
@@ -67,8 +70,7 @@ export function Campfire({
   const glow = useRef<THREE.Mesh>(null);
   const shapes = useMemo(() => ({ pit: firePitShape(), flame: flameShape() }), []);
   const pit = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
-  const flame = useMemo(() => new THREE.MeshBasicMaterial({ color: "#ff9a3c", toneMapped: false, transparent: true, opacity: 0.92 }), []);
-  const core = useMemo(() => new THREE.MeshBasicMaterial({ color: "#ffe08a", toneMapped: false }), []);
+  const flame = useMemo(() => new THREE.MeshBasicMaterial({ color: "#ffffff", vertexColors: true, toneMapped: false, transparent: true, opacity: 0.92 }), []);
   const spot = useMemo(() => makeSoftSpotTexture(0.1), []);
   const glowMaterial = useMemo(
     () =>
@@ -85,9 +87,9 @@ export function Campfire({
 
   useEffect(
     () => () => {
-      [shapes.pit, shapes.flame, pit, flame, core, spot, glowMaterial].forEach((item) => item.dispose());
+      [shapes.pit, shapes.flame, pit, flame, spot, glowMaterial].forEach((item) => item.dispose());
     },
-    [shapes, pit, flame, core, spot, glowMaterial],
+    [shapes, pit, flame, spot, glowMaterial],
   );
 
   useFrame(({ clock }) => {
@@ -105,9 +107,6 @@ export function Campfire({
         <>
           <group ref={flames} position={[0, 0.06, 0]} scale={1.3}>
             <mesh geometry={shapes.flame} material={flame} />
-            <mesh material={core} position={[0, 0.1, 0]}>
-              <coneGeometry args={[0.07, 0.18, 6]} />
-            </mesh>
           </group>
           <mesh ref={glow} material={glowMaterial} position={[0, upright ? 0.15 : 0.03, 0]} rotation={[upright ? 0 : -Math.PI / 2, 0, 0]} renderOrder={5}>
             <planeGeometry args={[1, 1]} />

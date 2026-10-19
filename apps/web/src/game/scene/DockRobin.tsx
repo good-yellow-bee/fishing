@@ -5,6 +5,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { robinAt } from "./robinVisit";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BROWN = "#7a5f44";
 const BREAST = "#e0662e";
@@ -76,6 +77,8 @@ export function DockRobin({ snow }: { snow: boolean }) {
       wings.current.children[1]?.rotation.set(0, 0, -beat);
     }
   });
+  useSkinnedFigure(bird, materials.painted);
+
   return (
     <group ref={bird} name="dock-robin" visible={false}>
       <group scale={SCALE}>

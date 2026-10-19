@@ -12,9 +12,12 @@ describe("fire pit", () => {
     pit.dispose();
   });
 
-  it("bakes the flame's tongues into one shape", () => {
+  it("bakes the flame's core and tongues into one painted shape", () => {
     const flame = flameShape();
-    expect(flame.getAttribute("position").count).toBeGreaterThan(0);
+    const colors = flame.getAttribute("color");
+    const tints = new Set(Array.from({ length: colors.count }, (_, i) => colors.getY(i).toFixed(3)));
+    // The pale core and the orange tongues.
+    expect(tints.size).toBe(2);
     flame.dispose();
   });
 });

@@ -256,3 +256,10 @@ describe("the shack's three-day board", () => {
     for (let width = 200; width <= 400; width++) expect([1, 3]).toContain(columns(width));
   });
 });
+
+describe("the lodge board's fish of the week on a narrow phone", () => {
+  it("puts the fish's mark above its name and bonus when they would get under 8em beside it", () => {
+    expect(/\n\.weekly-fish \{([^}]*)\}/.exec(css)?.[1]).toContain("flex-wrap: wrap;");
+    expect(/\n\.weekly-fish span \{([^}]*)\}/.exec(css)?.[1]).toContain("flex: 1 1 8em;");
+  });
+});

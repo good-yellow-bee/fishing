@@ -7,6 +7,7 @@ import { OSPREY_CYCLE_SEC, ospreyAt, ospreyStrikeAt } from "./ospreyFlight";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const BACK = "#4a3a2c";
 const BELLY = "#f1ece2";
@@ -109,6 +110,8 @@ export function Osprey() {
       });
     }
   });
+
+  useSkinnedFigure(bird, looks.painted);
 
   return (
     <>

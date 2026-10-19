@@ -5,6 +5,7 @@ import { BIRDER_AT, BIRDER_YAW, birderAt } from "./birdWatch";
 import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#8a8455";
 const TROUSERS = "#4e4a3c";
@@ -75,6 +76,7 @@ export function Birdwatcher() {
       head: birderHeadShape(), arm: birderArmShape(), glasses: binocularsShape(), notebook: new THREE.BoxGeometry(0.13, 0.17, 0.02) }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   const paper = useMemo(() => new THREE.MeshToonMaterial({ color: NOTEBOOK, gradientMap: toonRamp() }), []);
   useEffect(
@@ -102,8 +104,10 @@ export function Birdwatcher() {
     if (onChest.current) onChest.current.visible = pose.glasses <= 0.6;
     if (notebook.current) notebook.current.visible = pose.note > 0.4;
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="birdwatcher" position={[BIRDER_AT.x, 0, BIRDER_AT.z]} rotation={[0, BIRDER_YAW, 0]} scale={SCALE}>
+    <group ref={figure} name="birdwatcher" position={[BIRDER_AT.x, 0, BIRDER_AT.z]} rotation={[0, BIRDER_YAW, 0]} scale={SCALE}>
       <mesh geometry={shapes.body} material={material} castShadow />
       <group position={[0, HIP_Y, 0]}>
         <mesh ref={onChest} geometry={shapes.glasses} material={material} position={[0, 0.36, 0.19]} />

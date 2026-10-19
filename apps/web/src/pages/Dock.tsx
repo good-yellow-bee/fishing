@@ -7,6 +7,7 @@ import {
   INLET_LEVEL,
   catchPoints,
   cleanRunBonus,
+  PB_BONUS,
   CLEAN_RUN_FROM,
   catchStamp,
   dailyConditions,
@@ -49,7 +50,7 @@ import {
   type SkillId,
   type StanceId,
 } from "@stillwater/shared";
-import { buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
+import { buyGroundbait, buyUpgrade, errorText, getMe, getSpeciesRecords, releaseCatch, type Me } from "../api";
 import { DailyRequestsPanel } from "../components/DailyRequestsPanel";
 import { FightBar } from "../components/FightBar";
 import { FishMark } from "../components/FishMark";
@@ -58,6 +59,7 @@ import { Hud } from "../components/Hud";
 import { ForecastBoard } from "../components/ForecastBoard";
 import { LureChoice } from "../components/LureChoice";
 import { UpgradePanel } from "../components/UpgradePanel";
+import { BaitShop } from "../components/BaitShop";
 import { SettingsPanel } from "../components/SettingsPanel";
 import { SoundCaptions } from "../components/SoundCaptions";
 import { KeysCard } from "../components/KeysCard";
@@ -719,6 +721,20 @@ export function DockPage() {
     }
   };
 
+  const onBuyBait = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      await buyGroundbait();
+      game.addHandful();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? errorText(err.message) : t("purchase failed"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!me) {
     return <main className="dock-page">{error || t("Walking the planks…")}</main>;
   }
@@ -1062,7 +1078,7 @@ export function DockPage() {
                   game.outcome.species,
                   game.outcome.weight,
                   game.outcome.clean,
-                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun),
+                  weeklyBonus(game.outcome.species.id) * (landedGolden ? GOLDEN_BONUS : 1) * cleanRunBonus(game.outcome.clean, game.outcome.notes?.cleanRun) * (stamp?.kind === "pb" ? PB_BONUS : 1),
                 ),
               })}
             </p>
@@ -1078,7 +1094,7 @@ export function DockPage() {
             {fightNotesText(game.outcome.notes) && <p className="catch-stamp quiet fight-notes">{fightNotesText(game.outcome.notes)}</p>}
             {stamp?.kind === "first" && <p className="catch-stamp">{t("New in the field guide")}</p>}
             {stamp?.kind === "pb" && (
-              <p className="catch-stamp">{t("Personal best · was {weight}", { weight: weightText(stamp.previous) })}</p>
+              <p className="catch-stamp">{t("Personal best · was {weight} · 1.25× points", { weight: weightText(stamp.previous) })}</p>
             )}
             {stamp?.kind === "repeat" && (
               <p className="catch-stamp quiet">{t("Book PB {weight}", { weight: weightText(stamp.heaviest) })}</p>
@@ -1207,6 +1223,7 @@ export function DockPage() {
               {t("The shack")}
             </h2>
             <UpgradePanel profile={me.profile} busy={busy || scenePhase !== "idle"} onBuy={onBuy} />
+            <BaitShop points={me.profile.points} handfuls={game.handfuls} busy={busy || scenePhase !== "idle"} onBuy={onBuyBait} />
             <DailyRequestsPanel key={userId} catchKey={me.catches[0]?.id} onClaimed={refresh} />
             <ForecastBoard />
             <div className="shop-foot">

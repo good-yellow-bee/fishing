@@ -8,6 +8,7 @@ import { toonRamp } from "./toon";
 import { ToonModel } from "./ToonModel";
 import { useReducedMotion } from "./reducedMotion";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const CANOE_URL = "/models/canoe.glb";
 const JACKET = "#c8562e";
@@ -72,6 +73,8 @@ export function Canoeist() {
       arm.rotation.z = -pose.side * 0.22;
     }
   });
+  useSkinnedFigure(boat, material);
+
   return (
     <>
       <group ref={boat} name="canoeist">

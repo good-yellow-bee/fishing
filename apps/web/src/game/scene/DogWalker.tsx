@@ -5,6 +5,7 @@ import { dogAt, walkerAt } from "./dogWalk";
 import { mergePainted, poseLimbs } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const JACKET = "#4f7a4a";
 const TROUSERS = "#4a4038";
@@ -128,6 +129,7 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
     }),
     [],
   );
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
   useEffect(
     () => () => {
@@ -177,8 +179,10 @@ export function DogWalker({ rain = false }: { rain?: boolean }) {
     poseLimbs(armMeshes.current, arms);
     poseLimbs(pawMeshes.current, paws);
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="dog-walker">
+    <group ref={figure} name="dog-walker">
       <group ref={walker}>
         <group ref={upper} position={[0, HIP_Y, 0]}>
           <mesh geometry={shapes.torso} material={material} castShadow />

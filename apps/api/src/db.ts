@@ -189,6 +189,14 @@ export function findCatchByRequestId(userId: string, requestId: string): CatchRo
     .get(userId, requestId) as CatchRow | undefined;
 }
 
+/** The heaviest of a species this angler has landed, or null before the first. */
+export function heaviestCatch(userId: string, speciesId: string): number | null {
+  const row = db.prepare(`SELECT MAX(weight) as heaviest FROM catch WHERE user_id = ? AND species_id = ?`).get(userId, speciesId) as
+    | { heaviest: number | null }
+    | undefined;
+  return row?.heaviest ?? null;
+}
+
 export function listSpeciesStats(userId: string) {
   const rows = db
     .prepare(
@@ -402,6 +410,12 @@ export function applyUpgrade(userId: string, skill: "strength" | "accuracy" | "p
     if (result.changes !== 1) throw new Error("upgrade failed");
   });
   tx();
+}
+
+/** Takes the points for something bought at the shack, never below zero. */
+export function spendPoints(userId: string, cost: number) {
+  const result = db.prepare(`UPDATE profile SET points = points - ? WHERE user_id = ? AND points >= ?`).run(cost, userId, cost);
+  if (result.changes !== 1) throw new Error("purchase failed");
 }
 
 export function toProfile(row: ProfileRow) {

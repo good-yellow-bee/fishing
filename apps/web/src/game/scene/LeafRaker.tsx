@@ -5,6 +5,7 @@ import { rakerAt } from "./leafRake";
 import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
+import { useSkinnedFigure } from "./skinFigure";
 
 const SHIRT = "#8c3b2e";
 const VEST = "#3e4a3a";
@@ -95,6 +96,8 @@ export function LeafRaker() {
     });
     if (rake.current) rake.current.position.z = HANDS_IN + (HANDS_OUT - HANDS_IN) * pose.stroke;
   });
+  useSkinnedFigure(body, material);
+
   return (
     <group ref={body} name="leaf-raker">
       <group scale={SCALE}>

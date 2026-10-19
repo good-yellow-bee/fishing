@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { fx } from "../fx";
 import { lastSplash } from "./duckFlush";
-import { mergePainted, mergeParts } from "./mergeParts";
+import { mergePainted, mergeParts, poseFromHolders } from "./mergeParts";
 import { swanBusk, swanPose, swanScared } from "./swanGlide";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
@@ -55,35 +55,39 @@ export function swanShapes(): Pick<SwanParts, "body" | "wing" | "neck"> {
   };
 }
 
-/** One swan: a deep white body with raised wings, and an S of neck hinged at its base so it can tip under to feed. */
+/**
+ * One swan's poses: a deep white body with raised wings, and an S of neck hinged at its base so it
+ * can tip under to feed. The groups hold no meshes; the pair's parts are drawn as instanced meshes
+ * placed on them.
+ */
 function SwanBody({
-  parts,
   neck,
   wing,
 }: {
-  parts: SwanParts;
   neck: (g: THREE.Group | null) => void;
   wing: (side: 0 | 1, g: THREE.Group | null) => void;
 }) {
   return (
     <>
-      <mesh geometry={parts.body} material={parts.white} />
       {/* Folded wings held up over the back, the mute swan's arch. */}
       {/* Hinged at the shoulder, so an angry swan can raise them. */}
       {[-1, 1].map((side) => (
-        <group key={side} ref={(g) => wing(side < 0 ? 0 : 1, g)} position={[side * 0.1, 0.22, 0.05]}>
-          <mesh geometry={parts.wing} material={parts.white} position={[side * 0.03, 0.02, -0.13]} rotation={[0.25, 0, side * 0.35]} scale={[0.1, 0.1, 0.36]} />
+        <group key={side} position={[side * 0.1, 0.22, 0.05]} ref={(g) => wing(side < 0 ? 0 : 1, g)}>
+          <group name="swan-wing" position={[side * 0.03, 0.02, -0.13]} rotation={[0.25, 0, side * 0.35]} scale={[0.1, 0.1, 0.36]} />
         </group>
       ))}
-      <group ref={neck} position={[0, 0.18, 0.38]}>
-        <mesh geometry={parts.neck} material={parts.painted} />
-      </group>
+      <group ref={neck} position={[0, 0.18, 0.38]} />
     </>
   );
 }
 
 /** A pair of swans gliding the far water, each with its wake; motion lives in swanGlide.ts. */
 export function Swans() {
+  const root = useRef<THREE.Group>(null);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const wingMeshes = useRef<THREE.InstancedMesh>(null);
+  const neckMeshes = useRef<THREE.InstancedMesh>(null);
+  const wakeMeshes = useRef<THREE.InstancedMesh>(null);
   const swans = useRef<(THREE.Group | null)[]>([]);
   const necks = useRef<(THREE.Group | null)[]>([]);
   const wakes = useRef<(THREE.Group | null)[]>([]);
@@ -139,19 +143,27 @@ export function Swans() {
       wake.position.set(pose.x, surface + 0.04, pose.z);
       wake.rotation.y = pose.yaw;
     }
+    if (!root.current) return;
+    root.current.updateMatrixWorld();
+    poseFromHolders(bodies.current, root.current, swans.current);
+    poseFromHolders(neckMeshes.current, root.current, necks.current);
+    poseFromHolders(wingMeshes.current, root.current, wings.current.flatMap((pair) => pair.map((wing) => wing?.children[0] ?? null)));
+    poseFromHolders(wakeMeshes.current, root.current, wakes.current);
   });
   return (
-    <>
+    <group ref={root} name="swans">
       {[0, 1].map((k) => (
         <group key={k}>
           <group ref={(g) => void (swans.current[k] = g)} name="swan" scale={k === 0 ? 1.5 : 1.38}>
-            <SwanBody parts={parts} neck={(g) => void (necks.current[k] = g)} wing={(side, g) => void (wings.current[k]![side] = g)} />
+            <SwanBody neck={(g) => void (necks.current[k] = g)} wing={(side, g) => void (wings.current[k]![side] = g)} />
           </group>
-          <group ref={(g) => void (wakes.current[k] = g)}>
-            <mesh geometry={parts.wake} material={parts.foam} renderOrder={4} />
-          </group>
+          <group ref={(g) => void (wakes.current[k] = g)} />
         </group>
       ))}
-    </>
+      <instancedMesh ref={bodies} args={[parts.body, parts.white, 2]} frustumCulled={false} />
+      <instancedMesh ref={wingMeshes} args={[parts.wing, parts.white, 4]} frustumCulled={false} />
+      <instancedMesh ref={neckMeshes} args={[parts.neck, parts.painted, 2]} frustumCulled={false} />
+      <instancedMesh ref={wakeMeshes} args={[parts.wake, parts.foam, 2]} frustumCulled={false} renderOrder={4} />
+    </group>
   );
 }

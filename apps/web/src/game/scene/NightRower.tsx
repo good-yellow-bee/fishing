@@ -7,6 +7,7 @@ import { OAR_REACH, lanternFlicker, nightRowAt, rowBladeUp, rowSweep } from "./n
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 import { waterHeight } from "./water";
+import { useSkinnedFigure } from "./skinFigure";
 
 const WOOD = "#8a5a34";
 const RIM = "#5b3a22";
@@ -70,6 +71,7 @@ export function NightRower() {
   const streak = useRef<THREE.Mesh>(null);
   const oars = [useRef<THREE.Group>(null), useRef<THREE.Group>(null)];
   const shapes = useMemo(() => ({ boat: rowboatShape(), rower: nightRowerShape(), oar: rowOarShape(), lamp: new THREE.BoxGeometry(0.12, 0.16, 0.12), streak: new THREE.PlaneGeometry(1, 1) }), []);
+  const figure = useRef<THREE.Group>(null);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp(), side: THREE.DoubleSide }), []);
   const light = useMemo(() => {
     const map = makeSoftSpotTexture(0.25);
@@ -122,8 +124,10 @@ export function NightRower() {
       light.streak.opacity = 0.7 * flicker;
     }
   });
+  useSkinnedFigure(figure, material);
+
   return (
-    <group name="night-rower">
+    <group ref={figure} name="night-rower">
       <group ref={boat}>
         <mesh geometry={shapes.boat} material={material} />
         <group ref={rower} position={[0, 0.02, 0.12]}>
