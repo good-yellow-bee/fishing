@@ -686,6 +686,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
+    "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
   "On a narrow phone or with larger text, outing and catch cards now put the date, size and photo above the words instead of squeezing them into a strip, and the lodge board's fish of the week does the same. Keyboard focus in the field log stops below the phone's top bar, the catch form's time and nearest-water buttons are easier to tap, and on a phone held sideways the coach and the news card stay off the shore signs.":
     "Na wąskim telefonie lub z większym tekstem karty wypraw i połowów pokazują teraz datę, wymiar i zdjęcie nad tekstem, zamiast ściskać go w wąski pasek; tak samo ryba tygodnia na tablicy przystani. Fokus klawiatury w dzienniku zatrzymuje się pod górnym paskiem telefonu, przyciski czasu i najbliższego łowiska w formularzu połowu łatwiej trafić, a na telefonie trzymanym poziomo podpowiedzi i karta Co nowego nie zasłaniają tabliczek na brzegu.",
   "{lure} · good here": "{lure} · dobra tutaj",
