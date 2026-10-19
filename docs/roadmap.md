@@ -1368,7 +1368,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC195~~ | ~~Petal on the cap: in spring a pink blossom petal comes down onto the angler's cap the same way the fall leaf does, until a cast shakes it off~~ (#1440) | scene | S |
 | ~~SC196~~ | ~~The dog hears a nibble: when a fish nibbles at the float, the dock dog wakes, lifts its head, cocks it to one side and looks out at the float with a hopeful wag~~ (#1441) | scene | S |
 | ~~SC197~~ | ~~News card scene45 covers SC194 to SC196~~ (#1441) | scene | S |
-| SC198 | The dog's breath: on winter days the dock dog's breath puffs from its nose too, quicker than the angler's and out of step with it | scene | S |
+| ~~SC198~~ | ~~The dog's breath: on winter days the dock dog's breath puffs from its nose too, quicker than the angler's and out of step with it~~ (#1445) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
