@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-scene24";
+export const NEWS_ID = "2026-10-19-scene25";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On warm days someone reads in a striped hammock by the campers' tent, and on calm summer days someone paddles a paddleboard across the lake with a little dog sitting up at the nose. On calm nights someone rows slowly round the lake with a lantern glowing at the stern. Spring and summer showers now and then turn to hail that bounces on the dock, and on dry fall days a little whirlwind spins a column of leaves out over the water.",
   "On cold clear dawns in fall and winter wisps of steam rise off the lake and lean away on the breeze. On still summer dawns a hot-air balloon drifts over the far water, its burner roaring now and then, and dips its basket to touch the lake before climbing away. On winter days loads of snow slip off the trees across the lake in a puff of powder.",
   "The full-size photo steps through the other photos of the list it was opened from, Photos can show the largest first and counts the fish still without a photo, the find box offers your last three searches, and a fish's page can step through the rest of its outing's fish.",
   "Smallmouth bass and rainbow trout now charge: once a fight one may turn and run straight at you, and the fight card shouts REEL, so wind fast to keep the line tight, or a light hook drops out of the slack. And on a breezy day, cast into the foam lanes the wind rakes across the water: it gathers drowned insects there, and the fish feeding along them bite sooner.",
