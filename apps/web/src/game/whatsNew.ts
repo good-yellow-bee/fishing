@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-pa22";
+export const NEWS_ID = "2026-10-19-game19";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "Watch for the bigger fish hunting the small ones: a smallmouth may hit a crappie you're reeling in under the dock, and a pike a perch off the Drop-off, and then the fight starts again with the hunter. And from the dock, cast out under the kingfisher's snag: the perch and bass hunt the same fry it dives on, so the bites come sooner and many are one of them.",
   "On a phone, the small links in the field log are now easier to tap: the counts in Bests' month-by-year table and its season box, the lures and words in a water's tips, and a catch's sky, wind, water temperature and moon each reach a full finger's width.",
   "A planned outing now has Copy the plan, which copies the day, the water, what works there and what is still to pack, to send to whoever is coming along. Trips adds Only my outings when the sample week or the game's rounds sit among your own, and says how many outings have gone by since your last fish. The outings spreadsheet now lists what each outing took.",
   "On a phone the shack's three-day forecast now shows one day a row, so its moon and weather tips read in full lines instead of a word or two at a time. With reduce motion on, the terns over the fish patch, the bank's squirrels and the spring grebes now hold still like the lake's other creatures.",
@@ -12,7 +13,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "In spring and summer, hop a jig over the crayfish creeping about the dock's pilings: the smallmouth and catfish that hunt them bite sooner, and many a bite is one of them. And on spring days cast among the tadpoles milling in the warm shallows, where the perch, bluegill and bass come to gorge on them.",
   "A farmhouse and a red barn now stand on the hills behind the far bank: their windows glow in the evening, the chimney smokes on cold days, and from spring to fall three cows graze the pasture beside them. On calm, clear mornings a low bank of mist lies along the foot of the hills.",
   "A picked season's recap on Bests now opens what it counts: its fish, its outings, and its kinds further down. Bests' month-by-year table adds a total for each year with its best month in bold, a catch search with several fish says how many days and outings they came on, and a species page says how many outings at each water took one.",
-  "In spring a few of the shore trees flower white or pink. On clear winter mornings and evenings the snowy hills behind the far bank glow pink in the low sun. From summer into the fall two hay fields on those hills lie mown in pale stripes, with round bales dotted across them.",
 ];
 
 /** Whether this angler should see the card: someone who has fished before and not yet dismissed this batch. */
