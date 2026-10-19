@@ -1275,8 +1275,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC147~~ | ~~News card scene31: the farmstead, the grazing cows and the dawn valley mist~~ (#1260) | scene | S |
 | ~~SC148~~ | ~~Barn owl: at dusk from summer into the fall a pale barn owl quarters low over the mown hay fields on the far hills, beating slowly along them, hovering on fluttering wings, dropping into the stubble and rising to beat on, then working back the other way (two draws)~~ (#1262) | scene | S |
 | ~~SC149~~ | ~~Cloud shadows on the hills: on clear days the passing clouds' shadows slide on over the hills behind the far bank, dimming the slopes, the hay fields and the pasture as they cross, in step with the shadows on the water (one draw)~~ (#1263) | scene | S |
-| SC150 | Tractor: on dry summer days a little red tractor works the western hay field on the far hills, driving slowly along it between the rows of bales and swinging round at each end (one draw) | scene | S |
-| SC151 | News card scene32: the barn owl, the tractor and the cloud shadows on the hills | scene | S |
+| ~~SC150~~ | ~~Tractor: on dry summer days a little red tractor works the western hay field on the far hills, driving slowly along it between the rows of bales and swinging round at each end (one draw)~~ (#1265) | scene | S |
+| ~~SC151~~ | ~~News card scene32: the barn owl, the tractor and the cloud shadows on the hills~~ (#1265) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
