@@ -22,3 +22,17 @@ export function reedTilt(wind: { x: number; z: number }, time: number, phase: nu
   // Turning about +x tips the top toward +z; turning about +z tips it toward -x.
   return { x: tip * dir.z, z: -tip * dir.x };
 }
+
+export type ReedStem = { x: number; y: number; z: number; yaw: number; scale: number; phase: number };
+
+/** Where stem `index` of a clump rooted at `origin` stands: rows of four going back, each turned and sized a little differently. */
+export function reedStem(origin: readonly [number, number, number], index: number): ReedStem {
+  return {
+    x: origin[0] + (index % 4) * 0.52,
+    y: origin[1],
+    z: origin[2] - Math.floor(index / 4) * 0.44,
+    yaw: index * 0.73,
+    scale: 1.45 + (index % 3) * 0.16,
+    phase: index * 1.9 + origin[0],
+  };
+}

@@ -1230,6 +1230,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC103~~ | ~~News card scene22: porch rocker, winter eave lights, sandpipers, coots~~ (#1217) | scene | S |
 | ~~SC104~~ | ~~Starling murmuration: at dusk in fall a great flock of starlings wheels high over the far shore, stretching, folding and turning as one, its mirror crossing the still lake~~ (#1219) | scene | S |
 | ~~SC105~~ | ~~Dock robin: every minute or so by day a robin flies in over the water to the dock's front-left post, cocks its head and flicks its tail, flits to the front-right post and flies off again; on the snow caps in winter~~ (#1219) | scene | S |
+| ~~SC106~~ | ~~Dock snail: in the rain and on dewy mornings from spring to fall a snail glides a slow loop on the planks behind the angler, eye stalks swaying, a wet trail behind it~~ (#1222) | scene | S |
+| ~~SC107~~ | ~~Reed clumps in one draw each: the three reed beds draw their stems as one instanced mesh per clump, still swaying stem by stem in the wind~~ (#1222) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
