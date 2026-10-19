@@ -26,7 +26,9 @@ export function tripSummary(trip: Trip, spotName: string | null, catches: readon
       const elsewhere = entry.spotId !== trip.spotId ? waterOf(entry.spotId) : null;
       // A night session's fish after midnight say their own day, so the list doesn't seem to run back to the evening.
       const day = localDate(new Date(entry.caughtAt));
-      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${formatDay(day)}, ${formatTimeOfDay(entry.caughtAt)}`;
+      // Past New Year it carries its year, as the outing's day above does.
+      const shown = day.slice(0, 4) === trip.date.slice(0, 4) ? formatDay(day) : formatDatedDay(new Date(`${day}T12:00:00`));
+      const when = day === trip.date ? formatTimeOfDay(entry.caughtAt) : `${shown}, ${formatTimeOfDay(entry.caughtAt)}`;
       const parts = [`${when} ${t(entry.species)}`, measuresText(entry), t(entry.lure), ...(elsewhere ? [elsewhere] : []), ...(entry.released ? [t("Released")] : [])];
       return `- ${parts.join(", ")}`;
     });

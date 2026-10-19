@@ -11,7 +11,7 @@ import {
 } from "@stillwater/shared";
 import { tn, useT } from "../i18n";
 import { measuresText, tempText } from "../i18n/content";
-import { daysAheadLabel, fishCountLabel, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
+import { daysAheadLabel, fishCountLabel, fishSum, formatClock, formatDay, noteText, outingName, tripWhen } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchBadge } from "./catchBadge";
 import { WeatherLine } from "./Weather";
@@ -20,6 +20,7 @@ import { useTackleItems } from "./gear/TackleState";
 import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
+import { outingDay } from "./tripDates";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -108,14 +109,17 @@ export function TripCard({
   const tackle = useTackleItems();
   const { book } = useLogbook();
   // An outing still ahead with nothing logged: how the bag is coming along says more than "Nothing logged".
-  const bag = tackle && fishCount === 0 && trip.date >= today ? itemsForTrip(tackle, trip.id) : [];
+  const bag = tackle && fishCount === 0 && trip.date >= outingDay(today) ? itemsForTrip(tackle, trip.id) : [];
   const packed = packedCount(bag);
   const tally =
     bag.length === 0
       ? // Still ahead, or today's before its first fish, with nothing packed: planned, not a blank day.
         isPlanned(trip, today, fishCount)
         ? t("Planned")
-        : fishCountLabel(fishCount)
+        : // Beside "3 lost", a count: "0 fish · 3 lost", not "Nothing logged · 3 lost".
+          fishCount === 0 && (trip.lost || trip.missed)
+          ? fishSum(0)
+          : fishCountLabel(fishCount)
       : packed === bag.length
         ? t("All packed")
         : t("{packed} of {total} packed", { packed, total: bag.length });

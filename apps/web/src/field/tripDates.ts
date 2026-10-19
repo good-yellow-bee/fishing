@@ -1,4 +1,4 @@
-import { shiftDate, type Logbook } from "@stillwater/shared";
+import { localDate, shiftDate, type Logbook } from "@stillwater/shared";
 import { PLAY_LAKE_ID } from "./playLake";
 import { LATE_NIGHT_UNTIL } from "./suggestions";
 import { isSampleOuting } from "./bookCopy";
@@ -23,6 +23,14 @@ export function datePicks(now: Date): DatePick[] {
   // On a Friday or a Saturday, "next weekend" is a week on.
   else picks.push(...sundayPick, { label: "Next Saturday", date: shiftDate(now, ahead + 7) });
   return picks;
+}
+
+/**
+ * The day whose outing is still going: yesterday's in the small hours, as a night session is dated by its evening, so
+ * an evening outing isn't a blank day at midnight. `today` is the calendar's day; any other day is taken as it is.
+ */
+export function outingDay(today: string, now = new Date()): string {
+  return today === localDate(now) && now.getHours() < LATE_NIGHT_UNTIL ? shiftDate(now, -1) : today;
 }
 
 /** Whether an outing's title is only the name of a water: what an untitled outing is saved under. */
