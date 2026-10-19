@@ -86,7 +86,7 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   10: "Rare and legendary fish bite more often.",
   11: "Fish hold the bait 20% longer before they let go.",
   12: "The gold perfect-cast mark is wider.",
-  13: "Working a lure (pops, hops, lifts and strips) draws the fish sooner three times, not two.",
+  13: "Working a lure (pops, hops, lifts, strips and pauses) draws the fish sooner three times, not two.",
   14: "Your line holds a moment past the red: it snaps at 105% strain, not 100%.",
   15: "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.",
   16: "Pulling the rod against a run cuts it short 25% faster.",
