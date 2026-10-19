@@ -1618,6 +1618,8 @@ function CatchView() {
   const trip = entry.tripId ? tripById(book, entry.tripId) : undefined;
   const tripFish = trip ? book.catches.filter((other) => other.tripId === trip.id).length : 0;
   // Its place on the outing, first fish first: when in the session it came. Two in the same minute go by id.
+  // An untitled outing on this fish's own water goes by "That day's outing": its name is the water's, named already.
+  const namedOuting = trip !== undefined && (ownTitle(trip, book.spots) !== "" || trip.spotId !== entry.spotId);
   const intoTrip = intoOuting(book, entry);
   const sinceBefore = afterOneBefore(book, entry);
   const tripPlace = trip ? book.catches.filter((other) => other.tripId === trip.id && byTime(other, entry) < 0).length + 1 : 0;
@@ -1945,11 +1947,11 @@ function CatchView() {
         </p>
       </aside>
       {entry.note ? <p className="prose">{noteText(entry.note)}</p> : null}
-      <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip && (ownTitle(trip, book.spots) || trip.spotId !== entry.spotId) ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
+      <CopySummary text={() => catchSummary(entry, spot?.name ?? null, trip && namedOuting ? outingName(trip, book.spots) : null)} file="stillwater-catch.txt" photo={photo} />
       {trip ? (
         <p className="trip-link">
           {/* An untitled outing on this fish's water, named just above: "That day's outing" rather than the name twice. */}
-          {ownTitle(trip, book.spots) || trip.spotId !== entry.spotId ? (
+          {namedOuting ? (
             <>
               {t("Outing:")} <Link id="catch-outing" to={`/trips/${trip.id}`}>{outingName(trip, book.spots)}</Link>
             </>

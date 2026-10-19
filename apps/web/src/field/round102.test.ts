@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { CatchEntry, Logbook } from "@stillwater/shared";
 import { setLang } from "../i18n";
 import { catchesCsv } from "./catchCsv";
+import { newestOutingFirst } from "./catchNeighbors";
 import { catchSummary, searchSummary, tripSummary } from "./summaries";
 
 const fish = (id: string, over: Partial<CatchEntry> = {}): CatchEntry => ({
@@ -49,5 +50,18 @@ describe("round 102: a lure or kind typed two ways", () => {
 describe("round 102: a copied fish on an untitled outing", () => {
   it("leaves the outing out when the caller names none", () => {
     expect(catchSummary(book.catches[0]!, "Home Lake")).not.toContain("Outing:");
+  });
+});
+
+describe("round 102: a dawn and a dusk on one day", () => {
+  it("put the dusk first, whatever order they were saved in", () => {
+    const day = { date: "2026-08-20", spotId: "own", title: "", note: "" };
+    const both: Logbook = {
+      ...book,
+      trips: [{ ...day, id: "dawn" }, { ...day, id: "dusk" }],
+      catches: [fish("d", { tripId: "dawn", caughtAt: "2026-08-20T05:00:00.000Z" }), fish("k", { tripId: "dusk", caughtAt: "2026-08-20T19:00:00.000Z" })],
+    };
+    expect([...both.trips].sort(newestOutingFirst(both))[0]!.id).toBe("dusk");
+    expect([...both.trips].reverse().sort(newestOutingFirst(both))[0]!.id).toBe("dusk");
   });
 });
