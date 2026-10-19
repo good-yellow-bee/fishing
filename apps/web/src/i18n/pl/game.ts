@@ -373,7 +373,7 @@ export const PL_GAME: PlBook = {
   "Small lure — lighter fish (some here need Strength {rank})": "Mała przynęta — lżejsze ryby (niektóre tutaj wymagają Siły {rank})",
 
   // Shop
-  "Land heavier species.": "Wyholuj cięższe gatunki.",
+  "Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.": "Wyholuj cięższe gatunki. Od {rank} jedna pompka podrywa suma lub jesiotra.",
   "Wider cast band and longer strike window.": "Szerszy pasek rzutu i dłuższy czas na zacięcie.",
   "Shorter waits, heavier fish.": "Krótsze czekanie, cięższe ryby.",
   "Tackle box": "Skrzynka ze sprzętem",
@@ -669,6 +669,7 @@ export const PL_GAME: PlBook = {
     "Szarpak: między odjazdami potrząsa głową, więc wtedy na chwilę odpuść",
   "It's shaking its head — ease off a moment!": "Potrząsa głową — odpuść na chwilę!",
   "Bottom-sticker: when it sulks it takes two pumps to lift, not one": "Przyssawka: gdy zalega na dnie, trzeba dwóch pompek, by ją poderwać, nie jednej",
+  "Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump": "Przyssawka: trzyma się dna, ale twoja Siła podrywa ją jedną pompką",
   "It's lifting — ease off and pump once more!": "Rusza się — odpuść i pompuj jeszcze raz!",
   "Scrapper: pound for pound it fights hardest, so it tires slowly": "Zadziora: jak na swoją wagę walczy najmocniej, więc męczy się powoli",
   "Circler: it turns its flat side and circles, so it comes in slowly till it tires": "Krąży bokiem: ustawia się płaskim bokiem i krąży, więc idzie powoli, dopóki się nie zmęczy",

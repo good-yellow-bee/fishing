@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { skillCost, SKILL_LABELS, nextSkillRank, type SkillId, type Profile } from "@stillwater/shared";
 import { t, useT } from "../i18n";
+import { STRONG_LIFT_STRENGTH } from "../game/fight";
 import { skillUnlockText } from "../i18n/content";
 
 type Props = {
@@ -14,7 +15,7 @@ const skills: SkillId[] = ["strength", "accuracy", "patience"];
 function skillNote(skill: SkillId): string {
   switch (skill) {
     case "strength":
-      return t("Land heavier species.");
+      return t("Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.", { rank: STRONG_LIFT_STRENGTH });
     case "accuracy":
       return t("Wider cast band and longer strike window.");
     case "patience":

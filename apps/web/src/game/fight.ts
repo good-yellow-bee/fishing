@@ -122,8 +122,14 @@ export const SHAKE_MS = 600;
 /** A shake gives about a reaction time to let go before a tight line goes into the red. */
 export const SHAKE_GRACE_SEC = 0.3;
 
-/** Catfish and sturgeon stick to the bottom: a sulking one takes two pumps to lift, not one. */
+/** Catfish and sturgeon stick to the bottom: a sulking one takes two pumps to lift, not one, below STRONG_LIFT_STRENGTH. */
 export const STICKERS: ReadonlySet<string> = new Set(["catfish", "sturgeon"]);
+/** From this Strength rank one pump lifts a bottom-sticker, as it does any other sulking fish. */
+export const STRONG_LIFT_STRENGTH = 7;
+
+export function liftsStickerInOne(speciesId: string, strength: number): boolean {
+  return STICKERS.has(speciesId) && strength >= STRONG_LIFT_STRENGTH;
+}
 
 /** Largemouth bass bury themselves in cover: in the weeds or round a piling they stay put longer and don't run again till they come out. */
 export const COVER_DIVERS: ReadonlySet<string> = new Set(["largemouth-bass"]);
@@ -672,8 +678,8 @@ export function makeFight(
       if (sim.surge !== 0 || nowMs >= sulkUntil) sim.sulk = false;
       else if (!reeling) slackSec += dtSec;
       else if (slackSec >= SULK_PUMP_SEC) {
-        // A catfish only starts to lift on the first pump; the next one brings it up.
-        if (sticker && !sim.lifting) {
+        // A catfish only starts to lift on the first pump; the next one brings it up, unless strong arms lift it at once.
+        if (sticker && !sim.lifting && !liftsStickerInOne(species.id, strength)) {
           sim.lifting = true;
           slackSec = 0;
         } else {

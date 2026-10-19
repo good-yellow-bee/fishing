@@ -34,7 +34,7 @@ describe("UpgradePanel", () => {
     const [strength, accuracy, patience] = [...container.querySelectorAll("button")];
     const unlock = skillUnlock(profile, "strength");
     expect(unlock).toMatch(/^Strength 2: /);
-    expect(described(strength!)).toEqual(["Land heavier species.", unlock]);
+    expect(described(strength!)).toEqual(["Land heavier species. From 7, one pump lifts a catfish or sturgeon.", unlock]);
     // Accuracy opens nothing on its own at Strength 1, so it has no unlock line to point at.
     expect(described(accuracy!)).toEqual(["Wider cast band and longer strike window."]);
     expect(described(patience!)).toEqual(["Shorter waits, heavier fish."]);

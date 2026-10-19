@@ -39,7 +39,7 @@ export function FightBar({ fight, sim, performance, best = null, note = null, cl
   const leapLines = useMemo(() => jumpLines(), [lang]);
   // Landed clean, this one would make a run long enough to earn more: say so while it is still clean.
   const cleanLine = cleanRun + 1 >= CLEAN_RUN_FROM ? t("Clean fight · 1.5× points · {n} in a row: 1.2× more", { n: cleanRun + 1 }) : t("Clean fight · 1.5× points");
-  const habits = useMemo(() => habitLines(fight.species.id), [fight.species.id, lang]);
+  const habits = useMemo(() => habitLines(fight.species.id, fight.strongLift), [fight.species.id, fight.strongLift, lang]);
   const tensionMeter = useRef<HTMLDivElement>(null);
   const zoneWord = useRef<HTMLSpanElement>(null);
   const lineMeter = useRef<HTMLDivElement>(null);

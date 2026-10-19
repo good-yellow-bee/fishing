@@ -15,7 +15,7 @@ let frames: FrameRequestCallback[] = [];
 
 let sim: { current: FightSim } = { current: { line: 1, tension: 0.3, surge: 0, stamina: 1, runSide: 1 } };
 
-function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null, note: string | null = null, cleanRun = 0) {
+function mount(performance: FightPerformance | null, underpowered = false, species = perch, best: number | null = null, note: string | null = null, cleanRun = 0, strongLift = false) {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => frames.push(callback));
   vi.stubGlobal("cancelAnimationFrame", () => undefined);
@@ -24,7 +24,7 @@ function mount(performance: FightPerformance | null, underpowered = false, speci
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
-  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered }} sim={sim} performance={record} best={best} note={note} cleanRun={cleanRun} />));
+  act(() => root!.render(<FightBar fight={{ species, weight: 0.8, underpowered, strongLift }} sim={sim} performance={record} best={best} note={note} cleanRun={cleanRun} />));
   return record;
 }
 
@@ -373,6 +373,12 @@ describe("FightBar for screen readers", () => {
     expect(container!.textContent).toContain("Hooked light: reel in the red and the hook pulls out");
     act(() => root!.render(<FightBar fight={{ species: whitefish, weight: 0.8, underpowered: false, lightHook: true }} sim={sim} performance={{ current: { peakTension: 0.3, maxLine: 1 } }} />));
     expect(container!.textContent).not.toContain("Hooked light");
+  });
+
+  it("says a strong angler lifts a bottom-sticker in one pump", () => {
+    mount({ peakTension: 0.3, maxLine: 1 }, false, FISH.find((fish) => fish.id === "catfish")!, null, null, 0, true);
+    const lines = [...container!.querySelectorAll(".fight-water")].map((line) => line.textContent);
+    expect(lines).toContain("Bottom-sticker: it sticks to the bottom, but your Strength lifts it in one pump");
   });
 
   it("names each fish's habit on the card, and only its own", () => {
