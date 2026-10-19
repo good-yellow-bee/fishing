@@ -20,6 +20,7 @@ import { PLAY_LAKE_ID, offPlayLake } from "./playLake";
 import { cleanYearGoals, readYearGoals, writeYearGoals, type YearGoals } from "./YearGoal";
 import { datedName, downloadFile } from "./download";
 import { outingDay } from "./tripDates";
+import { bookFishDay } from "./tripMonths";
 import { t, useT } from "../i18n";
 import { homeScreenTip, installApp, useInstallOffer } from "../installPrompt";
 
@@ -362,6 +363,9 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
     loadButton.current?.focus();
   };
 
+  // This year's fish by their outing's day, as Bests and the goal count them: a New Year's Eve night's small hours are December's.
+  const thisYear = localDate(new Date()).slice(0, 4);
+  const thisYearFish = countedBook(book).catches.filter((entry) => bookFishDay(book, entry).startsWith(`${thisYear}-`));
   const lost = pending ? lostOnLoad(storedBook, pending.book) : 0;
   const placesLost = pending ? placesLostOnLoad(storedBook, pending.book) : 0;
   // Anything of this book's own to add to: a new phone with only a water and an outing planned counts too.
@@ -397,7 +401,12 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
               : t("The last download was {days} days ago, and the book has changed since. A fresh copy keeps it safe.", { days: nudge.days })}
         </p>
       ) : copyMark ? (
-        <p className="meta">{t("Last copy: {day}.", { day: formatCatchDay(new Date(copyMark.at).toISOString()) })}</p>
+        <p className="meta">
+          {/* With the fish it held, so a phone about to be wiped can be checked against its copy at a glance. */}
+          {copiedAt
+            ? t("Last copy: {day} · {fish}.", { day: formatCatchDay(new Date(copyMark.at).toISOString()), fish: fishCountLabel(copiedAt) })
+            : t("Last copy: {day}.", { day: formatCatchDay(new Date(copyMark.at).toISOString()) })}
+        </p>
       ) : null}
       {setAside ? (
         <SetAside
@@ -460,6 +469,19 @@ export function BookFile({ onSetAsideGone }: { onSetAsideGone?: () => void } = {
             }}
           >
             {t("Download catches as a spreadsheet")}
+          </button>
+        ) : null}
+        {/* This year's alone, for a club's or a permit's return, once the book holds another year too. */}
+        {thisYearFish.length > 0 && thisYearFish.length < countedBook(book).catches.length && !isSampleOnly(storedBook) ? (
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => {
+              downloadFile(catchesCsv({ ...book, catches: thisYearFish }), "text/csv;charset=utf-8", `stillwater-catches-${thisYear}.csv`);
+              setNotice({ tone: "ok", text: t("The catches were downloaded as a spreadsheet.") });
+            }}
+          >
+            {t("This year's catches ({year})", { year: thisYear })}
           </button>
         ) : null}
         {/* The outings beside the fish, as the Trips page gives them: the angler's own, up to today. */}

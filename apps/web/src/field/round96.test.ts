@@ -79,7 +79,7 @@ describe("round 96: the exports", () => {
 });
 
 describe("round 96: Home's news", () => {
-  it("finds field-log lines among the news, and lists none that isn't one", () => {
+  it("finds field-log lines among the news", () => {
     // Other threads add the game's lines on top, so not only the newest line is checked.
     expect(NEWS_ITEMS.filter((item) => FIELD_NEWS.has(item)).length).toBeGreaterThanOrEqual(2);
   });

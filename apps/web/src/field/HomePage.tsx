@@ -193,6 +193,9 @@ export function HomePage() {
   // Fish of their own logged beside the sample week: the invented part can go on its own.
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
+  // The newest outing fished, for a Next with nothing planned: on a water still in the book.
+  const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort((a, b) => b.date.localeCompare(a.date))[0];
+  const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
   const kept = readKeptDraft(now);
@@ -329,7 +332,8 @@ export function HomePage() {
               ) : null}
               {comparable ? `\u00a0· ${t("{n} by this date last year", { n: lastYearByNow })}` : null}
               {/* Where this year's pace ends it, against the goal, as the goal on Bests says it. */}
-              {pace ? `\u00a0· ${t("on pace for {n}", { n: pace.pace })}` : null}
+              {/* Behind it, what a week now needs to catch up: "on pace for 8" says the year is short, not what to do. */}
+              {pace ? `\u00a0· ${pace.ahead < 0 ? t("{left} to go, about {n} a week", { left: pace.left, n: pace.perWeek }) : t("on pace for {n}", { n: pace.pace })}` : null}
               {/* A round number a few fish off: the next one worth a cheer. */}
               {nextMark ? `\u00a0· ${t("{n} more to {mark}", { n: nextMark.left, mark: nextMark.mark })}` : null}
             </small>
@@ -374,6 +378,13 @@ export function HomePage() {
                     )}
                   </>
                 ) : null}
+              </>
+            ) : lastOut ? (
+              <>
+                {/* Nothing planned: how long since the last outing, and one tap to plan the same again. */}
+                {t("Last out: {day}", { day: lastOutRest >= 2 ? `${formatDay(lastOut.date)} · ${tn(lastOutRest, "{n} day ago", "{n} days ago")}` : formatDay(lastOut.date) })}
+                {" · "}
+                <Link to={`/trips/new?spot=${lastOut.spotId}&again=${lastOut.id}`}>{t("Go again")}</Link>
               </>
             ) : (
               t("Add an outing when you know the day")
