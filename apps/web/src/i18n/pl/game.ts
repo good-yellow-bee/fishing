@@ -745,6 +745,8 @@ export const PL_GAME: PlBook = {
   "It's turning toward you — get ready to reel!": "Zawraca w twoją stronę — szykuj się do zwijania!",
   "REEL — it's charging straight at you!": "ZWIJAJ — płynie prosto na ciebie!",
   "Turning it!": "Zawracasz ją!",
+  "On calm, sunny summer days two people pedal a white swan pedal boat slowly round the water off to the right, its paddle wheel churning behind. And on evenings and nights from spring to fall a little field mouse sometimes scurries across the dock behind you, sits up to nibble a crumb, and darts off over the edge.":
+    "W spokojne, słoneczne letnie dni dwoje ludzi pedałuje białym rowerem wodnym w kształcie łabędzia, powoli okrążając wodę po prawej, a za nim kręci się koło łopatkowe. A wieczorami i nocą od wiosny do jesieni mała mysz polna czasem przebiega po pomoście za tobą, siada, żeby skubnąć okruszek, i znika za krawędzią.",
   "Beat your own best of a kind and the catch now earns 1.25× points, marked on the landed card. And the shack sells groundbait: 60 points a handful, up to three in the bag, and they keep until you throw them.":
     "Pobicie własnego rekordu danego gatunku daje teraz 1,25× punktów, co widać na karcie połowu. A w szopie można kupić zanętę: 60 punktów za garść, do trzech w torbie, i czekają, aż ich użyjesz.",
   "From level 16, Voice of the lake, at 47000 points, pulling the rod against a run cuts it short a quarter faster. And a run you turn swings the fish's head round: reel straight after it to win line faster for a moment.":
