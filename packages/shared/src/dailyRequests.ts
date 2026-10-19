@@ -1,5 +1,5 @@
 import { fishById } from "./fish.ts";
-import { SPOT_LABELS } from "./progression.ts";
+import { anglerLevel, SPOT_LABELS } from "./progression.ts";
 import { lakeSeason, SEASON_SPECIES, type LakeSeason } from "./season.ts";
 import type { SpotId } from "./types.ts";
 
@@ -17,6 +17,13 @@ export type DailyCatch = { speciesId: string; spot: string; weight: number };
 
 /** Claiming the last of a day's requests clears the board, which pays this on top of its reward. */
 export const BOARD_BONUS = 25;
+
+export const BOARD_REWARD_LEVEL = 18;
+
+/** What a request pays this angler: its reward, or a quarter more from BOARD_REWARD_LEVEL. */
+export function boardReward(reward: number, lifetimePoints: number): number {
+  return anglerLevel(lifetimePoints) >= BOARD_REWARD_LEVEL ? Math.round(reward * 1.25) : reward;
+}
 
 /** Strength 1 fish on open banks, so a new angler can always finish two requests. */
 const STARTER_REQUESTS: readonly DailyRequest[] = [

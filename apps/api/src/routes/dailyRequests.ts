@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { BOARD_BONUS, dailyRequestProgress, dailyRequestsForDay } from "@stillwater/shared";
-import { claimDailyRequest, listCatchesBetween, listDailyClaims, overlapsOtherClaimedDay, toCatch } from "../db.ts";
+import { BOARD_BONUS, boardReward, dailyRequestProgress, dailyRequestsForDay } from "@stillwater/shared";
+import { claimDailyRequest, getProfile, listCatchesBetween, listDailyClaims, overlapsOtherClaimedDay, toCatch } from "../db.ts";
 import type { SessionUser } from "../session.ts";
 
 export const dailyRequestRoutes = new Hono();
@@ -35,8 +35,10 @@ dailyRequestRoutes.get("/daily-requests", (c) => {
   if (!local) return c.json({ error: "invalid day" }, 400);
   const catches = listCatchesBetween(user.id, local.from, local.to).map(toCatch);
   const claimed = new Set(listDailyClaims(user.id, local.day));
+  const lifetimePoints = getProfile(user.id)?.lifetime_points ?? 0;
   const requests = dailyRequestsForDay(local.day).map((request) => ({
     ...request,
+    reward: boardReward(request.reward, lifetimePoints),
     progress: dailyRequestProgress(request, catches),
     claimed: claimed.has(request.id),
   }));
@@ -53,7 +55,8 @@ dailyRequestRoutes.post("/daily-requests/:id/claim", (c) => {
   const catches = listCatchesBetween(user.id, local.from, local.to).map(toCatch);
   if (dailyRequestProgress(request, catches) < request.count) return c.json({ error: "request incomplete" }, 409);
   if (overlapsOtherClaimedDay(user.id, local)) return c.json({ error: "those hours already count for another day" }, 409);
-  const boardBonus = claimDailyRequest(user.id, local, request.id, request.reward, board.length, BOARD_BONUS);
+  const reward = boardReward(request.reward, getProfile(user.id)?.lifetime_points ?? 0);
+  const boardBonus = claimDailyRequest(user.id, local, request.id, reward, board.length, BOARD_BONUS);
   if (boardBonus === null) return c.json({ error: "request already claimed" }, 409);
-  return c.json({ reward: request.reward, boardBonus });
+  return c.json({ reward, boardBonus });
 });

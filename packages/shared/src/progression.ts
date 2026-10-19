@@ -6,7 +6,7 @@ export const INLET_LEVEL = 6;
 export const OPEN_LEVEL = 7;
 export const SPOT_IDS: SpotId[] = ["dock", "reeds", "dropoff", "point", "inlet", "open"];
 
-export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000, 30000, 38000, 47000, 57000];
+export const LEVEL_THRESHOLDS = [0, 50, 150, 350, 700, 1200, 2000, 3200, 5000, 8000, 12000, 17000, 23000, 30000, 38000, 47000, 57000, 68000];
 
 export function anglerLevel(lifetimePoints: number): number {
   let level = 1;
@@ -55,6 +55,7 @@ export const ANGLER_TITLES = [
   "One with the lake",
   "Voice of the lake",
   "Child of the lake",
+  "Breath of the lake",
 ] as const;
 
 export function anglerTitle(level: number): string {
@@ -90,6 +91,7 @@ const LEVEL_UNLOCKS: Record<number, string> = {
   15: "A solid hook lasts longer: a strike in the first 48% of the bite sets it solid, not 40%.",
   16: "Pulling the rod against a run cuts it short 25% faster.",
   17: "The shack sells you groundbait and live shiners a fifth cheaper.",
+  18: "The shack board's requests pay a quarter more.",
 };
 
 export function levelUnlock(level: number): string | null {

@@ -3,6 +3,7 @@ import { FISH, fishById } from "./fish.ts";
 import { CAST_RANGE, DROPOFF_PAD, inCastRange, resolveCast, resolveLanding } from "./lake.ts";
 import { anglerLevel, anglerTitle, canPreviewFish, showsSolidMark, fishTireMulForLevel, hookWindowMulForLevel, LEVEL_THRESHOLDS, levelProgress, levelUnlock, lineSnapForLevel, solidShareForLevel, turnCutMulForLevel, lureWorkTapsForLevel, perfectCastHalfForLevel, rareBiteMulForLevel } from "./progression.ts";
 import { legendaryCanBite, rollWeight } from "./rules.ts";
+import { boardReward } from "./dailyRequests.ts";
 
 describe("level unlock boundaries", () => {
   it.each([4, 5, 6, 7, 8])("reaches level %i at its lifetime threshold", (level) => {
@@ -56,16 +57,16 @@ describe("level unlock boundaries", () => {
 });
 
 describe("anglerTitle", () => {
-  it("gives every level its own title, Greenhorn to Child of the lake", () => {
+  it("gives every level its own title, Greenhorn to Breath of the lake", () => {
     const titles = Array.from({ length: LEVEL_THRESHOLDS.length }, (_, i) => anglerTitle(i + 1));
     expect(titles[0]).toBe("Greenhorn");
-    expect(titles.at(-1)).toBe("Child of the lake");
+    expect(titles.at(-1)).toBe("Breath of the lake");
     expect(new Set(titles).size).toBe(titles.length);
   });
 
   it("clamps levels outside the ladder", () => {
     expect(anglerTitle(0)).toBe("Greenhorn");
-    expect(anglerTitle(99)).toBe("Child of the lake");
+    expect(anglerTitle(99)).toBe("Breath of the lake");
   });
 });
 
@@ -179,5 +180,16 @@ describe("level 17", () => {
     expect(anglerLevel(57000)).toBe(17);
     expect(levelUnlock(17)).toBe("The shack sells you groundbait and live shiners a fifth cheaper.");
     expect(anglerTitle(17)).toBe("Child of the lake");
+  });
+});
+
+describe("level 18", () => {
+  it("opens at 68000 lifetime points with its unlock and title, and pays a quarter more on the shack board", () => {
+    expect(anglerLevel(67999)).toBe(17);
+    expect(anglerLevel(68000)).toBe(18);
+    expect(levelUnlock(18)).toBe("The shack board's requests pay a quarter more.");
+    expect(anglerTitle(18)).toBe("Breath of the lake");
+    expect(boardReward(18, 67999)).toBe(18);
+    expect(boardReward(18, 68000)).toBe(23);
   });
 });
