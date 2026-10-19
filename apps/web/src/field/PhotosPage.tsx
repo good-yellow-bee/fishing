@@ -8,7 +8,7 @@ import { measuresText } from "../i18n/content";
 import { formatClock, formatDay } from "./format";
 import { useLogbook } from "./LogbookState";
 import { catchPage, useShowMore } from "./PagedCatches";
-import { bookFishDay, catchMonth, monthName } from "./tripMonths";
+import { bookFishDay, monthName } from "./tripMonths";
 import { speciesCounts } from "./speciesLink";
 import { FROM_LIST } from "./leaveDeleted";
 import { catchLink } from "./catchList";
@@ -42,11 +42,11 @@ export function photoYears(pictured: readonly CatchEntry[], yearOf: (entry: Catc
   return [...perYear].sort((a, b) => b[0].localeCompare(a[0]));
 }
 
-/** Photos already newest first, cut into runs by the month they were caught. */
-function photoMonths(entries: readonly CatchEntry[]) {
+/** Photos already newest first, cut into runs by the month they count in: a night's small hours go with its outing's day. */
+function photoMonths(entries: readonly CatchEntry[], monthOf: (entry: CatchEntry) => string) {
   const months: { month: string; entries: CatchEntry[] }[] = [];
   for (const entry of entries) {
-    const month = catchMonth(entry);
+    const month = monthOf(entry);
     const last = months[months.length - 1];
     if (last && last.month === month) last.entries.push(entry);
     else months.push({ month, entries: [entry] });
@@ -130,8 +130,22 @@ export function PhotosPage() {
   const pickedYear = year && perYear.has(year) ? year : null;
   const all = pickedYear ? ofWater.filter((entry) => yearOf(entry) === pickedYear) : ofWater;
   const { visible, more } = catchPage(all, shown);
+  const monthOf = (entry: CatchEntry) => bookFishDay(book, entry).slice(0, 7);
+  // Each row of chips counts the photos the other two picks leave, so a chip's number is what tapping it shows.
+  const kindOf = (entry: CatchEntry) => entry.species.trim().toLowerCase();
+  const inKind = (entry: CatchEntry) => !picked || kindOf(entry) === picked;
+  const inWater = (entry: CatchEntry) => !pickedWater || entry.spotId === pickedWater;
+  const inYear = (entry: CatchEntry) => !pickedYear || yearOf(entry) === pickedYear;
+  const tally = (entries: CatchEntry[], keyOf: (entry: CatchEntry) => string) => {
+    const counts = new Map<string, number>();
+    for (const entry of entries) counts.set(keyOf(entry), (counts.get(keyOf(entry)) ?? 0) + 1);
+    return counts;
+  };
+  const kindCounts = tally(pictured.filter((entry) => inWater(entry) && inYear(entry)), kindOf);
+  const waterCounts = tally(pictured.filter((entry) => inKind(entry) && inYear(entry)), (entry) => entry.spotId);
+  const yearCounts = tally(pictured.filter((entry) => inKind(entry) && inWater(entry)), yearOf);
   const unpictured = unpicturedBests(book.catches, (id) => photoFor(id) !== null);
-  const monthCounts = new Map(photoMonths(all).map((group) => [group.month, group.entries.length]));
+  const monthCounts = new Map(photoMonths(all, monthOf).map((group) => [group.month, group.entries.length]));
 
   return (
     <div className="sheet">
@@ -177,11 +191,16 @@ export function PhotosPage() {
           <button type="button" className="text-button" aria-pressed={!picked} onClick={() => setKind(null)}>
             {t("All kinds")}
           </button>
-          {kinds.map((row) => (
-            <button key={row.species} type="button" className="text-button" aria-pressed={picked === row.species.trim().toLowerCase()} onClick={() => setKind(row.species.trim().toLowerCase())}>
-              {t(row.species)} ({row.count})
-            </button>
-          ))}
+          {/* A chip the other picks leave no photos for goes, unless it is the one picked, so it can be unpicked. */}
+          {kinds.map((row) => {
+            const count = kindCounts.get(row.species.trim().toLowerCase()) ?? 0;
+            const on = picked === row.species.trim().toLowerCase();
+            return count > 0 || on ? (
+              <button key={row.species} type="button" className="text-button" aria-pressed={on} onClick={() => setKind(row.species.trim().toLowerCase())}>
+                {t(row.species)} ({count})
+              </button>
+            ) : null;
+          })}
         </p>
       ) : null}
       {waters.length > 1 ? (
@@ -189,11 +208,14 @@ export function PhotosPage() {
           <button type="button" className="text-button" aria-pressed={!pickedWater} onClick={() => setWater(null)}>
             {t("All waters")}
           </button>
-          {waters.map((row) => (
-            <button key={row.id} type="button" className="text-button" aria-pressed={pickedWater === row.id} onClick={() => setWater(row.id)}>
-              {row.name} ({row.count})
-            </button>
-          ))}
+          {waters.map((row) => {
+            const count = waterCounts.get(row.id) ?? 0;
+            return count > 0 || pickedWater === row.id ? (
+              <button key={row.id} type="button" className="text-button" aria-pressed={pickedWater === row.id} onClick={() => setWater(row.id)}>
+                {row.name} ({count})
+              </button>
+            ) : null;
+          })}
         </p>
       ) : null}
       {years.length > 1 ? (
@@ -201,11 +223,14 @@ export function PhotosPage() {
           <button type="button" className="text-button" aria-pressed={!pickedYear} onClick={() => setYear(null)}>
             {t("All years")}
           </button>
-          {years.map(([value, count]) => (
-            <button key={value} type="button" className="text-button" aria-pressed={pickedYear === value} onClick={() => setYear(value)}>
-              {value} ({count})
-            </button>
-          ))}
+          {years.map(([value]) => {
+            const count = yearCounts.get(value) ?? 0;
+            return count > 0 || pickedYear === value ? (
+              <button key={value} type="button" className="text-button" aria-pressed={pickedYear === value} onClick={() => setYear(value)}>
+                {value} ({count})
+              </button>
+            ) : null;
+          })}
         </p>
       ) : null}
       {all.length === 0 && pictured.length > 0 ? (
@@ -214,7 +239,7 @@ export function PhotosPage() {
         <p className="empty">{t("No photos yet. Fish landed on the lake keep a snapshot, and a catch you log can carry one.")}</p>
       ) : (
         <div ref={box} className="paged-list">
-          {photoMonths(visible).map((group) => (
+          {photoMonths(visible, monthOf).map((group) => (
             <section key={group.month} aria-label={monthName(group.month)}>
               <h2 className="month-head">
                 {monthName(group.month)}

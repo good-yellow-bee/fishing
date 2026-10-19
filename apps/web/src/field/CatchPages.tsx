@@ -238,6 +238,8 @@ export function CatchesPage() {
                     entry={entry}
                     spotName={spotById(book, entry.spotId)?.name ?? t("Unknown water")}
                     tripTitle={entry.tripId ? outingNameById(book, entry.tripId) : null}
+                    // Shown largest first, a fish steps on to the next smaller and has a way back to this list.
+                    list={largest ? "book-largest:all" : undefined}
                   />
                 )}
               </PagedCatches>
@@ -782,10 +784,12 @@ function CatchForm() {
   };
 
   if (catchId && !existing) {
+    // Forward can reach a deleted fish's form too: it says so, as the fish's own page does.
+    const deleted = readDeletedFish().has(catchId);
     return (
       <div className="sheet">
-        <h1>{t("Missing fish")}</h1>
-        <p className="lede">{t("That catch is not in this book.")}</p>
+        <h1>{deleted ? t("Fish deleted") : t("Missing fish")}</h1>
+        <p className="lede">{deleted ? t("This fish was deleted.") : t("That catch is not in this book.")}</p>
         <Link to="/catches">{t("Back to catches")}</Link>
       </div>
     );
@@ -841,7 +845,7 @@ function CatchForm() {
             {existing
               ? t("Changes you made to this fish were not saved.")
               : waiting.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: waiting.species.trim() })
+              ? t("A fish you started logging was not saved: {species}.", { species: t(waiting.species.trim()) })
               : t("A fish you started logging was not saved.")}
           </p>
           <button type="button" className="field-primary inline" onClick={() => pickUp(waiting)}>

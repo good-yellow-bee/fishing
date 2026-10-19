@@ -2,7 +2,7 @@ import { Fragment, useDeferredValue, useEffect, useMemo, useRef, useState } from
 import { Link, useLocation, useNavigationType, useSearchParams } from "react-router-dom";
 import { BITE_TIMES, MOON_QUARTER_LABELS, type MoonQuarter, SEASON_LABELS, SKY_LABELS, WATER_LABELS, WIND_LABELS, biteTimeOf, catchesNewestFirst, foldText, lakeSeason, measuresOf, moonQuarterOf, searchCatches, spotById, tripById, type CatchEntry, type Logbook, type Measure } from "@stillwater/shared";
 import { pluralOf } from "./pluralWord";
-import { getLang, getUnits, loadPolish, polishBook, useLang, useT } from "../i18n";
+import { getLang, getUnits, loadPolish, polishBook, tn, useLang, useT } from "../i18n";
 import { CatchCard } from "./cards";
 import { CopySummary } from "./CopySummary";
 import { RenameKind } from "./RenameKind";
@@ -177,6 +177,22 @@ export function isTimeWord(want: string, t: (text: string) => string): boolean {
   return BITE_TIMES.some((band) => [band.label, t(band.label), ...(TIME_WORDS[band.id] ?? [])].some((word) => normalize(word).startsWith(typed)));
 }
 
+/** The part of the day a whole search names ("night", "at dusk", "o świcie", "wieczór"), in either language, or null. */
+function wholeTimeWord(want: string, t: (text: string) => string): (typeof BITE_TIMES)[number]["id"] | null {
+  const word = want.replace(/^(?:at|in the|during the|o|w|we|po) /, "");
+  return BITE_TIMES.find((band) => [band.label, t(band.label), inPolish(band.label), ...(TIME_WORDS[band.id] ?? [])].some((name) => normalize(name) === word))?.id ?? null;
+}
+
+/** Whether `want` starts a word of `text`, or runs on from one ("przy lili" in "przy liliach"). */
+function wordStarts(text: string, want: string): boolean {
+  let at = text.indexOf(want);
+  while (at >= 0) {
+    if (at === 0 || !/[\p{L}\p{N}]/u.test(text[at - 1]!)) return true;
+    at = text.indexOf(want, at + 1);
+  }
+  return false;
+}
+
 /** True when the part of the day the fish came at ("Dawn", "Wieczór", or a word for it such as "dusk") starts with what was typed, from three letters up. */
 function timeHas(entry: CatchEntry, want: string, t: (text: string) => string): boolean {
   if (want.length < 3) return false;
@@ -342,13 +358,19 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
   if (want === normalize(t("Kept")) || ["zabrane", "zabrany"].includes(want)) return catchesNewestFirst(book).filter((entry) => !entry.released);
   // "photo" whole: the fish with a picture kept, in either language.
   if (["photo", "photos", normalize(t("Photo")), normalize(t("Photos"))].includes(want)) return catchesNewestFirst(book).filter((entry) => pictured(entry.id));
+  // "night", "w nocy", "rain" whole: just the fish then or in it, not a Nightcrawler at noon or a Rainbow trout.
+  const band = wholeTimeWord(want, t);
+  if (band) return catchesNewestFirst(book).filter((entry) => whenOf(entry)?.bite === band);
+  const sky = (Object.keys(SKY_LABELS) as (keyof typeof SKY_LABELS)[]).find((key) => [SKY_LABELS[key], t(SKY_LABELS[key]), inPolish(SKY_LABELS[key])].some((word) => normalize(word) === want));
+  if (sky) return catchesNewestFirst(book).filter((entry) => entry.weather?.sky === sky);
   const hit = new Set(found.map((entry) => entry.id));
   // "rel" or "released" finds the fish put back, under both of the words the book uses for them.
   // An outing's title ("Opening day") finds the fish filed on it, from three letters up.
   const tripsNamed = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.title).includes(want)).map((trip) => trip.id));
   // Words from a fish's own note, its outing's note or its water's notes find it too, from three letters up.
-  const tripsNoted = new Set(want.length < 3 ? [] : book.trips.filter((trip) => normalize(trip.note).includes(want)).map((trip) => trip.id));
-  const spotsNoted = new Set(want.length < 3 ? [] : book.spots.filter((spot) => normalize(spot.notes).includes(want)).map((spot) => spot.id));
+  // From the start of a word: "noc" is not in "Północny brzeg", but "lilie" is in "przy liliach" and "rain" in "rain gear".
+  const tripsNoted = new Set(want.length < 3 ? [] : book.trips.filter((trip) => wordStarts(normalize(trip.note), want)).map((trip) => trip.id));
+  const spotsNoted = new Set(want.length < 3 ? [] : book.spots.filter((spot) => wordStarts(normalize(spot.notes), want)).map((spot) => spot.id));
   const releasedWords = want.length < 3 ? [] : [t("Released"), t("Released: {count} of {total}").split(":")[0]!].map(normalize);
   for (const entry of book.catches) {
     if (hit.has(entry.id)) continue;
@@ -366,7 +388,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
       (entry.tripId !== null && tripsNamed.has(entry.tripId)) ||
       (entry.tripId !== null && tripsNoted.has(entry.tripId)) ||
       spotsNoted.has(entry.spotId) ||
-      (want.length >= 3 && normalize(noteText(entry.note)).includes(want))
+      (want.length >= 3 && wordStarts(normalize(noteText(entry.note)), want))
     )
       hit.add(entry.id);
   }
@@ -709,6 +731,11 @@ export function CatchSearch() {
   // The same search sits on Home and on Catches; a fish opened from it leads back to whichever it was.
   const onCatches = useLocation().pathname.startsWith("/catches");
   const matches = useMemo(() => (largest ? largestFirst(found) : found), [found, largest]);
+  // The angler's own among them, decided for the whole book as /catches decides it.
+  const mine = useMemo(() => {
+    const own = new Set(countedFish(book.catches).map((entry) => entry.id));
+    return matches.filter((entry) => own.has(entry.id));
+  }, [book, matches]);
 
   return (
     <section
@@ -751,8 +778,13 @@ export function CatchSearch() {
         {!settled ? null : matches.length > 1 ? (
           // Several matches: what they add up to, from the count to the largest among them.
           <>
-            <FishSum catches={matches} />
-            <TopLure catches={matches} />
+            {/* Summed as /catches sums the book: the angler's own, with the sample week's and the game's said apart. */}
+            {/* A search that finds only those ("sample", "game") sums what it found. */}
+            <FishSum catches={mine.length > 0 ? mine : matches} />
+            <TopLure catches={mine.length > 0 ? mine : matches} />
+            {mine.length > 0 && mine.length < matches.length ? (
+              <p className="meta">{tn(matches.length - mine.length, "Also listed: {n} fish from the sample week or the game.", "Also listed: {n} fish from the sample week or the game.")}</p>
+            ) : null}
           </>
         ) : (
           <p>{matches.length === 0 ? emptyText(book, settled, t) : t("Matches: {count}", { count: matches.length })}</p>

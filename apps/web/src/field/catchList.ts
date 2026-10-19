@@ -1,4 +1,4 @@
-import { catchesForSpot, catchesForTrip, type CatchEntry, type Logbook } from "@stillwater/shared";
+import { catchesForSpot, catchesForTrip, catchesNewestFirst, type CatchEntry, type Logbook } from "@stillwater/shared";
 import { findCatches } from "./CatchSearch";
 import { FIND_PARAM, findLink } from "./findLinks";
 import { kindOnPage, speciesLink } from "./speciesLink";
@@ -11,12 +11,13 @@ export const LIST_PARAM = "in";
 /**
  * "find:pike" (the search on Home), "catches:pike" (the same search on the Catches page), "species:Northern pike",
  * "trip:<id>" or "water:<id>": a list a catch card can be opened from. "find-largest:pike", "catches-largest:pike",
- * "species-largest:Northern pike" and "water-largest:<id>" are those lists shown largest first.
+ * "species-largest:Northern pike" and "water-largest:<id>" are those lists shown largest first, and "book-largest:all"
+ * the whole Catches list shown largest first.
  */
-export type ListKey = `${"find" | "catches" | "species" | "water"}${"" | "-largest"}:${string}` | `trip:${string}`;
+export type ListKey = `${"find" | "catches" | "species" | "water"}${"" | "-largest"}:${string}` | `trip:${string}` | "book-largest:all";
 
 /** Whether a list steps through its fish largest first, not newest first. */
-export const largestList = (key: string | undefined) => Boolean(key && /^(find|catches|species|water)-largest:/.test(key));
+export const largestList = (key: string | undefined) => Boolean(key && /^(find|catches|species|water|book)-largest:/.test(key));
 
 /** The page a list's back link opens, largest first again when the list was. */
 const inOrder = (back: string, largest: boolean) => (largest ? `${back}${back.includes("?") ? "&" : "?"}${ORDER_PARAM}=largest` : back);
@@ -53,6 +54,8 @@ export function catchList(
         })()
       : search === "species"
         ? { rows: largest ? largestFirst(kindOnPage(book, value)) : kindOnPage(book, value), back: inOrder(speciesLink(value), largest) }
+        : kind === "book-largest"
+          ? { rows: largestFirst(catchesNewestFirst(book)), back: inOrder("/catches", true) }
         : kind === "trip"
           ? { rows: catchesForTrip(book, value), back: `/trips/${value}` }
           : search === "water"
