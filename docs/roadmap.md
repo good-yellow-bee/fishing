@@ -1361,6 +1361,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC189~~ | ~~News card scene43 covers SC186 to SC188~~ (#1420) | scene | S |
 | ~~SC190~~ | ~~Little owl takes fright: strike a fish while the little owl sits on its post and it beats off at once over the lake, back on its next visit (moved into the fishing scene so it sees the strike)~~ (#1423) | scene | S |
 | ~~SC191~~ | ~~Winter scarf: in winter the angler wraps up in a knitted red scarf with cream stripes to match the dock dog's jumper, its fringed ends hanging down the back and lifting and flapping in the wind~~ (#1427) | scene | S |
+| ~~SC192~~ | ~~Robin takes fright: strike a fish from the dock while the robin sits on the posts and it flies off at once from where it sat, back on its next visit; the dog's head follows it off (robin moved into the fishing scene, one strike hook shared with the little owl)~~ (#1432) | scene | S |
+| ~~SC193~~ | ~~News card scene44 covers SC190 to SC192~~ (#1432) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1713,7 +1715,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT345~~ | ~~News card 2026-10-19-game32 covers GT343 and GT344: clearing the shack board pays a 25-point bonus, and letting a trophy go pays 20 points~~ (#1422) | ui | S |
 | ~~GT346~~ | ~~Level 18, Breath of the lake, at 68000 lifetime points: the shack board's requests pay a quarter more (the server pays the same, and the board shows the raised reward)~~ (#1425) | gameplay | S |
 | ~~GT347~~ | ~~Strong arms lift a bottom-sticker: from Strength 7 one pump brings a sulking catfish or sturgeon off the bottom, not two; the shack's Strength line and the fight card's Bottom-sticker line say so~~ (#1429) | gameplay | S |
-| GT348 | News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump | ui | S |
+| ~~GT348~~ | ~~News card 2026-10-19-game33 covers GT346 and GT347: level 18, Breath of the lake, raises the shack board's rewards, and Strength 7 lifts a bottom-sticker in one pump~~ (#1430) | ui | S |
+| GT349 | A patient angler waits a dropped fish out: from Patience 7 a fish that dropped the bait before the strike takes again on a cast straight back 60% of the time, not 40%; the shack's Patience line and the miss line say so | gameplay | S |
 
 ## Risks / open questions for the owner
 
@@ -2292,3 +2295,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR567~~ | ~~Round 100 trips ideas: Out now on last evening's outing, the blank outings as a link, a last night quick search, the last outing in a copied plan, Home's lure only when it led~~ (#1409) | field | S |
 | ~~BR568~~ | ~~Round 101 catch-page fixes: a loose fish goes to the nearest of a day's outings, lures and kinds by their dictionary name, the first of same-size fish holds the record, the conditions line spaced, "Best time of day"~~ (#1424) | field | S |
 | ~~BR569~~ | ~~Round 101 catch-page ideas: step through the water's fish, the wait since the fish before, That day's outing for an untitled one, lengths in feet and inches~~ (#1428) | field | S |
+| ~~BR570~~ | ~~Round 102 Home and export fixes: a lure or kind typed two ways reads once in sheets and copied texts, Home's last outing is the day's later one, Perch and Worm in Polish~~ (#1435) | field | S |

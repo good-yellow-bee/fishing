@@ -375,7 +375,7 @@ export const PL_GAME: PlBook = {
   // Shop
   "Land heavier species. From {rank}, one pump lifts a catfish or sturgeon.": "Wyholuj cięższe gatunki. Od {rank} jedna pompka podrywa suma lub jesiotra.",
   "Wider cast band and longer strike window.": "Szerszy pasek rzutu i dłuższy czas na zacięcie.",
-  "Shorter waits, heavier fish.": "Krótsze czekanie, cięższe ryby.",
+  "Shorter waits, heavier fish. From {rank}, a fish that drops the bait takes again more often.": "Krótsze czekanie, cięższe ryby. Od {rank} ryba, która puści przynętę, częściej bierze znowu.",
   "Tackle box": "Skrzynka ze sprzętem",
   "Line & nerve": "Żyłka i nerwy",
   " → {next} ({cost} pts)": " → {next} ({cost} pkt)",
@@ -539,6 +539,7 @@ export const PL_GAME: PlBook = {
   "It's the one that got away!": "To ta, która się zerwała!",
   "It's the one that dropped your bait!": "To ta, która wypuściła twoją przynętę!",
   "It wasn't hooked, so it may take again: cast straight back here.": "Nie zacięła się, więc może wziąć znowu: zarzuć od razu w to samo miejsce.",
+  "It wasn't hooked, and your Patience keeps it about: cast straight back here, it will likely take again.": "Nie zacięła się, a twoja Cierpliwość ją zatrzymuje: zarzuć od razu w to samo miejsce, pewnie weźmie znowu.",
   "A largemouth bass followed it in to the bank!": "Bass wielkogębowy odprowadził ją aż do brzegu!",
   "A walleye followed it up to the boat!": "Sandacz odprowadził ją aż pod łódź!",
   "A pike followed it in to the bank!": "Szczupak odprowadził ją aż do brzegu!",
@@ -695,6 +696,8 @@ export const PL_GAME: PlBook = {
   "Runs in {season}": "Najlepiej: {season}",
   "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
     "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
+  "Strike a fish from the dock and the robin or the little owl on the posts takes fright and flies off, to come back another time. And in winter you now wrap up in a red knitted scarf to match your dog's jumper, its ends blowing in the wind.":
+    "Zatnij rybę z pomostu, a rudzik albo pójdźka na słupkach się spłoszy i odleci, by wrócić innym razem. A zimą owijasz się teraz czerwonym, dzierganym szalikiem do pary ze sweterkiem psa, a jego końce powiewają na wietrze.",
   "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
     "W bezdeszczowe noce pójdźka nadlatuje teraz nisko nad wodą i siada na słupku obok latarni. Kiwa głową, obraca ją aż do tyłu, poza zimą śledzi ćmy krążące wokół latarni i znów odlatuje. A jaskółki z liny cumowniczej łódki zrywają się teraz razem, gdy ją odwiązujesz.",
   "On a tablet or a phone held sideways, the Map's list of waters gives each water's last fish and next outing room to read in a line, and with larger text a water's details go under its name. The lodge's catch log now scrolls its own table sideways at every width instead of pushing the whole page, and a screen reader now reads out what the season and the sky mean for the fish, and the day's wind.":
@@ -818,8 +821,6 @@ export const PL_GAME: PlBook = {
     "W szare, pochmurne dni w chmurach co jakiś czas otwiera się prześwit i przez jezioro przesuwa się plama słońca, a w dół ukośnie schodzą do niej blade promienie. W wietrzne zimowe dni wiatr zrywa śnieg ze wzgórz za drugim brzegiem i niesie go wzdłuż nich długimi białymi smugami.",
   "On winter days snow lies white on the hills behind the lake, and two children take turns sledging down a run between the far trees, rushing down in a spray of snow and trudging back up pulling their sleds.":
     "W zimowe dni na wzgórzach za jeziorem leży biały śnieg, a dwoje dzieci na zmianę zjeżdża na sankach po torze między drzewami na drugim brzegu, pędząc w obłoku śniegu i wspinając się z powrotem z sankami na sznurku.",
-  "By day, unless it rains, a golden dog now lies on the dock behind you. It watches a fresh cast, dozes off when nothing bites, and sits up with its tail going when a fish takes. And on fine spring and summer days swallows sometimes come and sit in a row on the moored rowboat's rope.":
-    "Za dnia, gdy nie pada, na pomoście za tobą leży teraz złoty pies. Patrzy na świeży rzut, zasypia, gdy nic nie bierze, i siada, merdając ogonem, gdy ryba chwyci. A w pogodne wiosenne i letnie dni na cumie przycumowanej łódki przysiadają czasem rzędem jaskółki.",
   "A fish's page offers to step through its water's fish, and on an outing it says how long after the one before it came. A loose fish on a day with a dawn and a dusk outing goes to the nearer one, a length can be written in feet and inches, such as 2 ft 3 in, and a lure typed two ways reads as one.":
     "Strona ryby pozwala przejrzeć ryby z jej łowiska, a na wyprawie mówi, ile minęło od poprzedniej. Ryba bez wyprawy w dzień z wyprawą o świcie i o zmierzchu trafia do bliższej z nich, długość można wpisać w stopach i calach, np. 2 ft 3 in, a przynęta wpisana na dwa sposoby jest jedną przynętą.",
   "On Trips, last evening's outing still going after midnight says Out now, with a last night quick search, and the average's count of outings without a fish opens them. A copied plan says how the last outing on that water went, lost fish and missed strikes included, and Home names the last outing's lure only when it led.":

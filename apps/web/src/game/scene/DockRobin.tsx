@@ -39,8 +39,8 @@ export function robinTailShape() {
   return mergePainted([{ geometry: new THREE.BoxGeometry(0.026, 0.006, 0.05), position: [0, 0, -0.025], color: BROWN }]);
 }
 
-/** A robin dropping in on the dock's front posts (robinVisit.ts). */
-export function DockRobin({ snow }: { snow: boolean }) {
+/** A robin dropping in on the dock's front posts, startled off early by a strike (robinVisit.ts). */
+export function DockRobin({ snow, startledAt }: { snow: boolean; startledAt: Readonly<{ current: number }> }) {
   const still = useReducedMotion();
   const bird = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -59,7 +59,7 @@ export function DockRobin({ snow }: { snow: boolean }) {
   );
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
-    const pose = robinAt(time, snow, still);
+    const pose = robinAt(time, snow, still, startledAt.current);
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;

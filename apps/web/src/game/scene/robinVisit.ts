@@ -1,11 +1,12 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
 import { DOCK_POST_CAPS } from "./snowyDock";
+import { STARTLE_TURN_SEC, turnBetween, visitAt } from "./visitClock";
 
 /**
  * A robin that drops in on the dock: it flies in low over the water to the front-left post, cocks
  * its head this way and that and flicks its tail, flits across to the front-right post for a
  * while, and flies off again over the lake. It comes every minute or so, from dawn through the
- * day, in every season but not in the rain. Pure in time.
+ * day, in every season but not in the rain. A strike on the dock startles it off early. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
@@ -60,20 +61,38 @@ export type RobinPose = Point & {
 /** Facing the angler, back up the dock, as it perches. */
 const PERCH_YAW = 0;
 
-/** The robin `time` seconds in. `snow` lifts it onto the posts' snow caps; `still` keeps it perched on the left post. */
-export function robinAt(time: number, snow = false, still = false): RobinPose {
+/** Which visit `time` falls in, counting from 0, and how far into it; a negative visit before the first. */
+export const robinVisit = (time: number) => visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+export const robinVisitIndex = (time: number) => robinVisit(time).index;
+
+/**
+ * The robin `time` seconds in. `snow` lifts it onto the posts' snow caps; `still` keeps it perched on the left post;
+ * `startledAt`, when the angler last struck.
+ */
+export function robinAt(time: number, snow = false, still = false, startledAt = -Infinity): RobinPose {
   const lift = snow ? SNOW_CAP : 0;
   const left = { x: LEFT.x, y: LEFT.y + lift, z: LEFT.z };
   const right = { x: RIGHT.x, y: RIGHT.y + lift, z: RIGHT.z };
   if (still) return { ...left, here: true, yaw: PERCH_YAW, flying: 0, look: 0, flick: 0 };
-  const t = time - FIRST_SEC;
-  const into = ((t % VISIT_EVERY_SEC) + VISIT_EVERY_SEC) % VISIT_EVERY_SEC;
-  if (t < 0 || into >= VISIT_SEC) return { ...left, here: false, yaw: PERCH_YAW, flying: 0, look: 0, flick: 0 };
+  const { index, into } = robinVisit(time);
+  if (index < 0 || into >= VISIT_SEC) return { ...left, here: false, yaw: PERCH_YAW, flying: 0, look: 0, flick: 0 };
   const onLeft = IN_SEC;
   const flit = onLeft + LEFT_SEC;
   const onRight = flit + FLIT_SEC;
   const off = onRight + RIGHT_SEC;
   const heading = (a: Point, b: Point) => Math.atan2(b.x - a.x, b.z - a.z);
+  // Startled after it landed, or as it lands if struck while flying in: it flies off from where it was, gone until its next visit.
+  const strike = robinVisit(startledAt);
+  const startle = strike.index === index && strike.into < off ? Math.max(onLeft, strike.into) : Infinity;
+  if (into >= startle) {
+    const away = into - startle;
+    if (away >= OUT_SEC) return { ...left, here: false, yaw: PERCH_YAW, flying: 0, look: 0, flick: 0 };
+    const from = robinAt(time - away, snow);
+    const p = smooth(away / OUT_SEC);
+    // A quick swing round toward where it flies, its head coming back straight.
+    const turn = away / STARTLE_TURN_SEC;
+    return { ...lerp(from, TO, p, 0.4), here: true, yaw: turnBetween(from.yaw, heading(from, TO), turn), flying: 1, look: from.look * Math.max(0, 1 - turn), flick: 0 };
+  }
   // Head cocked this way and that in quick turns, with still moments between; the tail flicks now and then.
   const look = 0.7 * Math.sin(Math.round(into / 0.9) * 2.3) * (into > onLeft && into < off ? 1 : 0);
   const flick = Math.max(0, Math.sin(into * 2.1) ** 12);

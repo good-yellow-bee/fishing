@@ -33,6 +33,7 @@ import { sunTimes } from "./sunTimes";
 import { placeFor } from "./map/places";
 import { useTackleItems } from "./gear/TackleState";
 import { PLAY_LAKE_ID, offPlayLake, withoutPlayLake } from "./playLake";
+import { newestOutingFirst } from "./catchNeighbors";
 import { saveOutingIcs } from "./TripPages";
 
 function deskLine(now: Date): string {
@@ -94,7 +95,7 @@ function LastTimeLine({ book, trip, today }: { book: Logbook; trip: Trip; today:
   const last = here
     // Today's outing only once it has given a fish: one still to happen says nothing yet.
     .filter((other) => other.id !== trip.id && other.date < trip.date && (other.date < today || (other.date === today && catchesForTrip(book, other.id).length > 0)))
-    .sort((a, b) => b.date.localeCompare(a.date))[0];
+    .sort(newestOutingFirst(book))[0];
   if (!last) return null;
   // That water's fish of it, with those logged loose there that day, as the water's own page counts them.
   // A loose fish only when that was the day's one outing there: of a dawn and a dusk, it is neither's until filed.
@@ -202,7 +203,7 @@ export function HomePage() {
   const sampleLeft = !sampleOnly && hasSampleLeft(storedBook);
   const next = upcoming[0];
   // The newest outing fished, for a Next with nothing planned: on a water still in the book.
-  const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort((a, b) => b.date.localeCompare(a.date))[0];
+  const lastOut = next ? undefined : [...sheetOutings(book, fishedBy).trips].filter((trip) => spotById(book, trip.spotId) && !isSampleOuting(trip)).sort(newestOutingFirst(book))[0];
   const lastOutRest = lastOut ? daysBetween(lastOut.date, today) : 0;
   const nextSpot = next ? spotById(book, next.spotId) : undefined;
   // A fish started on the catch form and never saved: the first thing worth finishing.
@@ -269,7 +270,7 @@ export function HomePage() {
         <div className="kept-draft" role="status">
           <p>
             {kept.species.trim()
-              ? t("A fish you started logging was not saved: {species}.", { species: t(kept.species.trim()) })
+              ? t("A fish you started logging was not saved: {species}.", { species: pieceName(kept.species) })
               : t("A fish you started logging was not saved.")}
           </p>
           <Link to={`/catches/new?${RESUME_PARAM}=1`} className="field-primary inline">
