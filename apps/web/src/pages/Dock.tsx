@@ -273,6 +273,7 @@ export function DockPage() {
     const sync = () => wrap.style.setProperty("--stance-bottom", `${Math.ceil(chip.offsetTop + chip.offsetHeight)}px`);
     const observer = new ResizeObserver(sync);
     observer.observe(chip);
+    observer.observe(wrap);
     sync();
     return () => {
       observer.disconnect();

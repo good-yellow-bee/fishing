@@ -2368,9 +2368,11 @@ html[data-input="pad"] .fight-bar .on-pad {
     bottom: auto;
   }
 
+  /* Over the hint, which can come down this far under a tall bank chip: the meter is what a cast is read from. */
   .power-meter {
     right: 12px;
     bottom: 226px;
+    z-index: 3;
     width: 160px;
   }
 
