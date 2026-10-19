@@ -20,6 +20,14 @@ export function cleanRunBonus(clean: boolean | undefined, run: number | undefine
   return clean && (run ?? 0) >= CLEAN_RUN_FROM ? CLEAN_RUN_BONUS : 1;
 }
 
+/** A fish heavier than the angler's own best of its kind earns this much more; the first of a kind beats nothing. */
+export const PB_BONUS = 1.25;
+
+/** The bonus for beating your own best of a species: `priorBest` is the heaviest landed before, null or undefined before the first. */
+export function personalBestBonus(weight: number, priorBest: number | null | undefined): number {
+  return priorBest != null && weight > priorBest ? PB_BONUS : 1;
+}
+
 export function weightInRange(species: FishSpecies, weight: number): boolean {
   return weight >= species.minWeight && weight <= species.maxWeight;
 }
@@ -53,7 +61,8 @@ export type CatchResult = CatchOk | CatchErr;
 
 /** `at` is when the catch is recorded; it picks the fish of the week. */
 /** `requestId`, when given, rolls for a golden fish. */
-export function validateCatch(profile: Profile, request: CatchRequest & { requestId?: string }, at: Date = new Date()): CatchResult {
+/** `priorBest` is the heaviest of this species the angler landed before, for the personal best bonus. */
+export function validateCatch(profile: Profile, request: CatchRequest & { requestId?: string }, at: Date = new Date(), priorBest: number | null = null): CatchResult {
   const species = fishById(request.speciesId);
   if (!species) return { ok: false, error: "unknown species", status: 400 };
   if (!species.spots.includes(request.spot)) {
@@ -69,7 +78,7 @@ export function validateCatch(profile: Profile, request: CatchRequest & { reques
     return { ok: false, error: "line too light for this fish", status: 409 };
   }
   const golden = request.requestId !== undefined && isGolden(request.requestId) ? GOLDEN_BONUS : 1;
-  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun)), species };
+  return { ok: true, points: catchPoints(species, request.weight, request.clean, weeklyBonus(species.id, at) * golden * cleanRunBonus(request.clean, request.cleanRun) * personalBestBonus(request.weight, priorBest)), species };
 }
 
 export type UpgradeOk = { ok: true; cost: number; nextRank: number };
