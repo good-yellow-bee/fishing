@@ -630,6 +630,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone the shack's three-day forecast now shows one day a row, so its moon and weather tips read in full lines instead of a word or two at a time. With reduce motion on, the terns over the fish patch, the bank's squirrels and the spring grebes now hold still like the lake's other creatures.":
+    "Na telefonie prognoza na trzy dni w szopie pokazuje teraz jeden dzień w rzędzie, więc wskazówki o księżycu i pogodzie czyta się pełnymi wierszami, a nie po słowie czy dwa. Przy ograniczonym ruchu rybitwy nad ławicą, wiewiórki na brzegu i wiosenne perkozy stoją teraz w miejscu, jak inne zwierzęta nad jeziorem.",
   "On a tablet or a narrow laptop window with larger text, the field log keeps everything on the page: Home's cards and columns stack instead of squeezing words one letter a line, and Spots shows one card a row. The side menu now reaches Gear and Bests on a short window, and a full-size photo fits the screen with Close in reach.":
     "Na tablecie lub wąskim oknie laptopa przy większym tekście dziennik połowów mieści wszystko na stronie: karty i kolumny na Starcie układają się jedna pod drugą, zamiast ściskać słowa po literze w wierszu, a Łowiska pokazują jedną kartę w rzędzie. Boczne menu sięga teraz Sprzętu i Rekordów w niskim oknie, a zdjęcie w pełnym rozmiarze mieści się na ekranie razem z przyciskiem Zamknij.",
   "{lure} · good here": "{lure} · dobra tutaj",
