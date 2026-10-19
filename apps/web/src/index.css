@@ -2422,6 +2422,21 @@ html[data-input="pad"] .fight-bar .on-pad {
   }
 }
 
+/* On a short upright phone (320 x 568 to 375 x 667) the fight card, now taller with its fish's habit and the clean-fight
+   line, ran up over the header and the bank chip from its low place: as with larger text, it hangs from the header,
+   whose time, weather, level and points chips step aside until the fight ends, and the coach and bank chip go too. */
+@media (max-width: 800px) and (min-height: 501px) and (max-height: 700px) {
+  .fight-bar {
+    top: calc(var(--hud-bottom, 140px) + 8px);
+    bottom: auto;
+  }
+
+  .hud:has(+ .scene-wrap[data-phase="fight"]) :is(.hour-chip, .sky-chip, .level-chip, .points-chip),
+  .scene-wrap[data-phase="fight"] :is(.walkthrough, .stance-chip) {
+    display: none;
+  }
+}
+
 /* On a touch screen the thumb button already says Reel and the status line says when to let go, so the card's
    hold-and-release line goes with larger text too. */
 @media (pointer: coarse) and (max-width: 800px) and (min-height: 501px) {
