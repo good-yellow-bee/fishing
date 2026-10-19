@@ -1384,7 +1384,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC208~~ | ~~Mallard takes fright: strike a fish from the dock while the mallard is on the boards and it bursts up off them and away over the lake, back on a later visit; struck at while it swims in, it goes as soon as it lands (moved into the fishing scene)~~ (#1465) | scene | S |
 | ~~SC209~~ | ~~Fireflies by the dock: on summer nights a few fireflies drift and blink over the water just left of the dock, where you see them close, not only over the far reed beds~~ (#1468) | scene | S |
 | ~~SC210~~ | ~~News card scene49 covers SC208 and SC209~~ (#1468) | scene | S |
-| SC211 | Bat at the lantern: on summer evenings and nights now and then one of the bats breaks off its loop over the water to hawk the moths round the dock's right-hand lantern, a few tight turns in the light, and swings back out | scene | S |
+| SC211 | Bat at the lantern: on summer evenings and nights, when its loop brings it near, one of the bats now and then breaks off to hawk the moths just off the dock's right-hand lantern, a few tight turns in the light over the water, and eases back out | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
