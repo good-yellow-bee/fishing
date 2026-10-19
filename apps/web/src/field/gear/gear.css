@@ -17,6 +17,22 @@
   text-transform: uppercase;
 }
 
+/* On a touch screen the two wrap onto lines of their own: each gets a band to tap, so a tap just under "Hide packed"
+   lands on it and not on "Unpack all", which wipes every tick. */
+@media (pointer: coarse) {
+  .text-button.tackle-unpack,
+  .text-button.tackle-hide {
+    display: inline-block;
+    padding: 8px 0;
+  }
+
+  /* The padding is the band, so the reach-out area stays inside it rather than over the other button's line. */
+  .text-button.tackle-unpack::after,
+  .text-button.tackle-hide::after {
+    inset: 0 -4px;
+  }
+}
+
 .tackle-block > .tackle-count {
   margin: 0 0 8px;
 }
@@ -223,8 +239,10 @@
   padding: 0;
 }
 
+/* A line of its own at every width: in the record's flex row a wide screen ran them into the counts with no break. */
 .lure-record .lure-last {
   display: block;
+  flex-basis: 100%;
 }
 
 /* On a touch screen "Pack for …" sat 8 px under its lure's Largest link, the two tap reaches overlapping. */
