@@ -1,4 +1,5 @@
 import type { LakeHour, Sky } from "@stillwater/shared";
+import { MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
 import { SNOW_CAP } from "./robinVisit";
 import { DOCK_POST_CAPS } from "./snowyDock";
 
@@ -7,7 +8,8 @@ import { DOCK_POST_CAPS } from "./snowyDock";
  * a few soft wingbeats then a long glide, and lands on the dock's front-left post in the lanterns'
  * light. There it bobs its head up and down the way little owls do when something takes their
  * interest, swivels its head right round to look behind it and back, and blinks, before dropping
- * off the post and gliding away low over the lake. Any season, not in the rain. Pure in time.
+ * off the post and gliding away low over the lake. When moths are about the lantern beside it, it
+ * spends spells following one round with its head. Any season, not in the rain. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
@@ -62,8 +64,22 @@ function glide(a: Point, b: Point, t: number, dip: number): Point {
 /** Facing back up the dock, turned a touch toward the angler, as it perches. */
 const PERCH_YAW = 0.25;
 
-/** The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post. */
-export function owlAt(time: number, snow = false, still = false): OwlPose {
+/** Every so long on the post it picks out a moth round its lantern and follows it for a spell. */
+export const WATCH_EVERY_SEC = 9;
+export const WATCH_FROM_SEC = 3;
+export const WATCH_SEC = 5;
+
+/** The head turn, off its perching yaw and held to LOOK_MAX, that looks at the point (`x`, `z`) from the post. */
+export function owlLookAt(x: number, z: number) {
+  const raw = Math.atan2(x - OWL_POST.x, z - OWL_POST.z) - PERCH_YAW;
+  return Math.max(-LOOK_MAX, Math.min(LOOK_MAX, Math.atan2(Math.sin(raw), Math.cos(raw))));
+}
+
+/**
+ * The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post;
+ * `moths` when moths circle the lanterns (mothOrbit.ts), the first of which is the one on its post.
+ */
+export function owlAt(time: number, snow = false, still = false, moths = false): OwlPose {
   const post = { x: OWL_POST.x, y: OWL_POST.y + (snow ? SNOW_CAP : 0), z: OWL_POST.z };
   const sat: OwlPose = { ...post, here: true, yaw: PERCH_YAW, flying: 0, flap: 0, look: 0, bob: 0, blink: 0 };
   if (still) return sat;
@@ -84,6 +100,13 @@ export function owlAt(time: number, snow = false, still = false): OwlPose {
     const look = LOOK_MAX * Math.max(-1, Math.min(1, swivel * 1.6));
     const bobbing = sit % 7 < 1.6 ? Math.max(0, Math.sin((sit % 7) * Math.PI * 2.5)) : 0;
     const blink = sit % 5.3 < 0.18 ? 1 : 0;
+    const spell = sit % WATCH_EVERY_SEC;
+    if (moths && spell >= WATCH_FROM_SEC && spell < WATCH_FROM_SEC + WATCH_SEC) {
+      // Its head follows the moth round; a bob or two as it first fixes on it.
+      const moth = mothAt(Math.floor(sit / WATCH_EVERY_SEC) % MOTHS_PER_LANTERN, time);
+      const fix = spell - WATCH_FROM_SEC;
+      return { ...sat, look: owlLookAt(moth.x, moth.z), bob: fix < 0.8 ? Math.max(0, Math.sin(fix * Math.PI * 2.5)) : 0, blink };
+    }
     return { ...sat, look, bob: bobbing, blink };
   }
   const p = smooth((sit - SIT_SEC) / OUT_SEC);

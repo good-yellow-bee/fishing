@@ -71,7 +71,7 @@ export function owlWingShape(side: number) {
 }
 
 /** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off (littleOwl.ts). */
-export function PostOwl({ snow }: { snow: boolean }) {
+export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
   const still = useReducedMotion();
   const bird = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
@@ -90,9 +90,9 @@ export function PostOwl({ snow }: { snow: boolean }) {
     },
     [shapes, material],
   );
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
-    const pose = owlAt(time, snow, still);
+    const pose = owlAt(time, snow, still, moths);
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;
@@ -103,7 +103,8 @@ export function PostOwl({ snow }: { snow: boolean }) {
     group.rotation.x = pose.flying * 0.25;
     if (body.current) body.current.rotation.x = pose.bob * 0.35;
     if (head.current) {
-      head.current.rotation.y = pose.look;
+      // Eased, so it follows a darting moth without twitching and swings smoothly between looks.
+      head.current.rotation.y += (pose.look - head.current.rotation.y) * Math.min(1, delta * 7);
       head.current.position.y = 0.098 - pose.bob * 0.014;
     }
     if (eyes.current) eyes.current.visible = !pose.blink;

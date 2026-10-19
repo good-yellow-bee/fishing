@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { inLake } from "@stillwater/shared";
-import { LOOK_MAX, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, owlAt, littleOwlOut } from "./littleOwl";
+import { LOOK_MAX, OWL_POST, SIT_SEC, VISIT_EVERY_SEC, VISIT_SEC, WATCH_EVERY_SEC, WATCH_FROM_SEC, WATCH_SEC, owlAt, owlLookAt, littleOwlOut } from "./littleOwl";
+import { MOTH_LAMPS, MOTHS_PER_LANTERN, mothAt } from "./mothOrbit";
 import { robinOut } from "./robinVisit";
 
 describe("little owl on the dock post", () => {
@@ -55,6 +56,27 @@ describe("little owl on the dock post", () => {
     expect(maxLook).toBeLessThanOrEqual(LOOK_MAX);
     expect(bobs).toBeGreaterThan(0);
     expect(blinks).toBeGreaterThan(0);
+  });
+
+  it("perches beside the first moth lantern and, with moths about, follows one round with its head for spells", () => {
+    expect(Math.hypot(MOTH_LAMPS[0]!.x - OWL_POST.x, MOTH_LAMPS[0]!.z - OWL_POST.z)).toBeLessThan(0.3);
+    let watched = 0;
+    let differs = 0;
+    for (let t = 0; t < VISIT_EVERY_SEC; t += 0.05) {
+      const pose = owlAt(t, false, false, true);
+      if (!pose.here || pose.flying) continue;
+      if (Math.abs(pose.look - owlAt(t).look) > 1e-9) differs += 1;
+      for (let i = 0; i < MOTHS_PER_LANTERN; i++) {
+        const moth = mothAt(i, t);
+        if (Math.abs(owlLookAt(moth.x, moth.z) - pose.look) < 1e-9) {
+          watched += 1;
+          break;
+        }
+      }
+    }
+    expect(watched).toBeGreaterThan(SIT_SEC / WATCH_EVERY_SEC * WATCH_SEC * 10);
+    expect(differs).toBeGreaterThan(0);
+    expect(WATCH_FROM_SEC + WATCH_SEC).toBeLessThanOrEqual(WATCH_EVERY_SEC);
   });
 
   it("sits still on its post with reduced motion, up on the snow cap in winter", () => {

@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-pa30";
+export const NEWS_ID = "2026-10-19-scene43";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.",
   "On a tablet or a phone held sideways, the Map's list of waters gives each water's last fish and next outing room to read in a line, and with larger text a water's details go under its name. The lodge's catch log now scrolls its own table sideways at every width instead of pushing the whole page, and a screen reader now reads out what the season and the sky mean for the fish, and the day's wind.",
   "On fine spring and summer days a little paper boat now and then drifts slowly past in front of the dock. Your dog turns to watch it go by, and the robin on the posts too, and in winter it wears a red knitted jumper.",
   "Level 17, Child of the lake, waits at 57000 points, and from there the shack sells you groundbait and live shiners a fifth cheaper. Take a lodge record from another angler and the catch earns 1.5× points, and so does your first fish of a day that makes three or more days in a row.",
@@ -12,7 +13,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On Trips, last evening's outing still going after midnight says Out now, with a last night quick search, and the average's count of outings without a fish opens them. A copied plan says how the last outing on that water went, lost fish and missed strikes included, and Home names the last outing's lure only when it led.",
   "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.",
   "Two new lodge badges to chase: Whole lake, for landing every kind of fish in the lake, and Trophy hunter, for five kinds at trophy weight. And the shack now sells a live shiner for 50 points: it goes on your hook for the next cast and draws the hunters, and a shiner on the hook stays there through a reload.",
-  "On a narrow phone or with larger text, outing and catch cards now put the date, size and photo above the words instead of squeezing them into a strip, and the lodge board's fish of the week does the same. Keyboard focus in the field log stops below the phone's top bar, the catch form's time and nearest-water buttons are easier to tap, and on a phone held sideways the coach and the news card stay off the shore signs.",
   "On Waters, each card names the water's best fish and says when it has rested a week or more. A water's copied summary says when it was last fished, and a water fished only blank can be copied too.",
   "On Bests, a water's card names its biggest fish, the record tiles say the day, and a season marks each kind that set a new best and names its best lure. The year's goal box says how many days since your last fish, and the goal form offers a goal that beats last year.",
   "An outing's tackle list offers Undo after Unpack all or taking a piece off. On the Map, a water's next outing says how much of its bag is packed, and in the small hours the water you are on says Out now. Gear's best lures to pack put those of the outing's own water first.",
