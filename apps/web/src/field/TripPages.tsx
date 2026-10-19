@@ -114,7 +114,11 @@ const TRIP_FIND = "find";
 function calendarNotes(book: Logbook, trip: Trip, tackleItems: TackleItem[]): string[] {
   const works = lureTally({ ...book, catches: countedFish(catchesForSpot(book, trip.spotId)) }, 3).map((row) => t(row.lure));
   const toPack = itemsForTrip(tackleItems, trip.id).filter((item) => !item.packed).map((item) => item.label);
+  // When to leave: the day's light at the water, and the moon that night, as the outing's page gives them.
+  const spot = spotById(book, trip.spotId);
   return [
+    (spot && sunText(trip.date, spot)) || "",
+    t("Moon that night: {moon}", { moon: t(MOON_LABELS[moonName(moonPhase(new Date(`${trip.date}T22:00:00`)))]) }),
     works.length > 0 ? t("Works here: {lures}", { lures: works.join(", ") }) : "",
     toPack.length > 0 ? t("Still to pack: {items}", { items: toPack.join(", ") }) : "",
   ].filter(Boolean);
@@ -303,18 +307,20 @@ function peakTime(catches: readonly CatchEntry[]): { label: string; count: numbe
 /** The day's sunrise and sunset at the water, for a water with a place, in this device's clock. */
 /** Not from the sample sheet's pin: its made-up waters sit far away, and their sunrise read on this clock would mislead (as Home leaves it out). */
 function SunLine({ date, spot }: { date: string; spot: Spot }) {
+  const text = sunText(date, spot);
+  return text ? <p className="meta sun-line">{text}</p> : null;
+}
+
+/** The sun line's words, or null for a water with no place to read them at. */
+function sunText(date: string, spot: Spot): string | null {
   const place = spot.place ?? (isSampleSpot(spot.id) ? undefined : placeFor(spot.id));
   if (!place) return null;
   const sun = sunTimes(date, place.lat, place.lng);
-  return (
-    <p className="meta sun-line">
-      {"rise" in sun
-        ? t("Sunrise {rise} · sunset {set}", { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) })
-        : sun.always === "up"
-          ? t("The sun doesn't set that day.")
-          : t("The sun doesn't rise that day.")}
-    </p>
-  );
+  return "rise" in sun
+    ? t("Sunrise {rise} · sunset {set}", { rise: formatTimeOfDay(sun.rise.toISOString()), set: formatTimeOfDay(sun.set.toISOString()) })
+    : sun.always === "up"
+      ? t("The sun doesn't set that day.")
+      : t("The sun doesn't rise that day.");
 }
 
 function TripView() {

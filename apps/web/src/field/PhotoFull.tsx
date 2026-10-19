@@ -84,13 +84,15 @@ export function PhotoFull({ src: ownSrc, alt: ownAlt, name: ownName, caption: ow
         {caption ? <p className="photo-full-caption">{caption}</p> : null}
         {stepping ? (
           <div className="photo-full-bar">
-            <button type="button" className="text-button" disabled={shown <= 0} onClick={() => step(-1)}>
+            {/* At either end the step stays pressable but goes nowhere: a disabled button would drop focus out of the dialog,
+                and with it the arrow keys. */}
+            <button type="button" className="text-button" aria-disabled={shown <= 0} onClick={() => step(-1)}>
               {t("Previous photo")}
             </button>
             <span className="meta" aria-live="polite">
               {t("{at} of {count}", { at: shown + 1, count: photos.length })}
             </span>
-            <button type="button" className="text-button" disabled={shown >= photos.length - 1} onClick={() => step(1)}>
+            <button type="button" className="text-button" aria-disabled={shown >= photos.length - 1} onClick={() => step(1)}>
               {t("Next photo")}
             </button>
             {other ? (

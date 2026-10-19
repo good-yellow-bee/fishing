@@ -98,6 +98,12 @@ export type CatchDraft = {
   released?: boolean;
   /** The other measure (a weight for a fish measured by length, or the other way), left blank when not taken. */
   alsoAmount?: string;
+  /**
+   * The instant an edited fish was stored at, sent when the edit leaves its time and outing as they were: the fish
+   * keeps it exactly, and the outing it was saved on still holds, though the phone has since crossed a time zone
+   * and reads the same instant on another day.
+   */
+  keptAt?: string;
 };
 
 export type SpotDraft = {
@@ -651,13 +657,17 @@ export function parseCatchDraft(draft: CatchDraft, book: Logbook): Parsed<Omit<C
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(draft.caughtAt)) {
     return fail("caughtAt", "Set the time you landed it.");
   }
-  const when = new Date(draft.caughtAt);
+  const kept = draft.keptAt ? new Date(draft.keptAt) : null;
+  const keptTime = kept !== null && !Number.isNaN(kept.getTime());
+  const when = keptTime ? kept : new Date(draft.caughtAt);
   if (Number.isNaN(when.getTime())) return fail("caughtAt", "Set the time you landed it.");
+  // A slip of the keys ("1026") would file the fish as the book's oldest: from 1900 on, as an outing's date.
+  if (Number(draft.caughtAt.slice(0, 4)) < 1900) return fail("caughtAt", "Check the year.");
   if (when.getTime() > Date.now() + 5 * 60 * 1000) {
     return fail("caughtAt", "That time is still ahead of you.");
   }
   // A fish goes on its own day's outing or the night before's, never on one planned for later.
-  if (tripId && tripById(book, tripId)!.date > draft.caughtAt.slice(0, 10)) {
+  if (tripId && !keptTime && tripById(book, tripId)!.date > draft.caughtAt.slice(0, 10)) {
     return fail("tripId", "That outing comes after the time this fish was landed.");
   }
 

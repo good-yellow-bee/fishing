@@ -690,8 +690,15 @@ button.field-primary {
   margin-top: 8px;
 }
 
-.photo-full-bar .text-button {
+.photo-full-bar .text-button,
+.photo-full-bar .meta {
   color: #f3e6cc;
+}
+
+/* A step at the end of the photos: still in the tab order, so focus stays in the view, but plainly going nowhere. */
+.photo-full-bar .text-button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
 }
 
 /* What fish it is, under the full-size picture: a caption, kept to its width. */

@@ -164,7 +164,7 @@ export function PhotosPage() {
             <Link to="/catches">{t("Catch log")}</Link>
           </p>
           <h1>{t("Photos")}</h1>
-          <p className="lede">{t("Every fish in the book with a picture, newest first.")}</p>
+          <p className="lede">{largest ? t("Every fish in the book with a picture, largest first.") : t("Every fish in the book with a picture, newest first.")}</p>
         </div>
       </header>
       {all.length > 0 ? (
