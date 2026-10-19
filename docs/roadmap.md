@@ -1169,6 +1169,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA124~~ | ~~On a 280 px phone with larger text the lake's bank chip ("Dock · groundbait · 5 left") is 69 px wide inside, and "groundbait" alone ran 11 px out of it over the lure panel. The chip now breaks a word too long for it, with a hyphen where the language allows ("ground-bait") (#1450)~~ | phone UX | S |
 | ~~PA125~~ | ~~Under 360 px with larger text the lake header's links took three rows and pushed the hint under the walk stick and cast meter (71 px of it at 320 x 568, 26 px at 280 x 653). Its rows now sit flush (each link keeps its 32 px) and the links drop their letter spacing, so they take two: the hint clears the stick from 280 to 359 px in English. Known floor: Polish at 320 x 568 still needs three rows and the stick covers the hint's last 23 px (#1455)~~ | phone UX | S |
 | ~~PA126~~ | ~~On an upright phone the lake's hint hung a fixed 90 px under the header, but the bank chip beside the lure panel wraps tall when it says several things ("Dock · biting today · bites sooner now · groundbait · 5 left"), and drew over the hint's words (46 px of them at 390 x 844 with larger text, 22 px at 320-360 px by default). The scene now keeps the chip's bottom edge and the hint hangs below whichever is lower; the cast meter stays over the hint. Floor: under 375 px with larger text and three or more chip notes the hint comes down behind the walk stick's ring (on master it was hidden behind the chip) (#1463)~~ | phone UX | S |
+| ~~PA127~~ | ~~On a sideways phone the lake's bank chip had no right edge, so a long note ("Dock · cloud over the sun" with large or larger text at 568 to 740 px) ran on under the shore signs and was cut off mid-word. It now stops short of the signs' reach (--signs-room) and ends in an ellipsis; a screen reader still reads it whole (#1474)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -1384,6 +1385,9 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC208~~ | ~~Mallard takes fright: strike a fish from the dock while the mallard is on the boards and it bursts up off them and away over the lake, back on a later visit; struck at while it swims in, it goes as soon as it lands (moved into the fishing scene)~~ (#1465) | scene | S |
 | ~~SC209~~ | ~~Fireflies by the dock: on summer nights a few fireflies drift and blink over the water just left of the dock, where you see them close, not only over the far reed beds~~ (#1468) | scene | S |
 | ~~SC210~~ | ~~News card scene49 covers SC208 and SC209~~ (#1468) | scene | S |
+| ~~SC211~~ | ~~Bat at the lantern: on summer evenings and nights, when its loop brings it near, one of the bats now and then breaks off to hawk the moths just off the dock's right-hand lantern, a few tight turns in the light over the water, and eases back out~~ (#1470) | scene | S |
+| ~~SC212~~ | ~~Snowy owl nights: the little owl now comes to the dock post on snowy winter nights too, sitting on the post's snow cap by the lantern (it stayed away whenever it rained, which in winter is snow)~~ (#1473) | scene | S |
+| ~~SC213~~ | ~~News card scene50 covers SC211 and SC212~~ (#1473) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
@@ -1748,7 +1752,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT357~~ | ~~News card 2026-10-19-game36 covers GT355 and GT356: pause a crankbait and twitch a fly while they wait~~ (#1454) | ui | S |
 | ~~GT358~~ | ~~The point's rock edge: a cast landing just past the point's shallow rocks, where the water drops off (past the rocks' depth, to 0.55 on the lake's 0-1 depth scale), bites 0.85x sooner without the rocks' snag, and the wait hint says "Along the rock edge…"~~ (#1464) | gameplay | S |
 | ~~GT359~~ | ~~The walleye dives: in open water (from the boat) its runs bore down as they do off the drop-off (harder pull, faster tiring, the scene's dive), and the fight card and field guide say "Diver: …"~~ (#1466) | gameplay | S |
-| GT360 | News card 2026-10-19-game37 covers GT358 and GT359: the point's rock edge and the walleye's dive in open water | ui | S |
+| ~~GT360~~ | ~~News card 2026-10-19-game37 covers GT358 and GT359: the point's rock edge and the walleye's dive in open water~~ (#1469) | ui | S |
+| GT361 | More reasons: when a cast has more reasons for a sooner or slower bite than the hint's two, the hint ends with "2 more reasons", which opens the rest in the hint (and steps aside so Space still strikes) | gameplay | S |
 
 ## Risks / open questions for the owner
 

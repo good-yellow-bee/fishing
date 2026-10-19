@@ -5,11 +5,14 @@ import { robinOut } from "./robinVisit";
 
 describe("little owl on the dock post", () => {
   it("comes at night in any season, but not in the rain, so it never meets the robin", () => {
-    expect(littleOwlOut("night", "clear")).toBe(true);
-    expect(littleOwlOut("night", "fog")).toBe(true);
-    expect(littleOwlOut("night", "rain")).toBe(false);
-    expect(littleOwlOut("dusk", "clear")).toBe(false);
-    for (const hour of ["dawn", "day", "dusk", "night"] as const) for (const season of ["spring", "summer", "fall", "winter"] as const) expect(littleOwlOut(hour, "clear") && robinOut(hour, "clear", season)).toBe(false);
+    expect(littleOwlOut("night", "clear", "fall")).toBe(true);
+    expect(littleOwlOut("night", "fog", "spring")).toBe(true);
+    expect(littleOwlOut("night", "rain", "summer")).toBe(false);
+    expect(littleOwlOut("dusk", "clear", "fall")).toBe(false);
+    // Winter's precipitation is snow, and it comes in that.
+    expect(littleOwlOut("night", "rain", "winter")).toBe(true);
+    for (const hour of ["dawn", "day", "dusk", "night"] as const) for (const season of ["spring", "summer", "fall", "winter"] as const) expect(littleOwlOut(hour, "clear", season) && robinOut(hour, "clear", season)).toBe(false);
+    for (const hour of ["dawn", "day", "dusk", "night"] as const) expect(littleOwlOut(hour, "rain", "winter") && robinOut(hour, "rain", "winter")).toBe(false);
   });
 
   it("sits on the front-left post for a good while each visit, and is away the rest", () => {

@@ -1,10 +1,11 @@
 /** Bump with each batch of news, so anglers who saw the last card see the new one once. */
-export const NEWS_ID = "2026-10-19-field62";
+export const NEWS_ID = "2026-10-19-scene50";
 export const NEWS_KEY = "stillwater.news.v1";
 
 /** The headline changes since the last card, in English; the card runs each through t().
  * The card shows only the newest four, and this list ships with every page, so older lines are dropped. */
 export const NEWS_ITEMS: readonly string[] = [
+  "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.",
   "On Waters, a water's card says Out now while you are fishing it, and a water's page says when its first fish came. A kind typed two ways, such as Perch and Perches, is one kind on every page, chip and record.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.",
   "At the Point, cast just past the shallow rocks onto the edge where the water drops off: the bass hold there, so the bite comes sooner and the rocks can't snag you. And a walleye hooked in open water now bores down on its runs, pulling harder but tiring faster.",
@@ -12,8 +13,6 @@ export const NEWS_ITEMS: readonly string[] = [
   "On Bests, the longest and heaviest tiles say how long a record has stood, and the month-by-month table names the best month the book has ever had. Not yet this year counts a kind once however it was typed, in your language's order.",
   "On snowy winter days your dog now comes out on the dock too, and when the snow piles up on its back it gives itself a shake. The robin comes to the snowy posts as well.",
   "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.",
-  "Two more lures can be worked while they wait: tap to pause a crankbait so it floats up in front of a following fish, or to twitch a fly like a live insect. As with a popper, jig, spoon or streamer, the first taps bring the bite sooner, and too many put the fish off.",
-  "On wet evenings and nights from spring to fall a toad now hops slowly across the dock behind you. In winter your dog's breath puffs in the cold, and the robin stays on the posts into dusk, the last bird to go to roost.",
   "On Gear, each coming outing can copy its plan with what is still to pack, and the lure record says when a lure that never took a fish was last packed. On the Map, a water you have fished today says Out now.",
   "Home's Next box copies the plan for a message. The outings spreadsheet lists the lures each outing took, and from January to March the book file offers last year's catches as a sheet of their own. A lure typed two ways reads once in the spreadsheets and copied texts.",
   "A fish's page offers to step through its water's fish, and on an outing it says how long after the one before it came. A loose fish on a day with a dawn and a dusk outing goes to the nearer one, a length can be written in feet and inches, such as 2 ft 3 in, and a lure typed two ways reads as one.",
