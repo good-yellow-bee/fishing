@@ -1,11 +1,12 @@
 import { DOCK_PLANKS, DOCK_STAND_X, DOCK_STAND_Z, type LakeHour, type LakeSeason, type Sky } from "@stillwater/shared";
-import { smoothstep, visitAt } from "./visitClock";
+import { STARTLE_TURN_SEC, smoothstep, turnBetween, visitAt } from "./visitClock";
 
 /**
  * A mallard drake on the dock on wet days: now and then one swims in to the left side of the dock,
  * flaps up onto the boards behind the angler, waddles in, stops to preen with its head right round to
  * its back, gives itself a shake that throws off the rain, then turns and waddles back, flaps down and
- * swims away. It keeps to the left of the angler, clear of the thermos. From spring to fall, by day
+ * swims away. It keeps to the left of the angler, clear of the thermos. A strike from the dock while it
+ * is on the boards flushes it: it bursts up off them and away over the lake. From spring to fall, by day
  * while it rains. Pure in time since it came out.
  */
 
@@ -36,6 +37,15 @@ const REST_SEC = 1.4;
 const TURN_SEC = 1;
 const DOWN_SEC = 0.9;
 export const VISIT_SEC = SWIM_SEC + UP_SEC + WALK_SEC + PREEN_SEC + SHAKE_SEC + REST_SEC + TURN_SEC + WALK_SEC + DOWN_SEC + SWIM_SEC;
+/** When it is up on the boards, from landing to stepping off, in seconds into a visit. */
+const ON_BOARDS = SWIM_SEC + UP_SEC;
+const OFF_BOARDS = ON_BOARDS + WALK_SEC + PREEN_SEC + SHAKE_SEC + REST_SEC + TURN_SEC + WALK_SEC;
+/** A strike while it swims in counts only this close to its landing; earlier, it was too far out to mind. */
+const LATE_SWIM_SEC = 1;
+/** Flushed, it is gone over the lake this fast, rising this high and going this far. */
+const FLUSH_SEC = 1.6;
+const FLUSH_UP = 1.6;
+const FLUSH_OUT = 3;
 /** Its steps, a second. */
 const STEP_HZ = 2.6;
 
@@ -70,12 +80,42 @@ function rocking(t: number, length: number) {
   return Math.sin(t * STEP_HZ * Math.PI) * Math.min(1, t / 0.3, (length - t) / 0.3);
 }
 
-/** The mallard `time` seconds after it came out (so it never appears mid-way). `still` stands it behind the angler. */
-export function mallardAt(time: number, still = false): MallardPose {
+/** Which visit `time` falls in and how far into it, counted from when it came out. */
+export const mallardVisit = (time: number) => visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+
+/**
+ * The mallard `time` seconds after it came out (so it never appears mid-way). `still` stands it behind the
+ * angler. `startledAt`, on the same clock, is the angler's last strike: while it is on the boards that
+ * flushes it, and if it is still coming in, it goes as soon as it lands.
+ */
+export function mallardAt(time: number, still = false, startledAt = -Infinity): MallardPose {
   const at = (spot: Spot, yaw: number, y = MALLARD_Y): MallardPose => ({ ...spot, here: true, y, yaw, flap: 0, waddle: 0, preen: 0, shake: 0 });
   if (still) return at(MALLARD_STOP, IN_YAW);
-  const { index, into } = visitAt(time, FIRST_SEC, VISIT_EVERY_SEC);
+  const { index, into } = mallardVisit(time);
   if (index < 0 || into >= VISIT_SEC) return AWAY;
+  const strike = mallardVisit(startledAt);
+  const minds = strike.index === index && strike.into >= ON_BOARDS - LATE_SWIM_SEC && strike.into < OFF_BOARDS;
+  const flushAt = minds ? Math.max(ON_BOARDS, strike.into) : Infinity;
+  if (into >= flushAt) {
+    const away = into - flushAt;
+    if (away >= FLUSH_SEC) return AWAY;
+    // Up off the boards in a clatter of wings and away out over the water on its own side of the dock,
+    // swinging round toward it and its head coming straight in a moment.
+    const from = mallardAt(time - away);
+    const k = smoothstep(away / FLUSH_SEC);
+    const to = { x: from.x - FLUSH_OUT, z: from.z - FLUSH_OUT * 0.3 };
+    const turn = away / STARTLE_TURN_SEC;
+    return {
+      ...between(from, to, k * k),
+      here: true,
+      y: from.y + FLUSH_UP * k,
+      yaw: turnBetween(from.yaw, Math.atan2(to.x - from.x, to.z - from.z), turn),
+      flap: Math.min(1, from.flap + away / 0.15),
+      waddle: 0,
+      preen: from.preen * Math.max(0, 1 - turn),
+      shake: 0,
+    };
+  }
   let t = into;
   const hop = (from: Spot, to: Spot, fromY: number, toY: number, yaw: number, k: number): MallardPose => {
     const e = smoothstep(k);

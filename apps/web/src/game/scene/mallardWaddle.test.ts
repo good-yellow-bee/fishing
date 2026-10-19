@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { MALLARD_EDGE, MALLARD_STOP, MALLARD_Y, VISIT_EVERY_SEC, VISIT_SEC, mallardAt, mallardOut } from "./mallardWaddle";
+import { MALLARD_EDGE, MALLARD_STOP, MALLARD_Y, VISIT_EVERY_SEC, VISIT_SEC, mallardAt, mallardOut, mallardVisit } from "./mallardWaddle";
 import { LOOP_SEC, snailAt } from "./snailCrawl";
 import { CUP_SPOT, THERMOS_SPOT } from "./steamWisp";
 import { toadOut } from "./toadHop";
@@ -79,5 +79,68 @@ describe("mallard on the dock", () => {
   it("stands still on the boards with reduced motion", () => {
     expect(mallardAt(3, true)).toEqual(mallardAt(300, true));
     expect(mallardAt(3, true).here).toBe(true);
+  });
+
+  describe("flushed by a strike", () => {
+    const firstOnBoards = () => {
+      // Landed: on the boards with its wings folded, the hop up done.
+      for (let t = 0; t < VISIT_EVERY_SEC; t += 1 / 60) if (mallardAt(t).y === MALLARD_Y && mallardAt(t).flap === 0) return t;
+      throw new Error("never on the boards");
+    };
+
+    it("bursts up off the boards and away over the lake when struck at while it is up there, and is gone till next time", () => {
+      const strike = firstOnBoards() + 6;
+      const before = mallardAt(strike);
+      const off = mallardAt(strike + 0.4, false, strike);
+      expect(off.flap).toBe(1);
+      expect(off.y).toBeGreaterThan(before.y);
+      expect(Math.hypot(mallardAt(strike + 0.02, false, strike).x - before.x, mallardAt(strike + 0.02, false, strike).z - before.z)).toBeLessThan(0.05);
+      expect(mallardAt(strike + 2, false, strike).here).toBe(false);
+      expect(mallardAt(strike + 15, false, strike).here).toBe(false);
+      expect(mallardAt(strike + VISIT_EVERY_SEC, false, strike)).toEqual(mallardAt(strike + VISIT_EVERY_SEC));
+    });
+
+    it("struck at as it comes up onto the boards, it lands and goes at once", () => {
+      const landed = firstOnBoards();
+      const strike = landed - 0.5;
+      expect(mallardAt(strike + 0.3, false, strike)).toEqual(mallardAt(strike + 0.3));
+      expect(mallardAt(landed + 0.3, false, strike).flap).toBe(1);
+      expect(mallardAt(landed + 3, false, strike).here).toBe(false);
+    });
+
+    it("pays no mind once it has stepped off and is swimming away, and none to a strike from another visit", () => {
+      let leaving = -1;
+      const landed = firstOnBoards();
+      for (let t = landed; t < VISIT_EVERY_SEC; t += 1 / 60) if (mallardAt(t).y < MALLARD_Y) { leaving = t; break; }
+      const late = leaving + 1;
+      expect(mallardAt(late + 0.5, false, late)).toEqual(mallardAt(late + 0.5));
+      expect(mallardVisit(landed - VISIT_EVERY_SEC).index).not.toBe(mallardVisit(landed).index);
+      expect(mallardAt(landed + 5, false, landed + 5 - VISIT_EVERY_SEC)).toEqual(mallardAt(landed + 5));
+    });
+
+    it("flies off without jumps, swinging round and bringing its head in smoothly even mid-preen", () => {
+      let preening = -1;
+      for (let t = firstOnBoards(); t < VISIT_EVERY_SEC && preening < 0; t += 1 / 60) if (mallardAt(t).preen > 0.8) preening = t;
+      const strike = preening + 1;
+      let last = mallardAt(strike - 1 / 60, false, strike);
+      for (let t = strike; t < strike + 1.6; t += 1 / 60) {
+        const pose = mallardAt(t, false, strike);
+        if (pose.here && last.here) {
+          expect(Math.hypot(pose.x - last.x, pose.y - last.y, pose.z - last.z)).toBeLessThan(0.1);
+          expect(Math.abs(Math.atan2(Math.sin(pose.yaw - last.yaw), Math.cos(pose.yaw - last.yaw)))).toBeLessThan(0.25);
+          expect(Math.abs(pose.preen - last.preen)).toBeLessThan(0.25);
+          expect(Math.abs(pose.flap - last.flap)).toBeLessThan(0.25);
+          // Away over its own side of the dock, not across the angler.
+          expect(pose.x).toBeLessThan(MALLARD_STOP.x + 0.01);
+        }
+        last = pose;
+      }
+    });
+
+    it("pays no mind to a strike while it is still far out on the water", () => {
+      const landed = firstOnBoards();
+      const early = landed - 3.5;
+      expect(mallardAt(landed + 1, false, early)).toEqual(mallardAt(landed + 1));
+    });
   });
 });
