@@ -1385,6 +1385,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC209~~ | ~~Fireflies by the dock: on summer nights a few fireflies drift and blink over the water just left of the dock, where you see them close, not only over the far reed beds~~ (#1468) | scene | S |
 | ~~SC210~~ | ~~News card scene49 covers SC208 and SC209~~ (#1468) | scene | S |
 | ~~SC211~~ | ~~Bat at the lantern: on summer evenings and nights, when its loop brings it near, one of the bats now and then breaks off to hawk the moths just off the dock's right-hand lantern, a few tight turns in the light over the water, and eases back out~~ (#1470) | scene | S |
+| SC212 | Snowy owl nights: the little owl now comes to the dock post on snowy winter nights too, sitting on the post's snow cap by the lantern (it stayed away whenever it rained, which in winter is snow) | scene | S |
+| SC213 | News card scene50 covers SC211 and SC212 | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
