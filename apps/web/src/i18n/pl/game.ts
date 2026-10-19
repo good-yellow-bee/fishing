@@ -107,8 +107,6 @@ export const PL_GAME: PlBook = {
   "Lily pads: turn every run, or it dives into the pad stems": "Grzybienie: zawracaj każdy odjazd, bo zanurkuje między łodygi",
   "A cloud slides over the sun, and the fish move up into the shallows to feed.": "Chmura nasuwa się na słońce, a ryby podpływają na płyciznę żerować.",
   "{n} more reasons": ["jeszcze {n} powód", "jeszcze {n} powody", "jeszcze {n} powodów"],
-  "When a cast has more reasons for a quick or slow bite than the hint can fit, the hint ends with \"2 more reasons\": tap it to read the rest. And the outings you pack up from the lake now show their titles and season notes in whichever language you read the field log in.":
-    "Gdy rzut ma więcej powodów szybkiego lub wolnego brania, niż mieści podpowiedź, kończy się ona napisem „jeszcze 2 powody”: stuknij, by przeczytać resztę. A wyprawy zwinięte nad jeziorem pokazują teraz tytuły i notki o porze roku w języku, w którym czytasz dziennik połowów.",
   "Your headlamp shows the float plainly, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, ale jej światło na wodzie płoszy ryby.",
   "A headlamp shows the float plainly, so the strike holds longer, but its light on the water puts the fish off.": "Czołówka dobrze oświetla spławik, więc na zacięcie jest więcej czasu, ale jej światło na wodzie płoszy ryby.",
   "Headlamp": "Czołówka",
@@ -130,6 +128,8 @@ export const PL_GAME: PlBook = {
   "{n} fish in clean fights": "{n} ryb w czystych holach",
   "This week's challenges": "Wyzwania tygodnia",
   "Goals run Monday to Sunday.": "Wyzwania trwają od poniedziałku do niedzieli.",
+  "Every kind of fish now climbs mastery tiers as you land it, Known at 5, Skilled at 15 and Master at 40: the field guide shows how far you are, and a mastered kind pays 1.1× points. And the shack board adds three challenges that run all week, Monday to Sunday, for bigger rewards.":
+    "Każdy gatunek ryby wspina się teraz po poziomach opanowania, gdy go łowisz: Znajomość przy 5, Wprawa przy 15 i Mistrzostwo przy 40. Atlas ryb pokazuje, jak daleko to zaszło, a opanowany gatunek daje 1,1× punktów. A tablica w szopie dodaje trzy wyzwania na cały tydzień, od poniedziałku do niedzieli, z większymi nagrodami.",
   "Tight to the lily pads, where the bass and pike wait in ambush.": "Tuż przy liściach grzybieni, gdzie w zasadzce czekają bassy i szczupaki.",
   "Tight to the far rock, where the walleye hold in its shadow.": "Tuż przy dalekiej skale, gdzie w jej cieniu trzymają się sandacze.",
   "Along the rock edge, where the point drops off and the bass hold.": "Wzdłuż skalnej krawędzi, gdzie cypel opada w głąb i trzymają się bassy.",
