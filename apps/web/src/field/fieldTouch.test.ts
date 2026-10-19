@@ -353,3 +353,21 @@ describe("the field log with larger text", () => {
     expect(/\n\.field-rail \{([^}]*)\}/.exec(css)?.[1]).toContain("height: calc(100dvh / var(--text-zoom, 1));");
   });
 });
+
+describe("trip and catch cards on a narrow phone", () => {
+  it("stack the date, measure and photo above the text under about 330 px of room (390 px with a photo), zoom included", () => {
+    const at = (width: number) => css.slice(css.indexOf(`@media (max-width: ${width}px) {`));
+    for (const [width, prefix] of [[329, ""], [379, 'html[data-text-size="large"] '], [429, 'html[data-text-size="larger"] ']] as const) {
+      expect(at(width)).toMatch(new RegExp(`^@media \\(max-width: ${width}px\\) \\{\\n  ${prefix.replace(/[[\]]/g, "\\$&")}:is\\(\\.trip-card, \\.catch-card:not\\(\\.has-photo\\)\\) \\{\\n    grid-template-columns: minmax\\(0, 1fr\\);`));
+    }
+    for (const [width, prefix] of [[389, ""], [449, 'html[data-text-size="large"] '], [507, 'html[data-text-size="larger"] ']] as const) {
+      const block = at(width).slice(0, at(width).indexOf("\n}\n"));
+      expect(block).toContain(`${prefix}.catch-card.has-photo {\n    grid-template-columns: auto minmax(0, 1fr);`);
+      expect(block).toContain(`${prefix}.catch-card.has-photo > div {\n    grid-column: 1 / -1;`);
+    }
+  });
+
+  it("wraps the save button's words rather than spilling it off the bar", () => {
+    expect(/\n  \.form-save \.field-primary \{([^}]*)\}/.exec(css)?.[1]).toContain("max-width: 100%;");
+  });
+});
