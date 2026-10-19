@@ -2274,6 +2274,9 @@ html[data-input="pad"] .fight-bar .on-pad {
     max-width: calc(100% - 24px - min(210px, calc(56vw / var(--text-zoom, 1))));
     padding: 6px 10px;
     font-size: 14px;
+    /* At 280 px with larger text "groundbait" alone is wider than the chip: it breaks rather than run out of it. */
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
 
   .lure-choice {
