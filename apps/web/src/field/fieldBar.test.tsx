@@ -46,36 +46,50 @@ describe("the phone's sticky top bar", () => {
   });
 });
 
-describe("the phone's fixed tab bar", () => {
-  it("scrolls a field it partly covers clear when the field takes focus, and leaves one above it alone", async () => {
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-      if (this.classList.contains("field-tab")) return { top: 797, bottom: 844, height: 47 } as DOMRect;
-      if (this.id === "low") return { top: 731, bottom: 811, height: 80 } as DOMRect;
-      return { top: 400, bottom: 440, height: 40 } as DOMRect;
+describe("the phone's bars at the bottom", () => {
+  it("scrolls a field tabbed to that they partly cover clear of them, and leaves other focus alone", async () => {
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      if (this.id === "low") return { top: 731, bottom: 811 } as DOMRect;
+      if (this.id === "below") return { top: 900, bottom: 940 } as DOMRect;
+      return { top: 400, bottom: 440 } as DOMRect;
     });
-    const scrolled: string[] = [];
-    HTMLElement.prototype.scrollIntoView = function (this: HTMLElement) {
-      scrolled.push(this.id);
+    vi.stubGlobal("innerHeight", 844);
+    document.documentElement.style.scrollPaddingBottom = "56px";
+    const scrolled: [string, ScrollIntoViewOptions | boolean | undefined][] = [];
+    Element.prototype.scrollIntoView = function (this: Element, how?: ScrollIntoViewOptions | boolean) {
+      scrolled.push([this.id, how]);
     };
     const box = document.createElement("div");
     document.body.append(box);
     const root = createRoot(box);
-    await act(async () => {
-      root.render(
-        <MemoryRouter initialEntries={["/trips/new"]}>
-          <LogbookProvider>
-            <FieldShell>
-              <input id="high" />
-              <textarea id="low" />
-            </FieldShell>
-          </LogbookProvider>
-        </MemoryRouter>,
-      );
-    });
-    document.getElementById("high")!.focus();
-    document.getElementById("low")!.focus();
-    expect(scrolled).toEqual(["low"]);
-    await act(async () => root.unmount());
-    delete (HTMLElement.prototype as Partial<HTMLElement>).scrollIntoView;
+    try {
+      await act(async () => {
+        root.render(
+          <MemoryRouter initialEntries={["/trips/new"]}>
+            <LogbookProvider>
+              <FieldShell>
+                <input id="high" />
+                <textarea id="low" />
+                <input id="below" />
+              </FieldShell>
+            </LogbookProvider>
+          </MemoryRouter>,
+        );
+      });
+      const tabTo = (id: string) => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+        document.getElementById(id)!.focus();
+      };
+      tabTo("high");
+      document.getElementById("low")!.focus({ preventScroll: true });
+      tabTo("below");
+      tabTo("low");
+      expect(scrolled).toEqual([["low", { block: "nearest" }]]);
+    } finally {
+      await act(async () => root.unmount());
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+      document.documentElement.style.scrollPaddingBottom = "";
+      vi.unstubAllGlobals();
+    }
   });
 });
