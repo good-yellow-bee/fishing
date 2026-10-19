@@ -1170,6 +1170,13 @@ const CLOUDS: { y: number; z: number; scale: number; speed: number; offset: numb
   { y: 19, z: -34, scale: 1.2, offset: 72, speed: 0.28 },
 ];
 
+/** A cloud's three puffs, baked into one shape that every cloud shares. */
+const CLOUD_SHAPE = mergeParts([
+  { geometry: new THREE.SphereGeometry(1, 10, 7), position: [0, 0, 0], scale: [2.6, 1.1, 1.6] },
+  { geometry: new THREE.SphereGeometry(1, 9, 6), position: [1.9, 0.35, 0.2], scale: [1.5, 0.85, 1.2] },
+  { geometry: new THREE.SphereGeometry(1, 9, 6), position: [-1.8, 0.2, -0.3], scale: [1.3, 0.7, 1] },
+]);
+
 function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & { color: string }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
@@ -1178,16 +1185,7 @@ function Cloud({ y, z, scale, speed, offset, color }: (typeof CLOUDS)[number] & 
   });
   return (
     <group ref={ref} position={[0, y, z]} scale={scale}>
-      <mesh position={[0, 0, 0]} scale={[2.6, 1.1, 1.6]}>
-        <sphereGeometry args={[1, 10, 7]} />
-        <meshBasicMaterial color={color} fog={false} />
-      </mesh>
-      <mesh position={[1.9, 0.35, 0.2]} scale={[1.5, 0.85, 1.2]}>
-        <sphereGeometry args={[1, 9, 6]} />
-        <meshBasicMaterial color={color} fog={false} />
-      </mesh>
-      <mesh position={[-1.8, 0.2, -0.3]} scale={[1.3, 0.7, 1]}>
-        <sphereGeometry args={[1, 9, 6]} />
+      <mesh geometry={CLOUD_SHAPE}>
         <meshBasicMaterial color={color} fog={false} />
       </mesh>
     </group>
