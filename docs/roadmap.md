@@ -1153,6 +1153,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~PA108~~ | ~~Photos' "Your heaviest fish has no photo" and "Your longest fish has no photo" links ran on in one wrapping line, each reaching into the other (21-30 px): each stands as a 32 px band on touch (#1323)~~ | phone UX | S |
 | ~~PA109~~ | ~~On a sideways phone in Polish a water's coordinates on the Map list wrapped onto Copy the place, whose reach cut the link to 16 px: when the two wrap, the button drops 16 px below (#1329)~~ | phone UX | S |
 | ~~PA110~~ | ~~The amber focus ring read 1.6 to 1 on the parchment cards, so a keyboard player could barely see which of the landed card's or a toast's buttons was next: a darker brass ring there, 5 to 1 or more (#1339)~~ | phone UX | S |
+| ~~PA111~~ | ~~With Sound captions on, a deer snorting on the far bank and the ducklings peeping played with no words on screen, so a player who can't hear them missed both: they now caption like the loon and the beaver, also with sound off (#1349)~~ | phone UX | S |
 
 ## Scene track (added 2026-10-18; its own thread works the lake's look and life: light, water, sky, weather, creatures, scenery and scene speed)
 
@@ -2205,3 +2206,5 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR553~~ | ~~Round 93 ideas: warming or cooling on a water's card, today's sunrise and sunset on its page, its place in the copied summary~~ (#1328) | field | S |
 | ~~BR554~~ | ~~Round 94 outing fixes: an evening outing still going after midnight, sample plans past their day, weekday words in Find an outing, lure spellings, loose fish on cards, focus, touch and wording~~ (#1336) | field | S |
 | ~~BR555~~ | ~~Round 94 outing ideas: quick searches under Find an outing, Last night for an outing still going, missed strikes on cards, all of a water's tackle tips at once~~ (#1337) | field | S |
+| ~~BR556~~ | ~~Round 95 catch fixes: own counts for the lure at a water and a search's spreadsheet, Only my fish on a sample-only book, one kind however written, largest first on one scale, step focus, form touch, released/kept in Polish, wording~~ (#1345) | field | S |
+| ~~BR557~~ | ~~Round 95 catch ideas: quick searches under Find a catch, a search's spreadsheet named after it, a fish's place on its outing~~ (#1346) | field | S |

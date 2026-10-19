@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   WATER_LABELS,
   itemsForTrip,
+  localDate,
   packedCount,
   type CatchEntry,
   type Spot,
@@ -21,6 +22,7 @@ import { catchLink, type ListKey } from "./catchList";
 import { FROM_LIST } from "./leaveDeleted";
 import { isPlanned } from "./TripMonthHead";
 import { outingDay } from "./tripDates";
+import { bookFishDay } from "./tripMonths";
 
 /** A card's heading sits one below the section it is listed under. */
 type CardLevel = 2 | 3 | 4;
@@ -78,7 +80,10 @@ export const CatchCard = memo(function CatchCard({
         {entry.tripId && tripTitle ? (
           <p className="trip-link">
             {/* An untitled outing goes by its water's name, already on the line above: said once. */}
-            <Link to={`/trips/${entry.tripId}`}>{tripTitle === spotName ? t("That day's outing") : tripTitle}</Link>
+            {/* A fish after midnight was on the evening before's outing: "That night's outing". */}
+            <Link to={`/trips/${entry.tripId}`}>
+              {tripTitle !== spotName ? tripTitle : bookFishDay(book, entry) !== localDate(new Date(entry.caughtAt)) ? t("That night's outing") : t("That day's outing")}
+            </Link>
           </p>
         ) : null}
       </div>

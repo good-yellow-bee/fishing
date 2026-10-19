@@ -391,6 +391,19 @@ button.field-primary {
     inset: -8px -4px;
   }
 
+  /* The catch form's water and time rows sit 6 px apart: "Nearest water" under the water, "Now" and "−15 min" under
+     the time reach 5 px each way, and the time rows stand 4 px further apart, so no reach runs into the next control. */
+  .water-field .text-button::after,
+  .time-now.text-button::after,
+  .time-back .text-button::after {
+    inset: -5px -4px;
+  }
+
+  .time-now,
+  .time-back {
+    margin-top: 4px;
+  }
+
   /* Home's stacked count lines ("6 species", "Last time: …", "Log a catch") were 23 px links 8 px apart: each is
      now a full 32 px band of its own, touching the next rather than leaving a gap a tap falls into. */
   .stat-row small a {
