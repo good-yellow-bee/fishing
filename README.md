@@ -57,6 +57,14 @@ pnpm test        # shared lake / catch / board rules
 pnpm typecheck
 ```
 
+Or run both in Docker, with no local Node:
+
+```bash
+docker compose up --build
+```
+
+The game is at [http://localhost:5173](http://localhost:5173) as above. SQLite lives in the `api-data` volume; `docker compose down -v` wipes it. Rebuild after pulling.
+
 Force a lake hour while developing: `http://localhost:5173/?hour=dawn` (`day`, `dusk`, `night`).
 
 ## Layout
