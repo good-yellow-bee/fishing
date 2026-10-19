@@ -203,6 +203,8 @@ import { crowsOut } from "./crowFlush";
 import { sleddersOut } from "./sledRun";
 import { HayBales } from "./HayBales";
 import { Farmstead } from "./Farmstead";
+import { Cows } from "./Cows";
+import { cowsOut } from "./cowGraze";
 import { balesOut } from "./hayField";
 import { Sledders } from "./Sledders";
 import { spindriftOut } from "./blowingSnow";
@@ -2263,6 +2265,7 @@ export const LakeWorld = memo(function LakeWorld({
       ))}
       {balesOut(season) && <HayBales season={season} hour={hour} />}
       <Farmstead season={season} hour={hour} wind={wind} />
+      {cowsOut(hour, sky, season) && <Cows />}
       <TreeSwayClock wind={wind} />
       <ScatterModels items={BACK_TREES} sway />
       <ScatterModels items={TREES} sway />
