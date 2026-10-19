@@ -72,6 +72,17 @@ export function bakeToon(root: THREE.Object3D, shadows: boolean): THREE.Group | 
   return group;
 }
 
+/** What a prepared model looks like, part by part, so copies that look alike can share one baked shape. */
+export function lookOf(root: THREE.Object3D) {
+  const looks: string[] = [];
+  root.traverse((obj) => {
+    if (!(obj instanceof THREE.Mesh)) return;
+    const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+    looks.push(materials.map((material: THREE.Material) => (material instanceof THREE.MeshToonMaterial ? material.color.getHexString() : material.uuid)).join(","));
+  });
+  return looks.join("|");
+}
+
 /** Lets go of a model bakeToon made: its shape is its own; the shared material stays for the next. */
 export function releaseBaked(group: THREE.Object3D) {
   group.traverse((obj) => {
