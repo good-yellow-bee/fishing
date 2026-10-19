@@ -31,5 +31,11 @@ describe("painted fish", () => {
     const shapes = paintedFishShapes(PLAIN_BUILD, "#c97945", "#e9bc72");
     shapes.middle.computeBoundingBox();
     expect(shapes.middle.boundingBox!.getCenter(new THREE.Vector3()).z).toBeCloseTo(-0.15, 2);
+    // The tail cone lies along the fish, its tip forward toward the middle, with the tail fins spread behind it.
+    const cone = new THREE.ConeGeometry(0.2, 0.5, 7).rotateX(Math.PI / 2).translate(0, 0, -0.14);
+    cone.computeBoundingBox();
+    shapes.tail.computeBoundingBox();
+    expect(shapes.tail.boundingBox!.max.z).toBeCloseTo(cone.boundingBox!.max.z, 3);
+    expect(shapes.tail.boundingBox!.max.x).toBeGreaterThan(cone.boundingBox!.max.x);
   });
 });
