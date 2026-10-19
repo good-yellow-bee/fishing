@@ -1391,6 +1391,7 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC213~~ | ~~News card scene50 covers SC211 and SC212~~ (#1473) | scene | S |
 | ~~SC214~~ | ~~Fewer draws: the shore trees and creek grass are baked into one merged mesh per material instead of one instanced mesh per model part, each vertex carrying its tree's foot so they still sway; about 12 fewer draws in every scene, no visible change~~ (#1477) | scene | S |
 | ~~SC215~~ | ~~Fewer draws: the pier's timbers, the shack's ground and the shore boardwalk and logs (about 15 still models drawn one each) are baked together per material with a new StaticModels list; about 11 fewer draws in every scene, no visible change~~ (#1483) | scene | S |
+| SC216 | Fewer draws: the shore and creek trees draw as one swaying list, the bushes and grass round the lake and creek as one list, and every rock as one instanced mesh, so like materials bake together across lists; about 7 fewer draws in every scene, no visible change | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
