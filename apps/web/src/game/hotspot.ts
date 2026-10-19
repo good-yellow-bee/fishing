@@ -94,3 +94,25 @@ export function hotspotAt(nowMs: number, level: number): Hotspot {
 export function isHotspotCast(hotspot: Hotspot | null, x: number, z: number, spot: SpotId) {
   return hotspot !== null && hotspot.spot === spot && Math.hypot(hotspot.x - x, hotspot.z - z) <= HOTSPOT_RADIUS;
 }
+
+/** Once in every slot of the wall clock the bubble patch boils with baitfish for a while: a feeding frenzy. */
+export const FRENZY_SLOT_MS = 20 * 60 * 1000;
+export const FRENZY_MS = 90_000;
+/** The frenzy starts this long into its patch's period, so it never runs over the patch's move. */
+export const FRENZY_LEAD_MS = 30_000;
+
+export type Frenzy = { from: number; to: number };
+
+/** The frenzy of the slot holding `nowMs`: one hotspot period of the slot, the same for everyone on the lake. */
+export function slotFrenzy(nowMs: number): Frenzy {
+  const slot = Math.floor(nowMs / FRENZY_SLOT_MS);
+  const firstPeriod = Math.ceil((slot * FRENZY_SLOT_MS) / HOTSPOT_PERIOD_MS);
+  const from = (firstPeriod + (mix(slot + 7) % 5)) * HOTSPOT_PERIOD_MS + FRENZY_LEAD_MS;
+  return { from, to: from + FRENZY_MS };
+}
+
+/** Whether the bubble patch is in a frenzy at `nowMs`. */
+export function frenzyOn(nowMs: number): boolean {
+  const frenzy = slotFrenzy(nowMs);
+  return nowMs >= frenzy.from && nowMs < frenzy.to;
+}

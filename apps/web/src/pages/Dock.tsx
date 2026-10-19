@@ -823,8 +823,11 @@ export function DockPage() {
   /** A bank whose next cast meets wary fish, unless groundbait there keeps them feeding: its sign is dimmed and the stance chip says so. */
   const fishedHardAt = (target: StanceId) => game.fishedHard.some((bank) => bank === target) && game.groundbait?.spot !== target;
   /** What a walk sign tells a screen reader and the tooltip beyond its bank's name. */
+  const frenzyAt = (target: WalkTarget) => game.frenzy && game.hotspot?.spot === target;
   const signNote = (target: WalkTarget, label: string) =>
-    fishedHardAt(target)
+    frenzyAt(target)
+      ? t("{bank}: feeding frenzy now", { bank: t(label) })
+      : fishedHardAt(target)
       ? favoredNow(target)
         ? t("{bank}: bites sooner now, but fished hard", { bank: t(label) })
         : t("{bank}: fished hard", { bank: t(label) })
@@ -1118,6 +1121,7 @@ export function DockPage() {
               >
                 {t(label)}
                 {favoredNow(target) && <span className="sign-now" aria-hidden="true"> •</span>}
+                {frenzyAt(target) && <span className="sign-frenzy" aria-hidden="true"> ✦</span>}
               </button>
             ))}
           </nav>
