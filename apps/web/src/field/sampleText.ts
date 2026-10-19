@@ -1,5 +1,7 @@
 import { sampleLogbook, type Logbook } from "@stillwater/shared";
 import { t } from "../i18n";
+import { isPlayLine, shownPlayLine } from "../game/session";
+import { PLAY_LAKE_ID } from "./playLake";
 
 /** Every line the sample week writes; only these are put into the reader's language, never the player's own words. */
 const SAMPLE_LINES: ReadonlySet<string> = (() => {
@@ -17,7 +19,7 @@ const shown = (text: string) => (SAMPLE_LINES.has(text) ? t(text) : text);
 
 /**
  * The book as the reader sees it: the sample week's invented waters, trips
- * and notes in their language. The stored book keeps the English lines, so
+ * and notes, and the game outings' titles and notes, in their language. The stored book keeps the English lines, so
  * switching language switches them too; a sample line the player edits is
  * saved in their words like anything else.
  */
@@ -25,7 +27,9 @@ export function localizeSample(book: Logbook): Logbook {
   return {
     ...book,
     spots: book.spots.map((spot) => ({ ...spot, name: shown(spot.name), notes: shown(spot.notes), bestConditions: shown(spot.bestConditions) })),
-    trips: book.trips.map((trip) => ({ ...trip, title: shown(trip.title), note: shown(trip.note) })),
+    trips: book.trips.map((trip) =>
+      trip.spotId === PLAY_LAKE_ID ? { ...trip, title: shownPlayLine(trip.title), note: shownPlayLine(trip.note) } : { ...trip, title: shown(trip.title), note: shown(trip.note) },
+    ),
     catches: book.catches.map((entry) => (SAMPLE_LINES.has(entry.note) ? { ...entry, note: t(entry.note) } : entry)),
   };
 }
@@ -33,8 +37,10 @@ export function localizeSample(book: Logbook): Logbook {
 /**
  * Text from a form, as the book keeps it: a sample line the form showed (in the reader's language) and saved unchanged
  * goes back to the English it is stored in, so switching language still switches it. Anything else, including the
- * angler's own words that happen to read like a sample line, is kept as typed.
+ * angler's own words that happen to read like a sample line, is kept as typed. On the game's lake (playLake) a game outing's
+ * own title or note goes back to its English the same way.
  */
-export function bookLine(text: string, stored: string): string {
+export function bookLine(text: string, stored: string, playLake = false): string {
+  if (playLake && isPlayLine(stored) && shownPlayLine(stored) === text) return stored;
   return SAMPLE_LINES.has(stored) && t(stored) === text ? stored : text;
 }

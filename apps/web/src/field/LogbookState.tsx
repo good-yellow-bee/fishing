@@ -334,7 +334,7 @@ export function LogbookProvider({ children }: { children: ReactNode }) {
         if (!before) {
           return { ok: false, message: t("That outing is not in this book.") };
         }
-        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title, before.title), note: bookLine(draft.note, before.note) }, book);
+        const parsed = parseTripDraft({ ...draft, title: bookLine(draft.title, before.title, before.spotId === PLAY_LAKE_ID), note: bookLine(draft.note, before.note, before.spotId === PLAY_LAKE_ID) }, book);
         if (!parsed.ok) return { ok: false, message: parsed.message, field: parsed.field };
         // A game day and its fish stay on the game's lake, and a real outing stays off it.
         if (offPlayLake(before) !== offPlayLake(parsed.value)) return { ok: false, message: t("What was caught in the game stays on the game's lake."), field: "spotId" };

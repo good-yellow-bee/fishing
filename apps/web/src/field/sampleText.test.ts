@@ -32,3 +32,19 @@ describe("the sample week in the reader's language", () => {
     expect(bookLine("", "")).toBe("");
   });
 });
+
+describe("a game outing in the reader's language", () => {
+  afterEach(() => setLang("en"));
+
+  it("shows a game outing's English title and note in Polish, and keeps them in English when saved unchanged", () => {
+    const book = sampleLogbook(new Date());
+    const trip = { ...book.trips[0]!, spotId: "spot-stillwater", title: "Dusk at the dock · fog", note: "Season: Fall" };
+    setLang("pl");
+    const shown = localizeSample({ ...book, trips: [trip] }).trips[0]!;
+    expect(shown.title).not.toBe(trip.title);
+    expect(shown.note).not.toBe(trip.note);
+    expect(bookLine(shown.title, trip.title, true)).toBe(trip.title);
+    // Off the game's lake the angler's own words are theirs to change.
+    expect(bookLine(shown.note, trip.note)).toBe(shown.note);
+  });
+});

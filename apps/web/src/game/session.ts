@@ -2,11 +2,16 @@ import {
   isLakeHour,
   isSky,
   LAKE_HOUR_LABELS,
+  LAKE_HOURS,
+  LAKE_SEASONS,
   localDate,
+  SEASON_LABELS,
+  SKIES,
   SKY_LABELS,
   SPOT_IDS,
   SPOT_LABELS,
   type LakeHour,
+  type LakeSeason,
   type Sky,
   type SpotId,
 } from "@stillwater/shared";
@@ -81,12 +86,55 @@ export function sessionSummary(draft: SessionDraft): SessionSummary {
   };
 }
 
-/** "Dusk at the dock · overcast" */
+type Say = (text: string, vars?: Record<string, string>) => string;
+/** English as the book keeps it: the line's own words with its blanks filled. */
+const asWritten: Say = (text, vars) => text.replace(/\{(\w+)\}/g, (blank, key: string) => vars?.[key] ?? blank);
+
+function titleOf(hour: LakeHour | null, bank: SpotId | null, sky: Sky, say: Say): string {
+  const when = hour ? say(LAKE_HOUR_LABELS[hour]) : say("A day");
+  const where = bank ? say("at the {spot}", { spot: say(SPOT_LABELS[bank]).toLowerCase() }) : say("on the lake");
+  return say("{when} {where} · {sky}", { when, where, sky: say(SKY_LABELS[sky]).toLowerCase() });
+}
+
+/** "Dusk at the dock · overcast", in the reader's language. */
 export function sessionTitle(draft: SessionDraft): string {
   const summary = sessionSummary(draft);
-  const when = summary.hour ? t(LAKE_HOUR_LABELS[summary.hour]) : t("A day");
-  const where = summary.bank ? t("at the {spot}", { spot: t(SPOT_LABELS[summary.bank]).toLowerCase() }) : t("on the lake");
-  return t("{when} {where} · {sky}", { when, where, sky: t(SKY_LABELS[draft.sky]).toLowerCase() });
+  return titleOf(summary.hour, summary.bank, draft.sky, t);
+}
+
+/** The title as the field log keeps it, in English, so it follows the reader's language when shown. */
+export function bookSessionTitle(draft: SessionDraft): string {
+  const summary = sessionSummary(draft);
+  return titleOf(summary.hour, summary.bank, draft.sky, asWritten);
+}
+
+function seasonNoteOf(season: LakeSeason, say: Say): string {
+  return say("Season: {season}", { season: say(SEASON_LABELS[season]) });
+}
+
+/** The outing note the field log keeps for a season on the lake, in English. */
+export function bookSeasonNote(season: LakeSeason): string {
+  return seasonNoteOf(season, asWritten);
+}
+
+/** Every line a game outing writes into the book in English, with how to say it in the reader's language. */
+const PLAY_LINES: ReadonlyMap<string, () => string> = (() => {
+  const lines = new Map<string, () => string>();
+  for (const hour of [null, ...LAKE_HOURS])
+    for (const bank of [null, ...SPOT_IDS])
+      for (const sky of SKIES) lines.set(titleOf(hour, bank, sky, asWritten), () => titleOf(hour, bank, sky, t));
+  for (const season of LAKE_SEASONS) lines.set(bookSeasonNote(season), () => seasonNoteOf(season, t));
+  return lines;
+})();
+
+/** A game outing's title or note in the reader's language; anything the angler wrote stays as written. */
+export function shownPlayLine(text: string): string {
+  return PLAY_LINES.get(text)?.() ?? text;
+}
+
+/** Whether the book keeps this line for a game outing in English. */
+export function isPlayLine(text: string): boolean {
+  return PLAY_LINES.has(text);
 }
 
 function isSessionFish(value: unknown): value is SessionFish {
