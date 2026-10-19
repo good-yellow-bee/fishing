@@ -85,6 +85,24 @@ describe("little owl on the dock post", () => {
     expect(differs).toBeGreaterThan(0);
   });
 
+  it("beats off its post at once when the angler strikes while it sits, and is back on its next visit", () => {
+    let sitFrom = -1;
+    for (let t = 0; t < VISIT_EVERY_SEC && sitFrom < 0; t += 0.05) if (owlAt(t).here && !owlAt(t).flying) sitFrom = t;
+    const strike = sitFrom + 4;
+    expect(owlAt(strike - 0.1, false, false, false, strike).flying).toBe(0);
+    const off = owlAt(strike + 0.5, false, false, false, strike);
+    expect(off.flying).toBe(1);
+    expect(off.flap).toBe(1);
+    expect(Math.hypot(off.x - OWL_POST.x, off.z - OWL_POST.z)).toBeGreaterThan(0.1);
+    expect(owlAt(strike + 5, false, false, false, strike).here).toBe(false);
+    expect(owlAt(sitFrom + 8, false, false, false, strike).here).toBe(false);
+    expect(owlAt(sitFrom + 8).here).toBe(true);
+    expect(owlAt(sitFrom + VISIT_EVERY_SEC + 1, false, false, false, strike)).toEqual(owlAt(sitFrom + VISIT_EVERY_SEC + 1));
+    // A strike while it is away, or with reduced motion, changes nothing.
+    expect(owlAt(sitFrom + 2, false, false, false, sitFrom - 30)).toEqual(owlAt(sitFrom + 2));
+    expect(owlAt(strike + 1, false, true, false, strike)).toEqual(owlAt(strike + 1, false, true));
+  });
+
   it("sits still on its post with reduced motion, up on the snow cap in winter", () => {
     expect(owlAt(3, false, true)).toEqual(owlAt(300, false, true));
     expect(owlAt(3, true, true).y).toBeGreaterThan(owlAt(3, false, true).y);

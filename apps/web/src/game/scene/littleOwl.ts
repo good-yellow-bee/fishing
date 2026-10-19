@@ -9,7 +9,8 @@ import { DOCK_POST_CAPS } from "./snowyDock";
  * light. There it bobs its head up and down the way little owls do when something takes their
  * interest, swivels its head right round to look behind it and back, and blinks, before dropping
  * off the post and gliding away low over the lake. When moths are about the lantern beside it, it
- * spends spells following one round with its head. Any season, not in the rain. Pure in time.
+ * spends spells following one round with its head. A strike on the dock startles it off its post early.
+ * Any season, not in the rain. Pure in time.
  */
 
 type Point = { x: number; y: number; z: number };
@@ -96,9 +97,9 @@ export function owlWatchLook(sit: number, time: number) {
 
 /**
  * The owl `time` seconds in. `snow` lifts it onto the post's snow cap; `still` keeps it sat on the post;
- * `moths` when moths circle the lanterns (mothOrbit.ts).
+ * `moths` when moths circle the lanterns (mothOrbit.ts); `startledAt`, when the angler last struck.
  */
-export function owlAt(time: number, snow = false, still = false, moths = false): OwlPose {
+export function owlAt(time: number, snow = false, still = false, moths = false, startledAt = -Infinity): OwlPose {
   const post = { x: OWL_POST.x, y: OWL_POST.y + (snow ? SNOW_CAP : 0), z: OWL_POST.z };
   const sat: OwlPose = { ...post, here: true, yaw: PERCH_YAW, flying: 0, flap: 0, look: 0, bob: 0, blink: 0 };
   if (still) return sat;
@@ -113,6 +114,13 @@ export function owlAt(time: number, snow = false, still = false, moths = false):
     return { ...glide(FROM, post, p, 0.5), here: true, yaw: p > 0.94 ? PERCH_YAW : heading(FROM, post), flying: 1, flap, look: 0, bob: 0, blink: 0 };
   }
   const sit = into - IN_SEC;
+  // Startled while it sat: it beats off its post at once, and is gone until its next visit.
+  const startle = startledAt - (time - into) - IN_SEC;
+  if (startle >= 0 && startle < SIT_SEC && sit >= startle) {
+    const away = sit - startle;
+    if (away >= OUT_SEC) return { ...sat, here: false };
+    return { ...glide(post, TO, smooth(away / OUT_SEC), 0.3), here: true, yaw: heading(post, TO), flying: 1, flap: 1, look: 0, bob: 0, blink: 0 };
+  }
   if (sit < SIT_SEC) {
     // Slow swivels right round and back, with still spells between; a run of bobs when something catches its eye.
     const swivel = Math.sin(sit * 0.45) * Math.sin(sit * 0.17 + 0.6);

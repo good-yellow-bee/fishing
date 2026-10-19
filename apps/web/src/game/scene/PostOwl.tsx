@@ -6,6 +6,7 @@ import { mergePainted } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { useSkinnedFigure } from "./skinFigure";
 import { toonRamp } from "./toon";
+import type { ScenePhase } from "./types";
 
 const PLUMAGE = "#7b6650";
 const SPOT = "#e6dac4";
@@ -70,9 +71,10 @@ export function owlWingShape(side: number) {
   ]);
 }
 
-/** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off (littleOwl.ts). */
-export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
+/** A little owl that glides in to the dock's front-left post on some nights, bobs and swivels its head, and glides off, or beats off early when you strike (littleOwl.ts). */
+export function PostOwl({ snow, moths, phase }: { snow: boolean; moths: boolean; phase: ScenePhase }) {
   const still = useReducedMotion();
+  const startle = useRef({ phase, at: -Infinity });
   const bird = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -92,7 +94,11 @@ export function PostOwl({ snow, moths }: { snow: boolean; moths: boolean }) {
   );
   useFrame(({ clock }, delta) => {
     const time = clock.elapsedTime;
-    const pose = owlAt(time, snow, still, moths);
+    if (startle.current.phase !== phase) {
+      if (phase === "fight") startle.current.at = time;
+      startle.current.phase = phase;
+    }
+    const pose = owlAt(time, snow, still, moths, startle.current.at);
     const group = bird.current;
     if (!group) return;
     group.visible = pose.here;
