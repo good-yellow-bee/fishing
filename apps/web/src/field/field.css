@@ -517,6 +517,17 @@ button.field-primary {
     box-sizing: border-box;
   }
 
+  /* A month's heading in Bests' days calendar links its outings and fish in 13 px type, 12 px targets above the day
+     squares: each is now a 32 px band at least 32 px wide. */
+  .day-month h3 a {
+    display: inline-block;
+    min-width: 32px;
+    min-height: 32px;
+    padding-block: 8px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
   /* The fish's name hangs 3 px below its heading: the card's lines part 10 px, not 4, so each keeps its reach. */
   :is(.catch-card, .trip-card, .spot-card) :is(.meta, .trip-link) {
     margin-top: 10px;
