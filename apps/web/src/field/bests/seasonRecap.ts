@@ -4,6 +4,7 @@ import { countedFish } from "../milestones";
 import { sheetOutings } from "../catchCsv";
 import { outingDay } from "../tripDates";
 import { outingFish } from "../outingFish";
+import { kindKey } from "../speciesLink";
 
 /** One season's totals beside the season before, and the kinds it brought into the book for the first time. */
 export type SeasonRecap = {
@@ -43,11 +44,11 @@ export function seasonRecap(book: Logbook, year: string, today: string): SeasonR
       }
     : book;
   const of = (season: string) => (season === before ? cut : book).catches.filter((entry) => dayOf(entry).startsWith(`${season}-`));
-  const kinds = (season: string) => new Set(of(season).map((entry) => entry.species.trim().toLowerCase())).size;
+  const kinds = (season: string) => new Set(of(season).map((entry) => kindKey(entry.species))).size;
   // The first fish of each kind in the whole book, oldest first: those from this season are new to the book.
   const first = new Map<string, { name: string; at: string }>();
   for (const entry of [...countedFish(book.catches)].sort((a, b) => a.caughtAt.localeCompare(b.caughtAt))) {
-    const key = entry.species.trim().toLowerCase();
+    const key = kindKey(entry.species);
     if (!first.has(key)) first.set(key, { name: entry.species.trim(), at: dayOf(entry) });
   }
   // The outings counted as the season box's Outings line and the outings page count them, and what they landed, with

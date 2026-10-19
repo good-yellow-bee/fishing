@@ -72,7 +72,7 @@ export function spotSummary(
     .map((row) => `${pieceName(row.lure)} (${row.count})`)
     .join(", ");
   return [
-    `${spot.name} · ${t(WATER_LABELS[spot.waterType])}`,
+    `${spot.name.trim()} · ${t(WATER_LABELS[spot.waterType])}`,
     // Where it is, for "meet me here": the numbers and a map that opens on any phone.
     ...(spot.place ? [`${formatCoord(spot.place.lat, spot.place.lng)} · ${osmLink(spot.place.lat, spot.place.lng)}`] : []),
     // Beside its outings, a count: "2 outings · 0 fish", not "Nothing logged" when two were.

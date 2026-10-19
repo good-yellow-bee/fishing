@@ -37,6 +37,7 @@ import { tripDaySearch } from "../tripSearch";
 import { outingDay } from "../tripDates";
 import { outingFish } from "../outingFish";
 import { pieceName } from "../gear/pieceKey";
+import { kindKey } from "../speciesLink";
 
 function bestMeasures(longest: CatchEntry | null, heaviest: CatchEntry | null): string {
   const parts: string[] = [];
@@ -110,8 +111,8 @@ const YEAR_PARAM = "year";
 
 /** A kind's best lure and best water, once one of each took two or more: where and on what to go for it. */
 function KindLeaders({ book, species }: { book: Logbook; species: string }) {
-  const key = species.trim().toLowerCase();
-  const fish = book.catches.filter((entry) => entry.species.trim().toLowerCase() === key);
+  const key = kindKey(species);
+  const fish = book.catches.filter((entry) => kindKey(entry.species) === key);
   const [lure, nextLure] = pieceTally(fish, 2);
   const [water, nextWater] = speciesWaters(book, fish);
   // A tie has no leader, as the catch search's own "Most on" line takes it.
@@ -200,7 +201,7 @@ export function BestsPage() {
       { replace: true },
     );
   // The angler's own fish once there are any, as the Catches page sums them.
-  const bests = personalBests({ ...book, catches: countedFish(book.catches) });
+  const bests = personalBests({ ...book, catches: countedFish(book.catches) }, kindKey);
   // Each water's fish, newest first, gathered in one pass rather than sorting the book once per water.
   const bySpot = new Map<string, CatchEntry[]>();
   for (const entry of catchesNewestFirst(book)) {
@@ -223,16 +224,16 @@ export function BestsPage() {
   // Each kind's fish as its card counts them, for the day of its last one: which kinds have gone quiet.
   const kindFish = new Map<string, CatchEntry[]>();
   for (const entry of countedFish(book.catches)) {
-    const key = entry.species.trim().toLowerCase();
+    const key = kindKey(entry.species);
     const list = kindFish.get(key);
     if (list) list.push(entry);
     else kindFish.set(key, [entry]);
   }
-  const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map((name) => name.trim().toLowerCase())) : null;
+  const freshKinds = year ? new Set(seasonRecap(whole, year, today).newKinds.map(kindKey)) : null;
   // In a picked season, the kinds whose longest or heaviest beat every season before it: what an angler asks of a year.
-  const earlier = year ? new Map(personalBests({ ...whole, catches: countedFish(whole.catches).filter((entry) => dayOf(entry) < `${year}-01-01`) }).species.map((row) => [row.species.trim().toLowerCase(), row])) : null;
+  const earlier = year ? new Map(personalBests({ ...whole, catches: countedFish(whole.catches).filter((entry) => dayOf(entry) < `${year}-01-01`) }, kindKey).species.map((row) => [kindKey(row.species), row])) : null;
   const newBest = (row: (typeof bests.species)[number]) => {
-    const before = earlier?.get(row.species.trim().toLowerCase());
+    const before = earlier?.get(kindKey(row.species));
     return !!before && ((before.longest !== null && sizeOf(row.longest, "length") > sizeOf(before.longest, "length")) || (before.heaviest !== null && sizeOf(row.heaviest, "weight") > sizeOf(before.heaviest, "weight")));
   };
   // The newest fish of the angler's own and how long ago it came, for a dry spell measured in days.
@@ -521,7 +522,7 @@ export function BestsPage() {
                       </h3>
                       {row.large ? <span className="stamp">{t("Large")}</span> : null}
                       {/* A kind the season brought into the book for the first time. */}
-                      {freshKinds?.has(row.species.trim().toLowerCase()) ? <span className="stamp">{t("New this season")}</span> : null}
+                      {freshKinds?.has(kindKey(row.species)) ? <span className="stamp">{t("New this season")}</span> : null}
                       {/* A kind the season set a new record for. */}
                       {newBest(row) ? <span className="stamp">{t("New best")}</span> : null}
                     </div>
@@ -530,7 +531,7 @@ export function BestsPage() {
                       {measures ? ` · ${measures}` : ""}
                     </p>
                     <KindLeaders book={book} species={row.species} />
-                    {lastFishLine(whole, kindFish.get(row.species.trim().toLowerCase()) ?? [])}
+                    {lastFishLine(whole, kindFish.get(kindKey(row.species)) ?? [])}
                   </article>
                 );
               })}

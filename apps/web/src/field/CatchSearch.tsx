@@ -34,6 +34,7 @@ import { dateWords, monthWord } from "./dateWords";
 import { isSampleCatch } from "./bookCopy";
 import { offPlayLake } from "./playLake";
 import { bookSpelling, pieceName, shownPieceKey } from "./gear/pieceKey";
+import { kindKey } from "./speciesLink";
 
 /** A book name as the Polish UI shows it, or itself when Polish has no line for it. */
 function inPolish(name: string): string {
@@ -308,7 +309,7 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const named = (name: string) =>
       normalize(name) === want ||
       normalize(t(name)) === want ||
-      (bookNamed && (normalize(t(bookSpelling(name))) === want || normalize(inPolish(bookSpelling(name))) === want)) ||
+      (bookNamed && ((exact.field === "species" && kindKey(name) === kindKey(exact.name)) || normalize(t(bookSpelling(name))) === want || normalize(inPolish(bookSpelling(name))) === want)) ||
       normalize(inPolish(name)) === want ||
       (piece !== null && shownPieceKey(name) === piece);
     return catchesNewestFirst(book).filter((entry) => {
@@ -328,19 +329,19 @@ function findOne(book: Logbook, needle: string, t: (text: string) => string, pic
     const byKind = new Map<string, CatchEntry[]>();
     // The usual size from the angler's own fish: game pike would move it.
     for (const entry of countedFish(book.catches)) {
-      const kind = entry.species.trim().toLowerCase();
+      const kind = kindKey(entry.species);
       byKind.set(kind, [...(byKind.get(kind) ?? []), entry]);
     }
     const amount = (measure: Measure) => (measure.kind === "length" ? measure.inches : measure.pounds);
     return catchesNewestFirst(book).filter((entry) => {
-      const typical = typicalSize(byKind.get(entry.species.trim().toLowerCase()) ?? [], entry.measure.kind);
+      const typical = typicalSize(byKind.get(kindKey(entry.species)) ?? [], entry.measure.kind);
       return typical !== null && amount(entry.measure) > amount(typical);
     });
   }
   if (FIRST_WORDS.has(normalize(needle))) {
     const first = new Map<string, CatchEntry>();
     for (const entry of countedFish(book.catches)) {
-      const kind = entry.species.trim().toLowerCase();
+      const kind = kindKey(entry.species);
       const held = first.get(kind);
       if (!held || entry.caughtAt < held.caughtAt) first.set(kind, entry);
     }
@@ -1030,7 +1031,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
   const spelled = new Map<string, Map<string, number>>();
   for (const entry of matches) {
     const name = entry.species.trim();
-    const key = name.toLowerCase();
+    const key = kindKey(name);
     const forms = spelled.get(key) ?? new Map<string, number>();
     forms.set(name, (forms.get(name) ?? 0) + 1);
     spelled.set(key, forms);
@@ -1075,7 +1076,7 @@ function MatchSplits({ matches, all, search, largest }: { matches: readonly Catc
     ) : null;
   return (
     <>
-      {line(t("By kind:"), kinds, (species) => exactTerm("species", pieceName(species)), (species) => pieceName(species), (entry, species) => entry.species.trim().toLowerCase() === species.toLowerCase())}
+      {line(t("By kind:"), kinds, (species) => exactTerm("species", pieceName(species)), (species) => pieceName(species), (entry, species) => kindKey(entry.species) === kindKey(species))}
       {line(t("By year:"), years, (year) => year, (year) => year, (entry, year) => bookFishDay(book, entry).startsWith(`${year}-`), bestIn)}
     </>
   );

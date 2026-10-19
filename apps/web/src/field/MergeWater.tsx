@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { t, tn, useT } from "../i18n";
+import { locale, t, tn, useT } from "../i18n";
 import { useLogbook } from "./LogbookState";
 import { forgetMergedWater, mergeFolds, mergeMoves, mergeWaters, noteMergedWater } from "./waterMerge";
 import { useTackleIfAny } from "./gear/TackleState";
@@ -23,7 +23,7 @@ export function MergeWater({ spotId }: { spotId: string }) {
   const navigate = useNavigate();
   const location = useLocation();
   // The sample week's waters are made up: merged either way, their fish would count as the angler's or theirs would sit on a made-up place.
-  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => a.name.localeCompare(b.name));
+  const others = book.spots.filter((spot) => spot.id !== spotId && spot.id !== PLAY_LAKE_ID && !isSampleSpot(spot.id)).sort((a, b) => a.name.trim().localeCompare(b.name.trim(), locale()));
   const [params] = useSearchParams();
   const asked = params.get(MERGE_PARAM);
   const [into, setInto] = useState(() => (asked && others.some((spot) => spot.id === asked) ? asked : ""));

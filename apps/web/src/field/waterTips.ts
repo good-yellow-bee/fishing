@@ -1,6 +1,7 @@
 import { biteTimes, catchesForSpot, lakeSeason, localDate, moonTally, waterTempTally, type BiteTime, type MoonQuarter, type LakeSeason, type CatchEntry, type Logbook, type LureTally, type Sky, type Trip, type Wind, type WaterTempTally } from "@stillwater/shared";
 import { pieceTally } from "./pieceTally";
 import { shownPieceKey } from "./gear/pieceKey";
+import { kindKey, mostWritten } from "./speciesLink";
 import { isSampleOuting } from "./bookCopy";
 import { countedFish, ownFish } from "./milestones";
 
@@ -138,16 +139,22 @@ export function packingTips(book: Logbook, trip: Trip, today: string): string[] 
   return waterTips(own ? here.filter(ownFish) : countedFish(here))?.lures.map((row) => row.lure) ?? [];
 }
 
-/** The kinds of fish a water has given, most first: one-tap picks for the species on the catch form. */
+/**
+ * The kinds of fish a water has given, most first: one-tap picks for the species on the catch form. A kind however it
+ * was typed ("Perches", "perch ") is one, under the spelling most of its fish carry.
+ */
 export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[] {
-  const counts = new Map<string, { name: string; count: number }>();
+  const counts = new Map<string, { spellings: Map<string, number>; count: number }>();
   for (const entry of catches) {
-    const key = entry.species.trim().toLowerCase();
-    const row = counts.get(key) ?? { name: entry.species, count: 0 };
+    const name = entry.species.trim();
+    const key = kindKey(name);
+    const row = counts.get(key) ?? { spellings: new Map<string, number>(), count: 0 };
     row.count += 1;
+    row.spellings.set(name, (row.spellings.get(name) ?? 0) + 1);
     counts.set(key, row);
   }
   return [...counts.values()]
+    .map((row) => ({ count: row.count, name: mostWritten(row.spellings) }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
     .slice(0, limit)
     .map((row) => row.name);
@@ -155,9 +162,9 @@ export function waterSpecies(catches: readonly CatchEntry[], limit = 3): string[
 
 /** The lures that took this kind of fish on this water, most first; empty when the water hasn't given that kind. */
 export function speciesLures(catches: readonly CatchEntry[], species: string, limit = 3): string[] {
-  const want = species.trim().toLowerCase();
+  const want = kindKey(species);
   if (!want) return [];
-  const kind = catches.filter((entry) => entry.species.trim().toLowerCase() === want);
+  const kind = catches.filter((entry) => kindKey(entry.species) === want);
   return pieceTally(kind, limit).map((row) => row.lure);
 }
 

@@ -1,20 +1,20 @@
 import { localDate, type CatchEntry } from "@stillwater/shared";
 import { countedFish } from "../milestones";
-import { pieceKey } from "../gear/pieceKey";
+import { kindKey } from "../speciesLink";
 import { locale } from "../../i18n";
 
 /**
  * The kinds caught last year that haven't come in yet this year, each under the spelling most of last year's fish
  * carry, alphabetical. `nameOf` groups by something else, such as the lure. `dayOf` dates a fish ("2026-01-01"): a page
- * that files a night fish under its outing's day passes its own. `keyOf` says which names are one: by default as a
- * piece is keyed, so "Perches", "perch " and "Perch" are one kind in any language.
+ * that files a night fish under its outing's day passes its own. `keyOf` says which names are one: by default by kindKey,
+ * so "Perches", "perch " and "Perch" are one kind in any language.
  */
 export function notYetThisYear(
   catches: readonly CatchEntry[],
   today: Date = new Date(),
   nameOf: (entry: CatchEntry) => string = (entry) => entry.species,
   dayOf: (entry: CatchEntry) => string = (entry) => localDate(new Date(entry.caughtAt)),
-  keyOf: (name: string) => string = pieceKey,
+  keyOf: (name: string) => string = kindKey,
 ): string[] {
   const year = today.getFullYear();
   const lastYear = new Map<string, Map<string, number>>();
