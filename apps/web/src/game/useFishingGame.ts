@@ -353,6 +353,7 @@ export function useFishingGame(
   const castSkipRef = useRef(false);
   /** This cast landed tight to a lily pad bed, where the bass and pike lie in ambush. */
   const castPadsRef = useRef(false);
+  /** This cast landed on the point's rock edge, just past the shallow rocks. */
   const castEdgeRef = useRef(false);
   /** Whether this cast landed in one of the wind's foam lanes. */
   const castFoamRef = useRef(false);
