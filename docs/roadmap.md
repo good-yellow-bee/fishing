@@ -1590,7 +1590,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~GT300~~ | ~~News card 2026-10-19-game18 covers GT298 and GT299: a jig over the crayfish and the tadpole shallows~~ (#1254) | ui | S |
 | ~~GT301~~ | ~~More grabs: a smallmouth can hit a crappie hooked under the dock and a pike a perch off the drop-off, halfway in, and the fight starts again with the hunter; or it follows the small fish in and stays about that bank. Each has its own call and landed note~~ (#1266) | fight | S |
 | ~~GT302~~ | ~~The kingfisher's fry: from dawn to dusk outside winter, rain and fog, a cast landing within reach of the kingfisher's dives under its snag off the dock lands over the fry it hunts, so the bite comes sooner (0.85) and 35% of bites are a perch, smallmouth, largemouth or pike hunting the same shoal (as the dock can land them; not a beginner's first fish); the cast says so~~ (#1271) | gameplay | S |
-| ~~GT303~~ | ~~News card 2026-10-19-game19 covers GT301 and GT302: more grabs and the kingfisher's fry~~ | ui | S |
+| ~~GT303~~ | ~~News card 2026-10-19-game19 covers GT301 and GT302: more grabs and the kingfisher's fry~~ (#1274) | ui | S |
+| GT304 | The sunken log: all year a cast landing within 0.7 m of the half-sunk log off the west bank (the turtle's log, in the Point's water and the Reeds' at its far end) lands where the fish hold in its shade, so the bite comes sooner (0.85) and 35% of bites are a largemouth, bluegill, crappie or pike holding under it (as that bank can land them; not a beginner's first fish); the cast says so | gameplay | S |
 
 ## Risks / open questions for the owner
 

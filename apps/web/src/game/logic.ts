@@ -776,6 +776,16 @@ export function fryHunter(spot: SpotId, lure: string | undefined, profile: Pick<
   return drawnFrom(FRY_HUNTERS, FRY_HUNTER_SHARE, spot, lure, profile, hour, random);
 }
 
+/** The fish that hold in the shade under the half-sunk log off the west bank. */
+export const LOG_HOLDERS: ReadonlySet<string> = new Set(["largemouth-bass", "bluegill", "crappie", "pike"]);
+/** Chance a bite tight to the log is one of the fish holding under it. */
+export const LOG_HOLDER_SHARE = 0.35;
+
+/** A fish holding under the sunken log drawn to the cast for this bite, or none. */
+export function logHolder(spot: SpotId, lure: string | undefined, profile: Pick<Profile, "strength" | "accuracy">, hour: LakeHour, random = Math.random): FishSpecies | null {
+  return drawnFrom(LOG_HOLDERS, LOG_HOLDER_SHARE, spot, lure, profile, hour, random);
+}
+
 /** The first cast of a visit at a bank meets fish that haven't seen a lure today, so it bites this much sooner. */
 export const FRESH_WAIT = 0.9;
 
