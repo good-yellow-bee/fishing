@@ -577,6 +577,20 @@ a:focus-visible {
   cursor: pointer;
 }
 
+/* On a touch screen "2 more reasons" was a 15 px line of text to tap: it reaches 9 px up and down, into the hint's
+   padding and the plain words above it, for a 33 px band. */
+@media (pointer: coarse) {
+  .hint-more {
+    position: relative;
+  }
+
+  .hint-more::after {
+    content: "";
+    position: absolute;
+    inset: -9px -4px;
+  }
+}
+
 /* In a fight the hint would overlap the fight card, which shows the hookset's message itself for a while. */
 .scene-wrap[data-phase="fight"] .hint {
   display: none;
