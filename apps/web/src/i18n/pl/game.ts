@@ -693,6 +693,8 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone held sideways, the first-cast coach and the news card now leave the shore signs clear from the moment the lake opens. In the field log, tabbing to a field the bottom tab bar half covers scrolls it into full view, and an outing link that wraps onto two lines is as easy to tap on each.":
+    "Na telefonie trzymanym poziomo podpowiedzi do pierwszego rzutu i karta Co nowego nie zasłaniają tabliczek na brzegu od chwili otwarcia jeziora. W dzienniku przejście klawiszem Tab do pola, które dolny pasek kart przykrywa do połowy, przewija je całe na widok, a link do wyprawy zawinięty na dwie linijki łatwo trafić w każdej z nich.",
   "On nights without rain a little owl now glides in low over the water and lands on the post beside the lantern. It bobs its head, turns it right round to look behind it, follows the moths circling the lantern outside winter, and glides off again. And the swallows on the moored boat's rope now burst off together when you untie it under them.":
     "W bezdeszczowe noce pójdźka nadlatuje teraz nisko nad wodą i siada na słupku obok latarni. Kiwa głową, obraca ją aż do tyłu, poza zimą śledzi ćmy krążące wokół latarni i znów odlatuje. A jaskółki z liny cumowniczej łódki zrywają się teraz razem, gdy ją odwiązujesz.",
   "On a tablet or a phone held sideways, the Map's list of waters gives each water's last fish and next outing room to read in a line, and with larger text a water's details go under its name. The lodge's catch log now scrolls its own table sideways at every width instead of pushing the whole page, and a screen reader now reads out what the season and the sky mean for the fish, and the day's wind.":
@@ -765,8 +767,6 @@ export const PL_GAME: PlBook = {
     "W pogodne wiosenne i letnie dni przed pomostem przepływa czasem powoli mała papierowa łódka. Twój pies odwraca głowę, żeby popatrzeć, jak płynie, a także na rudzika na słupkach, a zimą nosi czerwony sweter z dzianiny.",
   "Level 18, Breath of the lake, waits at 68000 points, and from there the shack board's requests pay a quarter more. And from Strength 7 one pump lifts a sulking catfish or sturgeon off the bottom, not two.":
     "Poziom 18, Oddech jeziora, czeka przy 68000 punktów, a od niego prośby z tablicy w szopie płacą o jedną czwartą więcej. A od Siły 7 jedna pompka podrywa z dna zalegającego suma lub jesiotra, nie dwie.",
-  "While your rowboat lies tied up by the pier, a bow line and a stern line now hold it to the posts, sagging and drawing tight as it rides the chop. And on summer days, if your line sits quiet for a while, a blue dragonfly may come and settle on the tip of your rod until a nibble sends it off.":
-    "Gdy łódka stoi przycumowana przy pomoście, cuma dziobowa i rufowa trzymają ją przy palach, zwisając i napinając się, gdy kołysze się na fali. A w letnie dni, gdy żyłka przez chwilę spokojnie leży w wodzie, na szczytówce wędki może przysiąść niebieska ważka i siedzieć tam, aż spłoszy ją pierwsze skubnięcie.",
   "Its head is turned — reel now to win line": "Ma łeb zwrócony do ciebie — kręć teraz, by odzyskać żyłkę",
   "Wrong way: pulling with the run gives it line — pull the other side": "Nie w tę stronę: ciągnięcie razem z odjazdem oddaje jej żyłkę — ciągnij w drugą stronę",
   "Save picture": "Zapisz obrazek",
