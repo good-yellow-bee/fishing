@@ -13,36 +13,36 @@ describe("the one that got away", () => {
 
   it("can bite again at its own bank, same fish and weight", () => {
     const lost = gotAwayAfterLoss(pike, 9.2, "reeds");
-    expect(castForGotAway(lost, "reeds", AGAIN_ODDS - 0.01)).toEqual({ again: lost, next: null });
+    expect(castForGotAway(lost, "reeds", AGAIN_ODDS - 0.01, false, 1)).toEqual({ again: lost, next: null });
   });
 
   it("comes back sooner to a big lure", () => {
     const lost = gotAwayAfterLoss(pike, 9.2, "reeds");
-    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01).again).toBeNull();
-    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01, true).again).toBe(lost);
-    expect(castForGotAway(lost, "reeds", BIG_LURE_AGAIN_ODDS, true).again).toBeNull();
+    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01, false, 1).again).toBeNull();
+    expect(castForGotAway(lost, "reeds", AGAIN_ODDS + 0.01, true, 1).again).toBe(lost);
+    expect(castForGotAway(lost, "reeds", BIG_LURE_AGAIN_ODDS, true, 1).again).toBeNull();
   });
 
   it("waits through casts elsewhere or misses, then moves off", () => {
     let lost = gotAwayAfterLoss(pike, 9.2, "reeds");
     for (let cast = 1; cast < AGAIN_CASTS; cast += 1) {
-      const result = castForGotAway(lost, cast % 2 ? "dock" : "reeds", 0.99);
+      const result = castForGotAway(lost, cast % 2 ? "dock" : "reeds", 0.99, false, 1);
       expect(result.again).toBeNull();
       lost = result.next;
       expect(lost?.casts).toBe(AGAIN_CASTS - cast);
     }
-    expect(castForGotAway(lost, "reeds", 0.99)).toEqual({ again: null, next: null });
-    expect(castForGotAway(null, "reeds", 0)).toEqual({ again: null, next: null });
+    expect(castForGotAway(lost, "reeds", 0.99, false, 1)).toEqual({ again: null, next: null });
+    expect(castForGotAway(null, "reeds", 0, false, 1)).toEqual({ again: null, next: null });
   });
 
   it("keeps a fish that dropped the bait, common ones too, for the next cast only", () => {
     const dropped = gotAwayAfterDrop(perch, 0.4, "dock");
     expect(dropped).toEqual({ spot: "dock", species: perch, weight: 0.4, casts: 1, dropped: true });
-    expect(castForGotAway(dropped, "dock", DROPPED_ODDS - 0.01)).toEqual({ again: dropped, next: null });
-    expect(castForGotAway(dropped, "dock", DROPPED_ODDS)).toEqual({ again: null, next: null });
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS - 0.01, false, 1)).toEqual({ again: dropped, next: null });
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, false, 1)).toEqual({ again: null, next: null });
     // A big lure doesn't tempt back a fish that only let go of the bait.
-    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, true)).toEqual({ again: null, next: null });
-    expect(castForGotAway(dropped, "reeds", 0)).toEqual({ again: null, next: null });
+    expect(castForGotAway(dropped, "dock", DROPPED_ODDS, true, 1)).toEqual({ again: null, next: null });
+    expect(castForGotAway(dropped, "reeds", 0, false, 1)).toEqual({ again: null, next: null });
   });
 
   it("brings a dropped fish back more often for a patient angler", () => {
@@ -50,5 +50,8 @@ describe("the one that got away", () => {
     expect(castForGotAway(dropped, "dock", DROPPED_ODDS, false, PATIENT_DROP_RANK - 1).again).toBeNull();
     expect(castForGotAway(dropped, "dock", DROPPED_ODDS, false, PATIENT_DROP_RANK).again).toEqual(dropped);
     expect(castForGotAway(dropped, "dock", PATIENT_DROPPED_ODDS, false, PATIENT_DROP_RANK).again).toBeNull();
+    // A fish that broke off keeps its own odds, however patient the angler.
+    const lost = gotAwayAfterLoss(FISH.find((fish) => fish.id === "pike")!, 6, "dock")!;
+    expect(castForGotAway(lost, "dock", AGAIN_ODDS, false, 8).again).toBeNull();
   });
 });

@@ -51,7 +51,7 @@ import { MIDGE_RISE_WAIT, midgeLike, underMidges } from "./midgeClouds";
 import { DUCKWEED_FOUL_WAIT, DUCKWEED_TOPWATER_WAIT, duckweedCast, inDuckweed } from "./duckweedCast";
 import { castSnags, onShoreIce, SNAG_AT_MS, SNAG_TAPS, type SnagCover } from "./snag";
 import { FLUTTER_SEC, flutterGrabberFor, flutterTip, followCall, followerFor, GRAB_LINE, grabberFor, grabCall } from "./grab";
-import { AGAIN_CASTS, castForGotAway, DROPPED_ODDS, droppedOdds, gotAwayAfterDrop, gotAwayAfterLoss, type GotAway } from "./gotAway";
+import { AGAIN_CASTS, castForGotAway, gotAwayAfterDrop, PATIENT_DROP_RANK, gotAwayAfterLoss, type GotAway } from "./gotAway";
 import { castForReleased, loadReleased, saveReleased, type Recaught } from "./releasedFish";
 import { weightText } from "../i18n/content";
 import { HOTSPOT_PERIOD_MS, hotspotAt, isHotspotCast, type Hotspot } from "./hotspot";
@@ -1062,7 +1062,7 @@ export function useFishingGame(
             const dropped = !gotAwayRef.current;
             if (dropped) gotAwayRef.current = gotAwayAfterDrop(bitten.species, bitten.weight, spotRef.current);
             // Hold result so the miss spring and the turn play out.
-            resetToIdle((style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under.")) + (dropped ? ` ${droppedOdds(current.patience) > DROPPED_ODDS ? t("It wasn't hooked, and your Patience keeps it about: cast straight back here, it will likely take again.") : t("It wasn't hooked, so it may take again: cast straight back here.")}` : ""), "result");
+            resetToIdle((style === "lift" ? t("Strike the moment the float lifts.") : t("Strike the moment the bobber goes under.")) + (dropped ? ` ${current.patience >= PATIENT_DROP_RANK ? t("It wasn't hooked, and your Patience keeps it about: cast straight back here, it will likely take again.") : t("It wasn't hooked, so it may take again: cast straight back here.")}` : ""), "result");
           }, windowMs);
         };
         openWindow();

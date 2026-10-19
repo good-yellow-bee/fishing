@@ -10,6 +10,7 @@ export const AGAIN_CASTS = 5;
 export const DROPPED_ODDS = 0.4;
 /** From this Patience rank the angler waits the dropped fish out, so it takes again more often. */
 export const PATIENT_DROP_RANK = 7;
+/** A patient angler's odds in place of DROPPED_ODDS. */
 export const PATIENT_DROPPED_ODDS = 0.6;
 
 export function droppedOdds(patience: number): number {
@@ -33,7 +34,7 @@ export function gotAwayAfterDrop(species: FishSpecies, weight: number, spot: Spo
 }
 
 /** Whether this cast brings the fish that got away back, and what is still waiting after it. */
-export function castForGotAway(lost: GotAway | null, spot: SpotId, roll: number, bigLure = false, patience = 1): { again: GotAway | null; next: GotAway | null } {
+export function castForGotAway(lost: GotAway | null, spot: SpotId, roll: number, bigLure: boolean, patience: number): { again: GotAway | null; next: GotAway | null } {
   if (!lost) return { again: null, next: null };
   if (lost.spot === spot && roll < (lost.dropped ? droppedOdds(patience) : bigLure ? BIG_LURE_AGAIN_ODDS : AGAIN_ODDS)) return { again: lost, next: null };
   return { again: null, next: lost.casts > 1 ? { ...lost, casts: lost.casts - 1 } : null };
