@@ -1,4 +1,4 @@
-import { SHOP_X, SHOP_Z, type LakeHour } from "@stillwater/shared";
+import { SHOP_X, SHOP_Z, type LakeHour, type Sky } from "@stillwater/shared";
 import { BANK_POSTS } from "./bankWalk";
 
 /**
@@ -34,4 +34,9 @@ export function lanternLevel(hour: LakeHour) {
 export function lanternFlicker(time: number, seed: number, still = false) {
   if (still) return 1;
   return 0.88 + 0.08 * Math.sin(time * 7.3 + seed * 1.7) + 0.04 * Math.sin(time * 13.1 + seed * 3.1);
+}
+
+/** How far the lanterns' glow spreads in wet air, 0 on a clear night: most in fog, some in rain or a misty drizzle. */
+export function lanternMurk(sky: Sky | undefined) {
+  return sky === "fog" ? 1 : sky === "rain" ? 0.6 : 0;
 }
