@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import type { LakeSeason } from "@stillwater/shared";
@@ -39,16 +39,19 @@ export function beeShapes() {
   };
 }
 
-type BeeParts = { root: THREE.Group | null; wings: (THREE.Group | null)[] };
+/** Where each bee's two wings hinge on its back, in the bee's own size. */
+const WING_HINGE = [new THREE.Vector3(0.003, 0.006, 0.002), new THREE.Vector3(-0.003, 0.006, 0.002)];
 
-/** The season's wildflowers round the shack, and bumblebees working them while `bees`. */
+/** The season's wildflowers round the shack, and bumblebees working them while `bees`: three draws, the bees' bodies and wings each one instanced mesh. */
 export function Wildflowers({ season, bees }: { season: LakeSeason; bees: boolean }) {
   const still = useReducedMotion();
   const flowers = useMemo(() => flowersIn(season), [season]);
   const shape = useMemo(() => (flowers.length > 0 ? flowersShape(flowers) : null), [flowers]);
   const bee = useMemo(beeShapes, []);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
-  const parts = useMemo<BeeParts[]>(() => Array.from({ length: BEE_COUNT }, () => ({ root: null, wings: [null, null] })), []);
+  const bodies = useRef<THREE.InstancedMesh>(null);
+  const wings = useRef<THREE.InstancedMesh>(null);
+  const scratch = useMemo(() => ({ root: new THREE.Matrix4(), wing: new THREE.Matrix4(), turn: new THREE.Euler(), quat: new THREE.Quaternion(), scale: new THREE.Vector3(BEE_SCALE, BEE_SCALE, BEE_SCALE), at: new THREE.Vector3(), hidden: new THREE.Matrix4().makeScale(0, 0, 0) }), []);
   useEffect(() => () => shape?.dispose(), [shape]);
   useEffect(
     () => () => {
@@ -57,48 +60,42 @@ export function Wildflowers({ season, bees }: { season: LakeSeason; bees: boolea
     [bee, material],
   );
   useFrame(({ clock }) => {
-    if (!bees) return;
+    const body = bodies.current;
+    const wing = wings.current;
+    if (!bees || !body || !wing) return;
     const time = still ? 0.5 : clock.elapsedTime;
-    parts.forEach((part, i) => {
+    for (let i = 0; i < BEE_COUNT; i += 1) {
       const pose = beeAt(i, time, flowers);
-      if (!part.root) return;
-      part.root.visible = pose !== null;
-      if (!pose) return;
-      part.root.position.set(pose.x, pose.y, pose.z);
-      part.root.rotation.y = pose.yaw;
+      if (!pose) {
+        body.setMatrixAt(i, scratch.hidden);
+        wing.setMatrixAt(i * 2, scratch.hidden);
+        wing.setMatrixAt(i * 2 + 1, scratch.hidden);
+        continue;
+      }
+      scratch.turn.set(0, pose.yaw, 0);
+      scratch.root.compose(scratch.at.set(pose.x, pose.y, pose.z), scratch.quat.setFromEuler(scratch.turn), scratch.scale);
+      body.setMatrixAt(i, scratch.root);
       // A blur of wings in flight; on a flower they twitch now and then.
       const beat = pose.flying ? Math.sin(time * 90 + i) * 0.7 : Math.max(0, Math.sin(time * 3 + i)) * 0.3;
-      part.wings.forEach((wing, side) => {
-        if (wing) wing.rotation.set(0, side === 0 ? -0.3 : Math.PI + 0.3, beat * (side === 0 ? 1 : -1));
+      WING_HINGE.forEach((hinge, side) => {
+        scratch.turn.set(0, side === 0 ? -0.3 : Math.PI + 0.3, beat * (side === 0 ? 1 : -1));
+        scratch.wing.makeRotationFromEuler(scratch.turn).setPosition(hinge);
+        wing.setMatrixAt(i * 2 + side, scratch.wing.premultiply(scratch.root));
       });
-    });
+    }
+    body.instanceMatrix.needsUpdate = true;
+    wing.instanceMatrix.needsUpdate = true;
   });
   return (
     <group name="wildflowers">
       {shape && <mesh geometry={shape} material={material} />}
-      {bees &&
-        parts.map((part, i) => (
-          <group
-            key={i}
-            ref={(node) => {
-              part.root = node;
-            }}
-            scale={BEE_SCALE}
-          >
-            <mesh geometry={bee.body} material={material} />
-            {[0, 1].map((side) => (
-              <group
-                key={side}
-                ref={(node) => {
-                  part.wings[side] = node;
-                }}
-                position={[side === 0 ? 0.003 : -0.003, 0.006, 0.002]}
-              >
-                <mesh geometry={bee.wing} material={material} />
-              </group>
-            ))}
-          </group>
-        ))}
+      {bees && (
+        <>
+          {/* The bees roam the meadow, so they are never culled by a stale bound. */}
+          <instancedMesh ref={bodies} args={[bee.body, material, BEE_COUNT]} frustumCulled={false} />
+          <instancedMesh ref={wings} args={[bee.wing, material, BEE_COUNT * 2]} frustumCulled={false} />
+        </>
+      )}
     </group>
   );
 }
