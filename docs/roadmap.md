@@ -2180,3 +2180,4 @@ Also worth a call: seasons by real month (P24) vs a faster cadence; tap-to-walk 
 | ~~BR548~~ | ~~Round 91 gear and map fixes: lure links with a water, map fish counts, Polish packing notes, long names, offline map note, Unpack all tap band~~ (#1305) | field | S |
 | ~~BR549~~ | ~~Round 91 ideas: lure record spreadsheet, nearest water and all-waters GPS file on the Map~~ (#1308) | field | S |
 | ~~BR550~~ | ~~Round 92 Bests, species and search fixes: one row per lure however spelled, season box Outings link, empty season text, size bands, copied dates and counts, heading level, Polish wording, tap reach~~ (#1322) | field | S |
+| ~~BR551~~ | ~~Round 92 ideas: fish an outing in the season box, each year's biggest in a one-kind search, "31.12" as a day~~ (#TBD) | field | S |
