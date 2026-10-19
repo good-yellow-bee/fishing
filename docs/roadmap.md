@@ -1232,8 +1232,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC105~~ | ~~Dock robin: every minute or so by day a robin flies in over the water to the dock's front-left post, cocks its head and flicks its tail, flits to the front-right post and flies off again; on the snow caps in winter~~ (#1219) | scene | S |
 | ~~SC106~~ | ~~Dock snail: in the rain and on dewy mornings from spring to fall a snail glides a slow loop on the planks behind the angler, eye stalks swaying, a wet trail behind it~~ (#1222) | scene | S |
 | ~~SC107~~ | ~~Reed clumps in one draw each: the three reed beds draw their stems as one instanced mesh per clump, still swaying stem by stem in the wind~~ (#1222) | scene | S |
-| SC108 | Winter gulls: at dawn and by day in winter black-headed gulls stand on the broadest ice floes on the far side, facing into the wind as they drift, and now and then one wheels once low over the water and lands back on its floe | scene | S |
-| SC109 | News card scene23: starling murmuration, winter gulls, dock robin, dock snail | scene | S |
+| ~~SC108~~ | ~~Winter gulls: at dawn and by day in winter black-headed gulls stand on the broadest ice floes on the far side, facing into the wind as they drift, and now and then one wheels once low over the water and lands back on its floe~~ (#1224) | scene | S |
+| ~~SC109~~ | ~~News card scene23: starling murmuration, winter gulls, dock robin, dock snail~~ (#1224) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
