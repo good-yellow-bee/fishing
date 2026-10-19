@@ -1239,6 +1239,8 @@ Claude picked this: a bite that came while the game sat in another tab ran out i
 | ~~SC111~~ | ~~Hot-air balloon: on still clear dawns in spring and summer a striped balloon drifts in over the trees, skims the far half of the lake, dips its basket to kiss the water mid-lake and climbs away over the other bank, its burner flaring now and then~~ (#1228) | scene | S |
 | ~~SC112~~ | ~~Snow off the trees: on winter dawns and days a load of snow now and then slips off a tree across the lake, a few lumps tumbling to the ground in a puff of powder that drifts off on the breeze~~ (#1232) | scene | S |
 | ~~SC113~~ | ~~News card scene24: lake steam, hot-air balloon, snow slipping off the trees~~ (#1232) | scene | S |
+| ~~SC114~~ | ~~Hammock: on dry days in late spring and summer someone lies reading in a striped hammock slung between two trees by the campers' tent, pushing off a trunk with a foot now and then and turning a page~~ (#1234) | scene | S |
+| ~~SC115~~ | ~~Night row: on calm nights from spring to fall someone rows a wooden boat slowly round the near half of the lake, a lantern at the stern laying a wavering streak of light on the water~~ (#1234) | scene | S |
 
 ## Gameplay track (added 2026-10-15; its own thread works casting, fights, fish, levels and the lake, while the field log keeps the BR rows)
 
