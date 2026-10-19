@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { BIRDER_AT, BIRDER_YAW, birderAt } from "./birdWatch";
-import { mergePainted } from "./mergeParts";
+import { mergePainted, mergeParts } from "./mergeParts";
 import { useReducedMotion } from "./reducedMotion";
 import { toonRamp } from "./toon";
 
@@ -69,7 +69,10 @@ export function Birdwatcher() {
   const onChest = useRef<THREE.Mesh>(null);
   const notebook = useRef<THREE.Mesh>(null);
   const shapes = useMemo(
-    () => ({ torso: birderTorsoShape(), head: birderHeadShape(), legs: birderLegsShape(), arm: birderArmShape(), glasses: binocularsShape(), notebook: new THREE.BoxGeometry(0.13, 0.17, 0.02) }),
+    () => ({
+      // Legs and body hold still while the arms and head move: one draw.
+      body: mergeParts([{ geometry: birderLegsShape() }, { geometry: birderTorsoShape(), position: [0, HIP_Y, 0] }]),
+      head: birderHeadShape(), arm: birderArmShape(), glasses: binocularsShape(), notebook: new THREE.BoxGeometry(0.13, 0.17, 0.02) }),
     [],
   );
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
@@ -101,9 +104,8 @@ export function Birdwatcher() {
   });
   return (
     <group name="birdwatcher" position={[BIRDER_AT.x, 0, BIRDER_AT.z]} rotation={[0, BIRDER_YAW, 0]} scale={SCALE}>
-      <mesh geometry={shapes.legs} material={material} castShadow />
+      <mesh geometry={shapes.body} material={material} castShadow />
       <group position={[0, HIP_Y, 0]}>
-        <mesh geometry={shapes.torso} material={material} castShadow />
         <mesh ref={onChest} geometry={shapes.glasses} material={material} position={[0, 0.36, 0.19]} />
         <mesh ref={notebook} geometry={shapes.notebook} material={paper} position={[0, 0.3, 0.32]} rotation={[-0.7, 0, 0]} visible={false} />
         {[1, -1].map((side, i) => (
