@@ -704,16 +704,14 @@ export const PL_GAME: PlBook = {
   // Seasons and auto quality
   "Northern lake · {season}": "Jezioro na północy · {season}",
   "Runs in {season}": "Najlepiej: {season}",
+  "On a phone, the lake's hint now sits below the bank chip when the chip has a lot to say, instead of under it. Held sideways, a long bank note ends in an ellipsis before the shore signs, and with larger text on a short screen the lure moves up beside the bank chip, clear of the walk stick.":
+    "Na telefonie podpowiedź na jeziorze stoi teraz pod plakietką brzegu, gdy plakietka ma dużo do powiedzenia, a nie pod nią schowana. Na telefonie trzymanym poziomo długa notka o brzegu kończy się wielokropkiem przed tabliczkami, a z większym tekstem na niskim ekranie przynęta przesuwa się w górę obok plakietki brzegu, z dala od drążka chodzenia.",
   "On summer evenings a bat now and then swoops in to hawk the moths by the dock's lantern. And on snowy winter nights the little owl comes to the snow-capped post too.":
     "W letnie wieczory nietoperz czasem wlatuje polować na ćmy przy latarni na pomoście. A w śnieżne zimowe noce na zaśnieżony słupek przylatuje też pójdźka.",
   "Strike a fish while the mallard is on the dock and it bursts off over the water. And on summer nights a few fireflies now drift and blink over the water right beside the dock.":
     "Zatnij rybę, gdy kaczor jest na pomoście, a zerwie się i odleci nad wodą. A w letnie noce tuż przy pomoście unosi się teraz i mruga kilka świetlików.",
   "On rainy days a mallard drake now and then swims in and climbs onto the dock behind you to preen and shake off the rain. And in fog and rain the dock lanterns glow wider and warmer at night.":
     "W deszczowe dni na pomost za tobą wychodzi czasem kaczor krzyżówki, który czyści pióra i otrząsa się z deszczu. A we mgle i w deszczu latarnie na pomoście świecą nocą szerszym, cieplejszym blaskiem.",
-  "On snowy winter days your dog now comes out on the dock too, and when the snow piles up on its back it gives itself a shake. The robin comes to the snowy posts as well.":
-    "W śnieżne zimowe dni twój pies też wychodzi teraz na pomost, a gdy śnieg nasypie mu się na grzbiet, otrząsa się. Na zaśnieżone słupki przylatuje też rudzik.",
-  "On a small phone with larger text, the lake's header now fits its links in two rows, so the hint above your cast meter is no longer hidden under the walk stick, and a long word in the bank chip breaks inside it. On a fish's page, the line that finds fish caught in the same weather is easier to tap.":
-    "Na małym telefonie z większym tekstem nagłówek jeziora mieści teraz linki w dwóch rzędach, więc podpowiedź nad paskiem rzutu nie chowa się już pod drążkiem chodzenia, a długie słowo w plakietce brzegu łamie się w jej obrębie. Na stronie ryby łatwiej trafić w linijkę, która szuka ryb złowionych przy tej samej pogodzie.",
   "{lure} · good here": "{lure} · dobra tutaj",
   "This bank suits it: the bites come sooner.": "Ten brzeg jej sprzyja: brania przychodzą szybciej.",
   "{lure} · good now": "{lure} · dobra teraz",
