@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { settings } from "../settings";
 import { DOG_COCK, DOG_SPOT, DOG_YAW, dogGlance, dogMood, easeMood, dogAttention, tailSwing, type DogMood } from "./dogMood";
+import { PUFF_BLOBS, dogPuffAge, puffBlob } from "./breathPuff";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { mergePainted, type PaintedPart } from "./mergeParts";
@@ -17,6 +19,10 @@ const NOSE = "#2a1e18";
 const COLLAR = "#b8352c";
 const JUMPER = "#b8322c";
 const STRIPE = "#efe9df";
+/** Its breath in the cold: the colour of the angler's, from the tip of its nose in the head's frame, this size of the angler's. */
+const PUFF_COLOR = "#eef3f6";
+const MUZZLE = [0, 0.0, 0.22] as const;
+const PUFF_SIZE = 0.85;
 /** A shade larger than life, to stand beside the chunky angler. */
 const DOG_SCALE = 1.2;
 /** How far its chest rises about the hips when it sits up. */
@@ -91,12 +97,14 @@ type Props = {
   paperWind?: number | null;
   /** Where the float is while a fish nibbles at it, else null: it wakes, cocks its head and watches the float. */
   nibble?: Readonly<{ x: number; z: number }> | null;
+  /** Cold enough that its breath shows (breathPuff.ts). */
+  breath?: boolean;
   /** In winter it wears a knitted jumper. Its shape is baked once, so give the dog a fresh key when this changes. */
   winter?: boolean;
 };
 
 /** The angler's dog lying on the dock by day: it watches the line, the robin and the paper boat, cocks its head at a nibble, dozes, and sits up wagging for a bite (dogMood.ts). */
-export function DockDog({ phase, robin = null, paperWind = null, winter = false, nibble = null }: Props) {
+export function DockDog({ phase, robin = null, paperWind = null, winter = false, nibble = null, breath = false }: Props) {
   const still = useReducedMotion();
   const root = useRef<THREE.Group>(null);
   const front = useRef<THREE.Group>(null);
@@ -105,6 +113,16 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
   const tail = useRef<THREE.Group>(null);
   const shapes = useMemo(() => ({ rear: dogRearShape(winter), chest: dogChestShape(winter), leg: dogLegShape(), head: dogHeadShape(), tail: dogTailShape() }), [winter]);
   const material = useMemo(() => new THREE.MeshToonMaterial({ color: "#ffffff", vertexColors: true, gradientMap: toonRamp() }), []);
+  const puffs = useRef<(THREE.Mesh | null)[]>([]);
+  const puffGeometry = useMemo(() => new THREE.SphereGeometry(1, 8, 6), []);
+  const puffMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: PUFF_COLOR, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }), []);
+  useEffect(
+    () => () => {
+      puffGeometry.dispose();
+      puffMaterial.dispose();
+    },
+    [puffGeometry, puffMaterial],
+  );
   useEffect(
     () => () => {
       [...Object.values(shapes), material].forEach((item) => item.dispose());
@@ -141,6 +159,19 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
       head.current.rotation.z = still ? 0 : awake * (1 - mood.sit) * track.cock * DOG_COCK;
     }
     if (tail.current) tail.current.rotation.y = still ? 0 : tailSwing(time, mood.wag);
+    const age = breath && !still ? dogPuffAge(time, settings.particles === "lite" ? 2 : 1) : -1;
+    let peak = 0;
+    puffs.current.forEach((puff, i) => {
+      if (!puff) return;
+      puff.visible = age >= 0;
+      if (age < 0) return;
+      // The angler's puff, smaller, from the tip of its nose.
+      const blob = puffBlob(i, age);
+      puff.position.set(MUZZLE[0] + blob.side * PUFF_SIZE, MUZZLE[1] + blob.up * PUFF_SIZE, MUZZLE[2] + blob.forward * PUFF_SIZE);
+      puff.scale.setScalar(blob.scale * PUFF_SIZE);
+      peak = Math.max(peak, blob.opacity);
+    });
+    puffMaterial.opacity = peak * 0.45;
   });
   useSkinnedFigure(root, material);
 
@@ -167,6 +198,19 @@ export function DockDog({ phase, robin = null, paperWind = null, winter = false,
         {/* Turned, then nodded, then cocked about its own muzzle, so the cock stays a clean tilt. */}
         <group ref={head} position={[0, 0.12, 0.4]} rotation={[0, 0, 0, "YXZ"]}>
           <mesh geometry={shapes.head} material={material} castShadow />
+          {breath &&
+            Array.from({ length: PUFF_BLOBS }, (_, i) => (
+              <mesh
+                key={i}
+                geometry={puffGeometry}
+                material={puffMaterial}
+                visible={false}
+                renderOrder={5}
+                ref={(puff) => {
+                  puffs.current[i] = puff;
+                }}
+              />
+            ))}
         </group>
       </group>
     </group>

@@ -23,6 +23,15 @@ export function puffAge(t: number, every = 1) {
   return since < PUFF_SEC ? since / PUFF_SEC : -1;
 }
 
+/** The dock dog breathes quicker than the angler, out of step with it. */
+export const DOG_BREATH_EVERY = 2.3;
+const DOG_BREATH_LAG = 1.1;
+
+/** Age 0..1 through the dog's current puff at `t`, or -1 between puffs, as `puffAge` counts them. */
+export function dogPuffAge(t: number, every = 1) {
+  return puffAge((t + DOG_BREATH_LAG) * (BREATH_EVERY / DOG_BREATH_EVERY), every);
+}
+
 export type PuffBlob = { forward: number; up: number; side: number; scale: number; opacity: number };
 
 /**
