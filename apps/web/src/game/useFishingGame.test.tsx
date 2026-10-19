@@ -400,19 +400,20 @@ describe("useFishingGame live shiner", () => {
   });
 
   it("keeps a shiner on the hook across a reload, sends it out on the next cast, and hooks on a bought one", () => {
-    localStorage.setItem("stillwater.shiner.v1", "live");
+    // CI's Node has no localStorage of its own, so the test brings one.
+    const kept = new Map<string, string>([["stillwater.shiner.v1", "live"]]);
+    vi.stubGlobal("localStorage", { getItem: (key: string) => kept.get(key) ?? null, setItem: (key: string, value: string) => kept.set(key, value), removeItem: (key: string) => kept.delete(key) });
     const surface = mount();
     expect(liveShiner()).toBe("true");
     cast(surface);
     expect(liveShiner()).toBe("false");
     expect(hint()).toMatch(/^The live shiner swims down off the hook/);
-    expect(localStorage.getItem("stillwater.shiner.v1")).toBeNull();
+    expect(kept.has("stillwater.shiner.v1")).toBe(false);
     act(() => vi.advanceTimersByTime(60_000));
     const buy = () => act(() => ([...container!.querySelectorAll("button")].find((button) => button.textContent === "buy shiner") as HTMLButtonElement).click());
     buy();
     expect(liveShiner()).toBe("true");
-    expect(localStorage.getItem("stillwater.shiner.v1")).toBe("live");
-    localStorage.removeItem("stillwater.shiner.v1");
+    expect(kept.get("stillwater.shiner.v1")).toBe("live");
   });
 
   it("leaves any other landed fish on the card", () => {
