@@ -721,13 +721,13 @@ export function parseSpotDraft(draft: SpotDraft): Parsed<Omit<Spot, "id">> {
 }
 
 export function parseTripDraft(draft: TripDraft, book: Logbook): Parsed<Omit<Trip, "id">> {
-  // "2026-02-30" parses as 2 March: the day has to come back as typed.
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date) || localDate(new Date(`${draft.date}T12:00:00`)) !== draft.date) {
-    return fail("date", "Pick a date.");
-  }
-  // A slip of the keys ("2062", "0202") would file the outing decades away: a year from 1900 to five years ahead.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) return fail("date", "Pick a date.");
+  // A slip of the keys ("2062", "0202") would file the outing decades away: a year from 1900 to five years ahead. Read
+  // first, as a year before 1000 doesn't come back as typed below.
   const year = Number(draft.date.slice(0, 4));
   if (year < 1900 || year > new Date().getFullYear() + 5) return fail("date", "Check the year.");
+  // "2026-02-30" parses as 2 March: the day has to come back as typed.
+  if (localDate(new Date(`${draft.date}T12:00:00`)) !== draft.date) return fail("date", "Pick a date.");
   const spot = spotById(book, draft.spotId);
   if (!spot) return fail("spotId", "Pick a spot.");
   const title = cleanLine(draft.title) || spot.name;

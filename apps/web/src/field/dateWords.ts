@@ -108,10 +108,12 @@ function mondayOf(day: Date): Date {
 
 /**
  * The local days a date word names, or null for anything else: "today", "yesterday", "this week", "last week",
- * "this month", "last month", a weekday by its whole name (its latest, today included), "Oct 15" or "15 października" (this year's, or
+ * "this month", "last month", "last night", a weekday by its whole name (its latest, today included; "last saturday" the one
+ * before today), "Oct 15" or "15 października" (this year's, or
  * last year's while that day is still to come). English and Polish both. With `ahead` (outings, which can be planned),
  * "this week", "this month" and "this year" run to their ends, "this weekend" on a weekday is the coming one, "Oct 24"
- * is the nearest such day, and "tomorrow", "next week" and "next weekend" are read too.
+ * is the nearest such day, a weekday is the coming one, and "tomorrow", "next week", "next weekend" and "next saturday"
+ * are read too.
  */
 export function dateWords(text: string, now = new Date(), { ahead = false }: { ahead?: boolean } = {}): DayRange | null {
   const want = plain(text);
@@ -156,9 +158,24 @@ export function dateWords(text: string, now = new Date(), { ahead = false }: { a
   if (says(want, ["last year", "zeszły rok", "w zeszłym roku", "ubiegły rok", "w ubiegłym roku"])) {
     return { from: `${today.getFullYear() - 1}-01-01`, to: `${today.getFullYear() - 1}-12-31` };
   }
+  // A night session is dated by its evening, as the outing form's "Last night" pick dates it.
+  if (says(want, ["last night", "wczoraj wieczorem", "wczoraj w nocy", "zeszłej nocy", "zeszłego wieczoru"])) return one(dayOf(today, -1));
   weekdays ??= weekdayNames();
-  const weekday = want.length >= 3 ? weekdays.findIndex((names) => names.includes(want)) : -1;
-  if (weekday >= 0) return one(dayOf(today, -((today.getDay() - weekday + 7) % 7)));
+  // "on saturday", "w sobotę", "this saturday", "last saturday", "w zeszłą sobotę", "next saturday", "za tydzień w sobotę":
+  // the weekday with the words the outing form and people put round it.
+  const dayWords = /^(?:(?:on|we?) )?(?:(this|ten|ta|te|last|zeszl[aey]|ostatni[aey]?|next|przyszl[aey]|za tydzien w) )?(\p{L}+)$/u.exec(want);
+  const weekday = dayWords && dayWords[2]!.length >= 3 ? weekdays.findIndex((names) => names.includes(dayWords[2]!)) : -1;
+  if (weekday >= 0) {
+    const which = dayWords![1] ?? "";
+    const back = (today.getDay() - weekday + 7) % 7;
+    const coming = (weekday - today.getDay() + 7) % 7;
+    // The latest one before today.
+    if (/^(?:last|zeszl|ostatni)/.test(which)) return one(dayOf(today, -(back || 7)));
+    // As the outing form names it: the coming one, or the week after when that is today or tomorrow.
+    if (/^(?:next|przyszl|za tydzien)/.test(which)) return ahead ? one(dayOf(today, coming >= 2 ? coming : coming + 7)) : null;
+    // On its own: the coming one (today included) looking ahead, else the latest (today included).
+    return one(dayOf(today, ahead ? coming : -back));
+  }
   // Numbers alone, with the year or with a slash, which no size has: "31.12.2025", "12/31/2025", "12/31", "31/12".
   const dotted = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(text.trim());
   const slashed = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(text.trim());
