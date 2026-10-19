@@ -250,6 +250,12 @@
   .lure-record .lure-last:has(> .text-button) {
     margin-top: 8px;
   }
+
+  /* An open past list's "Open the outing" reached over the bottom of its own summary, so a tap meant to fold the
+     list opened the outing instead. */
+  .tackle-past-link {
+    margin-top: 12px;
+  }
 }
 
 /* An outing under "Coming up" reads as big as the section heads it used to be. */

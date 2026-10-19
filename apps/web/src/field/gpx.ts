@@ -6,7 +6,7 @@ const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;
 export function gpxFor(spots: readonly Spot[]): string {
   const points = spots.flatMap((spot) =>
     spot.place
-      ? [`  <wpt lat="${spot.place.lat}" lon="${spot.place.lng}">\n    <name>${escape(spot.name)}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
+      ? [`  <wpt lat="${spot.place.lat}" lon="${spot.place.lng}">\n    <name>${escape(spot.name.trim())}</name>${spot.notes.trim() ? `\n    <desc>${escape(spot.notes.trim())}</desc>` : ""}\n  </wpt>`]
       : [],
   );
   return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Stillwater" xmlns="http://www.topografix.com/GPX/1/1">\n${points.join("\n")}\n</gpx>\n`;
