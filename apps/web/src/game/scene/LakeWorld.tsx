@@ -149,6 +149,8 @@ import { canoeOut } from "./canoeTrip";
 import { Skier } from "./Skier";
 import { skiingOut } from "./skiTour";
 import { Kite } from "./Kite";
+import { Hammock } from "./Hammock";
+import { hammockOut, hammockTrees } from "./hammockSway";
 import { ShedSnow } from "./ShedSnow";
 import { snowShedOut } from "./snowShed";
 import { HotAirBalloon } from "./HotAirBalloon";
@@ -568,6 +570,9 @@ const SHACK_TREES: Scatter[] = [
 ];
 
 /** Where the squirrels run: between the two trees by the shack, and between two pairs of shore trees round the lake. */
+/** The two trees across the lake the hammock hangs between. */
+const HAMMOCK_TREES = hammockTrees(TREES);
+
 const SQUIRREL_RUNS = [[SHACK_TREES[1]!, SHACK_TREES[0]!] as const, ...squirrelRuns(TREES, 2)];
 
 /** The trees toadstools come up under in fall: the near shore and the two by the shack. */
@@ -2333,6 +2338,7 @@ export const LakeWorld = memo(function LakeWorld({
       {skiingOut(hour, sky, season) && <Skier />}
       {sailingOut(hour, sky, season, wind) && <Dinghy wind={wind} />}
       {kiteOut(hour, sky, season, wind) && <Kite wind={wind} />}
+      {HAMMOCK_TREES && hammockOut(hour, sky, season) && <Hammock trees={HAMMOCK_TREES} />}
       {balloonOut(hour, sky, season, wind) && <HotAirBalloon wind={wind} />}
       {fogAnglerOut(hour, sky) && <FogAngler />}
       {dogWalkOut(hour, season) && <DogWalker rain={sky === "rain"} />}
