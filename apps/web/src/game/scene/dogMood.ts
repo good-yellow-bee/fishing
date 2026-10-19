@@ -91,9 +91,22 @@ export function dogLookAt(x: number, z: number): number | null {
 /** How far it cocks its head to one side, radians, when a nibble at the float catches its ear. */
 export const DOG_COCK = 0.35;
 
-/** A nibble at the float wakes it: head right up and a small hopeful wag, its eyes on the float. */
+/** A nibble at the float wakes it: head right up and a small hopeful wag. */
 export function noticing(mood: DogMood): DogMood {
   return { ...mood, headUp: 1, wag: Math.max(mood.wag, 0.25) };
+}
+
+type Spot = { x: number; z: number };
+
+/**
+ * What the dog attends to, given its `calm` mood: a nibble at the float (`nibbling`, the float at `float`)
+ * before the robin (`bird`) before a paper boat (`boat`). Its head turn (null for none), its mood, and
+ * whether it cocks its head, as it does at a nibble.
+ */
+export function dogAttention(calm: DogMood, nibbling: Spot | null, bird: Spot | null, boat: Spot | null): { turn: number | null; mood: DogMood; cock: boolean } {
+  if (nibbling) return { turn: dogLookAt(nibbling.x, nibbling.z) ?? 0, mood: calm.sit > 0 ? calm : noticing(calm), cock: true };
+  const turn = bird ? dogLookAt(bird.x, bird.z) : boat ? dogLookAt(boat.x, boat.z) : null;
+  return { turn, mood: turn !== null && calm.sit === 0 ? watching(calm) : calm, cock: false };
 }
 
 /** Something worth watching lifts its head, unless it is sat up already for a bite. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DOCK_PLANKS } from "@stillwater/shared";
-import { CHEER_SEC, DOG_COCK, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, easeMood, noticing, tailSwing, watching } from "./dogMood";
+import { CHEER_SEC, DOG_COCK, DOG_LOOK_MAX, DOG_SPOT, DOZE_IDLE_SEC, DOZE_WAIT_SEC, dogGlance, dogLookAt, dogMood, dogOut, dogAttention, easeMood, noticing, tailSwing, watching } from "./dogMood";
 import { paperBoatAt } from "./paperDrift";
 import { robinAt } from "./robinVisit";
 import { MOUSE_FROM } from "./mouseScurry";
@@ -96,5 +96,22 @@ describe("dock dog", () => {
     expect(heard.sit).toBe(0);
     expect(DOG_COCK).toBeGreaterThan(0.1);
     expect(DOG_COCK).toBeLessThan(0.6);
+  });
+
+  it("minds a nibble before the robin or a boat: it turns to the float itself and cocks its head", () => {
+    const calm = dogMood("waiting", DOZE_WAIT_SEC + 1);
+    const float = { x: DOG_SPOT.x + 1, z: DOG_SPOT.z - 6 };
+    const robin = { x: DOG_SPOT.x - 1, z: DOG_SPOT.z - 2 };
+    const heard = dogAttention(calm, float, robin, null);
+    expect(heard.cock).toBe(true);
+    expect(heard.turn).toBe(dogLookAt(float.x, float.z));
+    expect(heard.mood.headUp).toBe(1);
+    const watched = dogAttention(calm, null, robin, null);
+    expect(watched.cock).toBe(false);
+    expect(watched.turn).toBe(dogLookAt(robin.x, robin.z));
+    expect(dogAttention(calm, null, null, null)).toEqual({ turn: null, mood: calm, cock: false });
+    // Sat up for a bite, it stays sat.
+    const sat = dogMood("hookset", 0);
+    expect(dogAttention(sat, float, null, null).mood).toEqual(sat);
   });
 });
